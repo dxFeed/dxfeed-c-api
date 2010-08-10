@@ -1,4 +1,4 @@
-// dxFeed C-like API
+// dxFeed plain C API
 
 #ifndef _DXFEED_API_H_INCLUDED_
 #define _DXFEED_API_H_INCLUDED_
@@ -15,18 +15,18 @@
 // if the function succeeds it returns the handle of the opened
 // connection via the function's out-parameter
 
-ERRORCODE openConnection (jstring host, OUT HCONNECTION* connection);
+ERRORCODE createConnectedFeed (jstring host, OUT HFEED* feed);
 
 // closes a connection, previously opened by 'openConnection'
 // returns the success/error code of the operation
 
-ERRORCODE closeConnection (HCONNECTION connection);
+ERRORCODE closeConnection (HFEED* connection); //??????????????? how connection closes id java?
 
 // subscribes to the selected type of events on the given connection
 // returns the success/error code of the operation
 // if the function succeeds it returns the handle of the created subscription
 // via the function's out-parameter
-
+createSubscription(events????)
 ERRORCODE addSubscription (HCONNECTION connection, EventType eventType, OUT HSUBSCRIPTION* subscription);
 
 // terminates previously created event subscription
