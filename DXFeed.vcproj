@@ -128,9 +128,6 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
-			<File
-				RelativePath=".\DXFeed.h">
-			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
@@ -177,7 +174,7 @@
 			Name="Common"
 			Filter="">
 			<File
-				RelativePath=".\include\dxfeed.h">
+				RelativePath=".\DXFeed.h">
 			</File>
 			<File
 				RelativePath=".\include\DXMemory.h">
