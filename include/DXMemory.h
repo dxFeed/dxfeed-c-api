@@ -1,4 +1,4 @@
-// AdvMemory.h
+// DXMemory.h
 // Contains wrappers for the common C memory functions, to encapsulate
 // the error handling
 

@@ -23,7 +23,7 @@
 
 #include "BufferedOutput.h"
 #include "ErrorReport.h"
-#include "AdvMemory.h"
+#include "DXMemory.h"
 
 
 // pointer to extern buffer

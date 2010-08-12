@@ -23,7 +23,7 @@
 
 #include "BufferedInput.h"
 #include "ErrorReport.h"
-#include "AdvMemory.h"
+#include "DXMemory.h"
 
 // pointer to extern inBuffer
 jByte* inBuffer = 0;
