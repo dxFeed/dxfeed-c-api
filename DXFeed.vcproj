@@ -180,7 +180,13 @@
 				RelativePath=".\include\DXFeed.h">
 			</File>
 			<File
+				RelativePath=".\src\DXMemory.c">
+			</File>
+			<File
 				RelativePath=".\include\DXMemory.h">
+			</File>
+			<File
+				RelativePath=".\src\ErrorReport.c">
 			</File>
 			<File
 				RelativePath=".\include\ErrorReport.h">

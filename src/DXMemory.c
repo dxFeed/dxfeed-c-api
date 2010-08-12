@@ -17,35 +17,30 @@
 *
 */
 
-// DXMemory.h
-// Contains wrappers for the common C memory functions, to encapsulate
-// the error handling
+#include "DXMemory.h"
 
-#ifndef DX_MEMORY_H_INCLUDED
-#define DX_MEMORY_H_INCLUDED
+void* dx_error_processor (void* src) {
+    if (src == NULL) {
+        dx_set_last_error(SS_DataSerializer, DS_OutOfMemory);
+    }
 
-#include <malloc.h>
-#include "ErrorReport.h"
-#include "ParserCommon.h"
-
-/* -------------------------------------------------------------------------- */
-/*
- *	Memory function wrappers
- */
-/* -------------------------------------------------------------------------- */
-
-void* dx_error_processor (void* src);
+    return src;
+}
 
 /* -------------------------------------------------------------------------- */
 
-void* dx_malloc (size_t size);
+void* dx_malloc (size_t size) {
+    return dx_error_processor(malloc(size));
+}
 
 /* -------------------------------------------------------------------------- */
 
-void* dx_calloc (size_t num, size_t size);
+void* dx_calloc (size_t num, size_t size) {
+    return dx_error_processor(calloc(num, size));
+}
 
 /* -------------------------------------------------------------------------- */
 
-void dx_free (void* buf);
-
-#endif // DX_MEMORY_H_INCLUDED
+void dx_free (void* buf) {
+    free(buf);
+}

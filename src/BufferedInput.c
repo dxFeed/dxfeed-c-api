@@ -31,7 +31,7 @@ jInt   inBufferLength = 0;
 jInt   currentInBufferPosition = 0;
 
 ////////////////////////////////////////////////////////////////////////////////
-void setBuffer( jByte* buf ) {
+void setInBuffer( jByte* buf ) {
     inBuffer = buf;
 }
 
@@ -207,7 +207,7 @@ enum DXResult readUTFBody(int utflen, OUT dx_string* str ) {
 
 ////////////////////////////////////////////////////////////////////////////////
 //void setInput(jByte* buf, jInt offset, jInt length) {
-//    setBuffer(buf);
+//    setInBuffer(buf);
 //    setLimit(offset + length);
 //    setPosition(offset);
 //}

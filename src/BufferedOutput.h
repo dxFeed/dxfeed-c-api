@@ -26,7 +26,7 @@ extern jByte* outBuffer;
 extern jInt   outBufferLength;
 extern jInt   currentOutBufferPosition;
 
-void setBuffer( jByte* );
+void setOutBuffer( jByte* );
 
 //enum DXResult write(jInt b);
 enum DXResult write(const jByte* b, jInt bLen, jInt off, jInt len);

@@ -32,7 +32,7 @@ jInt   outBufferLength = 0;
 jInt   currentOutBufferPosition = 0;
 
 ////////////////////////////////////////////////////////////////////////////////
-void setBuffer( jByte* buf ) {
+void setOutBuffer( jByte* buf ) {
     outBuffer = buf;
 }
 

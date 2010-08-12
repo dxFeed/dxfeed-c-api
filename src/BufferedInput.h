@@ -28,7 +28,7 @@ extern jByte* inBuffer;
 extern jInt   inBufferLength;
 extern jInt   currentInBufferPosition;
 
-void setBuffer( jByte* );
+void setInBuffer( jByte* );
 
 //enum DXResult needData(int length);
 jInt skip(jInt n);
