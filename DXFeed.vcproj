@@ -121,7 +121,7 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath=".\DXFeed.cpp">
+				RelativePath=".\src\DXFeed.c">
 			</File>
 		</Filter>
 		<Filter
@@ -174,7 +174,7 @@
 			Name="Common"
 			Filter="">
 			<File
-				RelativePath=".\DXFeed.h">
+				RelativePath=".\include\DXFeed.h">
 			</File>
 			<File
 				RelativePath=".\include\DXMemory.h">
