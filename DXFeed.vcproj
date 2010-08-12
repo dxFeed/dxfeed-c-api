@@ -174,6 +174,9 @@
 			Name="Common"
 			Filter="">
 			<File
+				RelativePath=".\include\APITypes.h">
+			</File>
+			<File
 				RelativePath=".\include\DXFeed.h">
 			</File>
 			<File
@@ -181,6 +184,9 @@
 			</File>
 			<File
 				RelativePath=".\include\ErrorReport.h">
+			</File>
+			<File
+				RelativePath=".\include\PrimitiveTypes.h">
 			</File>
 		</Filter>
 		<File

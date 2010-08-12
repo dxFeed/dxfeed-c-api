@@ -21,6 +21,7 @@
 #define COMMON_H
 
 #include "wctype.h"
+#include "PrimitiveTypes.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // prefix of function's parameters
@@ -48,21 +49,6 @@ enum DXResult {
 
 #define MAX(a,b) (((a)>(b))?(a):(b))
 #define MIN(a,b) (((a)<(b))?(a):(b))
-
-////////////////////////////////////////////////////////////////////////////////
-// WARNING! The types below must have the sizes specified
-// Use appropriated types with the same size on your platform if necessary
-typedef unsigned char jBool;   // 8 bit
-typedef char          jByte;   // 8 bit
-typedef wchar_t       jChar;   // 16 bit
-typedef short int     jShort;  // 16 bit
-typedef int           jInt;    // 32 bit
-typedef float         jFloat;  // 32 bit
-typedef long long     jLong;   // 64 bit
-typedef double        jDouble; // 64 bit
-
-
-
 
 typedef jChar* dx_string;
 
