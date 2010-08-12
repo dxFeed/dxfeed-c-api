@@ -20,6 +20,8 @@
 #ifndef PRIMITIVE_TYPES_H
 #define PRIMITIVE_TYPES_H
 
+#include "wtypes.h"
+
 ////////////////////////////////////////////////////////////////////////////////
 // WARNING! The types below must have the sizes specified
 // Use appropriated types with the same size on your platform if necessary
@@ -31,6 +33,8 @@ typedef int           jInt;    // 32 bit
 typedef float         jFloat;  // 32 bit
 typedef long long     jLong;   // 64 bit
 typedef double        jDouble; // 64 bit
+
+typedef jChar*        jstring;
 
 
 #endif // PRIMITIVE_TYPES_H

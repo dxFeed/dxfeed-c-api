@@ -21,9 +21,11 @@
 #define _DXFEED_API_H_INCLUDED_
 
 #ifdef DXFEED_EXPORTS
-#define DXFEED_API __declspec(dllexport)
+    #define DXFEED_API __declspec(dllexport)
+#elif  DXFEED_IMPORTS
+    #define DXFEED_API __declspec(dllimport)
 #else
-#define DXFEED_API __declspec(dllimport)
+    #define DXFEED_API
 #endif
 
 // dxFeed plain C API
@@ -55,7 +57,9 @@ DXFEED_API ERRORCODE closeConnection (HFEED* connection); //??????????????? how 
 // returns the success/error code of the operation
 // if the function succeeds it returns the handle of the created subscription
 // via the function's out-parameter
-createSubscription(events????)
+
+//createSubscription(events????)
+
 DXFEED_API ERRORCODE addSubscription (HCONNECTION connection, EventType eventType, OUT HSUBSCRIPTION* subscription);
 
 // terminates previously created event subscription

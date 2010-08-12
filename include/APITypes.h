@@ -20,5 +20,12 @@
 #ifndef API_TYPES_H
 #define API_TYPES_H
 
+// dummy
+typedef int ERRORCODE;
+typedef int HFEED;
+typedef int HCONNECTION;
+typedef int HSUBSCRIPTION;
+typedef int event_listener_t;
+typedef int EventType;
 
 #endif // API_TYPES_H
