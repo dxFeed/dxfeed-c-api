@@ -20,7 +20,6 @@
 #include "parser.h"
 
 ////////////////////////////////////////////////////////////////////////////////
-int parse( const jByte* ) {
-
-
+int parse( const jByte* val ) {
+    return 0;
 }

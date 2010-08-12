@@ -2,8 +2,8 @@
 // Contains wrappers for the common C memory functions, to encapsulate
 // the error handling
 
-#ifndef ADV_MEMORY_H_INCLUDED
-#define ADV_MEMORY_H_INCLUDED
+#ifndef DX_MEMORY_H_INCLUDED
+#define DX_MEMORY_H_INCLUDED
 
 #include <malloc.h>
 #include "ErrorReport.h"
@@ -41,4 +41,4 @@ void dx_free (void* buf) {
     free(buf);
 }
 
-#endif // ADV_MEMORY_H_INCLUDED
+#endif // DX_MEMORY_H_INCLUDED
