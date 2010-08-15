@@ -19,7 +19,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="Include"
+				AdditionalIncludeDirectories="include;thirdparty\pthreads\win32\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;DXFEED_EXPORTS"
 				MinimalRebuild="TRUE"
 				ExceptionHandling="FALSE"
@@ -70,7 +70,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="Include"
+				AdditionalIncludeDirectories="include;thirdparty\pthreads\win32\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;DXFEED_EXPORTS"
 				ExceptionHandling="FALSE"
 				RuntimeLibrary="0"
@@ -121,13 +121,46 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
+				RelativePath=".\src\DXErrorHandling.c">
+			</File>
+			<File
 				RelativePath=".\src\DXFeed.c">
+			</File>
+			<File
+				RelativePath=".\src\DXMemory.c">
+			</File>
+			<File
+				RelativePath=".\src\DXNetwork.c">
+			</File>
+			<File
+				RelativePath=".\src\DXSockets.c">
+			</File>
+			<File
+				RelativePath=".\src\DXThreads.c">
 			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
+			<File
+				RelativePath=".\src\DXMemory.h">
+			</File>
+			<File
+				RelativePath=".\src\DXNetwork.h">
+			</File>
+			<File
+				RelativePath=".\src\DXSockets.h">
+			</File>
+			<File
+				RelativePath=".\src\DXSubsystemRoster.h">
+			</File>
+			<File
+				RelativePath=".\src\DXThreads.h">
+			</File>
+			<File
+				RelativePath=".\src\PrimitiveTypes.h">
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
@@ -171,29 +204,37 @@
 			</Filter>
 		</Filter>
 		<Filter
-			Name="Common"
+			Name="Export"
 			Filter="">
 			<File
 				RelativePath=".\include\APITypes.h">
 			</File>
 			<File
+				RelativePath=".\include\DXErrorHandling.h">
+			</File>
+			<File
 				RelativePath=".\include\DXFeed.h">
 			</File>
 			<File
-				RelativePath=".\src\DXMemory.c">
+				RelativePath=".\include\DXSubsystemRoster.h">
 			</File>
-			<File
-				RelativePath=".\include\DXMemory.h">
-			</File>
-			<File
-				RelativePath=".\src\ErrorReport.c">
-			</File>
-			<File
-				RelativePath=".\include\ErrorReport.h">
-			</File>
-			<File
-				RelativePath=".\include\PrimitiveTypes.h">
-			</File>
+		</Filter>
+		<Filter
+			Name="Third Party"
+			Filter="">
+			<Filter
+				Name="pthreads"
+				Filter="">
+				<File
+					RelativePath=".\thirdparty\pthreads\win32\include\pthread.h">
+				</File>
+				<File
+					RelativePath=".\thirdparty\pthreads\win32\include\sched.h">
+				</File>
+				<File
+					RelativePath=".\thirdparty\pthreads\win32\include\semaphore.h">
+				</File>
+			</Filter>
 		</Filter>
 		<File
 			RelativePath=".\ReadMe.txt">
