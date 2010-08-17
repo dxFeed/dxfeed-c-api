@@ -30,6 +30,8 @@ jInt   bufferPos   = 0;
 jInt   bufferLimit = 0;
 
 MessageType pendingMessageType;
+jInt        lastCipher;
+dx_string   lastSymbol;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Message types
@@ -177,15 +179,35 @@ void nextMessage(MessageConsumer consumer, MessageType messageType) {
     pendingMessageType = messageType;
 }
 
+dx_result_t readSymbol() {
+    jInt r = codec.readSymbol(in, symbolBuffer, symbolResult);
+    if ((r & SymbolCodec.VALID_CIPHER) != 0) {
+        lastCipher = r;
+        lastSymbol = null;
+    } else if (r > 0) {
+        lastCipher = 0;
+        if (symbolResolver == null || (lastSymbol = symbolResolver.getSymbol(symbolBuffer, 0, r)) == null)
+            lastSymbol = new String(symbolBuffer, 0, r);
+    } else {
+        if (symbolResult[0] != null)
+            lastCipher = codec.encode(lastSymbol = symbolResult[0]);
+        if (lastCipher == 0 && lastSymbol == null)
+            throw new IOException("Symbol is undefined");
+    }
+}
+
 dx_result_t parseData() {
     lastCipher = 0;
-    lastSymbol = null;
+    lastSymbol = NULL;
     jInt start_position = getInBufferPosition();
     jInt last_rec_position = start_position;
     try {
         while (getInBufferPosition() < getInBufferLimit()) {
             readSymbol();
-            int id = readCompactInt();
+            jInt id;
+            if (readCompactInt(&id) != R_SUCCESSFUL) {
+                return R_FAILED;
+            }
             RecordReader rr = getRecordReader(id);
             if (rr == null)
                 throw new IOException("Unknown record #" + id);
