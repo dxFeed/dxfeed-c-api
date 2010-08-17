@@ -29,19 +29,19 @@ extern jInt   currentOutBufferPosition;
 void setOutBuffer( jByte* );
 
 //enum DXResult write(jInt b);
-enum DXResult write(const jByte* b, jInt bLen, jInt off, jInt len);
+enum dx_result_t write(const jByte* b, jInt bLen, jInt off, jInt len);
 
-enum DXResult writeBoolean        ( jBool );
-enum DXResult writeByte           ( jByte );
-enum DXResult writeShort          ( jShort );
-enum DXResult writeChar           ( jChar );
-enum DXResult writeInt            ( jInt );
-enum DXResult writeLong           ( jLong );
-enum DXResult writeFloat          ( jFloat );
-enum DXResult writeDouble         ( jDouble );
-enum DXResult writeBytes          ( const jChar* );
-enum DXResult writeChars          ( const jChar* );
-enum DXResult writeUTF            ( const dx_string );
+enum dx_result_t writeBoolean        ( jBool );
+enum dx_result_t writeByte           ( jByte );
+enum dx_result_t writeShort          ( jShort );
+enum dx_result_t writeChar           ( jChar );
+enum dx_result_t writeInt            ( jInt );
+enum dx_result_t writeLong           ( jLong );
+enum dx_result_t writeFloat          ( jFloat );
+enum dx_result_t writeDouble         ( jDouble );
+enum dx_result_t writeBytes          ( const jChar* );
+enum dx_result_t writeChars          ( const jChar* );
+enum dx_result_t writeUTF            ( const dx_string );
 
 // ========== Compact API ==========
 
@@ -50,14 +50,14 @@ enum DXResult writeUTF            ( const dx_string );
 *
 * @param val - value to be written
 */
-enum DXResult writeCompactInt     ( jInt val );
+enum dx_result_t writeCompactInt     ( jInt val );
 
 /**
 * Writes a jLong value in a compact format.
 *
 * @param v - value to be written
 */
-enum DXResult writeCompactLong    ( jLong v );
+enum dx_result_t writeCompactLong    ( jLong v );
 
 /**
 * Writes an array of bytes in a compact encapsulation format.
@@ -66,7 +66,7 @@ enum DXResult writeCompactLong    ( jLong v );
 * @param  bytes - the byte array to be written
 * @param  size - the size of the byte array
 */
-enum DXResult writeByteArray      ( const jByte* bytes, jInt size );
+enum dx_result_t writeByteArray      ( const jByte* bytes, jInt size );
 
 
 // ========== UTF API ==========
@@ -77,7 +77,7 @@ enum DXResult writeByteArray      ( const jByte* bytes, jInt size );
 *
 * @param codePoint the code point to be written
 */
-enum DXResult writeUTFChar        ( jInt codePoint );
+enum dx_result_t writeUTFChar        ( jInt codePoint );
 
 /**
 * Writes a string in a UTF-8 format with compact encapsulation.
@@ -86,14 +86,14 @@ enum DXResult writeUTFChar        ( jInt codePoint );
 *
 * @param str the string to be written
 */
-enum DXResult writeUTFString      ( const dx_string str );
+enum dx_result_t writeUTFString      ( const dx_string str );
 
 /**
 * Ensures that the byte array used for buffering has at least the specified capacity.
 * This method reallocates buffer if needed and copies content of old buffer into new one.
 * This method also sets the limit to the capacity.
 */
-enum DXResult ensureCapacity (int requiredCapacity);
+enum dx_result_t ensureCapacity (int requiredCapacity);
 
 
 #endif // BUFFERED_OUTPUT

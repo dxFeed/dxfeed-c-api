@@ -22,7 +22,7 @@
 #include <limits.h>
 
 #include "BufferedOutput.h"
-#include "ErrorReport.h"
+#include "DXErrorHandling.h"
 #include "DXMemory.h"
 
 
@@ -40,9 +40,9 @@ void setOutBuffer( jByte* buf ) {
 // ========== Implementation Details ==========
 ////////////////////////////////////////////////////////////////////////////////
 
-enum DXResult checkWrite(int requiredCapacity) {
+enum dx_result_t checkWrite(int requiredCapacity) {
     if ( !outBuffer ) {
-        return setParseError(DS_BufferNotInitialized);
+        return setParseError(pr_buffer_not_initialized);
     }
 
     if ( outBufferLength - currentOutBufferPosition < requiredCapacity && ensureCapacity(requiredCapacity) != R_SUCCESSFUL ) {
@@ -96,9 +96,9 @@ void writeIntUnchecked(jInt val) {
 //}
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult write(const jByte* b, jInt bLen, jInt off, jInt len) {
+enum dx_result_t write(const jByte* b, jInt bLen, jInt off, jInt len) {
     if ((off | len | (off + len) | (bLen - (off + len))) < 0) {
-        return setParseError(DS_IndexOutOfBounds);
+        return setParseError(pr_index_out_of_bounds);
     }
 
     if (outBufferLength - currentOutBufferPosition < len && (ensureCapacity(len) != R_SUCCESSFUL) ) {
@@ -111,7 +111,7 @@ enum DXResult write(const jByte* b, jInt bLen, jInt off, jInt len) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult writeBoolean( OUT jBool val ) {
+enum dx_result_t writeBoolean( OUT jBool val ) {
     if (checkWrite(1) != R_SUCCESSFUL) {
         return R_FAILED;
     }
@@ -121,7 +121,7 @@ enum DXResult writeBoolean( OUT jBool val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult writeByte( jByte val ) {
+enum dx_result_t writeByte( jByte val ) {
     if (checkWrite(1) != R_SUCCESSFUL) {
         return R_FAILED;
     }
@@ -131,7 +131,7 @@ enum DXResult writeByte( jByte val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult writeShort( jShort val ) {
+enum dx_result_t writeShort( jShort val ) {
     if (checkWrite(2) != R_SUCCESSFUL) {
         return R_FAILED;
     }
@@ -143,7 +143,7 @@ enum DXResult writeShort( jShort val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult writeChar( jChar val ) {
+enum dx_result_t writeChar( jChar val ) {
     if (checkWrite(2) != R_SUCCESSFUL) {
         return R_FAILED;
     }
@@ -155,7 +155,7 @@ enum DXResult writeChar( jChar val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult writeInt( jInt val ) {
+enum dx_result_t writeInt( jInt val ) {
     if (checkWrite(4) != R_SUCCESSFUL) {
         return R_FAILED;
     }
@@ -169,7 +169,7 @@ enum DXResult writeInt( jInt val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult writeLong( jLong val ) {
+enum dx_result_t writeLong( jLong val ) {
     if (checkWrite(8) != R_SUCCESSFUL) {
         return R_FAILED;
     }
@@ -187,18 +187,18 @@ enum DXResult writeLong( jLong val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult writeFloat( jFloat val ) {
+enum dx_result_t writeFloat( jFloat val ) {
     return writeInt(*((jInt*)&val));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult writeDouble( jDouble val) {
+enum dx_result_t writeDouble( jDouble val) {
     return writeLong(*((jLong*)&val));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult writeBytes( const jChar* val ) {
-    enum DXResult res = R_SUCCESSFUL;
+enum dx_result_t writeBytes( const jChar* val ) {
+    enum dx_result_t res = R_SUCCESSFUL;
     size_t length = wcslen(val);
     size_t i = 0;
     for (;i < length && res == R_SUCCESSFUL; i++) {
@@ -213,8 +213,8 @@ enum DXResult writeBytes( const jChar* val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult writeChars( const jChar* val ) {
-    enum DXResult res = R_SUCCESSFUL;
+enum dx_result_t writeChars( const jChar* val ) {
+    enum dx_result_t res = R_SUCCESSFUL;
     size_t length = wcslen(val);
     size_t i = 0;
     for (; i < length && res == R_SUCCESSFUL; i++) {
@@ -229,7 +229,7 @@ enum DXResult writeChars( const jChar* val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult writeUTF( const dx_string val ) {
+enum dx_result_t writeUTF( const dx_string val ) {
     size_t strlen = wcslen(val);
     jShort utflen = 0;
     size_t i = 0;
@@ -244,7 +244,7 @@ enum DXResult writeUTF( const dx_string val ) {
     }
 
     if ((size_t)utflen < strlen || utflen > 65535) {
-        return setParseError(DS_BadUTFDataFormat);
+        return setParseError(pr_bad_utf_data_format);
     }
 
     if (writeShort(utflen) != R_SUCCESSFUL) {
@@ -270,7 +270,7 @@ enum DXResult writeUTF( const dx_string val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult writeCompactInt(jInt val) {
+enum dx_result_t writeCompactInt(jInt val) {
     if (checkWrite(5) != R_SUCCESSFUL) {
         return R_FAILED;
     }
@@ -312,7 +312,7 @@ enum DXResult writeCompactInt(jInt val) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult writeCompactLong(jLong v) {
+enum dx_result_t writeCompactLong(jLong v) {
     jInt hi;
     if (v == (jLong)(jInt)v) {
         return writeCompactInt((jInt)v);
@@ -362,7 +362,7 @@ enum DXResult writeCompactLong(jLong v) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult writeByteArray(const jByte* bytes, jInt size) {
+enum dx_result_t writeByteArray(const jByte* bytes, jInt size) {
     if (bytes == NULL) {
         return writeCompactInt(-1);
     }
@@ -378,13 +378,13 @@ enum DXResult writeByteArray(const jByte* bytes, jInt size) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult writeUTFChar(jInt codePoint) {
+enum dx_result_t writeUTFChar(jInt codePoint) {
     if (checkWrite(4) != R_SUCCESSFUL) {
         return R_FAILED;
     }
 
     if (codePoint < 0) {
-        return setParseError(DS_BadUTFDataFormat);
+        return setParseError(pr_bad_utf_data_format);
     }
 
     if (codePoint <= 0x007F) {
@@ -396,13 +396,13 @@ enum DXResult writeUTFChar(jInt codePoint) {
     } else if (codePoint <= 0x10FFFF) {
         writeUTF4Unchecked(codePoint);
     } else {
-        return setParseError(DS_BadUTFDataFormat);
+        return setParseError(pr_bad_utf_data_format);
     }
 
     return parseSuccessful();
 }
 
-enum DXResult writeUTFString(const dx_string str) {
+enum dx_result_t writeUTFString(const dx_string str) {
     size_t strlen;
     size_t utflen;
     size_t i;
@@ -426,7 +426,7 @@ enum DXResult writeUTFString(const dx_string str) {
             utflen += 3;
     }
     if (utflen < strlen) {
-        return setParseError(DS_BadUTFDataFormat);
+        return setParseError(pr_bad_utf_data_format);
     }
 
     if (writeCompactInt((jInt)utflen) != R_SUCCESSFUL) {
@@ -454,9 +454,9 @@ enum DXResult writeUTFString(const dx_string str) {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult ensureCapacity( int requiredCapacity ) {
+enum dx_result_t ensureCapacity( int requiredCapacity ) {
     if (INT_MAX - currentOutBufferPosition < outBufferLength) {
-        return setParseError(DS_BufferOverFlow);
+        return setParseError(pr_buffer_overflow);
     }
 
     if (requiredCapacity > outBufferLength) {

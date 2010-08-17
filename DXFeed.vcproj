@@ -180,6 +180,9 @@
 				<File
 					RelativePath=".\src\ParserCommon.h">
 				</File>
+				<File
+					RelativePath=".\src\RecordReader.h">
+				</File>
 			</Filter>
 			<Filter
 				Name="Sources"
@@ -195,6 +198,9 @@
 				</File>
 				<File
 					RelativePath=".\src\ParserCommon.c">
+				</File>
+				<File
+					RelativePath=".\src\RecordReader.c">
 				</File>
 			</Filter>
 		</Filter>

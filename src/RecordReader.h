@@ -17,15 +17,4 @@
 *
 */
 
-#ifndef PARSER_H
-#define PARSER_H
-
-#include "PrimitiveTypes.h"
-
-////////////////////////////////////////////////////////////////////////////////
-// ========== external interface ==========
-////////////////////////////////////////////////////////////////////////////////
-
-int dx_parse( const jByte* buf, jInt bufLen );
-
-#endif // PARSER_H
+dx_result_t readRecord( RecordBuffer buffer, int cipher, String symbol);

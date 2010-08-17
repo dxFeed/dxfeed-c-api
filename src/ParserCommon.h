@@ -29,20 +29,22 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 // results of operations
-enum DataSerializerResult {
-    DS_Successful = 0,
-    DS_Failed,
-    DS_BufferOverFlow,
-    DS_IllegalArgument,         // the argument of function is noit valid
-    DS_IllegalLength,           // 
-    DS_BadUTFDataFormat,        // bad format of UTF string
-    DS_IndexOutOfBounds,        // index of buffer is not valid
-    DS_OutOfBuffer,             // reached the end of buffer
-    DS_BufferNotInitialized,    // there isn't a buffer to read
-    DS_OutOfMemory
+enum parser_result_t {
+    pr_successful = 0,
+    pr_failed,
+    pr_buffer_overflow,
+    pr_illegal_argument,         // the argument of function is noit valid
+    pr_illegal_length,           // 
+    pr_bad_utf_data_format,        // bad format of UTF string
+    pr_index_out_of_bounds,        // index of buffer is not valid
+    pr_out_of_buffer,             // reached the end of buffer
+    pr_buffer_not_initialized,    // there isn't a buffer to read
+    pr_out_of_memory,
+    pr_buffer_corrupt,
+    pr_message_not_complete
 };
 
-enum DXResult {
+enum dx_result_t {
     R_SUCCESSFUL = 0,
     R_FAILED
 };
@@ -53,8 +55,10 @@ enum DXResult {
 typedef jChar* dx_string;
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult setParseError(int err);
-enum DXResult parseSuccessful();
+enum dx_result_t setParseError(int err);
+enum dx_result_t parseSuccessful();
+
+enum parser_result_t getParserLastError();
 
 ////////////////////////////////////////////////////////////////////////////////
 // Unicode helpers
@@ -132,7 +136,7 @@ jInt toCodePoint(jChar high, jChar low);
 * value(s). (If dstIndex is equal to dstLen-1 and the specified codePoint is a supplementary
 * character, the high-surrogate value is not stored in dst[dstIndex].)
 */
-enum DXResult toChars(jInt codePoint, jInt dstIndex, jInt dstLen, OUT dx_string* dst, OUT jInt* res);
+enum dx_result_t toChars(jInt codePoint, jInt dstIndex, jInt dstLen, OUT dx_string* dst, OUT jInt* res);
 
 void toSurrogates(jInt codePoint, jInt index, OUT dx_string* dst);
 

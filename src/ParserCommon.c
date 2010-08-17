@@ -21,14 +21,26 @@
 #include "ErrorReport.h"
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult setParseError(int err) {
+enum dx_result_t setParseError(int err) {
     dx_set_last_error(SS_DataSerializer, err);
     return R_FAILED;
 }
 
-enum DXResult parseSuccessful() {
-    dx_set_last_error(SS_DataSerializer, DS_Successful);
+////////////////////////////////////////////////////////////////////////////////
+enum dx_result_t parseSuccessful() {
+    dx_set_last_error(SS_DataSerializer, pr_successful);
     return R_SUCCESSFUL;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+enum parser_result_t getParserLastError() {
+    enum parser_result_t res = pr_successful;
+    enum dx_error_function_result_t resultErr = dx_get_last_error (NULL, &res, NULL);
+    if (resultErr == efr_success || resultErr == efr_no_error_stored) {
+        return res;
+    }
+
+    return pr_failed;
 }
 
 /**
@@ -93,15 +105,15 @@ void toSurrogates(jInt codePoint, jInt index, OUT dx_string* dst) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult toChars(jInt codePoint, jInt dstIndex, jInt dstLen, OUT dx_string* dst, OUT jInt* res) {
+enum dx_result_t toChars(jInt codePoint, jInt dstIndex, jInt dstLen, OUT dx_string* dst, OUT jInt* res) {
     if (!dst || !(*dst) || !res || codePoint < 0 || codePoint > MAX_CODE_POINT) {
-        setParseError(DS_IllegalArgument);
+        setParseError(pr_illegal_argument);
         return R_FAILED;
     }
 
     if (codePoint < MIN_SUPPLEMENTARY_CODE_POINT) {
         if (dstLen - dstIndex < 1) {
-            setParseError(DS_IndexOutOfBounds);
+            setParseError(pr_index_out_of_bounds);
             return R_FAILED;
         }
         (*dst)[dstIndex] = (jChar)codePoint;
@@ -110,7 +122,7 @@ enum DXResult toChars(jInt codePoint, jInt dstIndex, jInt dstLen, OUT dx_string*
     }
 
     if(dstLen - dstIndex < 2) {
-        setParseError(DS_IndexOutOfBounds);
+        setParseError(pr_index_out_of_bounds);
         return R_FAILED;
     }
 

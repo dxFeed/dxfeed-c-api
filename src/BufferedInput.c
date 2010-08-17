@@ -22,17 +22,39 @@
 #include <limits.h>
 
 #include "BufferedInput.h"
-#include "ErrorReport.h"
+#include "DXErrorHandling.h"
 #include "DXMemory.h"
 
 // pointer to extern inBuffer
 jByte* inBuffer = 0;
 jInt   inBufferLength = 0;
+jInt   inBufferLimit = 0;
 jInt   currentInBufferPosition = 0;
 
 ////////////////////////////////////////////////////////////////////////////////
-void setInBuffer( jByte* buf ) {
+void setInBuffer( jByte* buf, jInt length ) {
     inBuffer = buf;
+    inBufferLength = length;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void setInBufferPosition( jInt pos ) {
+    currentInBufferPosition = pos;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void setInBufferLimit( jInt limit ) {
+    inBufferLimit = limit;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+jInt getInBufferPosition() {
+    return currentInBufferPosition;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+jInt getInBufferLimit() {
+    return inBufferLimit;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -48,26 +70,26 @@ void setInBuffer( jByte* buf ) {
 //}
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult checkValid(void* val, jInt len) {
+enum dx_result_t checkValid(void* val, jInt len) {
     if (!inBuffer) {
-        return setParseError(DS_BufferNotInitialized);
+        return setParseError(pr_buffer_not_initialized);
     }
     if (!val) {
-        return setParseError(DS_IllegalArgument);
+        return setParseError(pr_illegal_argument);
     }
     if (inBufferLength - currentInBufferPosition < len) {
-        return setParseError(DS_OutOfBuffer);
+        return setParseError(pr_out_of_buffer);
     }
 
-    setParseError(DS_Successful);
+    setParseError(pr_successful);
     return R_SUCCESSFUL;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult readUTF2(int first, OUT jInt* res) {
+enum dx_result_t readUTF2(int first, OUT jInt* res) {
     jByte second;
     if (!res) {
-        setParseError(DS_IllegalArgument);
+        setParseError(pr_illegal_argument);
         return R_FAILED;
     }
 
@@ -76,7 +98,7 @@ enum DXResult readUTF2(int first, OUT jInt* res) {
     }
 
     if ((second & 0xC0) != 0x80) {
-        setParseError(DS_BadUTFDataFormat);
+        setParseError(pr_bad_utf_data_format);
         return R_FAILED;
     }
 
@@ -85,10 +107,10 @@ enum DXResult readUTF2(int first, OUT jInt* res) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult readUTF3(int first, OUT jInt* res) {
+enum dx_result_t readUTF3(int first, OUT jInt* res) {
     jShort tail;
     if (!res) {
-        setParseError(DS_IllegalArgument);
+        setParseError(pr_illegal_argument);
         return R_FAILED;
     }
 
@@ -97,7 +119,7 @@ enum DXResult readUTF3(int first, OUT jInt* res) {
     }
 
     if ((tail & 0xC0C0) != 0x8080) {
-        setParseError(DS_BadUTFDataFormat);
+        setParseError(pr_bad_utf_data_format);
         return R_FAILED;
     }
 
@@ -106,12 +128,12 @@ enum DXResult readUTF3(int first, OUT jInt* res) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult readUTF4(int first, OUT jInt* res) {
+enum dx_result_t readUTF4(int first, OUT jInt* res) {
     jByte second;
     jShort tail;
 
     if (!res) {
-        setParseError(DS_IllegalArgument);
+        setParseError(pr_illegal_argument);
         return R_FAILED;
     }
 
@@ -124,14 +146,14 @@ enum DXResult readUTF4(int first, OUT jInt* res) {
     }
 
     if ((second & 0xC0) != 0x80 || (tail & 0xC0C0) != 0x8080) {
-        setParseError(DS_BadUTFDataFormat);
+        setParseError(pr_bad_utf_data_format);
         return R_FAILED;
     }
 
     *res = ((first & 0x07) << 18) | ((second & 0x3F) << 12) | ((tail & 0x3F00) >> 2) | (tail & 0x3F);
 
     if (*res > 0x10FFFF) {
-        setParseError(DS_BadUTFDataFormat);
+        setParseError(pr_bad_utf_data_format);
         return R_FAILED;
     }
 
@@ -139,13 +161,13 @@ enum DXResult readUTF4(int first, OUT jInt* res) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult readUTFBody(int utflen, OUT dx_string* str ) {
+enum dx_result_t readUTFBody(int utflen, OUT dx_string* str ) {
     dx_string chars;
     jInt count;
     jInt tmpCh;
 
     if (!str) {
-        setParseError(DS_IllegalArgument);
+        setParseError(pr_illegal_argument);
         return R_FAILED;
     }
 
@@ -190,12 +212,12 @@ enum DXResult readUTFBody(int utflen, OUT dx_string* str ) {
             }
             count += res;
         } else{
-            setParseError(DS_BadUTFDataFormat);
+            setParseError(pr_bad_utf_data_format);
             return R_FAILED;
         }
     }
     if (utflen < 0) {
-        setParseError(DS_BadUTFDataFormat);
+        setParseError(pr_bad_utf_data_format);
         return R_FAILED;
     }
 
@@ -278,12 +300,12 @@ jInt skip(jInt n) {
 //    return inBufferLength - currentInBufferPosition;
 //}
 
-enum DXResult readFully(jByte* b, jLong bLength, jInt off, jInt len) {
+enum dx_result_t readFully(jByte* b, jLong bLength, jInt off, jInt len) {
     if ((off | len | (off + len) | (bLength - (off + len))) < 0) {
-        return setParseError(DS_IndexOutOfBounds);
+        return setParseError(pr_index_out_of_bounds);
     }
     if (inBufferLength - currentInBufferPosition < len){
-        return setParseError(DS_OutOfBuffer);
+        return setParseError(pr_out_of_buffer);
     }
 
     memcpy(b + off, inBuffer + currentInBufferPosition, len);
@@ -296,7 +318,7 @@ enum DXResult readFully(jByte* b, jLong bLength, jInt off, jInt len) {
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult readBoolean( OUT jBool* val ) {
+enum dx_result_t readBoolean( OUT jBool* val ) {
     if (checkValid(val, 1) != R_SUCCESSFUL) {
         return R_FAILED;
     }
@@ -306,7 +328,7 @@ enum DXResult readBoolean( OUT jBool* val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult readByte( OUT jByte* val ) {
+enum dx_result_t readByte( OUT jByte* val ) {
     if (checkValid(val, 1) != R_SUCCESSFUL) {
         return R_FAILED;
     }
@@ -316,7 +338,7 @@ enum DXResult readByte( OUT jByte* val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult readUnsignedByte( OUT jInt* val ) {
+enum dx_result_t readUnsignedByte( OUT jInt* val ) {
     if (checkValid(val, 1) != R_SUCCESSFUL) {
         return R_FAILED;
     }
@@ -326,7 +348,7 @@ enum DXResult readUnsignedByte( OUT jInt* val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult readShort( OUT jShort* val ) {
+enum dx_result_t readShort( OUT jShort* val ) {
     if (checkValid(val, 2) != R_SUCCESSFUL) {
         return R_FAILED;
     }
@@ -336,7 +358,7 @@ enum DXResult readShort( OUT jShort* val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult readUnsignedShort( OUT jInt* val ) {
+enum dx_result_t readUnsignedShort( OUT jInt* val ) {
     if (checkValid(val, 2) != R_SUCCESSFUL) {
         return R_FAILED;
     }
@@ -346,7 +368,7 @@ enum DXResult readUnsignedShort( OUT jInt* val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult readChar( OUT jChar* val ) {
+enum dx_result_t readChar( OUT jChar* val ) {
     if (checkValid(val, 2) != R_SUCCESSFUL) {
         return R_FAILED;
     }
@@ -356,7 +378,7 @@ enum DXResult readChar( OUT jChar* val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult readInt( OUT jInt* val ) {
+enum dx_result_t readInt( OUT jInt* val ) {
     if (checkValid(val, 4) != R_SUCCESSFUL) {
         return R_FAILED;
     }
@@ -369,7 +391,7 @@ enum DXResult readInt( OUT jInt* val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult readLong( OUT jLong* val ) {
+enum dx_result_t readLong( OUT jLong* val ) {
     if (checkValid(val, 8) != R_SUCCESSFUL) {
         return R_FAILED;
     }
@@ -387,7 +409,7 @@ enum DXResult readLong( OUT jLong* val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult readFloat( OUT jFloat* val) {
+enum dx_result_t readFloat( OUT jFloat* val) {
     jInt intVal;
     if ( readInt(&intVal) == R_FAILED ) {
         return R_FAILED;
@@ -398,7 +420,7 @@ enum DXResult readFloat( OUT jFloat* val) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult readDouble( OUT jDouble* val ) {
+enum dx_result_t readDouble( OUT jDouble* val ) {
     jLong longVal;
     if ( readLong(&longVal) == R_FAILED ) {
         return R_FAILED;
@@ -409,7 +431,7 @@ enum DXResult readDouble( OUT jDouble* val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult readLine( OUT dx_string* val ) {
+enum dx_result_t readLine( OUT dx_string* val ) {
     const int tmpBufSize = 128;
     dx_string tmpBuffer;
     int count;
@@ -445,7 +467,7 @@ enum DXResult readLine( OUT dx_string* val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult readUTF( OUT dx_string* val ) {
+enum dx_result_t readUTF( OUT dx_string* val ) {
     jInt utflen;
     if (readUnsignedShort(&utflen) != R_SUCCESSFUL) {
         return R_FAILED;
@@ -459,10 +481,10 @@ enum DXResult readUTF( OUT dx_string* val ) {
 //}
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult readCompactInt( OUT jInt* val ) {
+enum dx_result_t readCompactInt( OUT jInt* val ) {
     jInt n;
     if (!val) {
-        return setParseError(DS_IllegalArgument);
+        return setParseError(pr_illegal_argument);
     }
     // The ((n << k) >> k) expression performs two's complement.
     if (readUnsignedByte(&n) != R_SUCCESSFUL) {
@@ -520,11 +542,11 @@ enum DXResult readCompactInt( OUT jInt* val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult readCompactLong( OUT jLong* val ) {
+enum dx_result_t readCompactLong( OUT jLong* val ) {
     jInt n;
     jInt tmpInt;
     if (!val) {
-        return setParseError(DS_IllegalArgument);
+        return setParseError(pr_illegal_argument);
     }
 
     // The ((n << k) >> k) expression performs two's complement.
@@ -600,17 +622,17 @@ enum DXResult readCompactLong( OUT jLong* val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult readByteArray( OUT jByte** val ) {
+enum dx_result_t readByteArray( OUT jByte** val ) {
     jByte* bytes;
     jLong length;
     if (!val) {
-        return setParseError(DS_IllegalArgument);
+        return setParseError(pr_illegal_argument);
     }
     if (readCompactLong(&length) != R_SUCCESSFUL) {
         return R_FAILED;
     }
     if (length < -1 || length > INT_MAX) {
-        return setParseError(DS_IllegalLength);
+        return setParseError(pr_illegal_length);
     }
     if (length == -1) {
         *val = NULL;
@@ -633,10 +655,10 @@ enum DXResult readByteArray( OUT jByte** val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult readUTFChar( OUT jInt* val ) {
+enum dx_result_t readUTFChar( OUT jInt* val ) {
     jByte c;
     if (!val) {
-        return setParseError(DS_IllegalArgument);
+        return setParseError(pr_illegal_argument);
     }
     if (readByte(&c) != R_SUCCESSFUL) {
         return R_FAILED;
@@ -655,17 +677,17 @@ enum DXResult readUTFChar( OUT jInt* val ) {
         return readUTF4(c, val);
     }
 
-    return setParseError(DS_BadUTFDataFormat);
+    return setParseError(pr_bad_utf_data_format);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum DXResult readUTFString( OUT dx_string* val ) {
+enum dx_result_t readUTFString( OUT dx_string* val ) {
     jLong utflen;
     if (readCompactLong(&utflen) != R_SUCCESSFUL) {
         return R_FAILED;
     }
     if (utflen < -1 || utflen > INT_MAX) {
-        return setParseError(DS_IllegalLength);
+        return setParseError(pr_illegal_length);
     }
     if (utflen == -1) {
         *val = NULL;
