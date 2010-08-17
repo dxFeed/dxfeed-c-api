@@ -264,25 +264,46 @@ bool dx_deinit_socket_subsystem () {
 /* -------------------------------------------------------------------------- */
 
 dx_socket_t dx_socket (int family, int type, int protocol) {
-    dx_socket_t res = INVALID_SOCKET;
+    dx_socket_t s = INVALID_SOCKET;
+    int res = INVALID_SOCKET;
+    u_long dummy;
     
     if (!dx_init_socket_subsystem()) {
-        return res;
+        return INVALID_SOCKET;
     }
     
-    res = socket(family, type, protocol);
-    
-    if (res == INVALID_SOCKET) {
+    if ((s = socket(family, type, protocol)) == INVALID_SOCKET ||
+        (res = ioctlsocket(s, FIONBIO, &dummy)) == INVALID_SOCKET) {
         dx_set_last_error(sc_sockets, (int)dx_wsa_error_code_to_internal(WSAGetLastError()));
+
+        return INVALID_SOCKET;
     }
     
-    return res;
+    return s;
 }
 
 /* -------------------------------------------------------------------------- */
 
 bool dx_connect (dx_socket_t s, const struct sockaddr* addr, socklen_t addrlen) {
-    if (connect(s, addr, addrlen) != 0) {
+    int res;
+
+    if ((res = connect(s, addr, addrlen)) == SOCKET_ERROR &&
+        (WSAGetLastError() == WSAEWOULDBLOCK)) {
+        /* this is the only normal case, since we're using a non-blocking socket */
+        int dummy = 0;
+        struct fd_set socket_to_wait;
+        
+        FD_ZERO(&socket_to_wait);
+        FD_SET(s, &socket_to_wait);
+        
+        if (select(dummy, NULL, &socket_to_wait, NULL, NULL) == 1) {
+            /* socket was successfully connected */
+            
+            return true;
+        }
+    }
+    
+    if (res != 0) {
         dx_set_last_error(sc_sockets, (int)dx_wsa_error_code_to_internal(WSAGetLastError()));
         
         return false;
@@ -293,31 +314,17 @@ bool dx_connect (dx_socket_t s, const struct sockaddr* addr, socklen_t addrlen) 
 
 /* -------------------------------------------------------------------------- */
 
-unsigned dx_send (dx_socket_t s, const void* buffer, int buflen) {
+int dx_send (dx_socket_t s, const void* buffer, int buflen) {
     int res = send(s, (const char*)buffer, buflen, 0);
     
     if (res == SOCKET_ERROR) {
+        if (WSAGetLastError() == WSAEWOULDBLOCK) {
+            return 0;
+        }
+        
         dx_set_last_error(sc_sockets, (int)dx_wsa_error_code_to_internal(WSAGetLastError()));
         
-        return 0;
-    }
-    
-    return (unsigned)res;
-}
-
-/* -------------------------------------------------------------------------- */
-
-unsigned dx_recv (dx_socket_t s, void* buffer, int buflen) {
-    int res = recv(s, (char*)buffer, buflen, 0);
-    
-    switch (res) {
-    case 0:
-        dx_set_last_error(sc_sockets, sec_connection_gracefully_closed);
-        break;
-    case SOCKET_ERROR:
-        dx_set_last_error(sc_sockets, (int)dx_wsa_error_code_to_internal(WSAGetLastError()));
-        res = 0;
-        break;
+        return INVALID_DATA_SIZE;
     }
     
     return res;
@@ -325,7 +332,38 @@ unsigned dx_recv (dx_socket_t s, void* buffer, int buflen) {
 
 /* -------------------------------------------------------------------------- */
 
+int dx_recv (dx_socket_t s, void* buffer, int buflen) {
+    int res = recv(s, (char*)buffer, buflen, 0);
+
+    switch (res) {
+    case 0:
+        dx_set_last_error(sc_sockets, sec_connection_gracefully_closed);
+        break;
+    case SOCKET_ERROR:
+        if (WSAGetLastError() == WSAEWOULDBLOCK) {
+            /* no data is queued */
+            
+            return 0;
+        }
+        
+        dx_set_last_error(sc_sockets, (int)dx_wsa_error_code_to_internal(WSAGetLastError()));        
+        break;
+    default:
+        return res;
+    }
+
+    return INVALID_DATA_SIZE;
+}
+
+/* -------------------------------------------------------------------------- */
+
 bool dx_close (dx_socket_t s) {
+    if (shutdown(s, SD_BOTH) == INVALID_SOCKET) {
+        dx_set_last_error(sc_sockets, (int)dx_wsa_error_code_to_internal(WSAGetLastError()));
+
+        return false;
+    }
+    
     if (closesocket(s) == INVALID_SOCKET) {
         dx_set_last_error(sc_sockets, (int)dx_wsa_error_code_to_internal(WSAGetLastError()));
         
@@ -358,6 +396,8 @@ bool dx_getaddrinfo (const char* nodename, const char* servname,
         if (funres == WSATRY_AGAIN) {
             continue;
         }
+        
+        break;
     }
     
     if (funres != 0) {

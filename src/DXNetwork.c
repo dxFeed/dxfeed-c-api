@@ -64,6 +64,7 @@ struct dx_connection_data_t {
 };
 
 static struct dx_connection_data_t* g_conn = NULL;
+static const size_t g_sock_operation_timeout = 100;
 
 /* -------------------------------------------------------------------------- */
 
@@ -74,7 +75,7 @@ void* dx_socket_reader (void* arg) {
     struct dx_connection_context_t* ctx = NULL;
 
     char read_buf[READ_CHUNK_SIZE];
-    unsigned count_of_bytes_read = 0;
+    int count_of_bytes_read = 0;
     
     if (arg == NULL) {
         /* invalid input parameter
@@ -99,13 +100,21 @@ void* dx_socket_reader (void* arg) {
             return NULL;
         }
         
-        if ((count_of_bytes_read = dx_recv(conn_data->s, (void*)read_buf, READ_CHUNK_SIZE)) == 0) {
+        count_of_bytes_read = dx_recv(conn_data->s, (void*)read_buf, READ_CHUNK_SIZE);
+        
+        switch (count_of_bytes_read) {
+        case INVALID_DATA_SIZE:
             /* the socket error
-               calling the data receiver to inform them something's going wrong */
-            
+            calling the data receiver to inform them something's going wrong */
+
             ctx->receiver(NULL, 0);
-            
+
             return NULL;
+        case 0:
+            /* no data to read */
+            dx_sleep(g_sock_operation_timeout);
+            
+            continue;            
         }
         
         /* reporting the read data */        
@@ -139,15 +148,14 @@ bool dx_resolve_host (const char* host, struct addrinfo** addrs) {
                 return false;
             }
             
-            hostbuf = (char*)dx_malloc(hostlen);
+            hostlen = strlen(host);
+            hostbuf = (char*)dx_malloc(hostlen + 1);
             
             if (hostbuf == NULL) {
                 return false;
             }
             
-            hostlen = strlen(host);
-            
-            memcpy(hostbuf, host, hostlen);
+            strcpy(hostbuf, host);
             
             portbuf = hostbuf + (port_start - host);
             
@@ -214,7 +222,9 @@ bool dx_create_connection (const char* host, const struct dx_connection_context_
             dx_close(s);
 
             continue;
-        }    
+        }
+        
+        break;
     }
     
     dx_freeaddrinfo(addrs);
@@ -278,12 +288,17 @@ bool dx_send_data (const void* buffer, unsigned buflen) {
     }
     
     do {
-        unsigned sent_count = dx_send(g_conn->s, (const void*)char_buf, buflen);
+        int sent_count = dx_send(g_conn->s, (const void*)char_buf, buflen);
         
-        if (sent_count == 0) {
+        switch (sent_count) {
+        case INVALID_DATA_SIZE:
             /* that means an error */
-            
             return false;
+        case 0:
+            /* try again */
+            dx_sleep(g_sock_operation_timeout);
+            
+            continue;
         }
         
         char_buf += sent_count;

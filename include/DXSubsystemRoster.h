@@ -30,6 +30,11 @@ enum dx_subsystem_code_t {
     sc_threads,
     sc_network,
     
+    /*  add new subsystem codes above this line 
+        also don't forget to modify DXErrorHandling.c to manually
+        aggregate the new subsystem's error codes into the error
+        handling system */
+    
     sc_subsystem_count,
     sc_invalid_subsystem = -1
 };

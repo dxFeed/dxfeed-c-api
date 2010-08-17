@@ -35,6 +35,8 @@
 
 #include "PrimitiveTypes.h"
 
+#define INVALID_DATA_SIZE (-1)
+
 /* -------------------------------------------------------------------------- */
 /*
  *	Socket function wrappers
@@ -43,8 +45,8 @@
 
 dx_socket_t dx_socket (int family, int type, int protocol);
 bool dx_connect (dx_socket_t s, const struct sockaddr* addr, socklen_t addrlen);
-unsigned dx_send (dx_socket_t s, const void* buffer, int buflen);
-unsigned dx_recv (dx_socket_t s, void* buffer, int buflen);
+int dx_send (dx_socket_t s, const void* buffer, int buflen);
+int dx_recv (dx_socket_t s, void* buffer, int buflen);
 bool dx_close (dx_socket_t s);
 bool dx_getaddrinfo (const char* nodename, const char* servname,
                      const struct addrinfo* hints, struct addrinfo** res);

@@ -97,7 +97,7 @@ enum dx_error_function_result_t dx_set_last_error (int subsystem_id, int error_c
                                         successfully initialized.
  */
 
-bool dx_get_last_error (int* subsystem_id, int* error_code, const char** error_descr);
+enum dx_error_function_result_t dx_get_last_error (int* subsystem_id, int* error_code, const char** error_descr);
 
 /* -------------------------------------------------------------------------- */
 /*

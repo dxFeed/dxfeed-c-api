@@ -33,6 +33,14 @@
 
 /* -------------------------------------------------------------------------- */
 /*
+ *	Auxiliary functions
+ */
+/* -------------------------------------------------------------------------- */
+
+void dx_sleep (size_t milliseconds);
+
+/* -------------------------------------------------------------------------- */
+/*
  *  below are the wrappers for the used POSIX thread functions that incorporate
  *  the error handling.
  *  these wrappers are common for any implementation unless some implementation brings

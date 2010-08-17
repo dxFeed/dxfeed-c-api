@@ -159,7 +159,15 @@ void dx_key_data_destructor (void* data) {
 
 enum dx_error_function_result_t dx_set_last_error (int subsystem_id, int error_code) {
     struct dx_last_error_data_t* error_data = NULL;
-    enum dx_error_function_result_t res = dx_check_error_data(subsystem_id, error_code);
+    enum dx_error_function_result_t res;
+    
+    if (subsystem_id == sc_invalid_subsystem && error_code == ERROR_CODE_FOOTER) {
+        /* that's a special case used to prune the previously stored error */
+        
+        res = efr_success;
+    } else {
+        res = dx_check_error_data(subsystem_id, error_code);
+    }
     
     if (res != efr_success) {
         return res;
@@ -170,16 +178,13 @@ enum dx_error_function_result_t dx_set_last_error (int subsystem_id, int error_c
     }
     
     if (dx_is_master_thread()) {
-        g_master_thread_last_error_data.subsystem_id = subsystem_id;
-        g_master_thread_last_error_data.error_code = error_code;
-        
-        return efr_success;
-    }
-    
-    error_data = dx_get_thread_data(g_last_error_data_key);
-    
-    if (error_data == NULL) {
-        return efr_error_subsys_init_failure;
+        error_data = &g_master_thread_last_error_data;
+    } else {
+        error_data = dx_get_thread_data(g_last_error_data_key);
+
+        if (error_data == NULL) {
+            return efr_error_subsys_init_failure;
+        }    
     }
     
     error_data->subsystem_id = subsystem_id;
@@ -225,6 +230,12 @@ enum dx_error_function_result_t dx_get_last_error (int* subsystem_id, int* error
     }
 
     return efr_success;
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_pop_last_error () {
+    return (dx_set_last_error(sc_invalid_subsystem, ERROR_CODE_FOOTER) == efr_success);
 }
 
 /* -------------------------------------------------------------------------- */

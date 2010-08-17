@@ -50,7 +50,23 @@ static struct dx_error_code_descr_t g_thread_errors[] = {
     { ERROR_CODE_FOOTER, ERROR_DESCR_FOOTER }
 };
 
-const struct dx_error_code_descr_t* g_thread_error_roster = g_thread_errors;
+const struct dx_error_code_descr_t* thread_error_roster = g_thread_errors;
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Auxiliary functions implementation
+ */
+/* -------------------------------------------------------------------------- */
+
+#ifdef _WIN32
+
+#include <Windows.h>
+
+void dx_sleep (size_t milliseconds) {
+    Sleep((DWORD)milliseconds);
+}
+
+#endif /* _WIN32 */
 
 /* -------------------------------------------------------------------------- */
 /*
