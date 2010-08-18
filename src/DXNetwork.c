@@ -26,19 +26,13 @@
 #include "DXErrorHandling.h"
 #include "DXThreads.h"
 #include "DXMemory.h"
-#include "DXSubsystemRoster.h"
+#include "DXErrorCodes.h"
 
 /* -------------------------------------------------------------------------- */
 /*
  *	Network error codes
  */
 /* -------------------------------------------------------------------------- */
-
-enum dx_network_error_code_t {
-    nec_invalid_port_value,
-    nec_invalid_function_arg,
-    nec_conn_not_established    
-};
 
 static struct dx_error_code_descr_t g_network_errors[] = {
     { nec_invalid_port_value, "Server address has invalid port value" },

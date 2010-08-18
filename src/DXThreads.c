@@ -19,24 +19,13 @@
 
 #include "DXThreads.h"
 #include "DXErrorHandling.h"
-#include "DXSubsystemRoster.h"
+#include "DXErrorCodes.h"
 
 /* -------------------------------------------------------------------------- */
 /*
  *	Thread error codes
  */
 /* -------------------------------------------------------------------------- */
-
-enum dx_thread_error_code_t {
-    tec_not_enough_sys_resources,
-    tec_permission_denied,
-    tec_invalid_res_operation,
-    tec_invalid_resource_id,
-    tec_deadlock_detected,
-    tec_not_enough_memory,
-    
-    tec_generic_error
-};
 
 static struct dx_error_code_descr_t g_thread_errors[] = {
     { tec_not_enough_sys_resources, "Not enough system resources to perform requested operation" },

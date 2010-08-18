@@ -22,7 +22,7 @@
  */
 
 #include "DXErrorHandling.h"
-#include "DXSubsystemRoster.h"
+#include "DXErrorCodes.h"
 #include "DXThreads.h"
 #include "DXMemory.h"
 
