@@ -28,46 +28,46 @@
 /* -------------------------------------------------------------------------- */
 
 static struct dx_error_code_descr_t g_socket_errors[] = {
-    { sec_socket_subsystem_init_failed, "Socket subsystem initialization failed" },
-    { sec_socket_subsystem_init_required, "Internal software error" },
-    { sec_socket_subsystem_incompatible_version, "Incompatible version of socket subsystem" },
-    { sec_connection_gracefully_closed, "Connection gracefully closed by peer" },
-    { sec_network_is_down, "Network is down" },
-    { sec_blocking_call_in_progress, "Internal software error" },
-    { sec_addr_family_not_supported, "Internal software error" },
-    { sec_no_sockets_available, "No sockets available" },
-    { sec_no_buffer_space_available, "Not enough space in socket buffers" },
-    { sec_proto_not_supported, "Internal software error" },
-    { sec_socket_type_proto_incompat, "Internal software error" },
-    { sec_socket_type_addrfam_incompat, "Internal software error" },
-    { sec_addr_already_in_use, "Internal software error" },
-    { sec_blocking_call_interrupted, "Internal software error" },
-    { sec_nonblocking_oper_pending, "Internal software error" },
-    { sec_addr_not_valid, "Internal software error" },
-    { sec_connection_refused, "Connection refused" },
-    { sec_invalid_ptr_arg, "Internal software error" },
-    { sec_invalid_arg, "Internal software error" },
-    { sec_sock_already_connected, "Internal software error" },
-    { sec_network_is_unreachable, "Network is unreachable" },
-    { sec_sock_oper_on_nonsocket, "Internal software error" },
-    { sec_connection_timed_out, "Connection timed out" },
-    { sec_res_temporarily_unavail, "Internal software error" },
-    { sec_permission_denied, "Permission denied" },
-    { sec_network_dropped_connection, "Network dropped connection on reset" },
-    { sec_socket_not_connected, "Internal software error" },
-    { sec_operation_not_supported, "Internal software error" },
-    { sec_socket_shutdown, "Internal software error" },
-    { sec_message_too_long, "Internal software error" },
-    { sec_no_route_to_host, "No route to host" },
-    { sec_connection_aborted, "Connection aborted" },
-    { sec_connection_reset, "Connection reset" },
-    { sec_persistent_temp_error, "Temporary failure in name resolution persists for too long" },
-    { sec_unrecoverable_error, "Internal software error" },
-    { sec_not_enough_memory, "Not enough memory to complete a socket operation" },
-    { sec_no_data_on_host, "Internal software error" },
-    { sec_host_not_found, "Host not found" },
+    { dx_sec_socket_subsystem_init_failed, "Socket subsystem initialization failed" },
+    { dx_sec_socket_subsystem_init_required, "Internal software error" },
+    { dx_sec_socket_subsystem_incompatible_version, "Incompatible version of socket subsystem" },
+    { dx_sec_connection_gracefully_closed, "Connection gracefully closed by peer" },
+    { dx_sec_network_is_down, "Network is down" },
+    { dx_sec_blocking_call_in_progress, "Internal software error" },
+    { dx_sec_addr_family_not_supported, "Internal software error" },
+    { dx_sec_no_sockets_available, "No sockets available" },
+    { dx_sec_no_buffer_space_available, "Not enough space in socket buffers" },
+    { dx_sec_proto_not_supported, "Internal software error" },
+    { dx_sec_socket_type_proto_incompat, "Internal software error" },
+    { dx_sec_socket_type_addrfam_incompat, "Internal software error" },
+    { dx_sec_addr_already_in_use, "Internal software error" },
+    { dx_sec_blocking_call_interrupted, "Internal software error" },
+    { dx_sec_nonblocking_oper_pending, "Internal software error" },
+    { dx_sec_addr_not_valid, "Internal software error" },
+    { dx_sec_connection_refused, "Connection refused" },
+    { dx_sec_invalid_ptr_arg, "Internal software error" },
+    { dx_sec_invalid_arg, "Internal software error" },
+    { dx_sec_sock_already_connected, "Internal software error" },
+    { dx_sec_network_is_unreachable, "Network is unreachable" },
+    { dx_sec_sock_oper_on_nonsocket, "Internal software error" },
+    { dx_sec_connection_timed_out, "Connection timed out" },
+    { dx_sec_res_temporarily_unavail, "Internal software error" },
+    { dx_sec_permission_denied, "Permission denied" },
+    { dx_sec_network_dropped_connection, "Network dropped connection on reset" },
+    { dx_sec_socket_not_connected, "Internal software error" },
+    { dx_sec_operation_not_supported, "Internal software error" },
+    { dx_sec_socket_shutdown, "Internal software error" },
+    { dx_sec_message_too_long, "Internal software error" },
+    { dx_sec_no_route_to_host, "No route to host" },
+    { dx_sec_connection_aborted, "Connection aborted" },
+    { dx_sec_connection_reset, "Connection reset" },
+    { dx_sec_persistent_temp_error, "Temporary failure in name resolution persists for too long" },
+    { dx_sec_unrecoverable_error, "Internal software error" },
+    { dx_sec_not_enough_memory, "Not enough memory to complete a socket operation" },
+    { dx_sec_no_data_on_host, "Internal software error" },
+    { dx_sec_host_not_found, "Host not found" },
 
-    { sec_generic_error, "Unrecognized socket error" },
+    { dx_sec_generic_error, "Unrecognized socket error" },
     
     { ERROR_CODE_FOOTER, ERROR_DESCR_FOOTER }
 };
@@ -79,79 +79,79 @@ const struct dx_error_code_descr_t* socket_error_roster = g_socket_errors;
 enum dx_socket_error_code_t dx_wsa_error_code_to_internal (int wsa_code) {
     switch (wsa_code) {
     case WSANOTINITIALISED:
-        return sec_socket_subsystem_init_required;
+        return dx_sec_socket_subsystem_init_required;
     case WSAENETDOWN:
-        return sec_network_is_down;
+        return dx_sec_network_is_down;
     case WSAEINPROGRESS:
-        return sec_blocking_call_in_progress;
+        return dx_sec_blocking_call_in_progress;
     case WSAEAFNOSUPPORT:
-        return sec_addr_family_not_supported;
+        return dx_sec_addr_family_not_supported;
     case WSAEMFILE:
-        return sec_no_sockets_available;
+        return dx_sec_no_sockets_available;
     case WSAENOBUFS:
-        return sec_no_buffer_space_available;
+        return dx_sec_no_buffer_space_available;
     case WSAEPROTONOSUPPORT:
-        return sec_proto_not_supported;
+        return dx_sec_proto_not_supported;
     case WSAEPROTOTYPE:
-        return sec_socket_type_proto_incompat;
+        return dx_sec_socket_type_proto_incompat;
     case WSAESOCKTNOSUPPORT:
-        return sec_socket_type_addrfam_incompat;
+        return dx_sec_socket_type_addrfam_incompat;
     case WSAEADDRINUSE:
-        return sec_addr_already_in_use;
+        return dx_sec_addr_already_in_use;
     case WSAEINTR:
-        return sec_blocking_call_interrupted;
+        return dx_sec_blocking_call_interrupted;
     case WSAEALREADY:
-        return sec_nonblocking_oper_pending;
+        return dx_sec_nonblocking_oper_pending;
     case WSAEADDRNOTAVAIL:
-        return sec_addr_not_valid;
+        return dx_sec_addr_not_valid;
     case WSAECONNREFUSED:
-        return sec_connection_refused;
+        return dx_sec_connection_refused;
     case WSAEFAULT:
-        return sec_invalid_ptr_arg;
+        return dx_sec_invalid_ptr_arg;
     case WSAEINVAL:
-        return sec_invalid_arg;
+        return dx_sec_invalid_arg;
     case WSAEISCONN:
-        return sec_sock_already_connected;
+        return dx_sec_sock_already_connected;
     case WSAENETUNREACH:
-        return sec_network_is_unreachable;
+        return dx_sec_network_is_unreachable;
     case WSAENOTSOCK:
-        return sec_sock_oper_on_nonsocket;
+        return dx_sec_sock_oper_on_nonsocket;
     case WSAETIMEDOUT:
-        return sec_connection_timed_out;
+        return dx_sec_connection_timed_out;
     case WSAEWOULDBLOCK:
-        return sec_res_temporarily_unavail;
+        return dx_sec_res_temporarily_unavail;
     case WSAEACCES:
-        return sec_permission_denied;
+        return dx_sec_permission_denied;
     case WSAENETRESET:
-        return sec_network_dropped_connection;
+        return dx_sec_network_dropped_connection;
     case WSAENOTCONN:
-        return sec_socket_not_connected;
+        return dx_sec_socket_not_connected;
     case WSAEOPNOTSUPP:
-        return sec_operation_not_supported;
+        return dx_sec_operation_not_supported;
     case WSAESHUTDOWN:
-        return sec_socket_shutdown;
+        return dx_sec_socket_shutdown;
     case WSAEMSGSIZE:
-        return sec_message_too_long;
+        return dx_sec_message_too_long;
     case WSAEHOSTUNREACH:
-        return sec_no_route_to_host;
+        return dx_sec_no_route_to_host;
     case WSAECONNABORTED:
-        return sec_connection_aborted;
+        return dx_sec_connection_aborted;
     case WSAECONNRESET:
-        return sec_connection_reset;
+        return dx_sec_connection_reset;
     case WSATRY_AGAIN:
-        return sec_persistent_temp_error;
+        return dx_sec_persistent_temp_error;
     case WSANO_RECOVERY:
-        return sec_unrecoverable_error;
+        return dx_sec_unrecoverable_error;
     case WSA_NOT_ENOUGH_MEMORY:
-        return sec_not_enough_memory;
+        return dx_sec_not_enough_memory;
     case WSANO_DATA:
-        return sec_no_data_on_host;
+        return dx_sec_no_data_on_host;
     case WSAHOST_NOT_FOUND:
-        return sec_host_not_found;
+        return dx_sec_host_not_found;
     case WSATYPE_NOT_FOUND:
-        return sec_socket_type_proto_incompat;
+        return dx_sec_socket_type_proto_incompat;
     default:
-        return sec_generic_error;    
+        return dx_sec_generic_error;    
     }
 }
 
@@ -184,13 +184,13 @@ bool dx_init_socket_subsystem () {
     wVersionRequested = MAKEWORD(2, 0);
 
     if (WSAStartup(wVersionRequested, &wsaData) != 0) {
-        dx_set_last_error(sc_sockets, sec_socket_subsystem_init_failed);
+        dx_set_last_error(sc_sockets, dx_sec_socket_subsystem_init_failed);
         
         return false;
     }
     
     if (LOBYTE(wsaData.wVersion) != 2 || HIBYTE(wsaData.wVersion) != 0) {
-        dx_set_last_error(sc_sockets, sec_socket_subsystem_incompatible_version);
+        dx_set_last_error(sc_sockets, dx_sec_socket_subsystem_incompatible_version);
         
         WSACleanup();
         
@@ -296,7 +296,7 @@ int dx_recv (dx_socket_t s, void* buffer, int buflen) {
 
     switch (res) {
     case 0:
-        dx_set_last_error(sc_sockets, sec_connection_gracefully_closed);
+        dx_set_last_error(sc_sockets, dx_sec_connection_gracefully_closed);
         break;
     case SOCKET_ERROR:
         if (WSAGetLastError() == WSAEWOULDBLOCK) {

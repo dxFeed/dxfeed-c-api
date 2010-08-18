@@ -34,7 +34,7 @@
 /* -------------------------------------------------------------------------- */
 
 static struct dx_error_code_descr_t g_memory_errors[] = {
-    { mec_insufficient_memory, "Insufficient memory available" },
+    { dx_mec_insufficient_memory, "Insufficient memory available" },
     
     { ERROR_CODE_FOOTER, ERROR_DESCR_FOOTER }
 };
@@ -45,7 +45,7 @@ const struct dx_error_code_descr_t* memory_error_roster = g_memory_errors;
 
 void* dx_error_processor (void* src) {
     if (src == NULL) {
-        dx_set_last_error(sc_memory, mec_insufficient_memory);
+        dx_set_last_error(sc_memory, dx_mec_insufficient_memory);
     }
 
     return src;
