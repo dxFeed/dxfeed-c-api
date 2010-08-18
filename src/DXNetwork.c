@@ -137,7 +137,7 @@ bool dx_resolve_host (const char* host, struct addrinfo** addrs) {
             size_t hostlen = 0;
             
             if (port < port_min || port > port_max) {
-                dx_set_last_error(sc_network, dx_nec_invalid_port_value);
+                dx_set_last_error(dx_sc_network, dx_nec_invalid_port_value);
                 
                 return false;
             }
@@ -190,7 +190,7 @@ bool dx_create_connection (const char* host, const struct dx_connection_context_
     struct dx_connection_data_t* conn_data = NULL;
     
     if (host == NULL || cc == NULL || cc->receiver == NULL) {
-        dx_set_last_error(sc_network, dx_nec_invalid_function_arg);
+        dx_set_last_error(dx_sc_network, dx_nec_invalid_function_arg);
         
         return false;
     }
@@ -270,13 +270,13 @@ bool dx_send_data (const void* buffer, unsigned buflen) {
     const char* char_buf = (const char*)buffer;
     
     if (buffer == NULL || buflen == 0) {
-        dx_set_last_error(sc_network, dx_nec_invalid_function_arg);
+        dx_set_last_error(dx_sc_network, dx_nec_invalid_function_arg);
         
         return false;
     }
     
     if (g_conn == NULL) {
-        dx_set_last_error(sc_network, dx_nec_conn_not_established);
+        dx_set_last_error(dx_sc_network, dx_nec_conn_not_established);
         
         return false;
     }
@@ -308,7 +308,7 @@ bool dx_close_connection () {
     bool res = true;
     
     if (g_conn == NULL) {
-        dx_set_last_error(sc_network, dx_nec_conn_not_established);
+        dx_set_last_error(dx_sc_network, dx_nec_conn_not_established);
 
         return false;
     }

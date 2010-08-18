@@ -45,25 +45,25 @@ struct dx_subsystem_descr_t {
 
 const struct dx_subsystem_descr_t* dx_subsystems () {
     static bool subsystems_initialized = false;
-    static struct dx_subsystem_descr_t s_subsystems[sc_subsystem_count + 1];
+    static struct dx_subsystem_descr_t s_subsystems[dx_sc_subsystem_count + 1];
     
     if (!subsystems_initialized) {
-        s_subsystems[0].subsystem_id = sc_memory;
+        s_subsystems[0].subsystem_id = dx_sc_memory;
         s_subsystems[0].error_roster = memory_error_roster;
         
-        s_subsystems[1].subsystem_id = sc_sockets;
+        s_subsystems[1].subsystem_id = dx_sc_sockets;
         s_subsystems[1].error_roster = socket_error_roster;
         
-        s_subsystems[2].subsystem_id = sc_threads;
+        s_subsystems[2].subsystem_id = dx_sc_threads;
         s_subsystems[2].error_roster = thread_error_roster;
         
-        s_subsystems[3].subsystem_id = sc_network;
+        s_subsystems[3].subsystem_id = dx_sc_network;
         s_subsystems[3].error_roster = network_error_roster;
         
-        s_subsystems[4].subsystem_id = sc_parser;
+        s_subsystems[4].subsystem_id = dx_sc_parser;
         s_subsystems[4].error_roster = parser_error_roster;
 
-        s_subsystems[5].subsystem_id = sc_invalid_subsystem;
+        s_subsystems[5].subsystem_id = dx_sc_invalid_subsystem;
         s_subsystems[5].error_roster = NULL;
         
         subsystems_initialized = true;
@@ -77,7 +77,7 @@ const struct dx_subsystem_descr_t* dx_subsystems () {
 const char* dx_get_error_descr (int subsystem_id, int error_code, enum dx_error_function_result_t* res) {
     const struct dx_subsystem_descr_t* cur_subsys = dx_subsystems();
 
-    for (; cur_subsys->subsystem_id != sc_invalid_subsystem && cur_subsys->error_roster != NULL; ++cur_subsys) {
+    for (; cur_subsys->subsystem_id != dx_sc_invalid_subsystem && cur_subsys->error_roster != NULL; ++cur_subsys) {
         const struct dx_error_code_descr_t* cur_error_descr;
         
         if (cur_subsys->subsystem_id != subsystem_id) {
@@ -133,7 +133,7 @@ struct dx_last_error_data_t {
     int error_code;
 };
 
-static struct dx_last_error_data_t g_master_thread_last_error_data = { sc_invalid_subsystem, ERROR_CODE_FOOTER };
+static struct dx_last_error_data_t g_master_thread_last_error_data = { dx_sc_invalid_subsystem, ERROR_CODE_FOOTER };
 
 /* -------------------------------------------------------------------------- */
 
@@ -165,7 +165,7 @@ enum dx_error_function_result_t dx_set_last_error (int subsystem_id, int error_c
     struct dx_last_error_data_t* error_data = NULL;
     enum dx_error_function_result_t res;
     
-    if (subsystem_id == sc_invalid_subsystem && error_code == ERROR_CODE_FOOTER) {
+    if (subsystem_id == dx_sc_invalid_subsystem && error_code == DX_INVALID_ERROR_CODE) {
         /* that's a special case used to prune the previously stored error */
         
         res = efr_success;
@@ -217,7 +217,9 @@ enum dx_error_function_result_t dx_get_last_error (int* subsystem_id, int* error
         }
     }
 
-    if (error_data->subsystem_id == sc_invalid_subsystem) {
+    if (error_data->subsystem_id == dx_sc_invalid_subsystem &&
+        error_data->error_code == DX_INVALID_ERROR_CODE) {
+        
         return efr_no_error_stored;
     }
 
@@ -239,7 +241,7 @@ enum dx_error_function_result_t dx_get_last_error (int* subsystem_id, int* error
 /* -------------------------------------------------------------------------- */
 
 bool dx_pop_last_error () {
-    return (dx_set_last_error(sc_invalid_subsystem, ERROR_CODE_FOOTER) == efr_success);
+    return (dx_set_last_error(dx_sc_invalid_subsystem, DX_INVALID_ERROR_CODE) == efr_success);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -272,8 +274,8 @@ bool dx_init_error_subsystem () {
         return false;
     }
     
-    error_data->subsystem_id = sc_invalid_subsystem;
-    error_data->error_code = ERROR_CODE_FOOTER;
+    error_data->subsystem_id = dx_sc_invalid_subsystem;
+    error_data->error_code = DX_INVALID_ERROR_CODE;
     
     if (!dx_set_thread_data_no_ehm(g_last_error_data_key, (const void*)error_data)) {
         dx_free(error_data);

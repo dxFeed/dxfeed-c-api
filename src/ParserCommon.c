@@ -49,13 +49,13 @@ const struct dx_error_code_descr_t* parser_error_roster = g_parser_errors;
 
 ////////////////////////////////////////////////////////////////////////////////
 enum dx_result_t setParseError(int err) {
-    dx_set_last_error(sc_parser, err);
+    dx_set_last_error(dx_sc_parser, err);
     return R_FAILED;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 enum dx_result_t parseSuccessful() {
-    dx_set_last_error(sc_parser, pr_successful);
+    dx_set_last_error(dx_sc_parser, pr_successful);
     return R_SUCCESSFUL;
 }
 

@@ -41,7 +41,7 @@
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/DXFeed.pdb"
 				SubSystem="2"
-				ImportLibrary="$(OutDir)/DXFeedd.lib"
+				ImportLibrary="$(OutDir)\DXFeedd.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -93,7 +93,7 @@
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="$(OutDir)/DXFeed.lib"
+				ImportLibrary="$(OutDir)\DXFeed.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"/>

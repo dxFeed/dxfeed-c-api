@@ -64,7 +64,7 @@ enum dx_error_function_result_t {
  *  Reports an error.
 
     Input:
-        subsystem_id - an ID of the subsystem where the error occured.
+        subsystem_id - an ID of the subsystem where the error occurred.
         error_code - an error code; must belong to the subsystems error roster.
         
     Return value:

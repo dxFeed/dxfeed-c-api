@@ -29,19 +29,19 @@
 /* -------------------------------------------------------------------------- */
 
 enum dx_subsystem_code_t {
-    sc_memory,
-    sc_sockets,
-    sc_threads,
-    sc_network,
-    sc_parser,
+    dx_sc_memory,
+    dx_sc_sockets,
+    dx_sc_threads,
+    dx_sc_network,
+    dx_sc_parser,
     
     /*  add new subsystem codes above this line 
         also don't forget to modify DXErrorHandling.c to manually
         aggregate the new subsystem's error codes into the error
         handling system */
     
-    sc_subsystem_count,
-    sc_invalid_subsystem = -1
+    dx_sc_subsystem_count,
+    dx_sc_invalid_subsystem = -1
 };
 
 /* -------------------------------------------------------------------------- */
@@ -51,6 +51,10 @@ enum dx_subsystem_code_t {
  *  a list of error code rosters belonging to different subsystems
  */
 /* -------------------------------------------------------------------------- */
+
+#define DX_INVALID_ERROR_CODE (-1)
+
+/* ---------------------------------- */
 /*
  *	Memory subsystem error codes
  */
@@ -111,7 +115,7 @@ enum dx_socket_error_code_t {
 
 /* ---------------------------------- */
 /*
- *	Thread subsystrem error codes
+ *	Thread subsystem error codes
  */
 /* ---------------------------------- */
 
@@ -159,7 +163,5 @@ enum parser_result_t {
     pr_message_not_complete,
     pr_internal_error
 };
-
-
 
 #endif /* DX_ERROR_CODES_H_INCLUDED */

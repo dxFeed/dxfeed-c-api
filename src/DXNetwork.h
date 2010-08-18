@@ -55,7 +55,7 @@ struct dx_connection_context_t {
              a 'receiver' field assigned a non-NULL value.
              
     Return value:
-        false - some error occured, use 'dx_get_last_error' for details.
+        false - some error occurred, use 'dx_get_last_error' for details.
         true - a connection has been established.
  */
 
@@ -71,7 +71,7 @@ bool dx_create_connection (const char* host, const struct dx_connection_context_
         
     Return value:
         true - OK.
-        false - some error occured, use 'dx_get_last_error' for details.
+        false - some error occurred, use 'dx_get_last_error' for details.
  */
 
 bool dx_send_data (const void* buffer, unsigned buflen);
@@ -85,7 +85,7 @@ bool dx_send_data (const void* buffer, unsigned buflen);
            
     Return value:
         true - OK.
-        false - some error occured, use 'sx_get_last_error' for details.
+        false - some error occurred, use 'dx_get_last_error' for details.
  */
 
 bool dx_close_connection ();

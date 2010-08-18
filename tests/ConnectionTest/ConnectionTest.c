@@ -1,69 +1,65 @@
 
 
-#include "DXNetwork.h"
-#include "DXErrorHandling.h"
-#include "DXSubsystemRoster.h"
+#include "DXFeed.h"
+#include "DXErrorCodes.h"
 #include <stdio.h>
 #include <Windows.h>
 
-const char dxfeed_host[] = "demo.dxfeed.com:7300";
+const char dxfeed_host[] = "demo.dxfeed.com:7200";
 
-void data_receiver (const void* buffer, unsigned buflen) {
-    printf("Data received: %d bytes\n", buflen);
-}
+/* -------------------------------------------------------------------------- */
 
 void process_last_error () {
-    int subsystem_id = sc_invalid_subsystem;
-    int error_code = 0;
+    int subsystem_id = dx_sc_invalid_subsystem;
+    int error_code = DX_INVALID_ERROR_CODE;
     const char* error_descr = NULL;
-    enum dx_error_function_result_t res;
+    int res;
     
-    res = dx_get_last_error(&subsystem_id, &error_code, &error_descr);
+    res = dxf_get_last_error(&subsystem_id, &error_code, &error_descr);
     
-    switch (res) {
-    case efr_success:
-        printf("Error occured and successfully retrieved:\n"
+    if (res == DXF_SUCCESS) {
+        if (subsystem_id == dx_sc_invalid_subsystem && error_code == DX_INVALID_ERROR_CODE) {
+            printf("WTF - no error information is stored");
+            
+            return;
+        }
+        
+        printf("Error occurred and successfully retrieved:\n"
                "subsystem code = %d, error code = %d, description = \"%s\"\n",
                subsystem_id, error_code, error_descr);
         return;
-    case efr_error_subsys_init_failure:
-        printf("An error occured but the error subsystem failed to initialize\n");
-        return;
-    default:
-        printf("WTF");        
-    }    
+    }
+    
+    printf("An error occurred but the error subsystem failed to initialize\n");
 }
 
-int main(int argc, char* argv[]) {
-    struct dx_connection_context_t ctx;
+/* -------------------------------------------------------------------------- */
+
+int main (int argc, char* argv[]) {
+    printf("Connection test started.\n");    
+    printf("Connecting to host %s...\n", dxfeed_host);
     
-    printf("Connection test started.\n");
-    
-    ctx.receiver = data_receiver;
-    
-    printf("Connecting to host...\n");
-    
-    if (!dx_create_connection(dxfeed_host, &ctx)) {
+    if (!dxf_connect_feed(dxfeed_host)) {
         process_last_error();
         
-        return;
+        return -1;
     }
     
     printf("Connection successful!\n");
     
-    Sleep(80000);
+    Sleep(100000);
     
     printf("Disconnecting from host...\n");
     
-    if (!dx_close_connection()) {
+    if (!dxf_disconnect_feed()) {
         process_last_error();
         
-        return;
+        return -1;
     }
     
     printf("Disconnect successful!\n"
            "Connection test completed successfully!\n");
-
-	return 0;
+           
+    return 0;
 }
 

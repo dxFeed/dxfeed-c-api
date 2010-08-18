@@ -12,14 +12,14 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="Debug"
+			OutputDirectory="..\..\bin"
 			IntermediateDirectory="Debug"
 			ConfigurationType="1"
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\thirdparty\pthreads\win32\include;..\..\include;..\..\src"
+				AdditionalIncludeDirectories="..\..\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -33,10 +33,10 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="pthreadVC2.lib Ws2_32.lib"
-				OutputFile="$(OutDir)/ConnectionTest.exe"
+				AdditionalDependencies="DXFeedd.lib"
+				OutputFile="$(OutDir)/ConnectionTestd.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\thirdparty\pthreads\win32\bin"
+				AdditionalLibraryDirectories="..\..\bin"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/ConnectionTest.pdb"
 				SubSystem="1"
@@ -64,13 +64,13 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="Release"
+			OutputDirectory="..\..\bin"
 			IntermediateDirectory="Release"
 			ConfigurationType="1"
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\thirdparty\pthreads\win32\include;..\..\include;..\..\src"
+				AdditionalIncludeDirectories="..\..\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="4"
 				UsePrecompiledHeader="0"
@@ -82,10 +82,10 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="pthreadVC2.lib Ws2_32.lib"
+				AdditionalDependencies="DXFeed.lib"
 				OutputFile="$(OutDir)/ConnectionTest.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\thirdparty\pthreads\win32\bin"
+				AdditionalLibraryDirectories="..\..\bin"
 				GenerateDebugInformation="TRUE"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -123,47 +123,11 @@
 			<File
 				RelativePath=".\ConnectionTest.c">
 			</File>
-			<File
-				RelativePath="..\..\src\DXErrorHandling.c">
-			</File>
-			<File
-				RelativePath="..\..\src\DXMemory.c">
-			</File>
-			<File
-				RelativePath="..\..\src\DXNetwork.c">
-			</File>
-			<File
-				RelativePath="..\..\src\DXSockets.c">
-			</File>
-			<File
-				RelativePath="..\..\src\DXThreads.c">
-			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
-			<File
-				RelativePath="..\..\include\DXErrorHandling.h">
-			</File>
-			<File
-				RelativePath="..\..\src\DXMemory.h">
-			</File>
-			<File
-				RelativePath="..\..\src\DXNetwork.h">
-			</File>
-			<File
-				RelativePath="..\..\src\DXSockets.h">
-			</File>
-			<File
-				RelativePath="..\..\include\DXSubsystemRoster.h">
-			</File>
-			<File
-				RelativePath="..\..\src\DXThreads.h">
-			</File>
-			<File
-				RelativePath="..\..\src\PrimitiveTypes.h">
-			</File>
 		</Filter>
 	</Files>
 	<Globals>

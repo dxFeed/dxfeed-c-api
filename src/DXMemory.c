@@ -45,7 +45,7 @@ const struct dx_error_code_descr_t* memory_error_roster = g_memory_errors;
 
 void* dx_error_processor (void* src) {
     if (src == NULL) {
-        dx_set_last_error(sc_memory, dx_mec_insufficient_memory);
+        dx_set_last_error(dx_sc_memory, dx_mec_insufficient_memory);
     }
 
     return src;
