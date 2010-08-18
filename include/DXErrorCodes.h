@@ -17,12 +17,16 @@
  *
  */
 
-/*
- *	Contains a roster of subsystem codes used for error reporting and handling
- */
+#ifndef DX_ERROR_CODES_H_INCLUDED
+#define DX_ERROR_CODES_H_INCLUDED
 
-#ifndef SUBSYSTEM_ROSTER_H_INCLUDED
-#define SUBSYSTEM_ROSTER_H_INCLUDED
+/* -------------------------------------------------------------------------- */
+/*
+ *	Subsystem codes
+ 
+ *  a complete roster of subsystem codes used throughout the project
+ */
+/* -------------------------------------------------------------------------- */
 
 enum dx_subsystem_code_t {
     sc_memory,
@@ -39,4 +43,14 @@ enum dx_subsystem_code_t {
     sc_invalid_subsystem = -1
 };
 
-#endif /* SUBSYSTEM_ROSTER_H_INCLUDED */
+/* -------------------------------------------------------------------------- */
+/*
+ *	
+ */
+/* -------------------------------------------------------------------------- */
+
+enum dx_memory_error_code_t {
+    mec_insufficient_memory
+};
+
+#endif /* DX_ERROR_CODES_H_INCLUDED */

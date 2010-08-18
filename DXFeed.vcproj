@@ -148,6 +148,9 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
+				RelativePath=".\src\DXErrorHandling.h">
+			</File>
+			<File
 				RelativePath=".\src\DXMemory.h">
 			</File>
 			<File
@@ -155,9 +158,6 @@
 			</File>
 			<File
 				RelativePath=".\src\DXSockets.h">
-			</File>
-			<File
-				RelativePath=".\src\DXSubsystemRoster.h">
 			</File>
 			<File
 				RelativePath=".\src\DXThreads.h">
@@ -221,13 +221,10 @@
 				RelativePath=".\include\APITypes.h">
 			</File>
 			<File
-				RelativePath=".\include\DXErrorHandling.h">
+				RelativePath=".\include\DXErrorCodes.h">
 			</File>
 			<File
 				RelativePath=".\include\DXFeed.h">
-			</File>
-			<File
-				RelativePath=".\include\DXSubsystemRoster.h">
 			</File>
 		</Filter>
 		<Filter

@@ -23,7 +23,7 @@
 
 #include "DXMemory.h"
 #include "DXErrorHandling.h"
-#include "DXSubsystemRoster.h"
+#include "DXErrorCodes.h"
 
 #include <malloc.h>
 
@@ -32,10 +32,6 @@
  *	Error related stuff
  */
 /* -------------------------------------------------------------------------- */
-
-enum dx_memory_error_code_t {
-    mec_insufficient_memory
-};
 
 static struct dx_error_code_descr_t g_memory_errors[] = {
     { mec_insufficient_memory, "Insufficient memory available" },
