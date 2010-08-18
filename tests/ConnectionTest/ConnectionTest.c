@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
     
     printf("Connection successful!\n");
     
-    Sleep(5000);
+    Sleep(80000);
     
     printf("Disconnecting from host...\n");
     

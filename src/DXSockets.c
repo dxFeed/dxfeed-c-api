@@ -265,21 +265,23 @@ bool dx_deinit_socket_subsystem () {
 
 dx_socket_t dx_socket (int family, int type, int protocol) {
     dx_socket_t s = INVALID_SOCKET;
-    int res = INVALID_SOCKET;
     u_long dummy;
     
     if (!dx_init_socket_subsystem()) {
         return INVALID_SOCKET;
     }
     
-    if ((s = socket(family, type, protocol)) == INVALID_SOCKET ||
-        (res = ioctlsocket(s, FIONBIO, &dummy)) == INVALID_SOCKET) {
-        dx_set_last_error(sc_sockets, (int)dx_wsa_error_code_to_internal(WSAGetLastError()));
-
-        return INVALID_SOCKET;
+    if ((s = socket(family, type, protocol)) != INVALID_SOCKET) {
+        if (ioctlsocket(s, FIONBIO, &dummy) != INVALID_SOCKET) {
+            return s;
+        }
+        
+        dx_close(s);
     }
     
-    return s;
+    dx_set_last_error(sc_sockets, (int)dx_wsa_error_code_to_internal(WSAGetLastError()));
+    
+    return INVALID_SOCKET;
 }
 
 /* -------------------------------------------------------------------------- */
