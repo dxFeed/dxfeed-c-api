@@ -229,7 +229,7 @@ enum dx_result_t writeChars( const jChar* val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t writeUTF( const dx_string val ) {
+enum dx_result_t writeUTF( const dx_string_t val ) {
     size_t strlen = wcslen(val);
     jShort utflen = 0;
     size_t i = 0;
@@ -402,7 +402,7 @@ enum dx_result_t writeUTFChar(jInt codePoint) {
     return parseSuccessful();
 }
 
-enum dx_result_t writeUTFString(const dx_string str) {
+enum dx_result_t writeUTFString(const dx_string_t str) {
     size_t strlen;
     size_t utflen;
     size_t i;

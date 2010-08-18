@@ -98,14 +98,14 @@ jInt toCodePoint(jChar high, jChar low) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void toSurrogates(jInt codePoint, jInt index, OUT dx_string* dst) {
+void toSurrogates(jInt codePoint, jInt index, OUT dx_string_t* dst) {
     jInt offset = codePoint - MIN_SUPPLEMENTARY_CODE_POINT;
     (*dst)[index+1] = (jChar)((offset & 0x3ff) + MIN_LOW_SURROGATE);
     (*dst)[index] = (jChar)((offset >> 10) + MIN_HIGH_SURROGATE);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t toChars(jInt codePoint, jInt dstIndex, jInt dstLen, OUT dx_string* dst, OUT jInt* res) {
+enum dx_result_t toChars(jInt codePoint, jInt dstIndex, jInt dstLen, OUT dx_string_t* dst, OUT jInt* res) {
     if (!dst || !(*dst) || !res || codePoint < 0 || codePoint > MAX_CODE_POINT) {
         setParseError(pr_illegal_argument);
         return R_FAILED;

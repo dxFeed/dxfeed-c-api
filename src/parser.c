@@ -31,7 +31,7 @@ jInt   bufferLimit = 0;
 
 MessageType pendingMessageType;
 jInt        lastCipher;
-dx_string   lastSymbol;
+dx_string_t   lastSymbol;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Message types

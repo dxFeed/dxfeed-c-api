@@ -86,7 +86,7 @@ enum dx_result_t writeUTFChar        ( jInt codePoint );
 *
 * @param str the string to be written
 */
-enum dx_result_t writeUTFString      ( const dx_string str );
+enum dx_result_t writeUTFString      ( const dx_string_t str );
 
 /**
 * Ensures that the byte array used for buffering has at least the specified capacity.

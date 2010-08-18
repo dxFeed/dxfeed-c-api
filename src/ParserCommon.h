@@ -41,7 +41,8 @@ enum parser_result_t {
     pr_buffer_not_initialized,    // there isn't a buffer to read
     pr_out_of_memory,
     pr_buffer_corrupt,
-    pr_message_not_complete
+    pr_message_not_complete,
+    pr_internal_error
 };
 
 enum dx_result_t {
@@ -52,7 +53,7 @@ enum dx_result_t {
 #define MAX(a,b) (((a)>(b))?(a):(b))
 #define MIN(a,b) (((a)<(b))?(a):(b))
 
-typedef jChar* dx_string;
+typedef jChar* dx_string_t;
 
 ////////////////////////////////////////////////////////////////////////////////
 enum dx_result_t setParseError(int err);
@@ -136,9 +137,9 @@ jInt toCodePoint(jChar high, jChar low);
 * value(s). (If dstIndex is equal to dstLen-1 and the specified codePoint is a supplementary
 * character, the high-surrogate value is not stored in dst[dstIndex].)
 */
-enum dx_result_t toChars(jInt codePoint, jInt dstIndex, jInt dstLen, OUT dx_string* dst, OUT jInt* res);
+enum dx_result_t toChars(jInt codePoint, jInt dstIndex, jInt dstLen, OUT dx_string_t* dst, OUT jInt* res);
 
-void toSurrogates(jInt codePoint, jInt index, OUT dx_string* dst);
+void toSurrogates(jInt codePoint, jInt index, OUT dx_string_t* dst);
 
 
 

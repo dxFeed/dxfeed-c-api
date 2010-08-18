@@ -161,8 +161,8 @@ enum dx_result_t readUTF4(int first, OUT jInt* res) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t readUTFBody(int utflen, OUT dx_string* str ) {
-    dx_string chars;
+enum dx_result_t readUTFBody(int utflen, OUT dx_string_t* str ) {
+    dx_string_t chars;
     jInt count;
     jInt tmpCh;
 
@@ -172,11 +172,11 @@ enum dx_result_t readUTFBody(int utflen, OUT dx_string* str ) {
     }
 
     if (utflen == 0) {
-        *str = (dx_string)calloc(1, sizeof(jChar));
+        *str = (dx_string_t)calloc(1, sizeof(jChar));
         return parseSuccessful();
     };
 
-    chars = (dx_string)malloc((utflen + 1) * sizeof(jChar));
+    chars = (dx_string_t)malloc((utflen + 1) * sizeof(jChar));
     count = 0;
     while (utflen > 0) {
         jByte c;
@@ -431,9 +431,9 @@ enum dx_result_t readDouble( OUT jDouble* val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t readLine( OUT dx_string* val ) {
+enum dx_result_t readLine( OUT dx_string_t* val ) {
     const int tmpBufSize = 128;
-    dx_string tmpBuffer;
+    dx_string_t tmpBuffer;
     int count;
     if (checkValid(val, 1) != R_SUCCESSFUL) {
         return R_FAILED;
@@ -467,7 +467,7 @@ enum dx_result_t readLine( OUT dx_string* val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t readUTF( OUT dx_string* val ) {
+enum dx_result_t readUTF( OUT dx_string_t* val ) {
     jInt utflen;
     if (readUnsignedShort(&utflen) != R_SUCCESSFUL) {
         return R_FAILED;
@@ -681,7 +681,7 @@ enum dx_result_t readUTFChar( OUT jInt* val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t readUTFString( OUT dx_string* val ) {
+enum dx_result_t readUTFString( OUT dx_string_t* val ) {
     jLong utflen;
     if (readCompactLong(&utflen) != R_SUCCESSFUL) {
         return R_FAILED;

@@ -97,7 +97,7 @@ enum dx_result_t readUTFChar( OUT jInt* );
 *
 * @param output parameter - the Unicode string read
 */
-enum dx_result_t readUTFString( OUT dx_string* );
+enum dx_result_t readUTFString( OUT dx_string_t* );
 
 
 
