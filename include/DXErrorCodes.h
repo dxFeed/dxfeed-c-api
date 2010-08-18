@@ -33,6 +33,7 @@ enum dx_subsystem_code_t {
     sc_sockets,
     sc_threads,
     sc_network,
+    sc_parser,
     
     /*  add new subsystem codes above this line 
         also don't forget to modify DXErrorHandling.c to manually
@@ -136,5 +137,29 @@ enum dx_network_error_code_t {
     dx_nec_invalid_function_arg,
     dx_nec_conn_not_established    
 };
+
+/* ---------------------------------- */
+/*
+*	Parser subsystem error codes
+*/
+/* ---------------------------------- */
+
+enum parser_result_t {
+    pr_successful = 0,
+    pr_failed,
+    pr_buffer_overflow,
+    pr_illegal_argument,
+    pr_illegal_length,
+    pr_bad_utf_data_format,
+    pr_index_out_of_bounds,
+    pr_out_of_buffer,
+    pr_buffer_not_initialized,
+    pr_out_of_memory,
+    pr_buffer_corrupt,
+    pr_message_not_complete,
+    pr_internal_error
+};
+
+
 
 #endif /* DX_ERROR_CODES_H_INCLUDED */

@@ -17,4 +17,4 @@
 *
 */
 
-dx_result_t readRecord( RecordBuffer buffer, int cipher, String symbol);
+//dx_result_t readRecord( RecordBuffer buffer, int cipher, String symbol);

@@ -18,23 +18,50 @@
 */
 
 #include "ParserCommon.h"
-#include "ErrorReport.h"
+#include "DXErrorHandling.h"
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Thread error codes
+*/
+/* -------------------------------------------------------------------------- */
+
+static struct dx_error_code_descr_t g_parser_errors[] = {
+    { pr_successful, NULL },
+    { pr_failed, NULL },
+    { pr_buffer_overflow, "Buffer overflow" },
+    { pr_illegal_argument, "The argument of function is not valid" },
+    { pr_illegal_length, "Illegal length of string or byte array" },
+    { pr_bad_utf_data_format, "Bad format of UTF string" },
+    { pr_index_out_of_bounds, "Index of buffer is not valid" },
+    { pr_out_of_buffer, "reached the end of buffer" },
+    { pr_buffer_not_initialized, "There isn't a buffer to read" },
+    { pr_out_of_memory, "Out of memory" },
+    { pr_buffer_corrupt, "Buffer is corrupt" },
+    { pr_message_not_complete, "Message is not complete" },
+    { pr_internal_error, "Internal error" },
+
+    { ERROR_CODE_FOOTER, ERROR_DESCR_FOOTER }
+};
+
+const struct dx_error_code_descr_t* parser_error_roster = g_parser_errors;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 enum dx_result_t setParseError(int err) {
-    dx_set_last_error(SS_DataSerializer, err);
+    dx_set_last_error(sc_parser, err);
     return R_FAILED;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 enum dx_result_t parseSuccessful() {
-    dx_set_last_error(SS_DataSerializer, pr_successful);
+    dx_set_last_error(sc_parser, pr_successful);
     return R_SUCCESSFUL;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 enum parser_result_t getParserLastError() {
-    enum parser_result_t res = pr_successful;
+    jInt res = pr_successful;
     enum dx_error_function_result_t resultErr = dx_get_last_error (NULL, &res, NULL);
     if (resultErr == efr_success || resultErr == efr_no_error_stored) {
         return res;

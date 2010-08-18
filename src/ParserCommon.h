@@ -22,28 +22,11 @@
 
 #include "wctype.h"
 #include "PrimitiveTypes.h"
+#include "DXErrorCodes.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // prefix of function's parameters
 #define OUT
-
-////////////////////////////////////////////////////////////////////////////////
-// results of operations
-enum parser_result_t {
-    pr_successful = 0,
-    pr_failed,
-    pr_buffer_overflow,
-    pr_illegal_argument,         // the argument of function is noit valid
-    pr_illegal_length,           // 
-    pr_bad_utf_data_format,        // bad format of UTF string
-    pr_index_out_of_bounds,        // index of buffer is not valid
-    pr_out_of_buffer,             // reached the end of buffer
-    pr_buffer_not_initialized,    // there isn't a buffer to read
-    pr_out_of_memory,
-    pr_buffer_corrupt,
-    pr_message_not_complete,
-    pr_internal_error
-};
 
 enum dx_result_t {
     R_SUCCESSFUL = 0,
