@@ -24,53 +24,53 @@
 
 //#define checkedCall(x) if ((x) != R_SUCCESSFUL) return R_FAILED;
 
-extern jByte* inBuffer;
-extern jInt   inBufferLength;
-extern jInt   inBufferLimit;
-extern jInt   currentInBufferPosition;
+extern dx_byte_t* inBuffer;
+extern dx_int_t   inBufferLength;
+extern dx_int_t   inBufferLimit;
+extern dx_int_t   currentInBufferPosition;
 
-void setInBuffer( jByte*, jInt length );
-void setInBufferPosition( jInt pos);
-void setInBufferLimit( jInt limit );
-jInt getInBufferPosition();
-jInt getInBufferLimit();
+void setInBuffer( dx_byte_t*, dx_int_t length );
+void setInBufferPosition( dx_int_t pos);
+void setInBufferLimit( dx_int_t limit );
+dx_int_t getInBufferPosition();
+dx_int_t getInBufferLimit();
 
 //enum DXResult needData(int length);
-jInt skip(jInt n);
-//enum DXResult readFully(jByte* b, jInt bLength, jInt off, jInt len);
+dx_int_t skip(dx_int_t n);
+//enum DXResult readFully(dx_byte_t* b, dx_int_t bLength, dx_int_t off, dx_int_t len);
 
-enum dx_result_t readBoolean       ( OUT jBool* );
-enum dx_result_t readByte          ( OUT jByte* );
-enum dx_result_t readUnsignedByte  ( OUT jInt* );
-enum dx_result_t readShort         ( OUT jShort* );
-enum dx_result_t readUnsignedShort ( OUT jInt* );
-enum dx_result_t readChar          ( OUT jChar* );
-enum dx_result_t readInt           ( OUT jInt* );
-enum dx_result_t readLong          ( OUT jLong* );
-enum dx_result_t readFloat         ( OUT jFloat* );
-enum dx_result_t readDouble        ( OUT jDouble* );
-enum dx_result_t readLine          ( OUT jChar** );
-enum dx_result_t readUTF           ( OUT jChar** );
+enum dx_result_t readBoolean       ( OUT dx_bool_t* );
+enum dx_result_t readByte          ( OUT dx_byte_t* );
+enum dx_result_t readUnsignedByte  ( OUT dx_int_t* );
+enum dx_result_t readShort         ( OUT dx_short_t* );
+enum dx_result_t readUnsignedShort ( OUT dx_int_t* );
+enum dx_result_t readChar          ( OUT dx_char_t* );
+enum dx_result_t readInt           ( OUT dx_int_t* );
+enum dx_result_t readLong          ( OUT dx_long_t* );
+enum dx_result_t readFloat         ( OUT dx_float_t* );
+enum dx_result_t readDouble        ( OUT dx_double_t* );
+enum dx_result_t readLine          ( OUT dx_char_t** );
+enum dx_result_t readUTF           ( OUT dx_char_t** );
 //Object readObject()
 
 // ========== Compact API ==========
 
 /**
-* Reads an jInt value in a compact format.
-* If actual encoded value does not fit into an jInt data type,
-* then it is truncated to jInt value (only lower 32 bits are returned);
+* Reads an dx_int_t value in a compact format.
+* If actual encoded value does not fit into an dx_int_t data type,
+* then it is truncated to dx_int_t value (only lower 32 bits are returned);
 * the number is read entirely in this case.
 *
-* @param output parameter - the jInt value read
+* @param output parameter - the dx_int_t value read
 */
-enum dx_result_t readCompactInt( OUT jInt* );
+enum dx_result_t readCompactInt( OUT dx_int_t* );
 
 /**
-* Reads a jLong value in a compact format.
+* Reads a dx_long_t value in a compact format.
 *
-* @param output parameter - the jLong value read
+* @param output parameter - the dx_long_t value read
 */
-enum dx_result_t readCompactLong( OUT jLong* );
+enum dx_result_t readCompactLong( OUT dx_long_t* );
 
 /**
 * Reads an array of bytes in a compact encapsulation format.
@@ -78,7 +78,7 @@ enum dx_result_t readCompactLong( OUT jLong* );
 *
 * @param output parameter - the byte array read
 */
-enum dx_result_t readByteArray( OUT jByte** );
+enum dx_result_t readByteArray( OUT dx_byte_t** );
 
 // ========== UTF API ==========
 
@@ -88,7 +88,7 @@ enum dx_result_t readByteArray( OUT jByte** );
 *
 * @param output parameter - the Unicode code point read
 */
-enum dx_result_t readUTFChar( OUT jInt* );
+enum dx_result_t readUTFChar( OUT dx_int_t* );
 
 /**
 * Reads Unicode string in a UTF-8 format with compact encapsulation.

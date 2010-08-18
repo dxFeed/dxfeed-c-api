@@ -61,7 +61,7 @@ enum dx_result_t parseSuccessful() {
 
 ////////////////////////////////////////////////////////////////////////////////
 enum parser_result_t getParserLastError() {
-    jInt res = pr_successful;
+    dx_int_t res = pr_successful;
     enum dx_error_function_result_t resultErr = dx_get_last_error (NULL, &res, NULL);
     if (resultErr == efr_success || resultErr == efr_no_error_stored) {
         return res;
@@ -75,64 +75,64 @@ enum parser_result_t getParserLastError() {
 * UTF-16 encoding. A high-surrogate is also known as a
 * leading-surrogate.
 */
-const jChar MIN_HIGH_SURROGATE = '\uD800';
+const dx_char_t MIN_HIGH_SURROGATE = '\uD800';
 
 /**
 * The maximum value of a Unicode high-surrogate code unit in the
 * UTF-16 encoding. A high-surrogate is also known as a
 * leading-surrogate.
 */
-const jChar MAX_HIGH_SURROGATE = '\uDBFF';
+const dx_char_t MAX_HIGH_SURROGATE = '\uDBFF';
 
 /**
 * The minimum value of a Unicode low-surrogate code unit in the
 * UTF-16 encoding. A low-surrogate is also known as a
 * trailing-surrogate.
 */
-const jChar MIN_LOW_SURROGATE  = '\uDC00';
+const dx_char_t MIN_LOW_SURROGATE  = '\uDC00';
 
 /**
 * The maximum value of a Unicode low-surrogate code unit in the
 * UTF-16 encoding. A low-surrogate is also known as a
 * trailing-surrogate.
 */
-const jChar MAX_LOW_SURROGATE  = '\uDFFF';
+const dx_char_t MAX_LOW_SURROGATE  = '\uDFFF';
 
 /**
 * The minimum value of a supplementary code point.
 */
-const jInt MIN_SUPPLEMENTARY_CODE_POINT = 0x010000;
+const dx_int_t MIN_SUPPLEMENTARY_CODE_POINT = 0x010000;
 
 /**
 * The maximum value of a Unicode code point.
 */
-jInt MAX_CODE_POINT = 0x10ffff;
+dx_int_t MAX_CODE_POINT = 0x10ffff;
 
 ////////////////////////////////////////////////////////////////////////////////
-int isHighSurrogate(jChar ch) {
+int isHighSurrogate(dx_char_t ch) {
     return ch >= MIN_HIGH_SURROGATE && ch <= MAX_HIGH_SURROGATE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-int isLowSurrogate(jChar ch) {
+int isLowSurrogate(dx_char_t ch) {
     return ch >= MIN_LOW_SURROGATE && ch <= MAX_LOW_SURROGATE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-jInt toCodePoint(jChar high, jChar low) {
+dx_int_t toCodePoint(dx_char_t high, dx_char_t low) {
     return ((high - MIN_HIGH_SURROGATE) << 10)
         + (low - MIN_LOW_SURROGATE) + MIN_SUPPLEMENTARY_CODE_POINT;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void toSurrogates(jInt codePoint, jInt index, OUT dx_string_t* dst) {
-    jInt offset = codePoint - MIN_SUPPLEMENTARY_CODE_POINT;
-    (*dst)[index+1] = (jChar)((offset & 0x3ff) + MIN_LOW_SURROGATE);
-    (*dst)[index] = (jChar)((offset >> 10) + MIN_HIGH_SURROGATE);
+void toSurrogates(dx_int_t codePoint, dx_int_t index, OUT dx_string_t* dst) {
+    dx_int_t offset = codePoint - MIN_SUPPLEMENTARY_CODE_POINT;
+    (*dst)[index+1] = (dx_char_t)((offset & 0x3ff) + MIN_LOW_SURROGATE);
+    (*dst)[index] = (dx_char_t)((offset >> 10) + MIN_HIGH_SURROGATE);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t toChars(jInt codePoint, jInt dstIndex, jInt dstLen, OUT dx_string_t* dst, OUT jInt* res) {
+enum dx_result_t toChars(dx_int_t codePoint, dx_int_t dstIndex, dx_int_t dstLen, OUT dx_string_t* dst, OUT dx_int_t* res) {
     if (!dst || !(*dst) || !res || codePoint < 0 || codePoint > MAX_CODE_POINT) {
         setParseError(pr_illegal_argument);
         return R_FAILED;
@@ -143,7 +143,7 @@ enum dx_result_t toChars(jInt codePoint, jInt dstIndex, jInt dstLen, OUT dx_stri
             setParseError(pr_index_out_of_bounds);
             return R_FAILED;
         }
-        (*dst)[dstIndex] = (jChar)codePoint;
+        (*dst)[dstIndex] = (dx_char_t)codePoint;
         *res = 1;
         return parseSuccessful();
     }

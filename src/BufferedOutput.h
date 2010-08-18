@@ -22,42 +22,42 @@
 
 #include "ParserCommon.h"
 
-extern jByte* outBuffer;
-extern jInt   outBufferLength;
-extern jInt   currentOutBufferPosition;
+extern dx_byte_t* outBuffer;
+extern dx_int_t   outBufferLength;
+extern dx_int_t   currentOutBufferPosition;
 
-void setOutBuffer( jByte* );
+void setOutBuffer( dx_byte_t* );
 
-//enum DXResult write(jInt b);
-enum dx_result_t write(const jByte* b, jInt bLen, jInt off, jInt len);
+//enum DXResult write(dx_int_t b);
+enum dx_result_t write(const dx_byte_t* b, dx_int_t bLen, dx_int_t off, dx_int_t len);
 
-enum dx_result_t writeBoolean        ( jBool );
-enum dx_result_t writeByte           ( jByte );
-enum dx_result_t writeShort          ( jShort );
-enum dx_result_t writeChar           ( jChar );
-enum dx_result_t writeInt            ( jInt );
-enum dx_result_t writeLong           ( jLong );
-enum dx_result_t writeFloat          ( jFloat );
-enum dx_result_t writeDouble         ( jDouble );
-enum dx_result_t writeBytes          ( const jChar* );
-enum dx_result_t writeChars          ( const jChar* );
-enum dx_result_t writeUTF            ( const dx_string );
+enum dx_result_t writeBoolean        ( dx_bool_t );
+enum dx_result_t writeByte           ( dx_byte_t );
+enum dx_result_t writeShort          ( dx_short_t );
+enum dx_result_t writeChar           ( dx_char_t );
+enum dx_result_t writeInt            ( dx_int_t );
+enum dx_result_t writeLong           ( dx_long_t );
+enum dx_result_t writeFloat          ( dx_float_t );
+enum dx_result_t writeDouble         ( dx_double_t );
+enum dx_result_t writeBytes          ( const dx_char_t* );
+enum dx_result_t writeChars          ( const dx_char_t* );
+enum dx_result_t writeUTF            ( const dx_string_t );
 
 // ========== Compact API ==========
 
 /**
-* Writes an jInt value in a compact format.
+* Writes an dx_int_t value in a compact format.
 *
 * @param val - value to be written
 */
-enum dx_result_t writeCompactInt     ( jInt val );
+enum dx_result_t writeCompactInt     ( dx_int_t val );
 
 /**
-* Writes a jLong value in a compact format.
+* Writes a dx_long_t value in a compact format.
 *
 * @param v - value to be written
 */
-enum dx_result_t writeCompactLong    ( jLong v );
+enum dx_result_t writeCompactLong    ( dx_long_t v );
 
 /**
 * Writes an array of bytes in a compact encapsulation format.
@@ -66,7 +66,7 @@ enum dx_result_t writeCompactLong    ( jLong v );
 * @param  bytes - the byte array to be written
 * @param  size - the size of the byte array
 */
-enum dx_result_t writeByteArray      ( const jByte* bytes, jInt size );
+enum dx_result_t writeByteArray      ( const dx_byte_t* bytes, dx_int_t size );
 
 
 // ========== UTF API ==========
@@ -77,7 +77,7 @@ enum dx_result_t writeByteArray      ( const jByte* bytes, jInt size );
 *
 * @param codePoint the code point to be written
 */
-enum dx_result_t writeUTFChar        ( jInt codePoint );
+enum dx_result_t writeUTFChar        ( dx_int_t codePoint );
 
 /**
 * Writes a string in a UTF-8 format with compact encapsulation.

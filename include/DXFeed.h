@@ -46,7 +46,7 @@
 // if the function succeeds it returns the handle of the opened
 // connection via the function's out-parameter
 
-DXFEED_API ERRORCODE connect (jstring host);
+DXFEED_API ERRORCODE connect (dx_string_t host);
 
 // disconnect a connection, previously created by 'connect'
 // returns the success/error code of the operation
@@ -76,23 +76,23 @@ DXFEED_API ERRORCODE removeSubscription (HSUBSCRIPTION subscription);
 // the selected symbols
 // returns the success/error code of the operation
 
-DXFEED_API ERRORCODE addSymbols (HSUBSCRIPTION subscription, jstring* symbols, int symbolCount);
+DXFEED_API ERRORCODE addSymbols (HSUBSCRIPTION subscription, dx_string_t* symbols, int symbolCount);
 
 // removes selected symbols to given subscription, thus making it stop receiving events concerning
 // the selected symbols
 // returns the success/error code of the operation
 
-DXFEED_API ERRORCODE removeSymbols (HSUBSCRIPTION subscription, jstring* symbols, int symbolCount);
+DXFEED_API ERRORCODE removeSymbols (HSUBSCRIPTION subscription, dx_string_t* symbols, int symbolCount);
 
 // adds symbols from selected instrument profile file to given subscription
 // returns the success/error code of the operation
 
-DXFEED_API ERRORCODE addSymbolsIpf (HSUBSCRIPTION subscription, jstring filePath);
+DXFEED_API ERRORCODE addSymbolsIpf (HSUBSCRIPTION subscription, dx_string_t filePath);
 
 // removes symbols from selected instrument profile file from given subscription
 // returns the success/error code of the operation
 
-DXFEED_API ERRORCODE removeSymbolsIpf (HSUBSCRIPTION subscription, jstring filePath);
+DXFEED_API ERRORCODE removeSymbolsIpf (HSUBSCRIPTION subscription, dx_string_t filePath);
 
 // attaches the specified event listener function to the given subscription
 // returns the success/error code of the operation

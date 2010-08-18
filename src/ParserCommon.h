@@ -36,8 +36,6 @@ enum dx_result_t {
 #define MAX(a,b) (((a)>(b))?(a):(b))
 #define MIN(a,b) (((a)<(b))?(a):(b))
 
-typedef jChar* dx_string_t;
-
 ////////////////////////////////////////////////////////////////////////////////
 enum dx_result_t setParseError(int err);
 enum dx_result_t parseSuccessful();
@@ -49,7 +47,7 @@ enum parser_result_t getParserLastError();
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
-* Determines if the given jChar value is a
+* Determines if the given dx_char_t value is a
 * high-surrogate code unit (also known as leading-surrogate
 * code unit). Such values do not represent characters by
 * themselves, but are used in the representation of 
@@ -58,16 +56,16 @@ enum parser_result_t getParserLastError();
 * This method returns nonzero if and only if
 * ch >= '\uD800' && ch <= '\uDBFF' is true.
 *
-* @param   ch   the jChar value to be tested.
-* @return  nonzero if the jChar value
+* @param   ch   the dx_char_t value to be tested.
+* @return  nonzero if the dx_char_t value
 *          is between '\uD800' and '\uDBFF' inclusive;
 *          zero otherwise.
 */
-int isHighSurrogate(jChar);
+int isHighSurrogate(dx_char_t);
 
 
 /**
-* Determines if the given jChar value is a
+* Determines if the given dx_char_t value is a
 * low-surrogate code unit (also known as trailing-surrogate code
 * unit). Such values do not represent characters by themselves,
 * but are used in the representation of supplementary characters
@@ -76,12 +74,12 @@ int isHighSurrogate(jChar);
 * This method returns nonzero if and only if
 * ch >= '\uDC00' && ch <= '\uDFFF' is true.
 *
-* @param   ch   the jChar value to be tested.
-* @return  nonzero if the jChar value
+* @param   ch   the dx_char_t value to be tested.
+* @return  nonzero if the dx_char_t value
 *          is between '\uDC00' and '\uDFFF' inclusive;
 *          zero otherwise.
 */
-int isLowSurrogate(jChar);
+int isLowSurrogate(dx_char_t);
 
 /**
 * Converts the specified surrogate pair to its supplementary code
@@ -94,7 +92,7 @@ int isLowSurrogate(jChar);
 * @return the supplementary code point composed from the
 *         specified surrogate pair.
 */
-jInt toCodePoint(jChar high, jChar low);
+dx_int_t toCodePoint(dx_char_t high, dx_char_t low);
 
 /**
 * Converts the specified character (Unicode code point) to its
@@ -109,8 +107,8 @@ jInt toCodePoint(jChar high, jChar low);
 * @param  codePoint the character (Unicode code point) to be converted.
 * @param dstIndex the start index into the dst array where the converted value is stored.
 * @param dstLen the length of the dst
-* @param  dst pointer to an array of jChar in which the codePoint's UTF-16 value is stored.
-* @param  res pointer to jInt in which stored 1 if the code point is a BMP code point
+* @param  dst pointer to an array of dx_char_t in which the codePoint's UTF-16 value is stored.
+* @param  res pointer to dx_int_t in which stored 1 if the code point is a BMP code point
 * or 2 if the code point is a supplementary code point
 *
 * set error DS_IllegalArgument if the specified codePoint is not a valid Unicode code point
@@ -120,9 +118,9 @@ jInt toCodePoint(jChar high, jChar low);
 * value(s). (If dstIndex is equal to dstLen-1 and the specified codePoint is a supplementary
 * character, the high-surrogate value is not stored in dst[dstIndex].)
 */
-enum dx_result_t toChars(jInt codePoint, jInt dstIndex, jInt dstLen, OUT dx_string_t* dst, OUT jInt* res);
+enum dx_result_t toChars(dx_int_t codePoint, dx_int_t dstIndex, dx_int_t dstLen, OUT dx_string_t* dst, OUT dx_int_t* res);
 
-void toSurrogates(jInt codePoint, jInt index, OUT dx_string_t* dst);
+void toSurrogates(dx_int_t codePoint, dx_int_t index, OUT dx_string_t* dst);
 
 
 

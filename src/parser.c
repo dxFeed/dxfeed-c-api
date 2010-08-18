@@ -24,13 +24,13 @@
 // ========== Implementation Details ==========
 ////////////////////////////////////////////////////////////////////////////////
 
-//jByte* buffer      = 0;
-//jInt   bufferSize  = 0;
-//jInt   bufferPos   = 0;
-//jInt   bufferLimit = 0;
+//dx_byte_t* buffer      = 0;
+//dx_int_t   bufferSize  = 0;
+//dx_int_t   bufferPos   = 0;
+//dx_int_t   bufferLimit = 0;
 //
 //MessageType pendingMessageType;
-//jInt        lastCipher;
+//dx_int_t        lastCipher;
 //dx_string_t   lastSymbol;
 //
 //////////////////////////////////////////////////////////////////////////////////
@@ -84,8 +84,8 @@
 //* Parses and return message type.
 //* @throws CorruptedException if stream is corrupted.
 //*/
-//dx_result_t parseType(OUT jInt* ltype) {
-//    jLong type;
+//dx_result_t parseType(OUT dx_int_t* ltype) {
+//    dx_long_t type;
 //    if (readCompactLong(&type) != R_SUCCESSFUL) {
 //        return setParseError(pr_buffer_corrupt);
 //    }
@@ -93,7 +93,7 @@
 //        return setParseError(pr_buffer_corrupt); // stream is corrupted
 //    }
 //
-//    *ltype = (jInt)(type);
+//    *ltype = (dx_int_t)(type);
 //    return parseSuccessful();
 //}
 //
@@ -103,11 +103,11 @@
 //* Returns false when message is not complete yet and its parsing cannot be started.
 //* @throws CorruptedException if stream is corrupted.
 //*/
-//dx_result_t parseLengthAndSetupInput(jInt position, jInt limit, OUT ) {
+//dx_result_t parseLengthAndSetupInput(dx_int_t position, dx_int_t limit, OUT ) {
 //    setInBuffer(buffer, bufferSize);
 //    setInBufferPosition(bufferPos);
 //
-//    jLong length;
+//    dx_long_t length;
 //    if (readCompactLong(&length) != R_SUCCESSFUL) {
 //        return R_FAILED; // need more bytes
 //    }
@@ -115,7 +115,7 @@
 //        return setParseError(pr_buffer_corrupt);
 //    }
 //
-//    jInt endPosition = getInBufferPosition() + (jInt)length;
+//    dx_int_t endPosition = getInBufferPosition() + (dx_int_t)length;
 //    if (endPosition > limit)
 //        return setParseError(pr_message_not_complete);
 //
@@ -180,7 +180,7 @@
 //}
 //
 //dx_result_t readSymbol() {
-//    jInt r = codec.readSymbol(in, symbolBuffer, symbolResult);
+//    dx_int_t r = codec.readSymbol(in, symbolBuffer, symbolResult);
 //    if ((r & SymbolCodec.VALID_CIPHER) != 0) {
 //        lastCipher = r;
 //        lastSymbol = null;
@@ -199,12 +199,12 @@
 //dx_result_t parseData() {
 //    lastCipher = 0;
 //    lastSymbol = NULL;
-//    jInt start_position = getInBufferPosition();
-//    jInt last_rec_position = start_position;
+//    dx_int_t start_position = getInBufferPosition();
+//    dx_int_t last_rec_position = start_position;
 //    try {
 //        while (getInBufferPosition() < getInBufferLimit()) {
 //            readSymbol();
-//            jInt id;
+//            dx_int_t id;
 //            if (readCompactInt(&id) != R_SUCCESSFUL) {
 //                return R_FAILED;
 //            }
@@ -265,10 +265,10 @@
 //////////////////////////////////////////////////////////////////////////////////
 //
 //////////////////////////////////////////////////////////////////////////////////
-//int dx_parse( const jByte* buf, jInt bufLen  ) {
+//int dx_parse( const dx_byte_t* buf, dx_int_t bufLen  ) {
 //    // Parsing loop
 //    while (bufferPos < bufferLimit) {
-//        jInt messageType = MESSAGE_HEARTBEAT; // zero-length messages are treated as just heartbeats
+//        dx_int_t messageType = MESSAGE_HEARTBEAT; // zero-length messages are treated as just heartbeats
 //
 //        if (parseLengthAndSetupInput(bufferPos, bufferLimit) != R_SUCCESSFUL) {
 //            if (getParserLastError() == pr_message_not_complete) {

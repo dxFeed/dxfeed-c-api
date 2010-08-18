@@ -27,12 +27,12 @@
 
 
 // pointer to extern buffer
-jByte* outBuffer = 0;
-jInt   outBufferLength = 0;
-jInt   currentOutBufferPosition = 0;
+dx_byte_t* outBuffer = 0;
+dx_int_t   outBufferLength = 0;
+dx_int_t   currentOutBufferPosition = 0;
 
 ////////////////////////////////////////////////////////////////////////////////
-void setOutBuffer( jByte* buf ) {
+void setOutBuffer( dx_byte_t* buf ) {
     outBuffer = buf;
 }
 
@@ -52,32 +52,32 @@ enum dx_result_t checkWrite(int requiredCapacity) {
     return parseSuccessful();
 }
 
-void writeUTF2Unchecked(jInt codePoint) {
-    outBuffer[currentOutBufferPosition++] = (jByte)(0xC0 | codePoint >> 6);
-    outBuffer[currentOutBufferPosition++] = (jByte)(0x80 | codePoint & 0x3F);
+void writeUTF2Unchecked(dx_int_t codePoint) {
+    outBuffer[currentOutBufferPosition++] = (dx_byte_t)(0xC0 | codePoint >> 6);
+    outBuffer[currentOutBufferPosition++] = (dx_byte_t)(0x80 | codePoint & 0x3F);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void writeUTF3Unchecked(jInt codePoint) {
-    outBuffer[currentOutBufferPosition++] = (jByte)(0xE0 | codePoint >> 12);
-    outBuffer[currentOutBufferPosition++] = (jByte)(0x80 | codePoint >> 6 & 0x3F);
-    outBuffer[currentOutBufferPosition++] = (jByte)(0x80 | codePoint & 0x3F);
+void writeUTF3Unchecked(dx_int_t codePoint) {
+    outBuffer[currentOutBufferPosition++] = (dx_byte_t)(0xE0 | codePoint >> 12);
+    outBuffer[currentOutBufferPosition++] = (dx_byte_t)(0x80 | codePoint >> 6 & 0x3F);
+    outBuffer[currentOutBufferPosition++] = (dx_byte_t)(0x80 | codePoint & 0x3F);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void writeUTF4Unchecked(jInt codePoint) {
-    outBuffer[currentOutBufferPosition++] = (jByte)(0xF0 | codePoint >> 18);
-    outBuffer[currentOutBufferPosition++] = (jByte)(0x80 | codePoint >> 12 & 0x3F);
-    outBuffer[currentOutBufferPosition++] = (jByte)(0x80 | codePoint >> 6 & 0x3F);
-    outBuffer[currentOutBufferPosition++] = (jByte)(0x80 | codePoint & 0x3F);
+void writeUTF4Unchecked(dx_int_t codePoint) {
+    outBuffer[currentOutBufferPosition++] = (dx_byte_t)(0xF0 | codePoint >> 18);
+    outBuffer[currentOutBufferPosition++] = (dx_byte_t)(0x80 | codePoint >> 12 & 0x3F);
+    outBuffer[currentOutBufferPosition++] = (dx_byte_t)(0x80 | codePoint >> 6 & 0x3F);
+    outBuffer[currentOutBufferPosition++] = (dx_byte_t)(0x80 | codePoint & 0x3F);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void writeIntUnchecked(jInt val) {
-    outBuffer[currentOutBufferPosition++] = (jByte)(val >> 24);
-    outBuffer[currentOutBufferPosition++] = (jByte)(val >> 16);
-    outBuffer[currentOutBufferPosition++] = (jByte)(val >> 8);
-    outBuffer[currentOutBufferPosition++] = (jByte)val;
+void writeIntUnchecked(dx_int_t val) {
+    outBuffer[currentOutBufferPosition++] = (dx_byte_t)(val >> 24);
+    outBuffer[currentOutBufferPosition++] = (dx_byte_t)(val >> 16);
+    outBuffer[currentOutBufferPosition++] = (dx_byte_t)(val >> 8);
+    outBuffer[currentOutBufferPosition++] = (dx_byte_t)val;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -85,18 +85,18 @@ void writeIntUnchecked(jInt val) {
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
-//enum DXResult write(jInt b) {
+//enum DXResult write(dx_int_t b) {
 //    enum DXResult res;
 //    if (currentOutBufferPosition >= outBufferLength && ((res = ensureCapacity(1)) != DS_Successful) ) {
 //        return res;
 //    }
 //
-//    buffer[currentOutBufferPosition++] = (jByte)b;
+//    buffer[currentOutBufferPosition++] = (dx_byte_t)b;
 //    return parseSuccessful();
 //}
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t write(const jByte* b, jInt bLen, jInt off, jInt len) {
+enum dx_result_t write(const dx_byte_t* b, dx_int_t bLen, dx_int_t off, dx_int_t len) {
     if ((off | len | (off + len) | (bLen - (off + len))) < 0) {
         return setParseError(pr_index_out_of_bounds);
     }
@@ -111,98 +111,98 @@ enum dx_result_t write(const jByte* b, jInt bLen, jInt off, jInt len) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t writeBoolean( OUT jBool val ) {
+enum dx_result_t writeBoolean( OUT dx_bool_t val ) {
     if (checkWrite(1) != R_SUCCESSFUL) {
         return R_FAILED;
     }
 
-    outBuffer[currentOutBufferPosition++] = val ? (jByte)1 : (jByte)0;
+    outBuffer[currentOutBufferPosition++] = val ? (dx_byte_t)1 : (dx_byte_t)0;
     return parseSuccessful();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t writeByte( jByte val ) {
+enum dx_result_t writeByte( dx_byte_t val ) {
     if (checkWrite(1) != R_SUCCESSFUL) {
         return R_FAILED;
     }
 
-    outBuffer[currentOutBufferPosition++] = (jByte)val;
+    outBuffer[currentOutBufferPosition++] = (dx_byte_t)val;
     return parseSuccessful();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t writeShort( jShort val ) {
+enum dx_result_t writeShort( dx_short_t val ) {
     if (checkWrite(2) != R_SUCCESSFUL) {
         return R_FAILED;
     }
 
-    outBuffer[currentOutBufferPosition++] = (jByte)(val >> 8);
-    outBuffer[currentOutBufferPosition++] = (jByte)val;
+    outBuffer[currentOutBufferPosition++] = (dx_byte_t)(val >> 8);
+    outBuffer[currentOutBufferPosition++] = (dx_byte_t)val;
 
     return parseSuccessful();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t writeChar( jChar val ) {
+enum dx_result_t writeChar( dx_char_t val ) {
     if (checkWrite(2) != R_SUCCESSFUL) {
         return R_FAILED;
     }
 
-    outBuffer[currentOutBufferPosition++] = (jByte)(val >> 8);
-    outBuffer[currentOutBufferPosition++] = (jByte)val;
+    outBuffer[currentOutBufferPosition++] = (dx_byte_t)(val >> 8);
+    outBuffer[currentOutBufferPosition++] = (dx_byte_t)val;
 
     return parseSuccessful();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t writeInt( jInt val ) {
+enum dx_result_t writeInt( dx_int_t val ) {
     if (checkWrite(4) != R_SUCCESSFUL) {
         return R_FAILED;
     }
 
-    outBuffer[currentOutBufferPosition++] = (jByte)(val >> 24);
-    outBuffer[currentOutBufferPosition++] = (jByte)(val >> 16);
-    outBuffer[currentOutBufferPosition++] = (jByte)(val >> 8);
-    outBuffer[currentOutBufferPosition++] = (jByte)val;
+    outBuffer[currentOutBufferPosition++] = (dx_byte_t)(val >> 24);
+    outBuffer[currentOutBufferPosition++] = (dx_byte_t)(val >> 16);
+    outBuffer[currentOutBufferPosition++] = (dx_byte_t)(val >> 8);
+    outBuffer[currentOutBufferPosition++] = (dx_byte_t)val;
 
     return parseSuccessful();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t writeLong( jLong val ) {
+enum dx_result_t writeLong( dx_long_t val ) {
     if (checkWrite(8) != R_SUCCESSFUL) {
         return R_FAILED;
     }
 
-    outBuffer[currentOutBufferPosition++] = (jByte)(val >> 56);
-    outBuffer[currentOutBufferPosition++] = (jByte)(val >> 48);
-    outBuffer[currentOutBufferPosition++] = (jByte)(val >> 40);
-    outBuffer[currentOutBufferPosition++] = (jByte)(val >> 32);
-    outBuffer[currentOutBufferPosition++] = (jByte)(val >> 24);
-    outBuffer[currentOutBufferPosition++] = (jByte)(val >> 16);
-    outBuffer[currentOutBufferPosition++] = (jByte)(val >> 8);
-    outBuffer[currentOutBufferPosition++] = (jByte)val;
+    outBuffer[currentOutBufferPosition++] = (dx_byte_t)(val >> 56);
+    outBuffer[currentOutBufferPosition++] = (dx_byte_t)(val >> 48);
+    outBuffer[currentOutBufferPosition++] = (dx_byte_t)(val >> 40);
+    outBuffer[currentOutBufferPosition++] = (dx_byte_t)(val >> 32);
+    outBuffer[currentOutBufferPosition++] = (dx_byte_t)(val >> 24);
+    outBuffer[currentOutBufferPosition++] = (dx_byte_t)(val >> 16);
+    outBuffer[currentOutBufferPosition++] = (dx_byte_t)(val >> 8);
+    outBuffer[currentOutBufferPosition++] = (dx_byte_t)val;
 
     return parseSuccessful();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t writeFloat( jFloat val ) {
-    return writeInt(*((jInt*)&val));
+enum dx_result_t writeFloat( dx_float_t val ) {
+    return writeInt(*((dx_int_t*)&val));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t writeDouble( jDouble val) {
-    return writeLong(*((jLong*)&val));
+enum dx_result_t writeDouble( dx_double_t val) {
+    return writeLong(*((dx_long_t*)&val));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t writeBytes( const jChar* val ) {
+enum dx_result_t writeBytes( const dx_char_t* val ) {
     enum dx_result_t res = R_SUCCESSFUL;
     size_t length = wcslen(val);
     size_t i = 0;
     for (;i < length && res == R_SUCCESSFUL; i++) {
-        res = writeByte((jByte)val[i]);
+        res = writeByte((dx_byte_t)val[i]);
     }
 
     if (res == R_FAILED) {
@@ -213,7 +213,7 @@ enum dx_result_t writeBytes( const jChar* val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t writeChars( const jChar* val ) {
+enum dx_result_t writeChars( const dx_char_t* val ) {
     enum dx_result_t res = R_SUCCESSFUL;
     size_t length = wcslen(val);
     size_t i = 0;
@@ -231,10 +231,10 @@ enum dx_result_t writeChars( const jChar* val ) {
 ////////////////////////////////////////////////////////////////////////////////
 enum dx_result_t writeUTF( const dx_string_t val ) {
     size_t strlen = wcslen(val);
-    jShort utflen = 0;
+    dx_short_t utflen = 0;
     size_t i = 0;
     for (; i < strlen; i++) {
-        jChar c = val[i];
+        dx_char_t c = val[i];
         if (c > 0 && c <= 0x007F)
             utflen++;
         else if (c <= 0x07FF)
@@ -252,14 +252,14 @@ enum dx_result_t writeUTF( const dx_string_t val ) {
     }
 
     for (i = 0; i < strlen; i++) {
-        jChar c;
+        dx_char_t c;
         if (outBufferLength - currentOutBufferPosition < 3 && ensureCapacity(3) != R_SUCCESSFUL) {
             return R_FAILED;
         }
 
         c = val[i];
         if (c > 0 && c <= 0x007F)
-            outBuffer[currentOutBufferPosition++] = (jByte)c;
+            outBuffer[currentOutBufferPosition++] = (dx_byte_t)c;
         else if (c <= 0x07FF)
             writeUTF2Unchecked(c);
         else
@@ -270,41 +270,41 @@ enum dx_result_t writeUTF( const dx_string_t val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t writeCompactInt(jInt val) {
+enum dx_result_t writeCompactInt(dx_int_t val) {
     if (checkWrite(5) != R_SUCCESSFUL) {
         return R_FAILED;
     }
 
     if (val >= 0) {
         if (val < 0x40) {
-            outBuffer[currentOutBufferPosition++] = (jByte)val;
+            outBuffer[currentOutBufferPosition++] = (dx_byte_t)val;
         } else if (val < 0x2000) {
-            outBuffer[currentOutBufferPosition++] = (jByte)(0x80 | val >> 8);
-            outBuffer[currentOutBufferPosition++] = (jByte)val;
+            outBuffer[currentOutBufferPosition++] = (dx_byte_t)(0x80 | val >> 8);
+            outBuffer[currentOutBufferPosition++] = (dx_byte_t)val;
         } else if (val < 0x100000) {
-            outBuffer[currentOutBufferPosition++] = (jByte)(0xC0 | val >> 16);
-            outBuffer[currentOutBufferPosition++] = (jByte)(val >> 8);
-            outBuffer[currentOutBufferPosition++] = (jByte)val;
+            outBuffer[currentOutBufferPosition++] = (dx_byte_t)(0xC0 | val >> 16);
+            outBuffer[currentOutBufferPosition++] = (dx_byte_t)(val >> 8);
+            outBuffer[currentOutBufferPosition++] = (dx_byte_t)val;
         } else if (val < 0x08000000) {
             writeIntUnchecked(0xE0000000 | val);
         } else {
-            outBuffer[currentOutBufferPosition++] = (jByte)0xF0;
+            outBuffer[currentOutBufferPosition++] = (dx_byte_t)0xF0;
             writeIntUnchecked(val);
         }
     } else {
         if (val >= -0x40) {
-            outBuffer[currentOutBufferPosition++] = (jByte)(0x7F & val);
+            outBuffer[currentOutBufferPosition++] = (dx_byte_t)(0x7F & val);
         } else if (val >= -0x2000) {
-            outBuffer[currentOutBufferPosition++] = (jByte)(0xBF & val >> 8);
-            outBuffer[currentOutBufferPosition++] = (jByte)val;
+            outBuffer[currentOutBufferPosition++] = (dx_byte_t)(0xBF & val >> 8);
+            outBuffer[currentOutBufferPosition++] = (dx_byte_t)val;
         } else if (val >= -0x100000) {
-            outBuffer[currentOutBufferPosition++] = (jByte)(0xDF & val >> 16);
-            outBuffer[currentOutBufferPosition++] = (jByte)(val >> 8);
-            outBuffer[currentOutBufferPosition++] = (jByte)val;
+            outBuffer[currentOutBufferPosition++] = (dx_byte_t)(0xDF & val >> 16);
+            outBuffer[currentOutBufferPosition++] = (dx_byte_t)(val >> 8);
+            outBuffer[currentOutBufferPosition++] = (dx_byte_t)val;
         } else if (val >= -0x08000000) {
             writeIntUnchecked(0xEFFFFFFF & val);
         } else {
-            outBuffer[currentOutBufferPosition++] = (jByte)0xF7;
+            outBuffer[currentOutBufferPosition++] = (dx_byte_t)0xF7;
             writeIntUnchecked(val);
         }
     }
@@ -312,47 +312,47 @@ enum dx_result_t writeCompactInt(jInt val) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t writeCompactLong(jLong v) {
-    jInt hi;
-    if (v == (jLong)(jInt)v) {
-        return writeCompactInt((jInt)v);
+enum dx_result_t writeCompactLong(dx_long_t v) {
+    dx_int_t hi;
+    if (v == (dx_long_t)(dx_int_t)v) {
+        return writeCompactInt((dx_int_t)v);
     }
 
     if (checkWrite(9) != R_SUCCESSFUL) {
         return R_FAILED;
     }
 
-    hi = (jInt)(v >> 32);
+    hi = (dx_int_t)(v >> 32);
     if (hi >= 0) {
         if (hi < 0x04) {
-            outBuffer[currentOutBufferPosition++] = (jByte)(0xF0 | hi);
+            outBuffer[currentOutBufferPosition++] = (dx_byte_t)(0xF0 | hi);
         } else if (hi < 0x0200) {
-            outBuffer[currentOutBufferPosition++] = (jByte)(0xF8 | hi >> 8);
-            outBuffer[currentOutBufferPosition++] = (jByte)hi;
+            outBuffer[currentOutBufferPosition++] = (dx_byte_t)(0xF8 | hi >> 8);
+            outBuffer[currentOutBufferPosition++] = (dx_byte_t)hi;
         } else if (hi < 0x010000) {
-            outBuffer[currentOutBufferPosition++] = (jByte)0xFC;
-            outBuffer[currentOutBufferPosition++] = (jByte)(hi >> 8);
-            outBuffer[currentOutBufferPosition++] = (jByte)hi;
+            outBuffer[currentOutBufferPosition++] = (dx_byte_t)0xFC;
+            outBuffer[currentOutBufferPosition++] = (dx_byte_t)(hi >> 8);
+            outBuffer[currentOutBufferPosition++] = (dx_byte_t)hi;
         } else if (hi < 0x800000) {
             writeIntUnchecked(0xFE000000 | hi);
         } else {
-            outBuffer[currentOutBufferPosition++] = (jByte)0xFF;
+            outBuffer[currentOutBufferPosition++] = (dx_byte_t)0xFF;
             writeIntUnchecked(hi);
         }
     } else {
         if (hi >= -0x04) {
-            outBuffer[currentOutBufferPosition++] = (jByte)(0xF7 & hi);
+            outBuffer[currentOutBufferPosition++] = (dx_byte_t)(0xF7 & hi);
         } else if (hi >= -0x0200) {
-            outBuffer[currentOutBufferPosition++] = (jByte)(0xFB & hi >> 8);
-            outBuffer[currentOutBufferPosition++] = (jByte)hi;
+            outBuffer[currentOutBufferPosition++] = (dx_byte_t)(0xFB & hi >> 8);
+            outBuffer[currentOutBufferPosition++] = (dx_byte_t)hi;
         } else if (hi >= -0x010000) {
-            outBuffer[currentOutBufferPosition++] = (jByte)0xFD;
-            outBuffer[currentOutBufferPosition++] = (jByte)(hi >> 8);
-            outBuffer[currentOutBufferPosition++] = (jByte)hi;
+            outBuffer[currentOutBufferPosition++] = (dx_byte_t)0xFD;
+            outBuffer[currentOutBufferPosition++] = (dx_byte_t)(hi >> 8);
+            outBuffer[currentOutBufferPosition++] = (dx_byte_t)hi;
         } else if (hi >= -0x800000) {
             writeIntUnchecked(0xFEFFFFFF & hi);
         } else {
-            outBuffer[currentOutBufferPosition++] = (jByte)0xFF;
+            outBuffer[currentOutBufferPosition++] = (dx_byte_t)0xFF;
             writeIntUnchecked(hi);
         }
     }
@@ -362,7 +362,7 @@ enum dx_result_t writeCompactLong(jLong v) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t writeByteArray(const jByte* bytes, jInt size) {
+enum dx_result_t writeByteArray(const dx_byte_t* bytes, dx_int_t size) {
     if (bytes == NULL) {
         return writeCompactInt(-1);
     }
@@ -378,7 +378,7 @@ enum dx_result_t writeByteArray(const jByte* bytes, jInt size) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t writeUTFChar(jInt codePoint) {
+enum dx_result_t writeUTFChar(dx_int_t codePoint) {
     if (checkWrite(4) != R_SUCCESSFUL) {
         return R_FAILED;
     }
@@ -388,7 +388,7 @@ enum dx_result_t writeUTFChar(jInt codePoint) {
     }
 
     if (codePoint <= 0x007F) {
-        outBuffer[currentOutBufferPosition++] = (jByte)codePoint;
+        outBuffer[currentOutBufferPosition++] = (dx_byte_t)codePoint;
     } else if (codePoint <= 0x07FF) {
         writeUTF2Unchecked(codePoint);
     } else if (codePoint <= 0xFFFF) {
@@ -414,7 +414,7 @@ enum dx_result_t writeUTFString(const dx_string_t str) {
     strlen = wcslen(str);
     utflen = 0;
     for (i = 0; i < strlen;) {
-        jChar c = str[i++];
+        dx_char_t c = str[i++];
         if (c <= 0x007F)
             utflen++;
         else if (c <= 0x07FF)
@@ -429,18 +429,18 @@ enum dx_result_t writeUTFString(const dx_string_t str) {
         return setParseError(pr_bad_utf_data_format);
     }
 
-    if (writeCompactInt((jInt)utflen) != R_SUCCESSFUL) {
+    if (writeCompactInt((dx_int_t)utflen) != R_SUCCESSFUL) {
         return R_FAILED;
     }
 
     for (i = 0; i < strlen;) {
-        jChar c;
+        dx_char_t c;
         if (outBufferLength - currentOutBufferPosition < 4 && (ensureCapacity(4) != R_SUCCESSFUL)) {
             return R_FAILED;
         }
         c = str[i++];
         if (c <= 0x007F)
-            outBuffer[currentOutBufferPosition++] = (jByte)c;
+            outBuffer[currentOutBufferPosition++] = (dx_byte_t)c;
         else if (c <= 0x07FF)
             writeUTF2Unchecked(c);
         else if (isHighSurrogate(c) && i < strlen && isLowSurrogate(str[i]))
@@ -460,8 +460,8 @@ enum dx_result_t ensureCapacity( int requiredCapacity ) {
     }
 
     if (requiredCapacity > outBufferLength) {
-        jInt length = MAX(MAX((jInt)MIN((jLong)outBufferLength << 1, (jLong)INT_MAX), 1024), requiredCapacity);
-        jByte* newBuffer = (jByte*)malloc(length);
+        dx_int_t length = MAX(MAX((dx_int_t)MIN((dx_long_t)outBufferLength << 1, (dx_long_t)INT_MAX), 1024), requiredCapacity);
+        dx_byte_t* newBuffer = (dx_byte_t*)malloc(length);
         memcpy(newBuffer, outBuffer, outBufferLength);
         free(outBuffer);
         outBuffer = newBuffer;

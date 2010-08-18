@@ -75,49 +75,49 @@
 ///**
 //* Pentas for ASCII characters. Invalid pentas are set to 0.
 //*/
-//jInt pentas[PENTA_LENGTH];
+//dx_int_t pentas[PENTA_LENGTH];
 //
 ///**
 //* Lengths (in bits) of pentas for ASCII characters. Invalid lengths are set to 64.
 //*/
-//jInt plength[PENTA_LENGTH];
+//dx_int_t plength[PENTA_LENGTH];
 //
 ///**
 //* ASCII characters for pentas. Invalid characters are set to 0.
 //*/
-//jChar characters[1024];
+//dx_char_t characters[1024];
 //
-//jInt WILDCARD_CIPHER = encode("*"); // need initialize in init function
+//dx_int_t WILDCARD_CIPHER = encode("*"); // need initialize in init function
 //
 //
 //////////////////////////////////////////////////////////////////////////////////
-//void initPenta(jInt c, jInt _penta, jInt _plen) {
+//void initPenta(dx_int_t c, dx_int_t _penta, dx_int_t _plen) {
 //    pentas[c] = _penta;
 //    plength[c] = _plen;
-//    characters[_penta] = (jChar)c;
+//    characters[_penta] = (dx_char_t)c;
 //}
 //
 //////////////////////////////////////////////////////////////////////////////////
 //dx_result_t initSymbolCodec() {
 //    // initialization
-//    jInt i = PENTA_LENGTH;
+//    dx_int_t i = PENTA_LENGTH;
 //    for (; --i >= 0;) {
 //        plength[i] = 64;
 //    }
-//    memset(pentas, 0, PENTA_LENGTH * sizeof(jInt));
-//    memset(characters, 0, 1024 * sizeof(jChar));
+//    memset(pentas, 0, PENTA_LENGTH * sizeof(dx_int_t));
+//    memset(characters, 0, 1024 * sizeof(dx_char_t));
 //
 //
-//    for (i = (jInt)(L'A'); i <= (jInt)(L'Z'); ++i) {
+//    for (i = (dx_int_t)(L'A'); i <= (dx_int_t)(L'Z'); ++i) {
 //        initPenta(i, i - 'A' + 1, 5);
 //    }
 //
-//    initPenta(jInt(L'.'), 27, 5);
-//    initPenta(jInt(L'/'), 28, 5);
-//    initPenta(jInt(L'$'), 29, 5);
-//    jInt penta = 0x03C0;
-//    for (jInt i = 32; i <= 126; i++){
-//        if (pentas[i] == 0 && i != (jInt)(L'\'') && i != (jInt)(L'`')){
+//    initPenta(dx_int_t(L'.'), 27, 5);
+//    initPenta(dx_int_t(L'/'), 28, 5);
+//    initPenta(dx_int_t(L'$'), 29, 5);
+//    dx_int_t penta = 0x03C0;
+//    for (dx_int_t i = 32; i <= 126; i++){
+//        if (pentas[i] == 0 && i != (dx_int_t)(L'\'') && i != (dx_int_t)(L'`')){
 //            initPenta(i, penta++, 10);
 //        }
 //    }
@@ -132,15 +132,15 @@
 //* Encodes penta into cipher. Shall return 0 if encoding impossible.
 //* The specified penta must be valid (no more than 35 bits).
 //*/
-//jInt encodePenta(jLong penta, jInt plen) {
-//    jInt c;
+//dx_int_t encodePenta(dx_long_t penta, dx_int_t plen) {
+//    dx_int_t c;
 //    if (plen <= 30)
-//        return (jInt)penta + 0x40000000;
-//    c = (jInt)((unsigned jLong)penta >> 30);
+//        return (dx_int_t)penta + 0x40000000;
+//    c = (dx_int_t)((unsigned dx_long_t)penta >> 30);
 //    if (c == pentas[L'/']) // Also checks that plen == 35 (high bits == 0).
-//        return ((jInt)penta & 0x3FFFFFFF) + 0x80000000;
+//        return ((dx_int_t)penta & 0x3FFFFFFF) + 0x80000000;
 //    if (c == pentas[L'$']) // Also checks that plen == 35 (high bits == 0).
-//        return ((jInt)penta & 0x3FFFFFFF) + 0xC0000000;
+//        return ((dx_int_t)penta & 0x3FFFFFFF) + 0xC0000000;
 //    return 0;
 //}
 //
@@ -149,18 +149,18 @@
 //* Decodes cipher into penta code. The specified cipher must not be 0.
 //* The returning penta code must be valid (no more than 35 bits).
 //*/
-//dx_result_t decodeCipher(jInt cipher, OUT jLong* c) {
-//    switch ((unsigned jInt)cipher >> 30) {
+//dx_result_t decodeCipher(dx_int_t cipher, OUT dx_long_t* c) {
+//    switch ((unsigned dx_int_t)cipher >> 30) {
 //        case 0:
 //            return setParseError(pr_illegal_argument);
 //        case 1:
 //            *c = cipher & 0x3FFFFFFF;
 //            break;
 //        case 2:
-//            *c = ((jLong)pentas[L'/'] << 30) + (cipher & 0x3FFFFFFF);
+//            *c = ((dx_long_t)pentas[L'/'] << 30) + (cipher & 0x3FFFFFFF);
 //            break;
 //        case 3:
-//            *c = ((jLong)pentas[L'$'] << 30) + (cipher & 0x3FFFFFFF);
+//            *c = ((dx_long_t)pentas[L'$'] << 30) + (cipher & 0x3FFFFFFF);
 //            break;
 //        default:
 //            return setParseError(pr_internal_error);
@@ -174,22 +174,22 @@
 //* Converts penta into string.
 //* The specified penta must be valid (no more than 35 bits).
 //*/
-//dx_string_t toString(jLong penta) {
-//    jInt plen = 0;
+//dx_string_t toString(dx_long_t penta) {
+//    dx_int_t plen = 0;
 //    dx_string_t chars;
-//    jInt length = 0;
-//    while (((unsigned jLong)penta >> plen) != 0) {
+//    dx_int_t length = 0;
+//    while (((unsigned dx_long_t)penta >> plen) != 0) {
 //        plen += 5;
 //    }
 //
-//    chars = new jChar[plen/5 + 1];
+//    chars = new dx_char_t[plen/5 + 1];
 //    while (plen > 0) {
-//        jInt code;
+//        dx_int_t code;
 //        plen -= 5;
-//        code = (jInt)((unsigned jLong)penta >> plen) & 0x1F;
+//        code = (dx_int_t)((unsigned dx_long_t)penta >> plen) & 0x1F;
 //        if (code >= 30 && plen > 0) {
 //            plen -= 5;
-//            code = (jInt)((unsigned jLong)penta >> plen) & 0x3FF;
+//            code = (dx_int_t)((unsigned dx_long_t)penta >> plen) & 0x3FF;
 //        }
 //        chars[length++] = characters[code];
 //    }
@@ -199,18 +199,18 @@
 //}
 //
 //////////////////////////////////////////////////////////////////////////////////
-//jInt getChartAt(jLong penta, jInt i) {
-//    jInt plen = 0;
-//    while (((unsigned jLong)penta >> plen) != 0) {
+//dx_int_t getChartAt(dx_long_t penta, dx_int_t i) {
+//    dx_int_t plen = 0;
+//    while (((unsigned dx_long_t)penta >> plen) != 0) {
 //        plen += 5;
 //    }
 //    while (i >= 0 && plen > 0) {
 //        int code;
 //        plen -= 5;
-//        code = (jInt)((unsigned jLong)penta >> plen) & 0x1F;
+//        code = (dx_int_t)((unsigned dx_long_t)penta >> plen) & 0x1F;
 //        if (code >= 30 && plen > 0) {
 //            plen -= 5;
-//            code = (jInt)((unsigned jLong)penta >> plen) & 0x3FF;
+//            code = (dx_int_t)((unsigned dx_long_t)penta >> plen) & 0x3FF;
 //        }
 //        if (i == 0) {
 //            return characters[code];
@@ -224,22 +224,22 @@
 //// ========== SymbolCodec Implementation ==========
 //
 //////////////////////////////////////////////////////////////////////////////////
-//jInt encode(dx_string_t symbol) {
-//    jLong penta = 0;
-//    jInt plen = 0;
-//    jInt i;
+//dx_int_t encode(dx_string_t symbol) {
+//    dx_long_t penta = 0;
+//    dx_int_t plen = 0;
+//    dx_int_t i;
 //    if (symbol == null) {
 //        return 0;
 //    }
-//    jInt length = wcslen(symbol);
+//    dx_int_t length = wcslen(symbol);
 //    if (length > 7) {
 //        return 0;
 //    }
 //    for (i = 0; i < length; ++i) {
-//        jInt c = symbol[i];
+//        dx_int_t c = symbol[i];
 //        if (c >= 128)
 //            return 0;
-//        jInt l = pentas[c];
+//        dx_int_t l = pentas[c];
 //        penta = (penta << l) + pentas[c];
 //        plen += l;
 //    }
@@ -250,7 +250,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////////
 //dx_result_t readSymbol(char[] buffer, String[] result) throws IOException {
-//    jInt i = readUnsignedByte();
+//    dx_int_t i = readUnsignedByte();
 //    long penta;
 //    if (i < 0x80) { // 15-bit
 //        penta = (i << 8) + in.readUnsignedByte();

@@ -26,6 +26,6 @@
 // ========== external interface ==========
 ////////////////////////////////////////////////////////////////////////////////
 
-int dx_parse( const jByte* buf, jInt bufLen );
+int dx_parse( const dx_byte_t* buf, dx_int_t bufLen );
 
 #endif // PARSER_H

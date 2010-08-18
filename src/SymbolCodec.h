@@ -17,6 +17,6 @@
 *
 */
 
-//dx_result_t readSymbol(jChar* buffer, OUT dx_string_t result);
+//dx_result_t readSymbol(dx_char_t* buffer, OUT dx_string_t result);
 
-//jInt encode(dx_string_t symbol);
+//dx_int_t encode(dx_string_t symbol);
