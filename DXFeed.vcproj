@@ -34,7 +34,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="pthreadVC2.lib"
+				AdditionalDependencies="pthreadVC2.lib Ws2_32.lib"
 				OutputFile="$(OutDir)/DXFeedd.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="bin"
@@ -85,7 +85,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="pthreadVC2.lib"
+				AdditionalDependencies="pthreadVC2.lib Ws2_32.lib"
 				OutputFile="$(OutDir)/DXFeed.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="bin"
