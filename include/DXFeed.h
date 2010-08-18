@@ -46,12 +46,17 @@
 // if the function succeeds it returns the handle of the opened
 // connection via the function's out-parameter
 
-DXFEED_API ERRORCODE createConnectedFeed (jstring host, OUT HFEED* feed);
+DXFEED_API ERRORCODE connect (jstring host);
+
+// disconnect a connection, previously created by 'connect'
+// returns the success/error code of the operation
+
+DXFEED_API ERRORCODE disconnect(); 
 
 // closes a connection, previously opened by 'openConnection'
 // returns the success/error code of the operation
 
-DXFEED_API ERRORCODE closeConnection (HFEED* connection); //??????????????? how connection closes id java?
+DXFEED_API ERRORCODE close ();  //??? maybe better closeConnection
 
 // subscribes to the selected type of events on the given connection
 // returns the success/error code of the operation
