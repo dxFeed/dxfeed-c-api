@@ -54,7 +54,7 @@ static struct dx_error_code_descr_t g_socket_errors[] = {
     { dx_sec_res_temporarily_unavail, "Internal software error" },
     { dx_sec_permission_denied, "Permission denied" },
     { dx_sec_network_dropped_connection, "Network dropped connection on reset" },
-    { dx_sec_socket_not_connected, "Internal software error" },
+    { dx_sec_socket_not_connected, "Connection to the specified address failed" },
     { dx_sec_operation_not_supported, "Internal software error" },
     { dx_sec_socket_shutdown, "Internal software error" },
     { dx_sec_message_too_long, "Internal software error" },

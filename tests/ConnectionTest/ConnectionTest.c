@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <Windows.h>
 
-const char dxfeed_host[] = "demo.dxfeed.com:7200";
+const char dxfeed_host[] = "demo.dxfeed.com:7300";
 
 /* -------------------------------------------------------------------------- */
 
@@ -41,7 +41,7 @@ int main (int argc, char* argv[]) {
     
     if (!dxf_connect_feed(dxfeed_host)) {
         process_last_error();
-        
+
         return -1;
     }
     
