@@ -48,17 +48,17 @@ static const dx_int_t dx_fields_types_count = sizeof(dx_fields) / sizeof(dx_fiel
 /*
 *   fields of data records
 */
-static const struct dx_field_info_t dx_fields_1[] =
-        { {dx_fid_byte, L"BYTE"}, {dx_fid_int, L"INT"}, {dx_fid_int, L"INT"}, {dx_fid_utf_char_array, L"UTF_CHAR_ARRAY"} };
+static const struct dx_field_info_ex_t dx_fields_1[] =
+        { {dx_fid_byte, L"BYTE", L"Field1"}, {dx_fid_int, L"INT", L"Field2"}, {dx_fid_int, L"INT", L"Field3"}, {dx_fid_utf_char_array, L"UTF_CHAR_ARRAY", L"Field4"} };
 
-static const struct dx_field_info_t dx_fields_2[] =
-        { {dx_fid_byte, L"BYTE"}, {dx_fid_int, L"INT"}, {dx_fid_byte, L"BYTE"} };
+static const struct dx_field_info_ex_t dx_fields_2[] =
+        { {dx_fid_byte, L"BYTE", L"Field1"}, {dx_fid_int, L"INT", L"Field2"}, {dx_fid_byte, L"BYTE", L"Field3"} };
 
-static const struct dx_field_info_t dx_fields_3[] =
-        { {dx_fid_int, L"INT"}, {dx_fid_compact_int, L"COMPACT_INT"}, {dx_fid_utf_char_array, L"UTF_CHAR_ARRAY"} };
+static const struct dx_field_info_ex_t dx_fields_3[] =
+        { {dx_fid_int, L"INT", L"Field1"}, {dx_fid_compact_int, L"COMPACT_INT", L"Field2"}, {dx_fid_utf_char_array, L"UTF_CHAR_ARRAY", L"Field3"} };
 
-static const struct dx_field_info_t dx_fields_4[] =
-        { {dx_fid_short, L"SHORT"}, {dx_fid_utf_char, L"UTF_CHAR"}, {dx_fid_int, L"INT"}, {dx_fid_byte, L"BYTE"} };
+static const struct dx_field_info_ex_t dx_fields_4[] =
+        { {dx_fid_short, L"SHORT", L"Field1"}, {dx_fid_utf_char, L"UTF_CHAR", L"Field2"}, {dx_fid_int, L"INT", L"Field3"}, {dx_fid_byte, L"BYTE", L"Field4"} };
 
 /* -------------------------------------------------------------------------- */
 
@@ -94,31 +94,16 @@ bool dx_matching_fields(const struct dx_record_info_t* record, const dx_string_t
     dx_int_t n = record->fields_count;
     dx_int_t i;
 
-    if (fname_len != n || ftype_len != n)
+    if (fname_len != n || ftype_len != n) {
         return false; // different number of fields
+    }
 
     for (i = 0; i < n; i++) {
-        dx_field_info_t* fld = &record->fields[i];
-        if (!fld->getLocalName().equals(fname[i]) || fld->id != ftype[i])
+        const struct dx_field_info_ex_t* fld = &record->fields[i];
+        if (wcscmp(fld->local_name, fname[i]) != 0 || fld->id != ftype[i]) {
             return false;
+        }
     }
 
     return true;
-    //dx_int_t nint = record.getIntFieldCount();
-    //dx_int_t nobj = record.getObjFieldCount();
-    //dx_int_t n = nint + nobj;
-    //dx_int_t i;
-    //if (fname.length != n || ftype.length != n)
-    //    return false; // different number of fields
-    //for (i = 0; i < nint; i++) {
-    //    DataIntField fld = record.getIntField(i);
-    //    if (!fld.getLocalName().equals(fname[i]) || fld.getSerialType().getId() != ftype[i])
-    //        return false;
-    //}
-    //for (i = 0; i < nobj; i++) {
-    //    DataObjField fld = record.getObjField(i);
-    //    if (!fld.getLocalName().equals(fname[i + nint]) || fld.getSerialType().getId() != ftype[i + nint])
-    //        return false;
-    //}
-    //return true;
 }

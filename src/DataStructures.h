@@ -56,11 +56,19 @@ struct dx_field_info_t {
 
 /* -------------------------------------------------------------------------- */
 
+struct dx_field_info_ex_t {
+    enum dx_fields_id_t id;
+    dx_string_t         type;
+    dx_string_t         local_name;
+};
+
+/* -------------------------------------------------------------------------- */
+
 struct dx_record_info_t {
     //enum dx_fields_id_t    id;
     dx_string_t             name;
     dx_int_t                fields_count;
-    const struct dx_field_info_t* fields;
+    const struct dx_field_info_ex_t* fields;
 };
 
 /* -------------------------------------------------------------------------- */
