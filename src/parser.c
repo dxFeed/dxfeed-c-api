@@ -19,6 +19,7 @@
 
 #include "parser.h"
 #include "BufferedInput.h"
+#include "RecordReader.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // ========== Implementation Details ==========
@@ -342,8 +343,9 @@ enum dx_result_t parseDescribeRecords() {
                 }
             }
 
-            DataRecord record = scheme.findRecordByName(name);
-            if (record != null) {
+            const struct dx_record_info_t* record = dx_get_record_by_name(name);
+            //DataRecord record = scheme.findRecordByName(name);
+            if (record != NULL) {
                 RecordReader rr = record;
                 if (!matchingFields(record, fname, ftype))
                     rr = createRecordAdapter(id, record, fname, ftype);

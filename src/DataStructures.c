@@ -41,7 +41,7 @@ static const struct dx_field_info_t dx_fields[] =
 
 /* -------------------------------------------------------------------------- */
 
-static const dx_int_t dx_fialds_count = sizeof(dx_fields) / sizeof(dx_fields[0]);
+static const dx_int_t dx_fields_types_count = sizeof(dx_fields) / sizeof(dx_fields[0]);
 
 /* -------------------------------------------------------------------------- */
 
@@ -73,8 +73,52 @@ static const struct dx_record_info_t dx_records[] =
     { L"Record4", sizeof(dx_fields_4) / sizeof(dx_fields_4[0]), &dx_fields_4[0] },
 };
 
+static const dx_int_t dx_records_count = sizeof(dx_records) / sizeof(dx_records[0]);
+
 /* -------------------------------------------------------------------------- */
 
-bool dx_matching_fields(const dx_string_t record_name, const dx_string_t* fname, dx_int_t fname_len, dx_int_t* ftype, dx_int_t ftype_len) {
-    return false;        
+const struct dx_record_info_t* dx_get_record_by_name(const dx_string_t name) {
+    int i = 0;
+    for (; i < dx_records_count; ++i) {
+        if (wcscmp(dx_records[i].name, name) == 0) {
+            return &dx_records[i];
+        }
+    }
+
+    return NULL;
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_matching_fields(const struct dx_record_info_t* record, const dx_string_t* fname, dx_int_t fname_len, dx_int_t* ftype, dx_int_t ftype_len) {
+    dx_int_t n = record->fields_count;
+    dx_int_t i;
+
+    if (fname_len != n || ftype_len != n)
+        return false; // different number of fields
+
+    for (i = 0; i < n; i++) {
+        dx_field_info_t* fld = &record->fields[i];
+        if (!fld->getLocalName().equals(fname[i]) || fld->id != ftype[i])
+            return false;
+    }
+
+    return true;
+    //dx_int_t nint = record.getIntFieldCount();
+    //dx_int_t nobj = record.getObjFieldCount();
+    //dx_int_t n = nint + nobj;
+    //dx_int_t i;
+    //if (fname.length != n || ftype.length != n)
+    //    return false; // different number of fields
+    //for (i = 0; i < nint; i++) {
+    //    DataIntField fld = record.getIntField(i);
+    //    if (!fld.getLocalName().equals(fname[i]) || fld.getSerialType().getId() != ftype[i])
+    //        return false;
+    //}
+    //for (i = 0; i < nobj; i++) {
+    //    DataObjField fld = record.getObjField(i);
+    //    if (!fld.getLocalName().equals(fname[i + nint]) || fld.getSerialType().getId() != ftype[i + nint])
+    //        return false;
+    //}
+    //return true;
 }

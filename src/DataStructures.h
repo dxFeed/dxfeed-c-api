@@ -100,3 +100,11 @@ struct dx_struct_three_t {
     dx_long_t   field5;
     dx_float_t  field6;
 };
+
+/* -------------------------------------------------------------------------- */
+
+const struct dx_record_info_t* dx_get_record_by_name(const dx_string_t name);
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_matching_fields(const struct dx_record_info_t* record, const dx_string_t* fname, dx_int_t fname_len, dx_int_t* ftype, dx_int_t ftype_len);
