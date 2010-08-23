@@ -17,4 +17,11 @@
 *
 */
 
-//dx_result_t readRecord( RecordBuffer buffer, int cipher, String symbol);
+#define MIN_FIELD_TYPE_ID 0x00
+#define MAX_FIELD_TYPE_ID 0xFF
+
+enum serialized_types_t {
+
+};
+
+enum dx_result_t dx_read_record( dx_int_t id );

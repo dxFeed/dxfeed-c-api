@@ -68,7 +68,13 @@
 /**
 *	Initialize of symbol codec
 */
-enum dx_result_t initSymbolCodec();
+enum dx_result_t dx_init_symbol_codec();
+
+
+/**
+*  valid cipher defines range of valid encoded ciphers.
+*/
+dx_int_t dx_get_codec_valid_chipher();
 
 
 /**
@@ -97,4 +103,4 @@ dx_int_t dx_encode(dx_string_t symbol);
 * @return result type code as described in the method above
 * @throws IOException if an I/O error occurs
 */
-enum dx_result_t dx_read_symbol(dx_char_t* buffer, dx_int_t buf_len, OUT dx_string_t* result, OUT dx_int_t* adv_res);
+enum dx_result_t dx_codec_read_symbol(dx_char_t* buffer, dx_int_t buf_len, OUT dx_string_t* result, OUT dx_int_t* adv_res);

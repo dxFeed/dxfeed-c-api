@@ -22,10 +22,13 @@
 
 #include "PrimitiveTypes.h"
 
-////////////////////////////////////////////////////////////////////////////////
-// ========== external interface ==========
-////////////////////////////////////////////////////////////////////////////////
-
+/**
+* Parses accumulated data and retrieve processed messages to
+* specified MessageConsumer.
+* It doesn't remove parsed bytes from buffer, it only
+* updates buffer_pos value.
+* @param consumer MessageConsumer to pass parsed messages.
+*/
 int dx_parse( const dx_byte_t* buf, dx_int_t bufLen );
 
 #endif // PARSER_H

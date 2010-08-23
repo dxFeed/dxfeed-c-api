@@ -179,6 +179,9 @@
 					RelativePath=".\src\BufferedOutput.h">
 				</File>
 				<File
+					RelativePath=".\src\DataStructures.h">
+				</File>
+				<File
 					RelativePath=".\src\parser.h">
 				</File>
 				<File
@@ -201,6 +204,9 @@
 					RelativePath=".\src\BufferedOutput.c">
 				</File>
 				<File
+					RelativePath=".\src\DataStructures.c">
+				</File>
+				<File
 					RelativePath=".\src\parser.c">
 				</File>
 				<File
@@ -211,6 +217,13 @@
 				</File>
 				<File
 					RelativePath=".\src\SymbolCodec.c">
+				</File>
+			</Filter>
+			<Filter
+				Name="Test"
+				Filter="">
+				<File
+					RelativePath=".\src\TestParser.c">
 				</File>
 			</Filter>
 		</Filter>
@@ -244,9 +257,6 @@
 				</File>
 			</Filter>
 		</Filter>
-		<File
-			RelativePath=".\ReadMe.txt">
-		</File>
 	</Files>
 	<Globals>
 	</Globals>

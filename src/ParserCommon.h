@@ -20,7 +20,8 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#include "wctype.h"
+#include <wctype.h>
+#include <limits.h>
 #include "PrimitiveTypes.h"
 #include "DXErrorCodes.h"
 
@@ -40,7 +41,16 @@ enum dx_result_t {
 enum dx_result_t setParseError(int err);
 enum dx_result_t parseSuccessful();
 
-enum parser_result_t getParserLastError();
+enum parser_result_t dx_get_parser_last_error();
+
+dx_string_t dx_create_string(dx_int_t size);
+
+#define CHECKED_CALL(func, param) \
+    if (func(param) != R_SUCCESSFUL) {\
+    return R_FAILED;\
+    }
+
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // Unicode helpers

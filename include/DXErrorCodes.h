@@ -149,19 +149,23 @@ enum dx_network_error_code_t {
 /* ---------------------------------- */
 
 enum parser_result_t {
-    pr_successful = 0,
-    pr_failed,
-    pr_buffer_overflow,
-    pr_illegal_argument,
-    pr_illegal_length,
-    pr_bad_utf_data_format,
-    pr_index_out_of_bounds,
-    pr_out_of_buffer,
-    pr_buffer_not_initialized,
-    pr_out_of_memory,
-    pr_buffer_corrupt,
-    pr_message_not_complete,
-    pr_internal_error
+    dx_pr_successful = 0,
+    dx_pr_failed,
+    dx_pr_buffer_overflow,
+    dx_pr_illegal_argument,
+    dx_pr_illegal_length,
+    dx_pr_bad_utf_data_format,
+    dx_pr_index_out_of_bounds,
+    dx_pr_out_of_buffer,
+    dx_pr_buffer_not_initialized,
+    dx_pr_out_of_memory,
+    dx_pr_buffer_corrupt,
+    dx_pr_message_not_complete,
+    dx_pr_internal_error,
+    dx_pr_reserved_bit_sequence,
+    dx_pr_undefined_symbol,
+    dx_pr_record_info_corrupt,
+    dx_pr_field_info_corrupt
 };
 
 #endif /* DX_ERROR_CODES_H_INCLUDED */

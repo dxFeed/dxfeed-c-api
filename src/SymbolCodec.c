@@ -51,14 +51,9 @@ static dx_char_t characters[1024];
 
 static dx_int_t wildcard_cipher;
 
-/**
-* VALID_CIPHER defines range of valid encoded ciphers.
-*/
-static dx_int_t valid_cipher = 0xC0000000;
-
 /* -------------------------------------------------------------------------- */
 
-void initPenta(dx_int_t c, dx_int_t _penta, dx_int_t _plen) {
+void dx_init_penta(dx_int_t c, dx_int_t _penta, dx_int_t _plen) {
     pentas[c] = _penta;
     plength[c] = _plen;
     characters[_penta] = (dx_char_t)c;
@@ -66,7 +61,7 @@ void initPenta(dx_int_t c, dx_int_t _penta, dx_int_t _plen) {
 
 /* -------------------------------------------------------------------------- */
 
-enum dx_result_t initSymbolCodec() {
+enum dx_result_t dx_init_symbol_codec() {
     // initialization
     dx_int_t i = PENTA_LENGTH;
     dx_int_t penta = 0x03C0;
@@ -80,20 +75,20 @@ enum dx_result_t initSymbolCodec() {
 
 
     for (i = (dx_int_t)(L'A'); i <= (dx_int_t)(L'Z'); ++i) {
-        initPenta(i, i - 'A' + 1, 5);
+        dx_init_penta(i, i - 'A' + 1, 5);
     }
 
-    initPenta((dx_int_t)(L'.'), 27, 5);
-    initPenta((dx_int_t)(L'/'), 28, 5);
-    initPenta((dx_int_t)(L'$'), 29, 5);
+    dx_init_penta((dx_int_t)(L'.'), 27, 5);
+    dx_init_penta((dx_int_t)(L'/'), 28, 5);
+    dx_init_penta((dx_int_t)(L'$'), 29, 5);
     for (i = 32; i <= 126; i++){
         if (pentas[i] == 0 && i != (dx_int_t)(L'\'') && i != (dx_int_t)(L'`')){
-            initPenta(i, penta++, 10);
+            dx_init_penta(i, penta++, 10);
         }
     }
 
     if (penta != 0x0400) {
-        return setParseError(pr_internal_error);
+        return setParseError(dx_pr_internal_error);
     }
 
     return parseSuccessful();
@@ -106,7 +101,7 @@ enum dx_result_t initSymbolCodec() {
 * Encodes penta into cipher. Shall return 0 if encoding impossible.
 * The specified penta must be valid (no more than 35 bits).
 */
-dx_int_t encodePenta(dx_long_t penta, dx_int_t plen) {
+dx_int_t dx_encode_penta(dx_long_t penta, dx_int_t plen) {
     dx_int_t c;
     if (plen <= 30) {
         return (dx_int_t)penta + 0x40000000;
@@ -125,7 +120,7 @@ dx_int_t encodePenta(dx_long_t penta, dx_int_t plen) {
 * Converts penta into string.
 * The specified penta must be valid (no more than 35 bits).
 */
-dx_string_t toString(dx_long_t penta) {
+dx_string_t dx_to_string(dx_long_t penta) {
     dx_int_t plen = 0;
     dx_string_t chars;
     dx_int_t length = 0;
@@ -134,7 +129,7 @@ dx_string_t toString(dx_long_t penta) {
         plen += 5;
     }
 
-    chars = dx_malloc((plen/5 + 1) * sizeof(dx_char_t));
+    chars = dx_calloc(plen/5 + 1, sizeof(dx_char_t));
     while (plen > 0) {
         dx_int_t code;
         plen -= 5;
@@ -150,33 +145,17 @@ dx_string_t toString(dx_long_t penta) {
     return chars;
 }
 
-/* -------------------------------------------------------------------------- */
-
-dx_int_t getChartAt(dx_long_t penta, dx_int_t i) {
-    dx_int_t plen = 0;
-    while (((dx_unsigned_long_t)penta >> plen) != 0) {
-        plen += 5;
-    }
-    while (i >= 0 && plen > 0) {
-        int code;
-        plen -= 5;
-        code = (dx_int_t)((dx_unsigned_long_t)penta >> plen) & 0x1F;
-        if (code >= 30 && plen > 0) {
-            plen -= 5;
-            code = (dx_int_t)((dx_unsigned_long_t)penta >> plen) & 0x3FF;
-        }
-        if (i == 0) {
-            return characters[code];
-        }
-        --i;
-    }
-    return -1;
-}
 
 /* -------------------------------------------------------------------------- */
 /*
 *	SymbolCodec interface implementation
 */
+/* -------------------------------------------------------------------------- */
+
+dx_int_t dx_get_codec_valid_chipher() {
+    return 0xC0000000;
+}
+
 /* -------------------------------------------------------------------------- */
 
 dx_int_t dx_encode(dx_string_t symbol) {
@@ -197,19 +176,19 @@ dx_int_t dx_encode(dx_string_t symbol) {
         dx_int_t l;
         if (c >= 128)
             return 0;
-        l = pentas[c];
+        l = plength[c];
         penta = (penta << l) + pentas[c];
         plen += l;
     }
     if (plen > 35) {
         return 0;
     }
-    return encodePenta(penta, plen);
+    return dx_encode_penta(penta, plen);
 }
 
 /* -------------------------------------------------------------------------- */
 
-enum dx_result_t readSymbol(dx_char_t* buffer, dx_int_t buf_len, OUT dx_string_t* result, OUT dx_int_t* adv_res) {
+enum dx_result_t dx_codec_read_symbol(dx_char_t* buffer, dx_int_t buf_len, OUT dx_string_t* result, OUT dx_int_t* adv_res) {
     dx_int_t i;
     dx_long_t penta;
     dx_int_t tmp_int_1;
@@ -217,38 +196,38 @@ enum dx_result_t readSymbol(dx_char_t* buffer, dx_int_t buf_len, OUT dx_string_t
     dx_int_t plen;
     dx_int_t cipher;
 
-    CHECKED_CALL(readUnsignedByte, &i);
+    CHECKED_CALL(dx_read_unsigned_byte, &i);
     if (i < 0x80) { // 15-bit
-        CHECKED_CALL(readUnsignedByte, &tmp_int_1);
+        CHECKED_CALL(dx_read_unsigned_byte, &tmp_int_1);
         penta = (i << 8) + tmp_int_1;
     } else if (i < 0xC0) { // 30-bit
-        CHECKED_CALL(readUnsignedByte, &tmp_int_1);
-        CHECKED_CALL(readUnsignedShort, &tmp_int_2);
+        CHECKED_CALL(dx_read_unsigned_byte, &tmp_int_1);
+        CHECKED_CALL(dx_read_unsigned_short, &tmp_int_2);
         penta = ((i & 0x3F) << 24) + (tmp_int_1 << 16) + tmp_int_2;
     } else if (i < 0xE0) { // reserved (first diapason)
-        return setParseError(pr_reserved_bit_sequence);
+        return setParseError(dx_pr_reserved_bit_sequence);
     } else if (i < 0xF0) { // 20-bit
-        CHECKED_CALL(readUnsignedShort, &tmp_int_1);
+        CHECKED_CALL(dx_read_unsigned_short, &tmp_int_1);
         penta = ((i & 0x0F) << 16) + tmp_int_1;
     } else if (i < 0xF8) { // 35-bit
-        if (readInt(&tmp_int_1) != R_SUCCESSFUL) {
+        if (dx_read_int(&tmp_int_1) != R_SUCCESSFUL) {
             return R_FAILED;
         }
         penta = ((long)(i & 0x07) << 32) + (tmp_int_1 & 0xFFFFFFFFL);
     } else if (i < 0xFC) { // reserved (second diapason)
-        return setParseError(pr_reserved_bit_sequence);
+        return setParseError(dx_pr_reserved_bit_sequence);
     } else if (i == 0xFC) { // UTF-8
         // todo This is inefficient, but currently UTF-8 is not used (compatibility mode). Shall be rewritten when UTF-8 become active.
-        CHECKED_CALL(readUTFString, result);
+        CHECKED_CALL(dx_read_utf_string, result);
         *adv_res = 0;
         return parseSuccessful();
     } else if (i == 0xFD) { // CESU-8
         dx_long_t length;
         dx_int_t k;
         dx_char_t* chars;
-        CHECKED_CALL(readCompactLong, &length);
+        CHECKED_CALL(dx_read_compact_long, &length);
         if (length < -1 || length > INT_MAX) {
-            return setParseError(pr_illegal_length);
+            return setParseError(dx_pr_illegal_length);
         }
         if (length == -1) {
             *result = NULL;
@@ -264,20 +243,20 @@ enum dx_result_t readSymbol(dx_char_t* buffer, dx_int_t buf_len, OUT dx_string_t
             return parseSuccessful();
         }
 
-        chars = length <= buf_len ? buffer : dx_malloc((size_t)(length * sizeof(dx_char_t)));
+        ???  chars = length <= buf_len ? buffer : dx_calloc((size_t)(length + 1), sizeof(dx_char_t));
         for (k = 0; k < length; ++k) {
             dx_int_t codePoint;
-            CHECKED_CALL(readUTFChar, &codePoint);
+            CHECKED_CALL(dx_read_utf_char, &codePoint);
             if (codePoint > 0xFFFF) {
-                return setParseError(pr_bad_utf_data_format);
+                return setParseError(dx_pr_bad_utf_data_format);
             }
             chars[k] = (dx_char_t)codePoint;
         }
-        if (length <= buf_len && (length & valid_cipher) == 0) {
+        if (length <= buf_len && (length & dx_get_codec_valid_chipher()) == 0) {
             *adv_res = (dx_int_t)length;
             return parseSuccessful();
         }
-        *result = dx_malloc((size_t)(length * sizeof(dx_char_t)));
+        *result = dx_calloc((size_t)(length + 1), sizeof(dx_char_t));
         if (!(*result)) {
             return R_FAILED;
         }
@@ -295,11 +274,10 @@ enum dx_result_t readSymbol(dx_char_t* buffer, dx_int_t buf_len, OUT dx_string_t
     while (((dx_unsigned_long_t)penta >> plen) != 0) {
         plen += 5;
     }
-    cipher = encodePenta(penta, plen);
+    cipher = dx_encode_penta(penta, plen);
     if (cipher == 0) {
-        *result = toString(penta); // Generally this is inefficient, but this use-case shall not actually happen.
+        *result = dx_to_string(penta); // Generally this is inefficient, but this use-case shall not actually happen.
     }
     *adv_res = cipher;
     return parseSuccessful();
 }
-

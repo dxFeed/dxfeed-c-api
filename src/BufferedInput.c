@@ -31,30 +31,45 @@ dx_int_t   inBufferLength = 0;
 dx_int_t   inBufferLimit = 0;
 dx_int_t   currentInBufferPosition = 0;
 
-////////////////////////////////////////////////////////////////////////////////
-void setInBuffer( dx_byte_t* buf, dx_int_t length ) {
+/* -------------------------------------------------------------------------- */
+
+void dx_set_in_buffer( dx_byte_t* buf, dx_int_t length ) {
     inBuffer = buf;
     inBufferLength = length;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-void setInBufferPosition( dx_int_t pos ) {
+/* -------------------------------------------------------------------------- */
+
+void dx_set_in_buffer_position( dx_int_t pos ) {
     currentInBufferPosition = pos;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-void setInBufferLimit( dx_int_t limit ) {
+/* -------------------------------------------------------------------------- */
+
+void dx_set_in_buffer_limit( dx_int_t limit ) {
     inBufferLimit = limit;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-dx_int_t getInBufferPosition() {
+/* -------------------------------------------------------------------------- */
+
+dx_int_t dx_get_in_buffer_position() {
     return currentInBufferPosition;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-dx_int_t getInBufferLimit() {
+/* -------------------------------------------------------------------------- */
+
+dx_int_t dx_get_in_buffer_limit() {
     return inBufferLimit;
+}
+
+/* -------------------------------------------------------------------------- */
+
+dx_byte_t* dx_get_in_buffer( OUT dx_int_t* size ) {
+    if (size) {
+        *size = inBufferLength;
+    }
+
+    return inBuffer;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -72,16 +87,16 @@ dx_int_t getInBufferLimit() {
 ////////////////////////////////////////////////////////////////////////////////
 enum dx_result_t checkValid(void* val, dx_int_t len) {
     if (!inBuffer) {
-        return setParseError(pr_buffer_not_initialized);
+        return setParseError(dx_pr_buffer_not_initialized);
     }
     if (!val) {
-        return setParseError(pr_illegal_argument);
+        return setParseError(dx_pr_illegal_argument);
     }
     if (inBufferLength - currentInBufferPosition < len) {
-        return setParseError(pr_out_of_buffer);
+        return setParseError(dx_pr_out_of_buffer);
     }
 
-    setParseError(pr_successful);
+    setParseError(dx_pr_successful);
     return R_SUCCESSFUL;
 }
 
@@ -89,16 +104,16 @@ enum dx_result_t checkValid(void* val, dx_int_t len) {
 enum dx_result_t readUTF2(int first, OUT dx_int_t* res) {
     dx_byte_t second;
     if (!res) {
-        setParseError(pr_illegal_argument);
+        setParseError(dx_pr_illegal_argument);
         return R_FAILED;
     }
 
-    if (readByte(&second) != R_SUCCESSFUL) {
+    if (dx_read_byte(&second) != R_SUCCESSFUL) {
         return R_FAILED;
     }
 
     if ((second & 0xC0) != 0x80) {
-        setParseError(pr_bad_utf_data_format);
+        setParseError(dx_pr_bad_utf_data_format);
         return R_FAILED;
     }
 
@@ -110,16 +125,16 @@ enum dx_result_t readUTF2(int first, OUT dx_int_t* res) {
 enum dx_result_t readUTF3(int first, OUT dx_int_t* res) {
     dx_short_t tail;
     if (!res) {
-        setParseError(pr_illegal_argument);
+        setParseError(dx_pr_illegal_argument);
         return R_FAILED;
     }
 
-    if (readShort(&tail) != R_SUCCESSFUL) {
+    if (dx_read_short(&tail) != R_SUCCESSFUL) {
         return R_FAILED;
     }
 
     if ((tail & 0xC0C0) != 0x8080) {
-        setParseError(pr_bad_utf_data_format);
+        setParseError(dx_pr_bad_utf_data_format);
         return R_FAILED;
     }
 
@@ -133,27 +148,27 @@ enum dx_result_t readUTF4(int first, OUT dx_int_t* res) {
     dx_short_t tail;
 
     if (!res) {
-        setParseError(pr_illegal_argument);
+        setParseError(dx_pr_illegal_argument);
         return R_FAILED;
     }
 
-    if (readByte(&second) != R_SUCCESSFUL) {
+    if (dx_read_byte(&second) != R_SUCCESSFUL) {
         return R_FAILED;
     }
 
-    if (readShort(&tail) != R_SUCCESSFUL) {
+    if (dx_read_short(&tail) != R_SUCCESSFUL) {
         return R_FAILED;
     }
 
     if ((second & 0xC0) != 0x80 || (tail & 0xC0C0) != 0x8080) {
-        setParseError(pr_bad_utf_data_format);
+        setParseError(dx_pr_bad_utf_data_format);
         return R_FAILED;
     }
 
     *res = ((first & 0x07) << 18) | ((second & 0x3F) << 12) | ((tail & 0x3F00) >> 2) | (tail & 0x3F);
 
     if (*res > 0x10FFFF) {
-        setParseError(pr_bad_utf_data_format);
+        setParseError(dx_pr_bad_utf_data_format);
         return R_FAILED;
     }
 
@@ -167,7 +182,7 @@ enum dx_result_t readUTFBody(int utflen, OUT dx_string_t* str ) {
     dx_int_t tmpCh;
 
     if (!str) {
-        setParseError(pr_illegal_argument);
+        setParseError(dx_pr_illegal_argument);
         return R_FAILED;
     }
 
@@ -180,7 +195,7 @@ enum dx_result_t readUTFBody(int utflen, OUT dx_string_t* str ) {
     count = 0;
     while (utflen > 0) {
         dx_byte_t c;
-        if (readByte(&c) != R_SUCCESSFUL) {
+        if (dx_read_byte(&c) != R_SUCCESSFUL) {
             return R_FAILED;
         }
 
@@ -212,12 +227,12 @@ enum dx_result_t readUTFBody(int utflen, OUT dx_string_t* str ) {
             }
             count += res;
         } else{
-            setParseError(pr_bad_utf_data_format);
+            setParseError(dx_pr_bad_utf_data_format);
             return R_FAILED;
         }
     }
     if (utflen < 0) {
-        setParseError(pr_bad_utf_data_format);
+        setParseError(dx_pr_bad_utf_data_format);
         return R_FAILED;
     }
 
@@ -229,7 +244,7 @@ enum dx_result_t readUTFBody(int utflen, OUT dx_string_t* str ) {
 
 ////////////////////////////////////////////////////////////////////////////////
 //void setInput(dx_byte_t* buf, dx_int_t offset, dx_int_t length) {
-//    setInBuffer(buf);
+//    dx_set_in_buffer(buf);
 //    setLimit(offset + length);
 //    setPosition(offset);
 //}
@@ -302,10 +317,10 @@ dx_int_t skip(dx_int_t n) {
 
 enum dx_result_t readFully(dx_byte_t* b, dx_long_t bLength, dx_int_t off, dx_int_t len) {
     if ((off | len | (off + len) | (bLength - (off + len))) < 0) {
-        return setParseError(pr_index_out_of_bounds);
+        return setParseError(dx_pr_index_out_of_bounds);
     }
     if (inBufferLength - currentInBufferPosition < len){
-        return setParseError(pr_out_of_buffer);
+        return setParseError(dx_pr_out_of_buffer);
     }
 
     memcpy(b + off, inBuffer + currentInBufferPosition, len);
@@ -318,7 +333,7 @@ enum dx_result_t readFully(dx_byte_t* b, dx_long_t bLength, dx_int_t off, dx_int
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t readBoolean( OUT dx_bool_t* val ) {
+enum dx_result_t dx_read_boolean( OUT dx_bool_t* val ) {
     if (checkValid(val, 1) != R_SUCCESSFUL) {
         return R_FAILED;
     }
@@ -328,7 +343,7 @@ enum dx_result_t readBoolean( OUT dx_bool_t* val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t readByte( OUT dx_byte_t* val ) {
+enum dx_result_t dx_read_byte( OUT dx_byte_t* val ) {
     if (checkValid(val, 1) != R_SUCCESSFUL) {
         return R_FAILED;
     }
@@ -338,7 +353,7 @@ enum dx_result_t readByte( OUT dx_byte_t* val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t readUnsignedByte( OUT dx_int_t* val ) {
+enum dx_result_t dx_read_unsigned_byte( OUT dx_int_t* val ) {
     if (checkValid(val, 1) != R_SUCCESSFUL) {
         return R_FAILED;
     }
@@ -348,7 +363,7 @@ enum dx_result_t readUnsignedByte( OUT dx_int_t* val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t readShort( OUT dx_short_t* val ) {
+enum dx_result_t dx_read_short( OUT dx_short_t* val ) {
     if (checkValid(val, 2) != R_SUCCESSFUL) {
         return R_FAILED;
     }
@@ -358,7 +373,7 @@ enum dx_result_t readShort( OUT dx_short_t* val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t readUnsignedShort( OUT dx_int_t* val ) {
+enum dx_result_t dx_read_unsigned_short( OUT dx_int_t* val ) {
     if (checkValid(val, 2) != R_SUCCESSFUL) {
         return R_FAILED;
     }
@@ -368,7 +383,7 @@ enum dx_result_t readUnsignedShort( OUT dx_int_t* val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t readChar( OUT dx_char_t* val ) {
+enum dx_result_t dx_read_char( OUT dx_char_t* val ) {
     if (checkValid(val, 2) != R_SUCCESSFUL) {
         return R_FAILED;
     }
@@ -378,7 +393,7 @@ enum dx_result_t readChar( OUT dx_char_t* val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t readInt( OUT dx_int_t* val ) {
+enum dx_result_t dx_read_int( OUT dx_int_t* val ) {
     if (checkValid(val, 4) != R_SUCCESSFUL) {
         return R_FAILED;
     }
@@ -391,7 +406,7 @@ enum dx_result_t readInt( OUT dx_int_t* val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t readLong( OUT dx_long_t* val ) {
+enum dx_result_t dx_read_long( OUT dx_long_t* val ) {
     if (checkValid(val, 8) != R_SUCCESSFUL) {
         return R_FAILED;
     }
@@ -409,9 +424,9 @@ enum dx_result_t readLong( OUT dx_long_t* val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t readFloat( OUT dx_float_t* val) {
+enum dx_result_t dx_read_float( OUT dx_float_t* val) {
     dx_int_t intVal;
-    if ( readInt(&intVal) == R_FAILED ) {
+    if ( dx_read_int(&intVal) == R_FAILED ) {
         return R_FAILED;
     }
 
@@ -420,9 +435,9 @@ enum dx_result_t readFloat( OUT dx_float_t* val) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t readDouble( OUT dx_double_t* val ) {
+enum dx_result_t dx_read_double( OUT dx_double_t* val ) {
     dx_long_t longVal;
-    if ( readLong(&longVal) == R_FAILED ) {
+    if ( dx_read_long(&longVal) == R_FAILED ) {
         return R_FAILED;
     }
 
@@ -431,7 +446,7 @@ enum dx_result_t readDouble( OUT dx_double_t* val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t readLine( OUT dx_string_t* val ) {
+enum dx_result_t dx_read_line( OUT dx_string_t* val ) {
     const int tmpBufSize = 128;
     dx_string_t tmpBuffer;
     int count;
@@ -467,9 +482,9 @@ enum dx_result_t readLine( OUT dx_string_t* val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t readUTF( OUT dx_string_t* val ) {
+enum dx_result_t dx_read_utf( OUT dx_string_t* val ) {
     dx_int_t utflen;
-    if (readUnsignedShort(&utflen) != R_SUCCESSFUL) {
+    if (dx_read_unsigned_short(&utflen) != R_SUCCESSFUL) {
         return R_FAILED;
     }
     return readUTFBody(utflen, OUT val);
@@ -481,13 +496,13 @@ enum dx_result_t readUTF( OUT dx_string_t* val ) {
 //}
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t readCompactInt( OUT dx_int_t* val ) {
+enum dx_result_t dx_read_compact_int( OUT dx_int_t* val ) {
     dx_int_t n;
     if (!val) {
-        return setParseError(pr_illegal_argument);
+        return setParseError(dx_pr_illegal_argument);
     }
     // The ((n << k) >> k) expression performs two's complement.
-    if (readUnsignedByte(&n) != R_SUCCESSFUL) {
+    if (dx_read_unsigned_byte(&n) != R_SUCCESSFUL) {
         return R_FAILED;
     }
     if (n < 0x80) {
@@ -496,7 +511,7 @@ enum dx_result_t readCompactInt( OUT dx_int_t* val ) {
     }
     if (n < 0xC0) {
         dx_int_t m;
-        if (readUnsignedByte(&m) != R_SUCCESSFUL) {
+        if (dx_read_unsigned_byte(&m) != R_SUCCESSFUL) {
             return R_FAILED;
         }
 
@@ -505,7 +520,7 @@ enum dx_result_t readCompactInt( OUT dx_int_t* val ) {
     }
     if (n < 0xE0) {
         dx_int_t m;
-        if (readUnsignedShort(&m) != R_SUCCESSFUL) {
+        if (dx_read_unsigned_short(&m) != R_SUCCESSFUL) {
             return R_FAILED;
         }
 
@@ -516,10 +531,10 @@ enum dx_result_t readCompactInt( OUT dx_int_t* val ) {
         dx_int_t tmpByte;
         dx_int_t tmpShort;
 
-        if (readUnsignedByte(&tmpByte) != R_SUCCESSFUL) {
+        if (dx_read_unsigned_byte(&tmpByte) != R_SUCCESSFUL) {
             return R_FAILED;
         }
-        if (readUnsignedShort(&tmpShort) != R_SUCCESSFUL) {
+        if (dx_read_unsigned_short(&tmpShort) != R_SUCCESSFUL) {
             return R_FAILED;
         }
 
@@ -529,12 +544,12 @@ enum dx_result_t readCompactInt( OUT dx_int_t* val ) {
 
 
     // The encoded number is possibly out of range, some bytes have to be skipped.
-    // The skipBytes(...) does the strange thing, thus readUnsignedByte() is used.
+    // The skipBytes(...) does the strange thing, thus dx_read_unsigned_byte() is used.
     while (((n <<= 1) & 0x10) != 0) {
         skip(1);
     }
 
-    if (readInt(&n) != R_SUCCESSFUL) {
+    if (dx_read_int(&n) != R_SUCCESSFUL) {
         return R_FAILED;
     }
 
@@ -542,15 +557,15 @@ enum dx_result_t readCompactInt( OUT dx_int_t* val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t readCompactLong( OUT dx_long_t* val ) {
+enum dx_result_t dx_read_compact_long( OUT dx_long_t* val ) {
     dx_int_t n;
     dx_int_t tmpInt;
     if (!val) {
-        return setParseError(pr_illegal_argument);
+        return setParseError(dx_pr_illegal_argument);
     }
 
     // The ((n << k) >> k) expression performs two's complement.
-    if (readUnsignedByte(&n) != R_SUCCESSFUL) {
+    if (dx_read_unsigned_byte(&n) != R_SUCCESSFUL) {
         return R_FAILED;
     }
     if (n < 0x80) {
@@ -559,7 +574,7 @@ enum dx_result_t readCompactLong( OUT dx_long_t* val ) {
     }
     if (n < 0xC0) {
         dx_int_t tmpByte;
-        if (readUnsignedByte(&tmpByte) != R_SUCCESSFUL) {
+        if (dx_read_unsigned_byte(&tmpByte) != R_SUCCESSFUL) {
             return R_FAILED;
         }
         *val = (((n << 8) | tmpByte) << 18) >> 18;
@@ -567,7 +582,7 @@ enum dx_result_t readCompactLong( OUT dx_long_t* val ) {
     }
     if (n < 0xE0) {
         dx_int_t tmpShort;
-        if (readUnsignedShort(&tmpShort) != R_SUCCESSFUL) {
+        if (dx_read_unsigned_short(&tmpShort) != R_SUCCESSFUL) {
             return R_FAILED;
         }
         *val = (((n << 16) | tmpShort) << 11) >> 11;
@@ -576,10 +591,10 @@ enum dx_result_t readCompactLong( OUT dx_long_t* val ) {
     if (n < 0xF0) {
         dx_int_t tmpByte;
         dx_int_t tmpShort;
-        if (readUnsignedByte(&tmpByte) != R_SUCCESSFUL) {
+        if (dx_read_unsigned_byte(&tmpByte) != R_SUCCESSFUL) {
             return R_FAILED;
         }
-        if (readUnsignedShort(&tmpShort) != R_SUCCESSFUL) {
+        if (dx_read_unsigned_short(&tmpShort) != R_SUCCESSFUL) {
             return R_FAILED;
         }
         *val = (((n << 24) | (tmpByte << 16) | tmpShort) << 4) >> 4;
@@ -589,32 +604,32 @@ enum dx_result_t readCompactLong( OUT dx_long_t* val ) {
         n = (n << 29) >> 29;
     } else if (n < 0xFC) {
         dx_int_t tmpByte;
-        if (readUnsignedByte(&tmpByte) != R_SUCCESSFUL) {
+        if (dx_read_unsigned_byte(&tmpByte) != R_SUCCESSFUL) {
             return R_FAILED;
         }
         n = (((n << 8) | tmpByte) << 22) >> 22;
     } else if (n < 0xFE) {
         dx_int_t tmpShort;
-        if (readUnsignedShort(&tmpShort) != R_SUCCESSFUL) {
+        if (dx_read_unsigned_short(&tmpShort) != R_SUCCESSFUL) {
             return R_FAILED;
         }
         n = (((n << 16) | tmpShort) << 15) >> 15;
     } else if (n < 0xFF) {
         dx_byte_t tmpByte;
         dx_int_t tmpShort;
-        if (readByte(&tmpByte) != R_SUCCESSFUL) {
+        if (dx_read_byte(&tmpByte) != R_SUCCESSFUL) {
             return R_FAILED;
         }
-        if (readUnsignedShort(&tmpShort) != R_SUCCESSFUL) {
+        if (dx_read_unsigned_short(&tmpShort) != R_SUCCESSFUL) {
             return R_FAILED;
         }
         n = (tmpByte << 16) | tmpShort;
     } else {
-        if (readInt(&n) != R_SUCCESSFUL) {
+        if (dx_read_int(&n) != R_SUCCESSFUL) {
             return R_FAILED;
         }
     }
-    if (readInt(&tmpInt) != R_SUCCESSFUL) {
+    if (dx_read_int(&tmpInt) != R_SUCCESSFUL) {
         return R_FAILED;
     }
     *val = ((dx_long_t)n << 32) | (tmpInt & 0xFFFFFFFFL);
@@ -622,17 +637,17 @@ enum dx_result_t readCompactLong( OUT dx_long_t* val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t readByteArray( OUT dx_byte_t** val ) {
+enum dx_result_t dx_read_byte_array( OUT dx_byte_t** val ) {
     dx_byte_t* bytes;
     dx_long_t length;
     if (!val) {
-        return setParseError(pr_illegal_argument);
+        return setParseError(dx_pr_illegal_argument);
     }
-    if (readCompactLong(&length) != R_SUCCESSFUL) {
+    if (dx_read_compact_long(&length) != R_SUCCESSFUL) {
         return R_FAILED;
     }
     if (length < -1 || length > INT_MAX) {
-        return setParseError(pr_illegal_length);
+        return setParseError(dx_pr_illegal_length);
     }
     if (length == -1) {
         *val = NULL;
@@ -655,12 +670,12 @@ enum dx_result_t readByteArray( OUT dx_byte_t** val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t readUTFChar( OUT dx_int_t* val ) {
+enum dx_result_t dx_read_utf_char( OUT dx_int_t* val ) {
     dx_byte_t c;
     if (!val) {
-        return setParseError(pr_illegal_argument);
+        return setParseError(dx_pr_illegal_argument);
     }
-    if (readByte(&c) != R_SUCCESSFUL) {
+    if (dx_read_byte(&c) != R_SUCCESSFUL) {
         return R_FAILED;
     }
     if (c >= 0) {
@@ -677,17 +692,17 @@ enum dx_result_t readUTFChar( OUT dx_int_t* val ) {
         return readUTF4(c, val);
     }
 
-    return setParseError(pr_bad_utf_data_format);
+    return setParseError(dx_pr_bad_utf_data_format);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t readUTFString( OUT dx_string_t* val ) {
+enum dx_result_t dx_read_utf_string( OUT dx_string_t* val ) {
     dx_long_t utflen;
-    if (readCompactLong(&utflen) != R_SUCCESSFUL) {
+    if (dx_read_compact_long(&utflen) != R_SUCCESSFUL) {
         return R_FAILED;
     }
     if (utflen < -1 || utflen > INT_MAX) {
-        return setParseError(pr_illegal_length);
+        return setParseError(dx_pr_illegal_length);
     }
     if (utflen == -1) {
         *val = NULL;

@@ -22,26 +22,26 @@
 
 #include "ParserCommon.h"
 
-extern dx_byte_t* outBuffer;
-extern dx_int_t   outBufferLength;
-extern dx_int_t   currentOutBufferPosition;
+extern dx_byte_t* out_buffer;
+extern dx_int_t   out_buffer_length;
+extern dx_int_t   current_out_buffer_position;
 
-void setOutBuffer( dx_byte_t* );
+void dx_set_out_buffer( dx_byte_t* buf, dx_int_t buf_len);
 
 //enum DXResult write(dx_int_t b);
 enum dx_result_t write(const dx_byte_t* b, dx_int_t bLen, dx_int_t off, dx_int_t len);
 
-enum dx_result_t writeBoolean        ( dx_bool_t );
-enum dx_result_t writeByte           ( dx_byte_t );
-enum dx_result_t writeShort          ( dx_short_t );
-enum dx_result_t writeChar           ( dx_char_t );
-enum dx_result_t writeInt            ( dx_int_t );
-enum dx_result_t writeLong           ( dx_long_t );
-enum dx_result_t writeFloat          ( dx_float_t );
-enum dx_result_t writeDouble         ( dx_double_t );
-enum dx_result_t writeBytes          ( const dx_char_t* );
-enum dx_result_t writeChars          ( const dx_char_t* );
-enum dx_result_t writeUTF            ( const dx_string_t );
+enum dx_result_t dx_write_boolean( dx_bool_t );
+enum dx_result_t dx_write_byte   ( dx_byte_t );
+enum dx_result_t dx_write_short  ( dx_short_t );
+enum dx_result_t dx_write_char   ( dx_char_t );
+enum dx_result_t dx_write_int    ( dx_int_t );
+enum dx_result_t dx_write_long   ( dx_long_t );
+enum dx_result_t dx_write_float  ( dx_float_t );
+enum dx_result_t dx_write_double ( dx_double_t );
+enum dx_result_t dx_write_bytes  ( const dx_char_t* );
+enum dx_result_t dx_write_chars  ( const dx_char_t* );
+enum dx_result_t dx_write_utf    ( const dx_string_t );
 
 // ========== Compact API ==========
 
@@ -50,14 +50,14 @@ enum dx_result_t writeUTF            ( const dx_string_t );
 *
 * @param val - value to be written
 */
-enum dx_result_t writeCompactInt     ( dx_int_t val );
+enum dx_result_t dx_write_compact_int     ( dx_int_t val );
 
 /**
 * Writes a dx_long_t value in a compact format.
 *
 * @param v - value to be written
 */
-enum dx_result_t writeCompactLong    ( dx_long_t v );
+enum dx_result_t dx_write_compact_long    ( dx_long_t v );
 
 /**
 * Writes an array of bytes in a compact encapsulation format.
@@ -66,7 +66,7 @@ enum dx_result_t writeCompactLong    ( dx_long_t v );
 * @param  bytes - the byte array to be written
 * @param  size - the size of the byte array
 */
-enum dx_result_t writeByteArray      ( const dx_byte_t* bytes, dx_int_t size );
+enum dx_result_t dx_write_byte_array      ( const dx_byte_t* bytes, dx_int_t size );
 
 
 // ========== UTF API ==========
@@ -77,7 +77,7 @@ enum dx_result_t writeByteArray      ( const dx_byte_t* bytes, dx_int_t size );
 *
 * @param codePoint the code point to be written
 */
-enum dx_result_t writeUTFChar        ( dx_int_t codePoint );
+enum dx_result_t dx_write_utf_char        ( dx_int_t codePoint );
 
 /**
 * Writes a string in a UTF-8 format with compact encapsulation.
@@ -86,14 +86,14 @@ enum dx_result_t writeUTFChar        ( dx_int_t codePoint );
 *
 * @param str the string to be written
 */
-enum dx_result_t writeUTFString      ( const dx_string_t str );
+enum dx_result_t dx_write_utf_string      ( const dx_string_t str );
 
 /**
 * Ensures that the byte array used for buffering has at least the specified capacity.
 * This method reallocates buffer if needed and copies content of old buffer into new one.
 * This method also sets the limit to the capacity.
 */
-enum dx_result_t ensureCapacity (int requiredCapacity);
+enum dx_result_t dx_ensure_capacity (int requiredCapacity);
 
 
 #endif // BUFFERED_OUTPUT

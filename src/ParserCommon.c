@@ -19,6 +19,7 @@
 
 #include "ParserCommon.h"
 #include "DXErrorHandling.h"
+#include "DXMemory.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -27,19 +28,23 @@
 /* -------------------------------------------------------------------------- */
 
 static struct dx_error_code_descr_t g_parser_errors[] = {
-    { pr_successful, NULL },
-    { pr_failed, NULL },
-    { pr_buffer_overflow, "Buffer overflow" },
-    { pr_illegal_argument, "The argument of function is not valid" },
-    { pr_illegal_length, "Illegal length of string or byte array" },
-    { pr_bad_utf_data_format, "Bad format of UTF string" },
-    { pr_index_out_of_bounds, "Index of buffer is not valid" },
-    { pr_out_of_buffer, "reached the end of buffer" },
-    { pr_buffer_not_initialized, "There isn't a buffer to read" },
-    { pr_out_of_memory, "Out of memory" },
-    { pr_buffer_corrupt, "Buffer is corrupt" },
-    { pr_message_not_complete, "Message is not complete" },
-    { pr_internal_error, "Internal error" },
+    { dx_pr_successful, NULL },
+    { dx_pr_failed, NULL },
+    { dx_pr_buffer_overflow, "Buffer overflow" },
+    { dx_pr_illegal_argument, "The argument of function is not valid" },
+    { dx_pr_illegal_length, "Illegal length of string or byte array" },
+    { dx_pr_bad_utf_data_format, "Bad format of UTF string" },
+    { dx_pr_index_out_of_bounds, "Index of buffer is not valid" },
+    { dx_pr_out_of_buffer, "reached the end of buffer" },
+    { dx_pr_buffer_not_initialized, "There isn't a buffer to read" },
+    { dx_pr_out_of_memory, "Out of memory" },
+    { dx_pr_buffer_corrupt, "Buffer is corrupt" },
+    { dx_pr_message_not_complete, "Message is not complete" },
+    { dx_pr_internal_error, "Internal error" },
+    { dx_pr_reserved_bit_sequence, "Reserved bit sequence" },
+    { dx_pr_undefined_symbol, "Symbol is undefined" },
+    { dx_pr_record_info_corrupt, "Corrupted record information" },
+    { dx_pr_field_info_corrupt, "Corrupted field information" },
 
     { ERROR_CODE_FOOTER, ERROR_DESCR_FOOTER }
 };
@@ -55,19 +60,19 @@ enum dx_result_t setParseError(int err) {
 
 ////////////////////////////////////////////////////////////////////////////////
 enum dx_result_t parseSuccessful() {
-    dx_set_last_error(dx_sc_parser, pr_successful);
+    dx_set_last_error(dx_sc_parser, dx_pr_successful);
     return R_SUCCESSFUL;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum parser_result_t getParserLastError() {
-    dx_int_t res = pr_successful;
+enum parser_result_t dx_get_parser_last_error() {
+    dx_int_t res = dx_pr_successful;
     enum dx_error_function_result_t resultErr = dx_get_last_error (NULL, &res, NULL);
     if (resultErr == efr_success || resultErr == efr_no_error_stored) {
         return res;
     }
 
-    return pr_failed;
+    return dx_pr_failed;
 }
 
 /**
@@ -134,13 +139,13 @@ void toSurrogates(dx_int_t codePoint, dx_int_t index, OUT dx_string_t* dst) {
 ////////////////////////////////////////////////////////////////////////////////
 enum dx_result_t toChars(dx_int_t codePoint, dx_int_t dstIndex, dx_int_t dstLen, OUT dx_string_t* dst, OUT dx_int_t* res) {
     if (!dst || !(*dst) || !res || codePoint < 0 || codePoint > MAX_CODE_POINT) {
-        setParseError(pr_illegal_argument);
+        setParseError(dx_pr_illegal_argument);
         return R_FAILED;
     }
 
     if (codePoint < MIN_SUPPLEMENTARY_CODE_POINT) {
         if (dstLen - dstIndex < 1) {
-            setParseError(pr_index_out_of_bounds);
+            setParseError(dx_pr_index_out_of_bounds);
             return R_FAILED;
         }
         (*dst)[dstIndex] = (dx_char_t)codePoint;
@@ -149,7 +154,7 @@ enum dx_result_t toChars(dx_int_t codePoint, dx_int_t dstIndex, dx_int_t dstLen,
     }
 
     if(dstLen - dstIndex < 2) {
-        setParseError(pr_index_out_of_bounds);
+        setParseError(dx_pr_index_out_of_bounds);
         return R_FAILED;
     }
 
@@ -158,3 +163,8 @@ enum dx_result_t toChars(dx_int_t codePoint, dx_int_t dstIndex, dx_int_t dstLen,
     return parseSuccessful();
 }
 
+/* -------------------------------------------------------------------------- */
+
+dx_string_t dx_create_string( dx_int_t size ) {
+    return (dx_string_t)dx_calloc((size_t)(size + 1), sizeof(dx_char_t));
+}
