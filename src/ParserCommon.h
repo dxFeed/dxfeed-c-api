@@ -133,6 +133,19 @@ enum dx_result_t toChars(dx_int_t codePoint, dx_int_t dstIndex, dx_int_t dstLen,
 void toSurrogates(dx_int_t codePoint, dx_int_t index, OUT dx_string_t* dst);
 
 
+/* -------------------------------------------------------------------------- */
+/*
+/* compact API 
+/*
+/* -------------------------------------------------------------------------- */
+
+/**
+* Returns number of bytes that are needed to write specified number in a compact format.
+*
+* @param n the number those compact length is returned
+* @return number of bytes that are needed to write specified number in a compact format
+*/
+dx_int_t dx_get_compact_length(dx_long_t n);
 
 //#define NULL 0
 //#define false 0

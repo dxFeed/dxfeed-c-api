@@ -168,3 +168,53 @@ enum dx_result_t toChars(dx_int_t codePoint, dx_int_t dstIndex, dx_int_t dstLen,
 dx_string_t dx_create_string( dx_int_t size ) {
     return (dx_string_t)dx_calloc((size_t)(size + 1), sizeof(dx_char_t));
 }
+
+/* -------------------------------------------------------------------------- */
+/*
+/* compact API 
+/*
+/* -------------------------------------------------------------------------- */
+
+dx_int_t dx_get_compact_length(dx_long_t n) {
+    if (n >= 0) {
+        if (n < 0x40) {
+            return 1;
+        } else if (n < 0x2000) {
+            return 2;
+        } else if (n < 0x100000) {
+            return 3;
+        } else if (n < 0x08000000) {
+            return 4;
+        } else if (n < 0x0400000000L) {
+            return 5;
+        } else if (n < 0x020000000000L) {
+            return 6;
+        } else if (n < 0x01000000000000L) {
+            return 7;
+        } else if (n < 0x80000000000000L) {
+            return 8;
+        } else {
+            return 9;
+        }
+    } else {
+        if (n >= -0x40) {
+            return 1;
+        } else if (n >= -0x2000) {
+            return 2;
+        } else if (n >= -0x100000) {
+            return 3;
+        } else if (n >= -0x08000000) {
+            return 4;
+        } else if (n >= -0x0400000000L) {
+            return 5;
+        } else if (n >= -0x020000000000L) {
+            return 6;
+        } else if (n >= -0x01000000000000L) {
+            return 7;
+        } else if (n >= -0x80000000000000L) {
+            return 8;
+        } else {
+            return 9;
+        }
+    }
+}

@@ -38,6 +38,28 @@ void dx_set_out_buffer( dx_byte_t* buf, dx_int_t buf_len ) {
     current_out_buffer_position = 0;
 }
 
+/* -------------------------------------------------------------------------- */
+
+dx_byte_t* dx_get_out_buffer( OUT dx_int_t* size ) {
+    if (size) {
+        *size = out_buffer_length;
+    }
+
+    return out_buffer;
+}
+
+/* -------------------------------------------------------------------------- */
+
+dx_int_t dx_get_out_buffer_position() {
+    return current_out_buffer_position;
+}
+
+/* -------------------------------------------------------------------------- */
+
+void dx_set_out_buffer_position( dx_int_t pos ) {
+    current_out_buffer_position = pos;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // ========== Implementation Details ==========
 ////////////////////////////////////////////////////////////////////////////////
@@ -471,4 +493,3 @@ enum dx_result_t dx_ensure_capacity( int requiredCapacity ) {
     }
     return parseSuccessful();
 }
-

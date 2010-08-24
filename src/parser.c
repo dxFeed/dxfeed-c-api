@@ -20,6 +20,7 @@
 #include "parser.h"
 #include "BufferedInput.h"
 #include "RecordReader.h"
+#include "Subscription.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // ========== Implementation Details ==========
@@ -37,93 +38,6 @@ static dx_string_t symbol_result;
 static dx_message_type_t pendingMessageType;
 static dx_int_t    lastCipher;
 static dx_string_t lastSymbol;
-
-////////////////////////////////////////////////////////////////////////////////
-// Message types
-////////////////////////////////////////////////////////////////////////////////
-//enum dx_message_type_t {
-//    MESSAGE_HEARTBEAT = 0,
-//
-//    MESSAGE_DESCRIBE_PROTOCOL = 1,
-//    MESSAGE_DESCRIBE_RECORDS = 2,
-//    MESSAGE_DESCRIBE_RESERVED = 3,
-//
-//    MESSAGE_RAW_DATA = 5,
-//
-//    MESSAGE_TICKER_DATA = 10,
-//    MESSAGE_TICKER_ADD_SUBSCRIPTION = 11,
-//    MESSAGE_TICKER_REMOVE_SUBSCRIPTION = 12,
-//
-//    MESSAGE_STREAM_DATA = 15,
-//    MESSAGE_STREAM_ADD_SUBSCRIPTION = 16,
-//    MESSAGE_STREAM_REMOVE_SUBSCRIPTION = 17,
-//
-//    MESSAGE_HISTORY_DATA = 20,
-//    MESSAGE_HISTORY_ADD_SUBSCRIPTION = 21,
-//    MESSAGE_HISTORY_REMOVE_SUBSCRIPTION = 22,
-//
-//    //MESSAGE_RMI_DESCRIBE_SUBJECT = 50, // int id, byte[] subject
-//    //MESSAGE_RMI_DESCRIBE_OPERATION = 51, // int id, byte[] operation (e.g. "service_name.ping()void")
-//    //MESSAGE_RMI_REQUEST = 52, // int request_id, int flags, int subject_id, int operation_id, Object[] parameters
-//    //MESSAGE_RMI_CANCEL = 53, // int request_id, int flags
-//    //MESSAGE_RMI_RESULT = 54, // int request_id, Object result
-//    //MESSAGE_RMI_ERROR = 55 // int request_id, int RMIExceptionType#getId(), byte[] causeMessage, byte[] serializedCause
-//
-//    /*
-//    * These two values are reserved and can not be used as any
-//    * message type. Point is that when serialized to a file
-//    * values 61 and 35 corresponds to ASCII symbols '=' and '#',
-//    * which are used in text data format. So, when we
-//    * read this values in binary format it means that we are actually
-//    * reading data not in binary, but in text format.
-//    */
-//    MESSAGE_TEXT_FORMAT_SPECIAL = 61, // '='
-//    MESSAGE_TEXT_FORMAT_COMMENT = 35, // '#'
-//
-//    MT_NULL = UINT_MAX
-//};
-
-enum dx_message_type_t {
-    MESSAGE_HEARTBEAT = 0,
-
-    MESSAGE_DESCRIBE_PROTOCOL = 1,
-    MESSAGE_DESCRIBE_RECORDS = 2,
-    MESSAGE_DESCRIBE_RESERVED = 3,
-
-    MESSAGE_RAW_DATA = 4,
-
-    MESSAGE_TICKER_DATA = 5,
-    MESSAGE_TICKER_ADD_SUBSCRIPTION = 6,
-    MESSAGE_TICKER_REMOVE_SUBSCRIPTION = 7,
-
-    MESSAGE_STREAM_DATA = 8,
-    MESSAGE_STREAM_ADD_SUBSCRIPTION = 9,
-    MESSAGE_STREAM_REMOVE_SUBSCRIPTION = 10,
-
-    MESSAGE_HISTORY_DATA = 11,
-    MESSAGE_HISTORY_ADD_SUBSCRIPTION = 12,
-    MESSAGE_HISTORY_REMOVE_SUBSCRIPTION = 13,
-
-    //MESSAGE_RMI_DESCRIBE_SUBJECT = 50, // int id, byte[] subject
-    //MESSAGE_RMI_DESCRIBE_OPERATION = 51, // int id, byte[] operation (e.g. "service_name.ping()void")
-    //MESSAGE_RMI_REQUEST = 52, // int request_id, int flags, int subject_id, int operation_id, Object[] parameters
-    //MESSAGE_RMI_CANCEL = 53, // int request_id, int flags
-    //MESSAGE_RMI_RESULT = 54, // int request_id, Object result
-    //MESSAGE_RMI_ERROR = 55 // int request_id, int RMIExceptionType#getId(), byte[] causeMessage, byte[] serializedCause
-
-    /*
-    * These two values are reserved and can not be used as any
-    * message type. Point is that when serialized to a file
-    * values 61 and 35 corresponds to ASCII symbols '=' and '#',
-    * which are used in text data format. So, when we
-    * read this values in binary format it means that we are actually
-    * reading data not in binary, but in text format.
-    */
-    MESSAGE_TEXT_FORMAT_SPECIAL = 14, // '='
-    MESSAGE_TEXT_FORMAT_COMMENT = 15, // '#'
-
-    MT_NULL = UINT_MAX
-};
 
 /* -------------------------------------------------------------------------- */
 
@@ -313,7 +227,7 @@ dx_result_t dx_parse_data() {
 
 /* -------------------------------------------------------------------------- */
 
-enum dx_result_t parseDescribeRecords() {
+enum dx_result_t dx_parse_describe_records() {
     dx_int_t start_position = dx_get_in_buffer_position();
     dx_int_t last_rec_position = start_position;
     try {
@@ -346,8 +260,8 @@ enum dx_result_t parseDescribeRecords() {
             const struct dx_record_info_t* record = dx_get_record_by_name(name);
             //DataRecord record = scheme.findRecordByName(name);
             if (record != NULL) {
-                RecordReader rr = record;
-                if (!matchingFields(record, fname, ftype))
+                //RecordReader rr = record;
+                if (!dx_matching_fields(record, fname, ftype))
                     rr = createRecordAdapter(id, record, fname, ftype);
                 if (rr != null)
                     remapRecord(id, rr); // silently remap
@@ -356,15 +270,7 @@ enum dx_result_t parseDescribeRecords() {
             } else {
                 // otherwise, attempt to create new record to process and skip incoming data
                 record = createRecord(id, name, fname, ftype);
-                if (record != null) {
-                    QDLog.log.info("Incoming record #" + id + " " + name +
-                        " is not found in data scheme. Incoming data and subscription will be skipped.");
-                    remapRecord(id, new RecordReaderSkipper(record));
-                }
             }
-            if (record == null)
-                QDLog.log.info("Incoming record #" + id + " " + name +
-                " cannot be found or created. Might not be able to parse incoming data.");
             last_rec_position = in.getPosition();
         }
     } catch (IOException e) {
@@ -399,9 +305,9 @@ dx_result_t dx_parse_message(dx_int_t type, MessageConsumer consumer) {
     }
     switch (type) {
         case MESSAGE_DESCRIBE_RECORDS:
-            if (parseDescribeRecords)
+            if (dx_parse_describe_records)
                 // todo: error handling is not atomic now -- partially parsed message is still being processed.
-                parseDescribeRecords();
+                dx_parse_describe_records();
             // falls through to ignore this message
         case MESSAGE_HEARTBEAT:
         case MESSAGE_DESCRIBE_PROTOCOL:

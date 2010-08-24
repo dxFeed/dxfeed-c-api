@@ -65,17 +65,22 @@
 
 
 
+/* -------------------------------------------------------------------------- */
+
+
 /**
 *	Initialize of symbol codec
 */
 enum dx_result_t dx_init_symbol_codec();
 
+/* -------------------------------------------------------------------------- */
 
 /**
 *  valid cipher defines range of valid encoded ciphers.
 */
 dx_int_t dx_get_codec_valid_chipher();
 
+/* -------------------------------------------------------------------------- */
 
 /**
 * Returns encoded cipher for specified symbol.
@@ -83,6 +88,7 @@ dx_int_t dx_get_codec_valid_chipher();
 */
 dx_int_t dx_encode(dx_string_t symbol);
 
+/* -------------------------------------------------------------------------- */
 
 /**
 * Reads symbol from specified input stream and returns it in several ways depending on it's encodability and length.
@@ -104,3 +110,7 @@ dx_int_t dx_encode(dx_string_t symbol);
 * @throws IOException if an I/O error occurs
 */
 enum dx_result_t dx_codec_read_symbol(dx_char_t* buffer, dx_int_t buf_len, OUT dx_string_t* result, OUT dx_int_t* adv_res);
+
+/* -------------------------------------------------------------------------- */
+
+enum dx_result_t dx_codec_write_symbol(dx_byte_t* buf, dx_int_t buf_len, dx_int_t pos, dx_int_t cipher, dx_string_t symbol);

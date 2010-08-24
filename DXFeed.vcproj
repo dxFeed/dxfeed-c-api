@@ -191,6 +191,9 @@
 					RelativePath=".\src\RecordReader.h">
 				</File>
 				<File
+					RelativePath=".\src\Subscription.h">
+				</File>
+				<File
 					RelativePath=".\src\SymbolCodec.h">
 				</File>
 			</Filter>
@@ -214,6 +217,9 @@
 				</File>
 				<File
 					RelativePath=".\src\RecordReader.c">
+				</File>
+				<File
+					RelativePath=".\src\Subscription.c">
 				</File>
 				<File
 					RelativePath=".\src\SymbolCodec.c">

@@ -39,7 +39,6 @@ enum dx_result_t dx_read_structure_2() {
 
 enum dx_result_t readRecord(dx_int_t id ) {
     
-    // make data_id from id
     enum data_structures_id_t data_id = 0;
 
     switch (data_id) {

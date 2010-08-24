@@ -20,9 +20,12 @@
 #include "PrimitiveTypes.h"
 
 /* -------------------------------------------------------------------------- */
-enum dx_data_structures_id_t {
-    dx_dsi_1,
-    dx_dsi_2
+enum dx_records_id_t {
+    dx_rid_1,
+    dx_rid_2,
+    dx_rid_3,
+    dx_rid_4,
+    dx_rid_5
 };
 
 /* -------------------------------------------------------------------------- */
@@ -65,9 +68,9 @@ struct dx_field_info_ex_t {
 /* -------------------------------------------------------------------------- */
 
 struct dx_record_info_t {
-    //enum dx_fields_id_t    id;
-    dx_string_t             name;
-    dx_int_t                fields_count;
+    enum dx_records_id_t             id;
+    dx_string_t                      name;
+    dx_int_t                         fields_count;
     const struct dx_field_info_ex_t* fields;
 };
 

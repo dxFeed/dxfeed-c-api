@@ -21,6 +21,7 @@
 
 #include "ParserCommon.h"
 #include "BufferedInput.h"
+#include "BufferedOutput.h"
 #include "DXMemory.h"
 
 #include "SymbolCodec.h"
@@ -145,6 +146,37 @@ dx_string_t dx_to_string(dx_long_t penta) {
     return chars;
 }
 
+/* -------------------------------------------------------------------------- */
+
+/**
+* Decodes cipher into penta code. The specified cipher must not be 0.
+* The returning penta code must be valid (no more than 35 bits).
+*/
+enum dx_result_t dx_decode_cipher(dx_int_t cipher, OUT dx_long_t* res) {
+    if (!res) {
+        return setParseError(dx_pr_illegal_argument);
+    };
+
+    switch ((dx_unsigned_int_t)cipher >> 30) {
+        case 0:
+            return setParseError(dx_pr_illegal_argument);
+        case 1:
+            *res = cipher & 0x3FFFFFFF;
+            break;
+        case 2:
+            *res = ((dx_long_t)pentas[L'/'] << 30) + (cipher & 0x3FFFFFFF);
+            break;
+        case 3:
+            *res = ((dx_long_t)pentas[L'$'] << 30) + (cipher & 0x3FFFFFFF);
+            break;
+        default:
+            // WTF ?
+            return setParseError(dx_pr_internal_error); // 'int' has more than 32 bits.
+    }
+
+    return parseSuccessful();
+}
+
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -243,7 +275,9 @@ enum dx_result_t dx_codec_read_symbol(dx_char_t* buffer, dx_int_t buf_len, OUT d
             return parseSuccessful();
         }
 
-        ???  chars = length <= buf_len ? buffer : dx_calloc((size_t)(length + 1), sizeof(dx_char_t));
+        // ???
+        chars = length <= buf_len ? buffer : dx_calloc((size_t)(length + 1), sizeof(dx_char_t));
+
         for (k = 0; k < length; ++k) {
             dx_int_t codePoint;
             CHECKED_CALL(dx_read_utf_char, &codePoint);
@@ -279,5 +313,53 @@ enum dx_result_t dx_codec_read_symbol(dx_char_t* buffer, dx_int_t buf_len, OUT d
         *result = dx_to_string(penta); // Generally this is inefficient, but this use-case shall not actually happen.
     }
     *adv_res = cipher;
+    return parseSuccessful();
+}
+
+/* -------------------------------------------------------------------------- */
+
+enum dx_result_t dx_codec_write_symbol(dx_byte_t* buf, dx_int_t buf_len, dx_int_t pos, dx_int_t cipher, dx_string_t symbol) {
+    if (cipher != 0) {
+        dx_long_t penta;
+
+        if (dx_decode_cipher(cipher, &penta) != R_SUCCESSFUL) {
+            return R_FAILED;
+        }
+
+        dx_set_out_buffer(buf, buf_len);
+        dx_set_out_buffer_position(pos);
+
+        if (penta == 0) { // 0-bit
+            CHECKED_CALL(dx_write_byte, 0xFE);
+        } else if (penta < 0x8000L) { // 15-bit
+            CHECKED_CALL(dx_write_short, (dx_short_t)penta);
+        } else if (penta < 0x100000L) { // 20-bit
+            CHECKED_CALL(dx_write_byte, 0xE0 | ((dx_unsigned_int_t)penta >> 16));
+            CHECKED_CALL(dx_write_short, (dx_short_t)penta);
+        } else if (penta < 0x40000000L) { // 30-bit
+            CHECKED_CALL(dx_write_int, 0x80000000 | (dx_int_t)penta);
+        } else if (penta < 0x0800000000L) { //35-bit
+            CHECKED_CALL(dx_write_byte, 0xF0 | (dx_int_t)((dx_unsigned_long_t)penta >> 32));
+            CHECKED_CALL(dx_write_int, (dx_int_t)penta);
+        } else { // more than 35-bit
+            return setParseError(dx_pr_internal_error); // Penta has more than 35 bits.
+        }
+    } else {
+        if (symbol != NULL) { // CESU-8
+            dx_int_t length;
+            dx_int_t i;
+            CHECKED_CALL(dx_write_byte, 0xFD);
+
+            length = (dx_int_t)wcslen(symbol);
+            CHECKED_CALL(dx_write_compact_int, length);
+
+            for (i = 0; i < length; ++i) {
+                CHECKED_CALL(dx_write_utf_char, symbol[i]);
+            }
+        } else { // void (null)
+            CHECKED_CALL(dx_write_byte, 0xFF);
+        }
+    }
+
     return parseSuccessful();
 }

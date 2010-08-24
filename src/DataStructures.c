@@ -67,10 +67,10 @@ static const struct dx_field_info_ex_t dx_fields_4[] =
 */
 static const struct dx_record_info_t dx_records[] = 
 {
-    { L"Record1", sizeof(dx_fields_1) / sizeof(dx_fields_1[0]), &dx_fields_1[0] },
-    { L"Record2", sizeof(dx_fields_2) / sizeof(dx_fields_2[0]), &dx_fields_2[0] },
-    { L"Record3", sizeof(dx_fields_3) / sizeof(dx_fields_3[0]), &dx_fields_3[0] },
-    { L"Record4", sizeof(dx_fields_4) / sizeof(dx_fields_4[0]), &dx_fields_4[0] },
+    { dx_rid_1, L"Record1", sizeof(dx_fields_1) / sizeof(dx_fields_1[0]), &dx_fields_1[0] },
+    { dx_rid_2, L"Record2", sizeof(dx_fields_2) / sizeof(dx_fields_2[0]), &dx_fields_2[0] },
+    { dx_rid_3, L"Record3", sizeof(dx_fields_3) / sizeof(dx_fields_3[0]), &dx_fields_3[0] },
+    { dx_rid_4, L"Record4", sizeof(dx_fields_4) / sizeof(dx_fields_4[0]), &dx_fields_4[0] },
 };
 
 static const dx_int_t dx_records_count = sizeof(dx_records) / sizeof(dx_records[0]);

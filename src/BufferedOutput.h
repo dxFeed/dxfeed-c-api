@@ -22,11 +22,26 @@
 
 #include "ParserCommon.h"
 
-extern dx_byte_t* out_buffer;
-extern dx_int_t   out_buffer_length;
-extern dx_int_t   current_out_buffer_position;
+//extern dx_byte_t* out_buffer;
+//extern dx_int_t   out_buffer_length;
+//extern dx_int_t   current_out_buffer_position;
 
+/* -------------------------------------------------------------------------- */
 void dx_set_out_buffer( dx_byte_t* buf, dx_int_t buf_len);
+
+/* -------------------------------------------------------------------------- */
+
+dx_byte_t* dx_get_out_buffer(OUT dx_int_t* size);
+
+/* -------------------------------------------------------------------------- */
+
+dx_int_t dx_get_out_buffer_position();
+
+/* -------------------------------------------------------------------------- */
+
+void dx_set_out_buffer_position(dx_int_t pos);
+
+/* -------------------------------------------------------------------------- */
 
 //enum DXResult write(dx_int_t b);
 enum dx_result_t write(const dx_byte_t* b, dx_int_t bLen, dx_int_t off, dx_int_t len);

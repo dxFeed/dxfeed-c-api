@@ -165,7 +165,8 @@ enum parser_result_t {
     dx_pr_reserved_bit_sequence,
     dx_pr_undefined_symbol,
     dx_pr_record_info_corrupt,
-    dx_pr_field_info_corrupt
+    dx_pr_field_info_corrupt,
+    dx_pr_unexpected_io_error
 };
 
 #endif /* DX_ERROR_CODES_H_INCLUDED */
