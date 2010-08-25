@@ -50,7 +50,20 @@ dx_string_t dx_create_string(dx_int_t size);
     return R_FAILED;\
     }
 
+#define CHECKED_CALL_0(func) \
+    if (func() != R_SUCCESSFUL) {\
+    return R_FAILED;\
+    }
 
+#define CHECKED_CALL_2(func, param1, param2) \
+    if (func( param1, param2 ) != R_SUCCESSFUL) {\
+    return R_FAILED;\
+    }
+
+#define CHECKED_CALL_3(func, param1, param2, param3) \
+    if (func( param1, param2, param3 ) != R_SUCCESSFUL) {\
+    return R_FAILED;\
+    }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Unicode helpers

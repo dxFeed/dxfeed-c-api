@@ -32,8 +32,9 @@
 
 void* dx_malloc (size_t size);
 void* dx_calloc (size_t num, size_t size);
-void dx_free (void* buf);
-
+void  dx_free (void* buf);
+void* dx_memcpy ( void * destination, const void * source, size_t size );
+void* dx_memset ( void * destination, int c, size_t size );
 /* -------------------------------------------------------------------------- */
 /*
  *	Memory function wrappers without error handling mechanism

@@ -17,8 +17,7 @@
 *
 */
 
-#include <string.h>
-#include <malloc.h>
+//#include <string.h>
 #include <limits.h>
 
 #include "BufferedInput.h"
@@ -187,11 +186,11 @@ enum dx_result_t readUTFBody(int utflen, OUT dx_string_t* str ) {
     }
 
     if (utflen == 0) {
-        *str = (dx_string_t)calloc(1, sizeof(dx_char_t));
+        *str = (dx_string_t)dx_calloc(1, sizeof(dx_char_t));
         return parseSuccessful();
     };
 
-    chars = (dx_string_t)malloc((utflen + 1) * sizeof(dx_char_t));
+    chars = (dx_string_t)dx_malloc((utflen + 1) * sizeof(dx_char_t));
     count = 0;
     while (utflen > 0) {
         dx_byte_t c;
@@ -323,7 +322,7 @@ enum dx_result_t readFully(dx_byte_t* b, dx_long_t bLength, dx_int_t off, dx_int
         return setParseError(dx_pr_out_of_buffer);
     }
 
-    memcpy(b + off, inBuffer + currentInBufferPosition, len);
+    dx_memcpy(b + off, inBuffer + currentInBufferPosition, len);
     currentInBufferPosition += len;
     return parseSuccessful();
 }
@@ -454,7 +453,7 @@ enum dx_result_t dx_read_line( OUT dx_string_t* val ) {
         return R_FAILED;
     }
 
-    tmpBuffer = (dx_char_t*)malloc(tmpBufSize * sizeof(dx_char_t));
+    tmpBuffer = (dx_char_t*)dx_malloc(tmpBufSize * sizeof(dx_char_t));
     count = 0;
     while (currentInBufferPosition < inBufferLength) {
         dx_char_t c = inBuffer[currentInBufferPosition++] & 0xFF;
@@ -467,9 +466,9 @@ enum dx_result_t dx_read_line( OUT dx_string_t* val ) {
         }
 
         if (count >= tmpBufSize) {
-            dx_char_t* tmp = (dx_char_t*)malloc((tmpBufSize << 1) * sizeof(dx_char_t));
-            memcpy(tmp, tmpBuffer, tmpBufSize * sizeof(dx_char_t));
-            free(tmpBuffer);
+            dx_char_t* tmp = (dx_char_t*)dx_malloc((tmpBufSize << 1) * sizeof(dx_char_t));
+            dx_memcpy(tmp, tmpBuffer, tmpBufSize * sizeof(dx_char_t));
+            dx_free(tmpBuffer);
             tmpBuffer = tmp;
         }
         tmpBuffer[count++] = c;

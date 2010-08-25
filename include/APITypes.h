@@ -24,8 +24,8 @@
 typedef int ERRORCODE;
 typedef int HFEED;
 typedef int HCONNECTION;
-typedef int HSUBSCRIPTION;
+typedef int dxf_subscription_t;
 typedef int event_listener_t;
-typedef int EventType;
+typedef int dxf_event_t;
 
 #endif // API_TYPES_H

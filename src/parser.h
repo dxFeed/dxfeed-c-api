@@ -67,54 +67,12 @@ enum dx_message_type_t {
     MESSAGE_TEXT_FORMAT_SPECIAL = 61, // '='
     MESSAGE_TEXT_FORMAT_COMMENT = 35, // '#'
 
-    MT_NULL = UINT_MAX
+   // MT_NULL = UINT_MAX //TODO: do we need it? this structure copied from java one-by-one
 };
-
-//enum dx_message_type_t {
-//    MESSAGE_HEARTBEAT = 0,
-//
-//    MESSAGE_DESCRIBE_PROTOCOL = 1,
-//    MESSAGE_DESCRIBE_RECORDS = 2,
-//    MESSAGE_DESCRIBE_RESERVED = 3,
-//
-//    MESSAGE_RAW_DATA = 4,
-//
-//    MESSAGE_TICKER_DATA = 5,
-//    MESSAGE_TICKER_ADD_SUBSCRIPTION = 6,
-//    MESSAGE_TICKER_REMOVE_SUBSCRIPTION = 7,
-//
-//    MESSAGE_STREAM_DATA = 8,
-//    MESSAGE_STREAM_ADD_SUBSCRIPTION = 9,
-//    MESSAGE_STREAM_REMOVE_SUBSCRIPTION = 10,
-//
-//    MESSAGE_HISTORY_DATA = 11,
-//    MESSAGE_HISTORY_ADD_SUBSCRIPTION = 12,
-//    MESSAGE_HISTORY_REMOVE_SUBSCRIPTION = 13,
-//
-//    //MESSAGE_RMI_DESCRIBE_SUBJECT = 50, // int id, byte[] subject
-//    //MESSAGE_RMI_DESCRIBE_OPERATION = 51, // int id, byte[] operation (e.g. "service_name.ping()void")
-//    //MESSAGE_RMI_REQUEST = 52, // int request_id, int flags, int subject_id, int operation_id, Object[] parameters
-//    //MESSAGE_RMI_CANCEL = 53, // int request_id, int flags
-//    //MESSAGE_RMI_RESULT = 54, // int request_id, Object result
-//    //MESSAGE_RMI_ERROR = 55 // int request_id, int RMIExceptionType#getId(), byte[] causeMessage, byte[] serializedCause
-//
-//    /*
-//    * These two values are reserved and can not be used as any
-//    * message type. Point is that when serialized to a file
-//    * values 61 and 35 corresponds to ASCII symbols '=' and '#',
-//    * which are used in text data format. So, when we
-//    * read this values in binary format it means that we are actually
-//    * reading data not in binary, but in text format.
-//    */
-//    MESSAGE_TEXT_FORMAT_SPECIAL = 14, // '='
-//    MESSAGE_TEXT_FORMAT_COMMENT = 15, // '#'
-//
-//    MT_NULL = UINT_MAX
-//};
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_is_subscription_message(dx_message_type_t type);
+bool dx_is_subscription_message(enum dx_message_type_t type);
 
 /**
 * Parses accumulated data and retrieve processed messages to

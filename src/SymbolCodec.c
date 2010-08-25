@@ -17,8 +17,6 @@
  *
 */
 
-#include <memory.h>
-
 #include "ParserCommon.h"
 #include "BufferedInput.h"
 #include "BufferedOutput.h"
@@ -71,8 +69,8 @@ enum dx_result_t dx_init_symbol_codec() {
     for (; --i >= 0;) {
         plength[i] = 64;
     }
-    memset(pentas, 0, PENTA_LENGTH * sizeof(dx_int_t));
-    memset(characters, 0, 1024 * sizeof(dx_char_t));
+    dx_memset(pentas, 0, PENTA_LENGTH * sizeof(dx_int_t));
+    dx_memset(characters, 0, 1024 * sizeof(dx_char_t));
 
 
     for (i = (dx_int_t)(L'A'); i <= (dx_int_t)(L'Z'); ++i) {

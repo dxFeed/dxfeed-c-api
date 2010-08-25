@@ -20,7 +20,8 @@
 #define SUBSCRIPTION_H
 
 #include "PrimitiveTypes.h"
+#include "Parser.h"
 
-void dx_create_subscription(dx_byte_t* out, dx_int_t out_len, dx_message_type_t type);
+enum dx_result_t dx_create_subscription(dx_byte_t* out, dx_int_t out_len, enum dx_message_type_t type, dx_int_t chiper, dx_string_t symbol, dx_int_t record_id);
 
 #endif // SUBSCRIPTION_H

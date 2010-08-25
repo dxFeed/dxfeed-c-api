@@ -18,7 +18,6 @@
 */
 
 #include <string.h>
-#include <malloc.h>
 #include <limits.h>
 
 #include "BufferedOutput.h"
@@ -129,7 +128,7 @@ enum dx_result_t write(const dx_byte_t* b, dx_int_t bLen, dx_int_t off, dx_int_t
         return R_FAILED;
     }
 
-    memcpy(out_buffer + current_out_buffer_position, b + off, len);
+    dx_memcpy(out_buffer + current_out_buffer_position, b + off, len);
     current_out_buffer_position += len;
     return parseSuccessful();
 }
@@ -485,9 +484,9 @@ enum dx_result_t dx_ensure_capacity( int requiredCapacity ) {
 
     if (requiredCapacity > out_buffer_length) {
         dx_int_t length = MAX(MAX((dx_int_t)MIN((dx_long_t)out_buffer_length << 1, (dx_long_t)INT_MAX), 1024), requiredCapacity);
-        dx_byte_t* newBuffer = (dx_byte_t*)malloc(length);
-        memcpy(newBuffer, out_buffer, out_buffer_length);
-        free(out_buffer);
+        dx_byte_t* newBuffer = (dx_byte_t*)dx_malloc((size_t)length);
+        dx_memcpy(newBuffer, out_buffer, out_buffer_length);
+        dx_free(out_buffer);
         out_buffer = newBuffer;
         out_buffer_length = length;
     }

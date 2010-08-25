@@ -158,7 +158,7 @@ bool dx_resolve_host (const char* host, struct addrinfo** addrs) {
         }
     }
     
-    memset(&hints, 0, sizeof(hints));
+    dx_memset(&hints, 0, sizeof(hints));
     
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
