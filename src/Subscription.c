@@ -22,13 +22,13 @@
 #include "DataStructures.h"
 #include "SymbolCodec.h"
 #include "DXMemory.h"
+#include "SymbolCodec.h"
 
 static dx_byte_t* dx_buf = NULL;
-static dx_int_t   dx_buf_len = 0;
-static dx_int_t   dx_processed = 0;
-static dx_int_t dx_message_body_start = 0;
 
 static const dx_int_t dx_default_threshold = 8000;//TODO: why 8000? what does it mean?
+
+static const dx_int_t dx_initial_buffer_size = 100; // It has to be enough to any subscription
 
 /* -------------------------------------------------------------------------- 
 *
@@ -57,15 +57,10 @@ enum dx_result_t dx_compose_message_header(dx_int_t messageTypeId) {
 * @param messageTypeId id of message type.
 */
 enum dx_result_t dx_begin_message(dx_int_t messageTypeId) {
-    if (dx_processed != dx_get_out_buffer_position()) {
-        dx_set_out_buffer_position(dx_processed);
-   }
 
     if(dx_compose_message_header(messageTypeId) != R_SUCCESSFUL) {
         return setParseError(dx_pr_unexpected_io_error);
     }
-
-    dx_message_body_start = dx_get_out_buffer_position();
 
     return parseSuccessful();
 }
@@ -82,7 +77,7 @@ enum dx_result_t dx_compose_body(dx_int_t record_id, dx_int_t chiper, dx_string_
     }
 
 	if (dx_codec_write_symbol(buf, buf_len, dx_get_out_buffer_position(), chiper, symbol) != R_SUCCESSFUL) {
-         return R_FAILED;
+         return R_FAILED;// TODO: error processing should be improved (now it's mixed style)
     }
 
     CHECKED_CALL(dx_write_compact_int, record_id);
@@ -107,17 +102,17 @@ void dx_move_data_forward(dx_int_t oldPos, dx_int_t newPos, dx_int_t length) {
 
 /* -------------------------------------------------------------------------- */
 
-enum dx_result_t dx_finish_composing_message(dx_int_t messageStart) {
-    dx_int_t messageLength = dx_get_out_buffer_position() - (messageStart + 1);
+enum dx_result_t dx_finish_composing_message() {
+    dx_int_t messageLength = dx_get_out_buffer_position() + 1;
     dx_int_t sizeLength = dx_get_compact_length(messageLength);
     if (sizeLength > 1) {
         // only 1 byte was initially reserved. Shift as needed
-        dx_move_data_forward(messageStart + 1, messageStart + sizeLength, messageLength);
+        dx_move_data_forward(1, sizeLength, messageLength);
     }
 
-   dx_set_out_buffer_position(messageStart);
+   dx_set_out_buffer_position(0);
    CHECKED_CALL(dx_write_compact_int, messageLength);
-   dx_set_out_buffer_position(messageStart + sizeLength + messageLength);
+   dx_set_out_buffer_position(sizeLength + messageLength);
 
    return R_SUCCESSFUL;
 }
@@ -129,16 +124,9 @@ enum dx_result_t dx_finish_composing_message(dx_int_t messageStart) {
 * Invoked every time after processing all message data.
 */
 enum dx_result_t dx_end_message() {
-    dx_int_t message_start = dx_processed;
-    if (dx_message_body_start == dx_get_out_buffer_position()) { // Collapse empty messages
-        dx_set_out_buffer_position(message_start);
-        return parseSuccessful();
-    }
-    if (dx_finish_composing_message(message_start) != R_SUCCESSFUL) {
+    if (dx_finish_composing_message() != R_SUCCESSFUL) {
             return setParseError(dx_pr_unexpected_io_error);
         }
-    dx_processed = dx_get_out_buffer_position();
-
 	return parseSuccessful();
 }
 
@@ -150,12 +138,14 @@ enum dx_result_t dx_end_message() {
 *
 /* -------------------------------------------------------------------------- */
 
-enum dx_result_t dx_create_subscription(dx_byte_t* out, dx_int_t out_len, enum dx_message_type_t type, dx_int_t chiper, dx_string_t symbol, dx_int_t record_id) {
-    dx_buf = out;
-    dx_buf_len = out_len;
+enum dx_result_t dx_create_subscription(dx_byte_t* out, dx_int_t* out_len, enum dx_message_type_t type, dx_int_t chiper, dx_string_t symbol, dx_int_t record_id) {
 
-    dx_set_out_buffer(dx_buf, dx_buf_len);
+	dx_buf = (dx_byte_t*)dx_malloc(dx_initial_buffer_size);
 
+	dx_buf = out;
+
+    dx_set_out_buffer(dx_buf, dx_initial_buffer_size);
+	// TODO: check if where is enough place for data in buffer
     if (!hasCapacity()) {
         return setParseError(dx_pr_illegal_length); 
     }    
@@ -169,6 +159,8 @@ enum dx_result_t dx_create_subscription(dx_byte_t* out, dx_int_t out_len, enum d
 	CHECKED_CALL_3(dx_compose_body, record_id, chiper, symbol);
 	
 	CHECKED_CALL_0(dx_end_message);
+
+	*out_len = dx_get_out_buffer_position() + 1;
 
 	return parseSuccessful();
 }
