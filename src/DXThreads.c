@@ -34,6 +34,7 @@ static struct dx_error_code_descr_t g_thread_errors[] = {
     { dx_tec_invalid_resource_id, "Internal software error" },
     { dx_tec_deadlock_detected, "Internal software error" },
     { dx_tec_not_enough_memory, "Not enough memory to perform requested operation" },
+    { dx_tec_resource_busy, "Internal software error" },
     { dx_tec_generic_error, "Unrecognized thread error" },
     
     { ERROR_CODE_FOOTER, ERROR_DESCR_FOOTER }
@@ -153,7 +154,7 @@ bool dx_set_thread_data (pthread_key_t key, const void* data) {
     default:
         dx_set_last_error(dx_sc_threads, dx_tec_generic_error); break;
     case 0:
-        return true;    
+        return true;
     }
 
     return false;
@@ -175,6 +176,91 @@ pthread_t dx_get_thread_id () {
 
 bool dx_compare_threads (pthread_t t1, pthread_t t2) {
     return (pthread_equal(t1, t2) != 0);
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_mutex_create (pthread_mutex_t* mutex) {
+    int res = pthread_mutex_init(mutex, NULL);
+    
+    switch (res) {
+    case EAGAIN:
+        dx_set_last_error(dx_sc_threads, dx_tec_not_enough_sys_resources); break;
+    case ENOMEM:
+        dx_set_last_error(dx_sc_threads, dx_tec_not_enough_memory); break;
+    case EPERM:
+        dx_set_last_error(dx_sc_threads, dx_tec_permission_denied); break;
+    case EBUSY:
+        dx_set_last_error(dx_sc_threads, dx_tec_resource_busy); break;
+    case EINVAL:
+        dx_set_last_error(dx_sc_threads, dx_tec_invalid_resource_id); break;
+    default:
+        dx_set_last_error(dx_sc_threads, dx_tec_generic_error); break;
+    case 0:
+        return true;
+    }
+    
+    return false;
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_mutex_destroy (pthread_mutex_t* mutex) {
+    int res = pthread_mutex_destroy(mutex);
+    
+    switch (res) {
+    case EBUSY:
+        dx_set_last_error(dx_sc_threads, dx_tec_resource_busy); break;
+    case EINVAL:
+        dx_set_last_error(dx_sc_threads, dx_tec_invalid_resource_id); break;
+    default:
+        dx_set_last_error(dx_sc_threads, dx_tec_generic_error); break;
+    case 0:
+        return true;
+    }
+    
+    return false;
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_mutex_lock (pthread_mutex_t* mutex) {
+    int res = pthread_mutex_lock(mutex);
+    
+    switch (res) {
+    case EINVAL:
+        dx_set_last_error(dx_sc_threads, dx_tec_invalid_resource_id); break;
+    case EAGAIN:
+        dx_set_last_error(dx_sc_threads, dx_tec_invalid_res_operation); break;
+    case EDEADLK:
+        dx_set_last_error(dx_sc_threads, dx_tec_deadlock_detected); break;
+    default:
+        dx_set_last_error(dx_sc_threads, dx_tec_generic_error); break;
+    case 0:
+        return true;
+    }
+    
+    return false;
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_mutex_unlock (pthread_mutex_t* mutex) {
+    int res = pthread_mutex_unlock(mutex);
+    
+    switch (res) {
+    case EINVAL:
+        dx_set_last_error(dx_sc_threads, dx_tec_invalid_resource_id); break;
+    case EAGAIN:
+    case EPERM:
+        dx_set_last_error(dx_sc_threads, dx_tec_invalid_res_operation); break;
+    default:
+        dx_set_last_error(dx_sc_threads, dx_tec_generic_error); break;
+    case 0:
+        return true;
+    }
+    
+    return false;
 }
 
 /* -------------------------------------------------------------------------- */

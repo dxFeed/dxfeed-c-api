@@ -58,6 +58,10 @@ bool dx_set_thread_data (pthread_key_t key, const void* data);
 void* dx_get_thread_data (pthread_key_t key);
 pthread_t dx_get_thread_id ();
 bool dx_compare_threads (pthread_t t1, pthread_t t2);
+bool dx_mutex_create (pthread_mutex_t* mutex);
+bool dx_mutex_destroy (pthread_mutex_t* mutex);
+bool dx_mutex_lock (pthread_mutex_t* mutex);
+bool dx_mutex_unlock (pthread_mutex_t* mutex);
 
 /* -------------------------------------------------------------------------- */
 /*
