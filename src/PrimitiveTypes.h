@@ -49,16 +49,16 @@ typedef unsigned size_t;
 
 typedef unsigned char      dx_bool_t;           // 8 bit
 typedef char               dx_byte_t;           // 8 bit
-typedef unsigned char      dx_unsigned_byte_t;  // 8 bit
+typedef unsigned char      dx_ubyte_t;  // 8 bit
 typedef wchar_t            dx_char_t;           // 16 bit
 //typedef unsigned wchar_t   dx_unsigned_char_t;  // 16 bit
 typedef short int          dx_short_t;          // 16 bit
-typedef unsigned short int dx_unsigned_short_t; // 16 bit
+typedef unsigned short int dx_ushort_t; // 16 bit
 typedef int                dx_int_t;            // 32 bit
-typedef unsigned int       dx_unsigned_int_t;   // 32 bit
+typedef unsigned int       dx_uint_t;   // 32 bit
 typedef float              dx_float_t;          // 32 bit
 typedef long long          dx_long_t;           // 64 bit
-typedef unsigned long long dx_unsigned_long_t;  // 64 bit
+typedef unsigned long long dx_ulong_t;  // 64 bit
 typedef double             dx_double_t;         // 64 bit
 
 typedef dx_char_t*    dx_string_t;

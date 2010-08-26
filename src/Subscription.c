@@ -103,7 +103,7 @@ void dx_move_data_forward(dx_int_t oldPos, dx_int_t newPos, dx_int_t length) {
 /* -------------------------------------------------------------------------- */
 
 enum dx_result_t dx_finish_composing_message() {
-    dx_int_t messageLength = dx_get_out_buffer_position() + 1;
+    dx_int_t messageLength = dx_get_out_buffer_position() - 1;
     dx_int_t sizeLength = dx_get_compact_length(messageLength);
     if (sizeLength > 1) {
         // only 1 byte was initially reserved. Shift as needed
@@ -138,15 +138,15 @@ enum dx_result_t dx_end_message() {
 *
 /* -------------------------------------------------------------------------- */
 
-enum dx_result_t dx_create_subscription(dx_byte_t* out, dx_int_t* out_len, enum dx_message_type_t type, dx_int_t chiper, dx_string_t symbol, dx_int_t record_id) {
+enum dx_result_t dx_create_subscription(dx_byte_t** out, dx_int_t* out_len, enum dx_message_type_t type, dx_int_t chiper, dx_string_t symbol, dx_int_t record_id) {
 
 	dx_buf = (dx_byte_t*)dx_malloc(dx_initial_buffer_size);
 
-	dx_buf = out;
+	*out = dx_buf;
 
     dx_set_out_buffer(dx_buf, dx_initial_buffer_size);
-	// TODO: check if where is enough place for data in buffer
-    if (!hasCapacity()) {
+
+	if (!hasCapacity()) {
         return setParseError(dx_pr_illegal_length); 
     }    
 
@@ -160,7 +160,7 @@ enum dx_result_t dx_create_subscription(dx_byte_t* out, dx_int_t* out_len, enum 
 	
 	CHECKED_CALL_0(dx_end_message);
 
-	*out_len = dx_get_out_buffer_position() + 1;
+	*out_len = dx_get_out_buffer_position();
 
 	return parseSuccessful();
 }

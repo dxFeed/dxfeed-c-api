@@ -42,9 +42,9 @@ dx_int_t skip(dx_int_t n);
 
 enum dx_result_t dx_read_boolean       ( OUT dx_bool_t* );
 enum dx_result_t dx_read_byte          ( OUT dx_byte_t* );
-enum dx_result_t dx_read_unsigned_byte  ( OUT dx_int_t* );
+enum dx_result_t dx_read_unsigned_byte  ( OUT dx_uint_t* );
 enum dx_result_t dx_read_short         ( OUT dx_short_t* );
-enum dx_result_t dx_read_unsigned_short ( OUT dx_int_t* );
+enum dx_result_t dx_read_unsigned_short ( OUT dx_uint_t* );
 enum dx_result_t dx_read_char          ( OUT dx_char_t* );
 enum dx_result_t dx_read_int           ( OUT dx_int_t* );
 enum dx_result_t dx_read_long          ( OUT dx_long_t* );

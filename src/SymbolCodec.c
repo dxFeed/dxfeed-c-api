@@ -105,7 +105,7 @@ dx_int_t dx_encode_penta(dx_long_t penta, dx_int_t plen) {
     if (plen <= 30) {
         return (dx_int_t)penta + 0x40000000;
     }
-    c = (dx_int_t)((dx_unsigned_long_t)penta >> 30);
+    c = (dx_int_t)((dx_ulong_t)penta >> 30);
     if (c == pentas[L'/']) // Also checks that plen == 35 (high bits == 0).
         return ((dx_int_t)penta & 0x3FFFFFFF) + 0x80000000;
     if (c == pentas[L'$']) // Also checks that plen == 35 (high bits == 0).
@@ -124,7 +124,7 @@ dx_string_t dx_to_string(dx_long_t penta) {
     dx_string_t chars;
     dx_int_t length = 0;
 
-    while (((dx_unsigned_long_t)penta >> plen) != 0) {
+    while (((dx_ulong_t)penta >> plen) != 0) {
         plen += 5;
     }
 
@@ -132,10 +132,10 @@ dx_string_t dx_to_string(dx_long_t penta) {
     while (plen > 0) {
         dx_int_t code;
         plen -= 5;
-        code = (dx_int_t)((dx_unsigned_long_t)penta >> plen) & 0x1F;
+        code = (dx_int_t)((dx_ulong_t)penta >> plen) & 0x1F;
         if (code >= 30 && plen > 0) {
             plen -= 5;
-            code = (dx_int_t)((dx_unsigned_long_t)penta >> plen) & 0x3FF;
+            code = (dx_int_t)((dx_ulong_t)penta >> plen) & 0x3FF;
         }
         chars[length++] = characters[code];
     }
@@ -155,7 +155,7 @@ enum dx_result_t dx_decode_cipher(dx_int_t cipher, OUT dx_long_t* res) {
         return setParseError(dx_pr_illegal_argument);
     };
 
-    switch ((dx_unsigned_int_t)cipher >> 30) {
+    switch ((dx_uint_t)cipher >> 30) {
         case 0:
             return setParseError(dx_pr_illegal_argument);
         case 1:
@@ -303,7 +303,7 @@ enum dx_result_t dx_codec_read_symbol(dx_char_t* buffer, dx_int_t buf_len, OUT d
         return parseSuccessful();
     }
     plen = 0;
-    while (((dx_unsigned_long_t)penta >> plen) != 0) {
+    while (((dx_ulong_t)penta >> plen) != 0) {
         plen += 5;
     }
     cipher = dx_encode_penta(penta, plen);
@@ -332,12 +332,12 @@ enum dx_result_t dx_codec_write_symbol(dx_byte_t* buf, dx_int_t buf_len, dx_int_
         } else if (penta < 0x8000L) { // 15-bit
             CHECKED_CALL(dx_write_short, (dx_short_t)penta);
         } else if (penta < 0x100000L) { // 20-bit
-            CHECKED_CALL(dx_write_byte, 0xE0 | ((dx_unsigned_int_t)penta >> 16));
+            CHECKED_CALL(dx_write_byte, 0xE0 | ((dx_uint_t)penta >> 16));
             CHECKED_CALL(dx_write_short, (dx_short_t)penta);
         } else if (penta < 0x40000000L) { // 30-bit
             CHECKED_CALL(dx_write_int, 0x80000000 | (dx_int_t)penta);
         } else if (penta < 0x0800000000L) { //35-bit
-            CHECKED_CALL(dx_write_byte, 0xF0 | (dx_int_t)((dx_unsigned_long_t)penta >> 32));
+            CHECKED_CALL(dx_write_byte, 0xF0 | (dx_int_t)((dx_ulong_t)penta >> 32));
             CHECKED_CALL(dx_write_int, (dx_int_t)penta);
         } else { // more than 35-bit
             return setParseError(dx_pr_internal_error); // Penta has more than 35 bits.

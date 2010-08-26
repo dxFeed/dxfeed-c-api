@@ -48,6 +48,7 @@ BOOL APIENTRY DllMain( HANDLE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 
 void data_receiver (const void* buffer, unsigned buflen) {
     printf("Internal data receiver stub. Data received: %d bytes\n", buflen);
+	dx_parse(buffer, buflen);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -105,8 +106,8 @@ DXFEED_API int dxf_get_last_error (int* subsystem_id, int* error_code, const cha
 
 DXFEED_API ERRORCODE dxf_add_subscription (enum dxf_event_t event_type, OUT dxf_subscription_t* subscription){
 	static int symbol_codec_initialized = 0;
-	// TODO: temporary stuff!!!
-	dx_byte_t* sub_buffer;
+	// TODO: temporary stuff!!! to check subscription serialization and test received messages parsing
+	dx_byte_t* sub_buffer = NULL;
 	dx_int_t out_len = 1000;
 
 	// initialization of penta codec. do not remove!
@@ -116,8 +117,13 @@ DXFEED_API ERRORCODE dxf_add_subscription (enum dxf_event_t event_type, OUT dxf_
 	}
 
 	//TODO: separate events per bit mask
-	dx_create_subscription(sub_buffer, out_len, MESSAGE_TICKER_ADD_SUBSCRIPTION, dx_encode(L"MSFT"), L"MSFT", 1);
-	dx_create_subscription(sub_buffer, out_len, MESSAGE_TICKER_ADD_SUBSCRIPTION, dx_encode(L"YHOO"), L"YHOO", 1);
+	dx_create_subscription(&sub_buffer, &out_len, MESSAGE_TICKER_ADD_SUBSCRIPTION, dx_encode(L"MSFT"), L"MSFT", 1);
+
+	//send to server
+	dx_send_data(sub_buffer, out_len);
+
+	dx_free(sub_buffer);
+	sub_buffer = NULL;
 
 	return DXF_SUCCESS;
 }

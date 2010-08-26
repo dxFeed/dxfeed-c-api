@@ -21,14 +21,15 @@
 #include "BufferedInput.h"
 #include "RecordReader.h"
 #include "Subscription.h"
+#include "DXMemory.h"
 
 //////////////////////////////////////////////////////////////////////////////////
 //// ========== Implementation Details ==========
 //////////////////////////////////////////////////////////////////////////////////
 //
-//static dx_byte_t* buffer      = 0;
-//static dx_int_t   buffer_size  = 0;
-//static dx_int_t   buffer_pos   = 0;
+static dx_byte_t* buffer      = 0;
+static dx_int_t   buffer_size  = 0;
+static dx_int_t   buffer_pos   = 0;
 //static dx_int_t   buffer_limit = 0;
 //
 //#define SYMBOL_BUFFER_LEN 64
@@ -41,18 +42,18 @@
 //
 ///* -------------------------------------------------------------------------- */
 //
-//bool dx_is_message_type_valid(dx_message_type_t type) {
-//   return type >= MESSAGE_HEARTBEAT && type <= MESSAGE_TEXT_FORMAT_COMMENT;
-//}
+bool dx_is_message_type_valid(enum dx_message_type_t type) {
+   return type >= MESSAGE_HEARTBEAT && type <= MESSAGE_TEXT_FORMAT_COMMENT;
+}
 //
 ///* -------------------------------------------------------------------------- */
 //
-//bool dx_is_data_message(dx_message_type_t type) {
-//    return type == MESSAGE_RAW_DATA
-//        || type == MESSAGE_TICKER_DATA
-//        || type == MESSAGE_STREAM_DATA
-//        || type == MESSAGE_HISTORY_DATA;
-//}
+bool dx_is_data_message(enum dx_message_type_t type) {
+    return type == MESSAGE_RAW_DATA
+        || type == MESSAGE_TICKER_DATA
+        || type == MESSAGE_STREAM_DATA
+        || type == MESSAGE_HISTORY_DATA;
+}
 
 /* -------------------------------------------------------------------------- */
 
@@ -72,45 +73,44 @@ bool dx_is_subscription_message(enum dx_message_type_t type) {
 //* Parses and return message type.
 //* @throws CorruptedException if stream is corrupted.
 //*/
-//static dx_result_t dx_parse_type(OUT dx_int_t* ltype) {
-//    dx_long_t type;
-//    if (dx_read_compact_long(&type) != R_SUCCESSFUL) {
-//        return setParseError(dx_pr_buffer_corrupt);
-//    }
-//    if (*ltype < 0 || *ltype > INT_MAX) {
-//        return setParseError(dx_pr_buffer_corrupt); // stream is corrupted
-//    }
-//
-//    *ltype = (dx_int_t)(type);
-//    return parseSuccessful();
-//}
-//
+enum dx_result_t dx_parse_type(OUT dx_int_t* ltype) {
+    dx_long_t type;
+    if (dx_read_compact_long(&type) != R_SUCCESSFUL) {
+        return setParseError(dx_pr_buffer_corrupt);
+    }
+    if (*ltype < 0 || *ltype > INT_MAX) {
+        return setParseError(dx_pr_buffer_corrupt); // stream is corrupted
+    }
+
+    *ltype = (dx_int_t)(type);
+    return parseSuccessful();
+}
+
 //////////////////////////////////////////////////////////////////////////////////
 ///**
-//* Parses message length and sets up in.position and in.limit for parsing of the message contents.
+//* Parses message length and sets up position and limit for parsing of the message contents.
 //* Returns false when message is not complete yet and its parsing cannot be started.
 //* @throws CorruptedException if stream is corrupted.
 //*/
-//static dx_result_t dx_parse_length_and_setup_input(dx_int_t position, dx_int_t limit, OUT ) {
-//    //dx_set_in_buffer(buffer, buffer_size);
-//    //dx_set_in_buffer_position(buffer_pos);
-//
-//    dx_long_t length;
-//    if (dx_read_compact_long(&length) != R_SUCCESSFUL) {
-//        return R_FAILED; // need more bytes
-//    }
-//    if (length < 0 || length > INT_MAX - dx_get_in_buffer_position()) {
-//        return setParseError(dx_pr_buffer_corrupt);
-//    }
-//
-//    dx_int_t endPosition = dx_get_in_buffer_position() + (dx_int_t)length;
-//    if (endPosition > limit)
-//        return setParseError(dx_pr_message_not_complete);
-//
-//    dx_set_in_buffer_limit(endPosition); // set limit for this message
-//    return parseSuccessful();
-//}
-//
+static enum dx_result_t dx_parse_length_and_setup_input(dx_int_t position, dx_int_t limit ) {
+    dx_long_t length;
+	dx_int_t endPosition;
+
+    if (dx_read_compact_long(&length) != R_SUCCESSFUL) {
+        return R_FAILED; // need more bytes TODO: process this situation
+    }
+    if (length < 0 || length > INT_MAX - dx_get_in_buffer_position()) {
+        return setParseError(dx_pr_buffer_corrupt);
+    }
+
+    endPosition = dx_get_in_buffer_position() + (dx_int_t)length;
+    if (endPosition > limit)
+        return setParseError(dx_pr_message_not_complete);
+
+    dx_set_in_buffer_limit(endPosition); // set limit for this message
+    return parseSuccessful();
+}
+
 //////////////////////////////////////////////////////////////////////////////////
 ///**
 //* Processes pending message from buffers (if any) and resets pendingMessageType to null.
@@ -227,57 +227,52 @@ bool dx_is_subscription_message(enum dx_message_type_t type) {
 //
 ///* -------------------------------------------------------------------------- */
 //
-//enum dx_result_t dx_parse_describe_records() {
-//    dx_int_t start_position = dx_get_in_buffer_position();
-//    dx_int_t last_rec_position = start_position;
-//    try {
-//        while (dx_get_in_buffer_position() < dx_get_in_buffer_limit()) {
-//            dx_int_t id;
-//            dx_string_t name;
-//            dx_int_t n;
-//            dx_string_t* fname;
-//            dx_int_t* ftype;
-//            dx_int_t i;
-//
-//            CHECKED_CALL(dx_read_compact_int, &id);
-//            CHECKED_CALL(dx_read_utf_string, &name);
-//            CHECKED_CALL(dx_read_compact_int, &n);
-//
-//            if (id < 0 || name == null || wcslen(name) == 0 || n < 0) {
-//                return setParseError(dx_pr_record_info_corrupt);
-//            }
-//
-//            fname = dx_malloc(n * sizeof(dx_string_t));
-//            ftype = dx_malloc(n);
-//            for (i = 0; i < n; ++i) {
-//                CHECKED_CALL(dx_read_utf_string, &(fname[i]));
-//                CHECKED_CALL(dx_read_compact_int, &(ftype[i]))
-//                if (fname[i] == NULL || wcslen(fname[i]) == 0 || ftype[i] < MIN_FIELD_TYPE_ID || ftype[i] > MAX_FIELD_TYPE_ID) {
-//                    return setParseError(dx_pr_field_info_corrupt);
-//                }
-//            }
-//
-//            const struct dx_record_info_t* record = dx_get_record_by_name(name);
-//            //DataRecord record = scheme.findRecordByName(name);
-//            if (record != NULL) {
-//                //RecordReader rr = record;
-//                if (!dx_matching_fields(record, fname, ftype))
-//                    rr = createRecordAdapter(id, record, fname, ftype);
-//                if (rr != null)
-//                    remapRecord(id, rr); // silently remap
-//                else
-//                    record = null; // log the error message (see below)
-//            } else {
-//                // otherwise, attempt to create new record to process and skip incoming data
-//                record = createRecord(id, name, fname, ftype);
-//            }
-//            last_rec_position = in.getPosition();
-//        }
-//    } catch (IOException e) {
-//        dumpParseDescribeRecordsErrorReport(e, start_position, last_rec_position);
-//        throw new CorruptedException(e);
-//    }
-//}
+enum dx_result_t dx_parse_describe_records() {
+    dx_int_t start_position = dx_get_in_buffer_position();
+    dx_int_t last_rec_position = start_position;
+        while (dx_get_in_buffer_position() < dx_get_in_buffer_limit()) {
+            dx_int_t id;
+            dx_string_t name;
+            dx_int_t n;
+            dx_string_t* fname;
+            dx_int_t* ftype;
+            dx_int_t i;
+
+            CHECKED_CALL(dx_read_compact_int, &id);
+            CHECKED_CALL(dx_read_utf_string, &name);
+            CHECKED_CALL(dx_read_compact_int, &n);
+
+            if (id < 0 || name == NULL || wcslen(name) == 0 || n < 0) {
+                return setParseError(dx_pr_record_info_corrupt);
+            }
+
+            fname = (dx_string_t*)dx_malloc(n * sizeof(dx_string_t));
+            ftype = (dx_int_t*)dx_malloc(n);
+            for (i = 0; i < n; ++i) {
+                CHECKED_CALL(dx_read_utf_string, &(fname[i]));
+                CHECKED_CALL(dx_read_compact_int, &(ftype[i]))
+                if (fname[i] == NULL || wcslen(fname[i]) == 0 || ftype[i] < MIN_FIELD_TYPE_ID || ftype[i] > MAX_FIELD_TYPE_ID) {
+                    return setParseError(dx_pr_field_info_corrupt);
+                }
+            }
+
+            //const struct dx_record_info_t* record = dx_get_record_by_name(name);
+            ////DataRecord record = scheme.findRecordByName(name);
+            //if (record != NULL) {
+            //    //RecordReader rr = record;
+            //    if (!dx_matching_fields(record, fname, ftype))
+            //        rr = createRecordAdapter(id, record, fname, ftype);
+            //    if (rr != null)
+            //        remapRecord(id, rr); // silently remap
+            //    else
+            //        record = null; // log the error message (see below)
+            //} else {
+            //    // otherwise, attempt to create new record to process and skip incoming data
+            //    record = createRecord(id, name, fname, ftype);
+            //}
+        }
+		return parseSuccessful();
+}
 //
 ///* -------------------------------------------------------------------------- */
 //
@@ -290,42 +285,42 @@ bool dx_is_subscription_message(enum dx_message_type_t type) {
 //* Parses message of the specified type. Some messages are processed immedetely, but data and subscription messages
 //* are just parsed into buffers and pendingMessageType is set.
 //*/
-//dx_result_t dx_parse_message(dx_int_t type, MessageConsumer consumer) {
-//    dx_message_type_t messageType = (dx_message_type_t)type;
-//    if (dx_is_message_type_valid(messageType)) {
-//        if (dx_is_data_message(messageType)) {
-//            if (dx_parse_data() != R_SUCCESSFUL) {
-//                return R_FAILED;
-//            }
-//            return parseSuccessful();
-//        } else if (dx_is_subscription_message(messageType)) {
-//            //parseSubscription(type);
-//            return parseSuccessful();
-//        }
-//    }
-//    switch (type) {
-//        case MESSAGE_DESCRIBE_RECORDS:
-//            if (dx_parse_describe_records)
-//                // todo: error handling is not atomic now -- partially parsed message is still being processed.
-//                dx_parse_describe_records();
-//            // falls through to ignore this message
-//        case MESSAGE_HEARTBEAT:
-//        case MESSAGE_DESCRIBE_PROTOCOL:
-//        case MESSAGE_DESCRIBE_RESERVED:
-//        case MESSAGE_TEXT_FORMAT_COMMENT:
-//        case MESSAGE_TEXT_FORMAT_SPECIAL:
-//            // just ignore those messages without any processing
-//            break;
-//        default:
-//            {
-//                dx_int_t size;
-//                dx_byte_t* buf = dx_get_in_buffer(&size);
+enum dx_result_t dx_parse_message(dx_int_t type) {
+    enum dx_message_type_t messageType = (enum dx_message_type_t)type;
+    if (dx_is_message_type_valid(messageType)) {
+     //   if (dx_is_data_message(messageType)) {
+     //       if (dx_parse_data() != R_SUCCESSFUL) {
+      //          return R_FAILED;
+     //       }
+      //      return parseSuccessful();
+        } else if (dx_is_subscription_message(messageType)) {
+            //parseSubscription(type); TODO: error subscription message doesn't valid here
+            return parseSuccessful();
+        }
+    
+    switch (type) {
+        case MESSAGE_DESCRIBE_RECORDS:
+                  // todo: error handling is not atomic now -- partially parsed message is still being processed.
+                dx_parse_describe_records();//TODO: errors 
+			break;
+            // falls through to ignore this message
+        case MESSAGE_HEARTBEAT:
+        case MESSAGE_DESCRIBE_PROTOCOL:
+        case MESSAGE_DESCRIBE_RESERVED:
+        case MESSAGE_TEXT_FORMAT_COMMENT:
+        case MESSAGE_TEXT_FORMAT_SPECIAL:
+            // just ignore those messages without any processing
+            break;
+        default:
+            {
+                dx_int_t size;
+                dx_byte_t* buf = dx_get_in_buffer(&size);
 //                dx_process_other_message(type, buf, size, dx_get_in_buffer_position(), dx_get_in_buffer_limit() - dx_get_in_buffer_position());
-//            }
-//    }
-//    return parseSuccessful();
-//
-//}
+            }
+    }
+    return parseSuccessful();
+
+}
 //
 //
 //////////////////////////////////////////////////////////////////////////////////
@@ -333,39 +328,42 @@ bool dx_is_subscription_message(enum dx_message_type_t type) {
 //////////////////////////////////////////////////////////////////////////////////
 //
 //////////////////////////////////////////////////////////////////////////////////
-//int dx_parse( const dx_byte_t* buf, dx_int_t bufLen  ) {
-//    dx_set_in_buffer(buffer, buffer_size);
-//    dx_set_in_buffer_position(buffer_pos);
-//
-//    // Parsing loop
-//    while (buffer_pos < buffer_limit) {
-//        dx_int_t messageType = MESSAGE_HEARTBEAT; // zero-length messages are treated as just heartbeats
-//
-//        if (dx_parse_length_and_setup_input(buffer_pos, buffer_limit) != R_SUCCESSFUL) {
-//            if (dx_get_parser_last_error() == dx_pr_message_not_complete) {
-//                break; // message is incomplete -- just stop parsing
-//            }
-//        }
-//        if (dx_get_in_buffer_limit() > dx_get_in_buffer_position()) { // only if not empty message, empty message is heartbeat
-//            if (dx_parse_type(&messageType) != R_SUCCESSFUL) {
-//                return R_FAILED; // cannot continue parsing on corrupted stream
-//            }
-//        }
-//
-//        // ???
-//        nextMessage(consumer, dx_message_type_t.findById(messageType));
-//
-//        //try {
-//            //if (consumer instanceof MessageConsumerAdapter)
-//            //    symbolResolver = (MessageConsumerAdapter)consumer;
-//            dx_parse_message(messageType, consumer);
-//        //} catch (CorruptedException e) {
-//        //    consumer.handleCorruptedMessage(messageType);
-//        //} finally {
-//        //    symbolResolver = null;
-//        //}
-//        // mark as "processed" and continue to the next message
-//        processed = in.getLimit();
-//    }
-//    processPending(consumer);
+enum dx_result_t dx_parse( const dx_byte_t* buf, dx_int_t bufLen  ) {
+	if ( (buffer_size == 0 && buffer_pos == 0 ) || (buffer_size == buffer_pos + 1 ) ) {// previous message was complete
+		buffer = buf;
+		buffer_size = bufLen;
+		buffer_pos = 0;
+		dx_set_in_buffer(buffer, buffer_size);
+		dx_set_in_buffer_position(buffer_pos);
+	} else {} //TODO:
+
+	//TODO: heartbeat messages
+	// Parsing loop
+    while (dx_get_in_buffer_position() < buffer_size) {
+        dx_int_t messageType = MESSAGE_HEARTBEAT; // zero-length messages are treated as just heartbeats
+
+        if (dx_parse_length_and_setup_input(buffer_pos, buffer_size) != R_SUCCESSFUL) {
+            if (dx_get_parser_last_error() == dx_pr_message_not_complete) {
+                break; // message is incomplete -- just stop parsing
+            }
+        }
+        if (dx_get_in_buffer_limit() > dx_get_in_buffer_position()) { // only if not empty message, empty message is heartbeat
+            if (dx_parse_type(&messageType) != R_SUCCESSFUL) {
+                return R_FAILED; // cannot continue parsing on corrupted stream
+            }
+	    }
+        // ???
+    //    nextMessage(consumer, dx_message_type_t.findById(messageType));
+
+        dx_parse_message(messageType);
+        //} catch (CorruptedException e) {
+        //    consumer.handleCorruptedMessage(messageType);
+        //} finally {
+        //    symbolResolver = null;
+        //}
+        // mark as "processed" and continue to the next message
+        //processed = in.getLimit();
+    }
+}
+    //processPending(consumer);
 //}

@@ -81,6 +81,6 @@ bool dx_is_subscription_message(enum dx_message_type_t type);
 * updates buffer_pos value.
 * @param consumer MessageConsumer to pass parsed messages.
 */
-int dx_parse( const dx_byte_t* buf, dx_int_t bufLen );
+enum dx_result_t dx_parse( const dx_byte_t* buf, dx_int_t bufLen );
 
 #endif // PARSER_H
