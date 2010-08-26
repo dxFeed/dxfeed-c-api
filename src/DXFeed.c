@@ -21,8 +21,11 @@
 #include "DXNetwork.h"
 #include "DXErrorHandling.h"
 #include "DXErrorCodes.h"
+#include "DXMemory.h"
+#include "Subscription.h"
 #include <Windows.h>
 #include <stdio.h>
+#include "SymbolCodec.h"
 
 BOOL APIENTRY DllMain( HANDLE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved )
 {
@@ -98,4 +101,23 @@ DXFEED_API int dxf_get_last_error (int* subsystem_id, int* error_code, const cha
     }
     
     return DXF_FAILURE;
+}
+
+DXFEED_API ERRORCODE dxf_add_subscription (enum dxf_event_t event_type, OUT dxf_subscription_t* subscription){
+	static int symbol_codec_initialized = 0;
+	// TODO: temporary stuff!!!
+	dx_byte_t* sub_buffer;
+	dx_int_t out_len = 1000;
+
+	// initialization of penta codec. do not remove!
+	if (symbol_codec_initialized == 0){
+		dx_init_symbol_codec();
+		symbol_codec_initialized = 1; 
+	}
+
+	//TODO: separate events per bit mask
+	dx_create_subscription(sub_buffer, out_len, MESSAGE_TICKER_ADD_SUBSCRIPTION, dx_encode(L"MSFT"), L"MSFT", 1);
+	dx_create_subscription(sub_buffer, out_len, MESSAGE_TICKER_ADD_SUBSCRIPTION, dx_encode(L"YHOO"), L"YHOO", 1);
+
+	return DXF_SUCCESS;
 }

@@ -63,6 +63,13 @@ DXFEED_API int dxf_disconnect_feed();
 
 DXFEED_API int dxf_get_last_error (int* subsystem_id, int* error_code, const char** error_descr);
 
+// subscribes to the selected type of events on the given connection
+// returns the success/error code of the operation
+// if the function succeeds it returns the handle of the created subscription
+// via the function's out-parameter
+
+DXFEED_API ERRORCODE dxf_add_subscription (enum dxf_event_t event_type, OUT dxf_subscription_t* subscription);
+
 /*
 // closes a connection, previously opened by 'openConnection'
 // returns the success/error code of the operation

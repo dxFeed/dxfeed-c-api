@@ -26,6 +26,9 @@ typedef int HFEED;
 typedef int HCONNECTION;
 typedef int dxf_subscription_t;
 typedef int event_listener_t;
-typedef int dxf_event_t;
+typedef enum dxf_event_t{
+	dx_qoute,
+	dx_trade
+};
 
 #endif // API_TYPES_H

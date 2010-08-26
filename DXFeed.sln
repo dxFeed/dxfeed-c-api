@@ -8,6 +8,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ConnectionTest", "tests\Con
 		{98DF2375-3C29-4806-A832-7C666F8BF54C} = {98DF2375-3C29-4806-A832-7C666F8BF54C}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SampleTest", "tests\SampleTest\SampleTest.vcproj", "{7F344E89-5118-4D89-A5CF-A887DFCF7352}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
@@ -18,6 +22,10 @@ Global
 		{98DF2375-3C29-4806-A832-7C666F8BF54C}.Debug.Build.0 = Debug|Win32
 		{98DF2375-3C29-4806-A832-7C666F8BF54C}.Release.ActiveCfg = Release|Win32
 		{98DF2375-3C29-4806-A832-7C666F8BF54C}.Release.Build.0 = Release|Win32
+		{7F344E89-5118-4D89-A5CF-A887DFCF7352}.Debug.ActiveCfg = Debug|Win32
+		{7F344E89-5118-4D89-A5CF-A887DFCF7352}.Debug.Build.0 = Debug|Win32
+		{7F344E89-5118-4D89-A5CF-A887DFCF7352}.Release.ActiveCfg = Release|Win32
+		{7F344E89-5118-4D89-A5CF-A887DFCF7352}.Release.Build.0 = Release|Win32
 		{7F344E89-5118-4D89-A5CF-A887DFCF7352}.Debug.ActiveCfg = Debug|Win32
 		{7F344E89-5118-4D89-A5CF-A887DFCF7352}.Debug.Build.0 = Debug|Win32
 		{7F344E89-5118-4D89-A5CF-A887DFCF7352}.Release.ActiveCfg = Release|Win32

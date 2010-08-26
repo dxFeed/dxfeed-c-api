@@ -29,6 +29,10 @@ typedef int bool;
 #define true 1
 #define false 0
 
+#ifndef OUT
+#define OUT
+#endif // OUT
+
 #ifndef NULL
     #define NULL ((void*)0)
 #endif // NULL
