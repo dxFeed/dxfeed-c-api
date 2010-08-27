@@ -20,13 +20,13 @@
 #include "PrimitiveTypes.h"
 
 /* -------------------------------------------------------------------------- */
-enum dx_records_id_t {
-    dx_rid_1,
-    dx_rid_2,
-    dx_rid_3,
-    dx_rid_4,
-    dx_rid_5
-};
+//enum dx_records_id_t {
+//    dx_rid_1,
+//    dx_rid_2,
+//    dx_rid_3,
+//    dx_rid_4,
+//    dx_rid_5
+//};
 
 /* -------------------------------------------------------------------------- */
 
@@ -52,70 +52,31 @@ enum dx_fields_id_t {
 
 /* -------------------------------------------------------------------------- */
 
-struct dx_field_info_t {
-    enum dx_fields_id_t id;
-    dx_string_t         type;
-};
+//struct dx_field_info_t {
+//    enum dx_fields_id_t id;
+//    dx_string_t         type;
+//};
 
 /* -------------------------------------------------------------------------- */
 
 struct dx_field_info_ex_t {
     enum dx_fields_id_t id;
-    dx_string_t         type;
     dx_string_t         local_name;
 };
 
 /* -------------------------------------------------------------------------- */
 
 struct dx_record_info_t {
-    enum dx_records_id_t             id;
+    dx_int_t			             id;
     dx_string_t                      name;
     dx_int_t                         fields_count;
     const struct dx_field_info_ex_t* fields;
 };
 
-/* -------------------------------------------------------------------------- */
-
-struct dx_struct_one_t {
-    dx_string_t record_name;
-    dx_int_t    fields_count;
-    dx_char_t   field1;
-    dx_long_t   field2;
-    dx_double_t field3;
-    dx_int_t    field4;
-    dx_float_t  field5;
-};
-
-/* -------------------------------------------------------------------------- */
-
-struct dx_struct_two_t {
-    dx_string_t record_name;
-    dx_int_t    fields_count;
-    dx_char_t   field1;
-    dx_long_t   field2;
-    dx_double_t field3;
-    dx_byte_t   field4;
-    dx_float_t  field5;
-    dx_float_t  field6;
-};
-
-/* -------------------------------------------------------------------------- */
-
-struct dx_struct_three_t {
-    dx_string_t record_name;
-    dx_int_t    fields_count;
-    dx_char_t   field1;
-    dx_long_t   field2;
-    dx_double_t field3;
-    dx_float_t  field4;
-    dx_long_t   field5;
-    dx_float_t  field6;
-};
-
-/* -------------------------------------------------------------------------- */
-
-const struct dx_record_info_t* dx_get_record_by_name(const dx_string_t name);
+//const struct dx_record_info_t* dx_get_record_by_name(const dx_string_t name);
 
 /* -------------------------------------------------------------------------- */
 
 bool dx_matching_fields(const struct dx_record_info_t* record, const dx_string_t* fname, dx_int_t fname_len, dx_int_t* ftype, dx_int_t ftype_len);
+
+enum dx_result_t dx_get_record_by_id(dx_int_t id, struct dx_record_info_t* record);

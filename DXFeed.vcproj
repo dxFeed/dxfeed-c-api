@@ -188,9 +188,6 @@
 					RelativePath=".\src\ParserCommon.h">
 				</File>
 				<File
-					RelativePath=".\src\RecordReader.h">
-				</File>
-				<File
 					RelativePath=".\src\Subscription.h">
 				</File>
 				<File
@@ -214,9 +211,6 @@
 				</File>
 				<File
 					RelativePath=".\src\ParserCommon.c">
-				</File>
-				<File
-					RelativePath=".\src\RecordReader.c">
 				</File>
 				<File
 					RelativePath=".\src\Subscription.c">

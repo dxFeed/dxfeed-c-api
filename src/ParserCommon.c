@@ -45,8 +45,11 @@ static struct dx_error_code_descr_t g_parser_errors[] = {
     { dx_pr_undefined_symbol, "Symbol is undefined" },
     { dx_pr_record_info_corrupt, "Corrupted record information" },
     { dx_pr_field_info_corrupt, "Corrupted field information" },
-
-    { ERROR_CODE_FOOTER, ERROR_DESCR_FOOTER }
+	{ dx_pr_wrong_record_id, "Wrong record id received" },
+	{ dx_pr_type_not_supported, "Serialization of this type not supported" },
+    { dx_pr_record_reading_failed, "Record reading failed" },
+    
+	{ ERROR_CODE_FOOTER, ERROR_DESCR_FOOTER }
 };
 
 const struct dx_error_code_descr_t* parser_error_roster = g_parser_errors;

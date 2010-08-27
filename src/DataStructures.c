@@ -18,47 +18,57 @@
 */
 
 #include "DataStructures.h"
+#include "ParserCommon.h"
+/* -------------------------------------------------------------------------- */
+
+//static const struct dx_field_info_t dx_fields[] = 
+//{
+//    {dx_fid_void,           L"VOID"},
+//    {dx_fid_byte,           L"BYTE"},
+//    {dx_fid_utf_char,       L"UTF_CHAR"},
+//    {dx_fid_short,          L"SHORT"},
+//    {dx_fid_int,            L"INT"},
+//    {dx_fid_compact_int,    L"COMPACT_INT"},
+//    {dx_fid_byte_array,     L"BYTE_ARRAY"},
+//    {dx_fid_utf_char_array, L"UTF_CHAR_ARRAY"},
+//
+//    {dx_fid_compact_int | dx_fid_flag_decimal,      L"DECIMAL"},
+//    {dx_fid_compact_int | dx_fid_flag_short_string, L"SHORT_STRING"},
+//    {dx_fid_byte_array | dx_fid_flag_string,        L"STRING"},
+//    {dx_fid_byte_array | dx_fid_flag_custom_object, L"CUSTOM_OBJECT"},
+//    {dx_fid_byte_array | dx_fid_flag_serial_object, L"SERIAL_OBJECT"}
+//};
 
 /* -------------------------------------------------------------------------- */
 
-static const struct dx_field_info_t dx_fields[] = 
-{
-    {dx_fid_void,           L"VOID"},
-    {dx_fid_byte,           L"BYTE"},
-    {dx_fid_utf_char,       L"UTF_CHAR"},
-    {dx_fid_short,          L"SHORT"},
-    {dx_fid_int,            L"INT"},
-    {dx_fid_compact_int,    L"COMPACT_INT"},
-    {dx_fid_byte_array,     L"BYTE_ARRAY"},
-    {dx_fid_utf_char_array, L"UTF_CHAR_ARRAY"},
-
-    {dx_fid_compact_int | dx_fid_flag_decimal,      L"DECIMAL"},
-    {dx_fid_compact_int | dx_fid_flag_short_string, L"SHORT_STRING"},
-    {dx_fid_byte_array | dx_fid_flag_string,        L"STRING"},
-    {dx_fid_byte_array | dx_fid_flag_custom_object, L"CUSTOM_OBJECT"},
-    {dx_fid_byte_array | dx_fid_flag_serial_object, L"SERIAL_OBJECT"}
-};
-
-/* -------------------------------------------------------------------------- */
-
-static const dx_int_t dx_fields_types_count = sizeof(dx_fields) / sizeof(dx_fields[0]);
+//static const dx_int_t dx_fields_types_count = sizeof(dx_fields) / sizeof(dx_fields[0]);
 
 /* -------------------------------------------------------------------------- */
 
 /*
 *   fields of data records
 */
-static const struct dx_field_info_ex_t dx_fields_1[] =
-        { {dx_fid_byte, L"BYTE", L"Field1"}, {dx_fid_int, L"INT", L"Field2"}, {dx_fid_int, L"INT", L"Field3"}, {dx_fid_utf_char_array, L"UTF_CHAR_ARRAY", L"Field4"} };
+static const struct dx_field_info_ex_t dx_fields_stub[] = { {dx_fid_void , L"Stub"} }; 
 
-static const struct dx_field_info_ex_t dx_fields_2[] =
-        { {dx_fid_byte, L"BYTE", L"Field1"}, {dx_fid_int, L"INT", L"Field2"}, {dx_fid_byte, L"BYTE", L"Field3"} };
+static const struct dx_field_info_ex_t dx_fields_qoute[] =
+        { {dx_fid_compact_int,						 L"Bid.Time"}, 
+		  {dx_fid_utf_char,							 L"Bid.Exchange"}, 
+		  {dx_fid_compact_int & dx_fid_flag_decimal, L"Bid.Price"}, 
+		  {dx_fid_compact_int,						 L"Bid.Size"},
+		  {dx_fid_compact_int,						 L"Ask.Time"}, 
+		  {dx_fid_utf_char,							 L"Ask.Exchange"}, 
+		  {dx_fid_compact_int & dx_fid_flag_decimal, L"Ask.Price"}, 
+		  {dx_fid_compact_int,						 L"Ask.Size"} 
+		}; 
 
-static const struct dx_field_info_ex_t dx_fields_3[] =
-        { {dx_fid_int, L"INT", L"Field1"}, {dx_fid_compact_int, L"COMPACT_INT", L"Field2"}, {dx_fid_utf_char_array, L"UTF_CHAR_ARRAY", L"Field3"} };
-
-static const struct dx_field_info_ex_t dx_fields_4[] =
-        { {dx_fid_short, L"SHORT", L"Field1"}, {dx_fid_utf_char, L"UTF_CHAR", L"Field2"}, {dx_fid_int, L"INT", L"Field3"}, {dx_fid_byte, L"BYTE", L"Field4"} };
+//static const struct dx_field_info_ex_t dx_fields_2[] =
+//        { {dx_fid_byte, L"BYTE", L"Field1"}, {dx_fid_int, L"INT", L"Field2"}, {dx_fid_byte, L"BYTE", L"Field3"} };
+//
+//static const struct dx_field_info_ex_t dx_fields_3[] =
+//        { {dx_fid_int, L"INT", L"Field1"}, {dx_fid_compact_int, L"COMPACT_INT", L"Field2"}, {dx_fid_utf_char_array, L"UTF_CHAR_ARRAY", L"Field3"} };
+//
+//static const struct dx_field_info_ex_t dx_fields_4[] =
+//        { {dx_fid_short, L"SHORT", L"Field1"}, {dx_fid_utf_char, L"UTF_CHAR", L"Field2"}, {dx_fid_int, L"INT", L"Field3"}, {dx_fid_byte, L"BYTE", L"Field4"} };
 
 /* -------------------------------------------------------------------------- */
 
@@ -67,10 +77,11 @@ static const struct dx_field_info_ex_t dx_fields_4[] =
 */
 static const struct dx_record_info_t dx_records[] = 
 {
-    { dx_rid_1, L"Record1", sizeof(dx_fields_1) / sizeof(dx_fields_1[0]), &dx_fields_1[0] },
-    { dx_rid_2, L"Record2", sizeof(dx_fields_2) / sizeof(dx_fields_2[0]), &dx_fields_2[0] },
-    { dx_rid_3, L"Record3", sizeof(dx_fields_3) / sizeof(dx_fields_3[0]), &dx_fields_3[0] },
-    { dx_rid_4, L"Record4", sizeof(dx_fields_4) / sizeof(dx_fields_4[0]), &dx_fields_4[0] },
+	{ 0, L"Stub", sizeof(dx_fields_stub) / sizeof(dx_fields_stub[0]), &dx_fields_stub[0] },
+    { 1, L"Qoute", sizeof(dx_fields_qoute) / sizeof(dx_fields_qoute[0]), &dx_fields_qoute[0] },
+   // { 2, L"Record2", sizeof(dx_fields_2) / sizeof(dx_fields_2[0]), &dx_fields_2[0] },
+   // { 3, L"Record3", sizeof(dx_fields_3) / sizeof(dx_fields_3[0]), &dx_fields_3[0] },
+   // { 4, L"Record4", sizeof(dx_fields_4) / sizeof(dx_fields_4[0]), &dx_fields_4[0] },
 };
 
 static const dx_int_t dx_records_count = sizeof(dx_records) / sizeof(dx_records[0]);
@@ -107,3 +118,13 @@ bool dx_matching_fields(const struct dx_record_info_t* record, const dx_string_t
 
     return true;
 }
+
+
+enum dx_result_t dx_get_record_by_id(dx_int_t id, struct dx_record_info_t* record){
+	if (id < 0 || id > dx_records_count)
+		return setParseError(dx_pr_wrong_record_id);
+
+	*record = dx_records[id];
+	return parseSuccessful();
+}
+

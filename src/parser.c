@@ -19,10 +19,10 @@
 
 #include "parser.h"
 #include "BufferedInput.h"
-#include "RecordReader.h"
 #include "Subscription.h"
 #include "DXMemory.h"
 #include "SymbolCodec.h"
+#include "DataStructures.h"
 
 //////////////////////////////////////////////////////////////////////////////////
 //// ========== Implementation Details ==========
@@ -39,6 +39,10 @@ static dx_string_t symbol_result;
 
 static dx_int_t    lastCipher;
 static dx_string_t lastSymbol;
+
+static dx_byte_t* records_buffer      = 0;
+static dx_int_t   records_buffer_size  = 0;
+static dx_int_t   records_buffer_position  = 0;
 //
 ///* -------------------------------------------------------------------------- */
 //
@@ -138,21 +142,75 @@ static enum dx_result_t dx_read_symbol() {
     return parseSuccessful();
 }
 
+enum dx_result_t dx_enlarge_record_buffer(){
+
+}
+enum dx_result_t dx_read_records(dx_int_t id) {
+	struct dx_record_info_t record;
+	dx_int_t i = 0;
+	dx_int_t read_int;
+	dx_char_t read_utf_char;
+	CHECKED_CALL_2(dx_get_record_by_id, id, &record);   
+
+	for ( ; i < record.fields_count; ++i ){ // read records into records buffer
+		switch (record.fields[i].id){ // polymorphism by hands :)
+			case dx_fid_compact_int:
+				if ( records_buffer_size - records_buffer_position < sizeof(dx_int_t) )  
+					CHECKED_CALL_0( dx_enlarge_record_buffer );// if there are not enough place in buffer. does anyone knows haw to make it better?
+										
+				CHECKED_CALL (dx_read_compact_int, &read_int);
+				CHECKED_CALL_3 (dx_memcpy, records_buffer + records_buffer_position, &read_int, sizeof(read_int) );
+				records_buffer_position +=  sizeof(read_int);
+				break;
+			case dx_fid_utf_char:
+				if ( records_buffer_size - records_buffer_position < sizeof(read_utf_char) )  
+					CHECKED_CALL_0( dx_enlarge_record_buffer );// if there are not enough place in buffer. does anyone knows haw to make it better?
+										
+				CHECKED_CALL (dx_read_compact_int, &read_utf_char);
+				CHECKED_CALL_3 (dx_memcpy, records_buffer + records_buffer_position, &read_utf_char, sizeof(read_utf_char) );
+				records_buffer_position +=  sizeof(read_utf_char);
+				break;
+			case dx_fid_compact_int | dx_fid_flag_decimal: 
+				if ( records_buffer_size - records_buffer_position < sizeof(dx_int_t) )  
+					CHECKED_CALL_0( dx_enlarge_record_buffer );// if there are not enough place in buffer. does anyone knows haw to make it better?
+										
+				CHECKED_CALL (dx_read_compact_int, &read_int);
+
+				CHECKED_CALL_3 (dx_memcpy, records_buffer + records_buffer_position, &read_int, sizeof(read_int) );
+				records_buffer_position +=  sizeof(read_int);
+				break;
+			case dx_fid_byte:  
+			case dx_fid_short:
+			case dx_fid_int:  
+			case dx_fid_byte_array: 
+			case dx_fid_utf_char_array: 
+			case dx_fid_compact_int | dx_fid_flag_short_string: 
+			case dx_fid_byte_array | dx_fid_flag_string: 
+			case dx_fid_byte_array | dx_fid_flag_custom_object: 
+			case dx_fid_byte_array | dx_fid_flag_serial_object: 
+			default:
+				return setParseError (dx_pr_type_not_supported);
+		}
+	}
+
+    return parseSuccessful();
+}
+
+
 enum dx_result_t dx_parse_data() {
     //lastCipher = 0;
     //lastSymbol = NULL;
     dx_int_t start_position = dx_get_in_buffer_position();
     dx_int_t last_rec_position = start_position;
 
-        while (dx_get_in_buffer_position() < dx_get_in_buffer_limit()) {
-            dx_int_t id;
-			dx_read_symbol();
-            
-            if (dx_read_compact_int(&id) != R_SUCCESSFUL) {
-                return R_FAILED;
-            }
-
-            dx_read_record(id);
+    dx_int_t id;
+	
+    CHECKED_CALL_0(dx_read_symbol);
+    CHECKED_CALL(dx_read_compact_int, &id);
+	//TODO: memory to records_buffer
+    while (dx_get_in_buffer_position() < dx_get_in_buffer_limit()) {
+		if ( dx_read_records ( id ) != R_SUCCESSFUL )
+			return setParseError(dx_pr_record_reading_failed);
         }
 }
 
@@ -261,6 +319,7 @@ enum dx_result_t dx_combine_buffers( const dx_byte_t* new_buffer, dx_int_t new_b
 	if ( buffer_size == buffer_pos ) {// previous message was fully processed, just setup buffers
 		dx_set_in_buffer(new_buffer, new_buffer_length);
 		dx_set_in_buffer_position(buffer_pos = 0);
+		buffer_size = new_buffer_length;
 	} else { // combine two buffers
 		if ( buffer_pos + new_buffer_length <= buffer_size ) 
 			if (dx_memcpy(buffer + buffer_pos, new_buffer, new_buffer_length) == NULL )

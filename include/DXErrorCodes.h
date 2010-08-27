@@ -168,7 +168,10 @@ enum parser_result_t {
     dx_pr_undefined_symbol,
     dx_pr_record_info_corrupt,
     dx_pr_field_info_corrupt,
-    dx_pr_unexpected_io_error
+    dx_pr_unexpected_io_error,
+	dx_pr_wrong_record_id,
+	dx_pr_record_reading_failed,
+	dx_pr_type_not_supported
 };
 
 /* ---------------------------------- */
