@@ -43,6 +43,10 @@ static dx_string_t lastSymbol;
 static dx_byte_t* records_buffer      = 0;
 static dx_int_t   records_buffer_size  = 0;
 static dx_int_t   records_buffer_position  = 0;
+
+#define MIN_FIELD_TYPE_ID 0x00
+#define MAX_FIELD_TYPE_ID 0xFF
+
 //
 ///* -------------------------------------------------------------------------- */
 //
