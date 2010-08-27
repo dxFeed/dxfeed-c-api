@@ -34,6 +34,7 @@ enum dx_subsystem_code_t {
     dx_sc_threads,
     dx_sc_network,
     dx_sc_parser,
+    dx_sc_subscription,
     
     /*  add new subsystem codes above this line 
         also don't forget to modify DXErrorHandling.c to manually
@@ -126,7 +127,8 @@ enum dx_thread_error_code_t {
     dx_tec_invalid_resource_id,
     dx_tec_deadlock_detected,
     dx_tec_not_enough_memory,
-
+    dx_tec_resource_busy,
+    
     dx_tec_generic_error
 };
 
@@ -144,8 +146,8 @@ enum dx_network_error_code_t {
 
 /* ---------------------------------- */
 /*
-*	Parser subsystem error codes
-*/
+ *  Parser subsystem error codes
+ */
 /* ---------------------------------- */
 
 enum parser_result_t {
@@ -167,6 +169,22 @@ enum parser_result_t {
     dx_pr_record_info_corrupt,
     dx_pr_field_info_corrupt,
     dx_pr_unexpected_io_error
+};
+
+/* ---------------------------------- */
+/*
+ *	Subscription subsystem error codes
+ */
+/* ---------------------------------- */
+
+enum dx_subscription_error_code_t {
+    dx_sub_invalid_event_type,
+    dx_sub_invalid_subscr_id,
+    dx_sub_invalid_internal_structure_state,
+    dx_sub_invalid_symbol_name,
+    dx_sub_invalid_listener,
+    dx_sub_listener_not_subscribed,
+    dx_sub_listener_event_type_incompatible
 };
 
 #endif /* DX_ERROR_CODES_H_INCLUDED */
