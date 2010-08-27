@@ -50,15 +50,16 @@
 */
 static const struct dx_field_info_ex_t dx_fields_stub[] = { {dx_fid_void , L"Stub"} }; 
 
-static const struct dx_field_info_ex_t dx_fields_qoute[] =
-        { {dx_fid_compact_int,						 L"Bid.Time"}, 
+static const struct dx_field_info_ex_t dx_fields_quote[] =
+        { 
 		  {dx_fid_utf_char,							 L"Bid.Exchange"}, 
-		  {dx_fid_compact_int & dx_fid_flag_decimal, L"Bid.Price"}, 
+		  {dx_fid_compact_int | dx_fid_flag_decimal, L"Bid.Price"}, 
 		  {dx_fid_compact_int,						 L"Bid.Size"},
-		  {dx_fid_compact_int,						 L"Ask.Time"}, 
 		  {dx_fid_utf_char,							 L"Ask.Exchange"}, 
-		  {dx_fid_compact_int & dx_fid_flag_decimal, L"Ask.Price"}, 
-		  {dx_fid_compact_int,						 L"Ask.Size"} 
+		  {dx_fid_compact_int | dx_fid_flag_decimal, L"Ask.Price"}, 
+		  {dx_fid_compact_int,						 L"Ask.Size"}, 
+		  {dx_fid_compact_int,						 L"Bid.Time"}, 
+		  {dx_fid_compact_int,						 L"Ask.Time"}
 		}; 
 
 //static const struct dx_field_info_ex_t dx_fields_2[] =
@@ -78,7 +79,7 @@ static const struct dx_field_info_ex_t dx_fields_qoute[] =
 static const struct dx_record_info_t dx_records[] = 
 {
 	{ 0, L"Stub", sizeof(dx_fields_stub) / sizeof(dx_fields_stub[0]), &dx_fields_stub[0] },
-    { 1, L"Qoute", sizeof(dx_fields_qoute) / sizeof(dx_fields_qoute[0]), &dx_fields_qoute[0] },
+    { 1, L"Quote", sizeof(dx_fields_quote) / sizeof(dx_fields_quote[0]), &dx_fields_quote[0] },
    // { 2, L"Record2", sizeof(dx_fields_2) / sizeof(dx_fields_2[0]), &dx_fields_2[0] },
    // { 3, L"Record3", sizeof(dx_fields_3) / sizeof(dx_fields_3[0]), &dx_fields_3[0] },
    // { 4, L"Record4", sizeof(dx_fields_4) / sizeof(dx_fields_4[0]), &dx_fields_4[0] },

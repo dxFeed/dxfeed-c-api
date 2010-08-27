@@ -67,16 +67,16 @@ enum dx_result_t dx_begin_message(dx_int_t messageTypeId) {
 
 ///* -------------------------------------------------------------------------- */
 //
-enum dx_result_t dx_compose_body(dx_int_t record_id, dx_int_t chiper, dx_string_t symbol) {
+enum dx_result_t dx_compose_body(dx_int_t record_id, dx_int_t cipher, dx_string_t symbol) {
 
 	dx_int_t buf_len;
     dx_byte_t* buf = dx_get_out_buffer(&buf_len);
 
-    if (chiper == 0 && symbol == NULL) {
+    if (cipher == 0 && symbol == NULL) {
         return setParseError(dx_pr_illegal_argument);
     }
 
-	if (dx_codec_write_symbol(buf, buf_len, dx_get_out_buffer_position(), chiper, symbol) != R_SUCCESSFUL) {
+	if (dx_codec_write_symbol(buf, buf_len, dx_get_out_buffer_position(), cipher, symbol) != R_SUCCESSFUL) {
          return R_FAILED;// TODO: error processing should be improved (now it's mixed style)
     }
 
@@ -138,7 +138,7 @@ enum dx_result_t dx_end_message() {
 *
 /* -------------------------------------------------------------------------- */
 
-enum dx_result_t dx_create_subscription(dx_byte_t** out, dx_int_t* out_len, enum dx_message_type_t type, dx_int_t chiper, dx_string_t symbol, dx_int_t record_id) {
+enum dx_result_t dx_create_subscription(dx_byte_t** out, dx_int_t* out_len, enum dx_message_type_t type, dx_int_t cipher, dx_string_t symbol, dx_int_t record_id) {
 
 	dx_buf = (dx_byte_t*)dx_malloc(dx_initial_buffer_size);
 
@@ -156,7 +156,7 @@ enum dx_result_t dx_create_subscription(dx_byte_t** out, dx_int_t* out_len, enum
 
     CHECKED_CALL(dx_begin_message, type);
     
-	CHECKED_CALL_3(dx_compose_body, record_id, chiper, symbol);
+	CHECKED_CALL_3(dx_compose_body, record_id, cipher, symbol);
 	
 	CHECKED_CALL_0(dx_end_message);
 
