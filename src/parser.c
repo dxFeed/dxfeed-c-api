@@ -22,6 +22,7 @@
 #include "RecordReader.h"
 #include "Subscription.h"
 #include "DXMemory.h"
+#include "SymbolCodec.h"
 
 //////////////////////////////////////////////////////////////////////////////////
 //// ========== Implementation Details ==========
@@ -31,14 +32,13 @@ static dx_byte_t* buffer      = 0;
 static dx_int_t   buffer_size  = 0;
 static dx_int_t   buffer_pos   = 0;
 //static dx_int_t   buffer_limit = 0;
-//
-//#define SYMBOL_BUFFER_LEN 64
-//static dx_char_t   symbol_buffer[SYMBOL_BUFFER_LEN];
-//static dx_string_t symbol_result;
-//
-//static dx_message_type_t pendingMessageType;
-//static dx_int_t    lastCipher;
-//static dx_string_t lastSymbol;
+
+#define SYMBOL_BUFFER_LEN 64
+static dx_char_t   symbol_buffer[SYMBOL_BUFFER_LEN];
+static dx_string_t symbol_result;
+
+static dx_int_t    lastCipher;
+static dx_string_t lastSymbol;
 //
 ///* -------------------------------------------------------------------------- */
 //
@@ -67,12 +67,12 @@ bool dx_is_subscription_message(enum dx_message_type_t type) {
 
 }
 
-///* -------------------------------------------------------------------------- */
-//
-///**
-//* Parses and return message type.
-//* @throws CorruptedException if stream is corrupted.
-//*/
+/* -------------------------------------------------------------------------- */
+
+/**
+* Parses and return message type.
+* @throws CorruptedException if stream is corrupted.
+*/
 enum dx_result_t dx_parse_type(OUT dx_int_t* ltype) {
     dx_long_t type;
     if (dx_read_compact_long(&type) != R_SUCCESSFUL) {
@@ -86,12 +86,12 @@ enum dx_result_t dx_parse_type(OUT dx_int_t* ltype) {
     return parseSuccessful();
 }
 
-//////////////////////////////////////////////////////////////////////////////////
-///**
-//* Parses message length and sets up position and limit for parsing of the message contents.
-//* Returns false when message is not complete yet and its parsing cannot be started.
-//* @throws CorruptedException if stream is corrupted.
-//*/
+////////////////////////////////////////////////////////////////////////////////
+/**
+* Parses message length and sets up position and limit for parsing of the message contents.
+* Returns false when message is not complete yet and its parsing cannot be started.
+* @throws CorruptedException if stream is corrupted.
+*/
 static enum dx_result_t dx_parse_length_and_setup_input(dx_int_t position, dx_int_t limit ) {
     dx_long_t length;
 	dx_int_t endPosition;
@@ -111,120 +111,51 @@ static enum dx_result_t dx_parse_length_and_setup_input(dx_int_t position, dx_in
     return parseSuccessful();
 }
 
-//////////////////////////////////////////////////////////////////////////////////
-///**
-//* Processes pending message from buffers (if any) and resets pendingMessageType to null.
-//*/
-//static void processPending(MessageConsumer consumer) {
-//    if (pendingMessageType != MT_NULL) {
-//        processMessage(pendingMessageType, consumer);
-//        pendingMessageType = MT_NULL;
-//    }
-//}
-//
-//////////////////////////////////////////////////////////////////////////////////
-///**
-//* Processses message from the recordBuffer or subscriptionBuffer into the consumer.
-//*/
-//static void processMessage(dx_message_type_t type, MessageConsumer consumer) {
-//    if (type.isData())
-//        processData(type, consumer);
-//    else if (type.isSubscription())
-//        processSubscription(type, consumer);
-//}
-//
-//////////////////////////////////////////////////////////////////////////////////
-//static void processData(dx_message_type_t type, MessageConsumer consumer) {
-//    switch (type) {
-//        case MESSAGE_RAW_DATA:
-//            consumer.processTickerData(recordBuffer);
-//            recordBuffer.rewind();
-//            consumer.processStreamData(recordBuffer);
-//            recordBuffer.rewind();
-//            consumer.processHistoryData(recordBuffer);
-//            break;
-//        case MESSAGE_TICKER_DATA:
-//            consumer.processTickerData(recordBuffer);
-//            break;
-//        case MESSAGE_STREAM_DATA:
-//            consumer.processStreamData(recordBuffer);
-//            break;
-//        case MESSAGE_HISTORY_DATA:
-//            consumer.processHistoryData(recordBuffer);
-//            break;
-//    }
-//    if (recordBuffer.hasNext())
-//        QDLog.log.error("WARNING: Data was not proceessed for QTP message " + type);
-//    recordBuffer.clear();
-//}
-//
-//////////////////////////////////////////////////////////////////////////////////
-//static void nextMessage(MessageConsumer consumer, dx_message_type_t messageType) {
-//    if (messageType == MESSAGE_HEARTBEAT || messageType == MESSAGE_DESCRIBE_RECORDS)
-//        return; // these message does not cause immediate processing
-//    if (pendingMessageType != MT_NULL && messageType != pendingMessageType)
-//        processPending(consumer);
-//    pendingMessageType = messageType;
-//}
-//
-//static dx_result_t dx_read_symbol() {
-//    dx_int_t r;
-//    if (dx_codec_read_symbol(symbol_buffer, SYMBOL_BUFFER_LEN, &symbol_result, &r) != R_SUCCESSFUL) {
-//        return R_FAILED;
-//    }
-//    if ((r & dx_get_codec_valid_chipher()) != 0) {
-//        lastCipher = r;
-//        lastSymbol = NULL;
-//    } else if (r > 0) {
-//        lastCipher = 0;
-//        //if (symbolResolver == null || (lastSymbol = symbolResolver.getSymbol(symbol_buffer, 0, r)) == null)
-//        lastSymbol = dx_calloc(r + 1, sizeof(dx_char_t));
-//        wcscpy(lastSymbol, symbol_buffer)
-//
-//    } else {
-//        if (symbol_result != null) {
-//            lastSymbol = dx_calloc(wcslen(symbol_result) + 1, sizeof(dx_char_t));
-//            wcscpy(lastSymbol, symbol_result);
-//            lastCipher = dx_encode(lastSymbol);
-//        }
-//        if (lastCipher == 0 && lastSymbol == null)
-//            return setParseError(dx_pr_undefined_symbol);
-//    }
-//
-//    return parseSuccessful();
-//}
-//
-//dx_result_t dx_parse_data() {
-//    lastCipher = 0;
-//    lastSymbol = NULL;
-//    dx_int_t start_position = dx_get_in_buffer_position();
-//    dx_int_t last_rec_position = start_position;
-//    try {
-//        while (dx_get_in_buffer_position() < dx_get_in_buffer_limit()) {
-//            dx_read_symbol();
-//            dx_int_t id;
-//            if (dx_read_compact_int(&id) != R_SUCCESSFUL) {
-//                return R_FAILED;
-//            }
-//
-//            dx_read_record(id);
-//            //RecordReader rr = getRecordReader(id);
-//            //if (rr == null)
-//            //    throw new IOException("Unknown record #" + id);
-//            //rr.readRecord(in, recordBuffer, lastCipher, lastSymbol);
-//            //last_rec_position = in.getPosition();
-//        }
-//    } catch (IOException e) {
-//        dumpParseDataErrorReport(e, start_position, last_rec_position);
-//        throw new CorruptedException(e);
-//    } catch (IllegalStateException e) {
-//        // Happens when visiting of previous record was not properly finished.
-//        // Happens when data schemes are incompatible or message is corrupted.
-//        dumpParseDataErrorReport(e, start_position, last_rec_position);
-//        throw new CorruptedException(e);
-//    }
-//}
-//
+static enum dx_result_t dx_read_symbol() {
+    dx_int_t r;
+    if (dx_codec_read_symbol(symbol_buffer, SYMBOL_BUFFER_LEN, &symbol_result, &r) != R_SUCCESSFUL) {
+        return R_FAILED;
+    }
+    if ((r & dx_get_codec_valid_chipher()) != 0) {
+        lastCipher = r;
+        lastSymbol = NULL;
+	} else 
+		if (r > 0) {
+        lastCipher = 0;
+        //if (symbolResolver == null || (lastSymbol = symbolResolver.getSymbol(symbol_buffer, 0, r)) == null)
+        lastSymbol = dx_calloc(r + 1, sizeof(dx_char_t));
+        wcscpy(lastSymbol, symbol_buffer);
+		} else {
+        if (symbol_result != NULL) {
+            lastSymbol = dx_calloc(wcslen(symbol_result) + 1, sizeof(dx_char_t));
+            wcscpy(lastSymbol, symbol_result);
+            lastCipher = dx_encode(lastSymbol);
+        }
+        if (lastCipher == 0 && lastSymbol == NULL)
+            return setParseError(dx_pr_undefined_symbol);
+    }
+
+    return parseSuccessful();
+}
+
+enum dx_result_t dx_parse_data() {
+    //lastCipher = 0;
+    //lastSymbol = NULL;
+    dx_int_t start_position = dx_get_in_buffer_position();
+    dx_int_t last_rec_position = start_position;
+
+        while (dx_get_in_buffer_position() < dx_get_in_buffer_limit()) {
+            dx_int_t id;
+			dx_read_symbol();
+            
+            if (dx_read_compact_int(&id) != R_SUCCESSFUL) {
+                return R_FAILED;
+            }
+
+            dx_read_record(id);
+        }
+}
+
 ///* -------------------------------------------------------------------------- */
 //
 enum dx_result_t dx_parse_describe_records() {
@@ -273,26 +204,25 @@ enum dx_result_t dx_parse_describe_records() {
         }
 		return parseSuccessful();
 }
-//
-///* -------------------------------------------------------------------------- */
-//
-//void dx_process_other_message(dx_int_t type, dx_byte_t* buf, dx_int_t size, dx_int_t buffer_position, dx_int_t len) {
-//    
-//}
-//
-//////////////////////////////////////////////////////////////////////////////////
-///**
-//* Parses message of the specified type. Some messages are processed immedetely, but data and subscription messages
-//* are just parsed into buffers and pendingMessageType is set.
-//*/
+
+/* -------------------------------------------------------------------------- */
+
+void dx_process_other_message(dx_int_t type, dx_byte_t* new_buffer, dx_int_t size, dx_int_t buffer_position, dx_int_t len) {
+    
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/**
+* Parses message of the specified type. Some messages are processed immedetely, but data and subscription messages
+* are just parsed into buffers and pendingMessageType is set.
+*/
 enum dx_result_t dx_parse_message(dx_int_t type) {
     enum dx_message_type_t messageType = (enum dx_message_type_t)type;
     if (dx_is_message_type_valid(messageType)) {
-     //   if (dx_is_data_message(messageType)) {
-     //       if (dx_parse_data() != R_SUCCESSFUL) {
-      //          return R_FAILED;
-     //       }
-      //      return parseSuccessful();
+        if (dx_is_data_message(messageType)) {
+            if (dx_parse_data() != R_SUCCESSFUL) {
+                return R_FAILED;
+            } return parseSuccessful();
         } else if (dx_is_subscription_message(messageType)) {
             //parseSubscription(type); TODO: error subscription message doesn't valid here
             return parseSuccessful();
@@ -314,30 +244,52 @@ enum dx_result_t dx_parse_message(dx_int_t type) {
         default:
             {
                 dx_int_t size;
-                dx_byte_t* buf = dx_get_in_buffer(&size);
-//                dx_process_other_message(type, buf, size, dx_get_in_buffer_position(), dx_get_in_buffer_limit() - dx_get_in_buffer_position());
+                dx_byte_t* new_buffer = dx_get_in_buffer(&size);
+//                dx_process_other_message(type, new_buffer, size, dx_get_in_buffer_position(), dx_get_in_buffer_limit() - dx_get_in_buffer_position());
             }
     }
+	}
     return parseSuccessful();
 
 }
-//
-//
-//////////////////////////////////////////////////////////////////////////////////
-//// ========== external interface ==========
-//////////////////////////////////////////////////////////////////////////////////
-//
-//////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t dx_parse( const dx_byte_t* buf, dx_int_t bufLen  ) {
-	if ( (buffer_size == 0 && buffer_pos == 0 ) || (buffer_size == buffer_pos + 1 ) ) {// previous message was complete
-		buffer = buf;
-		buffer_size = bufLen;
-		buffer_pos = 0;
+
+////////////////////////////////////////////////////////////////////////////////
+
+enum dx_result_t dx_combine_buffers( const dx_byte_t* new_buffer, dx_int_t new_buffer_length  ) {
+	// we have to combine two buffers - new data and old unprocessed data (if present)
+	// it's possible if logic message was diveded into two network packets
+	if ( buffer_size == buffer_pos ) {// previous message was fully processed, just setup buffers
+		dx_set_in_buffer(new_buffer, new_buffer_length);
+		dx_set_in_buffer_position(buffer_pos = 0);
+	} else { // combine two buffers
+		if ( buffer_pos + new_buffer_length <= buffer_size ) 
+			if (dx_memcpy(buffer + buffer_pos, new_buffer, new_buffer_length) == NULL )
+				return R_FAILED;
+		else{
+			dx_byte_t* tmp = (dx_byte_t*)dx_malloc(buffer_pos + new_buffer_length);
+			if (tmp == NULL) return R_FAILED;
+			if (dx_memcpy(tmp, buffer, buffer_pos ) == NULL ) return R_FAILED;
+			if (dx_memcpy(tmp + buffer_pos, new_buffer, new_buffer_length) == NULL) return R_FAILED;
+			dx_free(buffer);
+			buffer = tmp;
+			buffer_pos = 0;
+			buffer_size = buffer_pos + new_buffer_length;
+		}
 		dx_set_in_buffer(buffer, buffer_size);
 		dx_set_in_buffer_position(buffer_pos);
-	} else {} //TODO:
+	} 
+	return parseSuccessful();
+}
+////////////////////////////////////////////////////////////////////////////////
+// ========== external interface ==========
+////////////////////////////////////////////////////////////////////////////////
 
-	//TODO: heartbeat messages
+////////////////////////////////////////////////////////////////////////////////
+enum dx_result_t dx_parse( const dx_byte_t* new_buffer, dx_int_t new_buffer_length  ) {
+	if (dx_combine_buffers (new_buffer, new_buffer_length) != R_SUCCESSFUL) 
+		return R_FAILED;
+
+	//TODO: heartbeat messages ???
 	// Parsing loop
     while (dx_get_in_buffer_position() < buffer_size) {
         dx_int_t messageType = MESSAGE_HEARTBEAT; // zero-length messages are treated as just heartbeats
@@ -345,25 +297,16 @@ enum dx_result_t dx_parse( const dx_byte_t* buf, dx_int_t bufLen  ) {
         if (dx_parse_length_and_setup_input(buffer_pos, buffer_size) != R_SUCCESSFUL) {
             if (dx_get_parser_last_error() == dx_pr_message_not_complete) {
                 break; // message is incomplete -- just stop parsing
+				// TODO: reset position back to message start
             }
         }
-        if (dx_get_in_buffer_limit() > dx_get_in_buffer_position()) { // only if not empty message, empty message is heartbeat
+        if (dx_get_in_buffer_limit() > dx_get_in_buffer_position()) { // only if not empty message, empty message is heartbeat ???
             if (dx_parse_type(&messageType) != R_SUCCESSFUL) {
-                return R_FAILED; // cannot continue parsing on corrupted stream
+                return R_FAILED; // cannot continue parsing on corrupted stream TODO: buffer state
             }
 	    }
-        // ???
-    //    nextMessage(consumer, dx_message_type_t.findById(messageType));
 
-        dx_parse_message(messageType);
-        //} catch (CorruptedException e) {
-        //    consumer.handleCorruptedMessage(messageType);
-        //} finally {
-        //    symbolResolver = null;
-        //}
-        // mark as "processed" and continue to the next message
-        //processed = in.getLimit();
+		dx_parse_message(messageType);
     }
+	//TODO: we have to guarantee valid buffer state 
 }
-    //processPending(consumer);
-//}
