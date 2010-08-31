@@ -23,7 +23,6 @@
 #include "BufferedInput.h"
 #include "DXErrorHandling.h"
 #include "DXMemory.h"
-#include "stdio.h"
 // pointer to extern inBuffer
 dx_byte_t* inBuffer = 0;
 dx_int_t   inBufferLength = 0;
@@ -398,11 +397,11 @@ enum dx_result_t dx_read_int( OUT dx_int_t* val ) {
         return R_FAILED;
     }
 
-    *val = ((dx_int_t)inBuffer[currentInBufferPosition++] << 24);
-	*val = *val | ((dx_int_t)inBuffer[currentInBufferPosition++] << 16);
-    *val = *val | ((dx_int_t)inBuffer[currentInBufferPosition++] << 8) ;
-    *val = *val | ((dx_int_t)inBuffer[currentInBufferPosition++] & 0xFF);
-    return R_SUCCESSFUL;
+    *val = ((dx_int_t) (inBuffer[currentInBufferPosition++]  & 0xFF) << 24);
+	*val = *val | ((dx_int_t)(inBuffer[currentInBufferPosition++]  & 0xFF) << 16);
+	*val = *val | ((dx_int_t)(inBuffer[currentInBufferPosition++]  & 0xFF) << 8) ;
+	*val = *val | ((dx_int_t)inBuffer[currentInBufferPosition++] & 0xFF);
+	return R_SUCCESSFUL;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -547,6 +546,7 @@ enum dx_result_t dx_read_compact_int( OUT dx_int_t* val ) {
     if (dx_read_int(&n) != R_SUCCESSFUL) {
         return R_FAILED;
     }
+	*val = n;
 
     return parseSuccessful();
 }
