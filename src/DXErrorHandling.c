@@ -37,6 +37,7 @@ extern const struct dx_error_code_descr_t* socket_error_roster;
 extern const struct dx_error_code_descr_t* thread_error_roster;
 extern const struct dx_error_code_descr_t* network_error_roster;
 extern const struct dx_error_code_descr_t* parser_error_roster;
+extern const struct dx_error_code_descr_t* event_subscription_error_roster;
 
 struct dx_subsystem_descr_t {
     int subsystem_id;
@@ -62,9 +63,12 @@ const struct dx_subsystem_descr_t* dx_subsystems () {
         
         s_subsystems[4].subsystem_id = dx_sc_parser;
         s_subsystems[4].error_roster = parser_error_roster;
+        
+        s_subsystems[5].subsystem_id = dx_sc_event_subscription;
+        s_subsystems[5].error_roster = event_subscription_error_roster;
 
-        s_subsystems[5].subsystem_id = dx_sc_invalid_subsystem;
-        s_subsystems[5].error_roster = NULL;
+        s_subsystems[6].subsystem_id = dx_sc_invalid_subsystem;
+        s_subsystems[6].error_roster = NULL;
         
         subsystems_initialized = true;
     }

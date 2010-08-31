@@ -62,6 +62,7 @@ typedef unsigned long long dx_ulong_t;  // 64 bit
 typedef double             dx_double_t;         // 64 bit
 
 typedef dx_char_t*    dx_string_t;
+typedef const dx_char_t *dx_const_string_t;
 
 #endif /* _WIN32 */
 

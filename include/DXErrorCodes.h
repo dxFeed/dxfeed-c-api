@@ -34,7 +34,7 @@ enum dx_subsystem_code_t {
     dx_sc_threads,
     dx_sc_network,
     dx_sc_parser,
-    dx_sc_subscription,
+    dx_sc_event_subscription,
     
     /*  add new subsystem codes above this line 
         also don't forget to modify DXErrorHandling.c to manually
@@ -180,14 +180,12 @@ enum parser_result_t {
  */
 /* ---------------------------------- */
 
-enum dx_subscription_error_code_t {
-    dx_sub_invalid_event_type,
-    dx_sub_invalid_subscr_id,
-    dx_sub_invalid_internal_structure_state,
-    dx_sub_invalid_symbol_name,
-    dx_sub_invalid_listener,
-    dx_sub_listener_not_subscribed,
-    dx_sub_listener_event_type_incompatible
+enum dx_event_subscription_error_code_t {
+    dx_es_invalid_event_type,
+    dx_es_invalid_subscr_id,
+    dx_es_invalid_internal_structure_state,
+    dx_es_invalid_symbol_name,
+    dx_es_invalid_listener
 };
 
 #endif /* DX_ERROR_CODES_H_INCLUDED */

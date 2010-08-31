@@ -64,7 +64,7 @@ enum dx_result_t dx_init_symbol_codec() {
     // initialization
     dx_int_t i = PENTA_LENGTH;
     dx_int_t penta = 0x03C0;
-    wildcard_cipher = dx_encode(L"*");
+    wildcard_cipher = dx_encode_symbol_name(L"*");
 
     for (; --i >= 0;) {
         plength[i] = 64;
@@ -188,7 +188,7 @@ dx_int_t dx_get_codec_valid_chipher() {
 
 /* -------------------------------------------------------------------------- */
 
-dx_int_t dx_encode(dx_string_t symbol) {
+dx_int_t dx_encode_symbol_name (const dx_string_t symbol) {
     dx_long_t penta = 0;
     dx_int_t plen = 0;
     dx_int_t i;

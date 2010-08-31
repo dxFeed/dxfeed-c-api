@@ -143,7 +143,7 @@ static enum dx_result_t dx_read_symbol() {
         if (symbol_result != NULL) {
             lastSymbol = dx_calloc(wcslen(symbol_result) + 1, sizeof(dx_char_t));
             wcscpy(lastSymbol, symbol_result);
-            lastCipher = dx_encode(lastSymbol);
+            lastCipher = dx_encode_symbol_name(lastSymbol);
         }
         if (lastCipher == 0 && lastSymbol == NULL)
             return setParseError(dx_pr_undefined_symbol);
