@@ -182,6 +182,9 @@
 					RelativePath=".\src\DataStructures.h">
 				</File>
 				<File
+					RelativePath=".\src\Decimal.h">
+				</File>
+				<File
 					RelativePath=".\src\parser.h">
 				</File>
 				<File
@@ -205,6 +208,9 @@
 				</File>
 				<File
 					RelativePath=".\src\DataStructures.c">
+				</File>
+				<File
+					RelativePath=".\src\Decimal.c">
 				</File>
 				<File
 					RelativePath=".\src\parser.c">

@@ -23,11 +23,16 @@
 #include "DXMemory.h"
 #include "SymbolCodec.h"
 #include "DataStructures.h"
+#include "Decimal.h"
 
 //////////////////////////////////////////////////////////////////////////////////
 //// ========== Implementation Details ==========
 //////////////////////////////////////////////////////////////////////////////////
 //
+
+// should be at least two times bigger max socket buffer size
+#define INITIAL_BUFFER_SIZE 16000  
+//#define BUFFER_TOO_BIG 64000
 static dx_byte_t* buffer      = 0;
 static dx_int_t   buffer_size  = 0;
 static dx_int_t   buffer_pos   = 0;
@@ -151,6 +156,7 @@ static enum dx_result_t dx_read_symbol() {
 enum dx_result_t dx_enlarge_record_buffer(){
 	//TODO:
 }
+#pragma pack(1) 
 enum dx_result_t dx_read_records(dx_int_t id) {
 	struct dx_record_info_t record;
 	dx_int_t i = 0;
@@ -177,9 +183,9 @@ enum dx_result_t dx_read_records(dx_int_t id) {
 			case dx_fid_compact_int | dx_fid_flag_decimal: 
 				if ( records_buffer_size - records_buffer_position < sizeof(read_int) ) CHECKED_CALL_0( dx_enlarge_record_buffer );// if there are not enough place in buffer. does anyone knows haw to make it better?
 				CHECKED_CALL (dx_read_compact_int, &read_int);
-				// TODO: convert to read_double
-				if (dx_memcpy( records_buffer + records_buffer_position, &read_int, sizeof(read_int) ) == NULL ) return R_FAILED;
-				records_buffer_position +=  sizeof(read_int);
+				CHECKED_CALL_2(dx_int_to_double, read_int, &read_double);
+				if (dx_memcpy( records_buffer + records_buffer_position, &read_double, sizeof(read_double) ) == NULL ) return R_FAILED;
+				records_buffer_position +=  sizeof(read_double);
 				break;
 			case dx_fid_byte:  
 			case dx_fid_short:
@@ -220,17 +226,22 @@ enum dx_result_t dx_parse_data() {
 
     CHECKED_CALL_0(dx_read_symbol);
     CHECKED_CALL(dx_read_compact_int, &id);
-	if (lastSymbol != NULL) wprintf(L"Symbol: %s", lastSymbol);
-	else wprintf(L"Symbol cipher: %i", lastCipher);
-	wprintf(L"Record: %i",id);
+	if (lastSymbol != NULL) wprintf(L"Symbol: %s\n", lastSymbol);
+	else wprintf(L"Symbol cipher: %i\n", lastCipher);
+	wprintf(L"Record: %i \n",id);
     while (dx_get_in_buffer_position() < dx_get_in_buffer_limit()) {
 		if ( dx_read_records ( id ) != R_SUCCESSFUL )
 			return setParseError(dx_pr_record_reading_failed);
 		++records_count;
         };
 	{
-	struct dxf_quote* quotes = (struct dxf_quote*)records_buffer;
-	id++;
+		dx_int_t i = 0;
+		struct dxf_quote* quotes = (struct dxf_quote*)records_buffer;
+		for ( ; i < records_count ; ++i )
+			wprintf(L"Bid.Exchange=%C Bid.Price=%f Bid.Size=%i Ask.Exchange=%C Ask.Price=%f Ask.Size=%i Bid.Time=%i Ask.Time=%i \n" , 
+			quotes[i].bid_exchange,quotes[i].bid_price,quotes[i].bid_size,quotes[i].ask_exchange,quotes[i].ask_price,quotes[i].ask_size,quotes[i].bid_time,quotes[i].ask_time);
+	
+	records_buffer_position = 0; // mean we've called callback
 	}
 
 }
@@ -334,30 +345,26 @@ enum dx_result_t dx_parse_message(dx_int_t type) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-enum dx_result_t dx_combine_buffers( const dx_byte_t* new_buffer, dx_int_t new_buffer_length  ) {
+enum dx_result_t dx_combine_buffers( const dx_byte_t* new_buffer, dx_int_t new_buffer_size  ) {
+	if (buffer_size != buffer_pos ){ // copy all unprocessed data to beginning of buffer
+		if ( dx_memcpy(buffer, buffer + buffer_pos, buffer_size) == NULL)
+			return R_FAILED;
+		buffer_pos = 0;
+		buffer_size = buffer_size - buffer_pos;
+	} else {
+		buffer_pos = buffer_size = 0;
+	}
+
 	// we have to combine two buffers - new data and old unprocessed data (if present)
 	// it's possible if logic message was diveded into two network packets
-	if ( buffer_size == buffer_pos ) {// previous message was fully processed, just setup buffers
-		dx_set_in_buffer(new_buffer, new_buffer_length);
-		dx_set_in_buffer_position(buffer_pos = 0);
-		buffer_size = new_buffer_length;
-	} else { // combine two buffers
-		if ( buffer_pos + new_buffer_length <= buffer_size ) 
-			if (dx_memcpy(buffer + buffer_pos, new_buffer, new_buffer_length) == NULL )
-				return R_FAILED;
-		else{
-			dx_byte_t* tmp = (dx_byte_t*)dx_malloc(buffer_pos + new_buffer_length);
-			if (tmp == NULL) return R_FAILED;
-			if (dx_memcpy(tmp, buffer, buffer_pos ) == NULL ) return R_FAILED;
-			if (dx_memcpy(tmp + buffer_pos, new_buffer, new_buffer_length) == NULL) return R_FAILED;
-			dx_free(buffer);
-			buffer = tmp;
-			buffer_pos = 0;
-			buffer_size = buffer_pos + new_buffer_length;
-		}
-		dx_set_in_buffer(buffer, buffer_size);
-		dx_set_in_buffer_position(buffer_pos);
-	} 
+	if (dx_memcpy(buffer + buffer_size, new_buffer, new_buffer_size) == NULL )
+			return R_FAILED;
+
+	buffer_size = buffer_size + new_buffer_size;
+
+	dx_set_in_buffer(buffer, buffer_size);
+	dx_set_in_buffer_position(buffer_pos);
+	 
 	return parseSuccessful();
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -365,7 +372,7 @@ enum dx_result_t dx_combine_buffers( const dx_byte_t* new_buffer, dx_int_t new_b
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t dx_parse( const dx_byte_t* new_buffer, dx_int_t new_buffer_length  ) {
+enum dx_result_t dx_parse( const dx_byte_t* new_buffer, dx_int_t new_buffer_size  ) {
 	if (records_buffer_size == 0){
 		records_buffer_size = INITIAL_RECORDS_BUFFER_SIZE;
 		records_buffer = dx_malloc(records_buffer_size);
@@ -373,8 +380,15 @@ enum dx_result_t dx_parse( const dx_byte_t* new_buffer, dx_int_t new_buffer_leng
 			return R_FAILED;
 		records_buffer_position = 0;
 	}
-
-	if (dx_combine_buffers (new_buffer, new_buffer_length) != R_SUCCESSFUL) 
+	if ( buffer == NULL ) {// allocate memory for all program lifetime
+		buffer = dx_malloc(INITIAL_BUFFER_SIZE);
+		if (buffer == NULL)
+			return R_FAILED;
+		buffer_size = 0; // size of data in buffer
+		buffer_pos = 0; 
+	}
+	// TODO: skip wrong buffer 
+	if (dx_combine_buffers (new_buffer, new_buffer_size) != R_SUCCESSFUL) 
 		return R_FAILED;
 
 	//TODO: heartbeat messages ???
@@ -396,5 +410,5 @@ enum dx_result_t dx_parse( const dx_byte_t* new_buffer, dx_int_t new_buffer_leng
 
 		dx_parse_message(messageType);
     }
-	//TODO: we have to guarantee valid buffer state 
+	buffer_pos = dx_get_in_buffer_position();
 }

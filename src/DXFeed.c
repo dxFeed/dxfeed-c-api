@@ -117,7 +117,7 @@ DXFEED_API ERRORCODE dxf_add_subscription (enum dxf_event_t event_type, OUT dxf_
 	}
 
 	//TODO: separate events per bit mask
-	dx_create_subscription(&sub_buffer, &out_len, MESSAGE_TICKER_ADD_SUBSCRIPTION, dx_encode(L"MSFT"), L"MSFT", 1);
+	dx_create_subscription(&sub_buffer, &out_len, MESSAGE_TICKER_ADD_SUBSCRIPTION, dx_encode(L"IBM"), L"MSFT", 1);
 
 	//send to server
 	dx_send_data(sub_buffer, out_len);

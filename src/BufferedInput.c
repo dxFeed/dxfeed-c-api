@@ -23,7 +23,7 @@
 #include "BufferedInput.h"
 #include "DXErrorHandling.h"
 #include "DXMemory.h"
-
+#include "stdio.h"
 // pointer to extern inBuffer
 dx_byte_t* inBuffer = 0;
 dx_int_t   inBufferLength = 0;
@@ -365,30 +365,32 @@ enum dx_result_t dx_read_short( OUT dx_short_t* val ) {
     if (checkValid(val, 2) != R_SUCCESSFUL) {
         return R_FAILED;
     }
+	
+    *val = ((dx_short_t)inBuffer[currentInBufferPosition++] << 8) ;
+    *val = *val | ((dx_short_t)inBuffer[currentInBufferPosition++] & 0xFF);
 
-    *val = ((dx_short_t)inBuffer[currentInBufferPosition++] << 8) | ((dx_short_t)inBuffer[currentInBufferPosition++] & 0xFF);
     return R_SUCCESSFUL;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 enum dx_result_t dx_read_unsigned_short( OUT dx_uint_t* val ) {
-    if (checkValid(val, 2) != R_SUCCESSFUL) {
+	if (checkValid(val, 2) != R_SUCCESSFUL) {
         return R_FAILED;
     }
-
-    *val = ((dx_int_t)(inBuffer[currentInBufferPosition++] & 0xFF) << 8) | ((dx_int_t)inBuffer[currentInBufferPosition++] & 0xFF);
+    *val = ((dx_uint_t)(inBuffer[currentInBufferPosition++] & 0xFF) << 8) ;
+    *val = *val | ((dx_uint_t)inBuffer[currentInBufferPosition++] & 0xFF);
     return R_SUCCESSFUL;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t dx_read_char( OUT dx_char_t* val ) {
-    if (checkValid(val, 2) != R_SUCCESSFUL) {
-        return R_FAILED;
-    }
-
-    *val = ((dx_char_t)inBuffer[currentInBufferPosition++] << 8) | ((dx_char_t)inBuffer[currentInBufferPosition++] & 0xFF);
-    return R_SUCCESSFUL;
-}
+//enum dx_result_t dx_read_char( OUT dx_char_t* val ) {
+//    if (checkValid(val, 2) != R_SUCCESSFUL) {
+//        return R_FAILED;
+//    }
+//
+//    *val = ((dx_char_t)inBuffer[currentInBufferPosition++] << 8) | ((dx_char_t)inBuffer[currentInBufferPosition++] & 0xFF);
+//    return R_SUCCESSFUL;
+//}
 
 ////////////////////////////////////////////////////////////////////////////////
 enum dx_result_t dx_read_int( OUT dx_int_t* val ) {
@@ -396,10 +398,10 @@ enum dx_result_t dx_read_int( OUT dx_int_t* val ) {
         return R_FAILED;
     }
 
-    *val = ((dx_int_t)inBuffer[currentInBufferPosition++] << 24) |
-           ((dx_int_t)inBuffer[currentInBufferPosition++] << 16) |
-           ((dx_int_t)inBuffer[currentInBufferPosition++] << 8)  |
-           ((dx_int_t)inBuffer[currentInBufferPosition++] & 0xFF);
+    *val = ((dx_int_t)inBuffer[currentInBufferPosition++] << 24);
+	*val = *val | ((dx_int_t)inBuffer[currentInBufferPosition++] << 16);
+    *val = *val | ((dx_int_t)inBuffer[currentInBufferPosition++] << 8) ;
+    *val = *val | ((dx_int_t)inBuffer[currentInBufferPosition++] & 0xFF);
     return R_SUCCESSFUL;
 }
 
@@ -409,14 +411,14 @@ enum dx_result_t dx_read_long( OUT dx_long_t* val ) {
         return R_FAILED;
     }
 
-    *val = ((dx_long_t)inBuffer[currentInBufferPosition++] << 56) |
-           ((dx_long_t)inBuffer[currentInBufferPosition++] << 48) |
-           ((dx_long_t)inBuffer[currentInBufferPosition++] << 40) |
-           ((dx_long_t)inBuffer[currentInBufferPosition++] << 32) |
-           ((dx_long_t)inBuffer[currentInBufferPosition++] << 24) |
-           ((dx_long_t)inBuffer[currentInBufferPosition++] << 16) |
-           ((dx_long_t)inBuffer[currentInBufferPosition++] << 8)  |
-           ((dx_long_t)inBuffer[currentInBufferPosition++] & 0xFF);
+    *val = ((dx_long_t)inBuffer[currentInBufferPosition++] << 56) ;
+    *val = *val | ((dx_long_t)inBuffer[currentInBufferPosition++] << 48) ;
+    *val = *val | ((dx_long_t)inBuffer[currentInBufferPosition++] << 40) ;
+    *val = *val | ((dx_long_t)inBuffer[currentInBufferPosition++] << 32) ;
+    *val = *val | ((dx_long_t)inBuffer[currentInBufferPosition++] << 24) ;
+    *val = *val | ((dx_long_t)inBuffer[currentInBufferPosition++] << 16) ;
+    *val = *val | ((dx_long_t)inBuffer[currentInBufferPosition++] << 8)  ;
+    *val = *val | ((dx_long_t)inBuffer[currentInBufferPosition++] & 0xFF);
 
     return R_SUCCESSFUL;
 }
@@ -487,11 +489,6 @@ enum dx_result_t dx_read_utf( OUT dx_string_t* val ) {
     }
     return readUTFBody(utflen, OUT val);
 }
-
-////////////////////////////////////////////////////////////////////////////////
-//Object readObject() {
-//    return IOUtil.readObject(this);
-//}
 
 ////////////////////////////////////////////////////////////////////////////////
 enum dx_result_t dx_read_compact_int( OUT dx_int_t* val ) {
