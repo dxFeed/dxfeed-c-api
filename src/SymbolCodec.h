@@ -86,8 +86,14 @@ dx_int_t dx_get_codec_valid_chipher();
 * Returns encoded cipher for specified symbol.
 * Returns 0 if specified symbol is null or is unencodeable.
 */
-dx_int_t dx_encode_symbol_name (dx_const_string_t symbol);
+dx_int_t dx_encode_symbol_name (const dx_string_t symbol);
 
+/* -------------------------------------------------------------------------- */
+/**
+* Returns decoded symbol for specified cipher.
+* Returns null if specified cipher is 0.
+*/
+enum dx_result_t dx_decode_symbol_name(dx_int_t cipher, OUT dx_string_t* symbol);
 /* -------------------------------------------------------------------------- */
 
 /**

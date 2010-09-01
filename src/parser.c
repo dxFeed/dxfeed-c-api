@@ -226,7 +226,11 @@ enum dx_result_t dx_parse_data() {
     CHECKED_CALL_0(dx_read_symbol);
     CHECKED_CALL(dx_read_compact_int, &id);
 	if (lastSymbol != NULL) wprintf(L"Symbol: %s\n", lastSymbol);
-	else wprintf(L"Symbol cipher: %i\n", lastCipher);
+	else {
+		dx_string_t sym;
+		dx_decode_symbol_name(lastCipher, &sym);
+		wprintf(L"Symbol : %s\n",sym );
+	}
 	wprintf(L"Record: %i \n",id);
     while (dx_get_in_buffer_position() < dx_get_in_buffer_limit()) {
 		if ( dx_read_records ( id ) != R_SUCCESSFUL )

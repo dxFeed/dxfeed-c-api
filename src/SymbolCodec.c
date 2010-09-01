@@ -37,7 +37,7 @@
 * Pentas for ASCII characters. Invalid pentas are set to 0.
 */
 static dx_int_t pentas[PENTA_LENGTH];
-
+static dx_char_t CHAR[1024];
 /**
 * Lengths (in bits) of pentas for ASCII characters. Invalid lengths are set to 64.
 */
@@ -119,7 +119,7 @@ dx_int_t dx_encode_penta(dx_long_t penta, dx_int_t plen) {
 * Converts penta into string.
 * The specified penta must be valid (no more than 35 bits).
 */
-dx_string_t dx_to_string(dx_long_t penta) {
+dx_string_t dx_to_string(dx_long_t penta) {//TODO: errors handling
     dx_int_t plen = 0;
     dx_string_t chars;
     dx_int_t length = 0;
@@ -215,7 +215,20 @@ dx_int_t dx_encode_symbol_name (const dx_string_t symbol) {
     }
     return dx_encode_penta(penta, plen);
 }
+enum dx_result_t dx_decode_symbol_name(dx_int_t cipher, OUT dx_string_t* symbol){
+	dx_long_t penta;
 
+	if (cipher == 0 ){
+		*symbol = NULL;
+		return parseSuccessful();
+	}
+	if (dx_decode_cipher (cipher, & penta) != R_SUCCESSFUL)
+		setParseError(dx_pr_undefined_symbol); //TODO: maybe change error code?
+
+	*symbol = dx_to_string(penta);
+	return parseSuccessful();
+
+}
 /* -------------------------------------------------------------------------- */
 
 enum dx_result_t dx_codec_read_symbol(dx_char_t* buffer, dx_int_t buf_len, OUT dx_string_t* result, OUT dx_int_t* adv_res) {
