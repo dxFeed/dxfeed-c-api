@@ -22,6 +22,7 @@
 #include "DXErrorCodes.h"
 #include "DXMemory.h"
 #include "DXThreads.h"
+#include "SymbolCodec.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -385,10 +386,6 @@ int dx_name_symbol_comparator (dx_symbol_data_ptr_t e1, dx_symbol_data_ptr_t e2)
 /*
  *	Auxiliary functions
  */
-/* -------------------------------------------------------------------------- */
-
-extern dx_int_t dx_encode_symbol_name (dx_const_string_t symbol_name);
-
 /* -------------------------------------------------------------------------- */
 
 dx_symbol_data_ptr_t dx_subscribe_symbol (dx_const_string_t symbol_name, dx_subscription_data_ptr_t owner) {
