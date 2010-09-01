@@ -897,6 +897,28 @@ bool dx_remove_listener (dxf_subscription_t subscr_id, dx_event_listener_t liste
 
 /* -------------------------------------------------------------------------- */
 
+bool dx_get_event_subscription_event_types (dxf_subscription_t subscr_id, OUT int* event_types) {
+    dx_subscription_data_ptr_t subscr_data = (dx_subscription_data_ptr_t)subscr_id;
+    
+    if (event_types == NULL) {
+        dx_set_last_error(dx_sc_event_subscription, dx_es_invalid_event_type);
+
+        return false;
+    }
+    
+    if (subscr_id == dx_invalid_subscription) {
+        dx_set_last_error(dx_sc_event_subscription, dx_es_invalid_subscr_id);
+
+        return false;
+    }
+    
+    *event_types = subscr_data->event_types;
+    
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
 bool dx_process_event_data (int event_type, dx_const_string_t symbol_name, dx_int_t symbol_cipher,
                             const dx_event_data_t* data, int data_count) {
     dx_symbol_data_ptr_t symbol_data = NULL;
