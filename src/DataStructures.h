@@ -18,7 +18,7 @@
 */
 
 #include "PrimitiveTypes.h"
-
+#include "DXTypes.h"
 /* -------------------------------------------------------------------------- */
 //enum dx_records_id_t {
 //    dx_rid_1,

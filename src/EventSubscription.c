@@ -631,9 +631,9 @@ dx_symbol_data_ptr_t dx_find_symbol (dx_const_string_t symbol_name, dx_int_t sym
  */
 /* -------------------------------------------------------------------------- */
  
-const dx_subscription_t dx_invalid_subscription = (dx_subscription_t)NULL;
+const dxf_subscription_t dx_invalid_subscription = (dxf_subscription_t)NULL;
 
-dx_subscription_t dx_create_event_subscription (int event_types) {
+dxf_subscription_t dx_create_event_subscription (int event_types) {
     dx_subscription_data_ptr_t subscr_data = NULL;
     
     if (event_types & DX_ET_UNUSED) {
@@ -660,12 +660,12 @@ dx_subscription_t dx_create_event_subscription (int event_types) {
     
     subscr_data->event_types = event_types;
 
-    return (dx_subscription_t)subscr_data;
+    return (dxf_subscription_t)subscr_data;
 }
 
 /* -------------------------------------------------------------------------- */
  
-bool dx_close_event_subscription (dx_subscription_t subscr_id) {
+bool dx_close_event_subscription (dxf_subscription_t subscr_id) {
     dx_subscription_data_ptr_t subscr_data = (dx_subscription_data_ptr_t)subscr_id;
     bool res = true;
     
@@ -696,7 +696,7 @@ bool dx_close_event_subscription (dx_subscription_t subscr_id) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_add_symbols (dx_subscription_t subscr_id, dx_const_string_t* symbols, size_t symbol_count) {
+bool dx_add_symbols (dxf_subscription_t subscr_id, dx_const_string_t* symbols, size_t symbol_count) {
     dx_subscription_data_ptr_t subscr_data = (dx_subscription_data_ptr_t)subscr_id;
     size_t cur_symbol_index = 0;
     
@@ -758,7 +758,7 @@ bool dx_add_symbols (dx_subscription_t subscr_id, dx_const_string_t* symbols, si
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_remove_symbols (dx_subscription_t subscr_id, dx_const_string_t* symbols, size_t symbol_count) {
+bool dx_remove_symbols (dxf_subscription_t subscr_id, dx_const_string_t* symbols, size_t symbol_count) {
     dx_subscription_data_ptr_t subscr_data = (dx_subscription_data_ptr_t)subscr_id;
     size_t cur_symbol_index = 0;
 
@@ -817,7 +817,7 @@ bool dx_remove_symbols (dx_subscription_t subscr_id, dx_const_string_t* symbols,
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_add_listener (dx_subscription_t subscr_id, dx_event_listener_t listener) {
+bool dx_add_listener (dxf_subscription_t subscr_id, dx_event_listener_t listener) {
     dx_subscription_data_ptr_t subscr_data = (dx_subscription_data_ptr_t)subscr_id;
     size_t listener_index;
     bool failed;
@@ -857,7 +857,7 @@ bool dx_add_listener (dx_subscription_t subscr_id, dx_event_listener_t listener)
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_remove_listener (dx_subscription_t subscr_id, dx_event_listener_t listener) {
+bool dx_remove_listener (dxf_subscription_t subscr_id, dx_event_listener_t listener) {
     dx_subscription_data_ptr_t subscr_data = (dx_subscription_data_ptr_t)subscr_id;
     size_t listener_index;
     bool failed;

@@ -116,7 +116,7 @@
 #if defined(__MINGW32__) || defined(_UWIN)
 #if PTW32_LEVEL >= PTW32_LEVEL_MAX
 /* For pid_t */
-#  include <sys/types.h>
+#  include <sys/Types.h>
 /* Required by Unix 98 */
 #  include <time.h>
 #endif /* PTW32_LEVEL >= PTW32_LEVEL_MAX */

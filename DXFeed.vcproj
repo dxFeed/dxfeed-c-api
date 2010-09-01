@@ -243,13 +243,13 @@
 			Name="Export"
 			Filter="">
 			<File
-				RelativePath=".\include\APITypes.h">
-			</File>
-			<File
 				RelativePath=".\include\DXErrorCodes.h">
 			</File>
 			<File
 				RelativePath=".\include\DXFeed.h">
+			</File>
+			<File
+				RelativePath=".\include\DXTypes.h">
 			</File>
 			<File
 				RelativePath=".\include\EventData.h">

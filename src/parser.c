@@ -24,6 +24,7 @@
 #include "SymbolCodec.h"
 #include "DataStructures.h"
 #include "Decimal.h"
+#include "EventData.h"
 //////////////////////////////////////////////////////////////////////////////////
 //// ========== Implementation Details ==========
 //////////////////////////////////////////////////////////////////////////////////
@@ -203,17 +204,6 @@ enum dx_result_t dx_read_records(dx_int_t id) {
     return parseSuccessful();
 }
 
-struct dxf_quote{
-	dx_char_t bid_exchange;
-	dx_double_t bid_price;
-	dx_int_t bid_size;
-	dx_char_t ask_exchange;
-	dx_double_t ask_price;
-	dx_int_t ask_size;	
-	dx_int_t bid_time;	
-	dx_int_t ask_time;
-};
-
 enum dx_result_t dx_parse_data() {
     //lastCipher = 0;
     //lastSymbol = NULL;
@@ -239,7 +229,7 @@ enum dx_result_t dx_parse_data() {
         };
 	{
 		dx_int_t i = 0;
-		struct dxf_quote* quotes = (struct dxf_quote*)records_buffer;
+		struct dxf_quote_t* quotes = (struct dxf_quote_t*)records_buffer;
 		for ( ; i < records_count ; ++i )
 			wprintf(L"Bid.Exchange=%C Bid.Price=%f Bid.Size=%i Ask.Exchange=%C Ask.Price=%f Ask.Size=%i Bid.Time=%i Ask.Time=%i \n" , 
 			quotes[i].bid_exchange,quotes[i].bid_price,quotes[i].bid_size,quotes[i].ask_exchange,quotes[i].ask_price,quotes[i].ask_size,quotes[i].bid_time,quotes[i].ask_time);

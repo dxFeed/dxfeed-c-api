@@ -556,7 +556,7 @@ extern "C"
 #define PTW32_CDECL __cdecl
 
 #if defined(_UWIN) && PTW32_LEVEL >= PTW32_LEVEL_MAX
-#   include     <sys/types.h>
+#   include     <sys/Types.h>
 #else
 /*
  * Generic handle type - intended to extend uniqueness beyond

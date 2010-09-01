@@ -26,6 +26,7 @@
 #include <Windows.h>
 #include <stdio.h>
 #include "SymbolCodec.h"
+#include "EventSubscription.h"
 
 BOOL APIENTRY DllMain( HANDLE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved )
 {
@@ -104,7 +105,7 @@ DXFEED_API int dxf_get_last_error (int* subsystem_id, int* error_code, const cha
     return DXF_FAILURE;
 }
 
-DXFEED_API ERRORCODE dxf_add_subscription (enum dxf_event_t event_type, OUT dxf_subscription_t* subscription){
+DXFEED_API ERRORCODE dxf_add_subscription (int event_types, OUT dxf_subscription_t* subscription){
 	static int symbol_codec_initialized = 0;
 	// TODO: temporary stuff!!! to check subscription serialization and test received messages parsing
 	dx_byte_t* sub_buffer = NULL;
@@ -115,7 +116,10 @@ DXFEED_API ERRORCODE dxf_add_subscription (enum dxf_event_t event_type, OUT dxf_
 		dx_init_symbol_codec();
 		symbol_codec_initialized = 1; 
 	}
+	*subscription = dx_create_event_subscription(event_types);
 
+	if (*subscription == dx_invalid_subscription)
+		return 
 	//TODO: separate events per bit mask
 	dx_create_subscription(&sub_buffer, &out_len, MESSAGE_TICKER_ADD_SUBSCRIPTION, dx_encode_symbol_name(L"IBM"), L"MSFT", 1);
 

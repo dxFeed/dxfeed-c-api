@@ -21,7 +21,7 @@
 #define PARSER_H
 
 #include "PrimitiveTypes.h"
-
+#include "DXTypes.h"
 /* -------------------------------------------------------------------------- 
 *
 * Message types

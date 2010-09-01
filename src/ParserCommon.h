@@ -24,7 +24,7 @@
 #include <limits.h>
 #include "PrimitiveTypes.h"
 #include "DXErrorCodes.h"
-
+#include "DXTypes.h"
 ////////////////////////////////////////////////////////////////////////////////
 // prefix of function's parameters
 #define OUT

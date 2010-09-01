@@ -32,8 +32,8 @@
 #define OUT
 #endif // OUT
 
-#include "APITypes.h"
-
+#include "DXTypes.h"
+#include "EventData.h"
 /* -------------------------------------------------------------------------- */
 /*
  *	DXFeed API function return value codes
@@ -68,7 +68,7 @@ DXFEED_API int dxf_get_last_error (int* subsystem_id, int* error_code, const cha
 // if the function succeeds it returns the handle of the created subscription
 // via the function's out-parameter
 
-DXFEED_API ERRORCODE dxf_add_subscription (enum dxf_event_t event_type, OUT dxf_subscription_t* subscription);
+DXFEED_API ERRORCODE dxf_add_subscription (int event_types, OUT dxf_subscription_t* subscription);
 
 /*
 // closes a connection, previously opened by 'openConnection'
