@@ -188,7 +188,7 @@ dx_int_t dx_get_codec_valid_chipher() {
 
 /* -------------------------------------------------------------------------- */
 
-dx_int_t dx_encode_symbol_name (const dx_string_t symbol) {
+dx_int_t dx_encode_symbol_name (dx_const_string_t symbol) {
     dx_long_t penta = 0;
     dx_int_t plen = 0;
     dx_int_t i;

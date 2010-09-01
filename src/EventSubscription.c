@@ -63,7 +63,7 @@ typedef struct {
 
 typedef struct {
     dx_const_string_t name;
-    dx_int_t code;
+    dx_int_t cipher;
     size_t ref_count;
     dx_subscription_data_array_t subscriptions;
 } dx_symbol_data_t, *dx_symbol_data_ptr_t;
@@ -97,7 +97,7 @@ static pthread_mutex_t g_subscr_guard;
 
 #define SYMBOL_BUCKET_COUNT    1000
 
-static dx_symbol_data_array_t g_encoded_symbols[SYMBOL_BUCKET_COUNT] = {0};
+static dx_symbol_data_array_t g_ciphered_symbols[SYMBOL_BUCKET_COUNT] = {0};
 static dx_symbol_data_array_t g_hashed_symbols[SYMBOL_BUCKET_COUNT] = {0};
 
 /* -------------------------------------------------------------------------- */
@@ -362,15 +362,15 @@ dx_int_t dx_symbol_name_hasher (dx_const_string_t symbol_name) {
 
 typedef int (*dx_symbol_comparator_t)(dx_symbol_data_ptr_t e1, dx_symbol_data_ptr_t e2);
 
-int dx_encoded_symbol_comparator (dx_symbol_data_ptr_t e1, dx_symbol_data_ptr_t e2) {
-    return (e1->code - e2->code);
+int dx_ciphered_symbol_comparator (dx_symbol_data_ptr_t e1, dx_symbol_data_ptr_t e2) {
+    return (e1->cipher - e2->cipher);
 }
 
 /* -------------------------------------------------------------------------- */
 
 int dx_hashed_symbol_comparator (dx_symbol_data_ptr_t e1, dx_symbol_data_ptr_t e2) {
-    if (e1->code != e2->code) {
-        return (e1->code - e2->code);
+    if (e1->cipher != e2->cipher) {
+        return (e1->cipher - e2->cipher);
     }
     
     return wcscmp(e1->name, e2->name);
@@ -392,8 +392,8 @@ dx_symbol_data_ptr_t dx_subscribe_symbol (dx_const_string_t symbol_name, dx_subs
     dx_symbol_data_ptr_t res = NULL;
     
     {
-        dx_symbol_comparator_t comparator = dx_encoded_symbol_comparator;
-        dx_symbol_data_array_t* symbol_container = g_encoded_symbols;
+        dx_symbol_comparator_t comparator = dx_ciphered_symbol_comparator;
+        dx_symbol_data_array_t* symbol_container = g_ciphered_symbols;
         dx_symbol_data_array_t* symbol_array_obj_ptr = NULL;
         dx_symbol_data_t dummy;
 
@@ -403,13 +403,13 @@ dx_symbol_data_ptr_t dx_subscribe_symbol (dx_const_string_t symbol_name, dx_subs
 
         dummy.name = symbol_name;
 
-        if ((dummy.code = dx_encode_symbol_name(symbol_name)) == 0) {
+        if ((dummy.cipher = dx_encode_symbol_name(symbol_name)) == 0) {
             symbol_container = g_hashed_symbols;
             comparator = dx_hashed_symbol_comparator;
-            dummy.code = dx_symbol_name_hasher(symbol_name);
+            dummy.cipher = dx_symbol_name_hasher(symbol_name);
         }
 
-        symbol_array_obj_ptr = &(symbol_container[((unsigned)dummy.code) % SYMBOL_BUCKET_COUNT]);
+        symbol_array_obj_ptr = &(symbol_container[((unsigned)dummy.cipher) % SYMBOL_BUCKET_COUNT]);
 
         DX_ARRAY_SEARCH(symbol_array_obj_ptr->elements, 0, symbol_array_obj_ptr->size,
                         &dummy, comparator, true, symbol_exists, symbol_index);
@@ -422,7 +422,7 @@ dx_symbol_data_ptr_t dx_subscribe_symbol (dx_const_string_t symbol_name, dx_subs
             }
 
             res->name = symbol_name;
-            res->code = dummy.code;
+            res->cipher = dummy.cipher;
 
             DX_ARRAY_INSERT(*symbol_array_obj_ptr, dx_symbol_data_ptr_t, res, symbol_index, dx_capacity_manager_halfer, failed);
 
@@ -483,8 +483,8 @@ bool dx_unsubscribe_symbol (dx_symbol_data_ptr_t symbol_data, dx_subscription_da
     }
     
     if (--(symbol_data->ref_count) == 0) {
-        dx_symbol_comparator_t comparator = dx_encoded_symbol_comparator;
-        dx_symbol_data_array_t* symbol_container = g_encoded_symbols;
+        dx_symbol_comparator_t comparator = dx_ciphered_symbol_comparator;
+        dx_symbol_data_array_t* symbol_container = g_ciphered_symbols;
         dx_symbol_data_array_t* symbol_array_obj_ptr = NULL;
         
         bool symbol_exists = false;
@@ -496,7 +496,7 @@ bool dx_unsubscribe_symbol (dx_symbol_data_ptr_t symbol_data, dx_subscription_da
             comparator = dx_hashed_symbol_comparator;
         }
         
-        symbol_array_obj_ptr = &(symbol_container[((unsigned)symbol_data->code) % SYMBOL_BUCKET_COUNT]);
+        symbol_array_obj_ptr = &(symbol_container[((unsigned)symbol_data->cipher) % SYMBOL_BUCKET_COUNT]);
         
         DX_ARRAY_SEARCH(symbol_array_obj_ptr->elements, 0, symbol_array_obj_ptr->size,
                         symbol_data, comparator, true, symbol_exists, symbol_index);
@@ -562,8 +562,8 @@ size_t dx_find_symbol_in_array (dx_symbol_data_array_t* symbols, dx_const_string
     
     data.name = symbol_name;
     
-    if ((data.code = dx_encode_symbol_name(symbol_name)) != 0) {
-        comparator = dx_encoded_symbol_comparator;
+    if ((data.cipher = dx_encode_symbol_name(symbol_name)) != 0) {
+        comparator = dx_ciphered_symbol_comparator;
     } else {
         comparator = dx_name_symbol_comparator;
     }
@@ -594,11 +594,11 @@ size_t dx_find_listener_in_array (dx_listener_array_t* listeners, dx_event_liste
 
 /* -------------------------------------------------------------------------- */
 
-dx_symbol_data_ptr_t dx_find_symbol (dx_const_string_t symbol_name, dx_int_t symbol_code) {
+dx_symbol_data_ptr_t dx_find_symbol (dx_const_string_t symbol_name, dx_int_t symbol_cipher) {
     dx_symbol_data_ptr_t res = NULL;
 
-    dx_symbol_comparator_t comparator = dx_encoded_symbol_comparator;
-    dx_symbol_data_array_t* symbol_container = g_encoded_symbols;
+    dx_symbol_comparator_t comparator = dx_ciphered_symbol_comparator;
+    dx_symbol_data_array_t* symbol_container = g_ciphered_symbols;
     dx_symbol_data_array_t* symbol_array_obj_ptr = NULL;
     dx_symbol_data_t dummy;
 
@@ -607,13 +607,13 @@ dx_symbol_data_ptr_t dx_find_symbol (dx_const_string_t symbol_name, dx_int_t sym
 
     dummy.name = symbol_name;
 
-    if ((dummy.code = symbol_code) == 0) {
+    if ((dummy.cipher = symbol_cipher) == 0) {
         symbol_container = g_hashed_symbols;
         comparator = dx_hashed_symbol_comparator;
-        dummy.code = dx_symbol_name_hasher(symbol_name);
+        dummy.cipher = dx_symbol_name_hasher(symbol_name);
     }
 
-    symbol_array_obj_ptr = &(symbol_container[((unsigned)dummy.code) % SYMBOL_BUCKET_COUNT]);
+    symbol_array_obj_ptr = &(symbol_container[((unsigned)dummy.cipher) % SYMBOL_BUCKET_COUNT]);
 
     DX_ARRAY_SEARCH(symbol_array_obj_ptr->elements, 0, symbol_array_obj_ptr->size,
                     &dummy, comparator, true, symbol_exists, symbol_index);
@@ -897,7 +897,7 @@ bool dx_remove_listener (dx_subscription_t subscr_id, dx_event_listener_t listen
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_process_event_data (int event_type, dx_const_string_t symbol_name, dx_int_t symbol_code,
+bool dx_process_event_data (int event_type, dx_const_string_t symbol_name, dx_int_t symbol_cipher,
                             const dx_event_data_t* data, int data_count) {
     dx_symbol_data_ptr_t symbol_data = NULL;
     size_t cur_subscr_index = 0;
@@ -908,7 +908,7 @@ bool dx_process_event_data (int event_type, dx_const_string_t symbol_name, dx_in
         return false;
     }
     
-    if ((symbol_data = dx_find_symbol(symbol_name, symbol_code)) == NULL) {
+    if ((symbol_data = dx_find_symbol(symbol_name, symbol_cipher)) == NULL) {
         dx_set_last_error(dx_sc_event_subscription, dx_es_invalid_internal_structure_state);
         
         dx_mutex_unlock(&g_subscr_guard);

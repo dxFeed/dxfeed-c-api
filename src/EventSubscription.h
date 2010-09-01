@@ -39,7 +39,7 @@ bool dx_add_symbols (dx_subscription_t subscr_id, dx_const_string_t* symbols, si
 bool dx_remove_symbols (dx_subscription_t subscr_id, dx_const_string_t* symbols, size_t symbol_count);
 bool dx_add_listener (dx_subscription_t subscr_id, dx_event_listener_t listener);
 bool dx_remove_listener (dx_subscription_t subscr_id, dx_event_listener_t listener);
-bool dx_process_event_data (int event_type, dx_const_string_t symbol_name, dx_int_t symbol_code,
+bool dx_process_event_data (int event_type, dx_const_string_t symbol_name, dx_int_t symbol_cipher,
                             const dx_event_data_t* data, int data_count);
 
 #endif /* SUBSCRIPTIONS_H_INCLUDED */
