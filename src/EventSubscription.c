@@ -174,6 +174,8 @@ static dx_symbol_data_array_t g_hashed_symbols[SYMBOL_BUCKET_COUNT] = {0};
 
 #define DX_ARRAY_SEARCH(a, start_index, end_index, elem, comparator, is_binary, found, res_index) \
     do { \
+        found = false; \
+        \
         if (is_binary) { \
             DX_ARRAY_BINARY_SEARCH(a, start_index, end_index, elem, comparator, found, res_index); \
         } else { \
@@ -552,13 +554,10 @@ bool dx_clear_symbol_array (dx_symbol_data_array_t* symbols, dx_subscription_dat
 
 /* -------------------------------------------------------------------------- */
 
-static size_t const g_invalid_array_index = (size_t)-1;
-
-size_t dx_find_symbol_in_array (dx_symbol_data_array_t* symbols, dx_const_string_t symbol_name) {
+size_t dx_find_symbol_in_array (dx_symbol_data_array_t* symbols, dx_const_string_t symbol_name, OUT bool* found) {
     dx_symbol_data_t data;
     dx_symbol_comparator_t comparator;
     size_t symbol_index;
-    bool found = false;
     
     data.name = symbol_name;
     
@@ -568,28 +567,19 @@ size_t dx_find_symbol_in_array (dx_symbol_data_array_t* symbols, dx_const_string
         comparator = dx_name_symbol_comparator;
     }
     
-    DX_ARRAY_SEARCH(symbols->elements, 0, symbols->size, &data, comparator, false, found, symbol_index);
+    DX_ARRAY_SEARCH(symbols->elements, 0, symbols->size, &data, comparator, false, *found, symbol_index);
     
-    if (found) {
-        return symbol_index;
-    } else {
-        return g_invalid_array_index;
-    }
+    return symbol_index;
 }
 
 /* -------------------------------------------------------------------------- */
 
-size_t dx_find_listener_in_array (dx_listener_array_t* listeners, dx_event_listener_t listener) {
+size_t dx_find_listener_in_array (dx_listener_array_t* listeners, dx_event_listener_t listener, OUT bool* found) {
     size_t listener_index;
-    bool found = false;
     
-    DX_ARRAY_SEARCH(listeners->elements, 0, listeners->size, listener, DX_NUMERIC_COMPARATOR, false, found, listener_index);
+    DX_ARRAY_SEARCH(listeners->elements, 0, listeners->size, listener, DX_NUMERIC_COMPARATOR, false, *found, listener_index);
     
-    if (found) {
-        return listener_index;
-    } else {
-        return g_invalid_array_index;
-    }
+    return listener_index;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -654,9 +644,9 @@ dxf_subscription_t dx_create_event_subscription (int event_types) {
             
             return dx_invalid_subscription;
         }
-        
-        ++g_subscription_count;
     }
+    
+    ++g_subscription_count;
     
     subscr_data->event_types = event_types;
 
@@ -715,6 +705,7 @@ bool dx_add_symbols (dxf_subscription_t subscr_id, dx_const_string_t* symbols, s
     for (; cur_symbol_index < symbol_count; ++cur_symbol_index) {
         dx_symbol_data_ptr_t symbol_data;
         size_t symbol_index;
+        bool found = false;
         bool failed = false;
         
         if (symbols[cur_symbol_index] == NULL) {
@@ -725,10 +716,11 @@ bool dx_add_symbols (dxf_subscription_t subscr_id, dx_const_string_t* symbols, s
             return false;
         }
         
-        if ((symbol_index = dx_find_symbol_in_array(&(subscr_data->symbols), symbols[cur_symbol_index])) !=
-            g_invalid_array_index) {
+        symbol_index = dx_find_symbol_in_array(&(subscr_data->symbols), symbols[cur_symbol_index], &found);
+        
+        if (found) {
             /* symbol is already subscribed */
-            
+
             continue;
         }
         
@@ -777,6 +769,7 @@ bool dx_remove_symbols (dxf_subscription_t subscr_id, dx_const_string_t* symbols
     for (; cur_symbol_index < symbol_count; ++cur_symbol_index) {
         size_t symbol_index;
         bool failed = false;
+        bool found = false;
 
         if (symbols[cur_symbol_index] == NULL) {
             dx_set_last_error(dx_sc_event_subscription, dx_es_invalid_symbol_name);
@@ -786,8 +779,9 @@ bool dx_remove_symbols (dxf_subscription_t subscr_id, dx_const_string_t* symbols
             return false;
         }
 
-        if ((symbol_index = dx_find_symbol_in_array(&(subscr_data->symbols), symbols[cur_symbol_index])) ==
-            g_invalid_array_index) {
+        symbol_index = dx_find_symbol_in_array(&(subscr_data->symbols), symbols[cur_symbol_index], &found);
+        
+        if (!found) {
             /* symbol wasn't subscribed */
 
             continue;
@@ -821,6 +815,7 @@ bool dx_add_listener (dxf_subscription_t subscr_id, dx_event_listener_t listener
     dx_subscription_data_ptr_t subscr_data = (dx_subscription_data_ptr_t)subscr_id;
     size_t listener_index;
     bool failed;
+    bool found = false;
     
     if (subscr_id == dx_invalid_subscription) {
         dx_set_last_error(dx_sc_event_subscription, dx_es_invalid_subscr_id);
@@ -834,7 +829,9 @@ bool dx_add_listener (dxf_subscription_t subscr_id, dx_event_listener_t listener
         return false;
     }
     
-    if ((listener_index = dx_find_listener_in_array(&(subscr_data->listeners), listener)) != g_invalid_array_index) {
+    listener_index = dx_find_listener_in_array(&(subscr_data->listeners), listener, &found);
+    
+    if (found) {
         /* listener is already added */
         
         return true;
@@ -852,7 +849,7 @@ bool dx_add_listener (dxf_subscription_t subscr_id, dx_event_listener_t listener
         return false;
     }
 
-    return failed;
+    return !failed;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -861,6 +858,7 @@ bool dx_remove_listener (dxf_subscription_t subscr_id, dx_event_listener_t liste
     dx_subscription_data_ptr_t subscr_data = (dx_subscription_data_ptr_t)subscr_id;
     size_t listener_index;
     bool failed;
+    bool found = false;
 
     if (subscr_id == dx_invalid_subscription) {
         dx_set_last_error(dx_sc_event_subscription, dx_es_invalid_subscr_id);
@@ -874,8 +872,10 @@ bool dx_remove_listener (dxf_subscription_t subscr_id, dx_event_listener_t liste
         return false;
     }
 
-    if ((listener_index = dx_find_listener_in_array(&(subscr_data->listeners), listener)) == g_invalid_array_index) {
-        /* listener is already added */
+    listener_index = dx_find_listener_in_array(&(subscr_data->listeners), listener, &found);
+    
+    if (!found) {
+        /* listener isn't subscribed */
 
         return true;
     }
@@ -892,7 +892,7 @@ bool dx_remove_listener (dxf_subscription_t subscr_id, dx_event_listener_t liste
         return false;
     }
 
-    return failed;
+    return !failed;
 }
 
 /* -------------------------------------------------------------------------- */

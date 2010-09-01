@@ -22,7 +22,6 @@
 
 #include "PrimitiveTypes.h"
 #include "EventData.h"
-#include "EventData.h"
 
 extern const dxf_subscription_t dx_invalid_subscription;
 
@@ -32,6 +31,7 @@ extern const dxf_subscription_t dx_invalid_subscription;
  */
 /* -------------------------------------------------------------------------- */
 
+// returns dx_invalid_subscription on error
 dxf_subscription_t dx_create_event_subscription (int event_types);
 bool dx_close_event_subscription (dxf_subscription_t subscr_id);
 bool dx_add_symbols (dxf_subscription_t subscr_id, dx_const_string_t* symbols, size_t symbol_count);
