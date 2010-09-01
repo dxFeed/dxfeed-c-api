@@ -107,11 +107,9 @@ DXFEED_API int dxf_get_last_error (int* subsystem_id, int* error_code, const cha
 
 DXFEED_API ERRORCODE dxf_add_subscription (int event_types, OUT dxf_subscription_t* subscription){
 	static int symbol_codec_initialized = 0;
-	// TODO: temporary stuff!!! to check subscription serialization and test received messages parsing
-	dx_byte_t* sub_buffer = NULL;
-	dx_int_t out_len = 1000;
 
-	// initialization of penta codec. do not remove!
+
+	// initialization of penta codec. do not remove! 
 	if (symbol_codec_initialized == 0){
 		dx_init_symbol_codec();
 		symbol_codec_initialized = 1; 
@@ -119,15 +117,61 @@ DXFEED_API ERRORCODE dxf_add_subscription (int event_types, OUT dxf_subscription
 	*subscription = dx_create_event_subscription(event_types);
 
 	if (*subscription == dx_invalid_subscription)
-		return 
+		return DXF_FAILURE;
+
 	//TODO: separate events per bit mask
-	dx_create_subscription(&sub_buffer, &out_len, MESSAGE_TICKER_ADD_SUBSCRIPTION, dx_encode_symbol_name(L"IBM"), L"MSFT", 1);
+//	dx_create_subscription(&sub_buffer, &out_len, MESSAGE_TICKER_ADD_SUBSCRIPTION, dx_encode_symbol_name(L"IBM"), L"MSFT", 1);
 
 	//send to server
-	dx_send_data(sub_buffer, out_len);
+//	dx_send_data(sub_buffer, out_len);
+
+
+	return DXF_SUCCESS;
+}
+DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dx_string_t* symbols, int symbol_count){
+	dx_int_t i;
+
+	if (symbol_count < 0)
+		return DXF_FAILURE; //TODO: set_last_error 
+
+	for ( i = 0; i < symbol_count; ++i){
+		if (dxf_add_symbol(subscription, symbols[i]) == false )
+			return DXF_FAILURE;// todo set_last_error
+	}
+
+	return DXF_SUCCESS;
+
+}
+
+DXFEED_API ERRORCODE dxf_add_symbol (dxf_subscription_t subscription, dx_string_t symbol){
+	dx_int_t j = 0;
+
+	dx_byte_t* sub_buffer = NULL;
+	dx_int_t out_len = 1000;
+	
+	dx_int_t events; 
+	if (dx_get_event_subscription_event_types(subscription, &events)==false)
+		return DXF_FAILURE; //TODO: set_last_error ?
+	
+	for (; j < DX_ET_LAST ; ++j){
+		if (events & (1 << j )){
+			dx_create_subscription(&sub_buffer, &out_len, MESSAGE_TICKER_ADD_SUBSCRIPTION, dx_encode_symbol_name(symbol), symbol, 1 /*TODO*/);
+			dx_send_data(sub_buffer, out_len);
+		}
+	}
+	if ( dx_add_symbols(subscription, &symbol, 1) == false )
+		return DXF_FAILURE;// todo set_last_error
 
 	dx_free(sub_buffer);
 	sub_buffer = NULL;
 
 	return DXF_SUCCESS;
 }
+
+DXFEED_API ERRORCODE dxf_attach_event_listener (dxf_subscription_t subscription, dx_event_listener_t event_listener){
+	if (dx_add_listener (subscription, event_listener) == false )
+		return DXF_FAILURE; //TODO: set_last_error ?
+	return DXF_SUCCESS;
+}
+
+

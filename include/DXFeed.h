@@ -69,6 +69,9 @@ DXFEED_API int dxf_get_last_error (int* subsystem_id, int* error_code, const cha
 // via the function's out-parameter
 
 DXFEED_API ERRORCODE dxf_add_subscription (int event_types, OUT dxf_subscription_t* subscription);
+DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dx_string_t* symbols, int symbol_count);
+DXFEED_API ERRORCODE dxf_add_symbol (dxf_subscription_t subscription, dx_string_t symbol);
+DXFEED_API ERRORCODE dxf_attach_event_listener (dxf_subscription_t subscription, dx_event_listener_t event_listener);
 
 /*
 // closes a connection, previously opened by 'openConnection'

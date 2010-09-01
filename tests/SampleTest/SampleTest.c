@@ -6,7 +6,19 @@
 #include <Windows.h>
 
 const char dxfeed_host[] = "demo.dxfeed.com:7300";
+void quote_listener(int event_type, dx_const_string_t symbol_name,const dx_event_data_t* data, int data_count){
+		dx_int_t i = 0;
+		struct dxf_quote_t* quotes = (struct dxf_quote_t*)data;
 
+		wprintf(L"Record: %i \n",event_type);
+		wprintf(L"Symbol: %s\n", symbol_name);
+
+		for ( ; i < data_count ; ++i )
+			wprintf(L"Bid.Exchange=%C Bid.Price=%f Bid.Size=%i Ask.Exchange=%C Ask.Price=%f Ask.Size=%i Bid.Time=%i Ask.Time=%i \n" , 
+			quotes[i].bid_exchange,quotes[i].bid_price,quotes[i].bid_size,quotes[i].ask_exchange,quotes[i].ask_price,quotes[i].ask_size,quotes[i].bid_time,quotes[i].ask_time);
+
+
+}
 /* -------------------------------------------------------------------------- */
 
 void process_last_error () {
@@ -47,8 +59,9 @@ int main (int argc, char* argv[]) {
     }
     
     printf("Connection successful!\n");
-    dxf_add_subscription(dx_qoute, &subscription );
-//	dxf_add_subscription(dx_qoute, &subscription );
+    dxf_add_subscription(DX_ET_QUOTE, &subscription );
+	dxf_add_symbol(subscription, L"IBM"); 
+	dxf_attach_event_listener(subscription, quote_listener);
     Sleep(100000);
     
   //  printf("Disconnecting from host...\n");

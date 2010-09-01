@@ -25,6 +25,9 @@
 #include "DataStructures.h"
 #include "Decimal.h"
 #include "EventData.h"
+#include "EventSubscription.h"
+
+#pragma pack(1) //TODO: crossplatform thing move to .h?
 //////////////////////////////////////////////////////////////////////////////////
 //// ========== Implementation Details ==========
 //////////////////////////////////////////////////////////////////////////////////
@@ -156,7 +159,7 @@ static enum dx_result_t dx_read_symbol() {
 enum dx_result_t dx_enlarge_record_buffer(){
 	//TODO:
 }
-#pragma pack(1) 
+ 
 enum dx_result_t dx_read_records(dx_int_t id) {
 	struct dx_record_info_t record;
 	dx_int_t i = 0;
@@ -215,27 +218,15 @@ enum dx_result_t dx_parse_data() {
 
     CHECKED_CALL_0(dx_read_symbol);
     CHECKED_CALL(dx_read_compact_int, &id);
-	if (lastSymbol != NULL) wprintf(L"Symbol: %s\n", lastSymbol);
-	else {
-		dx_string_t sym;
-		dx_decode_symbol_name(lastCipher, &sym);
-		wprintf(L"Symbol : %s\n",sym );
-	}
-	wprintf(L"Record: %i \n",id);
+
     while (dx_get_in_buffer_position() < dx_get_in_buffer_limit()) {
 		if ( dx_read_records ( id ) != R_SUCCESSFUL )
 			return setParseError(dx_pr_record_reading_failed);
 		++records_count;
         };
-	{
-		dx_int_t i = 0;
-		struct dxf_quote_t* quotes = (struct dxf_quote_t*)records_buffer;
-		for ( ; i < records_count ; ++i )
-			wprintf(L"Bid.Exchange=%C Bid.Price=%f Bid.Size=%i Ask.Exchange=%C Ask.Price=%f Ask.Size=%i Bid.Time=%i Ask.Time=%i \n" , 
-			quotes[i].bid_exchange,quotes[i].bid_price,quotes[i].bid_size,quotes[i].ask_exchange,quotes[i].ask_price,quotes[i].ask_size,quotes[i].bid_time,quotes[i].ask_time);
-	
+	//todo: maybe move to another file?
+	dx_process_event_data(/*TODO:*/1, lastSymbol, lastCipher, records_buffer, records_buffer_size );
 	records_buffer_position = 0; // mean we've called callback
-	}
 
 }
 

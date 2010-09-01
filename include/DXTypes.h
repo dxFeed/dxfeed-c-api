@@ -20,17 +20,8 @@
 #ifndef API_TYPES_H
 #define API_TYPES_H
 
-//#include "EventData.h"
-// dummy
 typedef int ERRORCODE;
-//typedef int HFEED;
-//typedef int HCONNECTION;
 
-//typedef int event_listener_t;
-typedef enum dxf_event_t{
-	dx_qoute,
-	dx_trade
-};
 #ifdef _WIN32
 
 #include <wchar.h>

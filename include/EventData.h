@@ -37,7 +37,8 @@
 
 #define DX_ET_QUOTE    (0x1)
 #define DX_ET_TRADE    (0x2)
-#define DX_ET_UNUSED   (~0x3)
+#define DX_ET_LAST	   (0x3)
+#define DX_ET_UNUSED   (~DX_ET_LAST)
 
 
 typedef void* dxf_subscription_t;
