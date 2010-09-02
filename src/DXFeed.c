@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include "SymbolCodec.h"
 #include "EventSubscription.h"
+#include "DataStructures.h"
 
 BOOL APIENTRY DllMain( HANDLE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved )
 {
@@ -155,7 +156,7 @@ DXFEED_API ERRORCODE dxf_add_symbol (dxf_subscription_t subscription, dx_string_
 	
 	for (; j < DX_ET_LAST ; ++j){
 		if (events & (1 << j )){
-			dx_create_subscription(&sub_buffer, &out_len, MESSAGE_TICKER_ADD_SUBSCRIPTION, dx_encode_symbol_name(symbol), symbol, 1 /*TODO*/);
+			dx_create_subscription(&sub_buffer, &out_len, MESSAGE_TICKER_ADD_SUBSCRIPTION, dx_encode_symbol_name(symbol), symbol,get_record_id(events & (1 << j )) /*TODO*/);
 			dx_send_data(sub_buffer, out_len);
 		}
 	}

@@ -941,7 +941,7 @@ bool dx_process_event_data (int event_type, dx_const_string_t symbol_name, dx_in
     for (; cur_subscr_index < symbol_data->subscriptions.size; ++cur_subscr_index) {
         dx_subscription_data_ptr_t subscr_data = symbol_data->subscriptions.elements[cur_subscr_index];
         size_t cur_listener_index = 0;
-        
+       
         if (!(subscr_data->event_types & event_type)) {
             /* subscription doesn't want this specific event type */
             

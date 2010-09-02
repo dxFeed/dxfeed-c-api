@@ -35,10 +35,13 @@
  */
 /* -------------------------------------------------------------------------- */
 
-#define DX_ET_QUOTE    (0x1)
-#define DX_ET_TRADE    (0x2)
-#define DX_ET_LAST	   (0x3)
-#define DX_ET_UNUSED   (~DX_ET_LAST)
+#define DX_ET_QUOTE			 (1 << 0)
+#define DX_ET_TRADE			 (1 << 1)
+#define DX_ET_FUNDAMENTAL	 (1 << 2)
+#define DX_ET_PROFILE		 (1 << 3)
+#define DX_ET_MARKET_MAKER	 (1 << 4)
+#define DX_ET_LAST			 (1 << 5)
+#define DX_ET_UNUSED		 (~ ((1 << 6) - 1 ))
 
 
 typedef void* dxf_subscription_t;
@@ -51,19 +54,22 @@ typedef void* dxf_subscription_t;
 typedef void* dx_event_data_t;
 
 struct dxf_quote_t {
-  	dx_char_t bid_exchange;
-	dx_double_t bid_price;
-	dx_int_t bid_size;
-	dx_char_t ask_exchange;
-	dx_double_t ask_price;
-	dx_int_t ask_size;	
-	dx_int_t bid_time;	
-	dx_int_t ask_time;   
+  	dx_char_t			bid_exchange;
+	dx_double_t			bid_price;
+	dx_int_t			bid_size;
+	dx_char_t			ask_exchange;
+	dx_double_t			ask_price;
+	dx_int_t			ask_size;	
+	dx_int_t			bid_time;	
+	dx_int_t			ask_time;   
 };
-
-struct dx_trade_data_t {
-    int dummy;
-    /* trade specific fields */
+struct dxf_market_maker{
+	dx_char_t			mm_exchange; 
+	dx_int_t			mm_id;
+	dx_double_t			mmbid_price;
+	dx_int_t 			mmbid_size;
+	dx_double_t			mmask_price; 
+	dx_int_t			mmask_size;
 };
 
 /* -------------------------------------------------------------------------- */

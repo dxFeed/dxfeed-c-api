@@ -74,7 +74,8 @@ struct dx_record_info_t {
 };
 
 //const struct dx_record_info_t* dx_get_record_by_name(const dx_string_t name);
-
+dx_int_t get_record_id(dx_int_t event_type);
+dx_int_t get_event_type_by_id(dx_int_t record_id);
 /* -------------------------------------------------------------------------- */
 
 bool dx_matching_fields(const struct dx_record_info_t* record, const dx_string_t* fname, dx_int_t fname_len, dx_int_t* ftype, dx_int_t ftype_len);

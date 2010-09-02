@@ -225,7 +225,7 @@ enum dx_result_t dx_parse_data() {
 		++records_count;
         };
 	//todo: maybe move to another file?
-	dx_process_event_data(/*TODO:*/1, lastSymbol, lastCipher, records_buffer, records_buffer_size );
+	dx_process_event_data(get_event_type_by_id(id), lastSymbol, lastCipher, records_buffer, records_buffer_size );
 	records_buffer_position = 0; // mean we've called callback
 
 }
@@ -246,7 +246,7 @@ enum dx_result_t dx_parse_describe_records() {
             CHECKED_CALL(dx_read_compact_int, &id);
             CHECKED_CALL(dx_read_utf_string, &name);
             CHECKED_CALL(dx_read_compact_int, &n);
-
+			wprintf(L"recordId: %i, Name: %s , fields count: %i \n", id,name,n);
             if (id < 0 || name == NULL || wcslen(name) == 0 || n < 0) {
                 return setParseError(dx_pr_record_info_corrupt);
             }
@@ -259,6 +259,8 @@ enum dx_result_t dx_parse_describe_records() {
                 if (fname[i] == NULL || wcslen(fname[i]) == 0 || ftype[i] < MIN_FIELD_TYPE_ID || ftype[i] > MAX_FIELD_TYPE_ID) {
                     return setParseError(dx_pr_field_info_corrupt);
                 }
+				wprintf(L"%s    %i\n", fname[i], ftype[i]);
+
             }
 
             //const struct dx_record_info_t* record = dx_get_record_by_name(name);

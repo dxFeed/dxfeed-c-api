@@ -19,6 +19,7 @@
 
 #include "DataStructures.h"
 #include "ParserCommon.h"
+#include "EventData.h"
 /* -------------------------------------------------------------------------- */
 
 //static const struct dx_field_info_t dx_fields[] = 
@@ -157,4 +158,25 @@ enum dx_result_t dx_get_record_by_id(dx_int_t id, struct dx_record_info_t* recor
 	*record = dx_records[id];
 	return parseSuccessful();
 }
+// record ids simply hardcoded
+dx_int_t get_record_id(dx_int_t event_type){
+	switch (event_type){
+		case DX_ET_TRADE: return 0; 
+		case DX_ET_QUOTE: return 1; 
+		case DX_ET_FUNDAMENTAL: return 2; 
+		case DX_ET_PROFILE: return 3; 
+		case DX_ET_MARKET_MAKER: return 4; 
+		default: return (-1);
+	}	
+}
 
+dx_int_t get_event_type_by_id(dx_int_t record_id){
+	switch (record_id){
+		case 0: return DX_ET_TRADE; 
+		case 1 : return DX_ET_QUOTE; 
+		case 2 : return DX_ET_FUNDAMENTAL; 
+		case 3 : return DX_ET_PROFILE; 
+		case 4 : return DX_ET_MARKET_MAKER; 
+		default: return (DX_ET_UNUSED);
+	}
+}
