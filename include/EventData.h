@@ -24,6 +24,8 @@
  #ifndef EVENT_DATA_H_INCLUDED
  #define EVENT_DATA_H_INCLUDED
 
+
+
 #include "PrimitiveTypes.h"
 #include "DXTypes.h"
 /* -------------------------------------------------------------------------- */
@@ -71,7 +73,15 @@ struct dxf_market_maker{
 	dx_double_t			mmask_price; 
 	dx_int_t			mmask_size;
 };
-
+struct dxf_trade_t {
+  	dx_char_t			last_exchange;
+	dx_int_t			last_time;
+	dx_double_t			last_price;
+	dx_int_t			last_size;
+	dx_int_t			last_tick;
+	dx_double_t			last_change;	
+	dx_double_t			volume;	
+};
 /* -------------------------------------------------------------------------- */
 /*
  *	Event listener prototype

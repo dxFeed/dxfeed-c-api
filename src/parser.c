@@ -27,7 +27,7 @@
 #include "EventData.h"
 #include "EventSubscription.h"
 
-#pragma pack(1) //TODO: crossplatform thing move to .h?
+
 //////////////////////////////////////////////////////////////////////////////////
 //// ========== Implementation Details ==========
 //////////////////////////////////////////////////////////////////////////////////
@@ -225,9 +225,14 @@ enum dx_result_t dx_parse_data() {
 		++records_count;
         };
 	//todo: maybe move to another file?
-	
-	CHECKED_CALL_2 (dx_decode_symbol_name, lastCipher, &symbol); 
-	dx_process_event_data(get_event_type_by_id(id),symbol , lastCipher, records_buffer, records_buffer_size );
+	if (lastSymbol == NULL)
+		CHECKED_CALL_2 (dx_decode_symbol_name, lastCipher, &symbol); 
+	{
+		struct dxf_quote_t* quotes = (struct dxf_quote_t*)records_buffer;
+		int ddd = 0;
+		++ddd;
+	}
+	dx_process_event_data(get_event_type_by_id(id),symbol , lastCipher, records_buffer, records_count );
 	records_buffer_position = 0; // mean we've called callback
 
 }
@@ -248,7 +253,7 @@ enum dx_result_t dx_parse_describe_records() {
             CHECKED_CALL(dx_read_compact_int, &id);
             CHECKED_CALL(dx_read_utf_string, &name);
             CHECKED_CALL(dx_read_compact_int, &n);
-			wprintf(L"recordId: %i, Name: %s , fields count: %i \n", id,name,n);
+			//wprintf(L"recordId: %i, Name: %s , fields count: %i \n", id,name,n);
             if (id < 0 || name == NULL || wcslen(name) == 0 || n < 0) {
                 return setParseError(dx_pr_record_info_corrupt);
             }
@@ -261,24 +266,9 @@ enum dx_result_t dx_parse_describe_records() {
                 if (fname[i] == NULL || wcslen(fname[i]) == 0 || ftype[i] < MIN_FIELD_TYPE_ID || ftype[i] > MAX_FIELD_TYPE_ID) {
                     return setParseError(dx_pr_field_info_corrupt);
                 }
-				wprintf(L"%s    %i\n", fname[i], ftype[i]);
+				//wprintf(L"%s    %i\n", fname[i], ftype[i]);
 
             }
-
-            //const struct dx_record_info_t* record = dx_get_record_by_name(name);
-            ////DataRecord record = scheme.findRecordByName(name);
-            //if (record != NULL) {
-            //    //RecordReader rr = record;
-            //    if (!dx_matching_fields(record, fname, ftype))
-            //        rr = createRecordAdapter(id, record, fname, ftype);
-            //    if (rr != null)
-            //        remapRecord(id, rr); // silently remap
-            //    else
-            //        record = null; // log the error message (see below)
-            //} else {
-            //    // otherwise, attempt to create new record to process and skip incoming data
-            //    record = createRecord(id, name, fname, ftype);
-            //}
         }
 		return parseSuccessful();
 }

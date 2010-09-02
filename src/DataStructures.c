@@ -52,10 +52,10 @@
 static const struct dx_field_info_ex_t dx_fields_trade[] =  
         { 
 		  {dx_fid_utf_char,							 L"Last.Exchange"}, 
-		  {dx_fid_compact_int,						 L"Last.Time "}, 
+		  {dx_fid_compact_int,						 L"Last.Time"}, 
 		  {dx_fid_compact_int| dx_fid_flag_decimal,	 L"Last.Price"},
 		  {dx_fid_compact_int,						 L"Last.Size"}, 
-		  {dx_fid_compact_int,						 L"Last.Tick "}, 
+		  {dx_fid_compact_int,						 L"Last.Tick"}, 
 		  {dx_fid_compact_int| dx_fid_flag_decimal,  L"Last.Change"}, 
 		  {dx_fid_compact_int| dx_fid_flag_decimal,	 L"Volume"}
 		}; 

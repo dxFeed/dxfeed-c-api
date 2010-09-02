@@ -24,6 +24,8 @@
 #ifndef PRIMITIVE_TYPES_H_INCLUDED
 #define PRIMITIVE_TYPES_H_INCLUDED
 
+#pragma pack(1) //TODO: crossplatform thing move to .h?
+
 typedef int bool;
 
 #define true 1
