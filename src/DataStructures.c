@@ -48,7 +48,16 @@
 /*
 *   fields of data records
 */
-static const struct dx_field_info_ex_t dx_fields_stub[] = { {dx_fid_void , L"Stub"} }; 
+static const struct dx_field_info_ex_t dx_fields_trade[] =  
+        { 
+		  {dx_fid_utf_char,							 L"Last.Exchange"}, 
+		  {dx_fid_compact_int,						 L"Last.Time "}, 
+		  {dx_fid_compact_int| dx_fid_flag_decimal,	 L"Last.Price"},
+		  {dx_fid_compact_int,						 L"Last.Size"}, 
+		  {dx_fid_compact_int,						 L"Last.Tick "}, 
+		  {dx_fid_compact_int| dx_fid_flag_decimal,  L"Last.Change"}, 
+		  {dx_fid_compact_int| dx_fid_flag_decimal,	 L"Volume"}
+		}; 
 
 static const struct dx_field_info_ex_t dx_fields_quote[] =
         { 
@@ -61,16 +70,36 @@ static const struct dx_field_info_ex_t dx_fields_quote[] =
 		  {dx_fid_compact_int,						 L"Bid.Time"}, 
 		  {dx_fid_compact_int,						 L"Ask.Time"}
 		}; 
-
-//static const struct dx_field_info_ex_t dx_fields_2[] =
-//        { {dx_fid_byte, L"BYTE", L"Field1"}, {dx_fid_int, L"INT", L"Field2"}, {dx_fid_byte, L"BYTE", L"Field3"} };
-//
-//static const struct dx_field_info_ex_t dx_fields_3[] =
-//        { {dx_fid_int, L"INT", L"Field1"}, {dx_fid_compact_int, L"COMPACT_INT", L"Field2"}, {dx_fid_utf_char_array, L"UTF_CHAR_ARRAY", L"Field3"} };
-//
-//static const struct dx_field_info_ex_t dx_fields_4[] =
-//        { {dx_fid_short, L"SHORT", L"Field1"}, {dx_fid_utf_char, L"UTF_CHAR", L"Field2"}, {dx_fid_int, L"INT", L"Field3"}, {dx_fid_byte, L"BYTE", L"Field4"} };
-
+static const struct dx_field_info_ex_t dx_fields_fundamental[] =
+        { 
+		  {dx_fid_compact_int | dx_fid_flag_decimal, L"High.Price"}, 
+		  {dx_fid_compact_int | dx_fid_flag_decimal, L"Low.Price"}, 
+		  {dx_fid_compact_int | dx_fid_flag_decimal, L"Open.Price"},
+		  {dx_fid_compact_int | dx_fid_flag_decimal, L"Close.Price"}, 
+		  {dx_fid_compact_int,						 L"OpenInterest"} 
+		}; 
+static const struct dx_field_info_ex_t dx_fields_profile[] =
+        { 
+		  {dx_fid_compact_int | dx_fid_flag_decimal, L"Beta"}, 
+		  {dx_fid_compact_int | dx_fid_flag_decimal, L"Eps"}, 
+		  {dx_fid_compact_int,						 L"DivFreq"},
+		  {dx_fid_compact_int | dx_fid_flag_decimal, L"ExdDiv.Amount"}, 
+		  {dx_fid_compact_int ,						 L"ExdDiv.Date"}, 
+		  {dx_fid_compact_int | dx_fid_flag_decimal, L"52High.Price"}, 
+		  {dx_fid_compact_int | dx_fid_flag_decimal, L"52Low.Price"}, 
+		  {dx_fid_compact_int | dx_fid_flag_decimal, L"Shares"},
+		  {dx_fid_compact_int,						 L"IsIndex"}, 
+		  {dx_fid_utf_char_array,					 L"Description"}
+		}; 
+static const struct dx_field_info_ex_t dx_fields_market_maker[] =
+        { 
+		  {dx_fid_utf_char,	   				         L"MMExchange"}, 
+		  {dx_fid_compact_int,						 L"MMID"}, 
+		  {dx_fid_compact_int| dx_fid_flag_decimal,	 L"MMBid.Price"},
+		  {dx_fid_compact_int ,						 L"MMBid.Size"}, 
+		  {dx_fid_compact_int | dx_fid_flag_decimal, L"MMAsk.Price"}, 
+		  {dx_fid_compact_int ,						 L"MMAsk.Size"} 
+		}; 
 /* -------------------------------------------------------------------------- */
 
 /*
@@ -78,11 +107,11 @@ static const struct dx_field_info_ex_t dx_fields_quote[] =
 */
 static const struct dx_record_info_t dx_records[] = 
 {
-	{ 0, L"Stub", sizeof(dx_fields_stub) / sizeof(dx_fields_stub[0]), &dx_fields_stub[0] },
+	{ 0, L"Trade", sizeof(dx_fields_trade) / sizeof(dx_fields_trade[0]), &dx_fields_trade[0] },
     { 1, L"Quote", sizeof(dx_fields_quote) / sizeof(dx_fields_quote[0]), &dx_fields_quote[0] },
-   // { 2, L"Record2", sizeof(dx_fields_2) / sizeof(dx_fields_2[0]), &dx_fields_2[0] },
-   // { 3, L"Record3", sizeof(dx_fields_3) / sizeof(dx_fields_3[0]), &dx_fields_3[0] },
-   // { 4, L"Record4", sizeof(dx_fields_4) / sizeof(dx_fields_4[0]), &dx_fields_4[0] },
+    { 2, L"Fundamental", sizeof(dx_fields_fundamental) / sizeof(dx_fields_fundamental[0]), &dx_fields_fundamental[0] },
+    { 3, L"Profile", sizeof(dx_fields_profile) / sizeof(dx_fields_profile[0]), &dx_fields_profile[0] },
+    { 4, L"MarketMaker", sizeof(dx_fields_market_maker) / sizeof(dx_fields_market_maker[0]), &dx_fields_market_maker[0] },
 };
 
 static const dx_int_t dx_records_count = sizeof(dx_records) / sizeof(dx_records[0]);
