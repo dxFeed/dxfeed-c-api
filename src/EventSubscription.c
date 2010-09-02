@@ -423,7 +423,7 @@ dx_symbol_data_ptr_t dx_subscribe_symbol (dx_const_string_t symbol_name, dx_subs
             dummy.cipher = dx_symbol_name_hasher(symbol_name);
         }
 
-        symbol_array_obj_ptr = &(symbol_container[dx_get_bucket_index(dummy.cipher)];
+        symbol_array_obj_ptr = &(symbol_container[dx_get_bucket_index(dummy.cipher)]);
 
         DX_ARRAY_SEARCH(symbol_array_obj_ptr->elements, 0, symbol_array_obj_ptr->size,
                         &dummy, comparator, true, symbol_exists, symbol_index);
