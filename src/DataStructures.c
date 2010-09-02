@@ -180,3 +180,14 @@ dx_int_t get_event_type_by_id(dx_int_t record_id){
 		default: return (DX_ET_UNUSED);
 	}
 }
+
+dx_const_string_t dx_event_type_to_string(dx_int_t event_type){
+	switch (event_type){
+		case DX_ET_TRADE: return L"Trade"; 
+		case DX_ET_QUOTE: return L"Quote"; 
+		case DX_ET_FUNDAMENTAL: return L"Fundamental"; 
+		case DX_ET_PROFILE: return L"Profile"; 
+		case DX_ET_MARKET_MAKER: return L"MarketMaker"; 
+		default: return L"";
+	}	
+}

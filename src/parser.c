@@ -208,13 +208,13 @@ enum dx_result_t dx_read_records(dx_int_t id) {
 }
 
 enum dx_result_t dx_parse_data() {
-    //lastCipher = 0;
-    //lastSymbol = NULL;
     dx_int_t start_position = dx_get_in_buffer_position();
     dx_int_t last_rec_position = start_position;
 
     dx_int_t id;
 	dx_int_t records_count = 0;
+
+	dx_string_t symbol;
 
     CHECKED_CALL_0(dx_read_symbol);
     CHECKED_CALL(dx_read_compact_int, &id);
@@ -225,7 +225,9 @@ enum dx_result_t dx_parse_data() {
 		++records_count;
         };
 	//todo: maybe move to another file?
-	dx_process_event_data(get_event_type_by_id(id), lastSymbol, lastCipher, records_buffer, records_buffer_size );
+	
+	CHECKED_CALL_2 (dx_decode_symbol_name, lastCipher, &symbol); 
+	dx_process_event_data(get_event_type_by_id(id),symbol , lastCipher, records_buffer, records_buffer_size );
 	records_buffer_position = 0; // mean we've called callback
 
 }

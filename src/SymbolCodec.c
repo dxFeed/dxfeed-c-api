@@ -215,7 +215,7 @@ dx_int_t dx_encode_symbol_name (dx_const_string_t symbol) {
     }
     return dx_encode_penta(penta, plen);
 }
-enum dx_result_t dx_decode_symbol_name(dx_int_t cipher, OUT dx_string_t* symbol){
+enum dx_result_t dx_decode_symbol_name(dx_int_t cipher, OUT dx_string_t* symbol){// TODO: memory free????
 	dx_long_t penta;
 
 	if (cipher == 0 ){
