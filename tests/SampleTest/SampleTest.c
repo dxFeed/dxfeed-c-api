@@ -43,11 +43,11 @@ void listener(int event_type, dx_const_string_t symbol_name,const dx_event_data_
 				trade[i].last_exchange,trade[i].last_time,trade[i].last_price,trade[i].last_size,trade[i].last_tick,trade[i].last_change,trade[i].volume);
 		}
 		if (event_type == DX_ET_FUNDAMENTAL){
-			struct dxf_market_maker* mm = (struct dxf_market_maker*)data;
-		
-			//for ( ; i < data_count ; ++i )
-			//	wprintf(L"MMExchange=%C MMID=%i  MMBid.Price=%f MMBid.Size=%i MMAsk.Price=%f MMAsk.Size=%i\n" , 
-			//	mm[i].mm_exchange,mm[i].mm_id,mm[i].mmbid_price ,mm[i].mmbid_size ,mm[i].mmask_price ,mm[i].mmask_size);
+			struct dxf_fundamental_t* fundamental = (struct dxf_fundamental_t*)data;
+
+			for ( ; i < data_count ; ++i )
+				wprintf(L"High.Price=%f Low.Price=%f  Open.Price=%f Close.Price=%f OpenInterest=%i\n"  , 
+				fundamental[i].high_price, fundamental[i].low_price, fundamental[i].open_price, fundamental[i].close_price, fundamental[i].open_interest);
 		}
 		if (event_type == DX_ET_PROFILE){
 			struct dxf_market_maker* mm = (struct dxf_market_maker*)data;
@@ -97,7 +97,7 @@ int main (int argc, char* argv[]) {
     }
 
     printf("Connection successful!\n");
-    dxf_add_subscription(/**/DX_ET_TRADE /*| DX_ET_QUOTE | DX_ET_MARKET_MAKER | DX_ET_FUNDAMENTAL | DX_ET_PROFILE*/, &subscription );
+    dxf_add_subscription(/*DX_ET_TRADE | DX_ET_QUOTE | DX_ET_MARKET_MAKER |*/ DX_ET_FUNDAMENTAL /*| DX_ET_PROFILE*/, &subscription );
 	dxf_add_symbol(subscription, L"IBM"); 
 	dxf_attach_event_listener(subscription, listener);
     Sleep(1000000);

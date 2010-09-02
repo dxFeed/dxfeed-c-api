@@ -82,6 +82,14 @@ struct dxf_trade_t {
 	dx_double_t			last_change;	
 	dx_double_t			volume;	
 };
+struct dxf_fundamental_t{
+	dx_double_t			high_price;
+	dx_double_t			low_price;
+	dx_double_t			open_price;
+	dx_double_t			close_price;
+	dx_int_t			open_interest;
+};
+
 /* -------------------------------------------------------------------------- */
 /*
  *	Event listener prototype
