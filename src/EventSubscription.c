@@ -385,6 +385,18 @@ int dx_name_symbol_comparator (dx_symbol_data_ptr_t e1, dx_symbol_data_ptr_t e2)
 }
 
 /* -------------------------------------------------------------------------- */
+
+size_t dx_get_bucket_index (dx_int_t cipher) {
+    dx_int_t mod = cipher % SYMBOL_BUCKET_COUNT;
+    
+    if (mod < 0) {
+        mod += SYMBOL_BUCKET_COUNT;
+    }
+    
+    return (size_t)mod;
+}
+
+/* -------------------------------------------------------------------------- */
 /*
  *	Auxiliary functions
  */
@@ -411,7 +423,7 @@ dx_symbol_data_ptr_t dx_subscribe_symbol (dx_const_string_t symbol_name, dx_subs
             dummy.cipher = dx_symbol_name_hasher(symbol_name);
         }
 
-        symbol_array_obj_ptr = &(symbol_container[((unsigned)dummy.cipher) % SYMBOL_BUCKET_COUNT]);
+        symbol_array_obj_ptr = &(symbol_container[dx_get_bucket_index(dummy.cipher)];
 
         DX_ARRAY_SEARCH(symbol_array_obj_ptr->elements, 0, symbol_array_obj_ptr->size,
                         &dummy, comparator, true, symbol_exists, symbol_index);
@@ -498,7 +510,7 @@ bool dx_unsubscribe_symbol (dx_symbol_data_ptr_t symbol_data, dx_subscription_da
             comparator = dx_hashed_symbol_comparator;
         }
         
-        symbol_array_obj_ptr = &(symbol_container[((unsigned)symbol_data->cipher) % SYMBOL_BUCKET_COUNT]);
+        symbol_array_obj_ptr = &(symbol_container[dx_get_bucket_index(symbol_data->cipher)]);
         
         DX_ARRAY_SEARCH(symbol_array_obj_ptr->elements, 0, symbol_array_obj_ptr->size,
                         symbol_data, comparator, true, symbol_exists, symbol_index);
@@ -603,7 +615,7 @@ dx_symbol_data_ptr_t dx_find_symbol (dx_const_string_t symbol_name, dx_int_t sym
         dummy.cipher = dx_symbol_name_hasher(symbol_name);
     }
 
-    symbol_array_obj_ptr = &(symbol_container[((unsigned)dummy.cipher) % SYMBOL_BUCKET_COUNT]);
+    symbol_array_obj_ptr = &(symbol_container[dx_get_bucket_index(dummy.cipher)]);
 
     DX_ARRAY_SEARCH(symbol_array_obj_ptr->elements, 0, symbol_array_obj_ptr->size,
                     &dummy, comparator, true, symbol_exists, symbol_index);
@@ -941,7 +953,7 @@ bool dx_process_event_data (int event_type, dx_const_string_t symbol_name, dx_in
     for (; cur_subscr_index < symbol_data->subscriptions.size; ++cur_subscr_index) {
         dx_subscription_data_ptr_t subscr_data = symbol_data->subscriptions.elements[cur_subscr_index];
         size_t cur_listener_index = 0;
-       
+        
         if (!(subscr_data->event_types & event_type)) {
             /* subscription doesn't want this specific event type */
             

@@ -28,6 +28,8 @@
 #include "DXMemory.h"
 #include "DXErrorCodes.h"
 
+unsigned g_invalid_buffer_length = (unsigned)-1;
+
 /* -------------------------------------------------------------------------- */
 /*
  *	Network error codes
@@ -82,7 +84,7 @@ void* dx_socket_reader (void* arg) {
     ctx = &(conn_data->context);
     
     if (!dx_init_error_subsystem()) {
-        ctx->receiver(NULL, 0);
+        ctx->receiver(NULL, g_invalid_buffer_length);
 
         return NULL;
     }
@@ -99,9 +101,9 @@ void* dx_socket_reader (void* arg) {
         switch (count_of_bytes_read) {
         case INVALID_DATA_SIZE:
             /* the socket error
-            calling the data receiver to inform them something's going wrong */
+               calling the data receiver to inform them something's going wrong */
 
-            ctx->receiver(NULL, 0);
+            ctx->receiver(NULL, g_invalid_buffer_length);
 
             return NULL;
         case 0:
