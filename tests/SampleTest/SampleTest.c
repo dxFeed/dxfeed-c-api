@@ -97,21 +97,41 @@ int main (int argc, char* argv[]) {
     }
 
     printf("Connection successful!\n");
-    dxf_add_subscription(/*DX_ET_TRADE |*/ DX_ET_QUOTE /*| DX_ET_MARKET_MAKER |*/ /*DX_ET_FUNDAMENTAL*/ /*| DX_ET_PROFILE*/, &subscription );
+<<<<<<< .mine    
+	if (!dxf_add_subscription(/*DX_ET_TRADE | DX_ET_QUOTE | DX_ET_MARKET_MAKER |*/ DX_ET_FUNDAMENTAL /*| DX_ET_PROFILE*/, &subscription )) {
+        process_last_error();
+        
+        return -1;
+    };
+	
+	if (!dxf_add_symbol(subscription, L"IBM")) {
+        process_last_error();
+        
+        return -1;
+    }; 
+
+	if (!dxf_attach_event_listener(subscription, listener)) {
+        process_last_error();
+        
+        return -1;
+    };
+    printf("Subscription successful!\n");
+
+=======    dxf_add_subscription(/*DX_ET_TRADE |*/ DX_ET_QUOTE /*| DX_ET_MARKET_MAKER |*/ /*DX_ET_FUNDAMENTAL*/ /*| DX_ET_PROFILE*/, &subscription );
 	dxf_add_symbol(subscription, L"IBM"); 
 	dxf_attach_event_listener(subscription, listener);
-    Sleep(1000000);
+>>>>>>> .theirs    Sleep(1000000);
     
-  //  printf("Disconnecting from host...\n");
+    printf("Disconnecting from host...\n");
     
- //   if (!dxf_disconnect_feed()) {
-  //      process_last_error();
+    if (!dxf_disconnect_feed()) {
+        process_last_error();
         
-  //      return -1;
-  //  }
+        return -1;
+    }
     
-  //  printf("Disconnect successful!\n"
-  //         "Connection test completed successfully!\n");
+    printf("Disconnect successful!\n"
+           "Connection test completed successfully!\n");
            
     return 0;
 }
