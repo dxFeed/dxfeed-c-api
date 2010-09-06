@@ -17,6 +17,8 @@
  *
 */
 
+#ifndef SYMBOL_CODEC_H_INCLUDED
+#define SYMBOL_CODEC_H_INCLUDED
 
 /**
 * The PentaCodec performs symbol coding and serialization using
@@ -63,7 +65,7 @@
 * for details of string encoding.
 */
 
-
+#include "ParserCommon.h"
 
 /* -------------------------------------------------------------------------- */
 
@@ -71,7 +73,7 @@
 /**
 *	Initialize of symbol codec
 */
-enum dx_result_t dx_init_symbol_codec();
+dx_result_t dx_init_symbol_codec();
 
 /* -------------------------------------------------------------------------- */
 
@@ -93,7 +95,7 @@ dx_int_t dx_encode_symbol_name (dx_const_string_t symbol);
 * Returns decoded symbol for specified cipher.
 * Returns null if specified cipher is 0.
 */
-enum dx_result_t dx_decode_symbol_name(dx_int_t cipher, OUT dx_string_t* symbol);
+dx_result_t dx_decode_symbol_name(dx_int_t cipher, OUT dx_string_t* symbol);
 /* -------------------------------------------------------------------------- */
 
 /**
@@ -115,8 +117,10 @@ enum dx_result_t dx_decode_symbol_name(dx_int_t cipher, OUT dx_string_t* symbol)
 * @return result type code as described in the method above
 * @throws IOException if an I/O error occurs
 */
-enum dx_result_t dx_codec_read_symbol(dx_char_t* buffer, dx_int_t buf_len, OUT dx_string_t* result, OUT dx_int_t* adv_res);
+dx_result_t dx_codec_read_symbol(dx_char_t* buffer, dx_int_t buf_len, OUT dx_string_t* result, OUT dx_int_t* adv_res);
 
 /* -------------------------------------------------------------------------- */
 
-enum dx_result_t dx_codec_write_symbol(dx_byte_t* buf, dx_int_t buf_len, dx_int_t pos, dx_int_t cipher, dx_string_t symbol);
+dx_result_t dx_codec_write_symbol(dx_byte_t* buf, dx_int_t buf_len, dx_int_t pos, dx_int_t cipher, dx_string_t symbol);
+
+#endif /* SYMBOL_CODEC_H_INCLUDED */

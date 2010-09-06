@@ -154,9 +154,9 @@ DXFEED_API ERRORCODE dxf_add_symbol (dxf_subscription_t subscription, dx_string_
 	if (dx_get_event_subscription_event_types(subscription, &events)==false)
 		return DXF_FAILURE; //TODO: set_last_error ?
 	
-	for (; j < DX_ET_LAST ; ++j){
-		if (events & (1 << j )){
-			dx_create_subscription(&sub_buffer, &out_len, MESSAGE_TICKER_ADD_SUBSCRIPTION, dx_encode_symbol_name(symbol), symbol,get_record_id(events & (1 << j )) /*TODO*/);
+	for (; j < dx_eid_count; ++j) {
+		if (events & (1 << j)) {
+			dx_create_subscription(&sub_buffer, &out_len, MESSAGE_TICKER_ADD_SUBSCRIPTION, dx_encode_symbol_name(symbol), symbol, j /*TODO*/);
 			dx_send_data(sub_buffer, out_len);
 		}
 	}

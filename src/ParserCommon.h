@@ -29,17 +29,17 @@
 // prefix of function's parameters
 #define OUT
 
-enum dx_result_t {
+typedef enum {
     R_SUCCESSFUL = 0,
     R_FAILED
-};
+} dx_result_t;
 
 #define MAX(a,b) (((a)>(b))?(a):(b))
 #define MIN(a,b) (((a)<(b))?(a):(b))
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t setParseError(int err);
-enum dx_result_t parseSuccessful();
+dx_result_t setParseError(int err);
+dx_result_t parseSuccessful();
 
 enum parser_result_t dx_get_parser_last_error();
 
@@ -141,7 +141,7 @@ dx_int_t toCodePoint(dx_char_t high, dx_char_t low);
 * value(s). (If dstIndex is equal to dstLen-1 and the specified codePoint is a supplementary
 * character, the high-surrogate value is not stored in dst[dstIndex].)
 */
-enum dx_result_t toChars(dx_int_t codePoint, dx_int_t dstIndex, dx_int_t dstLen, OUT dx_string_t* dst, OUT dx_int_t* res);
+dx_result_t toChars(dx_int_t codePoint, dx_int_t dstIndex, dx_int_t dstLen, OUT dx_string_t* dst, OUT dx_int_t* res);
 
 void toSurrogates(dx_int_t codePoint, dx_int_t index, OUT dx_string_t* dst);
 

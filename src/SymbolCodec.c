@@ -60,7 +60,7 @@ void dx_init_penta(dx_int_t c, dx_int_t _penta, dx_int_t _plen) {
 
 /* -------------------------------------------------------------------------- */
 
-enum dx_result_t dx_init_symbol_codec() {
+dx_result_t dx_init_symbol_codec() {
     // initialization
     dx_int_t i = PENTA_LENGTH;
     dx_int_t penta = 0x03C0;
@@ -150,7 +150,7 @@ dx_string_t dx_to_string(dx_long_t penta) {//TODO: errors handling
 * Decodes cipher into penta code. The specified cipher must not be 0.
 * The returning penta code must be valid (no more than 35 bits).
 */
-enum dx_result_t dx_decode_cipher(dx_int_t cipher, OUT dx_long_t* res) {
+dx_result_t dx_decode_cipher(dx_int_t cipher, OUT dx_long_t* res) {
     if (!res) {
         return setParseError(dx_pr_illegal_argument);
     };
@@ -215,7 +215,7 @@ dx_int_t dx_encode_symbol_name (dx_const_string_t symbol) {
     }
     return dx_encode_penta(penta, plen);
 }
-enum dx_result_t dx_decode_symbol_name(dx_int_t cipher, OUT dx_string_t* symbol){// TODO: memory free????
+dx_result_t dx_decode_symbol_name(dx_int_t cipher, OUT dx_string_t* symbol){// TODO: memory free????
 	dx_long_t penta;
 
 	if (cipher == 0 ){
@@ -231,7 +231,7 @@ enum dx_result_t dx_decode_symbol_name(dx_int_t cipher, OUT dx_string_t* symbol)
 }
 /* -------------------------------------------------------------------------- */
 
-enum dx_result_t dx_codec_read_symbol(dx_char_t* buffer, dx_int_t buf_len, OUT dx_string_t* result, OUT dx_int_t* adv_res) {
+dx_result_t dx_codec_read_symbol(dx_char_t* buffer, dx_int_t buf_len, OUT dx_string_t* result, OUT dx_int_t* adv_res) {
     dx_int_t i;
     dx_long_t penta;
     dx_int_t tmp_int_1;
@@ -329,7 +329,7 @@ enum dx_result_t dx_codec_read_symbol(dx_char_t* buffer, dx_int_t buf_len, OUT d
 
 /* -------------------------------------------------------------------------- */
 
-enum dx_result_t dx_codec_write_symbol(dx_byte_t* buf, dx_int_t buf_len, dx_int_t pos, dx_int_t cipher, dx_string_t symbol) {
+dx_result_t dx_codec_write_symbol(dx_byte_t* buf, dx_int_t buf_len, dx_int_t pos, dx_int_t cipher, dx_string_t symbol) {
     if (cipher != 0) {
         dx_long_t penta;
 

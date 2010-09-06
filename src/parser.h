@@ -17,18 +17,20 @@
 *
 */
 
-#ifndef PARSER_H
-#define PARSER_H
+#ifndef PARSER_H_INCLUDED
+#define PARSER_H_INCLUDED
 
 #include "PrimitiveTypes.h"
 #include "DXTypes.h"
+#include "ParserCommon.h"
+
 /* -------------------------------------------------------------------------- 
-*
-* Message types
-*
+/*
+ * Message types
+ */
 /* -------------------------------------------------------------------------- */
 
-enum dx_message_type_t {
+typedef enum {
     MESSAGE_HEARTBEAT = 0,
 
     MESSAGE_DESCRIBE_PROTOCOL = 1,
@@ -68,11 +70,11 @@ enum dx_message_type_t {
     MESSAGE_TEXT_FORMAT_COMMENT = 35, // '#'
 
    // MT_NULL = UINT_MAX //TODO: do we need it? this structure copied from java one-by-one
-};
+} dx_message_type_t;
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_is_subscription_message(enum dx_message_type_t type);
+bool dx_is_subscription_message (dx_message_type_t type);
 
 /**
 * Parses accumulated data and retrieve processed messages to
@@ -81,6 +83,6 @@ bool dx_is_subscription_message(enum dx_message_type_t type);
 * updates buffer_pos value.
 * @param consumer MessageConsumer to pass parsed messages.
 */
-enum dx_result_t dx_parse( const dx_byte_t* buf, dx_int_t bufLen );
+dx_result_t dx_parse( const dx_byte_t* buf, dx_int_t bufLen );
 
-#endif // PARSER_H
+#endif /* PARSER_H_INCLUDED */

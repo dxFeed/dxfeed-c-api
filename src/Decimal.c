@@ -76,7 +76,7 @@ static const dx_int_t EXTRA_PRECISION_DIVISORS[] = {
 
 
 
-enum dx_result_t dx_int_to_double(dx_int_t integer, OUT dx_double_t* decimal){
+dx_result_t dx_int_to_double(dx_int_t integer, OUT dx_double_t* decimal){
 	dx_int_t power = integer & 0x0F;
 	if (power == 0) {
 		// extra precision and special cases

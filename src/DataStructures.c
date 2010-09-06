@@ -20,108 +20,111 @@
 #include "DataStructures.h"
 #include "ParserCommon.h"
 #include "EventData.h"
-/* -------------------------------------------------------------------------- */
-
-//static const struct dx_field_info_t dx_fields[] = 
-//{
-//    {dx_fid_void,           L"VOID"},
-//    {dx_fid_byte,           L"BYTE"},
-//    {dx_fid_utf_char,       L"UTF_CHAR"},
-//    {dx_fid_short,          L"SHORT"},
-//    {dx_fid_int,            L"INT"},
-//    {dx_fid_compact_int,    L"COMPACT_INT"},
-//    {dx_fid_byte_array,     L"BYTE_ARRAY"},
-//    {dx_fid_utf_char_array, L"UTF_CHAR_ARRAY"},
-//
-//    {dx_fid_compact_int | dx_fid_flag_decimal,      L"DECIMAL"},
-//    {dx_fid_compact_int | dx_fid_flag_short_string, L"SHORT_STRING"},
-//    {dx_fid_byte_array | dx_fid_flag_string,        L"STRING"},
-//    {dx_fid_byte_array | dx_fid_flag_custom_object, L"CUSTOM_OBJECT"},
-//    {dx_fid_byte_array | dx_fid_flag_serial_object, L"SERIAL_OBJECT"}
-//};
+#include "EventDataFieldSetters.h"
 
 /* -------------------------------------------------------------------------- */
-
-//static const dx_int_t dx_fields_types_count = sizeof(dx_fields) / sizeof(dx_fields[0]);
-
-/* -------------------------------------------------------------------------- */
-
 /*
-*   fields of data records
-*/
-static const struct dx_field_info_ex_t dx_fields_trade[] =  
-        { 
-		  {dx_fid_utf_char,							 L"Last.Exchange"}, 
-		  {dx_fid_compact_int,						 L"Last.Time"}, 
-		  {dx_fid_compact_int| dx_fid_flag_decimal,	 L"Last.Price"},
-		  {dx_fid_compact_int,						 L"Last.Size"}, 
-		  {dx_fid_compact_int,						 L"Last.Tick"}, 
-		  {dx_fid_compact_int| dx_fid_flag_decimal,  L"Last.Change"}, 
-		  {dx_fid_compact_int| dx_fid_flag_decimal,	 L"Volume"}
-		}; 
-
-static const struct dx_field_info_ex_t dx_fields_quote[] =
-        { 
-		  {dx_fid_utf_char,							 L"Bid.Exchange"}, 
-		  {dx_fid_compact_int | dx_fid_flag_decimal, L"Bid.Price"}, 
-		  {dx_fid_compact_int,						 L"Bid.Size"},
-		  {dx_fid_utf_char,							 L"Ask.Exchange"}, 
-		  {dx_fid_compact_int | dx_fid_flag_decimal, L"Ask.Price"}, 
-		  {dx_fid_compact_int,						 L"Ask.Size"}, 
-		  {dx_fid_compact_int,						 L"Bid.Time"}, 
-		  {dx_fid_compact_int,						 L"Ask.Time"}
-		}; 
-static const struct dx_field_info_ex_t dx_fields_fundamental[] =
-        { 
-		  {dx_fid_compact_int | dx_fid_flag_decimal, L"High.Price"}, 
-		  {dx_fid_compact_int | dx_fid_flag_decimal, L"Low.Price"}, 
-		  {dx_fid_compact_int | dx_fid_flag_decimal, L"Open.Price"},
-		  {dx_fid_compact_int | dx_fid_flag_decimal, L"Close.Price"}, 
-		  {dx_fid_compact_int,						 L"OpenInterest"} 
-		}; 
-static const struct dx_field_info_ex_t dx_fields_profile[] =
-        { 
-		  {dx_fid_compact_int | dx_fid_flag_decimal, L"Beta"}, 
-		  {dx_fid_compact_int | dx_fid_flag_decimal, L"Eps"}, 
-		  {dx_fid_compact_int,						 L"DivFreq"},
-		  {dx_fid_compact_int | dx_fid_flag_decimal, L"ExdDiv.Amount"}, 
-		  {dx_fid_compact_int ,						 L"ExdDiv.Date"}, 
-		  {dx_fid_compact_int | dx_fid_flag_decimal, L"52High.Price"}, 
-		  {dx_fid_compact_int | dx_fid_flag_decimal, L"52Low.Price"}, 
-		  {dx_fid_compact_int | dx_fid_flag_decimal, L"Shares"},
-		  {dx_fid_compact_int,						 L"IsIndex"}, 
-		  {dx_fid_utf_char_array,					 L"Description"}
-		}; 
-static const struct dx_field_info_ex_t dx_fields_market_maker[] =
-        { 
-		  {dx_fid_utf_char,	   				         L"MMExchange"}, 
-		  {dx_fid_compact_int,						 L"MMID"}, 
-		  {dx_fid_compact_int| dx_fid_flag_decimal,	 L"MMBid.Price"},
-		  {dx_fid_compact_int ,						 L"MMBid.Size"}, 
-		  {dx_fid_compact_int | dx_fid_flag_decimal, L"MMAsk.Price"}, 
-		  {dx_fid_compact_int ,						 L"MMAsk.Size"} 
-		}; 
+ *	Trade data fields
+ */
 /* -------------------------------------------------------------------------- */
 
+static const dx_field_info_t dx_fields_trade[] = { 
+	{ dx_fid_utf_char, L"Last.Exchange", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_trade_t, last_exchange) },
+	{ dx_fid_compact_int, L"Last.Time", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_trade_t, last_time) },
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Last.Price", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_trade_t, last_price) },
+	{ dx_fid_compact_int, L"Last.Size", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_trade_t, last_size) },
+	{ dx_fid_compact_int, L"Last.Tick", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_trade_t, last_tick) },
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Last.Change", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_trade_t, last_change) }, 
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Volume", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_trade_t, volume) }
+}; 
+
+/* -------------------------------------------------------------------------- */
 /*
-*   data records
-*/
-static const struct dx_record_info_t dx_records[] = 
-{
-	{ 0, L"Trade", sizeof(dx_fields_trade) / sizeof(dx_fields_trade[0]), &dx_fields_trade[0] },
-    { 1, L"Quote", sizeof(dx_fields_quote) / sizeof(dx_fields_quote[0]), &dx_fields_quote[0] },
-    { 2, L"Fundamental", sizeof(dx_fields_fundamental) / sizeof(dx_fields_fundamental[0]), &dx_fields_fundamental[0] },
-    { 3, L"Profile", sizeof(dx_fields_profile) / sizeof(dx_fields_profile[0]), &dx_fields_profile[0] },
-    { 4, L"MarketMaker", sizeof(dx_fields_market_maker) / sizeof(dx_fields_market_maker[0]), &dx_fields_market_maker[0] },
+ *	Quote data fields
+ */
+/* -------------------------------------------------------------------------- */
+
+static const dx_field_info_t dx_fields_quote[] = {
+    { dx_fid_utf_char, L"Bid.Exchange", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_quote_t, bid_exchange) },
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Bid.Price", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_quote_t, bid_price) },
+    { dx_fid_compact_int, L"Bid.Size", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_quote_t, bid_size) },
+    { dx_fid_utf_char, L"Ask.Exchange", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_quote_t, ask_exchange) },
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Ask.Price", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_quote_t, ask_price) },
+    { dx_fid_compact_int, L"Ask.Size", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_quote_t, ask_size) },
+    { dx_fid_compact_int, L"Bid.Time", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_quote_t, bid_time) },
+    { dx_fid_compact_int, L"Ask.Time", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_quote_t, ask_time) }
 };
 
-static const dx_int_t dx_records_count = sizeof(dx_records) / sizeof(dx_records[0]);
+/* -------------------------------------------------------------------------- */
+/*
+ *	Fundamental data fields
+ */
+/* -------------------------------------------------------------------------- */
+
+static const dx_field_info_t dx_fields_fundamental[] = { 
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"High.Price", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_fundamental_t, high_price) },
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Low.Price", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_fundamental_t, low_price) },
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Open.Price", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_fundamental_t, open_price) },
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Close.Price", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_fundamental_t, close_price) },
+	{ dx_fid_compact_int, L"OpenInterest", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_fundamental_t, open_interest) }
+};
+		
+/* -------------------------------------------------------------------------- */
+/*
+ *	Profile data fields
+ */
+/* -------------------------------------------------------------------------- */
+
+static const dx_field_info_t dx_fields_profile[] = { 
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Beta", NULL },
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Eps", NULL },
+	{ dx_fid_compact_int, L"DivFreq", NULL },
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"ExdDiv.Amount", NULL },
+	{ dx_fid_compact_int , L"ExdDiv.Date", NULL },
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"52High.Price", NULL },
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"52Low.Price", NULL },
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Shares", NULL },
+	{ dx_fid_compact_int, L"IsIndex", NULL },
+	{ dx_fid_utf_char_array, L"Description", NULL }
+}; 
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Market maker data fields
+ */
+/* -------------------------------------------------------------------------- */
+
+static const dx_field_info_t dx_fields_market_maker[] = { 
+	{ dx_fid_utf_char, L"MMExchange", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_market_maker, mm_exchange) },
+	{ dx_fid_compact_int, L"MMID", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_market_maker, mm_id) },
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"MMBid.Price", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_market_maker, mmbid_price) },
+	{ dx_fid_compact_int, L"MMBid.Size", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_market_maker, mmbid_size) },
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"MMAsk.Price", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_market_maker, mmask_price) },
+	{ dx_fid_compact_int, L"MMAsk.Size", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_market_maker, mmask_size) }
+}; 
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Event data records
+ */
+/* -------------------------------------------------------------------------- */
+
+static const dx_record_info_t dx_records[] = {
+	{ 0, L"Trade", sizeof(dx_fields_trade) / sizeof(dx_fields_trade[0]), &dx_fields_trade[0], dx_eid_trade },
+    { 1, L"Quote", sizeof(dx_fields_quote) / sizeof(dx_fields_quote[0]), &dx_fields_quote[0], dx_eid_quote },
+    { 2, L"Fundamental", sizeof(dx_fields_fundamental) / sizeof(dx_fields_fundamental[0]), &dx_fields_fundamental[0], dx_eid_fundamental },
+    { 3, L"Profile", sizeof(dx_fields_profile) / sizeof(dx_fields_profile[0]), &dx_fields_profile[0], dx_eid_profile },
+    { 4, L"MarketMaker", sizeof(dx_fields_market_maker) / sizeof(dx_fields_market_maker[0]), &dx_fields_market_maker[0], dx_eid_market_maker },
+};
+
+static const dx_int_t g_records_count = sizeof(dx_records) / sizeof(dx_records[0]);
 
 /* -------------------------------------------------------------------------- */
 
-const struct dx_record_info_t* dx_get_record_by_name(const dx_string_t name) {
+const dx_record_info_t* dx_get_record_by_name (dx_const_string_t name) {
     int i = 0;
-    for (; i < dx_records_count; ++i) {
+    
+    for (; i < g_records_count; ++i) {
         if (wcscmp(dx_records[i].name, name) == 0) {
             return &dx_records[i];
         }
@@ -132,17 +135,20 @@ const struct dx_record_info_t* dx_get_record_by_name(const dx_string_t name) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_matching_fields(const struct dx_record_info_t* record, const dx_string_t* fname, dx_int_t fname_len, dx_int_t* ftype, dx_int_t ftype_len) {
-    dx_int_t n = record->fields_count;
-    dx_int_t i;
+bool dx_matching_fields (const dx_record_info_t* record,
+                         const dx_const_string_t* field_names, size_t field_name_count,
+                         const dx_int_t* field_types, size_t field_type_count) {
+    size_t n = record->field_count;
+    size_t i = 0;
 
-    if (fname_len != n || ftype_len != n) {
-        return false; // different number of fields
+    if (field_name_count != record->field_count || field_type_count != record->field_count) {
+        return false;
     }
 
-    for (i = 0; i < n; i++) {
-        const struct dx_field_info_ex_t* fld = &record->fields[i];
-        if (wcscmp(fld->local_name, fname[i]) != 0 || fld->id != ftype[i]) {
+    for (; i < record->field_count; ++i) {
+        const dx_field_info_t* field = &(record->fields[i]);
+        
+        if (wcscmp(field->local_name, field_names[i]) != 0 || field->id != field_types[i]) {
             return false;
         }
     }
@@ -150,25 +156,19 @@ bool dx_matching_fields(const struct dx_record_info_t* record, const dx_string_t
     return true;
 }
 
+/* -------------------------------------------------------------------------- */
 
-enum dx_result_t dx_get_record_by_id(dx_int_t id, struct dx_record_info_t* record){
-	if (id < 0 || id > dx_records_count)
+dx_result_t dx_get_record_by_id (dx_int_t id, dx_record_info_t** record) {
+	if (id < 0 || id > g_records_count) {
 		return setParseError(dx_pr_wrong_record_id);
+    }
 
-	*record = dx_records[id];
+	*record = &dx_records[id];
+	
 	return parseSuccessful();
 }
-// record ids simply hardcoded
-dx_int_t get_record_id(dx_int_t event_type){
-	switch (event_type){
-		case DX_ET_TRADE: return 0; 
-		case DX_ET_QUOTE: return 1; 
-		case DX_ET_FUNDAMENTAL: return 2; 
-		case DX_ET_PROFILE: return 3; 
-		case DX_ET_MARKET_MAKER: return 4; 
-		default: return (-1);
-	}	
-}
+
+/* -------------------------------------------------------------------------- */
 
 dx_int_t get_event_type_by_id(dx_int_t record_id){
 	switch (record_id){

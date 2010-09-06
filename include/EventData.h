@@ -24,10 +24,9 @@
  #ifndef EVENT_DATA_H_INCLUDED
  #define EVENT_DATA_H_INCLUDED
 
-
-
 #include "PrimitiveTypes.h"
 #include "DXTypes.h"
+
 /* -------------------------------------------------------------------------- */
 /*
  *	Event type constants
@@ -37,16 +36,27 @@
  */
 /* -------------------------------------------------------------------------- */
 
-#define DX_ET_QUOTE			 (1 << 0)
-#define DX_ET_TRADE			 (1 << 1)
-#define DX_ET_FUNDAMENTAL	 (1 << 2)
-#define DX_ET_PROFILE		 (1 << 3)
-#define DX_ET_MARKET_MAKER	 (1 << 4)
-#define DX_ET_LAST			 (1 << 5)
-#define DX_ET_UNUSED		 (~ ((1 << 6) - 1 ))
+typedef enum {
+    dx_eid_trade,
+    dx_eid_quote,
+    dx_eid_fundamental,
+    dx_eid_profile,
+    dx_eid_market_maker,
+    
+    /* add new values above this line, add a new bit mask according to
+       the existing template */
+    
+    dx_eid_count
+} dx_event_id_t;
+
+#define DX_ET_TRADE			 (1 << dx_eid_trade)
+#define DX_ET_QUOTE			 (1 << dx_eid_quote)
+#define DX_ET_FUNDAMENTAL	 (1 << dx_eid_fundamental)
+#define DX_ET_PROFILE		 (1 << dx_eid_profile)
+#define DX_ET_MARKET_MAKER	 (1 << dx_eid_market_maker)
+#define DX_ET_UNUSED		 (~((1 << dx_eid_count) - 1))
 
 
-typedef void* dxf_subscription_t;
 /* -------------------------------------------------------------------------- */
 /*
  *	Event data structures
@@ -55,40 +65,43 @@ typedef void* dxf_subscription_t;
 
 typedef void* dx_event_data_t;
 
-struct dxf_quote_t {
-  	dx_char_t			bid_exchange;
-	dx_double_t			bid_price;
-	dx_int_t			bid_size;
-	dx_char_t			ask_exchange;
-	dx_double_t			ask_price;
-	dx_int_t			ask_size;	
-	dx_int_t			bid_time;	
-	dx_int_t			ask_time;   
-};
-struct dxf_market_maker{
-	dx_char_t			mm_exchange; 
-	dx_int_t			mm_id;
-	dx_double_t			mmbid_price;
-	dx_int_t 			mmbid_size;
-	dx_double_t			mmask_price; 
-	dx_int_t			mmask_size;
-};
-struct dxf_trade_t {
-  	dx_char_t			last_exchange;
-	dx_int_t			last_time;
-	dx_double_t			last_price;
-	dx_int_t			last_size;
-	dx_int_t			last_tick;
-	dx_double_t			last_change;	
-	dx_double_t			volume;	
-};
-struct dxf_fundamental_t{
-	dx_double_t			high_price;
-	dx_double_t			low_price;
-	dx_double_t			open_price;
-	dx_double_t			close_price;
-	dx_int_t			open_interest;
-};
+typedef struct {
+    dx_char_t last_exchange;
+    dx_int_t last_time;
+    dx_double_t last_price;
+    dx_int_t last_size;
+    dx_int_t last_tick;
+    dx_double_t last_change;	
+    dx_double_t	volume;	
+} dxf_trade_t;
+
+typedef struct {
+    dx_char_t bid_exchange;
+    dx_double_t bid_price;
+    dx_int_t bid_size;
+    dx_char_t ask_exchange;
+    dx_double_t ask_price;
+    dx_int_t ask_size;	
+    dx_int_t bid_time;
+    dx_int_t ask_time;   
+} dxf_quote_t;
+
+typedef struct {
+    dx_double_t	high_price;
+    dx_double_t	low_price;
+    dx_double_t	open_price;
+    dx_double_t	close_price;
+    dx_int_t open_interest;
+} dxf_fundamental_t;
+
+typedef struct {
+	dx_char_t mm_exchange;
+	dx_int_t mm_id;
+	dx_double_t mmbid_price;
+	dx_int_t mmbid_size;
+	dx_double_t mmask_price;
+	dx_int_t mmask_size;
+} dxf_market_maker;
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -96,8 +109,8 @@ struct dxf_fundamental_t{
  */
 /* -------------------------------------------------------------------------- */
 
-typedef void (*dx_event_listener_t)(int event_type, dx_const_string_t symbol_name,
-                                    const dx_event_data_t* data, int data_count);
+typedef void (*dx_event_listener_t) (int event_type, dx_const_string_t symbol_name,
+                                     const dx_event_data_t* data, int data_count);
 
  
 #endif /* EVENT_DATA_H_INCLUDED */

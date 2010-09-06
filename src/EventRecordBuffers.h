@@ -16,35 +16,49 @@
  * Contributor(s):
  *
  */
-
-/*
- *	Wrappers for the common C memory functions, to encapsulate the error handling
- */
-
-#ifndef DX_MEMORY_H_INCLUDED
-#define DX_MEMORY_H_INCLUDED
-
-/* -------------------------------------------------------------------------- */
-/*
- *	Memory function wrappers
- */
-/* -------------------------------------------------------------------------- */
-
-void* dx_malloc (size_t size);
-void* dx_calloc (size_t num, size_t size);
-void  dx_free (void* buf);
-void* dx_memcpy (void* destination, const void* source, size_t size);
-void* dx_memmove (void* destination, const void* source, size_t size);
-void* dx_memset (void* destination, int c, size_t size);
-/* -------------------------------------------------------------------------- */
-/*
- *	Memory function wrappers without error handling mechanism
  
- *  May be useful when the internal error handling mechanism cannot be relied
- *  upon, e.g. within its initialization.
+/*
+ *	Contains the functionality for managing the memory required to store
+ *  the event record data
+ */
+ 
+#ifndef EVENT_RECORD_BUFFERS_H_INCLUDED
+#define EVENT_RECORD_BUFFERS_H_INCLUDED
+
+#include "PrimitiveTypes.h"
+#include "EventData.h"
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Buffer manager functions prototypes
  */
 /* -------------------------------------------------------------------------- */
 
-void* dx_calloc_no_ehm (size_t num, size_t size);
+typedef void* (*dx_get_record_ptr_t)(size_t record_index);
+typedef void* (*dx_get_record_buffer_ptr_t)(void);
 
-#endif /* DX_MEMORY_H_INCLUDED */
+/* -------------------------------------------------------------------------- */
+/*
+ *	Buffer manager collection
+ */
+/* -------------------------------------------------------------------------- */
+
+typedef struct {
+    dx_get_record_ptr_t record_getter;
+    dx_get_record_buffer_ptr_t record_buffer_getter;
+} dx_buffer_manager_collection_t;
+
+extern const dx_buffer_manager_collection_t g_buffer_managers[dx_eid_count];
+
+void dx_clear_event_record_buffers (void);
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Auxiliary memory management functions
+ */
+/* -------------------------------------------------------------------------- */
+
+bool dx_store_string_buffer (dx_const_string_t buf);
+void dx_free_string_buffers (void);
+
+#endif /* EVENT_RECORD_BUFFERS_H_INCLUDED */

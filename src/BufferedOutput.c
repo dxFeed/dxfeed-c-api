@@ -63,7 +63,7 @@ void dx_set_out_buffer_position( dx_int_t pos ) {
 // ========== Implementation Details ==========
 ////////////////////////////////////////////////////////////////////////////////
 
-enum dx_result_t checkWrite(int requiredCapacity) {
+dx_result_t checkWrite(int requiredCapacity) {
     if ( !out_buffer ) {
         return setParseError(dx_pr_buffer_not_initialized);
     }
@@ -119,7 +119,7 @@ void writeIntUnchecked(dx_int_t val) {
 //}
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t write(const dx_byte_t* b, dx_int_t bLen, dx_int_t off, dx_int_t len) {
+dx_result_t write(const dx_byte_t* b, dx_int_t bLen, dx_int_t off, dx_int_t len) {
     if ((off | len | (off + len) | (bLen - (off + len))) < 0) {
         return setParseError(dx_pr_index_out_of_bounds);
     }
@@ -134,7 +134,7 @@ enum dx_result_t write(const dx_byte_t* b, dx_int_t bLen, dx_int_t off, dx_int_t
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t dx_write_boolean( OUT dx_bool_t val ) {
+dx_result_t dx_write_boolean( OUT dx_bool_t val ) {
     if (checkWrite(1) != R_SUCCESSFUL) {
         return R_FAILED;
     }
@@ -144,7 +144,7 @@ enum dx_result_t dx_write_boolean( OUT dx_bool_t val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t dx_write_byte( dx_byte_t val ) {
+dx_result_t dx_write_byte( dx_byte_t val ) {
     if (checkWrite(1) != R_SUCCESSFUL) {
         return R_FAILED;
     }
@@ -154,7 +154,7 @@ enum dx_result_t dx_write_byte( dx_byte_t val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t dx_write_short( dx_short_t val ) {
+dx_result_t dx_write_short( dx_short_t val ) {
     if (checkWrite(2) != R_SUCCESSFUL) {
         return R_FAILED;
     }
@@ -166,7 +166,7 @@ enum dx_result_t dx_write_short( dx_short_t val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t dx_write_char( dx_char_t val ) {
+dx_result_t dx_write_char( dx_char_t val ) {
     if (checkWrite(2) != R_SUCCESSFUL) {
         return R_FAILED;
     }
@@ -178,7 +178,7 @@ enum dx_result_t dx_write_char( dx_char_t val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t dx_write_int( dx_int_t val ) {
+dx_result_t dx_write_int( dx_int_t val ) {
     if (checkWrite(4) != R_SUCCESSFUL) {
         return R_FAILED;
     }
@@ -192,7 +192,7 @@ enum dx_result_t dx_write_int( dx_int_t val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t dx_write_long( dx_long_t val ) {
+dx_result_t dx_write_long( dx_long_t val ) {
     if (checkWrite(8) != R_SUCCESSFUL) {
         return R_FAILED;
     }
@@ -210,18 +210,18 @@ enum dx_result_t dx_write_long( dx_long_t val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t dx_write_float( dx_float_t val ) {
+dx_result_t dx_write_float( dx_float_t val ) {
     return dx_write_int(*((dx_int_t*)&val));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t dx_write_double( dx_double_t val) {
+dx_result_t dx_write_double( dx_double_t val) {
     return dx_write_long(*((dx_long_t*)&val));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t dx_write_bytes( const dx_char_t* val ) {
-    enum dx_result_t res = R_SUCCESSFUL;
+dx_result_t dx_write_bytes( const dx_char_t* val ) {
+    dx_result_t res = R_SUCCESSFUL;
     size_t length = wcslen(val);
     size_t i = 0;
     for (;i < length && res == R_SUCCESSFUL; i++) {
@@ -236,8 +236,8 @@ enum dx_result_t dx_write_bytes( const dx_char_t* val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t dx_write_chars( const dx_char_t* val ) {
-    enum dx_result_t res = R_SUCCESSFUL;
+dx_result_t dx_write_chars( const dx_char_t* val ) {
+    dx_result_t res = R_SUCCESSFUL;
     size_t length = wcslen(val);
     size_t i = 0;
     for (; i < length && res == R_SUCCESSFUL; i++) {
@@ -252,7 +252,7 @@ enum dx_result_t dx_write_chars( const dx_char_t* val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t dx_write_utf( const dx_string_t val ) {
+dx_result_t dx_write_utf( const dx_string_t val ) {
     size_t strlen = wcslen(val);
     dx_short_t utflen = 0;
     size_t i = 0;
@@ -293,7 +293,7 @@ enum dx_result_t dx_write_utf( const dx_string_t val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t dx_write_compact_int(dx_int_t val) {
+dx_result_t dx_write_compact_int(dx_int_t val) {
     if (checkWrite(5) != R_SUCCESSFUL) {
         return R_FAILED;
     }
@@ -335,7 +335,7 @@ enum dx_result_t dx_write_compact_int(dx_int_t val) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t dx_write_compact_long(dx_long_t v) {
+dx_result_t dx_write_compact_long(dx_long_t v) {
     dx_int_t hi;
     if (v == (dx_long_t)(dx_int_t)v) {
         return dx_write_compact_int((dx_int_t)v);
@@ -385,7 +385,7 @@ enum dx_result_t dx_write_compact_long(dx_long_t v) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t dx_write_byte_array(const dx_byte_t* bytes, dx_int_t size) {
+dx_result_t dx_write_byte_array(const dx_byte_t* bytes, dx_int_t size) {
     if (bytes == NULL) {
         return dx_write_compact_int(-1);
     }
@@ -401,7 +401,7 @@ enum dx_result_t dx_write_byte_array(const dx_byte_t* bytes, dx_int_t size) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t dx_write_utf_char(dx_int_t codePoint) {
+dx_result_t dx_write_utf_char(dx_int_t codePoint) {
     if (checkWrite(4) != R_SUCCESSFUL) {
         return R_FAILED;
     }
@@ -425,7 +425,7 @@ enum dx_result_t dx_write_utf_char(dx_int_t codePoint) {
     return parseSuccessful();
 }
 
-enum dx_result_t dx_write_utf_string(const dx_string_t str) {
+dx_result_t dx_write_utf_string(const dx_string_t str) {
     size_t strlen;
     size_t utflen;
     size_t i;
@@ -477,7 +477,7 @@ enum dx_result_t dx_write_utf_string(const dx_string_t str) {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t dx_ensure_capacity( int requiredCapacity ) {
+dx_result_t dx_ensure_capacity( int requiredCapacity ) {
     if (INT_MAX - current_out_buffer_position < out_buffer_length) {
         return setParseError(dx_pr_buffer_overflow);
     }

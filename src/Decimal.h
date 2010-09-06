@@ -24,6 +24,6 @@
 
 // Parse decimals stored as compact int 
 
-enum dx_result_t dx_int_to_double(dx_int_t integer, OUT dx_double_t* decimal);
+dx_result_t dx_int_to_double(dx_int_t integer, OUT dx_double_t* decimal);
 
 #endif // DECIMAL_H

@@ -136,6 +136,9 @@
 				Name="Headers"
 				Filter="">
 				<File
+					RelativePath="..\..\src\DXAlgorithms.h">
+				</File>
+				<File
 					RelativePath="..\..\include\DXErrorCodes.h">
 				</File>
 				<File
@@ -157,6 +160,9 @@
 			<Filter
 				Name="Sources"
 				Filter="">
+				<File
+					RelativePath="..\..\src\DXAlgorithms.c">
+				</File>
 				<File
 					RelativePath="..\..\src\DXErrorHandling.c">
 				</File>
@@ -199,6 +205,12 @@
 				Name="Headers"
 				Filter="">
 				<File
+					RelativePath="..\..\src\EventDataFieldSetters.h">
+				</File>
+				<File
+					RelativePath="..\..\src\EventRecordBuffers.h">
+				</File>
+				<File
 					RelativePath="..\..\src\SymbolCodec.h">
 				</File>
 			</Filter>
@@ -216,6 +228,12 @@
 				</File>
 				<File
 					RelativePath="..\..\src\Decimal.c">
+				</File>
+				<File
+					RelativePath="..\..\src\EventDataFieldSetters.c">
+				</File>
+				<File
+					RelativePath="..\..\src\EventRecordBuffers.c">
 				</File>
 				<File
 					RelativePath="..\..\src\parser.c">

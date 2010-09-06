@@ -25,8 +25,8 @@
 #include "DXErrorHandling.h"
 #include "DXErrorCodes.h"
 
-#include <malloc.h>
-#include <memory.h>
+#include <string.h>
+#include <stdlib.h>
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -70,13 +70,19 @@ void* dx_calloc (size_t num, size_t size) {
 
 /* -------------------------------------------------------------------------- */
 
-void* dx_memcpy ( void * destination, const void * source, size_t size ) {
+void* dx_memcpy (void * destination, const void * source, size_t size) {
     return dx_error_processor(memcpy(destination, source, size));
 }
 
 /* -------------------------------------------------------------------------- */
 
-void* dx_memset ( void * destination, int c, size_t size ) {
+void* dx_memmove (void * destination, const void * source, size_t size) {
+    return dx_error_processor(memmove(destination, source, size));
+}
+
+/* -------------------------------------------------------------------------- */
+
+void* dx_memset (void * destination, int c, size_t size) {
     return dx_error_processor(memset(destination, c, size));
 }
 

@@ -56,13 +56,13 @@ const struct dx_error_code_descr_t* parser_error_roster = g_parser_errors;
 
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t setParseError(int err) {
+dx_result_t setParseError(int err) {
     dx_set_last_error(dx_sc_parser, err);
     return R_FAILED;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t parseSuccessful() {
+dx_result_t parseSuccessful() {
     dx_set_last_error(dx_sc_parser, dx_pr_successful);
     return R_SUCCESSFUL;
 }
@@ -140,7 +140,7 @@ void toSurrogates(dx_int_t codePoint, dx_int_t index, OUT dx_string_t* dst) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum dx_result_t toChars(dx_int_t codePoint, dx_int_t dstIndex, dx_int_t dstLen, OUT dx_string_t* dst, OUT dx_int_t* res) {
+dx_result_t toChars(dx_int_t codePoint, dx_int_t dstIndex, dx_int_t dstLen, OUT dx_string_t* dst, OUT dx_int_t* res) {
     if (!dst || !(*dst) || !res || codePoint < 0 || codePoint > MAX_CODE_POINT) {
         setParseError(dx_pr_illegal_argument);
         return R_FAILED;

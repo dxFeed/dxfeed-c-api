@@ -42,7 +42,7 @@ bool hasCapacity() {
 
 ///* -------------------------------------------------------------------------- */
 //
-enum dx_result_t dx_compose_message_header(dx_int_t messageTypeId) {
+dx_result_t dx_compose_message_header(dx_int_t messageTypeId) {
 
     CHECKED_CALL(dx_write_byte, (dx_byte_t)0); // reserve one byte for message length
     CHECKED_CALL(dx_write_compact_int, messageTypeId);
@@ -56,7 +56,7 @@ enum dx_result_t dx_compose_message_header(dx_int_t messageTypeId) {
 * Invoked every time before processing a message.
 * @param messageTypeId id of message type.
 */
-enum dx_result_t dx_begin_message(dx_int_t messageTypeId) {
+dx_result_t dx_begin_message(dx_int_t messageTypeId) {
 
     if(dx_compose_message_header(messageTypeId) != R_SUCCESSFUL) {
         return setParseError(dx_pr_unexpected_io_error);
@@ -67,7 +67,7 @@ enum dx_result_t dx_begin_message(dx_int_t messageTypeId) {
 
 ///* -------------------------------------------------------------------------- */
 //
-enum dx_result_t dx_compose_body(dx_int_t record_id, dx_int_t cipher, dx_string_t symbol) {
+dx_result_t dx_compose_body(dx_int_t record_id, dx_int_t cipher, dx_string_t symbol) {
 
 	dx_int_t buf_len;
     dx_byte_t* buf = dx_get_out_buffer(&buf_len);
@@ -102,7 +102,7 @@ void dx_move_data_forward(dx_int_t oldPos, dx_int_t newPos, dx_int_t length) {
 
 /* -------------------------------------------------------------------------- */
 
-enum dx_result_t dx_finish_composing_message() {
+dx_result_t dx_finish_composing_message() {
     dx_int_t messageLength = dx_get_out_buffer_position() - 1;
     dx_int_t sizeLength = dx_get_compact_length(messageLength);
     if (sizeLength > 1) {
@@ -123,7 +123,7 @@ enum dx_result_t dx_finish_composing_message() {
 /**
 * Invoked every time after processing all message data.
 */
-enum dx_result_t dx_end_message() {
+dx_result_t dx_end_message() {
     if (dx_finish_composing_message() != R_SUCCESSFUL) {
             return setParseError(dx_pr_unexpected_io_error);
         }
@@ -138,7 +138,7 @@ enum dx_result_t dx_end_message() {
 *
 /* -------------------------------------------------------------------------- */
 
-enum dx_result_t dx_create_subscription(dx_byte_t** out, dx_int_t* out_len, enum dx_message_type_t type, dx_int_t cipher, dx_string_t symbol, dx_int_t record_id) {
+dx_result_t dx_create_subscription(dx_byte_t** out, dx_int_t* out_len, dx_message_type_t type, dx_int_t cipher, dx_string_t symbol, dx_int_t record_id) {
 
 	dx_buf = (dx_byte_t*)dx_malloc(dx_initial_buffer_size);
 

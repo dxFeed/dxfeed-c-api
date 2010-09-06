@@ -16,28 +16,27 @@
  * Contributor(s):
  *
  */
+ 
+#include "DXAlgorithms.h"
 
+/* -------------------------------------------------------------------------- */
 /*
- *	The primitive types for internal use
+ *	Array functions implementation
  */
+/* -------------------------------------------------------------------------- */
 
-#ifndef PRIMITIVE_TYPES_H_INCLUDED
-#define PRIMITIVE_TYPES_H_INCLUDED
+bool dx_capacity_manager_halfer (size_t new_size, size_t* capacity) {
+    if (new_size > *capacity) {
+        *capacity = (size_t)((double)*capacity * 1.5) + 1;
 
-typedef int bool;
+        return true;
+    }
 
-#define true 1
-#define false 0
+    if (new_size < *capacity && ((double)new_size / *capacity) < 1.5) {
+        *capacity = new_size;
 
-#ifndef OUT
-#define OUT
-#endif // OUT
+        return true;
+    }
 
-#ifndef NULL
-    #define NULL ((void*)0)
-#endif // NULL
-
-typedef unsigned size_t;
-
-
-#endif /* PRIMITIVE_TYPES_H_INCLUDED */
+    return false;
+}

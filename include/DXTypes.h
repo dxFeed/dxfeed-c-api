@@ -17,10 +17,11 @@
  *
  */
 
-#ifndef API_TYPES_H
-#define API_TYPES_H
+#ifndef DX_TYPES_H_INCLUDED
+#define DX_TYPES_H_INCLUDED
 
 typedef int ERRORCODE;
+typedef void* dxf_subscription_t;
 
 #ifdef _WIN32
 
@@ -44,4 +45,4 @@ typedef dx_char_t*    dx_string_t;
 typedef const dx_char_t *dx_const_string_t;
 
 #endif /* _WIN32 */
-#endif // API_TYPES_H
+#endif /* DX_TYPES_H_INCLUDED */

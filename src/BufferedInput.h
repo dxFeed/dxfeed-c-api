@@ -40,18 +40,18 @@ dx_byte_t* dx_get_in_buffer(OUT dx_int_t* size);
 dx_int_t skip(dx_int_t n);
 //enum DXResult readFully(dx_byte_t* b, dx_int_t bLength, dx_int_t off, dx_int_t len);
 
-enum dx_result_t dx_read_boolean       ( OUT dx_bool_t* );
-enum dx_result_t dx_read_byte          ( OUT dx_byte_t* );
-enum dx_result_t dx_read_unsigned_byte  ( OUT dx_uint_t* );
-enum dx_result_t dx_read_short         ( OUT dx_short_t* );
-enum dx_result_t dx_read_unsigned_short ( OUT dx_uint_t* );
-enum dx_result_t dx_read_char          ( OUT dx_char_t* );
-enum dx_result_t dx_read_int           ( OUT dx_int_t* );
-enum dx_result_t dx_read_long          ( OUT dx_long_t* );
-enum dx_result_t dx_read_float         ( OUT dx_float_t* );
-enum dx_result_t dx_read_double        ( OUT dx_double_t* );
-enum dx_result_t dx_read_line          ( OUT dx_char_t** );
-enum dx_result_t dx_read_utf           ( OUT dx_char_t** );
+dx_result_t dx_read_boolean       ( OUT dx_bool_t* );
+dx_result_t dx_read_byte          ( OUT dx_byte_t* );
+dx_result_t dx_read_unsigned_byte  ( OUT dx_uint_t* );
+dx_result_t dx_read_short         ( OUT dx_short_t* );
+dx_result_t dx_read_unsigned_short ( OUT dx_uint_t* );
+dx_result_t dx_read_char          ( OUT dx_char_t* );
+dx_result_t dx_read_int           ( OUT dx_int_t* );
+dx_result_t dx_read_long          ( OUT dx_long_t* );
+dx_result_t dx_read_float         ( OUT dx_float_t* );
+dx_result_t dx_read_double        ( OUT dx_double_t* );
+dx_result_t dx_read_line          ( OUT dx_char_t** );
+dx_result_t dx_read_utf           ( OUT dx_char_t** );
 //Object readObject()
 
 // ========== Compact API ==========
@@ -64,14 +64,14 @@ enum dx_result_t dx_read_utf           ( OUT dx_char_t** );
 *
 * @param output parameter - the dx_int_t value read
 */
-enum dx_result_t dx_read_compact_int( OUT dx_int_t* );
+dx_result_t dx_read_compact_int( OUT dx_int_t* );
 
 /**
 * Reads a dx_long_t value in a compact format.
 *
 * @param output parameter - the dx_long_t value read
 */
-enum dx_result_t dx_read_compact_long( OUT dx_long_t* );
+dx_result_t dx_read_compact_long( OUT dx_long_t* );
 
 /**
 * Reads an array of bytes in a compact encapsulation format.
@@ -79,7 +79,7 @@ enum dx_result_t dx_read_compact_long( OUT dx_long_t* );
 *
 * @param output parameter - the byte array read
 */
-enum dx_result_t dx_read_byte_array( OUT dx_byte_t** );
+dx_result_t dx_read_byte_array( OUT dx_byte_t** );
 
 // ========== UTF API ==========
 
@@ -89,7 +89,7 @@ enum dx_result_t dx_read_byte_array( OUT dx_byte_t** );
 *
 * @param output parameter - the Unicode code point read
 */
-enum dx_result_t dx_read_utf_char( OUT dx_int_t* );
+dx_result_t dx_read_utf_char( OUT dx_int_t* );
 
 /**
 * Reads Unicode string in a UTF-8 format with compact encapsulation.
@@ -98,7 +98,7 @@ enum dx_result_t dx_read_utf_char( OUT dx_int_t* );
 *
 * @param output parameter - the Unicode string read
 */
-enum dx_result_t dx_read_utf_string( OUT dx_string_t* );
+dx_result_t dx_read_utf_string( OUT dx_string_t* );
 
 
 
