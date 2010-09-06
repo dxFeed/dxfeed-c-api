@@ -97,7 +97,7 @@ int main (int argc, char* argv[]) {
     }
 
     printf("Connection successful!\n");
-<<<<<<< .mine    
+ 
 	if (!dxf_add_subscription(/*DX_ET_TRADE | DX_ET_QUOTE | DX_ET_MARKET_MAKER |*/ DX_ET_FUNDAMENTAL /*| DX_ET_PROFILE*/, &subscription )) {
         process_last_error();
         
@@ -116,11 +116,7 @@ int main (int argc, char* argv[]) {
         return -1;
     };
     printf("Subscription successful!\n");
-
-=======    dxf_add_subscription(/*DX_ET_TRADE |*/ DX_ET_QUOTE /*| DX_ET_MARKET_MAKER |*/ /*DX_ET_FUNDAMENTAL*/ /*| DX_ET_PROFILE*/, &subscription );
-	dxf_add_symbol(subscription, L"IBM"); 
-	dxf_attach_event_listener(subscription, listener);
->>>>>>> .theirs    Sleep(1000000);
+    Sleep(1000000);
     
     printf("Disconnecting from host...\n");
     

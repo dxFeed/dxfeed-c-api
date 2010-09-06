@@ -157,7 +157,7 @@ DXFEED_API ERRORCODE dxf_add_symbol (dxf_subscription_t subscription, dx_string_
 	
 	for (; j < dx_eid_count ; j = j << 1){
 		if (events & j){
-			dx_create_subscription(&sub_buffer, &out_len, MESSAGE_TICKER_ADD_SUBSCRIPTION, dx_encode_symbol_name(symbol), symbol,get_record_id(events &  j ) /*TODO*/);
+			dx_create_subscription(&sub_buffer, &out_len, MESSAGE_TICKER_ADD_SUBSCRIPTION, dx_encode_symbol_name(symbol), symbol,1/*get_record_id(events &  j ) TODO*/);
 			dx_send_data(sub_buffer, out_len);
 		}
 	}
