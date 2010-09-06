@@ -50,7 +50,6 @@ BOOL APIENTRY DllMain( HANDLE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 
 void data_receiver (const void* buffer, unsigned buflen) {
     printf("Internal data receiver stub. Data received: %d bytes\n", buflen);
-	// TODO: process errors 
 	dx_parse(buffer, buflen);
 }
 
@@ -146,7 +145,7 @@ DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dx_string
 }
 
 DXFEED_API ERRORCODE dxf_add_symbol (dxf_subscription_t subscription, dx_string_t symbol){
-	dx_int_t j = 1;
+	dx_int_t j = 0;
 
 	dx_byte_t* sub_buffer = NULL;
 	dx_int_t out_len = 1000;
@@ -155,9 +154,9 @@ DXFEED_API ERRORCODE dxf_add_symbol (dxf_subscription_t subscription, dx_string_
 	if (dx_get_event_subscription_event_types(subscription, &events)==false)
 		return DXF_FAILURE; //TODO: set_last_error ?
 	
-	for (; j < dx_eid_count ; j = j << 1){
-		if (events & j){
-			dx_create_subscription(&sub_buffer, &out_len, MESSAGE_TICKER_ADD_SUBSCRIPTION, dx_encode_symbol_name(symbol), symbol,1/*get_record_id(events &  j ) TODO*/);
+	for (; j < dx_eid_count; ++j) {
+		if (events & (1 << j)) {
+			dx_create_subscription(&sub_buffer, &out_len, MESSAGE_TICKER_ADD_SUBSCRIPTION, dx_encode_symbol_name(symbol), symbol, j /*TODO*/);
 			dx_send_data(sub_buffer, out_len);
 		}
 	}
