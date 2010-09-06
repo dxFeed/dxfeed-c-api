@@ -37,7 +37,8 @@
 /* -------------------------------------------------------------------------- */
 
 typedef enum {
-    dx_eid_trade,
+    dx_eid_begin,
+    dx_eid_trade = dx_eid_begin,
     dx_eid_quote,
     dx_eid_fundamental,
     dx_eid_profile,
@@ -46,7 +47,8 @@ typedef enum {
     /* add new values above this line, add a new bit mask according to
        the existing template */
     
-    dx_eid_count
+    dx_eid_count,
+    dx_eid_invalid
 } dx_event_id_t;
 
 #define DX_ET_TRADE			 (1 << dx_eid_trade)
@@ -56,6 +58,7 @@ typedef enum {
 #define DX_ET_MARKET_MAKER	 (1 << dx_eid_market_maker)
 #define DX_ET_UNUSED		 (~((1 << dx_eid_count) - 1))
 
+#define DX_EVENT_BIT_MASK(event_id) (1 << event_id)
 
 /* -------------------------------------------------------------------------- */
 /*

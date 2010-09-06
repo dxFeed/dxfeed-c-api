@@ -24,7 +24,12 @@
 #include "DXTypes.h"
 #include "EventDataFieldSetters.h"
 #include "ParserCommon.h"
+#include "EventData.h"
 
+/* -------------------------------------------------------------------------- */
+/*
+ *	Event record types and structures
+ */
 /* -------------------------------------------------------------------------- */
 
 typedef enum {
@@ -45,37 +50,39 @@ typedef enum {
     dx_fid_flag_string = 0x80,        // String representation as byte array
     dx_fid_flag_custom_object = 0xe0, // customly serialized object as byte array
     dx_fid_flag_serial_object = 0xf0  // serialized object as byte array
-} dx_fields_id_t;
+} dx_field_id_t;
 
 /* -------------------------------------------------------------------------- */
 
 typedef struct {
-    dx_fields_id_t id;
-    dx_string_t local_name;
+    int type;
+    dx_const_string_t name;
     dx_event_data_field_setter_t setter;
 } dx_field_info_t;
 
 /* -------------------------------------------------------------------------- */
 
 typedef struct {
-    dx_int_t id;
-    dx_string_t name;
+    dx_int_t protocol_level_id;
+    dx_const_string_t name;
     size_t field_count;
     const dx_field_info_t* fields;
-    int event_id;
 } dx_record_info_t;
 
-//const struct dx_record_info_t* dx_get_record_by_name(const dx_string_t name);
-dx_int_t get_record_id(dx_int_t event_type);
-dx_int_t get_event_type_by_id(dx_int_t record_id);
-dx_const_string_t dx_event_type_to_string(dx_int_t event_type);
-
+/* -------------------------------------------------------------------------- */
+/*
+ *	Event record functions
+ */
 /* -------------------------------------------------------------------------- */
 
-bool dx_matching_fields (const dx_record_info_t* record,
-                         const dx_const_string_t* field_names, size_t field_name_count,
-                         const dx_int_t* field_types, size_t field_type_count);
+dx_int_t dx_get_event_protocol_id (dx_event_id_t event_id);
+dx_event_id_t dx_get_event_id (dx_int_t protocol_level_id);
 
-dx_result_t dx_get_record_by_id (dx_int_t id, dx_record_info_t** record);
+const dx_record_info_t* dx_get_event_record_by_id (dx_event_id_t event_id);
+const dx_record_info_t* dx_get_event_record_by_name (dx_const_string_t record_name);
+
+bool dx_move_record_field (dx_record_info_t* record_info, dx_const_string_t field_name,
+                           dx_int_t field_type, size_t field_index);
+
 
 #endif /* DATA_STRUCTURES_H_INCLUDED */

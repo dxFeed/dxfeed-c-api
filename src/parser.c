@@ -159,7 +159,7 @@ dx_result_t dx_read_records (const dx_record_info_t* record_info, void* record_b
 	dx_double_t read_double;
 	
 	for (; i < record_info->field_count; ++i) {
-		switch (record_info->fields[i].id) {
+		switch (record_info->fields[i].type) {
 			case dx_fid_compact_int:
 				CHECKED_CALL(dx_read_compact_int, &read_int);
 				
@@ -198,24 +198,29 @@ dx_result_t dx_read_records (const dx_record_info_t* record_info, void* record_b
 }
 
 dx_result_t dx_parse_data (void) {
-    dx_int_t start_position = dx_get_in_buffer_position();
-    dx_int_t last_rec_position = start_position;
-
-    dx_int_t id;
+    dx_string_t symbol;
+	
+	const dx_record_info_t* record_info;
+	void* record_buffer = NULL;
+	dx_event_id_t event_id;
 	int record_count = 0;
 
-	dx_string_t symbol;
-	
-	dx_record_info_t* record_info;
-	void* record_buffer = NULL;
-
     CHECKED_CALL_0(dx_read_symbol);
-    CHECKED_CALL(dx_read_compact_int, &id);
     
-    CHECKED_CALL_2(dx_get_record_by_id, id, &record_info);
+    {
+        dx_int_t id;
+        
+        CHECKED_CALL(dx_read_compact_int, &id);
+
+        if ((event_id = dx_get_event_id(id)) == dx_eid_invalid) {
+            return setParseError(dx_pr_wrong_record_id);
+        }
+    }
+    
+    record_info = dx_get_event_record_by_id(event_id);
 
     while (dx_get_in_buffer_position() < dx_get_in_buffer_limit()) {
-		record_buffer = g_buffer_managers[record_info->event_id].record_getter(record_count++);
+		record_buffer = g_buffer_managers[event_id].record_getter(record_count++);
 		
 		if (record_buffer == NULL) {
 		    return R_FAILED;
@@ -231,7 +236,7 @@ dx_result_t dx_parse_data (void) {
 		CHECKED_CALL_2 (dx_decode_symbol_name, lastCipher, &symbol); 
     }
 	
-	if (!dx_process_event_data(get_event_type_by_id(id),symbol , lastCipher, g_buffer_managers[record_info->event_id].record_buffer_getter(), record_count)) {
+	if (!dx_process_event_data(DX_EVENT_BIT_MASK(event_id), symbol, lastCipher, g_buffer_managers[event_id].record_buffer_getter(), record_count)) {
 	    return R_FAILED;
 	}
 	
@@ -241,37 +246,47 @@ dx_result_t dx_parse_data (void) {
 ///* -------------------------------------------------------------------------- */
 //
 dx_result_t dx_parse_describe_records() {
-    dx_int_t start_position = dx_get_in_buffer_position();
-    dx_int_t last_rec_position = start_position;
-        while (dx_get_in_buffer_position() < dx_get_in_buffer_limit()) {
-            dx_int_t id;
-            dx_string_t name;
-            dx_int_t n;
-            dx_string_t* fname;
-            dx_int_t* ftype;
-            dx_int_t i;
-
-            CHECKED_CALL(dx_read_compact_int, &id);
-            CHECKED_CALL(dx_read_utf_string, &name);
-            CHECKED_CALL(dx_read_compact_int, &n);
-			//wprintf(L"recordId: %i, Name: %s , fields count: %i \n", id,name,n);
-            if (id < 0 || name == NULL || wcslen(name) == 0 || n < 0) {
-                return setParseError(dx_pr_record_info_corrupt);
-            }
-
-            fname = (dx_string_t*)dx_malloc(n * sizeof(dx_string_t));
-            ftype = (dx_int_t*)dx_malloc(n);
-            for (i = 0; i < n; ++i) {
-                CHECKED_CALL(dx_read_utf_string, &(fname[i]));
-                CHECKED_CALL(dx_read_compact_int, &(ftype[i]))
-                if (fname[i] == NULL || wcslen(fname[i]) == 0 || ftype[i] < MIN_FIELD_TYPE_ID || ftype[i] > MAX_FIELD_TYPE_ID) {
-                    return setParseError(dx_pr_field_info_corrupt);
-                }
-				//wprintf(L"%s    %i\n", fname[i], ftype[i]);
-
-            }
+    while (dx_get_in_buffer_position() < dx_get_in_buffer_limit()) {
+        dx_int_t record_id;
+        dx_string_t record_name;
+        dx_int_t field_count;
+        dx_record_info_t* record_info = NULL;
+        dx_int_t i;
+        
+        CHECKED_CALL(dx_read_compact_int, &record_id);
+        CHECKED_CALL(dx_read_utf_string, &record_name);
+        CHECKED_CALL(dx_read_compact_int, &field_count);
+		
+		if (record_id < 0 || record_name == NULL || wcslen(record_name) == 0 || field_count < 0) {
+            return setParseError(dx_pr_record_info_corrupt);
         }
-		return parseSuccessful();
+        
+        if ((record_info = (dx_record_info_t*)dx_get_event_record_by_name(record_name)) == NULL) {
+            return setParseError(dx_pr_unknown_record_name);
+        }
+        
+        record_info->protocol_level_id = record_id;
+
+        for (i = 0; i < field_count; ++i) {
+            dx_string_t field_name;
+            dx_int_t field_type;
+            
+            CHECKED_CALL(dx_read_utf_string, &field_name);
+            CHECKED_CALL(dx_read_compact_int, &field_type)
+            
+            if (field_name == NULL || wcslen(field_name) == 0 ||
+                field_type < MIN_FIELD_TYPE_ID || field_type > MAX_FIELD_TYPE_ID) {
+                
+                return setParseError(dx_pr_field_info_corrupt);
+            }
+			
+			if (!dx_move_record_field(record_info, field_name, field_type, i)) {
+			    return setParseError(dx_pr_unknown_record_field);
+			}
+        }
+    }
+	
+	return parseSuccessful();
 }
 
 /* -------------------------------------------------------------------------- */

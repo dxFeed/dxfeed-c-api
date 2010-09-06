@@ -6,7 +6,7 @@
 #include <Windows.h>
 
 const char dxfeed_host[] = "demo.dxfeed.com:7300";
-dx_const_string_t dx_event_type_to_string(dx_int_t event_type){
+dx_const_string_t dx_event_type_to_string(int event_type){
 	switch (event_type){
 		case DX_ET_TRADE: return L"Trade"; 
 		case DX_ET_QUOTE: return L"Quote"; 

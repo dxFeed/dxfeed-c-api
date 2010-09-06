@@ -260,4 +260,18 @@
 
 bool dx_capacity_manager_halfer (size_t new_size, size_t* capacity);
 
+/* -------------------------------------------------------------------------- */
+/*
+ *	Generic operations
+ */
+/* -------------------------------------------------------------------------- */
+
+#define DX_SWAP(type, e1, e2) \
+    do { \
+        type _tmp = e1; \
+        \
+        e1 = e2; \
+        e2 = _tmp; \
+    } while (false)
+
 #endif /* DX_ALGORITHMS_H_INCLUDED */

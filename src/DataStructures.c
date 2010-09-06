@@ -19,8 +19,8 @@
 
 #include "DataStructures.h"
 #include "ParserCommon.h"
-#include "EventData.h"
 #include "EventDataFieldSetters.h"
+#include "DXAlgorithms.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -28,7 +28,7 @@
  */
 /* -------------------------------------------------------------------------- */
 
-static const dx_field_info_t dx_fields_trade[] = { 
+static dx_field_info_t dx_fields_trade[] = { 
 	{ dx_fid_utf_char, L"Last.Exchange", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_trade_t, last_exchange) },
 	{ dx_fid_compact_int, L"Last.Time", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_trade_t, last_time) },
 	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Last.Price", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_trade_t, last_price) },
@@ -44,7 +44,7 @@ static const dx_field_info_t dx_fields_trade[] = {
  */
 /* -------------------------------------------------------------------------- */
 
-static const dx_field_info_t dx_fields_quote[] = {
+static dx_field_info_t dx_fields_quote[] = {
     { dx_fid_utf_char, L"Bid.Exchange", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_quote_t, bid_exchange) },
     { dx_fid_compact_int | dx_fid_flag_decimal, L"Bid.Price", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_quote_t, bid_price) },
     { dx_fid_compact_int, L"Bid.Size", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_quote_t, bid_size) },
@@ -61,7 +61,7 @@ static const dx_field_info_t dx_fields_quote[] = {
  */
 /* -------------------------------------------------------------------------- */
 
-static const dx_field_info_t dx_fields_fundamental[] = { 
+static dx_field_info_t dx_fields_fundamental[] = { 
 	{ dx_fid_compact_int | dx_fid_flag_decimal, L"High.Price", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_fundamental_t, high_price) },
 	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Low.Price", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_fundamental_t, low_price) },
 	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Open.Price", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_fundamental_t, open_price) },
@@ -75,7 +75,7 @@ static const dx_field_info_t dx_fields_fundamental[] = {
  */
 /* -------------------------------------------------------------------------- */
 
-static const dx_field_info_t dx_fields_profile[] = { 
+static dx_field_info_t dx_fields_profile[] = { 
 	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Beta", NULL },
 	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Eps", NULL },
 	{ dx_fid_compact_int, L"DivFreq", NULL },
@@ -94,7 +94,7 @@ static const dx_field_info_t dx_fields_profile[] = {
  */
 /* -------------------------------------------------------------------------- */
 
-static const dx_field_info_t dx_fields_market_maker[] = { 
+static dx_field_info_t dx_fields_market_maker[] = { 
 	{ dx_fid_utf_char, L"MMExchange", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_market_maker, mm_exchange) },
 	{ dx_fid_compact_int, L"MMID", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_market_maker, mm_id) },
 	{ dx_fid_compact_int | dx_fid_flag_decimal, L"MMBid.Price", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_market_maker, mmbid_price) },
@@ -109,85 +109,86 @@ static const dx_field_info_t dx_fields_market_maker[] = {
  */
 /* -------------------------------------------------------------------------- */
 
-static const dx_record_info_t dx_records[] = {
-	{ 0, L"Trade", sizeof(dx_fields_trade) / sizeof(dx_fields_trade[0]), &dx_fields_trade[0], dx_eid_trade },
-    { 1, L"Quote", sizeof(dx_fields_quote) / sizeof(dx_fields_quote[0]), &dx_fields_quote[0], dx_eid_quote },
-    { 2, L"Fundamental", sizeof(dx_fields_fundamental) / sizeof(dx_fields_fundamental[0]), &dx_fields_fundamental[0], dx_eid_fundamental },
-    { 3, L"Profile", sizeof(dx_fields_profile) / sizeof(dx_fields_profile[0]), &dx_fields_profile[0], dx_eid_profile },
-    { 4, L"MarketMaker", sizeof(dx_fields_market_maker) / sizeof(dx_fields_market_maker[0]), &dx_fields_market_maker[0], dx_eid_market_maker },
+static dx_record_info_t g_event_records[] = {
+	{ 0, L"Trade", sizeof(dx_fields_trade) / sizeof(dx_fields_trade[0]), &dx_fields_trade[0] },
+    { 1, L"Quote", sizeof(dx_fields_quote) / sizeof(dx_fields_quote[0]), &dx_fields_quote[0] },
+    { 2, L"Fundamental", sizeof(dx_fields_fundamental) / sizeof(dx_fields_fundamental[0]), &dx_fields_fundamental[0] },
+    { 3, L"Profile", sizeof(dx_fields_profile) / sizeof(dx_fields_profile[0]), &dx_fields_profile[0] },
+    { 4, L"MarketMaker", sizeof(dx_fields_market_maker) / sizeof(dx_fields_market_maker[0]), &dx_fields_market_maker[0] },
 };
 
-static const dx_int_t g_records_count = sizeof(dx_records) / sizeof(dx_records[0]);
+/* -------------------------------------------------------------------------- */
+/*
+ *	Auxiliary functions
+ */
+/* -------------------------------------------------------------------------- */
+
+void dx_swap_record_fields (dx_field_info_t* f1, dx_field_info_t* f2) {
+    DX_SWAP(int, f1->type, f2->type);
+    DX_SWAP(dx_const_string_t, f1->name, f2->name);
+    DX_SWAP(dx_event_data_field_setter_t, f1->setter, f2->setter);
+}
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Event record functions implementation
+ */
+/* -------------------------------------------------------------------------- */
+
+dx_int_t dx_get_event_protocol_id (dx_event_id_t event_id) {
+    return g_event_records[event_id].protocol_level_id;
+}
 
 /* -------------------------------------------------------------------------- */
 
-const dx_record_info_t* dx_get_record_by_name (dx_const_string_t name) {
-    int i = 0;
+dx_event_id_t dx_get_event_id (dx_int_t protocol_level_id) {
+    dx_event_id_t event_id = dx_eid_begin;
     
-    for (; i < g_records_count; ++i) {
-        if (wcscmp(dx_records[i].name, name) == 0) {
-            return &dx_records[i];
+    for (; event_id < dx_eid_count; ++event_id) {
+        if (g_event_records[event_id].protocol_level_id == protocol_level_id) {
+            return event_id;
         }
     }
+    
+    return dx_eid_invalid;
+}
 
+/* -------------------------------------------------------------------------- */
+
+const dx_record_info_t* dx_get_event_record_by_id (dx_event_id_t event_id) {
+	return &g_event_records[event_id];
+}
+
+/* -------------------------------------------------------------------------- */
+
+const dx_record_info_t* dx_get_event_record_by_name (dx_const_string_t record_name) {
+    dx_event_id_t event_id = dx_eid_begin;
+
+    for (; event_id < dx_eid_count; ++event_id) {
+        if (wcscmp(g_event_records[event_id].name, record_name) == 0) {
+            return &(g_event_records[event_id]);
+        }
+    }
+    
     return NULL;
 }
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_matching_fields (const dx_record_info_t* record,
-                         const dx_const_string_t* field_names, size_t field_name_count,
-                         const dx_int_t* field_types, size_t field_type_count) {
-    size_t n = record->field_count;
-    size_t i = 0;
-
-    if (field_name_count != record->field_count || field_type_count != record->field_count) {
-        return false;
-    }
-
-    for (; i < record->field_count; ++i) {
-        const dx_field_info_t* field = &(record->fields[i]);
-        
-        if (wcscmp(field->local_name, field_names[i]) != 0 || field->id != field_types[i]) {
-            return false;
+bool dx_move_record_field (dx_record_info_t* record_info, dx_const_string_t field_name,
+                           dx_int_t field_type, size_t field_index) {
+    size_t cur_field_index = 0;
+    dx_field_info_t* fields = (dx_field_info_t*)record_info->fields;
+    
+    for (; cur_field_index < record_info->field_count; ++cur_field_index) {
+        if (wcscmp(fields[cur_field_index].name, field_name) == 0 &&
+            fields[cur_field_index].type == field_type) {
+            
+            dx_swap_record_fields(fields + cur_field_index, fields + field_index);
+            
+            return true;
         }
     }
-
-    return true;
-}
-
-/* -------------------------------------------------------------------------- */
-
-dx_result_t dx_get_record_by_id (dx_int_t id, dx_record_info_t** record) {
-	if (id < 0 || id > g_records_count) {
-		return setParseError(dx_pr_wrong_record_id);
-    }
-
-	*record = &dx_records[id];
-	
-	return parseSuccessful();
-}
-
-/* -------------------------------------------------------------------------- */
-
-dx_int_t get_event_type_by_id(dx_int_t record_id){
-	switch (record_id){
-		case 0: return DX_ET_TRADE; 
-		case 1 : return DX_ET_QUOTE; 
-		case 2 : return DX_ET_FUNDAMENTAL; 
-		case 3 : return DX_ET_PROFILE; 
-		case 4 : return DX_ET_MARKET_MAKER; 
-		default: return (DX_ET_UNUSED);
-	}
-}
-
-dx_const_string_t dx_event_type_to_string(dx_int_t event_type){
-	switch (event_type){
-		case DX_ET_TRADE: return L"Trade"; 
-		case DX_ET_QUOTE: return L"Quote"; 
-		case DX_ET_FUNDAMENTAL: return L"Fundamental"; 
-		case DX_ET_PROFILE: return L"Profile"; 
-		case DX_ET_MARKET_MAKER: return L"MarketMaker"; 
-		default: return L"";
-	}	
+    
+    return false;
 }

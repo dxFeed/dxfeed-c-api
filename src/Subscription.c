@@ -20,7 +20,6 @@
 #include "Subscription.h"
 #include "BufferedOutput.h"
 #include "DataStructures.h"
-#include "SymbolCodec.h"
 #include "DXMemory.h"
 #include "SymbolCodec.h"
 
@@ -130,15 +129,14 @@ dx_result_t dx_end_message() {
 	return parseSuccessful();
 }
 
-///* -------------------------------------------------------------------------- */
-
-/* -------------------------------------------------------------------------- 
-*
-*  External interface
-*
+/* -------------------------------------------------------------------------- */
+/*
+ *	External interface
+ */
 /* -------------------------------------------------------------------------- */
 
-dx_result_t dx_create_subscription(dx_byte_t** out, dx_int_t* out_len, dx_message_type_t type, dx_int_t cipher, dx_string_t symbol, dx_int_t record_id) {
+dx_result_t dx_create_subscription (dx_byte_t** out, dx_int_t* out_len, dx_message_type_t type,
+                                    dx_int_t cipher, dx_string_t symbol, dx_int_t record_id) {
 
 	dx_buf = (dx_byte_t*)dx_malloc(dx_initial_buffer_size);
 

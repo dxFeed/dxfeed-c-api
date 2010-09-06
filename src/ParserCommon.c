@@ -48,6 +48,8 @@ static struct dx_error_code_descr_t g_parser_errors[] = {
 	{ dx_pr_wrong_record_id, "Wrong record id received" },
 	{ dx_pr_type_not_supported, "Serialization of this type not supported" },
     { dx_pr_record_reading_failed, "Record reading failed" },
+    { dx_pr_unknown_record_name, "Unknown record name" },
+    { dx_pr_unknown_record_field, "Unknown record field" },
     
 	{ ERROR_CODE_FOOTER, ERROR_DESCR_FOOTER }
 };
