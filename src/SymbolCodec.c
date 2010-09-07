@@ -128,7 +128,7 @@ dx_string_t dx_to_string(dx_long_t penta) {//TODO: errors handling
         plen += 5;
     }
 
-    chars = dx_calloc(plen/5 + 1, sizeof(dx_char_t));
+    chars = dx_create_string(plen/5);
     while (plen > 0) {
         dx_int_t code;
         plen -= 5;
@@ -287,7 +287,7 @@ dx_result_t dx_codec_read_symbol(dx_char_t* buffer, dx_int_t buf_len, OUT dx_str
         }
 
         // ???
-        chars = length <= buf_len ? buffer : dx_calloc((size_t)(length + 1), sizeof(dx_char_t));
+        chars = length <= buf_len ? buffer : dx_create_string((dx_int_t)length);
 
         for (k = 0; k < length; ++k) {
             dx_int_t codePoint;
@@ -301,7 +301,7 @@ dx_result_t dx_codec_read_symbol(dx_char_t* buffer, dx_int_t buf_len, OUT dx_str
             *adv_res = (dx_int_t)length;
             return parseSuccessful();
         }
-        *result = dx_calloc((size_t)(length + 1), sizeof(dx_char_t));
+        *result = dx_create_string((dx_int_t)length);
         if (!(*result)) {
             return R_FAILED;
         }

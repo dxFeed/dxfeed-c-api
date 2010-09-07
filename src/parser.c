@@ -136,11 +136,11 @@ static dx_result_t dx_read_symbol() {
 		if (r > 0) {
         lastCipher = 0;
         //if (symbolResolver == null || (lastSymbol = symbolResolver.getSymbol(symbol_buffer, 0, r)) == null)
-        lastSymbol = dx_calloc(r + 1, sizeof(dx_char_t));
+        lastSymbol = dx_create_string(r);
         wcscpy(lastSymbol, symbol_buffer);
 		} else {
         if (symbol_result != NULL) {
-            lastSymbol = dx_calloc(wcslen(symbol_result) + 1, sizeof(dx_char_t));
+            lastSymbol = dx_create_string(wcslen(symbol_result));
             wcscpy(lastSymbol, symbol_result);
             dx_free(symbol_result);
             lastCipher = dx_encode_symbol_name(lastSymbol);
