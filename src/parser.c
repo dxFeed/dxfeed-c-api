@@ -109,15 +109,16 @@ static dx_result_t dx_parse_length_and_setup_input(dx_int_t position, dx_int_t l
 	dx_int_t endPosition;
 
     if (dx_read_compact_long(&length) != R_SUCCESSFUL) {
-        return R_FAILED; // need more bytes TODO: process this situation
+        return setParseError(dx_pr_message_not_complete);
     }
     if (length < 0 || length > INT_MAX - dx_get_in_buffer_position()) {
         return setParseError(dx_pr_buffer_corrupt);
     }
 
     endPosition = dx_get_in_buffer_position() + (dx_int_t)length;
-    if (endPosition > limit)
+    if (endPosition > limit) {
         return setParseError(dx_pr_message_not_complete);
+    }
 
     dx_set_in_buffer_limit(endPosition); // set limit for this message
     return parseSuccessful();
@@ -395,7 +396,7 @@ dx_result_t dx_parse( const dx_byte_t* new_buffer, dx_int_t new_buffer_size  ) {
             }
 	    }
 
-		dx_parse_message(messageType);
+		CHECKED_CALL(dx_parse_message, messageType);
     }
 	buffer_pos = dx_get_in_buffer_position();
 	

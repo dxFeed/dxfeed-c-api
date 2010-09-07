@@ -189,7 +189,7 @@ dx_result_t readUTFBody(int utflen, OUT dx_string_t* str ) {
         return parseSuccessful();
     };
 
-    chars = (dx_string_t)dx_malloc((utflen + 1) * sizeof(dx_char_t));
+    chars = dx_create_string(utflen);
     count = 0;
     while (utflen > 0) {
         dx_byte_t c;
