@@ -1,21 +1,21 @@
 /*
-* The contents of this file are subject to the Mozilla Public License Version
-* 1.1 (the "License"); you may not use this file except in compliance with
-* the License. You may obtain a copy of the License at
-* http://www.mozilla.org/MPL/
-*
-* Software distributed under the License is distributed on an "AS IS" basis,
-* WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
-* for the specific language governing rights and limitations under the
-* License.
-*
-* The Initial Developer of the Original Code is Devexperts LLC.
-* Portions created by the Initial Developer are Copyright (C) 2010
-* the Initial Developer. All Rights Reserved.
-*
-* Contributor(s):
-*
-*/
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Initial Developer of the Original Code is Devexperts LLC.
+ * Portions created by the Initial Developer are Copyright (C) 2010
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *
+ */
 
 #include "parser.h"
 #include "BufferedInput.h"
@@ -245,50 +245,65 @@ dx_result_t dx_parse_data (void) {
 	return parseSuccessful();
 }
 
-///* -------------------------------------------------------------------------- */
-//
+/* -------------------------------------------------------------------------- */
+
 dx_result_t dx_parse_describe_records() {
+    static dx_const_string_t s_field_to_ignore = L"Symbol";
+    
     while (dx_get_in_buffer_position() < dx_get_in_buffer_limit()) {
         dx_int_t record_id;
         dx_string_t record_name;
         dx_int_t field_count;
         dx_record_info_t* record_info = NULL;
-        dx_int_t i;
+        size_t i = 0;
+        size_t real_field_index = 0;
+        dx_string_t field_name;
         
         CHECKED_CALL(dx_read_compact_int, &record_id);
         CHECKED_CALL(dx_read_utf_string, &record_name);
         CHECKED_CALL(dx_read_compact_int, &field_count);
 		
 		if (record_id < 0 || record_name == NULL || wcslen(record_name) == 0 || field_count < 0) {
+            dx_free(record_name);
+            
             return setParseError(dx_pr_record_info_corrupt);
         }
         
         if ((record_info = (dx_record_info_t*)dx_get_event_record_by_name(record_name)) == NULL) {
+            dx_free(record_name);
+            
             return setParseError(dx_pr_unknown_record_name);
         }
         
         dx_free(record_name);
-
+        
         record_info->protocol_level_id = record_id;
 
-        for (i = 0; i < field_count; ++i) {
-            dx_string_t field_name;
+        for (i = 0; i != field_count; ++i, dx_free(field_name)) {
             dx_int_t field_type;
             
             CHECKED_CALL(dx_read_utf_string, &field_name);
-            CHECKED_CALL(dx_read_compact_int, &field_type)
+            CHECKED_CALL(dx_read_compact_int, &field_type);
+            
+            if (wcscmp(field_name, s_field_to_ignore) == 0) {
+                continue;
+            }
             
             if (field_name == NULL || wcslen(field_name) == 0 ||
                 field_type < MIN_FIELD_TYPE_ID || field_type > MAX_FIELD_TYPE_ID) {
                 
+                dx_free(field_name);
+                
                 return setParseError(dx_pr_field_info_corrupt);
             }
 			
-			if (!dx_move_record_field(record_info, field_name, field_type, i)) {
+			if (!dx_move_record_field(record_info, field_name, field_type, real_field_index)) {
+			    dx_free(field_name);
+			    
 			    return setParseError(dx_pr_unknown_record_field);
 			}
-
-            dx_free(field_name);
+			
+			++real_field_index;			
         }
     }
 	

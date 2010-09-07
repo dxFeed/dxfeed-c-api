@@ -170,8 +170,8 @@ dx_result_t toChars(dx_int_t codePoint, dx_int_t dstIndex, dx_int_t dstLen, OUT 
 
 /* -------------------------------------------------------------------------- */
 
-dx_string_t dx_create_string( dx_int_t size ) {
-    return (dx_string_t)dx_calloc((size_t)(size + 1), sizeof(dx_char_t));
+dx_string_t dx_create_string (size_t size) {
+    return (dx_string_t)dx_calloc(size + 1, sizeof(dx_char_t));
 }
 
 /* -------------------------------------------------------------------------- */
