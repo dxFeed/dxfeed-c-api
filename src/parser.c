@@ -142,6 +142,7 @@ static dx_result_t dx_read_symbol() {
         if (symbol_result != NULL) {
             lastSymbol = dx_calloc(wcslen(symbol_result) + 1, sizeof(dx_char_t));
             wcscpy(lastSymbol, symbol_result);
+            dx_free(symbol_result);
             lastCipher = dx_encode_symbol_name(lastSymbol);
         }
         if (lastCipher == 0 && lastSymbol == NULL)
@@ -266,6 +267,8 @@ dx_result_t dx_parse_describe_records() {
             return setParseError(dx_pr_unknown_record_name);
         }
         
+        dx_free(record_name);
+
         record_info->protocol_level_id = record_id;
 
         for (i = 0; i < field_count; ++i) {
@@ -284,6 +287,8 @@ dx_result_t dx_parse_describe_records() {
 			if (!dx_move_record_field(record_info, field_name, field_type, i)) {
 			    return setParseError(dx_pr_unknown_record_field);
 			}
+
+            dx_free(field_name);
         }
     }
 	
