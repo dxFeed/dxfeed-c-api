@@ -55,6 +55,24 @@ void data_receiver (const void* buffer, unsigned buflen) {
 }
 
 /* -------------------------------------------------------------------------- */
+
+bool dx_update_record_description (void) {
+    dx_byte_t* msg_buffer;
+    dx_int_t msg_length;
+    bool res = false;    
+    
+    if (dx_compose_description_message(&msg_buffer, &msg_length) != R_SUCCESSFUL) {
+        return false;
+    }
+    
+    res = dx_send_data(msg_buffer, msg_length);
+    
+    dx_free(msg_buffer);
+
+    return res;
+}
+
+/* -------------------------------------------------------------------------- */
 /*
  *	DXFeed API implementation
  */
@@ -69,7 +87,14 @@ DXFEED_API int dxf_connect_feed (const char* host) {
     
     cc.receiver = data_receiver;
     
-    return dx_create_connection(host, &cc);
+    dx_clear_record_description_state();
+    
+    if (!dx_create_connection(host, &cc) ||
+        !dx_update_record_description()) {
+        return DXF_FAILURE;
+    }
+    
+    return DXF_SUCCESS;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -107,14 +132,16 @@ DXFEED_API int dxf_get_last_error (int* subsystem_id, int* error_code, const cha
     return DXF_FAILURE;
 }
 
+/* -------------------------------------------------------------------------- */
+
 DXFEED_API ERRORCODE dxf_add_subscription (int event_types, OUT dxf_subscription_t* subscription){
 	static int symbol_codec_initialized = 0;
 		
     if (!dx_pop_last_error()) {
         return DXF_FAILURE;
     }
-
-	// initialization of penta codec. do not remove! 
+	
+	// initialization of penta codec. do not remove!
 	if (symbol_codec_initialized == 0){
 		dx_init_symbol_codec();
 		symbol_codec_initialized = 1; 
@@ -146,14 +173,14 @@ DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dx_string
 	if (symbol_count < 0) {
 		return DXF_FAILURE; //TODO: set_last_error 
     }
-
-	for ( i = 0; i < symbol_count; ++i) {
+    
+    for ( i = 0; i < symbol_count; ++i) {
 		if (dxf_add_symbol(subscription, symbols[i]) == DXF_FAILURE) {
 			return DXF_FAILURE;
 		}
 	}
 
-	return DXF_SUCCESS;
+    return DXF_SUCCESS;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -174,19 +201,23 @@ DXFEED_API ERRORCODE dxf_add_symbol (dxf_subscription_t subscription, dx_string_
 		return DXF_FAILURE;
 	}
 	
-	for (; eid < dx_eid_count; ++eid) {
+    for (; eid < dx_eid_count; ++eid) {
 		if (events & DX_EVENT_BIT_MASK(eid)) {
 			dx_create_subscription(&sub_buffer, &out_len, MESSAGE_TICKER_ADD_SUBSCRIPTION,
 			                       dx_encode_symbol_name(symbol), symbol, eid);
-			dx_send_data(sub_buffer, out_len);
+			if (!dx_send_data(sub_buffer, out_len)) {
+			    dx_free(sub_buffer);
+			    
+			    return DXF_FAILURE;
+			}
+			
+			dx_free(sub_buffer);
 		}
 	}
 	
 	if (!dx_add_symbols(subscription, &symbol, 1)) {
 		return DXF_FAILURE;
     }
-
-	dx_free(sub_buffer);
 	
 	return DXF_SUCCESS;
 }

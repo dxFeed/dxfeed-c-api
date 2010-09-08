@@ -109,13 +109,23 @@ static dx_field_info_t dx_fields_market_maker[] = {
  */
 /* -------------------------------------------------------------------------- */
 
-static dx_record_info_t g_event_records[] = {
-	{ 0, L"Trade", sizeof(dx_fields_trade) / sizeof(dx_fields_trade[0]), &dx_fields_trade[0] },
-    { 1, L"Quote", sizeof(dx_fields_quote) / sizeof(dx_fields_quote[0]), &dx_fields_quote[0] },
-    { 2, L"Fundamental", sizeof(dx_fields_fundamental) / sizeof(dx_fields_fundamental[0]), &dx_fields_fundamental[0] },
-    { 3, L"Profile", sizeof(dx_fields_profile) / sizeof(dx_fields_profile[0]), &dx_fields_profile[0] },
-    { 4, L"MarketMaker", sizeof(dx_fields_market_maker) / sizeof(dx_fields_market_maker[0]), &dx_fields_market_maker[0] },
+static const dx_record_info_t g_event_records[] = {
+	{ L"Trade", sizeof(dx_fields_trade) / sizeof(dx_fields_trade[0]), &dx_fields_trade[0] },
+    { L"Quote", sizeof(dx_fields_quote) / sizeof(dx_fields_quote[0]), &dx_fields_quote[0] },
+    { L"Fundamental", sizeof(dx_fields_fundamental) / sizeof(dx_fields_fundamental[0]), &dx_fields_fundamental[0] },
+    { L"Profile", sizeof(dx_fields_profile) / sizeof(dx_fields_profile[0]), &dx_fields_profile[0] },
+    { L"MarketMaker", sizeof(dx_fields_market_maker) / sizeof(dx_fields_market_maker[0]), &dx_fields_market_maker[0] },
 };
+
+static dx_event_id_t g_protocol_to_event_id_map[dx_eid_count] = {
+    dx_eid_trade,
+    dx_eid_quote,
+    dx_eid_fundamental,
+    dx_eid_profile,
+    dx_eid_market_maker
+};
+
+static bool g_record_description_states[dx_eid_count] = { 0 };
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -135,22 +145,14 @@ void dx_swap_record_fields (dx_field_info_t* f1, dx_field_info_t* f2) {
  */
 /* -------------------------------------------------------------------------- */
 
-dx_int_t dx_get_event_protocol_id (dx_event_id_t event_id) {
-    return g_event_records[event_id].protocol_level_id;
+dx_event_id_t dx_get_event_id (dx_int_t protocol_id) {
+    return g_protocol_to_event_id_map[protocol_id];
 }
 
 /* -------------------------------------------------------------------------- */
 
-dx_event_id_t dx_get_event_id (dx_int_t protocol_level_id) {
-    dx_event_id_t event_id = dx_eid_begin;
-    
-    for (; event_id < dx_eid_count; ++event_id) {
-        if (g_event_records[event_id].protocol_level_id == protocol_level_id) {
-            return event_id;
-        }
-    }
-    
-    return dx_eid_invalid;
+void dx_assign_event_protocol_id (dx_event_id_t event_id, dx_int_t protocol_id) {
+    g_protocol_to_event_id_map[protocol_id] = event_id;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -161,21 +163,21 @@ const dx_record_info_t* dx_get_event_record_by_id (dx_event_id_t event_id) {
 
 /* -------------------------------------------------------------------------- */
 
-const dx_record_info_t* dx_get_event_record_by_name (dx_const_string_t record_name) {
+dx_event_id_t dx_get_event_record_id_by_name (dx_const_string_t record_name) {
     dx_event_id_t event_id = dx_eid_begin;
 
     for (; event_id < dx_eid_count; ++event_id) {
         if (wcscmp(g_event_records[event_id].name, record_name) == 0) {
-            return &(g_event_records[event_id]);
+            return event_id;
         }
     }
     
-    return NULL;
+    return dx_eid_invalid;
 }
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_move_record_field (dx_record_info_t* record_info, dx_const_string_t field_name,
+bool dx_move_record_field (const dx_record_info_t* record_info, dx_const_string_t field_name,
                            dx_int_t field_type, size_t field_index) {
     size_t cur_field_index = 0;
     dx_field_info_t* fields = (dx_field_info_t*)record_info->fields;
@@ -184,11 +186,35 @@ bool dx_move_record_field (dx_record_info_t* record_info, dx_const_string_t fiel
         if (wcscmp(fields[cur_field_index].name, field_name) == 0 &&
             fields[cur_field_index].type == field_type) {
             
-            dx_swap_record_fields(fields + cur_field_index, fields + field_index);
+            if (cur_field_index != field_index) {
+                dx_swap_record_fields(fields + cur_field_index, fields + field_index);
+            }
             
             return true;
         }
     }
     
     return false;
+}
+
+/* -------------------------------------------------------------------------- */
+
+void dx_clear_record_description_state (void) {
+    dx_event_id_t eid = dx_eid_begin;
+    
+    for (; eid < dx_eid_count; ++eid) {
+        g_record_description_states[eid] = false;
+    }
+}
+
+/* -------------------------------------------------------------------------- */
+
+void dx_set_record_description_state (dx_event_id_t event_id) {
+    g_record_description_states[event_id] = true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_get_record_description_state (dx_event_id_t event_id) {
+    return g_record_description_states[event_id];
 }

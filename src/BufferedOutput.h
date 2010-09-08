@@ -101,7 +101,7 @@ dx_result_t dx_write_utf_char        ( dx_int_t codePoint );
 *
 * @param str the string to be written
 */
-dx_result_t dx_write_utf_string      ( const dx_string_t str );
+dx_result_t dx_write_utf_string      (dx_const_string_t str );
 
 /**
 * Ensures that the byte array used for buffering has at least the specified capacity.

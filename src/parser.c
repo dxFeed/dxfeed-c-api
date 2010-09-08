@@ -206,7 +206,7 @@ dx_result_t dx_parse_data (void) {
 	void* record_buffer = NULL;
 	dx_event_id_t event_id;
 	int record_count = 0;
-
+    
     CHECKED_CALL_0(dx_read_symbol);
     
     {
@@ -214,9 +214,15 @@ dx_result_t dx_parse_data (void) {
         
         CHECKED_CALL(dx_read_compact_int, &id);
 
-        if ((event_id = dx_get_event_id(id)) == dx_eid_invalid) {
+        if (id < 0 || id >= dx_eid_count) {
             return setParseError(dx_pr_wrong_record_id);
         }
+        
+        event_id = dx_get_event_id(id);
+    }
+    
+    if (!dx_get_record_description_state(event_id)) {
+        return setParseError(dx_pr_record_description_not_received);
     }
     
     record_info = dx_get_event_record_by_id(event_id);
@@ -247,17 +253,18 @@ dx_result_t dx_parse_data (void) {
 
 /* -------------------------------------------------------------------------- */
 
-dx_result_t dx_parse_describe_records() {
+dx_result_t dx_parse_describe_records () {
     static dx_const_string_t s_field_to_ignore = L"Symbol";
     
     while (dx_get_in_buffer_position() < dx_get_in_buffer_limit()) {
         dx_int_t record_id;
         dx_string_t record_name;
         dx_int_t field_count;
-        dx_record_info_t* record_info = NULL;
+        const dx_record_info_t* record_info = NULL;
         size_t i = 0;
         size_t real_field_index = 0;
         dx_string_t field_name;
+        dx_event_id_t eid;
         
         CHECKED_CALL(dx_read_compact_int, &record_id);
         CHECKED_CALL(dx_read_utf_string, &record_name);
@@ -269,16 +276,28 @@ dx_result_t dx_parse_describe_records() {
             return setParseError(dx_pr_record_info_corrupt);
         }
         
-        if ((record_info = (dx_record_info_t*)dx_get_event_record_by_name(record_name)) == NULL) {
+        if (record_id >= dx_eid_count) {
             dx_free(record_name);
-            
-            return setParseError(dx_pr_unknown_record_name);
+
+            return setParseError(dx_pr_wrong_record_id);
         }
+        
+        eid = dx_get_event_record_id_by_name(record_name);
         
         dx_free(record_name);
         
-        record_info->protocol_level_id = record_id;
-
+        if (eid == dx_eid_invalid) {
+            return setParseError(dx_pr_unknown_record_name);
+        }
+        
+        dx_assign_event_protocol_id(eid, record_id);
+        
+        record_info = dx_get_event_record_by_id(eid);        
+        
+        if (record_info->field_count != field_count) {
+            return setParseError(dx_pr_record_field_count_mismatch);
+        }
+        
         for (i = 0; i != field_count; ++i, dx_free(field_name)) {
             dx_int_t field_type;
             
@@ -305,6 +324,8 @@ dx_result_t dx_parse_describe_records() {
 			
 			++real_field_index;			
         }
+        
+        dx_set_record_description_state(eid);
     }
 	
 	return parseSuccessful();
@@ -318,7 +339,7 @@ void dx_process_other_message(dx_int_t type, dx_byte_t* new_buffer, dx_int_t siz
 
 ////////////////////////////////////////////////////////////////////////////////
 /**
-* Parses message of the specified type. Some messages are processed immedetely, but data and subscription messages
+* Parses message of the specified type. Some messages are processed immediately, but data and subscription messages
 * are just parsed into buffers and pendingMessageType is set.
 */
 dx_result_t dx_parse_message(dx_int_t type) {
@@ -371,7 +392,7 @@ dx_result_t dx_combine_buffers( const dx_byte_t* new_buffer, dx_int_t new_buffer
 	}
 
 	// we have to combine two buffers - new data and old unprocessed data (if present)
-	// it's possible if logic message was diveded into two network packets
+	// it's possible if logic message was divided into two network packets
 	if (dx_memcpy(buffer + buffer_size, new_buffer, new_buffer_size) == NULL )
 			return R_FAILED;
 

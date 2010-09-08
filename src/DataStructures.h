@@ -63,7 +63,6 @@ typedef struct {
 /* -------------------------------------------------------------------------- */
 
 typedef struct {
-    dx_int_t protocol_level_id;
     dx_const_string_t name;
     size_t field_count;
     const dx_field_info_t* fields;
@@ -76,13 +75,17 @@ typedef struct {
 /* -------------------------------------------------------------------------- */
 
 dx_int_t dx_get_event_protocol_id (dx_event_id_t event_id);
-dx_event_id_t dx_get_event_id (dx_int_t protocol_level_id);
+dx_event_id_t dx_get_event_id (dx_int_t protocol_id);
+void dx_assign_event_protocol_id (dx_event_id_t event_id, dx_int_t protocol_id);
 
 const dx_record_info_t* dx_get_event_record_by_id (dx_event_id_t event_id);
-const dx_record_info_t* dx_get_event_record_by_name (dx_const_string_t record_name);
+dx_event_id_t dx_get_event_record_id_by_name (dx_const_string_t record_name);
 
-bool dx_move_record_field (dx_record_info_t* record_info, dx_const_string_t field_name,
+bool dx_move_record_field (const dx_record_info_t* record_info, dx_const_string_t field_name,
                            dx_int_t field_type, size_t field_index);
 
+void dx_clear_record_description_state (void);
+void dx_set_record_description_state (dx_event_id_t event_id);
+bool dx_get_record_description_state (dx_event_id_t event_id);
 
 #endif /* DATA_STRUCTURES_H_INCLUDED */

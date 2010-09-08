@@ -130,6 +130,43 @@ dx_result_t dx_end_message() {
 }
 
 /* -------------------------------------------------------------------------- */
+
+dx_result_t dx_write_record_field (const dx_field_info_t* field) {
+    CHECKED_CALL(dx_write_utf_string, field->name);
+    CHECKED_CALL(dx_write_compact_int, field->type);
+    
+    return parseSuccessful();
+}
+
+/* -------------------------------------------------------------------------- */
+
+dx_result_t dx_write_event_record (const dx_record_info_t* record, dx_int_t record_id) {
+    size_t field_index = 0;
+    
+    CHECKED_CALL(dx_write_compact_int, record_id);
+    CHECKED_CALL(dx_write_utf_string, record->name);
+    CHECKED_CALL(dx_write_compact_int, ((dx_int_t)record->field_count));
+    
+    for (; field_index != record->field_count; ++field_index) {
+        CHECKED_CALL(dx_write_record_field, record->fields + field_index);
+    }
+    
+    return parseSuccessful();
+}
+
+/* -------------------------------------------------------------------------- */
+
+dx_result_t dx_write_event_records (void) {
+    dx_event_id_t eid = dx_eid_begin;
+    
+    for (; eid < dx_eid_count; ++eid) {
+        CHECKED_CALL_2(dx_write_event_record, dx_get_event_record_by_id(eid), eid);
+    }
+    
+    return parseSuccessful();
+}
+
+/* -------------------------------------------------------------------------- */
 /*
  *	External interface
  */
@@ -161,4 +198,26 @@ dx_result_t dx_create_subscription (dx_byte_t** out, dx_int_t* out_len, dx_messa
 	*out_len = dx_get_out_buffer_position();
 
 	return parseSuccessful();
+}
+
+/* -------------------------------------------------------------------------- */
+
+dx_result_t dx_compose_description_message (OUT dx_byte_t** msg_buffer, OUT dx_int_t* msg_length) {
+    static const size_t initial_size = 1024;
+    dx_byte_t* initial_buffer = NULL;
+    
+    if ((initial_buffer = dx_malloc(initial_size)) == NULL) {
+        return R_FAILED;
+    }
+    
+    dx_set_out_buffer(initial_buffer, (dx_int_t)initial_size);
+    
+    CHECKED_CALL(dx_compose_message_header, MESSAGE_DESCRIBE_RECORDS);
+    CHECKED_CALL_0(dx_write_event_records);
+    CHECKED_CALL_0(dx_finish_composing_message);
+    
+    *msg_buffer = dx_get_out_buffer(NULL);
+    *msg_length = dx_get_out_buffer_position();
+    
+    return parseSuccessful();
 }

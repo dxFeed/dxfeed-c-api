@@ -98,7 +98,7 @@ int main (int argc, char* argv[]) {
 
     printf("Connection successful!\n");
  
-	if (!dxf_add_subscription(/*DX_ET_TRADE | DX_ET_QUOTE | DX_ET_MARKET_MAKER |*/ DX_ET_FUNDAMENTAL /*| DX_ET_PROFILE*/, &subscription )) {
+	if (!dxf_add_subscription(/*DX_ET_TRADE | */DX_ET_QUOTE/* | DX_ET_MARKET_MAKER | DX_ET_FUNDAMENTAL | DX_ET_PROFILE*/, &subscription )) {
         process_last_error();
         
         return -1;
