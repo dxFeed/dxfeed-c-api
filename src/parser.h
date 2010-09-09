@@ -68,8 +68,6 @@ typedef enum {
     */
     MESSAGE_TEXT_FORMAT_SPECIAL = 61, // '='
     MESSAGE_TEXT_FORMAT_COMMENT = 35, // '#'
-
-   // MT_NULL = UINT_MAX //TODO: do we need it? this structure copied from java one-by-one
 } dx_message_type_t;
 
 /* -------------------------------------------------------------------------- */

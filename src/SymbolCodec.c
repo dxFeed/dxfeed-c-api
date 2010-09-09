@@ -218,7 +218,7 @@ dx_int_t dx_encode_symbol_name (dx_const_string_t symbol) {
     }
     return dx_encode_penta(penta, plen);
 }
-dx_result_t dx_decode_symbol_name(dx_int_t cipher, OUT dx_string_t* symbol){// TODO: memory free????
+dx_result_t dx_decode_symbol_name(dx_int_t cipher, OUT dx_string_t* symbol){
 	dx_long_t penta;
     dx_string_t str;
 
@@ -226,8 +226,9 @@ dx_result_t dx_decode_symbol_name(dx_int_t cipher, OUT dx_string_t* symbol){// T
 		*symbol = NULL;
 		return parseSuccessful();
 	}
-	if (dx_decode_cipher (cipher, & penta) != R_SUCCESSFUL)
+    if (dx_decode_cipher (cipher, & penta) != R_SUCCESSFUL) {
 		setParseError(dx_pr_undefined_symbol); //TODO: maybe change error code?
+    }
 
     str = dx_to_string(penta);
     if (str == NULL) {

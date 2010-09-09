@@ -218,7 +218,7 @@ dx_result_t dx_read_records (const dx_record_info_t* record_info, void* record_b
 }
 
 dx_result_t dx_parse_data (void) {
-    dx_string_t symbol;
+    dx_string_t symbol = NULL;
 	
 	const dx_record_info_t* record_info;
 	void* record_buffer = NULL;
