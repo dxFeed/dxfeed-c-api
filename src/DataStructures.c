@@ -29,13 +29,13 @@
 /* -------------------------------------------------------------------------- */
 
 static dx_field_info_t dx_fields_trade[] = { 
-// 	{ dx_fid_utf_char, L"Last.Exchange", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_trade_t, last_exchange) },
-// 	{ dx_fid_compact_int, L"Last.Time", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_trade_t, last_time) },
-// 	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Last.Price", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_trade_t, last_price) },
-	{ dx_fid_compact_int, L"Last.Tick", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_trade_t, last_tick) },
+	{ dx_fid_utf_char, L"Last.Exchange", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_trade_t, last_exchange) },
+	{ dx_fid_compact_int, L"Last.Time", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_trade_t, last_time) },
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Last.Price", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_trade_t, last_price) },
 	{ dx_fid_compact_int, L"Last.Size", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_trade_t, last_size) },
-// 	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Last.Change", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_trade_t, last_change) }, 
-// 	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Volume", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_trade_t, volume) }
+	{ dx_fid_compact_int, L"Last.Tick", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_trade_t, last_tick) },
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Last.Change", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_trade_t, last_change) }, 
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Volume", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_trade_t, volume) }
 }; 
 
 /* -------------------------------------------------------------------------- */
@@ -76,17 +76,16 @@ static dx_field_info_t dx_fields_fundamental[] = {
 /* -------------------------------------------------------------------------- */
 
 static dx_field_info_t dx_fields_profile[] = { 
-	//{ dx_fid_compact_int | dx_fid_flag_decimal, L"Beta", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_profile_t, beta) },
-// 	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Eps", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_profile_t, eps) },
-// 	{ dx_fid_compact_int, L"DivFreq", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_profile_t, div_freq) },
-// 	//{ dx_fid_compact_int | dx_fid_flag_decimal, L"ExdDiv.Amount", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_profile_t, exd_div_amount) },
-// 	//{ dx_fid_compact_int , L"ExdDiv.Date", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_profile_t, exd_div_date) },
-// 	{ dx_fid_compact_int | dx_fid_flag_decimal, L"52High.Price", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_profile_t, price_52_high) },
-// 	{ dx_fid_compact_int | dx_fid_flag_decimal, L"52Low.Price", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_profile_t, price_52_low) },
-// 	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Shares", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_profile_t, shares) },
-// 	{ dx_fid_compact_int, L"IsIndex", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_profile_t, is_index) },
- 	{ dx_fid_utf_char_array, L"Description", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_profile_t, description) }
-	//{ dx_fid_utf_char_array, L"DescriptionDDSSDDSS", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_profile_t, description) }
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Beta", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_profile_t, beta) },
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Eps", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_profile_t, eps) },
+	{ dx_fid_compact_int, L"DivFreq", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_profile_t, div_freq) },
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"ExdDiv.Amount", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_profile_t, exd_div_amount) },
+	{ dx_fid_compact_int , L"ExdDiv.Date", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_profile_t, exd_div_date) },
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"52High.Price", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_profile_t, price_52_high) },
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"52Low.Price", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_profile_t, price_52_low) },
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Shares", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_profile_t, shares) },
+	{ dx_fid_compact_int, L"IsIndex", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_profile_t, is_index) },
+	{ dx_fid_utf_char_array, L"Description", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_profile_t, description) }
 }; 
 
 /* -------------------------------------------------------------------------- */

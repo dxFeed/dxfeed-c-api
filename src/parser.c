@@ -324,9 +324,9 @@ dx_result_t dx_parse_describe_records () {
         
         record_info = dx_get_event_record_by_id(eid);        
         
-//         if (record_info->field_count != field_count) {
-//             return setParseError(dx_pr_record_field_count_mismatch);
-//         }
+        if (record_info->field_count != field_count) {
+            return setParseError(dx_pr_record_field_count_mismatch);
+        }
         
         for (i = 0; i != field_count; ++i, dx_free(field_name)) {
             dx_int_t field_type;
@@ -347,10 +347,9 @@ dx_result_t dx_parse_describe_records () {
             }
 			
 			if (!dx_move_record_field(record_info, field_name, field_type, real_field_index)) {
-                continue;
-/*			    dx_free(field_name);*/
+			    dx_free(field_name);
 			    
-/*			    return setParseError(dx_pr_unknown_record_field);*/
+			    return setParseError(dx_pr_unknown_record_field);
 			}
 			
 			++real_field_index;			
