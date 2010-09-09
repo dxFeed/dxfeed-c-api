@@ -151,13 +151,6 @@ DXFEED_API ERRORCODE dxf_create_subscription (int event_types, OUT dxf_subscript
 	if (*subscription == dx_invalid_subscription)
 		return DXF_FAILURE;
 
-	//TODO: separate events per bit mask
-//	dx_create_subscription(&sub_buffer, &out_len, MESSAGE_TICKER_ADD_SUBSCRIPTION, dx_encode_symbol_name(L"IBM"), L"MSFT", 1);
-
-	//send to server
-//	dx_send_data(sub_buffer, out_len);
-
-
 	return DXF_SUCCESS;
 }
 
@@ -241,4 +234,7 @@ DXFEED_API ERRORCODE dxf_attach_event_listener (dxf_subscription_t subscription,
 	return DXF_SUCCESS;
 }
 
+DXFEED_API ERRORCODE dxf_subscription_clear_symbols (dxf_subscription_t subscription){
+
+}
 

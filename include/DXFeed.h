@@ -77,7 +77,7 @@ DXFEED_API ERRORCODE dxf_attach_event_listener (dxf_subscription_t subscription,
 DXFEED_API ERRORCODE dxf_add_subscription (dxf_subscription_t* subscription); // see next line
 DXFEED_API ERRORCODE dxf_remove_subscription (OUT dxf_subscription_t* subscription); // do not erase subscription data!
 DXFEED_API ERRORCODE dxf_get_last_event (int event_type, dx_string_t symbol, OUT void* data);
-DXFEED_API ERRORCODE dxf_subscription_clear_symbols ();
+DXFEED_API ERRORCODE dxf_subscription_clear_symbols (dxf_subscription_t subscription);
 DXFEED_API ERRORCODE dxf_close_subscription (dxf_subscription_t* subscription); // erase data
 DXFEED_API ERRORCODE dxf_get_symbols (dxf_subscription_t subscription, OUT dx_string_t* symbols, int* symbol_count);
 DXFEED_API ERRORCODE dxf_get_event_types_symbols (dxf_subscription_t subscription, OUT int* event_types);
