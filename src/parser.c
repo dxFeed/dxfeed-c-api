@@ -267,6 +267,7 @@ dx_result_t dx_parse_data (void) {
 		    
 		    return R_FAILED;
 		}
+        dx_store_string_buffer(symbol);
     }
 	
 	if (!dx_process_event_data(DX_EVENT_BIT_MASK(event_id), symbol, lastCipher, g_buffer_managers[event_id].record_buffer_getter(), record_count)) {

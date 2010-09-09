@@ -68,7 +68,7 @@ dx_result_t dx_compose_body(dx_int_t record_id, dx_int_t cipher, dx_string_t sym
     }
 
 	if (dx_codec_write_symbol(buf, buf_len, dx_get_out_buffer_position(), cipher, symbol) != R_SUCCESSFUL) {
-         return R_FAILED;// TODO: error processing should be improved (now it's mixed style)
+         return R_FAILED;
     }
 
     CHECKED_CALL(dx_write_compact_int, record_id);
