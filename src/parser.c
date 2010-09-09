@@ -83,12 +83,16 @@ bool dx_is_subscription_message(dx_message_type_t type) {
 
 /**
 * Parses and return message type.
-* @throws CorruptedException if stream is corrupted.
 */
 dx_result_t dx_parse_type(OUT dx_int_t* ltype) {
     dx_long_t type;
+
     if (dx_read_compact_long(&type) != R_SUCCESSFUL) {
-        return setParseError(dx_pr_buffer_corrupt);
+        if (dx_get_parser_last_error() == dx_pr_out_of_buffer) {
+            return setParseError(dx_pr_message_not_complete);
+        } else {
+            return setParseError(dx_pr_buffer_corrupt);
+        }
     }
     if (*ltype < 0 || *ltype > INT_MAX) {
         return setParseError(dx_pr_buffer_corrupt); // stream is corrupted
@@ -102,7 +106,6 @@ dx_result_t dx_parse_type(OUT dx_int_t* ltype) {
 /**
 * Parses message length and sets up position and limit for parsing of the message contents.
 * Returns false when message is not complete yet and its parsing cannot be started.
-* @throws CorruptedException if stream is corrupted.
 */
 static dx_result_t dx_parse_length_and_setup_input(dx_int_t position, dx_int_t limit ) {
     dx_long_t length;
@@ -134,14 +137,22 @@ static dx_result_t dx_read_symbol() {
         lastSymbol = NULL;
 	} else 
 		if (r > 0) {
-        lastCipher = 0;
-        //if (symbolResolver == null || (lastSymbol = symbolResolver.getSymbol(symbol_buffer, 0, r)) == null)
-        lastSymbol = dx_create_string(r);
-        wcscpy(lastSymbol, symbol_buffer);
+            lastCipher = 0;
+            //if (symbolResolver == null || (lastSymbol = symbolResolver.getSymbol(symbol_buffer, 0, r)) == null)
+            lastSymbol = dx_create_string(r);
+            if (!lastSymbol) {
+                return R_FAILED;
+            }
+            dx_strcpy(lastSymbol, symbol_buffer);
 		} else {
         if (symbol_result != NULL) {
-            lastSymbol = dx_create_string(wcslen(symbol_result));
-            wcscpy(lastSymbol, symbol_result);
+            lastSymbol = dx_create_string(dx_strlen(symbol_result));
+            if (!lastSymbol) {
+                return R_FAILED;
+            }
+
+            dx_strcpy(lastSymbol, symbol_result);
+
             dx_free(symbol_result);
             lastCipher = dx_encode_symbol_name(lastSymbol);
         }
@@ -289,7 +300,7 @@ dx_result_t dx_parse_describe_records () {
         CHECKED_CALL(dx_read_utf_string, &record_name);
         CHECKED_CALL(dx_read_compact_int, &field_count);
 		
-		if (record_id < 0 || record_name == NULL || wcslen(record_name) == 0 || field_count < 0) {
+		if (record_id < 0 || record_name == NULL || dx_strlen(record_name) == 0 || field_count < 0) {
             dx_free(record_name);
             
             return setParseError(dx_pr_record_info_corrupt);
@@ -327,7 +338,7 @@ dx_result_t dx_parse_describe_records () {
                 continue;
             }
             
-            if (field_name == NULL || wcslen(field_name) == 0 ||
+            if (field_name == NULL || dx_strlen(field_name) == 0 ||
                 field_type < MIN_FIELD_TYPE_ID || field_type > MAX_FIELD_TYPE_ID) {
                 
                 dx_free(field_name);
@@ -366,20 +377,29 @@ dx_result_t dx_parse_message(dx_int_t type) {
     if (dx_is_message_type_valid(messageType)) {
         if (dx_is_data_message(messageType)) {
             if (dx_parse_data() != R_SUCCESSFUL) {
+
+                if (dx_get_parser_last_error() == dx_pr_out_of_buffer) {
+                    return setParseError(dx_pr_message_not_complete);
+                }
                 return R_FAILED;
-            } return parseSuccessful();
-        } else if (dx_is_subscription_message(messageType)) {
-            //parseSubscription(type); TODO: error subscription message doesn't valid here
+            }
+
             return parseSuccessful();
+
+        } else if (dx_is_subscription_message(messageType)) {
+            return setParseError(dx_pr_unexpected_message_type);
         }
     
     switch (type) {
         case MESSAGE_DESCRIBE_RECORDS:
-                  // todo: error handling is not atomic now -- partially parsed message is still being processed.
-                dx_parse_describe_records();//TODO: errors 
+            if (dx_parse_describe_records() != R_SUCCESSFUL) {
+                if (dx_get_parser_last_error() == dx_pr_out_of_buffer) {
+                    return setParseError(dx_pr_message_not_complete);
+                }
+                return R_FAILED;
+            }
 			break;
-            // falls through to ignore this message
-        case MESSAGE_HEARTBEAT:
+        case MESSAGE_HEARTBEAT: // no break, falls through
         case MESSAGE_DESCRIBE_PROTOCOL:
         case MESSAGE_DESCRIBE_RESERVED:
         case MESSAGE_TEXT_FORMAT_COMMENT:
@@ -404,8 +424,9 @@ dx_result_t dx_combine_buffers( const dx_byte_t* new_buffer, dx_int_t new_buffer
 	if (buffer_size != buffer_pos ){ // copy all unprocessed data to beginning of buffer
 		if ( dx_memcpy(buffer, buffer + buffer_pos, buffer_size) == NULL)
 			return R_FAILED;
+
+        buffer_size = buffer_size - buffer_pos;
 		buffer_pos = 0;
-		buffer_size = buffer_size - buffer_pos;
 	} else {
 		buffer_pos = buffer_size = 0;
 	}
@@ -428,6 +449,8 @@ dx_result_t dx_combine_buffers( const dx_byte_t* new_buffer, dx_int_t new_buffer
 
 ////////////////////////////////////////////////////////////////////////////////
 dx_result_t dx_parse( const dx_byte_t* new_buffer, dx_int_t new_buffer_size  ) {
+    dx_result_t parse_result = R_SUCCESSFUL;
+
 	if ( buffer == NULL ) {// allocate memory for all program lifetime
 		buffer = dx_malloc(INITIAL_BUFFER_SIZE);
 		if (buffer == NULL)
@@ -435,30 +458,69 @@ dx_result_t dx_parse( const dx_byte_t* new_buffer, dx_int_t new_buffer_size  ) {
 		buffer_size = 0; // size of data in buffer
 		buffer_pos = 0; 
 	}
+
+    if (new_buffer_size <= 0) {
+        return R_FAILED;
+    }
+
 	// TODO: skip wrong buffer 
 	if (dx_combine_buffers (new_buffer, new_buffer_size) != R_SUCCESSFUL) 
 		return R_FAILED;
 
-	//TODO: heartbeat messages ???
 	// Parsing loop
     while (dx_get_in_buffer_position() < buffer_size) {
         dx_int_t messageType = MESSAGE_HEARTBEAT; // zero-length messages are treated as just heartbeats
+        const dx_int_t message_start_pos = dx_get_in_buffer_position();
 
+        // read length of a message and prepare an input buffer
         if (dx_parse_length_and_setup_input(buffer_pos, buffer_size) != R_SUCCESSFUL) {
             if (dx_get_parser_last_error() == dx_pr_message_not_complete) {
-                break; // message is incomplete -- just stop parsing
-				// TODO: reset position back to message start
+                // message is incomplete
+                // just reset position back to message start and stop parsing
+                dx_set_in_buffer_position(message_start_pos); 
+                break;
+            } else { // buffer is corrupt
+                dx_set_in_buffer_position(dx_get_in_buffer_limit());
+                continue; // cannot continue parsing this message on corrupted buffer, so go to the next one
             }
         }
         if (dx_get_in_buffer_limit() > dx_get_in_buffer_position()) { // only if not empty message, empty message is heartbeat ???
             if (dx_parse_type(&messageType) != R_SUCCESSFUL) {
-                return R_FAILED; // cannot continue parsing on corrupted stream TODO: buffer state
+
+                if (dx_get_parser_last_error() == dx_pr_message_not_complete) {
+                    // message is incomplete
+                    // just reset position back to message start and stop parsing
+                    dx_set_in_buffer_position(message_start_pos); 
+                    break;
+                } else {
+                    dx_set_in_buffer_position(dx_get_in_buffer_limit());
+                    continue; // cannot continue parsing this message on corrupted buffer, so go to the next one
+                }
             }
 	    }
 
-		CHECKED_CALL(dx_parse_message, messageType);
+        if (dx_parse_message(messageType) != R_SUCCESSFUL) {
+            enum parser_result_t res = dx_get_parser_last_error();
+            switch (res) {
+                case dx_pr_message_not_complete:
+                    // message is incomplete
+                    // just reset position back to message start and stop parsing
+                    dx_set_in_buffer_position(message_start_pos);
+                    break;
+                //case dx_pr_record_info_corrupt:
+                //case dx_pr_unknown_record_name:
+                //case dx_pr_field_info_corrupt:
+                //case dx_pr_unexpected_message_type:
+                default:
+                    // skip the whole message
+                    dx_set_in_buffer_position(dx_get_in_buffer_limit());
+                    continue;
+            }
+            dx_set_in_buffer_position(buffer_pos);
+            break;
+        }
     }
 	buffer_pos = dx_get_in_buffer_position();
 	
-	return parseSuccessful();
+	return parse_result;
 }

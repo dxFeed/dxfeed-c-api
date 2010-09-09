@@ -25,8 +25,6 @@
 
 static dx_byte_t* dx_buf = NULL;
 
-static const dx_int_t dx_default_threshold = 8000;//TODO: why 8000? what does it mean?
-
 static const dx_int_t dx_initial_buffer_size = 100; // It has to be enough to any subscription
 
 /* -------------------------------------------------------------------------- 
@@ -35,12 +33,6 @@ static const dx_int_t dx_initial_buffer_size = 100; // It has to be enough to an
 *
 /* -------------------------------------------------------------------------- */
 
-bool hasCapacity() {
-    return dx_get_out_buffer_position() < dx_default_threshold;
-}
-
-///* -------------------------------------------------------------------------- */
-//
 dx_result_t dx_compose_message_header(dx_int_t messageTypeId) {
 
     CHECKED_CALL(dx_write_byte, (dx_byte_t)0); // reserve one byte for message length
@@ -180,10 +172,6 @@ dx_result_t dx_create_subscription (dx_byte_t** out, dx_int_t* out_len, dx_messa
 	*out = dx_buf;
 
     dx_set_out_buffer(dx_buf, dx_initial_buffer_size);
-
-	if (!hasCapacity()) {
-        return setParseError(dx_pr_illegal_length); 
-    }    
 
 	if (!dx_is_subscription_message(type)) {
         return setParseError(dx_pr_illegal_argument);

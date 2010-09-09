@@ -108,7 +108,7 @@ dx_int_t dx_symbol_name_hasher (dx_const_string_t symbol_name) {
     size_t len = 0;
     size_t i = 0;
     
-    len = wcslen(symbol_name);
+    len = dx_strlen(symbol_name);
     
     for (; i < len; ++i) {
         h = 5 * h + towupper(symbol_name[i]);

@@ -24,6 +24,7 @@
 #ifndef DX_MEMORY_H_INCLUDED
 #define DX_MEMORY_H_INCLUDED
 
+#include "DXTypes.h"
 /* -------------------------------------------------------------------------- */
 /*
  *	Memory function wrappers
@@ -36,6 +37,15 @@ void  dx_free (void* buf);
 void* dx_memcpy (void* destination, const void* source, size_t size);
 void* dx_memmove (void* destination, const void* source, size_t size);
 void* dx_memset (void* destination, int c, size_t size);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	String function wrappers
+*/
+/* -------------------------------------------------------------------------- */
+dx_string_t dx_strcpy (dx_string_t destination, const dx_string_t source);
+size_t      dx_strlen (const dx_char_t* str);
+
 /* -------------------------------------------------------------------------- */
 /*
  *	Memory function wrappers without error handling mechanism

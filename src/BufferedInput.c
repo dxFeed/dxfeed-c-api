@@ -106,9 +106,7 @@ dx_result_t readUTF2(int first, OUT dx_int_t* res) {
         return R_FAILED;
     }
 
-    if (dx_read_byte(&second) != R_SUCCESSFUL) {
-        return R_FAILED;
-    }
+    CHECKED_CALL(dx_read_byte, &second);
 
     if ((second & 0xC0) != 0x80) {
         setParseError(dx_pr_bad_utf_data_format);
@@ -127,9 +125,7 @@ dx_result_t readUTF3(int first, OUT dx_int_t* res) {
         return R_FAILED;
     }
 
-    if (dx_read_short(&tail) != R_SUCCESSFUL) {
-        return R_FAILED;
-    }
+    CHECKED_CALL(dx_read_short, &tail);
 
     if ((tail & 0xC0C0) != 0x8080) {
         setParseError(dx_pr_bad_utf_data_format);
@@ -150,13 +146,9 @@ dx_result_t readUTF4(int first, OUT dx_int_t* res) {
         return R_FAILED;
     }
 
-    if (dx_read_byte(&second) != R_SUCCESSFUL) {
-        return R_FAILED;
-    }
+    CHECKED_CALL(dx_read_byte, &second);
 
-    if (dx_read_short(&tail) != R_SUCCESSFUL) {
-        return R_FAILED;
-    }
+    CHECKED_CALL(dx_read_short, &tail);
 
     if ((second & 0xC0) != 0x80 || (tail & 0xC0C0) != 0x8080) {
         setParseError(dx_pr_bad_utf_data_format);
@@ -166,8 +158,7 @@ dx_result_t readUTF4(int first, OUT dx_int_t* res) {
     *res = ((first & 0x07) << 18) | ((second & 0x3F) << 12) | ((tail & 0x3F00) >> 2) | (tail & 0x3F);
 
     if (*res > 0x10FFFF) {
-        setParseError(dx_pr_bad_utf_data_format);
-        return R_FAILED;
+        return setParseError(dx_pr_bad_utf_data_format);
     }
 
     return parseSuccessful();

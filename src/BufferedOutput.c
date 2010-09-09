@@ -222,7 +222,7 @@ dx_result_t dx_write_double( dx_double_t val) {
 ////////////////////////////////////////////////////////////////////////////////
 dx_result_t dx_write_bytes( const dx_char_t* val ) {
     dx_result_t res = R_SUCCESSFUL;
-    size_t length = wcslen(val);
+    size_t length = dx_strlen(val);
     size_t i = 0;
     for (;i < length && res == R_SUCCESSFUL; i++) {
         res = dx_write_byte((dx_byte_t)val[i]);
@@ -238,7 +238,7 @@ dx_result_t dx_write_bytes( const dx_char_t* val ) {
 ////////////////////////////////////////////////////////////////////////////////
 dx_result_t dx_write_chars( const dx_char_t* val ) {
     dx_result_t res = R_SUCCESSFUL;
-    size_t length = wcslen(val);
+    size_t length = dx_strlen(val);
     size_t i = 0;
     for (; i < length && res == R_SUCCESSFUL; i++) {
         res = dx_write_char(val[i]);
@@ -253,7 +253,7 @@ dx_result_t dx_write_chars( const dx_char_t* val ) {
 
 ////////////////////////////////////////////////////////////////////////////////
 dx_result_t dx_write_utf( const dx_string_t val ) {
-    size_t strlen = wcslen(val);
+    size_t strlen = dx_strlen(val);
     dx_short_t utflen = 0;
     size_t i = 0;
     for (; i < strlen; i++) {
@@ -434,7 +434,7 @@ dx_result_t dx_write_utf_string (dx_const_string_t str) {
         return dx_write_compact_int(-1);
     }
 
-    strlen = wcslen(str);
+    strlen = dx_strlen(str);
     utflen = 0;
     for (i = 0; i < strlen;) {
         dx_char_t c = str[i++];

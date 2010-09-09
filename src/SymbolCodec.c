@@ -119,7 +119,7 @@ dx_int_t dx_encode_penta(dx_long_t penta, dx_int_t plen) {
 * Converts penta into string.
 * The specified penta must be valid (no more than 35 bits).
 */
-dx_string_t dx_to_string(dx_long_t penta) {//TODO: errors handling
+dx_string_t dx_to_string(dx_long_t penta) {
     dx_int_t plen = 0;
     dx_string_t chars;
     dx_int_t length = 0;
@@ -129,6 +129,10 @@ dx_string_t dx_to_string(dx_long_t penta) {//TODO: errors handling
     }
 
     chars = dx_create_string(plen/5);
+    if (!chars) {
+        return NULL;
+    }
+
     while (plen > 0) {
         dx_int_t code;
         plen -= 5;
@@ -140,7 +144,6 @@ dx_string_t dx_to_string(dx_long_t penta) {//TODO: errors handling
         chars[length++] = characters[code];
     }
 
-    chars[length] = 0; // end of string
     return chars;
 }
 
@@ -168,7 +171,7 @@ dx_result_t dx_decode_cipher(dx_int_t cipher, OUT dx_long_t* res) {
             *res = ((dx_long_t)pentas[L'$'] << 30) + (cipher & 0x3FFFFFFF);
             break;
         default:
-            // WTF ?
+            // ???
             return setParseError(dx_pr_internal_error); // 'int' has more than 32 bits.
     }
 
@@ -197,7 +200,7 @@ dx_int_t dx_encode_symbol_name (dx_const_string_t symbol) {
     if (symbol == NULL) {
         return 0;
     }
-    length = (dx_int_t)wcslen(symbol);
+    length = (dx_int_t)dx_strlen(symbol);
     if (length > 7) {
         return 0;
     }
@@ -217,6 +220,7 @@ dx_int_t dx_encode_symbol_name (dx_const_string_t symbol) {
 }
 dx_result_t dx_decode_symbol_name(dx_int_t cipher, OUT dx_string_t* symbol){// TODO: memory free????
 	dx_long_t penta;
+    dx_string_t str;
 
 	if (cipher == 0 ){
 		*symbol = NULL;
@@ -225,7 +229,13 @@ dx_result_t dx_decode_symbol_name(dx_int_t cipher, OUT dx_string_t* symbol){// T
 	if (dx_decode_cipher (cipher, & penta) != R_SUCCESSFUL)
 		setParseError(dx_pr_undefined_symbol); //TODO: maybe change error code?
 
-	*symbol = dx_to_string(penta);
+    str = dx_to_string(penta);
+    if (str == NULL) {
+        return R_FAILED; // dx_to_string returns NULL only in case memory subsystem error, so last error already set
+    }
+
+	*symbol = str;
+
 	return parseSuccessful();
 
 }
@@ -253,9 +263,7 @@ dx_result_t dx_codec_read_symbol(dx_char_t* buffer, dx_int_t buf_len, OUT dx_str
         CHECKED_CALL(dx_read_unsigned_short, &tmp_int_1);
         penta = ((i & 0x0F) << 16) + tmp_int_1;
     } else if (i < 0xF8) { // 35-bit
-        if (dx_read_int(&tmp_int_1) != R_SUCCESSFUL) {
-            return R_FAILED;
-        }
+        CHECKED_CALL(dx_read_int, &tmp_int_1);
         penta = ((long)(i & 0x07) << 32) + (tmp_int_1 & 0xFFFFFFFFL);
     } else if (i < 0xFC) { // reserved (second diapason)
         return setParseError(dx_pr_reserved_bit_sequence);
@@ -288,6 +296,9 @@ dx_result_t dx_codec_read_symbol(dx_char_t* buffer, dx_int_t buf_len, OUT dx_str
 
         // ???
         chars = length <= buf_len ? buffer : dx_create_string((dx_int_t)length);
+        if (chars == NULL) {
+            return R_FAILED;
+        }
 
         for (k = 0; k < length; ++k) {
             dx_int_t codePoint;
@@ -321,7 +332,12 @@ dx_result_t dx_codec_read_symbol(dx_char_t* buffer, dx_int_t buf_len, OUT dx_str
     }
     cipher = dx_encode_penta(penta, plen);
     if (cipher == 0) {
-        *result = dx_to_string(penta); // Generally this is inefficient, but this use-case shall not actually happen.
+        dx_string_t str = dx_to_string(penta);
+        if (str == NULL) {
+            return R_FAILED; // dx_to_string returns NULL only in case memory subsystem error, so last error already set
+        }
+
+        *result = str; // Generally this is inefficient, but this use-case shall not actually happen.
     }
     *adv_res = cipher;
     return parseSuccessful();
@@ -361,7 +377,7 @@ dx_result_t dx_codec_write_symbol(dx_byte_t* buf, dx_int_t buf_len, dx_int_t pos
             dx_int_t i;
             CHECKED_CALL(dx_write_byte, 0xFD);
 
-            length = (dx_int_t)wcslen(symbol);
+            length = (dx_int_t)dx_strlen(symbol);
             CHECKED_CALL(dx_write_compact_int, length);
 
             for (i = 0; i < length; ++i) {

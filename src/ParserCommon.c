@@ -52,6 +52,7 @@ static struct dx_error_code_descr_t g_parser_errors[] = {
     { dx_pr_unknown_record_field, "Unknown record field" },
     { dx_pr_record_field_count_mismatch, "Event record field count mismatch" },
     { dx_pr_record_description_not_received, "Record description not received" },
+    { dx_pr_unexpected_message_type, "Unexpected message type" },
     
 	{ ERROR_CODE_FOOTER, ERROR_DESCR_FOOTER }
 };

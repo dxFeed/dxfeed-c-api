@@ -94,6 +94,22 @@ void dx_free (void* buf) {
 
 /* -------------------------------------------------------------------------- */
 /*
+*	String function wrappers implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+dx_string_t dx_strcpy (dx_string_t destination, const dx_string_t source) {
+    return wcscpy(destination, source);
+}
+
+/* -------------------------------------------------------------------------- */
+
+size_t dx_strlen( const dx_char_t* str ) {
+    return wcslen(str);
+}
+
+/* -------------------------------------------------------------------------- */
+/*
  *	Implementation of wrappers with no error handling mechanism enabled
  */
 /* -------------------------------------------------------------------------- */
@@ -101,3 +117,4 @@ void dx_free (void* buf) {
 void* dx_calloc_no_ehm (size_t num, size_t size) {
     return calloc(num, size);
 }
+
