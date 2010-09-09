@@ -203,8 +203,13 @@ DXFEED_API ERRORCODE dxf_add_symbol (dxf_subscription_t subscription, dx_string_
 	
     for (; eid < dx_eid_count; ++eid) {
 		if (events & DX_EVENT_BIT_MASK(eid)) {
-			dx_create_subscription(&sub_buffer, &out_len, MESSAGE_TICKER_ADD_SUBSCRIPTION,
-			                       dx_encode_symbol_name(symbol), symbol, eid);
+            if ( !dx_create_subscription(&sub_buffer, &out_len, 
+                                         MESSAGE_TICKER_ADD_SUBSCRIPTION,
+                                         dx_encode_symbol_name(symbol),
+                                         symbol, eid) ) {
+                return DXF_FAILURE;
+            }
+
 			if (!dx_send_data(sub_buffer, out_len)) {
 			    dx_free(sub_buffer);
 			    

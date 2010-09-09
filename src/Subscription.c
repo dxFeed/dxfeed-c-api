@@ -164,7 +164,7 @@ dx_result_t dx_write_event_records (void) {
  */
 /* -------------------------------------------------------------------------- */
 
-dx_result_t dx_create_subscription (dx_byte_t** out, dx_int_t* out_len, dx_message_type_t type,
+bool dx_create_subscription (dx_byte_t** out, dx_int_t* out_len, dx_message_type_t type,
                                     dx_int_t cipher, dx_string_t symbol, dx_int_t record_id) {
 
 	dx_buf = (dx_byte_t*)dx_malloc(dx_initial_buffer_size);
@@ -174,18 +174,27 @@ dx_result_t dx_create_subscription (dx_byte_t** out, dx_int_t* out_len, dx_messa
     dx_set_out_buffer(dx_buf, dx_initial_buffer_size);
 
 	if (!dx_is_subscription_message(type)) {
-        return setParseError(dx_pr_illegal_argument);
+        setParseError(dx_pr_illegal_argument);
+        return false;
     }
 
-    CHECKED_CALL(dx_begin_message, type);
-    
-	CHECKED_CALL_3(dx_compose_body, record_id, cipher, symbol);
-	
-	CHECKED_CALL_0(dx_end_message);
+    if (dx_begin_message(type) != R_SUCCESSFUL) {
+        return false;
+    }
+
+    if (dx_compose_body(record_id, cipher, symbol) != R_SUCCESSFUL) {
+        return false;
+    }
+
+    if (dx_end_message()) {
+        return false;
+    }
 
 	*out_len = dx_get_out_buffer_position();
 
-	return parseSuccessful();
+
+    parseSuccessful();
+    return true;
 }
 
 /* -------------------------------------------------------------------------- */

@@ -261,7 +261,6 @@ dx_result_t dx_parse_data (void) {
 		}
     }
 	
-	//todo: maybe move to another file?
 	if (lastSymbol == NULL) {
 		if (dx_decode_symbol_name(lastCipher, &symbol) != R_SUCCESSFUL) {
 		    dx_free_string_buffers();
@@ -463,7 +462,6 @@ dx_result_t dx_parse( const dx_byte_t* new_buffer, dx_int_t new_buffer_size  ) {
         return R_FAILED;
     }
 
-	// TODO: skip wrong buffer 
 	if (dx_combine_buffers (new_buffer, new_buffer_size) != R_SUCCESSFUL) 
 		return R_FAILED;
 
