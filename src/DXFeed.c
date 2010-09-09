@@ -134,7 +134,7 @@ DXFEED_API int dxf_get_last_error (int* subsystem_id, int* error_code, const cha
 
 /* -------------------------------------------------------------------------- */
 
-DXFEED_API ERRORCODE dxf_add_subscription (int event_types, OUT dxf_subscription_t* subscription){
+DXFEED_API ERRORCODE dxf_create_subscription (int event_types, OUT dxf_subscription_t* subscription){
 	static int symbol_codec_initialized = 0;
 		
     if (!dx_pop_last_error()) {

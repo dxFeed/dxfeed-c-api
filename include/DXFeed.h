@@ -68,61 +68,23 @@ DXFEED_API int dxf_get_last_error (int* subsystem_id, int* error_code, const cha
 // if the function succeeds it returns the handle of the created subscription
 // via the function's out-parameter
 
-DXFEED_API ERRORCODE dxf_add_subscription (int event_types, OUT dxf_subscription_t* subscription);
+DXFEED_API ERRORCODE dxf_create_subscription (int event_types, OUT dxf_subscription_t* subscription);
 DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dx_string_t* symbols, int symbol_count);
 DXFEED_API ERRORCODE dxf_add_symbol (dxf_subscription_t subscription, dx_string_t symbol);
 DXFEED_API ERRORCODE dxf_attach_event_listener (dxf_subscription_t subscription, dx_event_listener_t event_listener);
 
-/*
-// closes a connection, previously opened by 'openConnection'
-// returns the success/error code of the operation
+// TODO: not implemented
+DXFEED_API ERRORCODE dxf_add_subscription (dxf_subscription_t* subscription); // see next line
+DXFEED_API ERRORCODE dxf_remove_subscription (OUT dxf_subscription_t* subscription); // do not erase subscription data!
+DXFEED_API ERRORCODE dxf_get_last_event (int event_type, dx_string_t symbol, OUT void* data);
+DXFEED_API ERRORCODE dxf_subscription_clear_symbols ();
+DXFEED_API ERRORCODE dxf_close_subscription (dxf_subscription_t* subscription); // erase data
+DXFEED_API ERRORCODE dxf_get_symbols (dxf_subscription_t subscription, OUT dx_string_t* symbols, int* symbol_count);
+DXFEED_API ERRORCODE dxf_get_event_types_symbols (dxf_subscription_t subscription, OUT int* event_types);
+DXFEED_API ERRORCODE dxf_detach_event_listener (dxf_subscription_t subscription, dx_event_listener_t event_listener);
+DXFEED_API ERRORCODE dxf_remove_symbols (dxf_subscription_t subscription, dx_string_t* symbols, int symbol_count);
+DXFEED_API ERRORCODE dxf_set_symbols (dxf_subscription_t subscription, dx_string_t* symbols, int symbol_count);
 
-DXFEED_API ERRORCODE close_feed ();  //??? maybe better closeConnection
 
-// subscribes to the selected type of events on the given connection
-// returns the success/error code of the operation
-// if the function succeeds it returns the handle of the created subscription
-// via the function's out-parameter
 
-//createSubscription(events????)
-
-DXFEED_API ERRORCODE addSubscription (HCONNECTION connection, EventType eventType, OUT HSUBSCRIPTION* subscription);
-
-// terminates previously created event subscription
-// returns the success/error code of the operation
-
-DXFEED_API ERRORCODE removeSubscription (HSUBSCRIPTION subscription);
-
-// adds selected symbols to given subscription, thus making it receive events concerning
-// the selected symbols
-// returns the success/error code of the operation
-
-DXFEED_API ERRORCODE addSymbols (HSUBSCRIPTION subscription, dx_string_t* symbols, int symbolCount);
-
-// removes selected symbols to given subscription, thus making it stop receiving events concerning
-// the selected symbols
-// returns the success/error code of the operation
-
-DXFEED_API ERRORCODE removeSymbols (HSUBSCRIPTION subscription, dx_string_t* symbols, int symbolCount);
-
-// adds symbols from selected instrument profile file to given subscription
-// returns the success/error code of the operation
-
-DXFEED_API ERRORCODE addSymbolsIpf (HSUBSCRIPTION subscription, dx_string_t filePath);
-
-// removes symbols from selected instrument profile file from given subscription
-// returns the success/error code of the operation
-
-DXFEED_API ERRORCODE removeSymbolsIpf (HSUBSCRIPTION subscription, dx_string_t filePath);
-
-// attaches the specified event listener function to the given subscription
-// returns the success/error code of the operation
-
-DXFEED_API ERRORCODE attachEventListener (HSUBSCRIPTION subscription, event_listener_t eventListener, void* userData);
-
-// detaches the specified event listener function from the given subscription
-// returns the success/error code of the operation
-
-DXFEED_API ERRORCODE detachEventListener (HSUBSCRIPTION subscription, event_listener_t eventListener);
-*/
 #endif // _DXFEED_API_H_INCLUDED_
