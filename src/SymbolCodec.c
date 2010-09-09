@@ -227,7 +227,7 @@ dx_result_t dx_decode_symbol_name(dx_int_t cipher, OUT dx_string_t* symbol){
 		return parseSuccessful();
 	}
     if (dx_decode_cipher (cipher, & penta) != R_SUCCESSFUL) {
-		setParseError(dx_pr_undefined_symbol); //TODO: maybe change error code?
+		setParseError(dx_pr_undefined_symbol);
     }
 
     str = dx_to_string(penta);
