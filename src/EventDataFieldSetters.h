@@ -88,6 +88,23 @@ DX_EVENT_DATA_FIELD_SETTER_PROTOTYPE(dxf_fundamental_t, open_interest);
 
 /* -------------------------------------------------------------------------- */
 /*
+ *	Profile field setters
+ */
+/* -------------------------------------------------------------------------- */
+
+DX_EVENT_DATA_FIELD_SETTER_PROTOTYPE(dxf_profile_t, beta);
+DX_EVENT_DATA_FIELD_SETTER_PROTOTYPE(dxf_profile_t, eps);
+DX_EVENT_DATA_FIELD_SETTER_PROTOTYPE(dxf_profile_t, div_freq);
+DX_EVENT_DATA_FIELD_SETTER_PROTOTYPE(dxf_profile_t, exd_div_amount);
+DX_EVENT_DATA_FIELD_SETTER_PROTOTYPE(dxf_profile_t, exd_div_date);
+DX_EVENT_DATA_FIELD_SETTER_PROTOTYPE(dxf_profile_t, price_52_high);
+DX_EVENT_DATA_FIELD_SETTER_PROTOTYPE(dxf_profile_t, price_52_low);
+DX_EVENT_DATA_FIELD_SETTER_PROTOTYPE(dxf_profile_t, shares);
+DX_EVENT_DATA_FIELD_SETTER_PROTOTYPE(dxf_profile_t, is_index);
+DX_EVENT_DATA_FIELD_SETTER_PROTOTYPE(dxf_profile_t, description);
+
+/* -------------------------------------------------------------------------- */
+/*
  *	Market maker field setters
  */
 /* -------------------------------------------------------------------------- */

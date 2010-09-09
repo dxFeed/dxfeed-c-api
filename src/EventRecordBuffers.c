@@ -86,6 +86,8 @@ GET_RECORD_PTR_BODY(dx_eid_quote, dxf_quote_t)
 GET_RECORD_BUF_PTR_BODY(dx_eid_quote)
 GET_RECORD_PTR_BODY(dx_eid_fundamental, dxf_fundamental_t)
 GET_RECORD_BUF_PTR_BODY(dx_eid_fundamental)
+GET_RECORD_PTR_BODY(dx_eid_profile, dxf_profile_t)
+GET_RECORD_BUF_PTR_BODY(dx_eid_profile)
 GET_RECORD_PTR_BODY(dx_eid_market_maker, dxf_market_maker)
 GET_RECORD_BUF_PTR_BODY(dx_eid_market_maker)
 
@@ -99,7 +101,7 @@ const dx_buffer_manager_collection_t g_buffer_managers[dx_eid_count] = {
     { GET_RECORD_PTR_NAME(dx_eid_trade), GET_RECORD_BUF_PTR_NAME(dx_eid_trade) },
     { GET_RECORD_PTR_NAME(dx_eid_quote), GET_RECORD_BUF_PTR_NAME(dx_eid_quote) },
     { GET_RECORD_PTR_NAME(dx_eid_fundamental), GET_RECORD_BUF_PTR_NAME(dx_eid_fundamental) },
-    { NULL, NULL },
+    { GET_RECORD_PTR_NAME(dx_eid_profile), GET_RECORD_BUF_PTR_NAME(dx_eid_profile) },
     { GET_RECORD_PTR_NAME(dx_eid_market_maker), GET_RECORD_BUF_PTR_NAME(dx_eid_market_maker) },
 };
 
@@ -146,6 +148,10 @@ void dx_free_string_buffers (void) {
     
     for (; i < g_string_buffers.size; ++i) {
         dx_free((void*)g_string_buffers.elements[i]);
+    }
+    
+    if (g_string_buffers.elements != NULL) {
+        dx_free((void*)g_string_buffers.elements);
     }
     
     g_string_buffers.elements = NULL;

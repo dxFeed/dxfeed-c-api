@@ -78,6 +78,23 @@ FIELD_SETTER_BODY(dxf_fundamental_t, open_interest, dx_int_t)
 
 /* -------------------------------------------------------------------------- */
 /*
+ *	Profile field setter implementation
+ */
+/* -------------------------------------------------------------------------- */
+
+FIELD_SETTER_BODY(dxf_profile_t, beta, dx_double_t)
+FIELD_SETTER_BODY(dxf_profile_t, eps, dx_double_t)
+FIELD_SETTER_BODY(dxf_profile_t, div_freq, dx_int_t)
+FIELD_SETTER_BODY(dxf_profile_t, exd_div_amount, dx_double_t)
+FIELD_SETTER_BODY(dxf_profile_t, exd_div_date, dx_int_t)
+FIELD_SETTER_BODY(dxf_profile_t, price_52_high, dx_double_t)
+FIELD_SETTER_BODY(dxf_profile_t, price_52_low, dx_double_t)
+FIELD_SETTER_BODY(dxf_profile_t, shares, dx_double_t)
+FIELD_SETTER_BODY(dxf_profile_t, is_index, dx_int_t)
+FIELD_SETTER_BODY(dxf_profile_t, description, dx_const_string_t)
+
+/* -------------------------------------------------------------------------- */
+/*
  *	Market maker field setters implementation
  */
 /* -------------------------------------------------------------------------- */

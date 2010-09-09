@@ -98,6 +98,19 @@ typedef struct {
 } dxf_fundamental_t;
 
 typedef struct {
+    dx_double_t beta;
+    dx_double_t eps;
+    dx_int_t div_freq;
+    dx_double_t exd_div_amount;
+    dx_int_t exd_div_date;
+    dx_double_t price_52_high;
+    dx_double_t price_52_low;
+    dx_double_t shares;
+    dx_int_t is_index;
+    dx_const_string_t description;
+} dxf_profile_t;
+
+typedef struct {
 	dx_char_t mm_exchange;
 	dx_int_t mm_id;
 	dx_double_t mmbid_price;

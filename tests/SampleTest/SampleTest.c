@@ -50,11 +50,14 @@ void listener(int event_type, dx_const_string_t symbol_name,const dx_event_data_
 				fundamental[i].high_price, fundamental[i].low_price, fundamental[i].open_price, fundamental[i].close_price, fundamental[i].open_interest);
 		}
 		if (event_type == DX_ET_PROFILE){
-			dxf_market_maker* mm = (dxf_market_maker*)data;
+			dxf_profile_t* p = (dxf_profile_t*)data;
 		
-			//for ( ; i < data_count ; ++i )
-			//	wprintf(L"MMExchange=%C MMID=%i  MMBid.Price=%f MMBid.Size=%i MMAsk.Price=%f MMAsk.Size=%i\n" , 
-			//	mm[i].mm_exchange,mm[i].mm_id,mm[i].mmbid_price ,mm[i].mmbid_size ,mm[i].mmask_price ,mm[i].mmask_size);
+			for (; i < data_count ; ++i) {
+				wprintf(L"Beta=%f Eps=%f DivFreq=%i ExdDiv.Amount=%f ExdDiv.Date=%i "
+				        L"52High.Price=%f 52Low.Price=%f Shares=%f IsIndex=%i Description=%s\n",
+				        p[i].beta, p[i].eps, p[i].div_freq, p[i].exd_div_amount, p[i].exd_div_date,
+				        p[i].price_52_high, p[i].price_52_low, p[i].shares, p[i].is_index, p[i].description);
+		    }
 		}	
 }
 /* -------------------------------------------------------------------------- */
@@ -98,7 +101,7 @@ int main (int argc, char* argv[]) {
 
     printf("Connection successful!\n");
  
-	if (!dxf_add_subscription(/*DX_ET_TRADE | */DX_ET_QUOTE/* | DX_ET_MARKET_MAKER | DX_ET_FUNDAMENTAL | DX_ET_PROFILE*/, &subscription )) {
+	if (!dxf_add_subscription(/*DX_ET_TRADE | DX_ET_QUOTE | DX_ET_MARKET_MAKER | DX_ET_FUNDAMENTAL |*/ DX_ET_PROFILE, &subscription )) {
         process_last_error();
         
         return -1;

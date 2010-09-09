@@ -159,6 +159,7 @@ dx_result_t dx_read_records (const dx_record_info_t* record_info, void* record_b
 	dx_int_t read_int;
 	dx_char_t read_utf_char;
 	dx_double_t read_double;
+	dx_string_t read_string;
 	
 	for (; i < record_info->field_count; ++i) {
 		switch (record_info->fields[i].type) {
@@ -182,15 +183,21 @@ dx_result_t dx_read_records (const dx_record_info_t* record_info, void* record_b
 				record_info->fields[i].setter(record_buffer, &read_double);
 				
 				break;
-			case dx_fid_byte:  
+			case dx_fid_utf_char_array:
+			    CHECKED_CALL(dx_read_utf_string, &read_string);
+			    
+			    dx_store_string_buffer(read_string);
+			    record_info->fields[i].setter(record_buffer, &read_string);
+			    
+			    break;
+			case dx_fid_byte:
 			case dx_fid_short:
-			case dx_fid_int:  
-			case dx_fid_byte_array: 
-			case dx_fid_utf_char_array: 
-			case dx_fid_compact_int | dx_fid_flag_short_string: 
-			case dx_fid_byte_array | dx_fid_flag_string: 
-			case dx_fid_byte_array | dx_fid_flag_custom_object: 
-			case dx_fid_byte_array | dx_fid_flag_serial_object: 
+			case dx_fid_int:
+			case dx_fid_byte_array:
+			case dx_fid_compact_int | dx_fid_flag_short_string:
+			case dx_fid_byte_array | dx_fid_flag_string:
+			case dx_fid_byte_array | dx_fid_flag_custom_object:
+			case dx_fid_byte_array | dx_fid_flag_serial_object:
 			default:
 				return setParseError (dx_pr_type_not_supported);
 		}
@@ -231,22 +238,34 @@ dx_result_t dx_parse_data (void) {
 		record_buffer = g_buffer_managers[event_id].record_getter(record_count++);
 		
 		if (record_buffer == NULL) {
+		    dx_free_string_buffers();
+		    
 		    return R_FAILED;
 		}
 		
 		if (dx_read_records(record_info, record_buffer) != R_SUCCESSFUL) {
+			dx_free_string_buffers();
+			
 			return setParseError(dx_pr_record_reading_failed);
 		}
     }
 	
 	//todo: maybe move to another file?
 	if (lastSymbol == NULL) {
-		CHECKED_CALL_2 (dx_decode_symbol_name, lastCipher, &symbol); 
+		if (dx_decode_symbol_name(lastCipher, &symbol) != R_SUCCESSFUL) {
+		    dx_free_string_buffers();
+		    
+		    return R_FAILED;
+		}
     }
 	
 	if (!dx_process_event_data(DX_EVENT_BIT_MASK(event_id), symbol, lastCipher, g_buffer_managers[event_id].record_buffer_getter(), record_count)) {
+	    dx_free_string_buffers();
+	    
 	    return R_FAILED;
 	}
+	
+	dx_free_string_buffers();
 	
 	return parseSuccessful();
 }

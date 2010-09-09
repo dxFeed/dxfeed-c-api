@@ -76,16 +76,16 @@ static dx_field_info_t dx_fields_fundamental[] = {
 /* -------------------------------------------------------------------------- */
 
 static dx_field_info_t dx_fields_profile[] = { 
-	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Beta", NULL },
-	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Eps", NULL },
-	{ dx_fid_compact_int, L"DivFreq", NULL },
-	{ dx_fid_compact_int | dx_fid_flag_decimal, L"ExdDiv.Amount", NULL },
-	{ dx_fid_compact_int , L"ExdDiv.Date", NULL },
-	{ dx_fid_compact_int | dx_fid_flag_decimal, L"52High.Price", NULL },
-	{ dx_fid_compact_int | dx_fid_flag_decimal, L"52Low.Price", NULL },
-	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Shares", NULL },
-	{ dx_fid_compact_int, L"IsIndex", NULL },
-	{ dx_fid_utf_char_array, L"Description", NULL }
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Beta", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_profile_t, beta) },
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Eps", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_profile_t, eps) },
+	{ dx_fid_compact_int, L"DivFreq", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_profile_t, div_freq) },
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"ExdDiv.Amount", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_profile_t, exd_div_amount) },
+	{ dx_fid_compact_int , L"ExdDiv.Date", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_profile_t, exd_div_date) },
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"52High.Price", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_profile_t, price_52_high) },
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"52Low.Price", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_profile_t, price_52_low) },
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Shares", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_profile_t, shares) },
+	{ dx_fid_compact_int, L"IsIndex", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_profile_t, is_index) },
+	{ dx_fid_utf_char_array, L"Description", DX_EVENT_DATA_FIELD_SETTER_NAME(dxf_profile_t, description) }
 }; 
 
 /* -------------------------------------------------------------------------- */
