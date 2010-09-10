@@ -90,7 +90,9 @@ void process_last_error () {
 
 int main (int argc, char* argv[]) {
     dxf_subscription_t subscription;
-	
+
+    dx_logger_initialize( "log.log", true, true );
+
 	printf("Sample test started.\n");    
     printf("Connecting to host %s...\n", dxfeed_host);
     

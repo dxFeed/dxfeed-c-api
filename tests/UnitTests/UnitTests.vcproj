@@ -211,6 +211,9 @@
 					RelativePath="..\..\src\EventRecordBuffers.h">
 				</File>
 				<File
+					RelativePath="..\..\src\Logger.h">
+				</File>
+				<File
 					RelativePath="..\..\src\SymbolCodec.h">
 				</File>
 			</Filter>
@@ -234,6 +237,9 @@
 				</File>
 				<File
 					RelativePath="..\..\src\EventRecordBuffers.c">
+				</File>
+				<File
+					RelativePath="..\..\src\Logger.c">
 				</File>
 				<File
 					RelativePath="..\..\src\parser.c">

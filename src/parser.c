@@ -27,6 +27,7 @@
 #include "EventData.h"
 #include "EventSubscription.h"
 #include "EventRecordBuffers.h"
+#include "Logger.h"
 
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -451,6 +452,8 @@ dx_result_t dx_combine_buffers( const dx_byte_t* new_buffer, dx_int_t new_buffer
 dx_result_t dx_parse( const dx_byte_t* new_buffer, dx_int_t new_buffer_size  ) {
     dx_result_t parse_result = R_SUCCESSFUL;
 
+    dx_logging_info("Begin parsing...");
+
 	if ( buffer == NULL ) {// allocate memory for all program lifetime
 		buffer = dx_malloc(INITIAL_BUFFER_SIZE);
 		if (buffer == NULL)
@@ -471,15 +474,19 @@ dx_result_t dx_parse( const dx_byte_t* new_buffer, dx_int_t new_buffer_size  ) {
         dx_int_t messageType = MESSAGE_HEARTBEAT; // zero-length messages are treated as just heartbeats
         const dx_int_t message_start_pos = dx_get_in_buffer_position();
 
+        dx_logging_info("\nParsing message...");
+
         // read length of a message and prepare an input buffer
         if (dx_parse_length_and_setup_input(buffer_pos, buffer_size) != R_SUCCESSFUL) {
             if (dx_get_parser_last_error() == dx_pr_message_not_complete) {
                 // message is incomplete
                 // just reset position back to message start and stop parsing
-                dx_set_in_buffer_position(message_start_pos); 
+                dx_set_in_buffer_position(message_start_pos);
+                dx_logging_last_error();
                 break;
             } else { // buffer is corrupt
                 dx_set_in_buffer_position(dx_get_in_buffer_limit());
+                dx_logging_last_error();
                 continue; // cannot continue parsing this message on corrupted buffer, so go to the next one
             }
         }
@@ -490,9 +497,11 @@ dx_result_t dx_parse( const dx_byte_t* new_buffer, dx_int_t new_buffer_size  ) {
                     // message is incomplete
                     // just reset position back to message start and stop parsing
                     dx_set_in_buffer_position(message_start_pos); 
+                    dx_logging_last_error();
                     break;
                 } else {
                     dx_set_in_buffer_position(dx_get_in_buffer_limit());
+                    dx_logging_last_error();
                     continue; // cannot continue parsing this message on corrupted buffer, so go to the next one
                 }
             }
@@ -505,6 +514,7 @@ dx_result_t dx_parse( const dx_byte_t* new_buffer, dx_int_t new_buffer_size  ) {
                     // message is incomplete
                     // just reset position back to message start and stop parsing
                     dx_set_in_buffer_position(message_start_pos);
+                    dx_logging_last_error();
                     break;
                 //case dx_pr_record_info_corrupt:
                 //case dx_pr_unknown_record_name:
@@ -513,13 +523,17 @@ dx_result_t dx_parse( const dx_byte_t* new_buffer, dx_int_t new_buffer_size  ) {
                 default:
                     // skip the whole message
                     dx_set_in_buffer_position(dx_get_in_buffer_limit());
+                    dx_logging_last_error();
                     continue;
             }
             dx_set_in_buffer_position(buffer_pos);
             break;
         }
+
+        dx_logging_info("Parsing message complete.");
     }
 	buffer_pos = dx_get_in_buffer_position();
-	
+
+    dx_logging_info("End parsing.");
 	return parse_result;
 }

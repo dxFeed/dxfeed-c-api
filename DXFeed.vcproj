@@ -148,6 +148,9 @@
 			<File
 				RelativePath=".\src\EventSubscription.c">
 			</File>
+			<File
+				RelativePath=".\src\Logger.c">
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -173,6 +176,9 @@
 			</File>
 			<File
 				RelativePath=".\src\EventSubscription.h">
+			</File>
+			<File
+				RelativePath=".\src\Logger.h">
 			</File>
 			<File
 				RelativePath=".\src\PrimitiveTypes.h">
