@@ -252,7 +252,7 @@ dx_result_t dx_write_chars( const dx_char_t* val ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-dx_result_t dx_write_utf( const dx_string_t val ) {
+dx_result_t dx_write_utf( dx_const_string_t val ) {
     size_t strlen = dx_strlen(val);
     dx_short_t utflen = 0;
     size_t i = 0;

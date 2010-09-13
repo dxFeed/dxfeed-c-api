@@ -56,7 +56,7 @@ dx_result_t dx_write_float  ( dx_float_t );
 dx_result_t dx_write_double ( dx_double_t );
 dx_result_t dx_write_bytes  ( const dx_char_t* );
 dx_result_t dx_write_chars  ( const dx_char_t* );
-dx_result_t dx_write_utf    ( const dx_string_t );
+dx_result_t dx_write_utf    ( dx_const_string_t );
 
 // ========== Compact API ==========
 
