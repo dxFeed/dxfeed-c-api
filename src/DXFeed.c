@@ -29,6 +29,7 @@
 #include "EventSubscription.h"
 #include "DataStructures.h"
 #include "parser.h"
+#include "Logger.h"
 
 BOOL APIENTRY DllMain( HANDLE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved )
 {
@@ -51,6 +52,9 @@ BOOL APIENTRY DllMain( HANDLE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 
 void data_receiver (const void* buffer, unsigned buflen) {
     printf("Internal data receiver stub. Data received: %d bytes\n", buflen);
+    
+    dx_logging_info("Data received: %d bytes",  buflen);
+
 	// TODO: process errors 
 	dx_parse(buffer, buflen);
 }
@@ -62,6 +66,8 @@ bool dx_update_record_description (void) {
     dx_int_t msg_length;
     bool res = false;    
     
+    dx_logging_info("Update record description");
+
     if (dx_compose_description_message(&msg_buffer, &msg_length) != R_SUCCESSFUL) {
         return false;
     }
@@ -81,6 +87,8 @@ bool dx_update_record_description (void) {
 
 DXFEED_API int dxf_connect_feed (const char* host) {
     struct dx_connection_context_t cc;
+
+    dx_logging_info("Connecting to host: %s", host);
     
     if (!dx_pop_last_error()) {
         return DXF_FAILURE;
@@ -105,6 +113,7 @@ DXFEED_API int dxf_disconnect_feed () {
         return DXF_FAILURE;
     }
     
+    dx_logging_info("Disconnect");
     return dx_close_connection();
 }
 
@@ -137,7 +146,9 @@ DXFEED_API int dxf_get_last_error (int* subsystem_id, int* error_code, const cha
 
 DXFEED_API ERRORCODE dxf_create_subscription (int event_types, OUT dxf_subscription_t* subscription){
 	static int symbol_codec_initialized = 0;
-		
+
+    dx_logging_info("Create subscription, event types: %x", event_types);
+
     if (!dx_pop_last_error()) {
         return DXF_FAILURE;
     }
@@ -180,6 +191,7 @@ DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dx_string
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_add_symbol (dxf_subscription_t subscription, dx_string_t symbol) {
+
 	dx_event_id_t eid = dx_eid_begin;
 
 	dx_byte_t* sub_buffer = NULL;
@@ -187,6 +199,8 @@ DXFEED_API ERRORCODE dxf_add_symbol (dxf_subscription_t subscription, dx_string_
 	
 	dx_int_t events; 
 	
+    dx_logging_info("Adding symbol %s", symbol);
+
     if (!dx_pop_last_error()) {
         return DXF_FAILURE;
     }

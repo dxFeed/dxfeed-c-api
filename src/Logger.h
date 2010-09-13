@@ -23,18 +23,22 @@
 #include "DXFeed.h"
 #include "PrimitiveTypes.h"
 
-typedef enum dx_log_date_format {
-    dx_ltf_DD_MM_YYYY,
-    dx_ltf_MM_DD_YYYY,
-    dx_ltf_DD_MMMM_YYYY,
-    dx_ltf_MMMM_DD_YYYY
-} dx_log_time_format_t;
+//typedef DXFEED_API enum dx_log_date_format {
+//    dx_ltf_DD_MM_YYYY = 0,
+//    dx_ltf_MM_DD_YYYY,
+//    dx_ltf_DD_MMMM_YYYY,
+//    dx_ltf_MMMM_DD_YYYY,
+//} dx_log_date_format_t;
 
-DXFEED_API bool dx_logger_initialize (const char* file_name, bool rewrite, bool show_timezone_info);
+DXFEED_API bool dx_logger_initialize (const char* file_name, bool rewrite, bool show_timezone_info, bool verbose);
 
-void dx_logging_error (const char* message);
+DXFEED_API void dx_logging_error (const char* message);
 
-void dx_logging_info (const char* message);
+DXFEED_API void dx_logging_info (const char* format, ...);
+DXFEED_API void dx_logging_verbose_info (const char* format, ...);
+
+//DXFEED_API void dx_logging_info (const char* message1, const char* message2);
+//DXFEED_API void dx_logging_verbose_info (const char* message1, const char* message2);
 
 void dx_logging_last_error();
 

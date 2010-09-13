@@ -262,6 +262,9 @@ static dx_result_t dx_parse_length_and_setup_input(dx_int_t position, dx_int_t l
         return setParseError(dx_pr_message_not_complete);
     }
 
+
+    dx_logging_info("Length of message: %d", length);
+
     dx_set_in_buffer_limit(endPosition); // set limit for this message
     return parseSuccessful();
 }
@@ -611,7 +614,7 @@ dx_result_t dx_parse( const dx_byte_t* new_buffer, dx_int_t new_buffer_size  ) {
         dx_int_t messageType = MESSAGE_HEARTBEAT; // zero-length messages are treated as just heartbeats
         const dx_int_t message_start_pos = dx_get_in_buffer_position();
 
-        dx_logging_info("\nParsing message...");
+        dx_logging_info("Parsing message...");
 
         // read length of a message and prepare an input buffer
         if (dx_parse_length_and_setup_input(buffer_pos, buffer_size) != R_SUCCESSFUL) {

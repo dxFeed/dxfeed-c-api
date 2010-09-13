@@ -24,6 +24,7 @@
 #include "DXThreads.h"
 #include "SymbolCodec.h"
 #include "DXAlgorithms.h"
+#include "Logger.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -585,7 +586,9 @@ bool dx_add_listener (dxf_subscription_t subscr_id, dx_event_listener_t listener
     size_t listener_index;
     bool failed;
     bool found = false;
-    
+
+    dx_logging_info("Add listener");
+
     if (subscr_id == dx_invalid_subscription) {
         dx_set_last_error(dx_sc_event_subscription, dx_es_invalid_subscr_id);
 

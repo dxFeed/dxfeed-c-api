@@ -25,6 +25,7 @@
 #include "DXErrorCodes.h"
 #include "DXThreads.h"
 #include "DXMemory.h"
+#include "Logger.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -197,7 +198,12 @@ enum dx_error_function_result_t dx_set_last_error (int subsystem_id, int error_c
     
     error_data->subsystem_id = subsystem_id;
     error_data->error_code = error_code;
-    
+
+    {
+        enum dx_error_function_result_t dummy;
+        dx_logging_error(dx_get_error_descr(subsystem_id, error_code, &dummy));
+    }
+
     return efr_success;
 }
 

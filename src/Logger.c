@@ -20,6 +20,7 @@
 #include "Logger.h"
 #include "DXErrorHandling.h"
 #include <stdio.h>
+#include <stdarg.h>
 #include <Windows.h>
 
 /* -------------------------------------------------------------------------- 
@@ -34,8 +35,19 @@ static const char* info_prefix = "";
 
 static const char* default_time_string = "Incorrect time";
 
+static bool verbose_mode;
+
 #define CURRENT_TIME_STR_LENGTH 31
 static char current_time_str[CURRENT_TIME_STR_LENGTH + 1];
+
+// todo add different formats of date
+//static const char* data_format_strings[4] = {
+//    "%02u.%02u.%04u %02u:%02u:%02u:%03u",
+//    "%02u.%02u.%04u %02u:%02u:%02u:%03u",
+//    "%02u.%04u.%04u %02u:%02u:%02u:%03u",
+//    "%04u.%02u.%04u %02u:%02u:%02u:%03u"
+//};
+//static dx_log_date_format_t log_date_format;
 
 static bool show_timezone;
 
@@ -47,9 +59,8 @@ FILE* log_file = NULL;
 const char* dx_get_current_time() {
     
     SYSTEMTIME current_time;
-    //::GetSystemTime(&current_time);
-    GetLocalTime(&current_time);
 
+    GetLocalTime(&current_time);
     _snprintf(current_time_str, CURRENT_TIME_STR_LENGTH, "%02u.%02u.%04u %02u:%02u:%02u:%03u", current_time.wDay,
                                                                                                current_time.wMonth,
                                                                                                current_time.wYear,
@@ -85,7 +96,7 @@ const char* dx_get_current_time() {
 
 /* -------------------------------------------------------------------------- */
 
-DXFEED_API bool dx_logger_initialize( const char* file_name, bool rewrite_file, bool show_timezone_info ) {
+DXFEED_API bool dx_logger_initialize( const char* file_name, bool rewrite_file, bool show_timezone_info, bool verbose ) {
 
     puts("Initialize logger...");
 
@@ -96,6 +107,7 @@ DXFEED_API bool dx_logger_initialize( const char* file_name, bool rewrite_file, 
     }
 
     show_timezone = show_timezone_info;
+    verbose_mode = verbose;
 
     puts("Logger is initialized");
     return true;
@@ -103,8 +115,8 @@ DXFEED_API bool dx_logger_initialize( const char* file_name, bool rewrite_file, 
 
 /* -------------------------------------------------------------------------- */
 
-void dx_logging_error( const char* message ) {
-    if (log_file == NULL) {
+DXFEED_API void dx_logging_error( const char* message ) {
+    if (log_file == NULL || message == NULL) {
         return;
     }
 
@@ -113,14 +125,34 @@ void dx_logging_error( const char* message ) {
 
 /* -------------------------------------------------------------------------- */
 
-void dx_logging_info (const char* message) {
-    if (log_file == NULL) {
+//DXFEED_API void dx_logging_info (const char* message1, const char* message2) {
+//    if (log_file == NULL || message1 == NULL) {
+//        return;
+//    }
+//
+//    fprintf(log_file, "\n%s %s%s", dx_get_current_time(), info_prefix, message1);
+//
+//    if (message2) {
+//        fprintf(log_file, " %s", message2);
+//    }
+//}
+
+/* -------------------------------------------------------------------------- */
+
+DXFEED_API void dx_logging_info( const char* format, ... ) {
+    if (log_file == NULL || format == NULL) {
         return;
     }
 
-    fprintf(log_file, "\n%s %s%s", dx_get_current_time(), info_prefix, message);
-}
+    fprintf(log_file, "\n%s %s ", dx_get_current_time(), info_prefix);
 
+    {
+        va_list ap;
+        va_start(ap, format);
+        vfprintf(log_file, format, ap);
+        va_end(ap);
+    }
+}
 /* -------------------------------------------------------------------------- */
 
 void dx_logging_last_error() {
@@ -129,3 +161,25 @@ void dx_logging_last_error() {
 
     dx_logging_error(descr);
 }
+
+/* -------------------------------------------------------------------------- */
+
+DXFEED_API void dx_logging_verbose_info(const char* format, ...) {
+    if (!verbose_mode) {
+        return;
+    }
+
+    if (log_file == NULL || format == NULL) {
+        return;
+    }
+
+    fprintf(log_file, "\n%s %s ", dx_get_current_time(), info_prefix);
+
+    {
+        va_list ap;
+        va_start(ap, format);
+        vfprintf(log_file, format, ap);
+        va_end(ap);
+    }
+}
+
