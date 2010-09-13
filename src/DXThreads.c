@@ -184,7 +184,7 @@ bool dx_compare_threads (pthread_t t1, pthread_t t2) {
 bool dx_mutex_create (pthread_mutex_t* mutex) {
     int res = pthread_mutex_init(mutex, NULL);
     
-    dx_logging_verbose_info("Create mutex %#010x", mutex);
+    dx_logging_verbose_info(L"Create mutex %#010x", mutex);
 
     switch (res) {
     case EAGAIN:
@@ -211,7 +211,7 @@ bool dx_mutex_create (pthread_mutex_t* mutex) {
 bool dx_mutex_destroy (pthread_mutex_t* mutex) {
     int res = pthread_mutex_destroy(mutex);
     
-    dx_logging_verbose_info("Destroy mutex %#010x", mutex);
+    dx_logging_verbose_info(L"Destroy mutex %#010x", mutex);
 
     switch (res) {
     case EBUSY:
@@ -232,7 +232,7 @@ bool dx_mutex_destroy (pthread_mutex_t* mutex) {
 bool dx_mutex_lock (pthread_mutex_t* mutex) {
     int res = pthread_mutex_lock(mutex);
 
-    dx_logging_verbose_info("Lock mutex %#010x", mutex);
+    dx_logging_verbose_info(L"Lock mutex %#010x", mutex);
 
     switch (res) {
     case EINVAL:
@@ -256,7 +256,7 @@ bool dx_mutex_unlock (pthread_mutex_t* mutex) {
 
     int res = pthread_mutex_unlock(mutex);
     
-    dx_logging_verbose_info("Unlock mutex %#010x", mutex);
+    dx_logging_verbose_info(L"Unlock mutex %#010x", mutex);
 
     switch (res) {
     case EINVAL:

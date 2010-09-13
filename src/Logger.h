@@ -34,8 +34,10 @@ DXFEED_API bool dx_logger_initialize (const char* file_name, bool rewrite, bool 
 
 DXFEED_API void dx_logging_error (const char* message);
 
-DXFEED_API void dx_logging_info (const char* format, ...);
-DXFEED_API void dx_logging_verbose_info (const char* format, ...);
+DXFEED_API void dx_logging_info (const dx_char_t* format, ...);
+//DXFEED_API void dx_logging_info_a (const char* format, ...);
+DXFEED_API void dx_logging_verbose_info (const dx_char_t* format, ...);
+//DXFEED_API void dx_logging_verbose_info_a (const char* format, ...);
 
 //DXFEED_API void dx_logging_info (const char* message1, const char* message2);
 //DXFEED_API void dx_logging_verbose_info (const char* message1, const char* message2);

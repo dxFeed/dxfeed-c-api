@@ -24,6 +24,7 @@
 #include "DXMemory.h"
 #include "DXErrorHandling.h"
 #include "DXErrorCodes.h"
+#include "Logger.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -59,14 +60,14 @@ void* dx_error_processor (void* src) {
 /* -------------------------------------------------------------------------- */
 
 void* dx_malloc (size_t size) {
-    dx_logging_verbose_info("Allocate %d bytes", size);
+    dx_logging_verbose_info(L"Allocate %d bytes", size);
     return dx_error_processor(malloc(size));
 }
 
 /* -------------------------------------------------------------------------- */
 
 void* dx_calloc (size_t num, size_t size) {
-    dx_logging_verbose_info("Allocate %d bytes", size);
+    dx_logging_verbose_info(L"Allocate %d bytes", size);
     return dx_error_processor(calloc(num, size));
 }
 
@@ -91,7 +92,7 @@ void* dx_memset (void * destination, int c, size_t size) {
 /* -------------------------------------------------------------------------- */
 
 void dx_free (void* buf) {
-    dx_logging_verbose_info("Deallocate buffer %#010x", buf);
+    dx_logging_verbose_info(L"Deallocate buffer %#010x", buf);
     free(buf);
 }
 

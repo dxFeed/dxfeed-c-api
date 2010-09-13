@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <Windows.h>
+#include "ParserCommon.h"
 
 /* -------------------------------------------------------------------------- 
 *
@@ -29,16 +30,16 @@
 *
 /* -------------------------------------------------------------------------- */
 
-static const char* error_prefix = "Error:";
+static const dx_char_t* error_prefix = L"Error:";
 
-static const char* info_prefix = "";
+static const dx_char_t* info_prefix = L"";
 
-static const char* default_time_string = "Incorrect time";
+static const dx_char_t* default_time_string = L"Incorrect time";
 
 static bool verbose_mode;
 
 #define CURRENT_TIME_STR_LENGTH 31
-static char current_time_str[CURRENT_TIME_STR_LENGTH + 1];
+static dx_char_t current_time_str[CURRENT_TIME_STR_LENGTH + 1];
 
 // todo add different formats of date
 //static const char* data_format_strings[4] = {
@@ -56,23 +57,23 @@ FILE* log_file = NULL;
 
 #ifdef _WIN32
 
-const char* dx_get_current_time() {
+const dx_char_t* dx_get_current_time() {
     
     SYSTEMTIME current_time;
 
     GetLocalTime(&current_time);
-    _snprintf(current_time_str, CURRENT_TIME_STR_LENGTH, "%02u.%02u.%04u %02u:%02u:%02u:%03u", current_time.wDay,
-                                                                                               current_time.wMonth,
-                                                                                               current_time.wYear,
-                                                                                               current_time.wHour,
-                                                                                               current_time.wMinute,
-                                                                                               current_time.wSecond,
-                                                                                               current_time.wMilliseconds);
+    _snwprintf(current_time_str, CURRENT_TIME_STR_LENGTH, L"%02u.%02u.%04u %02u:%02u:%02u:%03u", current_time.wDay,
+                                                                                                 current_time.wMonth,
+                                                                                                 current_time.wYear,
+                                                                                                 current_time.wHour,
+                                                                                                 current_time.wMinute,
+                                                                                                 current_time.wSecond,
+                                                                                                 current_time.wMilliseconds);
 
     if (show_timezone) {
         TIME_ZONE_INFORMATION time_zone;
         GetTimeZoneInformation(&time_zone);
-        _snprintf(current_time_str + 21, 7, " GMT%+02d", time_zone.Bias / 60);
+        _snwprintf(current_time_str + 21, 7, L" GMT%+02d", time_zone.Bias / 60);
     }
 
     return current_time_str;
@@ -80,7 +81,7 @@ const char* dx_get_current_time() {
 
 #else // _WIN32
 
-const char* dx_get_current_time() {
+const dx_char_t* dx_get_current_time() {
     return default_time_string;
 }
 
@@ -120,7 +121,13 @@ DXFEED_API void dx_logging_error( const char* message ) {
         return;
     }
 
-    fprintf(log_file, "\n%s %s%s", dx_get_current_time(), error_prefix, message);
+    {
+        size_t len = strlen(message);
+        dx_string_t w_message = dx_create_string(len);
+        if (mbtowc(w_message, message, len) > 0) {
+            fwprintf(log_file, L"\n%s %s%s", dx_get_current_time(), error_prefix, w_message);
+        }
+    }
 }
 
 /* -------------------------------------------------------------------------- */
@@ -139,20 +146,20 @@ DXFEED_API void dx_logging_error( const char* message ) {
 
 /* -------------------------------------------------------------------------- */
 
-DXFEED_API void dx_logging_info( const char* format, ... ) {
-    if (log_file == NULL || format == NULL) {
-        return;
-    }
-
-    fprintf(log_file, "\n%s %s ", dx_get_current_time(), info_prefix);
-
-    {
-        va_list ap;
-        va_start(ap, format);
-        vfprintf(log_file, format, ap);
-        va_end(ap);
-    }
-}
+//DXFEED_API void dx_logging_info_a( const char* format, ... ) {
+//    if (log_file == NULL || format == NULL) {
+//        return;
+//    }
+//
+//    fprintf(log_file, "\n%s %s ", dx_get_current_time(), info_prefix);
+//
+//    {
+//        va_list ap;
+//        va_start(ap, format);
+//        vfprintf(log_file, format, ap);
+//        va_end(ap);
+//    }
+//}
 /* -------------------------------------------------------------------------- */
 
 void dx_logging_last_error() {
@@ -164,7 +171,28 @@ void dx_logging_last_error() {
 
 /* -------------------------------------------------------------------------- */
 
-DXFEED_API void dx_logging_verbose_info(const char* format, ...) {
+//DXFEED_API void dx_logging_verbose_info_a(const char* format, ...) {
+//    if (!verbose_mode) {
+//        return;
+//    }
+//
+//    if (log_file == NULL || format == NULL) {
+//        return;
+//    }
+//
+//    fprintf(log_file, "\n%s %s ", dx_get_current_time(), info_prefix);
+//
+//    {
+//        va_list ap;
+//        va_start(ap, format);
+//        vfprintf(log_file, format, ap);
+//        va_end(ap);
+//    }
+//}
+
+/* -------------------------------------------------------------------------- */
+
+DXFEED_API void dx_logging_verbose_info( const dx_char_t* format, ... ) {
     if (!verbose_mode) {
         return;
     }
@@ -173,13 +201,28 @@ DXFEED_API void dx_logging_verbose_info(const char* format, ...) {
         return;
     }
 
-    fprintf(log_file, "\n%s %s ", dx_get_current_time(), info_prefix);
+    fwprintf(log_file, L"\n%s %s ", dx_get_current_time(), info_prefix);
 
     {
         va_list ap;
         va_start(ap, format);
-        vfprintf(log_file, format, ap);
+        vfwprintf(log_file, format, ap);
         va_end(ap);
     }
 }
+/* -------------------------------------------------------------------------- */
 
+DXFEED_API void dx_logging_info( const dx_char_t* format, ... ) {
+    if (log_file == NULL || format == NULL) {
+        return;
+    }
+
+    fwprintf(log_file, L"\n%s %s ", dx_get_current_time(), info_prefix);
+
+    {
+        va_list ap;
+        va_start(ap, format);
+        vfwprintf(log_file, format, ap);
+        va_end(ap);
+    }
+}

@@ -165,7 +165,7 @@ size_t dx_get_bucket_index (dx_int_t cipher) {
 dx_symbol_data_ptr_t dx_subscribe_symbol (dx_const_string_t symbol_name, dx_subscription_data_ptr_t owner) {
     dx_symbol_data_ptr_t res = NULL;
     
-    dx_logging_info("Subscribe symbol: %s", symbol_name);
+    dx_logging_info(L"Subscribe symbol: %s", symbol_name);
 
     {
         dx_symbol_comparator_t comparator = dx_ciphered_symbol_comparator;
@@ -244,7 +244,7 @@ bool dx_unsubscribe_symbol (dx_symbol_data_ptr_t symbol_data, dx_subscription_da
         size_t subscr_index;
         bool failed = false;
 
-        dx_logging_info("Unsubscribe symbol: %s", symbol_data->name);
+        dx_logging_info(L"Unsubscribe symbol: %s", symbol_data->name);
         
         DX_ARRAY_SEARCH(symbol_data->subscriptions.elements, 0, symbol_data->subscriptions.size, owner, DX_NUMERIC_COMPARATOR, false,
                         subscr_exists, subscr_index);
@@ -645,7 +645,7 @@ bool dx_add_listener (dxf_subscription_t subscr_id, dx_event_listener_t listener
         return true;
     }
     
-    dx_logging_info("Add listener: %d", listener_index);
+    dx_logging_info(L"Add listener: %d", listener_index);
 
     /* a guard mutex is required to protect the internal containers 
        from the secondary data retriever threads */
@@ -690,7 +690,7 @@ bool dx_remove_listener (dxf_subscription_t subscr_id, dx_event_listener_t liste
         return true;
     }
 
-    dx_logging_info("Remove listener: %d", listener_index);
+    dx_logging_info(L"Remove listener: %d", listener_index);
 
     /* a guard mutex is required to protect the internal containers 
        from the secondary data retriever threads */
@@ -783,7 +783,7 @@ bool dx_process_event_data (int event_type, dx_const_string_t symbol_name, dx_in
     dx_symbol_data_ptr_t symbol_data = NULL;
     size_t cur_subscr_index = 0;
     
-    dx_logging_info("Process event data. Symbol: %s, data count: %d", symbol_name, data_count);
+    dx_logging_info(L"Process event data. Symbol: %s, data count: %d", symbol_name, data_count);
 
     /* this function is supposed to be called from a different thread than the other
        interface functions */

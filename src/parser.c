@@ -92,7 +92,7 @@ dx_result_t dx_create_field_digest (dx_event_id_t event_id, const dx_record_info
     CHECKED_CALL(dx_read_utf_string, &field_name);
     CHECKED_CALL(dx_read_compact_int, &field_type);
 
-    dx_logging_verbose_info("Field name: %s, field type: %d", field_name, field_type);
+    dx_logging_verbose_info(L"Field name: %s, field type: %d", field_name, field_type);
 
     if (wcscmp(field_name, s_field_to_ignore) == 0) {
         return parseSuccessful();
@@ -239,7 +239,7 @@ dx_result_t dx_parse_type(OUT dx_int_t* ltype) {
         return setParseError(dx_pr_buffer_corrupt); // stream is corrupted
     }
 
-    dx_logging_verbose_info("Parse type: %d", type);
+    dx_logging_verbose_info(L"Parse type: %d", type);
 
     *ltype = (dx_int_t)(type);
     return parseSuccessful();
@@ -267,7 +267,7 @@ static dx_result_t dx_parse_length_and_setup_input(dx_int_t position, dx_int_t l
     }
 
 
-    dx_logging_info("Length of message: %d", length);
+    dx_logging_info(L"Length of message: %d", length);
 
     dx_set_in_buffer_limit(endPosition); // set limit for this message
     return parseSuccessful();
@@ -324,7 +324,7 @@ dx_result_t dx_read_records (dx_event_id_t event_id, void* record_buffer) {
 	dx_string_t read_string;
 	const dx_record_digest_t* record_digest = &(g_record_digests[event_id]);
 	
-    dx_logging_info("Read records");
+    dx_logging_info(L"Read records");
 
 	for (; i < record_digest->size; ++i) {
 		switch (record_digest->elements[i]->type) {
@@ -385,7 +385,7 @@ dx_result_t dx_parse_data (void) {
 	dx_event_id_t event_id;
 	int record_count = 0;
     
-    dx_logging_info("Parse data");
+    dx_logging_info(L"Parse data");
 
     CHECKED_CALL_0(dx_read_symbol);
     
@@ -444,7 +444,7 @@ dx_result_t dx_parse_data (void) {
 /* -------------------------------------------------------------------------- */
 
 dx_result_t dx_parse_describe_records () {
-    dx_logging_info("Parse describe records");
+    dx_logging_info(L"Parse describe records");
 
     while (dx_get_in_buffer_position() < dx_get_in_buffer_limit()) {
         dx_int_t record_id;
@@ -465,7 +465,7 @@ dx_result_t dx_parse_describe_records () {
             return setParseError(dx_pr_record_info_corrupt);
         }
         
-        dx_logging_info("Record ID: %d, record name: %s, field count: %d", record_id, record_name, field_count);
+        dx_logging_info(L"Record ID: %d, record name: %s, field count: %d", record_id, record_name, field_count);
 
         if (record_id >= dx_eid_count) {
             dx_free(record_name);
@@ -604,7 +604,7 @@ dx_result_t dx_combine_buffers( const dx_byte_t* new_buffer, dx_int_t new_buffer
 dx_result_t dx_parse( const dx_byte_t* new_buffer, dx_int_t new_buffer_size  ) {
     dx_result_t parse_result = R_SUCCESSFUL;
 
-    dx_logging_info("Begin parsing...");
+    dx_logging_info(L"Begin parsing...");
 
 	if ( buffer == NULL ) {// allocate memory for all program lifetime
 		buffer = dx_malloc(INITIAL_BUFFER_SIZE);
@@ -626,7 +626,7 @@ dx_result_t dx_parse( const dx_byte_t* new_buffer, dx_int_t new_buffer_size  ) {
         dx_int_t messageType = MESSAGE_HEARTBEAT; // zero-length messages are treated as just heartbeats
         const dx_int_t message_start_pos = dx_get_in_buffer_position();
 
-        dx_logging_info("Parsing message...");
+        dx_logging_info(L"Parsing message...");
 
         // read length of a message and prepare an input buffer
         if (dx_parse_length_and_setup_input(buffer_pos, buffer_size) != R_SUCCESSFUL) {
@@ -682,10 +682,10 @@ dx_result_t dx_parse( const dx_byte_t* new_buffer, dx_int_t new_buffer_size  ) {
             break;
         }
 
-        dx_logging_info("Parsing message complete.");
+        dx_logging_info(L"Parsing message complete.");
     }
 	buffer_pos = dx_get_in_buffer_position();
 
-    dx_logging_info("End parsing.");
+    dx_logging_info(L"End parsing.");
 	return parse_result;
 }
