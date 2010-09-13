@@ -24,9 +24,17 @@
 #include "DXTypes.h"
 #include "ParserCommon.h"
 
+/* -------------------------------------------------------------------------- */
+/*
+ *	Server synchronization functions
+ */
+/* -------------------------------------------------------------------------- */
+
+void dx_clear_records_server_support_states (void);
+
 /* -------------------------------------------------------------------------- 
 /*
- * Message types
+ *  Message types
  */
 /* -------------------------------------------------------------------------- */
 
@@ -82,5 +90,6 @@ bool dx_is_subscription_message (dx_message_type_t type);
 * @param consumer MessageConsumer to pass parsed messages.
 */
 dx_result_t dx_parse( const dx_byte_t* buf, dx_int_t bufLen );
+
 
 #endif /* PARSER_H_INCLUDED */

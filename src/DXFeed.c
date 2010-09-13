@@ -28,6 +28,7 @@
 #include "SymbolCodec.h"
 #include "EventSubscription.h"
 #include "DataStructures.h"
+#include "parser.h"
 
 BOOL APIENTRY DllMain( HANDLE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved )
 {
@@ -87,7 +88,7 @@ DXFEED_API int dxf_connect_feed (const char* host) {
     
     cc.receiver = data_receiver;
     
-    dx_clear_record_description_state();
+    dx_clear_records_server_support_states();
     
     if (!dx_create_connection(host, &cc) ||
         !dx_update_record_description()) {

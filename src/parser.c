@@ -29,11 +29,11 @@
 #include "EventRecordBuffers.h"
 #include "Logger.h"
 
-
-//////////////////////////////////////////////////////////////////////////////////
-//// ========== Implementation Details ==========
-//////////////////////////////////////////////////////////////////////////////////
-//
+/* -------------------------------------------------------------------------- */
+/*
+ *	Common data
+ */
+/* -------------------------------------------------------------------------- */
 
 // should be at least two times bigger max socket buffer size
 #define INITIAL_BUFFER_SIZE 16000  
@@ -53,6 +53,144 @@ static dx_string_t lastSymbol;
 #define MIN_FIELD_TYPE_ID 0x00
 #define MAX_FIELD_TYPE_ID 0xFF
 
+/* -------------------------------------------------------------------------- */
+/*
+ *	Client-server data overlapping structures and stuff
+ */
+/* -------------------------------------------------------------------------- */
+
+extern dx_record_server_support_info_t g_record_server_support_states[];
+
+typedef struct {
+    int type;
+    dx_event_data_field_setter_t setter;
+    dx_event_data_field_def_val_getter def_val_getter;
+} dx_field_digest_t, *dx_field_digest_ptr_t;
+
+typedef struct {
+    dx_field_digest_ptr_t* elements;
+    size_t size;
+    bool in_sync_with_server;
+} dx_record_digest_t;
+
+static dx_record_digest_t g_record_digests[dx_eid_count] = { 0 };
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Field digest functions
+ */
+/* -------------------------------------------------------------------------- */
+
+dx_result_t dx_create_field_digest (dx_event_id_t event_id, const dx_record_info_t* record_info,
+                                    OUT dx_field_digest_ptr_t* field_digest) {
+    static dx_const_string_t s_field_to_ignore = L"Symbol";
+
+    dx_string_t field_name;
+    dx_int_t field_type;
+    size_t field_index = g_invalid_index;
+
+    CHECKED_CALL(dx_read_utf_string, &field_name);
+    CHECKED_CALL(dx_read_compact_int, &field_type);
+
+    if (wcscmp(field_name, s_field_to_ignore) == 0) {
+        return parseSuccessful();
+    }
+
+    if (field_name == NULL || dx_strlen(field_name) == 0 ||
+        field_type < MIN_FIELD_TYPE_ID || field_type > MAX_FIELD_TYPE_ID) {
+
+        dx_free(field_name);
+
+        return setParseError(dx_pr_field_info_corrupt);
+    }
+
+    field_index = dx_find_record_field(record_info, field_name, field_type);
+
+    dx_free(field_name);
+
+    *field_digest = (dx_field_digest_ptr_t)dx_calloc(1, sizeof(dx_field_digest_t));
+
+    if (field_digest == NULL) {
+        return R_FAILED;
+    }
+
+    (*field_digest)->type = field_type;
+
+    if (field_index != g_invalid_index) {
+        (*field_digest)->setter = record_info->fields[field_index].setter;
+        g_record_server_support_states[event_id].fields[field_index] = true;			    			    
+    }
+    
+    return parseSuccessful();
+}
+
+/* -------------------------------------------------------------------------- */
+
+dx_result_t dx_digest_unsupported_fields (dx_event_id_t event_id, const dx_record_info_t* record_info) {
+    dx_record_digest_t* record_digest = &(g_record_digests[event_id]);
+    size_t field_index = 0;
+
+    for (; field_index < record_info->field_count; ++field_index) {
+        dx_field_digest_ptr_t field_digest = NULL;
+
+        if (g_record_server_support_states[event_id].fields[field_index]) {
+            /* the field is supported by server, skipping */
+
+            continue;
+        }
+
+        field_digest = (dx_field_digest_ptr_t)dx_calloc(1, sizeof(dx_field_digest_t));
+
+        if (field_digest == NULL) {
+            return R_FAILED;
+        }
+
+        field_digest->setter = record_info->fields[field_index].setter;
+        field_digest->def_val_getter = record_info->fields[field_index].def_val_getter;
+
+        record_digest->elements[(record_digest->size)++] = field_digest;
+    }
+
+    return parseSuccessful();
+}
+
+/* -------------------------------------------------------------------------- */
+
+void dx_clear_records_server_support_states (void) {
+    dx_event_id_t eid;
+
+    /* stage 1 - resetting all the field flags */
+    for (eid = dx_eid_begin; eid < dx_eid_count; ++eid) {
+        size_t i = 0;
+
+        for (; i < g_record_server_support_states[eid].field_count; ++i) {
+            g_record_server_support_states[eid].fields[i] = false;
+        }
+
+        g_record_digests[eid].in_sync_with_server = false;
+    }
+
+    /* stage 2 - freeing all the memory allocated by previous synchronization */
+    for (eid = dx_eid_begin; eid < dx_eid_count; ++eid) {
+        size_t i = 0;
+
+        for (; i < g_record_digests[eid].size; ++i) {
+            dx_free(g_record_digests[eid].elements[i]);
+        }
+
+        if (g_record_digests[eid].elements != NULL) {
+            dx_free(g_record_digests[eid].elements);
+        }
+
+        g_record_digests[eid].elements = NULL;
+        g_record_digests[eid].size = 0;
+    }
+}
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Parser functions implementation
+ */
 /* -------------------------------------------------------------------------- */
 
 bool dx_is_message_type_valid (dx_message_type_t type) {
@@ -166,52 +304,65 @@ static dx_result_t dx_read_symbol() {
 
 /* -------------------------------------------------------------------------- */
 
-dx_result_t dx_read_records (const dx_record_info_t* record_info, void* record_buffer) {
+#define CHECKED_SET_VALUE(setter, buffer, value) \
+    if (setter != NULL) { \
+        setter(buffer, value); \
+    }
+
+dx_result_t dx_read_records (dx_event_id_t event_id, void* record_buffer) {
 	size_t i = 0;
 	dx_int_t read_int;
 	dx_char_t read_utf_char;
 	dx_double_t read_double;
 	dx_string_t read_string;
+	const dx_record_digest_t* record_digest = &(g_record_digests[event_id]);
 	
-	for (; i < record_info->field_count; ++i) {
-		switch (record_info->fields[i].type) {
-			case dx_fid_compact_int:
-				CHECKED_CALL(dx_read_compact_int, &read_int);
-				
-				record_info->fields[i].setter(record_buffer, &read_int);
-				
-				break;
-			case dx_fid_utf_char:
-				CHECKED_CALL (dx_read_utf_char, &read_int);
-				
-				read_utf_char = read_int;
-				record_info->fields[i].setter(record_buffer, &read_int);
-				
-				break;
-			case dx_fid_compact_int | dx_fid_flag_decimal: 
-				CHECKED_CALL (dx_read_compact_int, &read_int);
-				CHECKED_CALL_2(dx_int_to_double, read_int, &read_double);
-				
-				record_info->fields[i].setter(record_buffer, &read_double);
-				
-				break;
-			case dx_fid_utf_char_array:
-			    CHECKED_CALL(dx_read_utf_string, &read_string);
+	for (; i < record_digest->size; ++i) {
+		switch (record_digest->elements[i]->type) {
+		case 0:
+			/* 0 here means that we're dealing with the field the server does not support;
+			    using the default value for it */
 			    
-			    dx_store_string_buffer(read_string);
-			    record_info->fields[i].setter(record_buffer, &read_string);
-			    
-			    break;
-			case dx_fid_byte:
-			case dx_fid_short:
-			case dx_fid_int:
-			case dx_fid_byte_array:
-			case dx_fid_compact_int | dx_fid_flag_short_string:
-			case dx_fid_byte_array | dx_fid_flag_string:
-			case dx_fid_byte_array | dx_fid_flag_custom_object:
-			case dx_fid_byte_array | dx_fid_flag_serial_object:
-			default:
-				return setParseError (dx_pr_type_not_supported);
+			record_digest->elements[i]->setter(record_buffer, record_digest->elements[i]->def_val_getter());
+			
+			break;
+		case dx_fid_compact_int:
+			CHECKED_CALL(dx_read_compact_int, &read_int);
+			CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_int);
+			
+			break;
+		case dx_fid_utf_char:
+			CHECKED_CALL (dx_read_utf_char, &read_int);
+			
+			read_utf_char = read_int;
+			
+			CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_int);
+			
+			break;
+		case dx_fid_compact_int | dx_fid_flag_decimal: 
+			CHECKED_CALL (dx_read_compact_int, &read_int);
+			CHECKED_CALL_2(dx_int_to_double, read_int, &read_double);
+			CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double);
+			
+			break;
+		case dx_fid_utf_char_array:
+			CHECKED_CALL(dx_read_utf_string, &read_string);
+			
+			dx_store_string_buffer(read_string);
+			
+			CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_string);
+			
+			break;
+		case dx_fid_byte:
+		case dx_fid_short:
+		case dx_fid_int:
+		case dx_fid_byte_array:
+		case dx_fid_compact_int | dx_fid_flag_short_string:
+		case dx_fid_byte_array | dx_fid_flag_string:
+		case dx_fid_byte_array | dx_fid_flag_custom_object:
+		case dx_fid_byte_array | dx_fid_flag_serial_object:
+		default:
+			return setParseError (dx_pr_type_not_supported);
 		}
 	}
 
@@ -221,8 +372,7 @@ dx_result_t dx_read_records (const dx_record_info_t* record_info, void* record_b
 dx_result_t dx_parse_data (void) {
     dx_string_t symbol = NULL;
 	
-	const dx_record_info_t* record_info;
-	void* record_buffer = NULL;
+    void* record_buffer = NULL;
 	dx_event_id_t event_id;
 	int record_count = 0;
     
@@ -240,12 +390,10 @@ dx_result_t dx_parse_data (void) {
         event_id = dx_get_event_id(id);
     }
     
-    if (!dx_get_record_description_state(event_id)) {
+    if (!g_record_digests[event_id].in_sync_with_server) {
         return setParseError(dx_pr_record_description_not_received);
     }
     
-    record_info = dx_get_event_record_by_id(event_id);
-
     while (dx_get_in_buffer_position() < dx_get_in_buffer_limit()) {
 		record_buffer = g_buffer_managers[event_id].record_getter(record_count++);
 		
@@ -255,7 +403,7 @@ dx_result_t dx_parse_data (void) {
 		    return R_FAILED;
 		}
 		
-		if (dx_read_records(record_info, record_buffer) != R_SUCCESSFUL) {
+		if (dx_read_records(event_id, record_buffer) != R_SUCCESSFUL) {
 			dx_free_string_buffers();
 			
 			return setParseError(dx_pr_record_reading_failed);
@@ -285,16 +433,13 @@ dx_result_t dx_parse_data (void) {
 /* -------------------------------------------------------------------------- */
 
 dx_result_t dx_parse_describe_records () {
-    static dx_const_string_t s_field_to_ignore = L"Symbol";
-    
     while (dx_get_in_buffer_position() < dx_get_in_buffer_limit()) {
         dx_int_t record_id;
         dx_string_t record_name;
         dx_int_t field_count;
         const dx_record_info_t* record_info = NULL;
+        dx_record_digest_t* record_digest = NULL;
         size_t i = 0;
-        size_t real_field_index = 0;
-        dx_string_t field_name;
         dx_event_id_t eid;
         
         CHECKED_CALL(dx_read_compact_int, &record_id);
@@ -323,40 +468,32 @@ dx_result_t dx_parse_describe_records () {
         
         dx_assign_event_protocol_id(eid, record_id);
         
-        record_info = dx_get_event_record_by_id(eid);        
+        record_info = dx_get_event_record_by_id(eid);
+        record_digest = &(g_record_digests[eid]);
         
-        if (record_info->field_count != field_count) {
-            return setParseError(dx_pr_record_field_count_mismatch);
+        if (record_digest->elements != NULL) {
+            return setParseError(dx_pr_internal_error);
         }
         
-        for (i = 0; i != field_count; ++i, dx_free(field_name)) {
-            dx_int_t field_type;
-            
-            CHECKED_CALL(dx_read_utf_string, &field_name);
-            CHECKED_CALL(dx_read_compact_int, &field_type);
-            
-            if (wcscmp(field_name, s_field_to_ignore) == 0) {
-                continue;
-            }
-            
-            if (field_name == NULL || dx_strlen(field_name) == 0 ||
-                field_type < MIN_FIELD_TYPE_ID || field_type > MAX_FIELD_TYPE_ID) {
-                
-                dx_free(field_name);
-                
-                return setParseError(dx_pr_field_info_corrupt);
-            }
-			
-			if (!dx_move_record_field(record_info, field_name, field_type, real_field_index)) {
-			    dx_free(field_name);
-			    
-			    return setParseError(dx_pr_unknown_record_field);
-			}
-			
-			++real_field_index;			
+        /* a generous memory allocation, to allow the maximum possible amount of pointers to be stored,
+           but the overhead is insignificant */
+        if ((record_digest->elements = dx_calloc(field_count + record_info->field_count, sizeof(dx_field_digest_ptr_t))) == NULL) {
+            return R_FAILED;
         }
         
-        dx_set_record_description_state(eid);
+        for (i = 0; i != field_count; ++i) {
+            dx_field_digest_ptr_t field_digest = NULL;
+            
+            CHECKED_CALL_3(dx_create_field_digest, eid, record_info, &field_digest);
+            
+            if (field_digest != NULL) {
+                record_digest->elements[(record_digest->size)++] = field_digest;
+            }
+        }
+        
+        CHECKED_CALL_2(dx_digest_unsupported_fields, eid, record_info);
+        
+        g_record_digests[eid].in_sync_with_server = true;
     }
 	
 	return parseSuccessful();
