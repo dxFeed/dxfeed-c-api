@@ -23,6 +23,7 @@
 #include <stdarg.h>
 #include <Windows.h>
 #include "ParserCommon.h"
+#include "DXMemory.h"
 
 /* -------------------------------------------------------------------------- 
 *
