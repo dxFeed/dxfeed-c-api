@@ -229,11 +229,6 @@ DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dx_string
 
 DXFEED_API ERRORCODE dxf_add_symbol (dxf_subscription_t subscription, dx_string_t symbol) {
 
-	dx_event_id_t eid = dx_eid_begin;
-
-	dx_byte_t* sub_buffer = NULL;
-	dx_int_t out_len = 1000;
-	
 	dx_int_t events; 
 	
     dx_logging_info("Adding symbol %s", symbol);
