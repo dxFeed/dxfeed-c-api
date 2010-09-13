@@ -127,6 +127,7 @@ DXFEED_API void dx_logging_error( const char* message ) {
         if (mbtowc(w_message, message, len) > 0) {
             fwprintf(log_file, L"\n%s %s%s", dx_get_current_time(), error_prefix, w_message);
         }
+        dx_free(w_message);
     }
 }
 

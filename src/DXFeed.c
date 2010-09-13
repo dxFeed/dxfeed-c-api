@@ -91,10 +91,10 @@ bool dx_subscribe_to(dx_string_t* symbols, size_t symbols_count, int event_types
 		for (; eid < dx_eid_count; ++eid) {
 			if (event_types & DX_EVENT_BIT_MASK(eid)) {
 
-				if ( !dx_create_subscription(&sub_buffer, &out_len, 
+				if ( dx_create_subscription(&sub_buffer, &out_len, 
 											MESSAGE_TICKER_ADD_SUBSCRIPTION,//TODO: use flag
 											dx_encode_symbol_name(symbols[i]),
-											symbols[i], eid) ) {
+											symbols[i], eid) != R_SUCCESSFUL ) {
 					return false;
 				}
 
@@ -125,7 +125,16 @@ bool dx_unsubscribe(dx_string_t* symbols, size_t symbols_count, int event_types)
 DXFEED_API int dxf_connect_feed (const char* host) {
     struct dx_connection_context_t cc;
 
-    dx_logging_info(L"Connecting to host: %s", host);
+
+    {
+        size_t len = strlen(host);
+        dx_string_t w_host = dx_create_string(len);
+        int s = mbtowc(w_host, host, len);
+        if (s > 0) {
+            dx_logging_info(L"Connecting to host: %s", w_host);
+        }
+        dx_free(w_host);
+    }
     
     if (!dx_pop_last_error()) {
         return DXF_FAILURE;
