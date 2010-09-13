@@ -247,7 +247,7 @@ DXFEED_API ERRORCODE dxf_add_symbol (dxf_subscription_t subscription, dx_string_
 	if (!dx_add_symbols(subscription, &symbol, 1)) 
 		return DXF_FAILURE;
 	
-	if (!dx_unsubscribe(&symbol, 1, events))
+	if (!dx_subscribe(&symbol, 1, events))
 		return DXF_FAILURE;
 
 	
