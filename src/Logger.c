@@ -132,63 +132,12 @@ DXFEED_API void dx_logging_error( const char* message ) {
 
 /* -------------------------------------------------------------------------- */
 
-//DXFEED_API void dx_logging_info (const char* message1, const char* message2) {
-//    if (log_file == NULL || message1 == NULL) {
-//        return;
-//    }
-//
-//    fprintf(log_file, "\n%s %s%s", dx_get_current_time(), info_prefix, message1);
-//
-//    if (message2) {
-//        fprintf(log_file, " %s", message2);
-//    }
-//}
-
-/* -------------------------------------------------------------------------- */
-
-//DXFEED_API void dx_logging_info_a( const char* format, ... ) {
-//    if (log_file == NULL || format == NULL) {
-//        return;
-//    }
-//
-//    fprintf(log_file, "\n%s %s ", dx_get_current_time(), info_prefix);
-//
-//    {
-//        va_list ap;
-//        va_start(ap, format);
-//        vfprintf(log_file, format, ap);
-//        va_end(ap);
-//    }
-//}
-/* -------------------------------------------------------------------------- */
-
 void dx_logging_last_error() {
     const char* descr;
     dx_get_last_error(NULL, NULL, &descr);
 
     dx_logging_error(descr);
 }
-
-/* -------------------------------------------------------------------------- */
-
-//DXFEED_API void dx_logging_verbose_info_a(const char* format, ...) {
-//    if (!verbose_mode) {
-//        return;
-//    }
-//
-//    if (log_file == NULL || format == NULL) {
-//        return;
-//    }
-//
-//    fprintf(log_file, "\n%s %s ", dx_get_current_time(), info_prefix);
-//
-//    {
-//        va_list ap;
-//        va_start(ap, format);
-//        vfprintf(log_file, format, ap);
-//        va_end(ap);
-//    }
-//}
 
 /* -------------------------------------------------------------------------- */
 
