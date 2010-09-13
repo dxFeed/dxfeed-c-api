@@ -41,6 +41,7 @@ static struct dx_error_code_descr_t g_event_subscription_errors[] = {
     { dx_es_invalid_internal_structure_state, "Internal software error" },
     { dx_es_invalid_symbol_name, "Invalid symbol name" },
     { dx_es_invalid_listener, "Invalid listener" },
+    { dx_es_null_ptr_param, "Internal software error" },
 
     { ERROR_CODE_FOOTER, ERROR_DESCR_FOOTER }
 };
@@ -86,6 +87,7 @@ struct dx_subscription_data_struct_t {
     int event_types;
     dx_symbol_data_array_t symbols;
     dx_listener_array_t listeners;
+    bool is_muted;
 };
 
 static size_t g_subscription_count = 0;
@@ -429,6 +431,38 @@ dxf_subscription_t dx_create_event_subscription (int event_types) {
 
 /* -------------------------------------------------------------------------- */
  
+bool dx_mute_event_subscription (dxf_subscription_t subscr_id) {
+    dx_subscription_data_ptr_t subscr_data = (dx_subscription_data_ptr_t)subscr_id;
+    
+    if (subscr_id == dx_invalid_subscription) {
+        dx_set_last_error(dx_sc_event_subscription, dx_es_invalid_subscr_id);
+
+        return false;
+    }
+    
+    subscr_data->is_muted = true;
+    
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_unmute_event_subscription (dxf_subscription_t subscr_id) {
+    dx_subscription_data_ptr_t subscr_data = (dx_subscription_data_ptr_t)subscr_id;
+
+    if (subscr_id == dx_invalid_subscription) {
+        dx_set_last_error(dx_sc_event_subscription, dx_es_invalid_subscr_id);
+
+        return false;
+    }
+
+    subscr_data->is_muted = false;
+
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
 bool dx_close_event_subscription (dxf_subscription_t subscr_id) {
     dx_subscription_data_ptr_t subscr_data = (dx_subscription_data_ptr_t)subscr_id;
     bool res = true;
@@ -697,6 +731,53 @@ bool dx_get_event_subscription_event_types (dxf_subscription_t subscr_id, OUT in
 
 /* -------------------------------------------------------------------------- */
 
+bool dx_get_event_subscription_symbols (dxf_subscription_t subscr_id, OUT dx_const_string_t** symbols, OUT size_t* symbol_count) {
+    static size_t array_capacity = 0;
+    static dx_const_string_t* symbol_array = NULL;
+    size_t i = 0;
+    
+    dx_subscription_data_ptr_t subscr_data = (dx_subscription_data_ptr_t)subscr_id;
+
+    if (symbols == NULL || symbol_count == NULL) {
+        dx_set_last_error(dx_sc_event_subscription, dx_es_null_ptr_param);
+
+        return false;
+    }
+    
+    if (subscr_id == dx_invalid_subscription) {
+        dx_set_last_error(dx_sc_event_subscription, dx_es_invalid_subscr_id);
+
+        return false;
+    }
+    
+    if (subscr_data->symbols.size > array_capacity) {
+        if (symbol_array != NULL) {
+            dx_free((void*)symbol_array);
+            
+            array_capacity = 0;
+        }
+        
+        symbol_array = dx_calloc(subscr_data->symbols.size, sizeof(dx_const_string_t*));
+        
+        if (symbol_array == NULL) {
+            return false;
+        }
+        
+        array_capacity = subscr_data->symbols.size;
+    }
+    
+    for (; i < subscr_data->symbols.size; ++i) {
+        symbol_array[i] = subscr_data->symbols.elements[i]->name;
+    }
+    
+    *symbols = symbol_array;
+    *symbol_count = subscr_data->symbols.size;
+    
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
 bool dx_process_event_data (int event_type, dx_const_string_t symbol_name, dx_int_t symbol_cipher,
                             const dx_event_data_t* data, int data_count) {
     dx_symbol_data_ptr_t symbol_data = NULL;
@@ -722,8 +803,8 @@ bool dx_process_event_data (int event_type, dx_const_string_t symbol_name, dx_in
         dx_subscription_data_ptr_t subscr_data = symbol_data->subscriptions.elements[cur_subscr_index];
         size_t cur_listener_index = 0;
         
-        if (!(subscr_data->event_types & event_type)) {
-            /* subscription doesn't want this specific event type */
+        if (!(subscr_data->event_types & event_type) || /* subscription doesn't want this specific event type */
+            subscr_data->is_muted) { /* subscription is currently muted */
             
             continue;
         }
