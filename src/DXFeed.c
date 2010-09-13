@@ -214,18 +214,18 @@ DXFEED_API ERRORCODE dxf_create_subscription (int event_types, OUT dxf_subscript
 
 /* -------------------------------------------------------------------------- */
 
-DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dx_string_t* symbols, int symbol_count) {
+DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dx_string_t* symbols, int symbols_count) {
 	dx_int_t i;
 
     if (!dx_pop_last_error()) {
         return DXF_FAILURE;
     }
 	
-	if (symbol_count < 0) {
+	if (symbols_count < 0) {
 		return DXF_FAILURE; //TODO: set_last_error 
     }
     
-    for ( i = 0; i < symbol_count; ++i) {
+    for ( i = 0; i < symbols_count; ++i) {
 		if (dxf_add_symbol(subscription, symbols[i]) == DXF_FAILURE) {
 			return DXF_FAILURE;
 		}
@@ -279,7 +279,6 @@ DXFEED_API ERRORCODE dxf_subscription_clear_symbols (dxf_subscription_t subscrip
 	
 	dx_string_t* symbols;
 	size_t symbols_count;
-	size_t iter = 0;
 
     if (!dx_pop_last_error()) {
         return DXF_FAILURE;
@@ -306,6 +305,59 @@ DXFEED_API ERRORCODE dxf_subscription_clear_symbols (dxf_subscription_t subscrip
 
 /* -------------------------------------------------------------------------- */
 
+DXFEED_API ERRORCODE dxf_remove_symbols (dxf_subscription_t subscription, dx_string_t* symbols, int symbols_count){
+
+	dx_int_t events; 
+	
+	dx_string_t* existing_symbols;
+	size_t existing_symbols_count;
+
+	dx_int_t i = 0;
+	dx_int_t j = 0;
+
+    if (!dx_pop_last_error()) {
+        return DXF_FAILURE;
+    }
+	
+	if (!dx_get_event_subscription_event_types(subscription, &events)) {
+		return DXF_FAILURE;
+	}
+	
+	if (!dx_get_event_subscription_symbols(subscription, &existing_symbols, &existing_symbols_count)) {
+		return DXF_FAILURE;
+	}
+
+	for (; i < symbols_count; ++i)
+		for ( j = 0; j < existing_symbols_count; ++j)
+			if (symbols[i] == existing_symbols[j])
+				if (!dx_remove_symbols(subscription, symbols, symbols_count)) 
+					return DXF_FAILURE; 
+
+	if (!dx_unsubscribe(symbols, symbols_count, events))
+		return DXF_FAILURE;
+
+	
+	return DXF_SUCCESS;
+}
+
+DXFEED_API ERRORCODE dxf_set_symbols (dxf_subscription_t subscription, dx_string_t* symbols, int symbols_count){
+	
+    if (!dx_pop_last_error()) {
+        return DXF_FAILURE;
+    }
+	
+	if (dxf_subscription_clear_symbols(subscription) == DXF_FAILURE)
+		return DXF_FAILURE;
+
+	if (dxf_add_symbols(subscription, symbols, symbols_count) == DXF_FAILURE)
+		return DXF_FAILURE;
+
+	return DXF_SUCCESS;
+}
+
+
+/* -------------------------------------------------------------------------- */
+
 DXFEED_API ERRORCODE dxf_detach_event_listener (dxf_subscription_t subscription, dx_event_listener_t event_listener){
 	if (!dx_remove_listener(subscription, event_listener))
 		return DXF_FAILURE;
@@ -319,7 +371,6 @@ DXFEED_API ERRORCODE dxf_close_subscription (dxf_subscription_t subscription){
 	
 	dx_string_t* symbols;
 	size_t symbols_count;
-	size_t iter = 0;
 
     if (!dx_pop_last_error()) {
         return DXF_FAILURE;
@@ -394,5 +445,23 @@ DXFEED_API ERRORCODE dxf_add_subscription (dxf_subscription_t subscription){
 	if (!dx_subscribe(symbols, symbols_count, events))
 		return DXF_FAILURE;
 	
+	return DXF_SUCCESS;
+}
+
+/* -------------------------------------------------------------------------- */
+
+DXFEED_API ERRORCODE dxf_get_symbols (dxf_subscription_t subscription, OUT dx_string_t* symbols, int* symbols_count){
+	if (!dx_get_event_subscription_symbols(subscription, &symbols, symbols_count)) 
+		return DXF_FAILURE;
+
+	return DXF_SUCCESS;
+}
+
+/* -------------------------------------------------------------------------- */
+
+DXFEED_API ERRORCODE dxf_get_subscription_event_types (dxf_subscription_t subscription, OUT int* event_types){
+	if (!dx_get_event_subscription_event_types(subscription, event_types)) 
+		return DXF_FAILURE;
+
 	return DXF_SUCCESS;
 }
