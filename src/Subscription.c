@@ -164,7 +164,7 @@ dx_result_t dx_write_event_records (void) {
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_create_subscription (dx_byte_t** out, dx_int_t* out_len, dx_message_type_t type,
+dx_result_t dx_create_subscription (dx_byte_t** out, dx_int_t* out_len, dx_message_type_t type,
                                     dx_int_t cipher, dx_string_t symbol, dx_int_t record_id) {
 
 	dx_buf = (dx_byte_t*)dx_malloc(dx_initial_buffer_size);
@@ -174,27 +174,27 @@ bool dx_create_subscription (dx_byte_t** out, dx_int_t* out_len, dx_message_type
     dx_set_out_buffer(dx_buf, dx_initial_buffer_size);
 
 	if (!dx_is_subscription_message(type)) {
-        setParseError(dx_pr_illegal_argument);
-        return false;
+        return setParseError(dx_pr_illegal_argument);
     }
 
     if (dx_begin_message(type) != R_SUCCESSFUL) {
-        return false;
+        return setParseError(dx_pr_illegal_argument);//TODO: error type
     }
 
     if (dx_compose_body(record_id, cipher, symbol) != R_SUCCESSFUL) {
-        return false;
+        return setParseError(dx_pr_illegal_argument);//TODO: error type
     }
+	
+	if (type == MESSAGE_HISTORY_ADD_SUBSCRIPTION )
+		CHECKED_CALL (dx_write_compact_int , 0); // hardcoded, used only once while subscribing to MarketMaker
 
     if (dx_end_message()) {
-        return false;
+        return setParseError(dx_pr_illegal_argument);//TODO: error type
     }
 
 	*out_len = dx_get_out_buffer_position();
 
-
-    parseSuccessful();
-    return true;
+    return parseSuccessful();
 }
 
 /* -------------------------------------------------------------------------- */
