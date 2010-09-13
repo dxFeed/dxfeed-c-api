@@ -260,8 +260,8 @@ DXFEED_API ERRORCODE dxf_subscription_clear_symbols (dxf_subscription_t subscrip
 	dx_int_t events; 
 	
 	dx_string_t* symbols;
-	dx_int_t symbols_count;
-	dx_int_t iter=0;
+	size_t symbols_count;
+	size_t iter = 0;
 
     if (!dx_pop_last_error()) {
         return DXF_FAILURE;
@@ -302,7 +302,9 @@ DXFEED_API ERRORCODE dxf_subscription_clear_symbols (dxf_subscription_t subscrip
 	
 	return DXF_SUCCESS;
 }
+
 /* -------------------------------------------------------------------------- */
+
 DXFEED_API ERRORCODE dxf_detach_event_listener (dxf_subscription_t subscription, dx_event_listener_t event_listener){
 	if (!dx_remove_listener(subscription, event_listener))
 		return DXF_FAILURE;
@@ -319,8 +321,8 @@ DXFEED_API ERRORCODE dxf_close_subscription (dxf_subscription_t subscription){
 	dx_int_t events; 
 	
 	dx_string_t* symbols;
-	dx_int_t symbols_count;
-	dx_int_t iter=0;
+	size_t symbols_count;
+	size_t iter = 0;
 
     if (!dx_pop_last_error()) {
         return DXF_FAILURE;
@@ -357,11 +359,13 @@ DXFEED_API ERRORCODE dxf_close_subscription (dxf_subscription_t subscription){
 	}
 	
 	dx_close_event_subscription(subscription);
+	
 	return DXF_SUCCESS;
 }
 
 /* -------------------------------------------------------------------------- */
-DXFEED_API ERRORCODE dxf_remove_subscription (dxf_subscription_t subscription){
+
+DXFEED_API ERRORCODE dxf_remove_subscription (dxf_subscription_t subscription) {
 	dx_event_id_t eid = dx_eid_begin;
 
 	dx_byte_t* sub_buffer = NULL;
@@ -370,8 +374,8 @@ DXFEED_API ERRORCODE dxf_remove_subscription (dxf_subscription_t subscription){
 	dx_int_t events; 
 	
 	dx_string_t* symbols;
-	dx_int_t symbols_count;
-	dx_int_t iter=0;
+	size_t symbols_count;
+	size_t iter = 0;
 
     if (!dx_pop_last_error()) {
         return DXF_FAILURE;
@@ -385,7 +389,7 @@ DXFEED_API ERRORCODE dxf_remove_subscription (dxf_subscription_t subscription){
 		return DXF_FAILURE;
 	}
 
-	for (; iter < symbols_count; ++iter){
+	for (; iter < symbols_count; ++iter) {
 		for (; eid < dx_eid_count; ++eid) {
 			if (events & DX_EVENT_BIT_MASK(eid)) {
 
@@ -407,11 +411,13 @@ DXFEED_API ERRORCODE dxf_remove_subscription (dxf_subscription_t subscription){
 		}
 	}
 	
-	dx_freeze_event_subscription(subscription);
+	dx_mute_event_subscription(subscription);
+	
 	return DXF_SUCCESS;
 }
 
 /* -------------------------------------------------------------------------- */
+
 DXFEED_API ERRORCODE dxf_add_subscription (dxf_subscription_t subscription){
 	dx_event_id_t eid = dx_eid_begin;
 
@@ -421,8 +427,8 @@ DXFEED_API ERRORCODE dxf_add_subscription (dxf_subscription_t subscription){
 	dx_int_t events; 
 	
 	dx_string_t* symbols;
-	dx_int_t symbols_count;
-	dx_int_t iter=0;
+	size_t symbols_count;
+	size_t iter = 0;
 
     if (!dx_pop_last_error()) {
         return DXF_FAILURE;
@@ -458,7 +464,8 @@ DXFEED_API ERRORCODE dxf_add_subscription (dxf_subscription_t subscription){
 		}
 	}
 	
-	dx_unfreeze_event_subscription(subscription);
+	dx_unmute_event_subscription(subscription);
+	
 	return DXF_SUCCESS;
 }
 

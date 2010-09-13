@@ -37,7 +37,7 @@ typedef int bool;
     #define NULL ((void*)0)
 #endif // NULL
 
-typedef unsigned size_t;
+typedef unsigned int size_t;
 
 
 #endif /* PRIMITIVE_TYPES_H_INCLUDED */
