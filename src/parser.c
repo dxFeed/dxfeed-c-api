@@ -92,6 +92,8 @@ dx_result_t dx_create_field_digest (dx_event_id_t event_id, const dx_record_info
     CHECKED_CALL(dx_read_utf_string, &field_name);
     CHECKED_CALL(dx_read_compact_int, &field_type);
 
+    dx_logging_verbose_info("Field name: %s, field type: %d", field_name, field_type);
+
     if (wcscmp(field_name, s_field_to_ignore) == 0) {
         return parseSuccessful();
     }
@@ -237,6 +239,8 @@ dx_result_t dx_parse_type(OUT dx_int_t* ltype) {
         return setParseError(dx_pr_buffer_corrupt); // stream is corrupted
     }
 
+    dx_logging_verbose_info("Parse type: %d", type);
+
     *ltype = (dx_int_t)(type);
     return parseSuccessful();
 }
@@ -320,6 +324,8 @@ dx_result_t dx_read_records (dx_event_id_t event_id, void* record_buffer) {
 	dx_string_t read_string;
 	const dx_record_digest_t* record_digest = &(g_record_digests[event_id]);
 	
+    dx_logging_info("Read records");
+
 	for (; i < record_digest->size; ++i) {
 		switch (record_digest->elements[i]->type) {
 		case 0:
@@ -379,6 +385,8 @@ dx_result_t dx_parse_data (void) {
 	dx_event_id_t event_id;
 	int record_count = 0;
     
+    dx_logging_info("Parse data");
+
     CHECKED_CALL_0(dx_read_symbol);
     
     {
@@ -436,6 +444,8 @@ dx_result_t dx_parse_data (void) {
 /* -------------------------------------------------------------------------- */
 
 dx_result_t dx_parse_describe_records () {
+    dx_logging_info("Parse describe records");
+
     while (dx_get_in_buffer_position() < dx_get_in_buffer_limit()) {
         dx_int_t record_id;
         dx_string_t record_name;
@@ -455,6 +465,8 @@ dx_result_t dx_parse_describe_records () {
             return setParseError(dx_pr_record_info_corrupt);
         }
         
+        dx_logging_info("Record ID: %d, record name: %s, field count: %d", record_id, record_name, field_count);
+
         if (record_id >= dx_eid_count) {
             dx_free(record_name);
 

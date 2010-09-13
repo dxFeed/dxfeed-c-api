@@ -20,6 +20,7 @@
 #include "DXThreads.h"
 #include "DXErrorHandling.h"
 #include "DXErrorCodes.h"
+#include "Logger.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -183,6 +184,8 @@ bool dx_compare_threads (pthread_t t1, pthread_t t2) {
 bool dx_mutex_create (pthread_mutex_t* mutex) {
     int res = pthread_mutex_init(mutex, NULL);
     
+    dx_logging_verbose_info("Create mutex %#010x", mutex);
+
     switch (res) {
     case EAGAIN:
         dx_set_last_error(dx_sc_threads, dx_tec_not_enough_sys_resources); break;
@@ -208,6 +211,8 @@ bool dx_mutex_create (pthread_mutex_t* mutex) {
 bool dx_mutex_destroy (pthread_mutex_t* mutex) {
     int res = pthread_mutex_destroy(mutex);
     
+    dx_logging_verbose_info("Destroy mutex %#010x", mutex);
+
     switch (res) {
     case EBUSY:
         dx_set_last_error(dx_sc_threads, dx_tec_resource_busy); break;
@@ -226,7 +231,9 @@ bool dx_mutex_destroy (pthread_mutex_t* mutex) {
 
 bool dx_mutex_lock (pthread_mutex_t* mutex) {
     int res = pthread_mutex_lock(mutex);
-    
+
+    dx_logging_verbose_info("Lock mutex %#010x", mutex);
+
     switch (res) {
     case EINVAL:
         dx_set_last_error(dx_sc_threads, dx_tec_invalid_resource_id); break;
@@ -246,8 +253,11 @@ bool dx_mutex_lock (pthread_mutex_t* mutex) {
 /* -------------------------------------------------------------------------- */
 
 bool dx_mutex_unlock (pthread_mutex_t* mutex) {
+
     int res = pthread_mutex_unlock(mutex);
     
+    dx_logging_verbose_info("Unlock mutex %#010x", mutex);
+
     switch (res) {
     case EINVAL:
         dx_set_last_error(dx_sc_threads, dx_tec_invalid_resource_id); break;
