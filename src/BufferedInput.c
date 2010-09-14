@@ -23,6 +23,8 @@
 #include "BufferedInput.h"
 #include "DXErrorHandling.h"
 #include "DXMemory.h"
+#include "DXAlgorithms.h"
+
 // pointer to extern inBuffer
 dx_byte_t* inBuffer = 0;
 dx_int_t   inBufferLength = 0;

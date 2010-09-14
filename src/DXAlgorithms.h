@@ -274,4 +274,25 @@ bool dx_capacity_manager_halfer (size_t new_size, size_t* capacity);
         e2 = _tmp; \
     } while (false)
 
+/* -------------------------------------------------------------------------- */
+/*
+*	String functions
+*/
+/* -------------------------------------------------------------------------- */
+
+/* -------------------------------------------------------------------------- */
+/*
+/* allocate buffer for string and fill it with 0
+*/
+/* -------------------------------------------------------------------------- */
+dx_string_t dx_create_string (size_t size);
+
+/* -------------------------------------------------------------------------- */
+/*
+/*  convert ansi_str into unicode and return this new string, client must deallocate it
+/*
+/* -------------------------------------------------------------------------- */
+dx_string_t dx_ansi_to_unicode(const char* ansi_str);
+
+
 #endif /* DX_ALGORITHMS_H_INCLUDED */

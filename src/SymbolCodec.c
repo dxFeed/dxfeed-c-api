@@ -21,6 +21,7 @@
 #include "BufferedInput.h"
 #include "BufferedOutput.h"
 #include "DXMemory.h"
+#include "DXAlgorithms.h"
 
 #include "SymbolCodec.h"
 

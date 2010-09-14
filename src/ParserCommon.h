@@ -43,8 +43,6 @@ dx_result_t parseSuccessful();
 
 enum parser_result_t dx_get_parser_last_error();
 
-dx_string_t dx_create_string (size_t size);
-
 #define CHECKED_CALL(func, param) \
     if (func(param) != R_SUCCESSFUL) {\
     return R_FAILED;\

@@ -213,7 +213,7 @@ enum dx_error_function_result_t dx_get_last_error (int* subsystem_id, int* error
     struct dx_last_error_data_t* error_data = NULL;
     enum dx_error_function_result_t dummy;
     
-    if (!dx_init_error_subsystem()) {
+    if (!g_initialization_attempted && !dx_init_error_subsystem()) {
         return efr_error_subsys_init_failure;
     }
     
@@ -242,7 +242,7 @@ enum dx_error_function_result_t dx_get_last_error (int* subsystem_id, int* error
     }
     
     if (error_descr != NULL) {
-        *error_descr = dx_get_error_descr(*subsystem_id, *error_code, &dummy);
+        *error_descr = dx_get_error_descr(error_data->subsystem_id, error_data->error_code, &dummy);
     }
 
     return efr_success;

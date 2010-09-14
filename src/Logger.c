@@ -24,6 +24,7 @@
 #include <Windows.h>
 #include "ParserCommon.h"
 #include "DXMemory.h"
+#include "DXAlgorithms.h"
 
 /* -------------------------------------------------------------------------- 
 *
@@ -123,12 +124,11 @@ DXFEED_API void dx_logging_error( const char* message ) {
     }
 
     {
-        size_t len = strlen(message);
-        dx_string_t w_message = dx_create_string(len);
-        if (mbtowc(w_message, message, len) > 0) {
+        dx_string_t w_message = dx_ansi_to_unicode(message);
+        if (w_message) {
             fwprintf(log_file, L"\n%s %s%s", dx_get_current_time(), error_prefix, w_message);
+            dx_free(w_message);
         }
-        dx_free(w_message);
     }
 }
 

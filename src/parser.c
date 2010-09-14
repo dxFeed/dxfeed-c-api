@@ -28,6 +28,7 @@
 #include "EventSubscription.h"
 #include "EventRecordBuffers.h"
 #include "Logger.h"
+#include "DXAlgorithms.h"
 
 /* -------------------------------------------------------------------------- */
 /*

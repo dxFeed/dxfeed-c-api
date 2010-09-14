@@ -19,6 +19,8 @@
  
 #include "DXAlgorithms.h"
 
+#include <Windows.h>
+
 /* -------------------------------------------------------------------------- */
 /*
  *	Array functions implementation
@@ -39,4 +41,30 @@ bool dx_capacity_manager_halfer (size_t new_size, size_t* capacity) {
     }
 
     return false;
+}
+
+/* -------------------------------------------------------------------------- */
+
+dx_string_t dx_create_string (size_t size) {
+    return (dx_string_t)dx_calloc(size + 1, sizeof(dx_char_t));
+}
+
+/* -------------------------------------------------------------------------- */
+
+dx_string_t dx_ansi_to_unicode( const char* ansi_str ) {
+#ifdef _WIN32
+    size_t len = strlen(ansi_str);
+    dx_string_t wide_str = NULL;
+
+    // get required size
+    int wide_size = MultiByteToWideChar( CP_ACP, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, ansi_str, (int)len, wide_str, 0);
+    if (wide_size > 0) {
+        wide_str = dx_create_string(wide_size);
+        MultiByteToWideChar( CP_ACP, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, ansi_str, (int)len, wide_str, wide_size);
+    }
+
+    return wide_str;
+#else // _WIN32
+    return NULL; // todo
+#endif // _WIN32
 }

@@ -30,6 +30,7 @@
 #include "DataStructures.h"
 #include "parser.h"
 #include "Logger.h"
+#include "DXAlgorithms.h"
 
 BOOL APIENTRY DllMain( HANDLE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved )
 {
@@ -127,11 +128,11 @@ DXFEED_API int dxf_connect_feed (const char* host) {
 
 
     {
-        size_t len = strlen(host);
-        dx_string_t w_host = dx_create_string(len);
-        MultiByteToWideChar( CP_ACP, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, host, (int)len, w_host, (int)len);
-        dx_logging_info(L"Connecting to host: %s", w_host);
-        dx_free(w_host);
+        dx_string_t w_host = dx_ansi_to_unicode(host);
+        if (w_host) {
+            dx_logging_info(L"Connecting to host: %s", w_host);
+            dx_free(w_host);
+        }
     }
     
     if (!dx_pop_last_error()) {
