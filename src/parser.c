@@ -337,7 +337,10 @@ dx_result_t dx_read_records (dx_event_id_t event_id, void* record_buffer) {
 			
 			break;
 		case dx_fid_compact_int:
-			CHECKED_CALL(dx_read_compact_int, &read_int);
+			//CHECKED_CALL(dx_read_compact_int, &read_int);
+			    if (dx_read_compact_int(&read_int) != R_SUCCESSFUL) {
+    return R_FAILED;
+    }
 			CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_int);
 			
 			break;
