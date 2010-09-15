@@ -69,6 +69,7 @@ typedef struct {
     dx_int_t cipher;
     size_t ref_count;
     dx_subscription_data_array_t subscriptions;
+    dx_event_data_t* last_events;
 } dx_symbol_data_t, *dx_symbol_data_ptr_t;
 
 typedef struct {
@@ -156,6 +157,12 @@ size_t dx_get_bucket_index (dx_int_t cipher) {
     return (size_t)mod;
 }
 
+dx_symbol_data_ptr_t dx_create_symbol_data() {
+    dx_symbol_data_ptr_t res = (dx_symbol_data_ptr_t)dx_calloc(1, sizeof(dx_symbol_data_t));
+    res->last_events = dx_calloc(dx_eid_count, sizeof(dx_event_data_t));
+    return res;
+}
+
 /* -------------------------------------------------------------------------- */
 /*
  *	Auxiliary functions
@@ -191,7 +198,7 @@ dx_symbol_data_ptr_t dx_subscribe_symbol (dx_const_string_t symbol_name, dx_subs
                         &dummy, comparator, true, symbol_exists, symbol_index);
 
         if (!symbol_exists) {
-            res = (dx_symbol_data_ptr_t)dx_calloc(1, sizeof(dx_symbol_data_t));
+            res = dx_create_symbol_data();
 
             if (res == NULL) {
                 return NULL;
@@ -779,7 +786,7 @@ bool dx_get_event_subscription_symbols (dxf_subscription_t subscr_id, OUT dx_con
 /* -------------------------------------------------------------------------- */
 
 bool dx_process_event_data (int event_type, dx_const_string_t symbol_name, dx_int_t symbol_cipher,
-                            const dx_event_data_t* data, int data_count) {
+                            const dx_event_data_t data, int data_count) {
     dx_symbol_data_ptr_t symbol_data = NULL;
     size_t cur_subscr_index = 0;
     
@@ -799,6 +806,16 @@ bool dx_process_event_data (int event_type, dx_const_string_t symbol_name, dx_in
         return false;
     }
     
+    if (event_type >= dx_eid_begin && event_type < dx_eid_count) {
+        symbol_data->last_events[event_type] = data;
+    } else {
+        dx_set_last_error(dx_sc_event_subscription, dx_es_invalid_event_type);
+
+        dx_mutex_unlock(&g_subscr_guard);
+
+        return false;
+    }
+
     for (; cur_subscr_index < symbol_data->subscriptions.size; ++cur_subscr_index) {
         dx_subscription_data_ptr_t subscr_data = symbol_data->subscriptions.elements[cur_subscr_index];
         size_t cur_listener_index = 0;
@@ -820,3 +837,56 @@ bool dx_process_event_data (int event_type, dx_const_string_t symbol_name, dx_in
     
     return true;
 }
+
+/* -------------------------------------------------------------------------- */
+
+// todo: move this function in correct place and delete the second one from SampleTest.c
+dx_const_string_t dx_event_type_to_string(int event_type){
+    switch (event_type){
+    case DX_ET_TRADE: return L"Trade"; 
+    case DX_ET_QUOTE: return L"Quote"; 
+    case DX_ET_FUNDAMENTAL: return L"Fundamental"; 
+    case DX_ET_PROFILE: return L"Profile"; 
+    case DX_ET_MARKET_MAKER: return L"MarketMaker"; 
+    default: return L"";
+    }	
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_get_last_event( dx_const_string_t symbol_name, int event_type, OUT dx_event_data_t* event_data ) {
+    dx_symbol_data_ptr_t symbol_data = NULL;
+    size_t cur_subscr_index = 0;
+    dx_int_t cipher = dx_encode_symbol_name(symbol_name);
+
+    dx_logging_info(L"Getting last event. Symbol: %s, event type: %s", symbol_name, dx_event_type_to_string(event_type));
+
+    if (event_type < dx_eid_begin || event_type >= dx_eid_count) {
+        dx_set_last_error(dx_sc_event_subscription, dx_es_invalid_event_type);
+
+        return false;
+    }
+
+    /* this function is supposed to be called from a different thread than the other
+    interface functions */
+    if (!dx_mutex_lock(&g_subscr_guard)) {
+        return false;
+    }
+
+    if ((symbol_data = dx_find_symbol(symbol_name, cipher)) == NULL) { 
+        dx_set_last_error(dx_sc_event_subscription, dx_es_invalid_internal_structure_state); // todo incorrect last error
+
+        dx_mutex_unlock(&g_subscr_guard);
+
+        return false;
+    }
+
+    *event_data = symbol_data->last_events[event_type];
+
+    if (!dx_mutex_unlock(&g_subscr_guard)) {
+        return false;
+    }
+
+    return true;
+}
+

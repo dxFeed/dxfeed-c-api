@@ -81,8 +81,6 @@ DXFEED_API ERRORCODE dxf_get_symbols (dxf_subscription_t subscription, OUT dx_st
 DXFEED_API ERRORCODE dxf_get_subscription_event_types (dxf_subscription_t subscription, OUT int* event_types);
 DXFEED_API ERRORCODE dxf_remove_symbols (dxf_subscription_t subscription, dx_string_t* symbols, int symbols_count);
 DXFEED_API ERRORCODE dxf_set_symbols (dxf_subscription_t subscription, dx_string_t* symbols, int symbols_count);
-
-// TODO: not implemented
 DXFEED_API ERRORCODE dxf_get_last_event (int event_type, dx_string_t symbol, OUT void* data);
 
 
