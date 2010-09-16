@@ -467,7 +467,7 @@ DXFEED_API ERRORCODE dxf_get_subscription_event_types (dxf_subscription_t subscr
 
 /* -------------------------------------------------------------------------- */
 
-DXFEED_API ERRORCODE dxf_get_last_event( int event_type, dx_string_t symbol, OUT void* data ) {
+DXFEED_API ERRORCODE dxf_get_last_event( int event_type, dx_const_string_t symbol, OUT void* data ) {
     if (!dx_get_last_event(symbol, event_type, &data)) {
         return DXF_FAILURE;
     }

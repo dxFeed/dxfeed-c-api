@@ -105,6 +105,10 @@ static pthread_mutex_t g_subscr_guard;
 static dx_symbol_data_array_t g_ciphered_symbols[SYMBOL_BUCKET_COUNT] = {0};
 static dx_symbol_data_array_t g_hashed_symbols[SYMBOL_BUCKET_COUNT] = {0};
 
+static const int g_event_data_sizes[dx_eid_count] = {sizeof(dxf_trade_t), sizeof(dxf_quote_t), sizeof(dxf_fundamental_t),
+                                                   sizeof(dxf_profile_t), sizeof(dxf_market_maker)};
+
+
 /* -------------------------------------------------------------------------- */
 
 dx_int_t dx_symbol_name_hasher (dx_const_string_t symbol_name) {
@@ -159,7 +163,12 @@ size_t dx_get_bucket_index (dx_int_t cipher) {
 
 dx_symbol_data_ptr_t dx_create_symbol_data() {
     dx_symbol_data_ptr_t res = (dx_symbol_data_ptr_t)dx_calloc(1, sizeof(dx_symbol_data_t));
+    int i = dx_eid_begin;
     res->last_events = dx_calloc(dx_eid_count, sizeof(dx_event_data_t));
+    for (; i < dx_eid_count; ++i) {
+        res->last_events[i] = dx_calloc(1, g_event_data_sizes[i]);
+    }
+
     return res;
 }
 
@@ -807,6 +816,7 @@ bool dx_process_event_data (int event_type, dx_const_string_t symbol_name, dx_in
     }
     
     if (event_type >= dx_eid_begin && event_type < dx_eid_count) {
+        memcpy(symbol_data->last_events[event_type], data, g_event_data_sizes[event_type]);
         symbol_data->last_events[event_type] = data;
     } else {
         dx_set_last_error(dx_sc_event_subscription, dx_es_invalid_event_type);
