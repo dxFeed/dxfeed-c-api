@@ -337,10 +337,7 @@ dx_result_t dx_read_records (dx_event_id_t event_id, void* record_buffer) {
 			
 			break;
 		case dx_fid_compact_int:
-			//CHECKED_CALL(dx_read_compact_int, &read_int);
-			    if (dx_read_compact_int(&read_int) != R_SUCCESSFUL) {
-    return R_FAILED;
-    }
+			CHECKED_CALL(dx_read_compact_int, &read_int);
 			CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_int);
 			
 			break;
@@ -391,25 +388,26 @@ dx_result_t dx_parse_data (void) {
     
     dx_logging_info(L"Parse data");
 
-    CHECKED_CALL_0(dx_read_symbol);
-    
-    {
-        dx_int_t id;
-        
-        CHECKED_CALL(dx_read_compact_int, &id);
+	while (dx_get_in_buffer_position() < dx_get_in_buffer_limit()) {
+		CHECKED_CALL_0(dx_read_symbol);
+	    
+		{
+			dx_int_t id;
+	        
+			CHECKED_CALL(dx_read_compact_int, &id);
 
-        if (id < 0 || id >= dx_eid_count) {
-            return setParseError(dx_pr_wrong_record_id);
-        }
-        
-        event_id = dx_get_event_id(id);
-    }
-    
-    if (!g_record_digests[event_id].in_sync_with_server) {
-        return setParseError(dx_pr_record_description_not_received);
-    }
-    
-    while (dx_get_in_buffer_position() < dx_get_in_buffer_limit()) {
+			if (id < 0 || id >= dx_eid_count) {
+				return setParseError(dx_pr_wrong_record_id);
+			}
+	        
+			event_id = dx_get_event_id(id);
+		}
+	    
+		if (!g_record_digests[event_id].in_sync_with_server) {
+			return setParseError(dx_pr_record_description_not_received);
+		}
+	    
+
 		record_buffer = g_buffer_managers[event_id].record_getter(record_count++);
 		
 		if (record_buffer == NULL) {
