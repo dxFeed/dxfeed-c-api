@@ -36,6 +36,7 @@ DXFEED_API void dx_logging_error (const char* message);
 
 DXFEED_API void dx_logging_info (const dx_char_t* format, ...);
 DXFEED_API void dx_logging_verbose_info (const dx_char_t* format, ...);
+DXFEED_API void dx_logging_gap ();
 
 void dx_logging_last_error();
 

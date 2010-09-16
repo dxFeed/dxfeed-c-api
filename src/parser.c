@@ -36,12 +36,10 @@
  */
 /* -------------------------------------------------------------------------- */
 
-// should be at least two times bigger max socket buffer size
-#define INITIAL_BUFFER_SIZE 16000  
-//#define BUFFER_TOO_BIG 64000
 static dx_byte_t* buffer      = 0;
 static dx_int_t   buffer_size  = 0;
 static dx_int_t   buffer_pos   = 0;
+static dx_int_t   buffer_capacity = 16000;
 //static dx_int_t   buffer_limit = 0;
 
 #define SYMBOL_BUFFER_LEN 64
@@ -197,7 +195,7 @@ void dx_clear_records_server_support_states (void) {
 /* -------------------------------------------------------------------------- */
 
 bool dx_is_message_type_valid (dx_message_type_t type) {
-   return type >= MESSAGE_HEARTBEAT && type <= MESSAGE_TEXT_FORMAT_COMMENT;
+   return type >= MESSAGE_HEARTBEAT && type <= MESSAGE_TEXT_FORMAT_SPECIAL;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -545,32 +543,35 @@ dx_result_t dx_parse_message(dx_int_t type) {
             return setParseError(dx_pr_unexpected_message_type);
         }
     
-    switch (type) {
-        case MESSAGE_DESCRIBE_RECORDS:
-            if (dx_parse_describe_records() != R_SUCCESSFUL) {
-                if (dx_get_parser_last_error() == dx_pr_out_of_buffer) {
-                    return setParseError(dx_pr_message_not_complete);
+        switch (type) {
+            case MESSAGE_DESCRIBE_RECORDS:
+                if (dx_parse_describe_records() != R_SUCCESSFUL) {
+                    if (dx_get_parser_last_error() == dx_pr_out_of_buffer) {
+                        return setParseError(dx_pr_message_not_complete);
+                    }
+                    return R_FAILED;
                 }
-                return R_FAILED;
-            }
-			break;
-        case MESSAGE_HEARTBEAT: // no break, falls through
-        case MESSAGE_DESCRIBE_PROTOCOL:
-        case MESSAGE_DESCRIBE_RESERVED:
-        case MESSAGE_TEXT_FORMAT_COMMENT:
-        case MESSAGE_TEXT_FORMAT_SPECIAL:
-            // just ignore those messages without any processing
-            break;
-        default:
-            {
-                dx_int_t size;
-                dx_byte_t* new_buffer = dx_get_in_buffer(&size);
-//                dx_process_other_message(type, new_buffer, size, dx_get_in_buffer_position(), dx_get_in_buffer_limit() - dx_get_in_buffer_position());
-            }
-    }
+			    break;
+            case MESSAGE_HEARTBEAT: // no break, falls through
+            case MESSAGE_DESCRIBE_PROTOCOL:
+            case MESSAGE_DESCRIBE_RESERVED:
+            case MESSAGE_TEXT_FORMAT_COMMENT:
+            case MESSAGE_TEXT_FORMAT_SPECIAL:
+                // just ignore those messages without any processing
+                break;
+            default:
+                {
+                    dx_int_t size;
+                    dx_byte_t* new_buffer = dx_get_in_buffer(&size);
+    //                dx_process_other_message(type, new_buffer, size, dx_get_in_buffer_position(), dx_get_in_buffer_limit() - dx_get_in_buffer_position());
+                }
+        }
 	}
-    return parseSuccessful();
+    else {
+        return setParseError(dx_pr_unexpected_message_type);
+    }
 
+    return parseSuccessful();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -588,10 +589,25 @@ dx_result_t dx_combine_buffers( const dx_byte_t* new_buffer, dx_int_t new_buffer
 
 	// we have to combine two buffers - new data and old unprocessed data (if present)
 	// it's possible if logic message was divided into two network packets
+    if (buffer_capacity < buffer_size + new_buffer_size) {
+        dx_byte_t* larger_buffer;
+        buffer_capacity = buffer_size + new_buffer_size;
+        larger_buffer = dx_malloc(buffer_capacity);
+
+        if (dx_memcpy(larger_buffer, buffer, buffer_size) == NULL )
+            return R_FAILED;
+
+        dx_logging_verbose_info(L"Main buffer reallocated");
+
+        dx_free(buffer);
+        buffer = larger_buffer;
+    }
 	if (dx_memcpy(buffer + buffer_size, new_buffer, new_buffer_size) == NULL )
 			return R_FAILED;
 
 	buffer_size = buffer_size + new_buffer_size;
+
+    dx_logging_verbose_info(L"Buffers combined, new size: %d", buffer_size);
 
 	dx_set_in_buffer(buffer, buffer_size);
 	dx_set_in_buffer_position(buffer_pos);
@@ -606,10 +622,12 @@ dx_result_t dx_combine_buffers( const dx_byte_t* new_buffer, dx_int_t new_buffer
 dx_result_t dx_parse( const dx_byte_t* new_buffer, dx_int_t new_buffer_size  ) {
     dx_result_t parse_result = R_SUCCESSFUL;
 
+    dx_logging_gap();
     dx_logging_info(L"Begin parsing...");
+    dx_logging_verbose_info(L"buffer length: %d", new_buffer_size);
 
 	if ( buffer == NULL ) {// allocate memory for all program lifetime
-		buffer = dx_malloc(INITIAL_BUFFER_SIZE);
+		buffer = dx_malloc(buffer_capacity);
 		if (buffer == NULL)
 			return R_FAILED;
 		buffer_size = 0; // size of data in buffer
@@ -623,12 +641,15 @@ dx_result_t dx_parse( const dx_byte_t* new_buffer, dx_int_t new_buffer_size  ) {
 	if (dx_combine_buffers (new_buffer, new_buffer_size) != R_SUCCESSFUL) 
 		return R_FAILED;
 
-	// Parsing loop
+    dx_logging_verbose_info(L"buffer position: %d", dx_get_in_buffer_position());
+
+    // Parsing loop
     while (dx_get_in_buffer_position() < buffer_size) {
         dx_int_t messageType = MESSAGE_HEARTBEAT; // zero-length messages are treated as just heartbeats
         const dx_int_t message_start_pos = dx_get_in_buffer_position();
 
         dx_logging_info(L"Parsing message...");
+        dx_logging_verbose_info(L"buffer position: %d", message_start_pos);
 
         // read length of a message and prepare an input buffer
         if (dx_parse_length_and_setup_input(buffer_pos, buffer_size) != R_SUCCESSFUL) {
@@ -639,9 +660,13 @@ dx_result_t dx_parse( const dx_byte_t* new_buffer, dx_int_t new_buffer_size  ) {
                 dx_logging_last_error();
                 break;
             } else { // buffer is corrupt
-                dx_set_in_buffer_position(dx_get_in_buffer_limit());
+                //dx_set_in_buffer_position(dx_get_in_buffer_limit());
+                //dx_logging_last_error();
+                //continue; // cannot continue parsing this message on corrupted buffer, so go to the next one
+                dx_set_in_buffer_position(new_buffer_size); // skip the whole buffer
                 dx_logging_last_error();
-                continue; // cannot continue parsing this message on corrupted buffer, so go to the next one
+                parse_result = R_FAILED;
+                break;
             }
         }
         if (dx_get_in_buffer_limit() > dx_get_in_buffer_position()) { // only if not empty message, empty message is heartbeat ???
@@ -654,9 +679,13 @@ dx_result_t dx_parse( const dx_byte_t* new_buffer, dx_int_t new_buffer_size  ) {
                     dx_logging_last_error();
                     break;
                 } else {
-                    dx_set_in_buffer_position(dx_get_in_buffer_limit());
+                    //dx_set_in_buffer_position(dx_get_in_buffer_limit());
+                    //dx_logging_last_error();
+                    //continue; // cannot continue parsing this message on corrupted buffer, so go to the next one
+                    dx_set_in_buffer_position(new_buffer_size); // skip the whole buffer
                     dx_logging_last_error();
-                    continue; // cannot continue parsing this message on corrupted buffer, so go to the next one
+                    parse_result = R_FAILED;
+                    break;
                 }
             }
 	    }
@@ -676,18 +705,22 @@ dx_result_t dx_parse( const dx_byte_t* new_buffer, dx_int_t new_buffer_size  ) {
                 //case dx_pr_unexpected_message_type:
                 default:
                     // skip the whole message
-                    dx_set_in_buffer_position(dx_get_in_buffer_limit());
+                    //dx_set_in_buffer_position(dx_get_in_buffer_limit());
+                    dx_set_in_buffer_position(new_buffer_size); // skip the whole buffer
                     dx_logging_last_error();
-                    continue;
+                    parse_result = R_FAILED;
+                    break;
+                    //continue;
             }
-            dx_set_in_buffer_position(buffer_pos);
+            //dx_set_in_buffer_position(buffer_pos);
             break;
         }
 
-        dx_logging_info(L"Parsing message complete.");
+        dx_logging_info(L"Parsing message complete. Buffer position: %d", dx_get_in_buffer_position());
     }
 	buffer_pos = dx_get_in_buffer_position();
 
-    dx_logging_info(L"End parsing.");
+    dx_logging_info(L"End parsing. Buffer position: %d", dx_get_in_buffer_position());
+
 	return parse_result;
 }

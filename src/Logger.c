@@ -177,3 +177,9 @@ DXFEED_API void dx_logging_info( const dx_char_t* format, ... ) {
         va_end(ap);
     }
 }
+
+/* -------------------------------------------------------------------------- */
+
+DXFEED_API void dx_logging_gap() {
+    fwprintf(log_file, L"\n");
+}

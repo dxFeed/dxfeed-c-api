@@ -74,8 +74,9 @@ typedef enum {
     * read this values in binary format it means that we are actually
     * reading data not in binary, but in text format.
     */
-    MESSAGE_TEXT_FORMAT_SPECIAL = 61, // '='
     MESSAGE_TEXT_FORMAT_COMMENT = 35, // '#'
+    MESSAGE_TEXT_FORMAT_SPECIAL = 61, // '='
+
 } dx_message_type_t;
 
 /* -------------------------------------------------------------------------- */
