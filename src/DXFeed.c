@@ -80,7 +80,7 @@ bool dx_update_record_description (void) {
     return res;
 }
 
-bool dx_subscribe_to(dx_string_t* symbols, size_t symbols_count, int event_types, bool unsubscribe){
+bool dx_subscribe_to(dx_const_string_t* symbols, size_t symbols_count, int event_types, bool unsubscribe){
 	size_t i = 0;
 
 	dx_event_id_t eid = dx_eid_begin;
@@ -111,7 +111,7 @@ bool dx_subscribe_to(dx_string_t* symbols, size_t symbols_count, int event_types
 	}
 	return true;
 }
-bool dx_subscribe(dx_string_t* symbols, size_t symbols_count, int event_types){
+bool dx_subscribe(dx_const_string_t* symbols, size_t symbols_count, int event_types){
 	return dx_subscribe_to(symbols,symbols_count, event_types, true);
 }
 bool dx_unsubscribe(dx_string_t* symbols, size_t symbols_count, int event_types){
@@ -235,7 +235,7 @@ DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dx_string
 
 /* -------------------------------------------------------------------------- */
 
-DXFEED_API ERRORCODE dxf_add_symbol (dxf_subscription_t subscription, dx_string_t symbol) {
+DXFEED_API ERRORCODE dxf_add_symbol( dxf_subscription_t subscription, dx_const_string_t symbol ) {
 
 	dx_int_t events; 
 	
@@ -467,8 +467,8 @@ DXFEED_API ERRORCODE dxf_get_subscription_event_types (dxf_subscription_t subscr
 
 /* -------------------------------------------------------------------------- */
 
-DXFEED_API ERRORCODE dxf_get_last_event( int event_type, dx_const_string_t symbol, OUT void* data ) {
-    if (!dx_get_last_event(symbol, event_type, &data)) {
+DXFEED_API ERRORCODE dxf_get_last_event( int event_type, dx_const_string_t symbol, OUT void** data ) {
+    if (!dx_get_last_event(symbol, event_type, data)) {
         return DXF_FAILURE;
     }
 

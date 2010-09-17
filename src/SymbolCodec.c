@@ -347,7 +347,7 @@ dx_result_t dx_codec_read_symbol(dx_char_t* buffer, dx_int_t buf_len, OUT dx_str
 
 /* -------------------------------------------------------------------------- */
 
-dx_result_t dx_codec_write_symbol(dx_byte_t* buf, dx_int_t buf_len, dx_int_t pos, dx_int_t cipher, dx_string_t symbol) {
+dx_result_t dx_codec_write_symbol( dx_byte_t* buf, dx_int_t buf_len, dx_int_t pos, dx_int_t cipher, dx_const_string_t symbol ) {
     if (cipher != 0) {
         dx_long_t penta;
 

@@ -23,7 +23,7 @@
 #include "PrimitiveTypes.h"
 #include "Parser.h"
 
-dx_result_t dx_create_subscription (OUT dx_byte_t** out, OUT dx_int_t* out_len, dx_message_type_t type, dx_int_t cipher, dx_string_t symbol, dx_int_t record_id);
+dx_result_t dx_create_subscription (OUT dx_byte_t** out, OUT dx_int_t* out_len, dx_message_type_t type, dx_int_t cipher, dx_const_string_t symbol, dx_int_t record_id);
 
 dx_result_t dx_compose_description_message (OUT dx_byte_t** msg_buffer, OUT dx_int_t* msg_length);
 
