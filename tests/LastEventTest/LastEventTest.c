@@ -13,7 +13,9 @@
 const char dxfeed_host[] = "demo.dxfeed.com:7300";
 
 static pthread_mutex_t g_event_data_guard;
-static dx_const_string_t g_symbol = L"IBM";
+//static dx_const_string_t g_symbol = L"IBM";
+static dx_const_string_t g_symbols[] = { {L"IBM"}, {L"MSFT"}, {L"YHOO"}, {L"C"} };
+static const dx_int_t g_symbols_size = sizeof (g_symbols) / sizeof (g_symbols[0]);
 static const int g_event_type = DX_ET_TRADE;
 static int g_iteration_count = 10;
 
@@ -119,12 +121,12 @@ dx_const_string_t dx_event_type_to_string(int event_type){
 }
 
 bool compare_event_data(int event_type, const dx_event_data_t data1, const dx_event_data_t data2) {
-    if (!mutex_lock(&g_event_data_guard)) {
-        return false;
-    }
+    //if (!mutex_lock(&g_event_data_guard)) {
+    //    return false;
+    //}
 
     if ( !data1 || !data2) {
-        mutex_unlock(&g_event_data_guard);
+        //mutex_unlock(&g_event_data_guard);
         return false;
     }
 
@@ -146,14 +148,15 @@ bool compare_event_data(int event_type, const dx_event_data_t data1, const dx_ev
         res  = res && trade1->last_time == trade2->last_time;
         res  = res && fabs(trade1->volume - trade2->volume) < 0.00001;
 
-        if (!mutex_unlock(&g_event_data_guard)) {
-            return false;
-        }
+        //if (!mutex_unlock(&g_event_data_guard)) {
+        //    wprintf(L"Error in mutex_unlock");
+        //    return false;
+        //}
 
         return res;
     }
 
-    mutex_unlock(&g_event_data_guard);
+    //mutex_unlock(&g_event_data_guard);
     return false;
 }
 
@@ -201,20 +204,16 @@ void listener(int event_type, dx_const_string_t symbol_name,const dx_event_data_
 
     // copy event data
     if (!mutex_lock(&g_event_data_guard)) {
-        process_last_error();
+        wprintf(L"Error in mutex_lock");
         return;
     }
 
     memcpy(g_event_data[event_type], data, g_event_data_sizes[event_type]);
 
     if (!mutex_unlock(&g_event_data_guard)) {
-        process_last_error();
+        wprintf(L"Error in mutex_unlock");
         return;
     }
-
-    //dxf_get_last_event(event_type, symbol_name, &event_data);
-
-    //wprintf(L"\n Result : %s \n", compare_event_data(event_type, event_data, data) ? L"true" : L"false");
 }
 
 
@@ -238,13 +237,10 @@ int main (int argc, char* argv[]) {
         }
     }
 
-    //dx_string_t symbols_to_add[] = { {L"MSFT"}, {L"YHOO"}, {L"C"} };
-    //dx_int_t symbols_to_add_size = sizeof (symbols_to_add) / sizeof (symbols_to_add[0]);
-
     dx_logger_initialize( "log.log", true, true, true );
 
     if (!mutex_create(&g_event_data_guard)) {
-        process_last_error();
+        wprintf(L"Error in mutex_create");
         return -1;
     }
 
@@ -265,12 +261,25 @@ int main (int argc, char* argv[]) {
         return -1;
     };
 
-    wprintf(L"Symbol %s added\n", g_symbol);
-    if (!dxf_add_symbol(subscription, g_symbol)) {
+    //wprintf(L"Symbol %s added\n", g_symbol);
+    //if (!dxf_add_symbol(subscription, g_symbol)) {
+    //    process_last_error();
+
+    //    return -1;
+    //}; 
+
+    wprintf(L"Adding symbols:");
+    for (i = 0; i < g_symbols_size; ++i) {
+        wprintf(L" %S", g_symbols[i]);
+    }
+    wprintf(L"\n");
+
+    if (!dxf_add_symbols(subscription, g_symbols, g_symbols_size)) {
         process_last_error();
 
         return -1;
     }; 
+
     wprintf(L"Listener attached\n");
     if (!dxf_attach_event_listener(subscription, listener)) {
         process_last_error();
@@ -280,28 +289,32 @@ int main (int argc, char* argv[]) {
 
     //Sleep (5000); 
 
-    //printf("Adding symbols: %S %S %S \n", symbols_to_add[0], symbols_to_add[1], symbols_to_add[2] );
-    //if (!dxf_add_symbols(subscription, symbols_to_add, symbols_to_add_size)) {
-    //    process_last_error();
-
-    //    return -1;
-    //}; 
 
     //Sleep (5000); 
 
     while (g_iteration_count--) {
-        dx_event_data_t data;
-        bool compare_result;
-        if (!dxf_get_last_event(g_event_type, g_symbol, &data)) {
-            process_last_error();
+        if (!mutex_lock(&g_event_data_guard)) {
+            wprintf(L"Error in mutex_lock");
             return -1;
         }
+        for (i = 0; i < g_symbols_size; ++i) {
+            dx_event_data_t data;
+            bool compare_result;
+            if (!dxf_get_last_event(g_event_type, g_symbols[i], &data)) {
+                mutex_unlock(&g_event_data_guard);
+                return -1;
+            }
 
-        compare_result = compare_event_data(g_event_type, data, g_event_data[g_event_type]);
-        wprintf(L"\n Compare result : %s \n", compare_result ? L"true" : L"false");
-        
-        test_result = test_result && compare_result;
+            compare_result = compare_event_data(g_event_type, data, g_event_data[g_event_type]);
+            wprintf(L"\n Compare result : %s \n", compare_result ? L"true" : L"false");
+            
+            test_result = test_result && compare_result;
+        }
 
+        if (!mutex_unlock(&g_event_data_guard)) {
+            wprintf(L"Error in mutex_unlock");
+            return -1;
+        }
         Sleep (5000); 
     }
 

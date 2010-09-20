@@ -213,7 +213,7 @@ DXFEED_API ERRORCODE dxf_create_subscription (int event_types, OUT dxf_subscript
 
 /* -------------------------------------------------------------------------- */
 
-DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dx_string_t* symbols, int symbols_count) {
+DXFEED_API ERRORCODE dxf_add_symbols( dxf_subscription_t subscription, dx_const_string_t* symbols, int symbols_count ) {
 	dx_int_t i;
 
     if (!dx_pop_last_error()) {

@@ -69,7 +69,7 @@ DXFEED_API int dxf_get_last_error (int* subsystem_id, int* error_code, const cha
 // via the function's out-parameter
 
 DXFEED_API ERRORCODE dxf_create_subscription (int event_types, OUT dxf_subscription_t* subscription);
-DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dx_string_t* symbols, int symbols_count);
+DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dx_const_string_t* symbols, int symbols_count);
 DXFEED_API ERRORCODE dxf_add_symbol (dxf_subscription_t subscription, dx_const_string_t symbol);
 DXFEED_API ERRORCODE dxf_attach_event_listener (dxf_subscription_t subscription, dx_event_listener_t event_listener);
 DXFEED_API ERRORCODE dxf_subscription_clear_symbols (dxf_subscription_t subscription);
