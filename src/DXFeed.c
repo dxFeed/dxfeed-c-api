@@ -312,7 +312,7 @@ DXFEED_API ERRORCODE dxf_remove_symbols (dxf_subscription_t subscription, dx_str
 	size_t existing_symbols_count;
 
 	dx_int_t i = 0;
-	dx_int_t j = 0;
+	dx_uint_t j = 0;
 
     if (!dx_pop_last_error()) {
         return DXF_FAILURE;
@@ -449,7 +449,7 @@ DXFEED_API ERRORCODE dxf_add_subscription (dxf_subscription_t subscription){
 
 /* -------------------------------------------------------------------------- */
 
-DXFEED_API ERRORCODE dxf_get_symbols (dxf_subscription_t subscription, OUT dx_string_t* symbols, int* symbols_count){
+DXFEED_API ERRORCODE dxf_get_symbols (dxf_subscription_t subscription, OUT dx_string_t* symbols, size_t* symbols_count){
 	if (!dx_get_event_subscription_symbols(subscription, &symbols, symbols_count)) 
 		return DXF_FAILURE;
 

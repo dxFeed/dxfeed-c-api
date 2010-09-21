@@ -806,7 +806,12 @@ bool dx_process_event_data (int event_type, dx_const_string_t symbol_name, dx_in
     size_t cur_subscr_index = 0;
     int event_type_tmp;
     int event_id;
-    dx_event_id_t eid;
+
+    if (!dx_is_only_one_bit_set(event_type)) {
+        dx_set_last_error(dx_sc_event_subscription, dx_es_invalid_event_type);
+
+        return false;
+    }
 
     dx_logging_info(L"Process event data. Symbol: %s, data count: %d", symbol_name, data_count);
 
@@ -823,7 +828,9 @@ bool dx_process_event_data (int event_type, dx_const_string_t symbol_name, dx_in
         
         return false;
     }
-    
+
+
+    // copy last event data
     event_type_tmp = event_type;
     event_id = dx_eid_begin;
     while(event_type_tmp && event_id < dx_eid_count) {
@@ -835,6 +842,7 @@ bool dx_process_event_data (int event_type, dx_const_string_t symbol_name, dx_in
         ++event_id;
     }
 
+    // notify listeners
     for (; cur_subscr_index < symbol_data->subscriptions.size; ++cur_subscr_index) {
         dx_subscription_data_ptr_t subscr_data = symbol_data->subscriptions.elements[cur_subscr_index];
         size_t cur_listener_index = 0;
