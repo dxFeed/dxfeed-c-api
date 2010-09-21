@@ -293,6 +293,7 @@ int main (int argc, char* argv[]) {
     //Sleep (5000); 
 
     while (g_iteration_count--) {
+        // todo: deadlock here
         if (!mutex_lock(&g_event_data_guard)) {
             wprintf(L"Error in mutex_lock");
             return -1;
