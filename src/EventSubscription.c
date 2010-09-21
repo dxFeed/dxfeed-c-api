@@ -70,6 +70,7 @@ typedef struct {
     size_t ref_count;
     dx_subscription_data_array_t subscriptions;
     dx_event_data_t* last_events;
+    dx_event_data_t* last_requested_events;
 } dx_symbol_data_t, *dx_symbol_data_ptr_t;
 
 typedef struct {
@@ -167,6 +168,11 @@ dx_symbol_data_ptr_t dx_create_symbol_data() {
     res->last_events = dx_calloc(dx_eid_count, sizeof(dx_event_data_t));
     for (; i < dx_eid_count; ++i) {
         res->last_events[i] = dx_calloc(1, g_event_data_sizes[i]);
+    }
+
+    res->last_requested_events = dx_calloc(dx_eid_count, sizeof(dx_event_data_t));
+    for (; i < dx_eid_count; ++i) {
+        res->last_requested_events[i] = dx_calloc(1, g_event_data_sizes[i]);
     }
 
     return res;
@@ -798,7 +804,10 @@ bool dx_process_event_data (int event_type, dx_const_string_t symbol_name, dx_in
                             const dx_event_data_t data, int data_count) {
     dx_symbol_data_ptr_t symbol_data = NULL;
     size_t cur_subscr_index = 0;
-    
+    int event_type_tmp;
+    int event_id;
+    dx_event_id_t eid;
+
     dx_logging_info(L"Process event data. Symbol: %s, data count: %d", symbol_name, data_count);
 
     /* this function is supposed to be called from a different thread than the other
@@ -815,15 +824,15 @@ bool dx_process_event_data (int event_type, dx_const_string_t symbol_name, dx_in
         return false;
     }
     
-    if (event_type >= dx_eid_begin && event_type < dx_eid_count) {
-        memcpy(symbol_data->last_events[event_type], data, g_event_data_sizes[event_type]);
-        symbol_data->last_events[event_type] = data;
-    } else {
-        dx_set_last_error(dx_sc_event_subscription, dx_es_invalid_event_type);
+    event_type_tmp = event_type;
+    event_id = dx_eid_begin;
+    while(event_type_tmp && event_id < dx_eid_count) {
+        if (event_type_tmp & 0x01) {
+            memcpy(symbol_data->last_events[event_id], data, g_event_data_sizes[event_id]);
+        }
 
-        dx_mutex_unlock(&g_subscr_guard);
-
-        return false;
+        event_type_tmp >>= 1;
+        ++event_id;
     }
 
     for (; cur_subscr_index < symbol_data->subscriptions.size; ++cur_subscr_index) {
@@ -891,7 +900,8 @@ bool dx_get_last_event( dx_const_string_t symbol_name, int event_type, OUT dx_ev
         return false;
     }
 
-    *event_data = symbol_data->last_events[event_type];
+    dx_memcpy(symbol_data->last_requested_events[event_type], symbol_data->last_events[event_type], g_event_data_sizes[event_type]);
+    *event_data = symbol_data->last_requested_events[event_type];
 
     if (!dx_mutex_unlock(&g_subscr_guard)) {
         return false;

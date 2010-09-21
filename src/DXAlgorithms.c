@@ -68,3 +68,9 @@ dx_string_t dx_ansi_to_unicode( const char* ansi_str ) {
     return NULL; // todo
 #endif // _WIN32
 }
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_is_one_bit_sets( dx_int_t val ) {
+    return (val & (val - 1)) == 0;
+}

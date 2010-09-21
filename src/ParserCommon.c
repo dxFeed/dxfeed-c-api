@@ -72,9 +72,10 @@ dx_result_t parseSuccessful() {
 
 ////////////////////////////////////////////////////////////////////////////////
 enum parser_result_t dx_get_parser_last_error() {
+    dx_int_t subsystem_id;
     dx_int_t res = dx_pr_successful;
-    enum dx_error_function_result_t resultErr = dx_get_last_error (NULL, &res, NULL);
-    if (resultErr == efr_success || resultErr == efr_no_error_stored) {
+    enum dx_error_function_result_t resultErr = dx_get_last_error (&subsystem_id, &res, NULL);
+    if (subsystem_id == dx_sc_parser && (resultErr == efr_success || resultErr == efr_no_error_stored)) {
         return res;
     }
 

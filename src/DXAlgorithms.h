@@ -294,5 +294,11 @@ dx_string_t dx_create_string (size_t size);
 /* -------------------------------------------------------------------------- */
 dx_string_t dx_ansi_to_unicode(const char* ansi_str);
 
+/* -------------------------------------------------------------------------- */
+/*
+*	Bit operations
+*/
+/* -------------------------------------------------------------------------- */
+bool dx_is_only_one_bit_set(dx_int_t val);
 
 #endif /* DX_ALGORITHMS_H_INCLUDED */
