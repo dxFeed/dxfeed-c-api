@@ -166,13 +166,25 @@ dx_symbol_data_ptr_t dx_create_symbol_data() {
     dx_symbol_data_ptr_t res = (dx_symbol_data_ptr_t)dx_calloc(1, sizeof(dx_symbol_data_t));
     int i = dx_eid_begin;
     res->last_events = dx_calloc(dx_eid_count, sizeof(dx_event_data_t));
+    if (res->last_events == NULL) {
+        return NULL;
+    }
     for (; i < dx_eid_count; ++i) {
         res->last_events[i] = dx_calloc(1, g_event_data_sizes[i]);
+        if (res->last_events[i] == NULL) {
+            return NULL;
+        }
     }
 
     res->last_requested_events = dx_calloc(dx_eid_count, sizeof(dx_event_data_t));
+    if (res->last_requested_events == NULL) {
+        return NULL;
+    }
     for (i = dx_eid_begin; i < dx_eid_count; ++i) {
         res->last_requested_events[i] = dx_calloc(1, g_event_data_sizes[i]);
+        if (res->last_requested_events[i] == NULL) {
+            return NULL;
+        }
     }
 
     return res;
