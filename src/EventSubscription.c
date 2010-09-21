@@ -171,7 +171,7 @@ dx_symbol_data_ptr_t dx_create_symbol_data() {
     }
 
     res->last_requested_events = dx_calloc(dx_eid_count, sizeof(dx_event_data_t));
-    for (; i < dx_eid_count; ++i) {
+    for (i = dx_eid_begin; i < dx_eid_count; ++i) {
         res->last_requested_events[i] = dx_calloc(1, g_event_data_sizes[i]);
     }
 
