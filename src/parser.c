@@ -738,7 +738,8 @@ dx_result_t dx_parse( const dx_byte_t* new_buffer, dx_int_t new_buffer_size  ) {
     }
 	buffer_pos = dx_get_in_buffer_position();
 
-    dx_logging_info(L"End parsing. Buffer position: %d", dx_get_in_buffer_position());
+    dx_logging_info(L"End parsing. Buffer position: %d. Result: %s", dx_get_in_buffer_position()
+                                                                   , parse_result == R_SUCCESSFUL ? L"R_SUCCESSFUL" : L"R_FAILED");
 
 	return parse_result;
 }
