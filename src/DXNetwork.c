@@ -85,8 +85,6 @@ void* dx_socket_reader (void* arg) {
     ctx = &(conn_data->context);
     
     if (!dx_init_error_subsystem()) {
-        ctx->receiver(NULL, g_invalid_buffer_length);
-
         if (ctx->terminator) {
             ctx->terminator();
         }
@@ -110,8 +108,6 @@ void* dx_socket_reader (void* arg) {
         case INVALID_DATA_SIZE:
             /* the socket error
                calling the data receiver to inform them something's going wrong */
-
-            ctx->receiver(NULL, g_invalid_buffer_length);
 
             if (ctx->terminator) {
                 ctx->terminator();

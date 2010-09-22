@@ -287,11 +287,6 @@ int main (int argc, char* argv[]) {
         return -1;
     };
 
-    //Sleep (5000); 
-
-
-    //Sleep (5000); 
-
     while (g_iteration_count--) {
         // todo: deadlock here
         if (!mutex_lock(&g_event_data_guard)) {

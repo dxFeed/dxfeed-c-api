@@ -43,7 +43,7 @@ static dx_int_t   buffer_capacity = 16000;
 //static dx_int_t   buffer_limit = 0;
 
 #define SYMBOL_BUFFER_LEN 64
-static dx_char_t   symbol_buffer[SYMBOL_BUFFER_LEN];
+static dx_char_t   symbol_buffer[SYMBOL_BUFFER_LEN + 1];
 static dx_string_t symbol_result;
 
 static dx_int_t    lastCipher;
