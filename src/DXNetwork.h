@@ -25,6 +25,7 @@
 #define DX_NETWORK_H_INCLUDED
 
 #include "PrimitiveTypes.h"
+#include "DXFeed.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -34,10 +35,11 @@
 
 extern unsigned g_invalid_buffer_length;
 
-typedef void (*dx_socket_data_receiver_t)(const void* buffer, unsigned buflen);
+typedef bool (*dx_socket_data_receiver_t)(const void* buffer, unsigned buflen);
 
 struct dx_connection_context_t {
-    dx_socket_data_receiver_t receiver; /* a callback to pass the read data to */    
+    dx_socket_data_receiver_t       receiver; /* a callback to pass the read data to */    
+    dx_on_reader_thread_terminate_t terminator; /* a callback to notify client the dx_socket_reader is going to finished*/
 };
 
 /* -------------------------------------------------------------------------- */

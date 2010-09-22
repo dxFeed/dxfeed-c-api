@@ -39,7 +39,7 @@ int main (int argc, char* argv[]) {
     printf("Connection test started.\n");    
     printf("Connecting to host %s...\n", dxfeed_host);
     
-    if (!dxf_connect_feed(dxfeed_host)) {
+    if (!dxf_connect_feed(dxfeed_host, NULL)) {
         process_last_error();
 
         return -1;

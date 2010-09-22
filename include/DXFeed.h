@@ -43,6 +43,8 @@
 #define DXF_SUCCESS 1
 #define DXF_FAILURE 0
 
+typedef void (*dx_on_reader_thread_terminate_t)(void);
+
 /* -------------------------------------------------------------------------- */
 /*
  *	DXFeed C API functions
@@ -54,7 +56,7 @@
 // if the function succeeds it returns the handle of the opened
 // connection via the function's out-parameter
 
-DXFEED_API int dxf_connect_feed (const char* host);
+DXFEED_API int dxf_connect_feed (const char* host, dx_on_reader_thread_terminate_t term);
 
 // disconnect a connection, previously created by 'connect'
 // returns the success/error code of the operation

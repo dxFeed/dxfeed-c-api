@@ -51,13 +51,12 @@ BOOL APIENTRY DllMain( HANDLE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
  */
 /* -------------------------------------------------------------------------- */
 
-void data_receiver (const void* buffer, unsigned buflen) {
+bool data_receiver (const void* buffer, unsigned buflen) {
     printf("Internal data receiver stub. Data received: %d bytes\n", buflen);
     
     dx_logging_info(L"Data received: %d bytes",  buflen);
 
-	// TODO: process errors 
-	dx_parse(buffer, buflen);
+	return (dx_parse(buffer, buflen) == R_SUCCESSFUL);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -123,7 +122,7 @@ bool dx_unsubscribe(dx_string_t* symbols, size_t symbols_count, int event_types)
  */
 /* -------------------------------------------------------------------------- */
 
-DXFEED_API int dxf_connect_feed (const char* host) {
+DXFEED_API int dxf_connect_feed (const char* host, dx_on_reader_thread_terminate_t term) {
     struct dx_connection_context_t cc;
 
 
@@ -140,6 +139,7 @@ DXFEED_API int dxf_connect_feed (const char* host) {
     }
     
     cc.receiver = data_receiver;
+    cc.terminator = term;
     
     dx_clear_records_server_support_states();
     

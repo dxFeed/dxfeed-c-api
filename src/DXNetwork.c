@@ -69,6 +69,7 @@ static const size_t g_sock_operation_timeout = 100;
 void* dx_socket_reader (void* arg) {
     struct dx_connection_data_t* conn_data = NULL;
     struct dx_connection_context_t* ctx = NULL;
+    bool receiver_result = true;
 
     char read_buf[READ_CHUNK_SIZE];
     int count_of_bytes_read = 0;
@@ -86,13 +87,20 @@ void* dx_socket_reader (void* arg) {
     if (!dx_init_error_subsystem()) {
         ctx->receiver(NULL, g_invalid_buffer_length);
 
+        if (ctx->terminator) {
+            ctx->terminator();
+        }
+
         return NULL;
     }
     
     for (;;) {
-        if (conn_data->termination_trigger) {
+        if (conn_data->termination_trigger || !receiver_result) {
             /* the thread is told to terminate */
             
+            if (ctx->terminator) {
+                ctx->terminator();
+            }
             return NULL;
         }
         
@@ -105,6 +113,9 @@ void* dx_socket_reader (void* arg) {
 
             ctx->receiver(NULL, g_invalid_buffer_length);
 
+            if (ctx->terminator) {
+                ctx->terminator();
+            }
             return NULL;
         case 0:
             /* no data to read */
@@ -114,8 +125,13 @@ void* dx_socket_reader (void* arg) {
         }
         
         /* reporting the read data */        
-        ctx->receiver((const void*)read_buf, count_of_bytes_read);
+        receiver_result = ctx->receiver((const void*)read_buf, count_of_bytes_read);
     }
+
+    if (ctx->terminator) {
+        ctx->terminator();
+    }
+    return NULL;
 }
 
 /* -------------------------------------------------------------------------- */

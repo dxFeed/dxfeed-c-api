@@ -17,6 +17,33 @@ dx_const_string_t dx_event_type_to_string(int event_type){
 		default: return L"";
 	}	
 }
+
+/* -------------------------------------------------------------------------- */
+static bool is_listener_thread_terminated = false;
+CRITICAL_SECTION listener_thread_guard;
+
+bool is_thread_terminate() {
+    bool res;
+    EnterCriticalSection(&listener_thread_guard);
+    res = is_listener_thread_terminated;
+    LeaveCriticalSection(&listener_thread_guard);
+
+    return res;
+}
+
+/* -------------------------------------------------------------------------- */
+
+void on_reader_thread_terminate(void) {
+    EnterCriticalSection(&listener_thread_guard);
+    is_listener_thread_terminated = true;
+    LeaveCriticalSection(&listener_thread_guard);
+
+    printf("\nTerminating listener thread\n");
+    dx_logging_verbose_info(L"Terminating listener thread");
+}
+
+/* -------------------------------------------------------------------------- */
+
 void listener(int event_type, dx_const_string_t symbol_name,const dx_event_data_t* data, int data_count){
 		dx_int_t i = 0;
 
@@ -91,13 +118,14 @@ void process_last_error () {
 
 int main (int argc, char* argv[]) {
     dxf_subscription_t subscription;
+    int loop_counter = 10000;
 
     dx_logger_initialize( "log.log", true, true, true );
 
 	printf("Sample test started.\n");    
     printf("Connecting to host %s...\n", dxfeed_host);
     
-    if (!dxf_connect_feed(dxfeed_host)) {
+    if (!dxf_connect_feed(dxfeed_host, on_reader_thread_terminate)) {
         process_last_error();
         return -1;
     }
@@ -122,8 +150,13 @@ int main (int argc, char* argv[]) {
         return -1;
     };
     printf("Subscription successful!\n");
-    Sleep(1000000);
-    
+
+    InitializeCriticalSection(&listener_thread_guard);
+    while (!is_thread_terminate() && loop_counter--) {
+        Sleep(100);
+    }
+    DeleteCriticalSection(&listener_thread_guard);
+
     printf("Disconnecting from host...\n");
     
     if (!dxf_disconnect_feed()) {
