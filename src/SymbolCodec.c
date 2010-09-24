@@ -266,7 +266,7 @@ dx_result_t dx_codec_read_symbol(dx_char_t* buffer, dx_int_t buf_len, OUT dx_str
         penta = ((i & 0x0F) << 16) + tmp_int_1;
     } else if (i < 0xF8) { // 35-bit
         CHECKED_CALL(dx_read_int, &tmp_int_1);
-        penta = ((long)(i & 0x07) << 32) + (tmp_int_1 & 0xFFFFFFFFL);
+        penta = ((dx_long_t)(i & 0x07) << 32) + (tmp_int_1 & 0xFFFFFFFFL);
     } else if (i < 0xFC) { // reserved (second diapason)
         return setParseError(dx_pr_reserved_bit_sequence);
     } else if (i == 0xFC) { // UTF-8

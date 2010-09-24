@@ -12,7 +12,7 @@
 
 const char dxfeed_host[] = "demo.dxfeed.com:7300";
 
-static pthread_mutex_t g_event_data_guard;
+//static pthread_mutex_t g_event_data_guard;
 //static dx_const_string_t g_symbol = L"IBM";
 static dx_const_string_t g_symbols[] = { {L"IBM"}, {L"MSFT"}, {L"YHOO"}, {L"C"} };
 static const dx_int_t g_symbols_size = sizeof (g_symbols) / sizeof (g_symbols[0]);
@@ -23,89 +23,89 @@ static dx_event_data_t g_event_data[dx_eid_count];
 static const int g_event_data_sizes[dx_eid_count] = {sizeof(dxf_trade_t), sizeof(dxf_quote_t), sizeof(dxf_fundamental_t),
                                                      sizeof(dxf_profile_t), sizeof(dxf_market_maker)};
 
-static bool mutex_create (pthread_mutex_t* mutex) {
-    int res = pthread_mutex_init(mutex, NULL);
-
-    dx_logging_verbose_info(L"Create mutex %#010x", mutex);
-
-    switch (res) {
-    case EAGAIN:
-        return false;
-        //dx_set_last_error(dx_sc_threads, dx_tec_not_enough_sys_resources); break;
-    case ENOMEM:
-        return false;
-        //dx_set_last_error(dx_sc_threads, dx_tec_not_enough_memory); break;
-    case EPERM:
-        return false;
-        //dx_set_last_error(dx_sc_threads, dx_tec_permission_denied); break;
-    case EBUSY:
-        return false;
-        //dx_set_last_error(dx_sc_threads, dx_tec_resource_busy); break;
-    case EINVAL:
-        return false;
-        //dx_set_last_error(dx_sc_threads, dx_tec_invalid_resource_id); break;
-    default:
-        return false;
-        //dx_set_last_error(dx_sc_threads, dx_tec_generic_error); break;
-    case 0:
-        return true;
-    }
-
-    return false;
-}
-
-/* -------------------------------------------------------------------------- */
-
-static bool mutex_lock (pthread_mutex_t* mutex) {
-    int res = pthread_mutex_lock(mutex);
-
-    dx_logging_verbose_info(L"Lock mutex %#010x", mutex);
-
-    switch (res) {
-    case EINVAL:
-        return false;
-        //dx_set_last_error(dx_sc_threads, dx_tec_invalid_resource_id); break;
-    case EAGAIN:
-        return false;
-        //dx_set_last_error(dx_sc_threads, dx_tec_invalid_res_operation); break;
-    case EDEADLK:
-        return false;
-        //dx_set_last_error(dx_sc_threads, dx_tec_deadlock_detected); break;
-    default:
-        return false;
-        //dx_set_last_error(dx_sc_threads, dx_tec_generic_error); break;
-    case 0:
-        return true;
-    }
-
-    return false;
-}
-
-/* -------------------------------------------------------------------------- */
-
-static bool mutex_unlock (pthread_mutex_t* mutex) {
-
-    int res = pthread_mutex_unlock(mutex);
-
-    dx_logging_verbose_info(L"Unlock mutex %#010x", mutex);
-
-    switch (res) {
-    case EINVAL:
-        return false;
-        //dx_set_last_error(dx_sc_threads, dx_tec_invalid_resource_id); break;
-    case EAGAIN:
-    case EPERM:
-        return false;
-        //dx_set_last_error(dx_sc_threads, dx_tec_invalid_res_operation); break;
-    default:
-        return false;
-        //dx_set_last_error(dx_sc_threads, dx_tec_generic_error); break;
-    case 0:
-        return true;
-    }
-
-    return false;
-}
+//static bool mutex_create (pthread_mutex_t* mutex) {
+//    int res = pthread_mutex_init(mutex, NULL);
+//
+//    dx_logging_verbose_info(L"Create mutex %#010x", mutex);
+//
+//    switch (res) {
+//    case EAGAIN:
+//        return false;
+//        //dx_set_last_error(dx_sc_threads, dx_tec_not_enough_sys_resources); break;
+//    case ENOMEM:
+//        return false;
+//        //dx_set_last_error(dx_sc_threads, dx_tec_not_enough_memory); break;
+//    case EPERM:
+//        return false;
+//        //dx_set_last_error(dx_sc_threads, dx_tec_permission_denied); break;
+//    case EBUSY:
+//        return false;
+//        //dx_set_last_error(dx_sc_threads, dx_tec_resource_busy); break;
+//    case EINVAL:
+//        return false;
+//        //dx_set_last_error(dx_sc_threads, dx_tec_invalid_resource_id); break;
+//    default:
+//        return false;
+//        //dx_set_last_error(dx_sc_threads, dx_tec_generic_error); break;
+//    case 0:
+//        return true;
+//    }
+//
+//    return false;
+//}
+//
+///* -------------------------------------------------------------------------- */
+//
+//static bool mutex_lock (pthread_mutex_t* mutex) {
+//    int res = pthread_mutex_lock(mutex);
+//
+//    dx_logging_verbose_info(L"Lock mutex %#010x", mutex);
+//
+//    switch (res) {
+//    case EINVAL:
+//        return false;
+//        //dx_set_last_error(dx_sc_threads, dx_tec_invalid_resource_id); break;
+//    case EAGAIN:
+//        return false;
+//        //dx_set_last_error(dx_sc_threads, dx_tec_invalid_res_operation); break;
+//    case EDEADLK:
+//        return false;
+//        //dx_set_last_error(dx_sc_threads, dx_tec_deadlock_detected); break;
+//    default:
+//        return false;
+//        //dx_set_last_error(dx_sc_threads, dx_tec_generic_error); break;
+//    case 0:
+//        return true;
+//    }
+//
+//    return false;
+//}
+//
+///* -------------------------------------------------------------------------- */
+//
+//static bool mutex_unlock (pthread_mutex_t* mutex) {
+//
+//    int res = pthread_mutex_unlock(mutex);
+//
+//    dx_logging_verbose_info(L"Unlock mutex %#010x", mutex);
+//
+//    switch (res) {
+//    case EINVAL:
+//        return false;
+//        //dx_set_last_error(dx_sc_threads, dx_tec_invalid_resource_id); break;
+//    case EAGAIN:
+//    case EPERM:
+//        return false;
+//        //dx_set_last_error(dx_sc_threads, dx_tec_invalid_res_operation); break;
+//    default:
+//        return false;
+//        //dx_set_last_error(dx_sc_threads, dx_tec_generic_error); break;
+//    case 0:
+//        return true;
+//    }
+//
+//    return false;
+//}
 
 /* -------------------------------------------------------------------------- */
 
@@ -202,18 +202,21 @@ void listener(int event_type, dx_const_string_t symbol_name,const dx_event_data_
             trade[i].last_exchange,trade[i].last_time,trade[i].last_price,trade[i].last_size,trade[i].last_tick,trade[i].last_change,trade[i].volume);
     }
 
-    // copy event data
-    if (!mutex_lock(&g_event_data_guard)) {
-        wprintf(L"Error in mutex_lock");
-        return;
-    }
+    //// copy event data
+    //if (data_count == 0) {
+    //    return;
+    //}
+    //if (!mutex_lock(&g_event_data_guard)) {
+    //    wprintf(L"Error in mutex_lock");
+    //    return;
+    //}
 
-    memcpy(g_event_data[event_type], data, g_event_data_sizes[event_type]);
+    //memcpy(g_event_data[event_type], data + data_count -1, g_event_data_sizes[event_type]);
 
-    if (!mutex_unlock(&g_event_data_guard)) {
-        wprintf(L"Error in mutex_unlock");
-        return;
-    }
+    //if (!mutex_unlock(&g_event_data_guard)) {
+    //    wprintf(L"Error in mutex_unlock");
+    //    return;
+    //}
 }
 
 
@@ -223,7 +226,9 @@ int main (int argc, char* argv[]) {
     dxf_subscription_t subscription;
     int i = 0;
     bool test_result = true;
+
     //g_event_data = dx_calloc(dx_eid_count, sizeof(dx_event_data_t));
+
     if (g_event_data == NULL) {
         process_last_error();
         return -1;
@@ -239,10 +244,10 @@ int main (int argc, char* argv[]) {
 
     dx_logger_initialize( "log.log", true, true, true );
 
-    if (!mutex_create(&g_event_data_guard)) {
-        wprintf(L"Error in mutex_create");
-        return -1;
-    }
+    //if (!mutex_create(&g_event_data_guard)) {
+    //    wprintf(L"Error in mutex_create");
+    //    return -1;
+    //}
 
     wprintf(L"LastEvent test started.\n");    
     printf("Connecting to host %s...\n", dxfeed_host);
@@ -260,13 +265,6 @@ int main (int argc, char* argv[]) {
 
         return -1;
     };
-
-    //wprintf(L"Symbol %s added\n", g_symbol);
-    //if (!dxf_add_symbol(subscription, g_symbol)) {
-    //    process_last_error();
-
-    //    return -1;
-    //}; 
 
     wprintf(L"Adding symbols:");
     for (i = 0; i < g_symbols_size; ++i) {
@@ -288,29 +286,36 @@ int main (int argc, char* argv[]) {
     };
 
     while (g_iteration_count--) {
-        // todo: deadlock here
-        if (!mutex_lock(&g_event_data_guard)) {
-            wprintf(L"Error in mutex_lock");
-            return -1;
-        }
+        //if (!mutex_lock(&g_event_data_guard)) {
+        //    wprintf(L"Error in mutex_lock");
+        //    return -1;
+        //}
+        wprintf(L"\nLast event data:");
         for (i = 0; i < g_symbols_size; ++i) {
             dx_event_data_t data;
-            bool compare_result;
+            dxf_trade_t* trade;
+            //bool compare_result;
             if (!dxf_get_last_event(g_event_type, g_symbols[i], &data)) {
-                mutex_unlock(&g_event_data_guard);
+                //mutex_unlock(&g_event_data_guard);
                 return -1;
             }
 
-            compare_result = compare_event_data(g_event_type, data, g_event_data[g_event_type]);
-            wprintf(L"\n Compare result : %s \n", compare_result ? L"true" : L"false");
+            if (data) {
+                trade = (dxf_trade_t*)data;
+                wprintf(L"\nSymbol:%s Last.Exchange=%C Last.Time=%i  Last.Price=%f Last.Size=%i Last.Tick=%i Last.Change=%f Volume=%f\n" , 
+                    g_symbols[i], trade->last_exchange, trade->last_time,trade->last_price,trade->last_size,trade->last_tick,trade->last_change,trade->volume);
+            }
+            //compare_result = compare_event_data(g_event_type, data, g_event_data[g_event_type]);
+            //wprintf(L"\n Compare result : %s \n", compare_result ? L"true" : L"false");
             
-            test_result = test_result && compare_result;
+            //test_result = test_result && compare_result;
         }
+        wprintf(L"\n");
 
-        if (!mutex_unlock(&g_event_data_guard)) {
-            wprintf(L"Error in mutex_unlock");
-            return -1;
-        }
+        //if (!mutex_unlock(&g_event_data_guard)) {
+        //    wprintf(L"Error in mutex_unlock");
+        //    return -1;
+        //}
         Sleep (5000); 
     }
 

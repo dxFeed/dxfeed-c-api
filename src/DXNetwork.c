@@ -30,6 +30,8 @@
 
 unsigned g_invalid_buffer_length = (unsigned)-1;
 
+static pthread_mutex_t g_connection_guard;
+
 /* -------------------------------------------------------------------------- */
 /*
  *	Network error codes
@@ -39,7 +41,7 @@ unsigned g_invalid_buffer_length = (unsigned)-1;
 static struct dx_error_code_descr_t g_network_errors[] = {
     { dx_nec_invalid_port_value, "Server address has invalid port value" },
     { dx_nec_invalid_function_arg, "Internal software error" },
-    { dx_nec_conn_not_established, "Internal software error" },
+    { dx_nec_conn_not_established, "Connection is not established" },
         
     { ERROR_CODE_FOOTER, ERROR_DESCR_FOOTER }
 };
@@ -66,6 +68,35 @@ static const size_t g_sock_operation_timeout = 100;
 
 #define READ_CHUNK_SIZE 1024
 
+// must be called before return from thread function (it's dx_socket_reader now)
+void before_thread_terminate(struct dx_connection_context_t* ctx) {
+
+    // call client's callback
+    if (ctx->terminator) {
+        ctx->terminator();
+    }
+
+    // close connection
+    if (!dx_mutex_lock(&g_connection_guard)) {
+        return;
+    }
+
+    if (g_conn == NULL) {
+        dx_set_last_error(dx_sc_network, dx_nec_conn_not_established);
+        dx_mutex_unlock(&g_connection_guard);
+        return;
+    }
+
+    dx_close(g_conn->s);
+    dx_free((void*)g_conn);
+    g_conn = NULL;
+
+    dx_mutex_unlock(&g_connection_guard);
+    dx_mutex_destroy(&g_connection_guard);
+}
+
+/* -------------------------------------------------------------------------- */
+
 void* dx_socket_reader (void* arg) {
     struct dx_connection_data_t* conn_data = NULL;
     struct dx_connection_context_t* ctx = NULL;
@@ -85,10 +116,7 @@ void* dx_socket_reader (void* arg) {
     ctx = &(conn_data->context);
     
     if (!dx_init_error_subsystem()) {
-        if (ctx->terminator) {
-            ctx->terminator();
-        }
-
+        before_thread_terminate(ctx);
         return NULL;
     }
     
@@ -96,9 +124,7 @@ void* dx_socket_reader (void* arg) {
         if (conn_data->termination_trigger || !receiver_result) {
             /* the thread is told to terminate */
             
-            if (ctx->terminator) {
-                ctx->terminator();
-            }
+            before_thread_terminate(ctx);
             return NULL;
         }
         
@@ -109,9 +135,7 @@ void* dx_socket_reader (void* arg) {
             /* the socket error
                calling the data receiver to inform them something's going wrong */
 
-            if (ctx->terminator) {
-                ctx->terminator();
-            }
+            before_thread_terminate(ctx);
             return NULL;
         case 0:
             /* no data to read */
@@ -124,9 +148,7 @@ void* dx_socket_reader (void* arg) {
         receiver_result = ctx->receiver((const void*)read_buf, count_of_bytes_read);
     }
 
-    if (ctx->terminator) {
-        ctx->terminator();
-    }
+    before_thread_terminate(ctx);
     return NULL;
 }
 
@@ -208,8 +230,17 @@ bool dx_create_connection (const char* host, const struct dx_connection_context_
         
         return false;
     }
-    
+
+    if (!dx_mutex_create(&g_connection_guard)) {
+        return false;
+    }
+
+    if (!dx_mutex_lock(&g_connection_guard)) {
+        return false;
+    }
+
     if (!dx_resolve_host(host, &addrs)) {
+        dx_mutex_unlock(&g_connection_guard);
         return false;
     }
     
@@ -239,7 +270,7 @@ bool dx_create_connection (const char* host, const struct dx_connection_context_
     
     if (cur_addr == NULL) {
         /* we failed to establish a socket connection */
-        
+        dx_mutex_unlock(&g_connection_guard);
         return false;
     }
     
@@ -248,6 +279,7 @@ bool dx_create_connection (const char* host, const struct dx_connection_context_
     if (conn_data == NULL) {
         dx_close(s);
 
+        dx_mutex_unlock(&g_connection_guard);
         return false;
     }
     
@@ -269,13 +301,14 @@ bool dx_create_connection (const char* host, const struct dx_connection_context_
         
         dx_free((void*)conn_data);
         dx_close(s);
-        
+
+        dx_mutex_unlock(&g_connection_guard);
         return false;
     }
     
     g_conn = conn_data;    
     
-    return true;
+    return dx_mutex_unlock(&g_connection_guard);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -289,9 +322,14 @@ bool dx_send_data (const void* buffer, unsigned buflen) {
         return false;
     }
     
+    if (!dx_mutex_lock(&g_connection_guard)) {
+        return false;
+    }
+
     if (g_conn == NULL) {
         dx_set_last_error(dx_sc_network, dx_nec_conn_not_established);
         
+        dx_mutex_unlock(&g_connection_guard);
         return false;
     }
     
@@ -301,6 +339,7 @@ bool dx_send_data (const void* buffer, unsigned buflen) {
         switch (sent_count) {
         case INVALID_DATA_SIZE:
             /* that means an error */
+            dx_mutex_unlock(&g_connection_guard);
             return false;
         case 0:
             /* try again */
@@ -313,7 +352,7 @@ bool dx_send_data (const void* buffer, unsigned buflen) {
         buflen -= sent_count;
     } while (buflen > 0);
     
-    return true;
+    return dx_mutex_unlock(&g_connection_guard);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -321,9 +360,14 @@ bool dx_send_data (const void* buffer, unsigned buflen) {
 bool dx_close_connection () {
     bool res = true;
     
+    if (!dx_mutex_lock(&g_connection_guard)) {
+        return false;
+    }
+
     if (g_conn == NULL) {
         dx_set_last_error(dx_sc_network, dx_nec_conn_not_established);
 
+        dx_mutex_unlock(&g_connection_guard);
         return false;
     }
     
@@ -336,5 +380,9 @@ bool dx_close_connection () {
     
     g_conn = NULL;    
     
+    if (!dx_mutex_unlock(&g_connection_guard)) {
+        return false;
+    }
+
     return res;
 }
