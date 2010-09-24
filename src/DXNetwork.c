@@ -27,6 +27,7 @@
 #include "DXThreads.h"
 #include "DXMemory.h"
 #include "DXErrorCodes.h"
+#include "DXAlgorithms.h"
 
 unsigned g_invalid_buffer_length = (unsigned)-1;
 
@@ -59,24 +60,48 @@ struct dx_connection_data_t {
     dx_socket_t s;
     pthread_t reader_thread;
     bool termination_trigger;
+    char* hostname;
 };
 
 static struct dx_connection_data_t* g_conn = NULL;
 static const size_t g_sock_operation_timeout = 100;
+static bool g_idle_tread = false;
+static const int  g_idle_time = 500;
 
 /* -------------------------------------------------------------------------- */
 
 #define READ_CHUNK_SIZE 1024
 
+/* -------------------------------------------------------------------------- */
+
+void dx_clear_connection_data() {
+    if (g_conn == NULL) {
+        return;
+    }
+
+    dx_free(g_conn->hostname);
+    dx_free((void*)g_conn);
+    g_conn = NULL;
+
+}
+
+/* -------------------------------------------------------------------------- */
+
 // must be called before return from thread function (it's dx_socket_reader now)
 void before_thread_terminate(struct dx_connection_context_t* ctx) {
+    if (g_idle_time || !g_conn) {
+        return;
+    }
 
     // call client's callback
     if (ctx->terminator) {
-        ctx->terminator();
+        ctx->terminator(g_conn->hostname);
     }
 
+    g_idle_tread = true;
+
     // close connection
+    // todo: do reconnect
     if (!dx_mutex_lock(&g_connection_guard)) {
         return;
     }
@@ -88,11 +113,10 @@ void before_thread_terminate(struct dx_connection_context_t* ctx) {
     }
 
     dx_close(g_conn->s);
-    dx_free((void*)g_conn);
-    g_conn = NULL;
+
+    dx_clear_connection_data();
 
     dx_mutex_unlock(&g_connection_guard);
-    dx_mutex_destroy(&g_connection_guard);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -121,13 +145,20 @@ void* dx_socket_reader (void* arg) {
     }
     
     for (;;) {
-        if (conn_data->termination_trigger || !receiver_result) {
+        if (conn_data->termination_trigger) {
             /* the thread is told to terminate */
             
             before_thread_terminate(ctx);
-            return NULL;
+            break;
+        } else if (!receiver_result && !g_idle_tread) {
+            before_thread_terminate(ctx);
         }
-        
+
+        if (g_idle_tread) {
+            dx_sleep(g_idle_time);
+            continue;
+        }
+
         count_of_bytes_read = dx_recv(conn_data->s, (void*)read_buf, READ_CHUNK_SIZE);
         
         switch (count_of_bytes_read) {
@@ -136,7 +167,6 @@ void* dx_socket_reader (void* arg) {
                calling the data receiver to inform them something's going wrong */
 
             before_thread_terminate(ctx);
-            return NULL;
         case 0:
             /* no data to read */
             dx_sleep(g_sock_operation_timeout);
@@ -149,6 +179,7 @@ void* dx_socket_reader (void* arg) {
     }
 
     before_thread_terminate(ctx);
+    dx_mutex_destroy(&g_connection_guard);
     return NULL;
 }
 
@@ -306,7 +337,13 @@ bool dx_create_connection (const char* host, const struct dx_connection_context_
         return false;
     }
     
+    conn_data->hostname = dx_calloc(strlen(host) + 1, sizeof(char));
+    if (conn_data->hostname == NULL) {
+
+    }
+    strcpy(conn_data->hostname, host);
     g_conn = conn_data;    
+    g_idle_tread = false;
     
     return dx_mutex_unlock(&g_connection_guard);
 }
@@ -376,10 +413,8 @@ bool dx_close_connection () {
     res = dx_wait_for_thread(g_conn->reader_thread, NULL) && res;
     res = dx_close(g_conn->s) && res;
     
-    dx_free((void*)g_conn);
-    
-    g_conn = NULL;    
-    
+    dx_clear_connection_data();
+
     if (!dx_mutex_unlock(&g_connection_guard)) {
         return false;
     }

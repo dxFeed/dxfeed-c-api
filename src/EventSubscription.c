@@ -812,31 +812,32 @@ bool dx_get_event_subscription_symbols (dxf_subscription_t subscr_id, OUT dx_con
 
 /* -------------------------------------------------------------------------- */
 
-void store_last_event_data(dx_symbol_data_ptr_t symbol_data, int event_type, const dx_event_data_t data, int data_count) {
+void dx_store_last_event_data(dx_symbol_data_ptr_t symbol_data, int event_type, const dx_event_data_t data, int data_count) {
     //int event_type_tmp = event_type;
     //int event_id = dx_eid_begin;
 
     //while(event_type_tmp && event_id < dx_eid_count) {
     //    if (event_type_tmp & 0x01) {
             if (event_type == DX_ET_QUOTE){
-                dxf_quote_t* quotes = (dxf_quote_t*)data;
-                memcpy(symbol_data->last_events[event_type], quotes + data_count - 1, g_event_data_sizes[event_type]);
+                dxf_quote_t** quotes = (dxf_quote_t**)data;
+                memcpy(symbol_data->last_events[dx_eid_quote], quotes + data_count - 1, g_event_data_sizes[dx_eid_quote]);
             }
             if (event_type == DX_ET_MARKET_MAKER){
                 dxf_market_maker* mm = (dxf_market_maker*)data;
-                memcpy(symbol_data->last_events[event_type], mm + data_count - 1, g_event_data_sizes[event_type]);
+                dxf_market_maker* mm1 = mm + data_count - 1;
+                memcpy(symbol_data->last_events[dx_eid_market_maker], mm + data_count - 1, g_event_data_sizes[dx_eid_market_maker]);
             }
             if (event_type == DX_ET_TRADE){
                 dxf_trade_t* trade = (dxf_trade_t*)data;
-                memcpy(symbol_data->last_events[event_type], trade + data_count - 1, g_event_data_sizes[event_type]);
+                memcpy(symbol_data->last_events[dx_eid_trade], trade + data_count - 1, g_event_data_sizes[dx_eid_trade]);
             }
             if (event_type == DX_ET_FUNDAMENTAL){
                 dxf_fundamental_t* fundamental = (dxf_fundamental_t*)data;
-                memcpy(symbol_data->last_events[event_type], fundamental + data_count - 1, g_event_data_sizes[event_type]);
+                memcpy(symbol_data->last_events[dx_eid_fundamental], fundamental + data_count - 1, g_event_data_sizes[dx_eid_fundamental]);
             }
             if (event_type == DX_ET_PROFILE){
                 dxf_profile_t* p = (dxf_profile_t*)data;
-                memcpy(symbol_data->last_events[event_type], p + data_count - 1, g_event_data_sizes[event_type]);
+                memcpy(symbol_data->last_events[dx_eid_profile], p + data_count - 1, g_event_data_sizes[dx_eid_profile]);
             }	
     //    }
 
@@ -876,7 +877,7 @@ bool dx_process_event_data (int event_type, dx_const_string_t symbol_name, dx_in
 
 
     // copy last event data
-    store_last_event_data(symbol_data, event_type, data, data_count);
+    dx_store_last_event_data(symbol_data, event_type, data, data_count);
 
     // notify listeners
     for (; cur_subscr_index < symbol_data->subscriptions.size; ++cur_subscr_index) {

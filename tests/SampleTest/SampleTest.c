@@ -33,12 +33,12 @@ bool is_thread_terminate() {
 
 /* -------------------------------------------------------------------------- */
 
-void on_reader_thread_terminate(void) {
+void on_reader_thread_terminate(const char* host ) {
     EnterCriticalSection(&listener_thread_guard);
     is_listener_thread_terminated = true;
     LeaveCriticalSection(&listener_thread_guard);
 
-    printf("\nTerminating listener thread\n");
+    printf("\nTerminating listener thread, host: %s\n", host);
     dx_logging_verbose_info(L"Terminating listener thread");
 }
 

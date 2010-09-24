@@ -43,7 +43,7 @@
 #define DXF_SUCCESS 1
 #define DXF_FAILURE 0
 
-typedef void (*dx_on_reader_thread_terminate_t)(void);
+typedef void (*dx_on_reader_thread_terminate_t)(const char* host);
 
 /* -------------------------------------------------------------------------- */
 /*
