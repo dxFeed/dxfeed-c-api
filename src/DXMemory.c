@@ -59,33 +59,33 @@ void* dx_error_processor (void* src) {
  */
 /* -------------------------------------------------------------------------- */
 
-void* dx_malloc (size_t size) {
+void* dx_malloc (int size) {
     dx_logging_verbose_info(L"Allocate %d bytes", size);
     return dx_error_processor(malloc(size));
 }
 
 /* -------------------------------------------------------------------------- */
 
-void* dx_calloc (size_t num, size_t size) {
+void* dx_calloc (int num, int size) {
     dx_logging_verbose_info(L"Allocate %d bytes", size);
     return dx_error_processor(calloc(num, size));
 }
 
 /* -------------------------------------------------------------------------- */
 
-void* dx_memcpy (void * destination, const void * source, size_t size) {
+void* dx_memcpy (void * destination, const void * source, int size) {
     return dx_error_processor(memcpy(destination, source, size));
 }
 
 /* -------------------------------------------------------------------------- */
 
-void* dx_memmove (void * destination, const void * source, size_t size) {
+void* dx_memmove (void * destination, const void * source, int size) {
     return dx_error_processor(memmove(destination, source, size));
 }
 
 /* -------------------------------------------------------------------------- */
 
-void* dx_memset (void * destination, int c, size_t size) {
+void* dx_memset (void * destination, int c, int size) {
     return dx_error_processor(memset(destination, c, size));
 }
 
@@ -98,27 +98,11 @@ void dx_free (void* buf) {
 
 /* -------------------------------------------------------------------------- */
 /*
-*	String function wrappers implementation
-*/
-/* -------------------------------------------------------------------------- */
-
-dx_string_t dx_strcpy (dx_string_t destination, const dx_string_t source) {
-    return wcscpy(destination, source);
-}
-
-/* -------------------------------------------------------------------------- */
-
-size_t dx_strlen( const dx_char_t* str ) {
-    return wcslen(str);
-}
-
-/* -------------------------------------------------------------------------- */
-/*
  *	Implementation of wrappers with no error handling mechanism enabled
  */
 /* -------------------------------------------------------------------------- */
 
-void* dx_calloc_no_ehm (size_t num, size_t size) {
+void* dx_calloc_no_ehm (int num, int size) {
     return calloc(num, size);
 }
 

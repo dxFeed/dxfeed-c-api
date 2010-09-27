@@ -133,7 +133,7 @@ dx_result_t dx_write_record_field (const dx_field_info_t* field) {
 /* -------------------------------------------------------------------------- */
 
 dx_result_t dx_write_event_record (const dx_record_info_t* record, dx_int_t record_id) {
-    size_t field_index = 0;
+    int field_index = 0;
     
     CHECKED_CALL(dx_write_compact_int, record_id);
     CHECKED_CALL(dx_write_utf_string, record->name);
@@ -149,10 +149,10 @@ dx_result_t dx_write_event_record (const dx_record_info_t* record, dx_int_t reco
 /* -------------------------------------------------------------------------- */
 
 dx_result_t dx_write_event_records (void) {
-    dx_event_id_t eid = dx_eid_begin;
+    dx_record_id_t eid = dx_rid_begin;
     
-    for (; eid < dx_eid_count; ++eid) {
-        CHECKED_CALL_2(dx_write_event_record, dx_get_event_record_by_id(eid), eid);
+    for (; eid < dx_rid_count; ++eid) {
+        CHECKED_CALL_2(dx_write_event_record, dx_get_record_by_id(eid), eid);
     }
     
     return parseSuccessful();
@@ -199,7 +199,7 @@ dx_result_t dx_create_subscription( OUT dx_byte_t** out, OUT dx_int_t* out_len, 
 /* -------------------------------------------------------------------------- */
 
 dx_result_t dx_compose_description_message (OUT dx_byte_t** msg_buffer, OUT dx_int_t* msg_length) {
-    static const size_t initial_size = 1024;
+    static const int initial_size = 1024;
     dx_byte_t* initial_buffer = NULL;
     
     if ((initial_buffer = dx_malloc(initial_size)) == NULL) {

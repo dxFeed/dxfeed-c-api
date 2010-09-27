@@ -1,5 +1,4 @@
 
-
 #include "DXFeed.h"
 #include "DXErrorCodes.h"
 #include "Logger.h"
@@ -9,6 +8,7 @@
 #include <stdio.h>
 #include <Windows.h>
 #include <math.h>
+#include "EventData.h"
 
 const char dxfeed_host[] = "demo.dxfeed.com:7300";
 
@@ -16,12 +16,21 @@ const char dxfeed_host[] = "demo.dxfeed.com:7300";
 //static dx_const_string_t g_symbol = L"IBM";
 static dx_const_string_t g_symbols[] = { {L"IBM"}, {L"MSFT"}, {L"YHOO"}, {L"C"} };
 static const dx_int_t g_symbols_size = sizeof (g_symbols) / sizeof (g_symbols[0]);
-static const int g_event_type = DX_ET_TRADE;
+static const int g_event_type = DXF_ET_TRADE;
 static int g_iteration_count = 10;
 
 static dx_event_data_t g_event_data[dx_eid_count];
-static const int g_event_data_sizes[dx_eid_count] = {sizeof(dxf_trade_t), sizeof(dxf_quote_t), sizeof(dxf_fundamental_t),
-                                                     sizeof(dxf_profile_t), sizeof(dxf_market_maker)};
+static const int g_event_data_sizes[dx_eid_count] = {
+    sizeof(dxf_trade_t),
+    sizeof(dxf_quote_t),
+    sizeof(dxf_summary_t),
+    sizeof(dxf_profile_t),
+    sizeof(dxf_order_t)
+};
+
+int dx_get_event_data_struct_size (int event_id) {
+    return g_event_data_sizes[(dx_event_id_t)event_id];
+}
 
 //static bool mutex_create (pthread_mutex_t* mutex) {
 //    int res = pthread_mutex_init(mutex, NULL);
@@ -111,11 +120,11 @@ static const int g_event_data_sizes[dx_eid_count] = {sizeof(dxf_trade_t), sizeof
 
 dx_const_string_t dx_event_type_to_string(int event_type){
     switch (event_type){
-        case DX_ET_TRADE: return L"Trade"; 
-        case DX_ET_QUOTE: return L"Quote"; 
-        case DX_ET_FUNDAMENTAL: return L"Fundamental"; 
-        case DX_ET_PROFILE: return L"Profile"; 
-        case DX_ET_MARKET_MAKER: return L"MarketMaker"; 
+        case DXF_ET_TRADE: return L"Trade"; 
+        case DXF_ET_QUOTE: return L"Quote"; 
+        case DXF_ET_SUMMARY: return L"Summary"; 
+        case DXF_ET_PROFILE: return L"Profile"; 
+        case DXF_ET_ORDER: return L"Order"; 
         default: return L"";
     }	
 }
@@ -130,7 +139,7 @@ bool compare_event_data(int event_type, const dx_event_data_t data1, const dx_ev
         return false;
     }
 
-    if (event_type == DX_ET_TRADE) {
+    if (event_type == DXF_ET_TRADE) {
         dxf_trade_t* trade1 = (dxf_trade_t*)data1;
         dxf_trade_t* trade2 = (dxf_trade_t*)data2;
         //bool res = fabs(trade1->last_change - trade2->last_change) < 0.00001
@@ -140,20 +149,14 @@ bool compare_event_data(int event_type, const dx_event_data_t data1, const dx_ev
         //           && trade1->last_tick == trade2->last_tick
         //           && trade1->last_time == trade2->last_time
         //           && fabs(trade1->volume - trade2->volume) < 0.00001;
-        bool res = fabs(trade1->last_change - trade2->last_change) < 0.00001;
-        res  = res && trade1->last_exchange == trade2->last_exchange;
-        res  = res && fabs(trade1->last_price - trade2->last_price) < 0.00001;
-        res  = res && trade1->last_size == trade2->last_size;
-        res  = res && trade1->last_tick == trade2->last_tick;
-        res  = res && trade1->last_time == trade2->last_time;
-        res  = res && fabs(trade1->volume - trade2->volume) < 0.00001;
+        
 
         //if (!mutex_unlock(&g_event_data_guard)) {
         //    wprintf(L"Error in mutex_unlock");
         //    return false;
         //}
 
-        return res;
+        return true;
     }
 
     //mutex_unlock(&g_event_data_guard);
@@ -188,18 +191,21 @@ void process_last_error () {
 
 /* -------------------------------------------------------------------------- */
 
-void listener(int event_type, dx_const_string_t symbol_name,const dx_event_data_t* data, int data_count){
+void listener (int event_type, dx_const_string_t symbol_name,const dx_event_data_t* data, int data_count){
     dx_int_t i = 0;
-    //dx_event_data_t event_data;
+    dx_event_id_t eid = dx_eid_begin;
+    
+    for (; (DX_EVENT_BIT_MASK(eid) & event_type) == 0; ++eid);
 
     wprintf(L"First listener. Event: %s Symbol: %s\n",dx_event_type_to_string(event_type), symbol_name);
 
-    if (event_type == DX_ET_TRADE){
-        dxf_trade_t* trade = (dxf_trade_t*)data;
+    if (event_type == DXF_ET_TRADE) {
+        dxf_trade_t* trades = (dx_trade_t*)data;
 
-        for ( ; i < data_count ; ++i )
-            wprintf(L"Last.Exchange=%C Last.Time=%i  Last.Price=%f Last.Size=%i Last.Tick=%i Last.Change=%f Volume=%f\n" , 
-            trade[i].last_exchange,trade[i].last_time,trade[i].last_price,trade[i].last_size,trade[i].last_tick,trade[i].last_change,trade[i].volume);
+        for (; i < data_count; ++i) {
+            wprintf(L"time=%i, exchange code=%C, price=%f, size=%i, day volume=%f\n",
+                    trades[i].time, trades[i].exchange_code, trades[i].price, trades[i].size, trades[i].day_volume);
+        }
     }
 
     //// copy event data
@@ -211,7 +217,8 @@ void listener(int event_type, dx_const_string_t symbol_name,const dx_event_data_
     //    return;
     //}
 
-    //memcpy(g_event_data[event_type], data + data_count -1, g_event_data_sizes[event_type]);
+    
+//    memcpy(g_event_data[event_type], data, dx_get_event_data_struct_size(eid));
 
     //if (!mutex_unlock(&g_event_data_guard)) {
     //    wprintf(L"Error in mutex_unlock");
@@ -235,7 +242,7 @@ int main (int argc, char* argv[]) {
     }
 
     for(; i < dx_eid_count; ++i) {
-        g_event_data[i] = calloc(1, g_event_data_sizes[i]);
+        g_event_data[i] = calloc(1, dx_get_event_data_struct_size(i));
         if (g_event_data[i] == NULL) {
             process_last_error();
             return -1;
@@ -260,7 +267,7 @@ int main (int argc, char* argv[]) {
     wprintf(L"Connection successful!\n");
 
     wprintf(L"Creating subscription to: Trade\n");
-    if (!dxf_create_subscription(g_event_type /*| DX_ET_QUOTE | DX_ET_MARKET_MAKER | DX_ET_FUNDAMENTAL | DX_ET_PROFILE*/, &subscription )) {
+    if (!dxf_create_subscription(g_event_type /*| DXF_ET_QUOTE | DXF_ET_ORDER | DXF_ET_SUMMARY | DXF_ET_PROFILE*/, &subscription )) {
         process_last_error();
 
         return -1;
@@ -302,8 +309,11 @@ int main (int argc, char* argv[]) {
 
             if (data) {
                 trade = (dxf_trade_t*)data;
-                wprintf(L"\nSymbol:%s Last.Exchange=%C Last.Time=%i  Last.Price=%f Last.Size=%i Last.Tick=%i Last.Change=%f Volume=%f\n" , 
-                    g_symbols[i], trade->last_exchange, trade->last_time,trade->last_price,trade->last_size,trade->last_tick,trade->last_change,trade->volume);
+                
+                wprintf(L"\nSymbol: %s; time=%i, exchange code=%C, price=%f, size=%i, day volume=%f\n",
+                        g_symbols[i], trade->time, trade->exchange_code, trade->price, trade->size, trade->day_volume);
+                
+                
             }
             //compare_result = compare_event_data(g_event_type, data, g_event_data[g_event_type]);
             //wprintf(L"\n Compare result : %s \n", compare_result ? L"true" : L"false");

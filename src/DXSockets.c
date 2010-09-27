@@ -161,7 +161,7 @@ enum dx_socket_error_code_t dx_wsa_error_code_to_internal (int wsa_code) {
  */
 /* -------------------------------------------------------------------------- */
 
-static const size_t g_name_resolution_attempt_count = 5;
+static const int g_name_resolution_attempt_count = 5;
 static const unsigned g_connect_timeout = 5; /* timeout in seconds */
 
 /* -------------------------------------------------------------------------- */
@@ -354,7 +354,7 @@ bool dx_close (dx_socket_t s) {
 bool dx_getaddrinfo (const char* nodename, const char* servname,
                      const struct addrinfo* hints, struct addrinfo** res) {
     int funres = 0;
-    size_t iter_count = 0;
+    int iter_count = 0;
     
     if (!dx_init_socket_subsystem()) {
         return false;

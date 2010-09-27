@@ -53,7 +53,7 @@ const struct dx_error_code_descr_t* thread_error_roster = g_thread_errors;
 
 #include <Windows.h>
 
-void dx_sleep (size_t milliseconds) {
+void dx_sleep (int milliseconds) {
     Sleep((DWORD)milliseconds);
 }
 
@@ -103,6 +103,25 @@ bool dx_wait_for_thread (pthread_t thread_id, void **value_ptr) {
         return true;
     }
     
+    return false;
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_close_thread_handle (pthread_t thread_id) {
+    int res = pthread_detach(thread_id);
+    
+    switch (res) {
+    case EINVAL:
+        dx_set_last_error(dx_sc_threads, dx_tec_invalid_res_operation); break;
+    case ESRCH:
+        dx_set_last_error(dx_sc_threads, dx_tec_invalid_resource_id); break;
+    default:
+        dx_set_last_error(dx_sc_threads, dx_tec_generic_error); break;
+    case 0:
+        return true;
+    }
+
     return false;
 }
 

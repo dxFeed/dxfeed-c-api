@@ -146,10 +146,16 @@
 				RelativePath=".\src\DXThreads.c">
 			</File>
 			<File
+				RelativePath=".\src\EventData.c">
+			</File>
+			<File
 				RelativePath=".\src\EventSubscription.c">
 			</File>
 			<File
 				RelativePath=".\src\Logger.c">
+			</File>
+			<File
+				RelativePath=".\src\RecordTranscoder.c">
 			</File>
 		</Filter>
 		<Filter
@@ -183,6 +189,12 @@
 			<File
 				RelativePath=".\src\PrimitiveTypes.h">
 			</File>
+			<File
+				RelativePath=".\src\RecordData.h">
+			</File>
+			<File
+				RelativePath=".\src\RecordTranscoder.h">
+			</File>
 		</Filter>
 		<Filter
 			Name="Parser"
@@ -203,16 +215,16 @@
 					RelativePath=".\src\Decimal.h">
 				</File>
 				<File
-					RelativePath=".\src\EventDataFieldSetters.h">
-				</File>
-				<File
-					RelativePath=".\src\EventRecordBuffers.h">
-				</File>
-				<File
 					RelativePath=".\src\parser.h">
 				</File>
 				<File
 					RelativePath=".\src\ParserCommon.h">
+				</File>
+				<File
+					RelativePath=".\src\RecordBuffers.h">
+				</File>
+				<File
+					RelativePath=".\src\RecordFieldSetters.h">
 				</File>
 				<File
 					RelativePath=".\src\Subscription.h">
@@ -237,16 +249,16 @@
 					RelativePath=".\src\Decimal.c">
 				</File>
 				<File
-					RelativePath=".\src\EventDataFieldSetters.c">
-				</File>
-				<File
-					RelativePath=".\src\EventRecordBuffers.c">
-				</File>
-				<File
 					RelativePath=".\src\parser.c">
 				</File>
 				<File
 					RelativePath=".\src\ParserCommon.c">
+				</File>
+				<File
+					RelativePath=".\src\RecordBuffers.c">
+				</File>
+				<File
+					RelativePath=".\src\RecordFieldSetters.c">
 				</File>
 				<File
 					RelativePath=".\src\Subscription.c">

@@ -22,7 +22,7 @@
 
 #include "PrimitiveTypes.h"
 #include "DXTypes.h"
-#include "EventDataFieldSetters.h"
+#include "RecordFieldSetters.h"
 #include "ParserCommon.h"
 #include "EventData.h"
 
@@ -57,41 +57,41 @@ typedef enum {
 typedef struct {
     int type;
     dx_const_string_t name;
-    dx_event_data_field_setter_t setter;
-    dx_event_data_field_def_val_getter def_val_getter;
+    dx_record_field_setter_t setter;
+    dx_record_field_def_val_getter def_val_getter;
 } dx_field_info_t;
 
 /* -------------------------------------------------------------------------- */
 
 typedef struct {
     dx_const_string_t name;
-    size_t field_count;
+    int field_count;
     const dx_field_info_t* fields;
 } dx_record_info_t;
 
 /* -------------------------------------------------------------------------- */
 
 typedef struct {
-    size_t field_count;
+    int field_count;
     bool* fields;
 } dx_record_server_support_info_t;
 
 /* -------------------------------------------------------------------------- */
 /*
- *	Event record functions
+ *	Record functions
  */
 /* -------------------------------------------------------------------------- */
 
-extern const size_t g_invalid_index;
+extern const int g_invalid_index;
 
-dx_int_t dx_get_event_protocol_id (dx_event_id_t event_id);
-dx_event_id_t dx_get_event_id (dx_int_t protocol_id);
-void dx_assign_event_protocol_id (dx_event_id_t event_id, dx_int_t protocol_id);
+dx_record_id_t dx_get_record_id (dx_int_t protocol_id);
+void dx_assign_protocol_id (dx_record_id_t record_id, dx_int_t protocol_id);
 
-const dx_record_info_t* dx_get_event_record_by_id (dx_event_id_t event_id);
-dx_event_id_t dx_get_event_record_id_by_name (dx_const_string_t record_name);
+const dx_record_info_t* dx_get_record_by_id (dx_record_id_t record_id);
+dx_record_id_t dx_get_record_id_by_name (dx_const_string_t record_name);
 
-size_t dx_find_record_field (const dx_record_info_t* record_info, dx_const_string_t field_name,
-                             dx_int_t field_type);
+int dx_find_record_field (const dx_record_info_t* record_info, dx_const_string_t field_name,
+                          dx_int_t field_type);
+dx_char_t dx_get_record_exchange_code (dx_record_id_t record_id);
 
 #endif /* DATA_STRUCTURES_H_INCLUDED */

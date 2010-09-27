@@ -178,6 +178,9 @@
 				<File
 					RelativePath="..\..\src\DXThreads.c">
 				</File>
+				<File
+					RelativePath="..\..\src\EventData.c">
+				</File>
 			</Filter>
 		</Filter>
 		<Filter
@@ -233,12 +236,6 @@
 					RelativePath="..\..\src\Decimal.c">
 				</File>
 				<File
-					RelativePath="..\..\src\EventDataFieldSetters.c">
-				</File>
-				<File
-					RelativePath="..\..\src\EventRecordBuffers.c">
-				</File>
-				<File
 					RelativePath="..\..\src\Logger.c">
 				</File>
 				<File
@@ -246,6 +243,15 @@
 				</File>
 				<File
 					RelativePath="..\..\src\ParserCommon.c">
+				</File>
+				<File
+					RelativePath="..\..\src\RecordBuffers.c">
+				</File>
+				<File
+					RelativePath="..\..\src\RecordFieldSetters.c">
+				</File>
+				<File
+					RelativePath="..\..\src\RecordTranscoder.c">
 				</File>
 				<File
 					RelativePath="..\..\src\Subscription.c">

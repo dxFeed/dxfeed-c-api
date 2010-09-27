@@ -55,9 +55,9 @@
 
 #define DX_ARRAY_BINARY_SEARCH(a, start_index, end_index, elem, comparator, found, res_index) \
     do { \
-        size_t _begin = start_index; \
-        size_t _end = end_index; \
-        size_t _mid; \
+        int _begin = start_index; \
+        int _end = end_index; \
+        int _mid; \
         int _comp_res; \
         \
         found = false; \
@@ -109,7 +109,7 @@
         if (is_binary) { \
             DX_ARRAY_BINARY_SEARCH(a, start_index, end_index, elem, comparator, found, res_index); \
         } else { \
-            size_t _index = start_index; \
+            int _index = start_index; \
             \
             for (; _index < end_index; ++_index) { \
                 if (comparator((a)[_index], (elem)) == 0) { \
@@ -258,7 +258,7 @@
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_capacity_manager_halfer (size_t new_size, size_t* capacity);
+bool dx_capacity_manager_halfer (int new_size, int* capacity);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -273,32 +273,43 @@ bool dx_capacity_manager_halfer (size_t new_size, size_t* capacity);
         e1 = e2; \
         e2 = _tmp; \
     } while (false)
+    
+/* -------------------------------------------------------------------------- */
+/*
+ *	String functions
+ */
+/* -------------------------------------------------------------------------- */
+
+dx_string_t dx_create_string (int size);
+dx_string_t dx_create_string_src (dx_const_string_t src);
+dx_string_t dx_create_string_src_len (dx_const_string_t src, int len);
+dx_string_t dx_copy_string (dx_string_t dest, dx_const_string_t src);
+dx_string_t dx_copy_string_len (dx_string_t dest, dx_const_string_t src, int len);
+int dx_string_length (dx_const_string_t str);
+int dx_compare_strings (dx_const_string_t s1, dx_const_string_t s2);
+dx_char_t dx_toupper (dx_char_t c);
+dx_string_t dx_ansi_to_unicode (const char* ansi_str);
+dx_string_t dx_decode_from_integer (dx_long_t code);
 
 /* -------------------------------------------------------------------------- */
 /*
-*	String functions
-*/
+ *	Memory operations
+ */
 /* -------------------------------------------------------------------------- */
 
+#define CHECKED_FREE(ptr) \
+    do { \
+        if (ptr != NULL) { \
+            dx_free((void*)(ptr)); \
+        } \
+    } while (false)
+    
 /* -------------------------------------------------------------------------- */
 /*
-/* allocate buffer for string and fill it with 0
-*/
+ *	Bit operations
+ */
 /* -------------------------------------------------------------------------- */
-dx_string_t dx_create_string (size_t size);
 
-/* -------------------------------------------------------------------------- */
-/*
-/*  convert ansi_str into unicode and return this new string, client must deallocate it
-/*
-/* -------------------------------------------------------------------------- */
-dx_string_t dx_ansi_to_unicode(const char* ansi_str);
-
-/* -------------------------------------------------------------------------- */
-/*
-*	Bit operations
-*/
-/* -------------------------------------------------------------------------- */
-bool dx_is_only_one_bit_set(dx_int_t val);
+bool dx_is_only_single_bit_set (int value);
 
 #endif /* DX_ALGORITHMS_H_INCLUDED */

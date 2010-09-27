@@ -60,12 +60,12 @@ struct dx_connection_data_t {
     dx_socket_t s;
     pthread_t reader_thread;
     bool termination_trigger;
-    char* hostname;
+    const char* host;
 };
 
 static struct dx_connection_data_t* g_conn = NULL;
-static const size_t g_sock_operation_timeout = 100;
-static bool g_idle_tread = false;
+static const int g_sock_operation_timeout = 100;
+static bool g_idle_thread = false;
 static const int  g_idle_time = 500;
 
 /* -------------------------------------------------------------------------- */
@@ -74,13 +74,14 @@ static const int  g_idle_time = 500;
 
 /* -------------------------------------------------------------------------- */
 
-void dx_clear_connection_data() {
+void dx_clear_connection_data () {
     if (g_conn == NULL) {
         return;
     }
 
-    dx_free(g_conn->hostname);
+    dx_free((void*)g_conn->host);
     dx_free((void*)g_conn);
+    
     g_conn = NULL;
 
 }
@@ -95,10 +96,10 @@ void before_thread_terminate(struct dx_connection_context_t* ctx) {
 
     // call client's callback
     if (ctx->terminator) {
-        ctx->terminator(g_conn->hostname);
+        ctx->terminator(g_conn->host);
     }
 
-    g_idle_tread = true;
+    g_idle_thread = true;
 
     // close connection
     // todo: do reconnect
@@ -150,11 +151,11 @@ void* dx_socket_reader (void* arg) {
             
             before_thread_terminate(ctx);
             break;
-        } else if (!receiver_result && !g_idle_tread) {
+        } else if (!receiver_result && !g_idle_thread) {
             before_thread_terminate(ctx);
         }
 
-        if (g_idle_tread) {
+        if (g_idle_thread) {
             dx_sleep(g_idle_time);
             continue;
         }
@@ -187,21 +188,24 @@ void* dx_socket_reader (void* arg) {
 
 static const int port_min = 0;
 static const int port_max = 65535;
+static const char host_port_splitter = ':';
 
 bool dx_resolve_host (const char* host, struct addrinfo** addrs) {
     char* hostbuf = NULL;
     char* portbuf = NULL;
-    char* port_start = strrchr(host, (int)':');
+    char* port_start = NULL;
     struct addrinfo hints;
     bool res = true;
     
     *addrs = NULL;
     
+    port_start = strrchr(host, (int)host_port_splitter);
+    
     if (port_start != NULL) {
         int port;
         
         if (sscanf(port_start + 1, "%d", &port) == 1) {
-            size_t hostlen = 0;
+            int hostlen = 0;
             
             if (port < port_min || port > port_max) {
                 dx_set_last_error(dx_sc_network, dx_nec_invalid_port_value);
@@ -209,8 +213,8 @@ bool dx_resolve_host (const char* host, struct addrinfo** addrs) {
                 return false;
             }
             
-            hostlen = strlen(host);
-            hostbuf = (char*)dx_malloc(hostlen + 1);
+            hostlen = (int)strlen(host);
+            hostbuf = (char*)dx_calloc(hostlen + 1, sizeof(char));
             
             if (hostbuf == NULL) {
                 return false;
@@ -317,6 +321,18 @@ bool dx_create_connection (const char* host, const struct dx_connection_context_
     conn_data->context = *cc;
     conn_data->s = s;
     
+    conn_data->host = dx_calloc((int)strlen(host) + 1, sizeof(char));
+    
+    if (conn_data->host == NULL) {
+        dx_free((void*)conn_data);
+        dx_close(s);
+
+        dx_mutex_unlock(&g_connection_guard);
+        return false;
+    }
+    
+    strcpy((char*)conn_data->host, host);
+    
     /* the tricky place here.
        the error subsystem internally uses the thread-specific storage to ensure the error 
        operation functions are thread-safe and each thread supports its own last error.
@@ -330,6 +346,7 @@ bool dx_create_connection (const char* host, const struct dx_connection_context_
     if (!dx_thread_create(&(conn_data->reader_thread), NULL, dx_socket_reader, (void*)conn_data)) {
         /* failed to create a thread */
         
+        dx_free((void*)conn_data->host);
         dx_free((void*)conn_data);
         dx_close(s);
 
@@ -337,13 +354,8 @@ bool dx_create_connection (const char* host, const struct dx_connection_context_
         return false;
     }
     
-    conn_data->hostname = dx_calloc(strlen(host) + 1, sizeof(char));
-    if (conn_data->hostname == NULL) {
-
-    }
-    strcpy(conn_data->hostname, host);
     g_conn = conn_data;    
-    g_idle_tread = false;
+    g_idle_thread = false;
     
     return dx_mutex_unlock(&g_connection_guard);
 }

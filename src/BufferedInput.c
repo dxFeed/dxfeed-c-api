@@ -649,7 +649,7 @@ dx_result_t dx_read_byte_array( OUT dx_byte_t** val ) {
         return parseSuccessful();
     }
 
-    bytes = dx_malloc((size_t)length);
+    bytes = dx_malloc((int)length);
     if (readFully(bytes, length, 0, (dx_int_t)length) != R_SUCCESSFUL) {
         return R_FAILED;
     }

@@ -17,12 +17,12 @@
 *
 */
 
-#include <string.h>
 #include <limits.h>
 
 #include "BufferedOutput.h"
 #include "DXErrorHandling.h"
 #include "DXMemory.h"
+#include "DXAlgorithms.h"
 
 
 // pointer to extern buffer
@@ -222,8 +222,8 @@ dx_result_t dx_write_double( dx_double_t val) {
 ////////////////////////////////////////////////////////////////////////////////
 dx_result_t dx_write_bytes( const dx_char_t* val ) {
     dx_result_t res = R_SUCCESSFUL;
-    size_t length = dx_strlen(val);
-    size_t i = 0;
+    int length = dx_string_length(val);
+    int i = 0;
     for (;i < length && res == R_SUCCESSFUL; i++) {
         res = dx_write_byte((dx_byte_t)val[i]);
     }
@@ -238,8 +238,8 @@ dx_result_t dx_write_bytes( const dx_char_t* val ) {
 ////////////////////////////////////////////////////////////////////////////////
 dx_result_t dx_write_chars( const dx_char_t* val ) {
     dx_result_t res = R_SUCCESSFUL;
-    size_t length = dx_strlen(val);
-    size_t i = 0;
+    int length = dx_string_length(val);
+    int i = 0;
     for (; i < length && res == R_SUCCESSFUL; i++) {
         res = dx_write_char(val[i]);
     }
@@ -253,9 +253,9 @@ dx_result_t dx_write_chars( const dx_char_t* val ) {
 
 ////////////////////////////////////////////////////////////////////////////////
 dx_result_t dx_write_utf( dx_const_string_t val ) {
-    size_t strlen = dx_strlen(val);
+    int strlen = dx_string_length(val);
     dx_short_t utflen = 0;
-    size_t i = 0;
+    int i = 0;
     for (; i < strlen; i++) {
         dx_char_t c = val[i];
         if (c > 0 && c <= 0x007F)
@@ -266,7 +266,7 @@ dx_result_t dx_write_utf( dx_const_string_t val ) {
             utflen += 3;
     }
 
-    if ((size_t)utflen < strlen || utflen > 65535) {
+    if ((int)utflen < strlen || utflen > 65535) {
         return setParseError(dx_pr_bad_utf_data_format);
     }
 
@@ -426,15 +426,15 @@ dx_result_t dx_write_utf_char(dx_int_t codePoint) {
 }
 
 dx_result_t dx_write_utf_string (dx_const_string_t str) {
-    size_t strlen;
-    size_t utflen;
-    size_t i;
+    int strlen;
+    int utflen;
+    int i;
 
     if (str == NULL) {
         return dx_write_compact_int(-1);
     }
 
-    strlen = dx_strlen(str);
+    strlen = dx_string_length(str);
     utflen = 0;
     for (i = 0; i < strlen;) {
         dx_char_t c = str[i++];
@@ -484,7 +484,7 @@ dx_result_t dx_ensure_capacity( int requiredCapacity ) {
 
     if (requiredCapacity > out_buffer_length) {
         dx_int_t length = MAX(MAX((dx_int_t)MIN((dx_long_t)out_buffer_length << 1, (dx_long_t)INT_MAX), 1024), requiredCapacity);
-        dx_byte_t* newBuffer = (dx_byte_t*)dx_malloc((size_t)length);
+        dx_byte_t* newBuffer = (dx_byte_t*)dx_malloc((int)length);
         dx_memcpy(newBuffer, out_buffer, out_buffer_length);
         dx_free(out_buffer);
         out_buffer = newBuffer;

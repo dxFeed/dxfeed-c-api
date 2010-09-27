@@ -19,11 +19,11 @@
  
 /*
  *	Contains the functionality for managing the memory required to store
- *  the event record data
+ *  the record data
  */
  
-#ifndef EVENT_RECORD_BUFFERS_H_INCLUDED
-#define EVENT_RECORD_BUFFERS_H_INCLUDED
+#ifndef RECORD_BUFFERS_H_INCLUDED
+#define RECORD_BUFFERS_H_INCLUDED
 
 #include "PrimitiveTypes.h"
 #include "EventData.h"
@@ -34,7 +34,7 @@
  */
 /* -------------------------------------------------------------------------- */
 
-typedef void* (*dx_get_record_ptr_t)(size_t record_index);
+typedef void* (*dx_get_record_ptr_t)(int record_index);
 typedef void* (*dx_get_record_buffer_ptr_t)(void);
 
 /* -------------------------------------------------------------------------- */
@@ -48,9 +48,9 @@ typedef struct {
     dx_get_record_buffer_ptr_t record_buffer_getter;
 } dx_buffer_manager_collection_t;
 
-extern const dx_buffer_manager_collection_t g_buffer_managers[dx_eid_count];
+extern const dx_buffer_manager_collection_t g_buffer_managers[dx_rid_count];
 
-void dx_clear_event_record_buffers (void);
+void dx_clear_record_buffers (void);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -61,4 +61,4 @@ void dx_clear_event_record_buffers (void);
 bool dx_store_string_buffer (dx_const_string_t buf);
 void dx_free_string_buffers (void);
 
-#endif /* EVENT_RECORD_BUFFERS_H_INCLUDED */
+#endif /* RECORD_BUFFERS_H_INCLUDED */

@@ -37,7 +37,7 @@
  */
 /* -------------------------------------------------------------------------- */
 
-void dx_sleep (size_t milliseconds);
+void dx_sleep (int milliseconds);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -52,6 +52,7 @@ void dx_sleep (size_t milliseconds);
 bool dx_thread_create (pthread_t* thread_id, const pthread_attr_t* attr,
                        void* (*start_routine)(void*), void *arg);
 bool dx_wait_for_thread (pthread_t thread_id, void **value_ptr);
+bool dx_close_thread_handle (pthread_t thread_id);
 bool dx_thread_data_key_create (pthread_key_t* key, void (*destructor)(void*));
 bool dx_thread_data_key_destroy (pthread_key_t key);
 bool dx_set_thread_data (pthread_key_t key, const void* data);

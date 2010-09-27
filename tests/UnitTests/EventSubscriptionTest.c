@@ -3,6 +3,7 @@
 #include "EventSubscription.h"
 #include "SymbolCodec.h"
 #include "ParserCommon.h"
+#include "DXAlgorithms.h"
 
 static int last_event_type = 0;
 static dx_const_string_t last_symbol = NULL;
@@ -27,8 +28,8 @@ bool event_subscription_test (void) {
         return false;
     }
     
-    sub1 = dx_create_event_subscription(DX_ET_TRADE | DX_ET_QUOTE);
-    sub2 = dx_create_event_subscription(DX_ET_QUOTE);
+    sub1 = dx_create_event_subscription(DXF_ET_TRADE | DXF_ET_QUOTE);
+    sub2 = dx_create_event_subscription(DXF_ET_QUOTE);
     
     if (sub1 == dx_invalid_subscription || sub2 == dx_invalid_subscription) {
         return false;
@@ -53,15 +54,36 @@ bool event_subscription_test (void) {
         return false;
     }
     
+    // testing the symbol retrieval
+    {
+        dx_const_string_t* symbols = NULL;
+        int symbol_count = 0;
+        int i = 0;
+        
+        if (!dx_get_event_subscription_symbols(sub2, &symbols, &symbol_count)) {
+            return false;
+        }
+        
+        if (symbol_count != 2) {
+            return false;
+        }
+        
+        for (; i < symbol_count; ++i) {
+            if (dx_compare_strings(symbols[i], middle_symbol_set[i])) {
+                return false;
+            }
+        }
+    }
+    
     symbol_code = dx_encode_symbol_name(L"SYMB");
     
-    if (!dx_process_event_data(DX_ET_QUOTE, L"SYMB", symbol_code, NULL, 5)) {
+    if (!dx_process_event_data(DXF_ET_QUOTE, L"SYMB", symbol_code, NULL, 5)) {
         return false;
     }
     
     // both sub1 and sub2 should receive the data
     
-    if (last_event_type != DX_ET_QUOTE || wcscmp(last_symbol, L"SYMB") || visit_count != 2) {
+    if (last_event_type != DXF_ET_QUOTE || dx_compare_strings(last_symbol, L"SYMB") || visit_count != 2) {
         return false;
     }
     
@@ -69,19 +91,19 @@ bool event_subscription_test (void) {
     
     // unknown symbol SYMZ must be rejected
     
-    if (dx_process_event_data(DX_ET_TRADE, L"SYMZ", symbol_code, NULL, 5)) {
+    if (dx_process_event_data(DXF_ET_TRADE, L"SYMZ", symbol_code, NULL, 5)) {
         return false;
     }
     
     symbol_code = dx_encode_symbol_name(L"SYMD");
 
-    if (!dx_process_event_data(DX_ET_TRADE, L"SYMD", symbol_code, NULL, 5)) {
+    if (!dx_process_event_data(DXF_ET_TRADE, L"SYMD", symbol_code, NULL, 5)) {
         return false;
     }
     
     // SYMD is a known symbol to sub2, but sub2 doesn't support TRADEs
     
-    if (last_event_type != DX_ET_QUOTE || wcscmp(last_symbol, L"SYMB") || visit_count != 2) {
+    if (last_event_type != DXF_ET_QUOTE || dx_compare_strings(last_symbol, L"SYMB") || visit_count != 2) {
         return false;
     }
     
@@ -93,25 +115,25 @@ bool event_subscription_test (void) {
     
     symbol_code = dx_encode_symbol_name(L"SYMB");
     
-    if (!dx_process_event_data(DX_ET_QUOTE, L"SYMB", symbol_code, NULL, 5)) {
+    if (!dx_process_event_data(DXF_ET_QUOTE, L"SYMB", symbol_code, NULL, 5)) {
         return false;
     }
     
     // ... but sub2 still does
     
-    if (last_event_type != DX_ET_QUOTE || wcscmp(last_symbol, L"SYMB") || visit_count != 3) {
+    if (last_event_type != DXF_ET_QUOTE || dx_compare_strings(last_symbol, L"SYMB") || visit_count != 3) {
         return false;
     }
     
     symbol_code = dx_encode_symbol_name(L"SYMA");
     
-    if (!dx_process_event_data(DX_ET_TRADE, L"SYMA", symbol_code, NULL, 5)) {
+    if (!dx_process_event_data(DXF_ET_TRADE, L"SYMA", symbol_code, NULL, 5)) {
         return false;
     }
     
     // SYMA must be processed by sub1
     
-    if (last_event_type != DX_ET_TRADE || wcscmp(last_symbol, L"SYMA") || visit_count != 4) {
+    if (last_event_type != DXF_ET_TRADE || dx_compare_strings(last_symbol, L"SYMA") || visit_count != 4) {
         return false;
     }
     
@@ -123,11 +145,11 @@ bool event_subscription_test (void) {
 
     // SYMB is still supported by sub2, but sub2 no longer has a listener
     
-    if (!dx_process_event_data(DX_ET_QUOTE, L"SYMB", symbol_code, NULL, 5)) {
+    if (!dx_process_event_data(DXF_ET_QUOTE, L"SYMB", symbol_code, NULL, 5)) {
         return false;
     }
     
-    if (last_event_type != DX_ET_TRADE || wcscmp(last_symbol, L"SYMA") || visit_count != 4) {
+    if (last_event_type != DXF_ET_TRADE || dx_compare_strings(last_symbol, L"SYMA") || visit_count != 4) {
         return false;
     }
     

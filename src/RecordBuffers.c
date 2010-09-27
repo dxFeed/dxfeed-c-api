@@ -17,7 +17,7 @@
  *
  */
  
-#include "EventRecordBuffers.h"
+#include "RecordBuffers.h"
 #include "DXMemory.h"
 #include "DXAlgorithms.h"
 
@@ -29,10 +29,10 @@
 
 typedef struct {
     void* buffer;
-    size_t capacity;
+    int capacity;
 } dx_event_record_buffer_t;
 
-static dx_event_record_buffer_t g_event_record_buffer_array[dx_eid_count] = { 0 };
+static dx_event_record_buffer_t g_event_record_buffer_array[dx_rid_count] = { 0 };
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -40,15 +40,15 @@ static dx_event_record_buffer_t g_event_record_buffer_array[dx_eid_count] = { 0 
  */
 /* -------------------------------------------------------------------------- */
 
-#define GET_RECORD_PTR_NAME(event_id) \
-    event_id##_get_record_ptr
+#define GET_RECORD_PTR_NAME(record_id) \
+    record_id##_get_record_ptr
     
-#define GET_RECORD_BUF_PTR_NAME(event_id) \
-    event_id##_get_record_buf_ptr
+#define GET_RECORD_BUF_PTR_NAME(record_id) \
+    record_id##_get_record_buf_ptr
 
-#define GET_RECORD_PTR_BODY(event_id, record_type) \
-    void* GET_RECORD_PTR_NAME(event_id) (size_t record_index) { \
-        dx_event_record_buffer_t* record_buffer = &g_event_record_buffer_array[event_id]; \
+#define GET_RECORD_PTR_BODY(record_id, record_type) \
+    void* GET_RECORD_PTR_NAME(record_id) (int record_index) { \
+        dx_event_record_buffer_t* record_buffer = &g_event_record_buffer_array[record_id]; \
         \
         if (record_index >= record_buffer->capacity) { \
             record_type* new_buffer = dx_calloc(record_index + 1, sizeof(record_type)); \
@@ -69,9 +69,9 @@ static dx_event_record_buffer_t g_event_record_buffer_array[dx_eid_count] = { 0 
         return ((record_type*)record_buffer->buffer) + record_index; \
     }
 
-#define GET_RECORD_BUF_PTR_BODY(event_id) \
-    void* GET_RECORD_BUF_PTR_NAME(event_id) (void) { \
-        return g_event_record_buffer_array[event_id].buffer; \
+#define GET_RECORD_BUF_PTR_BODY(record_id) \
+    void* GET_RECORD_BUF_PTR_NAME(record_id) (void) { \
+        return g_event_record_buffer_array[record_id].buffer; \
     }
 
 /* -------------------------------------------------------------------------- */
@@ -80,16 +80,16 @@ static dx_event_record_buffer_t g_event_record_buffer_array[dx_eid_count] = { 0 
  */
 /* -------------------------------------------------------------------------- */
 
-GET_RECORD_PTR_BODY(dx_eid_trade, dxf_trade_t)
-GET_RECORD_BUF_PTR_BODY(dx_eid_trade)
-GET_RECORD_PTR_BODY(dx_eid_quote, dxf_quote_t)
-GET_RECORD_BUF_PTR_BODY(dx_eid_quote)
-GET_RECORD_PTR_BODY(dx_eid_fundamental, dxf_fundamental_t)
-GET_RECORD_BUF_PTR_BODY(dx_eid_fundamental)
-GET_RECORD_PTR_BODY(dx_eid_profile, dxf_profile_t)
-GET_RECORD_BUF_PTR_BODY(dx_eid_profile)
-GET_RECORD_PTR_BODY(dx_eid_market_maker, dxf_market_maker)
-GET_RECORD_BUF_PTR_BODY(dx_eid_market_maker)
+GET_RECORD_PTR_BODY(dx_rid_trade, dx_trade_t)
+GET_RECORD_BUF_PTR_BODY(dx_rid_trade)
+GET_RECORD_PTR_BODY(dx_rid_quote, dx_quote_t)
+GET_RECORD_BUF_PTR_BODY(dx_rid_quote)
+GET_RECORD_PTR_BODY(dx_rid_fundamental, dx_fundamental_t)
+GET_RECORD_BUF_PTR_BODY(dx_rid_fundamental)
+GET_RECORD_PTR_BODY(dx_rid_profile, dx_profile_t)
+GET_RECORD_BUF_PTR_BODY(dx_rid_profile)
+GET_RECORD_PTR_BODY(dx_rid_market_maker, dx_market_maker_t)
+GET_RECORD_BUF_PTR_BODY(dx_rid_market_maker)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -97,19 +97,18 @@ GET_RECORD_BUF_PTR_BODY(dx_eid_market_maker)
  */
 /* -------------------------------------------------------------------------- */
 
-const dx_buffer_manager_collection_t g_buffer_managers[dx_eid_count] = {
-    { GET_RECORD_PTR_NAME(dx_eid_trade), GET_RECORD_BUF_PTR_NAME(dx_eid_trade) },
-    { GET_RECORD_PTR_NAME(dx_eid_quote), GET_RECORD_BUF_PTR_NAME(dx_eid_quote) },
-    { GET_RECORD_PTR_NAME(dx_eid_fundamental), GET_RECORD_BUF_PTR_NAME(dx_eid_fundamental) },
-    { GET_RECORD_PTR_NAME(dx_eid_profile), GET_RECORD_BUF_PTR_NAME(dx_eid_profile) },
-    { GET_RECORD_PTR_NAME(dx_eid_market_maker), GET_RECORD_BUF_PTR_NAME(dx_eid_market_maker) },
+const dx_buffer_manager_collection_t g_buffer_managers[dx_rid_count] = {
+    { GET_RECORD_PTR_NAME(dx_rid_trade), GET_RECORD_BUF_PTR_NAME(dx_rid_trade) },
+    { GET_RECORD_PTR_NAME(dx_rid_quote), GET_RECORD_BUF_PTR_NAME(dx_rid_quote) },
+    { GET_RECORD_PTR_NAME(dx_rid_fundamental), GET_RECORD_BUF_PTR_NAME(dx_rid_fundamental) },
+    { GET_RECORD_PTR_NAME(dx_rid_profile), GET_RECORD_BUF_PTR_NAME(dx_rid_profile) },
+    { GET_RECORD_PTR_NAME(dx_rid_market_maker), GET_RECORD_BUF_PTR_NAME(dx_rid_market_maker) },
 };
 
-
-void dx_clear_event_record_buffers (void) {
-    size_t i = 0;
+void dx_clear_record_buffers (void) {
+    int i = 0;
     
-    for (; i < dx_eid_count; ++i) {
+    for (; i < dx_rid_count; ++i) {
         if (g_event_record_buffer_array[i].buffer != NULL) {
             dx_free(g_event_record_buffer_array[i].buffer);
             
@@ -127,8 +126,8 @@ void dx_clear_event_record_buffers (void) {
 
 struct {
     dx_const_string_t* elements;
-    size_t size;
-    size_t capacity;
+    int size;
+    int capacity;
 } g_string_buffers = { 0 };
 
 /* -------------------------------------------------------------------------- */
@@ -144,7 +143,7 @@ bool dx_store_string_buffer (dx_const_string_t buf) {
 /* -------------------------------------------------------------------------- */
 
 void dx_free_string_buffers (void) {
-    size_t i = 0;
+    int i = 0;
     
     for (; i < g_string_buffers.size; ++i) {
         dx_free((void*)g_string_buffers.elements[i]);

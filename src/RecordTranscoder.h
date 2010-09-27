@@ -16,25 +16,25 @@
  * Contributor(s):
  *
  */
-
+ 
 /*
- *	The primitive types for internal use
+ *	Record transcoder transforms the records we receive from server into the event data
+ *  passed to the client side.
  */
 
-#ifndef PRIMITIVE_TYPES_H_INCLUDED
-#define PRIMITIVE_TYPES_H_INCLUDED
+#ifndef RECORD_TRANSCODER_H_INCLUDED
+#define RECORD_TRANSCODER_H_INCLUDED
 
-typedef int bool;
+#include "RecordData.h"
+#include "PrimitiveTypes.h"
 
-#define true 1
-#define false 0
+/* -------------------------------------------------------------------------- */
+/*
+ *	Interface functions
+ */
+/* -------------------------------------------------------------------------- */
 
-#ifndef OUT
-#define OUT
-#endif // OUT
+bool dx_transcode_record_data (dx_record_id_t record_id, dx_const_string_t symbol_name, dx_int_t symbol_cipher,
+                               void* record_buffer, int record_count);
 
-#ifndef NULL
-    #define NULL ((void*)0)
-#endif // NULL
-
-#endif /* PRIMITIVE_TYPES_H_INCLUDED */
+#endif /* RECORD_TRANSCODER_H_INCLUDED */

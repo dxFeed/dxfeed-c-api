@@ -37,14 +37,14 @@ dxf_subscription_t dx_create_event_subscription (int event_types);
 bool dx_mute_event_subscription (dxf_subscription_t subscr_id);
 bool dx_unmute_event_subscription (dxf_subscription_t subscr_id);
 bool dx_close_event_subscription (dxf_subscription_t subscr_id);
-bool dx_add_symbols (dxf_subscription_t subscr_id, dx_const_string_t* symbols, size_t symbol_count);
-bool dx_remove_symbols (dxf_subscription_t subscr_id, dx_const_string_t* symbols, size_t symbol_count);
+bool dx_add_symbols (dxf_subscription_t subscr_id, dx_const_string_t* symbols, int symbol_count);
+bool dx_remove_symbols (dxf_subscription_t subscr_id, dx_const_string_t* symbols, int symbol_count);
 bool dx_add_listener (dxf_subscription_t subscr_id, dx_event_listener_t listener);
 bool dx_remove_listener (dxf_subscription_t subscr_id, dx_event_listener_t listener);
 bool dx_get_event_subscription_event_types (dxf_subscription_t subscr_id, OUT int* event_types);
-bool dx_get_event_subscription_symbols (dxf_subscription_t subscr_id, OUT dx_const_string_t** symbols, OUT size_t* symbol_count);
-bool dx_process_event_data (int event_type, dx_const_string_t symbol_name, dx_int_t symbol_cipher,
+bool dx_get_event_subscription_symbols (dxf_subscription_t subscr_id, OUT dx_const_string_t** symbols, OUT int* symbol_count);
+bool dx_process_event_data (dx_event_id_t event_id, dx_const_string_t symbol_name, dx_int_t symbol_cipher,
                             const dx_event_data_t data, int data_count);
-bool dx_get_last_event(dx_const_string_t symbol_name, int event_type, OUT dx_event_data_t* event_data);
+bool dx_get_last_symbol_event (dx_const_string_t symbol_name, int event_type, OUT dx_event_data_t* event_data);
 
 #endif /* SUBSCRIPTIONS_H_INCLUDED */

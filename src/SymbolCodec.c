@@ -201,7 +201,7 @@ dx_int_t dx_encode_symbol_name (dx_const_string_t symbol) {
     if (symbol == NULL) {
         return 0;
     }
-    length = (dx_int_t)dx_strlen(symbol);
+    length = (dx_int_t)dx_string_length(symbol);
     if (length > 7) {
         return 0;
     }
@@ -310,15 +310,18 @@ dx_result_t dx_codec_read_symbol(dx_char_t* buffer, dx_int_t buf_len, OUT dx_str
             }
             chars[k] = (dx_char_t)codePoint;
         }
+        
         if (length <= buf_len && (length & dx_get_codec_valid_chipher()) == 0) {
             *adv_res = (dx_int_t)length;
             return parseSuccessful();
         }
-        *result = dx_create_string((dx_int_t)length);
-        if (!(*result)) {
+        
+        *result = dx_create_string_src_len(chars, (int)length);
+        
+        if (*result == NULL) {
             return R_FAILED;
         }
-        wcsncpy(*result, chars, (dx_int_t)length);
+        
         *adv_res = 0;
         return parseSuccessful();
     } else if (i == 0xFE) { // 0-bit
@@ -329,19 +332,25 @@ dx_result_t dx_codec_read_symbol(dx_char_t* buffer, dx_int_t buf_len, OUT dx_str
         return parseSuccessful();
     }
     plen = 0;
+    
     while (((dx_ulong_t)penta >> plen) != 0) {
         plen += 5;
     }
+    
     cipher = dx_encode_penta(penta, plen);
+    
     if (cipher == 0) {
         dx_string_t str = dx_to_string(penta);
+        
         if (str == NULL) {
             return R_FAILED; // dx_to_string returns NULL only in case memory subsystem error, so last error already set
         }
 
         *result = str; // Generally this is inefficient, but this use-case shall not actually happen.
     }
+    
     *adv_res = cipher;
+    
     return parseSuccessful();
 }
 
@@ -379,7 +388,7 @@ dx_result_t dx_codec_write_symbol( dx_byte_t* buf, dx_int_t buf_len, dx_int_t po
             dx_int_t i;
             CHECKED_CALL(dx_write_byte, 0xFD);
 
-            length = (dx_int_t)dx_strlen(symbol);
+            length = (dx_int_t)dx_string_length(symbol);
             CHECKED_CALL(dx_write_compact_int, length);
 
             for (i = 0; i < length; ++i) {
