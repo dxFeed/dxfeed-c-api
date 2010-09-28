@@ -39,6 +39,7 @@ typedef enum {
     dx_rid_fundamental,
     dx_rid_profile,
     dx_rid_market_maker,
+    dx_rid_time_and_sale,
 
     /* add new values above this line */
 
@@ -91,6 +92,19 @@ typedef struct {
     dx_double_t mmask_price;
     dx_int_t mmask_size;
 } dx_market_maker_t;
+
+typedef struct {
+    dx_long_t event_id;
+    dx_long_t time;
+    dx_char_t exchange_code;
+    dx_double_t price;
+    dx_long_t size;
+    dx_double_t bid_price;
+    dx_double_t ask_price;
+    dx_const_string_t exchange_sale_conditions;
+    dx_bool_t is_trade;
+    dx_int_t type;    
+} dx_time_and_sale_t;
 
 
 #endif /* RECORD_DATA_H_INCLUDED */

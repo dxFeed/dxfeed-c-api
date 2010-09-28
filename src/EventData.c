@@ -31,7 +31,8 @@ static const int g_event_data_sizes[dx_eid_count] = {
     sizeof(dxf_quote_t),
     sizeof(dxf_summary_t),
     sizeof(dxf_profile_t),
-    sizeof(dxf_order_t)
+    sizeof(dxf_order_t),
+    sizeof(dxf_time_and_sale_t)
 };
 
 /* -------------------------------------------------------------------------- */
@@ -48,6 +49,10 @@ const dx_int_t DXF_ORDER_LEVEL_REGIONAL = 1;
 const dx_int_t DXF_ORDER_LEVEL_AGGREGATE = 2;
 const dx_int_t DXF_ORDER_LEVEL_ORDER = 3;
 
+const dx_int_t DXF_TIME_AND_SALE_TYPE_NEW = 0;
+const dx_int_t DXF_TIME_AND_SALE_TYPE_CORRECTION = 1;
+const dx_int_t DXF_TIME_AND_SALE_TYPE_CANCEL = 2;
+
 /* -------------------------------------------------------------------------- */
 /*
  *	Event functions implementation
@@ -61,6 +66,7 @@ dx_const_string_t dx_event_type_to_string (int event_type) {
     case DXF_ET_SUMMARY: return L"Summary"; 
     case DXF_ET_PROFILE: return L"Profile"; 
     case DXF_ET_ORDER: return L"Order"; 
+    case DXF_ET_TIME_AND_SALE: return L"Time&Sale"; 
     default: return L"";
     }	
 }
@@ -109,7 +115,11 @@ static const dx_event_subscription_param_t g_profile_subscription_params[] = {
 
 static const dx_event_subscription_param_t g_order_subscription_params[] = {
     { dx_rid_quote, dx_st_ticker },
-    { dx_rid_market_maker, dx_st_ticker }
+    { dx_rid_market_maker, dx_st_history }
+};
+
+static const dx_event_subscription_param_t g_time_and_sale_subscription_params[] = {
+    { dx_rid_time_and_sale, dx_st_stream }
 };
 
 typedef struct {
@@ -123,8 +133,8 @@ static const dx_event_subscription_param_roster g_event_param_rosters[dx_eid_cou
     { g_summary_subscription_params, sizeof(g_summary_subscription_params) / sizeof(g_summary_subscription_params[0]) },
     { g_profile_subscription_params, sizeof(g_profile_subscription_params) / sizeof(g_profile_subscription_params[0]) },
     { g_order_subscription_params, sizeof(g_order_subscription_params) / sizeof(g_order_subscription_params[0]) },
+    { g_time_and_sale_subscription_params, sizeof(g_time_and_sale_subscription_params) / sizeof(g_time_and_sale_subscription_params[0]) }
 };
-
 
 int dx_get_event_subscription_params (dx_event_id_t event_id, OUT const dx_event_subscription_param_t** params) {
     *params = g_event_param_rosters[event_id].params;
@@ -154,13 +164,15 @@ EVENT_DATA_NAVIGATOR_BODY(dxf_quote_t)
 EVENT_DATA_NAVIGATOR_BODY(dxf_summary_t)
 EVENT_DATA_NAVIGATOR_BODY(dxf_profile_t)
 EVENT_DATA_NAVIGATOR_BODY(dxf_order_t)
+EVENT_DATA_NAVIGATOR_BODY(dxf_time_and_sale_t)
 
 static const dx_event_data_navigator g_event_data_navigators[dx_eid_count] = {
     EVENT_DATA_NAVIGATOR_NAME(dxf_trade_t),
     EVENT_DATA_NAVIGATOR_NAME(dxf_quote_t),
     EVENT_DATA_NAVIGATOR_NAME(dxf_summary_t),
     EVENT_DATA_NAVIGATOR_NAME(dxf_profile_t),
-    EVENT_DATA_NAVIGATOR_NAME(dxf_order_t)
+    EVENT_DATA_NAVIGATOR_NAME(dxf_order_t),
+    EVENT_DATA_NAVIGATOR_NAME(dxf_time_and_sale_t)
 };
 
 /* -------------------------------------------------------------------------- */

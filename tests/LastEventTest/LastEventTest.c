@@ -120,12 +120,13 @@ int dx_get_event_data_struct_size (int event_id) {
 
 dx_const_string_t dx_event_type_to_string(int event_type){
     switch (event_type){
-        case DXF_ET_TRADE: return L"Trade"; 
-        case DXF_ET_QUOTE: return L"Quote"; 
-        case DXF_ET_SUMMARY: return L"Summary"; 
-        case DXF_ET_PROFILE: return L"Profile"; 
-        case DXF_ET_ORDER: return L"Order"; 
-        default: return L"";
+    case DXF_ET_TRADE: return L"Trade"; 
+    case DXF_ET_QUOTE: return L"Quote"; 
+    case DXF_ET_SUMMARY: return L"Summary"; 
+    case DXF_ET_PROFILE: return L"Profile"; 
+    case DXF_ET_ORDER: return L"Order";
+    case DXF_ET_TIME_AND_SALE: return L"Time&Sale";
+    default: return L"";
     }	
 }
 

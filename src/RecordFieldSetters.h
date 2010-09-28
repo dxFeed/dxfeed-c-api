@@ -44,7 +44,7 @@ typedef void (*dx_record_field_setter_t)(void* object, const void* field);
     
 #define DX_RECORD_FIELD_SETTER_PROTOTYPE(struct_name, field_name) \
     void DX_RECORD_FIELD_SETTER_NAME(struct_name, field_name) (void* object, const void* field)
-
+    
 /* -------------------------------------------------------------------------- */
 /*
  *	Trade field setters
@@ -104,6 +104,22 @@ DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_market_maker_t, mmbid_price);
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_market_maker_t, mmbid_size);
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_market_maker_t, mmask_price);
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_market_maker_t, mmask_size);
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Time and Sale field setters
+ */
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_time_and_sale_t, time);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_time_and_sale_t, sequence);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_time_and_sale_t, exchange_code);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_time_and_sale_t, price);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_time_and_sale_t, size);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_time_and_sale_t, bid_price);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_time_and_sale_t, ask_price);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_time_and_sale_t, exch_sale_conds);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_time_and_sale_t, type);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -188,5 +204,21 @@ DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_market_maker_t, mmbid_price);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_market_maker_t, mmbid_size);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_market_maker_t, mmask_price);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_market_maker_t, mmask_size);
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Time and Sale field default value getters
+ */
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_time_and_sale_t, time);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_time_and_sale_t, sequence);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_time_and_sale_t, exchange_code);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_time_and_sale_t, price);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_time_and_sale_t, size);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_time_and_sale_t, bid_price);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_time_and_sale_t, ask_price);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_time_and_sale_t, exch_sale_conds);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_time_and_sale_t, type);
 
 #endif /* RECORD_FIELD_SETTERS_H_INCLUDED */

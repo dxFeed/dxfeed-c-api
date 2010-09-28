@@ -307,6 +307,45 @@ bool RECORD_TRANSCODER_NAME(dx_market_maker_t) (dx_const_string_t symbol_name, d
 }
 
 /* -------------------------------------------------------------------------- */
+
+bool RECORD_TRANSCODER_NAME(dx_time_and_sale_t) (dx_const_string_t symbol_name, dx_int_t symbol_cipher,
+                                                 void* record_buffer, int record_count) {
+    dx_time_and_sale_t* event_buffer = (dx_time_and_sale_t*)record_buffer;
+    int i = 0;
+
+    for (; i < record_count; ++i) {
+        /* 'event_id' and 'type' fields were deliberately used to store the different values,
+           so that the structure might be reused without any new buffer allocations */
+        
+        dx_time_and_sale_t* cur_event = event_buffer + i;
+        const dx_int_t sequence = (dx_int_t)(cur_event->event_id & 0xFFFFFFFFL);
+        const dx_int_t exchange_sale_conditions = (dx_int_t)(cur_event->event_id >> 32);
+        const dx_int_t time = (dx_int_t)cur_event->time;
+        const dx_int_t flags = cur_event->type;
+
+        cur_event->event_id = ((dx_long_t)time << 32) | ((dx_long_t)sequence & 0xFFFFFFFFL);
+        cur_event->time = ((dx_long_t)time * 1000L) | UNSIGNED_LEFT_SHIFT(sequence, 22, dx_int_t);
+        cur_event->exchange_sale_conditions = dx_decode_from_integer(((flags & 0xFF00L) << 24) | exchange_sale_conditions);
+        cur_event->is_trade = ((flags & 0x4) != 0);
+        
+        if (cur_event->exchange_sale_conditions == NULL ||
+            !dx_store_string_buffer(cur_event->exchange_sale_conditions)) {
+            
+            return false;
+        }
+        
+        switch (flags & 0x3) {
+        case 0: cur_event->type = DXF_TIME_AND_SALE_TYPE_NEW; break;
+        case 1: cur_event->type = DXF_TIME_AND_SALE_TYPE_CORRECTION; break;
+        case 2: cur_event->type = DXF_TIME_AND_SALE_TYPE_CANCEL; break;
+        default: return false;
+        }
+    }
+
+    return dx_process_event_data(dx_eid_time_and_sale, symbol_name, symbol_cipher, event_buffer, record_count);
+}
+
+/* -------------------------------------------------------------------------- */
 /*
  *	Interface functions implementation
  */
@@ -317,7 +356,8 @@ static const dx_record_transcoder_t g_record_transcoders[dx_rid_count] = {
     RECORD_TRANSCODER_NAME(dx_quote_t),
     RECORD_TRANSCODER_NAME(dx_fundamental_t),
     RECORD_TRANSCODER_NAME(dx_profile_t),
-    RECORD_TRANSCODER_NAME(dx_market_maker_t)
+    RECORD_TRANSCODER_NAME(dx_market_maker_t),
+    RECORD_TRANSCODER_NAME(dx_time_and_sale_t)
 };
 
 /* -------------------------------------------------------------------------- */

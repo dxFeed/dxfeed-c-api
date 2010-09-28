@@ -14,7 +14,8 @@ dx_const_string_t dx_event_type_to_string (int event_type) {
 	case DXF_ET_QUOTE: return L"Quote"; 
 	case DXF_ET_SUMMARY: return L"Summary"; 
 	case DXF_ET_PROFILE: return L"Profile"; 
-	case DXF_ET_ORDER: return L"Order"; 
+	case DXF_ET_ORDER: return L"Order";
+	case DXF_ET_TIME_AND_SALE: return L"Time&Sale";
 	default: return L"";
 	}	
 }
@@ -92,7 +93,7 @@ int main (int argc, char* argv[]) {
 	
 	printf("Creating subscription to: Trade\n");
 	
-	if (!dxf_create_subscription(DXF_ET_TRADE /*| DXF_ET_QUOTE | DXF_ET_ORDER | DXF_ET_SUMMARY | DXF_ET_PROFILE*/, &subscription )) {
+	if (!dxf_create_subscription(DXF_ET_TRADE/* | DXF_ET_QUOTE | DXF_ET_ORDER | DXF_ET_SUMMARY | DXF_ET_PROFILE */| DXF_ET_TIME_AND_SALE, &subscription )) {
         process_last_error();
         
         return -1;

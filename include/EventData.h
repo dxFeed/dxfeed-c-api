@@ -41,6 +41,7 @@ typedef enum {
     dx_eid_summary,
     dx_eid_profile,
     dx_eid_order,
+    dx_eid_time_and_sale,
     
     /* add new event id above this line */
     
@@ -53,6 +54,7 @@ typedef enum {
 #define DXF_ET_SUMMARY	     (1 << dx_eid_summary)
 #define DXF_ET_PROFILE		 (1 << dx_eid_profile)
 #define DXF_ET_ORDER	     (1 << dx_eid_order)
+#define DXF_ET_TIME_AND_SALE (1 << dx_eid_time_and_sale)
 #define DXF_ET_UNUSED		 (~((1 << dx_eid_count) - 1))
 
 #define DX_EVENT_BIT_MASK(event_id) (1 << event_id)
@@ -69,6 +71,7 @@ typedef dx_trade_t dxf_trade_t;
 typedef dx_quote_t dxf_quote_t;
 typedef dx_fundamental_t dxf_summary_t;
 typedef dx_profile_t dxf_profile_t;
+typedef dx_time_and_sale_t dxf_time_and_sale_t;
 
 typedef struct {
     dx_long_t index;
@@ -94,6 +97,10 @@ extern const dx_int_t DXF_ORDER_LEVEL_COMPOSITE;
 extern const dx_int_t DXF_ORDER_LEVEL_REGIONAL;
 extern const dx_int_t DXF_ORDER_LEVEL_AGGREGATE;
 extern const dx_int_t DXF_ORDER_LEVEL_ORDER;
+
+extern const dx_int_t DXF_TIME_AND_SALE_TYPE_NEW;
+extern const dx_int_t DXF_TIME_AND_SALE_TYPE_CORRECTION;
+extern const dx_int_t DXF_TIME_AND_SALE_TYPE_CANCEL;
 
 /* -------------------------------------------------------------------------- */
 /*

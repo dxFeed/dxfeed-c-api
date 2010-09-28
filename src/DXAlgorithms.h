@@ -310,6 +310,18 @@ dx_string_t dx_decode_from_integer (dx_long_t code);
  */
 /* -------------------------------------------------------------------------- */
 
+#define UNSIGNED_TYPE_dx_int_t \
+    dx_uint_t
+    
+#define UNSIGNED_TYPE_dx_long_t \
+    dx_ulong_t
+    
+#define UNSIGNED_TYPE(type) \
+    UNSIGNED_TYPE_##type
+
+#define UNSIGNED_LEFT_SHIFT(value, offset, type) \
+    ((type)((UNSIGNED_TYPE(type))value >> offset))
+
 bool dx_is_only_single_bit_set (int value);
 
 #endif /* DX_ALGORITHMS_H_INCLUDED */

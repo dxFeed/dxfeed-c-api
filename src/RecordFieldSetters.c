@@ -103,6 +103,30 @@ FIELD_SETTER_BODY(dx_market_maker_t, mmask_size, dx_int_t)
 
 /* -------------------------------------------------------------------------- */
 /*
+ *	Time and Sale field setters implementation
+ */
+/* -------------------------------------------------------------------------- */
+
+FIELD_SETTER_BODY(dx_time_and_sale_t, time, dx_int_t)
+FIELD_SETTER_BODY(dx_time_and_sale_t, exchange_code, dx_char_t)
+FIELD_SETTER_BODY(dx_time_and_sale_t, price, dx_double_t)
+FIELD_SETTER_BODY(dx_time_and_sale_t, size, dx_int_t)
+FIELD_SETTER_BODY(dx_time_and_sale_t, bid_price, dx_double_t)
+FIELD_SETTER_BODY(dx_time_and_sale_t, ask_price, dx_double_t)
+FIELD_SETTER_BODY(dx_time_and_sale_t, type, dx_int_t)
+
+void DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, sequence) (void* object, const void* field) {
+    ((dx_time_and_sale_t*)object)->event_id &= 0xFFFFFFFF00000000L;
+    ((dx_time_and_sale_t*)object)->event_id |= *(dx_int_t*)field;
+}
+
+void DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, exch_sale_conds) (void* object, const void* field) {
+    ((dx_time_and_sale_t*)object)->event_id &= 0x00000000FFFFFFFFL;
+    ((dx_time_and_sale_t*)object)->event_id |= ((*(dx_int_t*)field) << 32);
+}
+
+/* -------------------------------------------------------------------------- */
+/*
  *	Default value getter functions
  */
 /* -------------------------------------------------------------------------- */
@@ -203,7 +227,7 @@ RECORD_EXCHANGE_CODE_GETTER_BODY(dx_rid_market_maker)
 
 /* -------------------------------------------------------------------------- */
 /*
- *	Trade field setters implementation
+ *	Trade field value getters implementation
  */
 /* -------------------------------------------------------------------------- */
 
@@ -215,7 +239,7 @@ FIELD_DEF_VAL_BODY(dx_trade_t, day_volume, dx_double_t)
 
 /* -------------------------------------------------------------------------- */
 /*
- *	Quote field setters implementation
+ *	Quote field value getters implementation
  */
 /* -------------------------------------------------------------------------- */
 
@@ -230,7 +254,7 @@ FIELD_DEF_VAL_BODY(dx_quote_t, ask_size, dx_int_t)
 
 /* -------------------------------------------------------------------------- */
 /*
- *	Fundamental field setters implementation
+ *	Fundamental field value getters implementation
  */
 /* -------------------------------------------------------------------------- */
 
@@ -242,7 +266,7 @@ FIELD_DEF_VAL_BODY(dx_fundamental_t, open_interest, dx_int_t)
 
 /* -------------------------------------------------------------------------- */
 /*
- *	Profile field setter implementation
+ *	Profile field value getters implementation
  */
 /* -------------------------------------------------------------------------- */
 
@@ -250,7 +274,7 @@ FIELD_DEF_VAL_BODY(dx_profile_t, description, dx_const_string_t)
 
 /* -------------------------------------------------------------------------- */
 /*
- *	Market maker field setters implementation
+ *	Market maker field value getters implementation
  */
 /* -------------------------------------------------------------------------- */
 
@@ -260,3 +284,19 @@ FIELD_DEF_VAL_BODY(dx_market_maker_t, mmbid_price, dx_double_t)
 FIELD_DEF_VAL_BODY(dx_market_maker_t, mmbid_size, dx_int_t)
 FIELD_DEF_VAL_BODY(dx_market_maker_t, mmask_price, dx_double_t)
 FIELD_DEF_VAL_BODY(dx_market_maker_t, mmask_size, dx_int_t)
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Time and Sale field value getters implementation
+ */
+/* -------------------------------------------------------------------------- */
+
+FIELD_DEF_VAL_BODY(dx_time_and_sale_t, time, dx_int_t)
+FIELD_DEF_VAL_BODY(dx_time_and_sale_t, sequence, dx_int_t)
+FIELD_DEF_VAL_BODY(dx_time_and_sale_t, exchange_code, dx_char_t)
+FIELD_DEF_VAL_BODY(dx_time_and_sale_t, price, dx_double_t)
+FIELD_DEF_VAL_BODY(dx_time_and_sale_t, size, dx_int_t)
+FIELD_DEF_VAL_BODY(dx_time_and_sale_t, bid_price, dx_double_t)
+FIELD_DEF_VAL_BODY(dx_time_and_sale_t, ask_price, dx_double_t)
+FIELD_DEF_VAL_BODY(dx_time_and_sale_t, exch_sale_conds, dx_int_t)
+FIELD_DEF_VAL_BODY(dx_time_and_sale_t, type, dx_int_t)

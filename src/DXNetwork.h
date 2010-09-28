@@ -39,7 +39,7 @@ typedef bool (*dx_socket_data_receiver_t)(const void* buffer, unsigned buflen);
 
 struct dx_connection_context_t {
     dx_socket_data_receiver_t       receiver; /* a callback to pass the read data to */    
-    dx_on_reader_thread_terminate_t terminator; /* a callback to notify client the dx_socket_reader is going to finished*/
+    dx_on_reader_thread_terminate_t terminator; /* a callback to notify client the dx_socket_reader is going to finish */
 };
 
 /* -------------------------------------------------------------------------- */

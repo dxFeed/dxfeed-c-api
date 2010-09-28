@@ -103,16 +103,37 @@ static bool g_market_maker_field_server_support_states[sizeof(dx_fields_market_m
 
 /* -------------------------------------------------------------------------- */
 /*
+ *	Time and Sale data fields
+ */
+/* -------------------------------------------------------------------------- */
+
+static const dx_field_info_t dx_fields_time_and_sale[] = {
+    { dx_fid_compact_int, L"Time", DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, time), DX_RECORD_FIELD_DEF_VAL_NAME(dx_time_and_sale_t, time) },
+    { dx_fid_compact_int, L"Sequence", DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, sequence), DX_RECORD_FIELD_DEF_VAL_NAME(dx_time_and_sale_t, sequence) },
+    { dx_fid_utf_char, L"Exchange", DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, exchange_code), DX_RECORD_FIELD_DEF_VAL_NAME(dx_time_and_sale_t, exchange_code) },
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Price", DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, price), DX_RECORD_FIELD_DEF_VAL_NAME(dx_time_and_sale_t, price) },
+    { dx_fid_compact_int, L"Size", DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, size), DX_RECORD_FIELD_DEF_VAL_NAME(dx_time_and_sale_t, size) },
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Bid.Price", DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, bid_price), DX_RECORD_FIELD_DEF_VAL_NAME(dx_time_and_sale_t, bid_price) },
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Ask.Price", DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, ask_price), DX_RECORD_FIELD_DEF_VAL_NAME(dx_time_and_sale_t, ask_price) },
+    { dx_fid_compact_int, L"ExchangeSaleConditions", DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, exch_sale_conds), DX_RECORD_FIELD_DEF_VAL_NAME(dx_time_and_sale_t, exch_sale_conds) },
+    { dx_fid_compact_int, L"Flags", DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, type), DX_RECORD_FIELD_DEF_VAL_NAME(dx_time_and_sale_t, type) }
+};
+
+static bool g_time_and_sale_field_server_support_states[sizeof(dx_fields_time_and_sale) / sizeof(dx_fields_time_and_sale[0])] = { 0 };
+
+/* -------------------------------------------------------------------------- */
+/*
  *	Records
  */
 /* -------------------------------------------------------------------------- */
 
-static const dx_record_info_t g_records[] = {
-	{ L"Trade", sizeof(dx_fields_trade) / sizeof(dx_fields_trade[0]), &dx_fields_trade[0] },
-    { L"Quote", sizeof(dx_fields_quote) / sizeof(dx_fields_quote[0]), &dx_fields_quote[0] },
-    { L"Fundamental", sizeof(dx_fields_fundamental) / sizeof(dx_fields_fundamental[0]), &dx_fields_fundamental[0] },
-    { L"Profile", sizeof(dx_fields_profile) / sizeof(dx_fields_profile[0]), &dx_fields_profile[0] },
-    { L"MarketMaker", sizeof(dx_fields_market_maker) / sizeof(dx_fields_market_maker[0]), &dx_fields_market_maker[0] },
+static const dx_record_info_t g_records[dx_rid_count] = {
+	{ L"Trade", sizeof(dx_fields_trade) / sizeof(dx_fields_trade[0]), dx_fields_trade },
+    { L"Quote", sizeof(dx_fields_quote) / sizeof(dx_fields_quote[0]), dx_fields_quote },
+    { L"Fundamental", sizeof(dx_fields_fundamental) / sizeof(dx_fields_fundamental[0]), dx_fields_fundamental },
+    { L"Profile", sizeof(dx_fields_profile) / sizeof(dx_fields_profile[0]), dx_fields_profile },
+    { L"MarketMaker", sizeof(dx_fields_market_maker) / sizeof(dx_fields_market_maker[0]), dx_fields_market_maker },
+    { L"TimeAndSale", sizeof(dx_fields_time_and_sale) / sizeof(dx_fields_time_and_sale[0]), dx_fields_time_and_sale }
 };
 
 static dx_record_id_t g_protocol_to_record_id_map[dx_rid_count] = {
@@ -120,15 +141,17 @@ static dx_record_id_t g_protocol_to_record_id_map[dx_rid_count] = {
     dx_rid_quote,
     dx_rid_fundamental,
     dx_rid_profile,
-    dx_rid_market_maker
+    dx_rid_market_maker,
+    dx_rid_time_and_sale
 };
 
-dx_record_server_support_info_t g_record_server_support_states[] = {
-    { sizeof(dx_fields_trade) / sizeof(dx_fields_trade[0]), &g_trade_field_server_support_states[0] },
-    { sizeof(dx_fields_quote) / sizeof(dx_fields_quote[0]), &g_quote_field_server_support_states[0] },
-    { sizeof(dx_fields_fundamental) / sizeof(dx_fields_fundamental[0]), &g_fundamental_field_server_support_states[0] },
-    { sizeof(dx_fields_profile) / sizeof(dx_fields_profile[0]), &g_profile_field_server_support_states[0] },
-    { sizeof(dx_fields_market_maker) / sizeof(dx_fields_market_maker[0]), &g_market_maker_field_server_support_states[0] }
+dx_record_server_support_info_t g_record_server_support_states[dx_rid_count] = {
+    { sizeof(dx_fields_trade) / sizeof(dx_fields_trade[0]), g_trade_field_server_support_states },
+    { sizeof(dx_fields_quote) / sizeof(dx_fields_quote[0]), g_quote_field_server_support_states },
+    { sizeof(dx_fields_fundamental) / sizeof(dx_fields_fundamental[0]), g_fundamental_field_server_support_states },
+    { sizeof(dx_fields_profile) / sizeof(dx_fields_profile[0]), g_profile_field_server_support_states },
+    { sizeof(dx_fields_market_maker) / sizeof(dx_fields_market_maker[0]), g_market_maker_field_server_support_states },
+    { sizeof(dx_fields_time_and_sale) / sizeof(dx_fields_time_and_sale[0]), g_time_and_sale_field_server_support_states }
 };
 
 /* In the Java code, the exchange code is determined by the record name: it's the last symbol of

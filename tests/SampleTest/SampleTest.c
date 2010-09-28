@@ -9,14 +9,15 @@
 const char dxfeed_host[] = "demo.dxfeed.com:7300";
 
 dx_const_string_t dx_event_type_to_string (int event_type) {
-	switch (event_type){
-	case DXF_ET_TRADE: return L"Trade"; 
-	case DXF_ET_QUOTE: return L"Quote"; 
-	case DXF_ET_SUMMARY: return L"Summary"; 
-	case DXF_ET_PROFILE: return L"Profile"; 
-	case DXF_ET_ORDER: return L"Order"; 
+	switch (event_type) {
+	case DXF_ET_TRADE: return L"Trade";
+	case DXF_ET_QUOTE: return L"Quote";
+	case DXF_ET_SUMMARY: return L"Summary";
+	case DXF_ET_PROFILE: return L"Profile";
+	case DXF_ET_ORDER: return L"Order";
+	case DXF_ET_TIME_AND_SALE: return L"Time&Sale";
 	default: return L"";
-	}	
+	}
 }
 
 /* -------------------------------------------------------------------------- */
@@ -89,14 +90,26 @@ void listener (int event_type, dx_const_string_t symbol_name, const dx_event_dat
 		}
     }
     
-    if (event_type == DXF_ET_PROFILE){
+    if (event_type == DXF_ET_PROFILE) {
 	    dxf_profile_t* p = (dxf_profile_t*)data;
 
 	    for (; i < data_count ; ++i) {
 		    wprintf(L"Description=%s\n",
 				    p[i].description);
 	    }
-    }	
+    }
+    
+    if (event_type == DXF_ET_TIME_AND_SALE) {
+        dxf_time_and_sale_t* tns = (dxf_time_and_sale_t*)data;
+
+        for (; i < data_count ; ++i) {
+            wprintf(L"event id=%ld, time=%ld, exchange code=%c, price=%f, size=%li, bid price=%f, ask price=%f, "
+                    L"exchange sale conditions=%s, is trade=%s, type=%i\n",
+                    tns[i].event_id, tns[i].time, tns[i].exchange_code, tns[i].price, tns[i].size,
+                    tns[i].bid_price, tns[i].ask_price, tns[i].exchange_sale_conditions,
+                    tns[i].is_trade ? L"True" : L"False", tns[i].type);
+        }
+    }
 }
 /* -------------------------------------------------------------------------- */
 
@@ -142,7 +155,7 @@ int main (int argc, char* argv[]) {
 
     printf("Connection successful!\n");
  
-	if (!dxf_create_subscription(DXF_ET_TRADE | DXF_ET_QUOTE | DXF_ET_ORDER | DXF_ET_SUMMARY | DXF_ET_PROFILE, &subscription )) {
+	if (!dxf_create_subscription(/*DXF_ET_TRADE | DXF_ET_QUOTE | DXF_ET_ORDER | DXF_ET_SUMMARY | DXF_ET_PROFILE*/DXF_ET_TIME_AND_SALE, &subscription)) {
         process_last_error();
         
         return -1;
