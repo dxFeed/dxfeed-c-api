@@ -68,7 +68,7 @@ dx_result_t checkWrite(int requiredCapacity) {
         return setParseError(dx_pr_buffer_not_initialized);
     }
 
-    if ( out_buffer_length - current_out_buffer_position < requiredCapacity && dx_ensure_capacity(requiredCapacity) != R_SUCCESSFUL ) {
+    if ( current_out_buffer_position + requiredCapacity > out_buffer_length && dx_ensure_capacity(requiredCapacity) != R_SUCCESSFUL ) {
         return R_FAILED;
     }
 
@@ -276,7 +276,7 @@ dx_result_t dx_write_utf( dx_const_string_t val ) {
 
     for (i = 0; i < strlen; i++) {
         dx_char_t c;
-        if (out_buffer_length - current_out_buffer_position < 3 && dx_ensure_capacity(3) != R_SUCCESSFUL) {
+        if ( current_out_buffer_position + 3 > out_buffer_length && dx_ensure_capacity(3) != R_SUCCESSFUL) {
             return R_FAILED;
         }
 
@@ -458,7 +458,7 @@ dx_result_t dx_write_utf_string (dx_const_string_t str) {
 
     for (i = 0; i < strlen;) {
         dx_char_t c;
-        if (out_buffer_length - current_out_buffer_position < 4 && (dx_ensure_capacity(4) != R_SUCCESSFUL)) {
+        if (current_out_buffer_position  + 4 > out_buffer_length  && (dx_ensure_capacity(4) != R_SUCCESSFUL)) {
             return R_FAILED;
         }
         c = str[i++];
@@ -482,8 +482,8 @@ dx_result_t dx_ensure_capacity( int requiredCapacity ) {
         return setParseError(dx_pr_buffer_overflow);
     }
 
-    if (requiredCapacity > out_buffer_length) {
-        dx_int_t length = MAX(MAX((dx_int_t)MIN((dx_long_t)out_buffer_length << 1, (dx_long_t)INT_MAX), 1024), requiredCapacity);
+    if (current_out_buffer_position + requiredCapacity > out_buffer_length) {
+        dx_int_t length = MAX(MAX((dx_int_t)MIN((dx_long_t)out_buffer_length << 1, (dx_long_t)INT_MAX), 1024), current_out_buffer_position + requiredCapacity);
         dx_byte_t* newBuffer = (dx_byte_t*)dx_malloc((int)length);
         dx_memcpy(newBuffer, out_buffer, out_buffer_length);
         dx_free(out_buffer);

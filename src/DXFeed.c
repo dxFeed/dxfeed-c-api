@@ -108,12 +108,12 @@ bool dx_update_record_description (void) {
 bool dx_subscribe_to (dx_const_string_t* symbols, int symbols_count, int event_types, bool unsubscribe) {
 	int i = 0;
 
-	dx_event_id_t eid = dx_eid_begin;
-
 	dx_byte_t* sub_buffer = NULL;
 	dx_int_t out_len = 1000;
 
 	for (; i < symbols_count; ++i){
+		dx_event_id_t eid = dx_eid_begin;
+
 		for (; eid < dx_eid_count; ++eid) {
 			if (event_types & DX_EVENT_BIT_MASK(eid)) {
 			    const dx_event_subscription_param_t* subscr_params = NULL;
@@ -319,8 +319,10 @@ DXFEED_API ERRORCODE dxf_attach_event_listener (dxf_subscription_t subscription,
 
 DXFEED_API ERRORCODE dxf_subscription_clear_symbols (dxf_subscription_t subscription) {
 	dx_int_t events; 
-	
+	dx_int_t count = 0;
+
 	dx_string_t* symbols;
+	dx_string_t* symbol_array;
 
 	int symbols_count;
 	int iter = 0;
@@ -337,11 +339,18 @@ DXFEED_API ERRORCODE dxf_subscription_clear_symbols (dxf_subscription_t subscrip
 		return DXF_FAILURE;
 	}
 
+    symbol_array = dx_calloc(symbols_count, sizeof(dx_const_string_t*));
+	
+	for (; count < symbols_count; ++count){
+		symbol_array[count] = dx_create_string_src(symbols[count]);
+		dx_copy_string(symbol_array[count],symbols[count]) ;
+	}
+
 	if (!dx_remove_symbols(subscription, symbols, symbols_count)) {
 		return DXF_FAILURE; 
     }
 
-	if (!dx_unsubscribe(symbols, symbols_count, events))
+	if (!dx_unsubscribe(symbol_array, symbols_count, events))
 		return DXF_FAILURE;
 
 	

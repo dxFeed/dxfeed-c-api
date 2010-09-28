@@ -873,11 +873,11 @@ bool dx_process_event_data (dx_event_id_t event_id, dx_const_string_t symbol_nam
     }
     
     if ((symbol_data = dx_find_symbol(symbol_name, symbol_cipher)) == NULL) {
-        dx_set_last_error(dx_sc_event_subscription, dx_es_invalid_internal_structure_state);
+        //dx_set_last_error(dx_sc_event_subscription, dx_es_invalid_internal_structure_state);
         
         dx_mutex_unlock(&g_subscr_guard);
         
-        return false;
+        return true;
     }
 
     dx_store_last_symbol_event(symbol_data, event_id, data, data_count);

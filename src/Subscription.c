@@ -168,8 +168,6 @@ dx_result_t dx_create_subscription( OUT dx_byte_t** out, OUT dx_int_t* out_len, 
 
 	dx_buf = (dx_byte_t*)dx_malloc(dx_initial_buffer_size);
 
-	*out = dx_buf;
-
     dx_set_out_buffer(dx_buf, dx_initial_buffer_size);
 
 	if (!dx_is_subscription_message(type)) {
@@ -191,7 +189,9 @@ dx_result_t dx_create_subscription( OUT dx_byte_t** out, OUT dx_int_t* out_len, 
         return setParseError(dx_pr_illegal_argument);//TODO: error type
     }
 
+	*out = dx_get_out_buffer(out_len);
 	*out_len = dx_get_out_buffer_position();
+	
 
     return parseSuccessful();
 }
