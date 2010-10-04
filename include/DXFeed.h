@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef _DXFEED_API_H_INCLUDED_
-#define _DXFEED_API_H_INCLUDED_
+#ifndef DXFEED_API_H_INCLUDED
+#define DXFEED_API_H_INCLUDED
 
 #ifdef DXFEED_EXPORTS
     #define DXFEED_API __declspec(dllexport)
@@ -29,11 +29,12 @@
 #endif
 
 #ifndef OUT
-#define OUT
-#endif // OUT
+    #define OUT
+#endif /* OUT */
 
 #include "DXTypes.h"
 #include "EventData.h"
+
 /* -------------------------------------------------------------------------- */
 /*
  *	DXFeed API function return value codes
@@ -43,7 +44,14 @@
 #define DXF_SUCCESS 1
 #define DXF_FAILURE 0
 
-typedef void (*dx_on_reader_thread_terminate_t)(const char* host);
+/* -------------------------------------------------------------------------- */
+/*
+ *	DXFeed API generic types
+ */
+/* -------------------------------------------------------------------------- */
+
+typedef void* dxf_connection_t;
+typedef void (*dxf_conn_termination_notifier_t) (const char* host);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -51,38 +59,31 @@ typedef void (*dx_on_reader_thread_terminate_t)(const char* host);
  */
 /* -------------------------------------------------------------------------- */
 
-// creates a connection to the specified host
-// the function returns the success/error code of the operation,
-// if the function succeeds it returns the handle of the opened
-// connection via the function's out-parameter
+DXFEED_API ERRORCODE dxf_create_connection (const char* host, dxf_conn_termination_notifier_t notifier,
+                                            OUT dxf_connection_t* connection);
+DXFEED_API ERRORCODE dxf_close_connection (dxf_connection_t connection);
 
-DXFEED_API int dxf_connect_feed (const char* host, dx_on_reader_thread_terminate_t term);
-
-// disconnect a connection, previously created by 'connect'
-// returns the success/error code of the operation
-
-DXFEED_API int dxf_disconnect_feed();
-
-DXFEED_API int dxf_get_last_error (int* subsystem_id, int* error_code, const char** error_descr);
-
-// subscribes to the selected type of events on the given connection
-// returns the success/error code of the operation
-// if the function succeeds it returns the handle of the created subscription
-// via the function's out-parameter
-
-DXFEED_API ERRORCODE dxf_create_subscription (int event_types, OUT dxf_subscription_t* subscription);
-DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dx_const_string_t* symbols, int symbols_count);
-DXFEED_API ERRORCODE dxf_add_symbol (dxf_subscription_t subscription, dx_const_string_t symbol);
-DXFEED_API ERRORCODE dxf_attach_event_listener (dxf_subscription_t subscription, dx_event_listener_t event_listener);
-DXFEED_API ERRORCODE dxf_subscription_clear_symbols (dxf_subscription_t subscription);
-DXFEED_API ERRORCODE dxf_detach_event_listener (dxf_subscription_t subscription, dx_event_listener_t event_listener);
+DXFEED_API ERRORCODE dxf_create_subscription (dxf_connection_t connection, int event_types,
+                                              OUT dxf_subscription_t* subscription);
 DXFEED_API ERRORCODE dxf_remove_subscription (dxf_subscription_t subscription); // do not erase subscription data!
 DXFEED_API ERRORCODE dxf_add_subscription (dxf_subscription_t subscription); // see next line
 DXFEED_API ERRORCODE dxf_close_subscription (dxf_subscription_t subscription); // erase data
-DXFEED_API ERRORCODE dxf_get_symbols (dxf_subscription_t subscription, OUT dx_string_t* symbols, int* symbols_count);
-DXFEED_API ERRORCODE dxf_get_subscription_event_types (dxf_subscription_t subscription, OUT int* event_types);
-DXFEED_API ERRORCODE dxf_remove_symbols (dxf_subscription_t subscription, dx_string_t* symbols, int symbols_count);
-DXFEED_API ERRORCODE dxf_set_symbols (dxf_subscription_t subscription, dx_string_t* symbols, int symbols_count);
-DXFEED_API ERRORCODE dxf_get_last_event (int event_type, dx_const_string_t symbol, OUT void** data);
 
-#endif // _DXFEED_API_H_INCLUDED_
+DXFEED_API ERRORCODE dxf_add_symbol (dxf_subscription_t subscription, dx_const_string_t symbol);
+DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dx_const_string_t* symbols, int symbol_count);
+DXFEED_API ERRORCODE dxf_remove_symbols (dxf_subscription_t subscription, dx_const_string_t* symbols, int symbol_count);
+DXFEED_API ERRORCODE dxf_get_symbols (dxf_subscription_t subscription, OUT dx_const_string_t* symbols, OUT int* symbol_count);
+DXFEED_API ERRORCODE dxf_set_symbols (dxf_subscription_t subscription, dx_const_string_t* symbols, int symbol_count);
+DXFEED_API ERRORCODE dxf_subscription_clear_symbols (dxf_subscription_t subscription);
+
+DXFEED_API ERRORCODE dxf_attach_event_listener (dxf_subscription_t subscription, dx_event_listener_t event_listener);
+DXFEED_API ERRORCODE dxf_detach_event_listener (dxf_subscription_t subscription, dx_event_listener_t event_listener);
+
+DXFEED_API ERRORCODE dxf_get_subscription_event_types (dxf_subscription_t subscription, OUT int* event_types);
+DXFEED_API ERRORCODE dxf_get_last_event (dxf_connection_t connection, int event_type, dx_const_string_t symbol, OUT const dx_event_data_t* event_data);
+
+DXFEED_API ERRORCODE dxf_get_last_error (int* subsystem_id, int* error_code, dx_const_string_t* error_descr);
+
+DXFEED_API ERRORCODE dxf_initialize_logger (const char* file_name, bool rewrite_file, bool show_timezone_info, bool verbose);
+
+#endif /* DXFEED_API_H_INCLUDED */

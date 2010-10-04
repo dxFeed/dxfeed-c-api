@@ -1,21 +1,21 @@
 /*
-* The contents of this file are subject to the Mozilla Public License Version
-* 1.1 (the "License"); you may not use this file except in compliance with
-* the License. You may obtain a copy of the License at
-* http://www.mozilla.org/MPL/
-*
-* Software distributed under the License is distributed on an "AS IS" basis,
-* WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
-* for the specific language governing rights and limitations under the
-* License.
-*
-* The Initial Developer of the Original Code is Devexperts LLC.
-* Portions created by the Initial Developer are Copyright (C) 2010
-* the Initial Developer. All Rights Reserved.
-*
-* Contributor(s):
-*
-*/
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Initial Developer of the Original Code is Devexperts LLC.
+ * Portions created by the Initial Developer are Copyright (C) 2010
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *
+ */
 
 #ifndef COMMON_H
 #define COMMON_H
@@ -41,7 +41,7 @@ typedef enum {
 dx_result_t setParseError(int err);
 dx_result_t parseSuccessful();
 
-enum parser_result_t dx_get_parser_last_error();
+dx_parser_result_t dx_get_parser_last_error();
 
 #define CHECKED_CALL(func, param) \
     if (func(param) != R_SUCCESSFUL) {\
@@ -60,6 +60,16 @@ enum parser_result_t dx_get_parser_last_error();
 
 #define CHECKED_CALL_3(func, param1, param2, param3) \
     if (func( param1, param2, param3 ) != R_SUCCESSFUL) {\
+    return R_FAILED;\
+    }
+    
+#define CHECKED_CALL_4(func, param1, param2, param3, param4) \
+    if (func(param1, param2, param3, param4) != R_SUCCESSFUL) {\
+    return R_FAILED;\
+    }
+    
+#define CHECKED_CALL_5(func, param1, param2, param3, param4, param5) \
+    if (func(param1, param2, param3, param4, param5) != R_SUCCESSFUL) {\
     return R_FAILED;\
     }
 

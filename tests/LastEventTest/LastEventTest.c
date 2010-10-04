@@ -169,7 +169,7 @@ bool compare_event_data(int event_type, const dx_event_data_t data1, const dx_ev
 void process_last_error () {
     int subsystem_id = dx_sc_invalid_subsystem;
     int error_code = DX_INVALID_ERROR_CODE;
-    const char* error_descr = NULL;
+    dx_const_string_t error_descr = NULL;
     int res;
 
     res = dxf_get_last_error(&subsystem_id, &error_code, &error_descr);
@@ -181,9 +181,9 @@ void process_last_error () {
             return;
         }
 
-        printf("Error occurred and successfully retrieved:\n"
-            "subsystem code = %d, error code = %d, description = \"%s\"\n",
-            subsystem_id, error_code, error_descr);
+        wprintf(L"Error occurred and successfully retrieved:\n"
+                L"subsystem code = %d, error code = %d, description = \"%s\"\n",
+                subsystem_id, error_code, error_descr);
         return;
     }
 
@@ -231,6 +231,7 @@ void listener (int event_type, dx_const_string_t symbol_name,const dx_event_data
 /* -------------------------------------------------------------------------- */
 
 int main (int argc, char* argv[]) {
+    dxf_connection_t connection;
     dxf_subscription_t subscription;
     int i = 0;
     bool test_result = true;
@@ -250,7 +251,7 @@ int main (int argc, char* argv[]) {
         }
     }
 
-    dx_logger_initialize( "log.log", true, true, true );
+    dxf_initialize_logger( "log.log", true, true, true );
 
     //if (!mutex_create(&g_event_data_guard)) {
     //    wprintf(L"Error in mutex_create");
@@ -260,7 +261,7 @@ int main (int argc, char* argv[]) {
     wprintf(L"LastEvent test started.\n");    
     printf("Connecting to host %s...\n", dxfeed_host);
 
-    if (!dxf_connect_feed(dxfeed_host, NULL)) {
+    if (!dxf_create_connection(dxfeed_host, NULL, &connection)) {
         process_last_error();
         return -1;
     }
@@ -268,7 +269,7 @@ int main (int argc, char* argv[]) {
     wprintf(L"Connection successful!\n");
 
     wprintf(L"Creating subscription to: Trade\n");
-    if (!dxf_create_subscription(g_event_type /*| DXF_ET_QUOTE | DXF_ET_ORDER | DXF_ET_SUMMARY | DXF_ET_PROFILE*/, &subscription )) {
+    if (!dxf_create_subscription(connection, g_event_type, &subscription )) {
         process_last_error();
 
         return -1;
@@ -303,7 +304,7 @@ int main (int argc, char* argv[]) {
             dx_event_data_t data;
             dxf_trade_t* trade;
             //bool compare_result;
-            if (!dxf_get_last_event(g_event_type, g_symbols[i], &data)) {
+            if (!dxf_get_last_event(connection, g_event_type, g_symbols[i], &data)) {
                 //mutex_unlock(&g_event_data_guard);
                 return -1;
             }
@@ -336,7 +337,7 @@ int main (int argc, char* argv[]) {
 
     wprintf(L"Disconnecting from host...\n");
 
-    if (!dxf_disconnect_feed()) {
+    if (!dxf_close_connection(connection)) {
         process_last_error();
 
         return -1;

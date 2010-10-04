@@ -27,35 +27,36 @@
 */
 /* -------------------------------------------------------------------------- */
 
-static struct dx_error_code_descr_t g_parser_errors[] = {
+static const dx_error_code_descr_t g_parser_errors[] = {
     { dx_pr_successful, NULL },
     { dx_pr_failed, NULL },
-    { dx_pr_buffer_overflow, "Buffer overflow" },
-    { dx_pr_illegal_argument, "The argument of function is not valid" },
-    { dx_pr_illegal_length, "Illegal length of string or byte array" },
-    { dx_pr_bad_utf_data_format, "Bad format of UTF string" },
-    { dx_pr_index_out_of_bounds, "Index of buffer is not valid" },
-    { dx_pr_out_of_buffer, "reached the end of buffer" },
-    { dx_pr_buffer_not_initialized, "There isn't a buffer to read" },
-    { dx_pr_out_of_memory, "Out of memory" },
-    { dx_pr_buffer_corrupt, "Buffer is corrupt" },
-    { dx_pr_message_not_complete, "Message is not complete" },
-    { dx_pr_internal_error, "Internal error" },
-    { dx_pr_reserved_bit_sequence, "Reserved bit sequence" },
-    { dx_pr_undefined_symbol, "Symbol is undefined" },
-    { dx_pr_record_info_corrupt, "Corrupted record information" },
-    { dx_pr_field_info_corrupt, "Corrupted field information" },
-	{ dx_pr_wrong_record_id, "Wrong record id received" },
-	{ dx_pr_type_not_supported, "Serialization of this type not supported" },
-    { dx_pr_record_reading_failed, "Record reading failed" },
-    { dx_pr_unknown_record_name, "Unknown record name" },
-    { dx_pr_record_description_not_received, "Communication protocol abused by server" },
-    { dx_pr_unexpected_message_type, "Unexpected message type" },
+    { dx_pr_buffer_overflow, L"Buffer overflow" },
+    { dx_pr_illegal_argument, L"The argument of function is not valid" },
+    { dx_pr_illegal_length, L"Illegal length of string or byte array" },
+    { dx_pr_bad_utf_data_format, L"Bad format of UTF string" },
+    { dx_pr_index_out_of_bounds, L"Index of buffer is not valid" },
+    { dx_pr_out_of_buffer, L"reached the end of buffer" },
+    { dx_pr_buffer_not_initialized, L"There isn't a buffer to read" },
+    { dx_pr_out_of_memory, L"Out of memory" },
+    { dx_pr_buffer_corrupt, L"Buffer is corrupt" },
+    { dx_pr_message_not_complete, L"Message is not complete" },
+    { dx_pr_internal_error, L"Internal error" },
+    { dx_pr_reserved_bit_sequence, L"Reserved bit sequence" },
+    { dx_pr_undefined_symbol, L"Symbol is undefined" },
+    { dx_pr_record_info_corrupt, L"Corrupted record information" },
+    { dx_pr_field_info_corrupt, L"Corrupted field information" },
+	{ dx_pr_wrong_record_id, L"Wrong record id received" },
+	{ dx_pr_type_not_supported, L"Serialization of this type not supported" },
+    { dx_pr_record_reading_failed, L"Record reading failed" },
+    { dx_pr_unknown_record_name, L"Unknown record name" },
+    { dx_pr_record_description_not_received, L"Communication protocol abused by server" },
+    { dx_pr_unexpected_message_type, L"Unexpected message type" },
+    { dx_pr_connection_context_not_initialized, L"Internal software error" },
     
 	{ ERROR_CODE_FOOTER, ERROR_DESCR_FOOTER }
 };
 
-const struct dx_error_code_descr_t* parser_error_roster = g_parser_errors;
+const dx_error_code_descr_t* parser_error_roster = g_parser_errors;
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -71,10 +72,11 @@ dx_result_t parseSuccessful() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-enum parser_result_t dx_get_parser_last_error() {
-    dx_int_t subsystem_id;
-    dx_int_t res = dx_pr_successful;
-    enum dx_error_function_result_t resultErr = dx_get_last_error (&subsystem_id, &res, NULL);
+dx_parser_result_t dx_get_parser_last_error() {
+    int subsystem_id;
+    int res = dx_pr_successful;
+    dx_error_function_result_t resultErr = dx_get_last_error (&subsystem_id, &res, NULL);
+    
     if (subsystem_id == dx_sc_parser && (resultErr == efr_success || resultErr == efr_no_error_stored)) {
         return res;
     }
@@ -136,37 +138,41 @@ dx_int_t toCodePoint(dx_char_t high, dx_char_t low) {
         + (low - MIN_LOW_SURROGATE) + MIN_SUPPLEMENTARY_CODE_POINT;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-void toSurrogates(dx_int_t codePoint, dx_int_t index, OUT dx_string_t* dst) {
+/* -------------------------------------------------------------------------- */
+
+void toSurrogates (dx_int_t codePoint, dx_int_t index, OUT dx_string_t* dst) {
     dx_int_t offset = codePoint - MIN_SUPPLEMENTARY_CODE_POINT;
+    
     (*dst)[index+1] = (dx_char_t)((offset & 0x3ff) + MIN_LOW_SURROGATE);
     (*dst)[index] = (dx_char_t)((offset >> 10) + MIN_HIGH_SURROGATE);
 }
 
-////////////////////////////////////////////////////////////////////////////////
-dx_result_t toChars(dx_int_t codePoint, dx_int_t dstIndex, dx_int_t dstLen, OUT dx_string_t* dst, OUT dx_int_t* res) {
-    if (!dst || !(*dst) || !res || codePoint < 0 || codePoint > MAX_CODE_POINT) {
-        setParseError(dx_pr_illegal_argument);
-        return R_FAILED;
+/* -------------------------------------------------------------------------- */
+
+dx_result_t toChars (dx_int_t codePoint, dx_int_t dstIndex, dx_int_t dstLen, OUT dx_string_t* dst, OUT dx_int_t* res) {
+    if (dst == NULL|| *dst == NULL || res == NULL|| codePoint < 0 || codePoint > MAX_CODE_POINT) {
+        return setParseError(dx_pr_illegal_argument);
     }
 
     if (codePoint < MIN_SUPPLEMENTARY_CODE_POINT) {
         if (dstLen - dstIndex < 1) {
-            setParseError(dx_pr_index_out_of_bounds);
-            return R_FAILED;
+            return setParseError(dx_pr_index_out_of_bounds);
         }
+        
         (*dst)[dstIndex] = (dx_char_t)codePoint;
         *res = 1;
+        
         return parseSuccessful();
     }
 
-    if(dstLen - dstIndex < 2) {
-        setParseError(dx_pr_index_out_of_bounds);
-        return R_FAILED;
+    if (dstLen - dstIndex < 2) {
+        return setParseError(dx_pr_index_out_of_bounds);
     }
 
     toSurrogates(codePoint, dstIndex, dst);
+    
     *res = 2;
+    
     return parseSuccessful();
 }
 

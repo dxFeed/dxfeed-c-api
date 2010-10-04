@@ -25,6 +25,8 @@
 #define DX_ERROR_HANDLING_H_INCLUDED
 
 #include "PrimitiveTypes.h"
+#include "DXErrorCodes.h"
+#include "DXTypes.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -32,14 +34,14 @@
  */
 /* -------------------------------------------------------------------------- */
 
-struct dx_error_code_descr_t {
+typedef struct {
     int error_code; /* a numeric error code; must be uniqie across a subsystem */
-    const char* error_descr; /* a text representation of an error coded in ANSI;
-                                is optional, may be null */
-};
+    dx_const_string_t error_descr; /* a text representation of an error;
+                                      is optional, may be null */
+} dx_error_code_descr_t;
 
 #define ERROR_CODE_FOOTER (-1)
-#define ERROR_DESCR_FOOTER ((const char*)-1)
+#define ERROR_DESCR_FOOTER ((dx_const_string_t)-1)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -47,13 +49,13 @@ struct dx_error_code_descr_t {
  */
 /* -------------------------------------------------------------------------- */
 
-enum dx_error_function_result_t {
+typedef enum {
     efr_success,
     efr_invalid_subsystem_id,
     efr_invalid_error_code,
     efr_no_error_stored,
     efr_error_subsys_init_failure    
-};
+} dx_error_function_result_t;
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -75,7 +77,7 @@ enum dx_error_function_result_t {
                                         successfully initialized.
  */
 
-enum dx_error_function_result_t dx_set_last_error (int subsystem_id, int error_code);
+dx_error_function_result_t dx_set_last_error (dx_subsystem_code_t subsystem_id, int error_code);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -97,7 +99,7 @@ enum dx_error_function_result_t dx_set_last_error (int subsystem_id, int error_c
                                         successfully initialized.
  */
 
-enum dx_error_function_result_t dx_get_last_error (int* subsystem_id, int* error_code, const char** error_descr);
+dx_error_function_result_t dx_get_last_error (int* subsystem_id, int* error_code, dx_const_string_t* error_descr);
 
 /* -------------------------------------------------------------------------- */
 /*

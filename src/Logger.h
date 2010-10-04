@@ -30,13 +30,10 @@
 //    dx_ltf_MMMM_DD_YYYY,
 //} dx_log_date_format_t;
 
-DXFEED_API bool dx_logger_initialize (const char* file_name, bool rewrite, bool show_timezone_info, bool verbose);
-
-DXFEED_API void dx_logging_error (const char* message);
-
-DXFEED_API void dx_logging_info (const dx_char_t* format, ...);
-DXFEED_API void dx_logging_verbose_info (const dx_char_t* format, ...);
-DXFEED_API void dx_logging_gap ();
+void dx_logging_error (dx_const_string_t message);
+void dx_logging_info (const dx_char_t* format, ...);
+void dx_logging_verbose_info (const dx_char_t* format, ...);
+void dx_logging_gap ();
 
 void dx_logging_last_error();
 

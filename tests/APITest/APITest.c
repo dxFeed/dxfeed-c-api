@@ -50,30 +50,31 @@ void second_listener (int event_type, dx_const_string_t symbol_name,const dx_eve
 void process_last_error () {
     int subsystem_id = dx_sc_invalid_subsystem;
     int error_code = DX_INVALID_ERROR_CODE;
-    const char* error_descr = NULL;
+    dx_const_string_t error_descr = NULL;
     int res;
     
     res = dxf_get_last_error(&subsystem_id, &error_code, &error_descr);
     
     if (res == DXF_SUCCESS) {
         if (subsystem_id == dx_sc_invalid_subsystem && error_code == DX_INVALID_ERROR_CODE) {
-            printf("WTF - no error information is stored");
+            wprintf(L"WTF - no error information is stored");
             
             return;
         }
         
-        printf("Error occurred and successfully retrieved:\n"
-               "subsystem code = %d, error code = %d, description = \"%s\"\n",
+        wprintf(L"Error occurred and successfully retrieved:\n"
+                L"subsystem code = %d, error code = %d, description = \"%s\"\n",
                subsystem_id, error_code, error_descr);
         return;
     }
     
-    printf("An error occurred but the error subsystem failed to initialize\n");
+    wprintf(L"An error occurred but the error subsystem failed to initialize\n");
 }
 
 /* -------------------------------------------------------------------------- */
 
 int main (int argc, char* argv[]) {
+    dxf_connection_t connection;
     dxf_subscription_t subscription;
 
 	dx_string_t symbols_to_add[] = { L"MSFT", L"YHOO", L"C" };
@@ -91,12 +92,12 @@ int main (int argc, char* argv[]) {
 	dx_int_t get_symbols_size;
 
 
-	dx_logger_initialize( "log.log", true, true, true );
+	dxf_initialize_logger( "log.log", true, true, true );
 	
 	printf("API test started.\n");    
     printf("Connecting to host %s...\n", dxfeed_host);
     
-    if (!dxf_connect_feed(dxfeed_host, NULL)) {
+    if (!dxf_create_connection(dxfeed_host, NULL, &connection)) {
         process_last_error();
         return -1;
     }
@@ -105,7 +106,7 @@ int main (int argc, char* argv[]) {
 	
 	printf("Creating subscription to: Trade\n");
 	
-	if (!dxf_create_subscription(DXF_ET_TRADE/* | DXF_ET_QUOTE | DXF_ET_ORDER | DXF_ET_SUMMARY | DXF_ET_PROFILE */| DXF_ET_TIME_AND_SALE, &subscription )) {
+	if (!dxf_create_subscription(connection, DXF_ET_TRADE/* | DXF_ET_QUOTE | DXF_ET_ORDER | DXF_ET_SUMMARY | DXF_ET_PROFILE */, &subscription )) {
         process_last_error();
         
         return -1;
@@ -213,7 +214,7 @@ int main (int argc, char* argv[]) {
     
     printf("Disconnecting from host...\n");
     
-    if (!dxf_disconnect_feed()) {
+    if (!dxf_close_connection(connection)) {
         process_last_error();
         
         return -1;

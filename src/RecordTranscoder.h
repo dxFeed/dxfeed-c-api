@@ -34,7 +34,8 @@
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_transcode_record_data (dx_record_id_t record_id, dx_const_string_t symbol_name, dx_int_t symbol_cipher,
+bool dx_transcode_record_data (dxf_connection_t connection,
+                               dx_record_id_t record_id, dx_const_string_t symbol_name, dx_int_t symbol_cipher,
                                void* record_buffer, int record_count);
 
 #endif /* RECORD_TRANSCODER_H_INCLUDED */

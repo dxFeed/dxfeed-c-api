@@ -117,7 +117,7 @@ dx_result_t dx_decode_symbol_name(dx_int_t cipher, OUT dx_string_t* symbol);
 * @return result type code as described in the method above
 * @throws IOException if an I/O error occurs
 */
-dx_result_t dx_codec_read_symbol(dx_char_t* buffer, dx_int_t buf_len, OUT dx_string_t* result, OUT dx_int_t* adv_res);
+dx_result_t dx_codec_read_symbol(void* buf_inp_ctx, dx_char_t* buffer, dx_int_t buf_len, OUT dx_string_t* result, OUT dx_int_t* adv_res);
 
 /* -------------------------------------------------------------------------- */
 

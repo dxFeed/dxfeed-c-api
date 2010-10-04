@@ -34,8 +34,8 @@
  */
 /* -------------------------------------------------------------------------- */
 
-typedef void* (*dx_get_record_ptr_t)(int record_index);
-typedef void* (*dx_get_record_buffer_ptr_t)(void);
+typedef void* (*dx_get_record_ptr_t)(dxf_connection_t connection, int record_index);
+typedef void* (*dx_get_record_buffer_ptr_t)(dxf_connection_t connection);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -50,15 +50,13 @@ typedef struct {
 
 extern const dx_buffer_manager_collection_t g_buffer_managers[dx_rid_count];
 
-void dx_clear_record_buffers (void);
-
 /* -------------------------------------------------------------------------- */
 /*
  *	Auxiliary memory management functions
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_store_string_buffer (dx_const_string_t buf);
-void dx_free_string_buffers (void);
+bool dx_store_string_buffer (dxf_connection_t connection, dx_const_string_t buf);
+void dx_free_string_buffers (dxf_connection_t connection);
 
 #endif /* RECORD_BUFFERS_H_INCLUDED */

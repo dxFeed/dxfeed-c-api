@@ -4,6 +4,7 @@
 #include "SymbolCodec.h"
 #include "ParserCommon.h"
 #include "DXAlgorithms.h"
+#include "ConnectionContextData.h"
 
 static int last_event_type = 0;
 static dx_const_string_t last_symbol = NULL;
@@ -17,6 +18,7 @@ void dummy_listener (int event_type, dx_const_string_t symbol_name,
 }
 
 bool event_subscription_test (void) {
+    dxf_connection_t connection;
     dxf_subscription_t sub1;
     dxf_subscription_t sub2;
     dx_const_string_t large_symbol_set[] = { L"SYMA", L"SYMB", L"SYMC" };
@@ -28,8 +30,10 @@ bool event_subscription_test (void) {
         return false;
     }
     
-    sub1 = dx_create_event_subscription(DXF_ET_TRADE | DXF_ET_QUOTE);
-    sub2 = dx_create_event_subscription(DXF_ET_QUOTE);
+    connection = dx_init_connection();
+    
+    sub1 = dx_create_event_subscription(connection, DXF_ET_TRADE | DXF_ET_QUOTE);
+    sub2 = dx_create_event_subscription(connection, DXF_ET_QUOTE);
     
     if (sub1 == dx_invalid_subscription || sub2 == dx_invalid_subscription) {
         return false;
@@ -77,7 +81,7 @@ bool event_subscription_test (void) {
     
     symbol_code = dx_encode_symbol_name(L"SYMB");
     
-    if (!dx_process_event_data(DXF_ET_QUOTE, L"SYMB", symbol_code, NULL, 5)) {
+    if (!dx_process_event_data(connection, DXF_ET_QUOTE, L"SYMB", symbol_code, NULL, 5)) {
         return false;
     }
     
@@ -91,13 +95,13 @@ bool event_subscription_test (void) {
     
     // unknown symbol SYMZ must be rejected
     
-    if (dx_process_event_data(DXF_ET_TRADE, L"SYMZ", symbol_code, NULL, 5)) {
+    if (dx_process_event_data(connection, DXF_ET_TRADE, L"SYMZ", symbol_code, NULL, 5)) {
         return false;
     }
     
     symbol_code = dx_encode_symbol_name(L"SYMD");
 
-    if (!dx_process_event_data(DXF_ET_TRADE, L"SYMD", symbol_code, NULL, 5)) {
+    if (!dx_process_event_data(connection, DXF_ET_TRADE, L"SYMD", symbol_code, NULL, 5)) {
         return false;
     }
     
@@ -115,7 +119,7 @@ bool event_subscription_test (void) {
     
     symbol_code = dx_encode_symbol_name(L"SYMB");
     
-    if (!dx_process_event_data(DXF_ET_QUOTE, L"SYMB", symbol_code, NULL, 5)) {
+    if (!dx_process_event_data(connection, DXF_ET_QUOTE, L"SYMB", symbol_code, NULL, 5)) {
         return false;
     }
     
@@ -127,7 +131,7 @@ bool event_subscription_test (void) {
     
     symbol_code = dx_encode_symbol_name(L"SYMA");
     
-    if (!dx_process_event_data(DXF_ET_TRADE, L"SYMA", symbol_code, NULL, 5)) {
+    if (!dx_process_event_data(connection, DXF_ET_TRADE, L"SYMA", symbol_code, NULL, 5)) {
         return false;
     }
     
@@ -145,7 +149,7 @@ bool event_subscription_test (void) {
 
     // SYMB is still supported by sub2, but sub2 no longer has a listener
     
-    if (!dx_process_event_data(DXF_ET_QUOTE, L"SYMB", symbol_code, NULL, 5)) {
+    if (!dx_process_event_data(connection, DXF_ET_QUOTE, L"SYMB", symbol_code, NULL, 5)) {
         return false;
     }
     

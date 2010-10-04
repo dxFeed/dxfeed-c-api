@@ -30,7 +30,7 @@
  */
 /* -------------------------------------------------------------------------- */
 
-void dx_clear_records_server_support_states (void);
+dx_result_t dx_clear_records_server_support_states (dxf_connection_t connection);
 
 /* -------------------------------------------------------------------------- 
 /*
@@ -83,16 +83,12 @@ typedef enum {
 
 bool dx_is_subscription_message (dx_message_type_t type);
 
-/**
-* Parses accumulated data and retrieve processed messages to
-* specified MessageConsumer.
-* It doesn't remove parsed bytes from buffer, it only
-* updates buffer_pos value.
-* @param consumer MessageConsumer to pass parsed messages.
-*/
-dx_result_t dx_parse( const dx_byte_t* buf, dx_int_t bufLen );
+/* -------------------------------------------------------------------------- */
+/*
+ *	Low level network data receiver
+ */
+/* -------------------------------------------------------------------------- */
 
-
-
+bool dx_socket_data_receiver (dxf_connection_t connection, const void* buffer, int buffer_size);
 
 #endif /* PARSER_H_INCLUDED */

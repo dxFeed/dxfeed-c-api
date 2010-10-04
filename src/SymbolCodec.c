@@ -243,7 +243,7 @@ dx_result_t dx_decode_symbol_name(dx_int_t cipher, OUT dx_string_t* symbol){
 }
 /* -------------------------------------------------------------------------- */
 
-dx_result_t dx_codec_read_symbol(dx_char_t* buffer, dx_int_t buf_len, OUT dx_string_t* result, OUT dx_int_t* adv_res) {
+dx_result_t dx_codec_read_symbol (void* buf_inp_ctx, dx_char_t* buffer, dx_int_t buf_len, OUT dx_string_t* result, OUT dx_int_t* adv_res) {
     dx_int_t i;
     dx_long_t penta;
     dx_int_t tmp_int_1;
@@ -251,34 +251,34 @@ dx_result_t dx_codec_read_symbol(dx_char_t* buffer, dx_int_t buf_len, OUT dx_str
     dx_int_t plen;
     dx_int_t cipher;
 
-    CHECKED_CALL(dx_read_unsigned_byte, &i);
+    CHECKED_CALL_2(dx_read_unsigned_byte, buf_inp_ctx, &i);
     if (i < 0x80) { // 15-bit
-        CHECKED_CALL(dx_read_unsigned_byte, &tmp_int_1);
+        CHECKED_CALL_2(dx_read_unsigned_byte, buf_inp_ctx, &tmp_int_1);
         penta = (i << 8) + tmp_int_1;
     } else if (i < 0xC0) { // 30-bit
-        CHECKED_CALL(dx_read_unsigned_byte, &tmp_int_1);
-        CHECKED_CALL(dx_read_unsigned_short, &tmp_int_2);
+        CHECKED_CALL_2(dx_read_unsigned_byte, buf_inp_ctx, &tmp_int_1);
+        CHECKED_CALL_2(dx_read_unsigned_short, buf_inp_ctx, &tmp_int_2);
         penta = ((i & 0x3F) << 24) + (tmp_int_1 << 16) + tmp_int_2;
     } else if (i < 0xE0) { // reserved (first diapason)
         return setParseError(dx_pr_reserved_bit_sequence);
     } else if (i < 0xF0) { // 20-bit
-        CHECKED_CALL(dx_read_unsigned_short, &tmp_int_1);
+        CHECKED_CALL_2(dx_read_unsigned_short, buf_inp_ctx, &tmp_int_1);
         penta = ((i & 0x0F) << 16) + tmp_int_1;
     } else if (i < 0xF8) { // 35-bit
-        CHECKED_CALL(dx_read_int, &tmp_int_1);
+        CHECKED_CALL_2(dx_read_int, buf_inp_ctx, &tmp_int_1);
         penta = ((dx_long_t)(i & 0x07) << 32) + (tmp_int_1 & 0xFFFFFFFFL);
     } else if (i < 0xFC) { // reserved (second diapason)
         return setParseError(dx_pr_reserved_bit_sequence);
     } else if (i == 0xFC) { // UTF-8
         // todo This is inefficient, but currently UTF-8 is not used (compatibility mode). Shall be rewritten when UTF-8 become active.
-        CHECKED_CALL(dx_read_utf_string, result);
+        CHECKED_CALL_2(dx_read_utf_string, buf_inp_ctx, result);
         *adv_res = 0;
         return parseSuccessful();
     } else if (i == 0xFD) { // CESU-8
         dx_long_t length;
         dx_int_t k;
         dx_char_t* chars;
-        CHECKED_CALL(dx_read_compact_long, &length);
+        CHECKED_CALL_2(dx_read_compact_long, buf_inp_ctx, &length);
         if (length < -1 || length > INT_MAX) {
             return setParseError(dx_pr_illegal_length);
         }
@@ -304,7 +304,7 @@ dx_result_t dx_codec_read_symbol(dx_char_t* buffer, dx_int_t buf_len, OUT dx_str
 
         for (k = 0; k < length; ++k) {
             dx_int_t codePoint;
-            CHECKED_CALL(dx_read_utf_char, &codePoint);
+            CHECKED_CALL_2(dx_read_utf_char, buf_inp_ctx, &codePoint);
             if (codePoint > 0xFFFF) {
                 return setParseError(dx_pr_bad_utf_data_format);
             }

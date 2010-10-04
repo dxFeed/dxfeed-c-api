@@ -84,8 +84,8 @@ typedef struct {
 
 extern const int g_invalid_index;
 
-dx_record_id_t dx_get_record_id (dx_int_t protocol_id);
-void dx_assign_protocol_id (dx_record_id_t record_id, dx_int_t protocol_id);
+dx_record_id_t dx_get_record_id (dxf_connection_t connection, dx_int_t protocol_id);
+void dx_assign_protocol_id (dxf_connection_t connection, dx_record_id_t record_id, dx_int_t protocol_id);
 
 const dx_record_info_t* dx_get_record_by_id (dx_record_id_t record_id);
 dx_record_id_t dx_get_record_id_by_name (dx_const_string_t record_name);
@@ -93,5 +93,7 @@ dx_record_id_t dx_get_record_id_by_name (dx_const_string_t record_name);
 int dx_find_record_field (const dx_record_info_t* record_info, dx_const_string_t field_name,
                           dx_int_t field_type);
 dx_char_t dx_get_record_exchange_code (dx_record_id_t record_id);
+
+dx_record_server_support_info_t* dx_get_record_server_support_states (dxf_connection_t connection);
 
 #endif /* DATA_STRUCTURES_H_INCLUDED */

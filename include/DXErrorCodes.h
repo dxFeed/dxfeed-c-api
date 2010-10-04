@@ -28,13 +28,15 @@
  */
 /* -------------------------------------------------------------------------- */
 
-enum dx_subsystem_code_t {
-    dx_sc_memory,
+typedef enum {
+    dx_sc_begin,
+    dx_sc_memory = dx_sc_begin,
     dx_sc_sockets,
     dx_sc_threads,
     dx_sc_network,
     dx_sc_parser,
     dx_sc_event_subscription,
+    dx_sc_logger,
     
     /*  add new subsystem codes above this line 
         also don't forget to modify DXErrorHandling.c to manually
@@ -43,7 +45,7 @@ enum dx_subsystem_code_t {
     
     dx_sc_subsystem_count,
     dx_sc_invalid_subsystem = -1
-};
+} dx_subsystem_code_t;
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -141,7 +143,8 @@ enum dx_thread_error_code_t {
 enum dx_network_error_code_t {
     dx_nec_invalid_port_value,
     dx_nec_invalid_function_arg,
-    dx_nec_conn_not_established    
+    dx_nec_invalid_connection_handle,
+    dx_nec_connection_closed
 };
 
 /* ---------------------------------- */
@@ -150,7 +153,7 @@ enum dx_network_error_code_t {
  */
 /* ---------------------------------- */
 
-enum parser_result_t {
+typedef enum {
     dx_pr_successful = 0,
     dx_pr_failed,
     dx_pr_buffer_overflow,
@@ -174,8 +177,9 @@ enum parser_result_t {
 	dx_pr_type_not_supported,
 	dx_pr_unknown_record_name,
     dx_pr_record_description_not_received,
-    dx_pr_unexpected_message_type
-};
+    dx_pr_unexpected_message_type,
+    dx_pr_connection_context_not_initialized
+} dx_parser_result_t;
 
 /* ---------------------------------- */
 /*
@@ -190,6 +194,16 @@ enum dx_event_subscription_error_code_t {
     dx_es_invalid_symbol_name,
     dx_es_invalid_listener,
     dx_es_null_ptr_param
+};
+
+/* ---------------------------------- */
+/*
+ *	Logger subsystem error codes
+ */
+/* ---------------------------------- */
+
+enum dx_logger_error_code_t {
+    dx_lec_failed_to_open_file
 };
 
 #endif /* DX_ERROR_CODES_H_INCLUDED */

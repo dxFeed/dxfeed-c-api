@@ -29,6 +29,7 @@
 #include "RecordBuffers.h"
 #include "Logger.h"
 #include "DXAlgorithms.h"
+#include "ConnectionContextData.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -36,29 +37,18 @@
  */
 /* -------------------------------------------------------------------------- */
 
-static dx_byte_t* buffer      = 0;
-static dx_int_t   buffer_size  = 0;
-static dx_int_t   buffer_pos   = 0;
-static dx_int_t   buffer_capacity = 16000;
-//static dx_int_t   buffer_limit = 0;
-
 #define SYMBOL_BUFFER_LEN 64
-static dx_char_t   symbol_buffer[SYMBOL_BUFFER_LEN + 1];
-static dx_string_t symbol_result;
-
-static dx_int_t    lastCipher;
-static dx_string_t lastSymbol;
 
 #define MIN_FIELD_TYPE_ID 0x00
 #define MAX_FIELD_TYPE_ID 0xFF
+
+#define DEFAULT_BUFFER_CAPACITY     16000
 
 /* -------------------------------------------------------------------------- */
 /*
  *	Client-server data overlapping structures and stuff
  */
 /* -------------------------------------------------------------------------- */
-
-extern dx_record_server_support_info_t g_record_server_support_states[];
 
 typedef struct {
     int type;
@@ -72,7 +62,86 @@ typedef struct {
     bool in_sync_with_server;
 } dx_record_digest_t;
 
-static dx_record_digest_t g_record_digests[dx_rid_count] = { 0 };
+/* -------------------------------------------------------------------------- */
+/*
+ *	Parser connection context
+ */
+/* -------------------------------------------------------------------------- */
+
+typedef struct {
+    dx_byte_t* buffer;
+    dx_int_t buffer_size;
+    dx_int_t buffer_pos;
+    dx_int_t buffer_capacity;
+    
+    dx_char_t symbol_buffer[SYMBOL_BUFFER_LEN + 1];
+    dx_string_t symbol_result;
+
+    dx_int_t lastCipher;
+    dx_string_t lastSymbol;
+    
+    dx_record_server_support_info_t* record_server_support_states;
+    dx_record_digest_t record_digests[dx_rid_count];
+    
+    void* bicc;
+} dx_parser_connection_context_t;
+
+/* -------------------------------------------------------------------------- */
+
+DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_parser) {
+    dx_parser_connection_context_t* context = dx_calloc(1, sizeof(dx_parser_connection_context_t));
+    
+    if (context == NULL) {
+        return false;
+    }
+    
+    if ((context->record_server_support_states = dx_get_record_server_support_states(connection)) == NULL ||
+        (context->bicc = dx_get_buffered_input_connection_context(connection)) == NULL) {
+        dx_free(context);
+        
+        return false;
+    }
+    
+    context->buffer = dx_malloc(DEFAULT_BUFFER_CAPACITY);
+    
+    if (context->buffer == NULL) {
+        dx_free(context);
+        
+        return false;
+    }
+    
+    context->buffer_capacity = DEFAULT_BUFFER_CAPACITY;
+    
+    if (!dx_set_subsystem_data(connection, dx_ccs_parser, context)) {
+        dx_free(context->buffer);
+        dx_free(context);
+        
+        return false;
+    }
+    
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+void dx_clear_record_digests (dx_parser_connection_context_t* context);
+
+DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_parser) {
+    dx_parser_connection_context_t* context = (dx_parser_connection_context_t*)dx_get_subsystem_data(connection, dx_ccs_parser);
+    
+    if (context == NULL) {
+        return true;
+    }
+    
+    CHECKED_FREE(context->buffer);
+    CHECKED_FREE(context->symbol_result);
+    CHECKED_FREE(context->lastSymbol);
+    
+    dx_clear_record_digests(context);
+    dx_free(context);
+    
+    return true;
+}
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -80,7 +149,8 @@ static dx_record_digest_t g_record_digests[dx_rid_count] = { 0 };
  */
 /* -------------------------------------------------------------------------- */
 
-dx_result_t dx_create_field_digest (dx_record_id_t record_id, const dx_record_info_t* record_info,
+dx_result_t dx_create_field_digest (dx_parser_connection_context_t* context,
+                                    dx_record_id_t record_id, const dx_record_info_t* record_info,
                                     OUT dx_field_digest_ptr_t* field_digest) {
     static dx_const_string_t s_field_to_ignore = L"Symbol";
 
@@ -88,8 +158,8 @@ dx_result_t dx_create_field_digest (dx_record_id_t record_id, const dx_record_in
     dx_int_t field_type;
     int field_index = g_invalid_index;
 
-    CHECKED_CALL(dx_read_utf_string, &field_name);
-    CHECKED_CALL(dx_read_compact_int, &field_type);
+    CHECKED_CALL_2(dx_read_utf_string, context->bicc, &field_name);
+    CHECKED_CALL_2(dx_read_compact_int, context->bicc, &field_type);
 
     dx_logging_verbose_info(L"Field name: %s, field type: %d", field_name, field_type);
 
@@ -119,7 +189,7 @@ dx_result_t dx_create_field_digest (dx_record_id_t record_id, const dx_record_in
 
     if (field_index != g_invalid_index) {
         (*field_digest)->setter = record_info->fields[field_index].setter;
-        g_record_server_support_states[record_id].fields[field_index] = true;			    			    
+        context->record_server_support_states[record_id].fields[field_index] = true;			    			    
     }
     
     return parseSuccessful();
@@ -127,14 +197,15 @@ dx_result_t dx_create_field_digest (dx_record_id_t record_id, const dx_record_in
 
 /* -------------------------------------------------------------------------- */
 
-dx_result_t dx_digest_unsupported_fields (dx_record_id_t record_id, const dx_record_info_t* record_info) {
-    dx_record_digest_t* record_digest = &(g_record_digests[record_id]);
+dx_result_t dx_digest_unsupported_fields (dx_parser_connection_context_t* context,
+                                          dx_record_id_t record_id, const dx_record_info_t* record_info) {
+    dx_record_digest_t* record_digest = &(context->record_digests[record_id]);
     int field_index = 0;
 
     for (; field_index < record_info->field_count; ++field_index) {
         dx_field_digest_ptr_t field_digest = NULL;
 
-        if (g_record_server_support_states[record_id].fields[field_index]) {
+        if (context->record_server_support_states[record_id].fields[field_index]) {
             /* the field is supported by server, skipping */
 
             continue;
@@ -157,35 +228,50 @@ dx_result_t dx_digest_unsupported_fields (dx_record_id_t record_id, const dx_rec
 
 /* -------------------------------------------------------------------------- */
 
-void dx_clear_records_server_support_states (void) {
+void dx_clear_record_digests (dx_parser_connection_context_t* context) {
+    dx_record_id_t record_id;
+    
+    for (record_id = dx_rid_begin; record_id < dx_rid_count; ++record_id) {
+        int i = 0;
+
+        for (; i < context->record_digests[record_id].size; ++i) {
+            dx_free(context->record_digests[record_id].elements[i]);
+        }
+
+        if (context->record_digests[record_id].elements != NULL) {
+            dx_free(context->record_digests[record_id].elements);
+        }
+
+        context->record_digests[record_id].elements = NULL;
+        context->record_digests[record_id].size = 0;
+    }
+}
+
+/* -------------------------------------------------------------------------- */
+
+dx_result_t dx_clear_records_server_support_states (dxf_connection_t connection) {
     dx_record_id_t eid;
+    dx_parser_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_parser);
+    
+    if (context == NULL) {
+        return setParseError(dx_pr_connection_context_not_initialized);
+    }
 
     /* stage 1 - resetting all the field flags */
     for (eid = dx_rid_begin; eid < dx_rid_count; ++eid) {
         int i = 0;
 
-        for (; i < g_record_server_support_states[eid].field_count; ++i) {
-            g_record_server_support_states[eid].fields[i] = false;
+        for (; i < context->record_server_support_states[eid].field_count; ++i) {
+            context->record_server_support_states[eid].fields[i] = false;
         }
 
-        g_record_digests[eid].in_sync_with_server = false;
+        context->record_digests[eid].in_sync_with_server = false;
     }
 
     /* stage 2 - freeing all the memory allocated by previous synchronization */
-    for (eid = dx_rid_begin; eid < dx_rid_count; ++eid) {
-        int i = 0;
-
-        for (; i < g_record_digests[eid].size; ++i) {
-            dx_free(g_record_digests[eid].elements[i]);
-        }
-
-        if (g_record_digests[eid].elements != NULL) {
-            dx_free(g_record_digests[eid].elements);
-        }
-
-        g_record_digests[eid].elements = NULL;
-        g_record_digests[eid].size = 0;
-    }
+    dx_clear_record_digests(context);
+    
+    return R_SUCCESSFUL;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -235,14 +321,13 @@ bool dx_is_subscription_message(dx_message_type_t type) {
 }
 
 /* -------------------------------------------------------------------------- */
-
 /**
 * Parses and return message type.
 */
-dx_result_t dx_parse_type(OUT dx_int_t* ltype) {
+dx_result_t dx_parse_type (dx_parser_connection_context_t* context, OUT dx_int_t* ltype) {
     dx_long_t type;
 
-    if (dx_read_compact_long(&type) != R_SUCCESSFUL) {
+    if (dx_read_compact_long(context->bicc, &type) != R_SUCCESSFUL) {
         if (dx_get_parser_last_error() == dx_pr_out_of_buffer) {
             return setParseError(dx_pr_message_not_complete);
         } else {
@@ -257,70 +342,73 @@ dx_result_t dx_parse_type(OUT dx_int_t* ltype) {
     dx_logging_verbose_info(L"Parse type: %d", type);
 
     *ltype = (dx_int_t)(type);
+    
     return parseSuccessful();
 }
 
-////////////////////////////////////////////////////////////////////////////////
+/* -------------------------------------------------------------------------- */
 /**
 * Parses message length and sets up position and limit for parsing of the message contents.
 * Returns false when message is not complete yet and its parsing cannot be started.
 */
-static dx_result_t dx_parse_length_and_setup_input(dx_int_t position, dx_int_t limit ) {
+static dx_result_t dx_parse_length_and_setup_input (dx_parser_connection_context_t* context, dx_int_t position, dx_int_t limit) {
     dx_long_t length;
 	dx_int_t endPosition;
 
-    if (dx_read_compact_long(&length) != R_SUCCESSFUL) {
+    if (dx_read_compact_long(context->bicc, &length) != R_SUCCESSFUL) {
         return setParseError(dx_pr_message_not_complete);
     }
-    if (length < 0 || length > INT_MAX - dx_get_in_buffer_position()) {
+    
+    if (length < 0 || length > INT_MAX - dx_get_in_buffer_position(context->bicc)) {
         return setParseError(dx_pr_buffer_corrupt);
     }
 
-    endPosition = dx_get_in_buffer_position() + (dx_int_t)length;
+    endPosition = dx_get_in_buffer_position(context->bicc) + (dx_int_t)length;
+    
     if (endPosition > limit) {
         return setParseError(dx_pr_message_not_complete);
     }
 
-
     dx_logging_info(L"Length of message: %d", length);
 
-    dx_set_in_buffer_limit(endPosition); // set limit for this message
+    dx_set_in_buffer_limit(context->bicc, endPosition); // set limit for this message
+    
     return parseSuccessful();
 }
 
 /* -------------------------------------------------------------------------- */
 
-static dx_result_t dx_read_symbol () {
+static dx_result_t dx_read_symbol (dx_parser_connection_context_t* context) {
     dx_int_t r;
     
-    if (dx_codec_read_symbol(symbol_buffer, SYMBOL_BUFFER_LEN, &symbol_result, &r) != R_SUCCESSFUL) {
+    if (dx_codec_read_symbol(context->bicc, context->symbol_buffer, SYMBOL_BUFFER_LEN, &(context->symbol_result), &r) != R_SUCCESSFUL) {
         return R_FAILED;
     }
     
     if ((r & dx_get_codec_valid_chipher()) != 0) {
-        lastCipher = r;
-        lastSymbol = NULL;
+        context->lastCipher = r;
+        context->lastSymbol = NULL;
 	} else if (r > 0) {
-        lastCipher = 0;            
-        lastSymbol = dx_create_string_src(symbol_buffer);
+        context->lastCipher = 0;            
+        context->lastSymbol = dx_create_string_src(context->symbol_buffer);
         
-        if (lastSymbol == NULL) {
+        if (context->lastSymbol == NULL) {
             return R_FAILED;
         }
 	} else {
-        if (symbol_result != NULL) {
-            lastSymbol = dx_create_string_src(symbol_result);
+        if (context->symbol_result != NULL) {
+            context->lastSymbol = dx_create_string_src(context->symbol_result);
             
-            if (lastSymbol == NULL) {
+            if (context->lastSymbol == NULL) {
                 return R_FAILED;
             }
 
-            dx_free(symbol_result);
+            dx_free(context->symbol_result);
             
-            lastCipher = dx_encode_symbol_name(lastSymbol);
+            context->lastCipher = dx_encode_symbol_name(context->lastSymbol);
         }
         
-        if (lastCipher == 0 && lastSymbol == NULL) {
+        if (context->lastCipher == 0 && context->lastSymbol == NULL) {
             return setParseError(dx_pr_undefined_symbol);
         }
     }
@@ -335,13 +423,14 @@ static dx_result_t dx_read_symbol () {
         setter(buffer, value); \
     }
 
-dx_result_t dx_read_records (dx_record_id_t record_id, void* record_buffer) {
+dx_result_t dx_read_records (dxf_connection_t connection, dx_parser_connection_context_t* context,
+                             dx_record_id_t record_id, void* record_buffer) {
 	int i = 0;
 	dx_int_t read_int;
 	dx_char_t read_utf_char;
 	dx_double_t read_double;
 	dx_string_t read_string;
-	const dx_record_digest_t* record_digest = &(g_record_digests[record_id]);
+	const dx_record_digest_t* record_digest = &(context->record_digests[record_id]);
 	
     dx_logging_info(L"Read records");
 
@@ -355,12 +444,12 @@ dx_result_t dx_read_records (dx_record_id_t record_id, void* record_buffer) {
 			
 			break;
 		case dx_fid_compact_int:
-			CHECKED_CALL(dx_read_compact_int, &read_int);
+			CHECKED_CALL_2(dx_read_compact_int, context->bicc, &read_int);
 			CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_int);
 			
 			break;
 		case dx_fid_utf_char:
-			CHECKED_CALL (dx_read_utf_char, &read_int);
+			CHECKED_CALL_2(dx_read_utf_char, context->bicc, &read_int);
 			
 			read_utf_char = read_int;
 			
@@ -368,15 +457,15 @@ dx_result_t dx_read_records (dx_record_id_t record_id, void* record_buffer) {
 			
 			break;
 		case dx_fid_compact_int | dx_fid_flag_decimal: 
-			CHECKED_CALL (dx_read_compact_int, &read_int);
+			CHECKED_CALL_2(dx_read_compact_int, context->bicc, &read_int);
 			CHECKED_CALL_2(dx_int_to_double, read_int, &read_double);
 			CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double);
 			
 			break;
 		case dx_fid_utf_char_array:
-			CHECKED_CALL(dx_read_utf_string, &read_string);
+			CHECKED_CALL_2(dx_read_utf_string, context->bicc, &read_string);
 			
-			dx_store_string_buffer(read_string);
+			dx_store_string_buffer(connection, read_string);
 			
 			CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_string);
 			
@@ -399,7 +488,7 @@ dx_result_t dx_read_records (dx_record_id_t record_id, void* record_buffer) {
 
 /* -------------------------------------------------------------------------- */
 
-dx_result_t dx_parse_data (void) {
+dx_result_t dx_parse_data (dxf_connection_t connection, dx_parser_connection_context_t* context) {
     dx_string_t symbol = NULL;
 	
     void* record_buffer = NULL;
@@ -408,68 +497,69 @@ dx_result_t dx_parse_data (void) {
     
     dx_logging_info(L"Parse data");
 
-	while (dx_get_in_buffer_position() < dx_get_in_buffer_limit()) {
-		CHECKED_CALL_0(dx_read_symbol);
+	while (dx_get_in_buffer_position(context->bicc) < dx_get_in_buffer_limit(context->bicc)) {
+		CHECKED_CALL(dx_read_symbol, context);
 	    
 		{
 			dx_int_t id;
 	        
-			CHECKED_CALL(dx_read_compact_int, &id);
+			CHECKED_CALL_2(dx_read_compact_int, context->bicc, &id);
 
 			if (id < 0 || id >= dx_rid_count) {
 				return setParseError(dx_pr_wrong_record_id);
 			}
 	        
-			record_id = dx_get_record_id(id);
+			record_id = dx_get_record_id(connection, id);
 		}
 	    
-		if (!g_record_digests[record_id].in_sync_with_server) {
+		if (!context->record_digests[record_id].in_sync_with_server) {
 			return setParseError(dx_pr_record_description_not_received);
 		}
 	    
 
-		record_buffer = g_buffer_managers[record_id].record_getter(record_count++);
+		record_buffer = g_buffer_managers[record_id].record_getter(connection, record_count++);
 		
 		if (record_buffer == NULL) {
-		    dx_free_string_buffers();
+		    dx_free_string_buffers(connection);
 		    
 		    return R_FAILED;
 		}
 		
-		if (dx_read_records(record_id, record_buffer) != R_SUCCESSFUL) {
-			dx_free_string_buffers();
+		if (dx_read_records(connection, context, record_id, record_buffer) != R_SUCCESSFUL) {
+			dx_free_string_buffers(connection);
 			
 			return setParseError(dx_pr_record_reading_failed);
 		}
     }
 	
-	if (lastSymbol == NULL) {
-		if (dx_decode_symbol_name(lastCipher, &symbol) != R_SUCCESSFUL) {
-		    dx_free_string_buffers();
+	if (context->lastSymbol == NULL) {
+		if (dx_decode_symbol_name(context->lastCipher, &symbol) != R_SUCCESSFUL) {
+		    dx_free_string_buffers(connection);
 		    
 		    return R_FAILED;
 		}
         
-        dx_store_string_buffer(symbol);
+        dx_store_string_buffer(connection, symbol);
     }
 	
-	if (!dx_transcode_record_data(record_id, symbol, lastCipher, g_buffer_managers[record_id].record_buffer_getter(), record_count)) {
-	    dx_free_string_buffers();
+	if (!dx_transcode_record_data(connection, record_id, symbol, context->lastCipher,
+	                              g_buffer_managers[record_id].record_buffer_getter(connection), record_count)) {
+	    dx_free_string_buffers(connection);
 	    
 	    return R_FAILED;
 	}
 	
-	dx_free_string_buffers();
+	dx_free_string_buffers(connection);
 	
 	return parseSuccessful();
 }
 
 /* -------------------------------------------------------------------------- */
 
-dx_result_t dx_parse_describe_records () {
+dx_result_t dx_parse_describe_records (dxf_connection_t connection, dx_parser_connection_context_t* context) {
     dx_logging_info(L"Parse describe records");
 
-    while (dx_get_in_buffer_position() < dx_get_in_buffer_limit()) {
+    while (dx_get_in_buffer_position(context->bicc) < dx_get_in_buffer_limit(context->bicc)) {
         dx_int_t record_id;
         dx_string_t record_name;
         dx_int_t field_count;
@@ -478,9 +568,9 @@ dx_result_t dx_parse_describe_records () {
         int i = 0;
         dx_record_id_t rid;
         
-        CHECKED_CALL(dx_read_compact_int, &record_id);
-        CHECKED_CALL(dx_read_utf_string, &record_name);
-        CHECKED_CALL(dx_read_compact_int, &field_count);
+        CHECKED_CALL_2(dx_read_compact_int, context->bicc, &record_id);
+        CHECKED_CALL_2(dx_read_utf_string, context->bicc, &record_name);
+        CHECKED_CALL_2(dx_read_compact_int, context->bicc, &field_count);
 		
 		if (record_id < 0 || record_name == NULL || dx_string_length(record_name) == 0 || field_count < 0) {
             dx_free(record_name);
@@ -504,10 +594,10 @@ dx_result_t dx_parse_describe_records () {
             return setParseError(dx_pr_unknown_record_name);
         }
         
-        dx_assign_protocol_id(rid, record_id);
+        dx_assign_protocol_id(connection, rid, record_id);
         
         record_info = dx_get_record_by_id(rid);
-        record_digest = &(g_record_digests[rid]);
+        record_digest = &(context->record_digests[rid]);
         
         if (record_digest->elements != NULL) {
             return setParseError(dx_pr_internal_error);
@@ -522,16 +612,16 @@ dx_result_t dx_parse_describe_records () {
         for (i = 0; i != field_count; ++i) {
             dx_field_digest_ptr_t field_digest = NULL;
             
-            CHECKED_CALL_3(dx_create_field_digest, rid, record_info, &field_digest);
+            CHECKED_CALL_4(dx_create_field_digest, context, rid, record_info, &field_digest);
             
             if (field_digest != NULL) {
                 record_digest->elements[(record_digest->size)++] = field_digest;
             }
         }
         
-        CHECKED_CALL_2(dx_digest_unsupported_fields, rid, record_info);
+        CHECKED_CALL_3(dx_digest_unsupported_fields, context, rid, record_info);
         
-        g_record_digests[rid].in_sync_with_server = true;
+        context->record_digests[rid].in_sync_with_server = true;
     }
 	
 	return parseSuccessful();
@@ -548,11 +638,12 @@ void dx_process_other_message(dx_int_t type, dx_byte_t* new_buffer, dx_int_t siz
 * Parses message of the specified type. Some messages are processed immediately, but data and subscription messages
 * are just parsed into buffers and pendingMessageType is set.
 */
-dx_result_t dx_parse_message(dx_int_t type) {
+dx_result_t dx_parse_message (dxf_connection_t connection, dx_parser_connection_context_t* context, dx_int_t type) {
     dx_message_type_t messageType = (dx_message_type_t)type;
+    
     if (dx_is_message_type_valid(messageType)) {
         if (dx_is_data_message(messageType)) {
-            if (dx_parse_data() != R_SUCCESSFUL) {
+            if (dx_parse_data(connection, context) != R_SUCCESSFUL) {
 
                 if (dx_get_parser_last_error() == dx_pr_out_of_buffer) {
                     return setParseError(dx_pr_message_not_complete);
@@ -568,7 +659,7 @@ dx_result_t dx_parse_message(dx_int_t type) {
     
         switch (type) {
             case MESSAGE_DESCRIBE_RECORDS:
-                if (dx_parse_describe_records() != R_SUCCESSFUL) {
+                if (dx_parse_describe_records(connection, context) != R_SUCCESSFUL) {
                     if (dx_get_parser_last_error() == dx_pr_out_of_buffer) {
                         return setParseError(dx_pr_message_not_complete);
                     }
@@ -585,7 +676,7 @@ dx_result_t dx_parse_message(dx_int_t type) {
             default:
                 {
                     dx_int_t size;
-                    dx_byte_t* new_buffer = dx_get_in_buffer(&size);
+                    dx_byte_t* new_buffer = dx_get_in_buffer(context->bicc, &size);
     //                dx_process_other_message(type, new_buffer, size, dx_get_in_buffer_position(), dx_get_in_buffer_limit() - dx_get_in_buffer_position());
                 }
         }
@@ -597,117 +688,125 @@ dx_result_t dx_parse_message(dx_int_t type) {
     return parseSuccessful();
 }
 
-////////////////////////////////////////////////////////////////////////////////
+/* -------------------------------------------------------------------------- */
 
-dx_result_t dx_combine_buffers( const dx_byte_t* new_buffer, dx_int_t new_buffer_size  ) {
-	if (buffer_size != buffer_pos ){ // copy all unprocessed data to beginning of buffer
-		if ( dx_memcpy(buffer, buffer + buffer_pos, buffer_size) == NULL)
+dx_result_t dx_combine_buffers (dx_parser_connection_context_t* context,
+                                const dx_byte_t* new_buffer, dx_int_t new_buffer_size) {
+	if (context->buffer_size != context->buffer_pos) { // copy all unprocessed data to beginning of buffer
+		if (dx_memcpy(context->buffer, context->buffer + context->buffer_pos, context->buffer_size) == NULL) {
 			return R_FAILED;
+		}
 
-        buffer_size = buffer_size - buffer_pos;
-		buffer_pos = 0;
+        context->buffer_size = context->buffer_size - context->buffer_pos;
+		context->buffer_pos = 0;
 	} else {
-		buffer_pos = buffer_size = 0;
+		context->buffer_pos = context->buffer_size = 0;
 	}
 
 	// we have to combine two buffers - new data and old unprocessed data (if present)
 	// it's possible if logic message was divided into two network packets
-    if (buffer_capacity < buffer_size + new_buffer_size) {
+    if (context->buffer_capacity < context->buffer_size + new_buffer_size) {
         dx_byte_t* larger_buffer;
-        buffer_capacity = buffer_size + new_buffer_size;
-        larger_buffer = dx_malloc(buffer_capacity);
+        
+        context->buffer_capacity = context->buffer_size + new_buffer_size;
+        larger_buffer = dx_malloc(context->buffer_capacity);
 
-        if (dx_memcpy(larger_buffer, buffer, buffer_size) == NULL )
+        if (dx_memcpy(larger_buffer, context->buffer, context->buffer_size) == NULL) {
             return R_FAILED;
+        }
 
         dx_logging_verbose_info(L"Main buffer reallocated");
 
-        dx_free(buffer);
-        buffer = larger_buffer;
+        dx_free(context->buffer);
+        
+        context->buffer = larger_buffer;
     }
-	if (dx_memcpy(buffer + buffer_size, new_buffer, new_buffer_size) == NULL )
-			return R_FAILED;
+	
+	if (dx_memcpy(context->buffer + context->buffer_size, new_buffer, new_buffer_size) == NULL) {
+	    return R_FAILED;
+	}
 
-	buffer_size = buffer_size + new_buffer_size;
+	context->buffer_size = context->buffer_size + new_buffer_size;
 
-    dx_logging_verbose_info(L"Buffers combined, new size: %d", buffer_size);
+    dx_logging_verbose_info(L"Buffers combined, new size: %d", context->buffer_size);
 
-	dx_set_in_buffer(buffer, buffer_size);
-	dx_set_in_buffer_position(buffer_pos);
+	dx_set_in_buffer(context->bicc, context->buffer, context->buffer_size);
+	dx_set_in_buffer_position(context->bicc, context->buffer_pos);
 	 
 	return parseSuccessful();
 }
-////////////////////////////////////////////////////////////////////////////////
-// ========== external interface ==========
-////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////
-dx_result_t dx_parse( const dx_byte_t* new_buffer, dx_int_t new_buffer_size  ) {
+/* -------------------------------------------------------------------------- */
+/*
+ *	Main functions
+ */
+/* -------------------------------------------------------------------------- */
+
+dx_result_t dx_parse (dxf_connection_t connection, const dx_byte_t* new_buffer, int new_buffer_size) {
     dx_result_t parse_result = R_SUCCESSFUL;
+    dx_parser_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_parser);
+    
+    if (context == NULL) {
+        return setParseError(dx_pr_connection_context_not_initialized);
+    }
 
     dx_logging_gap();
     dx_logging_info(L"Begin parsing...");
     dx_logging_verbose_info(L"buffer length: %d", new_buffer_size);
-
-	if ( buffer == NULL ) {// allocate memory for all program lifetime
-		buffer = dx_malloc(buffer_capacity);
-		if (buffer == NULL)
-			return R_FAILED;
-		buffer_size = 0; // size of data in buffer
-		buffer_pos = 0; 
-	}
+	
 
     if (new_buffer_size <= 0) {
         return R_FAILED;
     }
 
-	if (dx_combine_buffers (new_buffer, new_buffer_size) != R_SUCCESSFUL) 
+	if (dx_combine_buffers(context, new_buffer, new_buffer_size) != R_SUCCESSFUL) {
 		return R_FAILED;
+	}
 
-    dx_logging_verbose_info(L"buffer position: %d", dx_get_in_buffer_position());
+    dx_logging_verbose_info(L"buffer position: %d", dx_get_in_buffer_position(context->bicc));
 
     // Parsing loop
-    while (dx_get_in_buffer_position() < buffer_size) {
+    while (dx_get_in_buffer_position(context->bicc) < context->buffer_size) {
         dx_int_t messageType = MESSAGE_HEARTBEAT; // zero-length messages are treated as just heartbeats
-        const dx_int_t message_start_pos = dx_get_in_buffer_position();
+        const dx_int_t message_start_pos = dx_get_in_buffer_position(context->bicc);
 
         dx_logging_info(L"Parsing message...");
         dx_logging_verbose_info(L"buffer position: %d", message_start_pos);
 
         // read length of a message and prepare an input buffer
-        if (dx_parse_length_and_setup_input(buffer_pos, buffer_size) != R_SUCCESSFUL) {
+        if (dx_parse_length_and_setup_input(context, context->buffer_pos, context->buffer_size) != R_SUCCESSFUL) {
             if (dx_get_parser_last_error() == dx_pr_message_not_complete) {
                 // message is incomplete
                 // just reset position back to message start and stop parsing
-                dx_set_in_buffer_position(message_start_pos);
+                dx_set_in_buffer_position(context->bicc, message_start_pos);
                 dx_logging_last_error();
                 break;
             } else { // buffer is corrupt
-                dx_set_in_buffer_position(new_buffer_size); // skip the whole buffer
+                dx_set_in_buffer_position(context->bicc, new_buffer_size); // skip the whole buffer
                 dx_logging_last_error();
                 parse_result = R_FAILED;
                 break;
             }
         }
 
-        if (dx_get_in_buffer_limit() > dx_get_in_buffer_position()) { // only if not empty message, empty message is heartbeat ???
-            if (dx_parse_type(&messageType) != R_SUCCESSFUL) {
+        if (dx_get_in_buffer_limit(context->bicc) > dx_get_in_buffer_position(context->bicc)) { // only if not empty message, empty message is heartbeat ???
+            if (dx_parse_type(context, &messageType) != R_SUCCESSFUL) {
 
                 if (dx_get_parser_last_error() == dx_pr_message_not_complete) {
                     // message is incomplete
                     // just reset position back to message start and stop parsing
-                    dx_set_in_buffer_position(message_start_pos); 
+                    dx_set_in_buffer_position(context->bicc, message_start_pos);
                     dx_logging_last_error();
                     break;
                 } else if (dx_get_parser_last_error() == dx_pr_unexpected_message_type) {
                     // skip this message
-                    dx_set_in_buffer_position(dx_get_in_buffer_limit());
+                    dx_set_in_buffer_position(context->bicc, dx_get_in_buffer_limit(context->bicc));
                     continue;
                 } else {
                     //dx_set_in_buffer_position(dx_get_in_buffer_limit());
                     //dx_logging_last_error();
                     //continue; // cannot continue parsing this message on corrupted buffer, so go to the next one
-                    dx_set_in_buffer_position(new_buffer_size); // skip the whole buffer
+                    dx_set_in_buffer_position(context->bicc, new_buffer_size); // skip the whole buffer
                     dx_logging_last_error();
                     parse_result = R_FAILED;
                     break;
@@ -715,13 +814,14 @@ dx_result_t dx_parse( const dx_byte_t* new_buffer, dx_int_t new_buffer_size  ) {
             }
 	    }
 
-        if (dx_parse_message(messageType) != R_SUCCESSFUL) {
-            enum parser_result_t res = dx_get_parser_last_error();
+        if (dx_parse_message(connection, context, messageType) != R_SUCCESSFUL) {
+            dx_parser_result_t res = dx_get_parser_last_error();
+            
             switch (res) {
                 case dx_pr_message_not_complete:
                     // message is incomplete
                     // just reset position back to message start and stop parsing
-                    dx_set_in_buffer_position(message_start_pos);
+                    dx_set_in_buffer_position(context->bicc, message_start_pos);
                     dx_logging_last_error();
                     break;
                 //case dx_pr_record_info_corrupt:
@@ -731,7 +831,7 @@ dx_result_t dx_parse( const dx_byte_t* new_buffer, dx_int_t new_buffer_size  ) {
                 default:
                     // skip the whole message
                     //dx_set_in_buffer_position(dx_get_in_buffer_limit());
-                    dx_set_in_buffer_position(new_buffer_size); // skip the whole buffer
+                    dx_set_in_buffer_position(context->bicc, new_buffer_size); // skip the whole buffer
                     dx_logging_last_error();
                     parse_result = R_FAILED;
                     break;
@@ -741,12 +841,25 @@ dx_result_t dx_parse( const dx_byte_t* new_buffer, dx_int_t new_buffer_size  ) {
             break;
         }
 
-        dx_logging_info(L"Parsing message complete. Buffer position: %d", dx_get_in_buffer_position());
+        dx_logging_info(L"Parsing message complete. Buffer position: %d", dx_get_in_buffer_position(context->bicc));
     }
-	buffer_pos = dx_get_in_buffer_position();
+	
+	context->buffer_pos = dx_get_in_buffer_position(context->bicc);
 
-    dx_logging_info(L"End parsing. Buffer position: %d. Result: %s", dx_get_in_buffer_position()
+    dx_logging_info(L"End parsing. Buffer position: %d. Result: %s", dx_get_in_buffer_position(context->bicc)
                                                                    , parse_result == R_SUCCESSFUL ? L"R_SUCCESSFUL" : L"R_FAILED");
 
 	return parse_result;
+}
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Low level socket data receiver implementation
+ */
+/* -------------------------------------------------------------------------- */
+
+bool dx_socket_data_receiver (dxf_connection_t connection, const void* buffer, int buffer_size) {
+    dx_logging_info(L"Data received: %d bytes", buffer_size);
+
+    return (dx_parse(connection, buffer, buffer_size) == R_SUCCESSFUL);
 }

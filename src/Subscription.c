@@ -22,6 +22,8 @@
 #include "DataStructures.h"
 #include "DXMemory.h"
 #include "SymbolCodec.h"
+#include "Logger.h"
+#include "DXNetwork.h"
 
 static dx_byte_t* dx_buf = NULL;
 
@@ -164,7 +166,8 @@ dx_result_t dx_write_event_records (void) {
  */
 /* -------------------------------------------------------------------------- */
 
-dx_result_t dx_create_subscription( OUT dx_byte_t** out, OUT dx_int_t* out_len, dx_message_type_t type, dx_int_t cipher, dx_const_string_t symbol, dx_int_t record_id ) {
+dx_result_t dx_create_subscription (dx_message_type_t type, dx_const_string_t symbol, dx_int_t cipher, dx_int_t record_id,
+                                    OUT dx_byte_t** out, OUT dx_int_t* out_len) {
 
 	dx_buf = (dx_byte_t*)dx_malloc(dx_initial_buffer_size);
 
@@ -216,4 +219,24 @@ dx_result_t dx_compose_description_message (OUT dx_byte_t** msg_buffer, OUT dx_i
     *msg_length = dx_get_out_buffer_position();
     
     return parseSuccessful();
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_update_record_description (dxf_connection_t connection) {
+    dx_byte_t* msg_buffer;
+    dx_int_t msg_length;
+    bool res = false;    
+
+    dx_logging_info(L"Update record description");
+
+    if (dx_compose_description_message(&msg_buffer, &msg_length) != R_SUCCESSFUL) {
+        return false;
+    }
+
+    res = dx_send_data(connection, msg_buffer, msg_length);
+
+    dx_free(msg_buffer);
+
+    return res;
 }

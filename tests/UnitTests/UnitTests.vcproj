@@ -161,6 +161,9 @@
 				Name="Sources"
 				Filter="">
 				<File
+					RelativePath="..\..\src\ConnectionContextData.c">
+				</File>
+				<File
 					RelativePath="..\..\src\DXAlgorithms.c">
 				</File>
 				<File

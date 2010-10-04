@@ -274,6 +274,13 @@ bool dx_capacity_manager_halfer (int new_size, int* capacity);
         e2 = _tmp; \
     } while (false)
     
+#define DX_CHECKED_SET_VAL_TO_PTR(ptr, val) \
+    do { \
+        if (ptr != NULL) { \
+            *ptr = val; \
+        } \
+    } while (false)
+    
 /* -------------------------------------------------------------------------- */
 /*
  *	String functions
@@ -282,6 +289,7 @@ bool dx_capacity_manager_halfer (int new_size, int* capacity);
 
 dx_string_t dx_create_string (int size);
 dx_string_t dx_create_string_src (dx_const_string_t src);
+char* dx_ansi_create_string_src (const char* src);
 dx_string_t dx_create_string_src_len (dx_const_string_t src, int len);
 dx_string_t dx_copy_string (dx_string_t dest, dx_const_string_t src);
 dx_string_t dx_copy_string_len (dx_string_t dest, dx_const_string_t src, int len);
@@ -309,6 +317,8 @@ dx_string_t dx_decode_from_integer (dx_long_t code);
  *	Bit operations
  */
 /* -------------------------------------------------------------------------- */
+
+#define IS_FLAG_SET(flags, flag) ((flags & flag) != 0)
 
 #define UNSIGNED_TYPE_dx_int_t \
     dx_uint_t

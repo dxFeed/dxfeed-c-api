@@ -62,6 +62,18 @@ dx_string_t dx_create_string_src (dx_const_string_t src) {
 
 /* -------------------------------------------------------------------------- */
 
+char* dx_ansi_create_string_src (const char* src) {
+    char* res = (const char*)dx_calloc(strlen(src) + 1, sizeof(char));
+    
+    if (res == NULL) {
+        return NULL;
+    }
+    
+    return strcpy(res, src);
+}
+
+/* -------------------------------------------------------------------------- */
+
 dx_string_t dx_create_string_src_len (dx_const_string_t src, int len) {
     dx_string_t res = NULL;
 

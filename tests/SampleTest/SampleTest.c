@@ -41,7 +41,6 @@ void on_reader_thread_terminate(const char* host ) {
     LeaveCriticalSection(&listener_thread_guard);
 
     printf("\nTerminating listener thread, host: %s\n", host);
-    dx_logging_verbose_info(L"Terminating listener thread");
 }
 
 /* -------------------------------------------------------------------------- */
@@ -116,7 +115,7 @@ void listener (int event_type, dx_const_string_t symbol_name, const dx_event_dat
 void process_last_error () {
     int subsystem_id = dx_sc_invalid_subsystem;
     int error_code = DX_INVALID_ERROR_CODE;
-    const char* error_descr = NULL;
+    dx_const_string_t error_descr = NULL;
     int res;
     
     res = dxf_get_last_error(&subsystem_id, &error_code, &error_descr);
@@ -128,8 +127,8 @@ void process_last_error () {
             return;
         }
         
-        printf("Error occurred and successfully retrieved:\n"
-               "subsystem code = %d, error code = %d, description = \"%s\"\n",
+        wprintf(L"Error occurred and successfully retrieved:\n"
+                L"subsystem code = %d, error code = %d, description = \"%s\"\n",
                subsystem_id, error_code, error_descr);
         return;
     }
@@ -140,22 +139,23 @@ void process_last_error () {
 /* -------------------------------------------------------------------------- */
 
 int main (int argc, char* argv[]) {
+    dxf_connection_t connection;
     dxf_subscription_t subscription;
     int loop_counter = 10000;
 
-    dx_logger_initialize( "log.log", true, true, true );
+    dxf_initialize_logger( "log.log", true, true, true );
 
 	printf("Sample test started.\n");    
     printf("Connecting to host %s...\n", dxfeed_host);
     
-    if (!dxf_connect_feed(dxfeed_host, on_reader_thread_terminate)) {
+    if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, &connection)) {
         process_last_error();
         return -1;
     }
 
     printf("Connection successful!\n");
  
-	if (!dxf_create_subscription(/*DXF_ET_TRADE | DXF_ET_QUOTE | DXF_ET_ORDER | DXF_ET_SUMMARY | DXF_ET_PROFILE*/DXF_ET_TIME_AND_SALE, &subscription)) {
+	if (!dxf_create_subscription(connection, /*DXF_ET_TRADE | DXF_ET_QUOTE | DXF_ET_ORDER | DXF_ET_SUMMARY | DXF_ET_PROFILE*/DXF_ET_QUOTE, &subscription)) {
         process_last_error();
         
         return -1;
@@ -182,7 +182,7 @@ int main (int argc, char* argv[]) {
 
     printf("Disconnecting from host...\n");
     
-    if (!dxf_disconnect_feed()) {
+    if (!dxf_close_connection(connection)) {
         process_last_error();
         
         return -1;

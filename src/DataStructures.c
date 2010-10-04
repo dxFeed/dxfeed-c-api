@@ -20,6 +20,7 @@
 #include "DataStructures.h"
 #include "ParserCommon.h"
 #include "DXAlgorithms.h"
+#include "ConnectionContextData.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -34,8 +35,6 @@ static const dx_field_info_t dx_fields_trade[] = {
 	{ dx_fid_compact_int, L"Last.Size", DX_RECORD_FIELD_SETTER_NAME(dx_trade_t, size), DX_RECORD_FIELD_DEF_VAL_NAME(dx_trade_t, size) },
 	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Volume", DX_RECORD_FIELD_SETTER_NAME(dx_trade_t, day_volume), DX_RECORD_FIELD_DEF_VAL_NAME(dx_trade_t, day_volume) }
 }; 
-
-static bool g_trade_field_server_support_states[sizeof(dx_fields_trade) / sizeof(dx_fields_trade[0])] = { 0 };
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -54,8 +53,6 @@ static const dx_field_info_t dx_fields_quote[] = {
     { dx_fid_compact_int, L"Ask.Size", DX_RECORD_FIELD_SETTER_NAME(dx_quote_t, ask_size), DX_RECORD_FIELD_DEF_VAL_NAME(dx_quote_t, ask_size) }
 };
 
-static bool g_quote_field_server_support_states[sizeof(dx_fields_quote) / sizeof(dx_fields_quote[0])] = { 0 };
-
 /* -------------------------------------------------------------------------- */
 /*
  *	Fundamental data fields
@@ -70,8 +67,6 @@ static const dx_field_info_t dx_fields_fundamental[] = {
 	{ dx_fid_compact_int, L"OpenInterest", DX_RECORD_FIELD_SETTER_NAME(dx_fundamental_t, open_interest), DX_RECORD_FIELD_DEF_VAL_NAME(dx_fundamental_t, open_interest) }
 };
 
-static bool g_fundamental_field_server_support_states[sizeof(dx_fields_fundamental) / sizeof(dx_fields_fundamental[0])] = { 0 };
-		
 /* -------------------------------------------------------------------------- */
 /*
  *	Profile data fields
@@ -81,8 +76,6 @@ static bool g_fundamental_field_server_support_states[sizeof(dx_fields_fundament
 static const dx_field_info_t dx_fields_profile[] = { 
 	{ dx_fid_utf_char_array, L"Description", DX_RECORD_FIELD_SETTER_NAME(dx_profile_t, description), DX_RECORD_FIELD_DEF_VAL_NAME(dx_profile_t, description) }
 };
-
-static bool g_profile_field_server_support_states[sizeof(dx_fields_profile) / sizeof(dx_fields_profile[0])] = { 0 };
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -98,8 +91,6 @@ static const dx_field_info_t dx_fields_market_maker[] = {
 	{ dx_fid_compact_int | dx_fid_flag_decimal, L"MMAsk.Price", DX_RECORD_FIELD_SETTER_NAME(dx_market_maker_t, mmask_price), DX_RECORD_FIELD_DEF_VAL_NAME(dx_market_maker_t, mmask_price) },
 	{ dx_fid_compact_int, L"MMAsk.Size", DX_RECORD_FIELD_SETTER_NAME(dx_market_maker_t, mmask_size), DX_RECORD_FIELD_DEF_VAL_NAME(dx_market_maker_t, mmask_size) }
 }; 
-
-static bool g_market_maker_field_server_support_states[sizeof(dx_fields_market_maker) / sizeof(dx_fields_market_maker[0])] = { 0 };
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -119,13 +110,20 @@ static const dx_field_info_t dx_fields_time_and_sale[] = {
     { dx_fid_compact_int, L"Flags", DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, type), DX_RECORD_FIELD_DEF_VAL_NAME(dx_time_and_sale_t, type) }
 };
 
-static bool g_time_and_sale_field_server_support_states[sizeof(dx_fields_time_and_sale) / sizeof(dx_fields_time_and_sale[0])] = { 0 };
-
 /* -------------------------------------------------------------------------- */
 /*
  *	Records
  */
 /* -------------------------------------------------------------------------- */
+
+static const int g_record_field_counts[dx_rid_count] = {
+    sizeof(dx_fields_trade) / sizeof(dx_fields_trade[0]),
+    sizeof(dx_fields_quote) / sizeof(dx_fields_quote[0]),
+    sizeof(dx_fields_fundamental) / sizeof(dx_fields_fundamental[0]),
+    sizeof(dx_fields_profile) / sizeof(dx_fields_profile[0]),
+    sizeof(dx_fields_market_maker) / sizeof(dx_fields_market_maker[0]),
+    sizeof(dx_fields_time_and_sale) / sizeof(dx_fields_time_and_sale[0])
+};
 
 static const dx_record_info_t g_records[dx_rid_count] = {
 	{ L"Trade", sizeof(dx_fields_trade) / sizeof(dx_fields_trade[0]), dx_fields_trade },
@@ -136,24 +134,6 @@ static const dx_record_info_t g_records[dx_rid_count] = {
     { L"TimeAndSale", sizeof(dx_fields_time_and_sale) / sizeof(dx_fields_time_and_sale[0]), dx_fields_time_and_sale }
 };
 
-static dx_record_id_t g_protocol_to_record_id_map[dx_rid_count] = {
-    dx_rid_trade,
-    dx_rid_quote,
-    dx_rid_fundamental,
-    dx_rid_profile,
-    dx_rid_market_maker,
-    dx_rid_time_and_sale
-};
-
-dx_record_server_support_info_t g_record_server_support_states[dx_rid_count] = {
-    { sizeof(dx_fields_trade) / sizeof(dx_fields_trade[0]), g_trade_field_server_support_states },
-    { sizeof(dx_fields_quote) / sizeof(dx_fields_quote[0]), g_quote_field_server_support_states },
-    { sizeof(dx_fields_fundamental) / sizeof(dx_fields_fundamental[0]), g_fundamental_field_server_support_states },
-    { sizeof(dx_fields_profile) / sizeof(dx_fields_profile[0]), g_profile_field_server_support_states },
-    { sizeof(dx_fields_market_maker) / sizeof(dx_fields_market_maker[0]), g_market_maker_field_server_support_states },
-    { sizeof(dx_fields_time_and_sale) / sizeof(dx_fields_time_and_sale[0]), g_time_and_sale_field_server_support_states }
-};
-
 /* In the Java code, the exchange code is determined by the record name: it's the last symbol of
    the record name if the second last symbol is '&', otherwise it's zero.
    Here we don't have any exchange code semantics in the record names (and neither the Java code does),
@@ -162,18 +142,101 @@ static dx_char_t const g_record_exchange_codes[dx_rid_count] = { 0 };
 
 /* -------------------------------------------------------------------------- */
 /*
- *	Event record functions implementation
+ *	Data structures connection context
  */
 /* -------------------------------------------------------------------------- */
 
-dx_record_id_t dx_get_record_id (dx_int_t protocol_id) {
-    return g_protocol_to_record_id_map[protocol_id];
+typedef struct {
+    dx_record_id_t protocol_to_record_id_map[dx_rid_count];
+    dx_record_server_support_info_t record_server_support_states[dx_rid_count];
+} dx_data_structures_connection_context_t;
+
+#define CONTEXT_FIELD(field) \
+    (((dx_data_structures_connection_context_t*)dx_get_subsystem_data(connection, dx_ccs_data_structures))->field)
+
+/* -------------------------------------------------------------------------- */
+
+void dx_free_server_support_states_data (dx_record_server_support_info_t* data);
+
+DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_data_structures) {
+    dx_data_structures_connection_context_t* context = dx_calloc(1, sizeof(dx_data_structures_connection_context_t));
+    dx_record_id_t record_id = dx_rid_begin;
+    
+    if (context == NULL) {
+        return false;
+    }
+    
+    for (; record_id < dx_rid_count; ++record_id) {
+        context->protocol_to_record_id_map[record_id] = record_id;
+        
+        if ((context->record_server_support_states[record_id].fields = 
+             dx_calloc(g_record_field_counts[record_id], sizeof(bool))) == NULL) {
+            dx_free_server_support_states_data(context->record_server_support_states);
+            dx_free(context);
+            
+            return false;
+        }
+        
+        context->record_server_support_states[record_id].field_count = g_record_field_counts[record_id];
+    }
+    
+    if (!dx_set_subsystem_data(connection, dx_ccs_data_structures, context)) {
+        dx_free_server_support_states_data(context->record_server_support_states);
+        dx_free(context);
+
+        return false;
+    }
+    
+    return true;
 }
 
 /* -------------------------------------------------------------------------- */
 
-void dx_assign_protocol_id (dx_record_id_t record_id, dx_int_t protocol_id) {
-    g_protocol_to_record_id_map[protocol_id] = record_id;
+DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_data_structures) {
+    dx_data_structures_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_data_structures);
+    
+    if (context == NULL) {
+        return true;
+    }
+    
+    dx_free_server_support_states_data(context->record_server_support_states);
+    dx_free(context);
+    
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+void dx_free_server_support_states_data (dx_record_server_support_info_t* data) {
+    dx_record_id_t record_id = dx_rid_begin;
+    
+    for (; record_id < dx_rid_count; ++record_id) {
+        if (data[record_id].fields != NULL) {
+            dx_free(data[record_id].fields);
+        }
+    }
+}
+
+/* -------------------------------------------------------------------------- */
+
+dx_record_server_support_info_t* dx_get_record_server_support_states (dxf_connection_t connection) {
+    return CONTEXT_FIELD(record_server_support_states);
+}
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Event record functions implementation
+ */
+/* -------------------------------------------------------------------------- */
+
+dx_record_id_t dx_get_record_id (dxf_connection_t connection, dx_int_t protocol_id) {
+    return CONTEXT_FIELD(protocol_to_record_id_map)[protocol_id];
+}
+
+/* -------------------------------------------------------------------------- */
+
+void dx_assign_protocol_id (dxf_connection_t connection, dx_record_id_t record_id, dx_int_t protocol_id) {
+    CONTEXT_FIELD(protocol_to_record_id_map)[protocol_id] = record_id;
 }
 
 /* -------------------------------------------------------------------------- */

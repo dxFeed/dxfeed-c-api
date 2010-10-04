@@ -20,6 +20,7 @@
 #include "RecordBuffers.h"
 #include "DXMemory.h"
 #include "DXAlgorithms.h"
+#include "ConnectionContextData.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -32,7 +33,62 @@ typedef struct {
     int capacity;
 } dx_event_record_buffer_t;
 
-static dx_event_record_buffer_t g_event_record_buffer_array[dx_rid_count] = { 0 };
+typedef struct {
+    dx_const_string_t* elements;
+    int size;
+    int capacity;
+} dx_string_array_t;
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Record buffers connection context
+ */
+/* -------------------------------------------------------------------------- */
+
+typedef struct {
+    dx_event_record_buffer_t record_buffer_array[dx_rid_count];
+    dx_string_array_t string_buffers;
+} dx_record_buffers_connection_context_t;
+
+#define CONTEXT_FIELD(field) \
+    (((dx_record_buffers_connection_context_t*)dx_get_subsystem_data(connection, dx_ccs_record_buffers))->field)
+
+/* -------------------------------------------------------------------------- */
+
+DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_record_buffers) {
+    dx_record_buffers_connection_context_t* context = dx_calloc(1, sizeof(dx_record_buffers_connection_context_t));
+    
+    if (context == NULL) {
+        return false;
+    }
+    
+    if (!dx_set_subsystem_data(connection, dx_ccs_record_buffers, context)) {
+        dx_free(context);
+        
+        return false;
+    }
+    
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+void dx_clear_record_buffers (dx_event_record_buffer_t* record_buffers);
+void dx_free_string_buffers_impl (dx_string_array_t* string_buffers);
+
+DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_record_buffers) {
+    dx_record_buffers_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_record_buffers);
+    
+    if (context == NULL) {
+        return true;
+    }
+    
+    dx_clear_record_buffers(context->record_buffer_array);
+    dx_free_string_buffers_impl(&(context->string_buffers));
+    dx_free(context);
+    
+    return true;
+}
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -47,8 +103,11 @@ static dx_event_record_buffer_t g_event_record_buffer_array[dx_rid_count] = { 0 
     record_id##_get_record_buf_ptr
 
 #define GET_RECORD_PTR_BODY(record_id, record_type) \
-    void* GET_RECORD_PTR_NAME(record_id) (int record_index) { \
-        dx_event_record_buffer_t* record_buffer = &g_event_record_buffer_array[record_id]; \
+    void* GET_RECORD_PTR_NAME(record_id) (dxf_connection_t connection, int record_index) { \
+        dx_event_record_buffer_t* record_buffer = NULL; \
+        dx_record_buffers_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_record_buffers); \
+        \
+        record_buffer = &(context->record_buffer_array[record_id]); \
         \
         if (record_index >= record_buffer->capacity) { \
             record_type* new_buffer = dx_calloc(record_index + 1, sizeof(record_type)); \
@@ -70,8 +129,8 @@ static dx_event_record_buffer_t g_event_record_buffer_array[dx_rid_count] = { 0 
     }
 
 #define GET_RECORD_BUF_PTR_BODY(record_id) \
-    void* GET_RECORD_BUF_PTR_NAME(record_id) (void) { \
-        return g_event_record_buffer_array[record_id].buffer; \
+    void* GET_RECORD_BUF_PTR_NAME(record_id) (dxf_connection_t connection) { \
+        return CONTEXT_FIELD(record_buffer_array)[record_id].buffer; \
     }
 
 /* -------------------------------------------------------------------------- */
@@ -108,15 +167,15 @@ const dx_buffer_manager_collection_t g_buffer_managers[dx_rid_count] = {
     { GET_RECORD_PTR_NAME(dx_rid_time_and_sale), GET_RECORD_BUF_PTR_NAME(dx_rid_time_and_sale) }
 };
 
-void dx_clear_record_buffers (void) {
-    int i = 0;
+void dx_clear_record_buffers (dx_event_record_buffer_t* record_buffers) {
+    dx_record_id_t record_id = dx_rid_begin;
     
-    for (; i < dx_rid_count; ++i) {
-        if (g_event_record_buffer_array[i].buffer != NULL) {
-            dx_free(g_event_record_buffer_array[i].buffer);
+    for (; record_id < dx_rid_count; ++record_id) {
+        if (record_buffers[record_id].buffer != NULL) {
+            dx_free(record_buffers[record_id].buffer);
             
-            g_event_record_buffer_array[i].buffer = NULL;
-            g_event_record_buffer_array[i].capacity = 0;
+            record_buffers[record_id].buffer = NULL;
+            record_buffers[record_id].capacity = 0;
         }
     }
 }
@@ -127,36 +186,35 @@ void dx_clear_record_buffers (void) {
  */
 /* -------------------------------------------------------------------------- */
 
-struct {
-    dx_const_string_t* elements;
-    int size;
-    int capacity;
-} g_string_buffers = { 0 };
-
-/* -------------------------------------------------------------------------- */
-
-bool dx_store_string_buffer (dx_const_string_t buf) {
+bool dx_store_string_buffer (dxf_connection_t connection, dx_const_string_t buf) {
     bool failed = false;
+    dx_string_array_t* string_buffers = &CONTEXT_FIELD(string_buffers);
     
-    DX_ARRAY_INSERT(g_string_buffers, dx_const_string_t, buf, g_string_buffers.size, dx_capacity_manager_halfer, failed);
+    DX_ARRAY_INSERT(*string_buffers, dx_const_string_t, buf, string_buffers->size, dx_capacity_manager_halfer, failed);
     
     return !failed;
 }
 
 /* -------------------------------------------------------------------------- */
 
-void dx_free_string_buffers (void) {
+void dx_free_string_buffers_impl (dx_string_array_t* string_buffers) {
     int i = 0;
-    
-    for (; i < g_string_buffers.size; ++i) {
-        dx_free((void*)g_string_buffers.elements[i]);
+
+    for (; i < string_buffers->size; ++i) {
+        dx_free((void*)string_buffers->elements[i]);
     }
-    
-    if (g_string_buffers.elements != NULL) {
-        dx_free((void*)g_string_buffers.elements);
+
+    if (string_buffers->elements != NULL) {
+        dx_free((void*)string_buffers->elements);
     }
-    
-    g_string_buffers.elements = NULL;
-    g_string_buffers.size = 0;
-    g_string_buffers.capacity = 0;
+
+    string_buffers->elements = NULL;
+    string_buffers->size = 0;
+    string_buffers->capacity = 0;
+}
+
+/* ---------------------------------- */
+
+void dx_free_string_buffers (dxf_connection_t connection) {
+    dx_free_string_buffers_impl(&CONTEXT_FIELD(string_buffers));
 }

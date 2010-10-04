@@ -28,20 +28,20 @@
  */
 /* -------------------------------------------------------------------------- */
 
-static struct dx_error_code_descr_t g_thread_errors[] = {
-    { dx_tec_not_enough_sys_resources, "Not enough system resources to perform requested operation" },
-    { dx_tec_permission_denied, "Permission denied" },
-    { dx_tec_invalid_res_operation, "Internal software error" },
-    { dx_tec_invalid_resource_id, "Internal software error" },
-    { dx_tec_deadlock_detected, "Internal software error" },
-    { dx_tec_not_enough_memory, "Not enough memory to perform requested operation" },
-    { dx_tec_resource_busy, "Internal software error" },
-    { dx_tec_generic_error, "Unrecognized thread error" },
+static const dx_error_code_descr_t g_thread_errors[] = {
+    { dx_tec_not_enough_sys_resources, L"Not enough system resources to perform requested operation" },
+    { dx_tec_permission_denied, L"Permission denied" },
+    { dx_tec_invalid_res_operation, L"Internal software error" },
+    { dx_tec_invalid_resource_id, L"Internal software error" },
+    { dx_tec_deadlock_detected, L"Internal software error" },
+    { dx_tec_not_enough_memory, L"Not enough memory to perform requested operation" },
+    { dx_tec_resource_busy, L"Internal software error" },
+    { dx_tec_generic_error, L"Unrecognized thread error" },
     
     { ERROR_CODE_FOOTER, ERROR_DESCR_FOOTER }
 };
 
-const struct dx_error_code_descr_t* thread_error_roster = g_thread_errors;
+const dx_error_code_descr_t* thread_error_roster = g_thread_errors;
 
 /* -------------------------------------------------------------------------- */
 /*
