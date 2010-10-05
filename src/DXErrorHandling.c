@@ -112,7 +112,6 @@ dx_error_function_result_t dx_check_error_data (dx_subsystem_code_t subsystem_id
 
 static bool g_initialization_attempted = false;
 static pthread_key_t g_last_error_data_key;
-static pthread_t g_master_thread_id;
 
 typedef struct {
     int subsystem_id;
@@ -123,18 +122,12 @@ static dx_last_error_data_t g_master_thread_last_error_data = { dx_sc_invalid_su
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_is_master_thread () {
-    return dx_compare_threads(dx_get_thread_id(), g_master_thread_id);
-}
-
-/* -------------------------------------------------------------------------- */
-
 void dx_key_data_destructor (void* data) {
     if (data != &g_master_thread_last_error_data) {
         dx_free(data);
     }
     
-    if (dx_is_master_thread()) {
+    if (dx_is_thread_master()) {
         dx_thread_data_key_destroy(g_last_error_data_key);
 
         g_initialization_attempted = false;
@@ -167,7 +160,7 @@ dx_error_function_result_t dx_set_last_error (int subsystem_id, int error_code) 
         return efr_error_subsys_init_failure;
     }
     
-    if (dx_is_master_thread()) {
+    if (dx_is_thread_master()) {
         error_data = &g_master_thread_last_error_data;
     } else {
         error_data = dx_get_thread_data(g_last_error_data_key);
@@ -198,7 +191,7 @@ dx_error_function_result_t dx_get_last_error (int* subsystem_id, int* error_code
         return efr_error_subsys_init_failure;
     }
     
-    if (dx_is_master_thread()) {
+    if (dx_is_thread_master()) {
         error_data = &g_master_thread_last_error_data;
     } else {
         error_data = dx_get_thread_data(g_last_error_data_key);
@@ -242,8 +235,9 @@ bool dx_init_error_subsystem () {
     
     if (!g_initialization_attempted) {
         g_initialization_attempted = true;
-        g_master_thread_id = dx_get_thread_id();
         
+        dx_mark_thread_master();
+                
         if (!dx_thread_data_key_create(&g_last_error_data_key, dx_key_data_destructor)) {
             return false;
         }
@@ -253,7 +247,7 @@ bool dx_init_error_subsystem () {
         }
         
         return true;
-    } else if (dx_is_master_thread()) {
+    } else if (dx_is_thread_master()) {
         return true;
     }
     

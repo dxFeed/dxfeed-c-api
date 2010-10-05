@@ -47,6 +47,14 @@ void second_listener (int event_type, dx_const_string_t symbol_name,const dx_eve
 
 /* -------------------------------------------------------------------------- */
 
+dxf_connection_t connection;
+
+void conn_termination_notifier (const char* host) {
+    dxf_close_connection(connection);
+}
+
+/* -------------------------------------------------------------------------- */
+
 void process_last_error () {
     int subsystem_id = dx_sc_invalid_subsystem;
     int error_code = DX_INVALID_ERROR_CODE;
@@ -74,7 +82,6 @@ void process_last_error () {
 /* -------------------------------------------------------------------------- */
 
 int main (int argc, char* argv[]) {
-    dxf_connection_t connection;
     dxf_subscription_t subscription;
 
 	dx_string_t symbols_to_add[] = { L"MSFT", L"YHOO", L"C" };
@@ -97,7 +104,7 @@ int main (int argc, char* argv[]) {
 	printf("API test started.\n");    
     printf("Connecting to host %s...\n", dxfeed_host);
     
-    if (!dxf_create_connection(dxfeed_host, NULL, &connection)) {
+    if (!dxf_create_connection(dxfeed_host, conn_termination_notifier, &connection)) {
         process_last_error();
         return -1;
     }

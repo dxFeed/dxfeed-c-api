@@ -111,6 +111,8 @@ typedef struct {
     dx_symbol_data_array_t ciphered_symbols[SYMBOL_BUCKET_COUNT];
     dx_symbol_data_array_t hashed_symbols[SYMBOL_BUCKET_COUNT];
     
+    dx_subscription_data_array_t subscriptions;
+    
     int set_fields_flags;
 } dx_event_subscription_connection_context_t;
 
@@ -168,9 +170,18 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_event_subscription) {
 
 bool dx_clear_event_subscription_connection_context (dx_event_subscription_connection_context_t* context) {
     bool res = true;
+    int i = 0;
+    
+    for (; i < context->subscriptions.size; ++i) {
+        res = dx_close_event_subscription((dxf_subscription_t)context->subscriptions.elements[i]) && res;
+    }
     
     if (IS_FLAG_SET(context->set_fields_flags, MUTEX_FIELD_FLAG)) {
         res = dx_mutex_destroy(&(context->subscr_guard)) && res;
+    }
+    
+    if (context->subscriptions.elements != NULL) {
+        dx_free(context->subscriptions.elements);
     }
     
     dx_free(context);
@@ -316,6 +327,7 @@ dx_symbol_data_ptr_t dx_create_symbol_data (dx_const_string_t name, dx_int_t cip
 dx_symbol_data_ptr_t dx_subscribe_symbol (CONTEXT_VAL(ctx),
                                           dx_const_string_t symbol_name, dx_subscription_data_ptr_t owner) {
     dx_symbol_data_ptr_t res = NULL;
+    bool is_just_created = false;
     
     dx_logging_info(L"Subscribe symbol: %s", symbol_name);
 
@@ -348,6 +360,8 @@ dx_symbol_data_ptr_t dx_subscribe_symbol (CONTEXT_VAL(ctx),
             if (res == NULL) {
                 return NULL;
             }
+            
+            is_just_created = true;
 
             DX_ARRAY_INSERT(*symbol_array_obj_ptr, dx_symbol_data_ptr_t, res, symbol_index, dx_capacity_manager_halfer, failed);
 
@@ -374,7 +388,7 @@ dx_symbol_data_ptr_t dx_subscribe_symbol (CONTEXT_VAL(ctx),
         DX_ARRAY_INSERT(res->subscriptions, dx_subscription_data_ptr_t, owner, subscr_index, dx_capacity_manager_halfer, failed);
         
         if (failed) {
-            return NULL;
+            return (is_just_created ? dx_cleanup_symbol_data(res) : NULL);
         }
         
         ++(res->ref_count);
@@ -386,7 +400,9 @@ dx_symbol_data_ptr_t dx_subscribe_symbol (CONTEXT_VAL(ctx),
 /* -------------------------------------------------------------------------- */
 
 bool dx_unsubscribe_symbol (CONTEXT_VAL(ctx), dx_symbol_data_ptr_t symbol_data, dx_subscription_data_ptr_t owner) {
-    {
+    bool res = true;
+    
+    do {
         bool subscr_exists = false;
         int subscr_index;
         bool failed = false;
@@ -397,15 +413,21 @@ bool dx_unsubscribe_symbol (CONTEXT_VAL(ctx), dx_symbol_data_ptr_t symbol_data, 
                         subscr_exists, subscr_index);
 
         if (!subscr_exists) {
-            return true;
+            /* should never be here */
+            
+            res = false;
+            
+            break;
         }
 
         DX_ARRAY_DELETE(symbol_data->subscriptions, dx_subscription_data_ptr_t, subscr_index, dx_capacity_manager_halfer, failed);
 
         if (failed) {
-            return false;
+            /* most probably the memory allocation error */
+            
+            res = false;
         }
-    }
+    } while (false);
     
     if (--(symbol_data->ref_count) == 0) {
         dx_symbol_comparator_t comparator = dx_ciphered_symbol_comparator;
@@ -429,19 +451,19 @@ bool dx_unsubscribe_symbol (CONTEXT_VAL(ctx), dx_symbol_data_ptr_t symbol_data, 
         if (!symbol_exists) {
             dx_set_last_error(dx_sc_event_subscription, dx_es_invalid_internal_structure_state);
             
-            return false;
+            res = false;
         }
         
         DX_ARRAY_DELETE(*symbol_array_obj_ptr, dx_symbol_data_ptr_t, symbol_index, dx_capacity_manager_halfer, failed);
         
         if (failed) {
-            return false;
+            res = false;
         }
         
         dx_cleanup_symbol_data(symbol_data);
     }
     
-    return true;
+    return res;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -548,6 +570,62 @@ void dx_store_last_symbol_event (dx_symbol_data_ptr_t symbol_data, dx_event_id_t
 }
 
 /* -------------------------------------------------------------------------- */
+
+bool dx_add_subscription_to_context (dx_subscription_data_ptr_t subscr_data) {
+    bool subscr_exists = false;
+    int subscr_index;
+    bool failed = false;
+    
+    CONTEXT_VAL(ctx);
+    GET_CONTEXT_VAL(ctx, subscr_data);
+
+    DX_ARRAY_SEARCH(ctx->subscriptions.elements, 0, ctx->subscriptions.size, subscr_data, DX_NUMERIC_COMPARATOR, false,
+                    subscr_exists, subscr_index);
+
+    if (subscr_exists) {
+        /* should never be here */
+        
+        return false;
+    }
+
+    DX_ARRAY_INSERT(ctx->subscriptions, dx_subscription_data_ptr_t, subscr_data, subscr_index, dx_capacity_manager_halfer, failed);
+
+    if (failed) {
+        return false;
+    }
+    
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_remove_subscription_from_context (dx_subscription_data_ptr_t subscr_data) {
+    bool subscr_exists = false;
+    int subscr_index;
+    bool failed = false;
+    
+    CONTEXT_VAL(ctx);
+    GET_CONTEXT_VAL(ctx, subscr_data);
+
+    DX_ARRAY_SEARCH(ctx->subscriptions.elements, 0, ctx->subscriptions.size, subscr_data, DX_NUMERIC_COMPARATOR, false,
+                    subscr_exists, subscr_index);
+
+    if (!subscr_exists) {
+        /* should never be here */
+
+        return false;
+    }
+
+    DX_ARRAY_DELETE(ctx->subscriptions, dx_subscription_data_ptr_t, subscr_index, dx_capacity_manager_halfer, failed);
+
+    if (failed) {
+        return false;
+    }
+    
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
 /*
  *	Subscription functions implementation
  */
@@ -572,6 +650,12 @@ dxf_subscription_t dx_create_event_subscription (dxf_connection_t connection, in
     
     subscr_data->connection = connection;
     subscr_data->event_types = event_types;
+    
+    if (!dx_add_subscription_to_context(subscr_data)) {
+        dx_free(subscr_data);
+        
+        return dx_invalid_subscription;
+    }
 
     return (dxf_subscription_t)subscr_data;
 }
@@ -632,6 +716,10 @@ bool dx_close_event_subscription (dxf_subscription_t subscr_id) {
     dx_clear_listener_array(&(subscr_data->listeners));
     
     res = dx_mutex_unlock(&(context->subscr_guard)) && res;
+    
+    if (!dx_remove_subscription_from_context(subscr_data)) {
+        res = false;
+    }
     
     dx_free(subscr_data);
     

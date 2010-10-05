@@ -193,7 +193,7 @@ void* dx_socket_reader (void* arg) {
     dx_connection_context_t* ctx = NULL;
     bool receiver_result = true;
     bool is_thread_idle = false;
-
+    
     char read_buf[READ_CHUNK_SIZE];
     int number_of_bytes_read = 0;
     

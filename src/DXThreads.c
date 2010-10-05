@@ -60,6 +60,20 @@ void dx_sleep (int milliseconds) {
 #endif /* _WIN32 */
 
 /* -------------------------------------------------------------------------- */
+
+static pthread_t g_master_thread_id;
+
+void dx_mark_thread_master (void) {
+    g_master_thread_id = dx_get_thread_id();
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_is_thread_master (void) {
+    return dx_compare_threads(dx_get_thread_id(), g_master_thread_id);
+}
+
+/* -------------------------------------------------------------------------- */
 /*
  *	Wrapper implementation
  */
@@ -114,10 +128,12 @@ bool dx_close_thread_handle (pthread_t thread_id) {
     switch (res) {
     case EINVAL:
         dx_set_last_error(dx_sc_threads, dx_tec_invalid_res_operation); break;
-    case ESRCH:
-        dx_set_last_error(dx_sc_threads, dx_tec_invalid_resource_id); break;
     default:
         dx_set_last_error(dx_sc_threads, dx_tec_generic_error); break;
+    case ESRCH:
+        /* for some reason this return value is given for a valid thread handle */
+
+        /* dx_set_last_error(dx_sc_threads, dx_tec_invalid_resource_id); break; */
     case 0:
         return true;
     }
