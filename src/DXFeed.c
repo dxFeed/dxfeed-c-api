@@ -298,31 +298,6 @@ DXFEED_API ERRORCODE dxf_close_connection (dxf_connection_t connection) {
 
 /* -------------------------------------------------------------------------- */
 
-DXFEED_API ERRORCODE dxf_get_last_error (int* subsystem_id, int* error_code, dx_const_string_t* error_descr) {
-    int res = dx_get_last_error(subsystem_id, error_code, error_descr);
-    
-    switch (res) {
-    case efr_no_error_stored:
-        if (subsystem_id != NULL) {
-            *subsystem_id = dx_sc_invalid_subsystem;
-        }
-        
-        if (error_code != NULL) {
-            *error_code = DX_INVALID_ERROR_CODE;
-        }
-        
-        if (error_descr != NULL) {
-            *error_descr = L"No error occurred";
-        }
-    case efr_success:
-        return DXF_SUCCESS;
-    }
-    
-    return DXF_FAILURE;
-}
-
-/* -------------------------------------------------------------------------- */
-
 DXFEED_API ERRORCODE dxf_create_subscription (dxf_connection_t connection, int event_types, OUT dxf_subscription_t* subscription){
 	static bool symbol_codec_initialized = false;
 
@@ -330,36 +305,92 @@ DXFEED_API ERRORCODE dxf_create_subscription (dxf_connection_t connection, int e
 
     dx_perform_common_actions();
 	
-	// initialization of penta codec. do not remove!
 	if (!symbol_codec_initialized) {
-		dx_init_symbol_codec();
-		symbol_codec_initialized = 1; 
+		symbol_codec_initialized = true;
+		
+		if (dx_init_symbol_codec() != R_SUCCESSFUL) {
+		    return DXF_FAILURE;
+		}
 	}
 	
-	*subscription = dx_create_event_subscription(connection, event_types);
-
-	if (*subscription == dx_invalid_subscription)
-		return DXF_FAILURE;
+	if ((*subscription = dx_create_event_subscription(connection, event_types)) == dx_invalid_subscription) {
+	    return DXF_FAILURE;
+	}
 
 	return DXF_SUCCESS;
 }
 
 /* -------------------------------------------------------------------------- */
 
-DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dx_const_string_t* symbols, int symbols_count) {
-	dx_int_t i;
+DXFEED_API ERRORCODE dxf_remove_subscription (dxf_subscription_t subscription) {
+    dxf_connection_t connection;
+    int events;
+    bool mute_state;
+
+    dx_const_string_t* symbols;
+    int symbol_count;
 
     dx_perform_common_actions();
-	
-	if (symbols_count < 0) {
-		return DXF_FAILURE; //TODO: set_last_error 
+
+    if (!dx_get_event_subscription_mute_state(subscription, &mute_state) ||
+        (!mute_state && (!dx_get_subscription_connection(subscription, &connection) ||
+        !dx_get_event_subscription_event_types(subscription, &events) ||
+        !dx_get_event_subscription_symbols(subscription, &symbols, &symbol_count) ||
+        !dx_unsubscribe(connection, symbols, symbol_count, events) ||
+        !dx_mute_event_subscription(subscription)))) {
+
+        return DXF_FAILURE;
     }
-    
-    for ( i = 0; i < symbols_count; ++i) {
-		if (dxf_add_symbol(subscription, symbols[i]) == DXF_FAILURE) {
-			return DXF_FAILURE;
-		}
-	}
+
+    return DXF_SUCCESS;
+}
+
+/* -------------------------------------------------------------------------- */
+
+DXFEED_API ERRORCODE dxf_add_subscription (dxf_subscription_t subscription) {
+    dxf_connection_t connection;
+    int events; 
+    bool mute_state;
+
+    dx_const_string_t* symbols;
+    int symbols_count;
+
+    dx_perform_common_actions();
+
+    if (!dx_get_event_subscription_mute_state(subscription, &mute_state) ||
+        (mute_state && (!dx_unmute_event_subscription(subscription) ||
+        !dx_get_subscription_connection(subscription, &connection) ||
+        !dx_get_event_subscription_event_types(subscription, &events) ||
+        !dx_get_event_subscription_symbols(subscription, &symbols, &symbols_count) ||
+        !dx_subscribe(connection, symbols, symbols_count, events)))) {
+
+        return DXF_FAILURE;
+    }
+
+    return DXF_SUCCESS;
+}
+
+/* -------------------------------------------------------------------------- */
+
+DXFEED_API ERRORCODE dxf_close_subscription (dxf_subscription_t subscription) {
+    dxf_connection_t connection;
+    int events;
+    bool mute_state;
+
+    dx_const_string_t* symbols;
+    int symbol_count;
+
+    dx_perform_common_actions();
+
+    if (!dx_get_event_subscription_mute_state(subscription, &mute_state) ||
+        (!mute_state && (!dx_get_subscription_connection(subscription, &connection) ||
+        !dx_get_event_subscription_event_types(subscription, &events) ||
+        !dx_get_event_subscription_symbols(subscription, &symbols, &symbol_count) ||
+        !dx_unsubscribe(connection, symbols, symbol_count, events))) ||
+        !dx_close_event_subscription(subscription)) {
+
+        return DXF_FAILURE;
+    }
 
     return DXF_SUCCESS;
 }
@@ -369,28 +400,114 @@ DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dx_const_
 DXFEED_API ERRORCODE dxf_add_symbol (dxf_subscription_t subscription, dx_const_string_t symbol) {
 	dx_int_t events;
 	dxf_connection_t connection;
+	bool mute_state;
 	
     dx_logging_info(L"Adding symbol %s", symbol);
 
     dx_perform_common_actions();
 	
-	if (!dx_get_subscription_connection(subscription, &connection)) {
+	if (!dx_get_subscription_connection(subscription, &connection) ||
+	    !dx_get_event_subscription_event_types(subscription, &events) ||
+	    !dx_add_symbols(subscription, &symbol, 1) ||
+	    !dx_get_event_subscription_mute_state(subscription, &mute_state) ||
+	    (!mute_state && !dx_subscribe(connection, &symbol, 1, events))) {
+	    
 	    return DXF_FAILURE;
 	}
 	
-	if (!dx_get_event_subscription_event_types(subscription, &events)) {
-		return DXF_FAILURE;
-    }
-			
-	if (!dx_add_symbols(subscription, &symbol, 1)) {
-		return DXF_FAILURE;
-	}
-	
-	if (!dx_subscribe(connection, &symbol, 1, events)) {
-		return DXF_FAILURE;
-	}
-	
 	return DXF_SUCCESS;
+}
+
+/* -------------------------------------------------------------------------- */
+
+DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dx_const_string_t* symbols, int symbols_count) {
+    dx_int_t i;
+
+    dx_perform_common_actions();
+
+    if (symbols_count < 0) {
+        return DXF_FAILURE; //TODO: set_last_error 
+    }
+
+    for ( i = 0; i < symbols_count; ++i) {
+        if (dxf_add_symbol(subscription, symbols[i]) == DXF_FAILURE) {
+            return DXF_FAILURE;
+        }
+    }
+
+    return DXF_SUCCESS;
+}
+
+/* -------------------------------------------------------------------------- */
+
+DXFEED_API ERRORCODE dxf_remove_symbols (dxf_subscription_t subscription, dx_const_string_t* symbols, int symbol_count) {
+    dxf_connection_t connection;
+    int events;
+    bool mute_state;
+
+    dx_perform_common_actions();
+
+    if (!dx_get_event_subscription_mute_state(subscription, &mute_state) ||
+        (!mute_state && (!dx_get_subscription_connection(subscription, &connection) ||
+        !dx_get_event_subscription_event_types(subscription, &events) ||
+        !dx_unsubscribe(connection, symbols, symbol_count, events))) ||
+        !dx_remove_symbols(subscription, symbols, symbol_count)) {
+
+        return DXF_FAILURE;
+    }
+
+    return DXF_SUCCESS;
+}
+
+/* -------------------------------------------------------------------------- */
+
+DXFEED_API ERRORCODE dxf_get_symbols (dxf_subscription_t subscription, OUT dx_const_string_t* symbols, int* symbols_count){
+    dx_perform_common_actions();
+
+    if (!dx_get_event_subscription_symbols(subscription, &symbols, symbols_count)) {
+        return DXF_FAILURE;
+    }
+
+    return DXF_SUCCESS;
+}
+
+/* -------------------------------------------------------------------------- */
+
+DXFEED_API ERRORCODE dxf_set_symbols (dxf_subscription_t subscription, dx_const_string_t* symbols, int symbols_count) {	
+    dx_perform_common_actions();
+
+    if (dxf_subscription_clear_symbols(subscription) == DXF_FAILURE ||
+        dxf_add_symbols(subscription, symbols, symbols_count) == DXF_FAILURE) {
+
+        return DXF_FAILURE;
+    }
+
+    return DXF_SUCCESS;
+}
+
+/* -------------------------------------------------------------------------- */
+
+DXFEED_API ERRORCODE dxf_subscription_clear_symbols (dxf_subscription_t subscription) {
+    dxf_connection_t connection;
+    int events; 
+    bool mute_state;
+
+    dx_string_t* symbols;
+    int symbol_count;
+
+    dx_perform_common_actions();
+
+    if (!dx_get_event_subscription_symbols(subscription, &symbols, &symbol_count) ||
+        !dx_get_event_subscription_mute_state(subscription, &mute_state) ||
+        (!mute_state && (!dx_get_subscription_connection(subscription, &connection) ||
+        !dx_get_event_subscription_event_types(subscription, &events) ||
+        !dx_unsubscribe(connection, symbols, symbol_count, events))) ||
+        !dx_remove_symbols(subscription, symbols, symbol_count)) {
+
+        return DXF_FAILURE;
+    }
+
+    return DXF_SUCCESS;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -402,109 +519,6 @@ DXFEED_API ERRORCODE dxf_attach_event_listener (dxf_subscription_t subscription,
 		return DXF_FAILURE;
 	}
 	
-	return DXF_SUCCESS;
-}
-
-/* -------------------------------------------------------------------------- */
-
-DXFEED_API ERRORCODE dxf_subscription_clear_symbols (dxf_subscription_t subscription) {
-	dx_int_t events; 
-	dxf_connection_t connection;
-    dx_int_t count = 0;
-
-    dx_string_t* symbols;
-	dx_string_t* symbol_array;
-
-	int symbols_count;
-	int iter = 0;
-
-    dx_perform_common_actions();
-	
-	if (!dx_get_subscription_connection(subscription, &connection)) {
-	    return DXF_FAILURE;
-	}
-	
-	if (!dx_get_event_subscription_event_types(subscription, &events)) {
-		return DXF_FAILURE;
-	}
-	
-	if (!dx_get_event_subscription_symbols(subscription, &symbols, &symbols_count)) {
-		return DXF_FAILURE;
-	}
-
-    symbol_array = dx_calloc(symbols_count, sizeof(dx_const_string_t*));
-	
-	for (; count < symbols_count; ++count){
-		symbol_array[count] = dx_create_string_src(symbols[count]);
-	}
-
-	if (!dx_remove_symbols(subscription, symbols, symbols_count)) {
-		return DXF_FAILURE; 
-    }
-
-    if (!dx_unsubscribe(connection, symbol_array, symbols_count, events))
-		return DXF_FAILURE;
-
-	
-	return DXF_SUCCESS;
-}
-
-/* -------------------------------------------------------------------------- */
-
-DXFEED_API ERRORCODE dxf_remove_symbols (dxf_subscription_t subscription, dx_const_string_t* symbols, int symbols_count) {
-	dxf_connection_t connection;
-	dx_int_t events; 
-	
-	dx_string_t* existing_symbols;
-	int existing_symbols_count;
-
-	int i = 0;
-	int j = 0;
-
-    dx_perform_common_actions();
-	
-	if (!dx_get_subscription_connection(subscription, &connection)) {
-	    return DXF_FAILURE;
-	}
-	
-	if (!dx_get_event_subscription_event_types(subscription, &events)) {
-		return DXF_FAILURE;
-	}
-	
-	if (!dx_get_event_subscription_symbols(subscription, &existing_symbols, &existing_symbols_count)) {
-		return DXF_FAILURE;
-	}
-
-	for (; i < symbols_count; ++i) {
-		for ( j = 0; j < existing_symbols_count; ++j) {
-			if (symbols[i] == existing_symbols[j]) {
-				if (!dx_remove_symbols(subscription, symbols, symbols_count)) {
-					return DXF_FAILURE; 
-			    }
-			}
-		}
-	}
-
-	if (!dx_unsubscribe(connection, symbols, symbols_count, events)) {
-		return DXF_FAILURE;
-	}
-	
-	return DXF_SUCCESS;
-}
-
-/* -------------------------------------------------------------------------- */
-
-DXFEED_API ERRORCODE dxf_set_symbols (dxf_subscription_t subscription, dx_const_string_t* symbols, int symbols_count) {	
-    dx_perform_common_actions();
-	
-	if (dxf_subscription_clear_symbols(subscription) == DXF_FAILURE) {
-		return DXF_FAILURE;
-    }
-
-	if (dxf_add_symbols(subscription, symbols, symbols_count) == DXF_FAILURE) {
-		return DXF_FAILURE;
-	}
-
 	return DXF_SUCCESS;
 }
 
@@ -522,109 +536,6 @@ DXFEED_API ERRORCODE dxf_detach_event_listener (dxf_subscription_t subscription,
 
 /* -------------------------------------------------------------------------- */
 
-DXFEED_API ERRORCODE dxf_close_subscription (dxf_subscription_t subscription) {
-	dxf_connection_t connection;
-	dx_int_t events;
-	
-	dx_const_string_t* symbols;
-	int symbols_count;
-
-    dx_perform_common_actions();
-	
-	if (!dx_get_subscription_connection(subscription, &connection)) {
-	    return DXF_FAILURE;
-	}
-	
-	if (!dx_get_event_subscription_event_types(subscription, &events)) {
-		return DXF_FAILURE;
-	}
-	
-	if (!dx_get_event_subscription_symbols(subscription, &symbols, &symbols_count)) 
-		return DXF_FAILURE;
-	
-	if (!dx_unsubscribe(connection, symbols, symbols_count, events))
-		return DXF_FAILURE;
-
-	if (!dx_close_event_subscription(subscription))
-		return DXF_FAILURE;
-		
-	return DXF_SUCCESS;
-}
-
-/* -------------------------------------------------------------------------- */
-
-DXFEED_API ERRORCODE dxf_remove_subscription (dxf_subscription_t subscription) {
-	dxf_connection_t connection;
-	dx_int_t events;
-		
-	dx_const_string_t* symbols;
-	int symbols_count;
-
-    dx_perform_common_actions();
-	
-	if (!dx_get_subscription_connection(subscription, &connection)) {
-	    return DXF_FAILURE;
-	}
-	
-	if (!dx_get_event_subscription_event_types(subscription, &events)) 
-		return DXF_FAILURE;
-	
-	if (!dx_get_event_subscription_symbols(subscription, &symbols, &symbols_count)) 
-		return DXF_FAILURE;
-	
-	if (!dx_unsubscribe(connection, symbols, symbols_count, events))
-		return DXF_FAILURE;
-
-	if (!dx_mute_event_subscription(subscription))
-		return DXF_FAILURE;	
-
-	return DXF_SUCCESS;
-}
-
-/* -------------------------------------------------------------------------- */
-
-DXFEED_API ERRORCODE dxf_add_subscription (dxf_subscription_t subscription) {
-	dxf_connection_t connection;
-	dx_int_t events; 
-	
-	dx_const_string_t* symbols;
-	int symbols_count;
-
-    dx_perform_common_actions();
-	
-	if (!dx_get_subscription_connection(subscription, &connection)) {
-	    return DXF_FAILURE;
-	}
-	
-	if (!dx_get_event_subscription_event_types(subscription, &events)) 
-		return DXF_FAILURE;
-
-	if (!dx_get_event_subscription_symbols(subscription, &symbols, &symbols_count)) 
-		return DXF_FAILURE;
-
-	if (!dx_unmute_event_subscription(subscription))
-		return DXF_FAILURE;	
-	
-	if (!dx_subscribe(connection, symbols, symbols_count, events))
-		return DXF_FAILURE;
-	
-	return DXF_SUCCESS;
-}
-
-/* -------------------------------------------------------------------------- */
-
-DXFEED_API ERRORCODE dxf_get_symbols (dxf_subscription_t subscription, OUT dx_const_string_t* symbols, int* symbols_count){
-	dx_perform_common_actions();
-	
-	if (!dx_get_event_subscription_symbols(subscription, &symbols, symbols_count)) {
-		return DXF_FAILURE;
-	}
-
-	return DXF_SUCCESS;
-}
-
-/* -------------------------------------------------------------------------- */
-
 DXFEED_API ERRORCODE dxf_get_subscription_event_types (dxf_subscription_t subscription, OUT int* event_types) {
 	dx_perform_common_actions();
 	
@@ -637,7 +548,7 @@ DXFEED_API ERRORCODE dxf_get_subscription_event_types (dxf_subscription_t subscr
 
 /* -------------------------------------------------------------------------- */
 
-DXFEED_API ERRORCODE dxf_get_last_event (dxf_connection_t connection, int event_type, dx_const_string_t symbol, OUT void** data) {
+DXFEED_API ERRORCODE dxf_get_last_event (dxf_connection_t connection, int event_type, dx_const_string_t symbol, OUT dx_event_data_t* data) {
     dx_perform_common_actions();
     
     if (!dx_get_last_symbol_event(connection, symbol, event_type, data)) {
@@ -645,4 +556,29 @@ DXFEED_API ERRORCODE dxf_get_last_event (dxf_connection_t connection, int event_
     }
 
     return DXF_SUCCESS;
+}
+
+/* -------------------------------------------------------------------------- */
+
+DXFEED_API ERRORCODE dxf_get_last_error (int* subsystem_id, int* error_code, dx_const_string_t* error_descr) {
+    int res = dx_get_last_error(subsystem_id, error_code, error_descr);
+
+    switch (res) {
+    case efr_no_error_stored:
+        if (subsystem_id != NULL) {
+            *subsystem_id = dx_sc_invalid_subsystem;
+        }
+
+        if (error_code != NULL) {
+            *error_code = DX_INVALID_ERROR_CODE;
+        }
+
+        if (error_descr != NULL) {
+            *error_descr = L"No error occurred";
+        }
+    case efr_success:
+        return DXF_SUCCESS;
+    }
+
+    return DXF_FAILURE;
 }

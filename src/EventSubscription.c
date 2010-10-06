@@ -694,6 +694,28 @@ bool dx_unmute_event_subscription (dxf_subscription_t subscr_id) {
 
 /* -------------------------------------------------------------------------- */
 
+bool dx_get_event_subscription_mute_state (dxf_subscription_t subscr_id, OUT bool* state) {
+    dx_subscription_data_ptr_t subscr_data = (dx_subscription_data_ptr_t)subscr_id;
+
+    if (subscr_id == dx_invalid_subscription) {
+        dx_set_last_error(dx_sc_event_subscription, dx_es_invalid_subscr_id);
+
+        return false;
+    }
+    
+    if (state == NULL) {
+        dx_set_last_error(dx_sc_event_subscription, dx_es_null_ptr_param);
+        
+        return false;
+    }
+
+    *state = subscr_data->is_muted;
+
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
 bool dx_close_event_subscription (dxf_subscription_t subscr_id) {
     dx_subscription_data_ptr_t subscr_data = (dx_subscription_data_ptr_t)subscr_id;
     bool res = true;
@@ -1080,7 +1102,7 @@ bool dx_process_event_data (dxf_connection_t connection,
         int cur_listener_index = 0;
         
         if (!(subscr_data->event_types & event_bitmask) || /* subscription doesn't want this specific event type */
-            subscr_data->is_muted) { /* subscription is currently muted */
+            /*subscr_data->is_muted*/false) { /* subscription is currently muted */
             
             continue;
         }

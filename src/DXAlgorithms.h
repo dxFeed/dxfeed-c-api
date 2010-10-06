@@ -312,6 +312,23 @@ dx_string_t dx_decode_from_integer (dx_long_t code);
         } \
     } while (false)
     
+#define FREE_ARRAY(array_ptr, size) \
+    do { \
+        int _array_ind = 0; \
+        \
+        if (array_ptr == NULL) { \
+            break; \
+        } \
+        \
+        for (; _array_ind < size; ++_array_ind) { \
+            if (array_ptr[_array_ind] != NULL) { \
+                dx_free(array_ptr[_array_ind]); \
+            } \
+        } \
+        \
+        dx_free(array_ptr); \
+    } while (false)
+    
 /* -------------------------------------------------------------------------- */
 /*
  *	Bit operations

@@ -86,6 +86,8 @@ int main (int argc, char* argv[]) {
 
 	dx_string_t symbols_to_add[] = { L"MSFT", L"YHOO", L"C" };
 	dx_int_t symbols_to_add_size = sizeof (symbols_to_add) / sizeof (symbols_to_add[0]);
+    dx_string_t symbols_to_add_2[] = { L"C" };
+    dx_int_t symbols_to_add_2_size = sizeof (symbols_to_add_2) / sizeof (symbols_to_add_2[0]);
 
 	dx_string_t symbols_to_remove[] = { {L"MSFT"}, {L"YHOO"}, {L"IBM"} };
 	dx_int_t symbols_to_remove_size = sizeof (symbols_to_remove) / sizeof (symbols_to_remove[0]);
@@ -94,10 +96,6 @@ int main (int argc, char* argv[]) {
 	dx_int_t symbols_to_set_size = sizeof (symbols_to_set) / sizeof (symbols_to_set[0]);
  
 	dx_int_t get_event_types;
-
-	dx_string_t* get_symbols;
-	dx_int_t get_symbols_size;
-
 
 	dxf_initialize_logger( "log.log", true, true, true );
 	
@@ -199,22 +197,39 @@ int main (int argc, char* argv[]) {
     }; 
 	Sleep (5000); 
 
-	printf("Subscription events: \n");
+	printf("Subscription receives the following events: \n");
 	if (!dxf_get_subscription_event_types(subscription, & get_event_types)) {
         process_last_error();
         
         return -1;
 	}else{
 		dx_event_id_t eid = dx_eid_begin;
-			
+
 		for (; eid < dx_eid_count; ++eid) 
 			if (get_event_types & DX_EVENT_BIT_MASK(eid)) 
 				printf("%S ", dx_event_type_to_string(DX_EVENT_BIT_MASK(eid)));
 
 		printf ("\n");
 	}
+	
+	Sleep(5000);
 		
+    printf("Adding new symbols: %S\n", symbols_to_add_2[0]);
+    
+    if (!dxf_add_symbols(subscription, symbols_to_add_2, symbols_to_add_2_size)) {
+        process_last_error();
+        
+        return -1;
+    }
+    
+    Sleep(5000);
+    
+    printf("Resume subscription\n");
+    if (!dxf_add_subscription(subscription)) {
+        process_last_error();
 
+        return -1;
+    };
 
 
     Sleep(1000000);

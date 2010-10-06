@@ -36,6 +36,7 @@ extern const dxf_subscription_t dx_invalid_subscription;
 dxf_subscription_t dx_create_event_subscription (dxf_connection_t connection, int event_types);
 bool dx_mute_event_subscription (dxf_subscription_t subscr_id);
 bool dx_unmute_event_subscription (dxf_subscription_t subscr_id);
+bool dx_get_event_subscription_mute_state (dxf_subscription_t subscr_id, OUT bool* state);
 bool dx_close_event_subscription (dxf_subscription_t subscr_id);
 bool dx_add_symbols (dxf_subscription_t subscr_id, dx_const_string_t* symbols, int symbol_count);
 bool dx_remove_symbols (dxf_subscription_t subscr_id, dx_const_string_t* symbols, int symbol_count);
