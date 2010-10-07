@@ -483,7 +483,9 @@ dx_result_t dx_ensure_capacity( int requiredCapacity ) {
     }
 
     if (current_out_buffer_position + requiredCapacity > out_buffer_length) {
-        dx_int_t length = MAX(MAX((dx_int_t)MIN((dx_long_t)out_buffer_length << 1, (dx_long_t)INT_MAX), 1024), current_out_buffer_position + requiredCapacity);
+        dx_long_t tmp_len = (dx_long_t)out_buffer_length << 1;
+        dx_int_t tmp_min = (dx_int_t)MIN(tmp_len, (dx_long_t)INT_MAX);
+        dx_int_t length = MAX(MAX(tmp_min, 1024), current_out_buffer_position + requiredCapacity);
         dx_byte_t* newBuffer = (dx_byte_t*)dx_malloc((int)length);
         dx_memcpy(newBuffer, out_buffer, out_buffer_length);
         dx_free(out_buffer);
