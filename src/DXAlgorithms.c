@@ -63,7 +63,7 @@ dx_string_t dx_create_string_src (dx_const_string_t src) {
 /* -------------------------------------------------------------------------- */
 
 char* dx_ansi_create_string_src (const char* src) {
-    char* res = (const char*)dx_calloc(strlen(src) + 1, sizeof(char));
+    char* res = (char*)dx_calloc((int)strlen(src) + 1, sizeof(char));
     
     if (res == NULL) {
         return NULL;

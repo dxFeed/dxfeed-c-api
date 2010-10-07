@@ -90,7 +90,7 @@ dx_result_t dx_compose_body(dx_int_t record_id, dx_int_t cipher, dx_const_string
 */
 void dx_move_data_forward(dx_int_t oldPos, dx_int_t newPos, dx_int_t length) {
     dx_ensure_capacity(newPos + length);
-    dx_memcpy(dx_get_out_buffer(NULL) + newPos, dx_get_out_buffer(NULL) + oldPos, length);
+    dx_memmove(dx_get_out_buffer(NULL) + newPos, dx_get_out_buffer(NULL) + oldPos, length);
 }
 
 /* -------------------------------------------------------------------------- */

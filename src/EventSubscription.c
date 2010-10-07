@@ -1101,9 +1101,7 @@ bool dx_process_event_data (dxf_connection_t connection,
         dx_subscription_data_ptr_t subscr_data = symbol_data->subscriptions.elements[cur_subscr_index];
         int cur_listener_index = 0;
         
-        if (!(subscr_data->event_types & event_bitmask) || /* subscription doesn't want this specific event type */
-            /*subscr_data->is_muted*/false) { /* subscription is currently muted */
-            
+        if (!(subscr_data->event_types & event_bitmask)) { /* subscription doesn't want this specific event type */
             continue;
         }
         
