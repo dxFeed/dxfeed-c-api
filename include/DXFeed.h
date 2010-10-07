@@ -51,7 +51,7 @@
 /* -------------------------------------------------------------------------- */
 
 typedef void* dxf_connection_t;
-typedef void (*dxf_conn_termination_notifier_t) (const char* host);
+typedef void (*dxf_conn_termination_notifier_t) (dxf_connection_t connection);
 
 /* -------------------------------------------------------------------------- */
 /*

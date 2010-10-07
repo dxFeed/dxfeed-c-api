@@ -270,7 +270,7 @@ DXFEED_API ERRORCODE dxf_create_connection (const char* host, dxf_conn_terminati
     cc.receiver = dx_socket_data_receiver;
     cc.notifier = notifier;
     
-    if (!dx_bind_to_host(*connection, host, &cc) ||
+    if (!dx_bind_to_connector(*connection, host, &cc) ||
         !dx_update_record_description(*connection)) {
         dx_deinit_connection(*connection);
         

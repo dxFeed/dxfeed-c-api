@@ -46,11 +46,11 @@ typedef struct {
  */
 /* -------------------------------------------------------------------------- */
 /*
- *  Binds the connection to the specified host with the given context.
+ *  Binds the connection to the specified connector with the given context.
 
     Input:
         connection - the connection object to bind.
-        host - a string containing the host address; should conform to the
+        connector - a string containing the host address; should conform to the
                following pattern: <host>[:<port>], where <host> may either
                be a computer name or a domain name or an IP address string,
                and <port> is a text representation of a port number.
@@ -62,8 +62,8 @@ typedef struct {
         false - some error occurred, use 'dx_get_last_error' for details.        
  */
 
-bool dx_bind_to_host (dxf_connection_t connection, const char* host,
-                      const dx_connection_context_t* cc);
+bool dx_bind_to_connector (dxf_connection_t connection, const char* connector,
+                           const dx_connection_context_t* cc);
                            
 /* -------------------------------------------------------------------------- */
 /*

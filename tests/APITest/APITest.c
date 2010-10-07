@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <Windows.h>
 
-const char dxfeed_host[] = "demo.dxfeed.com:7300";
+const char dxfeed_host[] = "megasuperduperstupidhost.biz,demo.dxfeed.com:7300";
 
 dx_const_string_t dx_event_type_to_string (int event_type) {
 	switch (event_type){
@@ -49,8 +49,8 @@ void second_listener (int event_type, dx_const_string_t symbol_name,const dx_eve
 
 dxf_connection_t connection;
 
-void conn_termination_notifier (const char* host) {
-    dxf_close_connection(connection);
+void conn_termination_notifier (dxf_connection_t conn) {
+    dxf_close_connection(conn);
 }
 
 /* -------------------------------------------------------------------------- */
