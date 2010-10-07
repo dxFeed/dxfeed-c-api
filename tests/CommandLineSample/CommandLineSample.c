@@ -57,8 +57,8 @@ void listener (int event_type, dx_const_string_t symbol_name, const dx_event_dat
         for (; i < data_count; ++i) {
             wprintf(L"bid time=%i, bid exchange code=%C, bid price=%f, bid size=%i; "
                 L"ask time=%i, ask exchange code=%C, ask price=%f, ask size=%i\n",
-                quotes[i].bid_time, quotes[i].bid_exchange_code, quotes[i].bid_price, quotes[i].bid_size,
-                quotes[i].ask_time, quotes[i].ask_exchange_code, quotes[i].ask_price, quotes[i].ask_size);
+                (int)quotes[i].bid_time, quotes[i].bid_exchange_code, quotes[i].bid_price, (int)quotes[i].bid_size,
+                (int)quotes[i].ask_time, quotes[i].ask_exchange_code, quotes[i].ask_price, (int)quotes[i].ask_size);
         }
     }
 
@@ -67,8 +67,8 @@ void listener (int event_type, dx_const_string_t symbol_name, const dx_event_dat
 
         for (; i < data_count; ++i) {
             wprintf(L"index=%i, side=%i, level=%i, time=%i, exchange code=%C, market maker=%s, price=%f, size=%i\n",
-                orders[i].index, orders[i].side, orders[i].level, orders[i].time,
-                orders[i].exchange_code, orders[i].market_maker, orders[i].price, orders[i].size);
+                (int)orders[i].index, (int)orders[i].side, (int)orders[i].level, (int)orders[i].time,
+                orders[i].exchange_code, orders[i].market_maker, orders[i].price, (int)orders[i].size);
         }
     }
 
@@ -77,7 +77,7 @@ void listener (int event_type, dx_const_string_t symbol_name, const dx_event_dat
 
         for (; i < data_count; ++i) {
             wprintf(L"time=%i, exchange code=%C, price=%f, size=%i, day volume=%f\n",
-                trades[i].time, trades[i].exchange_code, trades[i].price, trades[i].size, trades[i].day_volume);
+                (int)trades[i].time, trades[i].exchange_code, trades[i].price, (int)trades[i].size, trades[i].day_volume);
         }
     }
 
@@ -86,7 +86,7 @@ void listener (int event_type, dx_const_string_t symbol_name, const dx_event_dat
 
         for (; i < data_count; ++i) {
             wprintf(L"day high price=%f, day low price=%f, day open price=%f, prev day close price=%f, open interest=%i\n",
-                s[i].day_high_price, s[i].day_low_price, s[i].day_open_price, s[i].prev_day_close_price, s[i].open_interest);
+                s[i].day_high_price, s[i].day_low_price, s[i].day_open_price, s[i].prev_day_close_price, (int)s[i].open_interest);
         }
     }
 
@@ -105,9 +105,9 @@ void listener (int event_type, dx_const_string_t symbol_name, const dx_event_dat
         for (; i < data_count ; ++i) {
             wprintf(L"event id=%ld, time=%ld, exchange code=%c, price=%f, size=%li, bid price=%f, ask price=%f, "
                 L"exchange sale conditions=%s, is trade=%s, type=%i\n",
-                tns[i].event_id, tns[i].time, tns[i].exchange_code, tns[i].price, tns[i].size,
+                tns[i].event_id, tns[i].time, tns[i].exchange_code, tns[i].price, (int)tns[i].size,
                 tns[i].bid_price, tns[i].ask_price, tns[i].exchange_sale_conditions,
-                tns[i].is_trade ? L"True" : L"False", tns[i].type);
+                tns[i].is_trade ? L"True" : L"False", (int)tns[i].type);
         }
     }
 }
@@ -198,6 +198,8 @@ int main (int argc, char* argv[]) {
     printf("Sample test started.\n");    
     printf("Connecting to host %s...\n", dxfeed_host);
 
+    InitializeCriticalSection(&listener_thread_guard);
+
     if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, &connection)) {
         process_last_error();
         return -1;
@@ -224,7 +226,6 @@ int main (int argc, char* argv[]) {
     };
     printf("Subscription successful!\n");
 
-    InitializeCriticalSection(&listener_thread_guard);
     while (!is_thread_terminate() && loop_counter--) {
         Sleep(100);
     }
