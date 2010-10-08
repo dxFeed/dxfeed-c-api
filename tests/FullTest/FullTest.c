@@ -104,7 +104,7 @@ void trade_listener (int event_type, dx_const_string_t symbol_name, const dx_eve
         return;
     }
 
-    print_at( coord, L"Event Trade:");
+    print_at( coord, L"Event Trade:                           ");
     ind = get_symbol_index(symbol_name);
     if (ind == -1) {
         return;
@@ -134,7 +134,7 @@ void quote_listener (int event_type, dx_const_string_t symbol_name, const dx_eve
         return;
     }
 
-    print_at( coord, L"Event Quote:");
+    print_at( coord, L"Event Quote:                           ");
     ind = get_symbol_index(symbol_name);
     if (ind == -1) {
         return;
@@ -166,7 +166,7 @@ void summary_listener (int event_type, dx_const_string_t symbol_name, const dx_e
         return;
     }
 
-    print_at( coord, L"Event Summary:");
+    print_at( coord, L"Event Summary:                           ");
     ind = get_symbol_index(symbol_name);
     if (ind == -1) {
         return;
@@ -197,7 +197,7 @@ void profile_listener (int event_type, dx_const_string_t symbol_name, const dx_e
         return;
     }
 
-    print_at( coord, L"Event Profile:");
+    print_at( coord, L"Event Profile:                           ");
     ind = get_symbol_index(symbol_name);
     if (ind == -1) {
         return;
@@ -228,7 +228,7 @@ void order_listener (int event_type, dx_const_string_t symbol_name, const dx_eve
         return;
     }
 
-    print_at( coord, L"Event Order:");
+    print_at( coord, L"Event Order:                           ");
     ind = get_symbol_index(symbol_name);
     if (ind == -1) {
         return;
@@ -259,7 +259,7 @@ void time_and_sale_listener (int event_type, dx_const_string_t symbol_name, cons
         return;
     }
 
-    print_at( coord, L"Event Time&Sale");
+    print_at( coord, L"Event Time&Sale:                           ");
     ind = get_symbol_index(symbol_name);
     if (ind == -1) {
         return;
@@ -332,6 +332,7 @@ dxf_subscription_t create_subscription(dxf_connection_t connection, int event_id
         if (ind == -1) {
             return NULL;
         }
+        symbol_coord.X += 5;
         symbol_coord.Y += ind + 1;
         print_at(symbol_coord, str);
     }
@@ -350,6 +351,7 @@ bool initialize_console() {
     CONSOLE_SCREEN_BUFFER_INFO info;
     COORD c = {80, 40};
     SMALL_RECT rect = {0, 0, 79, 39};
+    DWORD buffer_size, dummy;
 
     g_out_console = GetStdHandle(STD_OUTPUT_HANDLE);
     if (g_out_console == NULL) {
@@ -357,18 +359,38 @@ bool initialize_console() {
     }
 
     if (!GetConsoleScreenBufferInfo(g_out_console, &info)) {
+        DWORD err = GetLastError();
         return false;
+    }
+
+    if (info.dwSize.X < 80 || info.dwSize.Y < 40) {
+        if (!SetConsoleScreenBufferSize(g_out_console, c)) {
+            return false;
+        }
     }
 
     if (!SetConsoleWindowInfo(g_out_console, TRUE, &rect)) {
         return false;
     }
 
-    if (info.dwSize.X >= 80 && info.dwSize.Y >= 40) {
-        return true;
+    buffer_size = info.dwSize.X * info.dwSize.Y;
+
+    c.X = 0;
+    c.Y = 0;
+    if (!FillConsoleOutputCharacter(g_out_console, (TCHAR)' ', buffer_size, c, &dummy)) {
+        return false;
     }
 
-    if (!SetConsoleScreenBufferSize(g_out_console, c)) {
+    ///* get the current text attribute */
+    //bSuccess = GetConsoleScreenBufferInfo( hConsole, &csbi );
+
+    ///* now set the buffer's attributes accordingly */
+
+    //bSuccess = FillConsoleOutputAttribute( hConsole, csbi.wAttributes,
+    //    dwConSize, coordScreen, &cCharsWritten );
+
+    // put the cursor at (0, 0)
+    if (!SetConsoleCursorPosition(g_out_console, c)) {
         return false;
     }
 
@@ -387,11 +409,11 @@ int main (int argc, char* argv[]) {
     int loop_counter = 10000;
     int i;
     
+    dxf_initialize_logger( "log.log", true, true, true );
+
     if (!initialize_console()) {
         return -1;
     }
-
-    dxf_initialize_logger( "log.log", true, true, true );
 
     //printf("Sample test started.\n");    
     //printf("Connecting to host %s...\n", dxfeed_host);
