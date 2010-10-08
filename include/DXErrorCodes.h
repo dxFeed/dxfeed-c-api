@@ -178,7 +178,8 @@ typedef enum {
 	dx_pr_unknown_record_name,
     dx_pr_record_description_not_received,
     dx_pr_unexpected_message_type,
-    dx_pr_connection_context_not_initialized
+    dx_pr_connection_context_not_initialized,
+    dx_pr_message_type_not_supported
 } dx_parser_result_t;
 
 /* ---------------------------------- */

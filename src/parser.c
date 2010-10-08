@@ -672,7 +672,7 @@ dx_result_t dx_parse_message (dxf_connection_t connection, dx_parser_connection_
             case MESSAGE_TEXT_FORMAT_COMMENT:
             case MESSAGE_TEXT_FORMAT_SPECIAL:
                 // just ignore those messages without any processing
-                break;
+                return setParseError(dx_pr_message_type_not_supported);
             default:
                 {
                     dx_int_t size;
@@ -827,7 +827,11 @@ dx_result_t dx_parse (dxf_connection_t connection, const dx_byte_t* new_buffer, 
                 //case dx_pr_record_info_corrupt:
                 //case dx_pr_unknown_record_name:
                 //case dx_pr_field_info_corrupt:
-                //case dx_pr_unexpected_message_type:
+                case dx_pr_message_type_not_supported:
+                    // skip the whole message
+                    dx_set_in_buffer_position(context->bicc, dx_get_in_buffer_limit(context->bicc));
+                    dx_logging_last_error();
+                    continue;
                 default:
                     // skip the whole message
                     //dx_set_in_buffer_position(dx_get_in_buffer_limit());

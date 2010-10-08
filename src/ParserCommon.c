@@ -52,6 +52,7 @@ static const dx_error_code_descr_t g_parser_errors[] = {
     { dx_pr_record_description_not_received, L"Communication protocol abused by server" },
     { dx_pr_unexpected_message_type, L"Unexpected message type" },
     { dx_pr_connection_context_not_initialized, L"Internal software error" },
+    { dx_pr_message_type_not_supported, L"Message type is not supperted" };
     
 	{ ERROR_CODE_FOOTER, ERROR_DESCR_FOOTER }
 };
