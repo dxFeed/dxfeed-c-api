@@ -28,6 +28,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CommandLineSample", "tests\
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FullTest", "tests\FullTest\FullTest.vcproj", "{9D6628D8-BD75-472D-A295-88CF818AD254}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
@@ -64,6 +68,10 @@ Global
 		{C396319B-1914-478A-8BD2-D98C97776458}.Debug.Build.0 = Debug|Win32
 		{C396319B-1914-478A-8BD2-D98C97776458}.Release.ActiveCfg = Release|Win32
 		{C396319B-1914-478A-8BD2-D98C97776458}.Release.Build.0 = Release|Win32
+		{9D6628D8-BD75-472D-A295-88CF818AD254}.Debug.ActiveCfg = Debug|Win32
+		{9D6628D8-BD75-472D-A295-88CF818AD254}.Debug.Build.0 = Debug|Win32
+		{9D6628D8-BD75-472D-A295-88CF818AD254}.Release.ActiveCfg = Release|Win32
+		{9D6628D8-BD75-472D-A295-88CF818AD254}.Release.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection
