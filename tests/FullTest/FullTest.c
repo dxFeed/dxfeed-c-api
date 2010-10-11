@@ -302,7 +302,7 @@ void process_last_error () {
     printf("An error occurred but the error subsystem failed to initialize\n");
 }
 
-dxf_subscription_t create_subscription(dxf_connection_t connection, int event_id, dx_event_listener_t listener) {
+dxf_subscription_t create_subscription(dxf_connection_t connection, int event_id) {
     dxf_subscription_t subscription;
     wchar_t str[100];
     const int event_type = event_info[event_id].event_type;
@@ -337,7 +337,7 @@ dxf_subscription_t create_subscription(dxf_connection_t connection, int event_id
         print_at(symbol_coord, str);
     }
 
-    if (!dxf_attach_event_listener(subscription, listener)) {
+    if (!dxf_attach_event_listener(subscription, event_info[event_id].listener)) {
         process_last_error();
 
         return NULL;
@@ -427,7 +427,7 @@ int main (int argc, char* argv[]) {
 
     // create subscriptions
     for (i = dx_eid_begin; i < dx_eid_count; ++i) {
-        subscriptions[i] = create_subscription(connection, i, event_info[i].listener);
+        subscriptions[i] = create_subscription(connection, i);
         if (subscriptions[i] == NULL) {
             return -1;
         }
