@@ -4,7 +4,8 @@
 #include <stdio.h>
 #include <Windows.h>
 
-const char dxfeed_host[] = "demo.dxfeed.com:7300";
+static char dxfeed_host_default[] = "demo.dxfeed.com:7300";
+
 HANDLE g_out_console;
 
 dx_const_string_t dx_event_type_to_string (int event_type) {
@@ -324,6 +325,13 @@ int main (int argc, char* argv[]) {
     dxf_subscription_t subscriptions[EVENTS_COUNT];
     int loop_counter = 10000;
     int i;
+    char* dxfeed_host = NULL;
+
+    if (argc < 2) {
+        dxfeed_host = dxfeed_host_default;
+    } else {
+        dxfeed_host = argv[1];
+    }
 
     dxf_initialize_logger( "log.log", true, true, true );
 

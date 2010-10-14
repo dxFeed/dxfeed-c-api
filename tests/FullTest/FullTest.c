@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <Windows.h>
 
-const char dxfeed_host[] = "demo.dxfeed.com:7300";
+static char dxfeed_host_default[] = "demo.dxfeed.com:7300";
 HANDLE g_out_console;
 
 dx_const_string_t dx_event_type_to_string (int event_type) {
@@ -400,30 +400,26 @@ bool initialize_console() {
 int main (int argc, char* argv[]) {
     dxf_connection_t connection;
     dxf_subscription_t subscriptions[dx_eid_count];
-    //dxf_subscription_t trade_subscription;
-    //dxf_subscription_t quote_subscription;
-    //dxf_subscription_t summary_subscription;
-    //dxf_subscription_t profile_subscription;
-    //dxf_subscription_t order_subscription;
-    //dxf_subscription_t time_and_sale_subscription;
     int loop_counter = 10000;
     int i;
+    char* dxfeed_host = NULL;
     
+    if (argc < 2) {
+        dxfeed_host = dxfeed_host_default;
+    } else {
+        dxfeed_host = argv[1];
+    }
+
     dxf_initialize_logger( "log.log", true, true, true );
 
     if (!initialize_console()) {
         return -1;
     }
 
-    //printf("Sample test started.\n");    
-    //printf("Connecting to host %s...\n", dxfeed_host);
-
     if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, &connection)) {
         process_last_error();
         return -1;
     }
-
-    //printf("Connection successful!\n");
 
     // create subscriptions
     for (i = dx_eid_begin; i < dx_eid_count; ++i) {
@@ -432,44 +428,6 @@ int main (int argc, char* argv[]) {
             return -1;
         }
     }
-    //// trade subscription
-    //trade_subscription = create_subscription(connection, DXF_ET_TRADE, trade_listener);
-    //if (trade_subscription == NULL) {
-    //    return -1;
-    //}
-
-    //// quote subscription
-    //quote_subscription = create_subscription(connection, DXF_ET_QUOTE, quote_listener);
-    //if (quote_subscription == NULL) {
-    //    return -1;
-    //}
-
-    //// summary subscription
-    //summary_subscription = create_subscription(connection, DXF_ET_SUMMARY, summary_listener);
-    //if (summary_subscription == NULL) {
-    //    return -1;
-    //}
-
-    //// profile subscription
-    //profile_subscription = create_subscription(connection, DXF_ET_PROFILE, profile_listener);
-    //if (profile_subscription == NULL) {
-    //    return -1;
-    //}
-
-    //// order subscription
-    //order_subscription = create_subscription(connection, DXF_ET_ORDER, order_listener);
-    //if (order_subscription == NULL) {
-    //    return -1;
-    //}
-
-    //// time_and_sale subscription
-    //time_and_sale_subscription = create_subscription(connection, DXF_ET_TIME_AND_SALE, time_and_sale_listener);
-    //if (time_and_sale_subscription == NULL) {
-    //    return -1;
-    //}
-
-    //printf("Subscriptions successful!\n");
-
     // main loop
     InitializeCriticalSection(&listener_thread_guard);
     while (!is_thread_terminate() && loop_counter--) {
