@@ -7,7 +7,7 @@
 #include <Windows.h>
 #include "DXAlgorithms.h"
 
-const char dxfeed_host[] = "demo.dxfeed.com:7300";
+//const char dxfeed_host[] = "demo.dxfeed.com:7300";
 
 dx_const_string_t dx_event_type_to_string (int event_type) {
     switch (event_type) {
@@ -164,15 +164,18 @@ int main (int argc, char* argv[]) {
     char* event_type_name = NULL;
     int event_type;
     dx_string_t symbol = NULL;
+    char* dxfeed_host = NULL;
 
 
-    if ( argc < 3 ) {
+    if ( argc < 4 ) {
         return -1;
     }
 
     dxf_initialize_logger( "log.log", true, true, true );
 
-    event_type_name = argv[1];
+    dxfeed_host = argv[1];
+
+    event_type_name = argv[2];
     if (stricmp(event_type_name, "TRADE") == 0) {
         event_type = DXF_ET_TRADE;
     } else if (stricmp(event_type_name, "QUOTE") == 0) {
@@ -190,9 +193,13 @@ int main (int argc, char* argv[]) {
         return -1;
     }
 
-    symbol = ansi_to_unicode(argv[2]);
+    symbol = ansi_to_unicode(argv[3]);
     if (symbol == NULL) {
         return -1;
+    } else {
+        int i = 0;
+        for (; symbol[i]; i++)
+            symbol[i] = towupper(symbol[i]);
     }
 
     printf("Sample test started.\n");    
