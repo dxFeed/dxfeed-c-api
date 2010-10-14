@@ -1,0 +1,1 @@
+..\bin\CommandLineSample.exe demo.dxfeed.com:7300 TRADE IBM
