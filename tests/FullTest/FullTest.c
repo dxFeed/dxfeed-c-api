@@ -5,6 +5,7 @@
 #include <Windows.h>
 
 static char dxfeed_host_default[] = "demo.dxfeed.com:7300";
+//const char dxfeed_host[] = "localhost:5678";
 HANDLE g_out_console;
 
 dx_const_string_t dx_event_type_to_string (int event_type) {
