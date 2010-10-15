@@ -7,8 +7,6 @@
 #include <Windows.h>
 #include "DXAlgorithms.h"
 
-//const char dxfeed_host[] = "demo.dxfeed.com:7300";
-
 dx_const_string_t dx_event_type_to_string (int event_type) {
     switch (event_type) {
     case DXF_ET_TRADE: return L"Trade";
@@ -171,7 +169,7 @@ int main (int argc, char* argv[]) {
         return -1;
     }
 
-    dxf_initialize_logger( "log.log", true, true, true );
+    dxf_initialize_logger( "log.log", true, true, false );
 
     dxfeed_host = argv[1];
 
@@ -194,6 +192,7 @@ int main (int argc, char* argv[]) {
     }
 
     symbol = ansi_to_unicode(argv[3]);
+
     if (symbol == NULL) {
         return -1;
     } else {
@@ -237,7 +236,7 @@ int main (int argc, char* argv[]) {
         Sleep(100);
     }
     DeleteCriticalSection(&listener_thread_guard);
-
+	Sleep(100000);
     printf("Disconnecting from host...\n");
 
     if (!dxf_close_connection(connection)) {
