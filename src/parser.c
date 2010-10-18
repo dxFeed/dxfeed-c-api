@@ -505,10 +505,6 @@ dx_result_t dx_parse_data (dxf_connection_t connection, dx_parser_connection_con
 	        
 			CHECKED_CALL_2(dx_read_compact_int, context->bicc, &id);
 
-			if (id < 0 || id >= dx_rid_count) {
-				return setParseError(dx_pr_wrong_record_id);
-			}
-	        
 			record_id = dx_get_record_id(connection, id);
 		}
 	    
@@ -572,7 +568,7 @@ dx_result_t dx_parse_describe_records (dxf_connection_t connection, dx_parser_co
         CHECKED_CALL_2(dx_read_utf_string, context->bicc, &record_name);
         CHECKED_CALL_2(dx_read_compact_int, context->bicc, &field_count);
 		
-		if (record_id < 0 || record_name == NULL || dx_string_length(record_name) == 0 || field_count < 0) {
+		if (record_name == NULL || dx_string_length(record_name) == 0 || field_count < 0) {
             dx_free(record_name);
             
             return setParseError(dx_pr_record_info_corrupt);
@@ -580,12 +576,6 @@ dx_result_t dx_parse_describe_records (dxf_connection_t connection, dx_parser_co
         
         dx_logging_info(L"Record ID: %d, record name: %s, field count: %d", record_id, record_name, field_count);
 
-        if (record_id >= dx_rid_count) {
-            dx_free(record_name);
-
-            return setParseError(dx_pr_wrong_record_id);
-        }
-        
         rid = dx_get_record_id_by_name(record_name);
         
         dx_free(record_name);
@@ -594,7 +584,9 @@ dx_result_t dx_parse_describe_records (dxf_connection_t connection, dx_parser_co
             return setParseError(dx_pr_unknown_record_name);
         }
         
-        dx_assign_protocol_id(connection, rid, record_id);
+        if (!dx_assign_protocol_id(connection, rid, record_id)) {
+            return R_FAILED;
+        }
         
         record_info = dx_get_record_by_id(rid);
         record_digest = &(context->record_digests[rid]);

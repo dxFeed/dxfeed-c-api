@@ -104,117 +104,166 @@ int main (int argc, char* argv[]) {
     
     if (!dxf_create_connection(dxfeed_host, conn_termination_notifier, &connection)) {
         process_last_error();
+        
         return -1;
     }
 
     printf("Connection successful!\n");
 	
-	printf("Creating subscription to: Trade\n");
+	printf("Creating subscription to: Trade...\n");
 	
 	if (!dxf_create_subscription(connection, DXF_ET_TRADE/* | DXF_ET_QUOTE | DXF_ET_ORDER | DXF_ET_SUMMARY | DXF_ET_PROFILE */, &subscription )) {
         process_last_error();
         
         return -1;
-    };
+    }
 	
-	printf("Symbol %s added\n", "IBM");
+	printf("Subscription created\n");
+	printf("Adding symbols: %s...\n", "IBM");
 	
 	if (!dxf_add_symbol(subscription, L"IBM")) {
         process_last_error();
         
         return -1;
     }
-	
-	printf("First listener attached\n");
+    
+    printf("Symbol %s added\n", "IBM");
+    printf("Attaching first listener...\n");
 	
 	if (!dxf_attach_event_listener(subscription, first_listener)) {
         process_last_error();
         
         return -1;
     }
+    
+    printf("First listener attached\n");
+    printf("Attaching second listener...\n");
 
-    printf("Second listener attached\n");
-	
-	if (!dxf_attach_event_listener(subscription, second_listener)) {
+    if (!dxf_attach_event_listener(subscription, second_listener)) {
         process_last_error();
         
         return -1;
     }
+    
+    printf("Second listener attached\n");
+    printf("Master thread sleeping for %d ms...\n", 5000);
 	
 	Sleep (5000); 
 
-	printf("Adding symbols: %S %S %S \n", symbols_to_add[0], symbols_to_add[1], symbols_to_add[2]);
+	printf("Master thread woke up\n");
+	printf("Adding symbols: %S %S %S...\n", symbols_to_add[0], symbols_to_add[1], symbols_to_add[2]);
 	
 	if (!dxf_add_symbols(subscription, symbols_to_add, symbols_to_add_size)) {
         process_last_error();
         
         return -1;
     }
+    
+    printf("Symbols added\n");
+    printf("Master thread sleeping for %d ms...\n", 5000);
 	
 	Sleep (5000); 
 	
-	printf("Removing second listener \n");
+	printf("Master thread woke up\n");
+	printf("Detaching second listener...\n");
 	
 	if (!dxf_detach_event_listener(subscription, second_listener)) {
         process_last_error();
         
         return -1;
     }
+    
+    printf("Second listener detached\n");
+    printf("Master thread sleeping for %d ms...\n", 5000);
 	
 	Sleep (5000); 
 
-	printf("Clear symbols\n");
+	printf("Master thread woke up\n");
+	printf("Clearing symbols...\n");
+	
 	if (!dxf_subscription_clear_symbols(subscription)) {
         process_last_error();
         
         return -1;
-    }; 
+    }
+	
+	printf("Symbols cleared\n");
+	printf("Master thread sleeping for %d ms...\n", 5000);
+	
 	Sleep (5000); 
 
-	printf("Removing symbols: %S %S \n", symbols_to_remove[0], symbols_to_remove[1] );
+	printf("Master thread woke up\n");
+	printf("Removing symbols: %S %S...\n", symbols_to_remove[0], symbols_to_remove[1]);
+	
 	if (!dxf_remove_symbols(subscription, symbols_to_remove, symbols_to_remove_size)) {
         process_last_error();
         
         return -1;
-    }; 
+    }
+    
+    printf("Symbols cleared\n");
+    printf("Master thread sleeping for %d ms...\n", 5000);
+		
 	Sleep (5000); 
 
-
-
-	printf("Set symbols: %S %S \n", symbols_to_set[0], symbols_to_set[1] );
+    printf("Master thread woke up\n");
+    printf("Setting symbols: %S %S...\n", symbols_to_set[0], symbols_to_set[1]);
+	
 	if (!dxf_set_symbols(subscription, symbols_to_set, symbols_to_set_size)) {
         process_last_error();
         
         return -1;
-    }; 
+    }
+	
+    printf("Symbols set\n");
+    printf("Master thread sleeping for %d ms...\n", 5000);
+	
 	Sleep (5000);
-
-	printf("Pause subscription\n");
+	
+    printf("Master thread woke up\n");
+    printf("Pausing subscription...\n");
+    
 	if (!dxf_remove_subscription(subscription)) {
         process_last_error();
         
         return -1;
-    }; 
-	Sleep (5000); 
-
-	printf("Subscription receives the following events: \n");
-	if (!dxf_get_subscription_event_types(subscription, & get_event_types)) {
+    }
+    
+    printf("Subscription paused\n");
+    printf("Master thread sleeping for %d ms...\n", 5000);
+    
+	Sleep (5000);
+	
+	printf("Master thread woke up\n");
+	printf("Retrieving the subscription events...\n");
+	
+	if (!dxf_get_subscription_event_types(subscription, &get_event_types)) {
         process_last_error();
         
         return -1;
-	}else{
+	}
+	
+	{
 		dx_event_id_t eid = dx_eid_begin;
+		
+		printf("\tSubscription events are: ");
 
-		for (; eid < dx_eid_count; ++eid) 
-			if (get_event_types & DX_EVENT_BIT_MASK(eid)) 
+		for (; eid < dx_eid_count; ++eid) {
+			if (get_event_types & DX_EVENT_BIT_MASK(eid)) {
 				printf("%S ", dx_event_type_to_string(DX_EVENT_BIT_MASK(eid)));
+			}
+		}
 
 		printf ("\n");
 	}
 	
+    printf("Subscription events retrieved\n");
+    printf("Master thread sleeping for %d ms...\n", 5000);
+	
 	Sleep(5000);
 		
-    printf("Adding new symbols: %S\n", symbols_to_add_2[0]);
+    printf("Master thread woke up\n");
+    printf("Adding new symbols: %S...\n", symbols_to_add_2[0]);
     
     if (!dxf_add_symbols(subscription, symbols_to_add_2, symbols_to_add_2_size)) {
         process_last_error();
@@ -222,18 +271,26 @@ int main (int argc, char* argv[]) {
         return -1;
     }
     
+    printf("New symbols added\n");
+    printf("Master thread sleeping for %d ms...\n", 5000);
+    
     Sleep(5000);
     
-    printf("Resume subscription\n");
+    printf("Master thread woke up\n");
+    printf("Resuming subscription...\n");
+    
     if (!dxf_add_subscription(subscription)) {
         process_last_error();
 
         return -1;
-    };
+    }
 
+    printf("Subscription resumed\n");
+    printf("Master thread sleeping for %d ms...\n", 1000000);
 
     Sleep(1000000);
     
+    printf("Master thread woke up\n");
     printf("Disconnecting from host...\n");
     
     if (!dxf_close_connection(connection)) {
@@ -247,4 +304,3 @@ int main (int argc, char* argv[]) {
            
     return 0;
 }
-

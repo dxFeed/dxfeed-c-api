@@ -20,7 +20,52 @@
 #include "DXAlgorithms.h"
 #include "DXMemory.h"
 
+#include <time.h>
+#include <string.h>
+#include <limits.h>
 #include <Windows.h>
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Bit operations implementation
+ */
+/* -------------------------------------------------------------------------- */
+
+bool dx_is_only_single_bit_set (int value) {
+    return (value != 0 && (value & (value - 1)) == 0);
+}
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Random number generation functions implementation
+ */
+/* -------------------------------------------------------------------------- */
+
+static void dx_init_randomizer (void) {
+    static bool is_randomizer_initialized = false;
+
+    if (!is_randomizer_initialized) {
+        is_randomizer_initialized = true;
+
+        srand((unsigned int)time(NULL));
+    }
+}
+
+/* -------------------------------------------------------------------------- */
+
+int dx_random_integer (int max_value) {
+    dx_init_randomizer();
+
+    return (int)((long long)max_value * (unsigned int)rand() / RAND_MAX);
+}
+
+/* -------------------------------------------------------------------------- */
+
+double dx_random_double (double max_value) {
+    dx_init_randomizer();
+
+    return max_value / RAND_MAX * rand();
+}
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -162,10 +207,27 @@ dx_string_t dx_decode_from_integer (dx_long_t code) {
 
 /* -------------------------------------------------------------------------- */
 /*
- *	Bit operations implementation
+ *	Time functions implementation
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_is_only_single_bit_set (int value) {
-    return ((value & (value - 1)) == 0);
+int dx_millisecond_timestamp (void) {
+
+#ifdef _WIN32
+    return (int)GetTickCount();
+#else
+    return 0;
+#endif
+}
+
+/* -------------------------------------------------------------------------- */
+
+int dx_millisecond_timestamp_diff (int older, int newer) {
+    long long res = 0;
+    
+    if ((unsigned)older > (unsigned)newer) {
+        res += UINT_MAX;
+    }
+    
+    return (int)(res + (unsigned)newer - (unsigned)older);
 }

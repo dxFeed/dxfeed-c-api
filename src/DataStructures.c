@@ -146,8 +146,26 @@ static dx_char_t const g_record_exchange_codes[dx_rid_count] = { 0 };
  */
 /* -------------------------------------------------------------------------- */
 
+#define RECORD_ID_VECTOR_SIZE   1000
+
 typedef struct {
-    dx_record_id_t protocol_to_record_id_map[dx_rid_count];
+    dx_int_t server_record_id;
+    dx_record_id_t local_record_id;
+} dx_record_id_pair_t;
+
+typedef struct {
+    dx_record_id_pair_t* elements;
+    int size;
+    int capacity;
+} dx_record_id_map_t;
+
+typedef struct {
+    dx_record_id_t frequent_ids[RECORD_ID_VECTOR_SIZE];
+    dx_record_id_map_t id_map;
+} dx_server_local_record_id_map_t;
+
+typedef struct {
+    dx_server_local_record_id_map_t record_id_map;
     dx_record_server_support_info_t record_server_support_states[dx_rid_count];
 } dx_data_structures_connection_context_t;
 
@@ -161,14 +179,17 @@ void dx_free_server_support_states_data (dx_record_server_support_info_t* data);
 DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_data_structures) {
     dx_data_structures_connection_context_t* context = dx_calloc(1, sizeof(dx_data_structures_connection_context_t));
     dx_record_id_t record_id = dx_rid_begin;
+    int i = 0;
     
     if (context == NULL) {
         return false;
     }
     
+    for (; i < RECORD_ID_VECTOR_SIZE; ++i) {
+        context->record_id_map.frequent_ids[i] = dx_rid_invalid;
+    }
+    
     for (; record_id < dx_rid_count; ++record_id) {
-        context->protocol_to_record_id_map[record_id] = record_id;
-        
         if ((context->record_server_support_states[record_id].fields = 
              dx_calloc(g_record_field_counts[record_id], sizeof(bool))) == NULL) {
             dx_free_server_support_states_data(context->record_server_support_states);
@@ -199,6 +220,7 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_data_structures) {
         return true;
     }
     
+    CHECKED_FREE(context->record_id_map.id_map.elements);
     dx_free_server_support_states_data(context->record_server_support_states);
     dx_free(context);
     
@@ -225,18 +247,67 @@ dx_record_server_support_info_t* dx_get_record_server_support_states (dxf_connec
 
 /* -------------------------------------------------------------------------- */
 /*
- *	Event record functions implementation
+ *	Record functions implementation
  */
 /* -------------------------------------------------------------------------- */
 
+#define RECORD_ID_PAIR_COMPARATOR(left, right) \
+    DX_NUMERIC_COMPARATOR((left).server_record_id, (right).server_record_id)
+
 dx_record_id_t dx_get_record_id (dxf_connection_t connection, dx_int_t protocol_id) {
-    return CONTEXT_FIELD(protocol_to_record_id_map)[protocol_id];
+    dx_server_local_record_id_map_t* record_id_map = &CONTEXT_FIELD(record_id_map);
+        
+    if (protocol_id >= 0 && protocol_id < RECORD_ID_VECTOR_SIZE) {
+        return record_id_map->frequent_ids[protocol_id];
+    } else {
+        int idx;
+        bool found = false;
+        dx_record_id_pair_t dummy;
+        
+        dummy.server_record_id = protocol_id;
+        
+        DX_ARRAY_SEARCH(record_id_map->id_map.elements, 0, record_id_map->id_map.size, dummy, RECORD_ID_PAIR_COMPARATOR, true, found, idx);
+        
+        if (!found) {
+            return dx_rid_invalid;
+        }
+        
+        return record_id_map->id_map.elements[idx].local_record_id;
+    }
 }
 
 /* -------------------------------------------------------------------------- */
 
-void dx_assign_protocol_id (dxf_connection_t connection, dx_record_id_t record_id, dx_int_t protocol_id) {
-    CONTEXT_FIELD(protocol_to_record_id_map)[protocol_id] = record_id;
+bool dx_assign_protocol_id (dxf_connection_t connection, dx_record_id_t record_id, dx_int_t protocol_id) {
+    dx_server_local_record_id_map_t* record_id_map = &CONTEXT_FIELD(record_id_map);
+        
+    if (protocol_id >= 0 && protocol_id < RECORD_ID_VECTOR_SIZE) {
+        record_id_map->frequent_ids[protocol_id] = record_id;
+    } else {
+        int idx;
+        bool found = false;
+        bool failed = false;
+        dx_record_id_pair_t rip;
+        
+        rip.server_record_id = protocol_id;
+        rip.local_record_id = record_id;
+        
+        DX_ARRAY_SEARCH(record_id_map->id_map.elements, 0, record_id_map->id_map.size, rip, RECORD_ID_PAIR_COMPARATOR, true, found, idx);
+        
+        if (found) {
+            record_id_map->id_map.elements[idx].local_record_id = record_id;
+            
+            return true;
+        }
+        
+        DX_ARRAY_INSERT(record_id_map->id_map, dx_record_id_pair_t, rip, idx, dx_capacity_manager_halfer, failed);
+        
+        if (failed) {
+            return false;
+        }
+    }
+    
+    return true;
 }
 
 /* -------------------------------------------------------------------------- */

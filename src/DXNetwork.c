@@ -63,7 +63,7 @@ typedef struct {
     dx_addrinfo_ptr* elements_to_free;
     int elements_to_free_count;
     
-    time_t last_resolution_time;
+    int last_resolution_timestamp;
     int cur_addr_index;
 } dx_address_resolution_context_t;
 
@@ -329,7 +329,6 @@ void* dx_socket_reader (void* arg) {
 static const int port_min = 0;
 static const int port_max = 65535;
 static const char host_port_splitter = ':';
-static const int invalid_host_count = -1;
 static const char host_splitter = ',';
 
 bool dx_split_address (const char* host, OUT dx_address_t* addr) {
@@ -456,24 +455,22 @@ bool dx_get_addresses_from_connector (const char* connector, OUT dx_address_arra
 /* -------------------------------------------------------------------------- */
 
 void dx_sleep_before_resolve (dx_network_connection_context_t* conn_data) {
-    static time_t RECONNECT_TIMEOUT = 10;
+    static int RECONNECT_TIMEOUT = 10000;
 
-    time_t* last_res_time = &(conn_data->addr_context.last_resolution_time);
-    time_t cur_time = time(NULL);
+    int* last_res_timestamp = &(conn_data->addr_context.last_resolution_timestamp);
+    int timestamp_diff = dx_millisecond_timestamp_diff(*last_res_timestamp, dx_millisecond_timestamp());
 
-    if (*last_res_time != 0 && cur_time - *last_res_time < RECONNECT_TIMEOUT) {
-        // TODO: add timeout randomization
-
-        dx_sleep((int)((RECONNECT_TIMEOUT - (cur_time - *last_res_time)) * 1000));
+    if (*last_res_timestamp != 0 && timestamp_diff < RECONNECT_TIMEOUT) {
+        dx_sleep((int)((1.0 + dx_random_double(1)) * (RECONNECT_TIMEOUT - timestamp_diff)));
     }
     
-    time(last_res_time);
+    *last_res_timestamp = dx_millisecond_timestamp();
 }
 
 /* -------------------------------------------------------------------------- */
 
 void dx_shuffle_addrs (dx_address_resolution_context_t* addrs) {
-    // TODO: add addrs shuffling
+    DX_ARRAY_SHUFFLE(addrs->elements, dx_addrinfo_ptr, addrs->size);
 }
 
 /* -------------------------------------------------------------------------- */

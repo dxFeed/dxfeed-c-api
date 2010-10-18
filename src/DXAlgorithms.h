@@ -29,6 +29,88 @@
 
 /* -------------------------------------------------------------------------- */
 /*
+ *	Generic operations
+ */
+/* -------------------------------------------------------------------------- */
+
+#define DX_SWAP(type, e1, e2) \
+    do { \
+        type _tmp = e1; \
+        \
+        e1 = e2; \
+        e2 = _tmp; \
+    } while (false)
+
+#define DX_CHECKED_SET_VAL_TO_PTR(ptr, val) \
+    do { \
+        if (ptr != NULL) { \
+            *ptr = val; \
+        } \
+    } while (false)
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Memory operations
+ */
+/* -------------------------------------------------------------------------- */
+
+#define CHECKED_FREE(ptr) \
+    do { \
+        if (ptr != NULL) { \
+            dx_free((void*)(ptr)); \
+        } \
+    } while (false)
+
+#define FREE_ARRAY(array_ptr, size) \
+    do { \
+        int _array_ind = 0; \
+        \
+        if (array_ptr == NULL) { \
+            break; \
+        } \
+        \
+        for (; _array_ind < size; ++_array_ind) { \
+            if (array_ptr[_array_ind] != NULL) { \
+                dx_free(array_ptr[_array_ind]); \
+            } \
+        } \
+        \
+        dx_free(array_ptr); \
+    } while (false)
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Bit operations
+ */
+/* -------------------------------------------------------------------------- */
+
+#define IS_FLAG_SET(flags, flag) ((flags & flag) != 0)
+
+#define UNSIGNED_TYPE_dx_int_t \
+    dx_uint_t
+
+#define UNSIGNED_TYPE_dx_long_t \
+    dx_ulong_t
+
+#define UNSIGNED_TYPE(type) \
+    UNSIGNED_TYPE_##type
+
+#define UNSIGNED_LEFT_SHIFT(value, offset, type) \
+    ((type)((UNSIGNED_TYPE(type))value >> offset))
+
+bool dx_is_only_single_bit_set (int value);
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Random number generation functions
+ */
+/* -------------------------------------------------------------------------- */
+
+int dx_random_integer (int max_value);
+double dx_random_double (double max_value);
+
+/* -------------------------------------------------------------------------- */
+/*
  *	Array operations and functions
  
  *  A set of operations implementing various array algorithms: search,
@@ -247,6 +329,30 @@
         (array_obj).elements = _new_elem_buffer; \
         --((array_obj).size); \
     } while (false)
+    
+/* -------------------------------------------------------------------------- */
+/*
+ *	Shuffle
+ *  Shuffles the array elements in a random order.
+
+ *  a - array object (most likely of type 'type*' or 'type[]')
+ *  elem_type - type of elements in the array
+ *  size - the number of elements in the array
+ */
+/* -------------------------------------------------------------------------- */
+
+#define DX_ARRAY_SHUFFLE(a, elem_type, size) \
+    do { \
+        int _idx = 0; \
+        int _last_elem_idx = (size) - 1; \
+        int _rand_idx; \
+        \
+        for (; _idx < (size); ++_idx) { \
+            _rand_idx = dx_random_integer(_last_elem_idx); \
+            \
+            DX_SWAP(elem_type, (a)[_idx], (a)[_rand_idx]); \
+        } \
+    } while (false)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -260,27 +366,6 @@
 
 bool dx_capacity_manager_halfer (int new_size, int* capacity);
 
-/* -------------------------------------------------------------------------- */
-/*
- *	Generic operations
- */
-/* -------------------------------------------------------------------------- */
-
-#define DX_SWAP(type, e1, e2) \
-    do { \
-        type _tmp = e1; \
-        \
-        e1 = e2; \
-        e2 = _tmp; \
-    } while (false)
-    
-#define DX_CHECKED_SET_VAL_TO_PTR(ptr, val) \
-    do { \
-        if (ptr != NULL) { \
-            *ptr = val; \
-        } \
-    } while (false)
-    
 /* -------------------------------------------------------------------------- */
 /*
  *	String functions
@@ -301,54 +386,11 @@ dx_string_t dx_decode_from_integer (dx_long_t code);
 
 /* -------------------------------------------------------------------------- */
 /*
- *	Memory operations
+ *	Time functions
  */
 /* -------------------------------------------------------------------------- */
 
-#define CHECKED_FREE(ptr) \
-    do { \
-        if (ptr != NULL) { \
-            dx_free((void*)(ptr)); \
-        } \
-    } while (false)
-    
-#define FREE_ARRAY(array_ptr, size) \
-    do { \
-        int _array_ind = 0; \
-        \
-        if (array_ptr == NULL) { \
-            break; \
-        } \
-        \
-        for (; _array_ind < size; ++_array_ind) { \
-            if (array_ptr[_array_ind] != NULL) { \
-                dx_free(array_ptr[_array_ind]); \
-            } \
-        } \
-        \
-        dx_free(array_ptr); \
-    } while (false)
-    
-/* -------------------------------------------------------------------------- */
-/*
- *	Bit operations
- */
-/* -------------------------------------------------------------------------- */
-
-#define IS_FLAG_SET(flags, flag) ((flags & flag) != 0)
-
-#define UNSIGNED_TYPE_dx_int_t \
-    dx_uint_t
-    
-#define UNSIGNED_TYPE_dx_long_t \
-    dx_ulong_t
-    
-#define UNSIGNED_TYPE(type) \
-    UNSIGNED_TYPE_##type
-
-#define UNSIGNED_LEFT_SHIFT(value, offset, type) \
-    ((type)((UNSIGNED_TYPE(type))value >> offset))
-
-bool dx_is_only_single_bit_set (int value);
+int dx_millisecond_timestamp (void);
+int dx_millisecond_timestamp_diff (int older, int newer);
 
 #endif /* DX_ALGORITHMS_H_INCLUDED */
