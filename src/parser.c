@@ -82,7 +82,9 @@ typedef struct {
     
     dx_record_server_support_info_t* record_server_support_states;
     dx_record_digest_t record_digests[dx_rid_count];
-    
+   
+	dx_int_t sends; // bitmask for server messages type, to check compatibility in describe_protocol
+	dx_int_t recvs;
     void* bicc;
 } dx_parser_connection_context_t;
 
@@ -284,8 +286,6 @@ bool dx_is_message_type_valid (dx_long_t type) {
     return type == MESSAGE_HEARTBEAT
         || type == MESSAGE_DESCRIBE_PROTOCOL
         || type == MESSAGE_DESCRIBE_RECORDS
-        || type == MESSAGE_DESCRIBE_RESERVED
-        || type == MESSAGE_RAW_DATA
         || type == MESSAGE_TICKER_DATA
         || type == MESSAGE_TICKER_ADD_SUBSCRIPTION
         || type == MESSAGE_TICKER_REMOVE_SUBSCRIPTION
@@ -302,8 +302,7 @@ bool dx_is_message_type_valid (dx_long_t type) {
 /* -------------------------------------------------------------------------- */
 
 bool dx_is_data_message(dx_message_type_t type) {
-    return type == MESSAGE_RAW_DATA
-        || type == MESSAGE_TICKER_DATA
+    return type == MESSAGE_TICKER_DATA
         || type == MESSAGE_STREAM_DATA
         || type == MESSAGE_HISTORY_DATA;
 }
@@ -618,12 +617,112 @@ dx_result_t dx_parse_describe_records (dxf_connection_t connection, dx_parser_co
 	
 	return parseSuccessful();
 }
-
+/* -------------------------------------------------------------------------- */
+dx_const_string_t type_to_string(dx_message_type_t type){
+	switch (type){
+		case MESSAGE_HEARTBEAT: return L"HEARTBEAT";
+		case MESSAGE_DESCRIBE_PROTOCOL: return L"DESCRIBE_PROTOCOL";
+		case MESSAGE_DESCRIBE_RECORDS: return L"DESCRIBE_RECORDS";
+		case MESSAGE_TICKER_DATA: return L"TICKER_DATA";
+		case MESSAGE_TICKER_ADD_SUBSCRIPTION: return L"TICKER_ADD_SUBSCRIPTION";
+		case MESSAGE_TICKER_REMOVE_SUBSCRIPTION: return L"TICKER_REMOVE_SUBSCRIPTION";
+		case MESSAGE_STREAM_DATA: return L"STREAM_DATA";
+		case MESSAGE_STREAM_ADD_SUBSCRIPTION: return L"STREAM_ADD_SUBSCRIPTION";
+		case MESSAGE_STREAM_REMOVE_SUBSCRIPTION: return L"STREAM_REMOVE_SUBSCRIPTION";
+		case MESSAGE_HISTORY_DATA: return L"HISTORY_DATA";
+		case MESSAGE_HISTORY_ADD_SUBSCRIPTION: return L"HISTORY_ADD_SUBSCRIPTION";
+		case MESSAGE_HISTORY_REMOVE_SUBSCRIPTION: return L"HISTORY_REMOVE_SUBSCRIPTION";
+		default : return L"UNKNOWN MESSAGE TYPE";
+	}
+}
 /* -------------------------------------------------------------------------- */
 
-void dx_process_other_message(dx_int_t type, dx_byte_t* new_buffer, dx_int_t size, dx_int_t buffer_position, dx_int_t len) {
-    
+dx_result_t dx_read_describe_protocol_properties (dxf_connection_t connection, dx_parser_connection_context_t* context){
+	dx_string_t key, value;
+	dx_int_t count, i;
+
+	CHECKED_CALL_2 (dx_read_compact_int, context->bicc, &count);
+	if (count < 0 )
+		return setParseError(dx_pr_describe_protocol_corrupt);
+			
+	for ( i = 0; i < count; ++i){
+			CHECKED_CALL_2 (dx_read_utf_string, context->bicc, &key);
+			CHECKED_CALL_2 (dx_read_utf_string, context->bicc, &value);
+			dx_logging_info(L"%s: %s", key, value);
+
+			dx_free(key); //just skipping
+			dx_free(value);
+	}
+	return parseSuccessful();
 }
+typedef dx_result_t (*dx_dp_descriptor_processor_t) (dxf_connection_t connection, dx_message_type_t type);
+/* -------------------------------------------------------------------------- */
+dx_result_t dx_descriptor_sends (dxf_connection_t connection, dx_message_type_t type){
+    dx_parser_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_parser);
+
+//	switch (type){
+//		
+//		default: return setParseError(dx_pr_describe_protocol_corrupt);
+//	}
+
+	return parseSuccessful();
+};
+/* -------------------------------------------------------------------------- */
+dx_result_t dx_descriptor_recvs (dxf_connection_t connection, dx_message_type_t type){
+    dx_parser_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_parser);
+
+	return parseSuccessful();
+};
+/* -------------------------------------------------------------------------- */
+
+dx_result_t dx_read_describe_protocol_descriptor (dxf_connection_t connection, dx_parser_connection_context_t* context, dx_dp_descriptor_processor_t processor){
+	dx_int_t count, i;
+
+	dx_int_t message_id;
+	dx_string_t message_name;
+
+	CHECKED_CALL_2 (dx_read_compact_int, context->bicc, &count);
+	if (count < 0 )
+		return setParseError(dx_pr_describe_protocol_corrupt);
+	
+	for ( i = 0; i < count; ++i){
+			CHECKED_CALL_2 (dx_read_compact_int, context->bicc, &message_id);
+			CHECKED_CALL_2 (dx_read_utf_string, context->bicc, &message_name);
+			dx_logging_info(L"%i(%s): %s", message_id, type_to_string(message_id), message_name);
+			CHECKED_CALL_2 (processor, connection, message_id); 
+			dx_free(message_name);
+			// read properties for this descriptor
+			CHECKED_CALL_2 (dx_read_describe_protocol_properties, connection, context);
+	}
+	return parseSuccessful();
+}
+/* -------------------------------------------------------------------------- */
+
+dx_result_t dx_parse_describe_protocol (dxf_connection_t connection, dx_parser_connection_context_t* context) {
+    dx_int_t magic;
+
+	dx_logging_info(L"Parse describe protocol");
+
+	// read magic	
+	CHECKED_CALL_2(dx_read_int, context->bicc, &magic);
+	if (magic != 0x44585033) // 'D', 'X', 'P', '3'
+			return setParseError(dx_pr_describe_protocol_corrupt);
+
+	// read protocol properties
+	dx_logging_info(L"Protocol properties: ");
+	CHECKED_CALL_2 (dx_read_describe_protocol_properties, connection, context);
+	
+	//read  sends descriptors
+	dx_logging_info(L"Server sends: ");
+	CHECKED_CALL_3 (dx_read_describe_protocol_descriptor, connection, context, dx_descriptor_sends);
+
+	//read  receives descriptors
+	dx_logging_info(L"Server receives: ");
+	CHECKED_CALL_3 (dx_read_describe_protocol_descriptor, connection, context, dx_descriptor_recvs);
+
+	return parseSuccessful();
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 /**
@@ -658,19 +757,21 @@ dx_result_t dx_parse_message (dxf_connection_t connection, dx_parser_connection_
                     return R_FAILED;
                 }
 			    break;
-            case MESSAGE_HEARTBEAT: // no break, falls through
-            case MESSAGE_DESCRIBE_PROTOCOL:
-            case MESSAGE_DESCRIBE_RESERVED:
-            case MESSAGE_TEXT_FORMAT_COMMENT:
-            case MESSAGE_TEXT_FORMAT_SPECIAL:
-                // just ignore those messages without any processing
-                return setParseError(dx_pr_message_type_not_supported);
-            default:
-                {
-                    dx_int_t size;
-                    dx_byte_t* new_buffer = dx_get_in_buffer(context->bicc, &size);
-    //                dx_process_other_message(type, new_buffer, size, dx_get_in_buffer_position(), dx_get_in_buffer_limit() - dx_get_in_buffer_position());
+             case MESSAGE_DESCRIBE_PROTOCOL:
+                if (dx_parse_describe_protocol(connection, context) != R_SUCCESSFUL) {
+                    if (dx_get_parser_last_error() == dx_pr_out_of_buffer) {
+                        return setParseError(dx_pr_message_not_complete);
+                    }
+                    return R_FAILED;
                 }
+			    break;
+				 break;
+			 case MESSAGE_HEARTBEAT: // no break, falls through
+             case MESSAGE_TEXT_FORMAT_COMMENT:
+             case MESSAGE_TEXT_FORMAT_SPECIAL:
+             default:
+                // just ignore those messages without any processing and skip it later in dx_parse
+                return setParseError(dx_pr_message_type_not_supported);
         }
 	}
     else {

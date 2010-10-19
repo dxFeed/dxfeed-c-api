@@ -37,15 +37,13 @@ dx_result_t dx_clear_records_server_support_states (dxf_connection_t connection)
  *  Message types
  */
 /* -------------------------------------------------------------------------- */
-
+// while adding new message types do not forget to update message_describe_protocol processing
+// there are only only actual messages in this enum
 typedef enum {
     MESSAGE_HEARTBEAT = 0,
 
     MESSAGE_DESCRIBE_PROTOCOL = 1,
     MESSAGE_DESCRIBE_RECORDS = 2,
-    MESSAGE_DESCRIBE_RESERVED = 3,
-
-    MESSAGE_RAW_DATA = 5,
 
     MESSAGE_TICKER_DATA = 10,
     MESSAGE_TICKER_ADD_SUBSCRIPTION = 11,
@@ -78,6 +76,7 @@ typedef enum {
     MESSAGE_TEXT_FORMAT_SPECIAL = 61, // '='
 
 } dx_message_type_t;
+
 
 /* -------------------------------------------------------------------------- */
 

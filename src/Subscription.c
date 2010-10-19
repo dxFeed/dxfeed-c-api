@@ -43,6 +43,85 @@ dx_result_t dx_compose_message_header(dx_int_t messageTypeId) {
     return parseSuccessful();
 }
 
+///* -------------------------------------------------------------------------- */
+dx_result_t dx_write_magic() {
+	// hex value is 0x44585033
+    CHECKED_CALL(dx_write_byte, (dx_byte_t)'D'); 
+    CHECKED_CALL(dx_write_byte, (dx_byte_t)'X'); 
+    CHECKED_CALL(dx_write_byte, (dx_byte_t)'P'); 
+    CHECKED_CALL(dx_write_byte, (dx_byte_t)'3'); 
+
+    return parseSuccessful();
+}
+
+///* -------------------------------------------------------------------------- */
+dx_result_t dx_write_properties() {
+
+    CHECKED_CALL(dx_write_compact_int, 1); //count of properties
+    CHECKED_CALL(dx_write_utf_string, L"version"); 
+    CHECKED_CALL(dx_write_utf_string, L"DXFeed.cpp v 1.0 (c) Devexperts"); 
+  
+    return parseSuccessful();
+}
+
+///* -------------------------------------------------------------------------- */
+dx_result_t dx_write_sends() {
+    CHECKED_CALL(dx_write_compact_int, 7); // count of properties
+
+	CHECKED_CALL(dx_write_compact_int, MESSAGE_DESCRIBE_RECORDS); // type
+    CHECKED_CALL(dx_write_utf_string, L"DESCRIBE_RECORDS");// name
+	CHECKED_CALL(dx_write_compact_int, 0); // count of folloing properties
+
+	CHECKED_CALL(dx_write_compact_int, MESSAGE_TICKER_ADD_SUBSCRIPTION); // type
+    CHECKED_CALL(dx_write_utf_string, L"TICKER_ADD_SUBSCRIPTION");// name
+	CHECKED_CALL(dx_write_compact_int, 0); // count of folloing properties
+	
+	CHECKED_CALL(dx_write_compact_int, MESSAGE_TICKER_REMOVE_SUBSCRIPTION); // type
+    CHECKED_CALL(dx_write_utf_string, L"TICKER_REMOVE_SUBSCRIPTION");// name
+	CHECKED_CALL(dx_write_compact_int, 0); // count of folloing properties
+	
+	CHECKED_CALL(dx_write_compact_int, MESSAGE_STREAM_ADD_SUBSCRIPTION); // type
+    CHECKED_CALL(dx_write_utf_string, L"STREAM_ADD_SUBSCRIPTION");// name
+	CHECKED_CALL(dx_write_compact_int, 0); // count of folloing properties
+	
+	CHECKED_CALL(dx_write_compact_int, MESSAGE_STREAM_REMOVE_SUBSCRIPTION); // type
+    CHECKED_CALL(dx_write_utf_string, L"STREAM_REMOVE_SUBSCRIPTION");// name
+	CHECKED_CALL(dx_write_compact_int, 0); // count of folloing properties
+	
+	CHECKED_CALL(dx_write_compact_int, MESSAGE_HISTORY_ADD_SUBSCRIPTION); // type
+    CHECKED_CALL(dx_write_utf_string, L"HISTORY_ADD_SUBSCRIPTION");// name
+	CHECKED_CALL(dx_write_compact_int, 0); // count of folloing properties
+
+	CHECKED_CALL(dx_write_compact_int, MESSAGE_HISTORY_REMOVE_SUBSCRIPTION); // type
+    CHECKED_CALL(dx_write_utf_string, L"HISTORY_REMOVE_SUBSCRIPTION");// name
+	CHECKED_CALL(dx_write_compact_int, 0); // count of folloing properties
+
+	return parseSuccessful();
+}
+
+///* -------------------------------------------------------------------------- */
+
+dx_result_t dx_write_receives() {
+    CHECKED_CALL(dx_write_compact_int, 4); // count of properties
+
+	CHECKED_CALL(dx_write_compact_int, MESSAGE_DESCRIBE_RECORDS); // type
+    CHECKED_CALL(dx_write_utf_string, L"DESCRIBE_RECORDS");// name
+	CHECKED_CALL(dx_write_compact_int, 0); // count of folloing properties
+
+	CHECKED_CALL(dx_write_compact_int, MESSAGE_TICKER_DATA); // type
+    CHECKED_CALL(dx_write_utf_string, L"TICKER_DATA");// name
+	CHECKED_CALL(dx_write_compact_int, 0); // count of folloing properties
+	
+	CHECKED_CALL(dx_write_compact_int, MESSAGE_STREAM_DATA); // type
+    CHECKED_CALL(dx_write_utf_string, L"STREAM_DATA");// name
+	CHECKED_CALL(dx_write_compact_int, 0); // count of folloing properties
+	
+	CHECKED_CALL(dx_write_compact_int, MESSAGE_HISTORY_DATA); // type
+    CHECKED_CALL(dx_write_utf_string, L"HISTORY_DATA");// name
+	CHECKED_CALL(dx_write_compact_int, 0); // count of folloing properties
+	
+	return parseSuccessful();
+}
 
 /* -------------------------------------------------------------------------- */
 /**
@@ -201,7 +280,7 @@ dx_result_t dx_create_subscription (dx_message_type_t type, dx_const_string_t sy
 
 /* -------------------------------------------------------------------------- */
 
-dx_result_t dx_compose_description_message (OUT dx_byte_t** msg_buffer, OUT dx_int_t* msg_length) {
+dx_result_t dx_compose_records_description_message (OUT dx_byte_t** msg_buffer, OUT dx_int_t* msg_length) {
     static const int initial_size = 1024;
     dx_byte_t* initial_buffer = NULL;
     
@@ -220,7 +299,32 @@ dx_result_t dx_compose_description_message (OUT dx_byte_t** msg_buffer, OUT dx_i
     
     return parseSuccessful();
 }
+/* -------------------------------------------------------------------------- */
 
+dx_result_t dx_compose_protocol_description_message (OUT dx_byte_t** msg_buffer, OUT dx_int_t* msg_length) {
+    static const int initial_size = 1024;
+    dx_byte_t* initial_buffer = NULL;
+    
+    if ((initial_buffer = dx_malloc(initial_size)) == NULL) {
+        return R_FAILED;
+    }
+    
+    dx_set_out_buffer(initial_buffer, (dx_int_t)initial_size);
+    
+    CHECKED_CALL(dx_compose_message_header, MESSAGE_DESCRIBE_PROTOCOL);
+   
+	CHECKED_CALL_0(dx_write_magic);
+    CHECKED_CALL_0(dx_write_properties);
+    CHECKED_CALL_0(dx_write_sends);
+    CHECKED_CALL_0(dx_write_receives);
+
+    CHECKED_CALL_0(dx_finish_composing_message);
+    
+    *msg_buffer = dx_get_out_buffer(NULL);
+    *msg_length = dx_get_out_buffer_position();
+    
+    return parseSuccessful();
+}
 /* -------------------------------------------------------------------------- */
 
 bool dx_update_record_description (dxf_connection_t connection) {
@@ -230,7 +334,26 @@ bool dx_update_record_description (dxf_connection_t connection) {
 
     dx_logging_info(L"Update record description");
 
-    if (dx_compose_description_message(&msg_buffer, &msg_length) != R_SUCCESSFUL) {
+    if (dx_compose_records_description_message(&msg_buffer, &msg_length) != R_SUCCESSFUL) {
+        return false;
+    }
+
+    res = dx_send_data(connection, msg_buffer, msg_length);
+
+    dx_free(msg_buffer);
+
+    return res;
+}
+/* -------------------------------------------------------------------------- */
+
+bool dx_update_protocol_description (dxf_connection_t connection) {
+    dx_byte_t* msg_buffer;
+    dx_int_t msg_length;
+    bool res = false;    
+
+    dx_logging_info(L"Update record description");
+
+    if (dx_compose_protocol_description_message(&msg_buffer, &msg_length) != R_SUCCESSFUL) {
         return false;
     }
 

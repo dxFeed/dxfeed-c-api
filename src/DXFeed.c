@@ -271,6 +271,7 @@ DXFEED_API ERRORCODE dxf_create_connection (const char* host, dxf_conn_terminati
     cc.notifier = notifier;
     
     if (!dx_bind_to_connector(*connection, host, &cc) ||
+		!dx_update_protocol_description(*connection) ||
         !dx_update_record_description(*connection)) {
         dx_deinit_connection(*connection);
         
