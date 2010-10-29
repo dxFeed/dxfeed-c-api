@@ -35,19 +35,9 @@
  */
 /* -------------------------------------------------------------------------- */
 
-static const dx_error_code_descr_t g_memory_errors[] = {
-    { dx_mec_insufficient_memory, L"Insufficient memory available" },
-    
-    { ERROR_CODE_FOOTER, ERROR_DESCR_FOOTER }
-};
-
-const dx_error_code_descr_t* memory_error_roster = g_memory_errors;
-
-/* -------------------------------------------------------------------------- */
-
 void* dx_error_processor (void* src) {
     if (src == NULL) {
-        dx_set_last_error(dx_sc_memory, dx_mec_insufficient_memory);
+        dx_set_error_code(dx_mec_insufficient_memory);
     }
 
     return src;
@@ -108,4 +98,10 @@ void dx_free (void* buf) {
 
 void* dx_calloc_no_ehm (int num, int size) {
     return calloc(num, size);
+}
+
+/* -------------------------------------------------------------------------- */
+
+void dx_free_no_ehm (void* buf) {
+    free(buf);
 }

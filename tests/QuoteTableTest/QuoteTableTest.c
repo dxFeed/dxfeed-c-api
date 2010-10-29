@@ -8,7 +8,7 @@ static char dxfeed_host_default[] = "demo.dxfeed.com:7300";
 
 HANDLE g_out_console;
 
-dx_const_string_t dx_event_type_to_string (int event_type) {
+dxf_const_string_t dx_event_type_to_string (int event_type) {
     switch (event_type) {
     case DXF_ET_TRADE: return L"Trade";
     case DXF_ET_QUOTE: return L"Quote";
@@ -22,17 +22,17 @@ dx_const_string_t dx_event_type_to_string (int event_type) {
 
 struct event_info_t {
     int                 event_type;
-    dx_event_listener_t listener;
+    dxf_event_listener_t listener;
 };
 
 #define SYMBOLS_COUNT 63
 //static const dx_const_string_t g_symbols[] = { {L"IBM"}, {L"MSFT"}, {L"YHOO"}, {L"C"} };
-static dx_const_string_t g_symbols[] = { L"BP", L"AMD", L"BAC", L"BP", L"C", L"EMC", L"F", L"GE", L"HPQ", L"IBM", L"JPM", L"LCC", L"LSI", L"MGM", L"MO", L"MOT", L"MU",
+static dxf_const_string_t g_symbols[] = { L"BP", L"AMD", L"BAC", L"BP", L"C", L"EMC", L"F", L"GE", L"HPQ", L"IBM", L"JPM", L"LCC", L"LSI", L"MGM", L"MO", L"MOT", L"MU",
 L"NOK", L"PFE", L"RBS", L"S", L"SAP", L"T", L"VMW", L"WFC", L"XTO", L"BXD", L"BXM", L"BXN", L"BXR", L"BXY", L"CEX", L"CYX",
 L"DDA", L"DDB", L"EVZ", L"EXQ", L"FVX", L"GOX", L"GVZ", L"INX", L"IRX", L"OIX", L"OVX", L"RVX", L"TNX", L"TXX", L"TYX", L"VIO",
 L"VIX", L"VWA", L"VWB", L"VXB", L"VXD", L"VXN", L"VXO", L"VXV", L"ZIO", L"ZOC", L"OEX", L"SPX", L"XEO", L"XSP" };
 
-static const dx_int_t g_symbols_size = sizeof (g_symbols) / sizeof (g_symbols[0]);
+static const dxf_int_t g_symbols_size = sizeof (g_symbols) / sizeof (g_symbols[0]);
 
 #define EVENTS_COUNT 4
 
@@ -42,10 +42,10 @@ static dx_fundamental_t* summaries[SYMBOLS_COUNT] = {0};
 static dx_profile_t*     profiles[SYMBOLS_COUNT] = {0};
 
 /* -------------------------------------------------------------------------- */
-void trade_listener (int event_type, dx_const_string_t symbol_name, const dx_event_data_t* data, int data_count);
-void quote_listener (int event_type, dx_const_string_t symbol_name, const dx_event_data_t* data, int data_count);
-void summary_listener (int event_type, dx_const_string_t symbol_name, const dx_event_data_t* data, int data_count);
-void profile_listener (int event_type, dx_const_string_t symbol_name, const dx_event_data_t* data, int data_count);
+void trade_listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count);
+void quote_listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count);
+void summary_listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count);
+void profile_listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count);
 
 static struct event_info_t event_info[EVENTS_COUNT] = { {DXF_ET_TRADE, trade_listener},
 {DXF_ET_QUOTE, quote_listener},
@@ -78,7 +78,7 @@ void on_reader_thread_terminate(const char* host ) {
 
 /* -------------------------------------------------------------------------- */
 
-int get_symbol_index(dx_const_string_t symbol_name) {
+int get_symbol_index(dxf_const_string_t symbol_name) {
     int i = 0;
     for (; i < g_symbols_size; ++i) {
         if (wcsicmp(symbol_name, g_symbols[i]) == 0) {
@@ -120,7 +120,7 @@ void output_data(int i) {
 }
 
 /* -------------------------------------------------------------------------- */
-dx_event_data_t getData(int event_type, int i) {
+dxf_event_data_t getData(int event_type, int i) {
     if (event_type == DXF_ET_TRADE) {
         if (trades[i] == NULL) {
             trades[i] = (dx_trade_t*)calloc(1, sizeof(dx_trade_t));
@@ -152,7 +152,7 @@ dx_event_data_t getData(int event_type, int i) {
     else return NULL;
 }
 
-void trade_listener (int event_type, dx_const_string_t symbol_name, const dx_event_data_t* data, int data_count) {
+void trade_listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count) {
     dx_trade_t* trades_data = (dx_trade_t*)data;
     dx_trade_t* dst_trade;
     int i = 0;
@@ -181,7 +181,7 @@ void trade_listener (int event_type, dx_const_string_t symbol_name, const dx_eve
 
 /* -------------------------------------------------------------------------- */
 
-void quote_listener (int event_type, dx_const_string_t symbol_name, const dx_event_data_t* data, int data_count) {
+void quote_listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count) {
     dx_quote_t* quotes_data = (dx_quote_t*)data;
     dx_quote_t* dst_quote;
     int i = 0;
@@ -210,7 +210,7 @@ void quote_listener (int event_type, dx_const_string_t symbol_name, const dx_eve
 
 /* -------------------------------------------------------------------------- */
 
-void summary_listener (int event_type, dx_const_string_t symbol_name, const dx_event_data_t* data, int data_count) {
+void summary_listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count) {
     dx_fundamental_t* summaries_data = (dx_fundamental_t*)data;
     dx_fundamental_t* dst_summary;
     int i = 0;
@@ -239,7 +239,7 @@ void summary_listener (int event_type, dx_const_string_t symbol_name, const dx_e
 
 /* -------------------------------------------------------------------------- */
 
-void profile_listener (int event_type, dx_const_string_t symbol_name, const dx_event_data_t* data, int data_count) {
+void profile_listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count) {
     dx_profile_t* profiles_data = (dx_profile_t*)data;
     dx_profile_t* dst_profile;
     int i = 0;
@@ -269,23 +269,22 @@ void profile_listener (int event_type, dx_const_string_t symbol_name, const dx_e
 /* -------------------------------------------------------------------------- */
 
 void process_last_error () {
-    int subsystem_id = dx_sc_invalid_subsystem;
-    int error_code = DX_INVALID_ERROR_CODE;
-    dx_const_string_t error_descr = NULL;
+    int error_code = dx_ec_success;
+    dxf_const_string_t error_descr = NULL;
     int res;
 
-    res = dxf_get_last_error(&subsystem_id, &error_code, &error_descr);
+    res = dxf_get_last_error(&error_code, &error_descr);
 
     if (res == DXF_SUCCESS) {
-        if (subsystem_id == dx_sc_invalid_subsystem && error_code == DX_INVALID_ERROR_CODE) {
+        if (error_code == dx_ec_success) {
             printf("WTF - no error information is stored");
 
             return;
         }
 
         wprintf(L"Error occurred and successfully retrieved:\n"
-            L"subsystem code = %d, error code = %d, description = \"%s\"\n",
-            subsystem_id, error_code, error_descr);
+                L"error code = %d, description = \"%s\"\n",
+                error_code, error_descr);
         return;
     }
 

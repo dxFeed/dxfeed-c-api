@@ -41,8 +41,9 @@ typedef enum {
     dx_ccs_record_transcoder,
     dx_ccs_data_structures,
     dx_ccs_record_buffers,
-    dx_ccs_parser,
+    dx_ccs_server_msg_processor,
     dx_ccs_buffered_input,
+    dx_ccs_buffered_output,
     
     dx_ccs_count
 } dx_connection_context_subsystem_t;
@@ -78,15 +79,17 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_event_subscription);
 DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_record_transcoder);
 DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_data_structures);
 DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_record_buffers);
-DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_parser);
+DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_server_msg_processor);
 DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_buffered_input);
+DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_buffered_output);
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_network);
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_event_subscription);
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_record_transcoder);
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_data_structures);
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_record_buffers);
-DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_parser);
+DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_server_msg_processor);
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_buffered_input);
+DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_buffered_output);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -96,7 +99,8 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_buffered_input);
 
 dxf_connection_t dx_init_connection (void);
 bool dx_deinit_connection (dxf_connection_t connection);
-void* dx_get_subsystem_data (dxf_connection_t connection, dx_connection_context_subsystem_t subsystem);
+void* dx_get_subsystem_data (dxf_connection_t connection, dx_connection_context_subsystem_t subsystem, OUT bool* res);
 bool dx_set_subsystem_data (dxf_connection_t connection, dx_connection_context_subsystem_t subsystem, void* data);
+bool dx_validate_connection_handle (dxf_connection_t connection, bool is_internal);
 
 #endif /* CONNECTION_CONTEXT_DATA_H_INCLUDED */

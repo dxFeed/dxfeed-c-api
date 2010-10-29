@@ -19,6 +19,8 @@
  
 #include "ConnectionContextData.h"
 #include "DXMemory.h"
+#include "DXErrorHandling.h"
+#include "DXAlgorithms.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -30,18 +32,20 @@ static const dx_conn_ctx_subsys_manipulator_t g_initializer_queue[dx_ccs_count] 
     DX_CONNECTION_SUBSYS_INIT_NAME(dx_ccs_network),
     DX_CONNECTION_SUBSYS_INIT_NAME(dx_ccs_data_structures),
     DX_CONNECTION_SUBSYS_INIT_NAME(dx_ccs_buffered_input),
-    DX_CONNECTION_SUBSYS_INIT_NAME(dx_ccs_parser),
-    DX_CONNECTION_SUBSYS_INIT_NAME(dx_ccs_event_subscription),
+    DX_CONNECTION_SUBSYS_INIT_NAME(dx_ccs_buffered_output),
     DX_CONNECTION_SUBSYS_INIT_NAME(dx_ccs_record_buffers),
+    DX_CONNECTION_SUBSYS_INIT_NAME(dx_ccs_server_msg_processor),
+    DX_CONNECTION_SUBSYS_INIT_NAME(dx_ccs_event_subscription),
     DX_CONNECTION_SUBSYS_INIT_NAME(dx_ccs_record_transcoder)
 };
 
 static const dx_conn_ctx_subsys_manipulator_t g_deinitializer_queue[dx_ccs_count] = {
     DX_CONNECTION_SUBSYS_DEINIT_NAME(dx_ccs_network),
-    DX_CONNECTION_SUBSYS_DEINIT_NAME(dx_ccs_parser),
+    DX_CONNECTION_SUBSYS_DEINIT_NAME(dx_ccs_server_msg_processor),
     DX_CONNECTION_SUBSYS_DEINIT_NAME(dx_ccs_event_subscription),
     DX_CONNECTION_SUBSYS_DEINIT_NAME(dx_ccs_data_structures),
     DX_CONNECTION_SUBSYS_DEINIT_NAME(dx_ccs_buffered_input),
+    DX_CONNECTION_SUBSYS_DEINIT_NAME(dx_ccs_buffered_output),
     DX_CONNECTION_SUBSYS_DEINIT_NAME(dx_ccs_record_buffers),
     DX_CONNECTION_SUBSYS_DEINIT_NAME(dx_ccs_record_transcoder)
 };
@@ -98,10 +102,22 @@ bool dx_deinit_connection (dxf_connection_t connection) {
 
 /* -------------------------------------------------------------------------- */
 
-void* dx_get_subsystem_data (dxf_connection_t connection, dx_connection_context_subsystem_t subsystem) {
-    if (connection == NULL || subsystem < dx_ccs_begin || subsystem >= dx_ccs_count) {
+void* dx_get_subsystem_data (dxf_connection_t connection, dx_connection_context_subsystem_t subsystem, OUT bool* res) {
+    if (connection == NULL) {
+        dx_set_error_code(dx_cec_invalid_connection_handle_internal);
+        DX_CHECKED_SET_VAL_TO_PTR(res, false);
+        
         return NULL;
     }
+    
+    if (subsystem < dx_ccs_begin || subsystem >= dx_ccs_count) {
+        dx_set_last_error(dx_cec_invalid_connection_context_subsystem_id);
+        DX_CHECKED_SET_VAL_TO_PTR(res, false);
+        
+        return NULL;
+    }
+    
+    DX_CHECKED_SET_VAL_TO_PTR(res, true);
     
     return ((dx_connection_data_collection_t*)connection)->subsystem_data[subsystem];
 }
@@ -109,11 +125,29 @@ void* dx_get_subsystem_data (dxf_connection_t connection, dx_connection_context_
 /* -------------------------------------------------------------------------- */
 
 bool dx_set_subsystem_data (dxf_connection_t connection, dx_connection_context_subsystem_t subsystem, void* data) {
-    if (connection == NULL || subsystem < dx_ccs_begin || subsystem >= dx_ccs_count) {
+    if (connection == NULL) {
+        dx_set_last_error(dx_cec_invalid_connection_handle_internal);
+        
+        return false;
+    }
+    
+    if (subsystem < dx_ccs_begin || subsystem >= dx_ccs_count) {
+        dx_set_last_error(dx_cec_invalid_connection_context_subsystem_id);
+        
         return false;
     }
     
     ((dx_connection_data_collection_t*)connection)->subsystem_data[subsystem] = data;
+    
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_validate_connection_handle (dxf_connection_t connection, bool is_internal) {
+    if (connection == NULL) {
+        return dx_set_error_code(is_internal ? dx_cec_invalid_connection_handle_internal : dx_cec_invalid_connection_handle);
+    }
     
     return true;
 }

@@ -8,7 +8,7 @@ static char dxfeed_host_default[] = "demo.dxfeed.com:7300";
 //const char dxfeed_host[] = "localhost:5678";
 HANDLE g_out_console;
 
-dx_const_string_t dx_event_type_to_string (int event_type) {
+dxf_const_string_t dx_event_type_to_string (int event_type) {
     switch (event_type) {
     case DXF_ET_TRADE: return L"Trade";
     case DXF_ET_QUOTE: return L"Quote";
@@ -21,22 +21,22 @@ dx_const_string_t dx_event_type_to_string (int event_type) {
 }
 
 #define SYMBOLS_COUNT 4
-static const dx_const_string_t g_symbols[] = { {L"IBM"}, {L"MSFT"}, {L"YHOO"}, {L"C"} };
+static const dxf_const_string_t g_symbols[] = { {L"IBM"}, {L"MSFT"}, {L"YHOO"}, {L"C"} };
 //static const dx_int_t g_symbols_size = sizeof (g_symbols) / sizeof (g_symbols[0]);
 
 /* -------------------------------------------------------------------------- */
-void trade_listener (int event_type, dx_const_string_t symbol_name, const dx_event_data_t* data, int data_count);
-void quote_listener (int event_type, dx_const_string_t symbol_name, const dx_event_data_t* data, int data_count);
-void summary_listener (int event_type, dx_const_string_t symbol_name, const dx_event_data_t* data, int data_count);
-void profile_listener (int event_type, dx_const_string_t symbol_name, const dx_event_data_t* data, int data_count);
-void order_listener (int event_type, dx_const_string_t symbol_name, const dx_event_data_t* data, int data_count);
-void time_and_sale_listener (int event_type, dx_const_string_t symbol_name, const dx_event_data_t* data, int data_count);
+void trade_listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count);
+void quote_listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count);
+void summary_listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count);
+void profile_listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count);
+void order_listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count);
+void time_and_sale_listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count);
 
 struct event_info_t {
     dx_event_id_t       id;
     int                 event_type;
     COORD               coord;
-    dx_event_listener_t listener;
+    dxf_event_listener_t listener;
     unsigned int        total_data_count[SYMBOLS_COUNT];
 };
 
@@ -80,7 +80,7 @@ void on_reader_thread_terminate(const char* host ) {
 
 /* -------------------------------------------------------------------------- */
 
-int get_symbol_index(dx_const_string_t symbol_name) {
+int get_symbol_index(dxf_const_string_t symbol_name) {
     int i = 0;
     for (; i < SYMBOLS_COUNT; ++i) {
         if (wcsicmp(symbol_name, g_symbols[i]) == 0) {
@@ -93,8 +93,8 @@ int get_symbol_index(dx_const_string_t symbol_name) {
 
 /* -------------------------------------------------------------------------- */
 
-void trade_listener (int event_type, dx_const_string_t symbol_name, const dx_event_data_t* data, int data_count) {
-    dx_int_t i = 0;
+void trade_listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count) {
+    dxf_int_t i = 0;
     wchar_t str[200];
     int ind;
     COORD coord = event_info[dx_eid_trade].coord;
@@ -123,8 +123,8 @@ void trade_listener (int event_type, dx_const_string_t symbol_name, const dx_eve
 
 /* -------------------------------------------------------------------------- */
 
-void quote_listener (int event_type, dx_const_string_t symbol_name, const dx_event_data_t* data, int data_count) {
-    dx_int_t i = 0;
+void quote_listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count) {
+    dxf_int_t i = 0;
     wchar_t str[200];
     int ind;
     COORD coord = event_info[dx_eid_quote].coord;
@@ -155,8 +155,8 @@ void quote_listener (int event_type, dx_const_string_t symbol_name, const dx_eve
 
 /* -------------------------------------------------------------------------- */
 
-void summary_listener (int event_type, dx_const_string_t symbol_name, const dx_event_data_t* data, int data_count) {
-    dx_int_t i = 0;
+void summary_listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count) {
+    dxf_int_t i = 0;
     wchar_t str[200];
     int ind;
     COORD coord = event_info[dx_eid_summary].coord;
@@ -186,8 +186,8 @@ void summary_listener (int event_type, dx_const_string_t symbol_name, const dx_e
 
 /* -------------------------------------------------------------------------- */
 
-void profile_listener (int event_type, dx_const_string_t symbol_name, const dx_event_data_t* data, int data_count) {
-    dx_int_t i = 0;
+void profile_listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count) {
+    dxf_int_t i = 0;
     wchar_t str[200];
     int ind;
     COORD coord = event_info[dx_eid_profile].coord;
@@ -217,8 +217,8 @@ void profile_listener (int event_type, dx_const_string_t symbol_name, const dx_e
 
 /* -------------------------------------------------------------------------- */
 
-void order_listener (int event_type, dx_const_string_t symbol_name, const dx_event_data_t* data, int data_count) {
-    dx_int_t i = 0;
+void order_listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count) {
+    dxf_int_t i = 0;
     wchar_t str[200];
     int ind;
     COORD coord = event_info[dx_eid_order].coord;
@@ -248,8 +248,8 @@ void order_listener (int event_type, dx_const_string_t symbol_name, const dx_eve
 
 /* -------------------------------------------------------------------------- */
 
-void time_and_sale_listener (int event_type, dx_const_string_t symbol_name, const dx_event_data_t* data, int data_count) {
-    dx_int_t i = 0;
+void time_and_sale_listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count) {
+    dxf_int_t i = 0;
     wchar_t str[200];
     int ind;
     COORD coord = event_info[dx_eid_time_and_sale].coord;
@@ -280,23 +280,22 @@ void time_and_sale_listener (int event_type, dx_const_string_t symbol_name, cons
 /* -------------------------------------------------------------------------- */
 
 void process_last_error () {
-    int subsystem_id = dx_sc_invalid_subsystem;
-    int error_code = DX_INVALID_ERROR_CODE;
-    dx_const_string_t error_descr = NULL;
+    int error_code = dx_ec_success;
+    dxf_const_string_t error_descr = NULL;
     int res;
 
-    res = dxf_get_last_error(&subsystem_id, &error_code, &error_descr);
+    res = dxf_get_last_error(&error_code, &error_descr);
 
     if (res == DXF_SUCCESS) {
-        if (subsystem_id == dx_sc_invalid_subsystem && error_code == DX_INVALID_ERROR_CODE) {
+        if (error_code == dx_ec_success) {
             printf("WTF - no error information is stored");
 
             return;
         }
 
         wprintf(L"Error occurred and successfully retrieved:\n"
-            L"subsystem code = %d, error code = %d, description = \"%s\"\n",
-            subsystem_id, error_code, error_descr);
+            L"error code = %d, description = \"%s\"\n",
+            error_code, error_descr);
         return;
     }
 

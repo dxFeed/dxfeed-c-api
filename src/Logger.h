@@ -30,9 +30,9 @@
 //    dx_ltf_MMMM_DD_YYYY,
 //} dx_log_date_format_t;
 
-void dx_logging_error (dx_const_string_t message);
-void dx_logging_info (const dx_char_t* format, ...);
-void dx_logging_verbose_info (const dx_char_t* format, ...);
+void dx_logging_error (dxf_const_string_t message);
+void dx_logging_info (const dxf_char_t* format, ...);
+void dx_logging_verbose_info (const dxf_char_t* format, ...);
 void dx_logging_gap ();
 
 void dx_logging_last_error();

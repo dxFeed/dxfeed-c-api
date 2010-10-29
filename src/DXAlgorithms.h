@@ -29,6 +29,14 @@
 
 /* -------------------------------------------------------------------------- */
 /*
+ *	Generic values
+ */
+/* -------------------------------------------------------------------------- */
+
+#define INVALID_INDEX   (-1)
+
+/* -------------------------------------------------------------------------- */
+/*
  *	Generic operations
  */
 /* -------------------------------------------------------------------------- */
@@ -45,6 +53,51 @@
     do { \
         if (ptr != NULL) { \
             *ptr = val; \
+        } \
+    } while (false)
+    
+#define MAX(a,b) (((a)>(b))?(a):(b))
+#define MIN(a,b) (((a)<(b))?(a):(b))
+
+#define CHECKED_CALL(func, param) \
+    do { \
+        if (!func(param)) { \
+            return false; \
+        } \
+    } while (false)
+
+#define CHECKED_CALL_0(func) \
+    do { \
+        if (!func()) { \
+            return false; \
+        } \
+    } while (false)
+
+#define CHECKED_CALL_2(func, param1, param2) \
+    do { \
+        if (!func(param1, param2)) { \
+            return false; \
+        } \
+    } while (false)
+
+#define CHECKED_CALL_3(func, param1, param2, param3) \
+    do { \
+        if (!func(param1, param2, param3)) { \
+            return false; \
+        } \
+    } while (false)
+
+#define CHECKED_CALL_4(func, param1, param2, param3, param4) \
+    do { \
+        if (!func(param1, param2, param3, param4)) { \
+            return false; \
+        } \
+    } while (false)
+
+#define CHECKED_CALL_5(func, param1, param2, param3, param4, param5) \
+    do { \
+        if (!func(param1, param2, param3, param4, param5)) { \
+            return false; \
         } \
     } while (false)
 
@@ -71,11 +124,11 @@
         \
         for (; _array_ind < size; ++_array_ind) { \
             if (array_ptr[_array_ind] != NULL) { \
-                dx_free(array_ptr[_array_ind]); \
+                dx_free((void*)array_ptr[_array_ind]); \
             } \
         } \
         \
-        dx_free(array_ptr); \
+        dx_free((void*)array_ptr); \
     } while (false)
 
 /* -------------------------------------------------------------------------- */
@@ -84,13 +137,17 @@
  */
 /* -------------------------------------------------------------------------- */
 
-#define IS_FLAG_SET(flags, flag) ((flags & flag) != 0)
+#define INDEX_BITMASK(index) \
+    (1 << (index))
 
-#define UNSIGNED_TYPE_dx_int_t \
-    dx_uint_t
+#define IS_FLAG_SET(flags, flag) \
+    ((flags & flag) != 0)
 
-#define UNSIGNED_TYPE_dx_long_t \
-    dx_ulong_t
+#define UNSIGNED_TYPE_dxf_int_t \
+    dxf_uint_t
+
+#define UNSIGNED_TYPE_dxf_long_t \
+    dxf_ulong_t
 
 #define UNSIGNED_TYPE(type) \
     UNSIGNED_TYPE_##type
@@ -372,17 +429,17 @@ bool dx_capacity_manager_halfer (int new_size, int* capacity);
  */
 /* -------------------------------------------------------------------------- */
 
-dx_string_t dx_create_string (int size);
-dx_string_t dx_create_string_src (dx_const_string_t src);
+dxf_string_t dx_create_string (int size);
+dxf_string_t dx_create_string_src (dxf_const_string_t src);
 char* dx_ansi_create_string_src (const char* src);
-dx_string_t dx_create_string_src_len (dx_const_string_t src, int len);
-dx_string_t dx_copy_string (dx_string_t dest, dx_const_string_t src);
-dx_string_t dx_copy_string_len (dx_string_t dest, dx_const_string_t src, int len);
-int dx_string_length (dx_const_string_t str);
-int dx_compare_strings (dx_const_string_t s1, dx_const_string_t s2);
-dx_char_t dx_toupper (dx_char_t c);
-dx_string_t dx_ansi_to_unicode (const char* ansi_str);
-dx_string_t dx_decode_from_integer (dx_long_t code);
+dxf_string_t dx_create_string_src_len (dxf_const_string_t src, int len);
+dxf_string_t dx_copy_string (dxf_string_t dest, dxf_const_string_t src);
+dxf_string_t dx_copy_string_len (dxf_string_t dest, dxf_const_string_t src, int len);
+int dx_string_length (dxf_const_string_t str);
+int dx_compare_strings (dxf_const_string_t s1, dxf_const_string_t s2);
+dxf_char_t dx_toupper (dxf_char_t c);
+dxf_string_t dx_ansi_to_unicode (const char* ansi_str);
+dxf_string_t dx_decode_from_integer (dxf_long_t code);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -391,6 +448,6 @@ dx_string_t dx_decode_from_integer (dx_long_t code);
 /* -------------------------------------------------------------------------- */
 
 int dx_millisecond_timestamp (void);
-int dx_millisecond_timestamp_diff (int older, int newer);
+int dx_millisecond_timestamp_diff (int newer, int older);
 
 #endif /* DX_ALGORITHMS_H_INCLUDED */

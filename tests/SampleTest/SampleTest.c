@@ -8,7 +8,7 @@
 
 const char dxfeed_host[] = "demo.dxfeed.com:7300";
 
-dx_const_string_t dx_event_type_to_string (int event_type) {
+dxf_const_string_t dx_event_type_to_string (int event_type) {
 	switch (event_type) {
 	case DXF_ET_TRADE: return L"Trade";
 	case DXF_ET_QUOTE: return L"Quote";
@@ -45,8 +45,8 @@ void on_reader_thread_terminate(const char* host ) {
 
 /* -------------------------------------------------------------------------- */
 
-void listener (int event_type, dx_const_string_t symbol_name, const dx_event_data_t* data, int data_count) {
-    dx_int_t i = 0;
+void listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count) {
+    dxf_int_t i = 0;
 
     wprintf(L"Event: %s Symbol: %s\n",dx_event_type_to_string(event_type), symbol_name);
 
@@ -113,26 +113,25 @@ void listener (int event_type, dx_const_string_t symbol_name, const dx_event_dat
 /* -------------------------------------------------------------------------- */
 
 void process_last_error () {
-    int subsystem_id = dx_sc_invalid_subsystem;
-    int error_code = DX_INVALID_ERROR_CODE;
-    dx_const_string_t error_descr = NULL;
+    int error_code = dx_ec_success;
+    dxf_const_string_t error_descr = NULL;
     int res;
-    
-    res = dxf_get_last_error(&subsystem_id, &error_code, &error_descr);
-    
+
+    res = dxf_get_last_error(&error_code, &error_descr);
+
     if (res == DXF_SUCCESS) {
-        if (subsystem_id == dx_sc_invalid_subsystem && error_code == DX_INVALID_ERROR_CODE) {
+        if (error_code == dx_ec_success) {
             printf("WTF - no error information is stored");
-            
+
             return;
         }
-        
+
         wprintf(L"Error occurred and successfully retrieved:\n"
-                L"subsystem code = %d, error code = %d, description = \"%s\"\n",
-               subsystem_id, error_code, error_descr);
+            L"error code = %d, description = \"%s\"\n",
+            error_code, error_descr);
         return;
     }
-    
+
     printf("An error occurred but the error subsystem failed to initialize\n");
 }
 

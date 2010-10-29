@@ -12,14 +12,14 @@
 
 const char dxfeed_host[] = "demo.dxfeed.com:7300";
 
-static dx_const_string_t g_symbols[] = { {L"IBM"}, {L"MSFT"}, {L"YHOO"}, {L"C"} };
-static const dx_int_t g_symbols_size = sizeof (g_symbols) / sizeof (g_symbols[0]);
+static dxf_const_string_t g_symbols[] = { {L"IBM"}, {L"MSFT"}, {L"YHOO"}, {L"C"} };
+static const dxf_int_t g_symbols_size = sizeof (g_symbols) / sizeof (g_symbols[0]);
 static const int g_event_type = DXF_ET_TRADE;
 static int g_iteration_count = 10;
 
 /* -------------------------------------------------------------------------- */
 
-dx_const_string_t dx_event_type_to_string(int event_type){
+dxf_const_string_t dx_event_type_to_string(int event_type){
     switch (event_type){
     case DXF_ET_TRADE: return L"Trade"; 
     case DXF_ET_QUOTE: return L"Quote"; 
@@ -34,23 +34,22 @@ dx_const_string_t dx_event_type_to_string(int event_type){
 /* -------------------------------------------------------------------------- */
 
 void process_last_error () {
-    int subsystem_id = dx_sc_invalid_subsystem;
-    int error_code = DX_INVALID_ERROR_CODE;
-    dx_const_string_t error_descr = NULL;
+    int error_code = dx_ec_success;
+    dxf_const_string_t error_descr = NULL;
     int res;
 
-    res = dxf_get_last_error(&subsystem_id, &error_code, &error_descr);
+    res = dxf_get_last_error(&error_code, &error_descr);
 
     if (res == DXF_SUCCESS) {
-        if (subsystem_id == dx_sc_invalid_subsystem && error_code == DX_INVALID_ERROR_CODE) {
+        if (error_code == dx_ec_success) {
             printf("WTF - no error information is stored");
 
             return;
         }
 
         wprintf(L"Error occurred and successfully retrieved:\n"
-                L"subsystem code = %d, error code = %d, description = \"%s\"\n",
-                subsystem_id, error_code, error_descr);
+            L"error code = %d, description = \"%s\"\n",
+            error_code, error_descr);
         return;
     }
 
@@ -59,8 +58,8 @@ void process_last_error () {
 
 /* -------------------------------------------------------------------------- */
 
-void listener (int event_type, dx_const_string_t symbol_name,const dx_event_data_t* data, int data_count){
-    dx_int_t i = 0;
+void listener (int event_type, dxf_const_string_t symbol_name,const dxf_event_data_t* data, int data_count){
+    dxf_int_t i = 0;
     dx_event_id_t eid = dx_eid_begin;
     
     for (; (DX_EVENT_BIT_MASK(eid) & event_type) == 0; ++eid);
@@ -127,7 +126,7 @@ int main (int argc, char* argv[]) {
     while (g_iteration_count--) {
         wprintf(L"\nLast event data:");
         for (i = 0; i < g_symbols_size; ++i) {
-            dx_event_data_t data;
+            dxf_event_data_t data;
             dxf_trade_t* trade;
             if (!dxf_get_last_event(connection, g_event_type, g_symbols[i], &data)) {
                 return -1;

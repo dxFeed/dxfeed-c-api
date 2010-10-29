@@ -1,21 +1,21 @@
 /*
-* The contents of this file are subject to the Mozilla Public License Version
-* 1.1 (the "License"); you may not use this file except in compliance with
-* the License. You may obtain a copy of the License at
-* http://www.mozilla.org/MPL/
-*
-* Software distributed under the License is distributed on an "AS IS" basis,
-* WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
-* for the specific language governing rights and limitations under the
-* License.
-*
-* The Initial Developer of the Original Code is Devexperts LLC.
-* Portions created by the Initial Developer are Copyright (C) 2010
-* the Initial Developer. All Rights Reserved.
-*
-* Contributor(s):
-*
-*/
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Initial Developer of the Original Code is Devexperts LLC.
+ * Portions created by the Initial Developer are Copyright (C) 2010
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *
+ */
 
 #include <limits.h>
 
@@ -23,474 +23,589 @@
 #include "DXErrorHandling.h"
 #include "DXMemory.h"
 #include "DXAlgorithms.h"
+#include "DXThreads.h"
+#include "ConnectionContextData.h"
 
+/* -------------------------------------------------------------------------- */
+/*
+ *	Buffered output connection context
+ */
+/* -------------------------------------------------------------------------- */
 
-// pointer to extern buffer
-dx_byte_t* out_buffer = 0;
-dx_int_t   out_buffer_length = 0;
-dx_int_t   current_out_buffer_position = 0;
+typedef struct {
+    dxf_byte_t* out_buffer;
+    int out_buffer_length;
+    int current_out_buffer_position;
+    
+    pthread_mutex_t guard;
+    
+    int set_field_mask;
+} dx_buffered_output_connection_context_t;
 
-////////////////////////////////////////////////////////////////////////////////
-void dx_set_out_buffer( dx_byte_t* buf, dx_int_t buf_len ) {
-    out_buffer = buf;
-    out_buffer_length = buf_len;
-    current_out_buffer_position = 0;
+#define MUTEX_FIELD_FLAG    (0x1)
+
+#define CTX(context) \
+    ((dx_buffered_output_connection_context_t*)context)
+    
+#define IS_CUR_CAPACITY_ENOUGH(context, bytes_to_write) \
+    (CTX(context)->current_out_buffer_position + bytes_to_write <= CTX(context)->out_buffer_length)
+
+/* -------------------------------------------------------------------------- */
+
+static void dx_clear_buffered_output_context_data (dx_buffered_output_connection_context_t* context);
+
+DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_buffered_output) {
+    dx_buffered_output_connection_context_t* context = dx_calloc(1, sizeof(dx_buffered_output_connection_context_t));
+
+    if (context == NULL) {
+        return false;
+    }
+    
+    if (!(dx_mutex_create(&(context->guard)) && (context->set_field_mask |= MUTEX_FIELD_FLAG)) || /* setting the flag if the function succeeded, not setting otherwise */
+        !dx_set_subsystem_data(connection, dx_ccs_buffered_output, context)) {
+    
+        dx_clear_buffered_output_context_data(context);
+        
+        return false;
+    }
+
+    return true;
 }
 
 /* -------------------------------------------------------------------------- */
 
-dx_byte_t* dx_get_out_buffer( OUT dx_int_t* size ) {
-    if (size) {
-        *size = out_buffer_length;
-    }
+DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_buffered_output) {
+    bool res = true;
+    dx_buffered_output_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_buffered_output, &res);
 
-    return out_buffer;
+    if (context == NULL) {
+        return res;
+    }
+    
+    dx_clear_buffered_output_context_data(context);
+
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Connection context functions
+ */
+/* -------------------------------------------------------------------------- */
+
+static void dx_clear_buffered_output_context_data (dx_buffered_output_connection_context_t* context) {
+    if (context == NULL) {
+        return;
+    }
+    
+    if (IS_FLAG_SET(context->set_field_mask, MUTEX_FIELD_FLAG)) {
+        dx_mutex_destroy(&(context->guard));
+    }
+    
+    dx_free(context);
 }
 
 /* -------------------------------------------------------------------------- */
 
-dx_int_t dx_get_out_buffer_position() {
-    return current_out_buffer_position;
+void* dx_get_buffered_output_connection_context (dxf_connection_t connection) {
+    return dx_get_subsystem_data(connection, dx_ccs_buffered_output, NULL);
 }
 
 /* -------------------------------------------------------------------------- */
 
-void dx_set_out_buffer_position( dx_int_t pos ) {
-    current_out_buffer_position = pos;
+bool dx_lock_buffered_output (void* context) {
+    return dx_mutex_lock(&(CTX(context)->guard));
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// ========== Implementation Details ==========
-////////////////////////////////////////////////////////////////////////////////
+/* -------------------------------------------------------------------------- */
 
-dx_result_t checkWrite(int requiredCapacity) {
-    if ( !out_buffer ) {
-        return setParseError(dx_pr_buffer_not_initialized);
+bool dx_unlock_buffered_output (void* context) {
+    return dx_mutex_unlock(&(CTX(context)->guard));
+}
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Buffer manipulators implementation
+ */
+/* -------------------------------------------------------------------------- */
+
+dxf_byte_t* dx_get_out_buffer (void* context) {
+    return CTX(context)->out_buffer;
+}
+
+/* -------------------------------------------------------------------------- */
+
+int dx_get_out_buffer_length (void* context) {
+    return CTX(context)->out_buffer_length;
+}
+
+/* -------------------------------------------------------------------------- */
+
+void dx_set_out_buffer (void* context, dxf_byte_t* new_buffer, int new_length) {
+    CTX(context)->out_buffer = new_buffer;
+    CTX(context)->out_buffer_length = new_length;
+    CTX(context)->current_out_buffer_position = 0;
+}
+
+/* -------------------------------------------------------------------------- */
+
+int dx_get_out_buffer_position (void* context) {
+    return CTX(context)->current_out_buffer_position;
+}
+
+/* -------------------------------------------------------------------------- */
+
+void dx_set_out_buffer_position (void* context, int new_position) {
+    CTX(context)->current_out_buffer_position = new_position;
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_ensure_capacity (void* context, int required_capacity) {
+    if (INT_MAX - CTX(context)->current_out_buffer_position < CTX(context)->out_buffer_length) {
+        return dx_set_error_code(dx_bioec_buffer_overflow);
     }
 
-    if ( current_out_buffer_position + requiredCapacity > out_buffer_length && dx_ensure_capacity(requiredCapacity) != R_SUCCESSFUL ) {
-        return R_FAILED;
+    if (!IS_CUR_CAPACITY_ENOUGH(context, required_capacity)) {
+        dxf_long_t tmp_len = (dxf_long_t)CTX(context)->out_buffer_length << 1;
+        int tmp_min = (int)MIN(tmp_len, (dxf_long_t)INT_MAX);
+        int length = MAX(MAX(tmp_min, 1024), CTX(context)->current_out_buffer_position + required_capacity);
+        dxf_byte_t* new_buffer = (dxf_byte_t*)dx_malloc(length);
+        
+        if (new_buffer == NULL) {
+            return false;
+        }
+        
+        dx_memcpy(new_buffer, CTX(context)->out_buffer, CTX(context)->out_buffer_length);
+        dx_free(CTX(context)->out_buffer);
+        
+        CTX(context)->out_buffer = new_buffer;
+        CTX(context)->out_buffer_length = length;
+    }
+    
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Write operation helpers
+ */
+/* -------------------------------------------------------------------------- */
+
+static bool dx_check_write_possibility (void* context, int bytes_to_write) {
+    if (CTX(context)->out_buffer == NULL) {
+        return dx_set_error_code(dx_bioec_buffer_not_initialized);
     }
 
-    return parseSuccessful();
+    return IS_CUR_CAPACITY_ENOUGH(context, bytes_to_write) || dx_ensure_capacity(context, bytes_to_write);
 }
 
-void writeUTF2Unchecked(dx_int_t codePoint) {
-    out_buffer[current_out_buffer_position++] = (dx_byte_t)(0xC0 | codePoint >> 6);
-    out_buffer[current_out_buffer_position++] = (dx_byte_t)(0x80 | codePoint & 0x3F);
+/* -------------------------------------------------------------------------- */
+
+void dx_write_utf2_unchecked (void* context, dxf_int_t code_point) {
+    CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0xC0 | code_point >> 6);
+    CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0x80 | code_point & 0x3F);
 }
 
-////////////////////////////////////////////////////////////////////////////////
-void writeUTF3Unchecked(dx_int_t codePoint) {
-    out_buffer[current_out_buffer_position++] = (dx_byte_t)(0xE0 | codePoint >> 12);
-    out_buffer[current_out_buffer_position++] = (dx_byte_t)(0x80 | codePoint >> 6 & 0x3F);
-    out_buffer[current_out_buffer_position++] = (dx_byte_t)(0x80 | codePoint & 0x3F);
+/* -------------------------------------------------------------------------- */
+
+void dx_write_utf3_unchecked (void* context, dxf_int_t code_point) {
+    CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0xE0 | code_point >> 12);
+    CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0x80 | code_point >> 6 & 0x3F);
+    CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0x80 | code_point & 0x3F);
 }
 
-////////////////////////////////////////////////////////////////////////////////
-void writeUTF4Unchecked(dx_int_t codePoint) {
-    out_buffer[current_out_buffer_position++] = (dx_byte_t)(0xF0 | codePoint >> 18);
-    out_buffer[current_out_buffer_position++] = (dx_byte_t)(0x80 | codePoint >> 12 & 0x3F);
-    out_buffer[current_out_buffer_position++] = (dx_byte_t)(0x80 | codePoint >> 6 & 0x3F);
-    out_buffer[current_out_buffer_position++] = (dx_byte_t)(0x80 | codePoint & 0x3F);
+/* -------------------------------------------------------------------------- */
+
+void dx_write_utf4_unchecked (void* context, dxf_int_t code_point) {
+    CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0xF0 | code_point >> 18);
+    CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0x80 | code_point >> 12 & 0x3F);
+    CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0x80 | code_point >> 6 & 0x3F);
+    CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0x80 | code_point & 0x3F);
 }
 
-////////////////////////////////////////////////////////////////////////////////
-void writeIntUnchecked(dx_int_t val) {
-    out_buffer[current_out_buffer_position++] = (dx_byte_t)(val >> 24);
-    out_buffer[current_out_buffer_position++] = (dx_byte_t)(val >> 16);
-    out_buffer[current_out_buffer_position++] = (dx_byte_t)(val >> 8);
-    out_buffer[current_out_buffer_position++] = (dx_byte_t)val;
+/* -------------------------------------------------------------------------- */
+
+void dx_write_int_unchecked (void* context, dxf_int_t value) {
+    CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 24);
+    CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 16);
+    CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 8);
+    CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)value;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// ========== external interface ==========
-////////////////////////////////////////////////////////////////////////////////
+/* -------------------------------------------------------------------------- */
 
-////////////////////////////////////////////////////////////////////////////////
-//enum DXResult write(dx_int_t b) {
-//    enum DXResult res;
-//    if (current_out_buffer_position >= out_buffer_length && ((res = dx_ensure_capacity(1)) != DS_Successful) ) {
-//        return res;
-//    }
-//
-//    buffer[current_out_buffer_position++] = (dx_byte_t)b;
-//    return parseSuccessful();
-//}
-
-////////////////////////////////////////////////////////////////////////////////
-dx_result_t write(const dx_byte_t* b, dx_int_t bLen, dx_int_t off, dx_int_t len) {
-    if ((off | len | (off + len) | (bLen - (off + len))) < 0) {
-        return setParseError(dx_pr_index_out_of_bounds);
+bool dx_write_byte_buffer_segment (void* context, const dxf_byte_t* buffer, int buffer_length,
+                                   int segment_offset, int segment_length) {
+    if ((segment_offset | segment_length | (segment_offset + segment_length) |
+        (buffer_length - (segment_offset + segment_length))) < 0) {
+        /* a fast way to check if any of the values above are negative */
+        
+        return dx_set_error_code(dx_bioec_index_out_of_bounds);
     }
 
-    if (out_buffer_length - current_out_buffer_position < len && (dx_ensure_capacity(len) != R_SUCCESSFUL) ) {
-        return R_FAILED;
+    if (!(IS_CUR_CAPACITY_ENOUGH(context, segment_length) || dx_ensure_capacity(context, segment_length))) {
+        return false;
     }
 
-    dx_memcpy(out_buffer + current_out_buffer_position, b + off, len);
-    current_out_buffer_position += len;
-    return parseSuccessful();
+    dx_memcpy(CTX(context)->out_buffer + CTX(context)->current_out_buffer_position, buffer + segment_offset, segment_length);
+    
+    CTX(context)->current_out_buffer_position += segment_length;
+    
+    return true;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-dx_result_t dx_write_boolean( OUT dx_bool_t val ) {
-    if (checkWrite(1) != R_SUCCESSFUL) {
-        return R_FAILED;
-    }
+/* -------------------------------------------------------------------------- */
+/*
+ *	Write operations implementation
+ */
+/* -------------------------------------------------------------------------- */
 
-    out_buffer[current_out_buffer_position++] = val ? (dx_byte_t)1 : (dx_byte_t)0;
-    return parseSuccessful();
+bool dx_write_boolean (void* context, dxf_bool_t value) {
+    CHECKED_CALL_2(dx_check_write_possibility, context, 1);
+
+    CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (value ? (dxf_byte_t)1 : (dxf_byte_t)0);
+    
+    return true;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-dx_result_t dx_write_byte( dx_byte_t val ) {
-    if (checkWrite(1) != R_SUCCESSFUL) {
-        return R_FAILED;
-    }
+/* -------------------------------------------------------------------------- */
 
-    out_buffer[current_out_buffer_position++] = (dx_byte_t)val;
-    return parseSuccessful();
+bool dx_write_byte (void* context, dxf_byte_t value) {
+    CHECKED_CALL_2(dx_check_write_possibility, context, 1);
+
+    CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)value;
+    
+    return true;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-dx_result_t dx_write_short( dx_short_t val ) {
-    if (checkWrite(2) != R_SUCCESSFUL) {
-        return R_FAILED;
-    }
+/* -------------------------------------------------------------------------- */
 
-    out_buffer[current_out_buffer_position++] = (dx_byte_t)(val >> 8);
-    out_buffer[current_out_buffer_position++] = (dx_byte_t)val;
+bool dx_write_short (void* context, dxf_short_t value) {
+    CHECKED_CALL_2(dx_check_write_possibility, context, 2);
 
-    return parseSuccessful();
+    CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 8);
+    CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)value;
+
+    return true;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-dx_result_t dx_write_char( dx_char_t val ) {
-    if (checkWrite(2) != R_SUCCESSFUL) {
-        return R_FAILED;
-    }
+/* -------------------------------------------------------------------------- */
 
-    out_buffer[current_out_buffer_position++] = (dx_byte_t)(val >> 8);
-    out_buffer[current_out_buffer_position++] = (dx_byte_t)val;
+bool dx_write_char (void* context, dxf_char_t value) {
+    CHECKED_CALL_2(dx_check_write_possibility, context, 2);
 
-    return parseSuccessful();
+    CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 8);
+    CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)value;
+
+    return true;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-dx_result_t dx_write_int( dx_int_t val ) {
-    if (checkWrite(4) != R_SUCCESSFUL) {
-        return R_FAILED;
-    }
+/* -------------------------------------------------------------------------- */
 
-    out_buffer[current_out_buffer_position++] = (dx_byte_t)(val >> 24);
-    out_buffer[current_out_buffer_position++] = (dx_byte_t)(val >> 16);
-    out_buffer[current_out_buffer_position++] = (dx_byte_t)(val >> 8);
-    out_buffer[current_out_buffer_position++] = (dx_byte_t)val;
+bool dx_write_int (void* context, dxf_int_t value) {
+    CHECKED_CALL_2(dx_check_write_possibility, context, 4);
 
-    return parseSuccessful();
+    CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 24);
+    CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 16);
+    CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 8);
+    CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)value;
+
+    return true;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-dx_result_t dx_write_long( dx_long_t val ) {
-    if (checkWrite(8) != R_SUCCESSFUL) {
-        return R_FAILED;
-    }
+/* -------------------------------------------------------------------------- */
 
-    out_buffer[current_out_buffer_position++] = (dx_byte_t)(val >> 56);
-    out_buffer[current_out_buffer_position++] = (dx_byte_t)(val >> 48);
-    out_buffer[current_out_buffer_position++] = (dx_byte_t)(val >> 40);
-    out_buffer[current_out_buffer_position++] = (dx_byte_t)(val >> 32);
-    out_buffer[current_out_buffer_position++] = (dx_byte_t)(val >> 24);
-    out_buffer[current_out_buffer_position++] = (dx_byte_t)(val >> 16);
-    out_buffer[current_out_buffer_position++] = (dx_byte_t)(val >> 8);
-    out_buffer[current_out_buffer_position++] = (dx_byte_t)val;
+bool dx_write_long (void* context, dxf_long_t value) {
+    CHECKED_CALL_2(dx_check_write_possibility, context, 8);
 
-    return parseSuccessful();
+    CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 56);
+    CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 48);
+    CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 40);
+    CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 32);
+    CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 24);
+    CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 16);
+    CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 8);
+    CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)value;
+
+    return true;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-dx_result_t dx_write_float( dx_float_t val ) {
-    return dx_write_int(*((dx_int_t*)&val));
+/* -------------------------------------------------------------------------- */
+
+bool dx_write_float (void* context, dxf_float_t value) {
+    return dx_write_int(context, *((dxf_int_t*)&value));
 }
 
-////////////////////////////////////////////////////////////////////////////////
-dx_result_t dx_write_double( dx_double_t val) {
-    return dx_write_long(*((dx_long_t*)&val));
+/* -------------------------------------------------------------------------- */
+
+bool dx_write_double (void* context, dxf_double_t value) {
+    return dx_write_long(context, *((dxf_long_t*)&value));
 }
 
-////////////////////////////////////////////////////////////////////////////////
-dx_result_t dx_write_bytes( const dx_char_t* val ) {
-    dx_result_t res = R_SUCCESSFUL;
-    int length = dx_string_length(val);
+/* -------------------------------------------------------------------------- */
+
+bool dx_write_byte_buffer (void* context, const dxf_char_t* value) {
+    int length = dx_string_length(value);
     int i = 0;
-    for (;i < length && res == R_SUCCESSFUL; i++) {
-        res = dx_write_byte((dx_byte_t)val[i]);
+    
+    for (; i < length; ++i) {
+        CHECKED_CALL_2(dx_write_byte, context, (dxf_byte_t)value[i]);
     }
 
-    if (res == R_FAILED) {
-        return R_FAILED;
-    }
-
-    return parseSuccessful();
+    return true;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-dx_result_t dx_write_chars( const dx_char_t* val ) {
-    dx_result_t res = R_SUCCESSFUL;
-    int length = dx_string_length(val);
+/* -------------------------------------------------------------------------- */
+
+bool dx_write_char_buffer (void* context, const dxf_char_t* value) {
+    int length = dx_string_length(value);
     int i = 0;
-    for (; i < length && res == R_SUCCESSFUL; i++) {
-        res = dx_write_char(val[i]);
+    
+    for (; i < length; ++i) {
+        CHECKED_CALL_2(dx_write_char, context, value[i]);
     }
 
-    if (res == R_FAILED) {
-        return R_FAILED;
-    }
-
-    return parseSuccessful();
+    return true;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-dx_result_t dx_write_utf( dx_const_string_t val ) {
-    int strlen = dx_string_length(val);
-    dx_short_t utflen = 0;
+/* -------------------------------------------------------------------------- */
+
+bool dx_write_utf (void* context, dxf_const_string_t value) {
+    int strlen = dx_string_length(value);
+    dxf_short_t utflen = 0;
     int i = 0;
-    for (; i < strlen; i++) {
-        dx_char_t c = val[i];
-        if (c > 0 && c <= 0x007F)
-            utflen++;
-        else if (c <= 0x07FF)
+    
+    for (; i < strlen; ++i) {
+        dxf_char_t c = value[i];
+        
+        if (c > 0 && c <= 0x007F) {
+            ++utflen;
+        } else if (c <= 0x07FF) {
             utflen += 2;
-        else
+        } else {
             utflen += 3;
+        }
     }
 
     if ((int)utflen < strlen || utflen > 65535) {
-        return setParseError(dx_pr_bad_utf_data_format);
+        return dx_set_error_code(dx_utfec_bad_utf_data_format);
     }
 
-    if (dx_write_short(utflen) != R_SUCCESSFUL) {
-        return R_FAILED;
-    }
-
-    for (i = 0; i < strlen; i++) {
-        dx_char_t c;
-        if ( current_out_buffer_position + 3 > out_buffer_length && dx_ensure_capacity(3) != R_SUCCESSFUL) {
-            return R_FAILED;
+    CHECKED_CALL_2(dx_write_short, context, utflen);
+    
+    for (i = 0; i < strlen; ++i) {
+        dxf_char_t c;
+        
+        if (!(IS_CUR_CAPACITY_ENOUGH(context, 3) || dx_ensure_capacity(context, 3))) {
+            return false;
         }
 
-        c = val[i];
-        if (c > 0 && c <= 0x007F)
-            out_buffer[current_out_buffer_position++] = (dx_byte_t)c;
-        else if (c <= 0x07FF)
-            writeUTF2Unchecked(c);
-        else
-            writeUTF3Unchecked(c);
+        c = value[i];
+        
+        if (c > 0 && c <= 0x007F) {
+            CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)c;
+        } else if (c <= 0x07FF) {
+            dx_write_utf2_unchecked(context, c);
+        } else {
+            dx_write_utf3_unchecked(context, c);
+        }
     }
 
-    return parseSuccessful();
+    return true;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-dx_result_t dx_write_compact_int(dx_int_t val) {
-    if (checkWrite(5) != R_SUCCESSFUL) {
-        return R_FAILED;
-    }
+/* -------------------------------------------------------------------------- */
+/*
+ *	Compact write operations implementation
+ */
+/* -------------------------------------------------------------------------- */
 
-    if (val >= 0) {
-        if (val < 0x40) {
-            out_buffer[current_out_buffer_position++] = (dx_byte_t)val;
-        } else if (val < 0x2000) {
-            out_buffer[current_out_buffer_position++] = (dx_byte_t)(0x80 | val >> 8);
-            out_buffer[current_out_buffer_position++] = (dx_byte_t)val;
-        } else if (val < 0x100000) {
-            out_buffer[current_out_buffer_position++] = (dx_byte_t)(0xC0 | val >> 16);
-            out_buffer[current_out_buffer_position++] = (dx_byte_t)(val >> 8);
-            out_buffer[current_out_buffer_position++] = (dx_byte_t)val;
-        } else if (val < 0x08000000) {
-            writeIntUnchecked(0xE0000000 | val);
+bool dx_write_compact_int (void* context, dxf_int_t value) {
+    CHECKED_CALL_2(dx_check_write_possibility, context, 5);
+
+    if (value >= 0) {
+        if (value < 0x40) {
+            CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)value;
+        } else if (value < 0x2000) {
+            CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0x80 | value >> 8);
+            CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)value;
+        } else if (value < 0x100000) {
+            CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0xC0 | value >> 16);
+            CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 8);
+            CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)value;
+        } else if (value < 0x08000000) {
+            dx_write_int_unchecked(context, 0xE0000000 | value);
         } else {
-            out_buffer[current_out_buffer_position++] = (dx_byte_t)0xF0;
-            writeIntUnchecked(val);
+            CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)0xF0;
+            dx_write_int_unchecked(context, value);
         }
     } else {
-        if (val >= -0x40) {
-            out_buffer[current_out_buffer_position++] = (dx_byte_t)(0x7F & val);
-        } else if (val >= -0x2000) {
-            out_buffer[current_out_buffer_position++] = (dx_byte_t)(0xBF & val >> 8);
-            out_buffer[current_out_buffer_position++] = (dx_byte_t)val;
-        } else if (val >= -0x100000) {
-            out_buffer[current_out_buffer_position++] = (dx_byte_t)(0xDF & val >> 16);
-            out_buffer[current_out_buffer_position++] = (dx_byte_t)(val >> 8);
-            out_buffer[current_out_buffer_position++] = (dx_byte_t)val;
-        } else if (val >= -0x08000000) {
-            writeIntUnchecked(0xEFFFFFFF & val);
+        if (value >= -0x40) {
+            CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0x7F & value);
+        } else if (value >= -0x2000) {
+            CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0xBF & value >> 8);
+            CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)value;
+        } else if (value >= -0x100000) {
+            CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0xDF & value >> 16);
+            CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 8);
+            CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)value;
+        } else if (value >= -0x08000000) {
+            dx_write_int_unchecked(context, 0xEFFFFFFF & value);
         } else {
-            out_buffer[current_out_buffer_position++] = (dx_byte_t)0xF7;
-            writeIntUnchecked(val);
+            CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)0xF7;
+            dx_write_int_unchecked(context, value);
         }
     }
-    return parseSuccessful();
+    
+    return true;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-dx_result_t dx_write_compact_long(dx_long_t v) {
-    dx_int_t hi;
-    if (v == (dx_long_t)(dx_int_t)v) {
-        return dx_write_compact_int((dx_int_t)v);
+/* -------------------------------------------------------------------------- */
+
+bool dx_write_compact_long (void* context, dxf_long_t value) {
+    dxf_int_t hi = (dxf_int_t)(value >> 32);
+    
+    if (value == (dxf_long_t)(dxf_int_t)value) {
+        return dx_write_compact_int(context, (dxf_int_t)value);
     }
 
-    if (checkWrite(9) != R_SUCCESSFUL) {
-        return R_FAILED;
-    }
-
-    hi = (dx_int_t)(v >> 32);
+    CHECKED_CALL_2(dx_check_write_possibility, context, 9);
+    
     if (hi >= 0) {
         if (hi < 0x04) {
-            out_buffer[current_out_buffer_position++] = (dx_byte_t)(0xF0 | hi);
+            CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0xF0 | hi);
         } else if (hi < 0x0200) {
-            out_buffer[current_out_buffer_position++] = (dx_byte_t)(0xF8 | hi >> 8);
-            out_buffer[current_out_buffer_position++] = (dx_byte_t)hi;
+            CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0xF8 | hi >> 8);
+            CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)hi;
         } else if (hi < 0x010000) {
-            out_buffer[current_out_buffer_position++] = (dx_byte_t)0xFC;
-            out_buffer[current_out_buffer_position++] = (dx_byte_t)(hi >> 8);
-            out_buffer[current_out_buffer_position++] = (dx_byte_t)hi;
+            CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)0xFC;
+            CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(hi >> 8);
+            CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)hi;
         } else if (hi < 0x800000) {
-            writeIntUnchecked(0xFE000000 | hi);
+            dx_write_int_unchecked(context, 0xFE000000 | hi);
         } else {
-            out_buffer[current_out_buffer_position++] = (dx_byte_t)0xFF;
-            writeIntUnchecked(hi);
+            CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)0xFF;
+            dx_write_int_unchecked(context, hi);
         }
     } else {
         if (hi >= -0x04) {
-            out_buffer[current_out_buffer_position++] = (dx_byte_t)(0xF7 & hi);
+            CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0xF7 & hi);
         } else if (hi >= -0x0200) {
-            out_buffer[current_out_buffer_position++] = (dx_byte_t)(0xFB & hi >> 8);
-            out_buffer[current_out_buffer_position++] = (dx_byte_t)hi;
+            CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0xFB & hi >> 8);
+            CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)hi;
         } else if (hi >= -0x010000) {
-            out_buffer[current_out_buffer_position++] = (dx_byte_t)0xFD;
-            out_buffer[current_out_buffer_position++] = (dx_byte_t)(hi >> 8);
-            out_buffer[current_out_buffer_position++] = (dx_byte_t)hi;
+            CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)0xFD;
+            CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(hi >> 8);
+            CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)hi;
         } else if (hi >= -0x800000) {
-            writeIntUnchecked(0xFEFFFFFF & hi);
+            dx_write_int_unchecked(context, 0xFEFFFFFF & hi);
         } else {
-            out_buffer[current_out_buffer_position++] = (dx_byte_t)0xFF;
-            writeIntUnchecked(hi);
+            CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)0xFF;
+            dx_write_int_unchecked(context, hi);
         }
     }
-    writeIntUnchecked((int)v);
+    
+    dx_write_int_unchecked(context, (dxf_int_t)value);
 
-    return parseSuccessful();
+    return true;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-dx_result_t dx_write_byte_array(const dx_byte_t* bytes, dx_int_t size) {
-    if (bytes == NULL) {
-        return dx_write_compact_int(-1);
+/* -------------------------------------------------------------------------- */
+
+bool dx_write_byte_array (void* context, const dxf_byte_t* buffer, dxf_int_t buffer_size) {
+    if (buffer == NULL) {
+        return dx_write_compact_int(context, -1);
     }
 
-    if (dx_write_compact_int(size) != R_SUCCESSFUL) {
-        return R_FAILED;
-    }
-    if (write(bytes, size, 0, size) != R_SUCCESSFUL) {
-        return R_FAILED;
-    }
+    CHECKED_CALL_2(dx_write_compact_int, context, buffer_size);
+    CHECKED_CALL_5(dx_write_byte_buffer_segment, context, buffer, buffer_size, 0, buffer_size);
 
-    return parseSuccessful();
+    return true;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-dx_result_t dx_write_utf_char(dx_int_t codePoint) {
-    if (checkWrite(4) != R_SUCCESSFUL) {
-        return R_FAILED;
+/* -------------------------------------------------------------------------- */
+/*
+ *	UTF write operations implementation
+ */
+/* -------------------------------------------------------------------------- */
+
+bool dx_write_utf_char (void* context, dxf_int_t code_point) {
+    CHECKED_CALL_2(dx_check_write_possibility, context, 4);
+
+    if (code_point < 0) {
+        return dx_set_error_code(dx_utfec_bad_utf_data_format);
     }
 
-    if (codePoint < 0) {
-        return setParseError(dx_pr_bad_utf_data_format);
-    }
-
-    if (codePoint <= 0x007F) {
-        out_buffer[current_out_buffer_position++] = (dx_byte_t)codePoint;
-    } else if (codePoint <= 0x07FF) {
-        writeUTF2Unchecked(codePoint);
-    } else if (codePoint <= 0xFFFF) {
-        writeUTF3Unchecked(codePoint);
-    } else if (codePoint <= 0x10FFFF) {
-        writeUTF4Unchecked(codePoint);
+    if (code_point <= 0x007F) {
+        CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)code_point;
+    } else if (code_point <= 0x07FF) {
+        dx_write_utf2_unchecked(context, code_point);
+    } else if (code_point <= 0xFFFF) {
+        dx_write_utf3_unchecked(context, code_point);
+    } else if (code_point <= 0x10FFFF) {
+        dx_write_utf4_unchecked(context, code_point);
     } else {
-        return setParseError(dx_pr_bad_utf_data_format);
+        return dx_set_error_code(dx_utfec_bad_utf_data_format);
     }
 
-    return parseSuccessful();
+    return true;
 }
 
-dx_result_t dx_write_utf_string (dx_const_string_t str) {
+/* -------------------------------------------------------------------------- */
+
+bool dx_write_utf_string (void* context, dxf_const_string_t value) {
     int strlen;
     int utflen;
-    int i;
+    int i = 0;    
 
-    if (str == NULL) {
-        return dx_write_compact_int(-1);
+    if (value == NULL) {
+        return dx_write_compact_int(context, -1);
     }
 
-    strlen = dx_string_length(str);
+    strlen = dx_string_length(value);
     utflen = 0;
-    for (i = 0; i < strlen;) {
-        dx_char_t c = str[i++];
-        if (c <= 0x007F)
+    
+    for (; i < strlen; ) {
+        dxf_char_t c = value[i++];
+        
+        if (c <= 0x007F) {
             utflen++;
-        else if (c <= 0x07FF)
+        } else if (c <= 0x07FF) {
             utflen += 2;
-        else if (isHighSurrogate(c) && i < strlen && isLowSurrogate(str[i])) {
-            i++;
+        } else if (dx_is_high_surrogate(c) && i < strlen && dx_is_low_surrogate(value[i])) {
+            ++i;
             utflen += 4;
-        } else
+        } else {
             utflen += 3;
-    }
-    if (utflen < strlen) {
-        return setParseError(dx_pr_bad_utf_data_format);
-    }
-
-    if (dx_write_compact_int((dx_int_t)utflen) != R_SUCCESSFUL) {
-        return R_FAILED;
-    }
-
-    for (i = 0; i < strlen;) {
-        dx_char_t c;
-        if (current_out_buffer_position  + 4 > out_buffer_length  && (dx_ensure_capacity(4) != R_SUCCESSFUL)) {
-            return R_FAILED;
         }
-        c = str[i++];
-        if (c <= 0x007F)
-            out_buffer[current_out_buffer_position++] = (dx_byte_t)c;
-        else if (c <= 0x07FF)
-            writeUTF2Unchecked(c);
-        else if (isHighSurrogate(c) && i < strlen && isLowSurrogate(str[i]))
-            writeUTF4Unchecked(toCodePoint(c, str[i++]));
-        else
-            writeUTF3Unchecked(c);
+    }
+    
+    if (utflen < strlen) {
+        return dx_set_error_code(dx_utfec_bad_utf_data_format);
     }
 
-    return parseSuccessful();
-}
+    CHECKED_CALL_2(dx_write_compact_int, context, (dxf_int_t)utflen);
 
-
-////////////////////////////////////////////////////////////////////////////////
-dx_result_t dx_ensure_capacity( int requiredCapacity ) {
-    if (INT_MAX - current_out_buffer_position < out_buffer_length) {
-        return setParseError(dx_pr_buffer_overflow);
+    for (i = 0; i < strlen; ) {
+        dxf_char_t c;
+        
+        if (!(IS_CUR_CAPACITY_ENOUGH(context, 4) || dx_ensure_capacity(context, 4))) {
+            return false;
+        }
+        
+        c = value[i++];
+        
+        if (c <= 0x007F) {
+            CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)c;
+        } else if (c <= 0x07FF) {
+            dx_write_utf2_unchecked(context, c);
+        } else if (dx_is_high_surrogate(c) && i < strlen && dx_is_low_surrogate(value[i])) {
+            dx_write_utf4_unchecked(context, dx_surrogates_to_code_point(c, value[i++]));
+        } else {
+            dx_write_utf3_unchecked(context, c);
+        }
     }
 
-    if (current_out_buffer_position + requiredCapacity > out_buffer_length) {
-        dx_long_t tmp_len = (dx_long_t)out_buffer_length << 1;
-        dx_int_t tmp_min = (dx_int_t)MIN(tmp_len, (dx_long_t)INT_MAX);
-        dx_int_t length = MAX(MAX(tmp_min, 1024), current_out_buffer_position + requiredCapacity);
-        dx_byte_t* newBuffer = (dx_byte_t*)dx_malloc((int)length);
-        dx_memcpy(newBuffer, out_buffer, out_buffer_length);
-        dx_free(out_buffer);
-        out_buffer = newBuffer;
-        out_buffer_length = length;
-    }
-    return parseSuccessful();
+    return true;
 }

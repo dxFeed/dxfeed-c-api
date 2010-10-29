@@ -8,7 +8,7 @@
 
 const char dxfeed_host[] = "megasuperduperstupidhost.biz,demo.dxfeed.com:7300";
 
-dx_const_string_t dx_event_type_to_string (int event_type) {
+dxf_const_string_t dx_event_type_to_string (int event_type) {
 	switch (event_type){
 	case DXF_ET_TRADE: return L"Trade"; 
 	case DXF_ET_QUOTE: return L"Quote"; 
@@ -22,8 +22,8 @@ dx_const_string_t dx_event_type_to_string (int event_type) {
 
 /* -------------------------------------------------------------------------- */
 
-void first_listener (int event_type, dx_const_string_t symbol_name,const dx_event_data_t* data, int data_count) {
-	dx_int_t i = 0;
+void first_listener (int event_type, dxf_const_string_t symbol_name,const dxf_event_data_t* data, int data_count) {
+	dxf_int_t i = 0;
 
 	wprintf(L"First listener. Event: %s Symbol: %s\n",dx_event_type_to_string(event_type), symbol_name);
 
@@ -39,8 +39,8 @@ void first_listener (int event_type, dx_const_string_t symbol_name,const dx_even
 
 /* -------------------------------------------------------------------------- */
 
-void second_listener (int event_type, dx_const_string_t symbol_name,const dx_event_data_t* data, int data_count) {
-	dx_int_t i = 0;
+void second_listener (int event_type, dxf_const_string_t symbol_name,const dxf_event_data_t* data, int data_count) {
+	dxf_int_t i = 0;
 
 	wprintf(L"Second listener. Event: %s Symbol: %s\n",dx_event_type_to_string(event_type), symbol_name);
 }
@@ -50,33 +50,32 @@ void second_listener (int event_type, dx_const_string_t symbol_name,const dx_eve
 dxf_connection_t connection;
 
 void conn_termination_notifier (dxf_connection_t conn) {
-    dxf_close_connection(conn);
+    /*dxf_close_connection(conn);*/
 }
 
 /* -------------------------------------------------------------------------- */
 
 void process_last_error () {
-    int subsystem_id = dx_sc_invalid_subsystem;
-    int error_code = DX_INVALID_ERROR_CODE;
-    dx_const_string_t error_descr = NULL;
+    int error_code = dx_ec_success;
+    dxf_const_string_t error_descr = NULL;
     int res;
-    
-    res = dxf_get_last_error(&subsystem_id, &error_code, &error_descr);
-    
+
+    res = dxf_get_last_error(&error_code, &error_descr);
+
     if (res == DXF_SUCCESS) {
-        if (subsystem_id == dx_sc_invalid_subsystem && error_code == DX_INVALID_ERROR_CODE) {
-            wprintf(L"WTF - no error information is stored");
-            
+        if (error_code == dx_ec_success) {
+            printf("WTF - no error information is stored");
+
             return;
         }
-        
+
         wprintf(L"Error occurred and successfully retrieved:\n"
-                L"subsystem code = %d, error code = %d, description = \"%s\"\n",
-               subsystem_id, error_code, error_descr);
+            L"error code = %d, description = \"%s\"\n",
+            error_code, error_descr);
         return;
     }
-    
-    wprintf(L"An error occurred but the error subsystem failed to initialize\n");
+
+    printf("An error occurred but the error subsystem failed to initialize\n");
 }
 
 /* -------------------------------------------------------------------------- */
@@ -84,18 +83,18 @@ void process_last_error () {
 int main (int argc, char* argv[]) {
     dxf_subscription_t subscription;
 
-	dx_string_t symbols_to_add[] = { L"MSFT", L"YHOO", L"C" };
-	dx_int_t symbols_to_add_size = sizeof (symbols_to_add) / sizeof (symbols_to_add[0]);
-    dx_string_t symbols_to_add_2[] = { L"C" };
-    dx_int_t symbols_to_add_2_size = sizeof (symbols_to_add_2) / sizeof (symbols_to_add_2[0]);
+	dxf_string_t symbols_to_add[] = { L"MSFT", L"YHOO", L"C" };
+	dxf_int_t symbols_to_add_size = sizeof (symbols_to_add) / sizeof (symbols_to_add[0]);
+    dxf_string_t symbols_to_add_2[] = { L"C" };
+    dxf_int_t symbols_to_add_2_size = sizeof (symbols_to_add_2) / sizeof (symbols_to_add_2[0]);
 
-	dx_string_t symbols_to_remove[] = { {L"MSFT"}, {L"YHOO"}, {L"IBM"} };
-	dx_int_t symbols_to_remove_size = sizeof (symbols_to_remove) / sizeof (symbols_to_remove[0]);
+	dxf_string_t symbols_to_remove[] = { {L"MSFT"}, {L"YHOO"}, {L"IBM"} };
+	dxf_int_t symbols_to_remove_size = sizeof (symbols_to_remove) / sizeof (symbols_to_remove[0]);
 
-	dx_string_t symbols_to_set[] = { {L"MSFT"}, {L"YHOO"}};
-	dx_int_t symbols_to_set_size = sizeof (symbols_to_set) / sizeof (symbols_to_set[0]);
+	dxf_string_t symbols_to_set[] = { {L"MSFT"}, {L"YHOO"}};
+	dxf_int_t symbols_to_set_size = sizeof (symbols_to_set) / sizeof (symbols_to_set[0]);
  
-	dx_int_t get_event_types;
+	dxf_int_t get_event_types;
 
 	dxf_initialize_logger( "log.log", true, true, true );
 	
@@ -223,7 +222,7 @@ int main (int argc, char* argv[]) {
     printf("Master thread woke up\n");
     printf("Pausing subscription...\n");
     
-	if (!dxf_remove_subscription(subscription)) {
+	if (!dxf_pause_subscription(subscription)) {
         process_last_error();
         
         return -1;
@@ -279,7 +278,7 @@ int main (int argc, char* argv[]) {
     printf("Master thread woke up\n");
     printf("Resuming subscription...\n");
     
-    if (!dxf_add_subscription(subscription)) {
+    if (!dxf_resume_subscription(subscription)) {
         process_last_error();
 
         return -1;

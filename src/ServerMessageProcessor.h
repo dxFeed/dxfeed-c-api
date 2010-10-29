@@ -16,55 +16,45 @@
  * Contributor(s):
  *
  */
- 
-/*
- *	Contains the functionality for managing the memory required to store
- *  the record data
- */
- 
-#ifndef RECORD_BUFFERS_H_INCLUDED
-#define RECORD_BUFFERS_H_INCLUDED
+
+#ifndef SERVER_MESSAGE_PROCESSOR_H_INCLUDED
+#define SERVER_MESSAGE_PROCESSOR_H_INCLUDED
 
 #include "PrimitiveTypes.h"
-#include "EventData.h"
+#include "DXTypes.h"
+#include "BufferedIOCommon.h"
+#include "DXPMessageData.h"
 
 /* -------------------------------------------------------------------------- */
 /*
- *	Connection context functions
+ *	Server synchronization functions
  */
 /* -------------------------------------------------------------------------- */
 
-void* dx_get_record_buffers_connection_context (dxf_connection_t connection);
+bool dx_clear_server_info (dxf_connection_t connection);
 
 /* -------------------------------------------------------------------------- */
 /*
- *	Buffer manager functions prototypes
+ *	Describe protocol and message support functions
  */
 /* -------------------------------------------------------------------------- */
 
-typedef void* (*dx_get_record_ptr_t)(void* context, int record_index);
-typedef void* (*dx_get_record_buffer_ptr_t)(void* context);
+typedef enum {
+    dx_mss_supported,
+    dx_mss_not_supported,
+    dx_mss_pending
+} dx_message_support_status_t;
+
+bool dx_is_message_supported_by_server (dxf_connection_t connection, dx_message_type_t msg,
+                                        OUT dx_message_support_status_t* status);
+bool dx_describe_protocol_sent (dxf_connection_t connection);
 
 /* -------------------------------------------------------------------------- */
 /*
- *	Buffer manager collection
+ *	Low level network data receiver
  */
 /* -------------------------------------------------------------------------- */
 
-typedef struct {
-    dx_get_record_ptr_t record_getter;
-    dx_get_record_buffer_ptr_t record_buffer_getter;
-} dx_buffer_manager_collection_t;
+bool dx_socket_data_receiver (dxf_connection_t connection, const void* buffer, int buffer_size);
 
-extern const dx_buffer_manager_collection_t g_buffer_managers[dx_rid_count];
-
-/* -------------------------------------------------------------------------- */
-/*
- *	Auxiliary memory management functions
- */
-/* -------------------------------------------------------------------------- */
-
-bool dx_store_string_buffer (void* context, dxf_const_string_t buf);
-void dx_free_string_buffers (void* context);
-
-#endif /* RECORD_BUFFERS_H_INCLUDED */
+#endif /* SERVER_MESSAGE_PROCESSOR_H_INCLUDED */

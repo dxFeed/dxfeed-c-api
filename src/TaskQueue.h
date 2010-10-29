@@ -16,39 +16,42 @@
  * Contributor(s):
  *
  */
-
-/*
- *	Wrappers for the common C memory functions, to encapsulate the error handling
- */
-
-#ifndef DX_MEMORY_H_INCLUDED
-#define DX_MEMORY_H_INCLUDED
-
-#include "DXTypes.h"
-
-/* -------------------------------------------------------------------------- */
-/*
- *	Memory function wrappers
- */
-/* -------------------------------------------------------------------------- */
-
-void* dx_malloc (int size);
-void* dx_calloc (int num, int size);
-void  dx_free (void* buf);
-void* dx_memcpy (void* destination, const void* source, int size);
-void* dx_memmove (void* destination, const void* source, int size);
-void* dx_memset (void* destination, int c, int size);
-
-/* -------------------------------------------------------------------------- */
-/*
- *	Memory function wrappers without error handling mechanism
  
- *  May be useful when the internal error handling mechanism cannot be relied
- *  upon, e.g. within its initialization.
+#ifndef TASK_QUEUE_H_INCLUDED
+#define TASK_QUEUE_H_INCLUDED
+
+#include "PrimitiveTypes.h"
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Task data
  */
 /* -------------------------------------------------------------------------- */
 
-void* dx_calloc_no_ehm (int num, int size);
-void dx_free_no_ehm (void* buf);
+typedef enum {
+    dx_tes_success = (1 << 0), /* if this flag is not set then some error occurred */
+    dx_tes_dont_advance = (1 << 1), /* if this flag is set then the next tasks in queue are not processed */
+    dx_tes_pop_me = (1 << 2) /* if this flag is set then the task must be popped from the queue */
+} dx_task_execution_status_t;
 
-#endif /* DX_MEMORY_H_INCLUDED */
+typedef enum {
+    dx_tc_free_resources = (1 << 0) /* if this flag is set then the task must free its resources and return
+                                       without doing its job */
+} dx_task_command_t;
+
+typedef int (*dx_task_processor_t) (void* data, int command);
+
+typedef void* dx_task_queue_t;
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Task queue functions
+ */
+/* -------------------------------------------------------------------------- */
+
+bool dx_create_task_queue (OUT dx_task_queue_t* tq);
+bool dx_destroy_task_queue (dx_task_queue_t tq);
+bool dx_add_task_to_queue (dx_task_queue_t tq, dx_task_processor_t processor, void* data);
+bool dx_execute_task_queue (dx_task_queue_t tq);
+
+#endif /* TASK_QUEUE_H_INCLUDED */

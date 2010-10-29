@@ -127,10 +127,16 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
+				RelativePath=".\src\ClientMessageProcessor.c">
+			</File>
+			<File
 				RelativePath=".\src\ConnectionContextData.c">
 			</File>
 			<File
 				RelativePath=".\src\DXAlgorithms.c">
+			</File>
+			<File
+				RelativePath=".\src\DXErrorCodes.c">
 			</File>
 			<File
 				RelativePath=".\src\DXErrorHandling.c">
@@ -143,6 +149,9 @@
 			</File>
 			<File
 				RelativePath=".\src\DXNetwork.c">
+			</File>
+			<File
+				RelativePath=".\src\DXPMessageData.c">
 			</File>
 			<File
 				RelativePath=".\src\DXSockets.c">
@@ -162,11 +171,20 @@
 			<File
 				RelativePath=".\src\RecordTranscoder.c">
 			</File>
+			<File
+				RelativePath=".\src\ServerMessageProcessor.c">
+			</File>
+			<File
+				RelativePath=".\src\TaskQueue.c">
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
+			<File
+				RelativePath=".\src\ClientMessageProcessor.h">
+			</File>
 			<File
 				RelativePath=".\src\ConnectionContextData.h">
 			</File>
@@ -181,6 +199,9 @@
 			</File>
 			<File
 				RelativePath=".\src\DXNetwork.h">
+			</File>
+			<File
+				RelativePath=".\src\DXPMessageData.h">
 			</File>
 			<File
 				RelativePath=".\src\DXSockets.h">
@@ -203,6 +224,12 @@
 			<File
 				RelativePath=".\src\RecordTranscoder.h">
 			</File>
+			<File
+				RelativePath=".\src\ServerMessageProcessor.h">
+			</File>
+			<File
+				RelativePath=".\src\TaskQueue.h">
+			</File>
 		</Filter>
 		<Filter
 			Name="Parser"
@@ -214,6 +241,9 @@
 					RelativePath=".\src\BufferedInput.h">
 				</File>
 				<File
+					RelativePath=".\src\BufferedIOCommon.h">
+				</File>
+				<File
 					RelativePath=".\src\BufferedOutput.h">
 				</File>
 				<File
@@ -223,19 +253,10 @@
 					RelativePath=".\src\Decimal.h">
 				</File>
 				<File
-					RelativePath=".\src\parser.h">
-				</File>
-				<File
-					RelativePath=".\src\ParserCommon.h">
-				</File>
-				<File
 					RelativePath=".\src\RecordBuffers.h">
 				</File>
 				<File
 					RelativePath=".\src\RecordFieldSetters.h">
-				</File>
-				<File
-					RelativePath=".\src\Subscription.h">
 				</File>
 				<File
 					RelativePath=".\src\SymbolCodec.h">
@@ -248,6 +269,9 @@
 					RelativePath=".\src\BufferedInput.c">
 				</File>
 				<File
+					RelativePath=".\src\BufferedIOCommon.c">
+				</File>
+				<File
 					RelativePath=".\src\BufferedOutput.c">
 				</File>
 				<File
@@ -257,19 +281,10 @@
 					RelativePath=".\src\Decimal.c">
 				</File>
 				<File
-					RelativePath=".\src\parser.c">
-				</File>
-				<File
-					RelativePath=".\src\ParserCommon.c">
-				</File>
-				<File
 					RelativePath=".\src\RecordBuffers.c">
 				</File>
 				<File
 					RelativePath=".\src\RecordFieldSetters.c">
-				</File>
-				<File
-					RelativePath=".\src\Subscription.c">
 				</File>
 				<File
 					RelativePath=".\src\SymbolCodec.c">

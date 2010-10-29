@@ -10,26 +10,25 @@ const char dxfeed_host[] = "demo.dxfeed.com:7300";
 /* -------------------------------------------------------------------------- */
 
 void process_last_error () {
-    int subsystem_id = dx_sc_invalid_subsystem;
-    int error_code = DX_INVALID_ERROR_CODE;
-    dx_const_string_t error_descr = NULL;
+    int error_code = dx_ec_success;
+    dxf_const_string_t error_descr = NULL;
     int res;
-    
-    res = dxf_get_last_error(&subsystem_id, &error_code, &error_descr);
-    
+
+    res = dxf_get_last_error(&error_code, &error_descr);
+
     if (res == DXF_SUCCESS) {
-        if (subsystem_id == dx_sc_invalid_subsystem && error_code == DX_INVALID_ERROR_CODE) {
+        if (error_code == dx_ec_success) {
             printf("WTF - no error information is stored");
-            
+
             return;
         }
-        
+
         wprintf(L"Error occurred and successfully retrieved:\n"
-                L"subsystem code = %d, error code = %d, description = \"%s\"\n",
-                subsystem_id, error_code, error_descr);
+            L"error code = %d, description = \"%s\"\n",
+            error_code, error_descr);
         return;
     }
-    
+
     printf("An error occurred but the error subsystem failed to initialize\n");
 }
 

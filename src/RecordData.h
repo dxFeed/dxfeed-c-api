@@ -54,56 +54,56 @@ typedef enum {
 /* -------------------------------------------------------------------------- */
 
 typedef struct {
-    dx_long_t time;
-    dx_char_t exchange_code;
-    dx_double_t price;
-    dx_long_t size;
-    dx_long_t day_volume;	
+    dxf_long_t time;
+    dxf_char_t exchange_code;
+    dxf_double_t price;
+    dxf_long_t size;
+    dxf_long_t day_volume;	
 } dx_trade_t;
 
 typedef struct {
-    dx_long_t bid_time;
-    dx_char_t bid_exchange_code;
-    dx_double_t bid_price;
-    dx_long_t bid_size;
-    dx_long_t ask_time;
-    dx_char_t ask_exchange_code;
-    dx_double_t ask_price;
-    dx_long_t ask_size;
+    dxf_long_t bid_time;
+    dxf_char_t bid_exchange_code;
+    dxf_double_t bid_price;
+    dxf_long_t bid_size;
+    dxf_long_t ask_time;
+    dxf_char_t ask_exchange_code;
+    dxf_double_t ask_price;
+    dxf_long_t ask_size;
 } dx_quote_t;
 
 typedef struct {
-    dx_double_t	day_high_price;
-    dx_double_t	day_low_price;
-    dx_double_t	day_open_price;
-    dx_double_t	prev_day_close_price;
-    dx_long_t open_interest;
+    dxf_double_t	day_high_price;
+    dxf_double_t	day_low_price;
+    dxf_double_t	day_open_price;
+    dxf_double_t	prev_day_close_price;
+    dxf_long_t open_interest;
 } dx_fundamental_t;
 
 typedef struct {
-    dx_const_string_t description;
+    dxf_const_string_t description;
 } dx_profile_t;
 
 typedef struct {
-    dx_char_t mm_exchange;
-    dx_int_t mm_id;
-    dx_double_t mmbid_price;
-    dx_int_t mmbid_size;
-    dx_double_t mmask_price;
-    dx_int_t mmask_size;
+    dxf_char_t mm_exchange;
+    dxf_int_t mm_id;
+    dxf_double_t mmbid_price;
+    dxf_int_t mmbid_size;
+    dxf_double_t mmask_price;
+    dxf_int_t mmask_size;
 } dx_market_maker_t;
 
 typedef struct {
-    dx_long_t event_id;
-    dx_long_t time;
-    dx_char_t exchange_code;
-    dx_double_t price;
-    dx_long_t size;
-    dx_double_t bid_price;
-    dx_double_t ask_price;
-    dx_const_string_t exchange_sale_conditions;
-    dx_bool_t is_trade;
-    dx_int_t type;    
+    dxf_long_t event_id;
+    dxf_long_t time;
+    dxf_char_t exchange_code;
+    dxf_double_t price;
+    dxf_long_t size;
+    dxf_double_t bid_price;
+    dxf_double_t ask_price;
+    dxf_const_string_t exchange_sale_conditions;
+    dxf_bool_t is_trade;
+    dxf_int_t type;    
 } dx_time_and_sale_t;
 
 

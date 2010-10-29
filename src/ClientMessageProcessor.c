@@ -1,0 +1,590 @@
+/*
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Initial Developer of the Original Code is Devexperts LLC.
+ * Portions created by the Initial Developer are Copyright (C) 2010
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *
+ */
+
+#include "ClientMessageProcessor.h"
+#include "BufferedOutput.h"
+#include "DataStructures.h"
+#include "DXMemory.h"
+#include "SymbolCodec.h"
+#include "Logger.h"
+#include "DXNetwork.h"
+#include "DXPMessageData.h"
+#include "DXAlgorithms.h"
+#include "DXErrorHandling.h"
+#include "ConnectionContextData.h"
+#include "EventData.h"
+#include "ServerMessageProcessor.h"
+#include "TaskQueue.h"
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Event subscription auxiliary stuff
+ */
+/* -------------------------------------------------------------------------- */
+
+typedef enum {
+    dx_at_add_subscription,
+    dx_at_remove_subscription,
+
+    /* add new action types above this line */
+
+    dx_at_count
+} dx_action_type_t;
+
+dx_message_type_t dx_get_subscription_message_type (dx_action_type_t action_type, dx_subscription_type_t subscr_type) {
+    static dx_message_type_t subscr_message_types[dx_at_count][dx_st_count] = {
+        { MESSAGE_TICKER_ADD_SUBSCRIPTION, MESSAGE_STREAM_ADD_SUBSCRIPTION, MESSAGE_HISTORY_ADD_SUBSCRIPTION },
+        { MESSAGE_TICKER_REMOVE_SUBSCRIPTION, MESSAGE_STREAM_REMOVE_SUBSCRIPTION, MESSAGE_HISTORY_REMOVE_SUBSCRIPTION }
+    };
+
+    return subscr_message_types[action_type][subscr_type];
+}
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Event subscription task stuff
+ */
+/* -------------------------------------------------------------------------- */
+
+typedef struct {
+    dxf_connection_t connection;
+    dxf_const_string_t* symbols;
+    int symbol_count;
+    int event_types;
+    bool unsubscribe;
+} dx_event_subscription_task_data_t;
+
+/* -------------------------------------------------------------------------- */
+
+void* dx_destroy_event_subscription_task_data (dx_event_subscription_task_data_t* data) {
+    int i = 0;
+    
+    if (data == NULL) {
+        return NULL;
+    }
+    
+    FREE_ARRAY(data->symbols, data->symbol_count);
+    dx_free(data);
+    
+    return NULL;
+}
+
+/* -------------------------------------------------------------------------- */
+
+void* dx_create_event_subscription_task_data (dxf_connection_t connection,
+                                              dxf_const_string_t* symbols, int symbol_count, int event_types, bool unsubscribe) {
+    int i = 0;
+    dx_event_subscription_task_data_t* data = dx_calloc(1, sizeof(dx_event_subscription_task_data_t));
+    
+    if (data == NULL) {
+        return NULL;
+    }
+    
+    data->symbols = dx_calloc(symbol_count, sizeof(dxf_const_string_t));
+    
+    if (data->symbols == NULL) {
+        return dx_destroy_event_subscription_task_data(data);
+    }
+    
+    data->symbol_count = symbol_count;
+    
+    for (; i < symbol_count; ++i) {
+        if ((data->symbols[i] = dx_create_string_src(symbols[i])) == NULL) {
+            return dx_destroy_event_subscription_task_data(data);
+        }
+    }
+    
+    data->connection = connection;
+    data->event_types = event_types;
+    data->unsubscribe = unsubscribe;
+    
+    return data;
+}
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Common helpers
+ */
+/* -------------------------------------------------------------------------- */
+
+static bool dx_compose_message_header (void* bocc, dx_message_type_t message_type) {
+    CHECKED_CALL_2(dx_write_byte, bocc, (dxf_byte_t)0); /* reserve one byte for message length */
+    CHECKED_CALL_2(dx_write_compact_int, bocc, message_type);
+
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+static bool dx_move_message_data (void* bocc, int old_offset, int new_offset, int data_length) {
+    CHECKED_CALL_2(dx_ensure_capacity, bocc, new_offset + data_length);
+    
+    dx_memmove(dx_get_out_buffer(bocc) + new_offset, dx_get_out_buffer(bocc) + old_offset, data_length);
+    
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+static bool dx_finish_composing_message (void* bocc) {
+    int message_length = dx_get_out_buffer_position(bocc) - 1; /* 1 is for the one byte reserved for size */
+    int length_size = dx_get_compact_size(message_length);
+    
+    if (length_size > 1) {
+        /* Only one byte was initially reserved. Moving the message buffer */
+        
+        CHECKED_CALL_4(dx_move_message_data, bocc, 1, length_size, message_length);
+    }
+
+    dx_set_out_buffer_position(bocc, 0);
+    CHECKED_CALL_2(dx_write_compact_int, bocc, message_length);
+    dx_set_out_buffer_position(bocc, length_size + message_length);
+
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Symbol subscription helpers
+ */
+/* -------------------------------------------------------------------------- */
+
+static bool dx_compose_body (void* bocc, dxf_int_t record_id, dxf_int_t cipher, dxf_const_string_t symbol) {
+    if (cipher == 0 && symbol == NULL) {
+        return dx_set_error_code(dx_ec_invalid_func_param_internal);
+    }
+
+    CHECKED_CALL_3(dx_codec_write_symbol, bocc, cipher, symbol);
+    CHECKED_CALL_2(dx_write_compact_int, bocc, record_id);
+
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+static bool dx_subscribe_symbol_to_record (dxf_connection_t connection,
+                                           dx_message_type_t type, dxf_const_string_t symbol, dxf_int_t cipher, dxf_int_t record_id) {
+    static const dxf_int_t initial_buffer_size = 100;
+
+    void* bocc = NULL;
+    dxf_byte_t* subscr_buffer = NULL;
+    int message_size = 0;
+
+    bocc = dx_get_buffered_output_connection_context(connection);
+
+    if (bocc == NULL) {
+        return dx_set_error_code(dx_cec_connection_context_not_initialized);
+    }
+
+    if (!dx_is_subscription_message(type)) {
+        return dx_set_error_code(dx_pec_unexpected_message_type_internal);
+    }
+
+    CHECKED_CALL(dx_lock_buffered_output, bocc);
+
+    subscr_buffer = (dxf_byte_t*)dx_malloc(initial_buffer_size);
+
+    if (subscr_buffer == NULL) {
+        dx_unlock_buffered_output(bocc);
+
+        return false;
+    }
+
+    dx_set_out_buffer(bocc, subscr_buffer, initial_buffer_size);
+
+    if (!dx_compose_message_header(bocc, type) ||
+        !dx_compose_body(bocc, record_id, cipher, symbol) ||
+        ((type == MESSAGE_HISTORY_ADD_SUBSCRIPTION) && !dx_write_compact_int(bocc, 0)) || /* hardcoded, used only once while subscribing to MarketMaker */
+        !dx_finish_composing_message(bocc)) {
+
+        dx_free(dx_get_out_buffer(bocc));
+        dx_unlock_buffered_output(bocc);
+
+        return false;
+    }
+
+    subscr_buffer = dx_get_out_buffer(bocc);
+    message_size = dx_get_out_buffer_position(bocc);
+
+    if (!dx_unlock_buffered_output(bocc) ||
+        !dx_send_data(connection, subscr_buffer, message_size)) {
+
+        dx_free(subscr_buffer);
+
+        return false;
+    }
+
+    dx_free(subscr_buffer);	
+
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+int dx_subscribe_symbols_to_events_task (void* data, int command) {
+    dx_event_subscription_task_data_t* task_data = data;
+    int res = dx_tes_pop_me;
+    
+    if (task_data == NULL) {
+        return res;
+    }
+    
+    if (IS_FLAG_SET(command, dx_tc_free_resources)) {
+        dx_destroy_event_subscription_task_data(task_data);
+        
+        return res | dx_tes_success;
+    }
+    
+    if (dx_subscribe_symbols_to_events(task_data->connection, task_data->symbols, task_data->symbol_count,
+                                       task_data->event_types, task_data->unsubscribe, true)) {
+        res |= dx_tes_success;
+    }
+    
+    dx_destroy_event_subscription_task_data(task_data);
+    
+    return res;
+}
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Describe record helpers
+ */
+/* -------------------------------------------------------------------------- */
+
+static bool dx_write_record_field (void* bocc, const dx_field_info_t* field) {
+    CHECKED_CALL_2(dx_write_utf_string, bocc, field->name);
+    CHECKED_CALL_2(dx_write_compact_int, bocc, field->type);
+
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+static bool dx_write_event_record (void* bocc, const dx_record_info_t* record, dx_record_id_t record_id) {
+    int field_index = 0;
+
+    CHECKED_CALL_2(dx_write_compact_int, bocc, (dxf_int_t)record_id);
+    CHECKED_CALL_2(dx_write_utf_string, bocc, record->name);
+    CHECKED_CALL_2(dx_write_compact_int, bocc, (dxf_int_t)record->field_count);
+
+    for (; field_index != record->field_count; ++field_index) {
+        CHECKED_CALL_2(dx_write_record_field, bocc, record->fields + field_index);
+    }
+
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_write_event_records (void* bocc) {
+    dx_record_id_t record_id = dx_rid_begin;
+
+    for (; record_id < dx_rid_count; ++record_id) {
+        CHECKED_CALL_3(dx_write_event_record, bocc, dx_get_record_by_id(record_id), record_id);
+    }
+
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+int dx_describe_records_sender_task (void* data, int command) {
+    int res = dx_tes_pop_me;
+    
+    if (IS_FLAG_SET(command, dx_tc_free_resources)) {
+        return res | dx_tes_success;
+    }
+    
+    if (dx_send_record_description((dxf_connection_t)data, true)) {
+        res |= dx_tes_success;
+    }
+    
+    return res;
+}
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Describe protocol helpers
+ */
+/* -------------------------------------------------------------------------- */
+
+static bool dx_write_describe_protocol_magic (void* bocc) {
+	/* hex value is 0x44585033 */
+    CHECKED_CALL_2(dx_write_byte, bocc, (dxf_byte_t)'D'); 
+    CHECKED_CALL_2(dx_write_byte, bocc, (dxf_byte_t)'X'); 
+    CHECKED_CALL_2(dx_write_byte, bocc, (dxf_byte_t)'P'); 
+    CHECKED_CALL_2(dx_write_byte, bocc, (dxf_byte_t)'3'); 
+
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+static bool dx_write_describe_protocol_properties (void* bocc) {
+    CHECKED_CALL_2(dx_write_compact_int, bocc, 1); /* count of properties */
+    CHECKED_CALL_2(dx_write_utf_string, bocc, L"version"); 
+    CHECKED_CALL_2(dx_write_utf_string, bocc, L"DXFeed.cpp v 1.0 (c) Devexperts"); 
+  
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+static bool dx_write_describe_protocol_message_data (void* bocc, const int* msg_roster, int msg_count) {
+    int i = 0;
+
+    CHECKED_CALL_2(dx_write_compact_int, bocc, msg_count);
+
+    for (; i < msg_count; ++i) {
+        CHECKED_CALL_2(dx_write_compact_int, bocc, msg_roster[i]);
+        CHECKED_CALL_2(dx_write_utf_string, bocc, dx_get_message_type_name(msg_roster[i]));
+        CHECKED_CALL_2(dx_write_compact_int, bocc, 0); /* number of message properties */
+    }
+    
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+static bool dx_write_describe_protocol_sends (void* bocc) {
+    return dx_write_describe_protocol_message_data(bocc, dx_get_send_message_roster(), dx_get_send_message_roster_size());
+}
+
+/* -------------------------------------------------------------------------- */
+
+static bool dx_write_describe_protocol_recvs (void* bocc) {
+    return dx_write_describe_protocol_message_data(bocc, dx_get_recv_message_roster(), dx_get_recv_message_roster_size());
+}
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	External interface
+ */
+/* -------------------------------------------------------------------------- */
+
+bool dx_subscribe_symbols_to_events (dxf_connection_t connection,
+                                     dxf_const_string_t* symbols, int symbol_count, int event_types, bool unsubscribe,
+                                     bool task_mode) {
+    int i = 0;
+
+    CHECKED_CALL_2(dx_validate_connection_handle, connection, true);
+    
+    {
+        dx_message_support_status_t msg_support_status;
+
+        /*
+         *	A dirty little trick here.
+         *  In fact, this function relies on up to six different message types: ticker, stream and history
+         *  addition/removal messages. And formally they may be supported independently, so we must check exactly
+         *  those messages that we're gonna use. Implementing the proper check would result in splitting the single
+         *  task into many ones, producing great memory and performance overhead.
+         *  But it's sane to assume that those message types are in fact interconnected and may not be supported
+         *  apart from each other. So only one message is checked, and it's assumed that the rest has the same status.
+         *  This piece of code must be re-done in case this assumption turns false.
+         */
+        
+        CHECKED_CALL_3(dx_is_message_supported_by_server, connection, MESSAGE_TICKER_ADD_SUBSCRIPTION, &msg_support_status);
+
+        switch (msg_support_status) {
+        case dx_mss_supported:
+            /* everything's okay, proceeding with sending */
+            break;
+        case dx_mss_not_supported:
+            return dx_set_error_code(dx_pec_local_message_not_supported_by_server);
+        case dx_mss_pending:
+            if (task_mode) {
+                /* this task must never be executed unless it's clear whether the message is supported */
+                return dx_set_error_code(dx_ec_internal_assert_violation);
+            } else {
+                /* scheduling the task for later execution and returning success */
+                
+                void* data = dx_create_event_subscription_task_data(connection, symbols, symbol_count, event_types, unsubscribe);
+                
+                if (data == NULL) {
+                    return false;
+                }
+                
+                return dx_add_worker_thread_task(connection, dx_subscribe_symbols_to_events_task, data);
+            }
+        }
+    }
+    
+    for (; i < symbol_count; ++i){
+        dx_event_id_t eid = dx_eid_begin;
+
+        for (; eid < dx_eid_count; ++eid) {
+            if (event_types & DX_EVENT_BIT_MASK(eid)) {
+                const dx_event_subscription_param_t* subscr_params = NULL;
+                int j = 0;
+                int param_count = dx_get_event_subscription_params(eid, &subscr_params);
+
+                for (; j < param_count; ++j) {
+                    const dx_event_subscription_param_t* cur_param = subscr_params + j;
+                    dx_message_type_t msg_type = dx_get_subscription_message_type(unsubscribe ? dx_at_remove_subscription : dx_at_add_subscription, cur_param->subscription_type);
+
+                    if (!dx_subscribe_symbol_to_record(connection, msg_type, symbols[i],
+                        dx_encode_symbol_name(symbols[i]), cur_param->record_id)) {
+                        
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_send_record_description (dxf_connection_t connection, bool task_mode) {
+    static const int initial_size = 1024;
+    
+    void* bocc = NULL;
+    dxf_byte_t* initial_buffer = NULL;
+    int message_size = 0;
+    
+    dx_logging_info(L"Update record description");
+    
+    CHECKED_CALL_2(dx_validate_connection_handle, connection, true);
+
+    {
+        dx_message_support_status_t msg_support_status;
+        
+        CHECKED_CALL_3(dx_is_message_supported_by_server, connection, MESSAGE_DESCRIBE_RECORDS, &msg_support_status);
+        
+        switch (msg_support_status) {
+        case dx_mss_supported:
+            /* everything's okay, proceeding with sending */
+            break;
+        case dx_mss_not_supported:
+            return dx_set_error_code(dx_pec_local_message_not_supported_by_server);
+        case dx_mss_pending:
+            if (task_mode) {
+                /* this task must never be executed unless it's clear whether the message is supported */
+                return dx_set_error_code(dx_ec_internal_assert_violation);
+            }
+            
+            /* scheduling the task for later execution and returning success */
+            return dx_add_worker_thread_task(connection, dx_describe_records_sender_task, (void*)connection);
+        }
+    }
+    
+    bocc = dx_get_buffered_output_connection_context(connection);
+
+    if (bocc == NULL) {
+        return dx_set_error_code(dx_cec_connection_context_not_initialized);
+    }
+    
+    CHECKED_CALL(dx_lock_buffered_output, bocc);
+    
+    initial_buffer = dx_malloc(initial_size);
+    
+    if (initial_buffer == NULL) {
+        dx_unlock_buffered_output(bocc);
+        
+        return false;
+    }
+
+    dx_set_out_buffer(bocc, initial_buffer, initial_size);
+
+    if (!dx_compose_message_header(bocc, MESSAGE_DESCRIBE_RECORDS) ||
+        !dx_write_event_records(bocc) ||
+        !dx_finish_composing_message(bocc)) {
+        
+        dx_free(dx_get_out_buffer(bocc));
+        dx_unlock_buffered_output(bocc);
+
+        return false;
+    }
+    
+    initial_buffer = dx_get_out_buffer(bocc);
+    message_size = dx_get_out_buffer_position(bocc);
+
+    if (!dx_unlock_buffered_output(bocc) ||
+        !dx_send_data(connection, initial_buffer, message_size)) {
+
+        dx_free(initial_buffer);
+
+        return false;
+    }
+
+    dx_free(initial_buffer);
+
+    return true;
+}
+/* -------------------------------------------------------------------------- */
+
+bool dx_send_protocol_description (dxf_connection_t connection) {
+    static const int initial_size = 1024;
+
+    void* bocc = NULL;
+    dxf_byte_t* initial_buffer = NULL;
+    int message_size = 0;
+
+    dx_logging_info(L"Update protocol description");
+
+    CHECKED_CALL_2(dx_validate_connection_handle, connection, true);
+
+    bocc = dx_get_buffered_output_connection_context(connection);
+
+    if (bocc == NULL) {
+        return dx_set_error_code(dx_cec_connection_context_not_initialized);
+    }
+
+    CHECKED_CALL(dx_lock_buffered_output, bocc);
+
+    initial_buffer = dx_malloc(initial_size);
+
+    if (initial_buffer == NULL) {
+        dx_unlock_buffered_output(bocc);
+
+        return false;
+    }
+
+    dx_set_out_buffer(bocc, initial_buffer, initial_size);
+
+    if (!dx_compose_message_header(bocc, MESSAGE_DESCRIBE_PROTOCOL) ||
+        !dx_write_describe_protocol_magic(bocc) ||
+        !dx_write_describe_protocol_properties(bocc) ||
+        !dx_write_describe_protocol_sends(bocc) ||
+        !dx_write_describe_protocol_recvs(bocc) ||
+        !dx_finish_composing_message(bocc)) {
+
+        dx_free(dx_get_out_buffer(bocc));
+        dx_unlock_buffered_output(bocc);
+
+        return false;
+    }
+
+    initial_buffer = dx_get_out_buffer(bocc);
+    message_size = dx_get_out_buffer_position(bocc);
+
+    if (!dx_unlock_buffered_output(bocc) ||
+        !dx_send_data(connection, initial_buffer, message_size)) {
+
+        dx_free(initial_buffer);
+
+        return false;
+    }
+
+    dx_free(initial_buffer);
+
+    return dx_describe_protocol_sent(connection);
+}

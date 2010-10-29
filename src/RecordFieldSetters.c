@@ -47,11 +47,11 @@
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_SETTER_BODY(dx_trade_t, time, dx_int_t)
-FIELD_SETTER_BODY(dx_trade_t, exchange_code, dx_char_t)
-FIELD_SETTER_BODY(dx_trade_t, price, dx_double_t)
-FIELD_SETTER_BODY(dx_trade_t, size, dx_int_t)
-FIELD_SETTER_BODY_TWO_CASTS(dx_trade_t, day_volume, dx_double_t, dx_long_t)
+FIELD_SETTER_BODY(dx_trade_t, time, dxf_int_t)
+FIELD_SETTER_BODY(dx_trade_t, exchange_code, dxf_char_t)
+FIELD_SETTER_BODY(dx_trade_t, price, dxf_double_t)
+FIELD_SETTER_BODY(dx_trade_t, size, dxf_int_t)
+FIELD_SETTER_BODY_TWO_CASTS(dx_trade_t, day_volume, dxf_double_t, dxf_long_t)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -59,14 +59,14 @@ FIELD_SETTER_BODY_TWO_CASTS(dx_trade_t, day_volume, dx_double_t, dx_long_t)
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_SETTER_BODY(dx_quote_t, bid_time, dx_int_t)
-FIELD_SETTER_BODY(dx_quote_t, bid_exchange_code, dx_char_t)
-FIELD_SETTER_BODY(dx_quote_t, bid_price, dx_double_t)
-FIELD_SETTER_BODY(dx_quote_t, bid_size, dx_int_t)
-FIELD_SETTER_BODY(dx_quote_t, ask_time, dx_int_t)
-FIELD_SETTER_BODY(dx_quote_t, ask_exchange_code, dx_char_t)
-FIELD_SETTER_BODY(dx_quote_t, ask_price, dx_double_t)
-FIELD_SETTER_BODY(dx_quote_t, ask_size, dx_int_t)
+FIELD_SETTER_BODY(dx_quote_t, bid_time, dxf_int_t)
+FIELD_SETTER_BODY(dx_quote_t, bid_exchange_code, dxf_char_t)
+FIELD_SETTER_BODY(dx_quote_t, bid_price, dxf_double_t)
+FIELD_SETTER_BODY(dx_quote_t, bid_size, dxf_int_t)
+FIELD_SETTER_BODY(dx_quote_t, ask_time, dxf_int_t)
+FIELD_SETTER_BODY(dx_quote_t, ask_exchange_code, dxf_char_t)
+FIELD_SETTER_BODY(dx_quote_t, ask_price, dxf_double_t)
+FIELD_SETTER_BODY(dx_quote_t, ask_size, dxf_int_t)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -74,11 +74,11 @@ FIELD_SETTER_BODY(dx_quote_t, ask_size, dx_int_t)
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_SETTER_BODY(dx_fundamental_t, day_high_price, dx_double_t)
-FIELD_SETTER_BODY(dx_fundamental_t, day_low_price, dx_double_t)
-FIELD_SETTER_BODY(dx_fundamental_t, day_open_price, dx_double_t)
-FIELD_SETTER_BODY(dx_fundamental_t, prev_day_close_price, dx_double_t)
-FIELD_SETTER_BODY(dx_fundamental_t, open_interest, dx_int_t)
+FIELD_SETTER_BODY(dx_fundamental_t, day_high_price, dxf_double_t)
+FIELD_SETTER_BODY(dx_fundamental_t, day_low_price, dxf_double_t)
+FIELD_SETTER_BODY(dx_fundamental_t, day_open_price, dxf_double_t)
+FIELD_SETTER_BODY(dx_fundamental_t, prev_day_close_price, dxf_double_t)
+FIELD_SETTER_BODY(dx_fundamental_t, open_interest, dxf_int_t)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -86,7 +86,7 @@ FIELD_SETTER_BODY(dx_fundamental_t, open_interest, dx_int_t)
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_SETTER_BODY(dx_profile_t, description, dx_const_string_t)
+FIELD_SETTER_BODY(dx_profile_t, description, dxf_const_string_t)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -94,12 +94,12 @@ FIELD_SETTER_BODY(dx_profile_t, description, dx_const_string_t)
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_SETTER_BODY(dx_market_maker_t, mm_exchange, dx_char_t)
-FIELD_SETTER_BODY(dx_market_maker_t, mm_id, dx_int_t)
-FIELD_SETTER_BODY(dx_market_maker_t, mmbid_price, dx_double_t)
-FIELD_SETTER_BODY(dx_market_maker_t, mmbid_size, dx_int_t)
-FIELD_SETTER_BODY(dx_market_maker_t, mmask_price, dx_double_t)
-FIELD_SETTER_BODY(dx_market_maker_t, mmask_size, dx_int_t)
+FIELD_SETTER_BODY(dx_market_maker_t, mm_exchange, dxf_char_t)
+FIELD_SETTER_BODY(dx_market_maker_t, mm_id, dxf_int_t)
+FIELD_SETTER_BODY(dx_market_maker_t, mmbid_price, dxf_double_t)
+FIELD_SETTER_BODY(dx_market_maker_t, mmbid_size, dxf_int_t)
+FIELD_SETTER_BODY(dx_market_maker_t, mmask_price, dxf_double_t)
+FIELD_SETTER_BODY(dx_market_maker_t, mmask_size, dxf_int_t)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -107,22 +107,22 @@ FIELD_SETTER_BODY(dx_market_maker_t, mmask_size, dx_int_t)
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_SETTER_BODY(dx_time_and_sale_t, time, dx_int_t)
-FIELD_SETTER_BODY(dx_time_and_sale_t, exchange_code, dx_char_t)
-FIELD_SETTER_BODY(dx_time_and_sale_t, price, dx_double_t)
-FIELD_SETTER_BODY(dx_time_and_sale_t, size, dx_int_t)
-FIELD_SETTER_BODY(dx_time_and_sale_t, bid_price, dx_double_t)
-FIELD_SETTER_BODY(dx_time_and_sale_t, ask_price, dx_double_t)
-FIELD_SETTER_BODY(dx_time_and_sale_t, type, dx_int_t)
+FIELD_SETTER_BODY(dx_time_and_sale_t, time, dxf_int_t)
+FIELD_SETTER_BODY(dx_time_and_sale_t, exchange_code, dxf_char_t)
+FIELD_SETTER_BODY(dx_time_and_sale_t, price, dxf_double_t)
+FIELD_SETTER_BODY(dx_time_and_sale_t, size, dxf_int_t)
+FIELD_SETTER_BODY(dx_time_and_sale_t, bid_price, dxf_double_t)
+FIELD_SETTER_BODY(dx_time_and_sale_t, ask_price, dxf_double_t)
+FIELD_SETTER_BODY(dx_time_and_sale_t, type, dxf_int_t)
 
 void DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, sequence) (void* object, const void* field) {
     ((dx_time_and_sale_t*)object)->event_id &= 0xFFFFFFFF00000000L;
-    ((dx_time_and_sale_t*)object)->event_id |= *(dx_int_t*)field;
+    ((dx_time_and_sale_t*)object)->event_id |= *(dxf_int_t*)field;
 }
 
 void DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, exch_sale_conds) (void* object, const void* field) {
     ((dx_time_and_sale_t*)object)->event_id &= 0x00000000FFFFFFFFL;
-    ((dx_time_and_sale_t*)object)->event_id |= ((*(dx_int_t*)field) << 32);
+    ((dx_time_and_sale_t*)object)->event_id |= ((*(dxf_int_t*)field) << 32);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -171,7 +171,7 @@ void DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, exch_sale_conds) (void* obj
 #define RECORD_EXCHANGE_CODE_GETTER_BODY(record_id) \
     const void* RECORD_EXCHANGE_CODE_GETTER_NAME(record_id) (void) { \
         bool is_initialized = false; \
-        static dx_char_t exchange_code = 0; \
+        static dxf_char_t exchange_code = 0; \
         \
         if (!is_initialized) { \
             exchange_code = dx_get_record_exchange_code(record_id); \
@@ -187,32 +187,32 @@ void DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, exch_sale_conds) (void* obj
  */
 /* -------------------------------------------------------------------------- */
 
-GENERIC_VALUE_GETTER_NAME_PROTO(dx_char_t) {
-    static dx_char_t c = 0;
+GENERIC_VALUE_GETTER_NAME_PROTO(dxf_char_t) {
+    static dxf_char_t c = 0;
     
     return &c;
 }
 
 /* -------------------------------------------------------------------------- */
 
-GENERIC_VALUE_GETTER_NAME_PROTO(dx_int_t) {
-    static dx_int_t i = 0;
+GENERIC_VALUE_GETTER_NAME_PROTO(dxf_int_t) {
+    static dxf_int_t i = 0;
     
     return &i;
 }
 
 /* -------------------------------------------------------------------------- */
 
-GENERIC_VALUE_GETTER_NAME_PROTO(dx_double_t) {
-    static dx_double_t d = 0;
+GENERIC_VALUE_GETTER_NAME_PROTO(dxf_double_t) {
+    static dxf_double_t d = 0;
 
     return &d;
 }
 
 /* -------------------------------------------------------------------------- */
 
-GENERIC_VALUE_GETTER_NAME_PROTO(dx_const_string_t) {
-    static dx_const_string_t s = L"<Default>";
+GENERIC_VALUE_GETTER_NAME_PROTO(dxf_const_string_t) {
+    static dxf_const_string_t s = L"<Default>";
     
     return &s;
 }
@@ -231,11 +231,11 @@ RECORD_EXCHANGE_CODE_GETTER_BODY(dx_rid_market_maker)
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_DEF_VAL_BODY(dx_trade_t, time, dx_int_t)
-FIELD_DEF_VAL_BODY(dx_trade_t, exchange_code, dx_char_t)
-FIELD_DEF_VAL_BODY(dx_trade_t, price, dx_double_t)
-FIELD_DEF_VAL_BODY(dx_trade_t, size, dx_int_t)
-FIELD_DEF_VAL_BODY(dx_trade_t, day_volume, dx_double_t)
+FIELD_DEF_VAL_BODY(dx_trade_t, time, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_trade_t, exchange_code, dxf_char_t)
+FIELD_DEF_VAL_BODY(dx_trade_t, price, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_trade_t, size, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_trade_t, day_volume, dxf_double_t)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -243,14 +243,14 @@ FIELD_DEF_VAL_BODY(dx_trade_t, day_volume, dx_double_t)
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_DEF_VAL_BODY(dx_quote_t, bid_time, dx_int_t)
+FIELD_DEF_VAL_BODY(dx_quote_t, bid_time, dxf_int_t)
 FIELD_DEF_VAL_BODY_CUSTOM_FUN(dx_quote_t, bid_exchange_code, RECORD_EXCHANGE_CODE_GETTER_FUN, dx_rid_quote)
-FIELD_DEF_VAL_BODY(dx_quote_t, bid_price, dx_double_t)
-FIELD_DEF_VAL_BODY(dx_quote_t, bid_size, dx_int_t)
-FIELD_DEF_VAL_BODY(dx_quote_t, ask_time, dx_int_t)
+FIELD_DEF_VAL_BODY(dx_quote_t, bid_price, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_quote_t, bid_size, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_quote_t, ask_time, dxf_int_t)
 FIELD_DEF_VAL_BODY_CUSTOM_FUN(dx_quote_t, ask_exchange_code, RECORD_EXCHANGE_CODE_GETTER_FUN, dx_rid_quote)
-FIELD_DEF_VAL_BODY(dx_quote_t, ask_price, dx_double_t)
-FIELD_DEF_VAL_BODY(dx_quote_t, ask_size, dx_int_t)
+FIELD_DEF_VAL_BODY(dx_quote_t, ask_price, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_quote_t, ask_size, dxf_int_t)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -258,11 +258,11 @@ FIELD_DEF_VAL_BODY(dx_quote_t, ask_size, dx_int_t)
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_DEF_VAL_BODY(dx_fundamental_t, day_high_price, dx_double_t)
-FIELD_DEF_VAL_BODY(dx_fundamental_t, day_low_price, dx_double_t)
-FIELD_DEF_VAL_BODY(dx_fundamental_t, day_open_price, dx_double_t)
-FIELD_DEF_VAL_BODY(dx_fundamental_t, prev_day_close_price, dx_double_t)
-FIELD_DEF_VAL_BODY(dx_fundamental_t, open_interest, dx_int_t)
+FIELD_DEF_VAL_BODY(dx_fundamental_t, day_high_price, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_fundamental_t, day_low_price, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_fundamental_t, day_open_price, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_fundamental_t, prev_day_close_price, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_fundamental_t, open_interest, dxf_int_t)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -270,7 +270,7 @@ FIELD_DEF_VAL_BODY(dx_fundamental_t, open_interest, dx_int_t)
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_DEF_VAL_BODY(dx_profile_t, description, dx_const_string_t)
+FIELD_DEF_VAL_BODY(dx_profile_t, description, dxf_const_string_t)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -278,12 +278,12 @@ FIELD_DEF_VAL_BODY(dx_profile_t, description, dx_const_string_t)
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_DEF_VAL_BODY(dx_market_maker_t, mm_exchange, dx_char_t)
-FIELD_DEF_VAL_BODY(dx_market_maker_t, mm_id, dx_int_t)
-FIELD_DEF_VAL_BODY(dx_market_maker_t, mmbid_price, dx_double_t)
-FIELD_DEF_VAL_BODY(dx_market_maker_t, mmbid_size, dx_int_t)
-FIELD_DEF_VAL_BODY(dx_market_maker_t, mmask_price, dx_double_t)
-FIELD_DEF_VAL_BODY(dx_market_maker_t, mmask_size, dx_int_t)
+FIELD_DEF_VAL_BODY(dx_market_maker_t, mm_exchange, dxf_char_t)
+FIELD_DEF_VAL_BODY(dx_market_maker_t, mm_id, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_market_maker_t, mmbid_price, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_market_maker_t, mmbid_size, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_market_maker_t, mmask_price, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_market_maker_t, mmask_size, dxf_int_t)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -291,12 +291,12 @@ FIELD_DEF_VAL_BODY(dx_market_maker_t, mmask_size, dx_int_t)
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_DEF_VAL_BODY(dx_time_and_sale_t, time, dx_int_t)
-FIELD_DEF_VAL_BODY(dx_time_and_sale_t, sequence, dx_int_t)
-FIELD_DEF_VAL_BODY(dx_time_and_sale_t, exchange_code, dx_char_t)
-FIELD_DEF_VAL_BODY(dx_time_and_sale_t, price, dx_double_t)
-FIELD_DEF_VAL_BODY(dx_time_and_sale_t, size, dx_int_t)
-FIELD_DEF_VAL_BODY(dx_time_and_sale_t, bid_price, dx_double_t)
-FIELD_DEF_VAL_BODY(dx_time_and_sale_t, ask_price, dx_double_t)
-FIELD_DEF_VAL_BODY(dx_time_and_sale_t, exch_sale_conds, dx_int_t)
-FIELD_DEF_VAL_BODY(dx_time_and_sale_t, type, dx_int_t)
+FIELD_DEF_VAL_BODY(dx_time_and_sale_t, time, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_time_and_sale_t, sequence, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_time_and_sale_t, exchange_code, dxf_char_t)
+FIELD_DEF_VAL_BODY(dx_time_and_sale_t, price, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_time_and_sale_t, size, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_time_and_sale_t, bid_price, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_time_and_sale_t, ask_price, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_time_and_sale_t, exch_sale_conds, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_time_and_sale_t, type, dxf_int_t)

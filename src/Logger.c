@@ -23,25 +23,11 @@
 
 #include "Logger.h"
 #include "DXErrorHandling.h"
-#include "ParserCommon.h"
+#include "BufferedIOCommon.h"
 #include "DXMemory.h"
 #include "DXAlgorithms.h"
 #include "DXThreads.h"
 #include "DXErrorCodes.h"
-
-/* -------------------------------------------------------------------------- */
-/*
- *	Error related stuff
- */
-/* -------------------------------------------------------------------------- */
-
-static const dx_error_code_descr_t g_logger_errors[] = {
-    { dx_lec_failed_to_open_file, L"Failed to open the log file" },
-
-    { ERROR_CODE_FOOTER, ERROR_DESCR_FOOTER }
-};
-
-const dx_error_code_descr_t* logger_error_roster = g_logger_errors;
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -50,19 +36,21 @@ const dx_error_code_descr_t* logger_error_roster = g_logger_errors;
 /* -------------------------------------------------------------------------- */
 
 #define CURRENT_TIME_STR_LENGTH 31
+#define CURRENT_TIME_STR_TIME_OFFSET 24
 
-static dx_const_string_t g_error_prefix = L"Error:";
-static dx_const_string_t g_info_prefix = L"";
-static dx_const_string_t g_default_time_string = L"Incorrect time";
+static dxf_const_string_t g_error_prefix = L"Error:";
+static dxf_const_string_t g_info_prefix = L"";
+static dxf_const_string_t g_default_time_string = L"Incorrect time";
 
 static bool g_verbose_logger_mode;
 static bool g_show_timezone;
 static FILE* g_log_file = NULL;
 
 static pthread_key_t g_current_time_str_key;
-static bool g_key_not_created = true;
+static bool g_key_creation_attempted = false;
+static bool g_key_created = false;
 
-static dx_char_t current_time_str[CURRENT_TIME_STR_LENGTH + 1];
+static dxf_char_t current_time_str[CURRENT_TIME_STR_LENGTH + 1];
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -70,33 +58,35 @@ static dx_char_t current_time_str[CURRENT_TIME_STR_LENGTH + 1];
  */
 /* -------------------------------------------------------------------------- */
 
+dxf_string_t dx_get_current_time_buffer (void);
+
 #ifdef _WIN32
 
-const dx_char_t* dx_get_current_time() {
-    
+const dxf_char_t* dx_get_current_time (void) {    
     SYSTEMTIME current_time;
+    dxf_char_t* time_buffer = dx_get_current_time_buffer();
+    
+    if (time_buffer == NULL) {
+        return NULL;
+    }
 
     GetLocalTime(&current_time);
-    _snwprintf(current_time_str, CURRENT_TIME_STR_LENGTH, L"%02u.%02u.%04u %02u:%02u:%02u:%03u", current_time.wDay,
-                                                                                                 current_time.wMonth,
-                                                                                                 current_time.wYear,
-                                                                                                 current_time.wHour,
-                                                                                                 current_time.wMinute,
-                                                                                                 current_time.wSecond,
-                                                                                                 current_time.wMilliseconds);
-
+    _snwprintf(time_buffer, CURRENT_TIME_STR_LENGTH, L"%.2u.%.2u.%.4u %.2u:%.2u:%.2u.%.4u",
+                                                     current_time.wDay, current_time.wMonth, current_time.wYear,
+                                                     current_time.wHour, current_time.wMinute, current_time.wSecond,
+                                                     current_time.wMilliseconds);
     if (g_show_timezone) {
         TIME_ZONE_INFORMATION time_zone;
         GetTimeZoneInformation(&time_zone);
-        _snwprintf(current_time_str + 21, 7, L" GMT%+02d", time_zone.Bias / 60);
+        _snwprintf(time_buffer + CURRENT_TIME_STR_TIME_OFFSET, 7, L" GMT%+.2d", time_zone.Bias / 60);
     }
 
-    return current_time_str;
+    return time_buffer;
 }
 
 #else // _WIN32
 
-dx_const_string_t dx_get_current_time () {
+dxf_const_string_t dx_get_current_time () {
     return g_default_time_string;
 }
 
@@ -114,26 +104,31 @@ void dx_current_time_buffer_destructor (void* data) {
 
 /* -------------------------------------------------------------------------- */
 
-dx_string_t dx_get_current_time_buffer (void) {
-    dx_string_t buffer = NULL;
+dxf_string_t dx_get_current_time_buffer (void) {
+    /*
+     *	This function uses the low-level functions without embedded error handling/logging,
+     *  because otherwise an infinite recursion and a stack overflow may occur
+     */
     
-    if (g_key_not_created) {
+    dxf_string_t buffer = NULL;
+    
+    if (!g_key_created) {
         return NULL;
     }
     
-    buffer = (dx_string_t)dx_get_thread_data(g_current_time_str_key);
+    buffer = (dxf_string_t)dx_get_thread_data(g_current_time_str_key);
     
     if (buffer == NULL) {
         /* buffer for this thread wasn't yet created. */
         
-        buffer = (dx_string_t)dx_calloc(CURRENT_TIME_STR_LENGTH + 1, sizeof(dx_char_t));
+        buffer = (dxf_string_t)dx_calloc_no_ehm(CURRENT_TIME_STR_LENGTH + 1, sizeof(dxf_char_t));
         
         if (buffer == NULL) {
             return NULL;
         }
         
-        if (!dx_set_thread_data(g_current_time_str_key, buffer)) {
-            dx_free(buffer);
+        if (!dx_set_thread_data_no_ehm(g_current_time_str_key, buffer)) {
+            dx_free_no_ehm(buffer);
             
             return NULL;
         }
@@ -145,9 +140,11 @@ dx_string_t dx_get_current_time_buffer (void) {
 /* -------------------------------------------------------------------------- */
 
 bool dx_init_current_time_key (void) {
-    if (!g_key_not_created) {
-        return true;
+    if (g_key_creation_attempted) {
+        return g_key_created;
     }
+    
+    g_key_creation_attempted = true;
     
     if (!dx_thread_data_key_create(&g_current_time_str_key, dx_current_time_buffer_destructor)) {
         return false;
@@ -159,6 +156,8 @@ bool dx_init_current_time_key (void) {
         return false;
     }
     
+    g_key_created = true;
+    
     return true;
 }
 
@@ -168,30 +167,31 @@ bool dx_init_current_time_key (void) {
  */
 /* -------------------------------------------------------------------------- */
 
-DXFEED_API ERRORCODE dxf_initialize_logger (const char* file_name, bool rewrite_file, bool show_timezone_info, bool verbose) {
-
+DXFEED_API ERRORCODE dxf_initialize_logger (const char* file_name, int rewrite_file, int show_timezone_info, int verbose) {
     puts("Initialize logger...");
 
     g_log_file = fopen(file_name, rewrite_file ? "w" : "a");
+    
     if (g_log_file == NULL) {
         printf("\ncan not open log-file %s", file_name);
-        return false;
+        return DXF_FAILURE;
     }
 
-    g_show_timezone = show_timezone_info;
-    g_verbose_logger_mode = verbose;
+    g_show_timezone = show_timezone_info ? true : false;
+    g_verbose_logger_mode = verbose ? true : false;
     
     if (!dx_init_current_time_key()) {
-        
+        return DXF_FAILURE;
     }
 
     puts("Logger is initialized");
-    return true;
+    
+    return DXF_SUCCESS;
 }
 
 /* -------------------------------------------------------------------------- */
 
-void dx_logging_error (dx_const_string_t message ) {
+void dx_logging_error (dxf_const_string_t message ) {
     if (g_log_file == NULL || message == NULL) {
         return;
     }
@@ -201,16 +201,13 @@ void dx_logging_error (dx_const_string_t message ) {
 
 /* -------------------------------------------------------------------------- */
 
-void dx_logging_last_error() {
-    dx_const_string_t descr;
-    dx_get_last_error(NULL, NULL, &descr);
-
-    dx_logging_error(descr);
+void dx_logging_last_error (void) {
+    dx_logging_error(dx_get_error_description(dx_get_error_code()));
 }
 
 /* -------------------------------------------------------------------------- */
 
-void dx_logging_verbose_info( const dx_char_t* format, ... ) {
+void dx_logging_verbose_info( const dxf_char_t* format, ... ) {
     if (!g_verbose_logger_mode) {
         return;
     }
@@ -230,7 +227,7 @@ void dx_logging_verbose_info( const dx_char_t* format, ... ) {
 }
 /* -------------------------------------------------------------------------- */
 
-void dx_logging_info( const dx_char_t* format, ... ) {
+void dx_logging_info( const dxf_char_t* format, ... ) {
     if (g_log_file == NULL || format == NULL) {
         return;
     }

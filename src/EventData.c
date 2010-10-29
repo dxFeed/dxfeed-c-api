@@ -41,17 +41,17 @@ static const int g_event_data_sizes[dx_eid_count] = {
  */
 /* -------------------------------------------------------------------------- */
 
-const dx_int_t DXF_ORDER_SIDE_BUY = 0;
-const dx_int_t DXF_ORDER_SIDE_SELL = 1;
+const dxf_int_t DXF_ORDER_SIDE_BUY = 0;
+const dxf_int_t DXF_ORDER_SIDE_SELL = 1;
 
-const dx_int_t DXF_ORDER_LEVEL_COMPOSITE = 0;
-const dx_int_t DXF_ORDER_LEVEL_REGIONAL = 1;
-const dx_int_t DXF_ORDER_LEVEL_AGGREGATE = 2;
-const dx_int_t DXF_ORDER_LEVEL_ORDER = 3;
+const dxf_int_t DXF_ORDER_LEVEL_COMPOSITE = 0;
+const dxf_int_t DXF_ORDER_LEVEL_REGIONAL = 1;
+const dxf_int_t DXF_ORDER_LEVEL_AGGREGATE = 2;
+const dxf_int_t DXF_ORDER_LEVEL_ORDER = 3;
 
-const dx_int_t DXF_TIME_AND_SALE_TYPE_NEW = 0;
-const dx_int_t DXF_TIME_AND_SALE_TYPE_CORRECTION = 1;
-const dx_int_t DXF_TIME_AND_SALE_TYPE_CANCEL = 2;
+const dxf_int_t DXF_TIME_AND_SALE_TYPE_NEW = 0;
+const dxf_int_t DXF_TIME_AND_SALE_TYPE_CORRECTION = 1;
+const dxf_int_t DXF_TIME_AND_SALE_TYPE_CANCEL = 2;
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -59,7 +59,7 @@ const dx_int_t DXF_TIME_AND_SALE_TYPE_CANCEL = 2;
  */
 /* -------------------------------------------------------------------------- */
 
-dx_const_string_t dx_event_type_to_string (int event_type) {
+dxf_const_string_t dx_event_type_to_string (int event_type) {
     switch (event_type) {
     case DXF_ET_TRADE: return L"Trade"; 
     case DXF_ET_QUOTE: return L"Quote"; 
@@ -148,15 +148,15 @@ int dx_get_event_subscription_params (dx_event_id_t event_id, OUT const dx_event
  */
 /* -------------------------------------------------------------------------- */
 
-typedef const dx_event_data_t (*dx_event_data_navigator) (const dx_event_data_t data, int index);
+typedef const dxf_event_data_t (*dx_event_data_navigator) (const dxf_event_data_t data, int index);
 #define EVENT_DATA_NAVIGATOR_NAME(struct_name) \
     struct_name##_data_navigator
     
 #define EVENT_DATA_NAVIGATOR_BODY(struct_name) \
-    const dx_event_data_t EVENT_DATA_NAVIGATOR_NAME(struct_name) (const dx_event_data_t data, int index) { \
+    const dxf_event_data_t EVENT_DATA_NAVIGATOR_NAME(struct_name) (const dxf_event_data_t data, int index) { \
         struct_name* buffer = (struct_name*)data; \
         \
-        return (const dx_event_data_t)(buffer + index); \
+        return (const dxf_event_data_t)(buffer + index); \
     }
     
 EVENT_DATA_NAVIGATOR_BODY(dxf_trade_t)
@@ -177,6 +177,6 @@ static const dx_event_data_navigator g_event_data_navigators[dx_eid_count] = {
 
 /* -------------------------------------------------------------------------- */
 
-const dx_event_data_t dx_get_event_data_item (int event_id, const dx_event_data_t data, int index) {
+const dxf_event_data_t dx_get_event_data_item (int event_id, const dxf_event_data_t data, int index) {
     return g_event_data_navigators[(dx_event_id_t)event_id](data, index);
 }

@@ -29,23 +29,9 @@
 #include "DXErrorCodes.h"
 #include "DXAlgorithms.h"
 #include "ConnectionContextData.h"
-
-/* -------------------------------------------------------------------------- */
-/*
- *	Network error codes
- */
-/* -------------------------------------------------------------------------- */
-
-static const dx_error_code_descr_t g_network_errors[] = {
-    { dx_nec_invalid_port_value, L"Server address has invalid port value" },
-    { dx_nec_invalid_function_arg, L"Internal software error" },
-    { dx_nec_invalid_connection_handle, L"Internal software error" },
-    { dx_nec_connection_closed, L"Attempt to use an already closed connection" },
-        
-    { ERROR_CODE_FOOTER, ERROR_DESCR_FOOTER }
-};
-
-const dx_error_code_descr_t* network_error_roster = g_network_errors;
+#include "EventSubscription.h"
+#include "ClientMessageProcessor.h"
+#include "ServerMessageProcessor.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -85,7 +71,9 @@ typedef struct {
 /* -------------------------------------------------------------------------- */
 
 typedef struct {
-    dx_connection_context_t context;
+    dxf_connection_t connection;
+    
+    dx_connection_context_data_t context_data;
     dx_address_resolution_context_t addr_context;
     
     const char* connector;
@@ -94,24 +82,36 @@ typedef struct {
     pthread_mutex_t socket_guard;
     bool termination_trigger;
     
+    dx_task_queue_t tq;
+    
     int set_fields_flags;
 } dx_network_connection_context_t;
 
-#define SOCKET_FIELD_FLAG   (0x1)
-#define THREAD_FIELD_FLAG   (0x2)
-#define MUTEX_FIELD_FLAG    (0x4)
+#define SOCKET_FIELD_FLAG       (1 << 0)
+#define THREAD_FIELD_FLAG       (1 << 1)
+#define MUTEX_FIELD_FLAG        (1 << 2)
+#define TASK_QUEUE_FIELD_FLAG   (1 << 3)
 
 /* -------------------------------------------------------------------------- */
 
-DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_network) {
-    dx_network_connection_context_t* conn_data = dx_calloc(1, sizeof(dx_network_connection_context_t));
+bool dx_clear_connection_data (dx_network_connection_context_t* context);
 
-    if (conn_data == NULL) {
+DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_network) {
+    dx_network_connection_context_t* context = NULL;
+    
+    CHECKED_CALL_0(dx_on_connection_created);
+    
+    context = dx_calloc(1, sizeof(dx_network_connection_context_t));
+
+    if (context == NULL) {
         return false;
     }
+    
+    context->connection = connection;
 
-    if (!dx_set_subsystem_data(connection, dx_ccs_network, conn_data)) {
-        dx_free(conn_data);
+    if (!(dx_create_task_queue(&(context->tq)) && (context->set_fields_flags |= TASK_QUEUE_FIELD_FLAG)) ||
+        !dx_set_subsystem_data(connection, dx_ccs_network, context)) {
+        dx_clear_connection_data(context);
 
         return false;
     }
@@ -121,31 +121,22 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_network) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_clear_connection_data (dx_network_connection_context_t* conn_data);
-
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_network) {
     bool res = true;
-    dx_network_connection_context_t* conn_data = NULL;
+    dx_network_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
 
-    if (connection == NULL) {
-        dx_set_last_error(dx_sc_network, dx_nec_invalid_connection_handle);
-
-        return false;
+    if (context == NULL) {
+        return dx_on_connection_destroyed() && res;
     }
 
-    conn_data = (dx_network_connection_context_t*)dx_get_subsystem_data(connection, dx_ccs_network);
+    if (IS_FLAG_SET(context->set_fields_flags, THREAD_FIELD_FLAG)) {
+        context->termination_trigger = true;
 
-    if (conn_data == NULL) {
-        return true;
+        res = dx_wait_for_thread(context->reader_thread, NULL) && res;
     }
 
-    if (conn_data->set_fields_flags & THREAD_FIELD_FLAG) {
-        conn_data->termination_trigger = true;
-
-        res = dx_wait_for_thread(conn_data->reader_thread, NULL) && res;
-    }
-
-    res = dx_clear_connection_data(conn_data) && res;
+    res = dx_clear_connection_data(context) && res;
+    res = dx_on_connection_destroyed() && res;
 
     return res;
 }
@@ -189,70 +180,75 @@ void dx_clear_addr_context_data (dx_address_resolution_context_t* context_data) 
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_clear_connection_data (dx_network_connection_context_t* conn_data) {
+bool dx_clear_connection_data (dx_network_connection_context_t* context) {
     int set_fields_flags = 0;
     bool success = true;
     
-    if (conn_data == NULL) {
+    if (context == NULL) {
         return true;
     }
     
-    dx_clear_addr_context_data(&(conn_data->addr_context));
+    dx_clear_addr_context_data(&(context->addr_context));
     
-    set_fields_flags = conn_data->set_fields_flags;
+    set_fields_flags = context->set_fields_flags;
 
     if (IS_FLAG_SET(set_fields_flags, SOCKET_FIELD_FLAG)) {
-        success = dx_close(conn_data->s) && success;
+        success = dx_close(context->s) && success;
     }
     
     if (IS_FLAG_SET(set_fields_flags, MUTEX_FIELD_FLAG)) {
-        success = dx_mutex_destroy(&(conn_data->socket_guard)) && success;
+        success = dx_mutex_destroy(&(context->socket_guard)) && success;
     }
     
     if (IS_FLAG_SET(set_fields_flags, THREAD_FIELD_FLAG)) {
-        success = dx_close_thread_handle(conn_data->reader_thread) && success;
+        success = dx_close_thread_handle(context->reader_thread) && success;
     }
     
-    CHECKED_FREE(conn_data->connector);
+    if (IS_FLAG_SET(set_fields_flags, TASK_QUEUE_FIELD_FLAG)) {
+        success = dx_destroy_task_queue(context->tq) && success;
+    }
     
-    dx_free((void*)conn_data);
+    CHECKED_FREE(context->connector);
+    
+    dx_free(context);
     
     return success;
 }
 
 /* -------------------------------------------------------------------------- */
 
-void dx_notify_conn_termination (dxf_connection_t connection,
-                                 dx_network_connection_context_t* conn_data, OUT bool* idle_thread_flag) {
-    if (conn_data->context.notifier != NULL) {
-        conn_data->context.notifier(connection);
+void dx_notify_conn_termination (dx_network_connection_context_t* context, OUT bool* idle_thread_flag) {
+    if (context->context_data.notifier != NULL) {
+        context->context_data.notifier(context->connection);
     }
     
     if (idle_thread_flag != NULL) {
         *idle_thread_flag = true;
     }
 
-    if (!dx_mutex_lock(&(conn_data->socket_guard))) {
+    if (!dx_mutex_lock(&(context->socket_guard))) {
         return;
     }
 
-    dx_close(conn_data->s);
+    dx_close(context->s);
     
-    conn_data->set_fields_flags &= ~SOCKET_FIELD_FLAG;    
+    context->set_fields_flags &= ~SOCKET_FIELD_FLAG;    
     
-    dx_mutex_unlock(&(conn_data->socket_guard));
+    dx_mutex_unlock(&(context->socket_guard));
 }
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_reevaluate_connector (dx_network_connection_context_t* conn_data);
+bool dx_reestablish_connection (dx_network_connection_context_t* context);
 
 void* dx_socket_reader (void* arg) {
     dxf_connection_t connection = NULL;
-    dx_network_connection_context_t* conn_data = NULL;
-    dx_connection_context_t* ctx = NULL;
+    dx_network_connection_context_t* context = NULL;
+    dx_connection_context_data_t* context_data = NULL;
     bool receiver_result = true;
     bool is_thread_idle = false;
+    bool res = true;
+    dx_task_queue_t tq;
     
     char read_buf[READ_CHUNK_SIZE];
     int number_of_bytes_read = 0;
@@ -260,40 +256,50 @@ void* dx_socket_reader (void* arg) {
     if (arg == NULL) {
         /* invalid input parameter
            but we cannot report it anywhere so simply exit */
+        dx_set_error_code(dx_ec_invalid_func_param_internal);
            
         return NULL;
     }
     
     connection = (dxf_connection_t)arg;
-    conn_data = dx_get_subsystem_data(connection, dx_ccs_network);
+    context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
     
-    if (conn_data == NULL) {
+    if (context == NULL) {
         /* same story, nowhere to report */
+        
+        if (res) {
+            dx_set_error_code(dx_cec_connection_context_not_initialized);
+        }
         
         return NULL;
     }
     
-    ctx = &(conn_data->context);
+    context_data = &(context->context_data);
+    tq = context->tq;
     
     if (!dx_init_error_subsystem()) {
-        dx_notify_conn_termination(connection, conn_data, NULL);
+        /* the error subsystem is broken, aborting the thread */
+        
+        context_data->notifier(connection);
         
         return NULL;
     }
     
     for (;;) {
-        if (conn_data->termination_trigger) {
+        if (context->termination_trigger) {
             /* the thread is told to terminate */
             
             break;
         }
         
+        receiver_result = dx_execute_task_queue(tq) && receiver_result;
+        
         if (!receiver_result && !is_thread_idle) {
-            dx_notify_conn_termination(connection, conn_data, &is_thread_idle);
+            dx_notify_conn_termination(context, &is_thread_idle);
         }
 
         if (is_thread_idle) {
-            if (dx_reevaluate_connector(conn_data)) {
+            if (dx_reestablish_connection(context)) {
                 receiver_result = true;
                 is_thread_idle = false;
             } else {
@@ -301,13 +307,13 @@ void* dx_socket_reader (void* arg) {
             }
         }
 
-        number_of_bytes_read = dx_recv(conn_data->s, (void*)read_buf, READ_CHUNK_SIZE);
+        number_of_bytes_read = dx_recv(context->s, (void*)read_buf, READ_CHUNK_SIZE);
         
         switch (number_of_bytes_read) {
         case INVALID_DATA_SIZE:
             /* the socket error */
 
-            dx_notify_conn_termination(connection, conn_data, &is_thread_idle);
+            dx_notify_conn_termination(context, &is_thread_idle);
             
             continue;
         case 0:
@@ -318,7 +324,7 @@ void* dx_socket_reader (void* arg) {
         }
         
         /* reporting the read data */        
-        receiver_result = ctx->receiver(connection, (const void*)read_buf, number_of_bytes_read);
+        receiver_result = context_data->receiver(connection, (const void*)read_buf, number_of_bytes_read);
     }
 
     return NULL;
@@ -348,11 +354,9 @@ bool dx_split_address (const char* host, OUT dx_address_t* addr) {
 
         if (sscanf(port_start + 1, "%d", &port) == 1) {
             if (port < port_min || port > port_max) {
-                dx_set_last_error(dx_sc_network, dx_nec_invalid_port_value);
-                
                 dx_free((void*)addr->host);
-
-                return false;
+                
+                return dx_set_error_code(dx_nec_invalid_port_value);
             }
 
             addr->port = addr->host + (port_start - host);
@@ -394,7 +398,7 @@ bool dx_get_addresses_from_connector (const char* connector, OUT dx_address_arra
     int i = 0;
     
     if (connector == NULL || addresses == NULL) {
-        dx_set_last_error(dx_sc_network, dx_nec_invalid_function_arg);
+        dx_set_last_error(dx_ec_invalid_func_param_internal);
 
         return false;
     }
@@ -454,11 +458,11 @@ bool dx_get_addresses_from_connector (const char* connector, OUT dx_address_arra
 
 /* -------------------------------------------------------------------------- */
 
-void dx_sleep_before_resolve (dx_network_connection_context_t* conn_data) {
+void dx_sleep_before_resolve (dx_network_connection_context_t* context) {
     static int RECONNECT_TIMEOUT = 10000;
 
-    int* last_res_timestamp = &(conn_data->addr_context.last_resolution_timestamp);
-    int timestamp_diff = dx_millisecond_timestamp_diff(*last_res_timestamp, dx_millisecond_timestamp());
+    int* last_res_timestamp = &(context->addr_context.last_resolution_timestamp);
+    int timestamp_diff = dx_millisecond_timestamp_diff(dx_millisecond_timestamp(), *last_res_timestamp);
 
     if (*last_res_timestamp != 0 && timestamp_diff < RECONNECT_TIMEOUT) {
         dx_sleep((int)((1.0 + dx_random_double(1)) * (RECONNECT_TIMEOUT - timestamp_diff)));
@@ -475,24 +479,22 @@ void dx_shuffle_addrs (dx_address_resolution_context_t* addrs) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_resolve_connector (dx_network_connection_context_t* conn_data) {
+bool dx_resolve_connector (dx_network_connection_context_t* context) {
     dx_address_array_t addresses;
     struct addrinfo hints;
     int i = 0;
     
-    if (conn_data == NULL) {
-        dx_set_last_error(dx_sc_network, dx_nec_invalid_function_arg);
+    if (context == NULL) {
+        dx_set_last_error(dx_ec_invalid_func_param_internal);
 
         return false;
     }
     
     dx_memset(&addresses, 0, sizeof(dx_address_array_t));
     
-    dx_sleep_before_resolve(conn_data);
+    dx_sleep_before_resolve(context);
     
-    if (!dx_get_addresses_from_connector(conn_data->connector, &addresses)) {
-        return false;
-    }
+    CHECKED_CALL_2(dx_get_addresses_from_connector, context->connector, &addresses);
     
     dx_memset(&hints, 0, sizeof(hints));
     
@@ -500,9 +502,9 @@ bool dx_resolve_connector (dx_network_connection_context_t* conn_data) {
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_protocol = IPPROTO_TCP;
     
-    conn_data->addr_context.elements_to_free = dx_calloc(addresses.size, sizeof(dx_addrinfo_ptr));
+    context->addr_context.elements_to_free = dx_calloc(addresses.size, sizeof(dx_addrinfo_ptr));
     
-    if (conn_data->addr_context.elements_to_free == NULL) {
+    if (context->addr_context.elements_to_free == NULL) {
         dx_clear_address_array(&addresses);
         
         return false;
@@ -516,16 +518,16 @@ bool dx_resolve_connector (dx_network_connection_context_t* conn_data) {
             continue;
         }
         
-        cur_addr = conn_data->addr_context.elements_to_free[conn_data->addr_context.elements_to_free_count++] = addr;
+        cur_addr = context->addr_context.elements_to_free[context->addr_context.elements_to_free_count++] = addr;
         
         for (; cur_addr != NULL; cur_addr = cur_addr->ai_next) {
             bool failed = false;
             
-            DX_ARRAY_INSERT(conn_data->addr_context, dx_addrinfo_ptr, cur_addr, conn_data->addr_context.size, dx_capacity_manager_halfer, failed);
+            DX_ARRAY_INSERT(context->addr_context, dx_addrinfo_ptr, cur_addr, context->addr_context.size, dx_capacity_manager_halfer, failed);
 
             if (failed) {
                 dx_clear_address_array(&addresses);
-                dx_clear_addr_context_data(&(conn_data->addr_context));
+                dx_clear_addr_context_data(&(context->addr_context));
 
                 return false;
             }    
@@ -533,35 +535,33 @@ bool dx_resolve_connector (dx_network_connection_context_t* conn_data) {
     }
     
     dx_clear_address_array(&addresses);
-    dx_shuffle_addrs(&(conn_data->addr_context));
+    dx_shuffle_addrs(&(context->addr_context));
     
     return true;
 }
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_connect_to_resolved_addresses (dx_network_connection_context_t* conn_data) {
-    dx_address_resolution_context_t* ctx = &(conn_data->addr_context);
+bool dx_connect_to_resolved_addresses (dx_network_connection_context_t* context) {
+    dx_address_resolution_context_t* ctx = &(context->addr_context);
     
-    if (!dx_mutex_lock(&(conn_data->socket_guard))) {
-        return false;
-    }
+    CHECKED_CALL(dx_mutex_lock, &(context->socket_guard));
 
     for (; ctx->cur_addr_index < ctx->size; ++ctx->cur_addr_index) {
         dx_addrinfo_ptr cur_addr = ctx->elements[ctx->cur_addr_index];
         
-        conn_data->s = dx_socket(cur_addr->ai_family, cur_addr->ai_socktype, cur_addr->ai_protocol);
+        context->s = dx_socket(cur_addr->ai_family, cur_addr->ai_socktype, cur_addr->ai_protocol);
 
-        if (conn_data->s == INVALID_SOCKET) {
+        if (context->s == INVALID_SOCKET) {
             /* failed to create a new socket */
 
             continue;
         }
 
-        if (!dx_connect(conn_data->s, cur_addr->ai_addr, (socklen_t)cur_addr->ai_addrlen)) {
+        if (!dx_connect(context->s, cur_addr->ai_addr, (socklen_t)cur_addr->ai_addrlen)) {
             /* failed to connect */
 
-            dx_close(conn_data->s);
+            dx_close(context->s);
 
             continue;
         }
@@ -572,26 +572,53 @@ bool dx_connect_to_resolved_addresses (dx_network_connection_context_t* conn_dat
     if (ctx->cur_addr_index == ctx->size) {
         /* we failed to establish a socket connection */
 
-        dx_mutex_unlock(&(conn_data->socket_guard));
+        dx_mutex_unlock(&(context->socket_guard));
         
         return false;
     }
 
-    conn_data->set_fields_flags |= SOCKET_FIELD_FLAG;
+    context->set_fields_flags |= SOCKET_FIELD_FLAG;
     
-    return dx_mutex_unlock(&(conn_data->socket_guard));
+    return dx_mutex_unlock(&(context->socket_guard));
 }
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_reevaluate_connector (dx_network_connection_context_t* conn_data) {
-    dx_clear_addr_context_data(&(conn_data->addr_context));
-    
-    if (!dx_resolve_connector(conn_data) ||
-        !dx_connect_to_resolved_addresses(conn_data)) {
-    
-        return false;
+static bool dx_server_event_subscription_refresher (dxf_connection_t connection,
+                                                    dxf_const_string_t* symbols, int symbol_count, int event_types, bool pause_state) {
+    if (pause_state) {
+        /* paused subscriptions don't need any refreshment */
+        
+        return true;
     }
+    
+    return dx_subscribe_symbols_to_events(connection, symbols, symbol_count, event_types, false, false);
+}
+
+/* ---------------------------------- */
+
+bool dx_reestablish_connection (dx_network_connection_context_t* context) {
+    CHECKED_CALL(dx_clear_server_info, context->connection);
+    
+    if (!dx_connect_to_resolved_addresses(context)) {
+        /*
+         *	An important moment here.
+         *  Before we resolve connector anew, we must attempt to connect to the previously
+         *  resolved addresses, because there might still be some valid addresses resolved from
+         *  the previous attempt. And only if the new connection attempt fails, which also means
+         *  there are no valid addresses left, a new resolution is started, and then we repeat
+         *  the connection attempt with the newly resolved addresses.
+         */
+        
+        dx_clear_addr_context_data(&(context->addr_context));
+        
+        CHECKED_CALL(dx_resolve_connector, context);
+        CHECKED_CALL(dx_connect_to_resolved_addresses, context);
+    }
+    
+    CHECKED_CALL(dx_send_protocol_description, context->connection);
+    CHECKED_CALL_2(dx_send_record_description, context->connection, false);
+    CHECKED_CALL_2(dx_process_connection_subscriptions, context->connection, dx_server_event_subscription_refresher);
     
     return true;
 }
@@ -602,32 +629,33 @@ bool dx_reevaluate_connector (dx_network_connection_context_t* conn_data) {
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_bind_to_connector (dxf_connection_t connection, const char* connector, const dx_connection_context_t* cc) {
-    dx_network_connection_context_t* conn_data = (dx_network_connection_context_t*)dx_get_subsystem_data(connection, dx_ccs_network);
+bool dx_bind_to_connector (dxf_connection_t connection, const char* connector, const dx_connection_context_data_t* ccd) {
+    dx_network_connection_context_t* context = NULL;
+    bool res = true;
     
-    if (connector == NULL || cc == NULL || cc->receiver == NULL) {
-        dx_set_last_error(dx_sc_network, dx_nec_invalid_function_arg);
-        
-        return false;
+    if (connector == NULL || ccd == NULL || ccd->receiver == NULL) {
+        return dx_set_error_code(dx_ec_invalid_func_param_internal);
     }
     
-    if (conn_data == NULL) {
-        dx_set_last_error(dx_sc_network, dx_nec_invalid_connection_handle);
+    context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
+    
+    if (context == NULL) {
+        if (res) {
+            dx_set_error_code(dx_cec_connection_context_not_initialized);
+        }
 
         return false;
     }
 
-    conn_data->context = *cc;
+    context->context_data = *ccd;
     
-    if (!dx_mutex_create(&(conn_data->socket_guard))) {
-        return false;
-    }
+    CHECKED_CALL(dx_mutex_create, &(context->socket_guard));
 
-    conn_data->set_fields_flags |= MUTEX_FIELD_FLAG;
+    context->set_fields_flags |= MUTEX_FIELD_FLAG;
     
-    if ((conn_data->connector = dx_ansi_create_string_src(connector)) == NULL ||
-        !dx_resolve_connector(conn_data) ||
-        !dx_connect_to_resolved_addresses(conn_data)) {
+    if ((context->connector = dx_ansi_create_string_src(connector)) == NULL ||
+        !dx_resolve_connector(context) ||
+        !dx_connect_to_resolved_addresses(context)) {
         
         return false;
     }
@@ -640,15 +668,17 @@ bool dx_bind_to_connector (dxf_connection_t connection, const char* connector, c
        it happens implicitly on the first call to any error reporting function, but to
        ensure there'll be no potential thread race to create it, it's made sure such 
        key is created before any secondary thread is created. */
-    dx_init_error_subsystem();
+    if (!dx_init_error_subsystem()) {
+        return false;
+    }
     
-    if (!dx_thread_create(&(conn_data->reader_thread), NULL, dx_socket_reader, connection)) {
+    if (!dx_thread_create(&(context->reader_thread), NULL, dx_socket_reader, connection)) {
         /* failed to create a thread */
         
         return false;
     }
     
-    conn_data->set_fields_flags |= THREAD_FIELD_FLAG;
+    context->set_fields_flags |= THREAD_FIELD_FLAG;
     
     return true;
 }
@@ -656,41 +686,40 @@ bool dx_bind_to_connector (dxf_connection_t connection, const char* connector, c
 /* -------------------------------------------------------------------------- */
 
 bool dx_send_data (dxf_connection_t connection, const void* buffer, int buffer_size) {
-    dx_network_connection_context_t* conn_data = NULL;
+    dx_network_connection_context_t* context = NULL;
     const char* char_buf = (const char*)buffer;
-    
-    if (connection == NULL ||
-        (conn_data = (dx_network_connection_context_t*)dx_get_subsystem_data(connection, dx_ccs_network)) == NULL) {
-        dx_set_last_error(dx_sc_network, dx_nec_invalid_connection_handle);
-
-        return false;
-    }
+    bool res = true;
     
     if (buffer == NULL || buffer_size == 0) {
-        dx_set_last_error(dx_sc_network, dx_nec_invalid_function_arg);
-        
-        return false;
+        return dx_set_error_code(dx_ec_invalid_func_param_internal);
     }
     
-    if (!dx_mutex_lock(&(conn_data->socket_guard))) {
-        return false;
-    }
+    context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
     
-    if ((conn_data->set_fields_flags & SOCKET_FIELD_FLAG) == 0) {
-        dx_set_last_error(dx_sc_network, dx_nec_connection_closed);
-        dx_mutex_unlock(&(conn_data->socket_guard));
+    if (context == NULL) {
+        if (res) {        
+            dx_set_error_code(dx_cec_connection_context_not_initialized);
+        }
 
         return false;
+    }
+    
+    CHECKED_CALL(dx_mutex_lock, &(context->socket_guard));
+    
+    if (!IS_FLAG_SET(context->set_fields_flags, SOCKET_FIELD_FLAG)) {
+        dx_mutex_unlock(&(context->socket_guard));
+        
+        return dx_set_error_code(dx_nec_connection_closed);
     }
 
     do {
-        int sent_count = dx_send(conn_data->s, (const void*)char_buf, buffer_size);
+        int sent_count = dx_send(context->s, (const void*)char_buf, buffer_size);
         
         switch (sent_count) {
         case INVALID_DATA_SIZE:
             /* that means an error */
             
-            dx_mutex_unlock(&(conn_data->socket_guard));
+            dx_mutex_unlock(&(context->socket_guard));
             
             return false;
         case 0:
@@ -704,5 +733,28 @@ bool dx_send_data (dxf_connection_t connection, const void* buffer, int buffer_s
         buffer_size -= sent_count;
     } while (buffer_size > 0);
     
-    return dx_mutex_unlock(&(conn_data->socket_guard));
+    return dx_mutex_unlock(&(context->socket_guard));
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_add_worker_thread_task (dxf_connection_t connection, dx_task_processor_t processor, void* data) {
+    dx_network_connection_context_t* context = NULL;
+    bool res = true;
+    
+    if (processor == NULL) {
+        return dx_set_error_code(dx_ec_invalid_func_param_internal);
+    }
+    
+    context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
+
+    if (context == NULL) {
+        if (res) {        
+            dx_set_error_code(dx_cec_connection_context_not_initialized);
+        }
+
+        return false;
+    }
+    
+    return dx_add_task_to_queue(context->tq, processor, data);
 }

@@ -40,7 +40,7 @@ typedef void (*dx_record_field_setter_t)(void* object, const void* field);
 /* -------------------------------------------------------------------------- */
 
 #define DX_RECORD_FIELD_SETTER_NAME(struct_name, field_name) \
-    dx_##struct_name##_##field_name##_##setter
+    struct_name##_##field_name##_##setter
     
 #define DX_RECORD_FIELD_SETTER_PROTOTYPE(struct_name, field_name) \
     void DX_RECORD_FIELD_SETTER_NAME(struct_name, field_name) (void* object, const void* field)
@@ -140,7 +140,7 @@ typedef const void* (*dx_record_field_def_val_getter) (void);
 /* -------------------------------------------------------------------------- */
 
 #define DX_RECORD_FIELD_DEF_VAL_NAME(struct_name, field_name) \
-    dx_##struct_name##_##field_name##_##default_value
+    struct_name##_##field_name##_##default_value
 
 #define DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(struct_name, field_name) \
     const void* DX_RECORD_FIELD_DEF_VAL_NAME(struct_name, field_name) (void)

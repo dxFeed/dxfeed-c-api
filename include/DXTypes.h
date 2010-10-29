@@ -27,22 +27,22 @@ typedef void* dxf_subscription_t;
 
 #include <wchar.h>
 
-typedef unsigned char      dx_bool_t;           // 8 bit
-typedef char               dx_byte_t;           // 8 bit
-typedef unsigned char      dx_ubyte_t;  // 8 bit
-typedef wchar_t            dx_char_t;           // 16 bit
+typedef unsigned char      dxf_bool_t;           // 8 bit
+typedef char               dxf_byte_t;           // 8 bit
+typedef unsigned char      dxf_ubyte_t;  // 8 bit
+typedef wchar_t            dxf_char_t;           // 16 bit
 //typedef unsigned wchar_t   dx_unsigned_char_t;  // 16 bit
-typedef short int          dx_short_t;          // 16 bit
-typedef unsigned short int dx_ushort_t; // 16 bit
-typedef int                dx_int_t;            // 32 bit
-typedef unsigned int       dx_uint_t;   // 32 bit
-typedef float              dx_float_t;          // 32 bit
-typedef long long          dx_long_t;           // 64 bit
-typedef unsigned long long dx_ulong_t;  // 64 bit
-typedef double             dx_double_t;         // 64 bit
+typedef short int          dxf_short_t;          // 16 bit
+typedef unsigned short int dxf_ushort_t; // 16 bit
+typedef int                dxf_int_t;            // 32 bit
+typedef unsigned int       dxf_uint_t;   // 32 bit
+typedef float              dxf_float_t;          // 32 bit
+typedef long long          dxf_long_t;           // 64 bit
+typedef unsigned long long dxf_ulong_t;  // 64 bit
+typedef double             dxf_double_t;         // 64 bit
 
-typedef dx_char_t*    dx_string_t;
-typedef const dx_char_t *dx_const_string_t;
+typedef dxf_char_t*        dxf_string_t;
+typedef const dxf_char_t*  dxf_const_string_t;
 
 #endif /* _WIN32 */
 #endif /* DX_TYPES_H_INCLUDED */

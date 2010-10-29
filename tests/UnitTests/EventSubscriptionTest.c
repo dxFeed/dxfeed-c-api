@@ -2,16 +2,16 @@
 #include "EventSubscriptionTest.h"
 #include "EventSubscription.h"
 #include "SymbolCodec.h"
-#include "ParserCommon.h"
+#include "BufferedIOCommon.h"
 #include "DXAlgorithms.h"
 #include "ConnectionContextData.h"
 
 static int last_event_type = 0;
-static dx_const_string_t last_symbol = NULL;
+static dxf_const_string_t last_symbol = NULL;
 static int visit_count = 0;
 
-void dummy_listener (int event_type, dx_const_string_t symbol_name,
-                     const dx_event_data_t* data, int data_count) {
+void dummy_listener (int event_type, dxf_const_string_t symbol_name,
+                     const dxf_event_data_t* data, int data_count) {
     ++visit_count;
     last_event_type = event_type;
     last_symbol = symbol_name;
@@ -21,12 +21,12 @@ bool event_subscription_test (void) {
     dxf_connection_t connection;
     dxf_subscription_t sub1;
     dxf_subscription_t sub2;
-    dx_const_string_t large_symbol_set[] = { L"SYMA", L"SYMB", L"SYMC" };
-    dx_const_string_t middle_symbol_set[] = { L"SYMB", L"SYMD" };
-    dx_const_string_t small_symbol_set[] = { L"SYMB" };
-    dx_int_t symbol_code;
+    dxf_const_string_t large_symbol_set[] = { L"SYMA", L"SYMB", L"SYMC" };
+    dxf_const_string_t middle_symbol_set[] = { L"SYMB", L"SYMD" };
+    dxf_const_string_t small_symbol_set[] = { L"SYMB" };
+    dxf_int_t symbol_code;
     
-    if (dx_init_symbol_codec() != R_SUCCESSFUL) {
+    if (dx_init_symbol_codec() != true) {
         return false;
     }
     
@@ -60,7 +60,7 @@ bool event_subscription_test (void) {
     
     // testing the symbol retrieval
     {
-        dx_const_string_t* symbols = NULL;
+        dxf_const_string_t* symbols = NULL;
         int symbol_count = 0;
         int i = 0;
         

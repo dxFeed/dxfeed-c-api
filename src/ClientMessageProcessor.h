@@ -17,21 +17,17 @@
  *
  */
 
-#ifndef SUBSCRIPTION_H
-#define SUBSCRIPTION_H
+#ifndef CLIENT_MESSAGE_SENDER_H_INCLUDED
+#define CLIENT_MESSAGE_SENDER_H_INCLUDED
 
 #include "PrimitiveTypes.h"
-#include "Parser.h"
+#include "DXPMessageData.h"
 
-typedef void* dxf_connection_t;
+bool dx_subscribe_symbols_to_events (dxf_connection_t connection,
+                                     dxf_const_string_t* symbols, int symbol_count, int event_types, bool unsubscribe,
+                                     bool task_mode);
 
-dx_result_t dx_create_subscription (dx_message_type_t type, dx_const_string_t symbol, dx_int_t cipher, dx_int_t record_id,
-                                    OUT dx_byte_t** out, OUT dx_int_t* out_len);
+bool dx_send_record_description (dxf_connection_t connection, bool task_mode);
+bool dx_send_protocol_description (dxf_connection_t connection);
 
-dx_result_t dx_compose_records_description_message (OUT dx_byte_t** msg_buffer, OUT dx_int_t* msg_length);
-dx_result_t dx_compose_protocol_description_message (OUT dx_byte_t** msg_buffer, OUT dx_int_t* msg_length);
-
-bool dx_update_record_description (dxf_connection_t connection);
-bool dx_update_protocol_description (dxf_connection_t connection);
-
-#endif // SUBSCRIPTION_H
+#endif /* CLIENT_MESSAGE_SENDER_H_INCLUDED */

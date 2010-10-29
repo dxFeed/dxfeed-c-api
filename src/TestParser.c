@@ -4,18 +4,18 @@
 
 
 struct test_data_t {
-    dx_bool_t   bool_data;
-    dx_byte_t   byte_data;
-    dx_char_t   char_data;
-    dx_short_t  short_data;
-    dx_int_t    int_data;
-    dx_long_t   long_data;
-    dx_float_t  float_data;
-    dx_double_t double_data;
+    dxf_bool_t   bool_data;
+    dxf_byte_t   byte_data;
+    dxf_char_t   char_data;
+    dxf_short_t  short_data;
+    dxf_int_t    int_data;
+    dxf_long_t   long_data;
+    dxf_float_t  float_data;
+    dxf_double_t double_data;
     //dx_byte_t*  bytes_data;
     //dx_char_t*  chars_data;
-    dx_int_t    compact_int_data;
-    dx_long_t   compact_long_data;
+    dxf_int_t    compact_int_data;
+    dxf_long_t   compact_long_data;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -71,7 +71,7 @@ bool dx_compare(const struct test_data_t* data_1, const struct test_data_t* data
 /* -------------------------------------------------------------------------- */
 
 bool test() {
-    struct test_data_t read_data;
+/*    struct test_data_t read_data;
 
     dx_byte_t* buffer = dx_malloc(10);
     dx_set_out_buffer(buffer, 10);
@@ -80,5 +80,6 @@ bool test() {
 
     dx_test_read(&read_data);
 
-    return dx_compare(&test_data, &read_data);
+    return dx_compare(&test_data, &read_data);*/
+    return false;
 }

@@ -65,7 +65,7 @@ typedef enum {
  */
 /* -------------------------------------------------------------------------- */
 
-typedef void* dx_event_data_t;
+typedef void* dxf_event_data_t;
 
 typedef dx_trade_t dxf_trade_t;
 typedef dx_quote_t dxf_quote_t;
@@ -74,14 +74,14 @@ typedef dx_profile_t dxf_profile_t;
 typedef dx_time_and_sale_t dxf_time_and_sale_t;
 
 typedef struct {
-    dx_long_t index;
-    dx_int_t side;
-    dx_int_t level;
-    dx_long_t time;
-    dx_char_t exchange_code;
-    dx_const_string_t market_maker;
-    dx_double_t price;
-    dx_long_t size;
+    dxf_long_t index;
+    dxf_int_t side;
+    dxf_int_t level;
+    dxf_long_t time;
+    dxf_char_t exchange_code;
+    dxf_const_string_t market_maker;
+    dxf_double_t price;
+    dxf_long_t size;
 } dxf_order_t;
 
 /* -------------------------------------------------------------------------- */
@@ -90,17 +90,17 @@ typedef struct {
  */
 /* -------------------------------------------------------------------------- */
 
-extern const dx_int_t DXF_ORDER_SIDE_BUY;
-extern const dx_int_t DXF_ORDER_SIDE_SELL;
+extern const dxf_int_t DXF_ORDER_SIDE_BUY;
+extern const dxf_int_t DXF_ORDER_SIDE_SELL;
 
-extern const dx_int_t DXF_ORDER_LEVEL_COMPOSITE;
-extern const dx_int_t DXF_ORDER_LEVEL_REGIONAL;
-extern const dx_int_t DXF_ORDER_LEVEL_AGGREGATE;
-extern const dx_int_t DXF_ORDER_LEVEL_ORDER;
+extern const dxf_int_t DXF_ORDER_LEVEL_COMPOSITE;
+extern const dxf_int_t DXF_ORDER_LEVEL_REGIONAL;
+extern const dxf_int_t DXF_ORDER_LEVEL_AGGREGATE;
+extern const dxf_int_t DXF_ORDER_LEVEL_ORDER;
 
-extern const dx_int_t DXF_TIME_AND_SALE_TYPE_NEW;
-extern const dx_int_t DXF_TIME_AND_SALE_TYPE_CORRECTION;
-extern const dx_int_t DXF_TIME_AND_SALE_TYPE_CANCEL;
+extern const dxf_int_t DXF_TIME_AND_SALE_TYPE_NEW;
+extern const dxf_int_t DXF_TIME_AND_SALE_TYPE_CORRECTION;
+extern const dxf_int_t DXF_TIME_AND_SALE_TYPE_CANCEL;
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -111,8 +111,8 @@ extern const dx_int_t DXF_TIME_AND_SALE_TYPE_CANCEL;
  */
 /* -------------------------------------------------------------------------- */
 
-typedef void (*dx_event_listener_t) (int event_type, dx_const_string_t symbol_name,
-                                     const dx_event_data_t* data, int data_count);
+typedef void (*dxf_event_listener_t) (int event_type, dxf_const_string_t symbol_name,
+                                      const dxf_event_data_t* data, int data_count);
                                      
 /* -------------------------------------------------------------------------- */
 /*
@@ -120,7 +120,7 @@ typedef void (*dx_event_listener_t) (int event_type, dx_const_string_t symbol_na
  */
 /* -------------------------------------------------------------------------- */
 
-dx_const_string_t dx_event_type_to_string (int event_type);
+dxf_const_string_t dx_event_type_to_string (int event_type);
 int dx_get_event_data_struct_size (int event_id);
 dx_event_id_t dx_get_event_id_by_bitmask (int event_bitmask);
 
@@ -153,6 +153,6 @@ int dx_get_event_subscription_params (dx_event_id_t event_id, OUT const dx_event
  */
 /* -------------------------------------------------------------------------- */
 
-const dx_event_data_t dx_get_event_data_item (int event_id, const dx_event_data_t data, int index);
+const dxf_event_data_t dx_get_event_data_item (int event_id, const dxf_event_data_t data, int index);
  
 #endif /* EVENT_DATA_H_INCLUDED */

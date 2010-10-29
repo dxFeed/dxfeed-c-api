@@ -20,63 +20,16 @@
 #include "DXSockets.h"
 #include "DXErrorHandling.h"
 #include "DXErrorCodes.h"
+#include "DXThreads.h"
+#include "DXAlgorithms.h"
 
 /* -------------------------------------------------------------------------- */
 /*
- *	Socket error codes
+ *	Socket error code functions
  */
 /* -------------------------------------------------------------------------- */
 
-static const dx_error_code_descr_t g_socket_errors[] = {
-    { dx_sec_socket_subsystem_init_failed, L"Socket subsystem initialization failed" },
-    { dx_sec_socket_subsystem_init_required, L"Internal software error" },
-    { dx_sec_socket_subsystem_incompatible_version, L"Incompatible version of socket subsystem" },
-    { dx_sec_connection_gracefully_closed, L"Connection gracefully closed by peer" },
-    { dx_sec_network_is_down, L"Network is down" },
-    { dx_sec_blocking_call_in_progress, L"Internal software error" },
-    { dx_sec_addr_family_not_supported, L"Internal software error" },
-    { dx_sec_no_sockets_available, L"No sockets available" },
-    { dx_sec_no_buffer_space_available, L"Not enough space in socket buffers" },
-    { dx_sec_proto_not_supported, L"Internal software error" },
-    { dx_sec_socket_type_proto_incompat, L"Internal software error" },
-    { dx_sec_socket_type_addrfam_incompat, L"Internal software error" },
-    { dx_sec_addr_already_in_use, L"Internal software error" },
-    { dx_sec_blocking_call_interrupted, L"Internal software error" },
-    { dx_sec_nonblocking_oper_pending, L"Internal software error" },
-    { dx_sec_addr_not_valid, L"Internal software error" },
-    { dx_sec_connection_refused, L"Connection refused" },
-    { dx_sec_invalid_ptr_arg, L"Internal software error" },
-    { dx_sec_invalid_arg, L"Internal software error" },
-    { dx_sec_sock_already_connected, L"Internal software error" },
-    { dx_sec_network_is_unreachable, L"Network is unreachable" },
-    { dx_sec_sock_oper_on_nonsocket, L"Internal software error" },
-    { dx_sec_connection_timed_out, L"Connection timed out" },
-    { dx_sec_res_temporarily_unavail, L"Internal software error" },
-    { dx_sec_permission_denied, L"Permission denied" },
-    { dx_sec_network_dropped_connection, L"Network dropped connection on reset" },
-    { dx_sec_socket_not_connected, L"Connection to the specified address failed" },
-    { dx_sec_operation_not_supported, L"Internal software error" },
-    { dx_sec_socket_shutdown, L"Internal software error" },
-    { dx_sec_message_too_long, L"Internal software error" },
-    { dx_sec_no_route_to_host, L"No route to host" },
-    { dx_sec_connection_aborted, L"Connection aborted" },
-    { dx_sec_connection_reset, L"Connection reset" },
-    { dx_sec_persistent_temp_error, L"Temporary failure in name resolution persists for too long" },
-    { dx_sec_unrecoverable_error, L"Internal software error" },
-    { dx_sec_not_enough_memory, L"Not enough memory to complete a socket operation" },
-    { dx_sec_no_data_on_host, L"Internal software error" },
-    { dx_sec_host_not_found, L"Host not found" },
-
-    { dx_sec_generic_error, L"Unrecognized socket error" },
-    
-    { ERROR_CODE_FOOTER, ERROR_DESCR_FOOTER }
-};
-
-const dx_error_code_descr_t* socket_error_roster = g_socket_errors;
-
-/* -------------------------------------------------------------------------- */
-
-enum dx_socket_error_code_t dx_wsa_error_code_to_internal (int wsa_code) {
+dx_error_code_t dx_wsa_error_code_to_internal (int wsa_code) {
     switch (wsa_code) {
     case WSANOTINITIALISED:
         return dx_sec_socket_subsystem_init_required;
@@ -164,6 +117,10 @@ enum dx_socket_error_code_t dx_wsa_error_code_to_internal (int wsa_code) {
 static const int g_name_resolution_attempt_count = 5;
 static const unsigned g_connect_timeout = 5; /* timeout in seconds */
 
+static int g_connection_count = 0;
+static pthread_mutex_t g_count_guard;
+static bool g_count_guard_initialized = false;
+
 /* -------------------------------------------------------------------------- */
 /*
  *	Socket function wrappers
@@ -180,45 +137,82 @@ static const unsigned g_connect_timeout = 5; /* timeout in seconds */
  */
 /* ---------------------------------- */
 
-static bool g_sock_subsystem_initialized = false;
-
-bool dx_init_socket_subsystem () {
+bool dx_init_socket_subsystem (void) {
     WORD wVersionRequested;
     WSADATA wsaData;
         
-    if (g_sock_subsystem_initialized) {
-        return true;
-    }
-
+    
     wVersionRequested = MAKEWORD(2, 0);
 
     if (WSAStartup(wVersionRequested, &wsaData) != 0) {
-        dx_set_last_error(dx_sc_sockets, dx_sec_socket_subsystem_init_failed);
-        
-        return false;
+        return dx_set_error_code(dx_sec_socket_subsystem_init_failed);
     }
     
     if (LOBYTE(wsaData.wVersion) != 2 || HIBYTE(wsaData.wVersion) != 0) {
-        dx_set_last_error(dx_sc_sockets, dx_sec_socket_subsystem_incompatible_version);
+        dx_set_error_code(dx_sec_socket_subsystem_incompatible_version);
         
         WSACleanup();
         
         return false;
     }
 
-    return (g_sock_subsystem_initialized = true);
+    return true;
 }
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_deinit_socket_subsystem () {
+bool dx_deinit_socket_subsystem (void) {
     if (WSACleanup() == SOCKET_ERROR) {
-        dx_set_last_error(dx_sc_sockets, (int)dx_wsa_error_code_to_internal(WSAGetLastError()));
-        
-        return false;
+        return dx_set_error_code(dx_wsa_error_code_to_internal(WSAGetLastError()));
     }
     
-    g_sock_subsystem_initialized = false;
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Socket subsystem initialization implementation
+ */
+/* -------------------------------------------------------------------------- */
+
+bool dx_on_connection_created (void) {
+    if (!g_count_guard_initialized) {
+        CHECKED_CALL(dx_mutex_create, &g_count_guard);
+        
+        g_count_guard_initialized = true;
+    }
+    
+    CHECKED_CALL(dx_mutex_lock, &g_count_guard);
+    
+    if (g_connection_count == 0) {
+        if (!dx_init_socket_subsystem()) {
+            dx_mutex_unlock(&g_count_guard);
+            
+            return false;
+        }
+    }
+    
+    ++g_connection_count;
+    
+    CHECKED_CALL(dx_mutex_unlock, &g_count_guard);
+    
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_on_connection_destroyed (void) {
+    CHECKED_CALL(dx_mutex_lock, &g_count_guard);
+    
+    if (g_connection_count > 0 && --g_connection_count == 0) {
+        if (!dx_deinit_socket_subsystem()) {
+            dx_mutex_unlock(&g_count_guard);
+
+            return false;
+        }
+    }
+    
+    CHECKED_CALL(dx_mutex_unlock, &g_count_guard);
     
     return true;
 }
@@ -233,10 +227,6 @@ dx_socket_t dx_socket (int family, int type, int protocol) {
     dx_socket_t s = INVALID_SOCKET;
     u_long dummy;
     
-    if (!dx_init_socket_subsystem()) {
-        return INVALID_SOCKET;
-    }
-    
     if ((s = socket(family, type, protocol)) != INVALID_SOCKET) {
         if (ioctlsocket(s, FIONBIO, &dummy) != INVALID_SOCKET) {
             return s;
@@ -245,7 +235,7 @@ dx_socket_t dx_socket (int family, int type, int protocol) {
         dx_close(s);
     }
     
-    dx_set_last_error(dx_sc_sockets, (int)dx_wsa_error_code_to_internal(WSAGetLastError()));
+    dx_set_error_code(dx_wsa_error_code_to_internal(WSAGetLastError()));
     
     return INVALID_SOCKET;
 }
@@ -257,7 +247,9 @@ bool dx_connect (dx_socket_t s, const struct sockaddr* addr, socklen_t addrlen) 
 
     if ((res = connect(s, addr, addrlen)) == SOCKET_ERROR &&
         (WSAGetLastError() == WSAEWOULDBLOCK)) {
+        
         /* this is the only normal case, since we're using a non-blocking socket */
+        
         int dummy = 0;
         struct fd_set socket_to_wait;
         struct timeval tv;
@@ -276,9 +268,7 @@ bool dx_connect (dx_socket_t s, const struct sockaddr* addr, socklen_t addrlen) 
     }
     
     if (res != 0) {
-        dx_set_last_error(dx_sc_sockets, (int)dx_wsa_error_code_to_internal(WSAGetLastError()));
-        
-        return false;
+        return dx_set_error_code(dx_wsa_error_code_to_internal(WSAGetLastError()));
     }
     
     return true;
@@ -294,7 +284,7 @@ int dx_send (dx_socket_t s, const void* buffer, int buflen) {
             return 0;
         }
         
-        dx_set_last_error(dx_sc_sockets, (int)dx_wsa_error_code_to_internal(WSAGetLastError()));
+        dx_set_error_code(dx_wsa_error_code_to_internal(WSAGetLastError()));
         
         return INVALID_DATA_SIZE;
     }
@@ -309,7 +299,8 @@ int dx_recv (dx_socket_t s, void* buffer, int buflen) {
 
     switch (res) {
     case 0:
-        dx_set_last_error(dx_sc_sockets, dx_sec_connection_gracefully_closed);
+        dx_set_error_code(dx_sec_connection_gracefully_closed);
+        
         break;
     case SOCKET_ERROR:
         if (WSAGetLastError() == WSAEWOULDBLOCK) {
@@ -318,7 +309,8 @@ int dx_recv (dx_socket_t s, void* buffer, int buflen) {
             return 0;
         }
         
-        dx_set_last_error(dx_sc_sockets, (int)dx_wsa_error_code_to_internal(WSAGetLastError()));        
+        return dx_set_error_code(dx_wsa_error_code_to_internal(WSAGetLastError()));
+        
         break;
     default:
         return res;
@@ -331,19 +323,11 @@ int dx_recv (dx_socket_t s, void* buffer, int buflen) {
 
 bool dx_close (dx_socket_t s) {
     if (shutdown(s, SD_BOTH) == INVALID_SOCKET) {
-        dx_set_last_error(dx_sc_sockets, (int)dx_wsa_error_code_to_internal(WSAGetLastError()));
-
-        return false;
+        return dx_set_error_code(dx_wsa_error_code_to_internal(WSAGetLastError()));
     }
     
     if (closesocket(s) == INVALID_SOCKET) {
-        dx_set_last_error(dx_sc_sockets, (int)dx_wsa_error_code_to_internal(WSAGetLastError()));
-        
-        return false;
-    }
-    
-    if (!dx_deinit_socket_subsystem()) {
-        return false;
+        return dx_set_error_code(dx_wsa_error_code_to_internal(WSAGetLastError()));
     }
     
     return true;
@@ -356,10 +340,6 @@ bool dx_getaddrinfo (const char* nodename, const char* servname,
     int funres = 0;
     int iter_count = 0;
     
-    if (!dx_init_socket_subsystem()) {
-        return false;
-    }
-    
     for (; iter_count < g_name_resolution_attempt_count; ++iter_count) {
         funres = getaddrinfo(nodename, servname, hints, res);
         
@@ -371,9 +351,7 @@ bool dx_getaddrinfo (const char* nodename, const char* servname,
     }
     
     if (funres != 0) {
-        dx_set_last_error(dx_sc_sockets, (int)dx_wsa_error_code_to_internal(funres));
-        
-        return false;
+        return dx_set_error_code(dx_wsa_error_code_to_internal(funres));
     }
     
     return true;

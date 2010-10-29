@@ -95,13 +95,13 @@ bool dx_capacity_manager_halfer (int new_size, int* capacity) {
  */
 /* -------------------------------------------------------------------------- */
 
-dx_string_t dx_create_string (int size) {
-    return (dx_string_t)dx_calloc(size + 1, sizeof(dx_char_t));
+dxf_string_t dx_create_string (int size) {
+    return (dxf_string_t)dx_calloc(size + 1, sizeof(dxf_char_t));
 }
 
 /* -------------------------------------------------------------------------- */
 
-dx_string_t dx_create_string_src (dx_const_string_t src) {
+dxf_string_t dx_create_string_src (dxf_const_string_t src) {
     return dx_create_string_src_len(src, dx_string_length(src));
 }
 
@@ -119,8 +119,8 @@ char* dx_ansi_create_string_src (const char* src) {
 
 /* -------------------------------------------------------------------------- */
 
-dx_string_t dx_create_string_src_len (dx_const_string_t src, int len) {
-    dx_string_t res = NULL;
+dxf_string_t dx_create_string_src_len (dxf_const_string_t src, int len) {
+    dxf_string_t res = NULL;
 
     if (len == 0) {
         return res;
@@ -137,40 +137,40 @@ dx_string_t dx_create_string_src_len (dx_const_string_t src, int len) {
 
 /* -------------------------------------------------------------------------- */
 
-dx_string_t dx_copy_string (dx_string_t dest, dx_const_string_t src) {
+dxf_string_t dx_copy_string (dxf_string_t dest, dxf_const_string_t src) {
     return wcscpy(dest, src);
 }
 
 /* -------------------------------------------------------------------------- */
 
-dx_string_t dx_copy_string_len (dx_string_t dest, dx_const_string_t src, int len) {
+dxf_string_t dx_copy_string_len (dxf_string_t dest, dxf_const_string_t src, int len) {
     return wcsncpy(dest, src, len);
 }
 
 /* -------------------------------------------------------------------------- */
 
-int dx_string_length (dx_const_string_t str) {
+int dx_string_length (dxf_const_string_t str) {
     return (int)wcslen(str);
 }
 
 /* -------------------------------------------------------------------------- */
 
-int dx_compare_strings (dx_const_string_t s1, dx_const_string_t s2) {
+int dx_compare_strings (dxf_const_string_t s1, dxf_const_string_t s2) {
     return wcscmp(s1, s2);
 }
 
 /* -------------------------------------------------------------------------- */
 
-dx_char_t dx_toupper (dx_char_t c) {
+dxf_char_t dx_toupper (dxf_char_t c) {
     return towupper(c);
 }
 
 /* -------------------------------------------------------------------------- */
 
-dx_string_t dx_ansi_to_unicode (const char* ansi_str) {
+dxf_string_t dx_ansi_to_unicode (const char* ansi_str) {
 #ifdef _WIN32
     size_t len = strlen(ansi_str);
-    dx_string_t wide_str = NULL;
+    dxf_string_t wide_str = NULL;
 
     // get required size
     int wide_size = MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, ansi_str, (int)len, wide_str, 0);
@@ -188,12 +188,12 @@ dx_string_t dx_ansi_to_unicode (const char* ansi_str) {
 
 /* -------------------------------------------------------------------------- */
 
-dx_string_t dx_decode_from_integer (dx_long_t code) {
-    dx_char_t decoded[8] = { 0 };
+dxf_string_t dx_decode_from_integer (dxf_long_t code) {
+    dxf_char_t decoded[8] = { 0 };
     int offset = 0;
     
     while (code != 0) {
-        dx_char_t c = (dx_char_t)(code >> 56);
+        dxf_char_t c = (dxf_char_t)(code >> 56);
         
         if (c != 0) {
             decoded[offset++] = c;            
@@ -222,7 +222,7 @@ int dx_millisecond_timestamp (void) {
 
 /* -------------------------------------------------------------------------- */
 
-int dx_millisecond_timestamp_diff (int older, int newer) {
+int dx_millisecond_timestamp_diff (int newer, int older) {
     long long res = 0;
     
     if ((unsigned)older > (unsigned)newer) {

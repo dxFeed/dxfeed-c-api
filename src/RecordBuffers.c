@@ -34,7 +34,7 @@ typedef struct {
 } dx_event_record_buffer_t;
 
 typedef struct {
-    dx_const_string_t* elements;
+    dxf_const_string_t* elements;
     int size;
     int capacity;
 } dx_string_array_t;
@@ -49,6 +49,9 @@ typedef struct {
     dx_event_record_buffer_t record_buffer_array[dx_rid_count];
     dx_string_array_t string_buffers;
 } dx_record_buffers_connection_context_t;
+
+#define CTX(context) \
+    ((dx_record_buffers_connection_context_t*)context)
 
 #define CONTEXT_FIELD(field) \
     (((dx_record_buffers_connection_context_t*)dx_get_subsystem_data(connection, dx_ccs_record_buffers))->field)
@@ -77,10 +80,11 @@ void dx_clear_record_buffers (dx_event_record_buffer_t* record_buffers);
 void dx_free_string_buffers_impl (dx_string_array_t* string_buffers);
 
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_record_buffers) {
-    dx_record_buffers_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_record_buffers);
+    bool res = true;
+    dx_record_buffers_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_record_buffers, &res);
     
     if (context == NULL) {
-        return true;
+        return res;
     }
     
     dx_clear_record_buffers(context->record_buffer_array);
@@ -88,6 +92,16 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_record_buffers) {
     dx_free(context);
     
     return true;
+}
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Connection context functions implementation
+ */
+/* -------------------------------------------------------------------------- */
+
+void* dx_get_record_buffers_connection_context (dxf_connection_t connection) {
+    return dx_get_subsystem_data(connection, dx_ccs_record_buffers, NULL);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -103,11 +117,10 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_record_buffers) {
     record_id##_get_record_buf_ptr
 
 #define GET_RECORD_PTR_BODY(record_id, record_type) \
-    void* GET_RECORD_PTR_NAME(record_id) (dxf_connection_t connection, int record_index) { \
+    void* GET_RECORD_PTR_NAME(record_id) (void* context, int record_index) { \
         dx_event_record_buffer_t* record_buffer = NULL; \
-        dx_record_buffers_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_record_buffers); \
         \
-        record_buffer = &(context->record_buffer_array[record_id]); \
+        record_buffer = &(CTX(context)->record_buffer_array[record_id]); \
         \
         if (record_index >= record_buffer->capacity) { \
             record_type* new_buffer = dx_calloc(record_index + 1, sizeof(record_type)); \
@@ -129,8 +142,8 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_record_buffers) {
     }
 
 #define GET_RECORD_BUF_PTR_BODY(record_id) \
-    void* GET_RECORD_BUF_PTR_NAME(record_id) (dxf_connection_t connection) { \
-        return CONTEXT_FIELD(record_buffer_array)[record_id].buffer; \
+    void* GET_RECORD_BUF_PTR_NAME(record_id) (void* context) { \
+        return CTX(context)->record_buffer_array[record_id].buffer; \
     }
 
 /* -------------------------------------------------------------------------- */
@@ -186,11 +199,11 @@ void dx_clear_record_buffers (dx_event_record_buffer_t* record_buffers) {
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_store_string_buffer (dxf_connection_t connection, dx_const_string_t buf) {
+bool dx_store_string_buffer (void* context, dxf_const_string_t buf) {
     bool failed = false;
-    dx_string_array_t* string_buffers = &CONTEXT_FIELD(string_buffers);
+    dx_string_array_t* string_buffers = &(CTX(context)->string_buffers);
     
-    DX_ARRAY_INSERT(*string_buffers, dx_const_string_t, buf, string_buffers->size, dx_capacity_manager_halfer, failed);
+    DX_ARRAY_INSERT(*string_buffers, dxf_const_string_t, buf, string_buffers->size, dx_capacity_manager_halfer, failed);
     
     return !failed;
 }
@@ -215,6 +228,6 @@ void dx_free_string_buffers_impl (dx_string_array_t* string_buffers) {
 
 /* ---------------------------------- */
 
-void dx_free_string_buffers (dxf_connection_t connection) {
-    dx_free_string_buffers_impl(&CONTEXT_FIELD(string_buffers));
+void dx_free_string_buffers (void* context) {
+    dx_free_string_buffers_impl(&(CTX(context)->string_buffers));
 }
