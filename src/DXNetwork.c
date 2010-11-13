@@ -387,9 +387,7 @@ void* dx_socket_reader (void* arg) {
                 context->reader_thread_state = true;
                 is_thread_idle = false;
             } else {
-                static int s_reestablish_failure_timeout = 100;
-                
-                dx_sleep(s_reestablish_failure_timeout);
+                /* no waiting is required here, because there is a timeout within 'dx_reestablish_connection' */
                 
                 continue;
             }
