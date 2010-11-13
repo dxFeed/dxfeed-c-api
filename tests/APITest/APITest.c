@@ -220,21 +220,7 @@ int main (int argc, char* argv[]) {
 	Sleep (5000);
 	
     printf("Master thread woke up\n");
-    printf("Pausing subscription...\n");
-    
-	if (!dxf_pause_subscription(subscription)) {
-        process_last_error();
-        
-        return -1;
-    }
-    
-    printf("Subscription paused\n");
-    printf("Master thread sleeping for %d ms...\n", 5000);
-    
-	Sleep (5000);
-	
-	printf("Master thread woke up\n");
-	printf("Retrieving the subscription events...\n");
+    printf("Retrieving the subscription events...\n");
 	
 	if (!dxf_get_subscription_event_types(subscription, &get_event_types)) {
         process_last_error();
@@ -270,21 +256,7 @@ int main (int argc, char* argv[]) {
         return -1;
     }
     
-    printf("New symbols added\n");
-    printf("Master thread sleeping for %d ms...\n", 5000);
-    
-    Sleep(5000);
-    
-    printf("Master thread woke up\n");
-    printf("Resuming subscription...\n");
-    
-    if (!dxf_resume_subscription(subscription)) {
-        process_last_error();
-
-        return -1;
-    }
-
-    printf("Subscription resumed\n");
+    printf("New symbols added\n");    
     printf("Master thread sleeping for %d ms...\n", 1000000);
 
     Sleep(1000000);

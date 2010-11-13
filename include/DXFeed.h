@@ -91,22 +91,6 @@ DXFEED_API ERRORCODE dxf_close_connection (dxf_connection_t connection);
 DXFEED_API ERRORCODE dxf_create_subscription (dxf_connection_t connection, int event_types,
                                               OUT dxf_subscription_t* subscription);
 /*
- *	Pauses a subscription.
- *  The events for this subscription won't be processed while it's paused.
- 
- *  subscription - a handle of the subscription to pause
- */
-DXFEED_API ERRORCODE dxf_pause_subscription (dxf_subscription_t subscription);
-
-/*
- *	Resumes a subscription.
- *  Returns it to the normal state.
- 
- *  subscription - a handle of the subscription to resume
- */
-DXFEED_API ERRORCODE dxf_resume_subscription (dxf_subscription_t subscription);
-
-/*
  *	Closes a subscription.
  *  All the data associated with it will be freed.
  

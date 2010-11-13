@@ -42,8 +42,6 @@ typedef bool (*dx_subscription_processor_t) (dxf_connection_t connection,
 /* -------------------------------------------------------------------------- */
 
 dxf_subscription_t dx_create_event_subscription (dxf_connection_t connection, int event_types); /* returns dx_invalid_subscription on error */
-bool dx_pause_event_subscription (dxf_subscription_t subscr_id);
-bool dx_resume_event_subscription (dxf_subscription_t subscr_id);
 bool dx_get_event_subscription_pause_state (dxf_subscription_t subscr_id, OUT bool* state);
 bool dx_close_event_subscription (dxf_subscription_t subscr_id);
 bool dx_add_symbols (dxf_subscription_t subscr_id, dxf_const_string_t* symbols, int symbol_count);

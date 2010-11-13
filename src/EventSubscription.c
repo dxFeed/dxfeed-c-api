@@ -678,34 +678,6 @@ dxf_subscription_t dx_create_event_subscription (dxf_connection_t connection, in
 
 /* -------------------------------------------------------------------------- */
  
-bool dx_pause_event_subscription (dxf_subscription_t subscr_id) {
-    dx_subscription_data_ptr_t subscr_data = (dx_subscription_data_ptr_t)subscr_id;
-    
-    if (subscr_id == dx_invalid_subscription) {
-        return dx_set_error_code(dx_esec_invalid_subscr_id);
-    }
-    
-    subscr_data->is_paused = true;
-    
-    return true;
-}
-
-/* -------------------------------------------------------------------------- */
-
-bool dx_resume_event_subscription (dxf_subscription_t subscr_id) {
-    dx_subscription_data_ptr_t subscr_data = (dx_subscription_data_ptr_t)subscr_id;
-
-    if (subscr_id == dx_invalid_subscription) {
-        return dx_set_error_code(dx_esec_invalid_subscr_id);
-    }
-
-    subscr_data->is_paused = false;
-
-    return true;
-}
-
-/* -------------------------------------------------------------------------- */
-
 bool dx_get_event_subscription_pause_state (dxf_subscription_t subscr_id, OUT bool* state) {
     dx_subscription_data_ptr_t subscr_data = (dx_subscription_data_ptr_t)subscr_id;
 

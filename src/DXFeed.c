@@ -256,56 +256,6 @@ DXFEED_API ERRORCODE dxf_create_subscription (dxf_connection_t connection, int e
 
 /* -------------------------------------------------------------------------- */
 
-DXFEED_API ERRORCODE dxf_pause_subscription (dxf_subscription_t subscription) {
-    dxf_connection_t connection;
-    int events;
-    bool pause_state;
-
-    dxf_const_string_t* symbols;
-    int symbol_count;
-
-    dx_perform_common_actions();
-
-    if (!dx_get_event_subscription_pause_state(subscription, &pause_state) ||
-        (!pause_state && (!dx_get_subscription_connection(subscription, &connection) ||
-         !dx_get_event_subscription_event_types(subscription, &events) ||
-         !dx_get_event_subscription_symbols(subscription, &symbols, &symbol_count) ||
-         !dx_unsubscribe(connection, symbols, symbol_count, events) ||
-         !dx_pause_event_subscription(subscription)))) {
-
-        return DXF_FAILURE;
-    }
-
-    return DXF_SUCCESS;
-}
-
-/* -------------------------------------------------------------------------- */
-
-DXFEED_API ERRORCODE dxf_resume_subscription (dxf_subscription_t subscription) {
-    dxf_connection_t connection;
-    int events; 
-    bool pause_state;
-
-    dxf_const_string_t* symbols;
-    int symbols_count;
-
-    dx_perform_common_actions();
-
-    if (!dx_get_event_subscription_pause_state(subscription, &pause_state) ||
-        (pause_state && (!dx_resume_event_subscription(subscription) ||
-         !dx_get_subscription_connection(subscription, &connection) ||
-         !dx_get_event_subscription_event_types(subscription, &events) ||
-         !dx_get_event_subscription_symbols(subscription, &symbols, &symbols_count) ||
-         !dx_subscribe(connection, symbols, symbols_count, events)))) {
-
-        return DXF_FAILURE;
-    }
-
-    return DXF_SUCCESS;
-}
-
-/* -------------------------------------------------------------------------- */
-
 DXFEED_API ERRORCODE dxf_close_subscription (dxf_subscription_t subscription) {
     dxf_connection_t connection;
     int events;
