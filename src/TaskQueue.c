@@ -184,3 +184,17 @@ bool dx_execute_task_queue (dx_task_queue_t tq) {
     
     return dx_mutex_unlock(&(tqd->guard)) && res;
 }
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_is_queue_empty (dx_task_queue_t tq, OUT bool* res) {
+    dx_task_queue_data_t* tqd = tq;
+    
+    if (tq == NULL || res == NULL) {
+        return dx_set_error_code(dx_ec_invalid_func_param_internal);
+    }
+    
+    *res = (tqd->size == 0);
+    
+    return true;
+}

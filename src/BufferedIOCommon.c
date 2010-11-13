@@ -32,28 +32,28 @@
  * UTF-16 encoding. A high-surrogate is also known as a
  * leading-surrogate.
  */
-static const dxf_char_t MIN_HIGH_SURROGATE = '\uD800';
+static const dxf_char_t MIN_HIGH_SURROGATE = 0xD800;
 
 /*
  * The maximum value of a Unicode high-surrogate code unit in the
  * UTF-16 encoding. A high-surrogate is also known as a
  * leading-surrogate.
  */
-static const dxf_char_t MAX_HIGH_SURROGATE = '\uDBFF';
+static const dxf_char_t MAX_HIGH_SURROGATE = 0xDBFF;
 
 /*
  * The minimum value of a Unicode low-surrogate code unit in the
  * UTF-16 encoding. A low-surrogate is also known as a
  * trailing-surrogate.
  */
-static const dxf_char_t MIN_LOW_SURROGATE  = '\uDC00';
+static const dxf_char_t MIN_LOW_SURROGATE  = 0xDC00;
 
 /*
  * The maximum value of a Unicode low-surrogate code unit in the
  * UTF-16 encoding. A low-surrogate is also known as a
  * trailing-surrogate.
  */
-static const dxf_char_t MAX_LOW_SURROGATE  = '\uDFFF';
+static const dxf_char_t MAX_LOW_SURROGATE  = 0xDFFF;
 
 /*
  * The minimum value of a supplementary code point.

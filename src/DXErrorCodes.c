@@ -33,6 +33,8 @@ dxf_const_string_t dx_get_error_description (dx_error_code_t code) {
 
     case dx_ec_success: return L"Success";
     
+    case dx_ec_error_subsystem_failure: return s_internal_error_descr;
+    
     case dx_ec_invalid_func_param: return L"Invalid function parameter";
     case dx_ec_invalid_func_param_internal: return s_internal_error_descr;
     

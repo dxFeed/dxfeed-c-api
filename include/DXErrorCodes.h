@@ -33,6 +33,8 @@ typedef enum {
     
     dx_ec_success = 0,
     
+    dx_ec_error_subsystem_failure, /* this code may be set if passed from another thread */
+    
     dx_ec_invalid_func_param, /* the invalid param is submitted by client */
     dx_ec_invalid_func_param_internal, /* the invalid param is a result of internal error */
     

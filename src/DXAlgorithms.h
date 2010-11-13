@@ -400,12 +400,11 @@ double dx_random_double (double max_value);
 
 #define DX_ARRAY_SHUFFLE(a, elem_type, size) \
     do { \
-        int _idx = 0; \
-        int _last_elem_idx = (size) - 1; \
+        int _idx = (size) - 1; \
         int _rand_idx; \
         \
-        for (; _idx < (size); ++_idx) { \
-            _rand_idx = dx_random_integer(_last_elem_idx); \
+        for (; _idx > 0; --_idx) { \
+            _rand_idx = dx_random_integer(_idx); \
             \
             DX_SWAP(elem_type, (a)[_idx], (a)[_rand_idx]); \
         } \

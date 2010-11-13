@@ -66,11 +66,11 @@ typedef void (*dxf_conn_termination_notifier_t) (dxf_connection_t connection);
 /*
  *	Creates connection with the specified parameters.
  
- *  connector - "[host[:port],]host:port"
+ *  address - "[host[:port],]host:port"
  *  notifier - the callback to inform the client side that the connection has stumbled upon and error and will go reconnecting
  *  OUT connection - the handle of the created connection
  */
-DXFEED_API ERRORCODE dxf_create_connection (const char* connector, dxf_conn_termination_notifier_t notifier,
+DXFEED_API ERRORCODE dxf_create_connection (const char* address, dxf_conn_termination_notifier_t notifier,
                                             OUT dxf_connection_t* connection);
 
 /*
@@ -131,6 +131,14 @@ DXFEED_API ERRORCODE dxf_add_symbol (dxf_subscription_t subscription, dxf_const_
  *  symbol_count - a number of symbols
  */
 DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dxf_const_string_t* symbols, int symbol_count);
+
+/*
+ *	Removes a single symbol from the subscription.
+
+ *  subscription - a handle of the subscription from which a symbol is removed
+ *  symbol - the symbol to remove
+ */
+DXFEED_API ERRORCODE dxf_remove_symbol (dxf_subscription_t subscription, dxf_const_string_t symbol);
 
 /*
  *	Removes several symbols from the subscription.

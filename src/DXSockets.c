@@ -225,50 +225,19 @@ bool dx_on_connection_destroyed (void) {
 
 dx_socket_t dx_socket (int family, int type, int protocol) {
     dx_socket_t s = INVALID_SOCKET;
-    u_long dummy;
     
-    if ((s = socket(family, type, protocol)) != INVALID_SOCKET) {
-        if (ioctlsocket(s, FIONBIO, &dummy) != INVALID_SOCKET) {
-            return s;
-        }
-        
-        dx_close(s);
+    if ((s = socket(family, type, protocol)) == INVALID_SOCKET) {
+        dx_set_error_code(dx_wsa_error_code_to_internal(WSAGetLastError()));
     }
     
-    dx_set_error_code(dx_wsa_error_code_to_internal(WSAGetLastError()));
-    
-    return INVALID_SOCKET;
+    return s;
 }
 
 /* -------------------------------------------------------------------------- */
 
 bool dx_connect (dx_socket_t s, const struct sockaddr* addr, socklen_t addrlen) {
-    int res;
-
-    if ((res = connect(s, addr, addrlen)) == SOCKET_ERROR &&
-        (WSAGetLastError() == WSAEWOULDBLOCK)) {
-        
-        /* this is the only normal case, since we're using a non-blocking socket */
-        
-        int dummy = 0;
-        struct fd_set socket_to_wait;
-        struct timeval tv;
-        
-        tv.tv_sec = g_connect_timeout;
-        tv.tv_usec = 0;
-        
-        FD_ZERO(&socket_to_wait);
-        FD_SET(s, &socket_to_wait);
-        
-        if (select(dummy, NULL, &socket_to_wait, NULL, &tv) == 1) {
-            /* socket was successfully connected */
-            
-            return true;
-        }
-    }
-    
-    if (res != 0) {
-        return dx_set_error_code(dx_wsa_error_code_to_internal(WSAGetLastError()));
+    if (connect(s, addr, addrlen) == SOCKET_ERROR) {
+        return dx_set_error_code(dx_wsa_error_code_to_internal(WSAGetLastError()));        
     }
     
     return true;
@@ -280,10 +249,6 @@ int dx_send (dx_socket_t s, const void* buffer, int buflen) {
     int res = send(s, (const char*)buffer, buflen, 0);
     
     if (res == SOCKET_ERROR) {
-        if (WSAGetLastError() == WSAEWOULDBLOCK) {
-            return 0;
-        }
-        
         dx_set_error_code(dx_wsa_error_code_to_internal(WSAGetLastError()));
         
         return INVALID_DATA_SIZE;
@@ -302,14 +267,8 @@ int dx_recv (dx_socket_t s, void* buffer, int buflen) {
         dx_set_error_code(dx_sec_connection_gracefully_closed);
         
         break;
-    case SOCKET_ERROR:
-        if (WSAGetLastError() == WSAEWOULDBLOCK) {
-            /* no data is queued */
-            
-            return 0;
-        }
-        
-        return dx_set_error_code(dx_wsa_error_code_to_internal(WSAGetLastError()));
+    case SOCKET_ERROR:                
+        dx_set_error_code(dx_wsa_error_code_to_internal(WSAGetLastError()));
         
         break;
     default:

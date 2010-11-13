@@ -76,21 +76,28 @@ typedef struct {
     dx_connection_context_data_t context_data;
     dx_address_resolution_context_t addr_context;
     
-    const char* connector;
+    const char* address;
     dx_socket_t s;
     pthread_t reader_thread;
+    pthread_t queue_thread;
     pthread_mutex_t socket_guard;
-    bool termination_trigger;
+    
+    bool reader_thread_termination_trigger;
+    bool queue_thread_termination_trigger;
+    bool reader_thread_state;
+    bool queue_thread_state;
+    dx_error_code_t queue_thread_error;
     
     dx_task_queue_t tq;
     
     int set_fields_flags;
 } dx_network_connection_context_t;
 
-#define SOCKET_FIELD_FLAG       (1 << 0)
-#define THREAD_FIELD_FLAG       (1 << 1)
-#define MUTEX_FIELD_FLAG        (1 << 2)
-#define TASK_QUEUE_FIELD_FLAG   (1 << 3)
+#define SOCKET_FIELD_FLAG           (1 << 0)
+#define READER_THREAD_FIELD_FLAG    (1 << 1)
+#define MUTEX_FIELD_FLAG            (1 << 2)
+#define TASK_QUEUE_FIELD_FLAG       (1 << 3)
+#define QUEUE_THREAD_FIELD_FLAG     (1 << 4)
 
 /* -------------------------------------------------------------------------- */
 
@@ -108,6 +115,7 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_network) {
     }
     
     context->connection = connection;
+    context->queue_thread_state = true;
 
     if (!(dx_create_task_queue(&(context->tq)) && (context->set_fields_flags |= TASK_QUEUE_FIELD_FLAG)) ||
         !dx_set_subsystem_data(connection, dx_ccs_network, context)) {
@@ -121,6 +129,8 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_network) {
 
 /* -------------------------------------------------------------------------- */
 
+static bool dx_close_socket (dx_network_connection_context_t* context);
+
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_network) {
     bool res = true;
     dx_network_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
@@ -129,9 +139,16 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_network) {
         return dx_on_connection_destroyed() && res;
     }
 
-    if (IS_FLAG_SET(context->set_fields_flags, THREAD_FIELD_FLAG)) {
-        context->termination_trigger = true;
-
+    if (IS_FLAG_SET(context->set_fields_flags, QUEUE_THREAD_FIELD_FLAG)) {
+        context->queue_thread_termination_trigger = true;
+        
+        res = dx_wait_for_thread(context->queue_thread, NULL) && res;
+    }
+    
+    if (IS_FLAG_SET(context->set_fields_flags, READER_THREAD_FIELD_FLAG)) {
+        context->reader_thread_termination_trigger = true;
+        
+        res = dx_close_socket(context) && res;
         res = dx_wait_for_thread(context->reader_thread, NULL) && res;
     }
 
@@ -146,8 +163,6 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_network) {
  *	Common data
  */
 /* -------------------------------------------------------------------------- */
-
-static const int g_sock_operation_timeout = 100;
 
 #define READ_CHUNK_SIZE 1024
 
@@ -200,7 +215,7 @@ bool dx_clear_connection_data (dx_network_connection_context_t* context) {
         success = dx_mutex_destroy(&(context->socket_guard)) && success;
     }
     
-    if (IS_FLAG_SET(set_fields_flags, THREAD_FIELD_FLAG)) {
+    if (IS_FLAG_SET(set_fields_flags, READER_THREAD_FIELD_FLAG)) {
         success = dx_close_thread_handle(context->reader_thread) && success;
     }
     
@@ -208,11 +223,28 @@ bool dx_clear_connection_data (dx_network_connection_context_t* context) {
         success = dx_destroy_task_queue(context->tq) && success;
     }
     
-    CHECKED_FREE(context->connector);
+    CHECKED_FREE(context->address);
     
     dx_free(context);
     
     return success;
+}
+
+/* -------------------------------------------------------------------------- */
+
+static bool dx_close_socket (dx_network_connection_context_t* context) {
+    bool res = true;
+    
+    if (!IS_FLAG_SET(context->set_fields_flags, SOCKET_FIELD_FLAG)) {
+        return res;
+    }
+        
+    CHECKED_CALL(dx_mutex_lock, &(context->socket_guard));
+    
+    res = dx_close(context->s);
+    context->set_fields_flags &= ~SOCKET_FIELD_FLAG;
+    
+    return dx_mutex_unlock(&(context->socket_guard)) && res;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -226,15 +258,71 @@ void dx_notify_conn_termination (dx_network_connection_context_t* context, OUT b
         *idle_thread_flag = true;
     }
 
-    if (!dx_mutex_lock(&(context->socket_guard))) {
-        return;
-    }
+    dx_close_socket(context);
+}
 
-    dx_close(context->s);
+/* -------------------------------------------------------------------------- */
+
+void* dx_queue_executor (void* arg) {
+    static int s_idle_timeout = 100;
+    static int s_small_timeout = 25;
     
-    context->set_fields_flags &= ~SOCKET_FIELD_FLAG;    
+    dx_network_connection_context_t* context = NULL;
     
-    dx_mutex_unlock(&(context->socket_guard));
+    if (arg == NULL) {
+        /* invalid input parameter
+           but we cannot report it anywhere so simply exit */
+        dx_set_error_code(dx_ec_invalid_func_param_internal);
+
+        return NULL;
+    }
+    
+    context = (dx_network_connection_context_t*)arg;
+    
+    if (!dx_init_error_subsystem()) {
+        context->queue_thread_error = dx_ec_error_subsystem_failure;
+        context->queue_thread_state = false;
+        
+        return NULL;
+    }
+    
+    for (;;) {
+        bool queue_empty = true;
+        
+        if (context->queue_thread_termination_trigger) {
+            break;
+        }
+        
+        if (!context->reader_thread_state || !context->queue_thread_state) {
+            dx_sleep(s_idle_timeout);
+            
+            continue;
+        }
+        
+        if (!dx_is_queue_empty(context->tq, &queue_empty)) {
+            context->queue_thread_error = dx_get_error_code();
+            context->queue_thread_state = false;
+            
+            continue;
+        }
+        
+        if (queue_empty) {
+            dx_sleep(s_idle_timeout);
+            
+            continue;
+        }
+        
+        if (!dx_execute_task_queue(context->tq)) {
+            context->queue_thread_error = dx_get_error_code();
+            context->queue_thread_state = false;
+
+            continue;
+        }
+        
+        dx_sleep(s_small_timeout);
+    }
+    
+    return NULL;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -242,13 +330,9 @@ void dx_notify_conn_termination (dx_network_connection_context_t* context, OUT b
 bool dx_reestablish_connection (dx_network_connection_context_t* context);
 
 void* dx_socket_reader (void* arg) {
-    dxf_connection_t connection = NULL;
     dx_network_connection_context_t* context = NULL;
     dx_connection_context_data_t* context_data = NULL;
-    bool receiver_result = true;
     bool is_thread_idle = false;
-    bool res = true;
-    dx_task_queue_t tq;
     
     char read_buf[READ_CHUNK_SIZE];
     int number_of_bytes_read = 0;
@@ -261,70 +345,66 @@ void* dx_socket_reader (void* arg) {
         return NULL;
     }
     
-    connection = (dxf_connection_t)arg;
-    context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
-    
-    if (context == NULL) {
-        /* same story, nowhere to report */
-        
-        if (res) {
-            dx_set_error_code(dx_cec_connection_context_not_initialized);
-        }
-        
-        return NULL;
-    }
-    
+    context = (dx_network_connection_context_t*)arg;
     context_data = &(context->context_data);
-    tq = context->tq;
-    
+        
     if (!dx_init_error_subsystem()) {
         /* the error subsystem is broken, aborting the thread */
         
-        context_data->notifier(connection);
+        context_data->notifier(context->connection);
         
         return NULL;
     }
     
+    /*
+     *	That's an important initialization. Initially, this flag is false, to indicate that
+     *  the socket reader thread isn't initialized. And only when it's ready to work, this flag
+     *  is set to true.
+     *  This also prevents the queue thread from executing the task queue before the socket reader is ready.
+     */
+    context->reader_thread_state = true;
+    
     for (;;) {
-        if (context->termination_trigger) {
+        if (context->reader_thread_termination_trigger) {
             /* the thread is told to terminate */
             
             break;
         }
         
-        receiver_result = dx_execute_task_queue(tq) && receiver_result;
+        if (context->reader_thread_state && !context->queue_thread_state) {
+            context->reader_thread_state = false;
+            context->queue_thread_state = true;
+            
+            dx_set_error_code(context->queue_thread_error);
+        }
         
-        if (!receiver_result && !is_thread_idle) {
+        if (!context->reader_thread_state && !is_thread_idle) {
             dx_notify_conn_termination(context, &is_thread_idle);
         }
 
         if (is_thread_idle) {
             if (dx_reestablish_connection(context)) {
-                receiver_result = true;
+                context->reader_thread_state = true;
                 is_thread_idle = false;
             } else {
+                static int s_reestablish_failure_timeout = 100;
+                
+                dx_sleep(s_reestablish_failure_timeout);
+                
                 continue;
             }
         }
 
         number_of_bytes_read = dx_recv(context->s, (void*)read_buf, READ_CHUNK_SIZE);
         
-        switch (number_of_bytes_read) {
-        case INVALID_DATA_SIZE:
-            /* the socket error */
-
-            dx_notify_conn_termination(context, &is_thread_idle);
+        if (number_of_bytes_read == INVALID_DATA_SIZE) {
+            context->reader_thread_state = false;
             
             continue;
-        case 0:
-            /* no data to read */
-            dx_sleep(g_sock_operation_timeout);
-            
-            continue;            
         }
         
         /* reporting the read data */        
-        receiver_result = context_data->receiver(connection, (const void*)read_buf, number_of_bytes_read);
+        context->reader_thread_state = context_data->receiver(context->connection, (const void*)read_buf, number_of_bytes_read);
     }
 
     return NULL;
@@ -390,22 +470,22 @@ void dx_clear_address_array (dx_address_array_t* addresses) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_get_addresses_from_connector (const char* connector, OUT dx_address_array_t* addresses) {
-    char* connector_copied = NULL;
+bool dx_get_addresses_from_collection (const char* collection, OUT dx_address_array_t* addresses) {
+    char* collection_copied = NULL;
     char* cur_address = NULL;
     char* splitter_pos = NULL;
     const char* last_port = NULL;
     int i = 0;
     
-    if (connector == NULL || addresses == NULL) {
+    if (collection == NULL || addresses == NULL) {
         dx_set_last_error(dx_ec_invalid_func_param_internal);
 
         return false;
     }
     
-    cur_address = connector_copied = dx_ansi_create_string_src(connector);
+    cur_address = collection_copied = dx_ansi_create_string_src(collection);
     
-    if (connector_copied == NULL) {
+    if (collection_copied == NULL) {
         return false;
     }
     
@@ -421,7 +501,7 @@ bool dx_get_addresses_from_connector (const char* connector, OUT dx_address_arra
         
         if (!dx_split_address(cur_address, &addr)) {
             dx_clear_address_array(addresses);
-            dx_free(connector_copied);
+            dx_free(collection_copied);
             
             return false;
         }
@@ -430,7 +510,7 @@ bool dx_get_addresses_from_connector (const char* connector, OUT dx_address_arra
         
         if (failed) {
             dx_clear_address_array(addresses);
-            dx_free(connector_copied);
+            dx_free(collection_copied);
             dx_free((void*)addr.host);
             
             return false;
@@ -439,7 +519,7 @@ bool dx_get_addresses_from_connector (const char* connector, OUT dx_address_arra
         cur_address = splitter_pos;
     } while (splitter_pos != NULL);
     
-    dx_free(connector_copied);
+    dx_free(collection_copied);
     
     if ((last_port = addresses->elements[addresses->size - 1].port) == NULL) {
         dx_clear_address_array(addresses);
@@ -479,7 +559,7 @@ void dx_shuffle_addrs (dx_address_resolution_context_t* addrs) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_resolve_connector (dx_network_connection_context_t* context) {
+bool dx_resolve_address (dx_network_connection_context_t* context) {
     dx_address_array_t addresses;
     struct addrinfo hints;
     int i = 0;
@@ -494,7 +574,7 @@ bool dx_resolve_connector (dx_network_connection_context_t* context) {
     
     dx_sleep_before_resolve(context);
     
-    CHECKED_CALL_2(dx_get_addresses_from_connector, context->connector, &addresses);
+    CHECKED_CALL_2(dx_get_addresses_from_collection, context->address, &addresses);
     
     dx_memset(&hints, 0, sizeof(hints));
     
@@ -603,7 +683,7 @@ bool dx_reestablish_connection (dx_network_connection_context_t* context) {
     if (!dx_connect_to_resolved_addresses(context)) {
         /*
          *	An important moment here.
-         *  Before we resolve connector anew, we must attempt to connect to the previously
+         *  Before we resolve address anew, we must attempt to connect to the previously
          *  resolved addresses, because there might still be some valid addresses resolved from
          *  the previous attempt. And only if the new connection attempt fails, which also means
          *  there are no valid addresses left, a new resolution is started, and then we repeat
@@ -612,7 +692,7 @@ bool dx_reestablish_connection (dx_network_connection_context_t* context) {
         
         dx_clear_addr_context_data(&(context->addr_context));
         
-        CHECKED_CALL(dx_resolve_connector, context);
+        CHECKED_CALL(dx_resolve_address, context);
         CHECKED_CALL(dx_connect_to_resolved_addresses, context);
     }
     
@@ -629,11 +709,11 @@ bool dx_reestablish_connection (dx_network_connection_context_t* context) {
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_bind_to_connector (dxf_connection_t connection, const char* connector, const dx_connection_context_data_t* ccd) {
+bool dx_bind_to_address (dxf_connection_t connection, const char* address, const dx_connection_context_data_t* ccd) {
     dx_network_connection_context_t* context = NULL;
     bool res = true;
     
-    if (connector == NULL || ccd == NULL || ccd->receiver == NULL) {
+    if (address == NULL || ccd == NULL || ccd->receiver == NULL) {
         return dx_set_error_code(dx_ec_invalid_func_param_internal);
     }
     
@@ -653,8 +733,8 @@ bool dx_bind_to_connector (dxf_connection_t connection, const char* connector, c
 
     context->set_fields_flags |= MUTEX_FIELD_FLAG;
     
-    if ((context->connector = dx_ansi_create_string_src(connector)) == NULL ||
-        !dx_resolve_connector(context) ||
+    if ((context->address = dx_ansi_create_string_src(address)) == NULL ||
+        !dx_resolve_address(context) ||
         !dx_connect_to_resolved_addresses(context)) {
         
         return false;
@@ -668,17 +748,21 @@ bool dx_bind_to_connector (dxf_connection_t connection, const char* connector, c
        it happens implicitly on the first call to any error reporting function, but to
        ensure there'll be no potential thread race to create it, it's made sure such 
        key is created before any secondary thread is created. */
-    if (!dx_init_error_subsystem()) {
+    CHECKED_CALL_0(dx_init_error_subsystem);
+    
+    if (!dx_thread_create(&(context->queue_thread), NULL, dx_queue_executor, context)) {
         return false;
     }
     
-    if (!dx_thread_create(&(context->reader_thread), NULL, dx_socket_reader, connection)) {
+    context->set_fields_flags |= QUEUE_THREAD_FIELD_FLAG;
+    
+    if (!dx_thread_create(&(context->reader_thread), NULL, dx_socket_reader, context)) {
         /* failed to create a thread */
         
         return false;
     }
     
-    context->set_fields_flags |= THREAD_FIELD_FLAG;
+    context->set_fields_flags |= READER_THREAD_FIELD_FLAG;
     
     return true;
 }
@@ -715,18 +799,10 @@ bool dx_send_data (dxf_connection_t connection, const void* buffer, int buffer_s
     do {
         int sent_count = dx_send(context->s, (const void*)char_buf, buffer_size);
         
-        switch (sent_count) {
-        case INVALID_DATA_SIZE:
-            /* that means an error */
-            
+        if (sent_count == INVALID_DATA_SIZE) {
             dx_mutex_unlock(&(context->socket_guard));
-            
+
             return false;
-        case 0:
-            /* try again */
-            dx_sleep(g_sock_operation_timeout);
-            
-            continue;
         }
         
         char_buf += sent_count;

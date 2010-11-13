@@ -177,7 +177,7 @@ ERRORCODE dx_perform_common_actions () {
  */
 /* -------------------------------------------------------------------------- */
 
-DXFEED_API ERRORCODE dxf_create_connection (const char* connector, dxf_conn_termination_notifier_t notifier,
+DXFEED_API ERRORCODE dxf_create_connection (const char* address, dxf_conn_termination_notifier_t notifier,
                                             OUT dxf_connection_t* connection) {
     dx_connection_context_data_t ccd;
     
@@ -192,10 +192,10 @@ DXFEED_API ERRORCODE dxf_create_connection (const char* connector, dxf_conn_term
     }
 
     {
-        dxf_string_t w_host = dx_ansi_to_unicode(connector);
+        dxf_string_t w_host = dx_ansi_to_unicode(address);
         
         if (w_host != NULL) {
-            dx_logging_info(L"Binding to connector: %s", w_host);
+            dx_logging_info(L"Binding to address: %s", w_host);
             dx_free(w_host);
         }
     }
@@ -203,7 +203,7 @@ DXFEED_API ERRORCODE dxf_create_connection (const char* connector, dxf_conn_term
     ccd.receiver = dx_socket_data_receiver;
     ccd.notifier = notifier;
     
-    if (!dx_bind_to_connector(*connection, connector, &ccd) ||
+    if (!dx_bind_to_address(*connection, address, &ccd) ||
 		!dx_send_protocol_description(*connection) ||
         !dx_send_record_description(*connection, false)) {
         dx_deinit_connection(*connection);
@@ -367,6 +367,29 @@ DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dxf_const
         if (dxf_add_symbol(subscription, symbols[i]) == DXF_FAILURE) {
             return DXF_FAILURE;
         }
+    }
+
+    return DXF_SUCCESS;
+}
+
+/* -------------------------------------------------------------------------- */
+
+DXFEED_API ERRORCODE dxf_remove_symbol (dxf_subscription_t subscription, dxf_const_string_t symbol) {
+    dxf_int_t events;
+    dxf_connection_t connection;
+    bool pause_state;
+
+    dx_logging_info(L"Removing symbol %s", symbol);
+
+    dx_perform_common_actions();
+
+    if (!dx_get_subscription_connection(subscription, &connection) ||
+        !dx_get_event_subscription_event_types(subscription, &events) ||
+        !dx_remove_symbols(subscription, &symbol, 1) ||
+        !dx_get_event_subscription_pause_state(subscription, &pause_state) ||
+        (!pause_state && !dx_unsubscribe(connection, &symbol, 1, events))) {
+
+        return DXF_FAILURE;
     }
 
     return DXF_SUCCESS;
