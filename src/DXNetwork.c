@@ -663,13 +663,7 @@ bool dx_connect_to_resolved_addresses (dx_network_connection_context_t* context)
 /* -------------------------------------------------------------------------- */
 
 static bool dx_server_event_subscription_refresher (dxf_connection_t connection,
-                                                    dxf_const_string_t* symbols, int symbol_count, int event_types, bool pause_state) {
-    if (pause_state) {
-        /* paused subscriptions don't need any refreshment */
-        
-        return true;
-    }
-    
+                                                    dxf_const_string_t* symbols, int symbol_count, int event_types) {
     return dx_subscribe_symbols_to_events(connection, symbols, symbol_count, event_types, false, false);
 }
 

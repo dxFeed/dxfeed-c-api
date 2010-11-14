@@ -68,7 +68,6 @@ struct dx_subscription_data_struct_t {
     int event_types;
     dx_symbol_data_array_t symbols;
     dx_listener_array_t listeners;
-    bool is_paused;
     
     dxf_const_string_t* symbol_name_array;
     int symbol_name_array_capacity;
@@ -678,24 +677,6 @@ dxf_subscription_t dx_create_event_subscription (dxf_connection_t connection, in
 
 /* -------------------------------------------------------------------------- */
  
-bool dx_get_event_subscription_pause_state (dxf_subscription_t subscr_id, OUT bool* state) {
-    dx_subscription_data_ptr_t subscr_data = (dx_subscription_data_ptr_t)subscr_id;
-
-    if (subscr_id == dx_invalid_subscription) {
-        return dx_set_error_code(dx_esec_invalid_subscr_id);
-    }
-    
-    if (state == NULL) {
-        return dx_set_error_code(dx_ec_invalid_func_param_internal);
-    }
-
-    *state = subscr_data->is_paused;
-
-    return true;
-}
-
-/* -------------------------------------------------------------------------- */
-
 bool dx_close_event_subscription (dxf_subscription_t subscr_id) {
     dx_subscription_data_ptr_t subscr_data = (dx_subscription_data_ptr_t)subscr_id;
     bool res = true;
@@ -1113,12 +1094,10 @@ bool dx_process_connection_subscriptions (dxf_connection_t connection, dx_subscr
         dxf_const_string_t* symbols = NULL;
         int symbol_count = 0;
         int event_types = 0;
-        bool pause_state = false;
         
         if (!dx_get_event_subscription_symbols(subscriptions->elements[i], &symbols, &symbol_count) ||
             !dx_get_event_subscription_event_types(subscriptions->elements[i], &event_types) ||
-            !dx_get_event_subscription_pause_state(subscriptions->elements[i], &pause_state) ||
-            !processor(connection, symbols, symbol_count, event_types, pause_state)) {
+            !processor(connection, symbols, symbol_count, event_types)) {
                         
             dx_mutex_unlock(&(context->subscr_guard));
             
