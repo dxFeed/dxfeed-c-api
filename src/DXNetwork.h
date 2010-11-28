@@ -39,6 +39,7 @@ typedef bool (*dx_socket_data_receiver_t) (dxf_connection_t connection, const vo
 typedef struct {
     dx_socket_data_receiver_t receiver; /* a callback to pass the read data to */
     dxf_conn_termination_notifier_t notifier; /* a callback to notify client the dx_socket_reader is going to finish */
+    void* notifier_user_data; /* the user data passed to the temination notifier callback */
 } dx_connection_context_data_t;
 
 /* -------------------------------------------------------------------------- */

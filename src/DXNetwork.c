@@ -251,7 +251,7 @@ static bool dx_close_socket (dx_network_connection_context_t* context) {
 
 void dx_notify_conn_termination (dx_network_connection_context_t* context, OUT bool* idle_thread_flag) {
     if (context->context_data.notifier != NULL) {
-        context->context_data.notifier(context->connection);
+        context->context_data.notifier(context->connection, context->context_data.notifier_user_data);
     }
     
     if (idle_thread_flag != NULL) {
@@ -351,7 +351,7 @@ void* dx_socket_reader (void* arg) {
     if (!dx_init_error_subsystem()) {
         /* the error subsystem is broken, aborting the thread */
         
-        context_data->notifier(context->connection);
+        context_data->notifier(context->connection, context_data->notifier_user_data);
         
         return NULL;
     }
@@ -403,6 +403,11 @@ void* dx_socket_reader (void* arg) {
         
         /* reporting the read data */        
         context->reader_thread_state = context_data->receiver(context->connection, (const void*)read_buf, number_of_bytes_read);
+        
+        /* debug */
+        if (!context->reader_thread_state) {
+            int i = 0;
+        }
     }
 
     return NULL;

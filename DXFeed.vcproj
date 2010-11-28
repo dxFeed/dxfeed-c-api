@@ -27,7 +27,7 @@
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="TRUE"
+				Detect64BitPortabilityProblems="FALSE"
 				DebugInformationFormat="4"
 				CompileAs="1"/>
 			<Tool
@@ -80,7 +80,7 @@
 				UsePrecompiledHeader="0"
 				BrowseInformation="1"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="TRUE"
+				Detect64BitPortabilityProblems="FALSE"
 				DebugInformationFormat="3"
 				CompileAs="1"/>
 			<Tool
@@ -219,9 +219,6 @@
 				RelativePath=".\src\PrimitiveTypes.h">
 			</File>
 			<File
-				RelativePath=".\src\RecordData.h">
-			</File>
-			<File
 				RelativePath=".\src\RecordTranscoder.h">
 			</File>
 			<File
@@ -312,6 +309,9 @@
 			</File>
 			<File
 				RelativePath=".\include\EventData.h">
+			</File>
+			<File
+				RelativePath=".\src\RecordData.h">
 			</File>
 		</Filter>
 		<Filter

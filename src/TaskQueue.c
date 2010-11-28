@@ -169,7 +169,7 @@ bool dx_execute_task_queue (dx_task_queue_t tq) {
             res = res && !failed;
         }
         
-        if (IS_FLAG_SET(task_res, dx_tes_dont_advance)) {
+        if (IS_FLAG_SET(task_res, dx_tes_dont_advance) || !res) {
             break;
         }
         

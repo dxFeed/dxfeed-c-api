@@ -45,7 +45,7 @@ dxf_subscription_t dx_create_event_subscription (dxf_connection_t connection, in
 bool dx_close_event_subscription (dxf_subscription_t subscr_id);
 bool dx_add_symbols (dxf_subscription_t subscr_id, dxf_const_string_t* symbols, int symbol_count);
 bool dx_remove_symbols (dxf_subscription_t subscr_id, dxf_const_string_t* symbols, int symbol_count);
-bool dx_add_listener (dxf_subscription_t subscr_id, dxf_event_listener_t listener);
+bool dx_add_listener (dxf_subscription_t subscr_id, dxf_event_listener_t listener, void* user_data);
 bool dx_remove_listener (dxf_subscription_t subscr_id, dxf_event_listener_t listener);
 bool dx_get_subscription_connection (dxf_subscription_t subscr_id, OUT dxf_connection_t* connection);
 bool dx_get_event_subscription_event_types (dxf_subscription_t subscr_id, OUT int* event_types);

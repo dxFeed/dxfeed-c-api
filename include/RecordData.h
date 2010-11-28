@@ -73,10 +73,10 @@ typedef struct {
 } dx_quote_t;
 
 typedef struct {
-    dxf_double_t	day_high_price;
-    dxf_double_t	day_low_price;
-    dxf_double_t	day_open_price;
-    dxf_double_t	prev_day_close_price;
+    dxf_double_t day_high_price;
+    dxf_double_t day_low_price;
+    dxf_double_t day_open_price;
+    dxf_double_t prev_day_close_price;
     dxf_long_t open_interest;
 } dx_fundamental_t;
 
@@ -105,6 +105,5 @@ typedef struct {
     dxf_bool_t is_trade;
     dxf_int_t type;    
 } dx_time_and_sale_t;
-
 
 #endif /* RECORD_DATA_H_INCLUDED */

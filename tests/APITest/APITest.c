@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <Windows.h>
 
-const char dxfeed_host[] = "megasuperduperstupidhost.biz,demo.dxfeed.com:7300";
+const char dxfeed_host[] = "localhost:5555";
 
 dxf_const_string_t dx_event_type_to_string (int event_type) {
 	switch (event_type){
@@ -22,7 +22,7 @@ dxf_const_string_t dx_event_type_to_string (int event_type) {
 
 /* -------------------------------------------------------------------------- */
 
-void first_listener (int event_type, dxf_const_string_t symbol_name,const dxf_event_data_t* data, int data_count) {
+void first_listener (int event_type, dxf_const_string_t symbol_name,const dxf_event_data_t* data, int data_count, void* user_data) {
 	dxf_int_t i = 0;
 
 	wprintf(L"First listener. Event: %s Symbol: %s\n",dx_event_type_to_string(event_type), symbol_name);
@@ -39,7 +39,7 @@ void first_listener (int event_type, dxf_const_string_t symbol_name,const dxf_ev
 
 /* -------------------------------------------------------------------------- */
 
-void second_listener (int event_type, dxf_const_string_t symbol_name,const dxf_event_data_t* data, int data_count) {
+void second_listener (int event_type, dxf_const_string_t symbol_name,const dxf_event_data_t* data, int data_count, void* user_data) {
 	dxf_int_t i = 0;
 
 	wprintf(L"Second listener. Event: %s Symbol: %s\n",dx_event_type_to_string(event_type), symbol_name);
@@ -49,7 +49,7 @@ void second_listener (int event_type, dxf_const_string_t symbol_name,const dxf_e
 
 dxf_connection_t connection;
 
-void conn_termination_notifier (dxf_connection_t conn) {
+void conn_termination_notifier (dxf_connection_t conn, void* user_data) {
     /*dxf_close_connection(conn);*/
 }
 
@@ -101,7 +101,7 @@ int main (int argc, char* argv[]) {
 	printf("API test started.\n");    
     printf("Connecting to host %s...\n", dxfeed_host);
     
-    if (!dxf_create_connection(dxfeed_host, conn_termination_notifier, &connection)) {
+    if (!dxf_create_connection(dxfeed_host, conn_termination_notifier, NULL, &connection)) {
         process_last_error();
         
         return -1;
@@ -129,7 +129,7 @@ int main (int argc, char* argv[]) {
     printf("Symbol %s added\n", "IBM");
     printf("Attaching first listener...\n");
 	
-	if (!dxf_attach_event_listener(subscription, first_listener)) {
+	if (!dxf_attach_event_listener(subscription, first_listener, NULL)) {
         process_last_error();
         
         return -1;
@@ -138,7 +138,7 @@ int main (int argc, char* argv[]) {
     printf("First listener attached\n");
     printf("Attaching second listener...\n");
 
-    if (!dxf_attach_event_listener(subscription, second_listener)) {
+    if (!dxf_attach_event_listener(subscription, second_listener, NULL)) {
         process_last_error();
         
         return -1;
@@ -180,7 +180,7 @@ int main (int argc, char* argv[]) {
 	printf("Master thread woke up\n");
 	printf("Clearing symbols...\n");
 	
-	if (!dxf_subscription_clear_symbols(subscription)) {
+	if (!dxf_clear_symbols(subscription)) {
         process_last_error();
         
         return -1;

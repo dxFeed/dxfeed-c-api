@@ -51,7 +51,7 @@
 /* -------------------------------------------------------------------------- */
 
 typedef void* dxf_connection_t;
-typedef void (*dxf_conn_termination_notifier_t) (dxf_connection_t connection);
+typedef void (*dxf_conn_termination_notifier_t) (dxf_connection_t connection, void* user_data);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -68,9 +68,11 @@ typedef void (*dxf_conn_termination_notifier_t) (dxf_connection_t connection);
  
  *  address - "[host[:port],]host:port"
  *  notifier - the callback to inform the client side that the connection has stumbled upon and error and will go reconnecting
+ *  user_data - the user defined value passed to the termination notifier callback along with the connection handle; may be set
+                to whatever value
  *  OUT connection - the handle of the created connection
  */
-DXFEED_API ERRORCODE dxf_create_connection (const char* address, dxf_conn_termination_notifier_t notifier,
+DXFEED_API ERRORCODE dxf_create_connection (const char* address, dxf_conn_termination_notifier_t notifier, void* user_data,
                                             OUT dxf_connection_t* connection);
 
 /*
@@ -146,7 +148,7 @@ DXFEED_API ERRORCODE dxf_remove_symbols (dxf_subscription_t subscription, dxf_co
  */
 DXFEED_API ERRORCODE dxf_get_symbols (dxf_subscription_t subscription, OUT dxf_const_string_t** symbols, OUT int* symbol_count);
 
-/*
+/*f lj
  *	Sets the symbols for the subscription.
  *  The difference between this function and 'dxf_add_symbols' is that all the previously added symbols
  *  that do not belong to the symbol list passed to this function will be removed.
@@ -162,7 +164,7 @@ DXFEED_API ERRORCODE dxf_set_symbols (dxf_subscription_t subscription, dxf_const
  
  *  subscription - a handle of the subscription whose symbols are to be cleared
  */
-DXFEED_API ERRORCODE dxf_subscription_clear_symbols (dxf_subscription_t subscription);
+DXFEED_API ERRORCODE dxf_clear_symbols (dxf_subscription_t subscription);
 
 /*
  *	Attaches a listener callback to the subscription.
@@ -172,7 +174,8 @@ DXFEED_API ERRORCODE dxf_subscription_clear_symbols (dxf_subscription_t subscrip
  *  subscription - a handle of the subscription to which a listener is to be attached
  *  event_listener - a listener callback function pointer
  */
-DXFEED_API ERRORCODE dxf_attach_event_listener (dxf_subscription_t subscription, dxf_event_listener_t event_listener);
+DXFEED_API ERRORCODE dxf_attach_event_listener (dxf_subscription_t subscription, dxf_event_listener_t event_listener,
+                                                void* user_data);
 
 /*
  *	Detaches a listener from the subscription.

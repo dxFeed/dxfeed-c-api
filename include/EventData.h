@@ -25,8 +25,11 @@
 #define EVENT_DATA_H_INCLUDED
 
 #include "RecordData.h"
-#include "PrimitiveTypes.h"
 #include "DXTypes.h"
+
+#ifndef OUT
+    #define OUT
+#endif /* OUT */
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -112,7 +115,8 @@ extern const dxf_int_t DXF_TIME_AND_SALE_TYPE_CANCEL;
 /* -------------------------------------------------------------------------- */
 
 typedef void (*dxf_event_listener_t) (int event_type, dxf_const_string_t symbol_name,
-                                      const dxf_event_data_t* data, int data_count);
+                                      const dxf_event_data_t* data, int data_count,
+                                      void* user_data);
                                      
 /* -------------------------------------------------------------------------- */
 /*
@@ -153,6 +157,6 @@ int dx_get_event_subscription_params (dx_event_id_t event_id, OUT const dx_event
  */
 /* -------------------------------------------------------------------------- */
 
-const dxf_event_data_t dx_get_event_data_item (int event_id, const dxf_event_data_t data, int index);
+const dxf_event_data_t dx_get_event_data_item (int event_mask, const dxf_event_data_t data, int index);
  
 #endif /* EVENT_DATA_H_INCLUDED */

@@ -35,7 +35,7 @@ bool is_thread_terminate() {
 
 /* -------------------------------------------------------------------------- */
 
-void on_reader_thread_terminate(const char* host ) {
+void on_reader_thread_terminate(const char* host, void* user_data) {
     EnterCriticalSection(&listener_thread_guard);
     is_listener_thread_terminated = true;
     LeaveCriticalSection(&listener_thread_guard);
@@ -45,7 +45,7 @@ void on_reader_thread_terminate(const char* host ) {
 
 /* -------------------------------------------------------------------------- */
 
-void listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count) {
+void listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count, void* user_data) {
     dxf_int_t i = 0;
 
     wprintf(L"Event: %s Symbol: %s\n",dx_event_type_to_string(event_type), symbol_name);
@@ -147,7 +147,7 @@ int main (int argc, char* argv[]) {
 	printf("Sample test started.\n");    
     printf("Connecting to host %s...\n", dxfeed_host);
     
-    if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, &connection)) {
+    if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, &connection)) {
         process_last_error();
         return -1;
     }
@@ -166,7 +166,7 @@ int main (int argc, char* argv[]) {
         return -1;
     }; 
 
-	if (!dxf_attach_event_listener(subscription, listener)) {
+	if (!dxf_attach_event_listener(subscription, listener, NULL)) {
         process_last_error();
         
         return -1;

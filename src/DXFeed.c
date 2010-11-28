@@ -177,7 +177,7 @@ ERRORCODE dx_perform_common_actions () {
  */
 /* -------------------------------------------------------------------------- */
 
-DXFEED_API ERRORCODE dxf_create_connection (const char* address, dxf_conn_termination_notifier_t notifier,
+DXFEED_API ERRORCODE dxf_create_connection (const char* address, dxf_conn_termination_notifier_t notifier, void* user_data,
                                             OUT dxf_connection_t* connection) {
     dx_connection_context_data_t ccd;
     
@@ -204,6 +204,7 @@ DXFEED_API ERRORCODE dxf_create_connection (const char* address, dxf_conn_termin
     
     ccd.receiver = dx_socket_data_receiver;
     ccd.notifier = notifier;
+    ccd.notifier_user_data = user_data;
     
     if (!dx_bind_to_address(*connection, address, &ccd) ||
 		!dx_send_protocol_description(*connection) ||
@@ -429,7 +430,7 @@ DXFEED_API ERRORCODE dxf_set_symbols (dxf_subscription_t subscription, dxf_const
         return DXF_FAILURE;
     }
     
-    if (dxf_subscription_clear_symbols(subscription) == DXF_FAILURE ||
+    if (dxf_clear_symbols(subscription) == DXF_FAILURE ||
         dxf_add_symbols(subscription, symbols, symbol_count) == DXF_FAILURE) {
 
         return DXF_FAILURE;
@@ -440,7 +441,7 @@ DXFEED_API ERRORCODE dxf_set_symbols (dxf_subscription_t subscription, dxf_const
 
 /* -------------------------------------------------------------------------- */
 
-DXFEED_API ERRORCODE dxf_subscription_clear_symbols (dxf_subscription_t subscription) {
+DXFEED_API ERRORCODE dxf_clear_symbols (dxf_subscription_t subscription) {
     dxf_connection_t connection;
     int events; 
     
@@ -469,7 +470,8 @@ DXFEED_API ERRORCODE dxf_subscription_clear_symbols (dxf_subscription_t subscrip
 
 /* -------------------------------------------------------------------------- */
 
-DXFEED_API ERRORCODE dxf_attach_event_listener (dxf_subscription_t subscription, dxf_event_listener_t event_listener) {
+DXFEED_API ERRORCODE dxf_attach_event_listener (dxf_subscription_t subscription, dxf_event_listener_t event_listener,
+                                                void* user_data) {
     dx_perform_common_actions();
 	
     if (subscription == dx_invalid_subscription || event_listener == NULL) {
@@ -478,7 +480,7 @@ DXFEED_API ERRORCODE dxf_attach_event_listener (dxf_subscription_t subscription,
         return DXF_FAILURE;
     }
 	
-	if (!dx_add_listener (subscription, event_listener)) {
+	if (!dx_add_listener(subscription, event_listener, user_data)) {
 		return DXF_FAILURE;
 	}
 	

@@ -58,7 +58,7 @@ void process_last_error () {
 
 /* -------------------------------------------------------------------------- */
 
-void listener (int event_type, dxf_const_string_t symbol_name,const dxf_event_data_t* data, int data_count){
+void listener (int event_type, dxf_const_string_t symbol_name,const dxf_event_data_t* data, int data_count, void* user_data){
     dxf_int_t i = 0;
     dx_event_id_t eid = dx_eid_begin;
     
@@ -90,7 +90,7 @@ int main (int argc, char* argv[]) {
     wprintf(L"LastEvent test started.\n");    
     printf("Connecting to host %s...\n", dxfeed_host);
 
-    if (!dxf_create_connection(dxfeed_host, NULL, &connection)) {
+    if (!dxf_create_connection(dxfeed_host, NULL, NULL, &connection)) {
         process_last_error();
         return -1;
     }
@@ -117,7 +117,7 @@ int main (int argc, char* argv[]) {
     }; 
 
     wprintf(L"Listener attached\n");
-    if (!dxf_attach_event_listener(subscription, listener)) {
+    if (!dxf_attach_event_listener(subscription, listener, NULL)) {
         process_last_error();
 
         return -1;

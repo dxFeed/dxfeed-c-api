@@ -177,6 +177,6 @@ static const dx_event_data_navigator g_event_data_navigators[dx_eid_count] = {
 
 /* -------------------------------------------------------------------------- */
 
-const dxf_event_data_t dx_get_event_data_item (int event_id, const dxf_event_data_t data, int index) {
-    return g_event_data_navigators[(dx_event_id_t)event_id](data, index);
+const dxf_event_data_t dx_get_event_data_item (int event_mask, const dxf_event_data_t data, int index) {
+    return g_event_data_navigators[dx_get_event_id_by_bitmask(event_mask)](data, index);
 }
