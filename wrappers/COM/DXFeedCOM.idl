@@ -1,0 +1,168 @@
+[uuid(2AB4E53E-2F97-48a4-8F44-C3CAD9708A8A), version(1.0), helpstring("DXFeed COM server")]
+library DXFeedCOM {
+    
+    importlib("STDOLE2.TLB");
+    
+    [uuid(FC98632E-DEE9-4a56-B422-7AADFF5EDA66), helpstring("Trade data wrapper"), dual, oleautomation, nonextensible]
+    interface IDXTrade : IDispatch {
+        [id(1), propget, helpstring("Time value getter")]
+        HRESULT time ([out, retval] LONGLONG*);
+        [id(2), propget, helpstring("Exchange code value getter")]
+        HRESULT exchangeCode ([out, retval] SHORT*);
+        [id(3), propget, helpstring("Price value getter")]
+        HRESULT price ([out, retval] DOUBLE*);
+        [id(4), propget, helpstring("Size value getter")]
+        HRESULT size ([out, retval] LONGLONG*);
+        [id(5), propget, helpstring("Day volume value getter")]
+        HRESULT dayVolume ([out, retval] LONGLONG*);
+    };
+    
+    [uuid(2FD8E60E-40D0-47a2-87EA-10FE1C34B5F6), helpstring("Quote data wrapper"), dual, oleautomation, nonextensible]
+    interface IDXQuote : IDispatch {
+        [id(1), propget, helpstring("Bid time value getter")]
+        HRESULT bidTime ([out, retval] LONGLONG*);
+        [id(2), propget, helpstring("Bid exchange code value getter")]
+        HRESULT bidExchangeCode ([out, retval] SHORT*);
+        [id(3), propget, helpstring("Bid price value getter")]
+        HRESULT bidPrice ([out, retval] DOUBLE*);
+        [id(4), propget, helpstring("Bid size value getter")]
+        HRESULT bidSize ([out, retval] LONGLONG*);
+        [id(5), propget, helpstring("Ask time value getter")]
+        HRESULT askTime ([out, retval] LONGLONG*);
+        [id(6), propget, helpstring("Ask exchange code value getter")]
+        HRESULT askExchangeCode ([out, retval] SHORT*);
+        [id(7), propget, helpstring("Ask price value getter")]
+        HRESULT askPrice ([out, retval] DOUBLE*);
+        [id(8), propget, helpstring("Ask size value getter")]
+        HRESULT askSize ([out, retval] LONGLONG*);
+    };
+    
+    [uuid(6582F081-CCB3-4ca3-8490-D25D0C4C0837), helpstring("Summary data wrapper"), dual, oleautomation, nonextensible]
+    interface IDXSummary : IDispatch {
+        [id(1), propget, helpstring("Day high price value getter")]
+        HRESULT dayHighPrice ([out, retval] DOUBLE*);
+        [id(2), propget, helpstring("Day low price value getter")]
+        HRESULT dayLowPrice ([out, retval] DOUBLE*);
+        [id(3), propget, helpstring("Day open price value getter")]
+        HRESULT dayOpenPrice ([out, retval] DOUBLE*);
+        [id(4), propget, helpstring("Previous day close price value getter")]
+        HRESULT prevDayClosePrice ([out, retval] DOUBLE*);
+        [id(5), propget, helpstring("Open interest value getter")]
+        HRESULT openInterest ([out, retval] LONGLONG*);
+    };
+    
+    [uuid(74E10B0F-4C80-4792-96DD-D3BFFF40D675), helpstring("Profile data wrapper"), dual, oleautomation, nonextensible]
+    interface IDXProfile : IDispatch {
+        [id(1), propget, helpstring("Description value getter")]
+        HRESULT description ([out, retval] BSTR*);
+    };
+    
+    [uuid(2A6760EA-A547-4597-A12E-9E14794273C6), helpstring("Order data wrapper"), dual, oleautomation, nonextensible]
+    interface IDXOrder : IDispatch {
+        [id(1), propget, helpstring("Index value getter")]
+        HRESULT index ([out, retval] LONGLONG*);
+        [id(2), propget, helpstring("Side value getter")]
+        HRESULT side ([out, retval] INT*);
+        [id(3), propget, helpstring("Level value getter")]
+        HRESULT level ([out, retval] INT*);
+        [id(4), propget, helpstring("Time value getter")]
+        HRESULT time ([out, retval] LONGLONG*);
+        [id(5), propget, helpstring("Exchange code value getter")]
+        HRESULT exchangeCode ([out, retval] SHORT*);
+        [id(6), propget, helpstring("Market maker value getter")]
+        HRESULT marketMaker ([out, retval] BSTR*);
+        [id(7), propget, helpstring("Price value getter")]
+        HRESULT price ([out, retval] DOUBLE*);
+        [id(8), propget, helpstring("Size value getter")]
+        HRESULT size ([out, retval] LONGLONG*);
+    }
+    
+    [uuid(A12D2830-6B0B-405c-990D-5B960CB9C33B), helpstring("Time&Sale data wrapper"), dual, oleautomation, nonextensible]
+    interface IDXTimeAndSale : IDispatch {
+        [id(1), propget, helpstring("Event id value getter")]
+        HRESULT eventId ([out, retval] LONGLONG*);
+        [id(2), propget, helpstring("Time value getter")]
+        HRESULT time ([out, retval] LONGLONG*);
+        [id(3), propget, helpstring("Exchange code value getter")]
+        HRESULT exchangeCode ([out, retval] SHORT*);
+        [id(4), propget, helpstring("Price value getter")]
+        HRESULT price ([out, retval] DOUBLE*);
+        [id(5), propget, helpstring("Size value getter")]
+        HRESULT size ([out, retval] LONGLONG*);
+        [id(6), propget, helpstring("Bid price value getter")]
+        HRESULT bidPrice ([out, retval] DOUBLE*);
+        [id(7), propget, helpstring("Ask price value getter")]
+        HRESULT askPrice ([out, retval] DOUBLE*);
+        [id(8), propget, helpstring("Exchange sale condition value getter")]
+        HRESULT exchangeSaleCondition ([out, retval] BSTR*);
+        [id(9), propget, helpstring("Trade flag value getter")]
+        HRESULT isTrade ([out, retval] VARIANT_BOOL*);
+        [id(10), propget, helpstring("Type value getter")]
+        HRESULT type ([out, retval] INT*);
+    };
+    
+    [uuid(C334BBB7-AE1E-448e-9C1C-A0C7CCB2A126), helpstring("Event data collection"), dual, oleautomation, nonextensible]
+    interface IDXEventDataCollection : IDispatch {
+        [id(1), propget, helpstring("Event count value getter")]
+        HRESULT eventCount ([out, retval] INT*);
+        [id(2), helpstring("Event object retriever")]
+        HRESULT GetEvent ([in] INT, [out, retval] IDispatch**);
+    };
+    
+    [uuid(FE722B06-8AA9-4f09-AE55-D25B2EC8188A), helpstring("Event data receiver sink"), oleautomation, nonextensible]
+    interface IDXEventListener : IDispatch {
+        [id(1), helpstring("Event data processor")]
+        HRESULT OnNewData ([in] IDispatch*, [in] INT, [in] BSTR, [in] IDispatch*);
+    };
+    
+    [uuid(6B8FD5AA-2511-485e-BD4F-B832216C0480), dual, oleautomation, nonextensible]
+    interface IDXSubscription : IDispatch {
+        [id(1), helpstring("Adds a single symbol to the subscription")]
+        HRESULT AddSymbol ([in] BSTR);
+        [id(2), helpstring("Adds multiple symbols to the subscription")]
+        HRESULT AddSymbols ([in] SAFEARRAY(BSTR)*);
+        [id(3), helpstring("Removes a single symbol from the subscription")]
+        HRESULT RemoveSymbol ([in] BSTR);
+        [id(4), helpstring("Removes multiple symbols from the subscription")]
+        HRESULT RemoveSymbols ([in] SAFEARRAY(BSTR)*);
+        [id(5), helpstring("Retrieves the subscription symbols")]
+        HRESULT GetSymbols ([out, retval] SAFEARRAY(BSTR)**);
+        [id(6), helpstring("Sets the subscription symbols to the given values")]
+        HRESULT SetSymbols ([in] SAFEARRAY(BSTR)*);
+        [id(7), helpstring("Clears the subscription symbols")]
+        HRESULT ClearSymbols ();
+        [id(8), propget, helpstring("Event types value getter")]
+        HRESULT eventTypes ([out, retval] INT*);
+    };
+    
+    [uuid(F04762D2-A6BF-4762-ADB0-67EC51B6BAAE), helpstring("Connection termination notifier sink"), oleautomation, nonextensible]
+    interface IDXConnectionTermination : IDispatch {
+        [id(1), helpstring("Connection termination processor")]
+        HRESULT OnConnectionTerminated ([in] IDispatch*);
+    };
+    
+    [uuid(B35E0956-4F63-4383-B490-564EC4F3CA44), dual, oleautomation, nonextensible]
+    interface IDXConnection : IDispatch {
+        [id(1), helpstring("Creates a new subscription"), source]
+        HRESULT CreateSubscription ([in] INT, [out, retval] IDispatch**);
+        [id(2), helpstring("Event object retriever")]
+        HRESULT GetLastEvent ([in] INT, [in] BSTR, [out, retval] IDispatch**);
+    };
+    
+    [uuid(1CD222F3-8683-44a0-8EC9-32BF8BD3421D), helpstring("The main library interface"), dual, oleautomation, nonextensible]
+    interface IDXFeed : IDispatch {
+        [id(1), helpstring("Creates a new connection"), source]
+        HRESULT CreateConnection ([in] BSTR, [out, retval] IDispatch**);
+        [id(2), propget, helpstring("Last error code value getter")]
+        HRESULT lastError ([out, retval] INT*);
+        [id(3), propget, helpstring("Last error description value getter")]
+        HRESULT lastErrorDescr ([out, retval] BSTR*);
+        [id(4), helpstring("Initializes the logging mechanism")]
+        HRESULT InitLogger ([in] BSTR, [in] VARIANT_BOOL, [in] VARIANT_BOOL, [in] VARIANT_BOOL);
+    };
+    
+    [uuid(88E3240E-D6DE-416b-893B-C9A439EEA275), helpstring("The main library class"), appobject]
+    coclass DXFeed {
+        [default] interface IDXFeed;
+    };
+}

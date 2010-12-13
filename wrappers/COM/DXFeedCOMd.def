@@ -1,0 +1,6 @@
+LIBRARY DXFeedCOMd
+EXPORTS
+DllCanUnloadNow		PRIVATE
+DllGetClassObject	PRIVATE
+DllRegisterServer
+DllUnregisterServer
