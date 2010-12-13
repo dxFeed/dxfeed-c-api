@@ -31,8 +31,6 @@
 static const int g_send_msg_roster[] = {
     /* the messages our application is able and is going to send */
 
-    MESSAGE_DESCRIBE_RECORDS,
-
     MESSAGE_TICKER_ADD_SUBSCRIPTION,
     MESSAGE_TICKER_REMOVE_SUBSCRIPTION,
 
@@ -45,8 +43,6 @@ static const int g_send_msg_roster[] = {
 
 static const int g_recv_msg_roster[] = {
     /* the messages our application is able and is going to send */
-
-    MESSAGE_DESCRIBE_RECORDS,
 
     MESSAGE_TICKER_DATA,
 

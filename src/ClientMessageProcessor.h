@@ -28,6 +28,6 @@ bool dx_subscribe_symbols_to_events (dxf_connection_t connection,
                                      bool task_mode);
 
 bool dx_send_record_description (dxf_connection_t connection, bool task_mode);
-bool dx_send_protocol_description (dxf_connection_t connection);
+bool dx_send_protocol_description (dxf_connection_t connection, bool task_mode);
 
 #endif /* CLIENT_MESSAGE_SENDER_H_INCLUDED */

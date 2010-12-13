@@ -79,7 +79,7 @@ typedef struct {
     bool guard_initialized;
 } dx_connection_array_t;
 
-static dx_connection_array_t g_connection_queue = {0};
+static dx_connection_array_t g_connection_queue = { 0 };
 
 /* -------------------------------------------------------------------------- */
 
@@ -197,7 +197,7 @@ DXFEED_API ERRORCODE dxf_create_connection (const char* address, dxf_conn_termin
         dxf_string_t w_host = dx_ansi_to_unicode(address);
         
         if (w_host != NULL) {
-            dx_logging_info(L"Binding to address: %s", w_host);
+            dx_logging_verbose_info(L"Binding to address: %s", w_host);
             dx_free(w_host);
         }
     }
@@ -207,7 +207,7 @@ DXFEED_API ERRORCODE dxf_create_connection (const char* address, dxf_conn_termin
     ccd.notifier_user_data = user_data;
     
     if (!dx_bind_to_address(*connection, address, &ccd) ||
-		!dx_send_protocol_description(*connection) ||
+		!dx_send_protocol_description(*connection, false) ||
         !dx_send_record_description(*connection, false)) {
         dx_deinit_connection(*connection);
         
@@ -222,7 +222,7 @@ DXFEED_API ERRORCODE dxf_create_connection (const char* address, dxf_conn_termin
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_close_connection (dxf_connection_t connection) {
-    dx_logging_info(L"Disconnect");
+    dx_logging_verbose_info(L"Disconnect");
     
     if (!dx_validate_connection_handle(connection, false)) {
         return DXF_FAILURE;
@@ -242,7 +242,7 @@ DXFEED_API ERRORCODE dxf_close_connection (dxf_connection_t connection) {
 DXFEED_API ERRORCODE dxf_create_subscription (dxf_connection_t connection, int event_types, OUT dxf_subscription_t* subscription) {
 	static bool symbol_codec_initialized = false;
 
-    dx_logging_info(L"Create subscription, event types: %x", event_types);
+    dx_logging_verbose_info(L"Create subscription, event types: %x", event_types);
 
     dx_perform_common_actions();
 	
@@ -303,34 +303,16 @@ DXFEED_API ERRORCODE dxf_close_subscription (dxf_subscription_t subscription) {
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_add_symbol (dxf_subscription_t subscription, dxf_const_string_t symbol) {
-	dxf_int_t events;
-	dxf_connection_t connection;
-	
-    dx_logging_info(L"Adding symbol %s", symbol);
+	dx_logging_verbose_info(L"Adding symbol %s", symbol);
 
-    dx_perform_common_actions();
-    
-    if (subscription == dx_invalid_subscription) {
-        dx_set_error_code(dx_ec_invalid_func_param);
-
-        return DXF_FAILURE;
-    }
-	
-	if (!dx_get_subscription_connection(subscription, &connection) ||
-	    !dx_get_event_subscription_event_types(subscription, &events) ||
-	    !dx_add_symbols(subscription, &symbol, 1) ||
-	    !dx_subscribe(connection, &symbol, 1, events)) {
-	    
-	    return DXF_FAILURE;
-	}
-	
-	return DXF_SUCCESS;
+    return dxf_add_symbols(subscription, &symbol, 1);
 }
 
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dxf_const_string_t* symbols, int symbol_count) {
-    int i;
+    dxf_int_t events;
+    dxf_connection_t connection;
 
     dx_perform_common_actions();
 
@@ -340,40 +322,23 @@ DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dxf_const
         return DXF_FAILURE;
     }
 
-    for (i = 0; i < symbol_count; ++i) {
-        if (dxf_add_symbol(subscription, symbols[i]) == DXF_FAILURE) {
-            return DXF_FAILURE;
-        }
-    }
+    if (!dx_get_subscription_connection(subscription, &connection) ||
+        !dx_get_event_subscription_event_types(subscription, &events) ||
+        !dx_add_symbols(subscription, symbols, symbol_count) ||
+        !dx_subscribe(connection, symbols, symbol_count, events)) {
 
+        return DXF_FAILURE;
+    }
+    
     return DXF_SUCCESS;
 }
 
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_remove_symbol (dxf_subscription_t subscription, dxf_const_string_t symbol) {
-    int events;
-    dxf_connection_t connection;    
+    dx_logging_verbose_info(L"Removing symbol %s", symbol);
 
-    dx_logging_info(L"Removing symbol %s", symbol);
-
-    dx_perform_common_actions();
-    
-    if (subscription == dx_invalid_subscription) {
-        dx_set_error_code(dx_ec_invalid_func_param);
-
-        return DXF_FAILURE;
-    }
-
-    if (!dx_get_subscription_connection(subscription, &connection) ||
-        !dx_get_event_subscription_event_types(subscription, &events) ||
-        !dx_unsubscribe(connection, &symbol, 1, events) ||
-        !dx_remove_symbols(subscription, &symbol, 1)) {
-
-        return DXF_FAILURE;
-    }
-
-    return DXF_SUCCESS;
+    return dxf_remove_symbols(subscription, &symbol, 1);
 }
 
 /* -------------------------------------------------------------------------- */

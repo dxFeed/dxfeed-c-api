@@ -38,6 +38,7 @@
 				OutputFile="$(OutDir)/DXFeedd.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="bin"
+				ModuleDefinitionFile="DXFeedd.def"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/DXFeed.pdb"
 				SubSystem="2"
@@ -91,6 +92,7 @@
 				OutputFile="$(OutDir)/DXFeed.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="bin"
+				ModuleDefinitionFile="DXFeed.def"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -143,6 +145,12 @@
 			</File>
 			<File
 				RelativePath=".\src\DXFeed.c">
+			</File>
+			<File
+				RelativePath=".\DXFeed.def">
+			</File>
+			<File
+				RelativePath=".\DXFeedd.def">
 			</File>
 			<File
 				RelativePath=".\src\DXMemory.c">

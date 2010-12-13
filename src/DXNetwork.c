@@ -693,7 +693,7 @@ bool dx_reestablish_connection (dx_network_connection_context_t* context) {
         CHECKED_CALL(dx_connect_to_resolved_addresses, context);
     }
     
-    CHECKED_CALL(dx_send_protocol_description, context->connection);
+    CHECKED_CALL_2(dx_send_protocol_description, context->connection, false);
     CHECKED_CALL_2(dx_send_record_description, context->connection, false);
     CHECKED_CALL_2(dx_process_connection_subscriptions, context->connection, dx_server_event_subscription_refresher);
     

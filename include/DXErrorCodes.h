@@ -153,6 +153,7 @@ typedef enum {
     dx_pec_describe_protocol_message_corrupted,
     dx_pec_unexpected_message_sequence_internal,
     dx_pec_local_message_not_supported_by_server,
+    dx_pec_inconsistent_message_support,
     
     /* connection error codes */
     

@@ -24,6 +24,8 @@
     #define DXFEED_API __declspec(dllexport)
 #elif  DXFEED_IMPORTS
     #define DXFEED_API __declspec(dllimport)
+#elif __cplusplus
+    #define DXFEED_API extern "C"
 #else
     #define DXFEED_API
 #endif

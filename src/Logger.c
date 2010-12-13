@@ -162,6 +162,16 @@ bool dx_init_current_time_key (void) {
 }
 
 /* -------------------------------------------------------------------------- */
+
+static void dx_flush_log (void) {
+    if (g_log_file == NULL) {
+        return;
+    }
+    
+    fflush(g_log_file);
+}
+
+/* -------------------------------------------------------------------------- */
 /*
  *	External interface
  */
@@ -184,7 +194,9 @@ DXFEED_API ERRORCODE dxf_initialize_logger (const char* file_name, int rewrite_f
         return DXF_FAILURE;
     }
 
-    puts("Logger is initialized");
+    dx_logging_info(L"Logging started: file %s, verbose mode is %s",
+                    rewrite_file ? L"rewritten" : L"not rewritten", verbose ? L"on" : L"off");
+    dx_flush_log();
     
     return DXF_SUCCESS;
 }
@@ -197,12 +209,25 @@ void dx_logging_error (dxf_const_string_t message ) {
     }
 
     fwprintf(g_log_file, L"\n%s %s%s", dx_get_current_time(), g_error_prefix, message);
+    dx_flush_log();
 }
 
 /* -------------------------------------------------------------------------- */
 
 void dx_logging_last_error (void) {
     dx_logging_error(dx_get_error_description(dx_get_error_code()));
+    dx_flush_log();
+}
+
+/* -------------------------------------------------------------------------- */
+
+void dx_logging_last_error_verbose (void) {
+    if (!g_verbose_logger_mode) {
+        return;
+    }
+    
+    dx_logging_error(dx_get_error_description(dx_get_error_code()));
+    dx_flush_log();
 }
 
 /* -------------------------------------------------------------------------- */
@@ -244,6 +269,10 @@ void dx_logging_info( const dxf_char_t* format, ... ) {
 
 /* -------------------------------------------------------------------------- */
 
-void dx_logging_gap() {
+void dx_logging_verbose_gap (void) {
+    if (!g_verbose_logger_mode) {
+        return;
+    }
+    
     fwprintf(g_log_file, L"\n");
 }

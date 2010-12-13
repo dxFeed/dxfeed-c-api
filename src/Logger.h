@@ -33,8 +33,9 @@
 void dx_logging_error (dxf_const_string_t message);
 void dx_logging_info (const dxf_char_t* format, ...);
 void dx_logging_verbose_info (const dxf_char_t* format, ...);
-void dx_logging_gap ();
+void dx_logging_verbose_gap (void);
 
-void dx_logging_last_error();
+void dx_logging_last_error (void);
+void dx_logging_last_error_verbose (void);
 
 #endif // LOGGER_H

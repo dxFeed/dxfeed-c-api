@@ -306,16 +306,61 @@ bool dx_write_event_records (void* bocc) {
 
 int dx_describe_records_sender_task (void* data, int command) {
     int res = dx_tes_pop_me;
-    
+
     if (IS_FLAG_SET(command, dx_tc_free_resources)) {
         return res | dx_tes_success;
     }
-    
+
     if (dx_send_record_description((dxf_connection_t)data, true)) {
         res |= dx_tes_success;
     }
-    
+
     return res;
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_get_event_server_support (dxf_connection_t connection, int event_types, bool unsubscribe, OUT dx_message_support_status_t* res) {
+    dx_event_id_t eid = dx_eid_begin;
+    
+    *res = dx_mss_pending;
+
+    for (; eid < dx_eid_count; ++eid) {
+        if (event_types & DX_EVENT_BIT_MASK(eid)) {
+            const dx_event_subscription_param_t* subscr_params = NULL;
+            int j = 0;
+            int param_count = dx_get_event_subscription_params(eid, &subscr_params);
+
+            for (; j < param_count; ++j) {
+                const dx_event_subscription_param_t* cur_param = subscr_params + j;
+                dx_message_type_t msg_type = dx_get_subscription_message_type(unsubscribe ? dx_at_remove_subscription : dx_at_add_subscription, cur_param->subscription_type);
+                dx_message_support_status_t msg_res;
+
+                CHECKED_CALL_3(dx_is_message_supported_by_server, connection, msg_type, &msg_res);
+                
+                if (msg_res != *res) {
+                    if (*res == dx_mss_pending) {
+                        *res = msg_res;
+                    } else {
+                        if (msg_res == dx_mss_pending) {
+                            /* combination of messages with known and unknown support is forbidden */
+                            
+                            return dx_set_error_code(dx_pec_inconsistent_message_support);
+                        }
+                        
+                        /* combination of supported and unsupported messages means that the server
+                           does not fully support our requirements, hence the overall 'unsupported' result */
+                           
+                        *res = dx_mss_not_supported;
+                        
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    
+    return true;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -373,6 +418,22 @@ static bool dx_write_describe_protocol_recvs (void* bocc) {
 }
 
 /* -------------------------------------------------------------------------- */
+
+int dx_describe_protocol_sender_task (void* data, int command) {
+    int res = dx_tes_pop_me;
+
+    if (IS_FLAG_SET(command, dx_tc_free_resources)) {
+        return res | dx_tes_success;
+    }
+
+    if (dx_send_protocol_description((dxf_connection_t)data, true)) {
+        res |= dx_tes_success;
+    }
+
+    return res;
+}
+
+/* -------------------------------------------------------------------------- */
 /*
  *	External interface
  */
@@ -388,31 +449,19 @@ bool dx_subscribe_symbols_to_events (dxf_connection_t connection,
     {
         dx_message_support_status_t msg_support_status;
 
-        /*
-         *	A dirty little trick here.
-         *  In fact, this function relies on up to six different message types: ticker, stream and history
-         *  addition/removal messages. And formally they may be supported independently, so we must check exactly
-         *  those messages that we're gonna use. Implementing the proper check would result in splitting the single
-         *  task into many ones, producing great memory and performance overhead.
-         *  But it's sane to assume that those message types are in fact interconnected and may not be supported
-         *  apart from each other. So only one message is checked, and it's assumed that the rest has the same status.
-         *  This piece of code must be re-done in case this assumption turns false.
-         */
-        
-        CHECKED_CALL_3(dx_is_message_supported_by_server, connection, MESSAGE_TICKER_ADD_SUBSCRIPTION, &msg_support_status);
+        CHECKED_CALL_4(dx_get_event_server_support, connection, event_types, unsubscribe, &msg_support_status);
 
         switch (msg_support_status) {
-        case dx_mss_supported:
-            /* everything's okay, proceeding with sending */
-            break;
         case dx_mss_not_supported:
             return dx_set_error_code(dx_pec_local_message_not_supported_by_server);
         case dx_mss_pending:
             if (task_mode) {
                 /* this task must never be executed unless it's clear whether the message is supported */
                 return dx_set_error_code(dx_ec_internal_assert_violation);
-            } else {
-                /* scheduling the task for later execution and returning success */
+            }
+        default:
+            if (!task_mode) {
+                /* scheduling the task for asynchronous execution */
                 
                 void* data = dx_create_event_subscription_task_data(connection, symbols, symbol_count, event_types, unsubscribe);
                 
@@ -439,7 +488,7 @@ bool dx_subscribe_symbols_to_events (dxf_connection_t connection,
                     dx_message_type_t msg_type = dx_get_subscription_message_type(unsubscribe ? dx_at_remove_subscription : dx_at_add_subscription, cur_param->subscription_type);
 
                     if (!dx_subscribe_symbol_to_record(connection, msg_type, symbols[i],
-                        dx_encode_symbol_name(symbols[i]), cur_param->record_id)) {
+                                                       dx_encode_symbol_name(symbols[i]), cur_param->record_id)) {
                         
                         return false;
                     }
@@ -460,30 +509,13 @@ bool dx_send_record_description (dxf_connection_t connection, bool task_mode) {
     dxf_byte_t* initial_buffer = NULL;
     int message_size = 0;
     
-    dx_logging_info(L"Update record description");
+    dx_logging_verbose_info(L"Update record description");
     
     CHECKED_CALL_2(dx_validate_connection_handle, connection, true);
 
-    {
-        dx_message_support_status_t msg_support_status;
-        
-        CHECKED_CALL_3(dx_is_message_supported_by_server, connection, MESSAGE_DESCRIBE_RECORDS, &msg_support_status);
-        
-        switch (msg_support_status) {
-        case dx_mss_supported:
-            /* everything's okay, proceeding with sending */
-            break;
-        case dx_mss_not_supported:
-            return dx_set_error_code(dx_pec_local_message_not_supported_by_server);
-        case dx_mss_pending:
-            if (task_mode) {
-                /* this task must never be executed unless it's clear whether the message is supported */
-                return dx_set_error_code(dx_ec_internal_assert_violation);
-            }
-            
-            /* scheduling the task for later execution and returning success */
-            return dx_add_worker_thread_task(connection, dx_describe_records_sender_task, (void*)connection);
-        }
+    if (!task_mode) {        
+        /* scheduling the task for asynchronous execution */
+        return dx_add_worker_thread_task(connection, dx_describe_records_sender_task, (void*)connection);        
     }
     
     bocc = dx_get_buffered_output_connection_context(connection);
@@ -531,16 +563,27 @@ bool dx_send_record_description (dxf_connection_t connection, bool task_mode) {
 }
 /* -------------------------------------------------------------------------- */
 
-bool dx_send_protocol_description (dxf_connection_t connection) {
+bool dx_send_protocol_description (dxf_connection_t connection, bool task_mode) {
     static const int initial_size = 1024;
 
     void* bocc = NULL;
     dxf_byte_t* initial_buffer = NULL;
     int message_size = 0;
 
-    dx_logging_info(L"Update protocol description");
+    dx_logging_verbose_info(L"Update protocol description");
 
     CHECKED_CALL_2(dx_validate_connection_handle, connection, true);
+    
+    if (!task_mode) {        
+        /* scheduling the task for asynchronous execution */
+        if (!dx_add_worker_thread_task(connection, dx_describe_protocol_sender_task, (void*)connection) ||
+            !dx_describe_protocol_sent(connection)) {
+            
+            return false;
+        }
+        
+        return true;
+    }
 
     bocc = dx_get_buffered_output_connection_context(connection);
 
@@ -586,5 +629,5 @@ bool dx_send_protocol_description (dxf_connection_t connection) {
 
     dx_free(initial_buffer);
 
-    return dx_describe_protocol_sent(connection);
+    return true;
 }

@@ -322,7 +322,7 @@ dx_symbol_data_ptr_t dx_subscribe_symbol (dx_event_subscription_connection_conte
     dx_symbol_data_ptr_t res = NULL;
     bool is_just_created = false;
     
-    dx_logging_info(L"Subscribe symbol: %s", symbol_name);
+    dx_logging_verbose_info(L"Subscribe symbol: %s", symbol_name);
 
     {
         dx_symbol_comparator_t comparator = dx_ciphered_symbol_comparator;
@@ -400,7 +400,7 @@ bool dx_unsubscribe_symbol (dx_event_subscription_connection_context_t* context,
         int subscr_index;
         bool failed = false;
 
-        dx_logging_info(L"Unsubscribe symbol: %s", symbol_data->name);
+        dx_logging_verbose_info(L"Unsubscribe symbol: %s", symbol_data->name);
         
         DX_ARRAY_SEARCH(symbol_data->subscriptions.elements, 0, symbol_data->subscriptions.size, owner, DX_NUMERIC_COMPARATOR, false,
                         subscr_exists, subscr_index);
@@ -854,7 +854,7 @@ bool dx_add_listener (dxf_subscription_t subscr_id, dxf_event_listener_t listene
         return true;
     }
     
-    dx_logging_info(L"Add listener: %d", listener_index);
+    dx_logging_verbose_info(L"Add listener: %d", listener_index);
 
     /* a guard mutex is required to protect the internal containers 
        from the secondary data retriever threads */
@@ -895,7 +895,7 @@ bool dx_remove_listener (dxf_subscription_t subscr_id, dxf_event_listener_t list
         return true;
     }
 
-    dx_logging_info(L"Remove listener: %d", listener_index);
+    dx_logging_verbose_info(L"Remove listener: %d", listener_index);
 
     /* a guard mutex is required to protect the internal containers 
        from the secondary data retriever threads */
@@ -1005,7 +1005,7 @@ bool dx_process_event_data (dxf_connection_t connection,
         return dx_set_error_code(dx_esec_invalid_event_type);
     }
     
-    dx_logging_info(L"Process event data. Symbol: %s, data count: %d", symbol_name, data_count);
+    dx_logging_verbose_info(L"Process event data. Symbol: %s, data count: %d", symbol_name, data_count);
 
     /* this function is supposed to be called from a different thread than the other
        interface functions */
@@ -1071,7 +1071,7 @@ bool dx_get_last_symbol_event (dxf_connection_t connection, dxf_const_string_t s
     
     event_id = dx_get_event_id_by_bitmask(event_type);
     
-    dx_logging_info(L"Getting last event. Symbol: %s, event type: %s", symbol_name, dx_event_type_to_string(event_type));
+    dx_logging_verbose_info(L"Getting last event. Symbol: %s, event type: %s", symbol_name, dx_event_type_to_string(event_type));
 
     CHECKED_CALL(dx_mutex_lock, &(context->subscr_guard));
 

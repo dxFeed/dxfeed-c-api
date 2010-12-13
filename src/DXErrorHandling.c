@@ -106,7 +106,9 @@ dx_error_function_result_t dx_set_last_error (dx_error_code_t error_code) {
     
     *error_data = error_code;
 
-    dx_logging_error(dx_get_error_description(error_code));
+    if (error_code != dx_ec_success) {
+        dx_logging_error(dx_get_error_description(error_code));
+    }
 
     return dx_efr_success;
 }

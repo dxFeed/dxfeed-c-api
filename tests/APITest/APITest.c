@@ -6,7 +6,8 @@
 #include <stdio.h>
 #include <Windows.h>
 
-const char dxfeed_host[] = "localhost:5555";
+//const char dxfeed_host[] = "localhost:5555";
+const char dxfeed_host[] = "demo.dxfeed.com:7300";
 
 dxf_const_string_t dx_event_type_to_string (int event_type) {
 	switch (event_type){
@@ -96,7 +97,7 @@ int main (int argc, char* argv[]) {
  
 	dxf_int_t get_event_types;
 
-	dxf_initialize_logger( "log.log", true, true, true );
+	dxf_initialize_logger( "log.log", true, true, false );
 	
 	printf("API test started.\n");    
     printf("Connecting to host %s...\n", dxfeed_host);

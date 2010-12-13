@@ -99,9 +99,6 @@ typedef struct {
     dxf_char_t symbol_buffer[SYMBOL_BUFFER_LEN + 1];
     dxf_string_t symbol_result;
 
-    dxf_int_t last_cipher;
-    dxf_string_t last_symbol;
-    
     int* record_server_support_states;
     dx_record_digest_t record_digests[dx_rid_count];
     
@@ -406,8 +403,6 @@ bool dx_is_message_supported_by_server (dxf_connection_t connection, dx_message_
 
 bool dx_legacy_send_msg_bitmask (OUT int* bitmask) {
     static int s_legacy_msg_list[] = {
-        MESSAGE_DESCRIBE_RECORDS,
-
         MESSAGE_TICKER_ADD_SUBSCRIPTION,
         MESSAGE_TICKER_REMOVE_SUBSCRIPTION,
 
@@ -454,8 +449,6 @@ bool dx_legacy_send_msg_bitmask (OUT int* bitmask) {
 
 bool dx_legacy_recv_msg_bitmask (int* bitmask) {
     static int s_legacy_msg_list[] = {
-        MESSAGE_DESCRIBE_RECORDS,
-
         MESSAGE_TICKER_DATA,
 
         MESSAGE_STREAM_DATA,
@@ -681,7 +674,7 @@ static bool dx_read_message_length_and_set_buffer_limit (dx_server_msg_proc_conn
         return dx_set_error_code(dx_pec_message_incomplete);
     }
 
-    dx_logging_info(L"Length of message: %d", message_length);
+    dx_logging_verbose_info(L"Length of message: %d", message_length);
 
     dx_set_in_buffer_limit(context->bicc, message_end_offset); /* setting limit for this message */
     
@@ -690,37 +683,33 @@ static bool dx_read_message_length_and_set_buffer_limit (dx_server_msg_proc_conn
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_read_symbol (dx_server_msg_proc_connection_context_t* context) {
+static bool dx_read_symbol (dx_server_msg_proc_connection_context_t* context,
+                            OUT dxf_int_t* cipher, OUT dxf_const_string_t* symbol) {
     dxf_int_t r;
+    
+    if (context == NULL || cipher == NULL || symbol == NULL) {
+        return dx_set_error_code(dx_ec_invalid_func_param_internal);
+    }
     
     CHECKED_CALL_5(dx_codec_read_symbol, context->bicc, context->symbol_buffer, SYMBOL_BUFFER_LEN, &(context->symbol_result), &r);
     
     if ((r & dx_get_codec_valid_cipher()) != 0) {
-        context->last_cipher = r;
-        context->last_symbol = NULL;
+        *cipher = r;
+        *symbol = NULL;
 	} else if (r > 0) {
-        context->last_cipher = 0;            
-        context->last_symbol = dx_create_string_src(context->symbol_buffer);
+        *cipher = 0;            
+        *symbol = dx_create_string_src(context->symbol_buffer);
         
-        if (context->last_symbol == NULL) {
+        if (*symbol == NULL) {
             return false;
         }
-	} else {
-        if (context->symbol_result != NULL) {
-            context->last_symbol = dx_create_string_src(context->symbol_result);
-            
-            if (context->last_symbol == NULL) {
-                return false;
-            }
-
-            dx_free(context->symbol_result);
-            
-            context->last_cipher = dx_encode_symbol_name(context->last_symbol);
-        }
+	} else if (context->symbol_result != NULL) {
+        *symbol = context->symbol_result;            
+        context->symbol_result = NULL;
         
-        if (context->last_cipher == 0 && context->last_symbol == NULL) {
-            return dx_set_error_code(dx_pec_invalid_symbol);
-        }
+        *cipher = dx_encode_symbol_name(*symbol);
+    } else {
+        return dx_set_error_code(dx_pec_invalid_symbol);
     }
 
     return true;
@@ -742,7 +731,7 @@ bool dx_read_records (dx_server_msg_proc_connection_context_t* context,
 	dxf_string_t read_string;
 	const dx_record_digest_t* record_digest = &(context->record_digests[record_id]);
 	
-    dx_logging_info(L"Read records");
+    dx_logging_verbose_info(L"Read records");
 
 	for (; i < record_digest->size; ++i) {
 		switch (record_digest->elements[i]->type) {
@@ -799,26 +788,39 @@ bool dx_read_records (dx_server_msg_proc_connection_context_t* context,
 /* -------------------------------------------------------------------------- */
 
 bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) {
-    dxf_const_string_t symbol = NULL;
-	
-    void* record_buffer = NULL;
-	dx_record_id_t record_id;
-	int record_count = 0;
-    
-    dx_logging_info(L"Process data");
+    dx_logging_verbose_info(L"Process data");
 
 	while (dx_get_in_buffer_position(context->bicc) < dx_get_in_buffer_limit(context->bicc)) {
-		CHECKED_CALL(dx_read_symbol, context);
+        void* record_buffer = NULL;
+        dx_record_id_t record_id;
+        int record_count = 0;
+		
+		dxf_int_t cipher = 0;
+		dxf_const_string_t symbol = NULL;
+		
+		CHECKED_CALL_3(dx_read_symbol, context, &cipher, &symbol);
+		
+		if (symbol == NULL && !dx_decode_symbol_name(cipher, &symbol)) {
+		    return false;
+		}
+		
+		dx_store_string_buffer(context->rbcc, symbol);
 	    
 		{
 			dxf_int_t id;
 	        
-			CHECKED_CALL_2(dx_read_compact_int, context->bicc, &id);
+			if (!dx_read_compact_int(context->bicc, &id)) {
+			    dx_free_string_buffers(context->rbcc);
+			    
+			    return false;
+			}
 
 			record_id = dx_get_record_id(context->dscc, id);
 		}
 	    
 		if (!context->record_digests[record_id].in_sync_with_server) {
+			dx_free_string_buffers(context->rbcc);
+			
 			return dx_set_error_code(dx_pec_record_description_not_received);
 		}	    
 
@@ -835,26 +837,16 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 			
 			return false;
 		}
+		
+        if (!dx_transcode_record_data(context->connection, record_id, symbol, cipher,
+                                      g_buffer_managers[record_id].record_buffer_getter(context->rbcc), record_count)) {
+            dx_free_string_buffers(context->rbcc);
+
+            return false;
+        }
+
+        dx_free_string_buffers(context->rbcc);
     }
-	
-	if (context->last_symbol == NULL) {
-		if (!dx_decode_symbol_name(context->last_cipher, &symbol)) {
-		    dx_free_string_buffers(context->rbcc);
-		    
-		    return false;
-		}
-        
-        dx_store_string_buffer(context->rbcc, symbol);
-    }
-	
-	if (!dx_transcode_record_data(context->connection, record_id, symbol, context->last_cipher,
-	                              g_buffer_managers[record_id].record_buffer_getter(context->rbcc), record_count)) {
-	    dx_free_string_buffers(context->rbcc);
-	    
-	    return false;
-	}
-	
-	dx_free_string_buffers(context->rbcc);
 	
 	return true;
 }
@@ -862,7 +854,7 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 /* -------------------------------------------------------------------------- */
 
 bool dx_process_describe_records (dx_server_msg_proc_connection_context_t* context) {
-    dx_logging_info(L"Process describe records");
+    dx_logging_verbose_info(L"Process describe records");
 
     while (dx_get_in_buffer_position(context->bicc) < dx_get_in_buffer_limit(context->bicc)) {
         dxf_int_t record_id;
@@ -883,7 +875,7 @@ bool dx_process_describe_records (dx_server_msg_proc_connection_context_t* conte
             return dx_set_error_code(dx_pec_record_info_corrupted);
         }
         
-        dx_logging_info(L"Record ID: %d, record name: %s, field count: %d", record_id, record_name, field_count);
+        dx_logging_verbose_info(L"Record ID: %d, record name: %s, field count: %d", record_id, record_name, field_count);
 
         rid = dx_get_record_id_by_name(record_name);
         
@@ -950,7 +942,7 @@ bool dx_read_describe_protocol_properties (dx_server_msg_proc_connection_context
 		CHECKED_CALL_2(dx_read_utf_string, context->bicc, &key);
 		CHECKED_CALL_2(dx_read_utf_string, context->bicc, &value);
 		
-		dx_logging_info(L"%s: %s", key, value);
+		dx_logging_verbose_info(L"%s: %s", key, value);
 
 		/* so far the properties are not supported */
 		
@@ -1036,7 +1028,7 @@ bool dx_read_describe_protocol_descriptor (dx_server_msg_proc_connection_context
 		CHECKED_CALL_2(dx_read_compact_int, context->bicc, &message_id);
 		CHECKED_CALL_2(dx_read_utf_string, context->bicc, &message_name);
 		
-		dx_logging_info(L"%i(%s): %s", (int)message_id, dx_get_message_type_name((int)message_id), message_name);
+		dx_logging_verbose_info(L"%i(%s): %s", (int)message_id, dx_get_message_type_name((int)message_id), message_name);
 		
 		processor(context, (int)message_id, message_name);
 		
@@ -1054,7 +1046,7 @@ bool dx_read_describe_protocol_descriptor (dx_server_msg_proc_connection_context
 bool dx_process_describe_protocol (dx_server_msg_proc_connection_context_t* context) {
     dxf_int_t magic;
 
-	dx_logging_info(L"Processing describe protocol");
+	dx_logging_verbose_info(L"Processing describe protocol");
 	
 	CHECKED_CALL(dx_mutex_lock, &(context->describe_protocol_guard));
 	
@@ -1079,21 +1071,21 @@ bool dx_process_describe_protocol (dx_server_msg_proc_connection_context_t* cont
         return dx_set_error_code(dx_pec_describe_protocol_message_corrupted);
 	}
 
-	dx_logging_info(L"Protocol properties: ");
+	dx_logging_verbose_info(L"Protocol properties: ");
 	if (!dx_read_describe_protocol_properties(context)) {
         dx_mutex_unlock(&(context->describe_protocol_guard));
 
         return false;
 	}
 	
-	dx_logging_info(L"Server sends: ");
+	dx_logging_verbose_info(L"Server sends: ");
 	if (!dx_read_describe_protocol_descriptor(context, dx_process_server_send_message_type)) {
         dx_mutex_unlock(&(context->describe_protocol_guard));
 
         return false;
 	}
 
-	dx_logging_info(L"Server receives: ");
+	dx_logging_verbose_info(L"Server receives: ");
 	if (!dx_read_describe_protocol_descriptor(context, dx_process_server_recv_message_type)) {
         dx_mutex_unlock(&(context->describe_protocol_guard));
 
@@ -1230,8 +1222,8 @@ bool dx_process_server_data (dxf_connection_t connection, const dxf_byte_t* data
         return false;
     }
 
-    dx_logging_gap();
-    dx_logging_info(L"Begin processing server data...");
+    dx_logging_verbose_gap();
+    dx_logging_verbose_info(L"Begin processing server data...");
     dx_logging_verbose_info(L"buffer length: %d", data_buffer_size);	
 
     if (data_buffer_size <= 0) {
@@ -1248,7 +1240,7 @@ bool dx_process_server_data (dxf_connection_t connection, const dxf_byte_t* data
         dx_message_type_t message_type = MESSAGE_HEARTBEAT; /* zero-length messages are treated as just heartbeats */
         const dxf_int_t message_start_pos = dx_get_in_buffer_position(context->bicc);
 
-        dx_logging_info(L"Processing message...");
+        dx_logging_verbose_info(L"Processing message...");
         dx_logging_verbose_info(L"buffer position: %d", message_start_pos);
 
         if (!dx_read_message_length_and_set_buffer_limit(context)) {
@@ -1259,7 +1251,7 @@ bool dx_process_server_data (dxf_connection_t connection, const dxf_byte_t* data
                  */
                 
                 dx_set_in_buffer_position(context->bicc, message_start_pos);
-                dx_logging_last_error();
+                dx_logging_last_error_verbose();
                 dx_set_error_code(dx_ec_success);
                 
                 break;
@@ -1343,13 +1335,13 @@ bool dx_process_server_data (dxf_connection_t connection, const dxf_byte_t* data
             }
         }
 
-        dx_logging_info(L"Message processing complete. Buffer position: %d", dx_get_in_buffer_position(context->bicc));
+        dx_logging_verbose_info(L"Message processing complete. Buffer position: %d", dx_get_in_buffer_position(context->bicc));
     }
 	
 	context->buffer_pos = dx_get_in_buffer_position(context->bicc);
 
-    dx_logging_info(L"Data processing complete. Buffer position: %d. Result: %s",
-                     dx_get_in_buffer_position(context->bicc), process_result == true ? L"true" : L"false");
+    dx_logging_verbose_info(L"Data processing complete. Buffer position: %d. Result: %s",
+                            dx_get_in_buffer_position(context->bicc), process_result == true ? L"true" : L"false");
 
 	return process_result;
 }
@@ -1361,7 +1353,7 @@ bool dx_process_server_data (dxf_connection_t connection, const dxf_byte_t* data
 /* -------------------------------------------------------------------------- */
 
 bool dx_socket_data_receiver (dxf_connection_t connection, const void* buffer, int buffer_size) {
-    dx_logging_info(L"Data received: %d bytes", buffer_size);
+    dx_logging_verbose_info(L"Data received: %d bytes", buffer_size);
 
     return dx_process_server_data(connection, buffer, buffer_size);
 }

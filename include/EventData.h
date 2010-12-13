@@ -157,6 +157,9 @@ int dx_get_event_subscription_params (dx_event_id_t event_id, OUT const dx_event
  */
 /* -------------------------------------------------------------------------- */
 
+#ifdef __cplusplus
+    extern "C"
+#endif
 const dxf_event_data_t dx_get_event_data_item (int event_mask, const dxf_event_data_t data, int index);
  
 #endif /* EVENT_DATA_H_INCLUDED */
