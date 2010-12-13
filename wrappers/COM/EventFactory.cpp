@@ -36,7 +36,7 @@ private:
         return DefIDispatchImpl::QueryInterface(riid, ppvObject);
     }
     virtual ULONG STDMETHODCALLTYPE AddRef () { return DefIDispatchImpl::AddRef(); }
-    virtual ULONG STDMETHODCALLTYPE Release () { return DefIDispatchImpl::Release(); }
+    virtual ULONG STDMETHODCALLTYPE Release () { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
 
     virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo) { return DefIDispatchImpl::GetTypeInfoCount(pctinfo); }
     virtual HRESULT STDMETHODCALLTYPE GetTypeInfo (UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
@@ -145,7 +145,7 @@ private:
         return DefIDispatchImpl::QueryInterface(riid, ppvObject);
     }
     virtual ULONG STDMETHODCALLTYPE AddRef () { return DefIDispatchImpl::AddRef(); }
-    virtual ULONG STDMETHODCALLTYPE Release () { return DefIDispatchImpl::Release(); }
+    virtual ULONG STDMETHODCALLTYPE Release () { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
 
     virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo) { return DefIDispatchImpl::GetTypeInfoCount(pctinfo); }
     virtual HRESULT STDMETHODCALLTYPE GetTypeInfo (UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
@@ -287,7 +287,7 @@ private:
         return DefIDispatchImpl::QueryInterface(riid, ppvObject);
     }
     virtual ULONG STDMETHODCALLTYPE AddRef () { return DefIDispatchImpl::AddRef(); }
-    virtual ULONG STDMETHODCALLTYPE Release () { return DefIDispatchImpl::Release(); }
+    virtual ULONG STDMETHODCALLTYPE Release () { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
 
     virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo) { return DefIDispatchImpl::GetTypeInfoCount(pctinfo); }
     virtual HRESULT STDMETHODCALLTYPE GetTypeInfo (UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
@@ -396,7 +396,7 @@ private:
         return DefIDispatchImpl::QueryInterface(riid, ppvObject);
     }
     virtual ULONG STDMETHODCALLTYPE AddRef () { return DefIDispatchImpl::AddRef(); }
-    virtual ULONG STDMETHODCALLTYPE Release () { return DefIDispatchImpl::Release(); }
+    virtual ULONG STDMETHODCALLTYPE Release () { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
 
     virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo) { return DefIDispatchImpl::GetTypeInfoCount(pctinfo); }
     virtual HRESULT STDMETHODCALLTYPE GetTypeInfo (UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
@@ -469,7 +469,7 @@ private:
         return DefIDispatchImpl::QueryInterface(riid, ppvObject);
     }
     virtual ULONG STDMETHODCALLTYPE AddRef () { return DefIDispatchImpl::AddRef(); }
-    virtual ULONG STDMETHODCALLTYPE Release () { return DefIDispatchImpl::Release(); }
+    virtual ULONG STDMETHODCALLTYPE Release () { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
 
     virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo) { return DefIDispatchImpl::GetTypeInfoCount(pctinfo); }
     virtual HRESULT STDMETHODCALLTYPE GetTypeInfo (UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
@@ -619,7 +619,7 @@ private:
         return DefIDispatchImpl::QueryInterface(riid, ppvObject);
     }
     virtual ULONG STDMETHODCALLTYPE AddRef () { return DefIDispatchImpl::AddRef(); }
-    virtual ULONG STDMETHODCALLTYPE Release () { return DefIDispatchImpl::Release(); }
+    virtual ULONG STDMETHODCALLTYPE Release () { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
 
     virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo) { return DefIDispatchImpl::GetTypeInfoCount(pctinfo); }
     virtual HRESULT STDMETHODCALLTYPE GetTypeInfo (UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {

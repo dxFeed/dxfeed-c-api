@@ -2,5 +2,5 @@ LIBRARY DXFeedCOM
 EXPORTS
 DllCanUnloadNow		PRIVATE
 DllGetClassObject	PRIVATE
-DllRegisterServer
-DllUnregisterServer
+DllRegisterServer   PRIVATE
+DllUnregisterServer PRIVATE

@@ -142,6 +142,8 @@ struct RegKeyWrapperCreate : public RegKeyWrapper {
         
         ::RegCloseKey(m_key);
         
+        m_key = NULL;
+        
         if (getRemoveFlag()) {
             ::RegDeleteKey(m_parentKey, m_subkey.c_str());
         }
@@ -206,14 +208,14 @@ const TCHAR g_typeLibFileName[] = _T("DXFeedCOM.tlb");
 /* -------------------------------------------------------------------------- */
 
 const TCHAR* stringFromCLSID (REFIID riid) {
-    static _bstr_t container;    
+    static _bstr_t container;
     LPOLESTR stringBuf = NULL;
     
     if (::StringFromCLSID(riid, &stringBuf) != S_OK) {
         return NULL;
     }
     
-    container = _bstr_t(stringBuf, true);
+    container = _bstr_t(::SysAllocStringLen(stringBuf, g_guidStringSize - 1), false);
     ::CoTaskMemFree(stringBuf);
     
     return (const TCHAR*)container;
@@ -255,7 +257,7 @@ RegKeyWrapper* getRegistryTree (bool haltOnError = true) {
             RegKeyWrapper* clsidKey = NULL;
             
             try {
-                clsidKey = new RegKeyWrapperOpen(rootKey.get(), g_clsidStr, KEY_ALL_ACCESS);
+                clsidKey = new RegKeyWrapperOpen(rootKey.get(), g_clsidStr, KEY_WRITE);
             } catch (...) {
                 if (haltOnError) {
                     throw;
@@ -280,7 +282,7 @@ RegKeyWrapper* getRegistryTree (bool haltOnError = true) {
                 }
 
                 try {
-                    RegKeyWrapper* inProcSrvKey = new RegKeyWrapperCreate(clsidKey, _T("InprocServer32"), REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS);
+                    RegKeyWrapper* inProcSrvKey = new RegKeyWrapperCreate(objId, _T("InprocServer32"), REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS);
                     TCHAR libPath[MAX_PATH];
                     DWORD realPathLength = ::GetModuleFileName(LibraryLocker::GetLibraryHandle(), libPath, MAX_PATH);
 
@@ -297,7 +299,7 @@ RegKeyWrapper* getRegistryTree (bool haltOnError = true) {
                 }
 
                 try {
-                    RegKeyWrapper* progIdKey = new RegKeyWrapperCreate(clsidKey, _T("ProgID"), REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS);
+                    RegKeyWrapper* progIdKey = new RegKeyWrapperCreate(objId, _T("ProgID"), REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS);
 
                     progIdKey->setValue(NULL, REG_SZ, (const BYTE*)g_progID, sizeof(g_progID));
                 } catch (...) {

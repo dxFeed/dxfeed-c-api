@@ -36,10 +36,11 @@
 				OutputFile="$(OutDir)/DXFeedCOMd.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\bin"
+				ModuleDefinitionFile="DXFeedCOMd.def"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/DXFeedCOM.pdb"
 				SubSystem="2"
-				ImportLibrary="$(OutDir)/DXFeedCOM.lib"
+				ImportLibrary="..\..\bin\DXFeedCOMd.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -87,11 +88,12 @@
 				OutputFile="$(OutDir)/DXFeedCOM.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\bin"
+				ModuleDefinitionFile="DXFeedCOM.def"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="$(OutDir)/DXFeedCOM.lib"
+				ImportLibrary="..\..\bin\DXFeedCOM.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"

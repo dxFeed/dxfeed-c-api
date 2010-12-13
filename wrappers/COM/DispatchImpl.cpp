@@ -62,24 +62,6 @@ ULONG STDMETHODCALLTYPE DefIDispatchImpl::AddRef () {
 
 /* -------------------------------------------------------------------------- */
 
-ULONG STDMETHODCALLTYPE DefIDispatchImpl::Release () {
-    LibraryLocker::ReleaseLock();
-
-    int res = InterlockedDecrement(&m_refCount);
-
-    if (res == 0) {
-        if (m_customizer != NULL) {
-            m_customizer->OnBeforeDelete();
-        }
-        
-        delete this;
-    }
-
-    return res;
-}
-
-/* -------------------------------------------------------------------------- */
-
 HRESULT STDMETHODCALLTYPE DefIDispatchImpl::GetTypeInfoCount (UINT *pctinfo) {
     *pctinfo = 1;
 
@@ -133,4 +115,20 @@ HRESULT STDMETHODCALLTYPE DefIDispatchImpl::Invoke (DISPID dispIdMember, REFIID 
     }
 
     return ::DispInvoke(this, m_typeInfo, dispIdMember, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
+}
+
+/* -------------------------------------------------------------------------- */
+
+LONG DefIDispatchImpl::ReleaseImpl () {
+    LibraryLocker::ReleaseLock();
+
+    LONG res = InterlockedDecrement(&m_refCount);
+
+    if (res == 0) {
+        if (m_customizer != NULL) {
+            m_customizer->OnBeforeDelete();
+        }
+    }
+
+    return res;
 }

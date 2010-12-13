@@ -21,7 +21,6 @@ struct DefIDispatchImpl : public IDispatch {
     
     virtual HRESULT STDMETHODCALLTYPE QueryInterface (REFIID riid, void **ppvObject);
     virtual ULONG STDMETHODCALLTYPE AddRef ();
-    virtual ULONG STDMETHODCALLTYPE Release ();
 
     virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo);
     virtual HRESULT STDMETHODCALLTYPE GetTypeInfo (UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo);
@@ -30,6 +29,10 @@ struct DefIDispatchImpl : public IDispatch {
     virtual HRESULT STDMETHODCALLTYPE Invoke (DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
                                               DISPPARAMS *pDispParams, VARIANT *pVarResult,
                                               EXCEPINFO *pExcepInfo, UINT *puArgErr);    
+protected:
+
+    LONG ReleaseImpl ();
+
 private:
 
     LONG m_refCount;
