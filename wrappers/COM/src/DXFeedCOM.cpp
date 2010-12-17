@@ -4,6 +4,7 @@
 #include "TypeLibraryManager.h"
 #include "Feed.h"
 #include "LibraryLocker.h"
+#include "Interfaces.h"
 
 #include <Windows.h>
 

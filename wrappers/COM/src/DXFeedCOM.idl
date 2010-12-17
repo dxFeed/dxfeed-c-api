@@ -136,7 +136,7 @@ library DXFeedCOM {
     };
     
     [uuid(F04762D2-A6BF-4762-ADB0-67EC51B6BAAE), helpstring("Connection termination notifier sink"), oleautomation, nonextensible]
-    interface IDXConnectionTermination : IDispatch {
+    interface IDXConnectionTerminationNotifier : IDispatch {
         [id(1), helpstring("Connection termination processor")]
         HRESULT OnConnectionTerminated ([in] IDispatch*);
     };

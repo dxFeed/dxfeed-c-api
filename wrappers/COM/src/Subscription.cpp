@@ -5,6 +5,7 @@
 #include "ConnectionPointImpl.h"
 #include "Guids.h"
 #include "EventFactory.h"
+#include "Interfaces.h"
 
 #include <ComDef.h>
 
@@ -26,21 +27,23 @@ class DXSubscription : private IDXSubscription, private DefIDispatchImpl,
 private:    
     
     virtual HRESULT STDMETHODCALLTYPE QueryInterface (REFIID riid, void **ppvObject);
-    virtual ULONG STDMETHODCALLTYPE AddRef () { return DefIDispatchImpl::AddRef(); }
+    virtual ULONG STDMETHODCALLTYPE AddRef () { return AddRefImpl(); }
     virtual ULONG STDMETHODCALLTYPE Release () { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
 
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo) { return DefIDispatchImpl::GetTypeInfoCount(pctinfo); }
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo) {
+        return GetTypeInfoCountImpl(pctinfo);
+    }
     virtual HRESULT STDMETHODCALLTYPE GetTypeInfo (UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
-        return DefIDispatchImpl::GetTypeInfo(iTInfo, lcid, ppTInfo);
+        return GetTypeInfoImpl(iTInfo, lcid, ppTInfo);
     }
     virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames (REFIID riid, LPOLESTR *rgszNames,
                                                      UINT cNames, LCID lcid, DISPID *rgDispId) {
-        return DefIDispatchImpl::GetIDsOfNames(riid, rgszNames, cNames, lcid, rgDispId);
+        return GetIDsOfNamesImpl(riid, rgszNames, cNames, lcid, rgDispId);
     }
     virtual HRESULT STDMETHODCALLTYPE Invoke (DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
                                               DISPPARAMS *pDispParams, VARIANT *pVarResult,
                                               EXCEPINFO *pExcepInfo, UINT *puArgErr) {
-        return DefIDispatchImpl::Invoke(dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
+        return InvokeImpl(this, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
     }
     
     virtual HRESULT STDMETHODCALLTYPE AddSymbol (BSTR symbol);
@@ -97,6 +100,14 @@ DXSubscription::DXSubscription (dxf_connection_t connection, int eventTypes, IUn
     if (dxf_create_subscription(connection, eventTypes, &m_subscrHandle) == DXF_FAILURE) {
         throw "Failed to create a subscription";
     }
+    
+    if (DispUtils::GetMethodId(DIID_IDXEventListener, _bstr_t("OnNewData"), OUT m_listenerMethodId) != S_OK) {
+        m_listenerMethodId = 0;
+    }
+    
+    if (dxf_attach_event_listener(m_subscrHandle, OnNewData, this) != DXF_SUCCESS) {
+        throw "Failed to attach an internal event listener";
+    }
 }
 
 /* -------------------------------------------------------------------------- */
@@ -116,7 +127,7 @@ HRESULT STDMETHODCALLTYPE DXSubscription::QueryInterface (REFIID riid, void **pp
         return NOERROR;
     }
 
-    return DefIDispatchImpl::QueryInterface(riid, ppvObject);
+    return QueryInterfaceImpl(this, riid, ppvObject);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -300,6 +311,8 @@ void DXSubscription::OnNewData (int eventType, dxf_const_string_t symbol, const 
         return;
     }
     
+    IUnknownWrapper dcw(dataCollection);
+    
     try {
         listener_set_t::const_iterator it = thisPtr->m_listeners.begin();
         listener_set_t::const_iterator itEnd = thisPtr->m_listeners.end();
@@ -311,16 +324,10 @@ void DXSubscription::OnNewData (int eventType, dxf_const_string_t symbol, const 
                                       dataCollection, storage, listenerParams);
 
         for (; it != itEnd; ++it) {
-            // the sink is expected to Release the passed pointers
-            dataCollection->AddRef();
-            thisPtr->AddRef();
-            
             (*it)->Invoke(thisPtr->m_listenerMethodId, IID_NULL, 0, DISPATCH_METHOD, &listenerParams, NULL, NULL, NULL);
         }
     } catch (...) {    
     }
-    
-    dataCollection->Release();
 }
 
 /* -------------------------------------------------------------------------- */
@@ -398,16 +405,8 @@ HRESULT STDMETHODCALLTYPE DXSubscription::Advise (IUnknown *pUnkSink, DWORD *pdw
         return S_OK;
     }
     
-    DISPID listenerMethodId;
-    
-    if (DispUtils::GetMethodId(listener, _bstr_t("OnNewData"), OUT listenerMethodId) != S_OK) {
-        return CONNECT_E_CANNOTCONNECT;
-    }
-    
-    if (m_listenerMethodId == 0) {
-        m_listenerMethodId = listenerMethodId;
-    } else if (m_listenerMethodId != listenerMethodId) {
-        return CONNECT_E_CANNOTCONNECT;
+    if (m_listenerMethodId == 0) {        
+        return DISP_E_UNKNOWNNAME;
     }
     
     m_listeners.insert(listener);
@@ -476,23 +475,23 @@ class DXEventDataCollection : private IDXEventDataCollection, private DefIDispat
 private:
 
     virtual HRESULT STDMETHODCALLTYPE QueryInterface (REFIID riid, void **ppvObject) {
-        return DefIDispatchImpl::QueryInterface(riid, ppvObject);
+        return QueryInterfaceImpl(this, riid, ppvObject);
     }
-    virtual ULONG STDMETHODCALLTYPE AddRef () { return DefIDispatchImpl::AddRef(); }
+    virtual ULONG STDMETHODCALLTYPE AddRef () { return AddRefImpl(); }
     virtual ULONG STDMETHODCALLTYPE Release () { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
 
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo) { return DefIDispatchImpl::GetTypeInfoCount(pctinfo); }
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo) { return GetTypeInfoCountImpl(pctinfo); }
     virtual HRESULT STDMETHODCALLTYPE GetTypeInfo (UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
-        return DefIDispatchImpl::GetTypeInfo(iTInfo, lcid, ppTInfo);
+        return GetTypeInfoImpl(iTInfo, lcid, ppTInfo);
     }
     virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames (REFIID riid, LPOLESTR *rgszNames,
                                                      UINT cNames, LCID lcid, DISPID *rgDispId) {
-        return DefIDispatchImpl::GetIDsOfNames(riid, rgszNames, cNames, lcid, rgDispId);
+        return GetIDsOfNamesImpl(riid, rgszNames, cNames, lcid, rgDispId);
     }
     virtual HRESULT STDMETHODCALLTYPE Invoke (DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
                                               DISPPARAMS *pDispParams, VARIANT *pVarResult,
                                               EXCEPINFO *pExcepInfo, UINT *puArgErr) {
-        return DefIDispatchImpl::Invoke(dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
+        return InvokeImpl(this, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
     }
     
     HRESULT STDMETHODCALLTYPE GetEventCount (INT* count);
@@ -549,7 +548,7 @@ HRESULT STDMETHODCALLTYPE DXEventDataCollection::GetEvent (INT index, IDispatch*
     
     dxf_event_data_t singleEventData = dx_get_event_data_item(m_eventType, m_eventData, index);
     
-    if ((*eventData = EventDataFactory::CreateInstance(m_eventType, singleEventData, static_cast<IDXEventDataCollection*>(this))) == NULL) {
+    if ((*eventData = EventDataFactory::CreateInstance(m_eventType, singleEventData, this)) == NULL) {
         return E_FAIL;
     }
     

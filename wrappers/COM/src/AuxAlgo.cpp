@@ -1,6 +1,7 @@
 // Implementation of the helper classes and functions
 
 #include "AuxAlgo.h"
+#include "TypeLibraryManager.h"
 
 #include <ComDef.h>
 
@@ -12,14 +13,25 @@
 
 namespace DispUtils {
 
-HRESULT GetMethodId (IDispatch* obj, const _bstr_t& methodName, OUT DISPID& methodId) {
-    if (obj == NULL) {
-        return E_POINTER;
+HRESULT GetMethodId (REFIID riid, const _bstr_t& methodName, OUT DISPID& methodId) {
+    TypeLibraryManager* tlm = TypeLibraryMgrStorage::GetContent ();
+    
+    if (tlm == NULL) {
+        return E_FAIL;
     }
+    
+    ITypeInfo* ti = NULL;
+    HRESULT res = tlm->GetTypeInfo(riid, ti);
+    
+    if (res != S_OK) {
+        return res;
+    }
+    
+    _ASSERT(ti != NULL);
 
     BSTR methodNameStr = const_cast<_bstr_t&>(methodName).GetBSTR();
 
-    return obj->GetIDsOfNames(IID_NULL, &methodNameStr, 1, 0, &methodId);
+    return ::DispGetIDsOfNames(ti, &methodNameStr, 1, &methodId);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -81,18 +93,16 @@ HRESULT StringArrayToSafeArray (dxf_const_string_t* stringArray, int stringCount
         return E_FAIL;
     }
     
-    HRESULT hr = S_OK;
-    bool isAccessed = false;
+    BSTR* data = NULL;
+    HRESULT hr = ::SafeArrayAccessData(safeArray, (void**)&data);
     
+    if (hr != S_OK) {
+        ::SafeArrayDestroy(safeArray);
+        
+        return hr;
+    }
+        
     try {
-        BSTR* data = NULL;
-        
-        if (::SafeArrayAccessData(safeArray, (void**)&data) != S_OK) {
-            throw "Failed to access data";
-        }
-        
-        isAccessed = true;
-        
         for (int i = 0; i < stringCount; ++i) {
             data[i] = _bstr_t(stringArray[i]).Detach();
         }
@@ -106,10 +116,7 @@ HRESULT StringArrayToSafeArray (dxf_const_string_t* stringArray, int stringCount
         hr = E_FAIL;
     }
     
-    if (isAccessed) {
-        ::SafeArrayUnaccessData(safeArray);
-    }
-    
+    ::SafeArrayUnaccessData(safeArray);
     ::SafeArrayDestroy(safeArray);
     
     return hr;

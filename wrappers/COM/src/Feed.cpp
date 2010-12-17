@@ -6,6 +6,7 @@
 #include "TypeLibraryManager.h"
 #include "DispatchImpl.h"
 #include "Connection.h"
+#include "Interfaces.h"
 
 #include <comdef.h>
 
@@ -23,23 +24,23 @@ struct DXFeed : public IDXFeed, private DefIDispatchImpl {
     friend struct DefDXFeedFactory; 
     
     virtual HRESULT STDMETHODCALLTYPE QueryInterface (REFIID riid, void **ppvObject) {
-        return DefIDispatchImpl::QueryInterface(riid, ppvObject);
+        return QueryInterfaceImpl(this, riid, ppvObject);
     }
-    virtual ULONG STDMETHODCALLTYPE AddRef () { return DefIDispatchImpl::AddRef(); }
+    virtual ULONG STDMETHODCALLTYPE AddRef () { return AddRefImpl(); }
     virtual ULONG STDMETHODCALLTYPE Release () { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
 
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo) { return DefIDispatchImpl::GetTypeInfoCount(pctinfo); }
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo) { return GetTypeInfoCountImpl(pctinfo); }
     virtual HRESULT STDMETHODCALLTYPE GetTypeInfo (UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
-        return DefIDispatchImpl::GetTypeInfo(iTInfo, lcid, ppTInfo);
+        return GetTypeInfoImpl(iTInfo, lcid, ppTInfo);
     }
     virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames (REFIID riid, LPOLESTR *rgszNames,
                                                      UINT cNames, LCID lcid, DISPID *rgDispId) {
-        return DefIDispatchImpl::GetIDsOfNames(riid, rgszNames, cNames, lcid, rgDispId);
+        return GetIDsOfNamesImpl(riid, rgszNames, cNames, lcid, rgDispId);
     }
     virtual HRESULT STDMETHODCALLTYPE Invoke (DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
                                               DISPPARAMS *pDispParams, VARIANT *pVarResult,
                                               EXCEPINFO *pExcepInfo, UINT *puArgErr) {
-        return DefIDispatchImpl::Invoke(dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
+        return InvokeImpl(this, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
     }
                                               
     virtual HRESULT STDMETHODCALLTYPE CreateConnection (BSTR address, IDispatch** connection);

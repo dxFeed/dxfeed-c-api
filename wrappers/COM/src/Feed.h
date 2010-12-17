@@ -2,21 +2,7 @@
 
 #pragma once
 
-#include <objbase.h>
-
-/* -------------------------------------------------------------------------- */
-/*
- *	IDXFeed interface
- */
-/* -------------------------------------------------------------------------- */
-
-struct IDXFeed : public IDispatch {
-    virtual HRESULT STDMETHODCALLTYPE CreateConnection (BSTR address, IDispatch** connection) = 0;
-    virtual HRESULT STDMETHODCALLTYPE GetLastError (INT* code) = 0;
-    virtual HRESULT STDMETHODCALLTYPE GetLastErrorDescr (BSTR* descr) = 0;
-    virtual HRESULT STDMETHODCALLTYPE InitLogger (BSTR file, VARIANT_BOOL overwrite,
-                                                  VARIANT_BOOL showTimezone, VARIANT_BOOL verbose) = 0;
-};
+struct IDXFeed;
 
 /* -------------------------------------------------------------------------- */
 /*

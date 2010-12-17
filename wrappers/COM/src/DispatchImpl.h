@@ -14,25 +14,25 @@
 
 struct IDispBehaviorCustomizer;
 
-struct DefIDispatchImpl : public IDispatch {
+struct DefIDispatchImpl {
+protected:
+
     DefIDispatchImpl (REFGUID riid, IUnknown* parent = NULL);
     
     void SetBehaviorCustomizer (IDispBehaviorCustomizer* customizer);    
     
-    virtual HRESULT STDMETHODCALLTYPE QueryInterface (REFIID riid, void **ppvObject);
-    virtual ULONG STDMETHODCALLTYPE AddRef ();
-
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo);
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfo (UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo);
-    virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames (REFIID riid, LPOLESTR *rgszNames,
-                                                     UINT cNames, LCID lcid, DISPID *rgDispId);
-    virtual HRESULT STDMETHODCALLTYPE Invoke (DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
-                                              DISPPARAMS *pDispParams, VARIANT *pVarResult,
-                                              EXCEPINFO *pExcepInfo, UINT *puArgErr);    
-protected:
-
+    HRESULT QueryInterfaceImpl (IDispatch* objPtr, REFIID riid, void **ppvObject);
+    LONG AddRefImpl ();
     LONG ReleaseImpl ();
 
+    HRESULT GetTypeInfoCountImpl (UINT *pctinfo);
+    HRESULT GetTypeInfoImpl (UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo);
+    HRESULT GetIDsOfNamesImpl (REFIID riid, LPOLESTR *rgszNames,
+                               UINT cNames, LCID lcid, DISPID *rgDispId);
+    HRESULT InvokeImpl (IDispatch* objPtr,
+                        DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
+                        DISPPARAMS *pDispParams, VARIANT *pVarResult,
+                        EXCEPINFO *pExcepInfo, UINT *puArgErr);
 private:
 
     LONG m_refCount;

@@ -26,7 +26,7 @@ struct TypeLibraryProperties {
 struct TypeLibraryManager {
     virtual ~TypeLibraryManager () {}
     
-    virtual HRESULT GetTypeInfo (REFGUID iid, OUT ITypeInfo** typeInfo) = 0;
+    virtual HRESULT GetTypeInfo (REFGUID iid, OUT ITypeInfo*& typeInfo) = 0;
 };
 
 /* -------------------------------------------------------------------------- */

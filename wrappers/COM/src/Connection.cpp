@@ -7,6 +7,7 @@
 #include "EventFactory.h"
 #include "AuxAlgo.h"
 #include "Guids.h"
+#include "Interfaces.h"
 
 #include "DXFeed.h"
 
@@ -28,21 +29,21 @@ class DXConnection : private IDXConnection, private DefIDispatchImpl,
     friend struct DefDXConnectionFactory;
 
     virtual HRESULT STDMETHODCALLTYPE QueryInterface (REFIID riid, void **ppvObject);
-    virtual ULONG STDMETHODCALLTYPE AddRef () { return DefIDispatchImpl::AddRef(); }
+    virtual ULONG STDMETHODCALLTYPE AddRef () { return AddRefImpl(); }
     virtual ULONG STDMETHODCALLTYPE Release () { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
 
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo) { return DefIDispatchImpl::GetTypeInfoCount(pctinfo); }
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo) { return GetTypeInfoCountImpl(pctinfo); }
     virtual HRESULT STDMETHODCALLTYPE GetTypeInfo (UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
-        return DefIDispatchImpl::GetTypeInfo(iTInfo, lcid, ppTInfo);
+        return GetTypeInfoImpl(iTInfo, lcid, ppTInfo);
     }
     virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames (REFIID riid, LPOLESTR *rgszNames,
                                                      UINT cNames, LCID lcid, DISPID *rgDispId) {
-        return DefIDispatchImpl::GetIDsOfNames(riid, rgszNames, cNames, lcid, rgDispId);
+        return GetIDsOfNamesImpl(riid, rgszNames, cNames, lcid, rgDispId);
     }
     virtual HRESULT STDMETHODCALLTYPE Invoke (DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
                                               DISPPARAMS *pDispParams, VARIANT *pVarResult,
                                               EXCEPINFO *pExcepInfo, UINT *puArgErr) {
-        return DefIDispatchImpl::Invoke(dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
+        return InvokeImpl(this, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
     }
     
     virtual HRESULT STDMETHODCALLTYPE CreateSubscription (INT eventTypes, IDispatch** subscription);
@@ -53,6 +54,8 @@ private:
     DXConnection (const char* address);
     
     static void OnConnectionTerminated (dxf_connection_t connection, void* user_data);
+    static int OnSocketThreadCreated (dxf_connection_t connection, void* user_data);
+    static void OnSocketThreadDestroyed (dxf_connection_t connection, void* user_data);
     void ClearNotifier ();
     
 private:
@@ -91,11 +94,17 @@ DXConnection::DXConnection (const char* address)
 , m_connHandle(NULL)
 , m_termNotifier(NULL)
 , m_notifierMethodId(0) {
-    if (dxf_create_connection(address, OnConnectionTerminated, reinterpret_cast<void*>(this), &m_connHandle) == DXF_FAILURE) {
+    if (dxf_create_connection(address, OnConnectionTerminated, OnSocketThreadCreated,
+                              OnSocketThreadDestroyed, reinterpret_cast<void*>(this), &m_connHandle) == DXF_FAILURE) {
         throw "Failed to establish connection";
     }
     
     SetBehaviorCustomizer(this);
+    
+    if (DispUtils::GetMethodId(DIID_IDXConnectionTerminationNotifier, _bstr_t("OnConnectionTerminated"),
+                               OUT m_notifierMethodId) != S_OK) {
+        m_notifierMethodId = 0;
+    }
 }
 
 /* -------------------------------------------------------------------------- */
@@ -115,7 +124,7 @@ HRESULT STDMETHODCALLTYPE DXConnection::QueryInterface (REFIID riid, void **ppvO
         return NOERROR;
     }
 
-    return DefIDispatchImpl::QueryInterface(riid, ppvObject);
+    return QueryInterfaceImpl(this, riid, ppvObject);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -187,9 +196,26 @@ void DXConnection::OnConnectionTerminated (dxf_connection_t connection, void* us
         return;
     }
     
-    thisPtr->AddRef(); // the pointer is passed as a function parameter, and it will be Release'd
     thisPtr->m_termNotifier->Invoke(thisPtr->m_notifierMethodId, IID_NULL, 0, DISPATCH_METHOD,
                                     &(thisPtr->m_notifierMethodParams), NULL, NULL, NULL);
+}
+
+/* -------------------------------------------------------------------------- */
+
+int DXConnection::OnSocketThreadCreated (dxf_connection_t connection, void* user_data) {
+    HRESULT res = ::CoInitializeEx(NULL, COINIT_MULTITHREADED);
+    
+    if (res == S_OK || res == S_FALSE) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+/* -------------------------------------------------------------------------- */
+
+void DXConnection::OnSocketThreadDestroyed (dxf_connection_t connection, void* user_data) {
+    ::CoUninitialize();
 }
 
 /* -------------------------------------------------------------------------- */
@@ -222,16 +248,16 @@ HRESULT STDMETHODCALLTYPE DXConnection::Advise (IUnknown *pUnkSink, DWORD *pdwCo
         return CONNECT_E_CANNOTCONNECT;
     }
     
-    if (DispUtils::GetMethodId(m_termNotifier, _bstr_t("OnConnectionTerminated"), OUT m_notifierMethodId) != S_OK) {
+    if (m_notifierMethodId == 0) {
         ClearNotifier();
         
-        return CONNECT_E_CANNOTCONNECT;
+        return DISP_E_UNKNOWNNAME;
     }
 
     VariantInit(&m_thisWrapper);
 
     m_thisWrapper.vt = VT_DISPATCH;
-    m_thisWrapper.pdispVal = static_cast<IDXConnection*>(this);
+    m_thisWrapper.pdispVal = this;
 
     m_notifierMethodParams.rgvarg = &m_thisWrapper;
     m_notifierMethodParams.rgdispidNamedArgs = NULL;

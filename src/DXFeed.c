@@ -177,7 +177,11 @@ ERRORCODE dx_perform_common_actions () {
  */
 /* -------------------------------------------------------------------------- */
 
-DXFEED_API ERRORCODE dxf_create_connection (const char* address, dxf_conn_termination_notifier_t notifier, void* user_data,
+DXFEED_API ERRORCODE dxf_create_connection (const char* address,
+                                            dxf_conn_termination_notifier_t notifier,
+                                            dxf_socket_thread_creation_notifier_t stcn,
+                                            dxf_socket_thread_destruction_notifier_t stdn,
+                                            void* user_data,
                                             OUT dxf_connection_t* connection) {
     dx_connection_context_data_t ccd;
     
@@ -204,6 +208,8 @@ DXFEED_API ERRORCODE dxf_create_connection (const char* address, dxf_conn_termin
     
     ccd.receiver = dx_socket_data_receiver;
     ccd.notifier = notifier;
+    ccd.stcn = stcn;
+    ccd.stdn = stdn;
     ccd.notifier_user_data = user_data;
     
     if (!dx_bind_to_address(*connection, address, &ccd) ||

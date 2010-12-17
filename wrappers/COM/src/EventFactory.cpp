@@ -3,6 +3,7 @@
 #include "EventFactory.h"
 #include "DispatchImpl.h"
 #include "Guids.h"
+#include "Interfaces.h"
 
 #include <ComDef.h>
 
@@ -33,23 +34,23 @@ class DXTrade : private IDXTrade, private DefIDispatchImpl {
 private:
 
     virtual HRESULT STDMETHODCALLTYPE QueryInterface (REFIID riid, void **ppvObject) {
-        return DefIDispatchImpl::QueryInterface(riid, ppvObject);
+        return QueryInterfaceImpl(this, riid, ppvObject);
     }
-    virtual ULONG STDMETHODCALLTYPE AddRef () { return DefIDispatchImpl::AddRef(); }
+    virtual ULONG STDMETHODCALLTYPE AddRef () { return AddRefImpl(); }
     virtual ULONG STDMETHODCALLTYPE Release () { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
 
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo) { return DefIDispatchImpl::GetTypeInfoCount(pctinfo); }
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo) { return GetTypeInfoCountImpl(pctinfo); }
     virtual HRESULT STDMETHODCALLTYPE GetTypeInfo (UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
-        return DefIDispatchImpl::GetTypeInfo(iTInfo, lcid, ppTInfo);
+        return GetTypeInfoImpl(iTInfo, lcid, ppTInfo);
     }
     virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames (REFIID riid, LPOLESTR *rgszNames,
                                                      UINT cNames, LCID lcid, DISPID *rgDispId) {
-        return DefIDispatchImpl::GetIDsOfNames(riid, rgszNames, cNames, lcid, rgDispId);
+        return GetIDsOfNamesImpl(riid, rgszNames, cNames, lcid, rgDispId);
     }
     virtual HRESULT STDMETHODCALLTYPE Invoke (DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
                                               DISPPARAMS *pDispParams, VARIANT *pVarResult,
                                               EXCEPINFO *pExcepInfo, UINT *puArgErr) {
-        return DefIDispatchImpl::Invoke(dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
+        return InvokeImpl(this, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
     }
     
     virtual HRESULT STDMETHODCALLTYPE GetTime (LONGLONG* value);
@@ -142,23 +143,23 @@ class DXQuote : private IDXQuote, private DefIDispatchImpl {
 private:
 
     virtual HRESULT STDMETHODCALLTYPE QueryInterface (REFIID riid, void **ppvObject) {
-        return DefIDispatchImpl::QueryInterface(riid, ppvObject);
+        return QueryInterfaceImpl(this, riid, ppvObject);
     }
-    virtual ULONG STDMETHODCALLTYPE AddRef () { return DefIDispatchImpl::AddRef(); }
+    virtual ULONG STDMETHODCALLTYPE AddRef () { return AddRefImpl(); }
     virtual ULONG STDMETHODCALLTYPE Release () { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
 
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo) { return DefIDispatchImpl::GetTypeInfoCount(pctinfo); }
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo) { return GetTypeInfoCountImpl(pctinfo); }
     virtual HRESULT STDMETHODCALLTYPE GetTypeInfo (UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
-        return DefIDispatchImpl::GetTypeInfo(iTInfo, lcid, ppTInfo);
+        return GetTypeInfoImpl(iTInfo, lcid, ppTInfo);
     }
     virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames (REFIID riid, LPOLESTR *rgszNames,
                                                      UINT cNames, LCID lcid, DISPID *rgDispId) {
-         return DefIDispatchImpl::GetIDsOfNames(riid, rgszNames, cNames, lcid, rgDispId);
+         return GetIDsOfNamesImpl(riid, rgszNames, cNames, lcid, rgDispId);
     }
     virtual HRESULT STDMETHODCALLTYPE Invoke (DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
                                               DISPPARAMS *pDispParams, VARIANT *pVarResult,
                                               EXCEPINFO *pExcepInfo, UINT *puArgErr) {
-        return DefIDispatchImpl::Invoke(dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
+        return InvokeImpl(this, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
     }
 
     virtual HRESULT STDMETHODCALLTYPE GetBidTime (LONGLONG* value);
@@ -284,23 +285,23 @@ class DXSummary : private IDXSummary, private DefIDispatchImpl {
 private:
 
     virtual HRESULT STDMETHODCALLTYPE QueryInterface (REFIID riid, void **ppvObject) {
-        return DefIDispatchImpl::QueryInterface(riid, ppvObject);
+        return QueryInterfaceImpl(this, riid, ppvObject);
     }
-    virtual ULONG STDMETHODCALLTYPE AddRef () { return DefIDispatchImpl::AddRef(); }
+    virtual ULONG STDMETHODCALLTYPE AddRef () { return AddRefImpl(); }
     virtual ULONG STDMETHODCALLTYPE Release () { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
 
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo) { return DefIDispatchImpl::GetTypeInfoCount(pctinfo); }
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo) { return GetTypeInfoCountImpl(pctinfo); }
     virtual HRESULT STDMETHODCALLTYPE GetTypeInfo (UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
-        return DefIDispatchImpl::GetTypeInfo(iTInfo, lcid, ppTInfo);
+        return GetTypeInfoImpl(iTInfo, lcid, ppTInfo);
     }
     virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames (REFIID riid, LPOLESTR *rgszNames,
                                                      UINT cNames, LCID lcid, DISPID *rgDispId) {
-        return DefIDispatchImpl::GetIDsOfNames(riid, rgszNames, cNames, lcid, rgDispId);
+        return GetIDsOfNamesImpl(riid, rgszNames, cNames, lcid, rgDispId);
     }
     virtual HRESULT STDMETHODCALLTYPE Invoke (DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
                                               DISPPARAMS *pDispParams, VARIANT *pVarResult,
                                               EXCEPINFO *pExcepInfo, UINT *puArgErr) {
-        return DefIDispatchImpl::Invoke(dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
+        return InvokeImpl(this, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
     }
 
     virtual HRESULT STDMETHODCALLTYPE GetDayHighPrice (DOUBLE* value);
@@ -393,23 +394,23 @@ class DXProfile : private IDXProfile, private DefIDispatchImpl {
 private:
 
     virtual HRESULT STDMETHODCALLTYPE QueryInterface (REFIID riid, void **ppvObject) {
-        return DefIDispatchImpl::QueryInterface(riid, ppvObject);
+        return QueryInterfaceImpl(this, riid, ppvObject);
     }
-    virtual ULONG STDMETHODCALLTYPE AddRef () { return DefIDispatchImpl::AddRef(); }
+    virtual ULONG STDMETHODCALLTYPE AddRef () { return AddRefImpl(); }
     virtual ULONG STDMETHODCALLTYPE Release () { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
 
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo) { return DefIDispatchImpl::GetTypeInfoCount(pctinfo); }
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo) { return GetTypeInfoCountImpl(pctinfo); }
     virtual HRESULT STDMETHODCALLTYPE GetTypeInfo (UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
-        return DefIDispatchImpl::GetTypeInfo(iTInfo, lcid, ppTInfo);
+        return GetTypeInfoImpl(iTInfo, lcid, ppTInfo);
     }
     virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames (REFIID riid, LPOLESTR *rgszNames,
                                                      UINT cNames, LCID lcid, DISPID *rgDispId) {
-        return DefIDispatchImpl::GetIDsOfNames(riid, rgszNames, cNames, lcid, rgDispId);
+        return GetIDsOfNamesImpl(riid, rgszNames, cNames, lcid, rgDispId);
     }
     virtual HRESULT STDMETHODCALLTYPE Invoke (DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
                                               DISPPARAMS *pDispParams, VARIANT *pVarResult,
                                               EXCEPINFO *pExcepInfo, UINT *puArgErr) {
-        return DefIDispatchImpl::Invoke(dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
+        return InvokeImpl(this, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
     }
 
     virtual HRESULT STDMETHODCALLTYPE GetDescription (BSTR* value);
@@ -466,23 +467,23 @@ class DXOrder : private IDXOrder, private DefIDispatchImpl {
 private:
 
     virtual HRESULT STDMETHODCALLTYPE QueryInterface (REFIID riid, void **ppvObject) {
-        return DefIDispatchImpl::QueryInterface(riid, ppvObject);
+        return QueryInterfaceImpl(this, riid, ppvObject);
     }
-    virtual ULONG STDMETHODCALLTYPE AddRef () { return DefIDispatchImpl::AddRef(); }
+    virtual ULONG STDMETHODCALLTYPE AddRef () { return AddRefImpl(); }
     virtual ULONG STDMETHODCALLTYPE Release () { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
 
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo) { return DefIDispatchImpl::GetTypeInfoCount(pctinfo); }
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo) { return GetTypeInfoCountImpl(pctinfo); }
     virtual HRESULT STDMETHODCALLTYPE GetTypeInfo (UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
-        return DefIDispatchImpl::GetTypeInfo(iTInfo, lcid, ppTInfo);
+        return GetTypeInfoImpl(iTInfo, lcid, ppTInfo);
     }
     virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames (REFIID riid, LPOLESTR *rgszNames,
                                                      UINT cNames, LCID lcid, DISPID *rgDispId) {
-        return DefIDispatchImpl::GetIDsOfNames(riid, rgszNames, cNames, lcid, rgDispId);
+        return GetIDsOfNamesImpl(riid, rgszNames, cNames, lcid, rgDispId);
     }
     virtual HRESULT STDMETHODCALLTYPE Invoke (DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
                                               DISPPARAMS *pDispParams, VARIANT *pVarResult,
                                               EXCEPINFO *pExcepInfo, UINT *puArgErr) {
-        return DefIDispatchImpl::Invoke(dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
+        return InvokeImpl(this, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
     }
 
     virtual HRESULT STDMETHODCALLTYPE GetIndex (LONGLONG* value);
@@ -616,23 +617,23 @@ class DXTimeAndSale : private IDXTimeAndSale, private DefIDispatchImpl {
 private:
 
     virtual HRESULT STDMETHODCALLTYPE QueryInterface (REFIID riid, void **ppvObject) {
-        return DefIDispatchImpl::QueryInterface(riid, ppvObject);
+        return QueryInterfaceImpl(this, riid, ppvObject);
     }
-    virtual ULONG STDMETHODCALLTYPE AddRef () { return DefIDispatchImpl::AddRef(); }
+    virtual ULONG STDMETHODCALLTYPE AddRef () { return AddRefImpl(); }
     virtual ULONG STDMETHODCALLTYPE Release () { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
 
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo) { return DefIDispatchImpl::GetTypeInfoCount(pctinfo); }
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo) { return GetTypeInfoCountImpl(pctinfo); }
     virtual HRESULT STDMETHODCALLTYPE GetTypeInfo (UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
-        return DefIDispatchImpl::GetTypeInfo(iTInfo, lcid, ppTInfo);
+        return GetTypeInfoImpl(iTInfo, lcid, ppTInfo);
     }
     virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames (REFIID riid, LPOLESTR *rgszNames,
                                                      UINT cNames, LCID lcid, DISPID *rgDispId) {
-        return DefIDispatchImpl::GetIDsOfNames(riid, rgszNames, cNames, lcid, rgDispId);
+        return GetIDsOfNamesImpl(riid, rgszNames, cNames, lcid, rgDispId);
     }
     virtual HRESULT STDMETHODCALLTYPE Invoke (DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
                                               DISPPARAMS *pDispParams, VARIANT *pVarResult,
                                               EXCEPINFO *pExcepInfo, UINT *puArgErr) {
-        return DefIDispatchImpl::Invoke(dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
+        return InvokeImpl(this, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
     }
 
     virtual HRESULT STDMETHODCALLTYPE GetEventId (LONGLONG* value);

@@ -327,25 +327,51 @@ void* dx_queue_executor (void* arg) {
 
 /* -------------------------------------------------------------------------- */
 
+void dx_socket_reader (dx_network_connection_context_t* context);
+
+void* dx_socket_reader_wrapper (void* arg) {
+    dx_network_connection_context_t* context = NULL;
+    dx_connection_context_data_t* context_data = NULL;
+        
+    if (arg == NULL) {
+        /* invalid input parameter
+           but we cannot report it anywhere so simply exit */
+        dx_set_error_code(dx_ec_invalid_func_param_internal);
+
+        return NULL;
+    }
+    
+    context = (dx_network_connection_context_t*)arg;
+    context_data = &(context->context_data);
+    
+    if (context_data->stcn != NULL) {
+        if (context_data->stcn(context->connection, context_data->notifier_user_data) == 0) {
+            /* zero return value means fatal client side error */
+            
+            return NULL;
+        }
+    }
+    
+    dx_socket_reader(context);
+    
+    if (context_data->stdn != NULL) {
+        context_data->stdn(context->connection, context_data->notifier_user_data);
+    }
+    
+    return NULL;
+}
+
+/* -------------------------------------------------------------------------- */
+
 bool dx_reestablish_connection (dx_network_connection_context_t* context);
 
-void* dx_socket_reader (void* arg) {
-    dx_network_connection_context_t* context = NULL;
+void dx_socket_reader (dx_network_connection_context_t* context) {
     dx_connection_context_data_t* context_data = NULL;
     bool is_thread_idle = false;
     
     char read_buf[READ_CHUNK_SIZE];
     int number_of_bytes_read = 0;
     
-    if (arg == NULL) {
-        /* invalid input parameter
-           but we cannot report it anywhere so simply exit */
-        dx_set_error_code(dx_ec_invalid_func_param_internal);
-           
-        return NULL;
-    }
-    
-    context = (dx_network_connection_context_t*)arg;
     context_data = &(context->context_data);
         
     if (!dx_init_error_subsystem()) {
@@ -353,7 +379,7 @@ void* dx_socket_reader (void* arg) {
         
         context_data->notifier(context->connection, context_data->notifier_user_data);
         
-        return NULL;
+        return;
     }
     
     /*
@@ -409,8 +435,6 @@ void* dx_socket_reader (void* arg) {
             int i = 0;
         }
     }
-
-    return NULL;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -753,7 +777,7 @@ bool dx_bind_to_address (dxf_connection_t connection, const char* address, const
     
     context->set_fields_flags |= QUEUE_THREAD_FIELD_FLAG;
     
-    if (!dx_thread_create(&(context->reader_thread), NULL, dx_socket_reader, context)) {
+    if (!dx_thread_create(&(context->reader_thread), NULL, dx_socket_reader_wrapper, context)) {
         /* failed to create a thread */
         
         return false;

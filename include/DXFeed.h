@@ -55,6 +55,12 @@
 typedef void* dxf_connection_t;
 typedef void (*dxf_conn_termination_notifier_t) (dxf_connection_t connection, void* user_data);
 
+/* the low level callback types, required in case some thread-specific initialization must be performed
+   on the client side on the thread creation/destruction */
+
+typedef int (*dxf_socket_thread_creation_notifier_t) (dxf_connection_t connection, void* user_data);
+typedef void (*dxf_socket_thread_destruction_notifier_t) (dxf_connection_t connection, void* user_data);
+
 /* -------------------------------------------------------------------------- */
 /*
  *	DXFeed C API functions
@@ -70,11 +76,19 @@ typedef void (*dxf_conn_termination_notifier_t) (dxf_connection_t connection, vo
  
  *  address - "[host[:port],]host:port"
  *  notifier - the callback to inform the client side that the connection has stumbled upon and error and will go reconnecting
+ *  stcn - the callback for informing the client side about the socket thread creation;
+           may be set to NULL if no specific action is required to perform on the client side on a new thread creation
+ *  shdn - the callback for informing the client side about the socket thread destruction;
+           may be set to NULL if no specific action is required to perform on the client side on a thread destruction
  *  user_data - the user defined value passed to the termination notifier callback along with the connection handle; may be set
                 to whatever value
  *  OUT connection - the handle of the created connection
  */
-DXFEED_API ERRORCODE dxf_create_connection (const char* address, dxf_conn_termination_notifier_t notifier, void* user_data,
+DXFEED_API ERRORCODE dxf_create_connection (const char* address,
+                                            dxf_conn_termination_notifier_t notifier,
+                                            dxf_socket_thread_creation_notifier_t stcn,
+                                            dxf_socket_thread_destruction_notifier_t stdn,
+                                            void* user_data,
                                             OUT dxf_connection_t* connection);
 
 /*

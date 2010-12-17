@@ -31,7 +31,7 @@ namespace DispUtils {
     typedef std::vector<std::wstring> string_vector_t;
     typedef std::vector<dxf_const_string_t> string_array_t;
     
-    HRESULT GetMethodId (IDispatch* obj, const _bstr_t& methodName, OUT DISPID& methodId);
+    HRESULT GetMethodId (REFIID riid, const _bstr_t& methodName, OUT DISPID& methodId);
     HRESULT SafeArrayToStringArray (SAFEARRAY* safeArray, string_vector_t& storage,
                                     OUT string_array_t& stringArray);
     HRESULT StringArrayToSafeArray (dxf_const_string_t* stringArray, int stringCount,

@@ -205,7 +205,7 @@ int main (int argc, char* argv[]) {
 
     InitializeCriticalSection(&listener_thread_guard);
 
-    if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, &connection)) {
+    if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, &connection)) {
         process_last_error();
         return -1;
     }

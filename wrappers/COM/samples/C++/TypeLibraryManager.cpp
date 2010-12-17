@@ -16,16 +16,8 @@
 typedef const GUID* GUIDPTR;
 
 static GUIDPTR const g_interfaceGuids[] = {
-    &IID_IDXFeed,
-    &IID_IDXConnection,
-    &IID_IDXSubscription,
-    &IID_IDXEventDataCollection,
-    &IID_IDXTrade,
-    &IID_IDXQuote,
-    &IID_IDXSummary,
-    &IID_IDXProfile,
-    &IID_IDXOrder,
-    &IID_IDXTimeAndSale
+    &DIID_IDXConnectionTerminationNotifier,
+    &DIID_IDXEventListener
 };
 
 static const int g_interfaceCount = sizeof(g_interfaceGuids) / sizeof(g_interfaceGuids[0]);
@@ -80,7 +72,7 @@ public:
     TypeLibraryManagerImpl ();
     virtual ~TypeLibraryManagerImpl ();
     
-    virtual HRESULT GetTypeInfo (REFGUID iid, OUT ITypeInfo** typeInfo);
+    virtual HRESULT GetTypeInfo (REFGUID iid, OUT ITypeInfo*& typeInfo);
     
 private:
 
@@ -138,9 +130,9 @@ TypeLibraryManagerImpl::~TypeLibraryManagerImpl () {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT TypeLibraryManagerImpl::GetTypeInfo (REFGUID iid, OUT ITypeInfo** typeInfo) {
+HRESULT TypeLibraryManagerImpl::GetTypeInfo (REFGUID iid, OUT ITypeInfo*& typeInfo) {
     if (!m_isInitialized) {
-        *typeInfo = NULL;
+        typeInfo = NULL;
         
         return m_typeLibResult;
     }
@@ -148,12 +140,12 @@ HRESULT TypeLibraryManagerImpl::GetTypeInfo (REFGUID iid, OUT ITypeInfo** typeIn
     TypeInfoMap::iterator it = m_typeInfoMap.find(&iid);
     
     if (it == m_typeInfoMap.end()) {
-        *typeInfo = NULL;
+        typeInfo = NULL;
         
         return E_FAIL;
     }
     
-    *typeInfo = it->second.first;
+    typeInfo = it->second.first;
     
     return it->second.second;
 }

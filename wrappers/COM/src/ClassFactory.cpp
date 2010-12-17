@@ -3,6 +3,7 @@
 #include "LibraryLocker.h"
 #include "Guids.h"
 #include "Feed.h"
+#include "Interfaces.h"
 
 #include <Windows.h>
 #include <ObjBase.h>

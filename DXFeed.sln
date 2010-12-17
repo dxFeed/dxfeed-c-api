@@ -36,7 +36,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "QuoteTableTest", "tests\Quo
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DXFeedCOM", "wrappers\COM\DXFeedCOM.vcproj", "{1574E414-4DB2-456C-A08A-75F585A03D45}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DXFeedCOM", "wrappers\COM\src\DXFeedCOM.vcproj", "{1574E414-4DB2-456C-A08A-75F585A03D45}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DXFeedCOMC++Sample", "wrappers\COM\samples\C++\DXFeedCOMC++Sample.vcproj", "{69CC7B8C-3A6C-4761-9A06-E2FB9FC9589D}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
@@ -86,6 +90,10 @@ Global
 		{1574E414-4DB2-456C-A08A-75F585A03D45}.Debug.Build.0 = Debug|Win32
 		{1574E414-4DB2-456C-A08A-75F585A03D45}.Release.ActiveCfg = Release|Win32
 		{1574E414-4DB2-456C-A08A-75F585A03D45}.Release.Build.0 = Release|Win32
+		{69CC7B8C-3A6C-4761-9A06-E2FB9FC9589D}.Debug.ActiveCfg = Debug|Win32
+		{69CC7B8C-3A6C-4761-9A06-E2FB9FC9589D}.Debug.Build.0 = Debug|Win32
+		{69CC7B8C-3A6C-4761-9A06-E2FB9FC9589D}.Release.ActiveCfg = Release|Win32
+		{69CC7B8C-3A6C-4761-9A06-E2FB9FC9589D}.Release.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection

@@ -23,7 +23,7 @@ DefIDispatchImpl::DefIDispatchImpl (REFGUID riid, IUnknown* parent)
         return;
     }
 
-    m_typeInfoRes = tlm->GetTypeInfo(m_riid, &m_typeInfo);
+    m_typeInfoRes = tlm->GetTypeInfo(m_riid, m_typeInfo);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -34,7 +34,7 @@ void DefIDispatchImpl::SetBehaviorCustomizer (IDispBehaviorCustomizer* customize
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DefIDispatchImpl::QueryInterface (REFIID riid, void **ppvObject) {
+HRESULT DefIDispatchImpl::QueryInterfaceImpl (IDispatch* objPtr, REFIID riid, void **ppvObject) {
     if (ppvObject == NULL) {
         return E_POINTER;
     }
@@ -42,9 +42,9 @@ HRESULT STDMETHODCALLTYPE DefIDispatchImpl::QueryInterface (REFIID riid, void **
     *ppvObject = NULL;
     
     if (IsEqualIID(riid, IID_IUnknown) || IsEqualIID(riid, IID_IDispatch) || IsEqualIID(riid, m_riid)) {
-        *ppvObject = this;
+        *ppvObject = objPtr;
 
-        AddRef();
+        AddRefImpl();
 
         return NOERROR;
     }
@@ -54,7 +54,7 @@ HRESULT STDMETHODCALLTYPE DefIDispatchImpl::QueryInterface (REFIID riid, void **
 
 /* -------------------------------------------------------------------------- */
 
-ULONG STDMETHODCALLTYPE DefIDispatchImpl::AddRef () {
+LONG DefIDispatchImpl::AddRefImpl () {
     LibraryLocker::AddLock();
 
     return InterlockedIncrement(&m_refCount);
@@ -62,7 +62,23 @@ ULONG STDMETHODCALLTYPE DefIDispatchImpl::AddRef () {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DefIDispatchImpl::GetTypeInfoCount (UINT *pctinfo) {
+LONG DefIDispatchImpl::ReleaseImpl () {
+    LibraryLocker::ReleaseLock();
+
+    LONG res = InterlockedDecrement(&m_refCount);
+
+    if (res == 0) {
+        if (m_customizer != NULL) {
+            m_customizer->OnBeforeDelete();
+        }
+    }
+
+    return res;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT DefIDispatchImpl::GetTypeInfoCountImpl (UINT *pctinfo) {
     *pctinfo = 1;
 
     return S_OK;
@@ -70,7 +86,7 @@ HRESULT STDMETHODCALLTYPE DefIDispatchImpl::GetTypeInfoCount (UINT *pctinfo) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DefIDispatchImpl::GetTypeInfo (UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
+HRESULT DefIDispatchImpl::GetTypeInfoImpl (UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
     if (ppTInfo == NULL) {
         return E_POINTER;
     }
@@ -92,8 +108,8 @@ HRESULT STDMETHODCALLTYPE DefIDispatchImpl::GetTypeInfo (UINT iTInfo, LCID lcid,
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DefIDispatchImpl::GetIDsOfNames (REFIID riid, LPOLESTR *rgszNames,
-                                                           UINT cNames, LCID lcid, DISPID *rgDispId) {
+HRESULT DefIDispatchImpl::GetIDsOfNamesImpl (REFIID riid, LPOLESTR *rgszNames,
+                                             UINT cNames, LCID lcid, DISPID *rgDispId) {
     if (m_typeInfoRes != S_OK) {
         return m_typeInfoRes;
     }
@@ -103,9 +119,10 @@ HRESULT STDMETHODCALLTYPE DefIDispatchImpl::GetIDsOfNames (REFIID riid, LPOLESTR
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DefIDispatchImpl::Invoke (DISPID dispIdMember, REFIID riid, LCID lcid,
-                                                    WORD wFlags, DISPPARAMS *pDispParams, VARIANT *pVarResult,
-                                                    EXCEPINFO *pExcepInfo, UINT *puArgErr) {
+HRESULT DefIDispatchImpl::InvokeImpl (IDispatch* objPtr,
+                                      DISPID dispIdMember, REFIID riid, LCID lcid,
+                                      WORD wFlags, DISPPARAMS *pDispParams, VARIANT *pVarResult,
+                                      EXCEPINFO *pExcepInfo, UINT *puArgErr) {
     if (!IsEqualIID(riid, IID_NULL)) {
         return DISP_E_UNKNOWNINTERFACE;
     }
@@ -114,21 +131,5 @@ HRESULT STDMETHODCALLTYPE DefIDispatchImpl::Invoke (DISPID dispIdMember, REFIID 
         return m_typeInfoRes;
     }
 
-    return ::DispInvoke(this, m_typeInfo, dispIdMember, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
-}
-
-/* -------------------------------------------------------------------------- */
-
-LONG DefIDispatchImpl::ReleaseImpl () {
-    LibraryLocker::ReleaseLock();
-
-    LONG res = InterlockedDecrement(&m_refCount);
-
-    if (res == 0) {
-        if (m_customizer != NULL) {
-            m_customizer->OnBeforeDelete();
-        }
-    }
-
-    return res;
+    return ::DispInvoke(objPtr, m_typeInfo, dispIdMember, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
 }
