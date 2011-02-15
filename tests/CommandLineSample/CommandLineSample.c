@@ -74,7 +74,7 @@ void listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_d
         dxf_trade_t* trades = (dx_trade_t*)data;
 
         for (; i < data_count; ++i) {
-            wprintf(L"time=%i, exchange code=%C, price=%f, size=%i, day volume=%f\n",
+            wprintf(L"time=%i, exchange code=%C, price=%f, size=%i, day volume=%i\n",
                 (int)trades[i].time, trades[i].exchange_code, trades[i].price, (int)trades[i].size, trades[i].day_volume);
         }
     }

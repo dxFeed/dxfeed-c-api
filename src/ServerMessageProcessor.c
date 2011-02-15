@@ -198,7 +198,7 @@ bool dx_create_field_digest (dx_server_msg_proc_connection_context_t* context,
                              OUT dx_field_digest_ptr_t* field_digest) {
     static dxf_const_string_t s_field_to_ignore = L"Symbol";
 
-    dxf_string_t field_name;
+    dxf_string_t field_name = NULL;
     dxf_int_t field_type;
     int field_index = INVALID_INDEX;
 
@@ -858,7 +858,7 @@ bool dx_process_describe_records (dx_server_msg_proc_connection_context_t* conte
 
     while (dx_get_in_buffer_position(context->bicc) < dx_get_in_buffer_limit(context->bicc)) {
         dxf_int_t record_id;
-        dxf_string_t record_name;
+        dxf_string_t record_name = NULL;
         dxf_int_t field_count;
         const dx_record_info_t* record_info = NULL;
         dx_record_digest_t* record_digest = NULL;
