@@ -429,11 +429,6 @@ void dx_socket_reader (dx_network_connection_context_t* context) {
         
         /* reporting the read data */        
         context->reader_thread_state = context_data->receiver(context->connection, (const void*)read_buf, number_of_bytes_read);
-        
-        /* debug */
-        if (!context->reader_thread_state) {
-            int i = 0;
-        }
     }
 }
 
