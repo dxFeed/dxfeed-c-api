@@ -131,7 +131,7 @@ DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_time_and_sale_t, type);
  */
 /* -------------------------------------------------------------------------- */
 
-typedef const void* (*dx_record_field_def_val_getter) (void);
+typedef const void* (*dx_record_field_def_val_getter_t) (void);
 
 /* -------------------------------------------------------------------------- */
 /*

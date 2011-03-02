@@ -66,7 +66,7 @@ typedef struct {
     int type;
     dxf_const_string_t name;
     dx_record_field_setter_t setter;
-    dx_record_field_def_val_getter def_val_getter;
+    dx_record_field_def_val_getter_t def_val_getter;
 } dx_field_info_t;
 
 /* -------------------------------------------------------------------------- */
