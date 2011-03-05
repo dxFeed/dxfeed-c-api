@@ -1,0 +1,2 @@
+del source_code.zip
+pkzipc -add -dir=specify -excl=.svn -excl=Debug -excl=Release source_code.zip DXFeed.vcproj bin\pthreadVC2.* include\*.h src\*.* tests\APITest\APITest.* tests\CommandLineSample\CommandLineSample.*

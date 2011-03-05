@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <Windows.h>
 
-//const char dxfeed_host[] = "localhost:5555";
 const char dxfeed_host[] = "demo.dxfeed.com:7300";
 
 dxf_const_string_t dx_event_type_to_string (int event_type) {
@@ -28,14 +27,65 @@ void first_listener (int event_type, dxf_const_string_t symbol_name,const dxf_ev
 
 	wprintf(L"First listener. Event: %s Symbol: %s\n",dx_event_type_to_string(event_type), symbol_name);
 
-	if (event_type == DXF_ET_TRADE){
-		dxf_trade_t* trade = (dxf_trade_t*)data;
+    if (event_type == DXF_ET_QUOTE) {
+        dxf_quote_t* quotes = (dxf_quote_t*)data;
 
-		for (; i < data_count ; ++i) {
-			wprintf(/*L"time=%li, exchange code=%C, */L"price=%lf\n"/*, size=%li volume=%li\n"*/, 
-			        /*trade[i].time, trade[i].exchange_code, */trade[i].price/*, trade[i].size, trade[i].day_volume*/);
-		}
-	}	
+        for (; i < data_count; ++i) {
+            wprintf(L"bid time=%i, bid exchange code=%C, bid price=%f, bid size=%i; "
+                L"ask time=%i, ask exchange code=%C, ask price=%f, ask size=%i\n",
+                (int)quotes[i].bid_time, quotes[i].bid_exchange_code, quotes[i].bid_price, (int)quotes[i].bid_size,
+                (int)quotes[i].ask_time, quotes[i].ask_exchange_code, quotes[i].ask_price, (int)quotes[i].ask_size);
+        }
+    }
+
+    if (event_type == DXF_ET_ORDER){
+        dxf_order_t* orders = (dxf_order_t*)data;
+
+        for (; i < data_count; ++i) {
+            wprintf(L"index=%i, side=%i, level=%i, time=%i, exchange code=%C, market maker=%s, price=%f, size=%i\n",
+                (int)orders[i].index, (int)orders[i].side, (int)orders[i].level, (int)orders[i].time,
+                orders[i].exchange_code, orders[i].market_maker, orders[i].price, (int)orders[i].size);
+        }
+    }
+
+    if (event_type == DXF_ET_TRADE) {
+        dxf_trade_t* trades = (dx_trade_t*)data;
+
+        for (; i < data_count; ++i) {
+            wprintf(L"time=%i, exchange code=%C, price=%f, size=%i, day volume=%i\n",
+                (int)trades[i].time, trades[i].exchange_code, trades[i].price, (int)trades[i].size, trades[i].day_volume);
+        }
+    }
+
+    if (event_type == DXF_ET_SUMMARY) {
+        dxf_summary_t* s = (dxf_summary_t*)data;
+
+        for (; i < data_count; ++i) {
+            wprintf(L"day high price=%f, day low price=%f, day open price=%f, prev day close price=%f, open interest=%i\n",
+                s[i].day_high_price, s[i].day_low_price, s[i].day_open_price, s[i].prev_day_close_price, (int)s[i].open_interest);
+        }
+    }
+
+    if (event_type == DXF_ET_PROFILE) {
+        dxf_profile_t* p = (dxf_profile_t*)data;
+
+        for (; i < data_count ; ++i) {
+            wprintf(L"Description=%s\n",
+                p[i].description);
+        }
+    }
+
+    if (event_type == DXF_ET_TIME_AND_SALE) {
+        dxf_time_and_sale_t* tns = (dxf_time_and_sale_t*)data;
+
+        for (; i < data_count ; ++i) {
+            wprintf(L"event id=%ld, time=%ld, exchange code=%c, price=%f, size=%li, bid price=%f, ask price=%f, "
+                L"exchange sale conditions=%s, is trade=%s, type=%i\n",
+                tns[i].event_id, tns[i].time, tns[i].exchange_code, tns[i].price, (int)tns[i].size,
+                tns[i].bid_price, tns[i].ask_price, tns[i].exchange_sale_conditions,
+                tns[i].is_trade ? L"True" : L"False", (int)tns[i].type);
+        }
+    }	
 }
 
 /* -------------------------------------------------------------------------- */
@@ -48,10 +98,12 @@ void second_listener (int event_type, dxf_const_string_t symbol_name,const dxf_e
 
 /* -------------------------------------------------------------------------- */
 
-dxf_connection_t connection;
+void process_last_error ();
 
 void conn_termination_notifier (dxf_connection_t conn, void* user_data) {
-    /*dxf_close_connection(conn);*/
+    printf("Asynchronous error occurred, the connection will be reset!\n");
+
+    process_last_error();
 }
 
 /* -------------------------------------------------------------------------- */
@@ -82,6 +134,7 @@ void process_last_error () {
 /* -------------------------------------------------------------------------- */
 
 int main (int argc, char* argv[]) {
+    dxf_connection_t connection;
     dxf_subscription_t subscription;
 
 	dxf_string_t symbols_to_add[] = { L"MSFT", L"YHOO", L"C" };

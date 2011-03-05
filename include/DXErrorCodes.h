@@ -150,6 +150,7 @@ typedef enum {
     dx_pec_record_field_type_not_supported,
     dx_pec_record_info_corrupted,
     dx_pec_unknown_record_name,
+    dx_pec_record_not_supported,
     dx_pec_describe_protocol_message_corrupted,
     dx_pec_unexpected_message_sequence_internal,
     dx_pec_local_message_not_supported_by_server,

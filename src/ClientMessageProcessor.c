@@ -322,8 +322,12 @@ int dx_describe_records_sender_task (void* data, int command) {
 
 bool dx_get_event_server_support (dxf_connection_t connection, int event_types, bool unsubscribe, OUT dx_message_support_status_t* res) {
     dx_event_id_t eid = dx_eid_begin;
-    
+    bool halt = false;
+    bool success = true;
+        
     *res = dx_mss_pending;
+    
+    CHECKED_CALL_2(dx_lock_describe_protocol_processing, connection, true);
 
     for (; eid < dx_eid_count; ++eid) {
         if (event_types & DX_EVENT_BIT_MASK(eid)) {
@@ -336,7 +340,12 @@ bool dx_get_event_server_support (dxf_connection_t connection, int event_types, 
                 dx_message_type_t msg_type = dx_get_subscription_message_type(unsubscribe ? dx_at_remove_subscription : dx_at_add_subscription, cur_param->subscription_type);
                 dx_message_support_status_t msg_res;
 
-                CHECKED_CALL_3(dx_is_message_supported_by_server, connection, msg_type, &msg_res);
+                if (!dx_is_message_supported_by_server(connection, msg_type, false, &msg_res)) {
+                    halt = true;
+                    success = false;
+                    
+                    break;
+                }
                 
                 if (msg_res != *res) {
                     if (*res == dx_mss_pending) {
@@ -345,7 +354,12 @@ bool dx_get_event_server_support (dxf_connection_t connection, int event_types, 
                         if (msg_res == dx_mss_pending) {
                             /* combination of messages with known and unknown support is forbidden */
                             
-                            return dx_set_error_code(dx_pec_inconsistent_message_support);
+                            dx_set_error_code(dx_pec_inconsistent_message_support);
+                            
+                            halt = true;
+                            success = false;
+                            
+                            break;
                         }
                         
                         /* combination of supported and unsupported messages means that the server
@@ -353,14 +367,20 @@ bool dx_get_event_server_support (dxf_connection_t connection, int event_types, 
                            
                         *res = dx_mss_not_supported;
                         
-                        return true;
+                        halt = true;
+                        
+                        break;
                     }
                 }
+            }
+            
+            if (halt) {
+                break;
             }
         }
     }
     
-    return true;
+    return (dx_lock_describe_protocol_processing(connection, false) && success);
 }
 
 /* -------------------------------------------------------------------------- */

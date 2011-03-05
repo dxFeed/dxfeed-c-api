@@ -165,7 +165,14 @@ int main (int argc, char* argv[]) {
 
 
     if ( argc < 4 ) {
-        return -1;
+        printf("DXFeed command line sample.\n"
+               "Usage: CommandLineSample <server address> <event type> <symbol>\n"
+               "  <server address> - a DXFeed server address, e.g. demo.dxfeed.com:7300\n"
+               "  <event type> - an event type, one of the following: TRADE, QUOTE, SUMMARY,\n"
+               "                 PROFILE, ORDER, TIME_AND_SALE\n"
+               "  <symbol> - a trade symbol, e.g. C, MSFT, YHOO, IBM\n");
+        
+        return 0;
     }
 
     dxf_initialize_logger( "log.log", true, true, false );

@@ -45,7 +45,8 @@ typedef enum {
     dx_mss_pending
 } dx_message_support_status_t;
 
-bool dx_is_message_supported_by_server (dxf_connection_t connection, dx_message_type_t msg,
+bool dx_lock_describe_protocol_processing (dxf_connection_t connection, bool lock);
+bool dx_is_message_supported_by_server (dxf_connection_t connection, dx_message_type_t msg, bool lock_required,
                                         OUT dx_message_support_status_t* status);
 bool dx_describe_protocol_sent (dxf_connection_t connection);
 

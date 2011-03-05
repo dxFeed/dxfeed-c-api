@@ -150,6 +150,7 @@ dxf_const_string_t dx_get_error_description (dx_error_code_t code) {
     case dx_pec_record_field_type_not_supported: return L"Server record field type not supported";
     case dx_pec_record_info_corrupted: return L"Server record information corrupted";
     case dx_pec_unknown_record_name: return L"Unknown server record name";
+    case dx_pec_record_not_supported: return L"Server record not supported";
     case dx_pec_describe_protocol_message_corrupted: return L"Server describe protocol message corrupted";
     case dx_pec_unexpected_message_sequence_internal: return s_internal_error_descr;
     case dx_pec_local_message_not_supported_by_server: return L"Local message is not supported by server";
