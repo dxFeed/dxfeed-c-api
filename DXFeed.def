@@ -1,0 +1,23 @@
+; The following line has the only difference between release and debug versions of chartlib 
+LIBRARY DXFeed
+VERSION 1.000
+EXPORTS
+	dxf_create_connection 
+	dxf_close_connection 
+	dxf_create_subscription 
+	dxf_close_subscription 
+	dxf_add_symbol 
+	dxf_add_symbols 
+	dxf_remove_symbol 
+    dxf_remove_symbols 
+    dxf_get_symbols 
+    dxf_set_symbols 
+    dxf_clear_symbols 
+    dxf_attach_event_listener 
+    dxf_detach_event_listener 
+    dxf_get_subscription_event_types 
+    dxf_get_last_event 
+    dxf_get_last_error 
+    dxf_initialize_logger 
+    
+    dx_get_event_data_item
