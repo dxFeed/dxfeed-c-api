@@ -10,44 +10,55 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ConnectionTest", "tests\Con
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UnitTests", "tests\UnitTests\UnitTests.vcproj", "{2671AFA2-E2C2-4D75-ADE0-2B54D7D0DFF9}"
 	ProjectSection(ProjectDependencies) = postProject
+		{98DF2375-3C29-4806-A832-7C666F8BF54C} = {98DF2375-3C29-4806-A832-7C666F8BF54C}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SampleTest", "tests\SampleTest\SampleTest.vcproj", "{7F344E89-5118-4D89-A5CF-A887DFCF7352}"
 	ProjectSection(ProjectDependencies) = postProject
+		{98DF2375-3C29-4806-A832-7C666F8BF54C} = {98DF2375-3C29-4806-A832-7C666F8BF54C}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "APITest", "tests\APITest\APITest.vcproj", "{7F344E89-5118-4D89-A5CF-A887DFCF7352}"
 	ProjectSection(ProjectDependencies) = postProject
+		{98DF2375-3C29-4806-A832-7C666F8BF54C} = {98DF2375-3C29-4806-A832-7C666F8BF54C}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LastEventTest", "tests\LastEventTest\LastEventTest.vcproj", "{1279AD79-7991-4916-B111-78662932C7E2}"
 	ProjectSection(ProjectDependencies) = postProject
+		{98DF2375-3C29-4806-A832-7C666F8BF54C} = {98DF2375-3C29-4806-A832-7C666F8BF54C}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CommandLineSample", "tests\CommandLineSample\CommandLineSample.vcproj", "{C396319B-1914-478A-8BD2-D98C97776458}"
 	ProjectSection(ProjectDependencies) = postProject
+		{98DF2375-3C29-4806-A832-7C666F8BF54C} = {98DF2375-3C29-4806-A832-7C666F8BF54C}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FullTest", "tests\FullTest\FullTest.vcproj", "{9D6628D8-BD75-472D-A295-88CF818AD254}"
 	ProjectSection(ProjectDependencies) = postProject
+		{98DF2375-3C29-4806-A832-7C666F8BF54C} = {98DF2375-3C29-4806-A832-7C666F8BF54C}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "QuoteTableTest", "tests\QuoteTableTest\QuoteTableTest.vcproj", "{EC676D2E-7CE6-443D-B7A2-420AB0C71548}"
 	ProjectSection(ProjectDependencies) = postProject
+		{98DF2375-3C29-4806-A832-7C666F8BF54C} = {98DF2375-3C29-4806-A832-7C666F8BF54C}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DXFeedCOM", "wrappers\COM\src\DXFeedCOM.vcproj", "{1574E414-4DB2-456C-A08A-75F585A03D45}"
 	ProjectSection(ProjectDependencies) = postProject
+		{98DF2375-3C29-4806-A832-7C666F8BF54C} = {98DF2375-3C29-4806-A832-7C666F8BF54C}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DXFeedCOMC++Sample", "wrappers\COM\samples\C++\DXFeedCOMC++Sample.vcproj", "{69CC7B8C-3A6C-4761-9A06-E2FB9FC9589D}"
 	ProjectSection(ProjectDependencies) = postProject
+		{98DF2375-3C29-4806-A832-7C666F8BF54C} = {98DF2375-3C29-4806-A832-7C666F8BF54C}
 	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
 		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectDependencies) = postSolution
 	EndGlobalSection
 	GlobalSection(ProjectConfiguration) = postSolution
 		{98DF2375-3C29-4806-A832-7C666F8BF54C}.Debug.ActiveCfg = Debug|Win32

@@ -39,7 +39,7 @@
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\bin"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/CommandLineSample.pdb"
+				ProgramDatabaseFile="$(OutDir)/CommandLineSampled.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
 			<Tool

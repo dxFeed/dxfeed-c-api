@@ -216,7 +216,7 @@ bool dx_transcode_quote_to_order_ask (dx_record_transcoder_connection_context_t*
         is_exchange_code_initialized = true;
     }
 
-    if ((event_buffer = (dxf_order_t*)dx_get_event_data_buffer(context->connection, dx_eid_order, record_count)) == NULL) {
+    if ((event_buffer = (dxf_order_t*)dx_get_event_data_buffer(context/*->connection*/, dx_eid_order, record_count)) == NULL) {
         return false;
     }
 
