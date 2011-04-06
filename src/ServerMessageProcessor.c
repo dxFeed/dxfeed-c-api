@@ -770,10 +770,13 @@ static bool dx_read_symbol (dx_server_msg_proc_connection_context_t* context,
 bool dx_read_records (dx_server_msg_proc_connection_context_t* context,
                       dx_record_id_t record_id, void* record_buffer) {
 	int i = 0;
+	dxf_byte_t read_byte;
+	dxf_short_t read_short;
 	dxf_int_t read_int;
 	dxf_char_t read_utf_char;
 	dxf_double_t read_double;
 	dxf_string_t read_string;
+	dxf_byte_t* read_byte_array;
 	const dx_record_digest_t* record_digest = &(context->record_digests[record_id]);
 	
     dx_logging_verbose_info(L"Read records");
@@ -790,6 +793,21 @@ bool dx_read_records (dx_server_msg_proc_connection_context_t* context,
 		case dx_fid_compact_int:
 			CHECKED_CALL_2(dx_read_compact_int, context->bicc, &read_int);
 			CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_int);
+			
+			break;
+		case dx_fid_int:
+			CHECKED_CALL_2(dx_read_int, context->bicc, &read_int);
+			CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_int);
+			
+			break;
+		case dx_fid_byte:
+			CHECKED_CALL_2(dx_read_byte, context->bicc, &read_byte);
+			CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_byte);
+			
+			break;
+		case dx_fid_short:
+			CHECKED_CALL_2(dx_read_short, context->bicc, &read_short);
+			CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_short);
 			
 			break;
 		case dx_fid_utf_char:
@@ -814,10 +832,12 @@ bool dx_read_records (dx_server_msg_proc_connection_context_t* context,
 			CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_string);
 			
 			break;
-		case dx_fid_byte:
-		case dx_fid_short:
-		case dx_fid_int:
 		case dx_fid_byte_array:
+			CHECKED_CALL_2(dx_read_byte_array, context->bicc, &read_byte_array);
+			CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_byte_array);
+			
+			break;
+
 		case dx_fid_compact_int | dx_fid_flag_short_string:
 		case dx_fid_byte_array | dx_fid_flag_string:
 		case dx_fid_byte_array | dx_fid_flag_custom_object:

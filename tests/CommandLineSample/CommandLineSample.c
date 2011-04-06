@@ -175,7 +175,7 @@ int main (int argc, char* argv[]) {
         return 0;
     }
 
-    dxf_initialize_logger( "log.log", true, true, false );
+    dxf_initialize_logger( "log.log", true, true, true );
 
     dxfeed_host = argv[1];
 
@@ -239,7 +239,7 @@ int main (int argc, char* argv[]) {
     printf("Subscription successful!\n");
 
     while (!is_thread_terminate() && loop_counter--) {
-        Sleep(100);
+        Sleep(100000);
     }
     
 	printf("Disconnecting from host...\n");
