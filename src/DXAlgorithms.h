@@ -311,8 +311,6 @@ double dx_random_double (double max_value);
             _buffer_to_free = (void*)(array_obj).elements; \
         } \
         \
-        _new_elem_buffer[position] = new_elem; \
-        \
         if (_buffer_to_free == NULL) { \
             dx_memmove((void*)(_new_elem_buffer + position + 1), (const void*)((array_obj).elements + position), \
                        ((array_obj).size - position) * sizeof(elem_type)); \
@@ -321,6 +319,7 @@ double dx_random_double (double max_value);
                       ((array_obj).size - position) * sizeof(elem_type)); \
             dx_free(_buffer_to_free); \
         } \
+		_new_elem_buffer[position] = new_elem; \
         \
         (array_obj).elements = _new_elem_buffer; \
         ++((array_obj).size); \
