@@ -80,7 +80,7 @@ bool dx_capacity_manager_halfer (int new_size, int* capacity) {
         return true;
     }
 
-    if (new_size < *capacity && ((double)new_size / *capacity) < 1.5) {
+    if (new_size < *capacity && ((double)new_size / *capacity) < 0.5) {
         *capacity = new_size;
 
         return true;
