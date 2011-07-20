@@ -4,9 +4,10 @@
 #include "DXErrorCodes.h"
 #include "Logger.h"
 #include <time.h>
-#include <stdio.h>
+
 #include <Windows.h>
 #include "signal.h"
+#include <stdio.h>
 
 const char dxfeed_host[] = "mddqa.in.devexperts.com:7400";
 
@@ -169,6 +170,7 @@ void terminate (int param)
   printf ("Terminating program...\n");
   exit(1);
 }
+
 int main (int argc, char* argv[]) {
     dxf_connection_t connection;
     dxf_subscription_t subscription;
@@ -209,17 +211,16 @@ int main (int argc, char* argv[]) {
 				pch = strtok (line,",");
 			    pch = strtok (NULL, ",");// we need a second token
 				if (symbols_pos < symbols_max){
-					symbols[symbols_pos] = (char*)malloc (strlen(pch));
-					strcpy(symbols[symbols_pos],pch);
+					symbols[symbols_pos] = strdup(pch); 
 					++symbols_pos;
 				}
 			}
 			fclose(file);
 		}
 	}
-	
+
     dxf_initialize_logger( "log.log", true, true, true );
-	Sleep(15000);
+	
 	printf("Sample test started.\n");    
     printf("Connecting to host %s...\n", dxfeed_host);
     
