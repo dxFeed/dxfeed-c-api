@@ -82,7 +82,8 @@ static const dxf_int_t EXTRA_PRECISION_DIVISORS[] = {
 
 bool dx_int_to_double (dxf_int_t integer, OUT dxf_double_t* decimal) {
 	dxf_int_t power = integer & 0x0F;
-	
+	dxf_int_t mantissa ;
+
 	if (power == 0) {
 		// extra precision and special cases
 		dxf_int_t divisor = EXTRA_PRECISION_DIVISORS[((integer >> STANDARD_MANTISSA_SHIFT) & 0x07)];
@@ -90,12 +91,12 @@ bool dx_int_to_double (dxf_int_t integer, OUT dxf_double_t* decimal) {
 		if (divisor != 0) {
 			// mantissa in highest 25 bits for supported extra precision formats
 			*decimal  = (dxf_double_t)(integer >> EXTRA_PRECISION_MANTISSA_SHIFT) / divisor;
+			return true;
 		}
-	} else {
-		dxf_int_t mantissa = (integer >> STANDARD_MANTISSA_SHIFT);
-		
-		*decimal = power <= UNITY_POWER ? mantissa * MULTIPLIERS[power] : mantissa / DIVISORS[power];	
-	}
+	} 
+	
+	mantissa = (integer >> STANDARD_MANTISSA_SHIFT);
+	*decimal = power <= UNITY_POWER ? mantissa * MULTIPLIERS[power] : mantissa / DIVISORS[power];	
 	
 	return true;
 }
