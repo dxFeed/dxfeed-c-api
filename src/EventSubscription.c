@@ -207,14 +207,23 @@ dxf_int_t dx_symbol_name_hasher (dxf_const_string_t symbol_name) {
 typedef int (*dx_symbol_comparator_t)(dx_symbol_data_ptr_t e1, dx_symbol_data_ptr_t e2);
 
 int dx_ciphered_symbol_comparator (dx_symbol_data_ptr_t e1, dx_symbol_data_ptr_t e2) {
-    return (e1->cipher - e2->cipher);
+    if (e1->cipher < e2->cipher)
+		return -1;
+	if (e1->cipher > e2->cipher)
+		return 1;
+	return 0;
+	// do not use next line, you'll get overflow 
+	//return (e1->cipher - e2->cipher);
 }
 
 /* -------------------------------------------------------------------------- */
 
 int dx_hashed_symbol_comparator (dx_symbol_data_ptr_t e1, dx_symbol_data_ptr_t e2) {
     if (e1->cipher != e2->cipher) {
-        return (e1->cipher - e2->cipher);
+		if (e1->cipher < e2->cipher)
+			return -1;
+		if (e1->cipher > e2->cipher)
+			return 1;
     }
     
     return dx_compare_strings(e1->name, e2->name);
