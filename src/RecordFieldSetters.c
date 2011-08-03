@@ -51,7 +51,8 @@ FIELD_SETTER_BODY(dx_trade_t, time, dxf_int_t)
 FIELD_SETTER_BODY(dx_trade_t, exchange_code, dxf_char_t)
 FIELD_SETTER_BODY(dx_trade_t, price, dxf_double_t)
 FIELD_SETTER_BODY(dx_trade_t, size, dxf_int_t)
-FIELD_SETTER_BODY_TWO_CASTS(dx_trade_t, day_volume, dxf_double_t, dxf_long_t)
+FIELD_SETTER_BODY(dx_trade_t, day_volume, dxf_double_t)
+//FIELD_SETTER_BODY_TWO_CASTS(dx_trade_t, day_volume, dxf_double_t, dxf_long_t)
 
 /* -------------------------------------------------------------------------- */
 /*
