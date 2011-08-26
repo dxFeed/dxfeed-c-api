@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <Windows.h>
 
+/*const char dxfeed_host[] = "mddqa.in.devexperts.com:7400";*/
 const char dxfeed_host[] = "demo.dxfeed.com:7300";
 
 dxf_const_string_t dx_event_type_to_string (int event_type) {
@@ -143,6 +144,7 @@ int main (int argc, char* argv[]) {
     int loop_counter = 10000;
 
     dxf_initialize_logger( "log.log", true, true, true );
+    InitializeCriticalSection(&listener_thread_guard);
 
 	printf("Sample test started.\n");    
     printf("Connecting to host %s...\n", dxfeed_host);
@@ -154,13 +156,13 @@ int main (int argc, char* argv[]) {
 
     printf("Connection successful!\n");
  
-	if (!dxf_create_subscription(connection, /*DXF_ET_TRADE | DXF_ET_QUOTE | DXF_ET_ORDER | DXF_ET_SUMMARY | DXF_ET_PROFILE*/DXF_ET_QUOTE, &subscription)) {
+	if (!dxf_create_subscription(connection, /*DXF_ET_TRADE | DXF_ET_QUOTE | DXF_ET_ORDER | DXF_ET_SUMMARY | */DXF_ET_PROFILE, &subscription)) {
         process_last_error();
         
         return -1;
     };
 	
-	if (!dxf_add_symbol(subscription, L"IBM")) {
+	if (!dxf_add_symbol(subscription, L"CRMD")) {
         process_last_error();
         
         return -1;
@@ -173,7 +175,6 @@ int main (int argc, char* argv[]) {
     };
     printf("Subscription successful!\n");
 
-    InitializeCriticalSection(&listener_thread_guard);
     while (!is_thread_terminate() && loop_counter--) {
         Sleep(100);
     }
