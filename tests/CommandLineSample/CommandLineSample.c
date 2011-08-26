@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <Windows.h>
 #include "DXAlgorithms.h"
+#include <time.h>
 
 dxf_const_string_t dx_event_type_to_string (int event_type) {
     switch (event_type) {
@@ -42,70 +43,90 @@ void on_reader_thread_terminate(const char* host, void* user_data) {
     printf("\nTerminating listener thread, host: %s\n", host);
 }
 
+void print_timestamp(dxf_long_t timestamp){
+		char timefmt[80];
+		
+		struct tm * timeinfo;
+		int tmpint = (int)(timestamp /1000);
+		timeinfo = localtime ( &tmpint );
+		strftime(timefmt,80,"%Y%m%d-%H%M%S" ,timeinfo);
+		printf("%s",timefmt);
+}
 /* -------------------------------------------------------------------------- */
 
 void listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count, void* user_data) {
     dxf_int_t i = 0;
 
-    wprintf(L"Event: %s Symbol: %s\n",dx_event_type_to_string(event_type), symbol_name);
-
+	wprintf(L"%s{symbol=%s, ",dx_event_type_to_string(event_type), symbol_name);
+	
     if (event_type == DXF_ET_QUOTE) {
-        dxf_quote_t* quotes = (dxf_quote_t*)data;
+	    dxf_quote_t* quotes = (dxf_quote_t*)data;
 
-        for (; i < data_count; ++i) {
-            wprintf(L"bid time=%i, bid exchange code=%C, bid price=%f, bid size=%i; "
-                L"ask time=%i, ask exchange code=%C, ask price=%f, ask size=%i\n",
-                (int)quotes[i].bid_time, quotes[i].bid_exchange_code, quotes[i].bid_price, (int)quotes[i].bid_size,
-                (int)quotes[i].ask_time, quotes[i].ask_exchange_code, quotes[i].ask_price, (int)quotes[i].ask_size);
-        }
+	    for (; i < data_count; ++i) {
+			wprintf(L"bidTime=");
+			print_timestamp(quotes[i].bid_time);
+			wprintf(L" bidExchangeCode=%c, bidPrice=%f, bidSize=%I64i, ",
+					quotes[i].bid_exchange_code, 
+					quotes[i].bid_price,
+					quotes[i].bid_size);
+			wprintf(L"askTime=");
+			print_timestamp(quotes[i].ask_time);
+			wprintf(L" askExchangeCode=%c, askPrice=%f, askSize=%I64i}\n",
+					quotes[i].ask_exchange_code, 
+					quotes[i].ask_price,
+					quotes[i].ask_size);
+		}
     }
-
+    
     if (event_type == DXF_ET_ORDER){
-        dxf_order_t* orders = (dxf_order_t*)data;
+	    dxf_order_t* orders = (dxf_order_t*)data;
 
-        for (; i < data_count; ++i) {
-            wprintf(L"index=%i, side=%i, level=%i, time=%i, exchange code=%C, market maker=%s, price=%f, size=%i\n",
-                (int)orders[i].index, (int)orders[i].side, (int)orders[i].level, (int)orders[i].time,
-                orders[i].exchange_code, orders[i].market_maker, orders[i].price, (int)orders[i].size);
-        }
+	    for (; i < data_count; ++i) {
+		    wprintf(L"index=0x%I64X, side=%i, level=%i, time=",
+		            orders[i].index, orders[i].side, orders[i].level);
+					print_timestamp(orders[i].time);
+			wprintf(L", exchange code=%c, market maker=%s, price=%f, size=%I64i}\n",
+		            orders[i].exchange_code, orders[i].market_maker, orders[i].price, orders[i].size);
+		}
     }
-
+    
     if (event_type == DXF_ET_TRADE) {
-        dxf_trade_t* trades = (dx_trade_t*)data;
+	    dxf_trade_t* trades = (dx_trade_t*)data;
 
-        for (; i < data_count; ++i) {
-            wprintf(L"time=%i, exchange code=%C, price=%f, size=%i, day volume=%i\n",
-                (int)trades[i].time, trades[i].exchange_code, trades[i].price, (int)trades[i].size, trades[i].day_volume);
-        }
+		for (; i < data_count; ++i) {
+			print_timestamp(trades[i].time);
+			wprintf(L", exchangeCode=%c, price=%f, size=%I64i, day volume=%.0f}\n",
+		            trades[i].exchange_code, trades[i].price, trades[i].size, trades[i].day_volume);
+		}
     }
-
+    
     if (event_type == DXF_ET_SUMMARY) {
-        dxf_summary_t* s = (dxf_summary_t*)data;
+	    dxf_summary_t* s = (dxf_summary_t*)data;
 
-        for (; i < data_count; ++i) {
-            wprintf(L"day high price=%f, day low price=%f, day open price=%f, prev day close price=%f, open interest=%i\n",
-                s[i].day_high_price, s[i].day_low_price, s[i].day_open_price, s[i].prev_day_close_price, (int)s[i].open_interest);
-        }
+	    for (; i < data_count; ++i) {
+			wprintf(L"day high price=%f, day low price=%f, day open price=%f, prev day close price=%f, open interest=%I64i}\n",
+		            s[i].day_high_price, s[i].day_low_price, s[i].day_open_price, s[i].prev_day_close_price, s[i].open_interest);
+		}
     }
-
+    
     if (event_type == DXF_ET_PROFILE) {
-        dxf_profile_t* p = (dxf_profile_t*)data;
+	    dxf_profile_t* p = (dxf_profile_t*)data;
 
-        for (; i < data_count ; ++i) {
-            wprintf(L"Description=%s\n",
-                p[i].description);
-        }
+	    for (; i < data_count ; ++i) {
+			wprintf(L"Description=%s}\n",
+				    p[i].description);
+	    }
     }
-
+    
     if (event_type == DXF_ET_TIME_AND_SALE) {
         dxf_time_and_sale_t* tns = (dxf_time_and_sale_t*)data;
 
         for (; i < data_count ; ++i) {
-            wprintf(L"event id=%ld, time=%ld, exchange code=%c, price=%f, size=%li, bid price=%f, ask price=%f, "
-                L"exchange sale conditions=%s, is trade=%s, type=%i\n",
-                tns[i].event_id, tns[i].time, tns[i].exchange_code, tns[i].price, (int)tns[i].size,
-                tns[i].bid_price, tns[i].ask_price, tns[i].exchange_sale_conditions,
-                tns[i].is_trade ? L"True" : L"False", (int)tns[i].type);
+            wprintf(L"event id=%I64i, time=%I64i, exchange code=%c, price=%f, size=%I64i, bid price=%f, ask price=%f, "
+				L"exchange sale conditions=\'%s\', is trade=%s, type=%i}\n",
+                    tns[i].event_id, tns[i].time, tns[i].exchange_code, tns[i].price, tns[i].size,
+                    tns[i].bid_price, tns[i].ask_price, tns[i].exchange_sale_conditions,
+                    tns[i].is_trade ? L"True" : L"False", tns[i].type);
         }
     }
 }
@@ -157,7 +178,7 @@ dxf_string_t ansi_to_unicode (const char* ansi_str) {
 int main (int argc, char* argv[]) {
     dxf_connection_t connection;
     dxf_subscription_t subscription;
-    int loop_counter = 10000;
+    int loop_counter = 100000;
     char* event_type_name = NULL;
     int event_type;
     dxf_string_t symbol = NULL;
@@ -239,7 +260,7 @@ int main (int argc, char* argv[]) {
     printf("Subscription successful!\n");
 
     while (!is_thread_terminate() && loop_counter--) {
-        Sleep(100000);
+        Sleep(100);
     }
     
 	printf("Disconnecting from host...\n");
