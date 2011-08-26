@@ -99,6 +99,9 @@ typedef struct {
     dxf_char_t symbol_buffer[SYMBOL_BUFFER_LEN + 1];
     dxf_string_t symbol_result;
 
+	dxf_string_t last_symbol;
+	dxf_int_t last_cipher;
+
     int* record_server_support_states;
     dx_record_digest_t record_digests[dx_rid_count];
     
@@ -728,33 +731,34 @@ static bool dx_read_message_length_and_set_buffer_limit (dx_server_msg_proc_conn
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_read_symbol (dx_server_msg_proc_connection_context_t* context,
-                            OUT dxf_int_t* cipher, OUT dxf_const_string_t* symbol) {
+static bool dx_read_symbol (dx_server_msg_proc_connection_context_t* context) {
     dxf_int_t r;
     
-    if (context == NULL || cipher == NULL || symbol == NULL) {
+    if (context == NULL ) {
         return dx_set_error_code(dx_ec_invalid_func_param_internal);
     }
     
     CHECKED_CALL_5(dx_codec_read_symbol, context->bicc, context->symbol_buffer, SYMBOL_BUFFER_LEN, &(context->symbol_result), &r);
     
     if ((r & dx_get_codec_valid_cipher()) != 0) {
-        *cipher = r;
-        *symbol = NULL;
+        context->last_cipher = r;
+        context->last_symbol = NULL;
 	} else if (r > 0) {
-        *cipher = 0;            
-        *symbol = dx_create_string_src(context->symbol_buffer);
+        context->last_cipher = 0;      
+        context->last_symbol = dx_create_string_src(context->symbol_buffer);
         
-        if (*symbol == NULL) {
+        if (context->last_symbol == NULL) {
             return false;
         }
-	} else if (context->symbol_result != NULL) {
-        *symbol = context->symbol_result;            
+	} else {
+		if (context->symbol_result != NULL) {
+        context->last_symbol  = context->symbol_result;            
         context->symbol_result = NULL;
         
-        *cipher = dx_encode_symbol_name(*symbol);
-    } else {
-        return dx_set_error_code(dx_pec_invalid_symbol);
+        context->last_cipher = dx_encode_symbol_name(context->last_symbol );
+		} 
+		if (context->last_cipher == 0 && context->last_symbol == NULL) 
+			return dx_set_error_code(dx_pec_invalid_symbol);
     }
 
     return true;
@@ -860,16 +864,15 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
         dx_record_id_t record_id;
         int record_count = 0;
 		
-		dxf_int_t cipher = 0;
 		dxf_const_string_t symbol = NULL;
 		
-		CHECKED_CALL_3(dx_read_symbol, context, &cipher, &symbol);
+		CHECKED_CALL_1(dx_read_symbol, context);
 		
-		if (symbol == NULL && !dx_decode_symbol_name(cipher, &symbol)) {
+		if (context->last_symbol == NULL && !dx_decode_symbol_name(context->last_cipher, &context->last_symbol)) {
 		    return false;
 		}
-		
-		dx_store_string_buffer(context->rbcc, symbol);
+		symbol = dx_create_string_src(context->last_symbol);
+		dx_store_string_buffer(context->rbcc, symbol );
 	    
 		{
 			dxf_int_t id;
@@ -909,7 +912,7 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 			return false;
 		}
 		
-        if (!dx_transcode_record_data(context->connection, record_id, symbol, cipher,
+        if (!dx_transcode_record_data(context->connection, record_id, context->last_symbol , context->last_cipher,
                                       g_buffer_managers[record_id].record_buffer_getter(context->rbcc), record_count)) {
             dx_free_string_buffers(context->rbcc);
 
