@@ -46,19 +46,38 @@ void on_reader_thread_terminate(const char* host, void* user_data) {
 
 /* -------------------------------------------------------------------------- */
 
+void print_timestamp(dxf_long_t timestamp){
+		char timefmt[80];
+		
+		struct tm * timeinfo;
+		int tmpint = (int)(timestamp /1000);
+		timeinfo = localtime ( &tmpint );
+		strftime(timefmt,80,"%Y%m%d-%H%M%S" ,timeinfo);
+		printf("%s",timefmt);
+}
+/* -------------------------------------------------------------------------- */
+
 void listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count, void* user_data) {
     dxf_int_t i = 0;
 
-    wprintf(L"Event: %s Symbol: %s\n",dx_event_type_to_string(event_type), symbol_name);
-
+	wprintf(L"%s{symbol=%s, ",dx_event_type_to_string(event_type), symbol_name);
+	
     if (event_type == DXF_ET_QUOTE) {
 	    dxf_quote_t* quotes = (dxf_quote_t*)data;
 
 	    for (; i < data_count; ++i) {
-		    wprintf(L"bid time=%i, bid exchange code=%C, bid price=%f, bid size=%i; "
-		            L"ask time=%i, ask exchange code=%C, ask price=%f, ask size=%i\n",
-		            quotes[i].bid_time, quotes[i].bid_exchange_code, quotes[i].bid_price, quotes[i].bid_size,
-		            quotes[i].ask_time, quotes[i].ask_exchange_code, quotes[i].ask_price, quotes[i].ask_size);
+			wprintf(L"bidTime=");
+			print_timestamp(quotes[i].bid_time);
+			wprintf(L" bidExchangeCode=%c, bidPrice=%f, bidSize=%I64i, ",
+					quotes[i].bid_exchange_code, 
+					quotes[i].bid_price,
+					quotes[i].bid_size);
+			wprintf(L"askTime=");
+			print_timestamp(quotes[i].ask_time);
+			wprintf(L" askExchangeCode=%c, askPrice=%f, askSize=%I64i}\n",
+					quotes[i].ask_exchange_code, 
+					quotes[i].ask_price,
+					quotes[i].ask_size);
 		}
     }
     
@@ -66,8 +85,10 @@ void listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_d
 	    dxf_order_t* orders = (dxf_order_t*)data;
 
 	    for (; i < data_count; ++i) {
-		    wprintf(L"index=%i, side=%i, level=%i, time=%i, exchange code=%C, market maker=%s, price=%f, size=%i\n",
-		            orders[i].index, orders[i].side, orders[i].level, orders[i].time,
+		    wprintf(L"index=0x%I64X, side=%i, level=%i, time=",
+		            orders[i].index, orders[i].side, orders[i].level);
+					print_timestamp(orders[i].time);
+			wprintf(L", exchange code=%c, market maker=%s, price=%f, size=%I64i}\n",
 		            orders[i].exchange_code, orders[i].market_maker, orders[i].price, orders[i].size);
 		}
     }
@@ -75,9 +96,10 @@ void listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_d
     if (event_type == DXF_ET_TRADE) {
 	    dxf_trade_t* trades = (dx_trade_t*)data;
 
-	    for (; i < data_count; ++i) {
-		    wprintf(L"time=%i, exchange code=%C, price=%f, size=%i, day volume=%f\n",
-		            trades[i].time, trades[i].exchange_code, trades[i].price, trades[i].size, trades[i].day_volume);
+		for (; i < data_count; ++i) {
+			print_timestamp(trades[i].time);
+			wprintf(L", exchangeCode=%c, price=%f, size=%I64i, day volume=%.0f}\n",
+		            trades[i].exchange_code, trades[i].price, trades[i].size, trades[i].day_volume);
 		}
     }
     
@@ -85,7 +107,7 @@ void listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_d
 	    dxf_summary_t* s = (dxf_summary_t*)data;
 
 	    for (; i < data_count; ++i) {
-		    wprintf(L"day high price=%f, day low price=%f, day open price=%f, prev day close price=%f, open interest=%i\n",
+			wprintf(L"day high price=%f, day low price=%f, day open price=%f, prev day close price=%f, open interest=%I64i}\n",
 		            s[i].day_high_price, s[i].day_low_price, s[i].day_open_price, s[i].prev_day_close_price, s[i].open_interest);
 		}
     }
@@ -94,7 +116,7 @@ void listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_d
 	    dxf_profile_t* p = (dxf_profile_t*)data;
 
 	    for (; i < data_count ; ++i) {
-		    wprintf(L"Description=%s\n",
+			wprintf(L"Description=%s}\n",
 				    p[i].description);
 	    }
     }
@@ -103,8 +125,8 @@ void listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_d
         dxf_time_and_sale_t* tns = (dxf_time_and_sale_t*)data;
 
         for (; i < data_count ; ++i) {
-            wprintf(L"event id=%ld, time=%ld, exchange code=%c, price=%f, size=%li, bid price=%f, ask price=%f, "
-                    L"exchange sale conditions=%s, is trade=%s, type=%i\n",
+            wprintf(L"event id=%I64i, time=%I64i, exchange code=%c, price=%f, size=%I64i, bid price=%f, ask price=%f, "
+				L"exchange sale conditions=\'%s\', is trade=%s, type=%i}\n",
                     tns[i].event_id, tns[i].time, tns[i].exchange_code, tns[i].price, tns[i].size,
                     tns[i].bid_price, tns[i].ask_price, tns[i].exchange_sale_conditions,
                     tns[i].is_trade ? L"True" : L"False", tns[i].type);
