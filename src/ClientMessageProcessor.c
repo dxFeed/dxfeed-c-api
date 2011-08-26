@@ -129,7 +129,11 @@ static bool dx_compose_message_header (void* bocc, dx_message_type_t message_typ
 
     return true;
 }
+static bool dx_compose_heartbeat (void* bocc) {
+    CHECKED_CALL_2(dx_write_byte, bocc, (dxf_byte_t)0); /* reserve one byte for message length */
 
+    return true;
+}
 /* -------------------------------------------------------------------------- */
 
 static bool dx_move_message_data (void* bocc, int old_offset, int new_offset, int data_length) {
@@ -439,6 +443,19 @@ static bool dx_write_describe_protocol_recvs (void* bocc) {
 
 /* -------------------------------------------------------------------------- */
 
+int dx_heartbeat_sender_task (void* data, int command) {
+    int res = dx_tes_pop_me;
+
+    if (IS_FLAG_SET(command, dx_tc_free_resources)) {
+        return res | dx_tes_success;
+    }
+
+	if (dx_send_heartbeat((dxf_connection_t)data, true)) {
+        res |= dx_tes_success;
+    }
+
+    return res;
+}
 int dx_describe_protocol_sender_task (void* data, int command) {
     int res = dx_tes_pop_me;
 
@@ -629,6 +646,69 @@ bool dx_send_protocol_description (dxf_connection_t connection, bool task_mode) 
         !dx_write_describe_protocol_sends(bocc) ||
         !dx_write_describe_protocol_recvs(bocc) ||
         !dx_finish_composing_message(bocc)) {
+
+        dx_free(dx_get_out_buffer(bocc));
+        dx_unlock_buffered_output(bocc);
+
+        return false;
+    }
+
+    initial_buffer = dx_get_out_buffer(bocc);
+    message_size = dx_get_out_buffer_position(bocc);
+
+    if (!dx_unlock_buffered_output(bocc) ||
+        !dx_send_data(connection, initial_buffer, message_size)) {
+
+        dx_free(initial_buffer);
+
+        return false;
+    }
+
+    dx_free(initial_buffer);
+
+    return true;
+}
+
+bool dx_send_heartbeat (dxf_connection_t connection, bool task_mode) {
+    static const int initial_size = 1024;
+
+    void* bocc = NULL;
+    dxf_byte_t* initial_buffer = NULL;
+    int message_size = 0;
+
+
+    CHECKED_CALL_2(dx_validate_connection_handle, connection, true);
+    
+    if (!task_mode) {        
+        /* scheduling the task for asynchronous execution */
+        if (!dx_add_worker_thread_task(connection, dx_heartbeat_sender_task, (void*)connection) ) {
+            
+            return false;
+        }
+        
+        return true;
+    }
+    dx_logging_verbose_info(L"Send heartbeat");
+
+    bocc = dx_get_buffered_output_connection_context(connection);
+
+    if (bocc == NULL) {
+        return dx_set_error_code(dx_cec_connection_context_not_initialized);
+    }
+
+    CHECKED_CALL(dx_lock_buffered_output, bocc);
+
+    initial_buffer = dx_malloc(initial_size);
+
+    if (initial_buffer == NULL) {
+        dx_unlock_buffered_output(bocc);
+
+        return false;
+    }
+
+    dx_set_out_buffer(bocc, initial_buffer, initial_size);
+
+    if (!dx_compose_heartbeat(bocc)) {
 
         dx_free(dx_get_out_buffer(bocc));
         dx_unlock_buffered_output(bocc);
