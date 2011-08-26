@@ -567,7 +567,7 @@ bool dx_read_compact_int (void* context, OUT dxf_int_t* value) {
 /* -------------------------------------------------------------------------- */
 
 bool dx_read_compact_long (void* context, OUT dxf_long_t* value) {
-    dxf_uint_t n;
+    dxf_int_t n;
     dxf_int_t tmp_int;
     
     if (value == NULL) {
