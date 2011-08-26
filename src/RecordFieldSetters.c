@@ -123,7 +123,7 @@ void DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, sequence) (void* object, co
 
 void DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, exch_sale_conds) (void* object, const void* field) {
     ((dx_time_and_sale_t*)object)->event_id &= 0x00000000FFFFFFFFL;
-    ((dx_time_and_sale_t*)object)->event_id |= ((*(dxf_int_t*)field) << 32);
+    ((dx_time_and_sale_t*)object)->event_id |= (((dxf_long_t)(*(dxf_int_t*)field)) << 32);
 }
 
 /* -------------------------------------------------------------------------- */
