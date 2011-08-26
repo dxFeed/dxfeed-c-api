@@ -73,6 +73,13 @@
         } \
     } while (false)
 
+#define CHECKED_CALL_1(func, param1) \
+    do { \
+        if (!func(param1)) { \
+            return false; \
+        } \
+    } while (false)
+
 #define CHECKED_CALL_2(func, param1, param2) \
     do { \
         if (!func(param1, param2)) { \
