@@ -268,7 +268,8 @@ void* dx_queue_executor (void* arg) {
     static int s_idle_timeout = 100;
     static int s_small_timeout = 25;
     static int s_heartbeat_timeout = 60; // in seconds
-    int current_time;
+    
+	int current_time;
 
 	dx_network_connection_context_t* context = NULL;
     
@@ -288,7 +289,7 @@ void* dx_queue_executor (void* arg) {
         
         return NULL;
     }
-    context->next_heartbeat = 0;
+
 	time (&context->next_heartbeat);
 
     for (;;) {
