@@ -50,7 +50,7 @@ void* dx_error_processor (void* src) {
 /* -------------------------------------------------------------------------- */
 
 void* dx_malloc (int size) {
-    dx_logging_verbose_info(L"Allocate %d bytes", size);
+  //  dx_logging_verbose_info(L"Allocate %d bytes", size);
     
     return dx_error_processor(malloc(size));
 }
@@ -58,7 +58,7 @@ void* dx_malloc (int size) {
 /* -------------------------------------------------------------------------- */
 
 void* dx_calloc (int num, int size) {
-    dx_logging_verbose_info(L"Allocate %d bytes", size);
+  //  dx_logging_verbose_info(L"Allocate %d bytes", size);
     
     return dx_error_processor(calloc(num, size));
 }
@@ -85,7 +85,7 @@ void* dx_memset (void * destination, int c, int size) {
 /* -------------------------------------------------------------------------- */
 
 void dx_free (void* buf) {
-    dx_logging_verbose_info(L"Deallocate buffer %#010x", buf);
+   // dx_logging_verbose_info(L"Deallocate buffer %#010x", buf);
     
     free(buf);
 }
