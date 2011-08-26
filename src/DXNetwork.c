@@ -78,6 +78,7 @@ typedef struct {
     
     const char* address;
     dx_socket_t s;
+	int next_heartbeat;
     pthread_t reader_thread;
     pthread_t queue_thread;
     pthread_mutex_t socket_guard;
@@ -251,7 +252,7 @@ static bool dx_close_socket (dx_network_connection_context_t* context) {
 
 void dx_notify_conn_termination (dx_network_connection_context_t* context, OUT bool* idle_thread_flag) {
     if (context->context_data.notifier != NULL) {
-        context->context_data.notifier(context->connection, context->context_data.notifier_user_data);
+        context->context_data.notifier(context->address, context->context_data.notifier_user_data);
     }
     
     if (idle_thread_flag != NULL) {
@@ -266,8 +267,10 @@ void dx_notify_conn_termination (dx_network_connection_context_t* context, OUT b
 void* dx_queue_executor (void* arg) {
     static int s_idle_timeout = 100;
     static int s_small_timeout = 25;
-    
-    dx_network_connection_context_t* context = NULL;
+    static int s_heartbeat_timeout = 60; // in seconds
+    int current_time;
+
+	dx_network_connection_context_t* context = NULL;
     
     if (arg == NULL) {
         /* invalid input parameter
@@ -285,10 +288,20 @@ void* dx_queue_executor (void* arg) {
         
         return NULL;
     }
-    
+    context->next_heartbeat = 0;
+	time (&context->next_heartbeat);
+
     for (;;) {
-        bool queue_empty = true;
-        
+	    bool queue_empty = true;
+		
+		time (&current_time);
+		if ( difftime ( current_time , context->next_heartbeat) >= 0 ){
+			CHECKED_CALL_2(dx_send_heartbeat, context->connection, true);
+			time (&context->next_heartbeat);
+			context->next_heartbeat += s_heartbeat_timeout;
+		}
+		
+
         if (context->queue_thread_termination_trigger) {
             break;
         }
