@@ -1,35 +1,67 @@
 <?xml version="1.0" encoding="windows-1251"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="7.10"
+	Version="9,00"
 	Name="DXFeedCOM"
 	ProjectGUID="{1574E414-4DB2-456C-A08A-75F585A03D45}"
-	Keyword="Win32Proj">
+	Keyword="Win32Proj"
+	TargetFrameworkVersion="131072"
+	>
 	<Platforms>
 		<Platform
-			Name="Win32"/>
+			Name="Win32"
+		/>
 	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="..\..\..\bin"
 			IntermediateDirectory="..\build\Debug"
 			ConfigurationType="2"
-			CharacterSet="2">
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TypeLibraryName="..\bin\DXFeedCOM.tlb"
+				OutputDirectory="..\..\..\bin"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\include,..\include"
 				PreprocessorDefinitions="_WIN32_WINNT=0x0500, WIN32;_DEBUG;_CONSOLE"
-				MinimalRebuild="TRUE"
+				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="FALSE"
-				DebugInformationFormat="4"/>
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="4"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="comsupp.lib DXFeedd.lib"
@@ -37,40 +69,61 @@
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\..\bin"
 				ModuleDefinitionFile="DXFeedCOMd.def"
-				GenerateDebugInformation="TRUE"
+				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/DXFeedCOM.pdb"
 				SubSystem="2"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				ImportLibrary="..\..\..\bin\DXFeedCOMd.lib"
-				TargetMachine="1"/>
+				TargetMachine="1"
+			/>
 			<Tool
-				Name="VCMIDLTool"
-				TypeLibraryName="..\bin\DXFeedCOM.tlb"
-				OutputDirectory="..\..\..\bin"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCManifestTool"
+			/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCXDCMakeTool"
+			/>
 			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCBscMakeTool"
+			/>
 			<Tool
-				Name="VCResourceCompilerTool"/>
+				Name="VCFxCopTool"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="VCAppVerifierTool"
+			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="..\..\..\bin"
 			IntermediateDirectory="..\build\Release"
 			ConfigurationType="2"
-			CharacterSet="2">
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TypeLibraryName="..\bin\DXFeedCOM.tlb"
+				OutputDirectory="..\..\..\bin"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="..\..\..\include,..\include"
@@ -78,10 +131,18 @@
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="FALSE"
-				DebugInformationFormat="3"/>
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="3"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="comsupp.lib DXFeed.lib"
@@ -89,34 +150,36 @@
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\..\bin"
 				ModuleDefinitionFile="DXFeedCOM.def"
-				GenerateDebugInformation="TRUE"
+				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				ImportLibrary="..\..\..\bin\DXFeedCOM.lib"
-				TargetMachine="1"/>
+				TargetMachine="1"
+			/>
 			<Tool
-				Name="VCMIDLTool"
-				TypeLibraryName="..\bin\DXFeedCOM.tlb"
-				OutputDirectory="..\..\..\bin"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCManifestTool"
+			/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCXDCMakeTool"
+			/>
 			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCBscMakeTool"
+			/>
 			<Tool
-				Name="VCResourceCompilerTool"/>
+				Name="VCFxCopTool"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="VCAppVerifierTool"
+			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 	</Configurations>
 	<References>
@@ -125,93 +188,121 @@
 		<Filter
 			Name="Source Files"
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
+			>
 			<File
-				RelativePath=".\AuxAlgo.cpp">
+				RelativePath=".\AuxAlgo.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\ClassFactory.cpp">
+				RelativePath=".\ClassFactory.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\Connection.cpp">
+				RelativePath=".\Connection.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\ConnectionPointImpl.cpp">
+				RelativePath=".\ConnectionPointImpl.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\DispatchImpl.cpp">
+				RelativePath=".\DispatchImpl.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\DXFeedCOM.cpp">
+				RelativePath=".\DXFeedCOM.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\DXFeedCOM.def">
+				RelativePath=".\DXFeedCOM.def"
+				>
 			</File>
 			<File
-				RelativePath=".\DXFeedCOM.idl">
+				RelativePath=".\DXFeedCOM.idl"
+				>
 			</File>
 			<File
-				RelativePath=".\DXFeedCOMd.def">
+				RelativePath=".\DXFeedCOMd.def"
+				>
 			</File>
 			<File
-				RelativePath=".\EventFactory.cpp">
+				RelativePath=".\EventFactory.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\Feed.cpp">
+				RelativePath=".\Feed.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\LibraryLocker.cpp">
+				RelativePath=".\LibraryLocker.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\SelfRegistration.cpp">
+				RelativePath=".\SelfRegistration.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\Subscription.cpp">
+				RelativePath=".\Subscription.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\TypeLibraryManager.cpp">
+				RelativePath=".\TypeLibraryManager.cpp"
+				>
 			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
+			>
 			<File
-				RelativePath=".\AuxAlgo.h">
+				RelativePath=".\AuxAlgo.h"
+				>
 			</File>
 			<File
-				RelativePath=".\Connection.h">
+				RelativePath=".\Connection.h"
+				>
 			</File>
 			<File
-				RelativePath=".\ConnectionPointImpl.h">
+				RelativePath=".\ConnectionPointImpl.h"
+				>
 			</File>
 			<File
-				RelativePath=".\DispatchImpl.h">
+				RelativePath=".\DispatchImpl.h"
+				>
 			</File>
 			<File
-				RelativePath=".\EventFactory.h">
+				RelativePath=".\EventFactory.h"
+				>
 			</File>
 			<File
-				RelativePath=".\Feed.h">
+				RelativePath=".\Feed.h"
+				>
 			</File>
 			<File
-				RelativePath=".\LibraryLocker.h">
+				RelativePath=".\LibraryLocker.h"
+				>
 			</File>
 			<File
-				RelativePath=".\Subscription.h">
+				RelativePath=".\Subscription.h"
+				>
 			</File>
 			<File
-				RelativePath=".\TypeLibraryManager.h">
+				RelativePath=".\TypeLibraryManager.h"
+				>
 			</File>
 		</Filter>
 		<Filter
 			Name="External interface"
-			Filter="">
+			>
 			<File
-				RelativePath="..\include\Guids.h">
+				RelativePath="..\include\Guids.h"
+				>
 			</File>
 			<File
-				RelativePath="..\include\Interfaces.h">
+				RelativePath="..\include\Interfaces.h"
+				>
 			</File>
 		</Filter>
 	</Files>

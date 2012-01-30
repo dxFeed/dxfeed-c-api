@@ -1,118 +1,181 @@
 <?xml version="1.0" encoding="windows-1251"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="7.10"
+	Version="9,00"
 	Name="UnitTests"
 	ProjectGUID="{2671AFA2-E2C2-4D75-ADE0-2B54D7D0DFF9}"
-	Keyword="Win32Proj">
+	Keyword="Win32Proj"
+	TargetFrameworkVersion="131072"
+	>
 	<Platforms>
 		<Platform
-			Name="Win32"/>
+			Name="Win32"
+		/>
 	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="..\..\bin"
 			IntermediateDirectory="Debug"
 			ConfigurationType="1"
-			CharacterSet="2">
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include; ..\..\src;..\..\thirdparty\pthreads\win32\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
-				MinimalRebuild="TRUE"
-				ExceptionHandling="FALSE"
+				MinimalRebuild="true"
+				ExceptionHandling="0"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="5"
+				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="TRUE"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="4"
-				CompileAs="1"/>
+				CompileAs="1"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="pthreadVC2.lib Ws2_32.lib"
 				OutputFile="$(OutDir)/UnitTestsd.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\bin"
-				GenerateDebugInformation="TRUE"
+				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/UnitTests.pdb"
 				SubSystem="1"
-				TargetMachine="1"/>
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="1"
+			/>
 			<Tool
-				Name="VCMIDLTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCManifestTool"
+			/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCXDCMakeTool"
+			/>
 			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCBscMakeTool"
+			/>
 			<Tool
-				Name="VCResourceCompilerTool"/>
+				Name="VCFxCopTool"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="VCAppVerifierTool"
+			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="..\..\bin"
 			IntermediateDirectory="Release"
 			ConfigurationType="1"
-			CharacterSet="2">
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="..\..\include; ..\..\src;..\..\thirdparty\pthreads\win32\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
-				ExceptionHandling="FALSE"
-				RuntimeLibrary="4"
+				ExceptionHandling="0"
+				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="TRUE"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
-				CompileAs="1"/>
+				CompileAs="1"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="pthreadVC2.lib Ws2_32.lib"
 				OutputFile="$(OutDir)/UnitTests.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\bin"
-				GenerateDebugInformation="TRUE"
+				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				TargetMachine="1"/>
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="1"
+			/>
 			<Tool
-				Name="VCMIDLTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCManifestTool"
+			/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCXDCMakeTool"
+			/>
 			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCBscMakeTool"
+			/>
 			<Tool
-				Name="VCResourceCompilerTool"/>
+				Name="VCFxCopTool"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="VCAppVerifierTool"
+			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 	</Configurations>
 	<References>
@@ -121,158 +184,200 @@
 		<Filter
 			Name="Source Files"
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
+			>
 			<File
-				RelativePath=".\EventSubscriptionTest.c">
+				RelativePath=".\EventSubscriptionTest.c"
+				>
 			</File>
 			<File
-				RelativePath=".\UnitTests.c">
+				RelativePath=".\UnitTests.c"
+				>
 			</File>
 		</Filter>
 		<Filter
 			Name="Common"
-			Filter="">
+			>
 			<Filter
 				Name="Headers"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\src\DXAlgorithms.h">
+					RelativePath="..\..\src\DXAlgorithms.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\include\DXErrorCodes.h">
+					RelativePath="..\..\include\DXErrorCodes.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\src\DXErrorHandling.h">
+					RelativePath="..\..\src\DXErrorHandling.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\src\DXMemory.h">
+					RelativePath="..\..\src\DXMemory.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\src\DXThreads.h">
+					RelativePath="..\..\src\DXThreads.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\include\EventData.h">
+					RelativePath="..\..\include\EventData.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\src\PrimitiveTypes.h">
+					RelativePath="..\..\src\PrimitiveTypes.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\src\TaskQueue.h">
+					RelativePath="..\..\src\TaskQueue.h"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="Sources"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\src\ConnectionContextData.c">
+					RelativePath="..\..\src\ConnectionContextData.c"
+					>
 				</File>
 				<File
-					RelativePath="..\..\src\DXAlgorithms.c">
+					RelativePath="..\..\src\DXAlgorithms.c"
+					>
 				</File>
 				<File
-					RelativePath="..\..\src\DXErrorCodes.c">
+					RelativePath="..\..\src\DXErrorCodes.c"
+					>
 				</File>
 				<File
-					RelativePath="..\..\src\DXErrorHandling.c">
+					RelativePath="..\..\src\DXErrorHandling.c"
+					>
 				</File>
 				<File
-					RelativePath="..\..\src\DXMemory.c">
+					RelativePath="..\..\src\DXMemory.c"
+					>
 				</File>
 				<File
-					RelativePath="..\..\src\DXNetwork.c">
+					RelativePath="..\..\src\DXNetwork.c"
+					>
 				</File>
 				<File
-					RelativePath="..\..\src\DXPMessageData.c">
+					RelativePath="..\..\src\DXPMessageData.c"
+					>
 				</File>
 				<File
-					RelativePath="..\..\src\DXSockets.c">
+					RelativePath="..\..\src\DXSockets.c"
+					>
 				</File>
 				<File
-					RelativePath="..\..\src\DXThreads.c">
+					RelativePath="..\..\src\DXThreads.c"
+					>
 				</File>
 				<File
-					RelativePath="..\..\src\EventData.c">
+					RelativePath="..\..\src\EventData.c"
+					>
 				</File>
 				<File
-					RelativePath="..\..\src\TaskQueue.c">
+					RelativePath="..\..\src\TaskQueue.c"
+					>
 				</File>
 			</Filter>
 		</Filter>
 		<Filter
 			Name="Event subscription"
-			Filter="">
+			>
 			<File
-				RelativePath="..\..\src\EventSubscription.c">
+				RelativePath="..\..\src\EventSubscription.c"
+				>
 			</File>
 			<File
-				RelativePath="..\..\src\EventSubscription.h">
+				RelativePath="..\..\src\EventSubscription.h"
+				>
 			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
+			>
 			<File
-				RelativePath=".\EventSubscriptionTest.h">
+				RelativePath=".\EventSubscriptionTest.h"
+				>
 			</File>
 		</Filter>
 		<Filter
 			Name="Parser"
-			Filter="">
+			>
 			<Filter
 				Name="Headers"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\src\EventDataFieldSetters.h">
+					RelativePath="..\..\src\EventDataFieldSetters.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\src\EventRecordBuffers.h">
+					RelativePath="..\..\src\EventRecordBuffers.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\src\Logger.h">
+					RelativePath="..\..\src\Logger.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\src\SymbolCodec.h">
+					RelativePath="..\..\src\SymbolCodec.h"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="Sources"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\src\BufferedInput.c">
+					RelativePath="..\..\src\BufferedInput.c"
+					>
 				</File>
 				<File
-					RelativePath="..\..\src\BufferedIOCommon.c">
+					RelativePath="..\..\src\BufferedIOCommon.c"
+					>
 				</File>
 				<File
-					RelativePath="..\..\src\BufferedOutput.c">
+					RelativePath="..\..\src\BufferedOutput.c"
+					>
 				</File>
 				<File
-					RelativePath="..\..\src\ClientMessageProcessor.c">
+					RelativePath="..\..\src\ClientMessageProcessor.c"
+					>
 				</File>
 				<File
-					RelativePath="..\..\src\DataStructures.c">
+					RelativePath="..\..\src\DataStructures.c"
+					>
 				</File>
 				<File
-					RelativePath="..\..\src\Decimal.c">
+					RelativePath="..\..\src\Decimal.c"
+					>
 				</File>
 				<File
-					RelativePath="..\..\src\Logger.c">
+					RelativePath="..\..\src\Logger.c"
+					>
 				</File>
 				<File
-					RelativePath="..\..\src\RecordBuffers.c">
+					RelativePath="..\..\src\RecordBuffers.c"
+					>
 				</File>
 				<File
-					RelativePath="..\..\src\RecordFieldSetters.c">
+					RelativePath="..\..\src\RecordFieldSetters.c"
+					>
 				</File>
 				<File
-					RelativePath="..\..\src\RecordTranscoder.c">
+					RelativePath="..\..\src\RecordTranscoder.c"
+					>
 				</File>
 				<File
-					RelativePath="..\..\src\ServerMessageProcessor.c">
+					RelativePath="..\..\src\ServerMessageProcessor.c"
+					>
 				</File>
 				<File
-					RelativePath="..\..\src\SymbolCodec.c">
+					RelativePath="..\..\src\SymbolCodec.c"
+					>
 				</File>
 			</Filter>
 		</Filter>
