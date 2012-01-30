@@ -21,6 +21,8 @@
  *	Implementation of the network functions
  */
 
+#include <stdio.h>
+
 #include "DXNetwork.h"
 #include "DXSockets.h"
 #include "DXErrorHandling.h"
@@ -78,7 +80,7 @@ typedef struct {
     
     const char* address;
     dx_socket_t s;
-	int next_heartbeat;
+	time_t next_heartbeat;
     pthread_t reader_thread;
     pthread_t queue_thread;
     pthread_mutex_t socket_guard;
@@ -269,7 +271,7 @@ void* dx_queue_executor (void* arg) {
     static int s_small_timeout = 25;
     static int s_heartbeat_timeout = 60; // in seconds
     
-	int current_time;
+	time_t current_time;
 
 	dx_network_connection_context_t* context = NULL;
     

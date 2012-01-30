@@ -37,24 +37,6 @@ static const int g_event_data_sizes[dx_eid_count] = {
 
 /* -------------------------------------------------------------------------- */
 /*
- *	Event data constants
- */
-/* -------------------------------------------------------------------------- */
-
-const dxf_int_t DXF_ORDER_SIDE_BUY = 0;
-const dxf_int_t DXF_ORDER_SIDE_SELL = 1;
-
-const dxf_int_t DXF_ORDER_LEVEL_COMPOSITE = 0;
-const dxf_int_t DXF_ORDER_LEVEL_REGIONAL = 1;
-const dxf_int_t DXF_ORDER_LEVEL_AGGREGATE = 2;
-const dxf_int_t DXF_ORDER_LEVEL_ORDER = 3;
-
-const dxf_int_t DXF_TIME_AND_SALE_TYPE_NEW = 0;
-const dxf_int_t DXF_TIME_AND_SALE_TYPE_CORRECTION = 1;
-const dxf_int_t DXF_TIME_AND_SALE_TYPE_CANCEL = 2;
-
-/* -------------------------------------------------------------------------- */
-/*
  *	Event functions implementation
  */
 /* -------------------------------------------------------------------------- */

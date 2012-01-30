@@ -93,17 +93,17 @@ typedef struct {
  */
 /* -------------------------------------------------------------------------- */
 
-extern const dxf_int_t DXF_ORDER_SIDE_BUY;
-extern const dxf_int_t DXF_ORDER_SIDE_SELL;
+static const dxf_int_t DXF_ORDER_SIDE_BUY = 0;
+static const dxf_int_t DXF_ORDER_SIDE_SELL = 1;
 
-extern const dxf_int_t DXF_ORDER_LEVEL_COMPOSITE;
-extern const dxf_int_t DXF_ORDER_LEVEL_REGIONAL;
-extern const dxf_int_t DXF_ORDER_LEVEL_AGGREGATE;
-extern const dxf_int_t DXF_ORDER_LEVEL_ORDER;
+static const dxf_int_t DXF_ORDER_LEVEL_COMPOSITE = 0;
+static const dxf_int_t DXF_ORDER_LEVEL_REGIONAL = 1;
+static const dxf_int_t DXF_ORDER_LEVEL_AGGREGATE = 2;
+static const dxf_int_t DXF_ORDER_LEVEL_ORDER = 3;
 
-extern const dxf_int_t DXF_TIME_AND_SALE_TYPE_NEW;
-extern const dxf_int_t DXF_TIME_AND_SALE_TYPE_CORRECTION;
-extern const dxf_int_t DXF_TIME_AND_SALE_TYPE_CANCEL;
+static const dxf_int_t DXF_TIME_AND_SALE_TYPE_NEW = 0;
+static const dxf_int_t DXF_TIME_AND_SALE_TYPE_CORRECTION = 1;
+static const dxf_int_t DXF_TIME_AND_SALE_TYPE_CANCEL = 2;
 
 /* -------------------------------------------------------------------------- */
 /*
