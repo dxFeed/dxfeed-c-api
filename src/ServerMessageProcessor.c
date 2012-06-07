@@ -786,35 +786,33 @@ bool dx_read_records (dx_server_msg_proc_connection_context_t* context,
     dx_logging_verbose_info(L"Read records");
 
 	for (; i < record_digest->size; ++i) {
-		switch (record_digest->elements[i]->type) {
-		case 0:
+		int serialization = record_digest->elements[i]->type & dx_fid_mask_serialization;
+		int presentation = record_digest->elements[i]->type & dx_fid_mask_presentation;
+
+		switch (serialization) {
+		case dx_fid_void:
 			/* 0 here means that we're dealing with the field the server does not support;
 			    using the default value for it */
-			    
 			record_digest->elements[i]->setter(record_buffer, record_digest->elements[i]->def_val_getter());
-			
-			break;
-		case dx_fid_compact_int:
-			CHECKED_CALL_2(dx_read_compact_int, context->bicc, &read_int);
-			CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_int);
-			
-			break;
-		case dx_fid_int:
-			CHECKED_CALL_2(dx_read_int, context->bicc, &read_int);
-			CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_int);
 			
 			break;
 		case dx_fid_byte:
 			CHECKED_CALL_2(dx_read_byte, context->bicc, &read_byte);
-			CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_byte);
-			
-			break;
-		case dx_fid_short:
-			CHECKED_CALL_2(dx_read_short, context->bicc, &read_short);
-			CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_short);
+
+			if (presentation == dx_fid_flag_decimal) {
+				CHECKED_CALL_2(dx_int_to_double, read_byte, &read_double);
+				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double);
+			} else if (presentation == dx_fid_flag_short_string) {
+				read_string = dx_decode_from_integer(read_byte);
+				dx_store_string_buffer(context->rbcc, read_string);
+				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_string);
+			} else {
+				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_byte);
+			}
 			
 			break;
 		case dx_fid_utf_char:
+			/* No special presentation bits are supported for UTF char */
 			CHECKED_CALL_2(dx_read_utf_char, context->bicc, &read_int);
 			
 			read_utf_char = read_int;
@@ -822,10 +820,70 @@ bool dx_read_records (dx_server_msg_proc_connection_context_t* context,
 			CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_int);
 			
 			break;
-		case dx_fid_compact_int | dx_fid_flag_decimal: 
+		case dx_fid_short:
+			/* No special presentation bits are supported for UTF char */
+			CHECKED_CALL_2(dx_read_short, context->bicc, &read_short);
+
+			if (presentation == dx_fid_flag_decimal) {
+				CHECKED_CALL_2(dx_int_to_double, read_short, &read_double);
+				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double);
+			} else if (presentation == dx_fid_flag_short_string) {
+				read_string = dx_decode_from_integer(read_short);
+				dx_store_string_buffer(context->rbcc, read_string);
+				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_string);
+			} else {
+				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_short);
+			}
+			
+			break;
+		case dx_fid_int:
+			CHECKED_CALL_2(dx_read_int, context->bicc, &read_int);
+
+			if (presentation == dx_fid_flag_decimal) {
+				CHECKED_CALL_2(dx_int_to_double, read_int, &read_double);
+				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double);
+			} else if (presentation == dx_fid_flag_short_string) {
+				read_string = dx_decode_from_integer(read_int);
+				dx_store_string_buffer(context->rbcc, read_string);
+				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_string);
+			} else {
+				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_int);
+			}
+			
+			break;
+		case dx_fid_compact_int:
 			CHECKED_CALL_2(dx_read_compact_int, context->bicc, &read_int);
-			CHECKED_CALL_2(dx_int_to_double, read_int, &read_double);
-			CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double);
+
+			if (presentation == dx_fid_flag_decimal) {
+				CHECKED_CALL_2(dx_int_to_double, read_int, &read_double);
+				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double);
+			} else if (presentation == dx_fid_flag_short_string) {
+				read_string = dx_decode_from_integer(read_int);
+				dx_store_string_buffer(context->rbcc, read_string);
+				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_string);
+			} else {
+				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_int);
+			}
+			
+			break;
+		case dx_fid_byte_array:
+			if (presentation == dx_fid_flag_string) {
+				/* Treat as UTF char array with length in bytes */
+				CHECKED_CALL_2(dx_read_byte_array_as_utf_string, context->bicc, &read_string);
+			
+				dx_store_string_buffer(context->rbcc, read_string);
+			
+				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_string);
+			} else {
+				CHECKED_CALL_2(dx_read_byte_array, context->bicc, &read_byte_array);
+				/* Objects goes as byte array to.
+				 According to specification (DESCRIBE_RECORDS.txt):
+				 
+				 Unsupported values in those bits are reserved and MUST be ignored.
+				 such field SHOULD be treated as PLAIN.
+				*/
+				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_byte_array);
+			}
 			
 			break;
 		case dx_fid_utf_char_array:
@@ -836,16 +894,6 @@ bool dx_read_records (dx_server_msg_proc_connection_context_t* context,
 			CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_string);
 			
 			break;
-		case dx_fid_byte_array:
-			CHECKED_CALL_2(dx_read_byte_array, context->bicc, &read_byte_array);
-			CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_byte_array);
-			
-			break;
-
-		case dx_fid_compact_int | dx_fid_flag_short_string:
-		case dx_fid_byte_array | dx_fid_flag_string:
-		case dx_fid_byte_array | dx_fid_flag_custom_object:
-		case dx_fid_byte_array | dx_fid_flag_serial_object:
 		default:
 			return dx_set_error_code(dx_pec_record_field_type_not_supported);
 		}

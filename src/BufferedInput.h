@@ -61,7 +61,9 @@ bool dx_read_long (void* context, OUT dxf_long_t* value);
 bool dx_read_float (void* context, OUT dxf_float_t* value);
 bool dx_read_double (void* context, OUT dxf_double_t* value);
 bool dx_read_line (void* context, OUT dxf_string_t* value);
+/*
 bool dx_read_utf (void* context, OUT dxf_string_t* value);
+*/
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -111,10 +113,19 @@ bool dx_read_utf_char (void* context, OUT dxf_int_t* value);
 /*
  * Reads Unicode string in a UTF-8 format with compact encapsulation.
  * Overlong UTF-8 and CESU-8-encoded surrogates are accepted and read without errors.
- * This method defines length as a number of bytes.
+ * This method defines length as a number of characters.
  *
  * @param value - the Unicode string read
  */
 bool dx_read_utf_string (void* context, OUT dxf_string_t* value);
+
+/*
+ * Reads Unicode string in a UTF-8 format with compact encapsulation.
+ * Overlong UTF-8 and CESU-8-encoded surrogates are accepted and read without errors.
+ * This method defines length as a number of bytes.
+ *
+ * @param value - the Unicode string read
+ */
+bool dx_read_byte_array_as_utf_string (void* context, OUT dxf_string_t* value);
 
 #endif /* BUFFERED_INPUT_H_INCLUDED */

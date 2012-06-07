@@ -320,7 +320,7 @@ int dx_find_record_field (const dx_record_info_t* record_info, dxf_const_string_
     
     for (; cur_field_index < record_info->field_count; ++cur_field_index) {
         if (dx_compare_strings(fields[cur_field_index].name, field_name) == 0 &&
-            fields[cur_field_index].type == field_type) {
+            (fields[cur_field_index].type & dx_fid_mask_serialization)== (field_type & dx_fid_mask_serialization)) {
             
             return cur_field_index;
         }

@@ -53,11 +53,18 @@ typedef enum {
     dx_fid_utf_char_array = 10,
     // ids 11-15 are reserved for future use as array of short, array of int, etc
 
+	dx_fid_flag_plain = 0x00,         // plain represenation
     dx_fid_flag_decimal = 0x10,       // decimal representation as int field
     dx_fid_flag_short_string = 0x20,  // short (up to 4-character) string representation as int field
+	dx_fid_flag_time = 0x30,          // time in seconds in this integer field
+	dx_fid_flag_sequence = 0x40,      // sequence in this integer fields (with top 10 bits representing millis)
+	dx_fid_flag_date = 0x50,          // day id in this integer field
     dx_fid_flag_string = 0x80,        // String representation as byte array
-    dx_fid_flag_custom_object = 0xe0, // customly serialized object as byte array
-    dx_fid_flag_serial_object = 0xf0  // serialized object as byte array
+    dx_fid_flag_custom_object = 0xe0, // custom serialized object as byte array
+    dx_fid_flag_serial_object = 0xf0, // serialized object as byte array
+
+	dx_fid_mask_serialization = 0x0f,
+	dx_fid_mask_presentation = 0xf0
 } dx_field_id_t;
 
 /* -------------------------------------------------------------------------- */

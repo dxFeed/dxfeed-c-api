@@ -235,7 +235,7 @@ bool dx_read_utf4 (void* context, int first, OUT dxf_int_t* res) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_read_utf_sequence (void* context, int utflen, OUT dxf_string_t* value) {
+bool dx_read_utf_sequence (void* context, int utflen, bool lenInChars, OUT dxf_string_t* value) {
     dxf_string_t buffer;
     int count = 0;
     dxf_int_t tmpCh;
@@ -249,7 +249,8 @@ bool dx_read_utf_sequence (void* context, int utflen, OUT dxf_string_t* value) {
         
         return (*value != NULL);
     }
-
+	
+	/* May be slightly large, if length is in bytes */
     buffer = dx_create_string(utflen);
     
     if (buffer == NULL) {
@@ -265,13 +266,13 @@ bool dx_read_utf_sequence (void* context, int utflen, OUT dxf_string_t* value) {
             --utflen;
             buffer[count++] = (dxf_char_t)c;
         } else if ((c & 0xE0) == 0xC0) {
-            utflen -= 2;
+			utflen -= lenInChars?1:2;
             
             CHECKED_CALL_3(dx_read_utf2, context, c, &tmpCh);
             
             buffer[count++] = tmpCh;
         } else if ((c & 0xF0) == 0xE0) {
-            utflen -= 3;
+            utflen -= lenInChars?1:3;
             
             CHECKED_CALL_3(dx_read_utf3, context, c, &tmpCh);
             
@@ -279,7 +280,7 @@ bool dx_read_utf_sequence (void* context, int utflen, OUT dxf_string_t* value) {
         } else if ((c & 0xF8) == 0xF0) {
             dxf_int_t tmpInt;
             int res;
-            utflen -= 4;
+            utflen -= lenInChars?1:4;
             
             CHECKED_CALL_3(dx_read_utf4, context, c, &tmpInt);
             CHECKED_CALL_5(dx_code_point_to_utf16_chars, tmpInt, buffer, count, utflen, &res);
@@ -493,7 +494,7 @@ bool dx_read_utf (void* context, OUT dxf_string_t* value) {
     
     CHECKED_CALL_2(dx_read_unsigned_short, context, &utflen);
     
-    return dx_read_utf_sequence(context, utflen, OUT value);
+    return dx_read_utf_sequence(context, utflen, false, OUT value);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -750,5 +751,23 @@ bool dx_read_utf_string (void* context, OUT dxf_string_t* value) {
         return true;
     }
     
-    return dx_read_utf_sequence(context, (int)utflen, value);
+    return dx_read_utf_sequence(context, (int)utflen, true, value);
+}
+
+bool dx_read_byte_array_as_utf_string (void* context, OUT dxf_string_t* value) {
+    dxf_long_t utflen;
+    
+    CHECKED_CALL_2(dx_read_compact_long, context, &utflen);
+    
+    if (utflen < -1 || utflen > INT_MAX) {
+        return dx_set_error_code(dx_ec_invalid_func_param_internal);
+    }
+    
+    if (utflen == -1) {
+        *value = NULL;
+        
+        return true;
+    }
+    
+    return dx_read_utf_sequence(context, (int)utflen, false, value);
 }
