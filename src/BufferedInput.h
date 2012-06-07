@@ -126,6 +126,6 @@ bool dx_read_utf_char_array (void* context, OUT dxf_string_t* value);
  *
  * @param value - the Unicode string read
  */
-bool dx_read_byte_array_as_utf_string (void* context, OUT dxf_string_t* value);
+bool dx_read_utf_string (void* context, OUT dxf_string_t* value);
 
 #endif /* BUFFERED_INPUT_H_INCLUDED */

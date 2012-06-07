@@ -299,7 +299,7 @@ bool dx_codec_read_symbol (void* bicc, dxf_char_t* buffer, int buffer_length, OU
         return dx_set_error_code(dx_pcec_reserved_bit_sequence);
     } else if (i == 0xFC) { // UTF-8
         // todo This is inefficient, but currently UTF-8 is not used (compatibility mode). Shall be rewritten when UTF-8 become active.
-        CHECKED_CALL_2(dx_read_byte_array_as_utf_string, bicc, result);
+        CHECKED_CALL_2(dx_read_utf_string, bicc, result);
         
         *cipher_result = 0;
         

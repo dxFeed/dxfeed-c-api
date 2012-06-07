@@ -203,7 +203,7 @@ bool dx_create_field_digest (dx_server_msg_proc_connection_context_t* context,
     dxf_int_t field_type;
     int field_index = INVALID_INDEX;
     
-    CHECKED_CALL_2(dx_read_byte_array_as_utf_string, context->bicc, &field_name);
+    CHECKED_CALL_2(dx_read_utf_string, context->bicc, &field_name);
     CHECKED_CALL_2(dx_read_compact_int, context->bicc, &field_type);
 
     dx_logging_verbose_info(L"Field name: %s, field type: %d", field_name, field_type);
@@ -869,7 +869,7 @@ bool dx_read_records (dx_server_msg_proc_connection_context_t* context,
 		case dx_fid_byte_array:
 			if (presentation == dx_fid_flag_string) {
 				/* Treat as UTF char array with length in bytes */
-				CHECKED_CALL_2(dx_read_byte_array_as_utf_string, context->bicc, &read_string);
+				CHECKED_CALL_2(dx_read_utf_string, context->bicc, &read_string);
 			
 				dx_store_string_buffer(context->rbcc, read_string);
 			
@@ -1014,7 +1014,7 @@ bool dx_process_describe_records (dx_server_msg_proc_connection_context_t* conte
         dx_record_digest_t dummy;
         
         CHECKED_CALL_2(dx_read_compact_int, context->bicc, &record_id);
-        CHECKED_CALL_2(dx_read_byte_array_as_utf_string, context->bicc, &record_name);
+        CHECKED_CALL_2(dx_read_utf_string, context->bicc, &record_name);
         CHECKED_CALL_2(dx_read_compact_int, context->bicc, &field_count);
 		
 		if (record_name == NULL || dx_string_length(record_name) == 0 || field_count < 0) {
@@ -1073,8 +1073,8 @@ bool dx_read_describe_protocol_properties (dx_server_msg_proc_connection_context
 	}
 
 	for (; i < count; ++i) {
-		CHECKED_CALL_2(dx_read_byte_array_as_utf_string, context->bicc, &key);
-		CHECKED_CALL_2(dx_read_byte_array_as_utf_string, context->bicc, &value);
+		CHECKED_CALL_2(dx_read_utf_string, context->bicc, &key);
+		CHECKED_CALL_2(dx_read_utf_string, context->bicc, &value);
 		
 		dx_logging_verbose_info(L"%s: %s", key, value);
 
@@ -1160,7 +1160,7 @@ bool dx_read_describe_protocol_message_list (dx_server_msg_proc_connection_conte
         dxf_string_t message_name;
 		
 		CHECKED_CALL_2(dx_read_compact_int, context->bicc, &message_id);
-		CHECKED_CALL_2(dx_read_byte_array_as_utf_string, context->bicc, &message_name);
+		CHECKED_CALL_2(dx_read_utf_string, context->bicc, &message_name);
 		
 		dx_logging_verbose_info(L"%i(%s): %s", (int)message_id, dx_get_message_type_name((int)message_id), message_name);
 		
