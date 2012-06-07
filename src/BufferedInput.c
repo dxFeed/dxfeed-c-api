@@ -736,7 +736,7 @@ bool dx_read_utf_char (void* context, OUT dxf_int_t* value) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_read_utf_string (void* context, OUT dxf_string_t* value) {
+bool dx_read_utf_char_array (void* context, OUT dxf_string_t* value) {
     dxf_long_t utflen;
     
     CHECKED_CALL_2(dx_read_compact_long, context, &utflen);

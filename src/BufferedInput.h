@@ -117,7 +117,7 @@ bool dx_read_utf_char (void* context, OUT dxf_int_t* value);
  *
  * @param value - the Unicode string read
  */
-bool dx_read_utf_string (void* context, OUT dxf_string_t* value);
+bool dx_read_utf_char_array (void* context, OUT dxf_string_t* value);
 
 /*
  * Reads Unicode string in a UTF-8 format with compact encapsulation.

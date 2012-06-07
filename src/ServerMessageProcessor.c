@@ -887,7 +887,7 @@ bool dx_read_records (dx_server_msg_proc_connection_context_t* context,
 			
 			break;
 		case dx_fid_utf_char_array:
-			CHECKED_CALL_2(dx_read_utf_string, context->bicc, &read_string);
+			CHECKED_CALL_2(dx_read_utf_char_array, context->bicc, &read_string);
 			
 			dx_store_string_buffer(context->rbcc, read_string);
 			
