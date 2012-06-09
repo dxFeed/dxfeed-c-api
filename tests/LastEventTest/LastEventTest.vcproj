@@ -17,8 +17,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)/bin"
-			IntermediateDirectory="$(SolutionDir)/build/$(ConfigurationName)/$(ProjectName)"
+			OutputDirectory="$(SolutionDir)\bin"
+			IntermediateDirectory="$(SolutionDir)\build\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="1"
 			CharacterSet="2"
 			>
@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="$(SolutionDir)/include;$(SolutionDir)/include/pthreads;$(SolutionDir)/src"
+				AdditionalIncludeDirectories="$(SolutionDir)\include;$(SolutionDir)\include\pthreads;$(SolutionDir)\src"
 				PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;WIN32;_DEBUG;_CONSOLE"
 				ExceptionHandling="0"
 				BasicRuntimeChecks="3"
@@ -63,10 +63,10 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="DXFeedd.lib"
-				OutputFile="$(OutDir)/$(ProjectName)d.exe"
-				AdditionalLibraryDirectories="$(SolutionDir)/bin"
+				OutputFile="$(OutDir)\$(ProjectName)d.exe"
+				AdditionalLibraryDirectories="$(SolutionDir)\bin"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/$(ProjectName)d.pdb"
+				ProgramDatabaseFile="$(OutDir)\$(ProjectName)d.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -81,7 +81,7 @@
 			/>
 			<Tool
 				Name="VCBscMakeTool"
-				OutputFile="$(OutDir)/$(ProjectName)d.bsc"
+				OutputFile="$(OutDir)\$(ProjectName)d.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -95,8 +95,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)/bin"
-			IntermediateDirectory="$(SolutionDir)/build/$(ConfigurationName)/$(ProjectName)"
+			OutputDirectory="$(SolutionDir)\bin"
+			IntermediateDirectory="$(SolutionDir)\build\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="1"
 			CharacterSet="2"
 			>
@@ -118,7 +118,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="3"
-				AdditionalIncludeDirectories="$(SolutionDir)/include;$(SolutionDir)/include/pthreads;$(SolutionDir)/src"
+				AdditionalIncludeDirectories="$(SolutionDir)\include;$(SolutionDir)\include\pthreads;$(SolutionDir)\src"
 				PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;WIN32;NDEBUG;_CONSOLE"
 				ExceptionHandling="0"
 				RuntimeLibrary="2"
@@ -138,8 +138,8 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="DXFeed.lib"
-				OutputFile="$(OutDir)/$(ProjectName).exe"
-				AdditionalLibraryDirectories="$(SolutionDir)/bin"
+				OutputFile="$(OutDir)\$(ProjectName).exe"
+				AdditionalLibraryDirectories="$(SolutionDir)\bin"
 				SubSystem="1"
 				TargetMachine="1"
 			/>

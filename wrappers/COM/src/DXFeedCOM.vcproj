@@ -18,7 +18,7 @@
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="$(SolutionDir)\bin"
-			IntermediateDirectory="$(SolutionDir)/build/$(ConfigurationName)/$(ProjectName)"
+			IntermediateDirectory="$(SolutionDir)\build\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="2"
 			CharacterSet="2"
 			>
@@ -36,13 +36,13 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName="$(SolutionDir)/bin/tlb/$(ProjectName).tlb"
-				OutputDirectory="$(SolutionDir)/bin/tlb"
+				TypeLibraryName="$(SolutionDir)\bin\tlb\$(ProjectName).tlb"
+				OutputDirectory="$(SolutionDir)\bin\tlb"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="$(SolutionDir)/include;$(ProjectDir)/../include"
+				AdditionalIncludeDirectories="$(SolutionDir)\include;$(ProjectDir)\..\include"
 				PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_WIN32_WINNT=0x0500, WIN32;_DEBUG;_CONSOLE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -62,14 +62,14 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="comsupp.lib DXFeedd.lib"
-				OutputFile="$(OutDir)/$(ProjectName)d.dll"
+				OutputFile="$(OutDir)\$(ProjectName)d.dll"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="$(SolutionDir)/bin"
+				AdditionalLibraryDirectories="$(SolutionDir)\bin"
 				ModuleDefinitionFile="DXFeedCOMd.def"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/$(ProjectName)d.pdb"
+				ProgramDatabaseFile="$(OutDir)\$(ProjectName)d.pdb"
 				SubSystem="2"
-				ImportLibrary="$(OutDir)/$(ProjectName)d.lib"
+				ImportLibrary="$(OutDir)\$(ProjectName)d.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -97,7 +97,7 @@
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="$(SolutionDir)\bin"
-			IntermediateDirectory="$(SolutionDir)/build/$(ConfigurationName)/$(ProjectName)"
+			IntermediateDirectory="$(SolutionDir)\build\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="2"
 			CharacterSet="2"
 			>
@@ -115,13 +115,13 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName="$(SolutionDir)/bin/tlb/$(ProjectName).tlb"
-				OutputDirectory="$(SolutionDir)/bin/tlb"
+				TypeLibraryName="$(SolutionDir)\bin\tlb\$(ProjectName).tlb"
+				OutputDirectory="$(SolutionDir)\bin\tlb"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="3"
-				AdditionalIncludeDirectories="$(SolutionDir)/include;$(ProjectDir)/../include"
+				AdditionalIncludeDirectories="$(SolutionDir)\include;$(ProjectDir)\..\include"
 				PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_WIN32_WINNT=0x0500;WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
@@ -140,13 +140,13 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="comsupp.lib DXFeed.lib"
-				OutputFile="$(OutDir)/$(ProjectName).dll"
+				OutputFile="$(OutDir)\$(ProjectName).dll"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="$(SolutionDir)/bin"
+				AdditionalLibraryDirectories="$(SolutionDir)\bin"
 				ModuleDefinitionFile="DXFeedCOM.def"
-				ProgramDatabaseFile="$(OutDir)/$(ProjectName).pdb"
+				ProgramDatabaseFile="$(OutDir)\$(ProjectName).pdb"
 				SubSystem="2"
-				ImportLibrary="$(OutDir)/$(ProjectName).lib"
+				ImportLibrary="$(OutDir)\$(ProjectName).lib"
 				TargetMachine="1"
 			/>
 			<Tool

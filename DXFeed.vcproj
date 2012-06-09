@@ -17,8 +17,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)/bin"
-			IntermediateDirectory="$(SolutionDir)/build/$(ConfigurationName)/$(ProjectName)"
+			OutputDirectory="$(SolutionDir)\bin"
+			IntermediateDirectory="$(SolutionDir)\build\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="2"
 			CharacterSet="2"
 			>
@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="$(SolutionDir)/include;$(SolutionDir)/include/pthreads;$(SolutionDir)/src"
+				AdditionalIncludeDirectories="$(SolutionDir)\include;$(SolutionDir)\include\pthreads;$(SolutionDir)\src"
 				PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;WIN32;_DEBUG;_WINDOWS;_USRDLL;DXFEED_EXPORTS"
 				ExceptionHandling="0"
 				BasicRuntimeChecks="3"
@@ -63,14 +63,14 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="pthreadVC2d.lib ws2_32.lib"
-				OutputFile="$(OutDir)/$(ProjectName)d.dll"
+				OutputFile="$(OutDir)\$(ProjectName)d.dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="$(SolutionDir)/lib"
-				ModuleDefinitionFile="$(ProjectDir)/$(ProjectName)d.def"
+				AdditionalLibraryDirectories="$(SolutionDir)\lib"
+				ModuleDefinitionFile="$(ProjectDir)\$(ProjectName)d.def"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/$(ProjectName)d.pdb"
+				ProgramDatabaseFile="$(OutDir)\$(ProjectName)d.pdb"
 				SubSystem="2"
-				ImportLibrary="$(OutDir)/$(ProjectName)d.lib"
+				ImportLibrary="$(OutDir)\$(ProjectName)d.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -84,7 +84,7 @@
 			/>
 			<Tool
 				Name="VCBscMakeTool"
-				OutputFile="$(OutDir)/$(ProjectName)d.bsc"
+				OutputFile="$(OutDir)\$(ProjectName)d.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -98,8 +98,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)/bin"
-			IntermediateDirectory="$(SolutionDir)/build/$(ConfigurationName)/$(ProjectName)"
+			OutputDirectory="$(SolutionDir)\bin"
+			IntermediateDirectory="$(SolutionDir)\build\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="2"
 			CharacterSet="2"
 			>
@@ -121,7 +121,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
-				AdditionalIncludeDirectories="$(SolutionDir)/include;$(SolutionDir)/include/pthreads;$(SolutionDir)/src"
+				AdditionalIncludeDirectories="$(SolutionDir)\include;$(SolutionDir)\include\pthreads;$(SolutionDir)\src"
 				PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;WIN32;NDEBUG;_WINDOWS;_USRDLL;DXFEED_EXPORTS"
 				ExceptionHandling="0"
 				RuntimeLibrary="0"
@@ -141,14 +141,14 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="pthreadVC2.lib ws2_32.lib"
-				OutputFile="$(OutDir)/$(ProjectName).dll"
+				OutputFile="$(OutDir)\$(ProjectName).dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="$(SolutionDir)/lib"
-				ModuleDefinitionFile="$(ProjectDir)/$(ProjectName).def"
+				AdditionalLibraryDirectories="$(SolutionDir)\lib"
+				ModuleDefinitionFile="$(ProjectDir)\$(ProjectName).def"
 				GenerateDebugInformation="false"
-				ProgramDatabaseFile="$(OutDir)/$(ProjectName).pdb"
+				ProgramDatabaseFile="$(OutDir)\$(ProjectName).pdb"
 				SubSystem="2"
-				ImportLibrary="$(OutDir)/$(ProjectName).lib"
+				ImportLibrary="$(OutDir)\$(ProjectName).lib"
 				TargetMachine="1"
 			/>
 			<Tool
