@@ -4,6 +4,7 @@
 #include "DXErrorCodes.h"
 #include "Logger.h"
 #include <stdio.h>
+#include <time.h>
 #include <Windows.h>
 
 /*const char dxfeed_host[] = "mddqa.in.devexperts.com:7400";*/
@@ -52,7 +53,7 @@ void print_timestamp(dxf_long_t timestamp){
 		struct tm * timeinfo;
 		time_t tmpint = (int)(timestamp /1000);
 		timeinfo = localtime ( &tmpint );
-		strftime(timefmt,80,"%Y%m%d-%H%M%S" ,timeinfo);
+		strftime(timefmt,80,"%Y%m%d-%H%M%S", timeinfo);
 		printf("%s",timefmt);
 }
 /* -------------------------------------------------------------------------- */

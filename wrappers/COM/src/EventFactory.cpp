@@ -124,7 +124,7 @@ HRESULT STDMETHODCALLTYPE DXTrade::GetSize (LONGLONG* value) {
 HRESULT STDMETHODCALLTYPE DXTrade::GetDayVolume (LONGLONG* value) {
     CHECK_PTR(value);
 
-    *value = m_data->day_volume;
+    *value = *((LONGLONG*)&m_data->day_volume);
 
     return S_OK;
 }
