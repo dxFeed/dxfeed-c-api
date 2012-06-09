@@ -26,7 +26,8 @@
 #define DX_THREADS_H_INCLUDED
 
 #ifdef _WIN32
-    #include "../thirdparty/pthreads/win32/include/pthread.h"
+	#define PTW32_STATIC_LIB
+    #include "pthreads/pthread.h"
 #endif /* _WIN32 */
 
 #include "PrimitiveTypes.h"

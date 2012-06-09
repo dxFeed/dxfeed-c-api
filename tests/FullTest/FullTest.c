@@ -100,7 +100,7 @@ void trade_listener (int event_type, dxf_const_string_t symbol_name, const dxf_e
     COORD coord = event_info[dx_eid_trade].coord;
 
     if (event_type != DXF_ET_TRADE) {
-        swprintf(str, L"Error: event: %s Symbol: %s, expected event: Trade\n",dx_event_type_to_string(event_type), symbol_name);
+        swprintf(str, L"Error: event: %s Symbol: %s, expected event: Trade\n", dx_event_type_to_string(event_type), symbol_name);
         print_at( coord, str);
         return;
     }

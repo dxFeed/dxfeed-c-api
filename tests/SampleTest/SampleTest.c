@@ -50,7 +50,7 @@ void print_timestamp(dxf_long_t timestamp){
 		char timefmt[80];
 		
 		struct tm * timeinfo;
-		int tmpint = (int)(timestamp /1000);
+		time_t tmpint = (int)(timestamp /1000);
 		timeinfo = localtime ( &tmpint );
 		strftime(timefmt,80,"%Y%m%d-%H%M%S" ,timeinfo);
 		printf("%s",timefmt);
