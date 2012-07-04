@@ -783,7 +783,7 @@ bool dx_read_records (dx_server_msg_proc_connection_context_t* context,
 	dxf_byte_t* read_byte_array;
 	const dx_record_digest_t* record_digest = &(context->record_digests[record_id]);
 	
-    dx_logging_verbose_info(L"Read records");
+	dx_logging_verbose_info(L"Read records");
 
 	for (; i < record_digest->size; ++i) {
 		int serialization = record_digest->elements[i]->type & dx_fid_mask_serialization;
@@ -802,10 +802,6 @@ bool dx_read_records (dx_server_msg_proc_connection_context_t* context,
 			if (presentation == dx_fid_flag_decimal) {
 				CHECKED_CALL_2(dx_int_to_double, read_byte, &read_double);
 				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double);
-			} else if (presentation == dx_fid_flag_short_string) {
-				read_string = dx_decode_from_integer(read_byte);
-				dx_store_string_buffer(context->rbcc, read_string);
-				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_string);
 			} else {
 				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_byte);
 			}
@@ -827,10 +823,6 @@ bool dx_read_records (dx_server_msg_proc_connection_context_t* context,
 			if (presentation == dx_fid_flag_decimal) {
 				CHECKED_CALL_2(dx_int_to_double, read_short, &read_double);
 				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double);
-			} else if (presentation == dx_fid_flag_short_string) {
-				read_string = dx_decode_from_integer(read_short);
-				dx_store_string_buffer(context->rbcc, read_string);
-				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_string);
 			} else {
 				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_short);
 			}
@@ -842,10 +834,6 @@ bool dx_read_records (dx_server_msg_proc_connection_context_t* context,
 			if (presentation == dx_fid_flag_decimal) {
 				CHECKED_CALL_2(dx_int_to_double, read_int, &read_double);
 				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double);
-			} else if (presentation == dx_fid_flag_short_string) {
-				read_string = dx_decode_from_integer(read_int);
-				dx_store_string_buffer(context->rbcc, read_string);
-				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_string);
 			} else {
 				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_int);
 			}
@@ -857,10 +845,6 @@ bool dx_read_records (dx_server_msg_proc_connection_context_t* context,
 			if (presentation == dx_fid_flag_decimal) {
 				CHECKED_CALL_2(dx_int_to_double, read_int, &read_double);
 				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double);
-			} else if (presentation == dx_fid_flag_short_string) {
-				read_string = dx_decode_from_integer(read_int);
-				dx_store_string_buffer(context->rbcc, read_string);
-				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_string);
 			} else {
 				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_int);
 			}
@@ -908,36 +892,36 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
     dx_logging_verbose_info(L"Process data");
 
 	while (dx_get_in_buffer_position(context->bicc) < dx_get_in_buffer_limit(context->bicc)) {
-        void* record_buffer = NULL;
-        dx_record_id_t record_id;
-        int record_count = 0;
-		
+		void* record_buffer = NULL;
+		dx_record_id_t record_id;
+		int record_count = 0;
+
 		dxf_const_string_t symbol = NULL;
 		
 		CHECKED_CALL_1(dx_read_symbol, context);
 		
 		if (context->last_symbol == NULL && !dx_decode_symbol_name(context->last_cipher, &context->last_symbol)) {
-		    return false;
+			return false;
 		}
 		symbol = dx_create_string_src(context->last_symbol);
-		dx_store_string_buffer(context->rbcc, symbol );
+		dx_store_string_buffer(context->rbcc, symbol);
 	    
 		{
 			dxf_int_t id;
-	        
+
 			if (!dx_read_compact_int(context->bicc, &id)) {
-			    dx_free_string_buffers(context->rbcc);
+				dx_free_string_buffers(context->rbcc);
 			    
-			    return false;
+				return false;
 			}
 
 			record_id = dx_get_record_id(context->dscc, id);
 		}
 		
 		if (record_id == dx_rid_invalid) {
-            dx_free_string_buffers(context->rbcc);
+			dx_free_string_buffers(context->rbcc);
 
-            return dx_set_error_code(dx_pec_record_not_supported);
+			return dx_set_error_code(dx_pec_record_not_supported);
 		}
 	    
 		if (!context->record_digests[record_id].in_sync_with_server) {
@@ -949,9 +933,9 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 		record_buffer = g_buffer_managers[record_id].record_getter(context->rbcc, record_count++);
 		
 		if (record_buffer == NULL) {
-		    dx_free_string_buffers(context->rbcc);
+			dx_free_string_buffers(context->rbcc);
 		    
-		    return false;
+			return false;
 		}
 		
 		if (!dx_read_records(context, record_id, record_buffer)) {
@@ -960,15 +944,15 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 			return false;
 		}
 		
-        if (!dx_transcode_record_data(context->connection, record_id, context->last_symbol , context->last_cipher,
-                                      g_buffer_managers[record_id].record_buffer_getter(context->rbcc), record_count)) {
-            dx_free_string_buffers(context->rbcc);
+		if (!dx_transcode_record_data(context->connection, record_id, context->last_symbol , context->last_cipher,
+						g_buffer_managers[record_id].record_buffer_getter(context->rbcc), record_count)) {
+			dx_free_string_buffers(context->rbcc);
 
-            return false;
-        }
+			return false;
+	        }
 
-        dx_free_string_buffers(context->rbcc);
-    }
+		dx_free_string_buffers(context->rbcc);
+	}
 	
 	return true;
 }

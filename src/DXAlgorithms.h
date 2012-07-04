@@ -159,7 +159,7 @@
 #define UNSIGNED_TYPE(type) \
     UNSIGNED_TYPE_##type
 
-#define UNSIGNED_LEFT_SHIFT(value, offset, type) \
+#define UNSIGNED_RIGHT_SHIFT(value, offset, type) \
     ((type)((UNSIGNED_TYPE(type))value >> offset))
 
 bool dx_is_only_single_bit_set (int value);

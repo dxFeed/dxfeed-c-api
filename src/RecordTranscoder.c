@@ -404,12 +404,12 @@ bool RECORD_TRANSCODER_NAME(dx_time_and_sale_t) (dx_record_transcoder_connection
         const dxf_int_t flags = cur_event->type;
 
         cur_event->event_id = ((dxf_long_t)time << 32) | ((dxf_long_t)sequence & 0xFFFFFFFFL);
-        cur_event->time = ((dxf_long_t)time * 1000L) | UNSIGNED_LEFT_SHIFT(sequence, 22, dxf_int_t);
+        cur_event->time = ((dxf_long_t)time * 1000L) + (((dxf_long_t)sequence >> 22) & 0x000003FFL);
 
-        cur_event->exchange_sale_conditions = dx_decode_from_integer((((dxf_long_t)flags & 0xFF00L) << 24 ) |exchange_sale_conditions);
+        cur_event->exchange_sale_conditions = dx_decode_from_integer((((dxf_long_t)flags & 0xFF00L) << 24 ) | exchange_sale_conditions);
         cur_event->is_trade = ((flags & 0x4) != 0);
         
-        if (cur_event->exchange_sale_conditions == NULL ||
+        if (cur_event->exchange_sale_conditions != NULL &&
             !dx_store_string_buffer(context->rbcc, cur_event->exchange_sale_conditions)) {
             
             return false;
