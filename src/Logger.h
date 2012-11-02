@@ -23,6 +23,12 @@
 #include "DXFeed.h"
 #include "PrimitiveTypes.h"
 
+#if defined(_WIN32) && defined(_DEBUG)
+void dx_log_debug_message(const dxf_char_t *format, ...);
+#else
+#define dx_log_debug_message(f, ...)
+#endif
+
 //typedef DXFEED_API enum dx_log_date_format {
 //    dx_ltf_DD_MM_YYYY = 0,
 //    dx_ltf_MM_DD_YYYY,

@@ -21,6 +21,8 @@
  *	Implementation of the error functions.
  */
 
+#include <Windows.h>
+
 #include "DXErrorHandling.h"
 #include "DXErrorCodes.h"
 #include "Logger.h"
@@ -34,22 +36,25 @@
 /* -------------------------------------------------------------------------- */
 
 static bool g_initialization_attempted = false;
-static pthread_key_t g_last_error_data_key;
+static dx_key_t g_last_error_data_key;
 
 static dx_error_code_t g_master_thread_last_error_code = dx_ec_success;
 
 /* -------------------------------------------------------------------------- */
 
-void dx_key_data_destructor (void* data) {
-    if (data != &g_master_thread_last_error_code) {
+static void dx_key_data_destructor (void* data) {
+    if (data != &g_master_thread_last_error_code && data != NULL) {
         dx_free(data);
     }
-    
-    if (dx_is_thread_master()) {
-        dx_thread_data_key_destroy(g_last_error_data_key);
+}
 
-        g_initialization_attempted = false;
-    }
+static void dx_key_remover(void *data) {
+	dx_log_debug_message(L"Remove error key");
+	if (g_initialization_attempted) {
+		dx_thread_data_key_destroy(g_last_error_data_key);
+		g_initialization_attempted = false;
+	}
+	dx_log_debug_message(L"Remove error key -- done");
 }
 
 /* -------------------------------------------------------------------------- */
@@ -169,6 +174,8 @@ bool dx_init_error_subsystem (void) {
             return false;
         }
         
+		dx_register_process_destructor(&dx_key_remover, NULL);
+
         return true;
     } else if (dx_is_thread_master()) {
         return true;
@@ -180,6 +187,7 @@ bool dx_init_error_subsystem (void) {
         return true;
     }
     
+	dx_log_debug_message(L"dx_init_error_subsystem()");
     error_data = (dx_error_code_t*)dx_calloc_no_ehm(1, sizeof(dx_error_code_t));
     
     if (error_data == NULL) {

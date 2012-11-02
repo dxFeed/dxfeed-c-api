@@ -217,6 +217,12 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_data_structures) {
 }
 
 /* -------------------------------------------------------------------------- */
+
+DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_data_structures) {
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
 /*
  *	Connection context functions implementation
  */

@@ -35,7 +35,7 @@ typedef struct {
 } dx_task_data_t;
 
 typedef struct {
-    pthread_mutex_t guard;
+    dx_mutex_t guard;
     
     dx_task_data_t* elements;
     int size;

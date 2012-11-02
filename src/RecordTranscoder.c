@@ -94,6 +94,12 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_record_transcoder) {
 }
 
 /* -------------------------------------------------------------------------- */
+
+DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_record_transcoder) {
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
 /*
  *	Event data buffer functions
  
