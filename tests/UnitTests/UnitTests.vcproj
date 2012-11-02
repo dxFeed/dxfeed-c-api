@@ -269,6 +269,10 @@
 					RelativePath="..\..\src\TaskQueue.c"
 					>
 				</File>
+				<File
+					RelativePath="..\..\src\Win32.c"
+					>
+				</File>
 			</Filter>
 		</Filter>
 		<Filter
