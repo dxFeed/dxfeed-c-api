@@ -21,6 +21,7 @@
 #include "DXMemory.h"
 #include "DXErrorHandling.h"
 #include "DXAlgorithms.h"
+#include "Logger.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -50,6 +51,16 @@ static const dx_conn_ctx_subsys_manipulator_t g_deinitializer_queue[dx_ccs_count
     DX_CONNECTION_SUBSYS_DEINIT_NAME(dx_ccs_record_transcoder)
 };
 
+static const dx_conn_ctx_subsys_manipulator_t g_check_queue[dx_ccs_count] = {
+    DX_CONNECTION_SUBSYS_CHECK_NAME(dx_ccs_network),
+    DX_CONNECTION_SUBSYS_CHECK_NAME(dx_ccs_server_msg_processor),
+    DX_CONNECTION_SUBSYS_CHECK_NAME(dx_ccs_event_subscription),
+    DX_CONNECTION_SUBSYS_CHECK_NAME(dx_ccs_data_structures),
+    DX_CONNECTION_SUBSYS_CHECK_NAME(dx_ccs_buffered_input),
+    DX_CONNECTION_SUBSYS_CHECK_NAME(dx_ccs_buffered_output),
+    DX_CONNECTION_SUBSYS_CHECK_NAME(dx_ccs_record_buffers),
+    DX_CONNECTION_SUBSYS_CHECK_NAME(dx_ccs_record_transcoder)
+};
 /* -------------------------------------------------------------------------- */
 /*
  *	Various types
@@ -73,7 +84,6 @@ dxf_connection_t dx_init_connection (void) {
     if (res == NULL) {
         return NULL;
     }
-    
     for (; i < dx_ccs_count; ++i) {
         if (!g_initializer_queue[i]((dxf_connection_t)res)) {
             dx_deinit_connection((dxf_connection_t)res);
@@ -81,7 +91,7 @@ dxf_connection_t dx_init_connection (void) {
             return NULL;
         }
     }
-    
+
     return (dxf_connection_t)res;
 }
 
@@ -95,9 +105,23 @@ bool dx_deinit_connection (dxf_connection_t connection) {
         res = g_deinitializer_queue[i](connection) && res;
     }
     
-    dx_free(connection);
+	dx_free(connection);
     
     return res;
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_can_deinit_connection (dxf_connection_t connection) {
+    int i = dx_ccs_begin;
+    
+    for (; i < dx_ccs_count; ++i) {
+		if (!g_check_queue[i](connection)) {
+			return false;
+		}
+    }
+
+    return true;
 }
 
 /* -------------------------------------------------------------------------- */

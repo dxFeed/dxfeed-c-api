@@ -95,6 +95,12 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_record_buffers) {
 }
 
 /* -------------------------------------------------------------------------- */
+
+DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_record_buffers) {
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
 /*
  *	Connection context functions implementation
  */

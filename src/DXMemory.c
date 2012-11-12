@@ -21,6 +21,8 @@
  *	Implementation of the memory functions
  */
 
+#include <Windows.h>
+
 #include "DXMemory.h"
 #include "DXErrorHandling.h"
 #include "DXErrorCodes.h"
@@ -50,17 +52,15 @@ void* dx_error_processor (void* src) {
 /* -------------------------------------------------------------------------- */
 
 void* dx_malloc (int size) {
-  //  dx_logging_verbose_info(L"Allocate %d bytes", size);
-    
-    return dx_error_processor(malloc(size));
+	void* r = malloc(size);
+    return dx_error_processor(r);
 }
 
 /* -------------------------------------------------------------------------- */
 
 void* dx_calloc (int num, int size) {
-  //  dx_logging_verbose_info(L"Allocate %d bytes", size);
-    
-    return dx_error_processor(calloc(num, size));
+	void* r = calloc(num, size);
+    return dx_error_processor(r);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -85,8 +85,6 @@ void* dx_memset (void * destination, int c, int size) {
 /* -------------------------------------------------------------------------- */
 
 void dx_free (void* buf) {
-   // dx_logging_verbose_info(L"Deallocate buffer %#010x", buf);
-    
     free(buf);
 }
 
@@ -97,7 +95,8 @@ void dx_free (void* buf) {
 /* -------------------------------------------------------------------------- */
 
 void* dx_calloc_no_ehm (int num, int size) {
-    return calloc(num, size);
+	void *r = calloc(num, size);
+    return r;
 }
 
 /* -------------------------------------------------------------------------- */

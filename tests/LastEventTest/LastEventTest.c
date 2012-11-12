@@ -2,7 +2,6 @@
 #include "DXFeed.h"
 #include "DXErrorCodes.h"
 #include "Logger.h"
-#include "pthread.h"
 #include "DXMemory.h"
 #include "DXThreads.h"
 #include <stdio.h>

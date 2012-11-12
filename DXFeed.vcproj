@@ -62,7 +62,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="pthreadVC2d.lib ws2_32.lib"
+				AdditionalDependencies="ws2_32.lib"
 				OutputFile="$(OutDir)\$(ProjectName)d.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="$(SolutionDir)\lib"
@@ -140,7 +140,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="pthreadVC2.lib ws2_32.lib"
+				AdditionalDependencies="ws2_32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="$(SolutionDir)\lib"
@@ -256,6 +256,10 @@
 			</File>
 			<File
 				RelativePath=".\src\TaskQueue.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\Win32.c"
 				>
 			</File>
 		</Filter>

@@ -16,8 +16,6 @@
  * Contributor(s):
  *
  */
-
-#include <Windows.h>
 #include <stdio.h>
 
 #include "DXFeed.h"
@@ -35,18 +33,6 @@
 #include "ConnectionContextData.h"
 #include "DXThreads.h"
 
-BOOL APIENTRY DllMain (HANDLE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved)
-{
-	switch (ul_reason_for_call) {
-	case DLL_PROCESS_ATTACH:
-	case DLL_THREAD_ATTACH:
-	case DLL_THREAD_DETACH:
-	case DLL_PROCESS_DETACH:
-		break;
-	}
-    
-    return TRUE;
-}
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -75,7 +61,7 @@ typedef struct {
     int size;
     int capacity;
     
-    pthread_mutex_t guard;
+    dx_mutex_t guard;
     bool guard_initialized;
 } dx_connection_array_t;
 
@@ -222,6 +208,7 @@ DXFEED_API ERRORCODE dxf_create_connection (const char* address,
         return DXF_FAILURE;
     }
     
+	dx_logging_verbose_info(L"Return connection at %p", *connection);
     return DXF_SUCCESS;
 }
 
@@ -233,13 +220,11 @@ DXFEED_API ERRORCODE dxf_close_connection (dxf_connection_t connection) {
     if (!dx_validate_connection_handle(connection, false)) {
         return DXF_FAILURE;
     }
-    
-    if (!dx_is_thread_master()) {
-        return dx_queue_connection_for_close(connection) ? DXF_SUCCESS : DXF_FAILURE;
-        
-        return DXF_SUCCESS;
-    }
-    
+
+	if (!dx_can_deinit_connection(connection)) {
+		dx_queue_connection_for_close(connection);
+		return DXF_SUCCESS;
+	}
     return (dx_deinit_connection(connection) ? DXF_SUCCESS : DXF_FAILURE);
 }
 

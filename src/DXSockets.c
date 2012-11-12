@@ -118,7 +118,7 @@ static const int g_name_resolution_attempt_count = 5;
 static const unsigned g_connect_timeout = 5; /* timeout in seconds */
 
 static int g_connection_count = 0;
-static pthread_mutex_t g_count_guard;
+static dx_mutex_t g_count_guard;
 static bool g_count_guard_initialized = false;
 
 /* -------------------------------------------------------------------------- */

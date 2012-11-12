@@ -37,7 +37,7 @@ typedef struct {
     int out_buffer_length;
     int current_out_buffer_position;
     
-    pthread_mutex_t guard;
+    dx_mutex_t guard;
     
     int set_field_mask;
 } dx_buffered_output_connection_context_t;
@@ -84,6 +84,12 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_buffered_output) {
     
     dx_clear_buffered_output_context_data(context);
 
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_buffered_output) {
     return true;
 }
 

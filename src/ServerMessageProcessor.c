@@ -114,7 +114,7 @@ typedef struct {
 	
 	dx_describe_protocol_status_t describe_protocol_status;
 	int describe_protocol_timestamp;
-	pthread_mutex_t describe_protocol_guard;
+	dx_mutex_t describe_protocol_guard;
 } dx_server_msg_proc_connection_context_t;
 
 /* -------------------------------------------------------------------------- */
@@ -187,6 +187,12 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_server_msg_processor) {
     dx_clear_record_digests(context);
     dx_free(context);
     
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_server_msg_processor) {
     return true;
 }
 

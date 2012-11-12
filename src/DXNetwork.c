@@ -22,6 +22,7 @@
  */
 
 #include <stdio.h>
+#include <time.h>
 
 #include "DXNetwork.h"
 #include "DXSockets.h"
@@ -34,6 +35,7 @@
 #include "EventSubscription.h"
 #include "ClientMessageProcessor.h"
 #include "ServerMessageProcessor.h"
+#include "Logger.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -81,9 +83,9 @@ typedef struct {
     const char* address;
     dx_socket_t s;
 	time_t next_heartbeat;
-    pthread_t reader_thread;
-    pthread_t queue_thread;
-    pthread_mutex_t socket_guard;
+    dx_thread_t reader_thread;
+    dx_thread_t queue_thread;
+    dx_mutex_t socket_guard;
     
     bool reader_thread_termination_trigger;
     bool queue_thread_termination_trigger;
@@ -146,6 +148,7 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_network) {
         context->queue_thread_termination_trigger = true;
         
         res = dx_wait_for_thread(context->queue_thread, NULL) && res;
+		dx_log_debug_message(L"Queue thread exited");
     }
     
     if (IS_FLAG_SET(context->set_fields_flags, READER_THREAD_FIELD_FLAG)) {
@@ -153,6 +156,7 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_network) {
         
         res = dx_close_socket(context) && res;
         res = dx_wait_for_thread(context->reader_thread, NULL) && res;
+		dx_log_debug_message(L"Reader thread exited");
     }
 
     res = dx_clear_connection_data(context) && res;
@@ -160,6 +164,21 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_network) {
 
     return res;
 }
+
+/* -------------------------------------------------------------------------- */
+
+DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_network) {
+    bool res = true;
+    dx_network_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
+	dx_thread_t cur_thread = dx_get_thread_id();
+
+    if (context == NULL) {
+        return true;
+    }
+
+	return !dx_compare_threads(cur_thread, context->queue_thread) && !dx_compare_threads(cur_thread, context->reader_thread);
+}
+
 
 /* -------------------------------------------------------------------------- */
 /*

@@ -17,9 +17,13 @@
  *
  */
 
+#include <process.h>
+#include <errno.h>
+
 #include "DXThreads.h"
 #include "DXErrorHandling.h"
 #include "DXErrorCodes.h"
+#include "DXMemory.h"
 #include "Logger.h"
 
 /* -------------------------------------------------------------------------- */
@@ -30,7 +34,7 @@
 
 #ifdef _WIN32
 
-#include <Windows.h>
+#include <windows.h>
 
 void dx_sleep (int milliseconds) {
     Sleep((DWORD)milliseconds);
@@ -40,7 +44,7 @@ void dx_sleep (int milliseconds) {
 
 /* -------------------------------------------------------------------------- */
 
-static pthread_t g_master_thread_id;
+static dx_thread_t g_master_thread_id;
 
 void dx_mark_thread_master (void) {
     g_master_thread_id = dx_get_thread_id();
@@ -58,7 +62,8 @@ bool dx_is_thread_master (void) {
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_thread_create (pthread_t* thread_id, const pthread_attr_t* attr,
+#ifdef USE_PTHREADS
+bool dx_thread_create (dx_thread_t* thread_id, const pthread_attr_t* attr,
                        void* (*start_routine)(void*), void *arg) {
     int res = pthread_create(thread_id, attr, start_routine, arg);
     
@@ -78,7 +83,7 @@ bool dx_thread_create (pthread_t* thread_id, const pthread_attr_t* attr,
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_wait_for_thread (pthread_t thread_id, void **value_ptr) {
+bool dx_wait_for_thread (dx_thread_t thread_id, void **value_ptr) {
     int res = pthread_join(thread_id, value_ptr);
     
     switch (res) {
@@ -97,7 +102,7 @@ bool dx_wait_for_thread (pthread_t thread_id, void **value_ptr) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_close_thread_handle (pthread_t thread_id) {
+bool dx_close_thread_handle (dx_thread_t thread_id) {
     int res = pthread_detach(thread_id);
     
     switch (res) {
@@ -116,7 +121,7 @@ bool dx_close_thread_handle (pthread_t thread_id) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_thread_data_key_create (pthread_key_t* key, void (*destructor)(void*)) {
+bool dx_thread_data_key_create (dx_key_t* key, void (*destructor)(void*)) {
     int res = pthread_key_create(key, destructor);
     
     switch (res) {
@@ -133,7 +138,7 @@ bool dx_thread_data_key_create (pthread_key_t* key, void (*destructor)(void*)) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_thread_data_key_destroy (pthread_key_t key) {
+bool dx_thread_data_key_destroy (dx_key_t key) {
     int res = pthread_key_delete(key);
 
     switch (res) {
@@ -148,7 +153,7 @@ bool dx_thread_data_key_destroy (pthread_key_t key) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_set_thread_data (pthread_key_t key, const void* data) {
+bool dx_set_thread_data (dx_key_t key, const void* data) {
     int res = pthread_setspecific(key, data);
 
     switch (res) {
@@ -165,25 +170,25 @@ bool dx_set_thread_data (pthread_key_t key, const void* data) {
 
 /* -------------------------------------------------------------------------- */
 
-void* dx_get_thread_data (pthread_key_t key) {
+void* dx_get_thread_data (dx_key_t key) {
     return pthread_getspecific(key);
 }
 
 /* -------------------------------------------------------------------------- */
 
-pthread_t dx_get_thread_id () {
+dx_thread_t dx_get_thread_id () {
     return pthread_self();
 }
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_compare_threads (pthread_t t1, pthread_t t2) {
+bool dx_compare_threads (dx_thread_t t1, dx_thread_t t2) {
     return (pthread_equal(t1, t2) != 0);
 }
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_mutex_create (pthread_mutex_t* mutex) {
+bool dx_mutex_create (dx_mutex_t* mutex) {
     int res = pthread_mutex_init(mutex, NULL);
     
   //  dx_logging_verbose_info(L"Create mutex %#010x", mutex);
@@ -208,7 +213,7 @@ bool dx_mutex_create (pthread_mutex_t* mutex) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_mutex_destroy (pthread_mutex_t* mutex) {
+bool dx_mutex_destroy (dx_mutex_t* mutex) {
     int res = pthread_mutex_destroy(mutex);
     
    // dx_logging_verbose_info(L"Destroy mutex %#010x", mutex);
@@ -227,7 +232,7 @@ bool dx_mutex_destroy (pthread_mutex_t* mutex) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_mutex_lock (pthread_mutex_t* mutex) {
+bool dx_mutex_lock (dx_mutex_t* mutex) {
     int res = pthread_mutex_lock(mutex);
 
  //   dx_logging_verbose_info(L"Lock mutex %#010x", mutex);
@@ -248,7 +253,7 @@ bool dx_mutex_lock (pthread_mutex_t* mutex) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_mutex_unlock (pthread_mutex_t* mutex) {
+bool dx_mutex_unlock (dx_mutex_t* mutex) {
     int res = pthread_mutex_unlock(mutex);
     
   //  dx_logging_verbose_info(L"Unlock mutex %#010x", mutex);
@@ -272,6 +277,263 @@ bool dx_mutex_unlock (pthread_mutex_t* mutex) {
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_set_thread_data_no_ehm (pthread_key_t key, const void* data) {
+bool dx_set_thread_data_no_ehm (dx_key_t key, const void* data) {
     return (pthread_setspecific(key, data) == 0);
 }
+
+#elif defined (USE_WIN32_THREADS)
+
+/* Wrapper for thread start function */
+typedef struct dx_thread_wrapper_args_tag {
+	void* (*start_routine)(void*);
+	void *args;
+} dx_thread_wrapper_args_t;
+
+static unsigned __stdcall dx_thread_start_routine(void *a) {
+	dx_thread_wrapper_args_t *args = (dx_thread_wrapper_args_t*)a;
+	void *rv;
+	rv = args->start_routine(args->args);
+	dx_free(args);
+	return (unsigned)rv;
+}
+
+/* Way to process destructors for TLS */
+typedef struct dx_data_key_destructor_tag {
+	dx_key_t key;
+	void (*destructor)(void*);
+} dx_data_key_destructor_t;
+
+typedef struct dx_destructors_queue_tag {
+	dx_mutex_t mutex;
+	int size;
+	int count;
+	dx_data_key_destructor_t *destructors;
+} dx_destructors_queue_t;
+
+dx_destructors_queue_t g_key_destructors;
+
+static void dx_call_keys_destructor(void *arg) {
+	int i;
+	if (g_key_destructors.count == 0)
+		return;
+	if (!dx_mutex_lock(&g_key_destructors.mutex))
+		return;
+
+	for (i = 0; i < g_key_destructors.count; i++) {
+		void *data = dx_get_thread_data(g_key_destructors.destructors[i].key);
+		g_key_destructors.destructors[i].destructor(data);
+	}
+
+	dx_mutex_unlock(&g_key_destructors.mutex);
+}
+
+static void dx_add_key_destructor(dx_key_t key, void (*destructor)(void*)) {
+	if (g_key_destructors.size == 0)
+		return;
+	if (!dx_mutex_lock(&g_key_destructors.mutex))
+		return;
+	if (g_key_destructors.size == g_key_destructors.count) {
+		dx_data_key_destructor_t *ds;
+		g_key_destructors.size *= 2;
+		ds = dx_calloc(g_key_destructors.size, sizeof(*g_key_destructors.destructors));
+		dx_memcpy(ds, g_key_destructors.destructors, g_key_destructors.count * sizeof(*g_key_destructors.destructors));
+		dx_free(g_key_destructors.destructors);
+		g_key_destructors.destructors = ds;
+	}
+	g_key_destructors.destructors[g_key_destructors.count].key = key;
+	g_key_destructors.destructors[g_key_destructors.count].destructor = destructor;
+	g_key_destructors.count++;
+	dx_mutex_unlock(&g_key_destructors.mutex);
+}
+
+static void dx_remove_key_destructor(dx_key_t key) {
+	int i;
+	if (g_key_destructors.count == 0)
+		return;
+	if (!dx_mutex_lock(&g_key_destructors.mutex))
+		return;
+	for (i = 0; i < g_key_destructors.count; i++) {
+		if (g_key_destructors.destructors[i].key == key) {
+			dx_memmove(&g_key_destructors.destructors[i], &g_key_destructors.destructors[i + 1], sizeof(*g_key_destructors.destructors) * (g_key_destructors.count - i - 1));
+			g_key_destructors.count--;
+			break;
+		}
+	}
+	dx_mutex_unlock(&g_key_destructors.mutex);
+}
+
+static void dx_deinit_threads(void *arg) {
+	dx_free(g_key_destructors.destructors);
+	dx_mutex_destroy(&g_key_destructors.mutex);
+	dx_memset(&g_key_destructors, 0, sizeof(g_key_destructors));
+}
+
+void dx_init_threads() {
+	dx_mutex_create(&g_key_destructors.mutex);
+	g_key_destructors.size = 16;
+	g_key_destructors.count = 0;
+	g_key_destructors.destructors = dx_calloc(g_key_destructors.size, sizeof(*g_key_destructors.destructors));
+
+	dx_register_process_destructor(&dx_deinit_threads, NULL);
+	dx_register_thread_destructor(&dx_call_keys_destructor, NULL);
+}
+
+/* Public API */
+
+bool dx_thread_create (dx_thread_t* thread_id, const pthread_attr_t* attr,
+                       void* (*start_routine)(void*), void *arg) {
+	dx_thread_wrapper_args_t *wargs = dx_calloc(1, sizeof(*wargs));
+
+	wargs->start_routine = start_routine;
+	wargs->args = arg;
+	*thread_id = (dx_thread_t)_beginthreadex(NULL, 0, &dx_thread_start_routine, wargs, 0, NULL);
+
+	if (*thread_id != INVALID_HANDLE_VALUE) {
+		return true;
+	}
+    switch (errno) {
+    case EAGAIN:
+        return dx_set_error_code(dx_tec_not_enough_sys_resources);
+    case EINVAL:
+        return dx_set_error_code(dx_tec_invalid_resource_id);
+    case EPERM:
+        return dx_set_error_code(dx_tec_permission_denied);        
+    default:
+        return dx_set_error_code(dx_tec_generic_error);
+    }
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_wait_for_thread (dx_thread_t thread_id, void **value_ptr) {
+	int res;
+	res = WaitForSingleObject(thread_id, INFINITE);
+    
+    switch (res) {
+    case WAIT_FAILED:
+        return dx_set_error_code(dx_tec_invalid_res_operation);
+    case WAIT_ABANDONED:
+        return dx_set_error_code(dx_tec_invalid_resource_id);
+    case WAIT_TIMEOUT:
+        return dx_set_error_code(dx_tec_deadlock_detected);
+    default:
+        return dx_set_error_code(dx_tec_generic_error);
+	case WAIT_OBJECT_0:
+		if (value_ptr == NULL)
+			return true;
+        return GetExitCodeThread(thread_id, (LPDWORD)value_ptr);
+    }
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_close_thread_handle (dx_thread_t thread_id) {
+	if (CloseHandle(thread_id)) {
+		return true;
+	}
+    return dx_set_error_code(dx_tec_generic_error);
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_thread_data_key_create (dx_key_t* key, void (*destructor)(void*)) {
+	*key = TlsAlloc();
+	if (*key !=  TLS_OUT_OF_INDEXES) {
+		if (destructor != NULL)
+			dx_add_key_destructor(*key, destructor);
+		return true;
+	}
+    return dx_set_error_code(dx_tec_not_enough_memory);
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_thread_data_key_destroy (dx_key_t key) {
+	dx_remove_key_destructor(key);
+	TlsFree(key);
+	return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_set_thread_data (dx_key_t key, const void* data) {
+	TlsSetValue(key, (void*)data);
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+void* dx_get_thread_data (dx_key_t key) {
+	return TlsGetValue(key);
+}
+
+/* -------------------------------------------------------------------------- */
+
+dx_thread_t dx_get_thread_id () {
+	HANDLE rv;
+	DuplicateHandle(GetCurrentProcess(), GetCurrentThread(), GetCurrentProcess(), &rv, 0, FALSE, DUPLICATE_SAME_ACCESS);
+	return rv;
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_compare_threads (dx_thread_t t1, dx_thread_t t2) {
+    return t1 == t2;
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_mutex_create (dx_mutex_t* mutex) {
+    *mutex = CreateMutex(NULL, FALSE, NULL);
+	if (*mutex != INVALID_HANDLE_VALUE) {
+		return true;
+	}
+    return dx_set_error_code(dx_tec_generic_error);
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_mutex_destroy (dx_mutex_t* mutex) {
+	CloseHandle(*mutex);
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_mutex_lock (dx_mutex_t* mutex) {
+	int res;
+	res = WaitForSingleObject(*mutex, INFINITE);
+    
+    switch (res) {
+    case WAIT_FAILED:
+        return dx_set_error_code(dx_tec_invalid_res_operation);
+    case WAIT_ABANDONED:
+        return dx_set_error_code(dx_tec_invalid_resource_id);
+    case WAIT_TIMEOUT:
+        return dx_set_error_code(dx_tec_deadlock_detected);
+    default:
+        return dx_set_error_code(dx_tec_generic_error);
+	case WAIT_OBJECT_0:
+        return true;
+    }
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_mutex_unlock (dx_mutex_t* mutex) {
+	return ReleaseMutex(*mutex);
+}
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Implementation of wrappers without error handling mechanism
+ */
+/* -------------------------------------------------------------------------- */
+
+bool dx_set_thread_data_no_ehm (dx_key_t key, const void* data) {
+    return dx_set_thread_data(key, data);
+}
+
+#else
+#	error "Please, select threads implementation
+#endif

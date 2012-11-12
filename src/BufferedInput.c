@@ -78,6 +78,12 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_buffered_input) {
 }
 
 /* -------------------------------------------------------------------------- */
+
+DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_buffered_input) {
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
 /*
  *	Connection context functions
  */

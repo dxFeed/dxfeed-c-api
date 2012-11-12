@@ -97,7 +97,7 @@ struct dx_subscription_data_struct_t {
 typedef struct {
     dxf_connection_t connection;
     
-    pthread_mutex_t subscr_guard;
+    dx_mutex_t subscr_guard;
     
     dx_symbol_data_array_t ciphered_symbols[SYMBOL_BUCKET_COUNT];
     dx_symbol_data_array_t hashed_symbols[SYMBOL_BUCKET_COUNT];
@@ -157,6 +157,12 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_event_subscription) {
     }
     
     return dx_clear_event_subscription_connection_context(context);
+}
+
+/* -------------------------------------------------------------------------- */
+
+DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_event_subscription) {
+    return true;
 }
 
 /* -------------------------------------------------------------------------- */
