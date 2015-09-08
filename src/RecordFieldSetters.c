@@ -97,8 +97,10 @@ FIELD_SETTER_BODY(dx_profile_t, description, dxf_const_string_t)
 
 FIELD_SETTER_BODY(dx_market_maker_t, mm_exchange, dxf_char_t)
 FIELD_SETTER_BODY(dx_market_maker_t, mm_id, dxf_int_t)
+FIELD_SETTER_BODY(dx_market_maker_t, mmbid_time, dxf_int_t)
 FIELD_SETTER_BODY(dx_market_maker_t, mmbid_price, dxf_double_t)
 FIELD_SETTER_BODY(dx_market_maker_t, mmbid_size, dxf_int_t)
+FIELD_SETTER_BODY(dx_market_maker_t, mmask_time, dxf_int_t)
 FIELD_SETTER_BODY(dx_market_maker_t, mmask_price, dxf_double_t)
 FIELD_SETTER_BODY(dx_market_maker_t, mmask_size, dxf_int_t)
 
@@ -281,8 +283,10 @@ FIELD_DEF_VAL_BODY(dx_profile_t, description, dxf_const_string_t)
 
 FIELD_DEF_VAL_BODY(dx_market_maker_t, mm_exchange, dxf_char_t)
 FIELD_DEF_VAL_BODY(dx_market_maker_t, mm_id, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_market_maker_t, mmbid_time, dxf_int_t)
 FIELD_DEF_VAL_BODY(dx_market_maker_t, mmbid_price, dxf_double_t)
 FIELD_DEF_VAL_BODY(dx_market_maker_t, mmbid_size, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_market_maker_t, mmask_time, dxf_int_t)
 FIELD_DEF_VAL_BODY(dx_market_maker_t, mmask_price, dxf_double_t)
 FIELD_DEF_VAL_BODY(dx_market_maker_t, mmask_size, dxf_int_t)
 

@@ -87,8 +87,10 @@ typedef struct {
 typedef struct {
     dxf_char_t mm_exchange;
     dxf_int_t mm_id;
+    dxf_int_t mmbid_time;
     dxf_double_t mmbid_price;
     dxf_int_t mmbid_size;
+    dxf_int_t mmask_time;
     dxf_double_t mmask_price;
     dxf_int_t mmask_size;
 } dx_market_maker_t;
