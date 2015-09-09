@@ -900,6 +900,7 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 	while (dx_get_in_buffer_position(context->bicc) < dx_get_in_buffer_limit(context->bicc)) {
 		void* record_buffer = NULL;
 		dx_record_id_t record_id;
+		dxf_ubyte_t exchange;
 		int record_count = 0;
 
 		dxf_const_string_t symbol = NULL;
@@ -922,6 +923,7 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 			}
 
 			record_id = dx_get_record_id(context->dscc, id);
+			exchange = ((record_id & DX_RECORD_ID_SUFFIX_MASK) >> DX_RECORD_ID_SUFFIX_SHIFT) & 0xFF;
 		}
 		
 		if (record_id == dx_rid_invalid) {
@@ -950,7 +952,7 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 			return false;
 		}
 		
-		if (!dx_transcode_record_data(context->connection, record_id, context->last_symbol , context->last_cipher,
+		if (!dx_transcode_record_data(context->connection, record_id, exchange, context->last_symbol , context->last_cipher,
 						g_buffer_managers[record_id].record_buffer_getter(context->rbcc), record_count)) {
 			dx_free_string_buffers(context->rbcc);
 

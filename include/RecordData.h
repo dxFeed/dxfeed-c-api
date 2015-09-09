@@ -47,6 +47,9 @@ typedef enum {
     dx_rid_invalid
 } dx_record_id_t;
 
+static const dxf_int_t DX_RECORD_ID_SUFFIX_MASK  = 0xFF00;
+static const dxf_int_t DX_RECORD_ID_SUFFIX_SHIFT = 8;
+
 /* -------------------------------------------------------------------------- */
 /*
  *	Record structures
