@@ -19,6 +19,8 @@
 
 #include <limits.h>
 
+#include "DXFeed.h"
+
 #include "BufferedInput.h"
 #include "DXErrorHandling.h"
 #include "DXMemory.h"

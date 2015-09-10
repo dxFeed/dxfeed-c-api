@@ -31,7 +31,9 @@
 #	else
 #		include "pthread.h"
 #	endif
-#	define USE_PTHREADS
+#	ifndef USE_PTHREADS
+#		define USE_PTHREADS
+#	endif
 typedef pthread_t dx_thread_t;
 typedef pthread_key_t dx_key_t;
 typedef pthread_mutex_t dx_mutex_t;

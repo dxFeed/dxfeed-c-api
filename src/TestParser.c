@@ -1,3 +1,5 @@
+#include "DXFeed.h"
+
 #include "BufferedInput.h"
 #include "BufferedOutput.h"
 #include "DXMemory.h"

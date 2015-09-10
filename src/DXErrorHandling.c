@@ -21,7 +21,9 @@
  *	Implementation of the error functions.
  */
 
+#ifdef _WIN32
 #include <Windows.h>
+#endif  /* _WIN32 */
 
 #include "DXErrorHandling.h"
 #include "DXErrorCodes.h"

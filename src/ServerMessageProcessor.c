@@ -17,6 +17,8 @@
  *
  */
 
+#include "DXFeed.h"
+
 #include "ServerMessageProcessor.h"
 #include "BufferedInput.h"
 #include "DXMemory.h"
@@ -907,7 +909,7 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 		
 		CHECKED_CALL_1(dx_read_symbol, context);
 		
-		if (context->last_symbol == NULL && !dx_decode_symbol_name(context->last_cipher, &context->last_symbol)) {
+		if (context->last_symbol == NULL && !dx_decode_symbol_name(context->last_cipher, (dxf_const_string_t*)&context->last_symbol)) {
 			return false;
 		}
 		symbol = dx_create_string_src(context->last_symbol);
@@ -1267,7 +1269,7 @@ bool dx_process_message (dx_server_msg_proc_connection_context_t* context, dx_me
         }
 		
 		break;
-	case MESSAGE_HEARTBEAT:
+    case MESSAGE_HEARTBEAT:
     case MESSAGE_TEXT_FORMAT_COMMENT:
     case MESSAGE_TEXT_FORMAT_SPECIAL:
     default:

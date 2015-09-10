@@ -220,7 +220,7 @@ DXFEED_API ERRORCODE dxf_get_subscription_event_types (dxf_subscription_t subscr
                      data for this connection/event type/symbol, NULL will be stored
  */
 DXFEED_API ERRORCODE dxf_get_last_event (dxf_connection_t connection, int event_type, dxf_const_string_t symbol,
-                                         OUT const dxf_event_data_t* event_data);
+                                         OUT dxf_event_data_t* event_data);
 /*
  *	Retrieves the last error info.
  *  The error is stored on per-thread basis. If the connection termination notifier callback was invoked, then

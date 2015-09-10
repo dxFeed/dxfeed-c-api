@@ -17,6 +17,8 @@
  *
  */
 
+#include "DXFeed.h"
+
 #include "ClientMessageProcessor.h"
 #include "BufferedOutput.h"
 #include "DataStructures.h"

@@ -17,6 +17,8 @@
  *
  */
  
+#include "DXFeed.h"
+
 #include "ConnectionContextData.h"
 #include "DXMemory.h"
 #include "DXErrorHandling.h"

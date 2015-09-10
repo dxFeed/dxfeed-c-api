@@ -23,6 +23,7 @@
 
 #include <stdio.h>
 #include <time.h>
+#include <string.h>
 
 #include "DXNetwork.h"
 #include "DXSockets.h"

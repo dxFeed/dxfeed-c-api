@@ -16,6 +16,14 @@
  * Contributor(s):
  *
  */
+
+#ifdef _WIN32
+#include <Windows.h>
+#else
+#include <time.h>
+#include <stdlib.h>
+#include <wctype.h>
+#endif /* _WIN32 */
  
 #include "DXAlgorithms.h"
 #include "DXMemory.h"
@@ -23,7 +31,6 @@
 #include <time.h>
 #include <string.h>
 #include <limits.h>
-#include <Windows.h>
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -182,7 +189,24 @@ dxf_string_t dx_ansi_to_unicode (const char* ansi_str) {
 
     return wide_str;
 #else /* _WIN32 */
-    return NULL; /* todo */
+    mbstate_t state;
+    dxf_string_t wide_str = NULL;
+    // We trust it
+    size_t len = strlen(ansi_str);
+
+    mbrlen(NULL, 0, &state);
+    
+    const char *p = ansi_str;
+    size_t wide_size = mbsrtowcs(NULL, &p, 0, &state);
+
+    if (wide_size > 0) {
+        wide_str = dx_create_string(wide_size);
+        p = ansi_str;
+        mbrlen(NULL, 0, &state);
+        mbsrtowcs(wide_str, &p, wide_size, &state);
+    }
+
+    return wide_str;
 #endif /* _WIN32 */
 }
 
@@ -216,7 +240,9 @@ int dx_millisecond_timestamp (void) {
 #ifdef _WIN32
     return (int)GetTickCount();
 #else
-    return 0;
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (int)(ts.tv_sec * 1000 + ts.tv_sec / 1000000);
 #endif
 }
 

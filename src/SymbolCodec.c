@@ -17,6 +17,8 @@
  *
  */
 
+#include "DXFeed.h"
+
 #include "SymbolCodec.h"
 #include "BufferedIOCommon.h"
 #include "BufferedInput.h"

@@ -17,6 +17,8 @@
 *
 */
 
+#include "DXFeed.h"
+
 #include "DataStructures.h"
 #include "BufferedIOCommon.h"
 #include "DXAlgorithms.h"

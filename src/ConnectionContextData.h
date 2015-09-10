@@ -32,8 +32,6 @@
  */
 /* -------------------------------------------------------------------------- */
 
-typedef void* dxf_connection_t;
-
 typedef enum {
     dx_ccs_begin,
     dx_ccs_network = dx_ccs_begin,

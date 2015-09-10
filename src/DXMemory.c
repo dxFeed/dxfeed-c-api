@@ -21,7 +21,9 @@
  *	Implementation of the memory functions
  */
 
+#ifdef _WIN32
 #include <Windows.h>
+#endif
 
 #include "DXMemory.h"
 #include "DXErrorHandling.h"

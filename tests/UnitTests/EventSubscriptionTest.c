@@ -1,3 +1,4 @@
+#include "DXFeed.h"
 
 #include "EventSubscriptionTest.h"
 #include "EventSubscription.h"

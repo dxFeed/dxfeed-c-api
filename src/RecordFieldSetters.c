@@ -21,6 +21,8 @@
  *	Implementation of the record field setters
  */
  
+#include "DXFeed.h"
+
 #include "RecordFieldSetters.h"
 #include "EventData.h"
 #include "DataStructures.h"

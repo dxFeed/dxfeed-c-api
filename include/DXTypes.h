@@ -44,5 +44,27 @@ typedef double             dxf_double_t;         // 64 bit
 typedef dxf_char_t*        dxf_string_t;
 typedef const dxf_char_t*  dxf_const_string_t;
 
-#endif /* _WIN32 */
+#else /* POSIX? */
+
+#include <stdint.h>
+#include <wchar.h>
+
+typedef unsigned char    dxf_bool_t;           // 8 bit
+typedef int8_t           dxf_byte_t;           // 8 bit
+typedef uint8_t          dxf_ubyte_t;  // 8 bit
+typedef wchar_t          dxf_char_t;           // 16 bit
+//typedef unsigned wchar_t   dx_unsigned_char_t;  // 16 bit
+typedef int16_t          dxf_short_t;          // 16 bit
+typedef uint16_t         dxf_ushort_t; // 16 bit
+typedef int32_t          dxf_int_t;            // 32 bit
+typedef uint32_t         dxf_uint_t;   // 32 bit
+typedef float            dxf_float_t;          // 32 bit
+typedef int64_t          dxf_long_t;           // 64 bit
+typedef uint64_t         dxf_ulong_t;  // 64 bit
+typedef double           dxf_double_t;         // 64 bit
+
+typedef dxf_char_t*        dxf_string_t;
+typedef const dxf_char_t*  dxf_const_string_t;
+
+#endif /* _WIN32/POSIX */
 #endif /* DX_TYPES_H_INCLUDED */

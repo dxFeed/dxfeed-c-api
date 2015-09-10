@@ -17,6 +17,8 @@
  *
  */
  
+#include "DXFeed.h"
+
 #include "EventSubscription.h"
 #include "DXErrorHandling.h"
 #include "DXErrorCodes.h"

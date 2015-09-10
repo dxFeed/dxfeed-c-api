@@ -37,6 +37,4 @@ typedef int bool;
     #define NULL ((void*)0)
 #endif // NULL
 
-typedef void* dxf_connection_t;
-
 #endif /* PRIMITIVE_TYPES_H_INCLUDED */

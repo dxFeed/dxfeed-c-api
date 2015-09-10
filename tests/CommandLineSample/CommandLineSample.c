@@ -1,12 +1,23 @@
 
+#ifdef _WIN32
+#include <Windows.h>
+#else
+#include <unistd.h>
+#include <string.h>
+#include <wctype.h>
+#include <stdlib.h>
+#define stricmp strcasecmp
+#endif
 
 #include "DXFeed.h"
 #include "DXErrorCodes.h"
-#include "Logger.h"
 #include <stdio.h>
-#include <Windows.h>
-#include "DXAlgorithms.h"
 #include <time.h>
+
+typedef int bool;
+
+#define true 1
+#define false 0
 
 dxf_const_string_t dx_event_type_to_string (int event_type) {
     switch (event_type) {
@@ -21,6 +32,7 @@ dxf_const_string_t dx_event_type_to_string (int event_type) {
 }
 
 /* -------------------------------------------------------------------------- */
+#ifdef _WIN32
 static bool is_listener_thread_terminated = false;
 CRITICAL_SECTION listener_thread_guard;
 
@@ -32,32 +44,48 @@ bool is_thread_terminate() {
 
     return res;
 }
+#else
+static volatile bool is_listener_thread_terminated = false;
+bool is_thread_terminate() {
+    bool res;
+    res = is_listener_thread_terminated;
+    return res;
+}
+#endif
+
 
 /* -------------------------------------------------------------------------- */
 
-void on_reader_thread_terminate(const char* host, void* user_data) {
+#ifdef _WIN32
+void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
     EnterCriticalSection(&listener_thread_guard);
     is_listener_thread_terminated = true;
     LeaveCriticalSection(&listener_thread_guard);
 
-    printf("\nTerminating listener thread, host: %s\n", host);
+    wprintf(L"\nTerminating listener thread\n");
 }
+#else
+void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
+    is_listener_thread_terminated = true;
+    wprintf(L"\nTerminating listener thread\n");
+}
+#endif
 
 void print_timestamp(dxf_long_t timestamp){
-		char timefmt[80];
+		wchar_t timefmt[80];
 		
 		struct tm * timeinfo;
 		time_t tmpint = (time_t)(timestamp /1000);
 		timeinfo = localtime ( &tmpint );
-		strftime(timefmt,80,"%Y%m%d-%H%M%S" ,timeinfo);
-		printf("%s",timefmt);
+		wcsftime(timefmt,80, L"%Y%m%d-%H%M%S" ,timeinfo);
+		wprintf(L"%ls",timefmt);
 }
 /* -------------------------------------------------------------------------- */
 
 void listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count, void* user_data) {
     dxf_int_t i = 0;
 
-	wprintf(L"%s{symbol=%s, ",dx_event_type_to_string(event_type), symbol_name);
+	wprintf(L"%ls{symbol=%ls, ",dx_event_type_to_string(event_type), symbol_name);
 	
     if (event_type == DXF_ET_QUOTE) {
 	    dxf_quote_t* quotes = (dxf_quote_t*)data;
@@ -82,10 +110,10 @@ void listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_d
 	    dxf_order_t* orders = (dxf_order_t*)data;
 
 	    for (; i < data_count; ++i) {
-		    wprintf(L"index=0x%I64X, side=%i, level=%i, time=",
+		    wprintf(L"index=0x%llX, side=%i, level=%i, time=",
 		            orders[i].index, orders[i].side, orders[i].level);
 					print_timestamp(orders[i].time);
-			wprintf(L", exchange code=%c, market maker=%s, price=%f, size=%I64i}\n",
+			wprintf(L", exchange code=%c, market maker=%ls, price=%f, size=%lld}\n",
 		            orders[i].exchange_code, orders[i].market_maker, orders[i].price, orders[i].size);
 		}
     }
@@ -113,7 +141,7 @@ void listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_d
 	    dxf_profile_t* p = (dxf_profile_t*)data;
 
 	    for (; i < data_count ; ++i) {
-			wprintf(L"Description=%s}\n",
+			wprintf(L"Description=%ls}\n",
 				    p[i].description);
 	    }
     }
@@ -123,7 +151,7 @@ void listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_d
 
         for (; i < data_count ; ++i) {
             wprintf(L"event id=%I64i, time=%I64i, exchange code=%c, price=%f, size=%I64i, bid price=%f, ask price=%f, "
-				L"exchange sale conditions=\'%s\', is trade=%s, type=%i}\n",
+				L"exchange sale conditions=\'%ls\', is trade=%ls, type=%i}\n",
                     tns[i].event_id, tns[i].time, tns[i].exchange_code, tns[i].price, tns[i].size,
                     tns[i].bid_price, tns[i].ask_price, tns[i].exchange_sale_conditions,
                     tns[i].is_trade ? L"True" : L"False", tns[i].type);
@@ -141,18 +169,17 @@ void process_last_error () {
 
     if (res == DXF_SUCCESS) {
         if (error_code == dx_ec_success) {
-            printf("WTF - no error information is stored");
-
+            wprintf(L"WTF - no error information is stored");
             return;
         }
 
         wprintf(L"Error occurred and successfully retrieved:\n"
-            L"error code = %d, description = \"%s\"\n",
+            L"error code = %d, description = \"%ls\"\n",
             error_code, error_descr);
         return;
     }
 
-    printf("An error occurred but the error subsystem failed to initialize\n");
+    wprintf(L"An error occurred but the error subsystem failed to initialize\n");
 }
 
 /* -------------------------------------------------------------------------- */
@@ -171,7 +198,14 @@ dxf_string_t ansi_to_unicode (const char* ansi_str) {
 
     return wide_str;
 #else /* _WIN32 */
-    return NULL; /* todo */
+    dxf_string_t wide_str = NULL;
+    size_t wide_size = mbstowcs(NULL, ansi_str, 0);
+    if (wide_size > 0) {
+        wide_str = calloc(wide_size + 1, sizeof(dxf_char_t));
+        mbstowcs(wide_str, ansi_str, wide_size + 1);
+    }
+
+    return wide_str; /* todo */
 #endif /* _WIN32 */
 }
 
@@ -183,15 +217,16 @@ int main (int argc, char* argv[]) {
     int event_type;
     dxf_string_t symbol = NULL;
     char* dxfeed_host = NULL;
+	dxf_string_t dxfeed_host_u = NULL;
 
 
     if ( argc < 4 ) {
-        printf("DXFeed command line sample.\n"
-               "Usage: CommandLineSample <server address> <event type> <symbol>\n"
-               "  <server address> - a DXFeed server address, e.g. demo.dxfeed.com:7300\n"
-               "  <event type> - an event type, one of the following: TRADE, QUOTE, SUMMARY,\n"
-               "                 PROFILE, ORDER, TIME_AND_SALE\n"
-               "  <symbol> - a trade symbol, e.g. C, MSFT, YHOO, IBM\n");
+        wprintf(L"DXFeed command line sample.\n"
+                L"Usage: CommandLineSample <server address> <event type> <symbol>\n"
+                L"  <server address> - a DXFeed server address, e.g. demo.dxfeed.com:7300\n"
+                L"  <event type> - an event type, one of the following: TRADE, QUOTE, SUMMARY,\n"
+                L"                 PROFILE, ORDER, TIME_AND_SALE\n"
+                L"  <symbol> - a trade symbol, e.g. C, MSFT, YHOO, IBM\n");
         
         return 0;
     }
@@ -214,7 +249,7 @@ int main (int argc, char* argv[]) {
     } else if (stricmp(event_type_name, "TIME_AND_SALE") == 0) {
         event_type = DXF_ET_TIME_AND_SALE;
     } else {
-        printf("Unknown event type.\n");
+        wprintf(L"Unknown event type.\n");
         return -1;
     }
 
@@ -228,17 +263,21 @@ int main (int argc, char* argv[]) {
             symbol[i] = towupper(symbol[i]);
     }
 
-    printf("Sample test started.\n");    
-    printf("Connecting to host %s...\n", dxfeed_host);
+    wprintf(L"Sample test started.\n");
+	dxfeed_host_u = ansi_to_unicode(dxfeed_host);
+    wprintf(L"Connecting to host %ls...\n", dxfeed_host_u);
+	free(dxfeed_host_u);
 
+#ifdef _WIN32
     InitializeCriticalSection(&listener_thread_guard);
+#endif
 
     if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, &connection)) {
         process_last_error();
         return -1;
     }
 
-    printf("Connection successful!\n");
+    wprintf(L"Connection successful!\n");
 
     if (!dxf_create_subscription(connection, event_type, &subscription)) {
         process_last_error();
@@ -257,13 +296,17 @@ int main (int argc, char* argv[]) {
 
         return -1;
     };
-    printf("Subscription successful!\n");
+    wprintf(L"Subscription successful!\n");
 
     while (!is_thread_terminate() && loop_counter--) {
+#ifdef _WIN32
         Sleep(100);
+#else
+		sleep(1);
+#endif
     }
     
-	printf("Disconnecting from host...\n");
+    wprintf(L"Disconnecting from host...\n");
 
     if (!dxf_close_connection(connection)) {
         process_last_error();
@@ -271,10 +314,11 @@ int main (int argc, char* argv[]) {
         return -1;
     }
 
-    printf("Disconnect successful!\n"
-        "Connection test completed successfully!\n");
+    wprintf(L"Disconnect successful!\nConnection test completed successfully!\n");
 
+#ifdef _WIN32
     DeleteCriticalSection(&listener_thread_guard);
+#endif
     
     return 0;
 }

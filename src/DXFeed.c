@@ -401,7 +401,7 @@ DXFEED_API ERRORCODE dxf_clear_symbols (dxf_subscription_t subscription) {
     dxf_connection_t connection;
     int events; 
     
-    dxf_string_t* symbols;
+    dxf_const_string_t* symbols;
     int symbol_count;
 
     dx_perform_common_actions();

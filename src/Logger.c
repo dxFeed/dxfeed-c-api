@@ -17,7 +17,13 @@
  *
  */
 
+#ifdef _WIN32
 #include <Windows.h>
+#else
+#include <pthread.h>
+#include <time.h>
+#endif
+
 #include <stdio.h>
 #include <stdarg.h>
 
@@ -108,8 +114,56 @@ const dxf_char_t* dx_get_current_time (void) {
 #else // _WIN32
 
 dxf_const_string_t dx_get_current_time () {
-    return g_default_time_string;
+    dxf_char_t* time_buffer = dx_get_current_time_buffer();
+    time_t clock;
+    struct tm ltm;
+    
+    if (time_buffer == NULL) {
+        return NULL;
+    }
+
+    time(&clock);
+    localtime_r(&clock, &ltm);
+    swprintf(time_buffer, CURRENT_TIME_STR_LENGTH, L"%.2u.%.2u.%.4u %.2u:%.2u:%.2u.%.4u",
+                                                     ltm.tm_mday, ltm.tm_mon + 1, ltm.tm_year + 1900,
+                                                     ltm.tm_hour, ltm.tm_min, ltm.tm_sec,
+                                                     0);
+    if (g_show_timezone) {
+        swprintf(time_buffer + CURRENT_TIME_STR_TIME_OFFSET, 7, L" GMT%+.2d", ltm.tm_gmtoff / 3600);
+    }
+
+    return time_buffer;
 }
+
+#ifdef __linux
+#define _GNU_SOURCE
+#include <unistd.h>
+#include <sys/syscall.h>
+#define pthread_getthreadid_np() syscall(__NR_gettid)
+#else
+#define pthread_getthreadid_np() (0)
+#endif
+
+#ifdef _DEBUG
+void dx_log_debug_message(const dxf_char_t *format, ...) {
+	dxf_char_t message[256];
+	va_list ap;
+	swprintf(message, 255, L"[%08lx] ", (unsigned long)pthread_getthreadid_np());
+	va_start(ap, format);
+	vswprintf(&message[11], 244, format, ap);
+	printf("%s", message);
+	va_end(ap);
+}
+
+void dx_vlog_debug_message(const dxf_char_t *format, va_list ap) {
+	dxf_char_t message[256];
+	swprintf(message, 255, L"[%08lx] ", (unsigned long)pthread_getthreadid_np());
+	vswprintf(&message[11], 244, format, ap);
+	printf("%s", message);
+}
+#else
+#define dx_vlog_debug_message(f, ap)
+#endif
 
 #endif // _WIN32
 
@@ -217,22 +271,19 @@ static void dx_close_logging(void *arg) {
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_initialize_logger (const char* file_name, int rewrite_file, int show_timezone_info, int verbose) {
-
-	puts("Initialize logger...");
-
-	if (!dx_init_error_subsystem()) {
-        printf("\nCan not init error subsystem\n");
+    if (!dx_init_error_subsystem()) {
+        wprintf(L"\nCan not init error subsystem\n");
         return DXF_FAILURE;
-	}
+    }
 
     g_log_file = fopen(file_name, rewrite_file ? "w" : "a");
     
     if (g_log_file == NULL) {
-        printf("\ncan not open log-file %s", file_name);
+        wprintf(L"\nCan not open log-file %s", file_name);
         return DXF_FAILURE;
     }
 
-	dx_register_process_destructor(&dx_close_logging, NULL);
+    dx_register_process_destructor(&dx_close_logging, NULL);
 
     g_show_timezone = show_timezone_info ? true : false;
     g_verbose_logger_mode = verbose ? true : false;
@@ -255,8 +306,14 @@ void dx_logging_error (dxf_const_string_t message ) {
         return;
     }
 
-	dx_log_debug_message(L"%s", message);
-    fwprintf(g_log_file, L"\n%s [%08lx] %s%s", dx_get_current_time(), (unsigned long)GetCurrentThreadId(), g_error_prefix, message);
+    dx_log_debug_message(L"%s", message);
+    fwprintf(g_log_file, L"\n%s [%08lx] %s%s", dx_get_current_time(),
+#ifdef _WIN32
+     (unsigned long)GetCurrentThreadId(),
+#else
+     (unsigned long)pthread_getthreadid_np(),
+#endif
+     g_error_prefix, message);
     dx_flush_log();
 }
 
@@ -289,15 +346,21 @@ void dx_logging_verbose_info( const dxf_char_t* format, ... ) {
         return;
     }
 
-    fwprintf(g_log_file, L"\n%s [%08lx] %s ", dx_get_current_time(), (unsigned long)GetCurrentThreadId(), g_info_prefix);
+    fwprintf(g_log_file, L"\n%s [%08lx] %s ", dx_get_current_time(),
+#ifdef _WIN32
+     (unsigned long)GetCurrentThreadId(),
+#else
+     (unsigned long)pthread_getthreadid_np(),
+#endif
+      g_info_prefix);
     {
         va_list ap;
         va_start(ap, format);
-		dx_vlog_debug_message(format, ap);
+        dx_vlog_debug_message(format, ap);
         vfwprintf(g_log_file, format, ap);
         va_end(ap);
     }
-	dx_flush_log();
+    dx_flush_log();
 }
 /* -------------------------------------------------------------------------- */
 
@@ -306,15 +369,21 @@ void dx_logging_info( const dxf_char_t* format, ... ) {
         return;
     }
 
-    fwprintf(g_log_file, L"\n%s [%08lx] %s ", dx_get_current_time(), (unsigned long)GetCurrentThreadId(), g_info_prefix);
+    fwprintf(g_log_file, L"\n%s [%08lx] %s ", dx_get_current_time(),
+#ifdef _WIN32
+     (unsigned long)GetCurrentThreadId(),
+#else
+     (unsigned long)pthread_getthreadid_np(),
+#endif
+      g_info_prefix);
     {
         va_list ap;
         va_start(ap, format);
-		dx_vlog_debug_message(format, ap);
+        dx_vlog_debug_message(format, ap);
         vfwprintf(g_log_file, format, ap);
         va_end(ap);
     }
-	dx_flush_log();
+    dx_flush_log();
 }
 
 /* -------------------------------------------------------------------------- */

@@ -31,6 +31,17 @@
     #include <WS2tcpip.h>
     
     typedef SOCKET dx_socket_t;
+#else
+    #include <unistd.h>
+    #include <sys/types.h>
+    #include <sys/socket.h>
+    #include <netinet/in.h>
+    #include <netdb.h>
+    #include <errno.h>
+
+    #define INVALID_SOCKET -1
+    #define SOCKET_ERROR -1
+    typedef int dx_socket_t;
 #endif /* _WIN32 */
 
 #include "PrimitiveTypes.h"

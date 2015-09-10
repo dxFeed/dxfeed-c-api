@@ -17,6 +17,8 @@
  *
  */
  
+#include "DXFeed.h"
+
 #include "RecordBuffers.h"
 #include "DXMemory.h"
 #include "DXAlgorithms.h"

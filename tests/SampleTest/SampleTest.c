@@ -164,7 +164,7 @@ void process_last_error () {
 int main (int argc, char* argv[]) {
     dxf_connection_t connection;
     dxf_subscription_t subscription;
-    int loop_counter = 10000;
+    int loop_counter = 1000000;
 
     dxf_initialize_logger( "log.log", true, true, true );
     InitializeCriticalSection(&listener_thread_guard);
@@ -179,13 +179,13 @@ int main (int argc, char* argv[]) {
 
     printf("Connection successful!\n");
  
-	if (!dxf_create_subscription(connection, /*DXF_ET_TRADE | DXF_ET_QUOTE | DXF_ET_ORDER | DXF_ET_SUMMARY | */DXF_ET_PROFILE, &subscription)) {
+	if (!dxf_create_subscription(connection, DXF_ET_TRADE | DXF_ET_QUOTE | DXF_ET_ORDER | DXF_ET_SUMMARY | DXF_ET_PROFILE, &subscription)) {
         process_last_error();
         
         return -1;
     };
 	
-	if (!dxf_add_symbol(subscription, L"CRMD")) {
+	if (!dxf_add_symbol(subscription, L"EREGL:TR")) {
         process_last_error();
         
         return -1;

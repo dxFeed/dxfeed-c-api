@@ -17,7 +17,10 @@
  *
  */
 
+#ifdef _WIN32
 #include <process.h>
+#endif
+
 #include <errno.h>
 
 #include "DXThreads.h"
@@ -40,7 +43,19 @@ void dx_sleep (int milliseconds) {
     Sleep((DWORD)milliseconds);
 }
 
+#else
+
+#include <time.h>
+
+void dx_sleep (int milliseconds) {
+    struct timespec ts;
+    ts.tv_sec  = milliseconds / 1000;
+    ts.tv_nsec = (milliseconds % 1000) * 1000000;
+    nanosleep(&ts, NULL);
+}
+
 #endif /* _WIN32 */
+
 
 /* -------------------------------------------------------------------------- */
 
@@ -535,5 +550,5 @@ bool dx_set_thread_data_no_ehm (dx_key_t key, const void* data) {
 }
 
 #else
-#	error "Please, select threads implementation
+#	error "Please, select threads implementation"
 #endif

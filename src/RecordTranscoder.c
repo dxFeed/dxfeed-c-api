@@ -17,6 +17,8 @@
  *
  */
  
+#include "DXFeed.h"
+
 #include "RecordTranscoder.h"
 #include "EventData.h"
 #include "DXMemory.h"
