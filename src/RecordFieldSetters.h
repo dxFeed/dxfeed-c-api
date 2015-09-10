@@ -109,6 +109,20 @@ DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_market_maker_t, mmask_size);
 
 /* -------------------------------------------------------------------------- */
 /*
+ *	Order field setters
+ */
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_order_t, index);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_order_t, time);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_order_t, sequence);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_order_t, price);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_order_t, size);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_order_t, flags);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_order_t, mmid);
+
+/* -------------------------------------------------------------------------- */
+/*
  *	Time and Sale field setters
  */
 /* -------------------------------------------------------------------------- */
@@ -208,6 +222,20 @@ DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_market_maker_t, mmbid_size);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_market_maker_t, mmask_time);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_market_maker_t, mmask_price);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_market_maker_t, mmask_size);
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Order field default value getters
+ */
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_order_t, index);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_order_t, time);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_order_t, sequence);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_order_t, price);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_order_t, size);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_order_t, flags);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_order_t, mmid);
 
 /* -------------------------------------------------------------------------- */
 /*

@@ -106,6 +106,20 @@ FIELD_SETTER_BODY(dx_market_maker_t, mmask_size, dxf_int_t)
 
 /* -------------------------------------------------------------------------- */
 /*
+ *	Order field setters implementation
+ */
+/* -------------------------------------------------------------------------- */
+
+FIELD_SETTER_BODY(dx_order_t, index, dxf_int_t)
+FIELD_SETTER_BODY(dx_order_t, time, dxf_int_t)
+FIELD_SETTER_BODY(dx_order_t, sequence, dxf_int_t)
+FIELD_SETTER_BODY(dx_order_t, price, dxf_double_t)
+FIELD_SETTER_BODY(dx_order_t, size, dxf_int_t)
+FIELD_SETTER_BODY(dx_order_t, flags, dxf_int_t)
+FIELD_SETTER_BODY(dx_order_t, mmid, dxf_int_t)
+
+/* -------------------------------------------------------------------------- */
+/*
  *	Time and Sale field setters implementation
  */
 /* -------------------------------------------------------------------------- */
@@ -289,6 +303,19 @@ FIELD_DEF_VAL_BODY(dx_market_maker_t, mmbid_size, dxf_int_t)
 FIELD_DEF_VAL_BODY(dx_market_maker_t, mmask_time, dxf_int_t)
 FIELD_DEF_VAL_BODY(dx_market_maker_t, mmask_price, dxf_double_t)
 FIELD_DEF_VAL_BODY(dx_market_maker_t, mmask_size, dxf_int_t)
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Order field value getters implementation
+ */
+/* -------------------------------------------------------------------------- */
+FIELD_DEF_VAL_BODY(dx_order_t, index, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_order_t, time, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_order_t, sequence, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_order_t, price, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_order_t, size, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_order_t, flags, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_order_t, mmid, dxf_int_t)
 
 /* -------------------------------------------------------------------------- */
 /*

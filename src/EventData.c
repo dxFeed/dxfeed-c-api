@@ -97,7 +97,8 @@ static const dx_event_subscription_param_t g_profile_subscription_params[] = {
 
 static const dx_event_subscription_param_t g_order_subscription_params[] = {
     { dx_rid_quote, dx_st_ticker },
-    { dx_rid_market_maker, dx_st_history }
+    { dx_rid_market_maker, dx_st_history },
+    { dx_rid_order, dx_st_history }
 };
 
 static const dx_event_subscription_param_t g_time_and_sale_subscription_params[] = {

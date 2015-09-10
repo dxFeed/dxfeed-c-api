@@ -42,6 +42,13 @@ static const dxf_long_t DX_ORDER_SOURCE_AGGREGATE_ASK = 6;
 static const dxf_int_t DX_ORDER_SOURCE_ID_SHIFT = 40;
 static const dxf_int_t DX_ORDER_EXCHANGE_SHIFT = 32;
 
+static const dxf_int_t DX_ORDER_SIDE_SHIFT = 2;
+static const dxf_int_t DX_ORDER_SIDE_MASK = 3;
+static const dxf_int_t DX_ORDER_SIDE_BUY = 1;
+static const dxf_int_t DX_ORDER_SIDE_SELL = 2;
+
+static const dxf_int_t DX_ORDER_SCOPE_MASK = 3;
+
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -410,6 +417,43 @@ bool RECORD_TRANSCODER_NAME(dx_market_maker_t) (dx_record_transcoder_connection_
     return true;
 }
 
+/* ---------------------------------- */
+
+bool RECORD_TRANSCODER_NAME(dx_order_t) (dx_record_transcoder_connection_context_t* context,
+                                         dxf_ubyte_t exchange,
+                                         dxf_const_string_t symbol_name, dxf_int_t symbol_cipher,
+                                         void* record_buffer, int record_count) {
+    int i = 0;
+    dxf_order_t* event_buffer = (dxf_order_t*)dx_get_event_data_buffer(context, dx_eid_order, record_count);
+
+    if (event_buffer == NULL) {
+        return false;
+    }
+
+    for (; i < record_count; ++i) {
+        dx_order_t* cur_record = (dx_order_t*)record_buffer + i;
+        dxf_order_t* cur_event = event_buffer + i;
+
+        /* HARDCODE */
+        cur_event->index = ((((dxf_long_t)'I' << 8 | (dxf_long_t)'S') << 8 | (dxf_long_t)'T') << DX_ORDER_SOURCE_ID_SHIFT) | cur_record->index;
+        cur_event->side = ((cur_record->flags >> DX_ORDER_SIDE_SHIFT) & DX_ORDER_SIDE_MASK) == DX_ORDER_SIDE_SELL ? DXF_ORDER_SIDE_SELL : DXF_ORDER_SIDE_BUY;
+        cur_event->level = cur_record->flags & DX_ORDER_SCOPE_MASK;
+        cur_event->time = cur_record->time * 1000LL + ((cur_record->sequence >> 22) & 0x3ff);
+        cur_event->exchange_code = 0;
+        cur_event->market_maker = dx_decode_from_integer(cur_record->mmid);
+        cur_event->price = cur_record->price;
+        cur_event->size = cur_record->size;
+
+        if (cur_event->market_maker != NULL &&
+            !dx_store_string_buffer(context->rbcc, cur_event->market_maker)) {
+
+            return false;
+        }
+    }
+
+    return dx_process_event_data(context->connection, dx_eid_order, symbol_name, symbol_cipher, event_buffer, record_count);
+}
+
 /* -------------------------------------------------------------------------- */
 
 bool RECORD_TRANSCODER_NAME(dx_time_and_sale_t) (dx_record_transcoder_connection_context_t* context,
@@ -464,6 +508,7 @@ static const dx_record_transcoder_t g_record_transcoders[dx_rid_count] = {
     RECORD_TRANSCODER_NAME(dx_fundamental_t),
     RECORD_TRANSCODER_NAME(dx_profile_t),
     RECORD_TRANSCODER_NAME(dx_market_maker_t),
+    RECORD_TRANSCODER_NAME(dx_order_t),
     RECORD_TRANSCODER_NAME(dx_time_and_sale_t)
 };
 

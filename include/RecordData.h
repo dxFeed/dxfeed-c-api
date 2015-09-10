@@ -39,6 +39,7 @@ typedef enum {
     dx_rid_fundamental,
     dx_rid_profile,
     dx_rid_market_maker,
+    dx_rid_order,
     dx_rid_time_and_sale,
 
     /* add new values above this line */
@@ -97,6 +98,16 @@ typedef struct {
     dxf_double_t mmask_price;
     dxf_int_t mmask_size;
 } dx_market_maker_t;
+
+typedef struct {
+    dxf_int_t index;
+    dxf_int_t time;
+    dxf_int_t sequence;
+    dxf_double_t price;
+    dxf_int_t size;
+    dxf_int_t flags;
+    dxf_int_t mmid;
+} dx_order_t;
 
 typedef struct {
     dxf_long_t event_id;

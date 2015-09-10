@@ -168,6 +168,8 @@ GET_RECORD_PTR_BODY(dx_rid_profile, dx_profile_t)
 GET_RECORD_BUF_PTR_BODY(dx_rid_profile)
 GET_RECORD_PTR_BODY(dx_rid_market_maker, dx_market_maker_t)
 GET_RECORD_BUF_PTR_BODY(dx_rid_market_maker)
+GET_RECORD_PTR_BODY(dx_rid_order, dx_order_t)
+GET_RECORD_BUF_PTR_BODY(dx_rid_order)
 GET_RECORD_PTR_BODY(dx_rid_time_and_sale, dx_time_and_sale_t)
 GET_RECORD_BUF_PTR_BODY(dx_rid_time_and_sale)
 
@@ -183,6 +185,7 @@ const dx_buffer_manager_collection_t g_buffer_managers[dx_rid_count] = {
     { GET_RECORD_PTR_NAME(dx_rid_fundamental), GET_RECORD_BUF_PTR_NAME(dx_rid_fundamental) },
     { GET_RECORD_PTR_NAME(dx_rid_profile), GET_RECORD_BUF_PTR_NAME(dx_rid_profile) },
     { GET_RECORD_PTR_NAME(dx_rid_market_maker), GET_RECORD_BUF_PTR_NAME(dx_rid_market_maker) },
+    { GET_RECORD_PTR_NAME(dx_rid_order), GET_RECORD_BUF_PTR_NAME(dx_rid_order) },
     { GET_RECORD_PTR_NAME(dx_rid_time_and_sale), GET_RECORD_BUF_PTR_NAME(dx_rid_time_and_sale) }
 };
 

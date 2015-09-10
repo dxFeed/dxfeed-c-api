@@ -96,6 +96,22 @@ static const dx_field_info_t dx_fields_market_maker[] = {
 
 /* -------------------------------------------------------------------------- */
 /*
+ *	Order data fields
+ */
+/* -------------------------------------------------------------------------- */
+
+static const dx_field_info_t dx_fields_order[] = { 
+	{ dx_fid_compact_int, L"Index", DX_RECORD_FIELD_SETTER_NAME(dx_order_t, index), DX_RECORD_FIELD_DEF_VAL_NAME(dx_order_t, index) },
+	{ dx_fid_compact_int, L"Time", DX_RECORD_FIELD_SETTER_NAME(dx_order_t, time), DX_RECORD_FIELD_DEF_VAL_NAME(dx_order_t, time) },
+	{ dx_fid_compact_int, L"Sequence", DX_RECORD_FIELD_SETTER_NAME(dx_order_t, sequence), DX_RECORD_FIELD_DEF_VAL_NAME(dx_order_t, sequence) },
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Price", DX_RECORD_FIELD_SETTER_NAME(dx_order_t, price), DX_RECORD_FIELD_DEF_VAL_NAME(dx_order_t, price) },
+	{ dx_fid_compact_int, L"Size", DX_RECORD_FIELD_SETTER_NAME(dx_order_t, size), DX_RECORD_FIELD_DEF_VAL_NAME(dx_order_t, size) },
+	{ dx_fid_compact_int, L"Flags", DX_RECORD_FIELD_SETTER_NAME(dx_order_t, flags), DX_RECORD_FIELD_DEF_VAL_NAME(dx_order_t, flags) },
+	{ dx_fid_compact_int, L"MMID", DX_RECORD_FIELD_SETTER_NAME(dx_order_t, mmid), DX_RECORD_FIELD_DEF_VAL_NAME(dx_order_t, mmid) }
+}; 
+
+/* -------------------------------------------------------------------------- */
+/*
  *	Time and Sale data fields
  */
 /* -------------------------------------------------------------------------- */
@@ -124,15 +140,17 @@ static const int g_record_field_counts[dx_rid_count] = {
     sizeof(dx_fields_fundamental) / sizeof(dx_fields_fundamental[0]),
     sizeof(dx_fields_profile) / sizeof(dx_fields_profile[0]),
     sizeof(dx_fields_market_maker) / sizeof(dx_fields_market_maker[0]),
+    sizeof(dx_fields_order) / sizeof(dx_fields_order[0]),
     sizeof(dx_fields_time_and_sale) / sizeof(dx_fields_time_and_sale[0])
 };
 
 static const dx_record_info_t g_records[dx_rid_count] = {
-	{ L"Trade", sizeof(dx_fields_trade) / sizeof(dx_fields_trade[0]), dx_fields_trade },
+    { L"Trade", sizeof(dx_fields_trade) / sizeof(dx_fields_trade[0]), dx_fields_trade },
     { L"Quote", sizeof(dx_fields_quote) / sizeof(dx_fields_quote[0]), dx_fields_quote },
     { L"Fundamental", sizeof(dx_fields_fundamental) / sizeof(dx_fields_fundamental[0]), dx_fields_fundamental },
     { L"Profile", sizeof(dx_fields_profile) / sizeof(dx_fields_profile[0]), dx_fields_profile },
     { L"MarketMaker", sizeof(dx_fields_market_maker) / sizeof(dx_fields_market_maker[0]), dx_fields_market_maker },
+    { L"Order#IST", sizeof(dx_fields_order) / sizeof(dx_fields_order[0]), dx_fields_order },
     { L"TimeAndSale", sizeof(dx_fields_time_and_sale) / sizeof(dx_fields_time_and_sale[0]), dx_fields_time_and_sale }
 };
 
