@@ -1,0 +1,171 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{98DF2375-3C29-4806-A832-7C666F8BF54C}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\build\$(Configuration)\$(ProjectName)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\build\$(Configuration)\$(ProjectName)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectName)d</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(SolutionDir)\include;$(SolutionDir)\include\pthreads;$(SolutionDir)\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;WIN32;_DEBUG;_WINDOWS;_USRDLL;DXFEED_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <BrowseInformation>true</BrowseInformation>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>CompileAsC</CompileAs>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(ProjectName)d.dll</OutputFile>
+      <AdditionalLibraryDirectories>$(SolutionDir)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ModuleDefinitionFile>$(ProjectDir)\$(ProjectName)d.def</ModuleDefinitionFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(OutDir)$(ProjectName)d.pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+      <ImportLibrary>$(OutDir)$(ProjectName)d.lib</ImportLibrary>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+    <Bscmake>
+      <OutputFile>$(OutDir)$(ProjectName)d.bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <AdditionalIncludeDirectories>$(SolutionDir)\include;$(SolutionDir)\include\pthreads;$(SolutionDir)\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;WIN32;NDEBUG;_WINDOWS;_USRDLL;DXFEED_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <CompileAs>CompileAsC</CompileAs>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
+      <AdditionalLibraryDirectories>$(SolutionDir)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ModuleDefinitionFile>$(ProjectDir)\$(ProjectName).def</ModuleDefinitionFile>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(OutDir)$(ProjectName).pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+      <ImportLibrary>$(OutDir)$(ProjectName).lib</ImportLibrary>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="src\ClientMessageProcessor.c" />
+    <ClCompile Include="src\ConnectionContextData.c" />
+    <ClCompile Include="src\DXAlgorithms.c" />
+    <ClCompile Include="src\DXErrorCodes.c" />
+    <ClCompile Include="src\DXErrorHandling.c" />
+    <ClCompile Include="src\DXFeed.c" />
+    <ClCompile Include="src\DXMemory.c" />
+    <ClCompile Include="src\DXNetwork.c" />
+    <ClCompile Include="src\DXPMessageData.c" />
+    <ClCompile Include="src\DXSockets.c" />
+    <ClCompile Include="src\DXThreads.c" />
+    <ClCompile Include="src\EventData.c" />
+    <ClCompile Include="src\EventSubscription.c" />
+    <ClCompile Include="src\Logger.c" />
+    <ClCompile Include="src\RecordTranscoder.c" />
+    <ClCompile Include="src\ServerMessageProcessor.c" />
+    <ClCompile Include="src\TaskQueue.c" />
+    <ClCompile Include="src\Win32.c" />
+    <ClCompile Include="src\BufferedInput.c" />
+    <ClCompile Include="src\BufferedIOCommon.c" />
+    <ClCompile Include="src\BufferedOutput.c" />
+    <ClCompile Include="src\DataStructures.c" />
+    <ClCompile Include="src\Decimal.c" />
+    <ClCompile Include="src\RecordBuffers.c" />
+    <ClCompile Include="src\RecordFieldSetters.c" />
+    <ClCompile Include="src\SymbolCodec.c" />
+    <ClCompile Include="src\TestParser.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="DXFeed.def" />
+    <None Include="DXFeedd.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\ClientMessageProcessor.h" />
+    <ClInclude Include="src\ConnectionContextData.h" />
+    <ClInclude Include="src\DXAlgorithms.h" />
+    <ClInclude Include="src\DXErrorHandling.h" />
+    <ClInclude Include="src\DXMemory.h" />
+    <ClInclude Include="src\DXNetwork.h" />
+    <ClInclude Include="src\DXPMessageData.h" />
+    <ClInclude Include="src\DXSockets.h" />
+    <ClInclude Include="src\DXThreads.h" />
+    <ClInclude Include="src\EventSubscription.h" />
+    <ClInclude Include="src\Logger.h" />
+    <ClInclude Include="src\PrimitiveTypes.h" />
+    <ClInclude Include="src\RecordTranscoder.h" />
+    <ClInclude Include="src\ServerMessageProcessor.h" />
+    <ClInclude Include="src\TaskQueue.h" />
+    <ClInclude Include="src\BufferedInput.h" />
+    <ClInclude Include="src\BufferedIOCommon.h" />
+    <ClInclude Include="src\BufferedOutput.h" />
+    <ClInclude Include="src\DataStructures.h" />
+    <ClInclude Include="src\Decimal.h" />
+    <ClInclude Include="src\RecordBuffers.h" />
+    <ClInclude Include="src\RecordFieldSetters.h" />
+    <ClInclude Include="src\SymbolCodec.h" />
+    <ClInclude Include="include\DXErrorCodes.h" />
+    <ClInclude Include="include\DXFeed.h" />
+    <ClInclude Include="include\DXTypes.h" />
+    <ClInclude Include="include\EventData.h" />
+    <ClInclude Include="src\RecordData.h" />
+    <ClInclude Include="include\pthreads\pthread.h" />
+    <ClInclude Include="include\pthreads\sched.h" />
+    <ClInclude Include="include\pthreads\semaphore.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -1,0 +1,161 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Common">
+      <UniqueIdentifier>{698098e5-c644-4f3d-9902-b0a450ea567a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\Headers">
+      <UniqueIdentifier>{9d9c4ba9-ef1b-42e8-81af-0743adfa95e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\Sources">
+      <UniqueIdentifier>{6c32c257-3a64-4875-8aa5-3efb7de11e7d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Event subscription">
+      <UniqueIdentifier>{07db7214-539f-410d-afe8-c6e2c87b3061}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Parser">
+      <UniqueIdentifier>{58b5a3b2-3e05-4cd4-ae56-9d8bf5adbfef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Parser\Headers">
+      <UniqueIdentifier>{8c2aada9-3645-481d-8c55-b792dfbaac3c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Parser\Sources">
+      <UniqueIdentifier>{a7847eb6-68af-4565-bf79-c013e868e81f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="EventSubscriptionTest.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UnitTests.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ConnectionContextData.c">
+      <Filter>Common\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\DXAlgorithms.c">
+      <Filter>Common\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\DXErrorCodes.c">
+      <Filter>Common\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\DXErrorHandling.c">
+      <Filter>Common\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\DXMemory.c">
+      <Filter>Common\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\DXNetwork.c">
+      <Filter>Common\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\DXPMessageData.c">
+      <Filter>Common\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\DXSockets.c">
+      <Filter>Common\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\DXThreads.c">
+      <Filter>Common\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\EventData.c">
+      <Filter>Common\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\TaskQueue.c">
+      <Filter>Common\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Win32.c">
+      <Filter>Common\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\EventSubscription.c">
+      <Filter>Event subscription</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\BufferedInput.c">
+      <Filter>Parser\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\BufferedIOCommon.c">
+      <Filter>Parser\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\BufferedOutput.c">
+      <Filter>Parser\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ClientMessageProcessor.c">
+      <Filter>Parser\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\DataStructures.c">
+      <Filter>Parser\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Decimal.c">
+      <Filter>Parser\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Logger.c">
+      <Filter>Parser\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\RecordBuffers.c">
+      <Filter>Parser\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\RecordFieldSetters.c">
+      <Filter>Parser\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\RecordTranscoder.c">
+      <Filter>Parser\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ServerMessageProcessor.c">
+      <Filter>Parser\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\SymbolCodec.c">
+      <Filter>Parser\Sources</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\DXAlgorithms.h">
+      <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\DXErrorCodes.h">
+      <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\DXErrorHandling.h">
+      <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\DXMemory.h">
+      <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\DXThreads.h">
+      <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\EventData.h">
+      <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\PrimitiveTypes.h">
+      <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\TaskQueue.h">
+      <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\EventSubscription.h">
+      <Filter>Event subscription</Filter>
+    </ClInclude>
+    <ClInclude Include="EventSubscriptionTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\EventDataFieldSetters.h">
+      <Filter>Parser\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\EventRecordBuffers.h">
+      <Filter>Parser\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Logger.h">
+      <Filter>Parser\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\SymbolCodec.h">
+      <Filter>Parser\Headers</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

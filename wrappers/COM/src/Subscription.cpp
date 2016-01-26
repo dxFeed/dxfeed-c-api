@@ -340,8 +340,8 @@ void DXSubscription::ClearListeners () {
     
     for (; it != itEnd; ++it) {
         (*it)->Release();
-        *it = NULL;
     }
+	m_listeners.clear();
 }
 
 /* -------------------------------------------------------------------------- */

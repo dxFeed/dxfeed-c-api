@@ -152,7 +152,7 @@ static const dx_record_info_t g_records[dx_rid_count] = {
     { L"Fundamental", sizeof(dx_fields_fundamental) / sizeof(dx_fields_fundamental[0]), dx_fields_fundamental },
     { L"Profile", sizeof(dx_fields_profile) / sizeof(dx_fields_profile[0]), dx_fields_profile },
     { L"MarketMaker", sizeof(dx_fields_market_maker) / sizeof(dx_fields_market_maker[0]), dx_fields_market_maker },
-    { L"Order#IST", sizeof(dx_fields_order) / sizeof(dx_fields_order[0]), dx_fields_order },
+    { L"Order#NTV", sizeof(dx_fields_order) / sizeof(dx_fields_order[0]), dx_fields_order },
     { L"TimeAndSale", sizeof(dx_fields_time_and_sale) / sizeof(dx_fields_time_and_sale[0]), dx_fields_time_and_sale }
 };
 
