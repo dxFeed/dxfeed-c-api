@@ -347,7 +347,7 @@ bool dx_transcode_market_maker_to_order_bid (dx_record_transcoder_connection_con
 
         cur_event->exchange_code = exchange_code;
         cur_event->market_maker = dx_decode_from_integer(cur_record->mm_id);
-        cur_event->time = cur_record->mmbid_time * 1000L;
+        cur_event->time = ((dxf_long_t)cur_record->mmbid_time) * 1000L;
         cur_event->price = cur_record->mmbid_price;
         cur_event->size = cur_record->mmbid_size;
         cur_event->index = (((dxf_long_t)exchange_code << 32) | ((dxf_long_t)cur_record->mm_id) | 0x8200000000000000L);
@@ -385,7 +385,7 @@ bool dx_transcode_market_maker_to_order_ask (dx_record_transcoder_connection_con
 
         cur_event->exchange_code = exchange_code;
         cur_event->market_maker = dx_decode_from_integer(cur_record->mm_id);
-        cur_event->time = cur_record->mmask_time * 1000L;
+        cur_event->time = ((dxf_long_t)cur_record->mmask_time) * 1000L;
         cur_event->price = cur_record->mmask_price;
         cur_event->size = cur_record->mmask_size;
 		cur_event->index = (DX_ORDER_SOURCE_AGGREGATE_ASK << DX_ORDER_SOURCE_ID_SHIFT) | ((dxf_long_t)exchange << DX_ORDER_EXCHANGE_SHIFT) | ((dxf_long_t)cur_record->mm_id);
