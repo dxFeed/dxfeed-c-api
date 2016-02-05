@@ -753,17 +753,17 @@ static bool dx_read_symbol (dx_server_msg_proc_connection_context_t* context) {
         context->last_symbol = NULL;
 	} else if (r > 0) {
         context->last_cipher = 0;      
-        context->last_symbol = dx_create_string_src(context->symbol_buffer);
+        context->last_symbol = dx_create_string_src_len(context->symbol_buffer, r);
         
         if (context->last_symbol == NULL) {
             return false;
         }
 	} else {
 		if (context->symbol_result != NULL) {
-        context->last_symbol  = context->symbol_result;            
-        context->symbol_result = NULL;
+			context->last_symbol = context->symbol_result;
+			context->symbol_result = NULL;
         
-        context->last_cipher = dx_encode_symbol_name(context->last_symbol );
+			context->last_cipher = dx_encode_symbol_name(context->last_symbol);
 		} 
 		if (context->last_cipher == 0 && context->last_symbol == NULL) 
 			return dx_set_error_code(dx_pec_invalid_symbol);

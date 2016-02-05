@@ -313,15 +313,10 @@ bool dx_codec_read_symbol (void* bicc, dxf_char_t* buffer, int buffer_length, OU
         
         CHECKED_CALL_2(dx_read_compact_long, bicc, &length);
         
-        if (length < -1 || length > INT_MAX) {
+        if (length < 0 || length > INT_MAX) {
             return dx_set_error_code(dx_pcec_invalid_symbol_length);
         }
-        if (length == -1) {
-            *result = NULL;
-            *cipher_result = 0;
-            
-            return true;
-        } else if (length == 0) {
+        if (length == 0) {
             *result = dx_malloc(1);
             
             if (*result == NULL) {
@@ -345,13 +340,15 @@ bool dx_codec_read_symbol (void* bicc, dxf_char_t* buffer, int buffer_length, OU
             dxf_int_t code_point;
             
             if (!dx_read_utf_char(bicc, &code_point)) {
-                dx_free(symbol_buffer);
+				if (length > buffer_length)
+					dx_free(symbol_buffer);
                 
                 return false;
             }
             
             if (code_point > 0xFFFF) {
-                dx_free(symbol_buffer);
+				if (length > buffer_length)
+					dx_free(symbol_buffer);
                 
                 return dx_set_error_code(dx_utfec_bad_utf_data_format_server);
             }
