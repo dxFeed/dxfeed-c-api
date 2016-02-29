@@ -1,0 +1,42 @@
+
+# /
+/bin
+/build
+/ipch
+/*.suo
+/*.user
+/*.ncb
+/*.sdf
+
+# /tests/APITest/
+/tests/APITest/*.user
+
+# /tests/CommandLineSample/
+/tests/CommandLineSample/*.user
+
+# /tests/ConnectionTest/
+/tests/ConnectionTest/*.user
+
+# /tests/FullTest/
+/tests/FullTest/*.user
+
+# /tests/LastEventTest/
+/tests/LastEventTest/*.user
+
+# /tests/PerformanceTest/
+/tests/PerformanceTest/*.user
+
+# /tests/QuoteTableTest/
+/tests/QuoteTableTest/*.user
+
+# /tests/SampleTest/
+/tests/SampleTest/*.user
+
+# /tests/UnitTests/
+/tests/UnitTests/*.user
+
+# /wrappers/COM/samples/C++/
+/wrappers/COM/samples/C++/*.user
+
+# /wrappers/COM/src/
+/wrappers/COM/src/*.user
