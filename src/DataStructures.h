@@ -84,6 +84,20 @@ typedef struct {
     const dx_field_info_t* fields;
 } dx_record_info_t;
 
+//TODO: new type
+typedef struct {
+    dxf_string_t name;
+    int field_count;
+    const dx_field_info_t* fields;
+} dx_new_record_info_t;
+
+//TODO: new type
+typedef struct {
+    dx_new_record_info_t* elements;
+    int size;
+    int capacity;
+} dx_record_list_t;
+
 /* -------------------------------------------------------------------------- */
 /*
  *	Record functions
@@ -101,5 +115,10 @@ int dx_find_record_field (const dx_record_info_t* record_info, dxf_const_string_
 dxf_char_t dx_get_record_exchange_code (dx_record_id_t record_id);
 
 int* dx_get_record_server_support_states (void* context);
+
+
+/* Functions for working with records list */
+int dx_add_or_get_record_id(dxf_const_string_t name);
+void dx_free_records_list();
 
 #endif /* DATA_STRUCTURES_H_INCLUDED */

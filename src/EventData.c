@@ -19,6 +19,7 @@
 
 #include "EventData.h"
 #include "DXAlgorithms.h"
+//#include "DataStructures.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -110,6 +111,12 @@ typedef struct {
     int param_count;
 } dx_event_subscription_param_roster;
 
+typedef struct {
+    dx_event_subscription_param_t* elements;
+    int size;
+    int capacity;
+} dx_event_subscription_param_list_t;
+
 static const dx_event_subscription_param_roster g_event_param_rosters[dx_eid_count] = {
     { g_trade_subscription_params, sizeof(g_trade_subscription_params) / sizeof(g_trade_subscription_params[0]) },
     { g_quote_subscription_params, sizeof(g_quote_subscription_params) / sizeof(g_quote_subscription_params[0]) },
@@ -120,9 +127,83 @@ static const dx_event_subscription_param_roster g_event_param_rosters[dx_eid_cou
 };
 
 int dx_get_event_subscription_params (dx_event_id_t event_id, OUT const dx_event_subscription_param_t** params) {
+
     *params = g_event_param_rosters[event_id].params;
     
     return g_event_param_rosters[event_id].param_count;
+}
+
+bool dx_add_subscription_param_to_list(dx_event_subscription_param_list_t* param_list, 
+    dxf_const_string_t record_name, dx_subscription_type_t subscription_type) {
+    bool failed = false;
+    int record_id = dx_add_or_get_record_id(record_name);
+    dx_event_subscription_param_t param = { record_id, subscription_type };
+    DX_ARRAY_INSERT(*param_list, dx_event_subscription_param_t, param, param_list->size, dx_capacity_manager_halfer, failed);
+    return failed;
+}
+
+int dx_get_order_subscription_params(OUT dx_event_subscription_param_list_t* param_list) {
+    dxf_char_t ch = 'A';
+    dxf_const_string_t quote_tmpl = L"Quote&";
+    dx_add_subscription_param_to_list(&param_list, L"Quote", dx_st_ticker);
+    dx_add_subscription_param_to_list(&param_list, L"MarketMaker", dx_st_history);
+    dx_add_subscription_param_to_list(&param_list, L"Order", dx_st_history);
+    dx_add_subscription_param_to_list(&param_list, L"Order#NTV", dx_st_history);
+
+    //fill quotes Quote&A..Quote&Z
+    for (; ch <= 'Z'; ch++) {
+        int suffix_index = dx_string_length(quote_tmpl);
+        dxf_string_t record_name = dx_create_string(suffix_index + 1);
+        dx_copy_string(record_name, quote_tmpl);
+        record_name[suffix_index] = ch;
+        dx_add_subscription_param_to_list(&param_list, record_name, dx_st_ticker);
+        dx_free(record_name);
+    }
+
+    //TODO: add order subscriptions
+}
+
+int dx_get_trade_subscription_params(OUT dx_event_subscription_param_list_t* param_list) {
+    dxf_char_t ch = 'A';
+    dxf_const_string_t trade_tmpl = L"Trade&";
+    dx_add_subscription_param_to_list(&param_list, L"Trade", dx_st_ticker);
+
+    //fill trades Trade&A..Trade&Z
+    for (; ch <= 'Z'; ch++) {
+        int suffix_index = dx_string_length(trade_tmpl);
+        dxf_string_t record_name = dx_create_string(suffix_index + 1);
+        dx_copy_string(record_name, trade_tmpl);
+        record_name[suffix_index] = ch;
+        dx_add_subscription_param_to_list(&param_list, record_name, dx_st_ticker);
+        dx_free(record_name);
+    }
+}
+
+int dx_get_event_subscription_params2(dx_event_id_t event_id, OUT dx_event_subscription_param_list_t* params) {
+    dx_event_subscription_param_list_t param_list = { NULL, 0, 0 };
+    switch (event_id) {
+    case dx_eid_trade:
+        dx_get_trade_subscription_params(&param_list);
+        break;
+    case dx_eid_quote:
+        dx_add_subscription_param_to_list(&param_list, L"Quote", dx_st_ticker);
+        break;
+    case dx_eid_summary:
+        dx_add_subscription_param_to_list(&param_list, L"Fundamental", dx_st_ticker);
+        break;
+    case dx_eid_profile:
+        dx_add_subscription_param_to_list(&param_list, L"Profile", dx_st_ticker);
+        break;
+    case dx_eid_order:
+        dx_get_order_subscription_params(&param_list);
+        break;
+    case dx_eid_time_and_sale:
+        dx_add_subscription_param_to_list(&param_list, L"TimeAndSale", dx_st_stream);
+        break;
+    }
+
+    *params = param_list;
+    return param_list.size;
 }
     
 /* -------------------------------------------------------------------------- */

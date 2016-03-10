@@ -162,6 +162,9 @@ static const dx_record_info_t g_records[dx_rid_count] = {
    so all the record exchange codes are set to zero */
 static dxf_char_t const g_record_exchange_codes[dx_rid_count] = { 0 };
 
+//TODO: list, add freeing
+static dx_record_list_t g_records_list = {NULL, 0};
+
 /* -------------------------------------------------------------------------- */
 /*
  *	Data structures connection context
@@ -367,4 +370,89 @@ dxf_char_t dx_get_record_exchange_code (dx_record_id_t record_id) {
 
 int* dx_get_record_server_support_states (void* context) {
     return CTX(context)->record_server_support_states;
+}
+
+/* -------------------------------------------------------------------------- */
+
+/* Functions for working with records list */
+
+bool dx_add_record_to_list(dx_new_record_info_t record, int index) {
+    bool failed = false;
+    dx_new_record_info_t new_record;
+    new_record.name = dx_create_string_src(record.name);
+    new_record.field_count = record.field_count;
+    new_record.fields = record.fields;
+
+    DX_ARRAY_INSERT(g_records_list, dx_new_record_info_t, new_record, index, dx_capacity_manager_halfer, failed);
+
+    return failed;
+}
+
+//TODO: temp array, will be replace with g_records
+static const dxf_const_string_t g_records_names[dx_rid_count] = {
+    L"Trade", 
+    L"Quote", 
+    L"Fundamental", 
+    L"Profile", 
+    L"MarketMaker", 
+    L"Order", 
+    L"TimeAndSale"
+};
+
+dx_record_id_t dx_string_to_record_type(dxf_const_string_t name)
+{
+    if (dx_compare_strings_num(name, g_records_names[dx_rid_trade], dx_string_length(g_records_names[dx_rid_trade])) == 0)
+        return dx_rid_trade;
+    else if (dx_compare_strings_num(name, g_records_names[dx_rid_quote], dx_string_length(g_records_names[dx_rid_quote])) == 0)
+        return dx_rid_quote;
+    else if (dx_compare_strings_num(name, g_records_names[dx_rid_fundamental], dx_string_length(g_records_names[dx_rid_fundamental])) == 0)
+        return dx_rid_fundamental;
+    else if (dx_compare_strings_num(name, g_records_names[dx_rid_profile], dx_string_length(g_records_names[dx_rid_profile])) == 0)
+        return dx_rid_profile;
+    else if (dx_compare_strings_num(name, g_records_names[dx_rid_market_maker], dx_string_length(g_records_names[dx_rid_market_maker])) == 0)
+        return dx_rid_market_maker;
+    else if (dx_compare_strings_num(name, g_records_names[dx_rid_order], dx_string_length(g_records_names[dx_rid_order])) == 0)
+        return dx_rid_order;
+    else if (dx_compare_strings_num(name, g_records_names[dx_rid_time_and_sale], dx_string_length(g_records_names[dx_rid_time_and_sale])) == 0)
+        return dx_rid_time_and_sale;
+    else
+        return dx_rid_invalid;
+}
+
+#define DX_RECORDS_COMPARATOR(l, r) (dx_compare_strings(l.name, r.name))
+
+int dx_add_or_get_record_id(dxf_const_string_t name) {
+    bool failed = false;
+    bool found = false;
+    int index = -1;
+    dx_new_record_info_t record;
+    dx_record_id_t record_type_id;
+
+    record_type_id = dx_string_to_record_type(name);
+    if (record_type_id == dx_rid_invalid) {
+        return -1;
+    }
+
+    record.name = dx_create_string_src(name);
+    record.field_count = g_records[record_type_id].field_count, 
+    record.fields = g_records[record_type_id].fields;
+    
+    if (g_records_list.elements == NULL) {
+        failed = dx_add_record_to_list(record, 0);
+    } else {
+        DX_ARRAY_BINARY_SEARCH(g_records_list.elements, 0, g_records_list.size, record, DX_RECORDS_COMPARATOR, found, index);
+        if (!found) {
+            failed = dx_add_record_to_list(record, index);
+        }
+    }
+
+    dx_free(record.name);
+
+    if (failed)
+        return -1;
+    return index;
+}
+
+void dx_free_records_list() {
+    //TODO: free name of each element and each element
 }

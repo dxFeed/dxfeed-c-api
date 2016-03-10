@@ -7,6 +7,7 @@
 /*.user
 /*.ncb
 /*.sdf
+/*.opensdf
 
 # /tests/APITest/
 /tests/APITest/*.user
@@ -40,3 +41,5 @@
 
 # /wrappers/COM/src/
 /wrappers/COM/src/*.user
+
+log.log
