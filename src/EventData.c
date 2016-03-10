@@ -19,7 +19,8 @@
 
 #include "EventData.h"
 #include "DXAlgorithms.h"
-//#include "DataStructures.h"
+#include "DXErrorHandling.h"
+#include "Logger.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -128,6 +129,11 @@ static const dx_event_subscription_param_roster g_event_param_rosters[dx_eid_cou
 
 int dx_get_event_subscription_params (dx_event_id_t event_id, OUT const dx_event_subscription_param_t** params) {
 
+    /*temp*/
+    dx_event_subscription_param_list_t param_list;
+    dx_get_event_subscription_params2(event_id, &param_list);
+    dx_free(param_list.elements);
+
     *params = g_event_param_rosters[event_id].params;
     
     return g_event_param_rosters[event_id].param_count;
@@ -136,19 +142,28 @@ int dx_get_event_subscription_params (dx_event_id_t event_id, OUT const dx_event
 bool dx_add_subscription_param_to_list(dx_event_subscription_param_list_t* param_list, 
     dxf_const_string_t record_name, dx_subscription_type_t subscription_type) {
     bool failed = false;
+    dx_event_subscription_param_t param;
     int record_id = dx_add_or_get_record_id(record_name);
-    dx_event_subscription_param_t param = { record_id, subscription_type };
+    if (record_id < 0) {
+        dx_set_last_error(dx_esec_invalid_subscr_id);
+        return false;
+    }
+
+    param.record_id = record_id;
+    param.subscription_type = subscription_type;
     DX_ARRAY_INSERT(*param_list, dx_event_subscription_param_t, param, param_list->size, dx_capacity_manager_halfer, failed);
-    return failed;
+    if (failed)
+        dx_set_last_error(dx_sec_not_enough_memory);
+    return !failed;
 }
 
-int dx_get_order_subscription_params(OUT dx_event_subscription_param_list_t* param_list) {
+bool dx_get_order_subscription_params(OUT dx_event_subscription_param_list_t* param_list) {
     dxf_char_t ch = 'A';
     dxf_const_string_t quote_tmpl = L"Quote&";
-    dx_add_subscription_param_to_list(&param_list, L"Quote", dx_st_ticker);
-    dx_add_subscription_param_to_list(&param_list, L"MarketMaker", dx_st_history);
-    dx_add_subscription_param_to_list(&param_list, L"Order", dx_st_history);
-    dx_add_subscription_param_to_list(&param_list, L"Order#NTV", dx_st_history);
+    CHECKED_CALL_3(dx_add_subscription_param_to_list, param_list, L"Quote", dx_st_ticker);
+    CHECKED_CALL_3(dx_add_subscription_param_to_list, param_list, L"MarketMaker", dx_st_history);
+    CHECKED_CALL_3(dx_add_subscription_param_to_list, param_list, L"Order", dx_st_history);
+    CHECKED_CALL_3(dx_add_subscription_param_to_list, param_list, L"Order#NTV", dx_st_history);
 
     //fill quotes Quote&A..Quote&Z
     for (; ch <= 'Z'; ch++) {
@@ -156,17 +171,19 @@ int dx_get_order_subscription_params(OUT dx_event_subscription_param_list_t* par
         dxf_string_t record_name = dx_create_string(suffix_index + 1);
         dx_copy_string(record_name, quote_tmpl);
         record_name[suffix_index] = ch;
-        dx_add_subscription_param_to_list(&param_list, record_name, dx_st_ticker);
+        CHECKED_CALL_3(dx_add_subscription_param_to_list, param_list, record_name, dx_st_ticker);
         dx_free(record_name);
     }
 
     //TODO: add order subscriptions
+
+    return true;
 }
 
-int dx_get_trade_subscription_params(OUT dx_event_subscription_param_list_t* param_list) {
+bool dx_get_trade_subscription_params(OUT dx_event_subscription_param_list_t* param_list) {
     dxf_char_t ch = 'A';
     dxf_const_string_t trade_tmpl = L"Trade&";
-    dx_add_subscription_param_to_list(&param_list, L"Trade", dx_st_ticker);
+    CHECKED_CALL_3(dx_add_subscription_param_to_list, param_list, L"Trade", dx_st_ticker);
 
     //fill trades Trade&A..Trade&Z
     for (; ch <= 'Z'; ch++) {
@@ -174,32 +191,40 @@ int dx_get_trade_subscription_params(OUT dx_event_subscription_param_list_t* par
         dxf_string_t record_name = dx_create_string(suffix_index + 1);
         dx_copy_string(record_name, trade_tmpl);
         record_name[suffix_index] = ch;
-        dx_add_subscription_param_to_list(&param_list, record_name, dx_st_ticker);
+        CHECKED_CALL_3(dx_add_subscription_param_to_list, param_list, record_name, dx_st_ticker);
         dx_free(record_name);
     }
+
+    return true;
 }
 
 int dx_get_event_subscription_params2(dx_event_id_t event_id, OUT dx_event_subscription_param_list_t* params) {
+    bool result = true;
     dx_event_subscription_param_list_t param_list = { NULL, 0, 0 };
     switch (event_id) {
     case dx_eid_trade:
-        dx_get_trade_subscription_params(&param_list);
+        result = dx_get_trade_subscription_params(&param_list);
         break;
     case dx_eid_quote:
-        dx_add_subscription_param_to_list(&param_list, L"Quote", dx_st_ticker);
+        result = dx_add_subscription_param_to_list(&param_list, L"Quote", dx_st_ticker);
         break;
     case dx_eid_summary:
-        dx_add_subscription_param_to_list(&param_list, L"Fundamental", dx_st_ticker);
+        result = dx_add_subscription_param_to_list(&param_list, L"Fundamental", dx_st_ticker);
         break;
     case dx_eid_profile:
-        dx_add_subscription_param_to_list(&param_list, L"Profile", dx_st_ticker);
+        result = dx_add_subscription_param_to_list(&param_list, L"Profile", dx_st_ticker);
         break;
     case dx_eid_order:
-        dx_get_order_subscription_params(&param_list);
+        result = dx_get_order_subscription_params(&param_list);
         break;
     case dx_eid_time_and_sale:
-        dx_add_subscription_param_to_list(&param_list, L"TimeAndSale", dx_st_stream);
+        result = dx_add_subscription_param_to_list(&param_list, L"TimeAndSale", dx_st_stream);
         break;
+    }
+
+    if (!result) {
+        dx_logging_last_error();
+        dx_logging_info(L"Unable to create subscription to event %d (%s)", event_id, dx_event_type_to_string(event_id));
     }
 
     *params = param_list;

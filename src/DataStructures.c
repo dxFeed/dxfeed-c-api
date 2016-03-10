@@ -23,6 +23,7 @@
 #include "BufferedIOCommon.h"
 #include "DXAlgorithms.h"
 #include "ConnectionContextData.h"
+#include "DXErrorHandling.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -385,7 +386,10 @@ bool dx_add_record_to_list(dx_new_record_info_t record, int index) {
 
     DX_ARRAY_INSERT(g_records_list, dx_new_record_info_t, new_record, index, dx_capacity_manager_halfer, failed);
 
-    return failed;
+    if (failed)
+        dx_set_last_error(dx_sec_not_enough_memory);
+
+    return !failed;
 }
 
 //TODO: temp array, will be replace with g_records
@@ -422,7 +426,7 @@ dx_record_id_t dx_string_to_record_type(dxf_const_string_t name)
 #define DX_RECORDS_COMPARATOR(l, r) (dx_compare_strings(l.name, r.name))
 
 int dx_add_or_get_record_id(dxf_const_string_t name) {
-    bool failed = false;
+    bool result = true;
     bool found = false;
     int index = -1;
     dx_new_record_info_t record;
@@ -438,18 +442,22 @@ int dx_add_or_get_record_id(dxf_const_string_t name) {
     record.fields = g_records[record_type_id].fields;
     
     if (g_records_list.elements == NULL) {
-        failed = dx_add_record_to_list(record, 0);
+        index = 0;
+        result = dx_add_record_to_list(record, index);
     } else {
-        DX_ARRAY_BINARY_SEARCH(g_records_list.elements, 0, g_records_list.size, record, DX_RECORDS_COMPARATOR, found, index);
+        DX_ARRAY_SEARCH(g_records_list.elements, 0, g_records_list.size, record, DX_RECORDS_COMPARATOR, false, found, index);
         if (!found) {
-            failed = dx_add_record_to_list(record, index);
+            result = dx_add_record_to_list(record, index);
         }
     }
 
     dx_free(record.name);
 
-    if (failed)
+    if (!result) {
+        dx_logging_last_error();
         return -1;
+    }
+        
     return index;
 }
 
