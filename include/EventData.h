@@ -145,11 +145,24 @@ typedef enum {
 } dx_subscription_type_t;
 
 typedef struct {
-    dx_record_id_t record_id;
+    int record_id;
     dx_subscription_type_t subscription_type;
 } dx_event_subscription_param_t;
 
-int dx_get_event_subscription_params (dx_event_id_t event_id, OUT const dx_event_subscription_param_t** params);
+typedef struct {
+    dx_event_subscription_param_t* elements;
+    int size;
+    int capacity;
+} dx_event_subscription_param_list_t;
+
+//int dx_get_event_subscription_params (dx_event_id_t event_id, OUT const dx_event_subscription_param_t** params);
+
+/*
+* Returns the list of subscription params. Fills records list according to event_id.
+*
+* You need to call dx_free(params.elements) to free resources.
+*/
+int dx_get_event_subscription_params2(dx_event_id_t event_id, OUT dx_event_subscription_param_list_t* params);
 
 /* -------------------------------------------------------------------------- */
 /*

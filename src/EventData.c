@@ -112,12 +112,6 @@ typedef struct {
     int param_count;
 } dx_event_subscription_param_roster;
 
-typedef struct {
-    dx_event_subscription_param_t* elements;
-    int size;
-    int capacity;
-} dx_event_subscription_param_list_t;
-
 static const dx_event_subscription_param_roster g_event_param_rosters[dx_eid_count] = {
     { g_trade_subscription_params, sizeof(g_trade_subscription_params) / sizeof(g_trade_subscription_params[0]) },
     { g_quote_subscription_params, sizeof(g_quote_subscription_params) / sizeof(g_quote_subscription_params[0]) },
@@ -127,17 +121,12 @@ static const dx_event_subscription_param_roster g_event_param_rosters[dx_eid_cou
     { g_time_and_sale_subscription_params, sizeof(g_time_and_sale_subscription_params) / sizeof(g_time_and_sale_subscription_params[0]) }
 };
 
-int dx_get_event_subscription_params (dx_event_id_t event_id, OUT const dx_event_subscription_param_t** params) {
-
-    /*temp*/
-    dx_event_subscription_param_list_t param_list;
-    dx_get_event_subscription_params2(event_id, &param_list);
-    dx_free(param_list.elements);
-
-    *params = g_event_param_rosters[event_id].params;
-    
-    return g_event_param_rosters[event_id].param_count;
-}
+//int dx_get_event_subscription_params (dx_event_id_t event_id, OUT const dx_event_subscription_param_t** params) {
+//
+//    *params = g_event_param_rosters[event_id].params;
+//    
+//    return g_event_param_rosters[event_id].param_count;
+//}
 
 bool dx_add_subscription_param_to_list(dx_event_subscription_param_list_t* param_list, 
     dxf_const_string_t record_name, dx_subscription_type_t subscription_type) {
@@ -198,6 +187,11 @@ bool dx_get_trade_subscription_params(OUT dx_event_subscription_param_list_t* pa
     return true;
 }
 
+/*
+ * Returns the list of subscription params. Fills records list according to event_id.
+ *
+ * You need to call dx_free(params.elements) to free resources.
+*/
 int dx_get_event_subscription_params2(dx_event_id_t event_id, OUT dx_event_subscription_param_list_t* params) {
     bool result = true;
     dx_event_subscription_param_list_t param_list = { NULL, 0, 0 };

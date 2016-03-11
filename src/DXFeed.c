@@ -320,6 +320,11 @@ DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dxf_const
 
         return DXF_FAILURE;
     }
+
+    // describe records from subscription
+    if (!dx_send_record_description(connection, false)) {
+        return DXF_FAILURE;
+    }
     
     return DXF_SUCCESS;
 }

@@ -282,7 +282,7 @@ static bool dx_write_record_field (void* bocc, const dx_field_info_t* field) {
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_write_event_record (void* bocc, const dx_record_info_t* record, dx_record_id_t record_id) {
+static bool dx_write_event_record (void* bocc, const dx_new_record_info_t* record, int record_id) {
     int field_index = 0;
 
     CHECKED_CALL_2(dx_write_compact_int, bocc, (dxf_int_t)record_id);
@@ -299,9 +299,16 @@ static bool dx_write_event_record (void* bocc, const dx_record_info_t* record, d
 /* -------------------------------------------------------------------------- */
 
 bool dx_write_event_records (void* bocc) {
-    dx_record_id_t record_id = dx_rid_begin;
+    /*dx_record_id_t record_id = dx_rid_begin;
 
     for (; record_id < dx_rid_count; ++record_id) {
+        CHECKED_CALL_3(dx_write_event_record, bocc, dx_get_record_by_id(record_id), record_id);
+    }*/
+
+    int record_id = 0;
+    int count = dx_get_records_list_count();
+
+    for (; record_id < count; ++record_id) {
         CHECKED_CALL_3(dx_write_event_record, bocc, dx_get_record_by_id(record_id), record_id);
     }
 
@@ -337,12 +344,14 @@ bool dx_get_event_server_support (dxf_connection_t connection, int event_types, 
 
     for (; eid < dx_eid_count; ++eid) {
         if (event_types & DX_EVENT_BIT_MASK(eid)) {
-            const dx_event_subscription_param_t* subscr_params = NULL;
+            //const dx_event_subscription_param_t* subscr_params = NULL;
             int j = 0;
-            int param_count = dx_get_event_subscription_params(eid, &subscr_params);
+            //int param_count = dx_get_event_subscription_params(eid, &subscr_params);
+            dx_event_subscription_param_list_t subscr_params;
+            int param_count = dx_get_event_subscription_params2(eid, &subscr_params);
 
             for (; j < param_count; ++j) {
-                const dx_event_subscription_param_t* cur_param = subscr_params + j;
+                const dx_event_subscription_param_t* cur_param = subscr_params.elements + j;
                 dx_message_type_t msg_type = dx_get_subscription_message_type(unsubscribe ? dx_at_remove_subscription : dx_at_add_subscription, cur_param->subscription_type);
                 dx_message_support_status_t msg_res;
 
@@ -383,6 +392,8 @@ bool dx_get_event_server_support (dxf_connection_t connection, int event_types, 
             if (halt) {
                 break;
             }
+
+            dx_free(subscr_params.elements);
         }
     }
     
@@ -518,12 +529,14 @@ bool dx_subscribe_symbols_to_events (dxf_connection_t connection,
 
         for (; eid < dx_eid_count; ++eid) {
             if (event_types & DX_EVENT_BIT_MASK(eid)) {
-                const dx_event_subscription_param_t* subscr_params = NULL;
+                //const dx_event_subscription_param_t* subscr_params = NULL;
                 int j = 0;
-                int param_count = dx_get_event_subscription_params(eid, &subscr_params);
+                //int param_count = dx_get_event_subscription_params(eid, &subscr_params);
+                dx_event_subscription_param_list_t subscr_params;
+                int param_count = dx_get_event_subscription_params2(eid, &subscr_params);
 
                 for (; j < param_count; ++j) {
-                    const dx_event_subscription_param_t* cur_param = subscr_params + j;
+                    const dx_event_subscription_param_t* cur_param = subscr_params.elements + j;
                     dx_message_type_t msg_type = dx_get_subscription_message_type(unsubscribe ? dx_at_remove_subscription : dx_at_add_subscription, cur_param->subscription_type);
 
                     if (!dx_subscribe_symbol_to_record(connection, msg_type, symbols[i],
@@ -532,6 +545,8 @@ bool dx_subscribe_symbols_to_events (dxf_connection_t connection,
                         return false;
                     }
                 }
+
+                dx_free(subscr_params.elements);
             }
         }
     }

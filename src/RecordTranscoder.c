@@ -517,9 +517,9 @@ static const dx_record_transcoder_t g_record_transcoders[dx_rid_count] = {
 /* -------------------------------------------------------------------------- */
 
 bool dx_transcode_record_data (dxf_connection_t connection,
-                               dx_record_id_t record_id, dxf_ubyte_t exchange, dxf_const_string_t symbol_name, dxf_int_t symbol_cipher,
+                               int record_id, dxf_ubyte_t exchange, dxf_const_string_t symbol_name, dxf_int_t symbol_cipher,
                                void* record_buffer, int record_count) {
     dx_record_transcoder_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_record_transcoder, NULL);
-    
-    return g_record_transcoders[record_id](context, exchange, symbol_name, symbol_cipher, record_buffer, record_count);
+    const dx_new_record_info_t* record_info = dx_get_record_by_id(record_id);
+    return g_record_transcoders[record_info->type_id](context, exchange, symbol_name, symbol_cipher, record_buffer, record_count);
 }

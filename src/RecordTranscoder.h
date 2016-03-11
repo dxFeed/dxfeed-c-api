@@ -35,7 +35,7 @@
 /* -------------------------------------------------------------------------- */
 
 bool dx_transcode_record_data (dxf_connection_t connection,
-                               dx_record_id_t record_id, dxf_ubyte_t exchange, dxf_const_string_t symbol_name, dxf_int_t symbol_cipher,
+                               int record_id, dxf_ubyte_t exchange, dxf_const_string_t symbol_name, dxf_int_t symbol_cipher,
                                void* record_buffer, int record_count);
 
 #endif /* RECORD_TRANSCODER_H_INCLUDED */

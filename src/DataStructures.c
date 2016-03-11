@@ -24,6 +24,7 @@
 #include "DXAlgorithms.h"
 #include "ConnectionContextData.h"
 #include "DXErrorHandling.h"
+#include "Logger.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -147,21 +148,22 @@ static const int g_record_field_counts[dx_rid_count] = {
     sizeof(dx_fields_time_and_sale) / sizeof(dx_fields_time_and_sale[0])
 };
 
-static const dx_record_info_t g_records[dx_rid_count] = {
+static const dx_record_type_t g_record_types[dx_rid_count] = {
     { L"Trade", sizeof(dx_fields_trade) / sizeof(dx_fields_trade[0]), dx_fields_trade },
     { L"Quote", sizeof(dx_fields_quote) / sizeof(dx_fields_quote[0]), dx_fields_quote },
     { L"Fundamental", sizeof(dx_fields_fundamental) / sizeof(dx_fields_fundamental[0]), dx_fields_fundamental },
     { L"Profile", sizeof(dx_fields_profile) / sizeof(dx_fields_profile[0]), dx_fields_profile },
     { L"MarketMaker", sizeof(dx_fields_market_maker) / sizeof(dx_fields_market_maker[0]), dx_fields_market_maker },
-    { L"Order#NTV", sizeof(dx_fields_order) / sizeof(dx_fields_order[0]), dx_fields_order },
+    { L"Order", sizeof(dx_fields_order) / sizeof(dx_fields_order[0]), dx_fields_order },
     { L"TimeAndSale", sizeof(dx_fields_time_and_sale) / sizeof(dx_fields_time_and_sale[0]), dx_fields_time_and_sale }
 };
 
 /* In the Java code, the exchange code is determined by the record name: it's the last symbol of
    the record name if the second last symbol is '&', otherwise it's zero.
    Here we don't have any exchange code semantics in the record names (and neither the Java code does),
-   so all the record exchange codes are set to zero */
-static dxf_char_t const g_record_exchange_codes[dx_rid_count] = { 0 };
+   so all the record exchange codes are set to zero 
+   TODO: dynamic memory allocation!!!!!*/
+static dxf_char_t const g_record_exchange_codes[1000] = { 0 };
 
 //TODO: list, add freeing
 static dx_record_list_t g_records_list = {NULL, 0};
@@ -176,7 +178,7 @@ static dx_record_list_t g_records_list = {NULL, 0};
 
 typedef struct {
     dxf_int_t server_record_id;
-    dx_record_id_t local_record_id;
+    int local_record_id;
 } dx_record_id_pair_t;
 
 typedef struct {
@@ -186,7 +188,7 @@ typedef struct {
 } dx_record_id_map_t;
 
 typedef struct {
-    dx_record_id_t frequent_ids[RECORD_ID_VECTOR_SIZE];
+    int frequent_ids[RECORD_ID_VECTOR_SIZE];
     dx_record_id_map_t id_map;
 } dx_server_local_record_id_map_t;
 
@@ -194,7 +196,9 @@ typedef struct {
     dxf_connection_t connection;
     
     dx_server_local_record_id_map_t record_id_map;
-    int record_server_support_states[dx_rid_count];
+    //int record_server_support_states[dx_rid_count];
+    //TODO: dynamic memory allocation
+    int record_server_support_states[1000];
 } dx_data_structures_connection_context_t;
 
 #define CTX(context) \
@@ -267,7 +271,7 @@ void* dx_get_data_structures_connection_context (dxf_connection_t connection) {
 #define RECORD_ID_PAIR_COMPARATOR(left, right) \
     DX_NUMERIC_COMPARATOR((left).server_record_id, (right).server_record_id)
 
-dx_record_id_t dx_get_record_id (void* context, dxf_int_t server_record_id) {
+int dx_get_record_id (void* context, dxf_int_t server_record_id) {
     dx_server_local_record_id_map_t* record_id_map = &(CTX(context)->record_id_map);
         
     if (server_record_id >= 0 && server_record_id < RECORD_ID_VECTOR_SIZE) {
@@ -282,7 +286,7 @@ dx_record_id_t dx_get_record_id (void* context, dxf_int_t server_record_id) {
         DX_ARRAY_SEARCH(record_id_map->id_map.elements, 0, record_id_map->id_map.size, dummy, RECORD_ID_PAIR_COMPARATOR, true, found, idx);
         
         if (!found) {
-            return dx_rid_invalid;
+            return -1;
         }
         
         return record_id_map->id_map.elements[idx].local_record_id;
@@ -291,7 +295,7 @@ dx_record_id_t dx_get_record_id (void* context, dxf_int_t server_record_id) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_assign_server_record_id (void* context, dx_record_id_t record_id, dxf_int_t server_record_id) {
+bool dx_assign_server_record_id (void* context, int record_id, dxf_int_t server_record_id) {
     dx_server_local_record_id_map_t* record_id_map = &(CTX(context)->record_id_map);
         
     if (server_record_id >= 0 && server_record_id < RECORD_ID_VECTOR_SIZE) {
@@ -325,27 +329,47 @@ bool dx_assign_server_record_id (void* context, dx_record_id_t record_id, dxf_in
 
 /* -------------------------------------------------------------------------- */
 
-const dx_record_info_t* dx_get_record_by_id (dx_record_id_t record_id) {
-	return &g_records[record_id];
+//const dx_record_info_t* dx_get_record_by_id (dx_record_id_t record_id) {
+//	return &g_records[record_id];
+//}
+//
+///* -------------------------------------------------------------------------- */
+//
+//dx_record_id_t dx_get_record_id_by_name (dxf_const_string_t record_name) {
+//    dx_record_id_t record_id = dx_rid_begin;
+//
+//    for (; record_id < dx_rid_count; ++record_id) {
+//        if (dx_compare_strings(g_records[record_id].name, record_name) == 0) {
+//            return record_id;
+//        }
+//    }
+//    
+//    return dx_rid_invalid;
+//}
+
+/* -------------------------------------------------------------------------- */
+
+const dx_new_record_info_t* dx_get_record_by_id(int record_id) {
+    return &g_records_list.elements[record_id];
 }
 
 /* -------------------------------------------------------------------------- */
 
-dx_record_id_t dx_get_record_id_by_name (dxf_const_string_t record_name) {
-    dx_record_id_t record_id = dx_rid_begin;
+int dx_get_record_id_by_name(dxf_const_string_t record_name) {
+    int record_id = 0;
 
-    for (; record_id < dx_rid_count; ++record_id) {
-        if (dx_compare_strings(g_records[record_id].name, record_name) == 0) {
+    for (; record_id < g_records_list.size; ++record_id) {
+        if (dx_compare_strings(g_records_list.elements[record_id].name, record_name) == 0) {
             return record_id;
         }
     }
-    
-    return dx_rid_invalid;
+
+    return -1;
 }
 
 /* -------------------------------------------------------------------------- */
 
-int dx_find_record_field (const dx_record_info_t* record_info, dxf_const_string_t field_name,
+int dx_find_record_field (const dx_new_record_info_t* record_info, dxf_const_string_t field_name,
                           dxf_int_t field_type) {
     int cur_field_index = 0;
     dx_field_info_t* fields = (dx_field_info_t*)record_info->fields;
@@ -363,7 +387,7 @@ int dx_find_record_field (const dx_record_info_t* record_info, dxf_const_string_
 
 /* -------------------------------------------------------------------------- */
 
-dxf_char_t dx_get_record_exchange_code (dx_record_id_t record_id) {
+dxf_char_t dx_get_record_exchange_code (int record_id) {
     return g_record_exchange_codes[record_id];
 }
 
@@ -383,6 +407,7 @@ bool dx_add_record_to_list(dx_new_record_info_t record, int index) {
     new_record.name = dx_create_string_src(record.name);
     new_record.field_count = record.field_count;
     new_record.fields = record.fields;
+    new_record.type_id = record.type_id;
 
     DX_ARRAY_INSERT(g_records_list, dx_new_record_info_t, new_record, index, dx_capacity_manager_halfer, failed);
 
@@ -392,32 +417,21 @@ bool dx_add_record_to_list(dx_new_record_info_t record, int index) {
     return !failed;
 }
 
-//TODO: temp array, will be replace with g_records
-static const dxf_const_string_t g_records_names[dx_rid_count] = {
-    L"Trade", 
-    L"Quote", 
-    L"Fundamental", 
-    L"Profile", 
-    L"MarketMaker", 
-    L"Order", 
-    L"TimeAndSale"
-};
-
 dx_record_id_t dx_string_to_record_type(dxf_const_string_t name)
 {
-    if (dx_compare_strings_num(name, g_records_names[dx_rid_trade], dx_string_length(g_records_names[dx_rid_trade])) == 0)
+    if (dx_compare_strings_num(name, g_record_types[dx_rid_trade].name, dx_string_length(g_record_types[dx_rid_trade].name)) == 0)
         return dx_rid_trade;
-    else if (dx_compare_strings_num(name, g_records_names[dx_rid_quote], dx_string_length(g_records_names[dx_rid_quote])) == 0)
+    else if (dx_compare_strings_num(name, g_record_types[dx_rid_quote].name, dx_string_length(g_record_types[dx_rid_quote].name)) == 0)
         return dx_rid_quote;
-    else if (dx_compare_strings_num(name, g_records_names[dx_rid_fundamental], dx_string_length(g_records_names[dx_rid_fundamental])) == 0)
+    else if (dx_compare_strings_num(name, g_record_types[dx_rid_fundamental].name, dx_string_length(g_record_types[dx_rid_fundamental].name)) == 0)
         return dx_rid_fundamental;
-    else if (dx_compare_strings_num(name, g_records_names[dx_rid_profile], dx_string_length(g_records_names[dx_rid_profile])) == 0)
+    else if (dx_compare_strings_num(name, g_record_types[dx_rid_profile].name, dx_string_length(g_record_types[dx_rid_profile].name)) == 0)
         return dx_rid_profile;
-    else if (dx_compare_strings_num(name, g_records_names[dx_rid_market_maker], dx_string_length(g_records_names[dx_rid_market_maker])) == 0)
+    else if (dx_compare_strings_num(name, g_record_types[dx_rid_market_maker].name, dx_string_length(g_record_types[dx_rid_market_maker].name)) == 0)
         return dx_rid_market_maker;
-    else if (dx_compare_strings_num(name, g_records_names[dx_rid_order], dx_string_length(g_records_names[dx_rid_order])) == 0)
+    else if (dx_compare_strings_num(name, g_record_types[dx_rid_order].name, dx_string_length(g_record_types[dx_rid_order].name)) == 0)
         return dx_rid_order;
-    else if (dx_compare_strings_num(name, g_records_names[dx_rid_time_and_sale], dx_string_length(g_records_names[dx_rid_time_and_sale])) == 0)
+    else if (dx_compare_strings_num(name, g_record_types[dx_rid_time_and_sale].name, dx_string_length(g_record_types[dx_rid_time_and_sale].name)) == 0)
         return dx_rid_time_and_sale;
     else
         return dx_rid_invalid;
@@ -434,12 +448,15 @@ int dx_add_or_get_record_id(dxf_const_string_t name) {
 
     record_type_id = dx_string_to_record_type(name);
     if (record_type_id == dx_rid_invalid) {
+        //TODO: make other error code
+        dx_set_last_error(dx_ec_invalid_func_param);
         return -1;
     }
 
     record.name = dx_create_string_src(name);
-    record.field_count = g_records[record_type_id].field_count, 
-    record.fields = g_records[record_type_id].fields;
+    record.field_count = g_record_types[record_type_id].field_count;
+    record.fields = g_record_types[record_type_id].fields;
+    record.type_id = record_type_id;
     
     if (g_records_list.elements == NULL) {
         index = 0;
@@ -463,4 +480,8 @@ int dx_add_or_get_record_id(dxf_const_string_t name) {
 
 void dx_free_records_list() {
     //TODO: free name of each element and each element
+}
+
+int dx_get_records_list_count() {
+    return g_records_list.size;
 }
