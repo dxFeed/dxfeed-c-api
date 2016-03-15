@@ -189,8 +189,10 @@ bool RECORD_TRANSCODER_NAME(dx_trade_t) (dx_record_transcoder_connection_context
     
     for (; i < record_count; ++i) {
         dxf_trade_t* cur_event = event_buffer + i;
+        dxf_char_t exchange_code = (suffix == NULL ? 0 : suffix[0]);
         
         cur_event->time *= 1000L;
+        cur_event->exchange_code = exchange_code;
     }
     
     return dx_process_event_data(context->connection, dx_eid_trade, symbol_name, symbol_cipher, event_buffer, record_count);
