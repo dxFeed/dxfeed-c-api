@@ -90,6 +90,7 @@ typedef struct {
     int field_count;
     const dx_field_info_t* fields;
     dx_record_id_t type_id;
+    dxf_char_t suffix[RECORD_SUFFIX_SIZE];
 } dx_new_record_info_t;
 
 //TODO: new type

@@ -162,7 +162,7 @@ static const dx_record_type_t g_record_types[dx_rid_count] = {
    the record name if the second last symbol is '&', otherwise it's zero.
    Here we don't have any exchange code semantics in the record names (and neither the Java code does),
    so all the record exchange codes are set to zero 
-   TODO: dynamic memory allocation!!!!!*/
+   TODO: dynamic memory allocation!!!!! or remove*/
 static dxf_char_t const g_record_exchange_codes[1000] = { 0 };
 
 //TODO: list, add freeing
@@ -408,6 +408,7 @@ bool dx_add_record_to_list(dx_new_record_info_t record, int index) {
     new_record.field_count = record.field_count;
     new_record.fields = record.fields;
     new_record.type_id = record.type_id;
+    dx_memcpy(new_record.suffix, record.suffix, sizeof(record.suffix));
 
     DX_ARRAY_INSERT(g_records_list, dx_new_record_info_t, new_record, index, dx_capacity_manager_halfer, failed);
 
@@ -437,6 +438,47 @@ dx_record_id_t dx_string_to_record_type(dxf_const_string_t name)
         return dx_rid_invalid;
 }
 
+bool init_record_info(dx_new_record_info_t *record, dxf_const_string_t name) {
+    dx_record_id_t record_type_id;
+    dx_record_type_t record_type;
+    int suffix_index;
+    int name_length = dx_string_length(name);
+
+    record_type_id = dx_string_to_record_type(name);
+    if (record_type_id == dx_rid_invalid) {
+        //TODO: make other error code
+        dx_set_last_error(dx_ec_invalid_func_param);
+        return false;
+    }
+    record_type = g_record_types[record_type_id];
+
+    record->name = dx_create_string_src(name);
+    record->field_count = g_record_types[record_type_id].field_count;
+    record->fields = g_record_types[record_type_id].fields;
+    record->type_id = record_type_id;
+    dx_memset(record->suffix, '\0', sizeof(record->suffix));
+
+    suffix_index = dx_string_length(record_type.name);
+    if (name_length < suffix_index + 1)
+        return true;
+    if (record_type_id == dx_rid_order) {
+        if (record->name[suffix_index] != L'#')
+            return true;
+        dx_copy_string_len(record->suffix, &record->name[suffix_index + 1], name_length - suffix_index);
+    } else if (record_type_id == dx_rid_trade || record_type_id == dx_rid_quote) {
+        if (record->name[suffix_index] != L'&')
+            return true;
+        dx_copy_string_len(record->suffix, &record->name[suffix_index + 1], 1);
+    }
+
+    return true;
+}
+
+void deinit_record_info(dx_new_record_info_t *record) {
+    dx_free(record->name);
+    record->name = NULL;
+}
+
 #define DX_RECORDS_COMPARATOR(l, r) (dx_compare_strings(l.name, r.name))
 
 int dx_add_or_get_record_id(dxf_const_string_t name) {
@@ -444,19 +486,9 @@ int dx_add_or_get_record_id(dxf_const_string_t name) {
     bool found = false;
     int index = -1;
     dx_new_record_info_t record;
-    dx_record_id_t record_type_id;
 
-    record_type_id = dx_string_to_record_type(name);
-    if (record_type_id == dx_rid_invalid) {
-        //TODO: make other error code
-        dx_set_last_error(dx_ec_invalid_func_param);
+    if (!init_record_info(&record, name))
         return -1;
-    }
-
-    record.name = dx_create_string_src(name);
-    record.field_count = g_record_types[record_type_id].field_count;
-    record.fields = g_record_types[record_type_id].fields;
-    record.type_id = record_type_id;
     
     if (g_records_list.elements == NULL) {
         index = 0;
@@ -468,7 +500,7 @@ int dx_add_or_get_record_id(dxf_const_string_t name) {
         }
     }
 
-    dx_free(record.name);
+    deinit_record_info(&record);
 
     if (!result) {
         dx_logging_last_error();

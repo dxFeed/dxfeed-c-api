@@ -113,8 +113,11 @@ void listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_d
 		    wprintf(L"index=0x%llX, side=%i, level=%i, time=",
 		            orders[i].index, orders[i].side, orders[i].level);
 					print_timestamp(orders[i].time);
-			wprintf(L", exchange code=%c, market maker=%ls, price=%f, size=%lld}\n",
+			wprintf(L", exchange code=%c, market maker=%ls, price=%f, size=%lld",
 		            orders[i].exchange_code, orders[i].market_maker, orders[i].price, orders[i].size);
+            if (wcslen(orders[i].source) > 0)
+                wprintf(L", source=%s", orders[i].source);
+            wprintf(L"}\n");
 		}
     }
     

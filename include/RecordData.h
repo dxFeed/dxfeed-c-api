@@ -49,6 +49,7 @@ typedef enum {
 } dx_record_id_t;
 //TODO: possible need to rename to 'dx_record_type_id_t'
 
+//TODO: remove
 static const dxf_int_t DX_RECORD_ID_SUFFIX_MASK  = 0xFF00;
 static const dxf_int_t DX_RECORD_ID_SUFFIX_SHIFT = 8;
 
