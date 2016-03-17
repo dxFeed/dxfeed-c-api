@@ -132,7 +132,7 @@ bool dx_add_subscription_param_to_list(dxf_connection_t connection, dx_event_sub
                                         dxf_const_string_t record_name, dx_subscription_type_t subscription_type) {
     bool failed = false;
     dx_event_subscription_param_t param;
-    int record_id = dx_add_or_get_record_id(connection, record_name);
+    dx_record_id_t record_id = dx_add_or_get_record_id(connection, record_name);
     if (record_id < 0) {
         dx_set_last_error(dx_esec_invalid_subscr_id);
         return false;

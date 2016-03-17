@@ -192,7 +192,7 @@ const dx_buffer_manager_collection_t g_buffer_managers[dx_rid_count] = {
 };
 
 void dx_clear_record_buffers (dx_event_record_buffer_t* record_buffers) {
-    dx_record_id_t record_id = dx_rid_begin;
+    dx_record_type_id_t record_id = dx_rid_begin;
     
     for (; record_id < dx_rid_count; ++record_id) {
         if (record_buffers[record_id].buffer != NULL) {

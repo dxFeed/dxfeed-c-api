@@ -177,7 +177,7 @@ static dx_record_list_t g_records_list = {NULL, 0, 0};
 
 typedef struct {
     dxf_int_t server_record_id;
-    int local_record_id;
+    dx_record_id_t local_record_id;
 } dx_record_id_pair_t;
 
 typedef struct {
@@ -187,7 +187,7 @@ typedef struct {
 } dx_record_id_map_t;
 
 typedef struct {
-    int frequent_ids[RECORD_ID_VECTOR_SIZE];
+    dx_record_id_t frequent_ids[RECORD_ID_VECTOR_SIZE];
     dx_record_id_map_t id_map;
 } dx_server_local_record_id_map_t;
 
@@ -291,13 +291,13 @@ void* dx_get_data_structures_connection_context (dxf_connection_t connection) {
 #define RECORD_ID_PAIR_COMPARATOR(left, right) \
     DX_NUMERIC_COMPARATOR((left).server_record_id, (right).server_record_id)
 
-int dx_get_record_id (void* context, dxf_int_t server_record_id) {
+dx_record_id_t dx_get_record_id(void* context, dxf_int_t server_record_id) {
     dx_server_local_record_id_map_t* record_id_map = &(CTX(context)->record_id_map);
         
     if (server_record_id >= 0 && server_record_id < RECORD_ID_VECTOR_SIZE) {
         return record_id_map->frequent_ids[server_record_id];
     } else {
-        int idx;
+        dx_record_id_t idx;
         bool found = false;
         dx_record_id_pair_t dummy;
         
@@ -306,7 +306,7 @@ int dx_get_record_id (void* context, dxf_int_t server_record_id) {
         DX_ARRAY_SEARCH(record_id_map->id_map.elements, 0, record_id_map->id_map.size, dummy, RECORD_ID_PAIR_COMPARATOR, true, found, idx);
         
         if (!found) {
-            return -1;
+            return DX_RECORD_ID_INVALID;
         }
         
         return record_id_map->id_map.elements[idx].local_record_id;
@@ -315,7 +315,7 @@ int dx_get_record_id (void* context, dxf_int_t server_record_id) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_assign_server_record_id (void* context, int record_id, dxf_int_t server_record_id) {
+bool dx_assign_server_record_id(void* context, dx_record_id_t record_id, dxf_int_t server_record_id) {
     dx_server_local_record_id_map_t* record_id_map = &(CTX(context)->record_id_map);
         
     if (server_record_id >= 0 && server_record_id < RECORD_ID_VECTOR_SIZE) {
@@ -349,14 +349,14 @@ bool dx_assign_server_record_id (void* context, int record_id, dxf_int_t server_
 
 /* -------------------------------------------------------------------------- */
 
-const dx_new_record_info_t* dx_get_record_by_id(int record_id) {
+const dx_new_record_info_t* dx_get_record_by_id(dx_record_id_t record_id) {
     return &g_records_list.elements[record_id];
 }
 
 /* -------------------------------------------------------------------------- */
 
-int dx_get_record_id_by_name(dxf_const_string_t record_name) {
-    int record_id = 0;
+dx_record_id_t dx_get_record_id_by_name(dxf_const_string_t record_name) {
+    dx_record_id_t record_id = 0;
 
     for (; record_id < g_records_list.size; ++record_id) {
         if (dx_compare_strings(g_records_list.elements[record_id].name, record_name) == 0) {
@@ -364,7 +364,7 @@ int dx_get_record_id_by_name(dxf_const_string_t record_name) {
         }
     }
 
-    return -1;
+    return DX_RECORD_ID_INVALID;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -387,13 +387,13 @@ int dx_find_record_field (const dx_new_record_info_t* record_info, dxf_const_str
 
 /* -------------------------------------------------------------------------- */
 
-dxf_char_t dx_get_record_exchange_code (int record_id) {
+dxf_char_t dx_get_record_exchange_code(dx_record_id_t record_id) {
     if (record_id < 0 || record_id > g_records_list.size)
         return '\0';
     return g_records_list.elements[record_id].exchange_code;
 }
 
-bool dx_set_record_exchange_code(int record_id, dxf_char_t exchange_code) {
+bool dx_set_record_exchange_code(dx_record_id_t record_id, dxf_char_t exchange_code) {
     if (record_id < 0 || record_id > g_records_list.size)
         return false;
     g_records_list.elements[record_id].exchange_code = exchange_code;
@@ -407,7 +407,7 @@ dx_record_server_support_state_list_t* dx_get_record_server_support_states(void*
 }
 
 bool dx_get_record_server_support_state_value(dx_record_server_support_state_list_t* states, 
-                                              int record_id, 
+    dx_record_id_t record_id,
                                               OUT dx_record_server_support_state_t **value) {
     if (record_id < 0 || record_id >= states->size)
         return false;
@@ -419,7 +419,7 @@ bool dx_get_record_server_support_state_value(dx_record_server_support_state_lis
 
 /* Functions for working with records list */
 
-bool dx_add_record_to_list(dxf_connection_t connection, dx_new_record_info_t record, int index) {
+bool dx_add_record_to_list(dxf_connection_t connection, dx_new_record_info_t record, dx_record_id_t index) {
     bool failed = false;
     dx_new_record_info_t new_record;
     dx_record_server_support_state_t new_state;
@@ -459,7 +459,7 @@ bool dx_add_record_to_list(dxf_connection_t connection, dx_new_record_info_t rec
     return true;
 }
 
-dx_record_id_t dx_string_to_record_type(dxf_const_string_t name)
+dx_record_type_id_t dx_string_to_record_type(dxf_const_string_t name)
 {
     if (dx_compare_strings_num(name, g_record_types[dx_rid_trade].name, dx_string_length(g_record_types[dx_rid_trade].name)) == 0)
         return dx_rid_trade;
@@ -480,7 +480,7 @@ dx_record_id_t dx_string_to_record_type(dxf_const_string_t name)
 }
 
 bool init_record_info(dx_new_record_info_t *record, dxf_const_string_t name) {
-    dx_record_id_t record_type_id;
+    dx_record_type_id_t record_type_id;
     dx_record_type_t record_type;
     int suffix_index;
     int name_length = dx_string_length(name);
@@ -523,14 +523,14 @@ void clear_record_info(dx_new_record_info_t *record) {
 
 #define DX_RECORDS_COMPARATOR(l, r) (dx_compare_strings(l.name, r.name))
 
-int dx_add_or_get_record_id(dxf_connection_t connection, dxf_const_string_t name) {
+dx_record_id_t dx_add_or_get_record_id(dxf_connection_t connection, dxf_const_string_t name) {
     bool result = true;
     bool found = false;
-    int index = -1;
+    dx_record_id_t index = DX_RECORD_ID_INVALID;
     dx_new_record_info_t record;
 
     if (!init_record_info(&record, name))
-        return -1;
+        return DX_RECORD_ID_INVALID;
     
     if (g_records_list.elements == NULL) {
         index = 0;
@@ -546,14 +546,14 @@ int dx_add_or_get_record_id(dxf_connection_t connection, dxf_const_string_t name
 
     if (!result) {
         dx_logging_last_error();
-        return -1;
+        return DX_RECORD_ID_INVALID;
     }
         
     return index;
 }
 
 void dx_clear_records_list() {
-    int i = 0;
+    dx_record_id_t i = 0;
     dx_new_record_info_t *record = g_records_list.elements;
     for (; i < g_records_list.size; i++) {
         clear_record_info(record);

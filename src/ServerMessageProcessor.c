@@ -207,7 +207,7 @@ DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_server_msg_processor) {
 /* -------------------------------------------------------------------------- */
 
 bool dx_create_field_digest (dx_server_msg_proc_connection_context_t* context,
-                             int record_id, const dx_new_record_info_t* record_info,
+                             dx_record_id_t record_id, const dx_new_record_info_t* record_info,
                              OUT dx_field_digest_ptr_t* field_digest) {
     dxf_string_t field_name = NULL;
     dxf_int_t field_type;
@@ -263,7 +263,7 @@ bool dx_create_field_digest (dx_server_msg_proc_connection_context_t* context,
 /* -------------------------------------------------------------------------- */
 
 bool dx_digest_unsupported_fields (dx_server_msg_proc_connection_context_t* context,
-                                   int record_id, const dx_new_record_info_t* record_info) {
+                                   dx_record_id_t record_id, const dx_new_record_info_t* record_info) {
     dx_record_digest_t* record_digest = NULL;
     int field_index = 0;
     
@@ -333,7 +333,7 @@ void dx_clear_record_digests (dx_server_msg_proc_connection_context_t* context) 
     }*/
 
     //TODO: change clearing when dynamically memory allocation will be implemented
-    int record_id = 0;
+    dx_record_id_t record_id = 0;
     int count = dx_get_records_list_count();
     for (; record_id < count; ++record_id) {
         dx_clear_record_digest(&(context->record_digests[record_id]));
@@ -802,7 +802,7 @@ static bool dx_read_symbol (dx_server_msg_proc_connection_context_t* context) {
     }
 
 bool dx_read_records (dx_server_msg_proc_connection_context_t* context,
-                      int record_id, void* record_buffer) {
+                      dx_record_id_t record_id, void* record_buffer) {
 	int i = 0;
 	dxf_byte_t read_byte;
 	dxf_short_t read_short;
@@ -923,7 +923,7 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 
 	while (dx_get_in_buffer_position(context->bicc) < dx_get_in_buffer_limit(context->bicc)) {
 		void* record_buffer = NULL;
-		int record_id;
+        dx_record_id_t record_id;
         //TODO: warning exchange may be cleared!
 		dxf_const_string_t suffix;
 		int record_count = 0;
@@ -1031,7 +1031,7 @@ bool dx_process_describe_records (dx_server_msg_proc_connection_context_t* conte
         dx_record_digest_t* record_digest = NULL;
         int i = 0;
         //dx_record_id_t rid = dx_rid_invalid;
-        int rid = -1;
+        dx_record_id_t rid = DX_RECORD_ID_INVALID;
         dx_record_digest_t dummy;
         
         CHECKED_CALL_2(dx_read_compact_int, context->bicc, &record_id);
@@ -1050,8 +1050,7 @@ bool dx_process_describe_records (dx_server_msg_proc_connection_context_t* conte
         
         dx_free(record_name);
         
-        //if (rid == dx_rid_invalid) {
-        if (rid < 0) {
+        if (rid == DX_RECORD_ID_INVALID) {
             record_digest = &dummy;
         } else {
             CHECKED_CALL_3(dx_assign_server_record_id, context->dscc, rid, record_id);

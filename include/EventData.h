@@ -148,7 +148,7 @@ typedef enum {
 } dx_subscription_type_t;
 
 typedef struct {
-    int record_id;
+    dx_record_id_t record_id;
     dx_subscription_type_t subscription_type;
 } dx_event_subscription_param_t;
 
