@@ -172,7 +172,7 @@ dxf_event_data_t dx_get_event_data_buffer (dx_record_transcoder_connection_conte
 typedef bool (*dx_record_transcoder_t) (dx_record_transcoder_connection_context_t* context,
                                         dxf_const_string_t suffix, dxf_const_string_t symbol_name,
 										dxf_int_t symbol_cipher, void* record_buffer,
-										int record_count);
+										int record_count, int record_id);
     
 /* -------------------------------------------------------------------------- */
 /*
@@ -183,7 +183,7 @@ typedef bool (*dx_record_transcoder_t) (dx_record_transcoder_connection_context_
 bool RECORD_TRANSCODER_NAME(dx_trade_t) (dx_record_transcoder_connection_context_t* context,
                                          dxf_const_string_t suffix,
                                          dxf_const_string_t symbol_name, dxf_int_t symbol_cipher,
-                                         void* record_buffer, int record_count) {
+                                         void* record_buffer, int record_count, int record_id) {
     dxf_trade_t* event_buffer = (dxf_trade_t*)record_buffer;
     int i = 0;
     
@@ -193,6 +193,7 @@ bool RECORD_TRANSCODER_NAME(dx_trade_t) (dx_record_transcoder_connection_context
         
         cur_event->time *= 1000L;
         cur_event->exchange_code = exchange_code;
+        dx_set_record_exchange_code(record_id, exchange_code);
     }
     
     return dx_process_event_data(context->connection, dx_eid_trade, symbol_name, symbol_cipher, event_buffer, record_count);
@@ -268,19 +269,22 @@ bool dx_transcode_quote_to_order_ask (dx_record_transcoder_connection_context_t*
 bool dx_transcode_quote (dx_record_transcoder_connection_context_t* context,
                          dxf_const_string_t suffix,
                          dxf_const_string_t symbol_name, dxf_int_t symbol_cipher,
-                         dx_quote_t* record_buffer, int record_count) {
+                         dx_quote_t* record_buffer, int record_count, int record_id) {
     dxf_quote_t* event_buffer = (dxf_quote_t*)record_buffer;
     int i = 0;
+    dxf_char_t exchange_code = (suffix == NULL ? '/0' : suffix[0]);
 
     for (; i < record_count; ++i) {
         dxf_quote_t* cur_event = event_buffer + i;
 
         cur_event->bid_time *= 1000L;
 		if (cur_event->bid_exchange_code == 0)
-            cur_event->bid_exchange_code = suffix[0];
+            cur_event->bid_exchange_code = exchange_code;
         cur_event->ask_time *= 1000L;
 		if (cur_event->ask_exchange_code == 0)
-            cur_event->ask_exchange_code = suffix[0];
+            cur_event->ask_exchange_code = exchange_code;
+        //TODO: what code we need to set?
+        dx_set_record_exchange_code(record_id, cur_event->bid_exchange_code);
     }
 
     return dx_process_event_data(context->connection, dx_eid_quote, symbol_name, symbol_cipher, event_buffer, record_count);
@@ -291,7 +295,7 @@ bool dx_transcode_quote (dx_record_transcoder_connection_context_t* context,
 bool RECORD_TRANSCODER_NAME(dx_quote_t) (dx_record_transcoder_connection_context_t* context,
                                          dxf_const_string_t suffix,
                                          dxf_const_string_t symbol_name, dxf_int_t symbol_cipher,
-                                         void* record_buffer, int record_count) {
+                                         void* record_buffer, int record_count, int record_id) {
     /* note that it's important to call the order transcoders before the quote one,
        because the quote transcoder alters some values right within the same record buffer,
        which would affect the order transcoding if it took place before it. */
@@ -304,7 +308,7 @@ bool RECORD_TRANSCODER_NAME(dx_quote_t) (dx_record_transcoder_connection_context
         return false;
     }
     
-    if (!dx_transcode_quote(context, suffix, symbol_name, symbol_cipher, (dx_quote_t*)record_buffer, record_count)) {
+    if (!dx_transcode_quote(context, suffix, symbol_name, symbol_cipher, (dx_quote_t*)record_buffer, record_count, record_id)) {
         return false;
     }
     
@@ -316,7 +320,7 @@ bool RECORD_TRANSCODER_NAME(dx_quote_t) (dx_record_transcoder_connection_context
 bool RECORD_TRANSCODER_NAME(dx_fundamental_t) (dx_record_transcoder_connection_context_t* context,
                                                dxf_const_string_t suffix,
                                                dxf_const_string_t symbol_name, dxf_int_t symbol_cipher,
-                                               void* record_buffer, int record_count) {
+                                               void* record_buffer, int record_count, int record_id) {
     /* no transcoding actions are required */
     
     return dx_process_event_data(context->connection, dx_eid_summary, symbol_name, symbol_cipher, record_buffer, record_count);
@@ -327,7 +331,7 @@ bool RECORD_TRANSCODER_NAME(dx_fundamental_t) (dx_record_transcoder_connection_c
 bool RECORD_TRANSCODER_NAME(dx_profile_t) (dx_record_transcoder_connection_context_t* context,
                                            dxf_const_string_t suffix,
                                            dxf_const_string_t symbol_name, dxf_int_t symbol_cipher,
-                                           void* record_buffer, int record_count) {
+                                           void* record_buffer, int record_count, int record_id) {
     /* no transcoding actions are required */
 
     return dx_process_event_data(context->connection, dx_eid_profile, symbol_name, symbol_cipher, record_buffer, record_count);
@@ -338,7 +342,7 @@ bool RECORD_TRANSCODER_NAME(dx_profile_t) (dx_record_transcoder_connection_conte
 bool dx_transcode_market_maker_to_order_bid (dx_record_transcoder_connection_context_t* context,
                                              dxf_const_string_t suffix,
                                              dxf_const_string_t symbol_name, dxf_int_t symbol_cipher,
-                                             dx_market_maker_t* record_buffer, int record_count) {
+                                             dx_market_maker_t* record_buffer, int record_count, int record_id) {
     int i = 0;
     dxf_order_t* event_buffer = (dxf_order_t*)dx_get_event_data_buffer(context, dx_eid_order, record_count);    
 
@@ -350,6 +354,7 @@ bool dx_transcode_market_maker_to_order_bid (dx_record_transcoder_connection_con
         dx_market_maker_t* cur_record = record_buffer + i;
         dxf_order_t* cur_event = event_buffer + i;
         dxf_char_t exchange_code = (dxf_char_t)cur_record->mm_exchange;
+        dx_set_record_exchange_code(record_id, exchange_code);
 
         cur_event->exchange_code = exchange_code;
         cur_event->market_maker = dx_decode_from_integer(cur_record->mm_id);
@@ -378,7 +383,7 @@ bool dx_transcode_market_maker_to_order_bid (dx_record_transcoder_connection_con
 bool dx_transcode_market_maker_to_order_ask (dx_record_transcoder_connection_context_t* context,
                                              dxf_const_string_t suffix,
                                              dxf_const_string_t symbol_name, dxf_int_t symbol_cipher,
-                                             dx_market_maker_t* record_buffer, int record_count) {
+                                             dx_market_maker_t* record_buffer, int record_count, int record_id) {
     int i = 0;
     dxf_order_t* event_buffer = (dxf_order_t*)dx_get_event_data_buffer(context, dx_eid_order, record_count);
 
@@ -390,6 +395,8 @@ bool dx_transcode_market_maker_to_order_ask (dx_record_transcoder_connection_con
         dx_market_maker_t* cur_record = record_buffer + i;
         dxf_order_t* cur_event = event_buffer + i;
         dxf_char_t exchange_code = (dxf_char_t)cur_record->mm_exchange;
+        //TODO: duplicates?
+        dx_set_record_exchange_code(record_id, exchange_code);
 
         cur_event->exchange_code = exchange_code;
         cur_event->market_maker = dx_decode_from_integer(cur_record->mm_id);
@@ -417,12 +424,12 @@ bool dx_transcode_market_maker_to_order_ask (dx_record_transcoder_connection_con
 bool RECORD_TRANSCODER_NAME(dx_market_maker_t) (dx_record_transcoder_connection_context_t* context,
                                                 dxf_const_string_t suffix,
                                                 dxf_const_string_t symbol_name, dxf_int_t symbol_cipher,
-                                                void* record_buffer, int record_count) {
-    if (!dx_transcode_market_maker_to_order_bid(context, suffix, symbol_name, symbol_cipher, (dx_market_maker_t*)record_buffer, record_count)) {
+                                                void* record_buffer, int record_count, int record_id) {
+    if (!dx_transcode_market_maker_to_order_bid(context, suffix, symbol_name, symbol_cipher, (dx_market_maker_t*)record_buffer, record_count, record_id)) {
         return false;
     }
 
-    if (!dx_transcode_market_maker_to_order_ask(context, suffix, symbol_name, symbol_cipher, (dx_market_maker_t*)record_buffer, record_count)) {
+    if (!dx_transcode_market_maker_to_order_ask(context, suffix, symbol_name, symbol_cipher, (dx_market_maker_t*)record_buffer, record_count, record_id)) {
         return false;
     }
     
@@ -450,7 +457,7 @@ dxf_long_t suffix_to_long(dxf_const_string_t suffix)
 bool RECORD_TRANSCODER_NAME(dx_order_t) (dx_record_transcoder_connection_context_t* context,
                                          dxf_const_string_t suffix,
                                          dxf_const_string_t symbol_name, dxf_int_t symbol_cipher,
-                                         void* record_buffer, int record_count) {
+                                         void* record_buffer, int record_count, int record_id) {
     int i = 0;
     dxf_order_t* event_buffer = (dxf_order_t*)dx_get_event_data_buffer(context, dx_eid_order, record_count);
 
@@ -465,6 +472,7 @@ bool RECORD_TRANSCODER_NAME(dx_order_t) (dx_record_transcoder_connection_context
         dxf_char_t exchange_code = (cur_record->flags >> 10) & 0x1F;
         if (exchange_code > 0)
             exchange_code |= 0x40;
+        dx_set_record_exchange_code(record_id, exchange_code);
 
         /* HARDCODE */
         //cur_event->index = ((((dxf_long_t)'I' << 8 | (dxf_long_t)'S') << 8 | (dxf_long_t)'T') << DX_ORDER_SOURCE_ID_SHIFT) | cur_record->index;
@@ -494,7 +502,7 @@ bool RECORD_TRANSCODER_NAME(dx_order_t) (dx_record_transcoder_connection_context
 bool RECORD_TRANSCODER_NAME(dx_time_and_sale_t) (dx_record_transcoder_connection_context_t* context,
                                                  dxf_const_string_t suffix,
                                                  dxf_const_string_t symbol_name, dxf_int_t symbol_cipher,
-                                                 void* record_buffer, int record_count) {
+                                                 void* record_buffer, int record_count, int record_id) {
     dx_time_and_sale_t* event_buffer = (dx_time_and_sale_t*)record_buffer;
     int i = 0;
 
@@ -550,9 +558,9 @@ static const dx_record_transcoder_t g_record_transcoders[dx_rid_count] = {
 /* -------------------------------------------------------------------------- */
 
 bool dx_transcode_record_data (dxf_connection_t connection,
-    int record_id, dxf_const_string_t suffix, dxf_const_string_t symbol_name, dxf_int_t symbol_cipher,
-                               void* record_buffer, int record_count) {
+                               int record_id, dxf_const_string_t suffix, dxf_const_string_t symbol_name, 
+                               dxf_int_t symbol_cipher, void* record_buffer, int record_count) {
     dx_record_transcoder_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_record_transcoder, NULL);
     const dx_new_record_info_t* record_info = dx_get_record_by_id(record_id);
-    return g_record_transcoders[record_info->type_id](context, suffix, symbol_name, symbol_cipher, record_buffer, record_count);
+    return g_record_transcoders[record_info->type_id](context, suffix, symbol_name, symbol_cipher, record_buffer, record_count, record_id);
 }

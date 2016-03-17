@@ -344,11 +344,9 @@ bool dx_get_event_server_support (dxf_connection_t connection, int event_types, 
 
     for (; eid < dx_eid_count; ++eid) {
         if (event_types & DX_EVENT_BIT_MASK(eid)) {
-            //const dx_event_subscription_param_t* subscr_params = NULL;
             int j = 0;
-            //int param_count = dx_get_event_subscription_params(eid, &subscr_params);
             dx_event_subscription_param_list_t subscr_params;
-            int param_count = dx_get_event_subscription_params2(eid, &subscr_params);
+            int param_count = dx_get_event_subscription_params2(connection, eid, &subscr_params);
 
             for (; j < param_count; ++j) {
                 const dx_event_subscription_param_t* cur_param = subscr_params.elements + j;
@@ -533,7 +531,7 @@ bool dx_subscribe_symbols_to_events (dxf_connection_t connection,
                 int j = 0;
                 //int param_count = dx_get_event_subscription_params(eid, &subscr_params);
                 dx_event_subscription_param_list_t subscr_params;
-                int param_count = dx_get_event_subscription_params2(eid, &subscr_params);
+                int param_count = dx_get_event_subscription_params2(connection, eid, &subscr_params);
 
                 for (; j < param_count; ++j) {
                     const dx_event_subscription_param_t* cur_param = subscr_params.elements + j;

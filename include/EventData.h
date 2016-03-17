@@ -165,7 +165,8 @@ typedef struct {
 *
 * You need to call dx_free(params.elements) to free resources.
 */
-int dx_get_event_subscription_params2(dx_event_id_t event_id, OUT dx_event_subscription_param_list_t* params);
+int dx_get_event_subscription_params2(dxf_connection_t connection, dx_event_id_t event_id, 
+                                      OUT dx_event_subscription_param_list_t* params);
 
 /* -------------------------------------------------------------------------- */
 /*

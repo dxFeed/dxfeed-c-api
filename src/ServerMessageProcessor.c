@@ -104,7 +104,7 @@ typedef struct {
 	dxf_string_t last_symbol;
 	dxf_int_t last_cipher;
 
-    int* record_server_support_states;
+    dx_record_server_support_state_list_t* record_server_support_states;
     //dx_record_digest_t record_digests[dx_rid_count];
     //TODO: dynamic allocation!!!!!!
     dx_record_digest_t record_digests[1000];
@@ -212,6 +212,7 @@ bool dx_create_field_digest (dx_server_msg_proc_connection_context_t* context,
     dxf_string_t field_name = NULL;
     dxf_int_t field_type;
     int field_index = INVALID_INDEX;
+    dx_record_server_support_state_t* state = NULL;
     
     CHECKED_CALL_2(dx_read_utf_string, context->bicc, &field_name);
     CHECKED_CALL_2(dx_read_compact_int, context->bicc, &field_type);
@@ -250,7 +251,10 @@ bool dx_create_field_digest (dx_server_msg_proc_connection_context_t* context,
 
     if (field_index != INVALID_INDEX) {
         (*field_digest)->setter = record_info->fields[field_index].setter;
-        context->record_server_support_states[record_id] |= INDEX_BITMASK(field_index);
+        if (!dx_get_record_server_support_state_value(context->record_server_support_states, record_id, &state)) {
+            return false;
+        }
+        *state |= INDEX_BITMASK(field_index);
     }
     
     return true;
@@ -273,8 +277,12 @@ bool dx_digest_unsupported_fields (dx_server_msg_proc_connection_context_t* cont
 
     for (; field_index < record_info->field_count; ++field_index) {
         dx_field_digest_ptr_t field_digest = NULL;
+        dx_record_server_support_state_t* state;
+        if (!dx_get_record_server_support_state_value(context->record_server_support_states, record_id, &state)) {
+            return false;
+        }
 
-        if (context->record_server_support_states[record_id] & INDEX_BITMASK(field_index)) {
+        if (*state & INDEX_BITMASK(field_index)) {
             /* the field is supported by server, skipping */
 
             continue;
@@ -353,12 +361,12 @@ bool dx_clear_server_info (dxf_connection_t connection) {
     }
     
     /* stage 1 - resetting all the field flags */
-    /*for (eid = dx_rid_begin; eid < dx_rid_count; ++eid) {
-        context->record_server_support_states[eid] = 0;        
-    }*/
-    //TODO: clear code
     for (rid = 0; rid < dx_get_records_list_count(); ++rid) {
-        context->record_server_support_states[rid] = 0;
+        dx_record_server_support_state_t* state;
+        if (!dx_get_record_server_support_state_value(context->record_server_support_states, rid, &state)) {
+            return false;
+        }
+        *state = 0;
     }
 
     /* stage 2 - freeing all the memory allocated by previous synchronization */
