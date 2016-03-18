@@ -58,4 +58,12 @@ bool dx_describe_protocol_sent (dxf_connection_t connection);
 
 bool dx_socket_data_receiver (dxf_connection_t connection, const void* buffer, int buffer_size);
 
+/* -------------------------------------------------------------------------- */
+/*
+*	Records digest management
+*/
+/* -------------------------------------------------------------------------- */
+
+bool dx_add_record_digest_to_list(dxf_connection_t connection, dx_record_id_t index);
+
 #endif /* SERVER_MESSAGE_PROCESSOR_H_INCLUDED */

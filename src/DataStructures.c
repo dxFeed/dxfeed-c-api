@@ -25,6 +25,7 @@
 #include "ConnectionContextData.h"
 #include "DXErrorHandling.h"
 #include "Logger.h"
+#include "ServerMessageProcessor.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -236,9 +237,12 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_data_structures) {
     }
     
     context->connection = connection;
+    context->record_server_support_states.elements = NULL;
+    context->record_server_support_states.size = 0;
+    context->record_server_support_states.capacity = 0;
     
     for (; i < RECORD_ID_VECTOR_SIZE; ++i) {
-        context->record_id_map.frequent_ids[i] = dx_rid_invalid;
+        context->record_id_map.frequent_ids[i] = DX_RECORD_ID_INVALID;
     }
     
     if (!dx_set_subsystem_data(connection, dx_ccs_data_structures, context)) {
@@ -436,15 +440,14 @@ bool dx_add_record_to_list(dxf_connection_t connection, dx_new_record_info_t rec
     DX_ARRAY_INSERT(g_records_list, dx_new_record_info_t, new_record, index, dx_capacity_manager_halfer, failed);
 
     if (failed) {
-        dx_set_last_error(dx_sec_not_enough_memory);
-        return false;
+        return dx_set_error_code(dx_sec_not_enough_memory);
     }
 
     // Update record server support states
     dscc = dx_get_data_structures_connection_context(connection);
     if (dscc == NULL) {
         DX_ARRAY_DELETE(g_records_list, dx_new_record_info_t, index, dx_capacity_manager_halfer, failed);
-        return false;
+        return dx_set_error_code(dx_cec_connection_context_not_initialized);
     }
 
     new_state = 0;
@@ -452,7 +455,13 @@ bool dx_add_record_to_list(dxf_connection_t connection, dx_new_record_info_t rec
 
     if (failed) {
         DX_ARRAY_DELETE(g_records_list, dx_new_record_info_t, index, dx_capacity_manager_halfer, failed);
-        dx_set_last_error(dx_sec_not_enough_memory);
+        return dx_set_error_code(dx_sec_not_enough_memory);
+    }
+
+    //Update record digests
+    if (!dx_add_record_digest_to_list(connection, index)) {
+        DX_ARRAY_DELETE(g_records_list, dx_new_record_info_t, index, dx_capacity_manager_halfer, failed);
+        DX_ARRAY_DELETE(dscc->record_server_support_states, dx_record_server_support_state_t, index, dx_capacity_manager_halfer, failed);
         return false;
     }
 
