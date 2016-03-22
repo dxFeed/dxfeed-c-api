@@ -66,6 +66,7 @@ typedef struct {
 } dx_connection_array_t;
 
 static dx_connection_array_t g_connection_queue = { 0 };
+static dxf_uint_t g_connections_count = 0;
 
 /* -------------------------------------------------------------------------- */
 
@@ -122,6 +123,7 @@ void dx_close_queued_connections (void) {
     }
     
     g_connection_queue.size = 0;
+    //TODO: g_connection_queue is not free
     
     dx_mutex_unlock(&g_connection_queue.guard);
 }
@@ -208,6 +210,8 @@ DXFEED_API ERRORCODE dxf_create_connection (const char* address,
         return DXF_FAILURE;
     }
     
+    g_connections_count += 1;
+
 	dx_logging_verbose_info(L"Return connection at %p", *connection);
     return DXF_SUCCESS;
 }
@@ -215,6 +219,7 @@ DXFEED_API ERRORCODE dxf_create_connection (const char* address,
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_close_connection (dxf_connection_t connection) {
+    ERRORCODE error_code = DXF_SUCCESS;
     dx_logging_verbose_info(L"Disconnect");
     
     if (!dx_validate_connection_handle(connection, false)) {
@@ -225,7 +230,13 @@ DXFEED_API ERRORCODE dxf_close_connection (dxf_connection_t connection) {
 		dx_queue_connection_for_close(connection);
 		return DXF_SUCCESS;
 	}
-    return (dx_deinit_connection(connection) ? DXF_SUCCESS : DXF_FAILURE);
+    error_code = (dx_deinit_connection(connection) ? DXF_SUCCESS : DXF_FAILURE);
+    if (error_code == DXF_SUCCESS) {
+        g_connections_count--;
+        if (g_connections_count == 0)
+            dx_clear_records_list();
+    }
+    return error_code;
 }
 
 /* -------------------------------------------------------------------------- */

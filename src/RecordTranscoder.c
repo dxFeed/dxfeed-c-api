@@ -468,10 +468,9 @@ bool RECORD_TRANSCODER_NAME(dx_order_t) (dx_record_transcoder_connection_context
     for (; i < record_count; ++i) {
         dx_order_t* cur_record = (dx_order_t*)record_buffer + i;
         dxf_order_t* cur_event = event_buffer + i;
-        //TODO: define constants
-        dxf_char_t exchange_code = (cur_record->flags >> 10) & 0x1F;
+        dxf_char_t exchange_code = (cur_record->flags & DX_RECORD_SUFFIX_MASK) >> DX_RECORD_SUFFIX_IN_FLAG_SHIFT;
         if (exchange_code > 0)
-            exchange_code |= 0x40;
+            exchange_code |= DX_RECORD_SIFFIX_HIGH_BITS;
         dx_set_record_exchange_code(record_id, exchange_code);
 
         /* HARDCODE */
@@ -561,6 +560,6 @@ bool dx_transcode_record_data (dxf_connection_t connection,
                                dx_record_id_t record_id, dxf_const_string_t suffix, dxf_const_string_t symbol_name,
                                dxf_int_t symbol_cipher, void* record_buffer, int record_count) {
     dx_record_transcoder_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_record_transcoder, NULL);
-    const dx_new_record_info_t* record_info = dx_get_record_by_id(record_id);
-    return g_record_transcoders[record_info->type_id](context, suffix, symbol_name, symbol_cipher, record_buffer, record_count, record_id);
+    const dx_record_item_t* record_info = dx_get_record_by_id(record_id);
+    return g_record_transcoders[record_info->info_id](context, suffix, symbol_name, symbol_cipher, record_buffer, record_count, record_id);
 }

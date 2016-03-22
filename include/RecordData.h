@@ -46,15 +46,14 @@ typedef enum {
 
     dx_rid_count,
     dx_rid_invalid
-} dx_record_type_id_t;
+} dx_record_info_id_t;
 //TODO: possible need to rename elements
 
 typedef int dx_record_id_t;
 
-//TODO: remove
-static const dxf_int_t DX_RECORD_ID_SUFFIX_MASK  = 0xFF00;
-//TODO: remove
-static const dxf_int_t DX_RECORD_ID_SUFFIX_SHIFT = 8;
+static const dxf_int_t DX_RECORD_SUFFIX_MASK = 0x7C00;
+static const dxf_int_t DX_RECORD_SUFFIX_IN_FLAG_SHIFT = 10;
+static const dxf_int_t DX_RECORD_SIFFIX_HIGH_BITS = 0x40;
 
 /* Invalid or empty record id */
 static const dx_record_id_t DX_RECORD_ID_INVALID = -1;

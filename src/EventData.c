@@ -149,7 +149,7 @@ bool dx_add_subscription_param_to_list(dxf_connection_t connection, dx_event_sub
 bool dx_get_order_subscription_params(dxf_connection_t connection, OUT dx_event_subscription_param_list_t* param_list) {
     dxf_char_t ch = 'A';
     dxf_const_string_t quote_tmpl = L"Quote&";
-    CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Quote", dx_st_ticker, );
+    CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Quote", dx_st_ticker);
     CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"MarketMaker", dx_st_history);
     CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Order", dx_st_history);
     CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Order#NTV", dx_st_history);

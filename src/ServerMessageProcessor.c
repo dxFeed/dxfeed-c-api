@@ -230,7 +230,7 @@ dx_record_digest_t* dx_get_record_digest(dx_server_msg_proc_connection_context_t
 }
 
 bool dx_create_field_digest (dx_server_msg_proc_connection_context_t* context,
-                             dx_record_id_t record_id, const dx_new_record_info_t* record_info,
+                             dx_record_id_t record_id, const dx_record_item_t* record_info,
                              OUT dx_field_digest_ptr_t* field_digest) {
     dxf_string_t field_name = NULL;
     dxf_int_t field_type;
@@ -286,7 +286,7 @@ bool dx_create_field_digest (dx_server_msg_proc_connection_context_t* context,
 /* -------------------------------------------------------------------------- */
 
 bool dx_digest_unsupported_fields (dx_server_msg_proc_connection_context_t* context,
-                                   dx_record_id_t record_id, const dx_new_record_info_t* record_info) {
+                                   dx_record_id_t record_id, const dx_record_item_t* record_info) {
     dx_record_digest_t* record_digest = NULL;
     int field_index = 0;
     
@@ -960,11 +960,10 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 	while (dx_get_in_buffer_position(context->bicc) < dx_get_in_buffer_limit(context->bicc)) {
 		void* record_buffer = NULL;
         dx_record_id_t record_id;
-        //TODO: warning exchange may be cleared!
 		dxf_const_string_t suffix;
 		int record_count = 0;
 		dxf_const_string_t symbol = NULL;
-        const dx_new_record_info_t* record_info = NULL;
+        const dx_record_item_t* record_info = NULL;
         dx_record_digest_t* record_digest = NULL;
 		
 		CHECKED_CALL_1(dx_read_symbol, context);
@@ -1003,7 +1002,7 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 		}
 
         record_info = dx_get_record_by_id(record_id);
-		record_buffer = g_buffer_managers[record_info->type_id].record_getter(context->rbcc, record_count++);
+		record_buffer = g_buffer_managers[record_info->info_id].record_getter(context->rbcc, record_count++);
         suffix = dx_string_length(record_info->suffix) > 0 ? record_info->suffix : NULL;
 		
 		if (record_buffer == NULL) {
@@ -1019,7 +1018,7 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 		}
 		
         if (!dx_transcode_record_data(context->connection, record_id, suffix, context->last_symbol, context->last_cipher,
-						g_buffer_managers[record_info->type_id].record_buffer_getter(context->rbcc), record_count)) {
+            g_buffer_managers[record_info->info_id].record_buffer_getter(context->rbcc), record_count)) {
 			dx_free_string_buffers(context->rbcc);
 
 			return false;
@@ -1033,8 +1032,8 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_fill_record_digest (dx_server_msg_proc_connection_context_t* context, dx_record_id_t rid, const dx_new_record_info_t* record_info,
-                            dxf_int_t field_count, OUT dx_record_digest_t* record_digest) {
+bool dx_fill_record_digest(dx_server_msg_proc_connection_context_t* context, dx_record_id_t rid, const dx_record_item_t* record_info,
+                           dxf_int_t field_count, OUT dx_record_digest_t* record_digest) {
     int i = 0;
     
     for (; i != field_count; ++i) {
@@ -1068,7 +1067,7 @@ bool dx_process_describe_records (dx_server_msg_proc_connection_context_t* conte
         dxf_int_t server_record_id;
         dxf_string_t record_name = NULL;
         dxf_int_t server_field_count;
-        const dx_new_record_info_t* record_info = NULL;
+        const dx_record_item_t* record_info = NULL;
         dx_record_digest_t* record_digest = NULL;
         dx_record_id_t local_record_id = DX_RECORD_ID_INVALID;
         dx_record_digest_t dummy;

@@ -82,26 +82,31 @@ typedef struct {
     dxf_const_string_t name;
     int field_count;
     const dx_field_info_t* fields;
-} dx_record_type_t;
+} dx_record_info_t;
 
-//TODO: new type
 typedef struct {
     dxf_string_t name;
     int field_count;
     const dx_field_info_t* fields;
-    dx_record_type_id_t type_id;
+    dx_record_info_id_t info_id;
     dxf_char_t suffix[RECORD_SUFFIX_SIZE];
     dxf_char_t exchange_code;
-} dx_new_record_info_t;
+} dx_record_item_t;
 
-//TODO: new type
+/* Struct is stores record items
+ *      elements        - pointer to record items array
+ *      size            - size of elements array
+ *      capacity        - capacity of elements array
+ *      new_record_id   - the index of the first unsubscribe record to server;
+ *                        when record will be subscribe, this value will be equal to 'size'
+ */
 typedef struct {
-    dx_new_record_info_t* elements;
+    dx_record_item_t* elements;
     int size;
     int capacity;
+    dx_record_id_t new_record_id;
 } dx_record_list_t;
 
-//TODO: new type
 typedef int dx_record_server_support_state_t;
 typedef struct {
     dx_record_server_support_state_t* elements;
@@ -118,10 +123,12 @@ typedef struct {
 dx_record_id_t dx_get_record_id(void* context, dxf_int_t server_record_id);
 bool dx_assign_server_record_id(void* context, dx_record_id_t record_id, dxf_int_t server_record_id);
 
-const dx_new_record_info_t* dx_get_record_by_id(dx_record_id_t record_id);
+const dx_record_item_t* dx_get_record_by_id(dx_record_id_t record_id);
 dx_record_id_t dx_get_record_id_by_name(dxf_const_string_t record_name);
+dx_record_id_t dx_get_next_unsubscribed_record_id();
+void dx_set_subscribed_record(dx_record_id_t rid);
 
-int dx_find_record_field (const dx_new_record_info_t* record_info, dxf_const_string_t field_name,
+int dx_find_record_field(const dx_record_item_t* record_info, dxf_const_string_t field_name,
                           dxf_int_t field_type);
 dxf_char_t dx_get_record_exchange_code(dx_record_id_t record_id);
 bool dx_set_record_exchange_code(dx_record_id_t record_id, dxf_char_t exchange_code);

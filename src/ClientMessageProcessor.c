@@ -282,7 +282,7 @@ static bool dx_write_record_field (void* bocc, const dx_field_info_t* field) {
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_write_event_record(void* bocc, const dx_new_record_info_t* record, dx_record_id_t record_id) {
+static bool dx_write_event_record(void* bocc, const dx_record_item_t* record, dx_record_id_t record_id) {
     int field_index = 0;
 
     CHECKED_CALL_2(dx_write_compact_int, bocc, (dxf_int_t)record_id);
@@ -299,17 +299,13 @@ static bool dx_write_event_record(void* bocc, const dx_new_record_info_t* record
 /* -------------------------------------------------------------------------- */
 
 bool dx_write_event_records (void* bocc) {
-    /*dx_record_id_t record_id = dx_rid_begin;
-
-    for (; record_id < dx_rid_count; ++record_id) {
-        CHECKED_CALL_3(dx_write_event_record, bocc, dx_get_record_by_id(record_id), record_id);
-    }*/
-
-    dx_record_id_t record_id = 0;
+    //TODO: check new subscriptions
+    dx_record_id_t record_id = dx_get_next_unsubscribed_record_id();
     int count = dx_get_records_list_count();
 
     for (; record_id < count; ++record_id) {
         CHECKED_CALL_3(dx_write_event_record, bocc, dx_get_record_by_id(record_id), record_id);
+        dx_set_subscribed_record(record_id);
     }
 
     return true;

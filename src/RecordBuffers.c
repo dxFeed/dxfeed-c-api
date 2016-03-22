@@ -192,14 +192,14 @@ const dx_buffer_manager_collection_t g_buffer_managers[dx_rid_count] = {
 };
 
 void dx_clear_record_buffers (dx_event_record_buffer_t* record_buffers) {
-    dx_record_type_id_t record_id = dx_rid_begin;
+    dx_record_info_id_t info_id = dx_rid_begin;
     
-    for (; record_id < dx_rid_count; ++record_id) {
-        if (record_buffers[record_id].buffer != NULL) {
-            dx_free(record_buffers[record_id].buffer);
+    for (; info_id < dx_rid_count; ++info_id) {
+        if (record_buffers[info_id].buffer != NULL) {
+            dx_free(record_buffers[info_id].buffer);
             
-            record_buffers[record_id].buffer = NULL;
-            record_buffers[record_id].capacity = 0;
+            record_buffers[info_id].buffer = NULL;
+            record_buffers[info_id].capacity = 0;
         }
     }
 }
