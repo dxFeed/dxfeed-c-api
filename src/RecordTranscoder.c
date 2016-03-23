@@ -221,11 +221,10 @@ bool dx_transcode_quote_to_order_bid (dx_record_transcoder_connection_context_t*
         cur_event->time = ((dxf_long_t)(cur_record->bid_time) * 1000L);
         cur_event->price = cur_record->bid_price;
         cur_event->size = cur_record->bid_size;
-        //TODO: check this
 		cur_event->index = ((exchange_code == 0 ? DX_ORDER_SOURCE_COMPOSITE_BID : DX_ORDER_SOURCE_REGIONAL_BID) << DX_ORDER_SOURCE_ID_SHIFT) | ((dxf_long_t)exchange_code << DX_ORDER_EXCHANGE_SHIFT);
         cur_event->side = DXF_ORDER_SIDE_BUY;
         cur_event->level = (exchange_code == 0 ? DXF_ORDER_LEVEL_COMPOSITE : DXF_ORDER_LEVEL_REGIONAL);
-        cur_event->exchange_code = (cur_record->bid_exchange_code == 0 ? exchange_code : cur_record->bid_exchange_code);
+        cur_event->exchange_code = (exchange_code == 0 ? cur_record->bid_exchange_code : exchange_code);
         cur_event->market_maker = NULL;
     }
     
@@ -253,11 +252,10 @@ bool dx_transcode_quote_to_order_ask (dx_record_transcoder_connection_context_t*
         cur_event->time = ((dxf_long_t)(cur_record->ask_time) * 1000L);
         cur_event->price = cur_record->ask_price;
         cur_event->size = cur_record->ask_size;
-        //TODO:: check this
 		cur_event->index = ((exchange_code == 0 ? DX_ORDER_SOURCE_COMPOSITE_ASK : DX_ORDER_SOURCE_REGIONAL_ASK) << DX_ORDER_SOURCE_ID_SHIFT) | ((dxf_long_t)exchange_code << DX_ORDER_EXCHANGE_SHIFT);
         cur_event->side = DXF_ORDER_SIDE_SELL;
         cur_event->level = (exchange_code == 0 ? DXF_ORDER_LEVEL_COMPOSITE : DXF_ORDER_LEVEL_REGIONAL);
-        cur_event->exchange_code = (cur_record->ask_exchange_code == 0 ? exchange_code : cur_record->ask_exchange_code);
+        cur_event->exchange_code = (exchange_code == 0 ? cur_record->ask_exchange_code : exchange_code);
         cur_event->market_maker = NULL;
     }
 
@@ -272,18 +270,17 @@ bool dx_transcode_quote (dx_record_transcoder_connection_context_t* context,
                          dx_quote_t* record_buffer, int record_count, dx_record_id_t record_id) {
     dxf_quote_t* event_buffer = (dxf_quote_t*)record_buffer;
     int i = 0;
-    dxf_char_t exchange_code = (suffix == NULL ? '/0' : suffix[0]);
+    dxf_char_t exchange_code = (suffix == NULL ? 0 : suffix[0]);
 
     for (; i < record_count; ++i) {
         dxf_quote_t* cur_event = event_buffer + i;
 
         cur_event->bid_time *= 1000L;
-		if (cur_event->bid_exchange_code == 0)
+		if (exchange_code != 0)
             cur_event->bid_exchange_code = exchange_code;
         cur_event->ask_time *= 1000L;
-		if (cur_event->ask_exchange_code == 0)
+		if (exchange_code != 0)
             cur_event->ask_exchange_code = exchange_code;
-        //TODO: what code we need to set?
         dx_set_record_exchange_code(record_id, cur_event->bid_exchange_code);
     }
 
@@ -361,8 +358,6 @@ bool dx_transcode_market_maker_to_order_bid (dx_record_transcoder_connection_con
         cur_event->time = ((dxf_long_t)cur_record->mmbid_time) * 1000L;
         cur_event->price = cur_record->mmbid_price;
         cur_event->size = cur_record->mmbid_size;
-        cur_event->index = (((dxf_long_t)exchange_code << 32) | ((dxf_long_t)cur_record->mm_id) | 0x8200000000000000L);
-        //TODO: check this
 		cur_event->index = (DX_ORDER_SOURCE_AGGREGATE_BID << DX_ORDER_SOURCE_ID_SHIFT) 
             | ((dxf_long_t)exchange_code << DX_ORDER_EXCHANGE_SHIFT) | ((dxf_long_t)cur_record->mm_id);
         cur_event->side = DXF_ORDER_SIDE_BUY;
@@ -395,7 +390,6 @@ bool dx_transcode_market_maker_to_order_ask (dx_record_transcoder_connection_con
         dx_market_maker_t* cur_record = record_buffer + i;
         dxf_order_t* cur_event = event_buffer + i;
         dxf_char_t exchange_code = (dxf_char_t)cur_record->mm_exchange;
-        //TODO: duplicates?
         dx_set_record_exchange_code(record_id, exchange_code);
 
         cur_event->exchange_code = exchange_code;
@@ -403,7 +397,6 @@ bool dx_transcode_market_maker_to_order_ask (dx_record_transcoder_connection_con
         cur_event->time = ((dxf_long_t)cur_record->mmask_time) * 1000L;
         cur_event->price = cur_record->mmask_price;
         cur_event->size = cur_record->mmask_size;
-        //TODO: check this
         cur_event->index = (DX_ORDER_SOURCE_AGGREGATE_ASK << DX_ORDER_SOURCE_ID_SHIFT) 
             | ((dxf_long_t)exchange_code << DX_ORDER_EXCHANGE_SHIFT) | ((dxf_long_t)cur_record->mm_id);
         cur_event->side = DXF_ORDER_SIDE_SELL;
@@ -438,18 +431,24 @@ bool RECORD_TRANSCODER_NAME(dx_market_maker_t) (dx_record_transcoder_connection_
 
 /* ---------------------------------- */
 
+#define MAX_SUFFIX_LEN_FOR_INDEX 3
+
 dxf_long_t suffix_to_long(dxf_const_string_t suffix)
 {
-    int char_index = RECORD_SUFFIX_SIZE;
-    int suffix_length = dx_string_length(suffix);
+    int suffix_length = 0;
+    int i = 0;
     dxf_long_t ret = 0;
-    if (suffix_length < char_index)
-        char_index = suffix_length;
-    for (; char_index >= 0; char_index--) {
-        dxf_long_t ch = (dxf_long_t)suffix[char_index];
-        if (char_index == 0)
-            ch <<= 8;
-        ret |= ch & 0xFF;
+    if (suffix == NULL)
+        return 0;
+    suffix_length = dx_string_length(suffix);
+    if (suffix_length == 0)
+        return 0;
+
+    if (suffix_length > MAX_SUFFIX_LEN_FOR_INDEX)
+        i = suffix_length - MAX_SUFFIX_LEN_FOR_INDEX;
+    for (; i < suffix_length; i++) {
+        dxf_long_t ch = (dxf_long_t)suffix[i] & 0xFF;
+        ret = (ret << 8) | ch;
     }
     return ret;
 }
@@ -470,11 +469,9 @@ bool RECORD_TRANSCODER_NAME(dx_order_t) (dx_record_transcoder_connection_context
         dxf_order_t* cur_event = event_buffer + i;
         dxf_char_t exchange_code = (cur_record->flags & DX_RECORD_SUFFIX_MASK) >> DX_RECORD_SUFFIX_IN_FLAG_SHIFT;
         if (exchange_code > 0)
-            exchange_code |= DX_RECORD_SIFFIX_HIGH_BITS;
+            exchange_code |= DX_RECORD_SUFFIX_HIGH_BITS;
         dx_set_record_exchange_code(record_id, exchange_code);
 
-        /* HARDCODE */
-        //cur_event->index = ((((dxf_long_t)'I' << 8 | (dxf_long_t)'S') << 8 | (dxf_long_t)'T') << DX_ORDER_SOURCE_ID_SHIFT) | cur_record->index;
         cur_event->index = (suffix_to_long(suffix) << DX_ORDER_SOURCE_ID_SHIFT) | cur_record->index;
         cur_event->side = ((cur_record->flags >> DX_ORDER_SIDE_SHIFT) & DX_ORDER_SIDE_MASK) == DX_ORDER_SIDE_SELL ? DXF_ORDER_SIDE_SELL : DXF_ORDER_SIDE_BUY;
         cur_event->level = cur_record->flags & DX_ORDER_SCOPE_MASK;

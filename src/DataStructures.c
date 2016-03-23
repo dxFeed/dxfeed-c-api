@@ -403,7 +403,7 @@ int dx_find_record_field(const dx_record_item_t* record_info, dxf_const_string_t
 
 dxf_char_t dx_get_record_exchange_code(dx_record_id_t record_id) {
     if (record_id < 0 || record_id > g_records_list.size)
-        return '\0';
+        return 0;
     return g_records_list.elements[record_id].exchange_code;
 }
 
@@ -515,8 +515,8 @@ bool init_record_info(dx_record_item_t *record, dxf_const_string_t name) {
     record->field_count = g_record_info[record_info_id].field_count;
     record->fields = g_record_info[record_info_id].fields;
     record->info_id = record_info_id;
-    dx_memset(record->suffix, '\0', sizeof(record->suffix));
-    record->exchange_code = '\0';
+    dx_memset(record->suffix, 0, sizeof(record->suffix));
+    record->exchange_code = 0;
 
     suffix_index = dx_string_length(record_info.name);
     if (name_length < suffix_index + 1)
@@ -529,6 +529,7 @@ bool init_record_info(dx_record_item_t *record, dxf_const_string_t name) {
         if (record->name[suffix_index] != L'&')
             return true;
         dx_copy_string_len(record->suffix, &record->name[suffix_index + 1], 1);
+        record->exchange_code = record->suffix[0];
     }
 
     return true;
