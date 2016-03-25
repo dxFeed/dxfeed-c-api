@@ -168,6 +168,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="EventDynamicSubscriptionTest.cpp" />
     <ClCompile Include="EventSubscriptionTest.c" />
     <ClCompile Include="UnitTests.c" />
     <ClCompile Include="..\..\src\ConnectionContextData.c" />
@@ -206,6 +207,7 @@
     <ClInclude Include="..\..\src\PrimitiveTypes.h" />
     <ClInclude Include="..\..\src\TaskQueue.h" />
     <ClInclude Include="..\..\src\EventSubscription.h" />
+    <ClInclude Include="EventDynamicSubscriptionTest.h" />
     <ClInclude Include="EventSubscriptionTest.h" />
     <ClInclude Include="..\..\src\EventDataFieldSetters.h" />
     <ClInclude Include="..\..\src\EventRecordBuffers.h" />
