@@ -17,6 +17,7 @@
 *
 */
 
+
 #include "DXFeed.h"
 
 #include "DataStructures.h"
@@ -166,7 +167,7 @@ static const dx_record_info_t g_record_info[dx_rid_count] = {
    */
 
 /* List stores records. The list is not cleared until at least one connection is opened. */
-static dx_record_list_t g_records_list = {NULL, 0, 0, 0};
+static dx_record_list_t g_records_list = {NULL, 0, 0, 0, NULL};
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -250,6 +251,12 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_data_structures) {
     }
     
     return true;
+}
+
+void dx_init_records_list() {
+    if (g_records_list.guard == NULL) {
+        dx_mutex_create(&g_records_list.guard);
+    }
 }
 
 /* -------------------------------------------------------------------------- */
@@ -351,8 +358,14 @@ bool dx_assign_server_record_id(void* context, dx_record_id_t record_id, dxf_int
 
 /* -------------------------------------------------------------------------- */
 
+//TODO: make copy or setter
 const dx_record_item_t* dx_get_record_by_id(dx_record_id_t record_id) {
-    return &g_records_list.elements[record_id];
+    dx_record_item_t* value = NULL;
+    dx_init_records_list();
+    dx_mutex_lock(&(g_records_list.guard));
+    value = &g_records_list.elements[record_id];
+    dx_mutex_unlock(&(g_records_list.guard));
+    return value;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -360,11 +373,17 @@ const dx_record_item_t* dx_get_record_by_id(dx_record_id_t record_id) {
 dx_record_id_t dx_get_record_id_by_name(dxf_const_string_t record_name) {
     dx_record_id_t record_id = 0;
 
+    dx_init_records_list();
+    dx_mutex_lock(&(g_records_list.guard));
+
     for (; record_id < g_records_list.size; ++record_id) {
         if (dx_compare_strings(g_records_list.elements[record_id].name, record_name) == 0) {
+            dx_mutex_unlock(&(g_records_list.guard));
             return record_id;
         }
     }
+
+    dx_mutex_unlock(&(g_records_list.guard));
 
     return DX_RECORD_ID_INVALID;
 }
@@ -372,13 +391,27 @@ dx_record_id_t dx_get_record_id_by_name(dxf_const_string_t record_name) {
 /* -------------------------------------------------------------------------- */
 
 dx_record_id_t dx_get_next_unsubscribed_record_id() {
-    return g_records_list.new_record_id;
+    dx_record_id_t record_id = DX_RECORD_ID_INVALID;
+
+    dx_init_records_list();
+    dx_mutex_lock(&(g_records_list.guard));
+
+    record_id = g_records_list.new_record_id;
+
+    dx_mutex_unlock(&(g_records_list.guard));
+
+    return record_id;
 }
 
+//TODO: remove param
 void dx_set_subscribed_record(dx_record_id_t subscribed_record_id) {
-    if (subscribed_record_id < 0 || subscribed_record_id >= g_records_list.size)
-        return;
-    g_records_list.new_record_id = subscribed_record_id + 1;
+    dx_init_records_list();
+    dx_mutex_lock(&(g_records_list.guard));
+
+    if (subscribed_record_id >= 0 && subscribed_record_id < g_records_list.size)
+        g_records_list.new_record_id = subscribed_record_id + 1;
+
+    dx_mutex_unlock(&(g_records_list.guard));
 }
 
 /* -------------------------------------------------------------------------- */
@@ -391,7 +424,6 @@ int dx_find_record_field(const dx_record_item_t* record_info, dxf_const_string_t
     for (; cur_field_index < record_info->field_count; ++cur_field_index) {
         if (dx_compare_strings(fields[cur_field_index].name, field_name) == 0 &&
             (fields[cur_field_index].type & dx_fid_mask_serialization)== (field_type & dx_fid_mask_serialization)) {
-            
             return cur_field_index;
         }
     }
@@ -402,15 +434,30 @@ int dx_find_record_field(const dx_record_item_t* record_info, dxf_const_string_t
 /* -------------------------------------------------------------------------- */
 
 dxf_char_t dx_get_record_exchange_code(dx_record_id_t record_id) {
-    if (record_id < 0 || record_id > g_records_list.size)
-        return 0;
-    return g_records_list.elements[record_id].exchange_code;
+    dxf_char_t exchange_code = 0;
+
+    dx_init_records_list();
+    dx_mutex_lock(&(g_records_list.guard));
+
+    if (record_id >= 0 && record_id < g_records_list.size)
+        exchange_code = g_records_list.elements[record_id].exchange_code;
+
+    dx_mutex_unlock(&(g_records_list.guard));
+
+    return exchange_code;
 }
 
 bool dx_set_record_exchange_code(dx_record_id_t record_id, dxf_char_t exchange_code) {
     if (record_id < 0 || record_id > g_records_list.size)
         return false;
+
+    dx_init_records_list();
+    dx_mutex_lock(&(g_records_list.guard));
+
     g_records_list.elements[record_id].exchange_code = exchange_code;
+
+    dx_mutex_unlock(&(g_records_list.guard));
+
     return true;
 }
 
@@ -548,8 +595,13 @@ dx_record_id_t dx_add_or_get_record_id(dxf_connection_t connection, dxf_const_st
     dx_record_id_t index = DX_RECORD_ID_INVALID;
     dx_record_item_t record;
 
-    if (!init_record_info(&record, name))
+    dx_init_records_list();
+    dx_mutex_lock(&(g_records_list.guard));
+
+    if (!init_record_info(&record, name)) {
+        dx_mutex_unlock(&(g_records_list.guard));
         return DX_RECORD_ID_INVALID;
+    }
     
     if (g_records_list.elements == NULL) {
         index = 0;
@@ -563,6 +615,8 @@ dx_record_id_t dx_add_or_get_record_id(dxf_connection_t connection, dxf_const_st
 
     clear_record_info(&record);
 
+    dx_mutex_unlock(&(g_records_list.guard));
+
     if (!result) {
         dx_logging_last_error();
         return DX_RECORD_ID_INVALID;
@@ -574,6 +628,10 @@ dx_record_id_t dx_add_or_get_record_id(dxf_connection_t connection, dxf_const_st
 void dx_clear_records_list() {
     dx_record_id_t i = 0;
     dx_record_item_t *record = g_records_list.elements;
+
+    dx_init_records_list();
+    dx_mutex_lock(&(g_records_list.guard));
+
     for (; i < g_records_list.size; i++) {
         clear_record_info(record);
         record++;
@@ -583,8 +641,22 @@ void dx_clear_records_list() {
     g_records_list.capacity = 0;
     g_records_list.size = 0;
     g_records_list.new_record_id = 0;
+
+    dx_mutex_unlock(&(g_records_list.guard));
+
+    dx_mutex_destroy(&(g_records_list.guard));
+    g_records_list.guard = NULL;
 }
 
 int dx_get_records_list_count() {
-    return g_records_list.size;
+    int size = 0;
+
+    dx_init_records_list();
+    dx_mutex_lock(&(g_records_list.guard));
+
+    size = g_records_list.size;
+
+    dx_mutex_unlock(&(g_records_list.guard));
+
+    return size;
 }

@@ -158,14 +158,12 @@ typedef struct {
     int capacity;
 } dx_event_subscription_param_list_t;
 
-//int dx_get_event_subscription_params (dx_event_id_t event_id, OUT const dx_event_subscription_param_t** params);
-
 /*
 * Returns the list of subscription params. Fills records list according to event_id.
 *
 * You need to call dx_free(params.elements) to free resources.
 */
-int dx_get_event_subscription_params2(dxf_connection_t connection, dx_event_id_t event_id, 
+int dx_get_event_subscription_params(dxf_connection_t connection, dx_event_id_t event_id, 
                                       OUT dx_event_subscription_param_list_t* params);
 
 /* -------------------------------------------------------------------------- */

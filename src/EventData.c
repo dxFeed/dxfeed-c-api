@@ -81,53 +81,6 @@ dx_event_id_t dx_get_event_id_by_bitmask (int event_bitmask) {
  */
 /* -------------------------------------------------------------------------- */
 
-static const dx_event_subscription_param_t g_trade_subscription_params[] = {
-    { dx_rid_trade, dx_st_ticker }
-};
-
-static const dx_event_subscription_param_t g_quote_subscription_params[] = {
-    { dx_rid_quote, dx_st_ticker }
-};
-
-static const dx_event_subscription_param_t g_summary_subscription_params[] = {
-    { dx_rid_fundamental, dx_st_ticker }
-};
-
-static const dx_event_subscription_param_t g_profile_subscription_params[] = {
-    { dx_rid_profile, dx_st_ticker }
-};
-
-static const dx_event_subscription_param_t g_order_subscription_params[] = {
-    { dx_rid_quote, dx_st_ticker },
-    { dx_rid_market_maker, dx_st_history },
-    { dx_rid_order, dx_st_history }
-};
-
-static const dx_event_subscription_param_t g_time_and_sale_subscription_params[] = {
-    { dx_rid_time_and_sale, dx_st_stream }
-};
-
-typedef struct {
-    const dx_event_subscription_param_t* params;
-    int param_count;
-} dx_event_subscription_param_roster;
-
-static const dx_event_subscription_param_roster g_event_param_rosters[dx_eid_count] = {
-    { g_trade_subscription_params, sizeof(g_trade_subscription_params) / sizeof(g_trade_subscription_params[0]) },
-    { g_quote_subscription_params, sizeof(g_quote_subscription_params) / sizeof(g_quote_subscription_params[0]) },
-    { g_summary_subscription_params, sizeof(g_summary_subscription_params) / sizeof(g_summary_subscription_params[0]) },
-    { g_profile_subscription_params, sizeof(g_profile_subscription_params) / sizeof(g_profile_subscription_params[0]) },
-    { g_order_subscription_params, sizeof(g_order_subscription_params) / sizeof(g_order_subscription_params[0]) },
-    { g_time_and_sale_subscription_params, sizeof(g_time_and_sale_subscription_params) / sizeof(g_time_and_sale_subscription_params[0]) }
-};
-
-//int dx_get_event_subscription_params (dx_event_id_t event_id, OUT const dx_event_subscription_param_t** params) {
-//
-//    *params = g_event_param_rosters[event_id].params;
-//    
-//    return g_event_param_rosters[event_id].param_count;
-//}
-
 bool dx_add_subscription_param_to_list(dxf_connection_t connection, dx_event_subscription_param_list_t* param_list,
                                         dxf_const_string_t record_name, dx_subscription_type_t subscription_type) {
     bool failed = false;
@@ -192,7 +145,7 @@ bool dx_get_trade_subscription_params(dxf_connection_t connection, OUT dx_event_
  *
  * You need to call dx_free(params.elements) to free resources.
 */
-int dx_get_event_subscription_params2(dxf_connection_t connection, dx_event_id_t event_id, 
+int dx_get_event_subscription_params(dxf_connection_t connection, dx_event_id_t event_id, 
                                       OUT dx_event_subscription_param_list_t* params) {
     bool result = true;
     dx_event_subscription_param_list_t param_list = { NULL, 0, 0 };

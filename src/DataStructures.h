@@ -25,6 +25,7 @@
 #include "RecordFieldSetters.h"
 #include "BufferedIOCommon.h"
 #include "EventData.h"
+#include "DXThreads.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -105,6 +106,7 @@ typedef struct {
     int size;
     int capacity;
     dx_record_id_t new_record_id;
+    dx_mutex_t guard;
 } dx_record_list_t;
 
 typedef int dx_record_server_support_state_t;
