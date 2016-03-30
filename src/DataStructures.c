@@ -358,7 +358,7 @@ bool dx_assign_server_record_id(void* context, dx_record_id_t record_id, dxf_int
 
 /* -------------------------------------------------------------------------- */
 
-//TODO: make copy or setter
+/* Don't try to change any field of struct. You shouldn't free this resources */
 const dx_record_item_t* dx_get_record_by_id(dx_record_id_t record_id) {
     dx_record_item_t* value = NULL;
     dx_init_records_list();
@@ -390,28 +390,21 @@ dx_record_id_t dx_get_record_id_by_name(dxf_const_string_t record_name) {
 
 /* -------------------------------------------------------------------------- */
 
-dx_record_id_t dx_get_next_unsubscribed_record_id() {
+dx_record_id_t dx_get_next_unsubscribed_record_id(bool isUpdate) {
     dx_record_id_t record_id = DX_RECORD_ID_INVALID;
 
     dx_init_records_list();
     dx_mutex_lock(&(g_records_list.guard));
+
+    if (g_records_list.new_record_id < g_records_list.size && isUpdate) {
+        g_records_list.new_record_id += 1;
+    }
 
     record_id = g_records_list.new_record_id;
 
     dx_mutex_unlock(&(g_records_list.guard));
 
     return record_id;
-}
-
-//TODO: remove param
-void dx_set_subscribed_record(dx_record_id_t subscribed_record_id) {
-    dx_init_records_list();
-    dx_mutex_lock(&(g_records_list.guard));
-
-    if (subscribed_record_id >= 0 && subscribed_record_id < g_records_list.size)
-        g_records_list.new_record_id = subscribed_record_id + 1;
-
-    dx_mutex_unlock(&(g_records_list.guard));
 }
 
 /* -------------------------------------------------------------------------- */
@@ -527,19 +520,26 @@ bool dx_add_record_to_list(dxf_connection_t connection, dx_record_item_t record,
 
 dx_record_info_id_t dx_string_to_record_info(dxf_const_string_t name)
 {
-    if (dx_compare_strings_num(name, g_record_info[dx_rid_trade].name, dx_string_length(g_record_info[dx_rid_trade].name)) == 0)
+    if (dx_compare_strings_num(name, g_record_info[dx_rid_trade].default_name, 
+                               dx_string_length(g_record_info[dx_rid_trade].default_name)) == 0)
         return dx_rid_trade;
-    else if (dx_compare_strings_num(name, g_record_info[dx_rid_quote].name, dx_string_length(g_record_info[dx_rid_quote].name)) == 0)
+    else if (dx_compare_strings_num(name, g_record_info[dx_rid_quote].default_name, 
+                                    dx_string_length(g_record_info[dx_rid_quote].default_name)) == 0)
         return dx_rid_quote;
-    else if (dx_compare_strings_num(name, g_record_info[dx_rid_fundamental].name, dx_string_length(g_record_info[dx_rid_fundamental].name)) == 0)
+    else if (dx_compare_strings_num(name, g_record_info[dx_rid_fundamental].default_name, 
+                                    dx_string_length(g_record_info[dx_rid_fundamental].default_name)) == 0)
         return dx_rid_fundamental;
-    else if (dx_compare_strings_num(name, g_record_info[dx_rid_profile].name, dx_string_length(g_record_info[dx_rid_profile].name)) == 0)
+    else if (dx_compare_strings_num(name, g_record_info[dx_rid_profile].default_name, 
+                                    dx_string_length(g_record_info[dx_rid_profile].default_name)) == 0)
         return dx_rid_profile;
-    else if (dx_compare_strings_num(name, g_record_info[dx_rid_market_maker].name, dx_string_length(g_record_info[dx_rid_market_maker].name)) == 0)
+    else if (dx_compare_strings_num(name, g_record_info[dx_rid_market_maker].default_name, 
+                                    dx_string_length(g_record_info[dx_rid_market_maker].default_name)) == 0)
         return dx_rid_market_maker;
-    else if (dx_compare_strings_num(name, g_record_info[dx_rid_order].name, dx_string_length(g_record_info[dx_rid_order].name)) == 0)
+    else if (dx_compare_strings_num(name, g_record_info[dx_rid_order].default_name, 
+                                    dx_string_length(g_record_info[dx_rid_order].default_name)) == 0)
         return dx_rid_order;
-    else if (dx_compare_strings_num(name, g_record_info[dx_rid_time_and_sale].name, dx_string_length(g_record_info[dx_rid_time_and_sale].name)) == 0)
+    else if (dx_compare_strings_num(name, g_record_info[dx_rid_time_and_sale].default_name, 
+                                    dx_string_length(g_record_info[dx_rid_time_and_sale].default_name)) == 0)
         return dx_rid_time_and_sale;
     else
         return dx_rid_invalid;
@@ -565,7 +565,7 @@ bool init_record_info(dx_record_item_t *record, dxf_const_string_t name) {
     dx_memset(record->suffix, 0, sizeof(record->suffix));
     record->exchange_code = 0;
 
-    suffix_index = dx_string_length(record_info.name);
+    suffix_index = dx_string_length(record_info.default_name);
     if (name_length < suffix_index + 1)
         return true;
     if (record_info_id == dx_rid_order) {

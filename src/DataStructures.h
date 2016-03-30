@@ -80,7 +80,7 @@ typedef struct {
 /* -------------------------------------------------------------------------- */
 
 typedef struct {
-    dxf_const_string_t name;
+    dxf_const_string_t default_name;
     int field_count;
     const dx_field_info_t* fields;
 } dx_record_info_t;
@@ -125,10 +125,10 @@ typedef struct {
 dx_record_id_t dx_get_record_id(void* context, dxf_int_t server_record_id);
 bool dx_assign_server_record_id(void* context, dx_record_id_t record_id, dxf_int_t server_record_id);
 
+/* Don't try to change any field of struct. You shouldn't free this resources */
 const dx_record_item_t* dx_get_record_by_id(dx_record_id_t record_id);
 dx_record_id_t dx_get_record_id_by_name(dxf_const_string_t record_name);
-dx_record_id_t dx_get_next_unsubscribed_record_id();
-void dx_set_subscribed_record(dx_record_id_t rid);
+dx_record_id_t dx_get_next_unsubscribed_record_id(bool isUpdate);
 
 int dx_find_record_field(const dx_record_item_t* record_info, dxf_const_string_t field_name,
                           dxf_int_t field_type);

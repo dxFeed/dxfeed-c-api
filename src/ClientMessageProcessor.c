@@ -299,12 +299,12 @@ static bool dx_write_event_record(void* bocc, const dx_record_item_t* record, dx
 /* -------------------------------------------------------------------------- */
 
 bool dx_write_event_records (void* bocc) {
-    dx_record_id_t record_id = dx_get_next_unsubscribed_record_id();
+    dx_record_id_t record_id = dx_get_next_unsubscribed_record_id(false);
     int count = dx_get_records_list_count();
 
-    for (; record_id < count; ++record_id) {
+    while (record_id < count) {
         CHECKED_CALL_3(dx_write_event_record, bocc, dx_get_record_by_id(record_id), record_id);
-        dx_set_subscribed_record(record_id);
+        record_id = dx_get_next_unsubscribed_record_id(true);
     }
 
     return true;
