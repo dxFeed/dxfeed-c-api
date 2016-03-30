@@ -327,16 +327,12 @@ DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dxf_const
     if (!dx_get_subscription_connection(subscription, &connection) ||
         !dx_get_event_subscription_event_types(subscription, &events) ||
         !dx_add_symbols(subscription, symbols, symbol_count) ||
+        !dx_send_record_description(connection, false) ||
         !dx_subscribe(connection, symbols, symbol_count, events)) {
 
         return DXF_FAILURE;
     }
 
-    // describe records from subscription
-    if (!dx_send_record_description(connection, false)) {
-        return DXF_FAILURE;
-    }
-    
     return DXF_SUCCESS;
 }
 

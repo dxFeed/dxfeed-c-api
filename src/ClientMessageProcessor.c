@@ -299,7 +299,6 @@ static bool dx_write_event_record(void* bocc, const dx_record_item_t* record, dx
 /* -------------------------------------------------------------------------- */
 
 bool dx_write_event_records (void* bocc) {
-    //TODO: check new subscriptions
     dx_record_id_t record_id = dx_get_next_unsubscribed_record_id();
     int count = dx_get_records_list_count();
 

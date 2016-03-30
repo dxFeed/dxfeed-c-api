@@ -7,8 +7,8 @@
 #include "DXErrorCodes.h"
 #include "Logger.h"
 
-//Timeout in milliseconds for waiting some events is 2 minutes.
-#define EVENTS_TIMEOUT 120000
+//Timeout in milliseconds for waiting some events is 1 minutes.
+#define EVENTS_TIMEOUT 60000
 #define EVENTS_LOOP_SLEEP_TIME 100
 
 const char dxfeed_host[] = "demo.dxfeed.com:7300";
@@ -184,6 +184,7 @@ bool event_dynamic_subscription_test(void) {
 
     printf("Connection successful!\n");
 
+    //Subscribe on trade events
     if (!subscribe_to_event(connection, &trade_subscription, DXF_ET_TRADE, trade_listener)) {
         return false;
     }
