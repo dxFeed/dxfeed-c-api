@@ -66,6 +66,7 @@ dx_message_type_t dx_get_subscription_message_type (dx_action_type_t action_type
 
 typedef struct {
     dxf_connection_t connection;
+    dx_order_source_array_ptr_t order_source;
     dxf_const_string_t* symbols;
     int symbol_count;
     int event_types;
@@ -89,7 +90,7 @@ void* dx_destroy_event_subscription_task_data (dx_event_subscription_task_data_t
 
 /* -------------------------------------------------------------------------- */
 
-void* dx_create_event_subscription_task_data (dxf_connection_t connection,
+void* dx_create_event_subscription_task_data (dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
                                               dxf_const_string_t* symbols, int symbol_count, int event_types, bool unsubscribe) {
     int i = 0;
     dx_event_subscription_task_data_t* data = dx_calloc(1, sizeof(dx_event_subscription_task_data_t));
@@ -111,11 +112,12 @@ void* dx_create_event_subscription_task_data (dxf_connection_t connection,
             return dx_destroy_event_subscription_task_data(data);
         }
     }
-    
+
     data->connection = connection;
+    data->order_source = order_source;
     data->event_types = event_types;
     data->unsubscribe = unsubscribe;
-    
+
     return data;
 }
 
@@ -256,8 +258,8 @@ int dx_subscribe_symbols_to_events_task (void* data, int command) {
         
         return res | dx_tes_success;
     }
-    
-    if (dx_subscribe_symbols_to_events(task_data->connection, task_data->symbols, task_data->symbol_count,
+
+    if (dx_subscribe_symbols_to_events(task_data->connection, task_data->order_source, task_data->symbols, task_data->symbol_count,
                                        task_data->event_types, task_data->unsubscribe, true)) {
         res |= dx_tes_success;
     }
@@ -328,7 +330,7 @@ int dx_describe_records_sender_task (void* data, int command) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_get_event_server_support (dxf_connection_t connection, int event_types, bool unsubscribe, OUT dx_message_support_status_t* res) {
+bool dx_get_event_server_support (dxf_connection_t connection, dx_order_source_array_ptr_t order_source, int event_types, bool unsubscribe, OUT dx_message_support_status_t* res) {
     dx_event_id_t eid = dx_eid_begin;
     bool halt = false;
     bool success = true;
@@ -341,7 +343,7 @@ bool dx_get_event_server_support (dxf_connection_t connection, int event_types, 
         if (event_types & DX_EVENT_BIT_MASK(eid)) {
             int j = 0;
             dx_event_subscription_param_list_t subscr_params;
-            int param_count = dx_get_event_subscription_params(connection, eid, &subscr_params);
+            int param_count = dx_get_event_subscription_params(connection, order_source, eid, &subscr_params);
 
             for (; j < param_count; ++j) {
                 const dx_event_subscription_param_t* cur_param = subscr_params.elements + j;
@@ -482,7 +484,7 @@ int dx_describe_protocol_sender_task (void* data, int command) {
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_subscribe_symbols_to_events (dxf_connection_t connection,
+bool dx_subscribe_symbols_to_events (dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
                                      dxf_const_string_t* symbols, int symbol_count, int event_types, bool unsubscribe,
                                      bool task_mode) {
     int i = 0;
@@ -492,7 +494,7 @@ bool dx_subscribe_symbols_to_events (dxf_connection_t connection,
     {
         dx_message_support_status_t msg_support_status;
 
-        CHECKED_CALL_4(dx_get_event_server_support, connection, event_types, unsubscribe, &msg_support_status);
+        CHECKED_CALL_5(dx_get_event_server_support, connection, order_source, event_types, unsubscribe, &msg_support_status);
 
         switch (msg_support_status) {
         case dx_mss_not_supported:
@@ -505,9 +507,9 @@ bool dx_subscribe_symbols_to_events (dxf_connection_t connection,
         default:
             if (!task_mode) {
                 /* scheduling the task for asynchronous execution */
-                
-                void* data = dx_create_event_subscription_task_data(connection, symbols, symbol_count, event_types, unsubscribe);
-                
+
+                void* data = dx_create_event_subscription_task_data(connection, order_source, symbols, symbol_count, event_types, unsubscribe);
+
                 if (data == NULL) {
                     return false;
                 }
@@ -524,7 +526,7 @@ bool dx_subscribe_symbols_to_events (dxf_connection_t connection,
             if (event_types & DX_EVENT_BIT_MASK(eid)) {
                 int j = 0;
                 dx_event_subscription_param_list_t subscr_params;
-                int param_count = dx_get_event_subscription_params(connection, eid, &subscr_params);
+                int param_count = dx_get_event_subscription_params(connection, order_source, eid, &subscr_params);
 
                 for (; j < param_count; ++j) {
                     const dx_event_subscription_param_t* cur_param = subscr_params.elements + j;

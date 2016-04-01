@@ -245,4 +245,20 @@ DXFEED_API ERRORCODE dxf_get_last_error (OUT int* error_code, OUT dxf_const_stri
  */
 DXFEED_API ERRORCODE dxf_initialize_logger (const char* file_name, int rewrite_file, int show_timezone_info, int verbose);
 
+/*
+ *  Clear current sources and add new one to subscription
+ *
+ *  subscription - a handle of the subscription where source will be changed
+ *  source - source of order to set, 4 symbols maximum length
+ */
+DXFEED_API ERRORCODE dxf_set_order_source(dxf_subscription_t subscription, const char* source);
+
+/*
+ *  Add a new source to subscription
+ *
+ *  subscription - a handle of the subscription where source will be changed
+ *  source - source of order event to add, 4 symbols maximum length
+ */
+DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const char* source);
+
 #endif /* DXFEED_API_H_INCLUDED */
