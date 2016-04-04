@@ -5,7 +5,6 @@ cmake_policy(SET CMP0015 NEW)
 set(PROJECT DXFeed) 
 set(INCLUDE_DIR ../include)
 set(PTHREADS_INCLUDE_DIR ../include/pthreads)
-set(PTHREADS_LIB_DIR ../lib)
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(POSTFIX "d")
 else()
@@ -19,7 +18,6 @@ project(${PROJECT})
 
 include_directories(${INCLUDE_DIR})
 include_directories(${PTHREADS_INCLUDE_DIR})
-link_directories(${PTHREADS_LIB_DIR})
 
 set(EXPORT_HEADERS
     ${INCLUDE_DIR}/DXErrorCodes.h
@@ -116,7 +114,7 @@ set (ALL_SOURCES
 set (ADDITIONAL_LIBRARIES "")
 
 if (MSVC)
-	add_definitions (-D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE -D_USRDLL -DDXFEED_EXPORTS /Gd /TC /FR /Zc:wchar_t /Zc:forScope /Gm- /RTC1 /MTd /Od /W3)
+	add_definitions (-D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE -D_USRDLL -DDXFEED_EXPORTS /Gd /TC /FR /Zc:wchar_t /Zc:forScope /Gm- /RTC1 /MTd /Od /W3 /Ob0)
     
     set (ADDITIONAL_LIBRARIES
         ${ADDITIONAL_LIBRARIES}
@@ -130,11 +128,6 @@ if (MSVC)
     
 elseif (CMAKE_COMPILER_IS_GNUCXX)
 	add_definitions (-Wall -pedantic -O2 -DUSE_PTHREADS -std=gnu99 -fPIC)
-    
-    set (ADDITIONAL_LIBRARIES
-        ${ADDITIONAL_LIBRARIES}
-        pthreadVC2.lib
-    )
     
     set (SOURCE_FILES
         ${SOURCE_FILES}
@@ -161,3 +154,4 @@ add_library (${PROJECT} SHARED ${ALL_HEADERS} ${ALL_SOURCES})
 target_link_libraries (${PROJECT} ${ADDITIONAL_LIBRARIES})
 
 set_target_properties(${PROJECT} PROPERTIES DEBUG_POSTFIX "d")
+set_target_properties(${PROJECT} PROPERTIES LINK_FLAGS "/DEBUG /SUBSYSTEM:WINDOWS")
