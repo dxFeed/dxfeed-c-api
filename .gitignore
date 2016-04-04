@@ -9,6 +9,8 @@
 /*.sdf
 /*.opensdf
 
+/src/build
+
 # /tests/APITest/
 /tests/APITest/*.user
 

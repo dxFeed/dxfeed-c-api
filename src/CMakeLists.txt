@@ -114,7 +114,9 @@ set (ALL_SOURCES
 set (ADDITIONAL_LIBRARIES "")
 
 if (MSVC)
-	add_definitions (-D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE -D_USRDLL -DDXFEED_EXPORTS /Gd /TC /FR /Zc:wchar_t /Zc:forScope /Gm- /RTC1 /MTd /Od /W3 /Ob0)
+    set(CMAKE_C_FLAGS_DEBUG "/TC /RTC1 /MTd /Od")
+    set(CMAKE_C_FLAGS_RELEASE "/O2")
+    add_definitions (-D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE -D_USRDLL -DDXFEED_EXPORTS /Gd /TC /Zc:wchar_t /Zc:forScope /Gm- /W3 /Ob0)
     
     set (ADDITIONAL_LIBRARIES
         ${ADDITIONAL_LIBRARIES}
@@ -123,7 +125,6 @@ if (MSVC)
     
     # Hack for remove standard libraries from linking
     set(CMAKE_C_STANDARD_LIBRARIES "" CACHE STRING "" FORCE)
-    set(CMAKE_CXX_STANDARD_LIBRARIES "" CACHE STRING "" FORCE)
     # End hack
     
 elseif (CMAKE_COMPILER_IS_GNUCXX)
@@ -154,4 +155,3 @@ add_library (${PROJECT} SHARED ${ALL_HEADERS} ${ALL_SOURCES})
 target_link_libraries (${PROJECT} ${ADDITIONAL_LIBRARIES})
 
 set_target_properties(${PROJECT} PROPERTIES DEBUG_POSTFIX "d")
-set_target_properties(${PROJECT} PROPERTIES LINK_FLAGS "/DEBUG /SUBSYSTEM:WINDOWS")
