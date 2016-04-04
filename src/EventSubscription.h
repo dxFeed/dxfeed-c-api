@@ -32,7 +32,7 @@ extern const dxf_subscription_t dx_invalid_subscription;
  */
 /* -------------------------------------------------------------------------- */
 
-typedef bool (*dx_subscription_processor_t) (dxf_connection_t connection,
+typedef bool (*dx_subscription_processor_t) (dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
                                              dxf_const_string_t* symbols, int symbol_count, int event_types);
 
 /* -------------------------------------------------------------------------- */
@@ -56,7 +56,14 @@ bool dx_process_event_data (dxf_connection_t connection,
                             const dxf_event_data_t data, int data_count);
 bool dx_get_last_symbol_event (dxf_connection_t connection, dxf_const_string_t symbol_name, int event_type,
                                OUT dxf_event_data_t* event_data);
-                               
+
 bool dx_process_connection_subscriptions (dxf_connection_t connection, dx_subscription_processor_t processor);
+
+
+/* Functions for working with order source */
+bool dx_set_order_source(dxf_subscription_t subscr_id, dxf_const_string_t source);
+bool dx_add_order_source(dxf_subscription_t subscr_id, dxf_const_string_t source);
+void dx_clear_order_source(dxf_subscription_t subscr_id);
+dx_order_source_array_ptr_t dx_get_order_source(dxf_subscription_t subscr_id);
 
 #endif /* SUBSCRIPTIONS_H_INCLUDED */

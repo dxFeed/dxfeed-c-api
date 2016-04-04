@@ -66,6 +66,24 @@ typedef enum {
 
 /* -------------------------------------------------------------------------- */
 /*
+*	Source suffix array
+*/
+/* -------------------------------------------------------------------------- */
+
+typedef struct {
+    dxf_char_t suffix[RECORD_SUFFIX_SIZE];
+} dx_suffix_t;
+
+typedef struct {
+    dx_suffix_t *elements;
+    int size;
+    int capacity;
+} dx_order_source_array_t;
+
+typedef dx_order_source_array_t* dx_order_source_array_ptr_t;
+
+/* -------------------------------------------------------------------------- */
+/*
  *	Event data structures
  */
 /* -------------------------------------------------------------------------- */
@@ -163,7 +181,7 @@ typedef struct {
 *
 * You need to call dx_free(params.elements) to free resources.
 */
-int dx_get_event_subscription_params(dxf_connection_t connection, dx_event_id_t event_id, 
+int dx_get_event_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source, dx_event_id_t event_id,
                                       OUT dx_event_subscription_param_list_t* params);
 
 /* -------------------------------------------------------------------------- */

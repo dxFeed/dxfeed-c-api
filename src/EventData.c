@@ -21,6 +21,8 @@
 #include "DXAlgorithms.h"
 #include "DXErrorHandling.h"
 #include "Logger.h"
+#include "EventSubscription.h"
+#include "DataStructures.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -36,6 +38,15 @@ static const int g_event_data_sizes[dx_eid_count] = {
     sizeof(dxf_order_t),
     sizeof(dxf_time_and_sale_t)
 };
+
+static const dxf_char_t g_quote_tmpl[] = L"Quote&";
+static const dxf_char_t g_order_tmpl[] = L"Order#";
+static const dxf_char_t g_trade_tmpl[] = L"Trade&";
+
+#define STRLEN(char_array) (sizeof(char_array) / sizeof(char_array[0]) - 1)
+#define QUOTE_TMPL_LEN STRLEN(g_quote_tmpl)
+#define ORDER_TMPL_LEN STRLEN(g_order_tmpl)
+#define TRADE_TMPL_LEN STRLEN(g_trade_tmpl)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -99,42 +110,41 @@ bool dx_add_subscription_param_to_list(dxf_connection_t connection, dx_event_sub
     return !failed;
 }
 
-bool dx_get_order_subscription_params(dxf_connection_t connection, OUT dx_event_subscription_param_list_t* param_list) {
+bool dx_get_order_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source, OUT dx_event_subscription_param_list_t* param_list) {
     dxf_char_t ch = 'A';
-    dxf_const_string_t quote_tmpl = L"Quote&";
+    dxf_char_t order_name_buf[ORDER_TMPL_LEN + RECORD_SUFFIX_SIZE] = { 0 };
+    dxf_char_t quote_name_buf[QUOTE_TMPL_LEN + 2] = { 0 };
+    int i;
     CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Quote", dx_st_ticker);
     CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"MarketMaker", dx_st_history);
     CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Order", dx_st_history);
-    CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Order#NTV", dx_st_history);
 
-    //fill quotes Quote&A..Quote&Z
-    for (; ch <= 'Z'; ch++) {
-        int suffix_index = dx_string_length(quote_tmpl);
-        dxf_string_t record_name = dx_create_string(suffix_index + 1);
-        dx_copy_string(record_name, quote_tmpl);
-        record_name[suffix_index] = ch;
-        CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, record_name, dx_st_ticker);
-        dx_free(record_name);
+    dx_copy_string(order_name_buf, g_order_tmpl);
+    for (i = 0; i < order_source->size; ++i) {
+        dx_copy_string_len(&order_name_buf[ORDER_TMPL_LEN], order_source->elements[i].suffix, RECORD_SUFFIX_SIZE);
+        CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, order_name_buf, dx_st_history);
     }
 
-    //TODO: add order subscriptions
+    //fill quotes Quote&A..Quote&Z
+    dx_copy_string(quote_name_buf, g_quote_tmpl);
+    for (; ch <= 'Z'; ch++) {
+        quote_name_buf[QUOTE_TMPL_LEN] = ch;
+        CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, quote_name_buf, dx_st_ticker);
+    }
 
     return true;
 }
 
 bool dx_get_trade_subscription_params(dxf_connection_t connection, OUT dx_event_subscription_param_list_t* param_list) {
     dxf_char_t ch = 'A';
-    dxf_const_string_t trade_tmpl = L"Trade&";
+    dxf_char_t trade_name_buf[TRADE_TMPL_LEN + 2];
     CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Trade", dx_st_ticker);
 
     //fill trades Trade&A..Trade&Z
+    dx_copy_string(trade_name_buf, g_trade_tmpl);
     for (; ch <= 'Z'; ch++) {
-        int suffix_index = dx_string_length(trade_tmpl);
-        dxf_string_t record_name = dx_create_string(suffix_index + 1);
-        dx_copy_string(record_name, trade_tmpl);
-        record_name[suffix_index] = ch;
-        CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, record_name, dx_st_ticker);
-        dx_free(record_name);
+        trade_name_buf[TRADE_TMPL_LEN] = ch;
+        CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, trade_name_buf, dx_st_ticker);
     }
 
     return true;
@@ -145,7 +155,7 @@ bool dx_get_trade_subscription_params(dxf_connection_t connection, OUT dx_event_
  *
  * You need to call dx_free(params.elements) to free resources.
 */
-int dx_get_event_subscription_params(dxf_connection_t connection, dx_event_id_t event_id, 
+int dx_get_event_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source, dx_event_id_t event_id,
                                       OUT dx_event_subscription_param_list_t* params) {
     bool result = true;
     dx_event_subscription_param_list_t param_list = { NULL, 0, 0 };
@@ -163,7 +173,7 @@ int dx_get_event_subscription_params(dxf_connection_t connection, dx_event_id_t 
         result = dx_add_subscription_param_to_list(connection, &param_list, L"Profile", dx_st_ticker);
         break;
     case dx_eid_order:
-        result = dx_get_order_subscription_params(connection, &param_list);
+        result = dx_get_order_subscription_params(connection, order_source, &param_list);
         break;
     case dx_eid_time_and_sale:
         result = dx_add_subscription_param_to_list(connection, &param_list, L"TimeAndSale", dx_st_stream);

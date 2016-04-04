@@ -75,7 +75,8 @@ struct dx_subscription_data_struct_t {
     int event_types;
     dx_symbol_data_array_t symbols;
     dx_listener_array_t listeners;
-    
+    dx_order_source_array_t order_source;
+
     dxf_const_string_t* symbol_name_array;
     int symbol_name_array_capacity;
     
@@ -646,10 +647,11 @@ void dx_free_event_subscription_data (dx_subscription_data_ptr_t subscr_data) {
     if (subscr_data == NULL) {
         return;
     }
-    
+
     /* no element freeing is performed because this array only stores the pointers to the strings allocated somewhere else */
     CHECKED_FREE(subscr_data->symbol_name_array);
-    
+    dx_clear_order_source(subscr_data);
+
     dx_free(subscr_data);
 }
 
@@ -685,15 +687,30 @@ dxf_subscription_t dx_create_event_subscription (dxf_connection_t connection, in
         
         return dx_invalid_subscription;
     }
-    
+
     subscr_data = dx_calloc(1, sizeof(dx_subscription_data_t));
-    
+
     if (subscr_data == NULL) {
         return dx_invalid_subscription;
     }
     
     subscr_data->event_types = event_types;
     subscr_data->escc = context;
+
+    res = true;
+    if (event_types & DXF_ET_ORDER) {
+        res &= dx_add_order_source(subscr_data, L"NTV");
+        res &= dx_add_order_source(subscr_data, L"BYX");
+        res &= dx_add_order_source(subscr_data, L"BZX");
+        res &= dx_add_order_source(subscr_data, L"DEA");
+        res &= dx_add_order_source(subscr_data, L"DEX");
+        res &= dx_add_order_source(subscr_data, L"DEX");
+        res &= dx_add_order_source(subscr_data, L"IST");
+    }
+    if (!res) {
+        dx_free_event_subscription_data(subscr_data);
+        return dx_invalid_subscription;
+    }
     
     if (!dx_mutex_lock(&(context->subscr_guard))) {
         dx_free_event_subscription_data(subscr_data);
@@ -1135,16 +1152,70 @@ bool dx_process_connection_subscriptions (dxf_connection_t connection, dx_subscr
         dxf_const_string_t* symbols = NULL;
         int symbol_count = 0;
         int event_types = 0;
-        
+
         if (!dx_get_event_subscription_symbols(subscriptions->elements[i], &symbols, &symbol_count) ||
             !dx_get_event_subscription_event_types(subscriptions->elements[i], &event_types) ||
-            !processor(connection, symbols, symbol_count, event_types)) {
-                        
+            !processor(connection, dx_get_order_source(subscriptions->elements[i]), symbols, symbol_count, event_types)) {
+
             dx_mutex_unlock(&(context->subscr_guard));
-            
+
             return false;
         }
     }
-    
+
     return dx_mutex_unlock(&(context->subscr_guard));
+}
+
+/* -------------------------------------------------------------------------- */
+
+/* Functions for working with order source */
+
+bool dx_set_order_source(dxf_subscription_t subscr_id, dxf_const_string_t source) {
+    dx_clear_order_source(subscr_id);
+
+    if (dx_add_order_source(subscr_id, source))
+        return true;
+
+    return false;
+}
+
+/* -------------------------------------------------------------------------- */
+
+#define DX_ORDER_SOURCE_COMPARATOR(l, r) (dx_compare_strings(l.suffix, r.suffix))
+
+bool dx_add_order_source(dxf_subscription_t subscr_id, dxf_const_string_t source) {
+    dx_subscription_data_ptr_t subscr_data = (dx_subscription_data_ptr_t)subscr_id;
+
+    bool failed = false;
+    dx_suffix_t new_source;
+    bool found = false;
+    int index = 0;
+    dx_copy_string_len(new_source.suffix, source, RECORD_SUFFIX_SIZE);
+    if (subscr_data->order_source.elements == NULL) {
+        DX_ARRAY_INSERT(subscr_data->order_source, dx_suffix_t, new_source, index, dx_capacity_manager_halfer, failed);
+    }
+    else {
+        DX_ARRAY_SEARCH(subscr_data->order_source.elements, 0, subscr_data->order_source.size, new_source, DX_ORDER_SOURCE_COMPARATOR, false, found, index);
+        if (!found)
+            DX_ARRAY_INSERT(subscr_data->order_source, dx_suffix_t, new_source, index, dx_capacity_manager_halfer, failed);
+    }
+    if (failed) {
+        return dx_set_error_code(dx_sec_not_enough_memory);
+    }
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+void dx_clear_order_source(dxf_subscription_t subscr_id) {
+    dx_subscription_data_ptr_t subscr_data = (dx_subscription_data_ptr_t)subscr_id;
+    dx_free(subscr_data->order_source.elements);
+    subscr_data->order_source.elements = NULL;
+    subscr_data->order_source.size = 0;
+    subscr_data->order_source.capacity = 0;
+}
+
+dx_order_source_array_ptr_t dx_get_order_source(dxf_subscription_t subscr_id) {
+    dx_subscription_data_ptr_t subscr_data = (dx_subscription_data_ptr_t)subscr_id;
+    return &subscr_data->order_source;
 }
