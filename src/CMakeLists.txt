@@ -115,7 +115,7 @@ set (ADDITIONAL_LIBRARIES "")
 
 if (MSVC)
     set(CMAKE_C_FLAGS_DEBUG "/TC /RTC1 /MTd /Od")
-    set(CMAKE_C_FLAGS_RELEASE "/O2")
+    set(CMAKE_C_FLAGS_RELEASE "/O2 /MT")
     add_definitions (-D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE -D_USRDLL -DDXFEED_EXPORTS /Gd /TC /Zc:wchar_t /Zc:forScope /Gm- /W3 /Ob0)
     
     set (ADDITIONAL_LIBRARIES

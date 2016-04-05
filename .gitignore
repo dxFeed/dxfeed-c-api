@@ -16,6 +16,7 @@
 
 # /tests/CommandLineSample/
 /tests/CommandLineSample/*.user
+/tests/CommandLineSample/build
 
 # /tests/ConnectionTest/
 /tests/ConnectionTest/*.user
