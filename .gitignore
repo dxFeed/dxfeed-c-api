@@ -41,8 +41,10 @@
 
 # /wrappers/COM/samples/C++/
 /wrappers/COM/samples/C++/*.user
+/wrappers/COM/samples/C++/build
 
 # /wrappers/COM/src/
 /wrappers/COM/src/*.user
+/wrappers/COM/src/build
 
 log.log

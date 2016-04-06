@@ -69,8 +69,3 @@ set_target_properties(${LIB_DXFEED_PROJ}
 )
 
 add_dependencies(${PROJECT} ${LIB_DXFEED_PROJ})
-
-#add_custom_command(TARGET ${PROJECT} POST_BUILD
-#                   COMMAND ${CMAKE_COMMAND} -E copy
-#                       ${CMAKE_BINARY_DIR}/config $<TARGET_FILE_DIR:MyTarget>
-#)
