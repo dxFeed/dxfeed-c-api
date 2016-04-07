@@ -167,7 +167,7 @@ static const dx_record_info_t g_record_info[dx_rid_count] = {
    */
 
 /* List stores records. The list is not cleared until at least one connection is opened. */
-static dx_record_list_t g_records_list = { NULL, 0, 0, 0, INVALID_HANDLE_VALUE };
+static dx_record_list_t g_records_list = { NULL, 0, 0, 0, INVALID_MUTEX };
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -254,7 +254,7 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_data_structures) {
 }
 
 void dx_init_records_list() {
-    if (g_records_list.guard == INVALID_HANDLE_VALUE) {
+    if (g_records_list.guard == INVALID_MUTEX) {
         dx_mutex_create(&g_records_list.guard);
     }
 }
@@ -645,7 +645,7 @@ void dx_clear_records_list() {
     dx_mutex_unlock(&(g_records_list.guard));
 
     dx_mutex_destroy(&(g_records_list.guard));
-    g_records_list.guard = INVALID_HANDLE_VALUE;
+    g_records_list.guard = INVALID_MUTEX;
 }
 
 int dx_get_records_list_count() {
