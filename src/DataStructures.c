@@ -377,7 +377,7 @@ dx_record_id_t dx_get_record_id_by_name(dxf_const_string_t record_name) {
     dx_record_id_t record_id = 0;
 
     dx_init_records_list_guard();
-    dx_mutex_lock(guard);
+    dx_mutex_lock(&guard);
 
     for (; record_id < g_records_list.size; ++record_id) {
         if (dx_compare_strings(g_records_list.elements[record_id].name, record_name) == 0) {
