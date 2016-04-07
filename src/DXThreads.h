@@ -37,7 +37,6 @@
 typedef pthread_t dx_thread_t;
 typedef pthread_key_t dx_key_t;
 typedef pthread_mutex_t dx_mutex_t;
-#define INVALID_MUTEX PTHREAD_MUTEX_INITIALIZER
 #else /* !defined(_WIN32) || defined(USE_PTHREADS) */
 #	include <windows.h>
 #	define USE_WIN32_THREADS
@@ -45,7 +44,6 @@ typedef HANDLE dx_thread_t;
 typedef DWORD dx_key_t;
 typedef HANDLE dx_mutex_t;
 typedef void pthread_attr_t;
-#define INVALID_MUTEX INVALID_HANDLE_VALUE
 #endif /* !defined(_WIN32) || defined(USE_PTHREADS) */
 
 #include "PrimitiveTypes.h"

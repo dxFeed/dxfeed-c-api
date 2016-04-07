@@ -37,8 +37,4 @@ typedef int bool;
     #define NULL ((void*)0)
 #endif // NULL
 
-#ifndef INVALID_HANDLE_VALUE
-    #define INVALID_HANDLE_VALUE ((HANDLE)(LONG_PTR)-1)
-#endif
-
 #endif /* PRIMITIVE_TYPES_H_INCLUDED */
