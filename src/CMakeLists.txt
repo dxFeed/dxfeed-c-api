@@ -17,7 +17,6 @@ set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE TYPE INTERNAL FORCE)
 project(${PROJECT}) 
 
 include_directories(${INCLUDE_DIR})
-include_directories(${PTHREADS_INCLUDE_DIR})
 
 set(EXPORT_HEADERS
     ${INCLUDE_DIR}/DXErrorCodes.h
@@ -25,12 +24,6 @@ set(EXPORT_HEADERS
     ${INCLUDE_DIR}/DXTypes.h
     ${INCLUDE_DIR}/EventData.h
     ${INCLUDE_DIR}/RecordData.h
-    )
-    
-set (PTHREAD_HEADERS
-    ${PTHREADS_INCLUDE_DIR}/pthread.h
-    ${PTHREADS_INCLUDE_DIR}/sched.h
-    ${PTHREADS_INCLUDE_DIR}/semaphore.h
     )
  
 set (HEADER_FILES 
@@ -101,7 +94,6 @@ set (SOURCE_FILES
 set (ALL_HEADERS
     ${HEADER_FILES}
     ${EXPORT_HEADERS}
-    ${PTHREAD_HEADERS}
     ${PARSER_HEADERS}
     )
     
@@ -127,8 +119,23 @@ if (MSVC)
     set(CMAKE_C_STANDARD_LIBRARIES "" CACHE STRING "" FORCE)
     # End hack
     
-elseif (CMAKE_COMPILER_IS_GNUCXX)
-	add_definitions (-Wall -pedantic -O2 -DUSE_PTHREADS -std=gnu99 -fPIC)
+    include_directories(${PTHREADS_INCLUDE_DIR})
+    
+    set (PTHREAD_HEADERS
+        ${PTHREADS_INCLUDE_DIR}/pthread.h
+        ${PTHREADS_INCLUDE_DIR}/sched.h
+        ${PTHREADS_INCLUDE_DIR}/semaphore.h
+    )
+    
+    set (ALL_HEADERS
+        ${ALL_HEADERS}
+        ${PTHREAD_HEADERS}
+    )
+    
+    source_group("Third Party\\pthreads" FILES ${PTHREAD_HEADERS})
+    
+elseif (CMAKE_COMPILER_IS_GNUCC)
+	add_definitions (-O2 -DUSE_PTHREADS -std=gnu99 -fPIC)
     
     set (SOURCE_FILES
         ${SOURCE_FILES}
@@ -138,6 +145,11 @@ elseif (CMAKE_COMPILER_IS_GNUCXX)
         ${ALL_SOURCES}
         Linux.c
     )
+    set (ADDITIONAL_LIBRARIES
+        ${ADDITIONAL_LIBRARIES}
+        pthread
+    )
+    
 else ()
 	message ("Unknown compiler")
 endif ()
@@ -148,7 +160,6 @@ source_group ("Parser\\Headers" FILES ${PARSER_HEADERS})
 source_group ("Parser\\Sources" FILES ${PARSER_SOURCES})
 source_group ("Parser\\Test" FILES ${PARSER_TESTS})
 source_group ("Source Files" FILES ${SOURCE_FILES}) 
-source_group ("Third Party\\pthreads" FILES ${PTHREAD_HEADERS})
 
 add_library (${PROJECT} SHARED ${ALL_HEADERS} ${ALL_SOURCES})
 

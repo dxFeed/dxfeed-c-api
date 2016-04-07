@@ -44,8 +44,8 @@ if(MSVC)
     set(CMAKE_C_STANDARD_LIBRARIES "" CACHE STRING "" FORCE)
     # End hack
     
-elseif(CMAKE_COMPILER_IS_GNUCXX)
-	add_definitions(-Wall -pedantic -O2 -DUSE_PTHREADS -std=gnu99)
+elseif(CMAKE_COMPILER_IS_GNUCC)
+	add_definitions(-O2 -DUSE_PTHREADS -std=gnu99)
 else()
 	message("Unknown compiler")
 endif()
