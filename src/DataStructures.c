@@ -167,7 +167,7 @@ static const dx_record_info_t g_record_info[dx_rid_count] = {
    */
 
 /* List stores records. The list is not cleared until at least one connection is opened. */
-static dx_record_list_t g_records_list = { NULL, 0, 0, 0, INVALID_MUTEX };
+static dx_record_list_t g_records_list = { NULL, 0, 0, 0, (dx_mutex_t)INVALID_MUTEX };
 
 /* -------------------------------------------------------------------------- */
 /*
