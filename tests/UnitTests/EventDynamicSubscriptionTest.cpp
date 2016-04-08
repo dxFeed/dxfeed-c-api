@@ -233,7 +233,7 @@ bool event_dynamic_subscription_test(void) {
     drop_trade_counter();
 
     //Check order events
-    printf("Wait events from order event only...");
+    printf("Wait events from order event only...\n");
     while (loop_counter--) {
         if (is_thread_terminate()) {
             printf("Error: Thread was terminated!\n");

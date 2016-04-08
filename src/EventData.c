@@ -137,7 +137,7 @@ bool dx_get_order_subscription_params(dxf_connection_t connection, dx_order_sour
 
 bool dx_get_trade_subscription_params(dxf_connection_t connection, OUT dx_event_subscription_param_list_t* param_list) {
     dxf_char_t ch = 'A';
-    dxf_char_t trade_name_buf[TRADE_TMPL_LEN + 2];
+    dxf_char_t trade_name_buf[TRADE_TMPL_LEN + 2] = { 0 };
     CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Trade", dx_st_ticker);
 
     //fill trades Trade&A..Trade&Z
