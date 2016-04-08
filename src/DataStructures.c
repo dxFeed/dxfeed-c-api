@@ -160,12 +160,6 @@ static const dx_record_info_t g_record_info[dx_rid_count] = {
     { L"TimeAndSale", sizeof(dx_fields_time_and_sale) / sizeof(dx_fields_time_and_sale[0]), dx_fields_time_and_sale }
 };
 
-/* In the Java code, the exchange code is determined by the record name: it's the last symbol of
-   the record name if the second last symbol is '&', otherwise it's zero.
-   Here we don't have any exchange code semantics in the record names (and neither the Java code does),
-   so all the record exchange codes are set to zero 
-   */
-
 /* List stores records. The list is not cleared until at least one connection is opened. */
 static dx_record_list_t g_records_list = { NULL, 0, 0, 0 };
 static dx_mutex_t guard;
