@@ -61,7 +61,6 @@ bool dx_process_connection_subscriptions (dxf_connection_t connection, dx_subscr
 
 
 /* Functions for working with order source */
-bool dx_set_order_source(dxf_subscription_t subscr_id, dxf_const_string_t source);
 bool dx_add_order_source(dxf_subscription_t subscr_id, dxf_const_string_t source);
 void dx_clear_order_source(dxf_subscription_t subscr_id);
 dx_order_source_array_ptr_t dx_get_order_source(dxf_subscription_t subscr_id);

@@ -170,6 +170,7 @@
   <ItemGroup>
     <ClCompile Include="EventDynamicSubscriptionTest.cpp" />
     <ClCompile Include="EventSubscriptionTest.c" />
+    <ClCompile Include="OrderSourceConfigurationTest.c" />
     <ClCompile Include="UnitTests.c" />
     <ClCompile Include="..\..\src\ConnectionContextData.c" />
     <ClCompile Include="..\..\src\DXAlgorithms.c" />
@@ -213,6 +214,7 @@
     <ClInclude Include="..\..\src\EventRecordBuffers.h" />
     <ClInclude Include="..\..\src\Logger.h" />
     <ClInclude Include="..\..\src\SymbolCodec.h" />
+    <ClInclude Include="OrderSourceConfigurationTest.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\DXFeed.vcxproj">

@@ -537,37 +537,43 @@ DXFEED_API ERRORCODE dxf_get_last_error (OUT int* error_code, OUT dxf_const_stri
 
 DXFEED_API ERRORCODE dxf_set_order_source(dxf_subscription_t subscription, const char * source)
 {
-    dxf_string_t str;
-    if (source == NULL || source == "") {
-        dx_set_error_code(dx_ec_invalid_func_param);
-        return DXF_FAILURE;
-    }
-
-    str = dx_ansi_to_unicode(source);
-
-    if (dx_set_order_source(subscription, str)) {
-        dx_free(str);
-        return DXF_SUCCESS;
-    }
-    dx_free(str);
-    return DXF_FAILURE;
+    dx_clear_order_source(subscription);
+    return dxf_add_order_source(subscription, source);
 }
 
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const char * source)
 {
+    dxf_connection_t connection;
     dxf_string_t str;
+    dxf_const_string_t* symbols;
+    int symbol_count;
+    int events;
+
     if (source == NULL || source == "") {
         dx_set_error_code(dx_ec_invalid_func_param);
         return DXF_FAILURE;
     }
 
     str = dx_ansi_to_unicode(source);
-    if (dx_add_order_source(subscription, str)) {
+
+    if (!dx_add_order_source(subscription, str) ||
+        !dx_get_event_subscription_symbols(subscription, &symbols, &symbol_count)) {
         dx_free(str);
-        return DXF_SUCCESS;
+        return DXF_FAILURE;
+    }
+
+    if (symbol_count > 0) {
+        if (!dx_get_subscription_connection(subscription, &connection) ||
+            !dx_get_event_subscription_event_types(subscription, &events) ||
+            !dx_unsubscribe(connection, dx_get_order_source(subscription), symbols, symbol_count, events) ||
+            !dx_send_record_description(connection, false) ||
+            !dx_subscribe(connection, dx_get_order_source(subscription), symbols, symbol_count, events)) {
+            dx_free(str);
+            return DXF_FAILURE;
+        }
     }
     dx_free(str);
-    return DXF_FAILURE;
+    return DXF_SUCCESS;
 }

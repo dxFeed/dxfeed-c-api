@@ -1170,15 +1170,6 @@ bool dx_process_connection_subscriptions (dxf_connection_t connection, dx_subscr
 
 /* Functions for working with order source */
 
-bool dx_set_order_source(dxf_subscription_t subscr_id, dxf_const_string_t source) {
-    dx_clear_order_source(subscr_id);
-
-    if (dx_add_order_source(subscr_id, source))
-        return true;
-
-    return false;
-}
-
 /* -------------------------------------------------------------------------- */
 
 #define DX_ORDER_SOURCE_COMPARATOR(l, r) (dx_compare_strings(l.suffix, r.suffix))
