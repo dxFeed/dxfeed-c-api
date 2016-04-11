@@ -703,7 +703,7 @@ dxf_subscription_t dx_create_event_subscription (dxf_connection_t connection, in
         res &= dx_add_order_source(subscr_data, L"BYX");
         res &= dx_add_order_source(subscr_data, L"BZX");
         res &= dx_add_order_source(subscr_data, L"DEA");
-        res &= dx_add_order_source(subscr_data, L"DEX");
+        res &= dx_add_order_source(subscr_data, L"ISE");
         res &= dx_add_order_source(subscr_data, L"DEX");
         res &= dx_add_order_source(subscr_data, L"IST");
     }
