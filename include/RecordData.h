@@ -104,6 +104,9 @@ typedef struct {
     dxf_int_t mmask_time;
     dxf_double_t mmask_price;
     dxf_int_t mmask_size;
+    dxf_int_t mmbid_count;
+    dxf_int_t mmask_count;
+
 } dx_market_maker_t;
 
 typedef struct {
@@ -114,6 +117,7 @@ typedef struct {
     dxf_int_t size;
     dxf_int_t flags;
     dxf_int_t mmid;
+    dxf_int_t count;
 } dx_order_t;
 
 typedef struct {

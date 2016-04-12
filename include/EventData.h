@@ -106,6 +106,7 @@ typedef struct {
     dxf_double_t price;
     dxf_long_t size;
     dxf_char_t source[RECORD_SUFFIX_SIZE];
+    dxf_int_t count;
 } dxf_order_t;
 
 /* -------------------------------------------------------------------------- */
