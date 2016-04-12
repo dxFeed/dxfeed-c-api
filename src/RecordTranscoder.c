@@ -362,6 +362,7 @@ bool dx_transcode_market_maker_to_order_bid (dx_record_transcoder_connection_con
             | ((dxf_long_t)exchange_code << DX_ORDER_EXCHANGE_SHIFT) | ((dxf_long_t)cur_record->mm_id);
         cur_event->side = DXF_ORDER_SIDE_BUY;
         cur_event->level = DXF_ORDER_LEVEL_AGGREGATE;
+        cur_event->count = cur_record->mmbid_count;
         
         if (cur_event->market_maker == NULL ||
             !dx_store_string_buffer(context->rbcc, cur_event->market_maker)) {
@@ -401,6 +402,7 @@ bool dx_transcode_market_maker_to_order_ask (dx_record_transcoder_connection_con
             | ((dxf_long_t)exchange_code << DX_ORDER_EXCHANGE_SHIFT) | ((dxf_long_t)cur_record->mm_id);
         cur_event->side = DXF_ORDER_SIDE_SELL;
         cur_event->level = DXF_ORDER_LEVEL_AGGREGATE;
+        cur_event->count = cur_record->mmask_count;
 
         if (cur_event->market_maker == NULL ||
             !dx_store_string_buffer(context->rbcc, cur_event->market_maker)) {
@@ -482,6 +484,7 @@ bool RECORD_TRANSCODER_NAME(dx_order_t) (dx_record_transcoder_connection_context
         cur_event->size = cur_record->size;
         dx_memset(cur_event->source, 0, sizeof(cur_event->source));
         dx_copy_string_len(cur_event->source, suffix, dx_string_length(suffix));
+        cur_event->count = cur_record->count;
 
         if (cur_event->market_maker != NULL &&
             !dx_store_string_buffer(context->rbcc, cur_event->market_maker)) {

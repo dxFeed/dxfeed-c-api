@@ -97,7 +97,9 @@ static const dx_field_info_t dx_fields_market_maker[] = {
 	{ dx_fid_compact_int, L"MMBid.Size", DX_RECORD_FIELD_SETTER_NAME(dx_market_maker_t, mmbid_size), DX_RECORD_FIELD_DEF_VAL_NAME(dx_market_maker_t, mmbid_size) },
 	{ dx_fid_compact_int, L"MMAsk.Time", DX_RECORD_FIELD_SETTER_NAME(dx_market_maker_t, mmask_time), DX_RECORD_FIELD_DEF_VAL_NAME(dx_market_maker_t, mmask_time) },
 	{ dx_fid_compact_int | dx_fid_flag_decimal, L"MMAsk.Price", DX_RECORD_FIELD_SETTER_NAME(dx_market_maker_t, mmask_price), DX_RECORD_FIELD_DEF_VAL_NAME(dx_market_maker_t, mmask_price) },
-	{ dx_fid_compact_int, L"MMAsk.Size", DX_RECORD_FIELD_SETTER_NAME(dx_market_maker_t, mmask_size), DX_RECORD_FIELD_DEF_VAL_NAME(dx_market_maker_t, mmask_size) }
+	{ dx_fid_compact_int, L"MMAsk.Size", DX_RECORD_FIELD_SETTER_NAME(dx_market_maker_t, mmask_size), DX_RECORD_FIELD_DEF_VAL_NAME(dx_market_maker_t, mmask_size) }, 
+	{ dx_fid_compact_int, L"MMBid.Count", DX_RECORD_FIELD_SETTER_NAME(dx_market_maker_t, mmbid_count), DX_RECORD_FIELD_DEF_VAL_NAME(dx_market_maker_t, mmbid_count) }, 
+	{ dx_fid_compact_int, L"MMAsk.Count", DX_RECORD_FIELD_SETTER_NAME(dx_market_maker_t, mmask_count), DX_RECORD_FIELD_DEF_VAL_NAME(dx_market_maker_t, mmask_count) }
 }; 
 
 /* -------------------------------------------------------------------------- */
@@ -113,7 +115,8 @@ static const dx_field_info_t dx_fields_order[] = {
 	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Price", DX_RECORD_FIELD_SETTER_NAME(dx_order_t, price), DX_RECORD_FIELD_DEF_VAL_NAME(dx_order_t, price) },
 	{ dx_fid_compact_int, L"Size", DX_RECORD_FIELD_SETTER_NAME(dx_order_t, size), DX_RECORD_FIELD_DEF_VAL_NAME(dx_order_t, size) },
 	{ dx_fid_compact_int, L"Flags", DX_RECORD_FIELD_SETTER_NAME(dx_order_t, flags), DX_RECORD_FIELD_DEF_VAL_NAME(dx_order_t, flags) },
-	{ dx_fid_compact_int, L"MMID", DX_RECORD_FIELD_SETTER_NAME(dx_order_t, mmid), DX_RECORD_FIELD_DEF_VAL_NAME(dx_order_t, mmid) }
+	{ dx_fid_compact_int, L"MMID", DX_RECORD_FIELD_SETTER_NAME(dx_order_t, mmid), DX_RECORD_FIELD_DEF_VAL_NAME(dx_order_t, mmid) },
+	{ dx_fid_compact_int, L"Count", DX_RECORD_FIELD_SETTER_NAME(dx_order_t, count), DX_RECORD_FIELD_DEF_VAL_NAME(dx_order_t, count) }
 }; 
 
 /* -------------------------------------------------------------------------- */

@@ -106,6 +106,8 @@ DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_market_maker_t, mmbid_size);
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_market_maker_t, mmask_time);
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_market_maker_t, mmask_price);
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_market_maker_t, mmask_size);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_market_maker_t, mmbid_count);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_market_maker_t, mmask_count);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -120,6 +122,7 @@ DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_order_t, price);
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_order_t, size);
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_order_t, flags);
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_order_t, mmid);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_order_t, count);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -222,6 +225,8 @@ DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_market_maker_t, mmbid_size);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_market_maker_t, mmask_time);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_market_maker_t, mmask_price);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_market_maker_t, mmask_size);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_market_maker_t, mmbid_count);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_market_maker_t, mmask_count);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -236,6 +241,7 @@ DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_order_t, price);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_order_t, size);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_order_t, flags);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_order_t, mmid);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_order_t, count);
 
 /* -------------------------------------------------------------------------- */
 /*
