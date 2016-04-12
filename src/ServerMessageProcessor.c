@@ -1240,6 +1240,8 @@ bool dx_read_describe_protocol_message_list (dx_server_msg_proc_connection_conte
 
 bool dx_process_describe_protocol (dx_server_msg_proc_connection_context_t* context) {
     dxf_int_t magic;
+    int buf_pos;
+    int buf_limit;
 
 	dx_logging_verbose_info(L"Processing describe protocol");
 	
@@ -1286,6 +1288,12 @@ bool dx_process_describe_protocol (dx_server_msg_proc_connection_context_t* cont
 
         return false;
 	}
+
+    //All additional data must be skipped according to message length
+    buf_pos = dx_get_in_buffer_position(context->bicc);
+    buf_limit = dx_get_in_buffer_limit(context->bicc);
+    if (buf_pos < buf_limit)
+        dx_set_in_buffer_position(context->bicc, buf_limit);
 
 	return dx_mutex_unlock(&(context->describe_protocol_guard));
 }
