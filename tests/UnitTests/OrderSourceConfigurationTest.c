@@ -73,7 +73,8 @@ void print_timestamp_(dxf_long_t timestamp) {
 }
 
 
-void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count, void* user_data) {
+void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, 
+              dxf_event_flags_t flags, int data_count, void* user_data) {
     dxf_int_t i = 0;
     dxf_order_t* orders = (dxf_order_t*)data;
 

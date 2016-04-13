@@ -54,6 +54,9 @@ static dxf_char_t g_penta_characters[1024];
 
 static dxf_int_t g_wildcard_cipher;
 
+#define MRU_EVENT_FLAGS 1
+static dxf_int_t g_mru_event_flags = MRU_EVENT_FLAGS;
+
 /* -------------------------------------------------------------------------- */
 /*
  *	Helper functions
@@ -268,139 +271,171 @@ bool dx_decode_symbol_name (dxf_int_t cipher, OUT dxf_const_string_t* symbol) {
 }
 /* -------------------------------------------------------------------------- */
 
-bool dx_codec_read_symbol (void* bicc, dxf_char_t* buffer, int buffer_length, OUT dxf_string_t* result, OUT dxf_int_t* cipher_result) {
+bool dx_codec_read_symbol (void* bicc, dxf_char_t* buffer, int buffer_length, OUT dxf_string_t* result, 
+                            OUT dxf_int_t* cipher_result, OUT dxf_event_flags_t* flags) {
     dxf_int_t i;
     dxf_long_t penta;
     dxf_int_t tmp_int_1;
     dxf_int_t tmp_int_2;
     dxf_int_t plen;
     dxf_int_t cipher;
+    int event_flags_pos;
+    dxf_int_t event_flags_bytes = 0;
 
-    CHECKED_CALL_2(dx_read_unsigned_byte, bicc, &i);
-    
-    if (i < 0x80) { // 15-bit
-        CHECKED_CALL_2(dx_read_unsigned_byte, bicc, &tmp_int_1);
-        
-        penta = (i << 8) + tmp_int_1;
-    } else if (i < 0xC0) { // 30-bit
-        CHECKED_CALL_2(dx_read_unsigned_byte, bicc, &tmp_int_1);
-        CHECKED_CALL_2(dx_read_unsigned_short, bicc, &tmp_int_2);
-        
-        penta = ((i & 0x3F) << 24) + (tmp_int_1 << 16) + tmp_int_2;
-    } else if (i < 0xE0) { // reserved (first diapason)
-        return dx_set_error_code(dx_pcec_reserved_bit_sequence);
-    } else if (i < 0xF0) { // 20-bit
-        CHECKED_CALL_2(dx_read_unsigned_short, bicc, &tmp_int_1);
-        
-        penta = ((i & 0x0F) << 16) + tmp_int_1;
-    } else if (i < 0xF8) { // 35-bit
-        CHECKED_CALL_2(dx_read_int, bicc, &tmp_int_1);
-        
-        penta = ((dxf_long_t)(i & 0x07) << 32) + (tmp_int_1 & 0xFFFFFFFFL);
-    } else if (i < 0xFC) { // reserved (second diapason)
-        return dx_set_error_code(dx_pcec_reserved_bit_sequence);
-    } else if (i == 0xFC) { // UTF-8
-        // todo This is inefficient, but currently UTF-8 is not used (compatibility mode). Shall be rewritten when UTF-8 become active.
-        CHECKED_CALL_2(dx_read_utf_string, bicc, result);
-        
-        *cipher_result = 0;
-        
-        return true;
-    } else if (i == 0xFD) { // CESU-8
-        dxf_long_t length;
-        dxf_int_t k;
-        dxf_char_t* symbol_buffer;
-        
-        CHECKED_CALL_2(dx_read_compact_long, bicc, &length);
-        
-        if (length < 0 || length > INT_MAX) {
-            return dx_set_error_code(dx_pcec_invalid_symbol_length);
+    *flags = 0;
+
+    while (true) {
+        CHECKED_CALL_2(dx_read_unsigned_byte, bicc, &i);
+
+        if (i < 0x80) { // 15-bit
+            CHECKED_CALL_2(dx_read_unsigned_byte, bicc, &tmp_int_1);
+
+            penta = (i << 8) + tmp_int_1;
         }
-        if (length == 0) {
-            *result = dx_malloc(1);
-            
+        else if (i < 0xC0) { // 30-bit
+            CHECKED_CALL_2(dx_read_unsigned_byte, bicc, &tmp_int_1);
+            CHECKED_CALL_2(dx_read_unsigned_short, bicc, &tmp_int_2);
+
+            penta = ((i & 0x3F) << 24) + (tmp_int_1 << 16) + tmp_int_2;
+        }
+        else if (i < 0xE0) { // reserved (first diapason)
+            return dx_set_error_code(dx_pcec_reserved_bit_sequence);
+        }
+        else if (i < 0xF0) { // 20-bit
+            CHECKED_CALL_2(dx_read_unsigned_short, bicc, &tmp_int_1);
+
+            penta = ((i & 0x0F) << 16) + tmp_int_1;
+        }
+        else if (i < 0xF8) { // 35-bit
+            CHECKED_CALL_2(dx_read_int, bicc, &tmp_int_1);
+
+            penta = ((dxf_long_t)(i & 0x07) << 32) + (tmp_int_1 & 0xFFFFFFFFL);
+        }
+        else if (i == 0xF8) { // mru event flags
+             if (event_flags_bytes > 0)
+                 return dx_set_error_code(dx_pcec_invalid_event_flag);
+             *flags = g_mru_event_flags;
+             event_flags_bytes = 1;
+             continue; // read next byte
+         }
+         else if (i == 0xF9) { // new event flags
+             if (event_flags_bytes > 0)
+                 return dx_set_error_code(dx_pcec_invalid_event_flag);
+             event_flags_pos = dx_get_in_buffer_position(bicc);
+             CHECKED_CALL_2(dx_read_compact_int, bicc, &g_mru_event_flags);
+             *flags = g_mru_event_flags;
+             event_flags_bytes = dx_get_in_buffer_position(bicc) - event_flags_pos;
+             continue; // read next byte
+         }
+        else if (i < 0xFC) { // reserved (second diapason)
+            return dx_set_error_code(dx_pcec_reserved_bit_sequence);
+        }
+        else if (i == 0xFC) { // UTF-8
+            // todo This is inefficient, but currently UTF-8 is not used (compatibility mode). Shall be rewritten when UTF-8 become active.
+            CHECKED_CALL_2(dx_read_utf_string, bicc, result);
+
+            *cipher_result = 0;
+
+            return true;
+        }
+        else if (i == 0xFD) { // CESU-8
+            dxf_long_t length;
+            dxf_int_t k;
+            dxf_char_t* symbol_buffer;
+
+            CHECKED_CALL_2(dx_read_compact_long, bicc, &length);
+
+            if (length < 0 || length > INT_MAX) {
+                return dx_set_error_code(dx_pcec_invalid_symbol_length);
+            }
+            if (length == 0) {
+                *result = dx_malloc(1);
+
+                if (*result == NULL) {
+                    return false;
+                }
+
+                **result = 0; // empty string
+                *cipher_result = 0;
+
+                return true;
+            }
+
+            /* storing symbol as a string */
+            symbol_buffer = length <= buffer_length ? buffer : dx_create_string((int)length);
+
+            if (symbol_buffer == NULL) {
+                return false;
+            }
+
+            for (k = 0; k < length; ++k) {
+                dxf_int_t code_point;
+
+                if (!dx_read_utf_char(bicc, &code_point)) {
+                    if (length > buffer_length)
+                        dx_free(symbol_buffer);
+
+                    return false;
+                }
+
+                if (code_point > 0xFFFF) {
+                    if (length > buffer_length)
+                        dx_free(symbol_buffer);
+
+                    return dx_set_error_code(dx_utfec_bad_utf_data_format_server);
+                }
+
+                symbol_buffer[k] = (dxf_char_t)code_point;
+            }
+
+            if (length <= buffer_length && (length & dx_get_codec_valid_cipher()) == 0) {
+                *cipher_result = (dxf_int_t)length;
+
+                return true;
+            }
+
+            *result = dx_create_string_src_len(symbol_buffer, (int)length);
+
             if (*result == NULL) {
                 return false;
             }
-            
-            **result = 0; // empty string
+
             *cipher_result = 0;
-            
+
+            return true;
+        }
+        else if (i == 0xFE) { // 0-bit
+            penta = 0;
+        }
+        else { // void (null)
+            *result = NULL;
+            *cipher_result = 0;
+
             return true;
         }
 
-        /* storing symbol as a string */
-        symbol_buffer = length <= buffer_length ? buffer : dx_create_string((int)length);
-        
-        if (symbol_buffer == NULL) {
-            return false;
+        plen = 0;
+
+        while (((dxf_ulong_t)penta >> plen) != 0) {
+            plen += 5;
         }
 
-        for (k = 0; k < length; ++k) {
-            dxf_int_t code_point;
-            
-            if (!dx_read_utf_char(bicc, &code_point)) {
-				if (length > buffer_length)
-					dx_free(symbol_buffer);
-                
+        cipher = dx_encode_penta(penta, plen);
+
+        if (cipher == 0) {
+            dxf_string_t str = (dxf_string_t)dx_penta_to_string(penta);
+
+            if (str == NULL) {
                 return false;
             }
-            
-            if (code_point > 0xFFFF) {
-				if (length > buffer_length)
-					dx_free(symbol_buffer);
-                
-                return dx_set_error_code(dx_utfec_bad_utf_data_format_server);
-            }
-            
-            symbol_buffer[k] = (dxf_char_t)code_point;
-        }
-        
-        if (length <= buffer_length && (length & dx_get_codec_valid_cipher()) == 0) {
-            *cipher_result = (dxf_int_t)length;
-            
-            return true;
-        }
-        
-        *result = dx_create_string_src_len(symbol_buffer, (int)length);
-        
-        if (*result == NULL) {
-            return false;
-        }
-        
-        *cipher_result = 0;
-        
-        return true;
-    } else if (i == 0xFE) { // 0-bit
-        penta = 0;
-    } else { // void (null)
-        *result = NULL;
-        *cipher_result = 0;
-        
-        return true;
-    }
-    
-    plen = 0;
-    
-    while (((dxf_ulong_t)penta >> plen) != 0) {
-        plen += 5;
-    }
-    
-    cipher = dx_encode_penta(penta, plen);
-    
-    if (cipher == 0) {
-        dxf_string_t str = (dxf_string_t)dx_penta_to_string(penta);
-        
-        if (str == NULL) {
-            return false;
+
+            *result = str; // Generally this is inefficient, but this use-case shall not actually happen.
         }
 
-        *result = str; // Generally this is inefficient, but this use-case shall not actually happen.
+        *cipher_result = cipher;
+
+        return true;
     }
-    
-    *cipher_result = cipher;
-    
-    return true;
 }
 
 /* -------------------------------------------------------------------------- */
