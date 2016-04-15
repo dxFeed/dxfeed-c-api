@@ -55,6 +55,7 @@ static dxf_char_t g_penta_characters[1024];
 static dxf_int_t g_wildcard_cipher;
 
 #define MRU_EVENT_FLAGS 1
+//TODO: store in some context for multithreaded support
 static dxf_int_t g_mru_event_flags = MRU_EVENT_FLAGS;
 
 /* -------------------------------------------------------------------------- */
@@ -279,7 +280,7 @@ bool dx_codec_read_symbol (void* bicc, dxf_char_t* buffer, int buffer_length, OU
     dxf_int_t tmp_int_2;
     dxf_int_t plen;
     dxf_int_t cipher;
-    int event_flags_pos;
+    int event_flags_pos = 0;
     dxf_int_t event_flags_bytes = 0;
 
     *flags = 0;
@@ -312,21 +313,21 @@ bool dx_codec_read_symbol (void* bicc, dxf_char_t* buffer, int buffer_length, OU
             penta = ((dxf_long_t)(i & 0x07) << 32) + (tmp_int_1 & 0xFFFFFFFFL);
         }
         else if (i == 0xF8) { // mru event flags
-             if (event_flags_bytes > 0)
-                 return dx_set_error_code(dx_pcec_invalid_event_flag);
-             *flags = g_mru_event_flags;
-             event_flags_bytes = 1;
-             continue; // read next byte
-         }
-         else if (i == 0xF9) { // new event flags
-             if (event_flags_bytes > 0)
-                 return dx_set_error_code(dx_pcec_invalid_event_flag);
-             event_flags_pos = dx_get_in_buffer_position(bicc);
-             CHECKED_CALL_2(dx_read_compact_int, bicc, &g_mru_event_flags);
-             *flags = g_mru_event_flags;
-             event_flags_bytes = dx_get_in_buffer_position(bicc) - event_flags_pos;
-             continue; // read next byte
-         }
+            if (event_flags_bytes > 0)
+                return dx_set_error_code(dx_pcec_invalid_event_flag);
+            *flags = g_mru_event_flags;
+            event_flags_bytes = 1;
+            continue; // read next byte
+        }
+        else if (i == 0xF9) { // new event flags
+            if (event_flags_bytes > 0)
+                return dx_set_error_code(dx_pcec_invalid_event_flag);
+            event_flags_pos = dx_get_in_buffer_position(bicc);
+            CHECKED_CALL_2(dx_read_compact_int, bicc, &g_mru_event_flags);
+            *flags = g_mru_event_flags;
+            event_flags_bytes = dx_get_in_buffer_position(bicc) - event_flags_pos;
+            continue; // read next byte
+        }
         else if (i < 0xFC) { // reserved (second diapason)
             return dx_set_error_code(dx_pcec_reserved_bit_sequence);
         }
@@ -436,6 +437,7 @@ bool dx_codec_read_symbol (void* bicc, dxf_char_t* buffer, int buffer_length, OU
 
         return true;
     }
+    return false;
 }
 
 /* -------------------------------------------------------------------------- */
