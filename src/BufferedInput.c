@@ -571,7 +571,6 @@ bool dx_read_compact_int (void* context, OUT dxf_int_t* value) {
 	*value = n;
 
     return true;
-
 }
 
 /* -------------------------------------------------------------------------- */
