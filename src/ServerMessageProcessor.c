@@ -109,6 +109,7 @@ typedef struct {
 
 	dxf_string_t last_symbol;
 	dxf_int_t last_cipher;
+    dxf_event_flags_t last_flags;
 
     dx_record_server_support_state_list_t* record_server_support_states;
     dx_record_digest_list_t record_digests;
@@ -802,8 +803,11 @@ static bool dx_read_symbol (dx_server_msg_proc_connection_context_t* context) {
         return dx_set_error_code(dx_ec_invalid_func_param_internal);
     }
     
-    CHECKED_CALL_5(dx_codec_read_symbol, context->bicc, context->symbol_buffer, SYMBOL_BUFFER_LEN, &(context->symbol_result), &r);
-    
+    if (dx_codec_read_symbol(context->bicc, context->symbol_buffer, SYMBOL_BUFFER_LEN, 
+                             &(context->symbol_result), &r, &(context->last_flags)) == false) {
+        return false;
+    }
+        
     if ((r & dx_get_codec_valid_cipher()) != 0) {
         context->last_cipher = r;
         context->last_symbol = NULL;
@@ -1017,8 +1021,8 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 			return false;
 		}
 		
-        if (!dx_transcode_record_data(context->connection, record_id, suffix, context->last_symbol, context->last_cipher,
-            g_buffer_managers[record_info->info_id].record_buffer_getter(context->rbcc), record_count)) {
+        if (!dx_transcode_record_data(context->connection, record_id, suffix, context->last_symbol, context->last_cipher, 
+            context->last_flags, g_buffer_managers[record_info->info_id].record_buffer_getter(context->rbcc), record_count)) {
 			dx_free_string_buffers(context->rbcc);
 
 			return false;
