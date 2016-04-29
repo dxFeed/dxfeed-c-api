@@ -839,6 +839,41 @@ static bool dx_read_symbol (dx_server_msg_proc_connection_context_t* context) {
         setter(buffer, value); \
     }
 
+bool dx_read_qdtime_on_remove_event(dx_server_msg_proc_connection_context_t* context,
+                                    dx_record_id_t record_id, void* row) {
+    dxf_ulong_t qdtime;
+    const dx_record_item_t* record_info = dx_get_record_by_id(record_id);
+
+    CHECKED_CALL_2(dx_read_compact_long, context->bicc, &qdtime);
+    dx_logging_verbose_info(L"REMOVE_EVENT flag received, flags=%lX, compact long QDTime=%ld", context->last_flags, qdtime);
+
+    switch (record_info->info_id) {
+    case dx_rid_order: {
+            dx_order_t* order_row = (dx_order_t*)row;
+            dx_memset(order_row, 0, sizeof *order_row);
+
+            order_row->index = qdtime & 0xFFFFFFFF;
+        }
+      break;
+    case dx_rid_market_maker: {
+            dx_market_maker_t* mm_row = (dx_market_maker_t*)row;
+            dx_memset(mm_row, 0, sizeof *mm_row);
+            mm_row->mm_exchange = qdtime >> 8 * sizeof(dxf_ulong_t) / 2;
+            mm_row->mm_id = qdtime & 0xFFFFFFFF;
+        }
+        break;
+    case dx_rid_time_and_sale: {
+            dx_time_and_sale_t* ts_row = (dx_time_and_sale_t*)row;
+            dx_memset(ts_row, 0, sizeof *ts_row);
+            ts_row->time = qdtime >> 32;
+            ts_row->event_id = qdtime & 0xFFFFFFFF;
+        }
+        break;
+    }
+
+    return true;
+}
+
 bool dx_read_records (dx_server_msg_proc_connection_context_t* context,
                       dx_record_id_t record_id, void* record_buffer) {
 	int i = 0;
@@ -854,6 +889,10 @@ bool dx_read_records (dx_server_msg_proc_connection_context_t* context,
         return dx_set_error_code(dx_ec_invalid_func_param_internal);;
 	
 	dx_logging_verbose_info(L"Read records");
+
+    if (context->last_flags & dxf_ef_remove_event) {
+        return dx_read_qdtime_on_remove_event(context, record_id, record_buffer);
+    }
 
 	for (; i < record_digest->size; ++i) {
 		int serialization = record_digest->elements[i]->type & dx_fid_mask_serialization;
@@ -977,7 +1016,7 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 		}
 		symbol = dx_create_string_src(context->last_symbol);
 		dx_store_string_buffer(context->rbcc, symbol);
-	    
+
 		{
 			dxf_int_t id;
 
@@ -1015,12 +1054,14 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 			return false;
 		}
 		
-		if (!dx_read_records(context, record_id, record_buffer)) {
+
+        if (!dx_read_records(context, record_id, record_buffer)) {
 			dx_free_string_buffers(context->rbcc);
 			
 			return false;
 		}
-		
+		// TODO add assert to overlimit in context->bicc limit
+
         if (!dx_transcode_record_data(context->connection, record_id, suffix, context->last_symbol, context->last_cipher, 
             context->last_flags, g_buffer_managers[record_info->info_id].record_buffer_getter(context->rbcc), record_count)) {
 			dx_free_string_buffers(context->rbcc);
