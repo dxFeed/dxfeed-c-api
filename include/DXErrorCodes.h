@@ -121,6 +121,7 @@ typedef enum {
     
     dx_pcec_reserved_bit_sequence,
     dx_pcec_invalid_symbol_length,
+    dx_pcec_invalid_event_flag,
     
     /* event subscription error codes */
     

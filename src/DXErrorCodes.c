@@ -121,6 +121,7 @@ dxf_const_string_t dx_get_error_description (dx_error_code_t code) {
     
     case dx_pcec_reserved_bit_sequence: return L"Server data symbol format error";
     case dx_pcec_invalid_symbol_length: return L"Server data symbol format error";
+    case dx_pcec_invalid_event_flag: return L"Duplicated event flags prefix";
     
     /* event subscription error codes */
 

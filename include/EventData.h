@@ -129,6 +129,23 @@ static const dxf_int_t DXF_TIME_AND_SALE_TYPE_CANCEL = 2;
 
 /* -------------------------------------------------------------------------- */
 /*
+*	Events flag constants
+*/
+/* -------------------------------------------------------------------------- */
+
+typedef enum {
+    dxf_ef_tx_pending = 0x01,
+    dxf_ef_remove_event = 0x02,
+    dxf_ef_snapshot_begin = 0x04,
+    dxf_ef_snapshot_end = 0x08,
+    dxf_ef_snapshot_snip = 0x10,
+    dxf_ef_remove_symbol = 0x20
+} dxf_event_flag;
+
+typedef dxf_uint_t dxf_event_flags_t;
+
+/* -------------------------------------------------------------------------- */
+/*
  *	Event listener prototype
  
  *  event type here is a one-bit mask, not an integer
@@ -137,8 +154,8 @@ static const dxf_int_t DXF_TIME_AND_SALE_TYPE_CANCEL = 2;
 /* -------------------------------------------------------------------------- */
 
 typedef void (*dxf_event_listener_t) (int event_type, dxf_const_string_t symbol_name,
-                                      const dxf_event_data_t* data, int data_count,
-                                      void* user_data);
+                                      const dxf_event_data_t* data, dxf_event_flags_t flags,
+                                      int data_count, void* user_data);
                                      
 /* -------------------------------------------------------------------------- */
 /*

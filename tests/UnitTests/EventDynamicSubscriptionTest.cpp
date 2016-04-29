@@ -101,13 +101,15 @@ void print_timestamp(dxf_long_t timestamp){
 }
 /* -------------------------------------------------------------------------- */
 
-void trade_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count, void* user_data) {
+void trade_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, 
+                    dxf_event_flags_t flags, int data_count, void* user_data) {
     wprintf(L"%s{symbol=%s}\n", dx_event_type_to_string(event_type), symbol_name);
 
     inc_trade_counter();
 }
 
-void order_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count, void* user_data) {
+void order_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, 
+                    dxf_event_flags_t flags, int data_count, void* user_data) {
     wprintf(L"%s{symbol=%s}\n", dx_event_type_to_string(event_type), symbol_name);
 
     inc_order_counter();
