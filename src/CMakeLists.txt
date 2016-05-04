@@ -42,6 +42,7 @@ set (HEADER_FILES
     RecordTranscoder.h
     ServerMessageProcessor.h
     TaskQueue.h
+    Version.h
     )
  
  set (PARSER_HEADERS

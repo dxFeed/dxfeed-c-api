@@ -33,6 +33,7 @@
 #include "EventData.h"
 #include "ServerMessageProcessor.h"
 #include "TaskQueue.h"
+#include "Version.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -416,7 +417,7 @@ static bool dx_write_describe_protocol_magic (void* bocc) {
 static bool dx_write_describe_protocol_properties (void* bocc) {
     CHECKED_CALL_2(dx_write_compact_int, bocc, 2); /* count of properties */
     CHECKED_CALL_2(dx_write_utf_string, bocc, L"version"); 
-    CHECKED_CALL_2(dx_write_utf_string, bocc, L"DXFeed.cpp v 0.4 (c) Devexperts"); 
+    CHECKED_CALL_2(dx_write_utf_string, bocc, DX_LIBRARY_VERSION);
     CHECKED_CALL_2(dx_write_utf_string, bocc, L"opt");
     CHECKED_CALL_2(dx_write_utf_string, bocc, L"hs");
   

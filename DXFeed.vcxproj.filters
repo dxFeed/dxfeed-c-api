@@ -216,5 +216,8 @@
     <ClInclude Include="include\pthreads\semaphore.h">
       <Filter>Third Party\pthreads</Filter>
     </ClInclude>
+    <ClInclude Include="src\Version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
