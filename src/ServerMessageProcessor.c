@@ -858,7 +858,7 @@ bool dx_read_qdtime_on_remove_event(dx_server_msg_proc_connection_context_t* con
     case dx_rid_market_maker: {
             dx_market_maker_t* mm_row = (dx_market_maker_t*)row;
             dx_memset(mm_row, 0, sizeof *mm_row);
-            mm_row->mm_exchange = qdtime >> 8 * sizeof(dxf_ulong_t) / 2;
+            mm_row->mm_exchange = (dxf_char_t) (qdtime >> 8 * sizeof(dxf_ulong_t) / 2);
             mm_row->mm_id = qdtime & 0xFFFFFFFF;
         }
         break;
