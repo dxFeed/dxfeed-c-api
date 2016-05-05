@@ -53,6 +53,8 @@
 
 #define DESCRIBE_PROTOCOL_TIMEOUT   3000
 
+#define MRU_EVENT_FLAGS 1
+
 /* -------------------------------------------------------------------------- */
 /*
  *	Client-server data overlapping structures and stuff
@@ -110,6 +112,7 @@ typedef struct {
 	dxf_string_t last_symbol;
 	dxf_int_t last_cipher;
     dxf_event_flags_t last_flags;
+    dxf_event_flags_t mru_event_flags;
 
     dx_record_server_support_state_list_t* record_server_support_states;
     dx_record_digest_list_t record_digests;
@@ -184,6 +187,8 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_server_msg_processor) {
         
         return false;
     }
+
+    context->mru_event_flags = MRU_EVENT_FLAGS;
     
     return true;
 }
@@ -804,7 +809,8 @@ static bool dx_read_symbol (dx_server_msg_proc_connection_context_t* context) {
     }
     
     if (dx_codec_read_symbol(context->bicc, context->symbol_buffer, SYMBOL_BUFFER_LEN, 
-                             &(context->symbol_result), &r, &(context->last_flags)) == false) {
+                             &(context->symbol_result), &r, &(context->last_flags), 
+                             &(context->mru_event_flags)) == false) {
         return false;
     }
         

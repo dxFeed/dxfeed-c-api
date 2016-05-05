@@ -54,10 +54,6 @@ static dxf_char_t g_penta_characters[1024];
 
 static dxf_int_t g_wildcard_cipher;
 
-#define MRU_EVENT_FLAGS 1
-//TODO: store in some context for multithreaded support
-static dxf_int_t g_mru_event_flags = MRU_EVENT_FLAGS;
-
 /* -------------------------------------------------------------------------- */
 /*
  *	Helper functions
@@ -273,7 +269,8 @@ bool dx_decode_symbol_name (dxf_int_t cipher, OUT dxf_const_string_t* symbol) {
 /* -------------------------------------------------------------------------- */
 
 bool dx_codec_read_symbol (void* bicc, dxf_char_t* buffer, int buffer_length, OUT dxf_string_t* result, 
-                            OUT dxf_int_t* cipher_result, OUT dxf_event_flags_t* flags) {
+                           OUT dxf_int_t* cipher_result, OUT dxf_event_flags_t* flags, 
+                           OUT dxf_event_flags_t* mru_event_flags) {
     dxf_int_t i;
     dxf_long_t penta;
     dxf_int_t tmp_int_1;
@@ -315,7 +312,7 @@ bool dx_codec_read_symbol (void* bicc, dxf_char_t* buffer, int buffer_length, OU
         else if (i == 0xF8) { // mru event flags
             if (event_flags_bytes > 0)
                 return dx_set_error_code(dx_pcec_invalid_event_flag);
-            *flags = g_mru_event_flags;
+            *flags = *mru_event_flags;
             event_flags_bytes = 1;
             continue; // read next byte
         }
@@ -323,8 +320,8 @@ bool dx_codec_read_symbol (void* bicc, dxf_char_t* buffer, int buffer_length, OU
             if (event_flags_bytes > 0)
                 return dx_set_error_code(dx_pcec_invalid_event_flag);
             event_flags_pos = dx_get_in_buffer_position(bicc);
-            CHECKED_CALL_2(dx_read_compact_int, bicc, &g_mru_event_flags);
-            *flags = g_mru_event_flags;
+            CHECKED_CALL_2(dx_read_compact_int, bicc, mru_event_flags);
+            *flags = *mru_event_flags;
             event_flags_bytes = dx_get_in_buffer_position(bicc) - event_flags_pos;
             continue; // read next byte
         }
