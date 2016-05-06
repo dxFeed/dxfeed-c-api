@@ -198,6 +198,7 @@ dxf_string_t dx_ansi_to_unicode (const char* ansi_str) {
     // We trust it
     size_t len = strlen(ansi_str);
 
+    memset(&state, 0, sizeof(state));
     mbrlen(NULL, 0, &state);
     
     const char *p = ansi_str;
