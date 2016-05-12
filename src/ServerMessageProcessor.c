@@ -848,16 +848,16 @@ static bool dx_read_symbol (dx_server_msg_proc_connection_context_t* context) {
 bool dx_read_qdtime_on_remove_event(dx_server_msg_proc_connection_context_t* context,
                                     dx_record_id_t record_id, void* row) {
     int i;
-    int high;
-    int low;
+    dxf_int_t high;
+    dxf_int_t low;
     dxf_ulong_t qdtime;
     const dx_record_item_t* record_info = dx_get_record_by_id(record_id);
 
     CHECKED_CALL_2(dx_read_compact_long, context->bicc, &qdtime);
     dx_logging_verbose_info(L"REMOVE_EVENT flag received, flags=%lX, compact long QDTime=%ld", context->last_flags, qdtime);
 
-    high = (int)(qdtime >> 32);
-    low = (int)(qdtime & 0xFFFFFFFF);
+    high = (dxf_int_t)(qdtime >> 32);
+    low = (dxf_int_t)(qdtime & 0xFFFFFFFF);
     for (i = 0; i < record_info->field_count; ++i) {
         dx_field_info_t field = record_info->fields[i];
         if (field.time == dx_ft_first_time_int_field) {
