@@ -847,34 +847,24 @@ static bool dx_read_symbol (dx_server_msg_proc_connection_context_t* context) {
 
 bool dx_read_qdtime_on_remove_event(dx_server_msg_proc_connection_context_t* context,
                                     dx_record_id_t record_id, void* row) {
+    int i;
+    int high;
+    int low;
     dxf_ulong_t qdtime;
     const dx_record_item_t* record_info = dx_get_record_by_id(record_id);
 
     CHECKED_CALL_2(dx_read_compact_long, context->bicc, &qdtime);
     dx_logging_verbose_info(L"REMOVE_EVENT flag received, flags=%lX, compact long QDTime=%ld", context->last_flags, qdtime);
 
-    switch (record_info->info_id) {
-    case dx_rid_order: {
-            dx_order_t* order_row = (dx_order_t*)row;
-            dx_memset(order_row, 0, sizeof *order_row);
-
-            order_row->index = qdtime & 0xFFFFFFFF;
+    high = (int)(qdtime >> 32);
+    low = (int)(qdtime & 0xFFFFFFFF);
+    for (i = 0; i < record_info->field_count; ++i) {
+        dx_field_info_t field = record_info->fields[i];
+        if (field.time == dx_ft_first_time_int_field) {
+            CHECKED_SET_VALUE(field.setter, row, &high);
+        } else if (field.time == dx_ft_second_time_int_field) {
+            CHECKED_SET_VALUE(field.setter, row, &low);
         }
-      break;
-    case dx_rid_market_maker: {
-            dx_market_maker_t* mm_row = (dx_market_maker_t*)row;
-            dx_memset(mm_row, 0, sizeof *mm_row);
-            mm_row->mm_exchange = (dxf_char_t) (qdtime >> 8 * sizeof(dxf_ulong_t) / 2);
-            mm_row->mm_id = qdtime & 0xFFFFFFFF;
-        }
-        break;
-    case dx_rid_time_and_sale: {
-            dx_time_and_sale_t* ts_row = (dx_time_and_sale_t*)row;
-            dx_memset(ts_row, 0, sizeof *ts_row);
-            ts_row->time = qdtime >> 32;
-            ts_row->event_id = qdtime & 0xFFFFFFFF;
-        }
-        break;
     }
 
     return true;
@@ -892,7 +882,7 @@ bool dx_read_records (dx_server_msg_proc_connection_context_t* context,
 	dxf_byte_t* read_byte_array;
     const dx_record_digest_t* record_digest = dx_get_record_digest(context, record_id);
     if (record_digest == NULL)
-        return dx_set_error_code(dx_ec_invalid_func_param_internal);;
+        return dx_set_error_code(dx_ec_invalid_func_param_internal);
 	
 	dx_logging_verbose_info(L"Read records");
 

@@ -70,11 +70,20 @@ typedef enum {
 
 /* -------------------------------------------------------------------------- */
 
+typedef enum {
+    dx_ft_common_field = 0, 
+    dx_ft_first_time_int_field = 1,
+    dx_ft_second_time_int_field = 2
+} dx_scheme_field_time_t;
+
+/* -------------------------------------------------------------------------- */
+
 typedef struct {
     int type;
     dxf_const_string_t name;
     dx_record_field_setter_t setter;
     dx_record_field_def_val_getter_t def_val_getter;
+    dx_scheme_field_time_t time;
 } dx_field_info_t;
 
 /* -------------------------------------------------------------------------- */
