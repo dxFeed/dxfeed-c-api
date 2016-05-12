@@ -17,12 +17,16 @@
 *
 */
 
+
 #include "DXFeed.h"
 
 #include "DataStructures.h"
 #include "BufferedIOCommon.h"
 #include "DXAlgorithms.h"
 #include "ConnectionContextData.h"
+#include "DXErrorHandling.h"
+#include "Logger.h"
+#include "ServerMessageProcessor.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -93,7 +97,9 @@ static const dx_field_info_t dx_fields_market_maker[] = {
 	{ dx_fid_compact_int, L"MMBid.Size", DX_RECORD_FIELD_SETTER_NAME(dx_market_maker_t, mmbid_size), DX_RECORD_FIELD_DEF_VAL_NAME(dx_market_maker_t, mmbid_size) },
 	{ dx_fid_compact_int, L"MMAsk.Time", DX_RECORD_FIELD_SETTER_NAME(dx_market_maker_t, mmask_time), DX_RECORD_FIELD_DEF_VAL_NAME(dx_market_maker_t, mmask_time) },
 	{ dx_fid_compact_int | dx_fid_flag_decimal, L"MMAsk.Price", DX_RECORD_FIELD_SETTER_NAME(dx_market_maker_t, mmask_price), DX_RECORD_FIELD_DEF_VAL_NAME(dx_market_maker_t, mmask_price) },
-	{ dx_fid_compact_int, L"MMAsk.Size", DX_RECORD_FIELD_SETTER_NAME(dx_market_maker_t, mmask_size), DX_RECORD_FIELD_DEF_VAL_NAME(dx_market_maker_t, mmask_size) }
+	{ dx_fid_compact_int, L"MMAsk.Size", DX_RECORD_FIELD_SETTER_NAME(dx_market_maker_t, mmask_size), DX_RECORD_FIELD_DEF_VAL_NAME(dx_market_maker_t, mmask_size) }, 
+	{ dx_fid_compact_int, L"MMBid.Count", DX_RECORD_FIELD_SETTER_NAME(dx_market_maker_t, mmbid_count), DX_RECORD_FIELD_DEF_VAL_NAME(dx_market_maker_t, mmbid_count) }, 
+	{ dx_fid_compact_int, L"MMAsk.Count", DX_RECORD_FIELD_SETTER_NAME(dx_market_maker_t, mmask_count), DX_RECORD_FIELD_DEF_VAL_NAME(dx_market_maker_t, mmask_count) }
 }; 
 
 /* -------------------------------------------------------------------------- */
@@ -109,7 +115,8 @@ static const dx_field_info_t dx_fields_order[] = {
 	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Price", DX_RECORD_FIELD_SETTER_NAME(dx_order_t, price), DX_RECORD_FIELD_DEF_VAL_NAME(dx_order_t, price) },
 	{ dx_fid_compact_int, L"Size", DX_RECORD_FIELD_SETTER_NAME(dx_order_t, size), DX_RECORD_FIELD_DEF_VAL_NAME(dx_order_t, size) },
 	{ dx_fid_compact_int, L"Flags", DX_RECORD_FIELD_SETTER_NAME(dx_order_t, flags), DX_RECORD_FIELD_DEF_VAL_NAME(dx_order_t, flags) },
-	{ dx_fid_compact_int, L"MMID", DX_RECORD_FIELD_SETTER_NAME(dx_order_t, mmid), DX_RECORD_FIELD_DEF_VAL_NAME(dx_order_t, mmid) }
+	{ dx_fid_compact_int, L"MMID", DX_RECORD_FIELD_SETTER_NAME(dx_order_t, mmid), DX_RECORD_FIELD_DEF_VAL_NAME(dx_order_t, mmid) },
+	{ dx_fid_compact_int, L"Count", DX_RECORD_FIELD_SETTER_NAME(dx_order_t, count), DX_RECORD_FIELD_DEF_VAL_NAME(dx_order_t, count) }
 }; 
 
 /* -------------------------------------------------------------------------- */
@@ -146,21 +153,20 @@ static const int g_record_field_counts[dx_rid_count] = {
     sizeof(dx_fields_time_and_sale) / sizeof(dx_fields_time_and_sale[0])
 };
 
-static const dx_record_info_t g_records[dx_rid_count] = {
+static const dx_record_info_t g_record_info[dx_rid_count] = {
     { L"Trade", sizeof(dx_fields_trade) / sizeof(dx_fields_trade[0]), dx_fields_trade },
     { L"Quote", sizeof(dx_fields_quote) / sizeof(dx_fields_quote[0]), dx_fields_quote },
     { L"Fundamental", sizeof(dx_fields_fundamental) / sizeof(dx_fields_fundamental[0]), dx_fields_fundamental },
     { L"Profile", sizeof(dx_fields_profile) / sizeof(dx_fields_profile[0]), dx_fields_profile },
     { L"MarketMaker", sizeof(dx_fields_market_maker) / sizeof(dx_fields_market_maker[0]), dx_fields_market_maker },
-    { L"Order#NTV", sizeof(dx_fields_order) / sizeof(dx_fields_order[0]), dx_fields_order },
+    { L"Order", sizeof(dx_fields_order) / sizeof(dx_fields_order[0]), dx_fields_order },
     { L"TimeAndSale", sizeof(dx_fields_time_and_sale) / sizeof(dx_fields_time_and_sale[0]), dx_fields_time_and_sale }
 };
 
-/* In the Java code, the exchange code is determined by the record name: it's the last symbol of
-   the record name if the second last symbol is '&', otherwise it's zero.
-   Here we don't have any exchange code semantics in the record names (and neither the Java code does),
-   so all the record exchange codes are set to zero */
-static dxf_char_t const g_record_exchange_codes[dx_rid_count] = { 0 };
+/* List stores records. The list is not cleared until at least one connection is opened. */
+static dx_record_list_t g_records_list = { NULL, 0, 0, 0 };
+static dx_mutex_t guard;
+static bool guard_is_initialized = false;
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -190,7 +196,7 @@ typedef struct {
     dxf_connection_t connection;
     
     dx_server_local_record_id_map_t record_id_map;
-    int record_server_support_states[dx_rid_count];
+    dx_record_server_support_state_list_t record_server_support_states;
 } dx_data_structures_connection_context_t;
 
 #define CTX(context) \
@@ -198,9 +204,30 @@ typedef struct {
 
 /* -------------------------------------------------------------------------- */
 
+void dx_clear_record_server_support_states(dx_data_structures_connection_context_t* context) {
+    dx_record_server_support_state_list_t *states = NULL;
+    if (context == NULL)
+        return;
+    states = &(context->record_server_support_states);
+    if (states->elements == NULL)
+        return;
+
+    dx_free(states->elements);
+    states->elements = NULL;
+    states->size = 0;
+    states->capacity = 0;
+}
+
+void dx_free_data_structures_context(dx_data_structures_connection_context_t** context) {
+    if (context == NULL)
+        return;
+    dx_clear_record_server_support_states(*context);
+    dx_free(*context);
+    context = NULL;
+}
+
 DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_data_structures) {
     dx_data_structures_connection_context_t* context = dx_calloc(1, sizeof(dx_data_structures_connection_context_t));
-    dx_record_id_t record_id = dx_rid_begin;
     int i = 0;
     
     if (context == NULL) {
@@ -208,18 +235,28 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_data_structures) {
     }
     
     context->connection = connection;
+    context->record_server_support_states.elements = NULL;
+    context->record_server_support_states.size = 0;
+    context->record_server_support_states.capacity = 0;
     
     for (; i < RECORD_ID_VECTOR_SIZE; ++i) {
-        context->record_id_map.frequent_ids[i] = dx_rid_invalid;
+        context->record_id_map.frequent_ids[i] = DX_RECORD_ID_INVALID;
     }
     
     if (!dx_set_subsystem_data(connection, dx_ccs_data_structures, context)) {
-        dx_free(context);
+        dx_free_data_structures_context(&context);
 
         return false;
     }
     
     return true;
+}
+
+void dx_init_records_list_guard() {
+    if (!guard_is_initialized) {
+        dx_mutex_create(&guard);
+        guard_is_initialized = true;
+    }
 }
 
 /* -------------------------------------------------------------------------- */
@@ -233,7 +270,7 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_data_structures) {
     }
     
     CHECKED_FREE(context->record_id_map.id_map.elements);
-    dx_free(context);
+    dx_free_data_structures_context(&context);
     
     return true;
 }
@@ -263,13 +300,13 @@ void* dx_get_data_structures_connection_context (dxf_connection_t connection) {
 #define RECORD_ID_PAIR_COMPARATOR(left, right) \
     DX_NUMERIC_COMPARATOR((left).server_record_id, (right).server_record_id)
 
-dx_record_id_t dx_get_record_id (void* context, dxf_int_t server_record_id) {
+dx_record_id_t dx_get_record_id(void* context, dxf_int_t server_record_id) {
     dx_server_local_record_id_map_t* record_id_map = &(CTX(context)->record_id_map);
         
     if (server_record_id >= 0 && server_record_id < RECORD_ID_VECTOR_SIZE) {
         return record_id_map->frequent_ids[server_record_id];
     } else {
-        int idx;
+        dx_record_id_t idx;
         bool found = false;
         dx_record_id_pair_t dummy;
         
@@ -278,7 +315,7 @@ dx_record_id_t dx_get_record_id (void* context, dxf_int_t server_record_id) {
         DX_ARRAY_SEARCH(record_id_map->id_map.elements, 0, record_id_map->id_map.size, dummy, RECORD_ID_PAIR_COMPARATOR, true, found, idx);
         
         if (!found) {
-            return dx_rid_invalid;
+            return DX_RECORD_ID_INVALID;
         }
         
         return record_id_map->id_map.elements[idx].local_record_id;
@@ -287,7 +324,7 @@ dx_record_id_t dx_get_record_id (void* context, dxf_int_t server_record_id) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_assign_server_record_id (void* context, dx_record_id_t record_id, dxf_int_t server_record_id) {
+bool dx_assign_server_record_id(void* context, dx_record_id_t record_id, dxf_int_t server_record_id) {
     dx_server_local_record_id_map_t* record_id_map = &(CTX(context)->record_id_map);
         
     if (server_record_id >= 0 && server_record_id < RECORD_ID_VECTOR_SIZE) {
@@ -321,27 +358,58 @@ bool dx_assign_server_record_id (void* context, dx_record_id_t record_id, dxf_in
 
 /* -------------------------------------------------------------------------- */
 
-const dx_record_info_t* dx_get_record_by_id (dx_record_id_t record_id) {
-	return &g_records[record_id];
+/* Don't try to change any field of struct. You shouldn't free this resources */
+const dx_record_item_t* dx_get_record_by_id(dx_record_id_t record_id) {
+    dx_record_item_t* value = NULL;
+    dx_init_records_list_guard();
+    dx_mutex_lock(&guard);
+    value = &g_records_list.elements[record_id];
+    dx_mutex_unlock(&guard);
+    return value;
 }
 
 /* -------------------------------------------------------------------------- */
 
-dx_record_id_t dx_get_record_id_by_name (dxf_const_string_t record_name) {
-    dx_record_id_t record_id = dx_rid_begin;
+dx_record_id_t dx_get_record_id_by_name(dxf_const_string_t record_name) {
+    dx_record_id_t record_id = 0;
 
-    for (; record_id < dx_rid_count; ++record_id) {
-        if (dx_compare_strings(g_records[record_id].name, record_name) == 0) {
+    dx_init_records_list_guard();
+    dx_mutex_lock(&guard);
+
+    for (; record_id < g_records_list.size; ++record_id) {
+        if (dx_compare_strings(g_records_list.elements[record_id].name, record_name) == 0) {
+            dx_mutex_unlock(&guard);
             return record_id;
         }
     }
-    
-    return dx_rid_invalid;
+
+    dx_mutex_unlock(&guard);
+
+    return DX_RECORD_ID_INVALID;
 }
 
 /* -------------------------------------------------------------------------- */
 
-int dx_find_record_field (const dx_record_info_t* record_info, dxf_const_string_t field_name,
+dx_record_id_t dx_get_next_unsubscribed_record_id(bool isUpdate) {
+    dx_record_id_t record_id = DX_RECORD_ID_INVALID;
+
+    dx_init_records_list_guard();
+    dx_mutex_lock(&guard);
+
+    if (g_records_list.new_record_id < g_records_list.size && isUpdate) {
+        g_records_list.new_record_id += 1;
+    }
+
+    record_id = g_records_list.new_record_id;
+
+    dx_mutex_unlock(&guard);
+
+    return record_id;
+}
+
+/* -------------------------------------------------------------------------- */
+
+int dx_find_record_field(const dx_record_item_t* record_info, dxf_const_string_t field_name,
                           dxf_int_t field_type) {
     int cur_field_index = 0;
     dx_field_info_t* fields = (dx_field_info_t*)record_info->fields;
@@ -349,7 +417,6 @@ int dx_find_record_field (const dx_record_info_t* record_info, dxf_const_string_
     for (; cur_field_index < record_info->field_count; ++cur_field_index) {
         if (dx_compare_strings(fields[cur_field_index].name, field_name) == 0 &&
             (fields[cur_field_index].type & dx_fid_mask_serialization)== (field_type & dx_fid_mask_serialization)) {
-            
             return cur_field_index;
         }
     }
@@ -359,12 +426,237 @@ int dx_find_record_field (const dx_record_info_t* record_info, dxf_const_string_
 
 /* -------------------------------------------------------------------------- */
 
-dxf_char_t dx_get_record_exchange_code (dx_record_id_t record_id) {
-    return g_record_exchange_codes[record_id];
+dxf_char_t dx_get_record_exchange_code(dx_record_id_t record_id) {
+    dxf_char_t exchange_code = 0;
+
+    dx_init_records_list_guard();
+    dx_mutex_lock(&guard);
+
+    if (record_id >= 0 && record_id < g_records_list.size)
+        exchange_code = g_records_list.elements[record_id].exchange_code;
+
+    dx_mutex_unlock(&guard);
+
+    return exchange_code;
+}
+
+bool dx_set_record_exchange_code(dx_record_id_t record_id, dxf_char_t exchange_code) {
+    if (record_id < 0 || record_id > g_records_list.size)
+        return false;
+
+    dx_init_records_list_guard();
+    dx_mutex_lock(&guard);
+
+    g_records_list.elements[record_id].exchange_code = exchange_code;
+
+    dx_mutex_unlock(&guard);
+
+    return true;
 }
 
 /* -------------------------------------------------------------------------- */
 
-int* dx_get_record_server_support_states (void* context) {
-    return CTX(context)->record_server_support_states;
+dx_record_server_support_state_list_t* dx_get_record_server_support_states(void* context) {
+    return &(CTX(context)->record_server_support_states);
+}
+
+bool dx_get_record_server_support_state_value(dx_record_server_support_state_list_t* states, 
+    dx_record_id_t record_id,
+                                              OUT dx_record_server_support_state_t **value) {
+    if (record_id < 0 || record_id >= states->size)
+        return false;
+    *value = &(states->elements[record_id]);
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+/* Functions for working with records list */
+
+bool dx_add_record_to_list(dxf_connection_t connection, dx_record_item_t record, dx_record_id_t index) {
+    bool failed = false;
+    dx_record_item_t new_record;
+    dx_record_server_support_state_t new_state;
+    dx_data_structures_connection_context_t* dscc = NULL;
+
+    // Update records list
+    new_record.name = dx_create_string_src(record.name);
+    new_record.field_count = record.field_count;
+    new_record.fields = record.fields;
+    new_record.info_id = record.info_id;
+    dx_memcpy(new_record.suffix, record.suffix, sizeof(record.suffix));
+    new_record.exchange_code = record.exchange_code;
+
+    DX_ARRAY_INSERT(g_records_list, dx_record_item_t, new_record, index, dx_capacity_manager_halfer, failed);
+
+    if (failed) {
+        return dx_set_error_code(dx_sec_not_enough_memory);
+    }
+
+    // Update record server support states
+    dscc = dx_get_data_structures_connection_context(connection);
+    if (dscc == NULL) {
+        DX_ARRAY_DELETE(g_records_list, dx_record_item_t, index, dx_capacity_manager_halfer, failed);
+        return dx_set_error_code(dx_cec_connection_context_not_initialized);
+    }
+
+    new_state = 0;
+    DX_ARRAY_INSERT(dscc->record_server_support_states, dx_record_server_support_state_t, new_state, index, dx_capacity_manager_halfer, failed);
+
+    if (failed) {
+        DX_ARRAY_DELETE(g_records_list, dx_record_item_t, index, dx_capacity_manager_halfer, failed);
+        return dx_set_error_code(dx_sec_not_enough_memory);
+    }
+
+    //Update record digests
+    if (!dx_add_record_digest_to_list(connection, index)) {
+        DX_ARRAY_DELETE(g_records_list, dx_record_item_t, index, dx_capacity_manager_halfer, failed);
+        DX_ARRAY_DELETE(dscc->record_server_support_states, dx_record_server_support_state_t, index, dx_capacity_manager_halfer, failed);
+        return false;
+    }
+
+    return true;
+}
+
+dx_record_info_id_t dx_string_to_record_info(dxf_const_string_t name)
+{
+    if (dx_compare_strings_num(name, g_record_info[dx_rid_trade].default_name, 
+                               dx_string_length(g_record_info[dx_rid_trade].default_name)) == 0)
+        return dx_rid_trade;
+    else if (dx_compare_strings_num(name, g_record_info[dx_rid_quote].default_name, 
+                                    dx_string_length(g_record_info[dx_rid_quote].default_name)) == 0)
+        return dx_rid_quote;
+    else if (dx_compare_strings_num(name, g_record_info[dx_rid_fundamental].default_name, 
+                                    dx_string_length(g_record_info[dx_rid_fundamental].default_name)) == 0)
+        return dx_rid_fundamental;
+    else if (dx_compare_strings_num(name, g_record_info[dx_rid_profile].default_name, 
+                                    dx_string_length(g_record_info[dx_rid_profile].default_name)) == 0)
+        return dx_rid_profile;
+    else if (dx_compare_strings_num(name, g_record_info[dx_rid_market_maker].default_name, 
+                                    dx_string_length(g_record_info[dx_rid_market_maker].default_name)) == 0)
+        return dx_rid_market_maker;
+    else if (dx_compare_strings_num(name, g_record_info[dx_rid_order].default_name, 
+                                    dx_string_length(g_record_info[dx_rid_order].default_name)) == 0)
+        return dx_rid_order;
+    else if (dx_compare_strings_num(name, g_record_info[dx_rid_time_and_sale].default_name, 
+                                    dx_string_length(g_record_info[dx_rid_time_and_sale].default_name)) == 0)
+        return dx_rid_time_and_sale;
+    else
+        return dx_rid_invalid;
+}
+
+bool init_record_info(dx_record_item_t *record, dxf_const_string_t name) {
+    dx_record_info_id_t record_info_id;
+    dx_record_info_t record_info;
+    int suffix_index;
+    int name_length = dx_string_length(name);
+
+    record_info_id = dx_string_to_record_info(name);
+    if (record_info_id == dx_rid_invalid) {
+        dx_set_last_error(dx_ec_invalid_func_param_internal);
+        return false;
+    }
+    record_info = g_record_info[record_info_id];
+
+    record->name = dx_create_string_src(name);
+    record->field_count = g_record_info[record_info_id].field_count;
+    record->fields = g_record_info[record_info_id].fields;
+    record->info_id = record_info_id;
+    dx_memset(record->suffix, 0, sizeof(record->suffix));
+    record->exchange_code = 0;
+
+    suffix_index = dx_string_length(record_info.default_name);
+    if (name_length < suffix_index + 1)
+        return true;
+    if (record_info_id == dx_rid_order) {
+        if (record->name[suffix_index] != L'#')
+            return true;
+        dx_copy_string_len(record->suffix, &record->name[suffix_index + 1], name_length - suffix_index);
+    } else if (record_info_id == dx_rid_trade || record_info_id == dx_rid_quote) {
+        if (record->name[suffix_index] != L'&')
+            return true;
+        dx_copy_string_len(record->suffix, &record->name[suffix_index + 1], 1);
+        record->exchange_code = record->suffix[0];
+    }
+
+    return true;
+}
+
+void clear_record_info(dx_record_item_t *record) {
+    dx_free(record->name);
+    record->name = NULL;
+}
+
+#define DX_RECORDS_COMPARATOR(l, r) (dx_compare_strings(l.name, r.name))
+
+dx_record_id_t dx_add_or_get_record_id(dxf_connection_t connection, dxf_const_string_t name) {
+    bool result = true;
+    bool found = false;
+    dx_record_id_t index = DX_RECORD_ID_INVALID;
+    dx_record_item_t record;
+
+    dx_init_records_list_guard();
+    dx_mutex_lock(&guard);
+
+    if (!init_record_info(&record, name)) {
+        dx_mutex_unlock(&guard);
+        return DX_RECORD_ID_INVALID;
+    }
+    
+    if (g_records_list.elements == NULL) {
+        index = 0;
+        result = dx_add_record_to_list(connection, record, index);
+    } else {
+        DX_ARRAY_SEARCH(g_records_list.elements, 0, g_records_list.size, record, DX_RECORDS_COMPARATOR, false, found, index);
+        if (!found) {
+            result = dx_add_record_to_list(connection, record, index);
+        }
+    }
+
+    clear_record_info(&record);
+
+    dx_mutex_unlock(&guard);
+
+    if (!result) {
+        dx_logging_last_error();
+        return DX_RECORD_ID_INVALID;
+    }
+        
+    return index;
+}
+
+void dx_clear_records_list() {
+    dx_record_id_t i = 0;
+    dx_record_item_t *record = g_records_list.elements;
+
+    dx_init_records_list_guard();
+    dx_mutex_lock(&guard);
+
+    for (; i < g_records_list.size; i++) {
+        clear_record_info(record);
+        record++;
+    }
+    dx_free(g_records_list.elements);
+    g_records_list.elements = NULL;
+    g_records_list.capacity = 0;
+    g_records_list.size = 0;
+    g_records_list.new_record_id = 0;
+
+    dx_mutex_unlock(&guard);
+
+    dx_mutex_destroy(&guard);
+    guard_is_initialized = false;
+}
+
+int dx_get_records_list_count() {
+    int size = 0;
+
+    dx_init_records_list_guard();
+    dx_mutex_lock(&guard);
+
+    size = g_records_list.size;
+
+    dx_mutex_unlock(&guard);
+
+    return size;
 }

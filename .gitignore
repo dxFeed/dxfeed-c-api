@@ -7,12 +7,16 @@
 /*.user
 /*.ncb
 /*.sdf
+/*.opensdf
+
+/src/build
 
 # /tests/APITest/
 /tests/APITest/*.user
 
 # /tests/CommandLineSample/
 /tests/CommandLineSample/*.user
+/tests/CommandLineSample/build
 
 # /tests/ConnectionTest/
 /tests/ConnectionTest/*.user
@@ -37,6 +41,10 @@
 
 # /wrappers/COM/samples/C++/
 /wrappers/COM/samples/C++/*.user
+/wrappers/COM/samples/C++/build
 
 # /wrappers/COM/src/
 /wrappers/COM/src/*.user
+/wrappers/COM/src/build
+
+log.log

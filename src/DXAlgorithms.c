@@ -166,6 +166,10 @@ int dx_compare_strings (dxf_const_string_t s1, dxf_const_string_t s2) {
     return wcscmp(s1, s2);
 }
 
+int dx_compare_strings_num(dxf_const_string_t s1, dxf_const_string_t s2, size_t num) {
+    return wcsncmp(s1, s2, num);
+}
+
 /* -------------------------------------------------------------------------- */
 
 dxf_char_t dx_toupper (dxf_char_t c) {
@@ -194,6 +198,7 @@ dxf_string_t dx_ansi_to_unicode (const char* ansi_str) {
     // We trust it
     size_t len = strlen(ansi_str);
 
+    memset(&state, 0, sizeof(state));
     mbrlen(NULL, 0, &state);
     
     const char *p = ansi_str;

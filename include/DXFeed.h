@@ -52,7 +52,6 @@
  */
 /* -------------------------------------------------------------------------- */
 
-typedef void* dxf_connection_t;
 typedef void (*dxf_conn_termination_notifier_t) (dxf_connection_t connection, void* user_data);
 
 /* the low level callback types, required in case some thread-specific initialization must be performed
@@ -245,5 +244,23 @@ DXFEED_API ERRORCODE dxf_get_last_error (OUT int* error_code, OUT dxf_const_stri
  *  verbose - a flag defining the logging mode; if it's nonzero then the verbose logging will be enabled
  */
 DXFEED_API ERRORCODE dxf_initialize_logger (const char* file_name, int rewrite_file, int show_timezone_info, int verbose);
+
+/*
+ *  Clear current sources and add new one to subscription
+ *  Warning: you must configure order source before dxf_add_symbols/dxf_add_symbol call
+ *
+ *  subscription - a handle of the subscription where source will be changed
+ *  source - source of order to set, 4 symbols maximum length
+ */
+DXFEED_API ERRORCODE dxf_set_order_source(dxf_subscription_t subscription, const char* source);
+
+/*
+ *  Add a new source to subscription
+ *  Warning: you must configure order source before dxf_add_symbols/dxf_add_symbol call
+ *
+ *  subscription - a handle of the subscription where source will be changed
+ *  source - source of order event to add, 4 symbols maximum length
+ */
+DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const char* source);
 
 #endif /* DXFEED_API_H_INCLUDED */

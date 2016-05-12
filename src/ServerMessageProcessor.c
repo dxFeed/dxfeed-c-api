@@ -53,6 +53,8 @@
 
 #define DESCRIBE_PROTOCOL_TIMEOUT   3000
 
+#define MRU_EVENT_FLAGS 1
+
 /* -------------------------------------------------------------------------- */
 /*
  *	Client-server data overlapping structures and stuff
@@ -70,6 +72,12 @@ typedef struct {
     int size;
     bool in_sync_with_server;
 } dx_record_digest_t;
+
+typedef struct {
+    dx_record_digest_t* elements;
+    int size;
+    int capacity;
+} dx_record_digest_list_t;
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -103,9 +111,11 @@ typedef struct {
 
 	dxf_string_t last_symbol;
 	dxf_int_t last_cipher;
+    dxf_event_flags_t last_flags;
+    dxf_event_flags_t mru_event_flags;
 
-    int* record_server_support_states;
-    dx_record_digest_t record_digests[dx_rid_count];
+    dx_record_server_support_state_list_t* record_server_support_states;
+    dx_record_digest_list_t record_digests;
     
     void* bicc; /* buffered input connection context */
     void* rbcc; /* record buffers connection context */
@@ -121,6 +131,14 @@ typedef struct {
 
 /* -------------------------------------------------------------------------- */
 
+void dx_init_record_digests_list(dx_record_digest_list_t* record_digests) {
+    if (record_digests == NULL)
+        return;
+    record_digests->elements = NULL;
+    record_digests->size = 0;
+    record_digests->capacity = 0;
+}
+
 DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_server_msg_processor) {
     dx_server_msg_proc_connection_context_t* context = NULL;
     
@@ -133,6 +151,7 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_server_msg_processor) {
     }
     
     context->connection = connection;
+    dx_init_record_digests_list(&(context->record_digests));
     
     if ((context->bicc = dx_get_buffered_input_connection_context(connection)) == NULL ||
         (context->rbcc = dx_get_record_buffers_connection_context(connection)) == NULL ||
@@ -168,6 +187,8 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_server_msg_processor) {
         
         return false;
     }
+
+    context->mru_event_flags = MRU_EVENT_FLAGS;
     
     return true;
 }
@@ -204,12 +225,23 @@ DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_server_msg_processor) {
  */
 /* -------------------------------------------------------------------------- */
 
+dx_record_digest_t* dx_get_record_digest(dx_server_msg_proc_connection_context_t* context, dx_record_id_t record_id) {
+    dx_record_digest_list_t* record_digests = NULL;
+    if (context == NULL)
+        return NULL;
+    record_digests = &(context->record_digests);
+    if (record_digests->elements == NULL || record_id < 0 || record_id >= record_digests->size)
+        return NULL;
+    return &(record_digests->elements[record_id]);
+}
+
 bool dx_create_field_digest (dx_server_msg_proc_connection_context_t* context,
-                             dx_record_id_t record_id, const dx_record_info_t* record_info,
+                             dx_record_id_t record_id, const dx_record_item_t* record_info,
                              OUT dx_field_digest_ptr_t* field_digest) {
     dxf_string_t field_name = NULL;
     dxf_int_t field_type;
     int field_index = INVALID_INDEX;
+    dx_record_server_support_state_t* state = NULL;
     
     CHECKED_CALL_2(dx_read_utf_string, context->bicc, &field_name);
     CHECKED_CALL_2(dx_read_compact_int, context->bicc, &field_type);
@@ -248,7 +280,10 @@ bool dx_create_field_digest (dx_server_msg_proc_connection_context_t* context,
 
     if (field_index != INVALID_INDEX) {
         (*field_digest)->setter = record_info->fields[field_index].setter;
-        context->record_server_support_states[record_id] |= INDEX_BITMASK(field_index);
+        if (!dx_get_record_server_support_state_value(context->record_server_support_states, record_id, &state)) {
+            return false;
+        }
+        *state |= INDEX_BITMASK(field_index);
     }
     
     return true;
@@ -257,22 +292,28 @@ bool dx_create_field_digest (dx_server_msg_proc_connection_context_t* context,
 /* -------------------------------------------------------------------------- */
 
 bool dx_digest_unsupported_fields (dx_server_msg_proc_connection_context_t* context,
-                                   dx_record_id_t record_id, const dx_record_info_t* record_info) {
+                                   dx_record_id_t record_id, const dx_record_item_t* record_info) {
     dx_record_digest_t* record_digest = NULL;
     int field_index = 0;
     
-    if (record_id == dx_rid_invalid) {
+    if (record_id < 0) {
         /* a special case of a dummy digest */
         
         return true;
     }
     
-    record_digest = &(context->record_digests[record_id]);
+    record_digest = dx_get_record_digest(context, record_id);
+    if (record_digest == NULL)
+        return dx_set_error_code(dx_ec_invalid_func_param_internal);
 
     for (; field_index < record_info->field_count; ++field_index) {
         dx_field_digest_ptr_t field_digest = NULL;
+        dx_record_server_support_state_t* state;
+        if (!dx_get_record_server_support_state_value(context->record_server_support_states, record_id, &state)) {
+            return false;
+        }
 
-        if (context->record_server_support_states[record_id] & INDEX_BITMASK(field_index)) {
+        if (*state & INDEX_BITMASK(field_index)) {
             /* the field is supported by server, skipping */
 
             continue;
@@ -295,6 +336,16 @@ bool dx_digest_unsupported_fields (dx_server_msg_proc_connection_context_t* cont
 
 /* -------------------------------------------------------------------------- */
 
+void dx_init_record_digest(dx_record_digest_t* digest) {
+    if (digest == NULL)
+        return;
+    digest->elements = NULL;
+    digest->size = 0;
+    digest->in_sync_with_server = false;
+}
+
+/* -------------------------------------------------------------------------- */
+
 void dx_clear_record_digest (dx_record_digest_t* digest) {
     int i = 0;
     
@@ -308,19 +359,26 @@ void dx_clear_record_digest (dx_record_digest_t* digest) {
     
     CHECKED_FREE(digest->elements);
     
-    digest->elements = NULL;
-    digest->size = 0;
-    digest->in_sync_with_server = false;
+    dx_init_record_digest(digest);
 }
 
 /* -------------------------------------------------------------------------- */
 
 void dx_clear_record_digests (dx_server_msg_proc_connection_context_t* context) {
-    dx_record_id_t record_id = dx_rid_begin;
-    
-    for (; record_id < dx_rid_count; ++record_id) {
-        dx_clear_record_digest(&(context->record_digests[record_id]));
+    int i = 0;
+    int count = 0;
+    if (context->record_digests.elements == NULL)
+        return;
+    count = context->record_digests.size;
+    for (; i < count; ++i) {
+        dx_record_digest_t* record_digest = dx_get_record_digest(context, i);
+        if (record_digest == NULL)
+            continue;
+        dx_clear_record_digest(record_digest);
     }
+
+    dx_free(context->record_digests.elements);
+    dx_init_record_digests_list(&(context->record_digests));
 }
 
 /* -------------------------------------------------------------------------- */
@@ -332,7 +390,7 @@ void dx_clear_record_digests (dx_server_msg_proc_connection_context_t* context) 
 bool dx_clear_server_info (dxf_connection_t connection) {
     bool res = true;
     dx_server_msg_proc_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_server_msg_processor, &res);
-    dx_record_id_t eid;
+    dx_record_id_t rid;
 
     if (context == NULL) {
         if (res) {
@@ -343,8 +401,12 @@ bool dx_clear_server_info (dxf_connection_t connection) {
     }
     
     /* stage 1 - resetting all the field flags */
-    for (eid = dx_rid_begin; eid < dx_rid_count; ++eid) {
-        context->record_server_support_states[eid] = 0;        
+    for (rid = 0; rid < dx_get_records_list_count(); ++rid) {
+        dx_record_server_support_state_t* state;
+        if (!dx_get_record_server_support_state_value(context->record_server_support_states, rid, &state)) {
+            return false;
+        }
+        *state = 0;
     }
 
     /* stage 2 - freeing all the memory allocated by previous synchronization */
@@ -746,8 +808,12 @@ static bool dx_read_symbol (dx_server_msg_proc_connection_context_t* context) {
         return dx_set_error_code(dx_ec_invalid_func_param_internal);
     }
     
-    CHECKED_CALL_5(dx_codec_read_symbol, context->bicc, context->symbol_buffer, SYMBOL_BUFFER_LEN, &(context->symbol_result), &r);
-    
+    if (dx_codec_read_symbol(context->bicc, context->symbol_buffer, SYMBOL_BUFFER_LEN, 
+                             &(context->symbol_result), &r, &(context->last_flags), 
+                             &(context->mru_event_flags)) == false) {
+        return false;
+    }
+        
     if ((r & dx_get_codec_valid_cipher()) != 0) {
         context->last_cipher = r;
         context->last_symbol = NULL;
@@ -779,6 +845,41 @@ static bool dx_read_symbol (dx_server_msg_proc_connection_context_t* context) {
         setter(buffer, value); \
     }
 
+bool dx_read_qdtime_on_remove_event(dx_server_msg_proc_connection_context_t* context,
+                                    dx_record_id_t record_id, void* row) {
+    dxf_ulong_t qdtime;
+    const dx_record_item_t* record_info = dx_get_record_by_id(record_id);
+
+    CHECKED_CALL_2(dx_read_compact_long, context->bicc, &qdtime);
+    dx_logging_verbose_info(L"REMOVE_EVENT flag received, flags=%lX, compact long QDTime=%ld", context->last_flags, qdtime);
+
+    switch (record_info->info_id) {
+    case dx_rid_order: {
+            dx_order_t* order_row = (dx_order_t*)row;
+            dx_memset(order_row, 0, sizeof *order_row);
+
+            order_row->index = qdtime & 0xFFFFFFFF;
+        }
+      break;
+    case dx_rid_market_maker: {
+            dx_market_maker_t* mm_row = (dx_market_maker_t*)row;
+            dx_memset(mm_row, 0, sizeof *mm_row);
+            mm_row->mm_exchange = (dxf_char_t) (qdtime >> 8 * sizeof(dxf_ulong_t) / 2);
+            mm_row->mm_id = qdtime & 0xFFFFFFFF;
+        }
+        break;
+    case dx_rid_time_and_sale: {
+            dx_time_and_sale_t* ts_row = (dx_time_and_sale_t*)row;
+            dx_memset(ts_row, 0, sizeof *ts_row);
+            ts_row->time = qdtime >> 32;
+            ts_row->event_id = qdtime & 0xFFFFFFFF;
+        }
+        break;
+    }
+
+    return true;
+}
+
 bool dx_read_records (dx_server_msg_proc_connection_context_t* context,
                       dx_record_id_t record_id, void* record_buffer) {
 	int i = 0;
@@ -789,9 +890,15 @@ bool dx_read_records (dx_server_msg_proc_connection_context_t* context,
 	dxf_double_t read_double;
 	dxf_string_t read_string;
 	dxf_byte_t* read_byte_array;
-	const dx_record_digest_t* record_digest = &(context->record_digests[record_id]);
+    const dx_record_digest_t* record_digest = dx_get_record_digest(context, record_id);
+    if (record_digest == NULL)
+        return dx_set_error_code(dx_ec_invalid_func_param_internal);;
 	
 	dx_logging_verbose_info(L"Read records");
+
+    if (context->last_flags & dxf_ef_remove_event) {
+        return dx_read_qdtime_on_remove_event(context, record_id, record_buffer);
+    }
 
 	for (; i < record_digest->size; ++i) {
 		int serialization = record_digest->elements[i]->type & dx_fid_mask_serialization;
@@ -901,11 +1008,12 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 
 	while (dx_get_in_buffer_position(context->bicc) < dx_get_in_buffer_limit(context->bicc)) {
 		void* record_buffer = NULL;
-		dx_record_id_t record_id;
-		dxf_ubyte_t exchange;
+        dx_record_id_t record_id;
+		dxf_const_string_t suffix;
 		int record_count = 0;
-
 		dxf_const_string_t symbol = NULL;
+        const dx_record_item_t* record_info = NULL;
+        dx_record_digest_t* record_digest = NULL;
 		
 		CHECKED_CALL_1(dx_read_symbol, context);
 		
@@ -914,7 +1022,7 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 		}
 		symbol = dx_create_string_src(context->last_symbol);
 		dx_store_string_buffer(context->rbcc, symbol);
-	    
+
 		{
 			dxf_int_t id;
 
@@ -925,22 +1033,26 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 			}
 
 			record_id = dx_get_record_id(context->dscc, id);
-			exchange = ((record_id & DX_RECORD_ID_SUFFIX_MASK) >> DX_RECORD_ID_SUFFIX_SHIFT) & 0xFF;
 		}
 		
-		if (record_id == dx_rid_invalid) {
+		if (record_id < 0) {
 			dx_free_string_buffers(context->rbcc);
 
 			return dx_set_error_code(dx_pec_record_not_supported);
 		}
 	    
-		if (!context->record_digests[record_id].in_sync_with_server) {
+        record_digest = dx_get_record_digest(context, record_id);
+        if (record_digest == NULL)
+            return dx_set_error_code(dx_ec_invalid_func_param_internal);
+		if (!record_digest->in_sync_with_server) {
 			dx_free_string_buffers(context->rbcc);
 			
 			return dx_set_error_code(dx_pec_record_description_not_received);
-		}	    
+		}
 
-		record_buffer = g_buffer_managers[record_id].record_getter(context->rbcc, record_count++);
+        record_info = dx_get_record_by_id(record_id);
+		record_buffer = g_buffer_managers[record_info->info_id].record_getter(context->rbcc, record_count++);
+        suffix = dx_string_length(record_info->suffix) > 0 ? record_info->suffix : NULL;
 		
 		if (record_buffer == NULL) {
 			dx_free_string_buffers(context->rbcc);
@@ -948,14 +1060,16 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 			return false;
 		}
 		
-		if (!dx_read_records(context, record_id, record_buffer)) {
+
+        if (!dx_read_records(context, record_id, record_buffer)) {
 			dx_free_string_buffers(context->rbcc);
 			
 			return false;
 		}
-		
-		if (!dx_transcode_record_data(context->connection, record_id, exchange, context->last_symbol , context->last_cipher,
-						g_buffer_managers[record_id].record_buffer_getter(context->rbcc), record_count)) {
+		// TODO add assert to overlimit in context->bicc limit
+
+        if (!dx_transcode_record_data(context->connection, record_id, suffix, context->last_symbol, context->last_cipher, 
+            context->last_flags, g_buffer_managers[record_info->info_id].record_buffer_getter(context->rbcc), record_count)) {
 			dx_free_string_buffers(context->rbcc);
 
 			return false;
@@ -969,8 +1083,8 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_fill_record_digest (dx_server_msg_proc_connection_context_t* context, dx_record_id_t rid, const dx_record_info_t* record_info,
-                            dxf_int_t field_count, OUT dx_record_digest_t* record_digest) {
+bool dx_fill_record_digest(dx_server_msg_proc_connection_context_t* context, dx_record_id_t rid, const dx_record_item_t* record_info,
+                           dxf_int_t field_count, OUT dx_record_digest_t* record_digest) {
     int i = 0;
     
     for (; i != field_count; ++i) {
@@ -985,8 +1099,11 @@ bool dx_fill_record_digest (dx_server_msg_proc_connection_context_t* context, dx
 
     CHECKED_CALL_3(dx_digest_unsupported_fields, context, rid, record_info);
 
-    if (rid != dx_rid_invalid) {
-        context->record_digests[rid].in_sync_with_server = true;
+    if (rid >= 0) {
+        record_digest = dx_get_record_digest(context, rid);
+        if (record_digest == NULL)
+            return dx_set_error_code(dx_ec_invalid_func_param_internal);
+        record_digest->in_sync_with_server = true;
     }
     
     return true;
@@ -998,38 +1115,39 @@ bool dx_process_describe_records (dx_server_msg_proc_connection_context_t* conte
     dx_logging_verbose_info(L"Process describe records");
 
     while (dx_get_in_buffer_position(context->bicc) < dx_get_in_buffer_limit(context->bicc)) {
-        dxf_int_t record_id;
+        dxf_int_t server_record_id;
         dxf_string_t record_name = NULL;
-        dxf_int_t field_count;
-        const dx_record_info_t* record_info = NULL;
+        dxf_int_t server_field_count;
+        const dx_record_item_t* record_info = NULL;
         dx_record_digest_t* record_digest = NULL;
-        int i = 0;
-        dx_record_id_t rid = dx_rid_invalid;
+        dx_record_id_t local_record_id = DX_RECORD_ID_INVALID;
         dx_record_digest_t dummy;
         
-        CHECKED_CALL_2(dx_read_compact_int, context->bicc, &record_id);
+        CHECKED_CALL_2(dx_read_compact_int, context->bicc, &server_record_id);
         CHECKED_CALL_2(dx_read_utf_string, context->bicc, &record_name);
-        CHECKED_CALL_2(dx_read_compact_int, context->bicc, &field_count);
+        CHECKED_CALL_2(dx_read_compact_int, context->bicc, &server_field_count);
 		
-		if (record_name == NULL || dx_string_length(record_name) == 0 || field_count < 0) {
+        if (record_name == NULL || dx_string_length(record_name) == 0 || server_field_count < 0) {
             dx_free(record_name);
             
             return dx_set_error_code(dx_pec_record_info_corrupted);
         }
         
-        dx_logging_verbose_info(L"Record ID: %d, record name: %s, field count: %d", record_id, record_name, field_count);
+        dx_logging_verbose_info(L"Record ID: %d, record name: %s, field count: %d", server_record_id, record_name, server_field_count);
 
-        rid = dx_get_record_id_by_name(record_name);
+        local_record_id = dx_get_record_id_by_name(record_name);
         
         dx_free(record_name);
         
-        if (rid == dx_rid_invalid) {
+        if (local_record_id == DX_RECORD_ID_INVALID) {
             record_digest = &dummy;
         } else {
-            CHECKED_CALL_3(dx_assign_server_record_id, context->dscc, rid, record_id);
+            CHECKED_CALL_3(dx_assign_server_record_id, context->dscc, local_record_id, server_record_id);
 
-            record_info = dx_get_record_by_id(rid);
-            record_digest = &(context->record_digests[rid]);
+            record_info = dx_get_record_by_id(local_record_id);
+            record_digest = dx_get_record_digest(context, local_record_id);
+            if (record_digest == NULL)
+                return dx_set_error_code(dx_ec_invalid_func_param_internal);
 
             if (record_digest->elements != NULL) {
                 dx_clear_record_digest(record_digest);
@@ -1037,12 +1155,12 @@ bool dx_process_describe_records (dx_server_msg_proc_connection_context_t* conte
 
             /* a generous memory allocation, to allow the maximum possible amount of pointers to be stored,
                but the overhead is insignificant */
-            if ((record_digest->elements = dx_calloc(field_count + record_info->field_count, sizeof(dx_field_digest_ptr_t))) == NULL) {
+            if ((record_digest->elements = dx_calloc(server_field_count + record_info->field_count, sizeof(dx_field_digest_ptr_t))) == NULL) {
                 return false;
             }
         }
         
-        CHECKED_CALL_5(dx_fill_record_digest, context, rid, record_info, field_count, record_digest);
+        CHECKED_CALL_5(dx_fill_record_digest, context, local_record_id, record_info, server_field_count, record_digest);
     }
 	
 	return true;
@@ -1173,6 +1291,8 @@ bool dx_read_describe_protocol_message_list (dx_server_msg_proc_connection_conte
 
 bool dx_process_describe_protocol (dx_server_msg_proc_connection_context_t* context) {
     dxf_int_t magic;
+    int buf_pos;
+    int buf_limit;
 
 	dx_logging_verbose_info(L"Processing describe protocol");
 	
@@ -1219,6 +1339,12 @@ bool dx_process_describe_protocol (dx_server_msg_proc_connection_context_t* cont
 
         return false;
 	}
+
+    //All additional data must be skipped according to message length
+    buf_pos = dx_get_in_buffer_position(context->bicc);
+    buf_limit = dx_get_in_buffer_limit(context->bicc);
+    if (buf_pos < buf_limit)
+        dx_set_in_buffer_position(context->bicc, buf_limit);
 
 	return dx_mutex_unlock(&(context->describe_protocol_guard));
 }
@@ -1484,4 +1610,31 @@ bool dx_socket_data_receiver (dxf_connection_t connection, const void* buffer, i
     dx_logging_verbose_info(L"Data received: %d bytes", buffer_size);
 
     return dx_process_server_data(connection, buffer, buffer_size);
+}
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Records digest management
+*/
+/* -------------------------------------------------------------------------- */
+
+bool dx_add_record_digest_to_list(dxf_connection_t connection, dx_record_id_t index) {
+    bool failed = false;
+    dx_record_digest_t new_digest;
+    dx_server_msg_proc_connection_context_t* mpcc = dx_get_subsystem_data(connection, dx_ccs_server_msg_processor, &failed);
+    if (mpcc == NULL) {
+        if (failed) {
+            dx_set_error_code(dx_cec_connection_context_not_initialized);
+        }
+        return false;
+    }
+
+    dx_init_record_digest(&new_digest);
+    DX_ARRAY_INSERT(mpcc->record_digests, dx_record_digest_t, new_digest, index, dx_capacity_manager_halfer, failed);
+
+    if (failed) {
+        return dx_set_error_code(dx_sec_not_enough_memory);
+    }
+
+    return true;
 }

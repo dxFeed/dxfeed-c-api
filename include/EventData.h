@@ -62,6 +62,26 @@ typedef enum {
 
 #define DX_EVENT_BIT_MASK(event_id) (1 << event_id)
 
+#define RECORD_SUFFIX_SIZE 5
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Source suffix array
+*/
+/* -------------------------------------------------------------------------- */
+
+typedef struct {
+    dxf_char_t suffix[RECORD_SUFFIX_SIZE];
+} dx_suffix_t;
+
+typedef struct {
+    dx_suffix_t *elements;
+    int size;
+    int capacity;
+} dx_order_source_array_t;
+
+typedef dx_order_source_array_t* dx_order_source_array_ptr_t;
+
 /* -------------------------------------------------------------------------- */
 /*
  *	Event data structures
@@ -85,6 +105,8 @@ typedef struct {
     dxf_const_string_t market_maker;
     dxf_double_t price;
     dxf_long_t size;
+    dxf_char_t source[RECORD_SUFFIX_SIZE];
+    dxf_int_t count;
 } dxf_order_t;
 
 /* -------------------------------------------------------------------------- */
@@ -107,6 +129,23 @@ static const dxf_int_t DXF_TIME_AND_SALE_TYPE_CANCEL = 2;
 
 /* -------------------------------------------------------------------------- */
 /*
+*	Events flag constants
+*/
+/* -------------------------------------------------------------------------- */
+
+typedef enum {
+    dxf_ef_tx_pending = 0x01,
+    dxf_ef_remove_event = 0x02,
+    dxf_ef_snapshot_begin = 0x04,
+    dxf_ef_snapshot_end = 0x08,
+    dxf_ef_snapshot_snip = 0x10,
+    dxf_ef_remove_symbol = 0x20
+} dxf_event_flag;
+
+typedef dxf_uint_t dxf_event_flags_t;
+
+/* -------------------------------------------------------------------------- */
+/*
  *	Event listener prototype
  
  *  event type here is a one-bit mask, not an integer
@@ -115,8 +154,8 @@ static const dxf_int_t DXF_TIME_AND_SALE_TYPE_CANCEL = 2;
 /* -------------------------------------------------------------------------- */
 
 typedef void (*dxf_event_listener_t) (int event_type, dxf_const_string_t symbol_name,
-                                      const dxf_event_data_t* data, int data_count,
-                                      void* user_data);
+                                      const dxf_event_data_t* data, dxf_event_flags_t flags,
+                                      int data_count, void* user_data);
                                      
 /* -------------------------------------------------------------------------- */
 /*
@@ -149,7 +188,19 @@ typedef struct {
     dx_subscription_type_t subscription_type;
 } dx_event_subscription_param_t;
 
-int dx_get_event_subscription_params (dx_event_id_t event_id, OUT const dx_event_subscription_param_t** params);
+typedef struct {
+    dx_event_subscription_param_t* elements;
+    int size;
+    int capacity;
+} dx_event_subscription_param_list_t;
+
+/*
+* Returns the list of subscription params. Fills records list according to event_id.
+*
+* You need to call dx_free(params.elements) to free resources.
+*/
+int dx_get_event_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source, dx_event_id_t event_id,
+                                      OUT dx_event_subscription_param_list_t* params);
 
 /* -------------------------------------------------------------------------- */
 /*

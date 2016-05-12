@@ -46,10 +46,17 @@ typedef enum {
 
     dx_rid_count,
     dx_rid_invalid
-} dx_record_id_t;
+} dx_record_info_id_t;
+//TODO: possible need to rename elements
 
-static const dxf_int_t DX_RECORD_ID_SUFFIX_MASK  = 0xFF00;
-static const dxf_int_t DX_RECORD_ID_SUFFIX_SHIFT = 8;
+typedef int dx_record_id_t;
+
+static const dxf_int_t DX_RECORD_SUFFIX_MASK = 0x7C00;
+static const dxf_int_t DX_RECORD_SUFFIX_IN_FLAG_SHIFT = 10;
+static const dxf_int_t DX_RECORD_SUFFIX_HIGH_BITS = 0x40;
+
+/* Invalid or empty record id */
+static const dx_record_id_t DX_RECORD_ID_INVALID = -1;
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -97,6 +104,9 @@ typedef struct {
     dxf_int_t mmask_time;
     dxf_double_t mmask_price;
     dxf_int_t mmask_size;
+    dxf_int_t mmbid_count;
+    dxf_int_t mmask_count;
+
 } dx_market_maker_t;
 
 typedef struct {
@@ -107,6 +117,7 @@ typedef struct {
     dxf_int_t size;
     dxf_int_t flags;
     dxf_int_t mmid;
+    dxf_int_t count;
 } dx_order_t;
 
 typedef struct {
