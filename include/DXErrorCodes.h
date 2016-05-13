@@ -163,6 +163,13 @@ typedef enum {
     dx_cec_invalid_connection_handle_internal,
     dx_cec_connection_context_not_initialized,
     dx_cec_invalid_connection_context_subsystem_id,
+
+    /* snapshot error codes */
+
+    dx_ssec_invalid_snapshot_id,
+    dx_ssec_invalid_event_id,
+    dx_ssec_invalid_symbol,
+    dx_ssec_snapshot_exist,
     
     /* miscellaneous error codes */
     

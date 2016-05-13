@@ -163,6 +163,13 @@ dxf_const_string_t dx_get_error_description (dx_error_code_t code) {
     case dx_cec_invalid_connection_handle_internal: return s_internal_error_descr;
     case dx_cec_connection_context_not_initialized: return s_internal_error_descr;
     case dx_cec_invalid_connection_context_subsystem_id: return s_internal_error_descr;
+
+    /* snapshot error codes */
+
+    case dx_ssec_invalid_snapshot_id: return L"Invalid snapshot descriptor";
+    case dx_ssec_invalid_event_id: return L"Invalid event id";
+    case dx_ssec_invalid_symbol: return L"Invalid or empty symbol string";
+    case dx_ssec_snapshot_exist: return L"Snapshot with such event id and symbol already exists";
     
     /* miscellaneous error codes */
     

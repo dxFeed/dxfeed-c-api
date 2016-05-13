@@ -32,6 +32,7 @@
 #include "DXAlgorithms.h"
 #include "ConnectionContextData.h"
 #include "DXThreads.h"
+#include "Snapshot.h"
 
 
 /* -------------------------------------------------------------------------- */
@@ -576,4 +577,46 @@ DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const
     }
     dx_free(str);
     return DXF_SUCCESS;
+}
+
+/* -------------------------------------------------------------------------- */
+
+DXFEED_API ERRORCODE dxf_create_snapshot(dxf_connection_t connection, dx_event_id_t event_id,
+                                         dxf_const_string_t symbol, OUT dxf_snapshot_t* snapshot) {
+    dx_logging_verbose_info(L"Create snapshot, event type id: %d, symbol: %s", event_id, symbol);
+
+    if (!dx_validate_connection_handle(connection, false)) {
+        return DXF_FAILURE;
+    }
+
+    if (snapshot == NULL) {
+        dx_set_error_code(dx_ec_invalid_func_param);
+        return DXF_FAILURE;
+    }
+
+    if ((*snapshot = dx_create_snapshot(connection, event_id, symbol)) == dx_invalid_snapshot) {
+        return DXF_FAILURE;
+    }
+
+    return DXF_SUCCESS;
+
+}
+
+/* -------------------------------------------------------------------------- */
+
+DXFEED_API ERRORCODE dxf_close_snapshot(dxf_snapshot_t snapshot) {
+
+}
+
+/* -------------------------------------------------------------------------- */
+
+DXFEED_API ERRORCODE dxf_attach_snapshot_listener(dxf_snapshot_t snapshot, dxf_snapshot_listener_t snapshot_listener,
+    void* user_data) {
+
+}
+
+/* -------------------------------------------------------------------------- */
+
+DXFEED_API ERRORCODE dxf_detach_snapshot_listener(dxf_snapshot_t snapshot, dxf_snapshot_listener_t snapshot_listener) {
+
 }

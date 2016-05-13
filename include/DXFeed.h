@@ -271,27 +271,35 @@ DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const
 *               on how to get an event type
 *  OUT snapshot - a handle of the created snapshot
 */
-DXFEED_API ERRORCODE dxf_create_snapshot(dxf_connection_t connection, int event_type, 
+DXFEED_API ERRORCODE dxf_create_snapshot(dxf_connection_t connection, dx_event_id_t event_id, 
                                          dxf_const_string_t symbol, OUT dxf_snapshot_t* snapshot);
 
 /*
-*  Attaches a listener callback to the subscription.
-*  This callback will be invoked when the new event data for the subscription symbols arrives.
+*	Closes a snapshot.
+*  All the data associated with it will be freed.
+
+*  snapshot - a handle of the snapshot to close
+*/
+DXFEED_API ERRORCODE dxf_close_snapshot(dxf_snapshot_t snapshot);
+
+/*
+*  Attaches a listener callback to the snapshot.
+*  This callback will be invoked when the new snapshot arrives or existing updates.
 *  No error occurs if it's attempted to attach the same listener twice or more.
 
-*  subscription - a handle of the subscription to which a listener is to be attached
-*  event_listener - a listener callback function pointer
+*  snapshot - a handle of the snapshot to which a listener is to be attached
+*  snapshot_listener - a listener callback function pointer
 */
-DXFEED_API ERRORCODE dxf_attach_snapshot_listener(dxf_snapshot_t snapshot, dxf_event_listener_t event_listener,
+DXFEED_API ERRORCODE dxf_attach_snapshot_listener(dxf_snapshot_t snapshot, dxf_snapshot_listener_t snapshot_listener,
     void* user_data);
 
 /*
-*  Detaches a listener from the subscription.
+*  Detaches a listener from the snapshot.
 *  No error occurs if it's attempted to detach a listener which wasn't previously attached.
 
-*  subscription - a handle of the subscription from which a listener is to be detached
-*  event_listener - a listener callback function pointer
+*  snapshot - a handle of the snapshot to which a listener is to be detached
+*  snapshot_listener - a listener callback function pointer
 */
-DXFEED_API ERRORCODE dxf_detach_snapshot_listener(dxf_snapshot_t snapshot, dxf_event_listener_t event_listener);
+DXFEED_API ERRORCODE dxf_detach_snapshot_listener(dxf_snapshot_t snapshot, dxf_snapshot_listener_t snapshot_listener);
 
 #endif /* DXFEED_API_H_INCLUDED */

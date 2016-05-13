@@ -204,6 +204,18 @@ int dx_get_event_subscription_params(dxf_connection_t connection, dx_order_sourc
 
 /* -------------------------------------------------------------------------- */
 /*
+*	Snapshot listener prototype
+
+*  snapshot - pointer to the received snapshot
+*/
+/* -------------------------------------------------------------------------- */
+
+typedef void(*dxf_snapshot_listener_t) (dxf_snapshot_t snapshot);
+
+/* -------------------------------------------------------------------------- */
+
+/* -------------------------------------------------------------------------- */
+/*
  *	Event data navigation functions
  */
 /* -------------------------------------------------------------------------- */
