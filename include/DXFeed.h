@@ -263,4 +263,35 @@ DXFEED_API ERRORCODE dxf_set_order_source(dxf_subscription_t subscription, const
  */
 DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const char* source);
 
+/*
+*  Creates a snapshot with the specified parameters.
+
+*  connection - a handle of a previously created connection which the subscription will be using
+*  event_type - only single subscription event type allowed. See 'dx_event_id_t' for information
+*               on how to get an event type
+*  OUT snapshot - a handle of the created snapshot
+*/
+DXFEED_API ERRORCODE dxf_create_snapshot(dxf_connection_t connection, int event_type, 
+                                         dxf_const_string_t symbol, OUT dxf_snapshot_t* snapshot);
+
+/*
+*  Attaches a listener callback to the subscription.
+*  This callback will be invoked when the new event data for the subscription symbols arrives.
+*  No error occurs if it's attempted to attach the same listener twice or more.
+
+*  subscription - a handle of the subscription to which a listener is to be attached
+*  event_listener - a listener callback function pointer
+*/
+DXFEED_API ERRORCODE dxf_attach_snapshot_listener(dxf_snapshot_t snapshot, dxf_event_listener_t event_listener,
+    void* user_data);
+
+/*
+*  Detaches a listener from the subscription.
+*  No error occurs if it's attempted to detach a listener which wasn't previously attached.
+
+*  subscription - a handle of the subscription from which a listener is to be detached
+*  event_listener - a listener callback function pointer
+*/
+DXFEED_API ERRORCODE dxf_detach_snapshot_listener(dxf_snapshot_t snapshot, dxf_event_listener_t event_listener);
+
 #endif /* DXFEED_API_H_INCLUDED */

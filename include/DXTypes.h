@@ -23,6 +23,7 @@
 typedef int ERRORCODE;
 typedef void* dxf_subscription_t;
 typedef void* dxf_connection_t;
+typedef void* dxf_snapshot_t;
 
 #ifdef _WIN32
 
