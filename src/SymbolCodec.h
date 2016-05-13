@@ -116,7 +116,9 @@ bool dx_decode_symbol_name (dxf_int_t cipher, OUT dxf_const_string_t* symbol);
  * characters. The 'result' shall have length 1 because only first element is ever used.
  *
  */
-bool dx_codec_read_symbol (void* bicc, dxf_char_t* buffer, int buffer_length, OUT dxf_string_t* result, OUT dxf_int_t* cipher_result);
+bool dx_codec_read_symbol(void* bicc, dxf_char_t* buffer, int buffer_length, OUT dxf_string_t* result, 
+                          OUT dxf_int_t* cipher_result, OUT dxf_event_flags_t* flags, 
+                          OUT dxf_event_flags_t* mru_event_flags);
 
 /* -------------------------------------------------------------------------- */
 /*

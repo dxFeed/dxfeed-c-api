@@ -113,6 +113,12 @@
     <ClCompile Include="..\..\src\SymbolCodec.c">
       <Filter>Parser\Sources</Filter>
     </ClCompile>
+    <ClCompile Include="EventDynamicSubscriptionTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OrderSourceConfigurationTest.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\DXAlgorithms.h">
@@ -156,6 +162,12 @@
     </ClInclude>
     <ClInclude Include="..\..\src\SymbolCodec.h">
       <Filter>Parser\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="EventDynamicSubscriptionTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OrderSourceConfigurationTest.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -19,6 +19,10 @@
 
 #include "EventData.h"
 #include "DXAlgorithms.h"
+#include "DXErrorHandling.h"
+#include "Logger.h"
+#include "EventSubscription.h"
+#include "DataStructures.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -34,6 +38,15 @@ static const int g_event_data_sizes[dx_eid_count] = {
     sizeof(dxf_order_t),
     sizeof(dxf_time_and_sale_t)
 };
+
+static const dxf_char_t g_quote_tmpl[] = L"Quote&";
+static const dxf_char_t g_order_tmpl[] = L"Order#";
+static const dxf_char_t g_trade_tmpl[] = L"Trade&";
+
+#define STRLEN(char_array) (sizeof(char_array) / sizeof(char_array[0]) - 1)
+#define QUOTE_TMPL_LEN STRLEN(g_quote_tmpl)
+#define ORDER_TMPL_LEN STRLEN(g_order_tmpl)
+#define TRADE_TMPL_LEN STRLEN(g_trade_tmpl)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -79,50 +92,101 @@ dx_event_id_t dx_get_event_id_by_bitmask (int event_bitmask) {
  */
 /* -------------------------------------------------------------------------- */
 
-static const dx_event_subscription_param_t g_trade_subscription_params[] = {
-    { dx_rid_trade, dx_st_ticker }
-};
+bool dx_add_subscription_param_to_list(dxf_connection_t connection, dx_event_subscription_param_list_t* param_list,
+                                        dxf_const_string_t record_name, dx_subscription_type_t subscription_type) {
+    bool failed = false;
+    dx_event_subscription_param_t param;
+    dx_record_id_t record_id = dx_add_or_get_record_id(connection, record_name);
+    if (record_id < 0) {
+        dx_set_last_error(dx_esec_invalid_subscr_id);
+        return false;
+    }
 
-static const dx_event_subscription_param_t g_quote_subscription_params[] = {
-    { dx_rid_quote, dx_st_ticker }
-};
+    param.record_id = record_id;
+    param.subscription_type = subscription_type;
+    DX_ARRAY_INSERT(*param_list, dx_event_subscription_param_t, param, param_list->size, dx_capacity_manager_halfer, failed);
+    if (failed)
+        dx_set_last_error(dx_sec_not_enough_memory);
+    return !failed;
+}
 
-static const dx_event_subscription_param_t g_summary_subscription_params[] = {
-    { dx_rid_fundamental, dx_st_ticker }
-};
+bool dx_get_order_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source, OUT dx_event_subscription_param_list_t* param_list) {
+    dxf_char_t ch = 'A';
+    dxf_char_t order_name_buf[ORDER_TMPL_LEN + RECORD_SUFFIX_SIZE] = { 0 };
+    dxf_char_t quote_name_buf[QUOTE_TMPL_LEN + 2] = { 0 };
+    int i;
+    CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Quote", dx_st_ticker);
+    CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"MarketMaker", dx_st_history);
+    CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Order", dx_st_history);
 
-static const dx_event_subscription_param_t g_profile_subscription_params[] = {
-    { dx_rid_profile, dx_st_ticker }
-};
+    dx_copy_string(order_name_buf, g_order_tmpl);
+    for (i = 0; i < order_source->size; ++i) {
+        dx_copy_string_len(&order_name_buf[ORDER_TMPL_LEN], order_source->elements[i].suffix, RECORD_SUFFIX_SIZE);
+        CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, order_name_buf, dx_st_history);
+    }
 
-static const dx_event_subscription_param_t g_order_subscription_params[] = {
-    { dx_rid_quote, dx_st_ticker },
-    { dx_rid_market_maker, dx_st_history },
-    { dx_rid_order, dx_st_history }
-};
+    //fill quotes Quote&A..Quote&Z
+    dx_copy_string(quote_name_buf, g_quote_tmpl);
+    for (; ch <= 'Z'; ch++) {
+        quote_name_buf[QUOTE_TMPL_LEN] = ch;
+        CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, quote_name_buf, dx_st_ticker);
+    }
 
-static const dx_event_subscription_param_t g_time_and_sale_subscription_params[] = {
-    { dx_rid_time_and_sale, dx_st_stream }
-};
+    return true;
+}
 
-typedef struct {
-    const dx_event_subscription_param_t* params;
-    int param_count;
-} dx_event_subscription_param_roster;
+bool dx_get_trade_subscription_params(dxf_connection_t connection, OUT dx_event_subscription_param_list_t* param_list) {
+    dxf_char_t ch = 'A';
+    dxf_char_t trade_name_buf[TRADE_TMPL_LEN + 2] = { 0 };
+    CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Trade", dx_st_ticker);
 
-static const dx_event_subscription_param_roster g_event_param_rosters[dx_eid_count] = {
-    { g_trade_subscription_params, sizeof(g_trade_subscription_params) / sizeof(g_trade_subscription_params[0]) },
-    { g_quote_subscription_params, sizeof(g_quote_subscription_params) / sizeof(g_quote_subscription_params[0]) },
-    { g_summary_subscription_params, sizeof(g_summary_subscription_params) / sizeof(g_summary_subscription_params[0]) },
-    { g_profile_subscription_params, sizeof(g_profile_subscription_params) / sizeof(g_profile_subscription_params[0]) },
-    { g_order_subscription_params, sizeof(g_order_subscription_params) / sizeof(g_order_subscription_params[0]) },
-    { g_time_and_sale_subscription_params, sizeof(g_time_and_sale_subscription_params) / sizeof(g_time_and_sale_subscription_params[0]) }
-};
+    //fill trades Trade&A..Trade&Z
+    dx_copy_string(trade_name_buf, g_trade_tmpl);
+    for (; ch <= 'Z'; ch++) {
+        trade_name_buf[TRADE_TMPL_LEN] = ch;
+        CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, trade_name_buf, dx_st_ticker);
+    }
 
-int dx_get_event_subscription_params (dx_event_id_t event_id, OUT const dx_event_subscription_param_t** params) {
-    *params = g_event_param_rosters[event_id].params;
-    
-    return g_event_param_rosters[event_id].param_count;
+    return true;
+}
+
+/*
+ * Returns the list of subscription params. Fills records list according to event_id.
+ *
+ * You need to call dx_free(params.elements) to free resources.
+*/
+int dx_get_event_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source, dx_event_id_t event_id,
+                                      OUT dx_event_subscription_param_list_t* params) {
+    bool result = true;
+    dx_event_subscription_param_list_t param_list = { NULL, 0, 0 };
+    switch (event_id) {
+    case dx_eid_trade:
+        result = dx_get_trade_subscription_params(connection, &param_list);
+        break;
+    case dx_eid_quote:
+        result = dx_add_subscription_param_to_list(connection, &param_list, L"Quote", dx_st_ticker);
+        break;
+    case dx_eid_summary:
+        result = dx_add_subscription_param_to_list(connection, &param_list, L"Fundamental", dx_st_ticker);
+        break;
+    case dx_eid_profile:
+        result = dx_add_subscription_param_to_list(connection, &param_list, L"Profile", dx_st_ticker);
+        break;
+    case dx_eid_order:
+        result = dx_get_order_subscription_params(connection, order_source, &param_list);
+        break;
+    case dx_eid_time_and_sale:
+        result = dx_add_subscription_param_to_list(connection, &param_list, L"TimeAndSale", dx_st_stream);
+        break;
+    }
+
+    if (!result) {
+        dx_logging_last_error();
+        dx_logging_info(L"Unable to create subscription to event %d (%s)", event_id, dx_event_type_to_string(event_id));
+    }
+
+    *params = param_list;
+    return param_list.size;
 }
     
 /* -------------------------------------------------------------------------- */

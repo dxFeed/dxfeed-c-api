@@ -33,6 +33,7 @@
 #include "EventData.h"
 #include "ServerMessageProcessor.h"
 #include "TaskQueue.h"
+#include "Version.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -66,6 +67,7 @@ dx_message_type_t dx_get_subscription_message_type (dx_action_type_t action_type
 
 typedef struct {
     dxf_connection_t connection;
+    dx_order_source_array_ptr_t order_source;
     dxf_const_string_t* symbols;
     int symbol_count;
     int event_types;
@@ -89,7 +91,7 @@ void* dx_destroy_event_subscription_task_data (dx_event_subscription_task_data_t
 
 /* -------------------------------------------------------------------------- */
 
-void* dx_create_event_subscription_task_data (dxf_connection_t connection,
+void* dx_create_event_subscription_task_data (dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
                                               dxf_const_string_t* symbols, int symbol_count, int event_types, bool unsubscribe) {
     int i = 0;
     dx_event_subscription_task_data_t* data = dx_calloc(1, sizeof(dx_event_subscription_task_data_t));
@@ -111,11 +113,12 @@ void* dx_create_event_subscription_task_data (dxf_connection_t connection,
             return dx_destroy_event_subscription_task_data(data);
         }
     }
-    
+
     data->connection = connection;
+    data->order_source = order_source;
     data->event_types = event_types;
     data->unsubscribe = unsubscribe;
-    
+
     return data;
 }
 
@@ -256,8 +259,8 @@ int dx_subscribe_symbols_to_events_task (void* data, int command) {
         
         return res | dx_tes_success;
     }
-    
-    if (dx_subscribe_symbols_to_events(task_data->connection, task_data->symbols, task_data->symbol_count,
+
+    if (dx_subscribe_symbols_to_events(task_data->connection, task_data->order_source, task_data->symbols, task_data->symbol_count,
                                        task_data->event_types, task_data->unsubscribe, true)) {
         res |= dx_tes_success;
     }
@@ -282,7 +285,7 @@ static bool dx_write_record_field (void* bocc, const dx_field_info_t* field) {
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_write_event_record (void* bocc, const dx_record_info_t* record, dx_record_id_t record_id) {
+static bool dx_write_event_record(void* bocc, const dx_record_item_t* record, dx_record_id_t record_id) {
     int field_index = 0;
 
     CHECKED_CALL_2(dx_write_compact_int, bocc, (dxf_int_t)record_id);
@@ -299,10 +302,12 @@ static bool dx_write_event_record (void* bocc, const dx_record_info_t* record, d
 /* -------------------------------------------------------------------------- */
 
 bool dx_write_event_records (void* bocc) {
-    dx_record_id_t record_id = dx_rid_begin;
+    dx_record_id_t record_id = dx_get_next_unsubscribed_record_id(false);
+    int count = dx_get_records_list_count();
 
-    for (; record_id < dx_rid_count; ++record_id) {
+    while (record_id < count) {
         CHECKED_CALL_3(dx_write_event_record, bocc, dx_get_record_by_id(record_id), record_id);
+        record_id = dx_get_next_unsubscribed_record_id(true);
     }
 
     return true;
@@ -326,7 +331,7 @@ int dx_describe_records_sender_task (void* data, int command) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_get_event_server_support (dxf_connection_t connection, int event_types, bool unsubscribe, OUT dx_message_support_status_t* res) {
+bool dx_get_event_server_support (dxf_connection_t connection, dx_order_source_array_ptr_t order_source, int event_types, bool unsubscribe, OUT dx_message_support_status_t* res) {
     dx_event_id_t eid = dx_eid_begin;
     bool halt = false;
     bool success = true;
@@ -337,12 +342,12 @@ bool dx_get_event_server_support (dxf_connection_t connection, int event_types, 
 
     for (; eid < dx_eid_count; ++eid) {
         if (event_types & DX_EVENT_BIT_MASK(eid)) {
-            const dx_event_subscription_param_t* subscr_params = NULL;
             int j = 0;
-            int param_count = dx_get_event_subscription_params(eid, &subscr_params);
+            dx_event_subscription_param_list_t subscr_params;
+            int param_count = dx_get_event_subscription_params(connection, order_source, eid, &subscr_params);
 
             for (; j < param_count; ++j) {
-                const dx_event_subscription_param_t* cur_param = subscr_params + j;
+                const dx_event_subscription_param_t* cur_param = subscr_params.elements + j;
                 dx_message_type_t msg_type = dx_get_subscription_message_type(unsubscribe ? dx_at_remove_subscription : dx_at_add_subscription, cur_param->subscription_type);
                 dx_message_support_status_t msg_res;
 
@@ -383,6 +388,8 @@ bool dx_get_event_server_support (dxf_connection_t connection, int event_types, 
             if (halt) {
                 break;
             }
+
+            dx_free(subscr_params.elements);
         }
     }
     
@@ -408,9 +415,11 @@ static bool dx_write_describe_protocol_magic (void* bocc) {
 /* -------------------------------------------------------------------------- */
 
 static bool dx_write_describe_protocol_properties (void* bocc) {
-    CHECKED_CALL_2(dx_write_compact_int, bocc, 1); /* count of properties */
+    CHECKED_CALL_2(dx_write_compact_int, bocc, 2); /* count of properties */
     CHECKED_CALL_2(dx_write_utf_string, bocc, L"version"); 
-    CHECKED_CALL_2(dx_write_utf_string, bocc, L"DXFeed.cpp v 0.4 (c) Devexperts"); 
+    CHECKED_CALL_2(dx_write_utf_string, bocc, DX_LIBRARY_VERSION);
+    CHECKED_CALL_2(dx_write_utf_string, bocc, L"opt");
+    CHECKED_CALL_2(dx_write_utf_string, bocc, L"hs");
   
     return true;
 }
@@ -478,7 +487,7 @@ int dx_describe_protocol_sender_task (void* data, int command) {
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_subscribe_symbols_to_events (dxf_connection_t connection,
+bool dx_subscribe_symbols_to_events (dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
                                      dxf_const_string_t* symbols, int symbol_count, int event_types, bool unsubscribe,
                                      bool task_mode) {
     int i = 0;
@@ -488,7 +497,7 @@ bool dx_subscribe_symbols_to_events (dxf_connection_t connection,
     {
         dx_message_support_status_t msg_support_status;
 
-        CHECKED_CALL_4(dx_get_event_server_support, connection, event_types, unsubscribe, &msg_support_status);
+        CHECKED_CALL_5(dx_get_event_server_support, connection, order_source, event_types, unsubscribe, &msg_support_status);
 
         switch (msg_support_status) {
         case dx_mss_not_supported:
@@ -501,9 +510,9 @@ bool dx_subscribe_symbols_to_events (dxf_connection_t connection,
         default:
             if (!task_mode) {
                 /* scheduling the task for asynchronous execution */
-                
-                void* data = dx_create_event_subscription_task_data(connection, symbols, symbol_count, event_types, unsubscribe);
-                
+
+                void* data = dx_create_event_subscription_task_data(connection, order_source, symbols, symbol_count, event_types, unsubscribe);
+
                 if (data == NULL) {
                     return false;
                 }
@@ -518,12 +527,12 @@ bool dx_subscribe_symbols_to_events (dxf_connection_t connection,
 
         for (; eid < dx_eid_count; ++eid) {
             if (event_types & DX_EVENT_BIT_MASK(eid)) {
-                const dx_event_subscription_param_t* subscr_params = NULL;
                 int j = 0;
-                int param_count = dx_get_event_subscription_params(eid, &subscr_params);
+                dx_event_subscription_param_list_t subscr_params;
+                int param_count = dx_get_event_subscription_params(connection, order_source, eid, &subscr_params);
 
                 for (; j < param_count; ++j) {
-                    const dx_event_subscription_param_t* cur_param = subscr_params + j;
+                    const dx_event_subscription_param_t* cur_param = subscr_params.elements + j;
                     dx_message_type_t msg_type = dx_get_subscription_message_type(unsubscribe ? dx_at_remove_subscription : dx_at_add_subscription, cur_param->subscription_type);
 
                     if (!dx_subscribe_symbol_to_record(connection, msg_type, symbols[i],
@@ -532,6 +541,8 @@ bool dx_subscribe_symbols_to_events (dxf_connection_t connection,
                         return false;
                     }
                 }
+
+                dx_free(subscr_params.elements);
             }
         }
     }
