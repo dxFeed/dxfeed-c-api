@@ -45,6 +45,7 @@ typedef enum {
     dx_eid_profile,
     dx_eid_order,
     dx_eid_time_and_sale,
+    dx_eid_candle,
     
     /* add new event id above this line */
     
@@ -58,6 +59,7 @@ typedef enum {
 #define DXF_ET_PROFILE		 (1 << dx_eid_profile)
 #define DXF_ET_ORDER	     (1 << dx_eid_order)
 #define DXF_ET_TIME_AND_SALE (1 << dx_eid_time_and_sale)
+#define DXF_ET_CANDLE        (1 << dx_eid_candle)
 #define DXF_ET_UNUSED		 (~((1 << dx_eid_count) - 1))
 
 #define DX_EVENT_BIT_MASK(event_id) (1 << event_id)

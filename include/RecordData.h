@@ -41,6 +41,7 @@ typedef enum {
     dx_rid_market_maker,
     dx_rid_order,
     dx_rid_time_and_sale,
+    dx_rid_candle,
 
     /* add new values above this line */
 
@@ -132,5 +133,10 @@ typedef struct {
     dxf_bool_t is_trade;
     dxf_int_t type;    
 } dx_time_and_sale_t;
+
+typedef struct {
+    dxf_long_t index;
+    // other
+} dx_candle_t;
 
 #endif /* RECORD_DATA_H_INCLUDED */
