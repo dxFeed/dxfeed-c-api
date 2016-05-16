@@ -170,6 +170,7 @@ typedef enum {
     dx_ssec_invalid_event_id,
     dx_ssec_invalid_symbol,
     dx_ssec_snapshot_exist,
+    dx_ssec_invalid_listener,
     
     /* miscellaneous error codes */
     

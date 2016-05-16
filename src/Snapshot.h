@@ -44,7 +44,8 @@ extern const dxf_snapshot_t dx_invalid_snapshot;
 /* returns dx_invalid_snapshot on error */
 dxf_snapshot_t dx_create_snapshot(dxf_connection_t connection, dx_event_id_t event_id, dxf_const_string_t symbol);
 bool dx_close_snapshot(dxf_snapshot_t snapshot);
-bool dx_add_listener(dxf_snapshot_t snapshot, dxf_snapshot_listener_t listener, void* user_data);
-bool dx_remove_listener(dxf_snapshot_t snapshot, dxf_snapshot_listener_t listener);
+bool dx_add_snapshot_listener(dxf_snapshot_t snapshot, dxf_snapshot_listener_t listener, void* user_data);
+bool dx_remove_snapshot_listener(dxf_snapshot_t snapshot, dxf_snapshot_listener_t listener);
+bool dx_get_snapshot_subscription(dxf_snapshot_t snapshot, OUT dxf_subscription_t *subscription);
 
 #endif /* SNAPSHOT_H_INCLUDED */
