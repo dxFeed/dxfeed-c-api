@@ -119,6 +119,9 @@
     <ClCompile Include="OrderSourceConfigurationTest.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Snapshot.c">
+      <Filter>Common\Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\DXAlgorithms.h">
@@ -168,6 +171,9 @@
     </ClInclude>
     <ClInclude Include="OrderSourceConfigurationTest.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Snapshot.h">
+      <Filter>Common\Headers</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

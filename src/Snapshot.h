@@ -32,9 +32,6 @@ extern const dxf_snapshot_t dx_invalid_snapshot;
 */
 /* -------------------------------------------------------------------------- */
 
-//typedef bool(*dx_subscription_processor_t) (dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
-//    dxf_const_string_t* symbols, int symbol_count, int event_types);
-
 /* -------------------------------------------------------------------------- */
 /*
 *	Subscription functions
