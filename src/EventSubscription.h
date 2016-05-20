@@ -65,4 +65,7 @@ bool dx_add_order_source(dxf_subscription_t subscr_id, dxf_const_string_t source
 void dx_clear_order_source(dxf_subscription_t subscr_id);
 dx_order_source_array_ptr_t dx_get_order_source(dxf_subscription_t subscr_id);
 
+//TODO: move to DXAlgorithms?
+dxf_int_t dx_symbol_name_hasher(dxf_const_string_t symbol_name);
+
 #endif /* SUBSCRIPTIONS_H_INCLUDED */

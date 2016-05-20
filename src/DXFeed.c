@@ -581,23 +581,40 @@ DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const
 
 /* -------------------------------------------------------------------------- */
 
-DXFEED_API ERRORCODE dxf_create_snapshot(dxf_connection_t connection, dx_event_id_t event_id,
-                                         dxf_const_string_t symbol, OUT dxf_snapshot_t* snapshot) {
+ERRORCODE dx_create_snapshot_subscription(dxf_connection_t connection, dx_event_id_t event_id, 
+                                          dxf_const_string_t symbol, dxf_const_string_t source, 
+                                          OUT dxf_snapshot_t* snapshot) {
     dxf_subscription_t subscription = NULL;
-    int event_types = DX_EVENT_BIT_MASK(event_id);
+    dx_record_id_t record_id;
+    dxf_const_string_t order_source_value = NULL;
     ERRORCODE error_code;
+    int event_types = DX_EVENT_BIT_MASK(event_id);
+    int source_len = (source == NULL ? 0 : dx_string_length(source));
 
-    dx_logging_verbose_info(L"Create snapshot, event type id: %d, symbol: %s", event_id, symbol);
+    //TODO: add candle event
+    if (event_id == dx_eid_order) {
+        if (source_len > 0 &&
+            (dx_compare_strings(source, DXF_ORDER_COMPOSITE_BID_STR) == 0 ||
+            dx_compare_strings(source, DXF_ORDER_COMPOSITE_ASK_STR) == 0)) {
+            record_id = dx_rid_market_maker;
+        }
+        else {
+            record_id = dx_rid_order;
+            if (source_len > 0)
+                order_source_value = source;
+        }
+    }
+    else {
+        dx_set_error_code(dx_ssec_invalid_event_id);
+        return DXF_FAILURE;
+    }
+
+    dx_logging_verbose_info(L"Create snapshot, event_id: %d, symbol: %s", event_id, symbol);
 
     dx_perform_common_actions();
 
     if (snapshot == NULL) {
         dx_set_error_code(dx_ec_invalid_func_param);
-        return DXF_FAILURE;
-    }
-
-    if (event_id < dx_eid_begin || event_id >= dx_eid_count) {
-        dx_set_error_code(dx_ssec_invalid_event_id);
         return DXF_FAILURE;
     }
 
@@ -610,7 +627,7 @@ DXFEED_API ERRORCODE dxf_create_snapshot(dxf_connection_t connection, dx_event_i
     if (error_code == DXF_FAILURE)
         return error_code;
 
-    *snapshot = dx_create_snapshot(connection, subscription, event_id, symbol);
+    *snapshot = dx_create_snapshot(connection, subscription, record_id, symbol, order_source_value);
     if (*snapshot == dx_invalid_snapshot) {
         dxf_close_subscription(subscription);
         return DXF_FAILURE;
@@ -626,6 +643,15 @@ DXFEED_API ERRORCODE dxf_create_snapshot(dxf_connection_t connection, dx_event_i
 
     return DXF_SUCCESS;
 
+}
+
+DXFEED_API ERRORCODE dxf_create_snapshot(dxf_connection_t connection, dx_event_id_t event_id,
+                                         dxf_const_string_t symbol, const char* source,
+                                         OUT dxf_snapshot_t* snapshot) {
+    dxf_string_t source_str = dx_ansi_to_unicode(source);
+    ERRORCODE res = dx_create_snapshot_subscription(connection, event_id, symbol, source_str, snapshot);
+    dx_free(source_str);
+    return res;
 }
 
 /* -------------------------------------------------------------------------- */

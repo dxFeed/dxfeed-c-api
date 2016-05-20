@@ -127,6 +127,9 @@ static const dxf_int_t DXF_TIME_AND_SALE_TYPE_NEW = 0;
 static const dxf_int_t DXF_TIME_AND_SALE_TYPE_CORRECTION = 1;
 static const dxf_int_t DXF_TIME_AND_SALE_TYPE_CANCEL = 2;
 
+static dxf_const_string_t DXF_ORDER_COMPOSITE_BID_STR = L"COMPOSITE_BID";
+static dxf_const_string_t DXF_ORDER_COMPOSITE_ASK_STR = L"COMPOSITE_ASK";
+
 /* -------------------------------------------------------------------------- */
 /*
 *	Events flag constants

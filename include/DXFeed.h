@@ -264,20 +264,28 @@ DXFEED_API ERRORCODE dxf_set_order_source(dxf_subscription_t subscription, const
 DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const char* source);
 
 /*
-*  Creates a snapshot with the specified parameters.
-
+*  Creates Order or Candle snapshot with the specified parameters.
+*
+*  For Order events.
+*  If source is NULL string subscription on Order event will be performed. You can specify order 
+*  source for Order event by passing suffix: "BYX", "BZX", "DEA", "DEX", "ISE", "IST", "NTV".
+*  If source is equal to "COMPOSITE_BID" or "COMPOSITE_ASK" subscription on MarketMaker event will 
+*  be performed.
+*
 *  connection - a handle of a previously created connection which the subscription will be using
-*  event_type - only single subscription event type allowed. See 'dx_event_id_t' for information
-*               on how to get an event type
+*  event_id - identifier of event (dx_eid_order or dx_eid_candle)
+*  source - order source for Order event with 4 symbols maximum length OR keyword which can be 
+*           one of COMPOSITE_BID or COMPOSITE_ASK
 *  OUT snapshot - a handle of the created snapshot
 */
-DXFEED_API ERRORCODE dxf_create_snapshot(dxf_connection_t connection, dx_event_id_t event_id, 
-                                         dxf_const_string_t symbol, OUT dxf_snapshot_t* snapshot);
+DXFEED_API ERRORCODE dxf_create_snapshot(dxf_connection_t connection, dx_event_id_t event_id,
+                                         dxf_const_string_t symbol, const char* source,
+                                         OUT dxf_snapshot_t* snapshot);
 
 /*
-*	Closes a snapshot.
+*  Closes a snapshot.
 *  All the data associated with it will be freed.
-
+*
 *  snapshot - a handle of the snapshot to close
 */
 DXFEED_API ERRORCODE dxf_close_snapshot(dxf_snapshot_t snapshot);

@@ -39,7 +39,11 @@ extern const dxf_snapshot_t dx_invalid_snapshot;
 /* -------------------------------------------------------------------------- */
 
 /* returns dx_invalid_snapshot on error */
-dxf_snapshot_t dx_create_snapshot(dxf_connection_t connection, dxf_subscription_t subscription, dx_event_id_t event_id, dxf_const_string_t symbol);
+dxf_snapshot_t dx_create_snapshot(dxf_connection_t connection, 
+                                  dxf_subscription_t subscription, 
+                                  dx_record_id_t record_id, 
+                                  dxf_const_string_t symbol, 
+                                  dxf_const_string_t order_source);
 bool dx_close_snapshot(dxf_snapshot_t snapshot);
 bool dx_add_snapshot_listener(dxf_snapshot_t snapshot, dxf_snapshot_listener_t listener, void* user_data);
 bool dx_remove_snapshot_listener(dxf_snapshot_t snapshot, dxf_snapshot_listener_t listener);

@@ -51,9 +51,11 @@ typedef struct {
 } dx_listener_array_t;
 
 typedef struct {
+    dxf_ulong_t key;
     dxf_subscription_t subscription;
-    dx_event_id_t event_id;
-    dxf_int_t event_type;
+    dx_record_id_t record_id;
+    int event_type;
+    dxf_string_t order_source;
     dxf_string_t symbol;
     dx_snapshot_status_t status;
 
@@ -64,14 +66,12 @@ typedef struct {
 } dx_snapshot_data_t, *dx_snapshot_data_ptr_t;
 
 //TODO: possible need to map (key(s)->value) implementation
-//      && improve search algorithms
+//      and/or improve search algorithms
 typedef struct {
     dx_snapshot_data_ptr_t* elements;
     int size;
     int capacity;
 } dx_snapshots_data_array_t;
-
-#define DX_SNAPSHOTS_COMPARATOR(l, r) (l->event_id == r->event_id ? dx_compare_strings(l->symbol, r->symbol) : (l->event_id < r->event_id ? -1 : 1))
 
 #define SYMBOL_COUNT 1
 
@@ -229,6 +229,17 @@ void event_listener(int event_type, dxf_const_string_t symbol_name, const dxf_ev
 
 }
 
+dxf_ulong_t dx_new_snapshot_key(dx_record_id_t record_id, dxf_const_string_t symbol,
+    dxf_const_string_t order_source) {
+    dxf_int_t symbol_hash = dx_symbol_name_hasher(symbol);
+    dxf_int_t order_source_hash = dx_symbol_name_hasher(order_source);
+    return ((dxf_ulong_t)record_id << 56) | ((dxf_ulong_t)symbol_hash << 24) | (order_source_hash & 0xFFFFFF);
+}
+
+int dx_snapshot_comparator(dx_snapshot_data_ptr_t s1, dx_snapshot_data_ptr_t s2) {
+    return DX_NUMERIC_COMPARATOR(s1->key, s2->key);
+}
+
 //TODO: repeated code
 void dx_clear_snapshot_records_array(dx_snapshot_records_array_t* records) {
     dx_free(records->elements);
@@ -275,18 +286,25 @@ bool dx_free_snapshot_data(dx_snapshot_data_t* snapshot_data) {
 
     if (snapshot_data->symbol != NULL)
         dx_free(snapshot_data->symbol);
+    if (snapshot_data->order_source != NULL)
+        dx_free(snapshot_data->order_source);
 
     dx_free(snapshot_data);
     return true;
 }
 
-dxf_snapshot_t dx_create_snapshot(dxf_connection_t connection, dxf_subscription_t subscription, dx_event_id_t event_id, dxf_const_string_t symbol) {
+dxf_snapshot_t dx_create_snapshot(dxf_connection_t connection, 
+                                  dxf_subscription_t subscription,
+                                  dx_record_id_t record_id, 
+                                  dxf_const_string_t symbol, 
+                                  dxf_const_string_t order_source) {
     dx_snapshot_subscription_connection_context_t* context = NULL;
     dx_snapshot_data_t *snapshot_data = NULL;
     bool failed = false;
     bool found = false;
     bool res = false;
     int position = 0;
+    int event_types;
 
     if (!dx_validate_connection_handle(connection, false)) {
         return dx_invalid_snapshot;
@@ -301,13 +319,19 @@ dxf_snapshot_t dx_create_snapshot(dxf_connection_t connection, dxf_subscription_
         return dx_invalid_snapshot;
     }
 
+    if (!dx_get_event_subscription_event_types(subscription, &event_types)) {
+        return dx_invalid_snapshot;
+    }
+
     snapshot_data = dx_calloc(1, sizeof(dx_snapshot_data_t));
     if (snapshot_data == NULL) {
         return dx_invalid_snapshot;
     }
-    snapshot_data->event_id = event_id;
-    snapshot_data->event_type = DX_EVENT_BIT_MASK(event_id);
+    snapshot_data->key = dx_new_snapshot_key(record_id, symbol, order_source);
+    snapshot_data->record_id = record_id;
+    snapshot_data->event_type = event_types;
     snapshot_data->symbol = dx_create_string_src(symbol);
+    snapshot_data->order_source = dx_create_string_src(order_source);
     snapshot_data->status = dx_status_unknown;
     snapshot_data->sscc = context;
     snapshot_data->subscription = subscription;
@@ -323,7 +347,7 @@ dxf_snapshot_t dx_create_snapshot(dxf_connection_t connection, dxf_subscription_
     }
 
     if (context->snapshots_array.size > 0) {
-        DX_ARRAY_SEARCH(context->snapshots_array.elements, 0, context->snapshots_array.size, snapshot_data, DX_SNAPSHOTS_COMPARATOR, false, found, position);
+        DX_ARRAY_SEARCH(context->snapshots_array.elements, 0, context->snapshots_array.size, snapshot_data, dx_snapshot_comparator, false, found, position);
         if (found) {
             dx_free_snapshot_data(snapshot_data);
             dx_set_error_code(dx_ssec_snapshot_exist);
@@ -360,7 +384,7 @@ bool dx_close_snapshot(dxf_snapshot_t snapshot) {
     CHECKED_CALL(dx_mutex_lock, &(context->guard));
 
     //remove item from snapshots_array
-    DX_ARRAY_SEARCH(context->snapshots_array.elements, 0, context->snapshots_array.size, snapshot_data, DX_SNAPSHOTS_COMPARATOR, false, found, position);
+    DX_ARRAY_SEARCH(context->snapshots_array.elements, 0, context->snapshots_array.size, snapshot_data, dx_snapshot_comparator, false, found, position);
     if (found) {
         DX_ARRAY_DELETE(context->snapshots_array, dx_snapshot_data_ptr_t, position, dx_capacity_manager_halfer, failed);
         if (failed) {
