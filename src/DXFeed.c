@@ -648,8 +648,11 @@ ERRORCODE dx_create_snapshot_subscription(dxf_connection_t connection, dx_event_
 DXFEED_API ERRORCODE dxf_create_snapshot(dxf_connection_t connection, dx_event_id_t event_id,
                                          dxf_const_string_t symbol, const char* source,
                                          OUT dxf_snapshot_t* snapshot) {
-    dxf_string_t source_str = dx_ansi_to_unicode(source);
-    ERRORCODE res = dx_create_snapshot_subscription(connection, event_id, symbol, source_str, snapshot);
+    dxf_string_t source_str = NULL;
+    ERRORCODE res;
+    if (source != NULL)
+        source_str = dx_ansi_to_unicode(source);
+    res = dx_create_snapshot_subscription(connection, event_id, symbol, source_str, snapshot);
     dx_free(source_str);
     return res;
 }

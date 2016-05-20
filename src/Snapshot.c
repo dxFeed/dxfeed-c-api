@@ -232,7 +232,7 @@ void event_listener(int event_type, dxf_const_string_t symbol_name, const dxf_ev
 dxf_ulong_t dx_new_snapshot_key(dx_record_id_t record_id, dxf_const_string_t symbol,
     dxf_const_string_t order_source) {
     dxf_int_t symbol_hash = dx_symbol_name_hasher(symbol);
-    dxf_int_t order_source_hash = dx_symbol_name_hasher(order_source);
+    dxf_int_t order_source_hash = (order_source == NULL ? 0 : dx_symbol_name_hasher(order_source));
     return ((dxf_ulong_t)record_id << 56) | ((dxf_ulong_t)symbol_hash << 24) | (order_source_hash & 0xFFFFFF);
 }
 
@@ -331,7 +331,8 @@ dxf_snapshot_t dx_create_snapshot(dxf_connection_t connection,
     snapshot_data->record_id = record_id;
     snapshot_data->event_type = event_types;
     snapshot_data->symbol = dx_create_string_src(symbol);
-    snapshot_data->order_source = dx_create_string_src(order_source);
+    if (order_source != NULL)
+        snapshot_data->order_source = dx_create_string_src(order_source);
     snapshot_data->status = dx_status_unknown;
     snapshot_data->sscc = context;
     snapshot_data->subscription = subscription;
