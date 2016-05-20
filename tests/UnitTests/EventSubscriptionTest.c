@@ -33,8 +33,8 @@ bool event_subscription_test (void) {
     
     connection = dx_init_connection();
     
-    sub1 = dx_create_event_subscription(connection, DXF_ET_TRADE | DXF_ET_QUOTE);
-    sub2 = dx_create_event_subscription(connection, DXF_ET_QUOTE);
+    sub1 = dx_create_event_subscription(connection, DXF_ET_TRADE | DXF_ET_QUOTE, 0);
+    sub2 = dx_create_event_subscription(connection, DXF_ET_QUOTE, 0);
     
     if (sub1 == dx_invalid_subscription || sub2 == dx_invalid_subscription) {
         return false;

@@ -203,7 +203,7 @@ typedef struct {
 * You need to call dx_free(params.elements) to free resources.
 */
 int dx_get_event_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source, dx_event_id_t event_id,
-                                      OUT dx_event_subscription_param_list_t* params);
+                                     dxf_uint_t subscr_flags, OUT dx_event_subscription_param_list_t* params);
 
 /* -------------------------------------------------------------------------- */
 /*
