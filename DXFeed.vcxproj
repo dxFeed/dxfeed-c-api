@@ -246,7 +246,7 @@
     <ClInclude Include="include\DXFeed.h" />
     <ClInclude Include="include\DXTypes.h" />
     <ClInclude Include="include\EventData.h" />
-    <ClInclude Include="src\RecordData.h" />
+    <ClInclude Include="include\RecordData.h" />
     <ClInclude Include="include\pthreads\pthread.h" />
     <ClInclude Include="include\pthreads\sched.h" />
     <ClInclude Include="include\pthreads\semaphore.h" />

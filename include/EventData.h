@@ -97,6 +97,7 @@ typedef dx_quote_t dxf_quote_t;
 typedef dx_fundamental_t dxf_summary_t;
 typedef dx_profile_t dxf_profile_t;
 typedef dx_time_and_sale_t dxf_time_and_sale_t;
+typedef dx_candle_t dxf_candle_t;
 
 typedef struct {
     dxf_long_t index;
@@ -131,8 +132,81 @@ static const dxf_int_t DXF_TIME_AND_SALE_TYPE_CANCEL = 2;
 
 /* -------------------------------------------------------------------------- */
 /*
-*	Events flag constants
-*/
+ *	Event candle attributes
+ */
+/* -------------------------------------------------------------------------- */
+
+#define DXF_CANDLE_EXCHANGE_CODE_COMPOSITE_ATTRIBUTE '\0';
+static const dxf_char_t DXF_CANDLE_EXCHANGE_CODE_DEFAULT_ATTRIBUTE = DXF_CANDLE_EXCHANGE_CODE_COMPOSITE_ATTRIBUTE;
+
+typedef enum {
+    dxf_cpa_last,
+    dxf_cpa_bid,
+    dxf_cpa_ask,
+    dxf_cpa_mark,
+    dxf_cpa_settlement,
+
+    dxf_cpa_count
+} dxf_candle_price_attribute_t;
+
+static const dxf_candle_price_attribute_t DXF_CANDLE_PRICE_DEFAULT_ATTRIBUTE = dxf_cpa_last;
+
+typedef enum {
+    dxf_csa_any,
+    dxf_csa_regular,
+
+    dxf_csa_count
+} dxf_candle_session_attribute_t;
+
+static const dxf_candle_session_attribute_t DXF_CANDLE_SESSION_DEFAULT_ATTRIBUTE = dxf_csa_any;
+
+typedef enum {
+    dxf_ct_tick,
+    dxf_ct_second,
+    dxf_ct_minute,
+    dxf_ct_hour,
+    dxf_ct_day,
+    dxf_ct_week,
+    dxf_ct_month,
+    dxf_ct_optexp,
+    dxf_ct_year,
+    dxf_ct_volume,
+    dxf_ct_price,
+    dxf_ct_price_momentum,
+    dxf_ct_price_renko,
+
+    dxf_ct_count
+} dxf_candle_type_t;
+
+typedef struct {
+    dxf_double_t value;
+    dxf_candle_type_t type;
+} dxf_candle_period_attribute_t;
+
+static const dxf_candle_period_attribute_t DXF_CANDLE_PERIOD_DEFAULT_ATTRIBUTE = { 1, dxf_ct_tick };
+
+typedef enum {
+    dxf_caa_midnight,
+    dxf_caa_session,
+
+    dxf_caa_count
+} dxf_candle_alignment_attribute_t;
+
+static const dxf_candle_alignment_attribute_t DXF_CANDLE_ALIGNMENT_DEFAULT_ATTRIBUTE = dxf_caa_midnight;
+
+typedef struct {
+    dxf_char_t exchange_code;
+    dxf_candle_price_attribute_t price;
+    dxf_candle_session_attribute_t session;
+    dxf_candle_period_attribute_t period;
+    dxf_candle_alignment_attribute_t alignment;
+} dxf_candle_attributes_t;
+
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Events flag constants
+ */
 /* -------------------------------------------------------------------------- */
 
 typedef enum {
@@ -143,8 +217,6 @@ typedef enum {
     dxf_ef_snapshot_snip = 0x10,
     dxf_ef_remove_symbol = 0x20
 } dxf_event_flag;
-
-typedef dxf_uint_t dxf_event_flags_t;
 
 /* -------------------------------------------------------------------------- */
 /*

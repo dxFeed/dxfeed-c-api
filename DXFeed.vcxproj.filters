@@ -204,7 +204,7 @@
     <ClInclude Include="include\EventData.h">
       <Filter>Export</Filter>
     </ClInclude>
-    <ClInclude Include="src\RecordData.h">
+    <ClInclude Include="include\RecordData.h">
       <Filter>Export</Filter>
     </ClInclude>
     <ClInclude Include="include\pthreads\pthread.h">

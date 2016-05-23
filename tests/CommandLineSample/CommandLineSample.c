@@ -131,7 +131,7 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 		            trades[i].exchange_code, trades[i].price, trades[i].size, trades[i].day_volume);
 		}
     }
-    
+
     if (event_type == DXF_ET_SUMMARY) {
 	    dxf_summary_t* s = (dxf_summary_t*)data;
 
