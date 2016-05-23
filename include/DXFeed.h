@@ -294,7 +294,7 @@ DXFEED_API ERRORCODE dxf_close_snapshot(dxf_snapshot_t snapshot);
 *  Attaches a listener callback to the snapshot.
 *  This callback will be invoked when the new snapshot arrives or existing updates.
 *  No error occurs if it's attempted to attach the same listener twice or more.
-
+*
 *  snapshot - a handle of the snapshot to which a listener is to be attached
 *  snapshot_listener - a listener callback function pointer
 */
@@ -304,10 +304,17 @@ DXFEED_API ERRORCODE dxf_attach_snapshot_listener(dxf_snapshot_t snapshot, dxf_s
 /*
 *  Detaches a listener from the snapshot.
 *  No error occurs if it's attempted to detach a listener which wasn't previously attached.
-
+*
 *  snapshot - a handle of the snapshot to which a listener is to be detached
 *  snapshot_listener - a listener callback function pointer
 */
 DXFEED_API ERRORCODE dxf_detach_snapshot_listener(dxf_snapshot_t snapshot, dxf_snapshot_listener_t snapshot_listener);
+
+/*
+*  Clear snapshot data struct resources.
+*
+*  snapshot_data - pointer to struct with data to be cleared
+*/
+DXFEED_API ERRORCODE dxf_clear_snapshot_data(dxf_snapshot_data_ptr_t snapshot_data);
 
 #endif /* DXFEED_API_H_INCLUDED */

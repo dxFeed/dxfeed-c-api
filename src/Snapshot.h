@@ -48,5 +48,6 @@ bool dx_close_snapshot(dxf_snapshot_t snapshot);
 bool dx_add_snapshot_listener(dxf_snapshot_t snapshot, dxf_snapshot_listener_t listener, void* user_data);
 bool dx_remove_snapshot_listener(dxf_snapshot_t snapshot, dxf_snapshot_listener_t listener);
 bool dx_get_snapshot_subscription(dxf_snapshot_t snapshot, OUT dxf_subscription_t *subscription);
+void dx_snapshot_clear_records_array(dxf_snapshot_records_array_t* records);
 
 #endif /* SNAPSHOT_H_INCLUDED */

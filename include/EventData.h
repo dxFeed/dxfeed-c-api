@@ -215,13 +215,13 @@ typedef struct {
     dxf_event_data_t* elements;
     int size;
     int capacity;
-} dx_snapshot_records_array_t;
+} dxf_snapshot_records_array_t;
 
 typedef struct {
-    dx_event_id_t event_id;
-    dxf_int_t event_type;
-    dxf_const_string_t symbol;
-    dx_snapshot_records_array_t records;
+    dx_record_id_t record_id;
+    int event_type;
+    dxf_string_t symbol;
+    dxf_snapshot_records_array_t records;
 } dxf_snapshot_data_t, *dxf_snapshot_data_ptr_t;
 
 /* -------------------------------------------------------------------------- */

@@ -110,11 +110,43 @@ bool dx_add_subscription_param_to_list(dxf_connection_t connection, dx_event_sub
     return !failed;
 }
 
-bool dx_get_order_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source, OUT dx_event_subscription_param_list_t* param_list) {
+bool dx_get_single_order_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source, 
+                                             dxf_uint_t subscr_flags,
+                                             OUT dx_event_subscription_param_list_t* param_list) {
+    dxf_char_t order_name_buf[ORDER_TMPL_LEN + RECORD_SUFFIX_SIZE] = { 0 };
+
+    if (!IS_FLAG_SET(subscr_flags, DX_SUBSCR_FLAG_SINGLE_RECORD)) {
+        return false;
+    }
+    if (IS_FLAG_SET(subscr_flags, DX_SUBSCR_FLAG_SR_MARKET_MAKER_ORDER)) {
+        CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"MarketMaker", dx_st_history);
+    }
+    else {
+        if (order_source->size > 1) {
+            return false;
+        }
+        CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Order", dx_st_history);
+        if (order_source->size != 0) {
+            dx_copy_string(order_name_buf, g_order_tmpl);
+            dx_copy_string_len(&order_name_buf[ORDER_TMPL_LEN], order_source->elements[0].suffix, RECORD_SUFFIX_SIZE);
+            CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, order_name_buf, dx_st_history);
+        }
+    }
+    return true;
+}
+
+bool dx_get_order_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source, 
+                                      dxf_uint_t subscr_flags,
+                                      OUT dx_event_subscription_param_list_t* param_list) {
     dxf_char_t ch = 'A';
     dxf_char_t order_name_buf[ORDER_TMPL_LEN + RECORD_SUFFIX_SIZE] = { 0 };
     dxf_char_t quote_name_buf[QUOTE_TMPL_LEN + 2] = { 0 };
     int i;
+
+    if (IS_FLAG_SET(subscr_flags, DX_SUBSCR_FLAG_SINGLE_RECORD)) {
+        return dx_get_single_order_subscription_params(connection, order_source, subscr_flags, param_list);
+    }
+
     CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Quote", dx_st_ticker);
     CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"MarketMaker", dx_st_history);
     CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Order", dx_st_history);
@@ -159,6 +191,7 @@ int dx_get_event_subscription_params(dxf_connection_t connection, dx_order_sourc
                                      dxf_uint_t subscr_flags, OUT dx_event_subscription_param_list_t* params) {
     bool result = true;
     dx_event_subscription_param_list_t param_list = { NULL, 0, 0 };
+
     switch (event_id) {
     case dx_eid_trade:
         result = dx_get_trade_subscription_params(connection, &param_list);
@@ -173,7 +206,7 @@ int dx_get_event_subscription_params(dxf_connection_t connection, dx_order_sourc
         result = dx_add_subscription_param_to_list(connection, &param_list, L"Profile", dx_st_ticker);
         break;
     case dx_eid_order:
-        result = dx_get_order_subscription_params(connection, order_source, &param_list);
+        result = dx_get_order_subscription_params(connection, order_source, subscr_flags, &param_list);
         break;
     case dx_eid_time_and_sale:
         result = dx_add_subscription_param_to_list(connection, &param_list, L"TimeAndSale", dx_st_stream);
