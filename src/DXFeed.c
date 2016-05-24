@@ -656,7 +656,7 @@ ERRORCODE dxf_create_snapshot_impl(dxf_connection_t connection, dx_event_id_t ev
             dx_add_order_source(subscription, order_source_value);
     }
 
-    *snapshot = dx_create_snapshot(connection, subscription, record_id, symbol, order_source_value);
+    *snapshot = dx_create_snapshot(connection, subscription, event_id, record_id, symbol, order_source_value);
     if (*snapshot == dx_invalid_snapshot) {
         dxf_close_subscription(subscription);
         return DXF_FAILURE;
@@ -743,19 +743,5 @@ DXFEED_API ERRORCODE dxf_detach_snapshot_listener(dxf_snapshot_t snapshot, dxf_s
         return DXF_FAILURE;
     }
 
-    return DXF_SUCCESS;
-}
-
-DXFEED_API ERRORCODE dxf_clear_snapshot_data(dxf_snapshot_data_ptr_t snapshot_data) {
-    dx_perform_common_actions();
-
-    if (snapshot_data == NULL) {
-        dx_set_error_code(dx_ec_invalid_func_param);
-        return DXF_FAILURE;
-    }
-
-    dx_free(snapshot_data->symbol);
-    dx_snapshot_clear_records_array(&(snapshot_data->records));
-    dx_free(snapshot_data);
     return DXF_SUCCESS;
 }

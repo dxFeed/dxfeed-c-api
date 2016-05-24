@@ -212,16 +212,13 @@ int dx_get_event_subscription_params(dxf_connection_t connection, dx_order_sourc
 /* -------------------------------------------------------------------------- */
 
 typedef struct {
-    dxf_event_data_t* elements;
-    int size;
-    int capacity;
-} dxf_snapshot_records_array_t;
-
-typedef struct {
     dx_record_id_t record_id;
+    dx_event_id_t event_id;
     int event_type;
     dxf_string_t symbol;
-    dxf_snapshot_records_array_t records;
+
+    int records_count;
+    const dxf_event_data_t* records;
 } dxf_snapshot_data_t, *dxf_snapshot_data_ptr_t;
 
 /* -------------------------------------------------------------------------- */
@@ -233,7 +230,19 @@ typedef struct {
 */
 /* -------------------------------------------------------------------------- */
 
-typedef void(*dxf_snapshot_listener_t) (dxf_snapshot_data_ptr_t snapshot_data, void* user_data);
+typedef void(*dxf_snapshot_listener_t) (const dxf_snapshot_data_ptr_t snapshot_data, void* user_data);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Event objects management functions
+*/
+/* -------------------------------------------------------------------------- */
+
+typedef dxf_bool_t (*dx_event_copy_function_t) (const dxf_event_data_t source, OUT dxf_event_data_t* new_obj);
+typedef void (*dx_event_free_function_t) (dxf_event_data_t obj);
+
+dx_event_copy_function_t dx_get_event_copy_function(dx_event_id_t event_id);
+dx_event_free_function_t dx_get_event_free_function(dx_event_id_t event_id);
 
 /* -------------------------------------------------------------------------- */
 /*

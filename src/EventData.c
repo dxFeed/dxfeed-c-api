@@ -256,6 +256,138 @@ static const dx_event_data_navigator g_event_data_navigators[dx_eid_count] = {
 };
 
 /* -------------------------------------------------------------------------- */
+/*
+*	Event objects management functions
+*/
+/* -------------------------------------------------------------------------- */
+
+#define EVENT_COPY_FUNCTION_NAME(struct_name) \
+    struct_name##_event_copy
+
+#define EVENT_COPY_FUNCTION_BODY(struct_name) \
+    dxf_bool_t EVENT_COPY_FUNCTION_NAME(struct_name)(const dxf_event_data_t source, OUT dxf_event_data_t* new_obj) { \
+        struct_name* dest = NULL; \
+        if (source == NULL || new_obj == NULL) { \
+            return dx_set_error_code(dx_ec_invalid_func_param_internal); \
+                                        } \
+        dest = dx_calloc(1, sizeof(struct_name)); \
+        if (dest == NULL) { \
+            return false; \
+                                        } \
+        dx_memcpy(dest, source, sizeof(struct_name)); \
+        *new_obj = (dxf_event_data_t)dest; \
+        return true; \
+                }
+
+#define EVENT_COPY_WITH_STRING_FUNCTION_BODY(struct_name, string_param) \
+    dxf_bool_t EVENT_COPY_FUNCTION_NAME(struct_name)(const dxf_event_data_t source, OUT dxf_event_data_t* new_obj) { \
+        struct_name* dest = NULL; \
+        struct_name* src_obj = (struct_name*)source; \
+        if (source == NULL || new_obj == NULL) { \
+            return dx_set_error_code(dx_ec_invalid_func_param_internal); \
+                        } \
+        dest = dx_calloc(1, sizeof(struct_name)); \
+        if (dest == NULL) { \
+            return false; \
+                        } \
+        dx_memcpy(dest, source, sizeof(struct_name)); \
+        if (src_obj->string_param != NULL) { \
+            dest->string_param = dx_create_string_src(src_obj->string_param); \
+                        } \
+        *new_obj = (dxf_event_data_t)dest; \
+        return true; \
+        }
+
+EVENT_COPY_FUNCTION_BODY(dxf_trade_t)
+EVENT_COPY_FUNCTION_BODY(dxf_quote_t)
+EVENT_COPY_FUNCTION_BODY(dxf_summary_t)
+EVENT_COPY_WITH_STRING_FUNCTION_BODY(dxf_profile_t, description)
+EVENT_COPY_WITH_STRING_FUNCTION_BODY(dxf_order_t, market_maker)
+EVENT_COPY_WITH_STRING_FUNCTION_BODY(dxf_time_and_sale_t, exchange_sale_conditions)
+
+//TODO: temp, remove later
+//dxf_bool_t dxf_order_t_event_copy(const dxf_event_data_t source, OUT dxf_event_data_t* new_obj) {
+//    dxf_order_t* dest = NULL;
+//    dxf_order_t* src_obj = (dxf_order_t*)source;
+//    if (source == NULL || new_obj == NULL) {
+//        return dx_set_error_code(dx_ec_invalid_func_param_internal);
+//    }
+//    dest = dx_calloc(1, sizeof(dxf_order_t));
+//    if (dest == NULL) {
+//
+//        return false;
+//    }
+//    dx_memcpy(dest, source, sizeof(dxf_order_t));
+//    if (src_obj->market_maker != NULL) {
+//        dest->market_maker = dx_create_string_src(src_obj->market_maker);
+//    }
+//    *new_obj = (dxf_event_data_t)dest;
+//    return true;
+//}
+
+static const dx_event_copy_function_t g_event_copy_functions[dx_eid_count] = {
+    EVENT_COPY_FUNCTION_NAME(dxf_trade_t),
+    EVENT_COPY_FUNCTION_NAME(dxf_quote_t),
+    EVENT_COPY_FUNCTION_NAME(dxf_summary_t),
+    EVENT_COPY_FUNCTION_NAME(dxf_profile_t),
+    EVENT_COPY_FUNCTION_NAME(dxf_order_t),
+    EVENT_COPY_FUNCTION_NAME(dxf_time_and_sale_t)
+};
+
+dx_event_copy_function_t dx_get_event_copy_function(dx_event_id_t event_id) {
+    if (event_id >= dx_eid_count) {
+        dx_set_error_code(dx_ec_invalid_func_param_internal);
+        return NULL;
+    }
+    return g_event_copy_functions[event_id];
+}
+
+#define EVENT_FREE_FUNCTION_NAME(struct_name) \
+    struct_name##_event_free
+
+#define EVENT_FREE_FUNCTION_BODY(struct_name) \
+    void EVENT_FREE_FUNCTION_NAME(struct_name)(dxf_event_data_t obj) { \
+        dx_free(obj); \
+    }
+
+#define EVENT_FREE_WITH_STRING_FUNCTION_BODY(struct_name, string_param) \
+    void EVENT_FREE_FUNCTION_NAME(struct_name)(dxf_event_data_t obj) { \
+        struct_name* struct_data = NULL; \
+        if (obj == NULL) \
+            return; \
+        struct_data = (struct_name*)obj; \
+        /*TODO: bad */ \
+        dx_free((void*)struct_data->string_param); \
+        dx_free(obj); \
+    }
+
+EVENT_FREE_FUNCTION_BODY(dxf_trade_t)
+EVENT_FREE_FUNCTION_BODY(dxf_quote_t)
+EVENT_FREE_FUNCTION_BODY(dxf_summary_t)
+EVENT_FREE_WITH_STRING_FUNCTION_BODY(dxf_profile_t, description)
+EVENT_FREE_WITH_STRING_FUNCTION_BODY(dxf_order_t, market_maker)
+EVENT_FREE_WITH_STRING_FUNCTION_BODY(dxf_time_and_sale_t, exchange_sale_conditions)
+
+static const dx_event_free_function_t g_event_free_functions[dx_eid_count] = {
+    EVENT_FREE_FUNCTION_NAME(dxf_trade_t),
+    EVENT_FREE_FUNCTION_NAME(dxf_quote_t),
+    EVENT_FREE_FUNCTION_NAME(dxf_summary_t),
+    EVENT_FREE_FUNCTION_NAME(dxf_profile_t),
+    EVENT_FREE_FUNCTION_NAME(dxf_order_t),
+    EVENT_FREE_FUNCTION_NAME(dxf_time_and_sale_t)
+};
+
+dx_event_free_function_t dx_get_event_free_function(dx_event_id_t event_id) {
+    if (event_id >= dx_eid_count) {
+        dx_set_error_code(dx_ec_invalid_func_param_internal);
+        return NULL;
+    }
+    return g_event_free_functions[event_id];
+}
+
+//TODO: add candle
+
+/* -------------------------------------------------------------------------- */
 
 const dxf_event_data_t dx_get_event_data_item (int event_mask, const dxf_event_data_t data, int index) {
     return g_event_data_navigators[dx_get_event_id_by_bitmask(event_mask)](data, index);

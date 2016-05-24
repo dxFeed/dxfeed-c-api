@@ -51,15 +51,22 @@ typedef struct {
 } dx_snapshot_listener_array_t;
 
 typedef struct {
+    dxf_event_data_t* elements;
+    int size;
+    int capacity;
+} dx_snapshot_records_array_t;
+
+typedef struct {
     dxf_ulong_t key;
     dxf_subscription_t subscription;
     dx_record_id_t record_id;
+    dx_event_id_t event_id;
     int event_type;
     dxf_string_t order_source;
     dxf_string_t symbol;
     dx_snapshot_status_t status;
 
-    dxf_snapshot_records_array_t records;
+    dx_snapshot_records_array_t records;
     dx_snapshot_listener_array_t listeners;
 
     void* sscc;
@@ -180,14 +187,41 @@ bool dx_clear_snapshot_subscription_connection_context(dx_snapshot_subscription_
 
 bool dx_snapshot_add_event_records(dx_snapshot_data_ptr_t snapshot_data, const dxf_event_data_t* data, int data_count) {
     int i;
-    bool failed = false;
 
     for (i = 0; i < data_count; ++i) {
-        DX_ARRAY_INSERT(snapshot_data->records, dxf_event_data_t, data[i], snapshot_data->records.size, dx_capacity_manager_halfer, failed);
+        bool failed = false;
+        dxf_event_data_t obj = NULL;
+        dx_event_copy_function_t clone_event = dx_get_event_copy_function(snapshot_data->event_id);
+        dxf_bool_t res = false;
+        if (clone_event == NULL) {
+            return false;
+        }
+        if (!clone_event(&data[i], &obj)) {
+            return false;
+        }
+        DX_ARRAY_INSERT(snapshot_data->records, dxf_event_data_t, obj, snapshot_data->records.size, dx_capacity_manager_halfer, failed);
         if (failed) {
             return dx_set_error_code(dx_mec_insufficient_memory);
         }
     }
+    return true;
+}
+
+bool dx_snapshot_clear_records_array(dx_snapshot_records_array_t* records, dx_event_id_t event_id) {
+    int i;
+    dx_event_free_function_t free_event = dx_get_event_free_function(event_id);
+
+    if (free_event == NULL) {
+        return false;
+    }
+
+    for (i = 0; i < records->size; i++) {
+        free_event(records->elements[i]);
+    }
+    dx_free(records->elements);
+    records->elements = NULL;
+    records->size = 0;
+    records->capacity = 0;
     return true;
 }
 
@@ -196,21 +230,17 @@ bool dx_snapshot_call_listeners(dx_snapshot_data_ptr_t snapshot_data) {
 
     for (; cur_listener_index < snapshot_data->listeners.size; ++cur_listener_index) {
         dx_snapshot_listener_context_t* listener_context = snapshot_data->listeners.elements + cur_listener_index;
-        dxf_snapshot_records_array_t* records = &(snapshot_data->records);
-        int i;
         bool failed = false;
 
-        dxf_snapshot_data_ptr_t ret_data = dx_calloc(1, sizeof(dxf_snapshot_data_t));
-        ret_data->event_type = snapshot_data->event_type;
-        ret_data->record_id = snapshot_data->record_id;
-        ret_data->symbol = dx_create_string_src(snapshot_data->symbol);
-        for (i = 0; i < records->size; i++) {
-            DX_ARRAY_INSERT(ret_data->records, dxf_event_data_t, records->elements[i], i, dx_capacity_manager_halfer, failed);
-            if (failed) {
-                return dx_set_error_code(dx_mec_insufficient_memory);
-            }
-        }
-        listener_context->listener(ret_data, listener_context->user_data);
+        dxf_snapshot_data_t callback_data;
+        callback_data.record_id = snapshot_data->record_id;
+        callback_data.event_id = snapshot_data->event_id;
+        callback_data.event_type = snapshot_data->event_type;
+        callback_data.symbol = dx_create_string_src(snapshot_data->symbol);
+        callback_data.records_count = snapshot_data->records.size;
+        callback_data.records = (const dxf_event_data_t*)snapshot_data->records.elements;
+        listener_context->listener(&callback_data, listener_context->user_data);
+        dx_free(callback_data.symbol);
     }
     return true;
 }
@@ -236,7 +266,7 @@ void event_listener(int event_type, dxf_const_string_t symbol_name, const dxf_ev
         }
         if (IS_FLAG_SET(flags, dxf_ef_snapshot_begin)) {
             snapshot_data->status = dx_status_begin;
-            dx_snapshot_clear_records_array(&(snapshot_data->records));
+            dx_snapshot_clear_records_array(&(snapshot_data->records), snapshot_data->event_id);
             dx_snapshot_add_event_records(snapshot_data, data, data_count);
             continue;
         }
@@ -286,18 +316,6 @@ int dx_snapshot_comparator(dx_snapshot_data_ptr_t s1, dx_snapshot_data_ptr_t s2)
     return DX_NUMERIC_COMPARATOR(s1->key, s2->key);
 }
 
-void dx_snapshot_clear_records_array(dxf_snapshot_records_array_t* records) {
-    int i;
-
-    for (i = 0; i < records->size; i++) {
-        dx_free(records->elements[i]);
-    }
-    dx_free(records->elements);
-    records->elements = NULL;
-    records->size = 0;
-    records->capacity = 0;
-}
-
 //TODO: repeated code
 void dx_clear_snapshot_listener_array(dx_snapshot_listener_array_t* listeners) {
     dx_free(listeners->elements);
@@ -331,7 +349,7 @@ bool dx_free_snapshot_data(dx_snapshot_data_t* snapshot_data) {
     dx_clear_snapshot_listener_array(&(snapshot_data->listeners));
 
     //remove records
-    dx_snapshot_clear_records_array(&(snapshot_data->records));
+    dx_snapshot_clear_records_array(&(snapshot_data->records), snapshot_data->event_id);
 
     if (snapshot_data->symbol != NULL)
         dx_free(snapshot_data->symbol);
@@ -350,6 +368,7 @@ bool dx_free_snapshot_data(dx_snapshot_data_t* snapshot_data) {
 
 dxf_snapshot_t dx_create_snapshot(dxf_connection_t connection, 
                                   dxf_subscription_t subscription,
+                                  dx_event_id_t event_id,
                                   dx_record_id_t record_id, 
                                   dxf_const_string_t symbol, 
                                   dxf_const_string_t order_source) {
@@ -384,6 +403,7 @@ dxf_snapshot_t dx_create_snapshot(dxf_connection_t connection,
     }
     snapshot_data->key = dx_new_snapshot_key(record_id, symbol, order_source);
     snapshot_data->record_id = record_id;
+    snapshot_data->event_id = event_id;
     snapshot_data->event_type = event_types;
     snapshot_data->symbol = dx_create_string_src(symbol);
     if (order_source != NULL)

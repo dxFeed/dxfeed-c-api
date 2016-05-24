@@ -310,11 +310,5 @@ DXFEED_API ERRORCODE dxf_attach_snapshot_listener(dxf_snapshot_t snapshot, dxf_s
 */
 DXFEED_API ERRORCODE dxf_detach_snapshot_listener(dxf_snapshot_t snapshot, dxf_snapshot_listener_t snapshot_listener);
 
-/*
-*  Clear snapshot data struct resources.
-*
-*  snapshot_data - pointer to struct with data to be cleared
-*/
-DXFEED_API ERRORCODE dxf_clear_snapshot_data(dxf_snapshot_data_ptr_t snapshot_data);
 
 #endif /* DXFEED_API_H_INCLUDED */
