@@ -57,14 +57,15 @@ void process_last_error () {
 
 /* -------------------------------------------------------------------------- */
 
-void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, 
-              dxf_event_flags_t flags, int data_count, void* user_data) {
+void listener(int event_type, dxf_const_string_t symbol_name,
+              const dxf_event_data_t* data, int data_count,
+              const dxf_event_params_t* event_params, void* user_data) {
     dxf_int_t i = 0;
     dx_event_id_t eid = dx_eid_begin;
     
     for (; (DX_EVENT_BIT_MASK(eid) & event_type) == 0; ++eid);
 
-    wprintf(L"First listener. Event: %s Symbol: %s\n",dx_event_type_to_string(event_type), symbol_name);
+    wprintf(L"First listener. Event: %s Symbol: %s\n", dx_event_type_to_string(event_type), symbol_name);
 
     if (event_type == DXF_ET_TRADE) {
         dxf_trade_t* trades = (dx_trade_t*)data;

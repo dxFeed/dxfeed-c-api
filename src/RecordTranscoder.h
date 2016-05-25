@@ -36,6 +36,7 @@
 
 bool dx_transcode_record_data (dxf_connection_t connection,
                                dx_record_id_t record_id, dxf_const_string_t suffix, dxf_const_string_t symbol_name,
-                               dxf_int_t symbol_cipher, dxf_event_flags_t flags, void* record_buffer, int record_count);
+                               dxf_int_t symbol_cipher, dxf_event_flags_t flags, void* record_buffer, int record_count, 
+                               dxf_ulong_t time_int_field);
 
 #endif /* RECORD_TRANSCODER_H_INCLUDED */

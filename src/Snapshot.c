@@ -245,9 +245,11 @@ bool dx_snapshot_call_listeners(dx_snapshot_data_ptr_t snapshot_data) {
     return true;
 }
 
-void event_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data,
-                    dxf_event_flags_t flags, int data_count, void* user_data) {
+void event_listener(int event_type, dxf_const_string_t symbol_name,
+                    const dxf_event_data_t* data, int data_count,
+                    const dxf_event_params_t* event_params, void* user_data) {
     int i;
+    const dxf_event_flags_t flags = event_params->flags;
     dx_snapshot_subscription_connection_context_t* context = CTX(user_data);
 
     /* locking a guard mutex */

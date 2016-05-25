@@ -993,6 +993,35 @@ bool dx_read_records (dx_server_msg_proc_connection_context_t* context,
 
 /* -------------------------------------------------------------------------- */
 
+#define CHECKED_GET_VALUE(getter, buffer, value) \
+    if (getter != NULL) { \
+        getter(buffer, value); \
+    }
+
+dxf_ulong_t dx_get_time_int_field(dx_record_id_t record_id, void* record_buffer) {
+    int i;
+    dxf_uint_t high = 0;
+    dxf_uint_t low = 0;
+    dxf_ulong_t time = 0;
+    const dx_record_item_t* record_info = dx_get_record_by_id(record_id);
+
+    for (i = 0; i < record_info->field_count; ++i) {
+        dx_field_info_t field = record_info->fields[i];
+        if (field.time == dx_ft_first_time_int_field) {
+            CHECKED_GET_VALUE(field.getter, record_buffer, &high);
+        }
+        else if (field.time == dx_ft_second_time_int_field) {
+            CHECKED_GET_VALUE(field.getter, record_buffer, &low);
+        }
+    }
+
+    time = ((dxf_ulong_t)high << 32) | low;
+
+    return time;
+}
+
+/* -------------------------------------------------------------------------- */
+
 bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) {
     dx_logging_verbose_info(L"Process data");
 
@@ -1004,6 +1033,7 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 		dxf_const_string_t symbol = NULL;
         const dx_record_item_t* record_info = NULL;
         dx_record_digest_t* record_digest = NULL;
+        dxf_ulong_t time_int_field;
 		
 		CHECKED_CALL_1(dx_read_symbol, context);
 		
@@ -1058,8 +1088,12 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 		}
 		// TODO add assert to overlimit in context->bicc limit
 
+        time_int_field = dx_get_time_int_field(record_id, record_buffer);
+
         if (!dx_transcode_record_data(context->connection, record_id, suffix, context->last_symbol, context->last_cipher, 
-            context->last_flags, g_buffer_managers[record_info->info_id].record_buffer_getter(context->rbcc), record_count)) {
+            context->last_flags, g_buffer_managers[record_info->info_id].record_buffer_getter(context->rbcc), record_count, 
+            time_int_field)) {
+
 			dx_free_string_buffers(context->rbcc);
 
 			return false;

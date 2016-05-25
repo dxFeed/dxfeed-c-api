@@ -149,6 +149,17 @@ typedef dxf_uint_t dxf_event_flags_t;
 
 /* -------------------------------------------------------------------------- */
 /*
+*   Additional event params struct
+*/
+/* -------------------------------------------------------------------------- */
+
+typedef struct {
+    dxf_event_flags_t flags;
+    dxf_ulong_t time_int_field;
+} dxf_event_params_t;
+
+/* -------------------------------------------------------------------------- */
+/*
  *	Event listener prototype
  
  *  event type here is a one-bit mask, not an integer
@@ -157,8 +168,8 @@ typedef dxf_uint_t dxf_event_flags_t;
 /* -------------------------------------------------------------------------- */
 
 typedef void (*dxf_event_listener_t) (int event_type, dxf_const_string_t symbol_name,
-                                      const dxf_event_data_t* data, dxf_event_flags_t flags,
-                                      int data_count, void* user_data);
+                                      const dxf_event_data_t* data, int data_count, 
+                                      const dxf_event_params_t* event_params, void* user_data);
                                      
 /* -------------------------------------------------------------------------- */
 /*

@@ -58,10 +58,12 @@ void print_timestamp(dxf_long_t timestamp){
 }
 /* -------------------------------------------------------------------------- */
 
-void listener (int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, dxf_event_flags_t flags, int data_count, void* user_data) {
+void listener(int event_type, dxf_const_string_t symbol_name,
+              const dxf_event_data_t* data, int data_count,
+              const dxf_event_params_t* event_params, void* user_data) {
     dxf_int_t i = 0;
 
-	wprintf(L"%s{symbol=%s, ",dx_event_type_to_string(event_type), symbol_name);
+    wprintf(L"%s{symbol=%s, ", dx_event_type_to_string(event_type), symbol_name);
 	
     if (event_type == DXF_ET_QUOTE) {
 	    dxf_quote_t* quotes = (dxf_quote_t*)data;
