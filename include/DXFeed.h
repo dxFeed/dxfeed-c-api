@@ -263,4 +263,16 @@ DXFEED_API ERRORCODE dxf_set_order_source(dxf_subscription_t subscription, const
  */
 DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const char* source);
 
+/*
+ * Simple api that allows user to create candle symbol attributes
+ *
+ */
+DXFEED_API ERRORCODE dxf_initialise_candle_symbol_attributes(OUT dxf_candle_attributes_t* candle_attributes,
+                                                             dxf_const_string_t base_symbol,
+                                                             dxf_char_t exchange_code,
+                                                             dxf_candle_price_attribute_t price,
+                                                             dxf_candle_session_attribute_t session,
+                                                             dxf_candle_period_attribute_t period,
+                                                             dxf_candle_alignment_attribute_t alignment);
+
 #endif /* DXFEED_API_H_INCLUDED */

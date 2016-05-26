@@ -184,6 +184,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Candle.c" />
     <ClCompile Include="src\ClientMessageProcessor.c" />
     <ClCompile Include="src\ConnectionContextData.c" />
     <ClCompile Include="src\DXAlgorithms.c" />
@@ -219,6 +220,7 @@
     <None Include="DXFeedd_64.def" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Candle.h" />
     <ClInclude Include="src\ClientMessageProcessor.h" />
     <ClInclude Include="src\ConnectionContextData.h" />
     <ClInclude Include="src\DXAlgorithms.h" />

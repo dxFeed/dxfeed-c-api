@@ -194,15 +194,6 @@ typedef enum {
 
 static const dxf_candle_alignment_attribute_t DXF_CANDLE_ALIGNMENT_DEFAULT_ATTRIBUTE = dxf_caa_midnight;
 
-typedef struct {
-    dxf_char_t exchange_code;
-    dxf_candle_price_attribute_t price;
-    dxf_candle_session_attribute_t session;
-    dxf_candle_period_attribute_t period;
-    dxf_candle_alignment_attribute_t alignment;
-} dxf_candle_attributes_t;
-
-
 /* -------------------------------------------------------------------------- */
 /*
  *	Events flag constants
@@ -269,10 +260,10 @@ typedef struct {
 } dx_event_subscription_param_list_t;
 
 /*
-* Returns the list of subscription params. Fills records list according to event_id.
-*
-* You need to call dx_free(params.elements) to free resources.
-*/
+ * Returns the list of subscription params. Fills records list according to event_id.
+ *
+ * You need to call dx_free(params.elements) to free resources.
+ */
 int dx_get_event_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source, dx_event_id_t event_id,
                                       OUT dx_event_subscription_param_list_t* params);
 
