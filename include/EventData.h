@@ -153,9 +153,11 @@ typedef dxf_uint_t dxf_event_flags_t;
 */
 /* -------------------------------------------------------------------------- */
 
+typedef dxf_ulong_t dxf_time_int_field_t;
+
 typedef struct {
     dxf_event_flags_t flags;
-    dxf_ulong_t time_int_field;
+    dxf_time_int_field_t time_int_field;
 } dxf_event_params_t;
 
 /* -------------------------------------------------------------------------- */

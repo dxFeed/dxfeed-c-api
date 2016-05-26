@@ -34,7 +34,7 @@ typedef struct {
     dxf_const_string_t symbol_name; 
     dxf_int_t symbol_cipher;
     dxf_event_flags_t flags;
-    dxf_ulong_t time_int_field;
+    dxf_time_int_field_t time_int_field;
 } dx_record_params_t;
 
 /* -------------------------------------------------------------------------- */
