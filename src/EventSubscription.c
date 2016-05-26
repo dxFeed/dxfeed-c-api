@@ -1045,10 +1045,10 @@ bool dx_get_event_subscription_flags(dxf_subscription_t subscr_id, OUT dxf_uint_
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_process_event_data (dxf_connection_t connection,
-                            dx_event_id_t event_id, dxf_const_string_t symbol_name, dxf_int_t symbol_cipher,
-                            dxf_event_flags_t flags, const dxf_event_data_t data, int data_count, 
-                            dxf_ulong_t time_int_field) {
+bool dx_process_event_data (dxf_connection_t connection, dx_event_id_t event_id, 
+                            dxf_const_string_t symbol_name, dxf_int_t symbol_cipher, 
+                            dxf_event_flags_t flags, const dxf_event_data_t data, 
+                            int data_count, dxf_ulong_t time_int_field) {
     dx_symbol_data_ptr_t symbol_data = NULL;
     int cur_subscr_index = 0;
     int event_bitmask = DX_EVENT_BIT_MASK(event_id);

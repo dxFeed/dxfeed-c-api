@@ -1033,7 +1033,7 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 		dxf_const_string_t symbol = NULL;
         const dx_record_item_t* record_info = NULL;
         dx_record_digest_t* record_digest = NULL;
-        dxf_ulong_t time_int_field;
+        dx_record_params_t record_params;
 		
 		CHECKED_CALL_1(dx_read_symbol, context);
 		
@@ -1088,16 +1088,20 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 		}
 		// TODO add assert to overlimit in context->bicc limit
 
-        time_int_field = dx_get_time_int_field(record_id, record_buffer);
+        record_params.record_id = record_id;
+        record_params.suffix = suffix;
+        record_params.symbol_name = context->last_symbol;
+        record_params.symbol_cipher = context->last_cipher;
+        record_params.flags = context->last_flags;
+        record_params.time_int_field = dx_get_time_int_field(record_id, record_buffer);
 
-        if (!dx_transcode_record_data(context->connection, record_id, suffix, context->last_symbol, context->last_cipher, 
-            context->last_flags, g_buffer_managers[record_info->info_id].record_buffer_getter(context->rbcc), record_count, 
-            time_int_field)) {
+        if (!dx_transcode_record_data(context->connection, &record_params, 
+            g_buffer_managers[record_info->info_id].record_buffer_getter(context->rbcc), record_count)) {
 
 			dx_free_string_buffers(context->rbcc);
 
 			return false;
-	        }
+	    }
 
 		dx_free_string_buffers(context->rbcc);
 	}
