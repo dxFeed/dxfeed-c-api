@@ -90,8 +90,8 @@ static const dx_field_info_t dx_fields_profile[] = {
 /* -------------------------------------------------------------------------- */
 
 static const dx_field_info_t dx_fields_market_maker[] = { 
-	{ dx_fid_utf_char, L"MMExchange", DX_RECORD_FIELD_SETTER_NAME(dx_market_maker_t, mm_exchange), DX_RECORD_FIELD_DEF_VAL_NAME(dx_market_maker_t, mm_exchange) },
-	{ dx_fid_compact_int, L"MMID", DX_RECORD_FIELD_SETTER_NAME(dx_market_maker_t, mm_id), DX_RECORD_FIELD_DEF_VAL_NAME(dx_market_maker_t, mm_id) },
+	{ dx_fid_utf_char, L"MMExchange", DX_RECORD_FIELD_SETTER_NAME(dx_market_maker_t, mm_exchange), DX_RECORD_FIELD_DEF_VAL_NAME(dx_market_maker_t, mm_exchange), dx_ft_first_time_int_field },
+	{ dx_fid_compact_int, L"MMID", DX_RECORD_FIELD_SETTER_NAME(dx_market_maker_t, mm_id), DX_RECORD_FIELD_DEF_VAL_NAME(dx_market_maker_t, mm_id), dx_ft_second_time_int_field },
 	{ dx_fid_compact_int, L"MMBid.Time", DX_RECORD_FIELD_SETTER_NAME(dx_market_maker_t, mmbid_time), DX_RECORD_FIELD_DEF_VAL_NAME(dx_market_maker_t, mmbid_time) },
 	{ dx_fid_compact_int | dx_fid_flag_decimal, L"MMBid.Price", DX_RECORD_FIELD_SETTER_NAME(dx_market_maker_t, mmbid_price), DX_RECORD_FIELD_DEF_VAL_NAME(dx_market_maker_t, mmbid_price) },
 	{ dx_fid_compact_int, L"MMBid.Size", DX_RECORD_FIELD_SETTER_NAME(dx_market_maker_t, mmbid_size), DX_RECORD_FIELD_DEF_VAL_NAME(dx_market_maker_t, mmbid_size) },
@@ -109,7 +109,7 @@ static const dx_field_info_t dx_fields_market_maker[] = {
 /* -------------------------------------------------------------------------- */
 
 static const dx_field_info_t dx_fields_order[] = { 
-	{ dx_fid_compact_int, L"Index", DX_RECORD_FIELD_SETTER_NAME(dx_order_t, index), DX_RECORD_FIELD_DEF_VAL_NAME(dx_order_t, index) },
+	{ dx_fid_compact_int, L"Index", DX_RECORD_FIELD_SETTER_NAME(dx_order_t, index), DX_RECORD_FIELD_DEF_VAL_NAME(dx_order_t, index), dx_ft_second_time_int_field },
 	{ dx_fid_compact_int, L"Time", DX_RECORD_FIELD_SETTER_NAME(dx_order_t, time), DX_RECORD_FIELD_DEF_VAL_NAME(dx_order_t, time) },
 	{ dx_fid_compact_int, L"Sequence", DX_RECORD_FIELD_SETTER_NAME(dx_order_t, sequence), DX_RECORD_FIELD_DEF_VAL_NAME(dx_order_t, sequence) },
 	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Price", DX_RECORD_FIELD_SETTER_NAME(dx_order_t, price), DX_RECORD_FIELD_DEF_VAL_NAME(dx_order_t, price) },
@@ -126,8 +126,8 @@ static const dx_field_info_t dx_fields_order[] = {
 /* -------------------------------------------------------------------------- */
 
 static const dx_field_info_t dx_fields_time_and_sale[] = {
-    { dx_fid_compact_int, L"Time", DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, time), DX_RECORD_FIELD_DEF_VAL_NAME(dx_time_and_sale_t, time) },
-    { dx_fid_compact_int, L"Sequence", DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, sequence), DX_RECORD_FIELD_DEF_VAL_NAME(dx_time_and_sale_t, sequence) },
+    { dx_fid_compact_int, L"Time", DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, time), DX_RECORD_FIELD_DEF_VAL_NAME(dx_time_and_sale_t, time), dx_ft_first_time_int_field },
+    { dx_fid_compact_int, L"Sequence", DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, sequence), DX_RECORD_FIELD_DEF_VAL_NAME(dx_time_and_sale_t, sequence), dx_ft_second_time_int_field },
     { dx_fid_utf_char, L"Exchange", DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, exchange_code), DX_RECORD_FIELD_DEF_VAL_NAME(dx_time_and_sale_t, exchange_code) },
     { dx_fid_compact_int | dx_fid_flag_decimal, L"Price", DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, price), DX_RECORD_FIELD_DEF_VAL_NAME(dx_time_and_sale_t, price) },
     { dx_fid_compact_int, L"Size", DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, size), DX_RECORD_FIELD_DEF_VAL_NAME(dx_time_and_sale_t, size) },
