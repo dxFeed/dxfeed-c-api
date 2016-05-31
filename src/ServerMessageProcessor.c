@@ -1044,8 +1044,10 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 		}
 	    
         record_digest = dx_get_record_digest(context, record_id);
-        if (record_digest == NULL)
+        if (record_digest == NULL) {
+            dx_free_string_buffers(context->rbcc);
             return dx_set_error_code(dx_ec_invalid_func_param_internal);
+        }
 		if (!record_digest->in_sync_with_server) {
 			dx_free_string_buffers(context->rbcc);
 			
