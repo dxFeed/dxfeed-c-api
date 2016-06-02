@@ -898,7 +898,7 @@ bool dx_read_records (dx_server_msg_proc_connection_context_t* context,
 	
 	dx_logging_verbose_info(L"Read records");
 
-    if (context->last_flags & dxf_ef_remove_event) {
+    if (IS_FLAG_SET(context->last_flags, dxf_ef_remove_event)) {
         return dx_read_qdtime_on_remove_event(context, record_id, record_buffer);
     }
 
