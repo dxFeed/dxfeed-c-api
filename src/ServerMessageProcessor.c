@@ -1007,6 +1007,10 @@ bool dx_read_records (dx_server_msg_proc_connection_context_t* context,
 
 bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) {
     dx_logging_verbose_info(L"Process data");
+    context->last_cipher = 0;
+    CHECKED_FREE(context->last_symbol);
+    context->last_flags = 0;
+    context->mru_event_flags = dxf_ef_tx_pending;
 
 	while (dx_get_in_buffer_position(context->bicc) < dx_get_in_buffer_limit(context->bicc)) {
 		void* record_buffer = NULL;
