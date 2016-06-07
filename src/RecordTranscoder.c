@@ -374,8 +374,10 @@ bool dx_transcode_market_maker_to_order_bid (dx_record_transcoder_connection_con
         cur_event->level = DXF_ORDER_LEVEL_AGGREGATE;
         cur_event->count = cur_record->mmbid_count;
         
-        if (cur_event->market_maker == NULL ||
-            !dx_store_string_buffer(context->rbcc, cur_event->market_maker)) {
+        /* when we get REMOVE_EVENT flag almost all fields of record is null;
+        in this case no fileds are checked for null*/
+        if (!IS_FLAG_SET(flags, dxf_ef_remove_event) &&
+            (cur_event->market_maker == NULL || !dx_store_string_buffer(context->rbcc, cur_event->market_maker))) {
             
             return false;
         }
@@ -415,8 +417,10 @@ bool dx_transcode_market_maker_to_order_ask (dx_record_transcoder_connection_con
         cur_event->level = DXF_ORDER_LEVEL_AGGREGATE;
         cur_event->count = cur_record->mmask_count;
 
-        if (cur_event->market_maker == NULL ||
-            !dx_store_string_buffer(context->rbcc, cur_event->market_maker)) {
+        /* when we get REMOVE_EVENT flag almost all fields of record is null;
+        in this case no fileds are checked for null*/
+        if (!IS_FLAG_SET(flags, dxf_ef_remove_event) && 
+            (cur_event->market_maker == NULL || !dx_store_string_buffer(context->rbcc, cur_event->market_maker))) {
 
             return false;
         }
@@ -538,17 +542,21 @@ bool RECORD_TRANSCODER_NAME(dx_time_and_sale_t) (dx_record_transcoder_connection
         cur_event->exchange_sale_conditions = dx_decode_from_integer((((dxf_long_t)flags & 0xFF00L) << 24 ) | exchange_sale_conditions);
         cur_event->is_trade = ((flags & 0x4) != 0);
         
-        if (cur_event->exchange_sale_conditions != NULL &&
-            !dx_store_string_buffer(context->rbcc, cur_event->exchange_sale_conditions)) {
-            
-            return false;
-        }
-        
-        switch (flags & 0x3) {
-        case 0: cur_event->type = DXF_TIME_AND_SALE_TYPE_NEW; break;
-        case 1: cur_event->type = DXF_TIME_AND_SALE_TYPE_CORRECTION; break;
-        case 2: cur_event->type = DXF_TIME_AND_SALE_TYPE_CANCEL; break;
-        default: return false;
+        /* when we get REMOVE_EVENT flag almost all fields of record is null;
+           in this case no fileds are checked for null*/
+        if (!IS_FLAG_SET(flags, dxf_ef_remove_event)) {
+            if (cur_event->exchange_sale_conditions != NULL &&
+                !dx_store_string_buffer(context->rbcc, cur_event->exchange_sale_conditions)) {
+
+                return false;
+            }
+
+            switch (flags & 0x3) {
+            case 0: cur_event->type = DXF_TIME_AND_SALE_TYPE_NEW; break;
+            case 1: cur_event->type = DXF_TIME_AND_SALE_TYPE_CORRECTION; break;
+            case 2: cur_event->type = DXF_TIME_AND_SALE_TYPE_CANCEL; break;
+            default: return false;
+            }
         }
     }
 

@@ -318,8 +318,11 @@ void* dx_queue_executor (void* arg) {
 	    bool queue_empty = true;
 		
 		time (&current_time);
-		if ( difftime ( current_time , context->next_heartbeat) >= 0 ){
-			CHECKED_CALL_2(dx_send_heartbeat, context->connection, true);
+		if ( difftime ( current_time , context->next_heartbeat) >= 0 ) {
+            if (!dx_send_heartbeat(context->connection, true)) {
+                dx_sleep(s_idle_timeout);
+                continue;
+            }
 			time (&context->next_heartbeat);
 			context->next_heartbeat += s_heartbeat_timeout;
 		}

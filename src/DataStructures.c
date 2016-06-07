@@ -540,6 +540,17 @@ dx_record_id_t dx_get_next_unsubscribed_record_id(bool isUpdate) {
 
 /* -------------------------------------------------------------------------- */
 
+void dx_drop_unsubscribe_counter() {
+    dx_init_records_list_guard();
+    dx_mutex_lock(&guard);
+
+    g_records_list.new_record_id = 0;
+
+    dx_mutex_unlock(&guard);
+}
+
+/* -------------------------------------------------------------------------- */
+
 int dx_find_record_field(const dx_record_item_t* record_info, dxf_const_string_t field_name,
                           dxf_int_t field_type) {
     int cur_field_index = 0;
