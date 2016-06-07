@@ -376,7 +376,7 @@ bool dx_transcode_market_maker_to_order_bid (dx_record_transcoder_connection_con
         
         /* when we get REMOVE_EVENT flag almost all fields of record is null;
         in this case no fileds are checked for null*/
-        if (!IS_FLAG_SET(flags, dxf_ef_remove_event) &&
+        if (!IS_FLAG_SET(record_params->flags, dxf_ef_remove_event) &&
             (cur_event->market_maker == NULL || !dx_store_string_buffer(context->rbcc, cur_event->market_maker))) {
             
             return false;
@@ -419,7 +419,7 @@ bool dx_transcode_market_maker_to_order_ask (dx_record_transcoder_connection_con
 
         /* when we get REMOVE_EVENT flag almost all fields of record is null;
         in this case no fileds are checked for null*/
-        if (!IS_FLAG_SET(flags, dxf_ef_remove_event) && 
+        if (!IS_FLAG_SET(record_params->flags, dxf_ef_remove_event) &&
             (cur_event->market_maker == NULL || !dx_store_string_buffer(context->rbcc, cur_event->market_maker))) {
 
             return false;
