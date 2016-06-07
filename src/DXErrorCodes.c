@@ -171,6 +171,7 @@ dxf_const_string_t dx_get_error_description (dx_error_code_t code) {
     case dx_ssec_invalid_symbol: return L"Invalid or empty symbol string";
     case dx_ssec_snapshot_exist: return L"Snapshot with such event id and symbol already exists";
     case dx_ssec_invalid_listener: return L"Invalid snapshot listener";
+    case dx_ssec_unknown_state: return L"Unknown state of snapshot flags";
     
     /* miscellaneous error codes */
     
