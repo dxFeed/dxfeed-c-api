@@ -30,6 +30,7 @@
 
 typedef struct {
     dx_record_id_t record_id;
+    dx_record_info_id_t record_info_id;
     dxf_const_string_t suffix;
     dxf_const_string_t symbol_name; 
     dxf_int_t symbol_cipher;
@@ -45,6 +46,7 @@ typedef struct {
 
 bool dx_transcode_record_data (dxf_connection_t connection, 
                                const dx_record_params_t* record_params,
+                               const dxf_event_params_t* event_params,
                                void* record_buffer, int record_count);
 
 #endif /* RECORD_TRANSCODER_H_INCLUDED */

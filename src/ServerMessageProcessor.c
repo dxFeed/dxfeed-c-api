@@ -35,6 +35,7 @@
 #include "DXThreads.h"
 #include "TaskQueue.h"
 #include "DXNetwork.h"
+#include "Snapshot.h"
 
 #include <limits.h>
 
@@ -1050,6 +1051,7 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
         const dx_record_item_t* record_info = NULL;
         dx_record_digest_t* record_digest = NULL;
         dx_record_params_t record_params;
+        dxf_event_params_t event_params;
 		
 		CHECKED_CALL_1(dx_read_symbol, context);
 		
@@ -1107,13 +1109,18 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 		// TODO add assert to overlimit in context->bicc limit
 
         record_params.record_id = record_id;
+        record_params.record_info_id = record_info->info_id;
         record_params.suffix = suffix;
         record_params.symbol_name = context->last_symbol;
         record_params.symbol_cipher = context->last_cipher;
         record_params.flags = context->last_flags;
         record_params.time_int_field = dx_get_time_int_field(record_id, record_buffer);
 
-        if (!dx_transcode_record_data(context->connection, &record_params, 
+        event_params.flags = record_params.flags;
+        event_params.time_int_field = record_params.time_int_field;
+        event_params.snapshot_key = dx_new_snapshot_key(record_info->info_id, record_params.symbol_name, suffix);
+
+        if (!dx_transcode_record_data(context->connection, &record_params, &event_params, 
             g_buffer_managers[record_info->info_id].record_buffer_getter(context->rbcc), record_count)) {
 
 			dx_free_string_buffers(context->rbcc);

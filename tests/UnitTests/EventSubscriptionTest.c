@@ -27,6 +27,7 @@ bool event_subscription_test (void) {
     dxf_const_string_t middle_symbol_set[] = { L"SYMB", L"SYMD" };
     dxf_const_string_t small_symbol_set[] = { L"SYMB" };
     dxf_int_t symbol_code;
+    dxf_event_params_t empty_event_params = { 0, 0, 0 };
     
     if (dx_init_symbol_codec() != true) {
         return false;
@@ -83,7 +84,7 @@ bool event_subscription_test (void) {
     
     symbol_code = dx_encode_symbol_name(L"SYMB");
     
-    if (!dx_process_event_data(connection, DXF_ET_QUOTE, L"SYMB", symbol_code, 0, NULL, 5, 0)) {
+    if (!dx_process_event_data(connection, DXF_ET_QUOTE, L"SYMB", symbol_code, NULL, 5, &empty_event_params)) {
         return false;
     }
     
@@ -97,13 +98,13 @@ bool event_subscription_test (void) {
     
     // unknown symbol SYMZ must be rejected
     
-    if (dx_process_event_data(connection, DXF_ET_TRADE, L"SYMZ", symbol_code, 0, NULL, 5, 0)) {
+    if (dx_process_event_data(connection, DXF_ET_TRADE, L"SYMZ", symbol_code, NULL, 5, &empty_event_params)) {
         return false;
     }
     
     symbol_code = dx_encode_symbol_name(L"SYMD");
 
-    if (!dx_process_event_data(connection, DXF_ET_TRADE, L"SYMD", symbol_code, 0, NULL, 5, 0)) {
+    if (!dx_process_event_data(connection, DXF_ET_TRADE, L"SYMD", symbol_code, NULL, 5, &empty_event_params)) {
         return false;
     }
     
@@ -121,7 +122,7 @@ bool event_subscription_test (void) {
     
     symbol_code = dx_encode_symbol_name(L"SYMB");
     
-    if (!dx_process_event_data(connection, DXF_ET_QUOTE, L"SYMB", symbol_code, 0, NULL, 5, 0)) {
+    if (!dx_process_event_data(connection, DXF_ET_QUOTE, L"SYMB", symbol_code, NULL, 5, &empty_event_params)) {
         return false;
     }
     
@@ -133,7 +134,7 @@ bool event_subscription_test (void) {
     
     symbol_code = dx_encode_symbol_name(L"SYMA");
     
-    if (!dx_process_event_data(connection, DXF_ET_TRADE, L"SYMA", symbol_code, 0, NULL, 5, 0)) {
+    if (!dx_process_event_data(connection, DXF_ET_TRADE, L"SYMA", symbol_code, NULL, 5, &empty_event_params)) {
         return false;
     }
     
@@ -151,7 +152,7 @@ bool event_subscription_test (void) {
 
     // SYMB is still supported by sub2, but sub2 no longer has a listener
     
-    if (!dx_process_event_data(connection, DXF_ET_QUOTE, L"SYMB", symbol_code, 0, NULL, 5, 0)) {
+    if (!dx_process_event_data(connection, DXF_ET_QUOTE, L"SYMB", symbol_code, NULL, 5, &empty_event_params)) {
         return false;
     }
     

@@ -30,6 +30,7 @@
 */
 /* -------------------------------------------------------------------------- */
 
+//used for subscribing on one record only in case of snapshots
 #define DX_SUBSCR_FLAG_SINGLE_RECORD            0x1
 //use with DX_SUBSCR_FLAG_SINGLE_RECORD flag and for dx_eid_order (Order) event
 #define DX_SUBSCR_FLAG_SR_MARKET_MAKER_ORDER    0x2
@@ -68,8 +69,8 @@ bool dx_get_event_subscription_symbols (dxf_subscription_t subscr_id,
 bool dx_get_event_subscription_flags(dxf_subscription_t subscr_id, OUT dxf_uint_t* subscr_flags);
 bool dx_process_event_data (dxf_connection_t connection, dx_event_id_t event_id, 
                             dxf_const_string_t symbol_name, dxf_int_t symbol_cipher, 
-                            dxf_event_flags_t flags, const dxf_event_data_t data, 
-                            int data_count, dxf_time_int_field_t time_int_field);
+                            const dxf_event_data_t data, int data_count, 
+                            const dxf_event_params_t* event_params);
 bool dx_get_last_symbol_event (dxf_connection_t connection, dxf_const_string_t symbol_name, int event_type,
                                OUT dxf_event_data_t* event_data);
 

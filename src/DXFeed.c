@@ -607,7 +607,7 @@ ERRORCODE dxf_create_snapshot_impl(dxf_connection_t connection, dx_event_id_t ev
                                    dxf_const_string_t symbol, dxf_const_string_t source, 
                                    OUT dxf_snapshot_t* snapshot) {
     dxf_subscription_t subscription = NULL;
-    dx_record_id_t record_id;
+    dx_record_info_id_t record_info_id;
     dxf_const_string_t order_source_value = NULL;
     ERRORCODE error_code;
     int event_types = DX_EVENT_BIT_MASK(event_id);
@@ -619,11 +619,11 @@ ERRORCODE dxf_create_snapshot_impl(dxf_connection_t connection, dx_event_id_t ev
         if (source_len > 0 &&
             (dx_compare_strings(source, DXF_ORDER_COMPOSITE_BID_STR) == 0 ||
             dx_compare_strings(source, DXF_ORDER_COMPOSITE_ASK_STR) == 0)) {
-            record_id = dx_rid_market_maker;
+            record_info_id = dx_rid_market_maker;
             subscr_flags |= DX_SUBSCR_FLAG_SR_MARKET_MAKER_ORDER;
         }
         else {
-            record_id = dx_rid_order;
+            record_info_id = dx_rid_order;
             if (source_len > 0)
                 order_source_value = source;
         }
@@ -650,13 +650,13 @@ ERRORCODE dxf_create_snapshot_impl(dxf_connection_t connection, dx_event_id_t ev
     error_code = dxf_create_subscription_impl(connection, event_types, subscr_flags, &subscription);
     if (error_code == DXF_FAILURE)
         return error_code;
-    if (record_id == dx_rid_order) {
+    if (record_info_id == dx_rid_order) {
         dx_clear_order_source(subscription);
         if (order_source_value != NULL)
             dx_add_order_source(subscription, order_source_value);
     }
 
-    *snapshot = dx_create_snapshot(connection, subscription, event_id, record_id, symbol, order_source_value);
+    *snapshot = dx_create_snapshot(connection, subscription, event_id, record_info_id, symbol, order_source_value);
     if (*snapshot == dx_invalid_snapshot) {
         dxf_close_subscription(subscription);
         return DXF_FAILURE;

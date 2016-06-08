@@ -158,6 +158,7 @@ typedef dxf_ulong_t dxf_time_int_field_t;
 typedef struct {
     dxf_event_flags_t flags;
     dxf_time_int_field_t time_int_field;
+    dxf_ulong_t snapshot_key;
 } dxf_event_params_t;
 
 /* -------------------------------------------------------------------------- */
@@ -225,7 +226,7 @@ int dx_get_event_subscription_params(dxf_connection_t connection, dx_order_sourc
 /* -------------------------------------------------------------------------- */
 
 typedef struct {
-    dx_record_id_t record_id;
+    dx_record_info_id_t record_info_id;
     dx_event_id_t event_id;
     int event_type;
     dxf_string_t symbol;
