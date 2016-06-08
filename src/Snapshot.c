@@ -70,6 +70,7 @@ typedef struct {
     int event_type;
     dxf_string_t order_source;
     dxf_string_t symbol;
+    dxf_int_t time;
     dx_snapshot_status_t status;
 
     dx_snapshot_records_array_t records;
@@ -455,7 +456,7 @@ void event_listener(int event_type, dxf_const_string_t symbol_name,
             //go throw...
         }
         //finish snapshot
-        if (IS_FLAG_SET(flags, dxf_ef_snapshot_end) || IS_FLAG_SET(flags, dxf_ef_snapshot_snip) /* TODO: time check */) {
+        if (IS_FLAG_SET(flags, dxf_ef_snapshot_end) || IS_FLAG_SET(flags, dxf_ef_snapshot_snip)) {
             if (!is_remove_event)
                 dx_snapshot_add_event_records(snapshot_data, data, data_count, event_params);
             snapshot_data->status = dx_status_full;
@@ -564,7 +565,8 @@ dxf_snapshot_t dx_create_snapshot(dxf_connection_t connection,
                                   dx_event_id_t event_id,
                                   dx_record_info_id_t record_info_id,
                                   dxf_const_string_t symbol, 
-                                  dxf_const_string_t order_source) {
+                                  dxf_const_string_t order_source, 
+                                  dxf_int_t time) {
     dx_snapshot_subscription_connection_context_t* context = NULL;
     dx_snapshot_data_t *snapshot_data = NULL;
     bool failed = false;
@@ -599,6 +601,7 @@ dxf_snapshot_t dx_create_snapshot(dxf_connection_t connection,
     snapshot_data->event_id = event_id;
     snapshot_data->event_type = event_types;
     snapshot_data->symbol = dx_create_string_src(symbol);
+    snapshot_data->time = time;
     if (order_source != NULL)
         snapshot_data->order_source = dx_create_string_src(order_source);
     snapshot_data->status = dx_status_unknown;

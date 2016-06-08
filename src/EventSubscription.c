@@ -77,6 +77,7 @@ struct dx_subscription_data_struct_t {
     dx_listener_array_t listeners;
     dx_order_source_array_t order_source;
     dxf_uint_t subscr_flags;
+    dxf_int_t time;
 
     dxf_const_string_t* symbol_name_array;
     int symbol_name_array_capacity;
@@ -665,7 +666,7 @@ void dx_free_event_subscription_data (dx_subscription_data_ptr_t subscr_data) {
 const dxf_subscription_t dx_invalid_subscription = (dxf_subscription_t)NULL;
 
 dxf_subscription_t dx_create_event_subscription(dxf_connection_t connection, int event_types, 
-                                                dxf_uint_t subscr_flags) {
+                                                dxf_uint_t subscr_flags, dxf_int_t time) {
     dx_subscription_data_ptr_t subscr_data = NULL;
     bool res = true;
     dx_event_subscription_connection_context_t* context = NULL;
@@ -699,6 +700,7 @@ dxf_subscription_t dx_create_event_subscription(dxf_connection_t connection, int
     subscr_data->event_types = event_types;
     subscr_data->escc = context;
     subscr_data->subscr_flags = subscr_flags;
+    subscr_data->time = time;
 
     res = true;
     if (event_types & DXF_ET_ORDER) {
@@ -1045,6 +1047,24 @@ bool dx_get_event_subscription_flags(dxf_subscription_t subscr_id, OUT dxf_uint_
 
 /* -------------------------------------------------------------------------- */
 
+bool dx_get_event_subscription_time(dxf_subscription_t subscr_id, OUT dxf_int_t* time) {
+    dx_subscription_data_ptr_t subscr_data = (dx_subscription_data_ptr_t)subscr_id;
+
+    if (subscr_id == dx_invalid_subscription) {
+        return dx_set_error_code(dx_esec_invalid_subscr_id);
+    }
+
+    if (time == NULL) {
+        return dx_set_error_code(dx_ec_invalid_func_param_internal);
+    }
+
+    *time = subscr_data->time;
+
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
 bool dx_process_event_data (dxf_connection_t connection, dx_event_id_t event_id, 
                             dxf_const_string_t symbol_name, dxf_int_t symbol_cipher, 
                             const dxf_event_data_t data, int data_count, 
@@ -1174,11 +1194,13 @@ bool dx_process_connection_subscriptions (dxf_connection_t connection, dx_subscr
         int symbol_count = 0;
         int event_types = 0;
         dxf_uint_t subscr_flags = 0;
+        dxf_int_t time;
 
         if (!dx_get_event_subscription_symbols(subscriptions->elements[i], &symbols, &symbol_count) ||
             !dx_get_event_subscription_event_types(subscriptions->elements[i], &event_types) ||
             !dx_get_event_subscription_flags(subscriptions->elements[i], &subscr_flags) ||
-            !processor(connection, dx_get_order_source(subscriptions->elements[i]), symbols, symbol_count, event_types, subscr_flags)) {
+            !dx_get_event_subscription_time(subscriptions->elements[i], &time) ||
+            !processor(connection, dx_get_order_source(subscriptions->elements[i]), symbols, symbol_count, event_types, subscr_flags, time)) {
 
             dx_mutex_unlock(&(context->subscr_guard));
 

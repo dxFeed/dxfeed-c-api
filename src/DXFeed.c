@@ -34,7 +34,6 @@
 #include "DXThreads.h"
 #include "Snapshot.h"
 
-
 /* -------------------------------------------------------------------------- */
 /*
  *	Auxiliary internal functions
@@ -43,18 +42,18 @@
 
 bool dx_subscribe (dxf_connection_t connection, dx_order_source_array_ptr_t order_source, 
                    dxf_const_string_t* symbols, int symbols_count, int event_types, 
-                   dxf_uint_t subscr_flags) {
+                   dxf_uint_t subscr_flags, dxf_int_t time) {
     return dx_subscribe_symbols_to_events(connection, order_source, symbols, symbols_count, 
-                                          event_types, false, false, subscr_flags);
+                                          event_types, false, false, subscr_flags, time);
 }
 
 /* -------------------------------------------------------------------------- */
 
 bool dx_unsubscribe(dxf_connection_t connection, dx_order_source_array_ptr_t order_source, 
                     dxf_const_string_t* symbols, int symbols_count, int event_types, 
-                    dxf_uint_t subscr_flags) {
+                    dxf_uint_t subscr_flags, dxf_int_t time) {
     return dx_subscribe_symbols_to_events(connection, order_source, symbols, symbols_count, 
-                                          event_types, true, false, subscr_flags);
+                                          event_types, true, false, subscr_flags, time);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -168,6 +167,15 @@ ERRORCODE dx_perform_common_actions () {
 
 /* -------------------------------------------------------------------------- */
 /*
+*	DXFeed API constants
+*/
+/* -------------------------------------------------------------------------- */
+
+#define DEFAULT_SUBSCRIPTION_FLAGS 0
+#define DEFAULT_SUBSCRIPTION_TIME 0
+
+/* -------------------------------------------------------------------------- */
+/*
  *	DXFeed API implementation
  */
 /* -------------------------------------------------------------------------- */
@@ -249,7 +257,7 @@ DXFEED_API ERRORCODE dxf_close_connection (dxf_connection_t connection) {
 /* -------------------------------------------------------------------------- */
 
 ERRORCODE dxf_create_subscription_impl (dxf_connection_t connection, int event_types, 
-                                        dxf_uint_t subscr_flags, 
+                                        dxf_uint_t subscr_flags, dxf_int_t time, 
                                         OUT dxf_subscription_t* subscription) {
 	static bool symbol_codec_initialized = false;
 
@@ -275,15 +283,17 @@ ERRORCODE dxf_create_subscription_impl (dxf_connection_t connection, int event_t
 		}
 	}
 	
-	if ((*subscription = dx_create_event_subscription(connection, event_types, subscr_flags)) == dx_invalid_subscription) {
+	if ((*subscription = dx_create_event_subscription(connection, event_types, subscr_flags, time)) == dx_invalid_subscription) {
 	    return DXF_FAILURE;
 	}
 
 	return DXF_SUCCESS;
 }
 
-DXFEED_API ERRORCODE dxf_create_subscription(dxf_connection_t connection, int event_types, OUT dxf_subscription_t* subscription) {
-    return dxf_create_subscription_impl(connection, event_types, 0, subscription);
+DXFEED_API ERRORCODE dxf_create_subscription(dxf_connection_t connection, int event_types, 
+                                             OUT dxf_subscription_t* subscription) {
+    return dxf_create_subscription_impl(connection, event_types, DEFAULT_SUBSCRIPTION_FLAGS, 
+        DEFAULT_SUBSCRIPTION_TIME, subscription);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -295,6 +305,7 @@ DXFEED_API ERRORCODE dxf_close_subscription (dxf_subscription_t subscription) {
     dxf_const_string_t* symbols;
     int symbol_count;
     dxf_uint_t subscr_flags;
+    dxf_int_t time;
 
     dx_perform_common_actions();
     
@@ -308,7 +319,8 @@ DXFEED_API ERRORCODE dxf_close_subscription (dxf_subscription_t subscription) {
         !dx_get_event_subscription_event_types(subscription, &events) ||
         !dx_get_event_subscription_symbols(subscription, &symbols, &symbol_count) ||
         !dx_get_event_subscription_flags(subscription, &subscr_flags) ||
-        !dx_unsubscribe(connection, dx_get_order_source(subscription), symbols, symbol_count, events, subscr_flags) ||
+        !dx_get_event_subscription_time(subscription, &time) ||
+        !dx_unsubscribe(connection, dx_get_order_source(subscription), symbols, symbol_count, events, subscr_flags, time) ||
         !dx_close_event_subscription(subscription)) {
 
         return DXF_FAILURE;
@@ -331,6 +343,7 @@ DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dxf_const
     dxf_int_t events;
     dxf_connection_t connection;
     dxf_uint_t subscr_flags;
+    dxf_int_t time;
 
     dx_perform_common_actions();
 
@@ -343,9 +356,10 @@ DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dxf_const
     if (!dx_get_subscription_connection(subscription, &connection) ||
         !dx_get_event_subscription_event_types(subscription, &events) ||
         !dx_get_event_subscription_flags(subscription, &subscr_flags) ||
+        !dx_get_event_subscription_time(subscription, &time) ||
         !dx_add_symbols(subscription, symbols, symbol_count) ||
         !dx_send_record_description(connection, false) ||
-        !dx_subscribe(connection, dx_get_order_source(subscription), symbols, symbol_count, events, subscr_flags)) {
+        !dx_subscribe(connection, dx_get_order_source(subscription), symbols, symbol_count, events, subscr_flags, time)) {
 
         return DXF_FAILURE;
     }
@@ -367,6 +381,7 @@ DXFEED_API ERRORCODE dxf_remove_symbols (dxf_subscription_t subscription, dxf_co
     dxf_connection_t connection;
     int events;
     dxf_uint_t subscr_flags;
+    dxf_int_t time;
     
     dx_perform_common_actions();
     
@@ -379,7 +394,8 @@ DXFEED_API ERRORCODE dxf_remove_symbols (dxf_subscription_t subscription, dxf_co
     if (!dx_get_subscription_connection(subscription, &connection) ||
         !dx_get_event_subscription_event_types(subscription, &events) ||
         !dx_get_event_subscription_flags(subscription, &subscr_flags) ||
-        !dx_unsubscribe(connection, dx_get_order_source(subscription), symbols, symbol_count, events, subscr_flags) ||
+        !dx_get_event_subscription_time(subscription, &time) ||
+        !dx_unsubscribe(connection, dx_get_order_source(subscription), symbols, symbol_count, events, subscr_flags, time) ||
         !dx_remove_symbols(subscription, symbols, symbol_count)) {
 
         return DXF_FAILURE;
@@ -435,6 +451,7 @@ DXFEED_API ERRORCODE dxf_clear_symbols (dxf_subscription_t subscription) {
     dxf_const_string_t* symbols;
     int symbol_count;
     dxf_uint_t subscr_flags;
+    dxf_int_t time;
 
     dx_perform_common_actions();
     
@@ -448,7 +465,8 @@ DXFEED_API ERRORCODE dxf_clear_symbols (dxf_subscription_t subscription) {
         !dx_get_subscription_connection(subscription, &connection) ||
         !dx_get_event_subscription_event_types(subscription, &events) ||
         !dx_get_event_subscription_flags(subscription, &subscr_flags) ||
-        !dx_unsubscribe(connection, dx_get_order_source(subscription), symbols, symbol_count, events, subscr_flags) ||
+        !dx_get_event_subscription_time(subscription, &time) ||
+        !dx_unsubscribe(connection, dx_get_order_source(subscription), symbols, symbol_count, events, subscr_flags, time) ||
         !dx_remove_symbols(subscription, symbols, symbol_count)) {
 
         return DXF_FAILURE;
@@ -572,6 +590,7 @@ DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const
     int symbol_count;
     int events;
     dxf_uint_t subscr_flags;
+    dxf_int_t time;
 
     if (source == NULL || source == "") {
         dx_set_error_code(dx_ec_invalid_func_param);
@@ -590,9 +609,10 @@ DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const
         if (!dx_get_subscription_connection(subscription, &connection) ||
             !dx_get_event_subscription_event_types(subscription, &events) ||
             !dx_get_event_subscription_flags(subscription, &subscr_flags) ||
-            !dx_unsubscribe(connection, dx_get_order_source(subscription), symbols, symbol_count, events, subscr_flags) ||
+            !dx_get_event_subscription_time(subscription, &time) ||
+            !dx_unsubscribe(connection, dx_get_order_source(subscription), symbols, symbol_count, events, subscr_flags, time) ||
             !dx_send_record_description(connection, false) ||
-            !dx_subscribe(connection, dx_get_order_source(subscription), symbols, symbol_count, events, subscr_flags)) {
+            !dx_subscribe(connection, dx_get_order_source(subscription), symbols, symbol_count, events, subscr_flags, time)) {
             dx_free(str);
             return DXF_FAILURE;
         }
@@ -605,7 +625,7 @@ DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const
 
 ERRORCODE dxf_create_snapshot_impl(dxf_connection_t connection, dx_event_id_t event_id, 
                                    dxf_const_string_t symbol, dxf_const_string_t source, 
-                                   OUT dxf_snapshot_t* snapshot) {
+                                   dxf_int_t time, OUT dxf_snapshot_t* snapshot) {
     dxf_subscription_t subscription = NULL;
     dx_record_info_id_t record_info_id;
     dxf_const_string_t order_source_value = NULL;
@@ -647,7 +667,7 @@ ERRORCODE dxf_create_snapshot_impl(dxf_connection_t connection, dx_event_id_t ev
         return DXF_FAILURE;
     }
 
-    error_code = dxf_create_subscription_impl(connection, event_types, subscr_flags, &subscription);
+    error_code = dxf_create_subscription_impl(connection, event_types, subscr_flags, time, &subscription);
     if (error_code == DXF_FAILURE)
         return error_code;
     if (record_info_id == dx_rid_order) {
@@ -656,7 +676,7 @@ ERRORCODE dxf_create_snapshot_impl(dxf_connection_t connection, dx_event_id_t ev
             dx_add_order_source(subscription, order_source_value);
     }
 
-    *snapshot = dx_create_snapshot(connection, subscription, event_id, record_info_id, symbol, order_source_value);
+    *snapshot = dx_create_snapshot(connection, subscription, event_id, record_info_id, symbol, order_source_value, time);
     if (*snapshot == dx_invalid_snapshot) {
         dxf_close_subscription(subscription);
         return DXF_FAILURE;
@@ -676,12 +696,12 @@ ERRORCODE dxf_create_snapshot_impl(dxf_connection_t connection, dx_event_id_t ev
 
 DXFEED_API ERRORCODE dxf_create_snapshot(dxf_connection_t connection, dx_event_id_t event_id,
                                          dxf_const_string_t symbol, const char* source,
-                                         OUT dxf_snapshot_t* snapshot) {
+                                         dxf_int_t time, OUT dxf_snapshot_t* snapshot) {
     dxf_string_t source_str = NULL;
     ERRORCODE res;
     if (source != NULL)
         source_str = dx_ansi_to_unicode(source);
-    res = dxf_create_snapshot_impl(connection, event_id, symbol, source_str, snapshot);
+    res = dxf_create_snapshot_impl(connection, event_id, symbol, source_str, time, snapshot);
     dx_free(source_str);
     return res;
 }

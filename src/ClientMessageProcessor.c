@@ -73,6 +73,7 @@ typedef struct {
     int event_types;
     bool unsubscribe;
     dxf_uint_t subscr_flags;
+    dxf_int_t time;
 } dx_event_subscription_task_data_t;
 
 /* -------------------------------------------------------------------------- */
@@ -94,7 +95,7 @@ void* dx_destroy_event_subscription_task_data (dx_event_subscription_task_data_t
 
 void* dx_create_event_subscription_task_data (dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
                                               dxf_const_string_t* symbols, int symbol_count, int event_types, 
-                                              bool unsubscribe, dxf_uint_t subscr_flags) {
+                                              bool unsubscribe, dxf_uint_t subscr_flags, dxf_int_t time) {
     int i = 0;
     dx_event_subscription_task_data_t* data = dx_calloc(1, sizeof(dx_event_subscription_task_data_t));
     
@@ -121,6 +122,7 @@ void* dx_create_event_subscription_task_data (dxf_connection_t connection, dx_or
     data->event_types = event_types;
     data->unsubscribe = unsubscribe;
     data->subscr_flags = subscr_flags;
+    data->time = time;
 
     return data;
 }
@@ -190,8 +192,9 @@ static bool dx_compose_body (void* bocc, dxf_int_t record_id, dxf_int_t cipher, 
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_subscribe_symbol_to_record (dxf_connection_t connection,
-                                           dx_message_type_t type, dxf_const_string_t symbol, dxf_int_t cipher, dxf_int_t record_id) {
+static bool dx_subscribe_symbol_to_record(dxf_connection_t connection, dx_message_type_t type, 
+                                          dxf_const_string_t symbol, dxf_int_t cipher, 
+                                          dxf_int_t record_id, dxf_int_t time) {
     static const dxf_int_t initial_buffer_size = 100;
 
     void* bocc = NULL;
@@ -222,7 +225,7 @@ static bool dx_subscribe_symbol_to_record (dxf_connection_t connection,
 
     if (!dx_compose_message_header(bocc, type) ||
         !dx_compose_body(bocc, record_id, cipher, symbol) ||
-        ((type == MESSAGE_HISTORY_ADD_SUBSCRIPTION) && !dx_write_compact_int(bocc, 0)) || /* hardcoded, used only once while subscribing to MarketMaker */
+        ((type == MESSAGE_HISTORY_ADD_SUBSCRIPTION) && !dx_write_compact_int(bocc, time)) || /* hardcoded, used only once while subscribing to MarketMaker */
         !dx_finish_composing_message(bocc)) {
 
         dx_free(dx_get_out_buffer(bocc));
@@ -263,8 +266,10 @@ int dx_subscribe_symbols_to_events_task (void* data, int command) {
         return res | dx_tes_success;
     }
 
-    if (dx_subscribe_symbols_to_events(task_data->connection, task_data->order_source, task_data->symbols, task_data->symbol_count,
-                                       task_data->event_types, task_data->unsubscribe, true, task_data->subscr_flags)) {
+    if (dx_subscribe_symbols_to_events(task_data->connection, task_data->order_source, 
+                                       task_data->symbols, task_data->symbol_count,
+                                       task_data->event_types, task_data->unsubscribe, 
+                                       true, task_data->subscr_flags, task_data->time)) {
         res |= dx_tes_success;
     }
     
@@ -494,7 +499,7 @@ int dx_describe_protocol_sender_task (void* data, int command) {
 
 bool dx_subscribe_symbols_to_events (dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
                                      dxf_const_string_t* symbols, int symbol_count, int event_types, bool unsubscribe,
-                                     bool task_mode, dxf_uint_t subscr_flags) {
+                                     bool task_mode, dxf_uint_t subscr_flags, dxf_int_t time) {
     int i = 0;
 
     CHECKED_CALL_2(dx_validate_connection_handle, connection, true);
@@ -502,8 +507,6 @@ bool dx_subscribe_symbols_to_events (dxf_connection_t connection, dx_order_sourc
     {
         dx_message_support_status_t msg_support_status;
 
-        //TODO: subsr params struct?
-        //CHECKED_CALL_5(dx_get_event_server_support, connection, order_source, event_types, unsubscribe, subscr_flags, &msg_support_status);
         if (!dx_get_event_server_support(connection, order_source, event_types, unsubscribe, subscr_flags, &msg_support_status)) {
             return false;
         }
@@ -520,7 +523,8 @@ bool dx_subscribe_symbols_to_events (dxf_connection_t connection, dx_order_sourc
             if (!task_mode) {
                 /* scheduling the task for asynchronous execution */
 
-                void* data = dx_create_event_subscription_task_data(connection, order_source, symbols, symbol_count, event_types, unsubscribe, subscr_flags);
+                void* data = dx_create_event_subscription_task_data(connection, order_source, symbols, 
+                    symbol_count, event_types, unsubscribe, subscr_flags, time);
 
                 if (data == NULL) {
                     return false;
@@ -538,14 +542,16 @@ bool dx_subscribe_symbols_to_events (dxf_connection_t connection, dx_order_sourc
             if (event_types & DX_EVENT_BIT_MASK(eid)) {
                 int j = 0;
                 dx_event_subscription_param_list_t subscr_params;
-                int param_count = dx_get_event_subscription_params(connection, order_source, eid, subscr_flags, &subscr_params);
+                int param_count = dx_get_event_subscription_params(connection, order_source, eid, 
+                    subscr_flags, &subscr_params);
 
                 for (; j < param_count; ++j) {
                     const dx_event_subscription_param_t* cur_param = subscr_params.elements + j;
                     dx_message_type_t msg_type = dx_get_subscription_message_type(unsubscribe ? dx_at_remove_subscription : dx_at_add_subscription, cur_param->subscription_type);
 
                     if (!dx_subscribe_symbol_to_record(connection, msg_type, symbols[i],
-                                                       dx_encode_symbol_name(symbols[i]), cur_param->record_id)) {
+                                                       dx_encode_symbol_name(symbols[i]), 
+                                                       cur_param->record_id, time)) {
                         
                         return false;
                     }
