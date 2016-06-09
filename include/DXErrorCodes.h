@@ -172,6 +172,7 @@ typedef enum {
     dx_ssec_snapshot_exist,
     dx_ssec_invalid_listener,
     dx_ssec_unknown_state,
+    dx_ssec_duplicate_record,
     
     /* miscellaneous error codes */
     
