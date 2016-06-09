@@ -22,6 +22,7 @@
 #include "DXErrorCodes.h"
 #include "DXErrorHandling.h"
 #include "DXThreads.h"
+#include "EventManager.h"
 #include "EventSubscription.h"
 #include "Logger.h"
 #include "Snapshot.h"
@@ -63,6 +64,12 @@ typedef struct {
 } dx_snapshot_record_time_ints_t;
 
 typedef struct {
+    dx_string_array_ptr_t* elements;
+    int size;
+    int capacity;
+} dx_snapshot_record_buffers_t;
+
+typedef struct {
     dxf_ulong_t key;
     dxf_subscription_t subscription;
     dx_record_info_id_t record_info_id;
@@ -73,11 +80,14 @@ typedef struct {
     dxf_int_t time;
     dx_snapshot_status_t status;
 
+    /* Store received records */
     dx_snapshot_records_array_t records;
-    /* time_int_field is a key for record in snapshot records array;
-     position of time_int_field in dx_snapshot_record_time_ints_t array 
-     is position of record in dx_snapshot_records_array_t*/
+    /* Store keys of snapshot records */
     dx_snapshot_record_time_ints_t record_time_ints;
+    /* Stores a string for snapshot records */
+    dx_snapshot_record_buffers_t record_buffers;
+    /* position of record == position of record_time_ints == position of record_buffer */
+
     dx_snapshot_listener_array_t listeners;
 
     void* sscc;
@@ -210,19 +220,34 @@ bool dx_snapshot_add_event_record(dx_snapshot_data_ptr_t snapshot_data,
     dxf_event_data_t obj = NULL;
     dx_event_copy_function_t clone_event = dx_get_event_copy_function(snapshot_data->event_id);
     dxf_bool_t res = false;
+    dx_string_array_ptr_t string_buffer = NULL;
     if (clone_event == NULL) {
         return false;
     }
-    if (!clone_event(event_row, &obj)) {
+    if (!clone_event(event_row, &string_buffer, &obj)) {
         return false;
     }
+    //store event data
     DX_ARRAY_INSERT(snapshot_data->records, dxf_event_data_t, obj, position, dx_capacity_manager_halfer, failed);
     if (failed) {
+        dx_string_array_free(string_buffer);
         return dx_set_error_code(dx_mec_insufficient_memory);
     }
+
+    //store time_int_field
     DX_ARRAY_INSERT(snapshot_data->record_time_ints, dxf_time_int_field_t, event_params->time_int_field, position, dx_capacity_manager_halfer, failed);
     if (failed) {
+        dx_string_array_free(string_buffer);
         DX_ARRAY_DELETE(snapshot_data->records, dxf_event_data_t, position, dx_capacity_manager_halfer, failed);
+        return dx_set_error_code(dx_mec_insufficient_memory);
+    }
+
+    //store string buffer
+    DX_ARRAY_INSERT(snapshot_data->record_buffers, dx_string_array_ptr_t, string_buffer, position, dx_capacity_manager_halfer, failed);
+    if (failed) {
+        dx_string_array_free(string_buffer);
+        DX_ARRAY_DELETE(snapshot_data->records, dxf_event_data_t, position, dx_capacity_manager_halfer, failed);
+        DX_ARRAY_DELETE(snapshot_data->record_time_ints, dxf_time_int_field_t, position, dx_capacity_manager_halfer, failed);
         return dx_set_error_code(dx_mec_insufficient_memory);
     }
     return true;
@@ -256,11 +281,13 @@ bool dx_snapshot_clear_records_array(dx_snapshot_data_ptr_t snapshot_data) {
     dx_event_free_function_t free_event;
     dx_snapshot_records_array_t* records;
     dx_snapshot_record_time_ints_t* time_ints;
+    dx_snapshot_record_buffers_t* string_buffers;
 
     if (snapshot_data == NULL) {
         return dx_set_error_code(dx_ec_invalid_func_param_internal);
     }
 
+    //free records data
     free_event = dx_get_event_free_function(snapshot_data->event_id);
     records = &(snapshot_data->records);
 
@@ -268,7 +295,7 @@ bool dx_snapshot_clear_records_array(dx_snapshot_data_ptr_t snapshot_data) {
         return false;
     }
 
-    for (i = 0; i < records->size; i++) {
+    for (i = 0; i < records->size; ++i) {
         free_event(records->elements[i]);
     }
     dx_free(records->elements);
@@ -276,11 +303,22 @@ bool dx_snapshot_clear_records_array(dx_snapshot_data_ptr_t snapshot_data) {
     records->size = 0;
     records->capacity = 0;
 
+    //free time_ints
     time_ints = &(snapshot_data->record_time_ints);
     dx_free(time_ints->elements);
     time_ints->elements = NULL;
     time_ints->size = 0;
     time_ints->capacity = 0;
+
+    //clear records string buffers
+    string_buffers = &(snapshot_data->record_buffers);
+    for (i = 0; i < string_buffers->size; ++i) {
+        dx_string_array_free(string_buffers->elements[i]);
+    }
+    dx_free(string_buffers->elements);
+    string_buffers->elements = NULL;
+    string_buffers->size = 0;
+    string_buffers->capacity = 0;
 
     return true;
 }
@@ -299,10 +337,15 @@ bool dx_snapshot_remove_event_record(dx_snapshot_data_ptr_t snapshot_data, int p
     }
     free_event(snapshot_data->records.elements[position]);
 
+    dx_string_array_free(snapshot_data->record_buffers.elements[position]);
+
     DX_ARRAY_DELETE(snapshot_data->records, dxf_event_data_t, position, dx_capacity_manager_halfer, failed);
     if (failed)
         return dx_set_error_code(dx_mec_insufficient_memory);
     DX_ARRAY_DELETE(snapshot_data->record_time_ints, dxf_time_int_field_t, position, dx_capacity_manager_halfer, failed);
+    if (failed)
+        return dx_set_error_code(dx_mec_insufficient_memory);
+    DX_ARRAY_DELETE(snapshot_data->record_buffers, dx_string_array_ptr_t, position, dx_capacity_manager_halfer, failed);
     if (failed)
         return dx_set_error_code(dx_mec_insufficient_memory);
     return true;
@@ -336,7 +379,8 @@ bool dx_snapshot_remove_event_records(dx_snapshot_data_ptr_t snapshot_data, cons
     return true;
 }
 
-bool dx_snapshot_replace_record(dx_snapshot_data_ptr_t snapshot_data, int position, dxf_event_data_t new_record) {
+bool dx_snapshot_replace_record(dx_snapshot_data_ptr_t snapshot_data, int position, 
+                                dxf_event_data_t new_record) {
     dx_event_free_function_t free_event = NULL;
     dx_event_copy_function_t clone_event = NULL;
 
@@ -351,7 +395,10 @@ bool dx_snapshot_replace_record(dx_snapshot_data_ptr_t snapshot_data, int positi
     }
     free_event(snapshot_data->records.elements[position]);
 
-    if (!clone_event(new_record, &(snapshot_data->records.elements[position]))) {
+    dx_string_array_free(snapshot_data->record_buffers.elements[position]);
+
+    if (!clone_event(new_record, &(snapshot_data->record_buffers.elements[position]), 
+        &(snapshot_data->records.elements[position]))) {
         return false;
     }
 

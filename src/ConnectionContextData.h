@@ -25,7 +25,6 @@
 #define CONNECTION_CONTEXT_DATA_H_INCLUDED
 
 #include "PrimitiveTypes.h"
-//TODO: temp?
 #include "DXTypes.h"
 
 /* -------------------------------------------------------------------------- */

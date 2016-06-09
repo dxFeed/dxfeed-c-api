@@ -122,6 +122,12 @@
     <ClCompile Include="..\..\src\Snapshot.c">
       <Filter>Common\Sources</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\StringArray.c">
+      <Filter>Common\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\EventManager.c">
+      <Filter>Common\Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\DXAlgorithms.h">
@@ -173,6 +179,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Snapshot.h">
+      <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\EventManager.h">
+      <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\StringArray.h">
       <Filter>Common\Headers</Filter>
     </ClInclude>
   </ItemGroup>
