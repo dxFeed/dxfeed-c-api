@@ -42,6 +42,7 @@
 # /tests/SnapshotConsoleSample/
 /tests/SnapshotConsoleSample/*.user
 /tests/SnapshotConsoleSample/*.suo
+/tests/SnapshotConsoleSample/build
 
 # /wrappers/COM/samples/C++/
 /wrappers/COM/samples/C++/*.user
