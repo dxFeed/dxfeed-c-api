@@ -100,7 +100,7 @@ typedef struct {
     int field_count;
     const dx_field_info_t* fields;
     dx_record_info_id_t info_id;
-    dxf_char_t suffix[RECORD_SUFFIX_SIZE];
+    dxf_char_t suffix[DXF_RECORD_SUFFIX_SIZE];
     dxf_char_t exchange_code;
 } dx_record_item_t;
 

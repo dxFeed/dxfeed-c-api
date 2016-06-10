@@ -1226,7 +1226,7 @@ bool dx_add_order_source(dxf_subscription_t subscr_id, dxf_const_string_t source
     dx_suffix_t new_source;
     bool found = false;
     int index = 0;
-    dx_copy_string_len(new_source.suffix, source, RECORD_SUFFIX_SIZE);
+    dx_copy_string_len(new_source.suffix, source, DXF_RECORD_SUFFIX_SIZE);
     if (subscr_data->order_source.elements == NULL) {
         DX_ARRAY_INSERT(subscr_data->order_source, dx_suffix_t, new_source, index, dx_capacity_manager_halfer, failed);
     }

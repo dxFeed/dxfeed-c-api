@@ -62,7 +62,7 @@ typedef enum {
 
 #define DX_EVENT_BIT_MASK(event_id) (1 << event_id)
 
-#define RECORD_SUFFIX_SIZE 5
+#define DXF_RECORD_SUFFIX_SIZE 5
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -71,7 +71,7 @@ typedef enum {
 /* -------------------------------------------------------------------------- */
 
 typedef struct {
-    dxf_char_t suffix[RECORD_SUFFIX_SIZE];
+    dxf_char_t suffix[DXF_RECORD_SUFFIX_SIZE];
 } dx_suffix_t;
 
 typedef struct {
@@ -105,7 +105,7 @@ typedef struct {
     dxf_const_string_t market_maker;
     dxf_double_t price;
     dxf_long_t size;
-    dxf_char_t source[RECORD_SUFFIX_SIZE];
+    dxf_char_t source[DXF_RECORD_SUFFIX_SIZE];
     dxf_int_t count;
 } dxf_order_t;
 

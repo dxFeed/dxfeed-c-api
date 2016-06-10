@@ -113,7 +113,7 @@ bool dx_add_subscription_param_to_list(dxf_connection_t connection, dx_event_sub
 bool dx_get_single_order_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source, 
                                              dxf_uint_t subscr_flags,
                                              OUT dx_event_subscription_param_list_t* param_list) {
-    dxf_char_t order_name_buf[ORDER_TMPL_LEN + RECORD_SUFFIX_SIZE] = { 0 };
+    dxf_char_t order_name_buf[ORDER_TMPL_LEN + DXF_RECORD_SUFFIX_SIZE] = { 0 };
 
     if (!IS_FLAG_SET(subscr_flags, DX_SUBSCR_FLAG_SINGLE_RECORD)) {
         return false;
@@ -128,7 +128,7 @@ bool dx_get_single_order_subscription_params(dxf_connection_t connection, dx_ord
         CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Order", dx_st_history);
         if (order_source->size != 0) {
             dx_copy_string(order_name_buf, g_order_tmpl);
-            dx_copy_string_len(&order_name_buf[ORDER_TMPL_LEN], order_source->elements[0].suffix, RECORD_SUFFIX_SIZE);
+            dx_copy_string_len(&order_name_buf[ORDER_TMPL_LEN], order_source->elements[0].suffix, DXF_RECORD_SUFFIX_SIZE);
             CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, order_name_buf, dx_st_history);
         }
     }
@@ -139,7 +139,7 @@ bool dx_get_order_subscription_params(dxf_connection_t connection, dx_order_sour
                                       dxf_uint_t subscr_flags,
                                       OUT dx_event_subscription_param_list_t* param_list) {
     dxf_char_t ch = 'A';
-    dxf_char_t order_name_buf[ORDER_TMPL_LEN + RECORD_SUFFIX_SIZE] = { 0 };
+    dxf_char_t order_name_buf[ORDER_TMPL_LEN + DXF_RECORD_SUFFIX_SIZE] = { 0 };
     dxf_char_t quote_name_buf[QUOTE_TMPL_LEN + 2] = { 0 };
     int i;
 
@@ -153,7 +153,7 @@ bool dx_get_order_subscription_params(dxf_connection_t connection, dx_order_sour
 
     dx_copy_string(order_name_buf, g_order_tmpl);
     for (i = 0; i < order_source->size; ++i) {
-        dx_copy_string_len(&order_name_buf[ORDER_TMPL_LEN], order_source->elements[i].suffix, RECORD_SUFFIX_SIZE);
+        dx_copy_string_len(&order_name_buf[ORDER_TMPL_LEN], order_source->elements[i].suffix, DXF_RECORD_SUFFIX_SIZE);
         CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, order_name_buf, dx_st_history);
     }
 
