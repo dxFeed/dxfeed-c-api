@@ -264,13 +264,12 @@ bool dx_snapshot_add_event_records(dx_snapshot_data_ptr_t snapshot_data, const d
     for (i = 0; i < data_count; ++i) {
         bool found = false;
         int position = 0;
-        dxf_event_data_t obj = &(data[i]);
         DX_ARRAY_BINARY_SEARCH(snapshot_data->record_time_ints.elements, 0, snapshot_data->record_time_ints.size,
             event_params->time_int_field, dx_snapshot_records_comparator, found, position);
         if (found) {
             dx_set_error_code(dx_ssec_duplicate_record);
         }
-        if (!dx_snapshot_add_event_record(snapshot_data, event_params, obj, position)) {
+        if (!dx_snapshot_add_event_record(snapshot_data, event_params, data + i, position)) {
             return false;
         }
     }
@@ -426,13 +425,13 @@ bool dx_snapshot_update_event_records(dx_snapshot_data_ptr_t snapshot_data, cons
         /* add or update record */
         if (found) {
             dx_logging_verbose_info(L"Update record at %d position (time=%llu)", index, event_params->time_int_field);
-            if (!dx_snapshot_replace_record(snapshot_data, index, &(data[i]))) {
+            if (!dx_snapshot_replace_record(snapshot_data, index, data + i)) {
                 return false;
             }
         }
         else {
             dx_logging_verbose_info(L"Add new record at %d position (time=%llu)", index, event_params->time_int_field);
-            if (!dx_snapshot_add_event_record(snapshot_data, event_params, &(data[i]), index)) {
+            if (!dx_snapshot_add_event_record(snapshot_data, event_params, data + i, index)) {
                 return false;
             }
         }
@@ -491,7 +490,7 @@ void event_listener(int event_type, dxf_const_string_t symbol_name,
         dx_snapshot_data_ptr_t snapshot_data = context->snapshots_array.elements[i];
         bool is_remove_event = false;
         
-        if (!dx_is_snapshot_event(snapshot_data, event_type, event_params, &(data[i]))) {
+        if (!dx_is_snapshot_event(snapshot_data, event_type, event_params, data + i)) {
             continue;
         }
 
