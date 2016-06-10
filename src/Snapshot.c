@@ -264,7 +264,7 @@ bool dx_snapshot_add_event_records(dx_snapshot_data_ptr_t snapshot_data, const d
     for (i = 0; i < data_count; ++i) {
         bool found = false;
         int position = 0;
-        const dxf_event_data_t obj = &(data[i]);
+        dxf_event_data_t obj = &(data[i]);
         DX_ARRAY_BINARY_SEARCH(snapshot_data->record_time_ints.elements, 0, snapshot_data->record_time_ints.size,
             event_params->time_int_field, dx_snapshot_records_comparator, found, position);
         if (found) {
