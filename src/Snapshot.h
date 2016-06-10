@@ -42,7 +42,7 @@ extern const dxf_snapshot_t dx_invalid_snapshot;
 dxf_snapshot_t dx_create_snapshot(dxf_connection_t connection, 
                                   dxf_subscription_t subscription, 
                                   dx_event_id_t event_id, 
-                                  dx_record_id_t record_id, 
+                                  dx_record_info_id_t record_info_id,
                                   dxf_const_string_t symbol, 
                                   dxf_const_string_t order_source, 
                                   dxf_int_t time);
