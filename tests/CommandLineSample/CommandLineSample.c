@@ -118,7 +118,7 @@ void listener(int event_type, dxf_const_string_t symbol_name,
 			wprintf(L", exchange code=%c, market maker=%ls, price=%f, size=%lld",
 		            orders[i].exchange_code, orders[i].market_maker, orders[i].price, orders[i].size);
             if (wcslen(orders[i].source) > 0)
-                wprintf(L", source=%s", orders[i].source);
+                wprintf(L", source=%ls", orders[i].source);
             wprintf(L", count=%d}\n", orders[i].count);
 		}
     }

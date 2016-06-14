@@ -162,7 +162,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
             wprintf(L", exchange code=%c, market maker=%ls, price=%f, size=%lld",
                 order->exchange_code, order->market_maker, order->price, order->size);
             if (wcslen(order->source) > 0)
-                wprintf(L", source=%s", order->source);
+                wprintf(L", source=%ls", order->source);
             wprintf(L", count=%d}\n", order->count);
         }
     }
