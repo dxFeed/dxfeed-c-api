@@ -31,7 +31,7 @@
 */
 /* -------------------------------------------------------------------------- */
 
-typedef dxf_bool_t(*dx_event_copy_function_t) (const dxf_event_data_t* source,
+typedef dxf_bool_t(*dx_event_copy_function_t) (const dxf_event_data_t source,
     OUT dx_string_array_ptr_t* string_buffer,
     OUT dxf_event_data_t* new_obj);
 typedef void(*dx_event_free_function_t) (dxf_event_data_t obj);
