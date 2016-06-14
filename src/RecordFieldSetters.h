@@ -265,7 +265,7 @@ DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_time_and_sale_t, type);
 */
 /* -------------------------------------------------------------------------- */
 
-typedef void(*dx_record_field_getter_t)(void* object, void* field);
+typedef void(*dx_record_field_getter_t)(void* object, OUT void* field);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -277,7 +277,7 @@ typedef void(*dx_record_field_getter_t)(void* object, void* field);
     struct_name##_##field_name##_##getter
 
 #define DX_RECORD_FIELD_GETTER_PROTOTYPE(struct_name, field_name) \
-    void DX_RECORD_FIELD_GETTER_NAME(struct_name, field_name) (void* object, const void* field)
+    void DX_RECORD_FIELD_GETTER_NAME(struct_name, field_name) (void* object, OUT void* field)
 
 /* -------------------------------------------------------------------------- */
 /*

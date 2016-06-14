@@ -178,9 +178,10 @@ int main(int argc, char* argv[]) {
     dxf_string_t symbol = NULL;
     char* dxfeed_host = NULL;
     dxf_string_t dxfeed_host_u = NULL;
-    char order_source[MAX_SOURCE_SIZE] = { 0 };
+    char order_source[MAX_SOURCE_SIZE + 1] = { 0 };
     char* order_source_ptr = NULL;
-
+    char* param_ptr = NULL;
+    int string_len = 0;
 
     if (argc < 4) {
         wprintf(L"DXFeed command line sample.\n"
@@ -223,7 +224,13 @@ int main(int argc, char* argv[]) {
     }
 
     if (argc == 5) {
-        strcpy_s(order_source, MAX_SOURCE_SIZE, argv[4]);
+        param_ptr = argv[4];
+        string_len = strlen(param_ptr);
+        if (string_len > MAX_SOURCE_SIZE) {
+            wprintf(L"Error: Invalid order source param!\n");
+            return -1;
+        }
+        strcpy(order_source, param_ptr);
         order_source_ptr = &(order_source[0]);
     }
 

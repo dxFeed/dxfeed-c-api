@@ -445,11 +445,11 @@ FIELD_GETTER_BODY(dx_time_and_sale_t, bid_price, dxf_double_t)
 FIELD_GETTER_BODY(dx_time_and_sale_t, ask_price, dxf_double_t)
 FIELD_GETTER_BODY(dx_time_and_sale_t, type, dxf_int_t)
 
-void DX_RECORD_FIELD_GETTER_NAME(dx_time_and_sale_t, sequence) (void* object, const void* field) {
+void DX_RECORD_FIELD_GETTER_NAME(dx_time_and_sale_t, sequence) (void* object, OUT void* field) {
     *(dxf_int_t*)field = (dxf_int_t)(((dx_time_and_sale_t*)object)->event_id & 0x00000000FFFFFFFFL);
 }
 
-void DX_RECORD_FIELD_GETTER_NAME(dx_time_and_sale_t, exch_sale_conds) (void* object, const void* field) {
+void DX_RECORD_FIELD_GETTER_NAME(dx_time_and_sale_t, exch_sale_conds) (void* object, OUT void* field) {
     dxf_ulong_t event_id = ((dx_time_and_sale_t*)object)->event_id;
     *(dxf_int_t*)field = (dxf_int_t)((event_id >> 32) & 0x00000000FFFFFFFFL);
 }
