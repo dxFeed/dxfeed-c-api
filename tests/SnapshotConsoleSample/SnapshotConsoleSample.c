@@ -182,7 +182,7 @@ int main(int argc, char* argv[]) {
     char order_source[MAX_SOURCE_SIZE + 1] = { 0 };
     char* order_source_ptr = NULL;
     char* param_ptr = NULL;
-    int string_len = 0;
+    size_t string_len = 0;
 
     if (argc < 4) {
         wprintf(L"DXFeed command line sample.\n"
