@@ -22,15 +22,8 @@
 
 #include "EventData.h"
 #include "DXTypes.h"
+#include "PrimitiveTypes.h"
 
-typedef struct {
-    dxf_string_t base_symbol;
-    dxf_char_t exchange_code;
-    dxf_candle_price_attribute_t price;
-    dxf_candle_session_attribute_t session;
-    dxf_candle_period_attribute_t period;
-    dxf_candle_alignment_attribute_t alignment;
-} dxf_candle_attributes_data_t;
+bool dx_candle_symbol_to_string(dxf_candle_attributes_t attributes, OUT dxf_string_t* string);
 
-dxf_string_t candle_symbol_to_string(dxf_string_t string, dxf_candle_attributes_data_t attributes);
 #endif /* CANDLE_H_INCLUDED */

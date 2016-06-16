@@ -160,30 +160,27 @@ typedef enum {
 
 static const dxf_candle_session_attribute_t DXF_CANDLE_SESSION_DEFAULT_ATTRIBUTE = dxf_csa_any;
 
+static const dxf_double_t DXF_CANDLE_PERIOD_VALUE_DEFAULT_ATTRIBUTE = 1;
+
 typedef enum {
-    dxf_ct_tick,
-    dxf_ct_second,
-    dxf_ct_minute,
-    dxf_ct_hour,
-    dxf_ct_day,
-    dxf_ct_week,
-    dxf_ct_month,
-    dxf_ct_optexp,
-    dxf_ct_year,
-    dxf_ct_volume,
-    dxf_ct_price,
-    dxf_ct_price_momentum,
-    dxf_ct_price_renko,
+    dxf_ctp_tick,
+    dxf_ctp_second,
+    dxf_ctp_minute,
+    dxf_ctp_hour,
+    dxf_ctp_day,
+    dxf_ctp_week,
+    dxf_ctp_month,
+    dxf_ctp_optexp,
+    dxf_ctp_year,
+    dxf_ctp_volume,
+    dxf_ctp_price,
+    dxf_ctp_price_momentum,
+    dxf_ctp_price_renko,
 
-    dxf_ct_count
-} dxf_candle_type_t;
+    dxf_ctp_count
+} dxf_candle_type_period_attribute_t;
 
-typedef struct {
-    dxf_double_t value;
-    dxf_candle_type_t type;
-} dxf_candle_period_attribute_t;
-
-static const dxf_candle_period_attribute_t DXF_CANDLE_PERIOD_DEFAULT_ATTRIBUTE = { 1, dxf_ct_tick };
+static const dxf_candle_type_period_attribute_t DXF_CANDLE_PERIOD_TYPE_DEFAULT_ATTRIBUTE = dxf_ctp_tick;
 
 typedef enum {
     dxf_caa_midnight,
