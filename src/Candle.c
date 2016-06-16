@@ -35,7 +35,7 @@ typedef struct {
     dxf_candle_price_attribute_t price;
     dxf_candle_session_attribute_t session;
     dxf_candle_alignment_attribute_t alignment;
-} dxf_candle_attributes_data_t;
+} dx_candle_attributes_data_t;
 
 typedef struct {
     dxf_string_t string;
@@ -77,7 +77,7 @@ static const dxf_string_t g_candle_alignment[dxf_caa_count] = {
 };
 
 
-DXFEED_API ERRORCODE dxf_initialise_candle_symbol_attributes(dxf_const_string_t base_symbol,
+DXFEED_API ERRORCODE dxf_initialize_candle_symbol_attributes(dxf_const_string_t base_symbol,
                                                              dxf_char_t exchange_code,
                                                              dxf_double_t period_value,
                                                              dxf_candle_type_period_attribute_t period_type,
@@ -85,7 +85,7 @@ DXFEED_API ERRORCODE dxf_initialise_candle_symbol_attributes(dxf_const_string_t 
                                                              dxf_candle_session_attribute_t session,
                                                              dxf_candle_alignment_attribute_t alignment,
                                                              OUT dxf_candle_attributes_t* candle_attributes) {
-    dxf_candle_attributes_data_t* attributes;
+    dx_candle_attributes_data_t* attributes;
     if (candle_attributes == NULL) {
         dx_set_error_code(dx_ec_invalid_func_param);
 
@@ -97,7 +97,7 @@ DXFEED_API ERRORCODE dxf_initialise_candle_symbol_attributes(dxf_const_string_t 
         return DXF_FAILURE;
     }
 
-    attributes = dx_calloc(1, sizeof(dxf_candle_attributes_data_t));
+    attributes = dx_calloc(1, sizeof(dx_candle_attributes_data_t));
     if (attributes == NULL) {
         dx_set_error_code(dx_mec_insufficient_memory);
         return DXF_FAILURE;
@@ -119,21 +119,21 @@ DXFEED_API ERRORCODE dxf_initialise_candle_symbol_attributes(dxf_const_string_t 
     return DXF_SUCCESS;
 }
 
-DXFEED_API ERRORCODE dxf_delete_candle_symbol_attributes(OUT dxf_candle_attributes_t* candle_attributes)
+DXFEED_API ERRORCODE dxf_delete_candle_symbol_attributes(dxf_candle_attributes_t candle_attributes)
 {
-    dxf_candle_attributes_data_t *attributes = *candle_attributes;
-    if (*candle_attributes == NULL) {
+    dx_candle_attributes_data_t *attributes = candle_attributes;
+    if (candle_attributes == NULL) {
         dx_set_error_code(dx_ec_invalid_func_param);
         return DXF_FAILURE;
     }
     dx_free(attributes->base_symbol);
-    dx_free(*candle_attributes);
+    dx_free(candle_attributes);
 
     return DXF_SUCCESS;
 }
 
 bool dx_candle_symbol_to_string(dxf_candle_attributes_t _attr, OUT dxf_string_t* string) {
-    dxf_candle_attributes_data_t *attributes = _attr;
+    dx_candle_attributes_data_t *attributes = _attr;
     dxf_char_t buffer_str[1000];
     bool put_comma = false;
 
@@ -148,8 +148,7 @@ bool dx_candle_symbol_to_string(dxf_candle_attributes_t _attr, OUT dxf_string_t*
 
     if (attributes->period_type != DXF_CANDLE_PERIOD_TYPE_DEFAULT_ATTRIBUTE) {
         dx_concatenate_strings(buffer_str, L"=");
-        if (attributes->period_value != DXF_CANDLE_PERIOD_VALUE_DEFAULT_ATTRIBUTE)
-        {
+        if (attributes->period_value != DXF_CANDLE_PERIOD_VALUE_DEFAULT_ATTRIBUTE) {
             dxf_char_t tmpstr[100];
             swprintf(tmpstr, 99, L"%f", attributes->period_value);
             dx_concatenate_strings(buffer_str, tmpstr);
@@ -158,8 +157,7 @@ bool dx_candle_symbol_to_string(dxf_candle_attributes_t _attr, OUT dxf_string_t*
         put_comma = true;
     }
 
-    if (attributes->price != DXF_CANDLE_PRICE_DEFAULT_ATTRIBUTE)
-    {
+    if (attributes->price != DXF_CANDLE_PRICE_DEFAULT_ATTRIBUTE) {
         if (put_comma) {
             dx_concatenate_strings(buffer_str, L",");
         }
@@ -169,8 +167,7 @@ bool dx_candle_symbol_to_string(dxf_candle_attributes_t _attr, OUT dxf_string_t*
         put_comma = true;
     }
 
-    if (attributes->session != DXF_CANDLE_SESSION_DEFAULT_ATTRIBUTE)
-    {
+    if (attributes->session != DXF_CANDLE_SESSION_DEFAULT_ATTRIBUTE) {
         if (put_comma) {
             dx_concatenate_strings(buffer_str, L",");
         }
@@ -184,7 +181,7 @@ bool dx_candle_symbol_to_string(dxf_candle_attributes_t _attr, OUT dxf_string_t*
         if (put_comma) {
             dx_concatenate_strings(buffer_str, L",");
         }
-        dx_concatenate_strings(buffer_str, L"tho=");
+        dx_concatenate_strings(buffer_str, L"a=");
         dx_concatenate_strings(buffer_str, g_candle_alignment[attributes->alignment]);
 
         put_comma = true;

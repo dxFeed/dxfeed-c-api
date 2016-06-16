@@ -164,7 +164,7 @@ dxf_const_string_t dx_get_error_description (dx_error_code_t code) {
     case dx_cec_connection_context_not_initialized: return s_internal_error_descr;
     case dx_cec_invalid_connection_context_subsystem_id: return s_internal_error_descr;
 
-    /* candele event error codes*/
+    /* candel event error codes*/
 
     case dx_ceec_invalid_candle_period_value: return L"Invalid candle event period value";
 

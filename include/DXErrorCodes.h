@@ -164,7 +164,7 @@ typedef enum {
     dx_cec_connection_context_not_initialized,
     dx_cec_invalid_connection_context_subsystem_id,
 
-    /* candele event error codes*/
+    /* candel event error codes*/
 
     dx_ceec_invalid_candle_period_value,
 

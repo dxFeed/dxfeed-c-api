@@ -267,7 +267,7 @@ DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const
  * Api that allows user to create candle symbol attributes
  *
  */
-DXFEED_API ERRORCODE dxf_initialise_candle_symbol_attributes(dxf_const_string_t base_symbol,
+DXFEED_API ERRORCODE dxf_initialize_candle_symbol_attributes(dxf_const_string_t base_symbol,
                                                              dxf_char_t exchange_code,
                                                              dxf_double_t period_value,
                                                              dxf_candle_type_period_attribute_t period_type,
@@ -280,6 +280,6 @@ DXFEED_API ERRORCODE dxf_initialise_candle_symbol_attributes(dxf_const_string_t 
  * Free memory wich allocated by dxf_initialise_candle_symbol_attributes(...) function
  *
  */
-DXFEED_API ERRORCODE dxf_delete_candle_symbol_attributes(OUT dxf_candle_attributes_t* candle_attributes);
+DXFEED_API ERRORCODE dxf_delete_candle_symbol_attributes(dxf_candle_attributes_t candle_attributes);
 
 #endif /* DXFEED_API_H_INCLUDED */
