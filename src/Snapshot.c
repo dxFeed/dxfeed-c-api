@@ -52,7 +52,7 @@ typedef struct {
 } dx_snapshot_listener_array_t;
 
 typedef struct {
-    dxf_event_data_t* elements;
+    dxf_event_data_t elements;
     int size;
     int capacity;
 } dx_snapshot_records_array_t;
@@ -213,32 +213,79 @@ int dx_snapshot_records_comparator(dxf_time_int_field_t t1, dxf_time_int_field_t
     return t1 > t2 ? -1 : (t1 < t2 ? 1 : 0);
 }
 
+bool dx_snapshot_insert_record(dx_snapshot_data_ptr_t snapshot_data, dxf_event_data_t obj, const int position) {
+    bool failed = false;
+    //TODO: add Candle
+    switch (snapshot_data->event_id)
+    {
+    case dx_eid_order:
+        DX_ARRAY_INSERT(snapshot_data->records, dxf_order_t, *((dxf_order_t*)obj), position, dx_capacity_manager_halfer, failed);
+        break;
+    default:
+        return dx_set_error_code(dx_ssec_invalid_event_id);
+    }
+
+    return !failed;
+}
+
+bool dx_snapshot_delete_record(dx_snapshot_data_ptr_t snapshot_data, const int position) {
+    bool failed = false;
+    //TODO: add Candle
+    switch (snapshot_data->event_id)
+    {
+    case dx_eid_order:
+        DX_ARRAY_DELETE(snapshot_data->records, dxf_order_t, position, dx_capacity_manager_halfer, failed);
+        break;
+    default:
+        return dx_set_error_code(dx_ssec_invalid_event_id);
+    }
+
+    return !failed;
+}
+
+bool dx_snapshot_set_record(dx_snapshot_data_ptr_t snapshot_data, dxf_event_data_t obj, const int position) {
+    //TODO: add Candle
+    switch (snapshot_data->event_id)
+    {
+    case dx_eid_order:
+        dx_memcpy(&(((dxf_order_t*)snapshot_data->records.elements)[position]), (dxf_order_t*)obj, sizeof(dxf_order_t));
+        break;
+    default:
+        return dx_set_error_code(dx_ssec_invalid_event_id);
+    }
+
+    return true;
+}
+
 bool dx_snapshot_add_event_record(dx_snapshot_data_ptr_t snapshot_data, 
                                   const dxf_event_params_t* event_params, 
                                   const dxf_event_data_t event_row, const int position) {
     bool failed = false;
     dxf_event_data_t obj = NULL;
     dx_event_copy_function_t clone_event = dx_get_event_copy_function(snapshot_data->event_id);
+    dx_event_free_function_t free_event = dx_get_event_free_function(snapshot_data->event_id);
     dxf_bool_t res = false;
     dx_string_array_ptr_t string_buffer = NULL;
-    if (clone_event == NULL) {
+    if (clone_event == NULL || free_event == NULL) {
         return false;
     }
     if (!clone_event(event_row, &string_buffer, &obj)) {
         return false;
     }
+    
     //store event data
-    DX_ARRAY_INSERT(snapshot_data->records, dxf_event_data_t, obj, position, dx_capacity_manager_halfer, failed);
-    if (failed) {
+    res = dx_snapshot_insert_record(snapshot_data, obj, position);
+    free_event(obj);
+    if (!res) {
         dx_string_array_free(string_buffer);
-        return dx_set_error_code(dx_mec_insufficient_memory);
+        return false;
     }
 
     //store time_int_field
     DX_ARRAY_INSERT(snapshot_data->record_time_ints, dxf_time_int_field_t, event_params->time_int_field, position, dx_capacity_manager_halfer, failed);
     if (failed) {
         dx_string_array_free(string_buffer);
-        DX_ARRAY_DELETE(snapshot_data->records, dxf_event_data_t, position, dx_capacity_manager_halfer, failed);
+        dx_snapshot_delete_record(snapshot_data, position);
         return dx_set_error_code(dx_mec_insufficient_memory);
     }
 
@@ -246,7 +293,7 @@ bool dx_snapshot_add_event_record(dx_snapshot_data_ptr_t snapshot_data,
     DX_ARRAY_INSERT(snapshot_data->record_buffers, dx_string_array_ptr_t, string_buffer, position, dx_capacity_manager_halfer, failed);
     if (failed) {
         dx_string_array_free(string_buffer);
-        DX_ARRAY_DELETE(snapshot_data->records, dxf_event_data_t, position, dx_capacity_manager_halfer, failed);
+        dx_snapshot_delete_record(snapshot_data, position);
         DX_ARRAY_DELETE(snapshot_data->record_time_ints, dxf_time_int_field_t, position, dx_capacity_manager_halfer, failed);
         return dx_set_error_code(dx_mec_insufficient_memory);
     }
@@ -278,7 +325,6 @@ bool dx_snapshot_add_event_records(dx_snapshot_data_ptr_t snapshot_data, const d
 
 bool dx_snapshot_clear_records_array(dx_snapshot_data_ptr_t snapshot_data) {
     int i;
-    dx_event_free_function_t free_event;
     dx_snapshot_records_array_t* records;
     dx_snapshot_record_time_ints_t* time_ints;
     dx_snapshot_record_buffers_t* string_buffers;
@@ -288,16 +334,8 @@ bool dx_snapshot_clear_records_array(dx_snapshot_data_ptr_t snapshot_data) {
     }
 
     //free records data
-    free_event = dx_get_event_free_function(snapshot_data->event_id);
     records = &(snapshot_data->records);
 
-    if (free_event == NULL) {
-        return false;
-    }
-
-    for (i = 0; i < records->size; ++i) {
-        free_event(records->elements[i]);
-    }
     dx_free(records->elements);
     records->elements = NULL;
     records->size = 0;
@@ -324,24 +362,16 @@ bool dx_snapshot_clear_records_array(dx_snapshot_data_ptr_t snapshot_data) {
 }
 
 bool dx_snapshot_remove_event_record(dx_snapshot_data_ptr_t snapshot_data, int position) {
-    dx_event_free_function_t free_event;
     bool failed = false;
 
     if (snapshot_data == NULL || position < 0 || position >= snapshot_data->records.size) {
         return dx_set_error_code(dx_ec_invalid_func_param_internal);
     }
 
-    free_event = dx_get_event_free_function(snapshot_data->event_id);
-    if (free_event == NULL) {
-        return false;
-    }
-    free_event(snapshot_data->records.elements[position]);
-
     dx_string_array_free(snapshot_data->record_buffers.elements[position]);
 
-    DX_ARRAY_DELETE(snapshot_data->records, dxf_event_data_t, position, dx_capacity_manager_halfer, failed);
-    if (failed)
-        return dx_set_error_code(dx_mec_insufficient_memory);
+    if (!dx_snapshot_delete_record(snapshot_data, position))
+        return false;
     DX_ARRAY_DELETE(snapshot_data->record_time_ints, dxf_time_int_field_t, position, dx_capacity_manager_halfer, failed);
     if (failed)
         return dx_set_error_code(dx_mec_insufficient_memory);
@@ -383,6 +413,8 @@ bool dx_snapshot_replace_record(dx_snapshot_data_ptr_t snapshot_data, int positi
                                 const dxf_event_data_t new_record) {
     dx_event_free_function_t free_event = NULL;
     dx_event_copy_function_t clone_event = NULL;
+    dxf_event_data_t new_obj = NULL;
+    bool status;
 
     if (snapshot_data == NULL || position < 0 || position >= snapshot_data->records.size) {
         return dx_set_error_code(dx_ec_invalid_func_param_internal);
@@ -393,16 +425,20 @@ bool dx_snapshot_replace_record(dx_snapshot_data_ptr_t snapshot_data, int positi
     if (free_event == NULL || clone_event == NULL) {
         return false;
     }
-    free_event(snapshot_data->records.elements[position]);
 
     dx_string_array_free(snapshot_data->record_buffers.elements[position]);
 
-    if (!clone_event(new_record, &(snapshot_data->record_buffers.elements[position]), 
-        &(snapshot_data->records.elements[position]))) {
+    if (!clone_event(new_record, &(snapshot_data->record_buffers.elements[position]), &new_obj)) {
         return false;
     }
 
-    return true;
+    status = dx_snapshot_set_record(snapshot_data, new_obj, position);
+    if (!status)
+        dx_string_array_free(snapshot_data->record_buffers.elements[position]);
+
+    free_event(new_obj);
+
+    return status;
 }
 
 bool dx_snapshot_update_event_records(dx_snapshot_data_ptr_t snapshot_data, const dxf_event_data_t* data, 
@@ -448,12 +484,10 @@ bool dx_snapshot_call_listeners(dx_snapshot_data_ptr_t snapshot_data) {
         bool failed = false;
 
         dxf_snapshot_data_t callback_data;
-        callback_data.record_info_id = snapshot_data->record_info_id;
-        callback_data.event_id = snapshot_data->event_id;
         callback_data.event_type = snapshot_data->event_type;
         callback_data.symbol = dx_create_string_src(snapshot_data->symbol);
         callback_data.records_count = snapshot_data->records.size;
-        callback_data.records = (const dxf_event_data_t*)snapshot_data->records.elements;
+        callback_data.records = snapshot_data->records.elements;
         listener_context->listener(&callback_data, listener_context->user_data);
         dx_free(callback_data.symbol);
     }

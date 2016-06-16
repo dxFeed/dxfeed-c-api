@@ -148,8 +148,9 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
             snapshot_data->records_count);
 
     if (snapshot_data->event_type == DXF_ET_ORDER) {
+        dxf_order_t* order_records = (dxf_order_t*)snapshot_data->records;
         for (; i < snapshot_data->records_count; ++i) {
-            dxf_order_t* order = (dxf_order_t*)snapshot_data->records[i];
+            dxf_order_t order = order_records[i];
 
             if (i >= RECORDS_PRINT_LIMIT) {
                 wprintf(L"   { ... %d records left ...}\n", snapshot_data->records_count - i);
@@ -157,13 +158,13 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
             }
 
             wprintf(L"   {index=0x%llX, side=%i, level=%i, time=",
-                order->index, order->side, order->level);
-            print_timestamp(order->time);
+                order.index, order.side, order.level);
+            print_timestamp(order.time);
             wprintf(L", exchange code=%c, market maker=%ls, price=%f, size=%lld",
-                order->exchange_code, order->market_maker, order->price, order->size);
-            if (wcslen(order->source) > 0)
-                wprintf(L", source=%ls", order->source);
-            wprintf(L", count=%d}\n", order->count);
+                order.exchange_code, order.market_maker, order.price, order.size);
+            if (wcslen(order.source) > 0)
+                wprintf(L", source=%ls", order.source);
+            wprintf(L", count=%d}\n", order.count);
         }
     }
 }

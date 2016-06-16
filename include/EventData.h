@@ -226,8 +226,6 @@ int dx_get_event_subscription_params(dxf_connection_t connection, dx_order_sourc
 /* -------------------------------------------------------------------------- */
 
 typedef struct {
-    dx_record_info_id_t record_info_id;
-    dx_event_id_t event_id;
     int event_type;
     dxf_string_t symbol;
 
