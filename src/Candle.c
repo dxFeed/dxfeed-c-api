@@ -146,6 +146,7 @@ bool dx_candle_symbol_to_string(dxf_candle_attributes_t _attr, OUT dxf_string_t*
     }
     dx_concatenate_strings(buffer_str, L"{");
 
+    /*attribute (period) has no name and is written the first, and the rest should be sorted alphabetically.*/
     if (attributes->period_type != DXF_CANDLE_PERIOD_TYPE_DEFAULT_ATTRIBUTE) {
         dx_concatenate_strings(buffer_str, L"=");
         if (attributes->period_value != DXF_CANDLE_PERIOD_VALUE_DEFAULT_ATTRIBUTE) {
@@ -154,6 +155,16 @@ bool dx_candle_symbol_to_string(dxf_candle_attributes_t _attr, OUT dxf_string_t*
             dx_concatenate_strings(buffer_str, tmpstr);
         }
         dx_concatenate_strings(buffer_str, g_candle_type_period[attributes->period_type].string);
+        put_comma = true;
+    }
+
+    if (attributes->alignment != DXF_CANDLE_ALIGNMENT_DEFAULT_ATTRIBUTE) {
+        if (put_comma) {
+            dx_concatenate_strings(buffer_str, L",");
+        }
+        dx_concatenate_strings(buffer_str, L"a=");
+        dx_concatenate_strings(buffer_str, g_candle_alignment[attributes->alignment]);
+
         put_comma = true;
     }
 
@@ -173,16 +184,6 @@ bool dx_candle_symbol_to_string(dxf_candle_attributes_t _attr, OUT dxf_string_t*
         }
         dx_concatenate_strings(buffer_str, L"tho=");
         dx_concatenate_strings(buffer_str, g_candle_session[attributes->session]);
-
-        put_comma = true;
-    }
-
-    if (attributes->alignment != DXF_CANDLE_ALIGNMENT_DEFAULT_ATTRIBUTE) {
-        if (put_comma) {
-            dx_concatenate_strings(buffer_str, L",");
-        }
-        dx_concatenate_strings(buffer_str, L"a=");
-        dx_concatenate_strings(buffer_str, g_candle_alignment[attributes->alignment]);
 
         put_comma = true;
     }
