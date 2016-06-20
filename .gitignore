@@ -48,3 +48,7 @@
 /wrappers/COM/src/build
 
 log.log
+/tests/UnitTests/*.log
+/.vs
+/DXFeed.VC.db
+/DXFeed.VC.VC.opendb
