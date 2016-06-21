@@ -67,7 +67,7 @@ dx_message_type_t dx_get_subscription_message_type (dx_action_type_t action_type
 
 typedef struct {
     dxf_connection_t connection;
-    dx_order_source_array_ptr_t order_source;
+    dx_order_source_array_t order_source;
     dxf_const_string_t* symbols;
     int symbol_count;
     int event_types;
@@ -86,6 +86,12 @@ void* dx_destroy_event_subscription_task_data (dx_event_subscription_task_data_t
     }
     
     FREE_ARRAY(data->symbols, data->symbol_count);
+
+    dx_free(data->order_source.elements);
+    data->order_source.elements = NULL;
+    data->order_source.size = 0;
+    data->order_source.capacity = 0;
+
     dx_free(data);
     
     return NULL;
@@ -117,8 +123,16 @@ void* dx_create_event_subscription_task_data (dxf_connection_t connection, dx_or
         }
     }
 
+    if (order_source->size > 0) {
+        data->order_source.elements = dx_calloc(order_source->size, sizeof(dx_suffix_t));
+        if (data->order_source.elements == NULL)
+            return dx_destroy_event_subscription_task_data(data);
+        dx_memcpy(data->order_source.elements, order_source->elements, order_source->size * sizeof(dx_suffix_t));
+        data->order_source.size = order_source->size;
+        data->order_source.capacity = order_source->capacity;
+    }
+
     data->connection = connection;
-    data->order_source = order_source;
     data->event_types = event_types;
     data->unsubscribe = unsubscribe;
     data->subscr_flags = subscr_flags;
@@ -266,7 +280,7 @@ int dx_subscribe_symbols_to_events_task (void* data, int command) {
         return res | dx_tes_success;
     }
 
-    if (dx_subscribe_symbols_to_events(task_data->connection, task_data->order_source, 
+    if (dx_subscribe_symbols_to_events(task_data->connection, &(task_data->order_source), 
                                        task_data->symbols, task_data->symbol_count,
                                        task_data->event_types, task_data->unsubscribe, 
                                        true, task_data->subscr_flags, task_data->time)) {
