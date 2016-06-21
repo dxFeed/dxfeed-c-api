@@ -758,7 +758,9 @@ bool dx_close_snapshot(dxf_snapshot_t snapshot) {
         if (failed) {
             dx_set_error_code(dx_mec_insufficient_memory);
         }
-        return !failed && dx_free_snapshot_data(snapshot_data);
+        dx_free_snapshot_data(snapshot_data);
+        dx_mutex_unlock(&(context->guard));
+        return !failed;
     }
     else {
         dx_mutex_unlock(&(context->guard));

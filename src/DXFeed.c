@@ -721,8 +721,8 @@ DXFEED_API ERRORCODE dxf_close_snapshot(dxf_snapshot_t snapshot) {
     }
 
     if (!dx_get_snapshot_subscription(snapshot, &subscription) ||
-        !dx_close_snapshot(snapshot) ||
-        !dxf_close_subscription(subscription)) {
+        !dxf_close_subscription(subscription) ||
+        !dx_close_snapshot(snapshot)) {
 
         return DXF_FAILURE;
     }
