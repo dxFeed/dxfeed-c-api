@@ -64,7 +64,7 @@ typedef enum {
 
 #define DX_EVENT_BIT_MASK(event_id) (1 << event_id)
 
-#define RECORD_SUFFIX_SIZE 5
+#define DXF_RECORD_SUFFIX_SIZE 5
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -73,7 +73,7 @@ typedef enum {
 /* -------------------------------------------------------------------------- */
 
 typedef struct {
-    dxf_char_t suffix[RECORD_SUFFIX_SIZE];
+    dxf_char_t suffix[DXF_RECORD_SUFFIX_SIZE];
 } dx_suffix_t;
 
 typedef struct {
@@ -108,7 +108,7 @@ typedef struct {
     dxf_const_string_t market_maker;
     dxf_double_t price;
     dxf_long_t size;
-    dxf_char_t source[RECORD_SUFFIX_SIZE];
+    dxf_char_t source[DXF_RECORD_SUFFIX_SIZE];
     dxf_int_t count;
 } dxf_order_t;
 
@@ -129,6 +129,9 @@ static const dxf_int_t DXF_ORDER_LEVEL_ORDER = 3;
 static const dxf_int_t DXF_TIME_AND_SALE_TYPE_NEW = 0;
 static const dxf_int_t DXF_TIME_AND_SALE_TYPE_CORRECTION = 1;
 static const dxf_int_t DXF_TIME_AND_SALE_TYPE_CANCEL = 2;
+
+static dxf_const_string_t DXF_ORDER_COMPOSITE_BID_STR = L"COMPOSITE_BID";
+static dxf_const_string_t DXF_ORDER_COMPOSITE_ASK_STR = L"COMPOSITE_ASK";
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -208,6 +211,20 @@ typedef enum {
 
 /* -------------------------------------------------------------------------- */
 /*
+*   Additional event params struct
+*/
+/* -------------------------------------------------------------------------- */
+
+typedef dxf_ulong_t dxf_time_int_field_t;
+
+typedef struct {
+    dxf_event_flags_t flags;
+    dxf_time_int_field_t time_int_field;
+    dxf_ulong_t snapshot_key;
+} dxf_event_params_t;
+
+/* -------------------------------------------------------------------------- */
+/*
  *	Event listener prototype
  
  *  event type here is a one-bit mask, not an integer
@@ -216,8 +233,8 @@ typedef enum {
 /* -------------------------------------------------------------------------- */
 
 typedef void (*dxf_event_listener_t) (int event_type, dxf_const_string_t symbol_name,
-                                      const dxf_event_data_t* data, dxf_event_flags_t flags,
-                                      int data_count, void* user_data);
+                                      const dxf_event_data_t* data, int data_count, 
+                                      const dxf_event_params_t* event_params, void* user_data);
                                      
 /* -------------------------------------------------------------------------- */
 /*
@@ -262,7 +279,32 @@ typedef struct {
  * You need to call dx_free(params.elements) to free resources.
  */
 int dx_get_event_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source, dx_event_id_t event_id,
-                                      OUT dx_event_subscription_param_list_t* params);
+                                     dxf_uint_t subscr_flags, OUT dx_event_subscription_param_list_t* params);
+
+/* -------------------------------------------------------------------------- */
+/*
+*  Snapshot data structs
+*/
+/* -------------------------------------------------------------------------- */
+
+typedef struct {
+    int event_type;
+    dxf_string_t symbol;
+
+    int records_count;
+    const dxf_event_data_t* records;
+} dxf_snapshot_data_t, *dxf_snapshot_data_ptr_t;
+
+/* -------------------------------------------------------------------------- */
+/*
+*  Snapshot listener prototype
+
+*  snapshot_data - pointer to the received snapshot data
+*  user_data     - pointer to user struct, use NULL by default
+*/
+/* -------------------------------------------------------------------------- */
+
+typedef void(*dxf_snapshot_listener_t) (const dxf_snapshot_data_ptr_t snapshot_data, void* user_data);
 
 /* -------------------------------------------------------------------------- */
 /*

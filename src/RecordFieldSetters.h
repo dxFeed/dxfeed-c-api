@@ -259,4 +259,119 @@ DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_time_and_sale_t, ask_price);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_time_and_sale_t, exch_sale_conds);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_time_and_sale_t, type);
 
+/* -------------------------------------------------------------------------- */
+/*
+*	Generic setter prototype
+*/
+/* -------------------------------------------------------------------------- */
+
+typedef void(*dx_record_field_getter_t)(void* object, OUT void* field);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Setter macros
+*/
+/* -------------------------------------------------------------------------- */
+
+#define DX_RECORD_FIELD_GETTER_NAME(struct_name, field_name) \
+    struct_name##_##field_name##_##getter
+
+#define DX_RECORD_FIELD_GETTER_PROTOTYPE(struct_name, field_name) \
+    void DX_RECORD_FIELD_GETTER_NAME(struct_name, field_name) (void* object, OUT void* field)
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Trade field getters
+*/
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_trade_t, time);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_trade_t, exchange_code);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_trade_t, price);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_trade_t, size);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_trade_t, day_volume);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Quote field getters
+*/
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_quote_t, bid_time);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_quote_t, bid_exchange_code);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_quote_t, bid_price);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_quote_t, bid_size);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_quote_t, ask_time);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_quote_t, ask_exchange_code);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_quote_t, ask_price);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_quote_t, ask_size);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Fundamental field getters
+*/
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_fundamental_t, day_high_price);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_fundamental_t, day_low_price);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_fundamental_t, day_open_price);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_fundamental_t, prev_day_close_price);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_fundamental_t, open_interest);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Profile field getters
+*/
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_profile_t, description);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Market maker field getters
+*/
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_market_maker_t, mm_exchange);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_market_maker_t, mm_id);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_market_maker_t, mmbid_time);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_market_maker_t, mmbid_price);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_market_maker_t, mmbid_size);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_market_maker_t, mmask_time);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_market_maker_t, mmask_price);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_market_maker_t, mmask_size);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_market_maker_t, mmbid_count);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_market_maker_t, mmask_count);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Order field getters
+*/
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_order_t, index);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_order_t, time);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_order_t, sequence);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_order_t, price);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_order_t, size);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_order_t, flags);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_order_t, mmid);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_order_t, count);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Time and Sale field getters
+*/
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_time_and_sale_t, time);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_time_and_sale_t, sequence);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_time_and_sale_t, exchange_code);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_time_and_sale_t, price);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_time_and_sale_t, size);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_time_and_sale_t, bid_price);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_time_and_sale_t, ask_price);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_time_and_sale_t, exch_sale_conds);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_time_and_sale_t, type);
+
 #endif /* RECORD_FIELD_SETTERS_H_INCLUDED */

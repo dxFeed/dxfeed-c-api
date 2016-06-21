@@ -82,11 +82,12 @@ void print_timestamp(dxf_long_t timestamp){
 }
 /* -------------------------------------------------------------------------- */
 
-void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, 
-              dxf_event_flags_t flags, int data_count, void* user_data) {
+void listener(int event_type, dxf_const_string_t symbol_name,
+              const dxf_event_data_t* data, int data_count,
+              const dxf_event_params_t* event_params, void* user_data) {
     dxf_int_t i = 0;
 
-	wprintf(L"%ls{symbol=%ls, flags=%d, ",dx_event_type_to_string(event_type), symbol_name, flags);
+    wprintf(L"%ls{symbol=%ls, flags=%d, ", dx_event_type_to_string(event_type), symbol_name, event_params->flags);
 	
     if (event_type == DXF_ET_QUOTE) {
 	    dxf_quote_t* quotes = (dxf_quote_t*)data;
@@ -117,7 +118,7 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 			wprintf(L", exchange code=%c, market maker=%ls, price=%f, size=%lld",
 		            orders[i].exchange_code, orders[i].market_maker, orders[i].price, orders[i].size);
             if (wcslen(orders[i].source) > 0)
-                wprintf(L", source=%s", orders[i].source);
+                wprintf(L", source=%ls", orders[i].source);
             wprintf(L", count=%d}\n", orders[i].count);
 		}
     }
@@ -131,7 +132,7 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 		            trades[i].exchange_code, trades[i].price, trades[i].size, trades[i].day_volume);
 		}
     }
-
+    
     if (event_type == DXF_ET_SUMMARY) {
 	    dxf_summary_t* s = (dxf_summary_t*)data;
 

@@ -725,9 +725,13 @@ bool dx_connect_to_resolved_addresses (dx_network_connection_context_t* context)
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_server_event_subscription_refresher (dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
-                                                    dxf_const_string_t* symbols, int symbol_count, int event_types) {
-    return dx_subscribe_symbols_to_events(connection, order_source, symbols, symbol_count, event_types, false, false);
+static bool dx_server_event_subscription_refresher (dxf_connection_t connection, 
+                                                    dx_order_source_array_ptr_t order_source,
+                                                    dxf_const_string_t* symbols, int symbol_count, 
+                                                    int event_types, dxf_uint_t subscr_flags, 
+                                                    dxf_int_t time) {
+    return dx_subscribe_symbols_to_events(connection, order_source, symbols, symbol_count, 
+        event_types, false, false, subscr_flags, time);
 }
 
 /* ---------------------------------- */
