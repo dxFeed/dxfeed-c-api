@@ -107,6 +107,19 @@ DXFEED_API ERRORCODE dxf_close_connection (dxf_connection_t connection);
  */
 DXFEED_API ERRORCODE dxf_create_subscription (dxf_connection_t connection, int event_types,
                                               OUT dxf_subscription_t* subscription);
+
+/*
+ *	Creates a subscription with the specified parameters.
+
+ *  connection - a handle of a previously created connection which the subscription will be using
+ *  event_types - a bitmask of the subscription event types. See 'dx_event_id_t' and 'DX_EVENT_BIT_MASK'
+ *                for information on how to create an event type bitmask
+ *  time - time in the past (unix time in milliseconds)
+ *  OUT subscription - a handle of the created subscription
+ */
+DXFEED_API ERRORCODE dxf_create_subscription_timed(dxf_connection_t connection, int event_types, dxf_int_t time,
+                                                   OUT dxf_subscription_t* subscription);
+
 /*
  *	Closes a subscription.
  *  All the data associated with it will be freed.

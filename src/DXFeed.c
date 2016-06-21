@@ -297,6 +297,11 @@ DXFEED_API ERRORCODE dxf_create_subscription(dxf_connection_t connection, int ev
 
 /* -------------------------------------------------------------------------- */
 
+DXFEED_API ERRORCODE dxf_create_subscription_timed(dxf_connection_t connection, int event_types, dxf_int_t time,
+                                                   OUT dxf_subscription_t* subscription) {
+    return dxf_create_subscription_impl(connection, event_types, DEFAULT_SUBSCRIPTION_FLAGS, time, subscription);
+}
+
 DXFEED_API ERRORCODE dxf_close_subscription (dxf_subscription_t subscription) {
     dxf_connection_t connection;
     int events;

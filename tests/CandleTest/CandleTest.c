@@ -71,11 +71,12 @@ void print_timestamp(dxf_long_t timestamp){
 }
 /* -------------------------------------------------------------------------- */
 
-void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, 
-              dxf_event_flags_t flags, int data_count, void* user_data) {
+void listener(int event_type, dxf_const_string_t symbol_name,
+    const dxf_event_data_t* data, int data_count,
+    const dxf_event_params_t* event_params, void* user_data) {
     dxf_int_t i = 0;
 
-	wprintf(L"%ls{symbol=%ls, flags=%d, ",dx_event_type_to_string(event_type), symbol_name, flags);
+	//wprintf(L"%ls{symbol=%ls, flags=%d, ",dx_event_type_to_string(event_type), symbol_name, flags);
 	
 }
 /* -------------------------------------------------------------------------- */
@@ -134,9 +135,20 @@ int main (int argc, char* argv[]) {
     dxf_subscription_t subscription;
     int loop_counter = 100000;
     int event_type = DXF_ET_CANDLE;
+    dxf_candle_attributes_t candle_attributes;
     dxf_string_t symbol = L"AAPL";
     char* dxfeed_host = "mddqa.in.devexperts.com:7400";
     dxf_string_t dxfeed_host_u = L"mddqa.in.devexperts.com:7400";
+    struct tm time_struct;// = {/*seconds*/ 0, /*minutes*/ 0, /*hours*/0,
+                            // /*day*/1, /*month*/0, /*year*/ 116}; 
+    time_t time;
+    time_struct.tm_sec = 0;
+    time_struct.tm_min = 0;
+    time_struct.tm_hour = 0;
+    time_struct.tm_mday = 1;
+    time_struct.tm_mon = 0;
+    time_struct.tm_year = 2016 - 1900;
+    time = mktime(&time_struct);
 
     dxf_initialize_logger( "log.log", true, true, true );
 
@@ -154,9 +166,13 @@ int main (int argc, char* argv[]) {
 
     wprintf(L"Connection successful!\n");
 
-    if (!dxf_create_subscription(connection, event_type, &subscription)) {
+    if (!dxf_initialize_candle_symbol_attributes(symbol, 0, 1, dxf_ctp_day, dxf_cpa_last, dxf_csa_any, dxf_caa_midnight, &candle_attributes)) {
         process_last_error();
+        return -1;
+    }
 
+    if (!dxf_create_subscription_timed(connection, event_type, time, &subscription)) {
+        process_last_error();
         return -1;
     };
 
