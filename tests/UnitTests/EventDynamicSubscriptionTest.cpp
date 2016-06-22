@@ -6,15 +6,18 @@
 #include "DXFeed.h"
 #include "DXErrorCodes.h"
 #include "Logger.h"
+#include "TestHelper.h"
 
-//Timeout in milliseconds for waiting some events is 1 minutes.
-#define EVENTS_TIMEOUT 60000
+//Timeout in milliseconds for waiting some events is 2 minutes.
+#define EVENTS_TIMEOUT 120000
 #define EVENTS_LOOP_SLEEP_TIME 100
 
 const char dxfeed_host[] = "demo.dxfeed.com:7300";
 
 #define SYMBOLS_COUNT 4
 static dxf_const_string_t g_symbols[] = { { L"IBM" }, { L"MSFT" }, { L"YHOO" }, { L"C" } };
+
+dxf_listener_thread_data_t g_listener_thread_data;
 
 /* -------------------------------------------------------------------------- */
 
@@ -66,29 +69,6 @@ void drop_trade_counter() {
 }
 
 /* -------------------------------------------------------------------------- */
-static bool is_listener_thread_terminated = false;
-CRITICAL_SECTION listener_thread_guard;
-
-bool is_thread_terminate() {
-    bool res;
-    EnterCriticalSection(&listener_thread_guard);
-    res = is_listener_thread_terminated;
-    LeaveCriticalSection(&listener_thread_guard);
-
-    return res;
-}
-
-/* -------------------------------------------------------------------------- */
-
-void on_reader_thread_terminate(const char* host, void* user_data) {
-    EnterCriticalSection(&listener_thread_guard);
-    is_listener_thread_terminated = true;
-    LeaveCriticalSection(&listener_thread_guard);
-
-    printf("\nTerminating listener thread, host: %s\n", host);
-}
-
-/* -------------------------------------------------------------------------- */
 
 void print_timestamp(dxf_long_t timestamp){
     char timefmt[80];
@@ -118,30 +98,6 @@ void order_listener(int event_type, dxf_const_string_t symbol_name,
 }
 /* -------------------------------------------------------------------------- */
 
-void process_last_error() {
-    int error_code = dx_ec_success;
-    dxf_const_string_t error_descr = NULL;
-    int res;
-
-    res = dxf_get_last_error(&error_code, &error_descr);
-
-    if (res == DXF_SUCCESS) {
-        if (error_code == dx_ec_success) {
-            printf("WTF - no error information is stored");
-
-            return;
-        }
-
-        wprintf(L"Error occurred and successfully retrieved:\n"
-            L"error code = %d, description = \"%s\"\n",
-            error_code, error_descr);
-        return;
-    }
-
-    printf("An error occurred but the error subsystem failed to initialize\n");
-}
-/* -------------------------------------------------------------------------- */
-
 bool subscribe_to_event(dxf_connection_t connection, dxf_subscription_t* subscription, int event_type, dxf_event_listener_t event_listener) {
     if (!dxf_create_subscription(connection, event_type, subscription)) {
         process_last_error();
@@ -166,6 +122,14 @@ bool subscribe_to_event(dxf_connection_t connection, dxf_subscription_t* subscri
 
 /* -------------------------------------------------------------------------- */
 
+void on_thread_terminate(dxf_connection_t connection, void* user_data) {
+    if (g_listener_thread_data == NULL)
+        return;
+    on_reader_thread_terminate(g_listener_thread_data, connection, user_data);
+}
+
+/* -------------------------------------------------------------------------- */
+
 bool event_dynamic_subscription_test(void) {
     dxf_connection_t connection = NULL;
     dxf_subscription_t trade_subscription = NULL;
@@ -173,15 +137,10 @@ bool event_dynamic_subscription_test(void) {
     int loop_counter = EVENTS_TIMEOUT / EVENTS_LOOP_SLEEP_TIME;
     int timestamp = 0;
 
-    dxf_initialize_logger("log.log", true, true, true);
-    InitializeCriticalSection(&listener_thread_guard);
-    InitializeCriticalSection(&g_order_counter_guard);
-    InitializeCriticalSection(&g_trade_counter_guard);
-
     printf("EventDynamicSubscription test started.\n");
     printf("Connecting to host %s...\n", dxfeed_host);
 
-    if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, &connection)) {
+    if (!dxf_create_connection(dxfeed_host, on_thread_terminate, NULL, NULL, NULL, &connection)) {
         process_last_error();
         return false;
     }
@@ -190,6 +149,7 @@ bool event_dynamic_subscription_test(void) {
 
     //Subscribe on trade events
     if (!subscribe_to_event(connection, &trade_subscription, DXF_ET_TRADE, trade_listener)) {
+        dxf_close_connection(connection);
         return false;
     }
 
@@ -197,12 +157,18 @@ bool event_dynamic_subscription_test(void) {
     printf("Wait events from trade...\n");
     timestamp = dx_millisecond_timestamp();
     while (get_trade_counter() == 0) {
-        if (is_thread_terminate()) {
+        if (is_thread_terminate(g_listener_thread_data)) {
+            dxf_close_subscription(trade_subscription);
+            dxf_close_connection(connection);
             printf("Error: Thread was terminated!\n");
+            PRINT_TEST_FAILED;
             return false;
         }
         if (dx_millisecond_timestamp_diff(dx_millisecond_timestamp(), timestamp) > EVENTS_TIMEOUT) {
+            dxf_close_subscription(trade_subscription);
+            dxf_close_connection(connection);
             printf("Test failed: timeout is elapsed!");
+            PRINT_TEST_FAILED;
             return false;
         }
         Sleep(EVENTS_LOOP_SLEEP_TIME);
@@ -210,6 +176,9 @@ bool event_dynamic_subscription_test(void) {
 
     //Subscribe on order events
     if (!subscribe_to_event(connection, &order_subscription, DXF_ET_ORDER, order_listener)) {
+        dxf_close_subscription(trade_subscription);
+        dxf_close_connection(connection);
+        PRINT_TEST_FAILED;
         return false;
     }
 
@@ -220,12 +189,20 @@ bool event_dynamic_subscription_test(void) {
     printf("Wait events from both trade and order...\n");
     timestamp = dx_millisecond_timestamp();
     while (get_trade_counter() == 0 || get_order_counter() == 0) {
-        if (is_thread_terminate()) {
+        if (is_thread_terminate(g_listener_thread_data)) {
+            dxf_close_subscription(trade_subscription);
+            dxf_close_subscription(order_subscription);
+            dxf_close_connection(connection);
             printf("Error: Thread was terminated!\n");
+            PRINT_TEST_FAILED;
             return false;
         }
         if (dx_millisecond_timestamp_diff(dx_millisecond_timestamp(), timestamp) > EVENTS_TIMEOUT) {
+            dxf_close_subscription(trade_subscription);
+            dxf_close_subscription(order_subscription);
+            dxf_close_connection(connection);
             printf("Test failed: timeout is elapsed!");
+            PRINT_TEST_FAILED;
             return false;
         }
         Sleep(EVENTS_LOOP_SLEEP_TIME);
@@ -239,25 +216,26 @@ bool event_dynamic_subscription_test(void) {
     //Check order events
     printf("Wait events from order event only...\n");
     while (loop_counter--) {
-        if (is_thread_terminate()) {
+        if (is_thread_terminate(g_listener_thread_data)) {
+            dxf_close_subscription(trade_subscription);
+            dxf_close_subscription(order_subscription);
+            dxf_close_connection(connection);
             printf("Error: Thread was terminated!\n");
+            PRINT_TEST_FAILED;
             return false;
         }
         Sleep(EVENTS_LOOP_SLEEP_TIME);
     }
     if (get_order_counter() == 0 || get_trade_counter() > 0) {
+        dxf_close_subscription(trade_subscription);
+        dxf_close_subscription(order_subscription);
+        dxf_close_connection(connection);
         printf("Test failed: no order events or trade events is occur!");
+        PRINT_TEST_FAILED;
         return false;
     }
 
-    DeleteCriticalSection(&listener_thread_guard);
-    DeleteCriticalSection(&g_order_counter_guard);
-    DeleteCriticalSection(&g_trade_counter_guard);
-
     dxf_detach_event_listener(order_subscription, order_listener);
-
-    dxf_clear_symbols(trade_subscription);
-    dxf_clear_symbols(order_subscription);
 
     dxf_close_subscription(trade_subscription);
     dxf_close_subscription(order_subscription);
@@ -265,7 +243,7 @@ bool event_dynamic_subscription_test(void) {
     printf("Disconnecting from host...\n");
     if (!dxf_close_connection(connection)) {
         process_last_error();
-
+        PRINT_TEST_FAILED;
         return false;
     }
 
@@ -273,4 +251,21 @@ bool event_dynamic_subscription_test(void) {
         "Connection test completed successfully!\n");
 
     return true;
+}
+
+bool event_dynamic_subscription_all_test(void) {
+    bool res = true;
+
+    dxf_initialize_logger("log.log", true, true, true);
+    init_listener_thread_data(&g_listener_thread_data);
+    InitializeCriticalSection(&g_order_counter_guard);
+    InitializeCriticalSection(&g_trade_counter_guard);
+
+    res = event_dynamic_subscription_test();
+
+    free_listener_thread_data(g_listener_thread_data);
+    DeleteCriticalSection(&g_order_counter_guard);
+    DeleteCriticalSection(&g_trade_counter_guard);
+
+    return res;
 }
