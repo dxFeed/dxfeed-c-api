@@ -39,4 +39,4 @@ typedef void(*dx_event_free_function_t) (dxf_event_data_t obj);
 dx_event_copy_function_t dx_get_event_copy_function(dx_event_id_t event_id);
 dx_event_free_function_t dx_get_event_free_function(dx_event_id_t event_id);
 
-#endif //EVENT_MANAGER_H_INCLUDED
+#endif /* EVENT_MANAGER_H_INCLUDED */

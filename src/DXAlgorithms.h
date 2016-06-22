@@ -418,25 +418,6 @@ double dx_random_double (double max_value);
 
 /* -------------------------------------------------------------------------- */
 /*
- *	Array initialization
-
- *  array_obj - an array descriptor structure. this structure must contain
-                at least three fields:
-        elements - a pointer to the array buffer (of type 'elem_type*')
-        size - an integer value containing the number of elements in the buffer
-        capacity - the current buffer capacity, may be greater than size
-*/
-/* -------------------------------------------------------------------------- */
-
-#define DX_ARRAY_INIT(array_obj) \
-    do { \
-        array_obj.elements = NULL; \
-        array_obj.size = 0; \
-        array_obj.capacity = 0; \
-    } while (false)
-
-/* -------------------------------------------------------------------------- */
-/*
  *	Functions and predicates used in array operations
  */
 /* -------------------------------------------------------------------------- */

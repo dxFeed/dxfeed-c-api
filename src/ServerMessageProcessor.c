@@ -1393,7 +1393,7 @@ bool dx_process_describe_protocol (dx_server_msg_proc_connection_context_t* cont
         return false;
 	}
 
-    //All additional data must be skipped according to message length
+    /* All additional data must be skipped according to message length */
     buf_pos = dx_get_in_buffer_position(context->bicc);
     buf_limit = dx_get_in_buffer_limit(context->bicc);
     if (buf_pos < buf_limit)

@@ -157,7 +157,7 @@ bool dx_get_order_subscription_params(dxf_connection_t connection, dx_order_sour
         CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, order_name_buf, dx_st_history);
     }
 
-    //fill quotes Quote&A..Quote&Z
+    /* fill quotes Quote&A..Quote&Z */
     dx_copy_string(quote_name_buf, g_quote_tmpl);
     for (; ch <= 'Z'; ch++) {
         quote_name_buf[QUOTE_TMPL_LEN] = ch;
@@ -172,7 +172,7 @@ bool dx_get_trade_subscription_params(dxf_connection_t connection, OUT dx_event_
     dxf_char_t trade_name_buf[TRADE_TMPL_LEN + 2] = { 0 };
     CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Trade", dx_st_ticker);
 
-    //fill trades Trade&A..Trade&Z
+    /* fill trades Trade&A..Trade&Z */
     dx_copy_string(trade_name_buf, g_trade_tmpl);
     for (; ch <= 'Z'; ch++) {
         trade_name_buf[TRADE_TMPL_LEN] = ch;
