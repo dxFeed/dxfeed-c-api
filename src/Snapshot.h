@@ -45,7 +45,7 @@ dxf_snapshot_t dx_create_snapshot(dxf_connection_t connection,
                                   dx_record_info_id_t record_info_id,
                                   dxf_const_string_t symbol, 
                                   dxf_const_string_t order_source, 
-                                  dxf_int_t time);
+                                  dxf_long_t time);
 bool dx_close_snapshot(dxf_snapshot_t snapshot);
 bool dx_add_snapshot_listener(dxf_snapshot_t snapshot, dxf_snapshot_listener_t listener, void* user_data);
 bool dx_remove_snapshot_listener(dxf_snapshot_t snapshot, dxf_snapshot_listener_t listener);

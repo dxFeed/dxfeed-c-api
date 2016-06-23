@@ -77,7 +77,7 @@ typedef struct {
     int event_type;
     dxf_string_t order_source;
     dxf_string_t symbol;
-    dxf_int_t time;
+    dxf_long_t time;
     dx_snapshot_status_t status;
 
     /* Store received records */
@@ -686,7 +686,7 @@ dxf_snapshot_t dx_create_snapshot(dxf_connection_t connection,
                                   dx_record_info_id_t record_info_id,
                                   dxf_const_string_t symbol, 
                                   dxf_const_string_t order_source, 
-                                  dxf_int_t time) {
+                                  dxf_long_t time) {
     dx_snapshot_subscription_connection_context_t* context = NULL;
     dx_snapshot_data_t *snapshot_data = NULL;
     bool failed = false;

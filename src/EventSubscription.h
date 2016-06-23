@@ -47,7 +47,7 @@ typedef bool (*dx_subscription_processor_t) (dxf_connection_t connection,
                                              dx_order_source_array_ptr_t order_source,
                                              dxf_const_string_t* symbols, int symbol_count, 
                                              int event_types, dxf_uint_t subscr_flags, 
-                                             dxf_int_t time);
+                                             dxf_long_t time);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -57,7 +57,7 @@ typedef bool (*dx_subscription_processor_t) (dxf_connection_t connection,
 
 /* returns dx_invalid_subscription on error */
 dxf_subscription_t dx_create_event_subscription (dxf_connection_t connection, int event_types, 
-                                                 dxf_uint_t subscr_flags, dxf_int_t time); 
+                                                 dxf_uint_t subscr_flags, dxf_long_t time); 
 bool dx_close_event_subscription (dxf_subscription_t subscr_id);
 bool dx_add_symbols (dxf_subscription_t subscr_id, dxf_const_string_t* symbols, int symbol_count);
 bool dx_remove_symbols (dxf_subscription_t subscr_id, dxf_const_string_t* symbols, int symbol_count);
@@ -70,7 +70,7 @@ bool dx_get_event_subscription_event_types (dxf_subscription_t subscr_id, OUT in
 bool dx_get_event_subscription_symbols (dxf_subscription_t subscr_id,
                                         OUT dxf_const_string_t** symbols, OUT int* symbol_count);
 bool dx_get_event_subscription_flags(dxf_subscription_t subscr_id, OUT dxf_uint_t* subscr_flags);
-bool dx_get_event_subscription_time(dxf_subscription_t subscr_id, OUT dxf_int_t* time);
+bool dx_get_event_subscription_time(dxf_subscription_t subscr_id, OUT dxf_long_t* time);
 bool dx_process_event_data (dxf_connection_t connection, dx_event_id_t event_id, 
                             dxf_const_string_t symbol_name, dxf_int_t symbol_cipher, 
                             const dxf_event_data_t data, int data_count, 
