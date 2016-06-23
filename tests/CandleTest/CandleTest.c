@@ -166,7 +166,7 @@ int main (int argc, char* argv[]) {
 
     wprintf(L"Connection successful!\n");
 
-    if (!dxf_initialize_candle_symbol_attributes(symbol, 0, DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT, dxf_ctpa_day, dxf_cpa_last, dxf_csa_any, dxf_caa_midnight, &candle_attributes)) {
+    if (!dxf_initialize_candle_symbol_attributes(symbol, DXF_CANDLE_EXCHANGE_CODE_ATTRIBUTE_DEFAULT, DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT, dxf_ctpa_day, dxf_cpa_last, dxf_csa_any, dxf_caa_midnight, &candle_attributes)) {
         process_last_error();
         return -1;
     }
