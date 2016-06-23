@@ -166,21 +166,20 @@ int main (int argc, char* argv[]) {
 
     wprintf(L"Connection successful!\n");
 
-    if (!dxf_initialize_candle_symbol_attributes(symbol, DXF_CANDLE_EXCHANGE_CODE_ATTRIBUTE_DEFAULT, DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT, dxf_ctpa_day, dxf_cpa_last, dxf_csa_any, dxf_caa_midnight, &candle_attributes)) {
-        process_last_error();
-        return -1;
-    }
-
     if (!dxf_create_subscription_timed(connection, event_type, time, &subscription)) {
         process_last_error();
         return -1;
     };
 
-    if (!dxf_add_symbol(subscription, symbol)) {
+    if (!dxf_initialize_candle_symbol_attributes(symbol, DXF_CANDLE_EXCHANGE_CODE_ATTRIBUTE_DEFAULT, DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT, dxf_ctpa_day, dxf_cpa_last, dxf_csa_any, dxf_caa_midnight, &candle_attributes)) {
         process_last_error();
-
         return -1;
-    }; 
+    }
+
+    if (!dxf_add_candle_symbol(subscription, candle_attributes)) {
+        process_last_error();
+        return -1;
+    };
 
     if (!dxf_attach_event_listener(subscription, listener, NULL)) {
         process_last_error();

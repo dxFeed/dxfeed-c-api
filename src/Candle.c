@@ -191,6 +191,27 @@ bool dx_candle_symbol_to_string(dxf_candle_attributes_t _attr, OUT dxf_string_t*
     dx_concatenate_strings(buffer_str, L"}");
 
     *string = dx_create_string_src(buffer_str);
+    if (*string == NULL) {
+        dx_set_error_code(dx_mec_insufficient_memory);
+        return false;
+    }
 
     return true;
+}
+
+DXFEED_API ERRORCODE dxf_add_candle_symbol(dxf_subscription_t subscription, dxf_candle_attributes_t candle_attributes)
+{
+    dxf_string_t candle_symbol;
+
+    if (!dx_candle_symbol_to_string(candle_attributes, &candle_symbol)) {
+        return DXF_FAILURE;
+    }
+
+    if (!dxf_add_symbol(subscription, candle_symbol)) {
+        CHECKED_FREE(candle_symbol);
+        return DXF_FAILURE;
+    }
+
+    CHECKED_FREE(candle_symbol);
+    return DXF_SUCCESS;
 }

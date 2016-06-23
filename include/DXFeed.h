@@ -147,6 +147,14 @@ DXFEED_API ERRORCODE dxf_add_symbol (dxf_subscription_t subscription, dxf_const_
 DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dxf_const_string_t* symbols, int symbol_count);
 
 /*
+ *	Adds a candle symbol to the subscription.
+ 
+ *  subscription - a handle of the subscription to which a symbol is added
+ *  candle_attributes - pointer to the candle struct
+ */
+DXFEED_API ERRORCODE dxf_add_candle_symbol(dxf_subscription_t subscription, dxf_candle_attributes_t candle_attributes);
+
+/*
  *	Removes a single symbol from the subscription.
 
  *  subscription - a handle of the subscription from which a symbol is removed
@@ -259,26 +267,29 @@ DXFEED_API ERRORCODE dxf_get_last_error (OUT int* error_code, OUT dxf_const_stri
 DXFEED_API ERRORCODE dxf_initialize_logger (const char* file_name, int rewrite_file, int show_timezone_info, int verbose);
 
 /*
- *  Clear current sources and add new one to subscription
+ *	Clear current sources and add new one to subscription
  *  Warning: you must configure order source before dxf_add_symbols/dxf_add_symbol call
- *
+
  *  subscription - a handle of the subscription where source will be changed
  *  source - source of order to set, 4 symbols maximum length
  */
 DXFEED_API ERRORCODE dxf_set_order_source(dxf_subscription_t subscription, const char* source);
 
 /*
- *  Add a new source to subscription
+ *	Add a new source to subscription
  *  Warning: you must configure order source before dxf_add_symbols/dxf_add_symbol call
- *
+
  *  subscription - a handle of the subscription where source will be changed
  *  source - source of order event to add, 4 symbols maximum length
  */
 DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const char* source);
 
 /*
- * Api that allows user to create candle symbol attributes
- *
+ *	Api that allows user to create candle symbol attributes
+
+ *  base_symbol the - symbols to add
+ *  exchange_code, period_value, period_type, price, session, alignment - candle attributes
+ *  candle_attributes - pointer to the candle struct
  */
 DXFEED_API ERRORCODE dxf_initialize_candle_symbol_attributes(dxf_const_string_t base_symbol,
                                                              dxf_char_t exchange_code,
@@ -290,8 +301,9 @@ DXFEED_API ERRORCODE dxf_initialize_candle_symbol_attributes(dxf_const_string_t 
                                                              OUT dxf_candle_attributes_t* candle_attributes);
 
 /*
- * Free memory wich allocated by dxf_initialise_candle_symbol_attributes(...) function
- *
+ *	Free memory wich allocated by dxf_initialise_candle_symbol_attributes(...) function
+
+ *  candle_attributes - pointer to the candle struct
  */
 DXFEED_API ERRORCODE dxf_delete_candle_symbol_attributes(dxf_candle_attributes_t candle_attributes);
 
