@@ -198,6 +198,8 @@ int main (int argc, char* argv[]) {
     
     wprintf(L"Disconnecting from host...\n");
 
+    dxf_delete_candle_symbol_attributes(candle_attributes);
+
     if (!dxf_close_connection(connection)) {
         process_last_error();
 

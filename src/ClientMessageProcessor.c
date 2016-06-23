@@ -73,7 +73,7 @@ typedef struct {
     int event_types;
     bool unsubscribe;
     dxf_uint_t subscr_flags;
-    dxf_int_t time;
+    dxf_long_t time;
 } dx_event_subscription_task_data_t;
 
 /* -------------------------------------------------------------------------- */
@@ -101,7 +101,7 @@ void* dx_destroy_event_subscription_task_data (dx_event_subscription_task_data_t
 
 void* dx_create_event_subscription_task_data (dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
                                               dxf_const_string_t* symbols, int symbol_count, int event_types, 
-                                              bool unsubscribe, dxf_uint_t subscr_flags, dxf_int_t time) {
+                                              bool unsubscribe, dxf_uint_t subscr_flags, dxf_long_t time) {
     int i = 0;
     dx_event_subscription_task_data_t* data = dx_calloc(1, sizeof(dx_event_subscription_task_data_t));
     
@@ -208,7 +208,7 @@ static bool dx_compose_body (void* bocc, dxf_int_t record_id, dxf_int_t cipher, 
 
 static bool dx_subscribe_symbol_to_record(dxf_connection_t connection, dx_message_type_t type, 
                                           dxf_const_string_t symbol, dxf_int_t cipher, 
-                                          dxf_int_t record_id, dxf_int_t time) {
+                                          dxf_int_t record_id, dxf_long_t time) {
     static const dxf_int_t initial_buffer_size = 100;
 
     void* bocc = NULL;
@@ -239,7 +239,7 @@ static bool dx_subscribe_symbol_to_record(dxf_connection_t connection, dx_messag
 
     if (!dx_compose_message_header(bocc, type) ||
         !dx_compose_body(bocc, record_id, cipher, symbol) ||
-        ((type == MESSAGE_HISTORY_ADD_SUBSCRIPTION) && !dx_write_compact_int(bocc, time)) || /* hardcoded, used only once while subscribing to MarketMaker */
+        ((type == MESSAGE_HISTORY_ADD_SUBSCRIPTION) && !dx_write_compact_long(bocc, time)) || /* hardcoded, used only once while subscribing to MarketMaker */
         !dx_finish_composing_message(bocc)) {
 
         dx_free(dx_get_out_buffer(bocc));
@@ -513,7 +513,7 @@ int dx_describe_protocol_sender_task (void* data, int command) {
 
 bool dx_subscribe_symbols_to_events (dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
                                      dxf_const_string_t* symbols, int symbol_count, int event_types, bool unsubscribe,
-                                     bool task_mode, dxf_uint_t subscr_flags, dxf_int_t time) {
+                                     bool task_mode, dxf_uint_t subscr_flags, dxf_long_t time) {
     int i = 0;
 
     CHECKED_CALL_2(dx_validate_connection_handle, connection, true);

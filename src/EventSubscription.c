@@ -77,7 +77,7 @@ struct dx_subscription_data_struct_t {
     dx_listener_array_t listeners;
     dx_order_source_array_t order_source;
     dxf_uint_t subscr_flags;
-    dxf_int_t time;
+    dxf_long_t time;
 
     dxf_const_string_t* symbol_name_array;
     int symbol_name_array_capacity;
@@ -666,7 +666,7 @@ void dx_free_event_subscription_data (dx_subscription_data_ptr_t subscr_data) {
 const dxf_subscription_t dx_invalid_subscription = (dxf_subscription_t)NULL;
 
 dxf_subscription_t dx_create_event_subscription(dxf_connection_t connection, int event_types, 
-                                                dxf_uint_t subscr_flags, dxf_int_t time) {
+                                                dxf_uint_t subscr_flags, dxf_long_t time) {
     dx_subscription_data_ptr_t subscr_data = NULL;
     bool res = true;
     dx_event_subscription_connection_context_t* context = NULL;
@@ -1047,7 +1047,7 @@ bool dx_get_event_subscription_flags(dxf_subscription_t subscr_id, OUT dxf_uint_
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_get_event_subscription_time(dxf_subscription_t subscr_id, OUT dxf_int_t* time) {
+bool dx_get_event_subscription_time(dxf_subscription_t subscr_id, OUT dxf_long_t* time) {
     dx_subscription_data_ptr_t subscr_data = (dx_subscription_data_ptr_t)subscr_id;
 
     if (subscr_id == dx_invalid_subscription) {
@@ -1194,7 +1194,7 @@ bool dx_process_connection_subscriptions (dxf_connection_t connection, dx_subscr
         int symbol_count = 0;
         int event_types = 0;
         dxf_uint_t subscr_flags = 0;
-        dxf_int_t time;
+        dxf_long_t time;
 
         if (!dx_get_event_subscription_symbols(subscriptions->elements[i], &symbols, &symbol_count) ||
             !dx_get_event_subscription_event_types(subscriptions->elements[i], &event_types) ||

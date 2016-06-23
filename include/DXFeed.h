@@ -117,7 +117,7 @@ DXFEED_API ERRORCODE dxf_create_subscription (dxf_connection_t connection, int e
  *  time - time in the past (unix time in milliseconds)
  *  OUT subscription - a handle of the created subscription
  */
-DXFEED_API ERRORCODE dxf_create_subscription_timed(dxf_connection_t connection, int event_types, dxf_int_t time,
+DXFEED_API ERRORCODE dxf_create_subscription_timed(dxf_connection_t connection, int event_types, dxf_long_t time,
                                                    OUT dxf_subscription_t* subscription);
 
 /*
