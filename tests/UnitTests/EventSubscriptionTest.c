@@ -12,8 +12,7 @@ static dxf_const_string_t last_symbol = NULL;
 static int visit_count = 0;
 
 void dummy_listener(int event_type, dxf_const_string_t symbol_name,
-                    const dxf_event_data_t* data, int data_count,
-                    const dxf_event_params_t* event_params, void* user_data) {
+                    const dxf_event_data_t* data, int data_count, void* user_data) {
     ++visit_count;
     last_event_type = event_type;
     last_symbol = symbol_name;

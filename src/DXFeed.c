@@ -477,7 +477,8 @@ DXFEED_API ERRORCODE dxf_clear_symbols (dxf_subscription_t subscription) {
 
 /* -------------------------------------------------------------------------- */
 
-DXFEED_API ERRORCODE dxf_attach_event_listener (dxf_subscription_t subscription, dxf_event_listener_t event_listener,
+DXFEED_API ERRORCODE dxf_attach_event_listener (dxf_subscription_t subscription, 
+                                                dxf_event_listener_t event_listener,
                                                 void* user_data) {
     dx_perform_common_actions();
 	
@@ -496,7 +497,8 @@ DXFEED_API ERRORCODE dxf_attach_event_listener (dxf_subscription_t subscription,
 
 /* -------------------------------------------------------------------------- */
 
-DXFEED_API ERRORCODE dxf_detach_event_listener (dxf_subscription_t subscription, dxf_event_listener_t event_listener) {
+DXFEED_API ERRORCODE dxf_detach_event_listener(dxf_subscription_t subscription,
+                                               dxf_event_listener_t event_listener) {
 	dx_perform_common_actions();
 	
     if (subscription == dx_invalid_subscription || event_listener == NULL) {
@@ -510,6 +512,45 @@ DXFEED_API ERRORCODE dxf_detach_event_listener (dxf_subscription_t subscription,
     }
 		
 	return DXF_SUCCESS;
+}
+
+/* -------------------------------------------------------------------------- */
+
+DXFEED_API ERRORCODE dxf_attach_event_listener_v2(dxf_subscription_t subscription,
+                                                  dxf_event_listener_v2_t event_listener,
+                                                  void* user_data) {
+    dx_perform_common_actions();
+
+    if (subscription == dx_invalid_subscription || event_listener == NULL) {
+        dx_set_error_code(dx_ec_invalid_func_param);
+
+        return DXF_FAILURE;
+    }
+
+    if (!dx_add_listener_v2(subscription, event_listener, user_data)) {
+        return DXF_FAILURE;
+    }
+
+    return DXF_SUCCESS;
+}
+
+/* -------------------------------------------------------------------------- */
+
+DXFEED_API ERRORCODE dxf_detach_event_listener_v2(dxf_subscription_t subscription,
+                                                  dxf_event_listener_v2_t event_listener) {
+    dx_perform_common_actions();
+
+    if (subscription == dx_invalid_subscription || event_listener == NULL) {
+        dx_set_error_code(dx_ec_invalid_func_param);
+
+        return DXF_FAILURE;
+    }
+
+    if (!dx_remove_listener_v2(subscription, event_listener)) {
+        return DXF_FAILURE;
+    }
+
+    return DXF_SUCCESS;
 }
 
 /* -------------------------------------------------------------------------- */

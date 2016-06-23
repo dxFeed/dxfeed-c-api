@@ -170,10 +170,15 @@ typedef struct {
  */
 /* -------------------------------------------------------------------------- */
 
+
 typedef void (*dxf_event_listener_t) (int event_type, dxf_const_string_t symbol_name,
+                                      const dxf_event_data_t* data, int data_count,
+                                      void* user_data);
+
+typedef void (*dxf_event_listener_v2_t) (int event_type, dxf_const_string_t symbol_name,
                                       const dxf_event_data_t* data, int data_count, 
                                       const dxf_event_params_t* event_params, void* user_data);
-                                     
+
 /* -------------------------------------------------------------------------- */
 /*
  *	Various event functions

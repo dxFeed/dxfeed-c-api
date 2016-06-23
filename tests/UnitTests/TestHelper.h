@@ -23,18 +23,18 @@ void process_last_error();
 #define PRINT_TEST_FAILED printf("%s failed! File: %s, line: %d\n", __FUNCTION__, __FILE__, __LINE__);
 
 #define DX_IS_EQUAL_FUNCTION_DECLARATION(type) bool dx_is_equal_##type##(type expected, type actual)
+#define DX_IS_GREATER_OR_EQUAL_FUNCTION_DECLARATION(type) bool dx_ge_##type##(type actual, type param)
 
 DX_IS_EQUAL_FUNCTION_DECLARATION(bool);
 DX_IS_EQUAL_FUNCTION_DECLARATION(int);
 DX_IS_EQUAL_FUNCTION_DECLARATION(ERRORCODE);
 DX_IS_EQUAL_FUNCTION_DECLARATION(dxf_const_string_t);
 DX_IS_EQUAL_FUNCTION_DECLARATION(dxf_string_t);
+DX_IS_EQUAL_FUNCTION_DECLARATION(dxf_uint_t);
+
+DX_IS_GREATER_OR_EQUAL_FUNCTION_DECLARATION(dxf_uint_t);
 
 bool dx_is_not_null(void* actual);
 bool dx_is_null(void* actual);
-
-#define DX_IS_GREATER_OR_EQUAL_FUNCTION_DECLARATION(type) bool dx_ge_##type##(type actual, type param)
-
-DX_IS_GREATER_OR_EQUAL_FUNCTION_DECLARATION(dxf_uint_t);
 
 #endif //TEST_HELPER_H_INCLUDED

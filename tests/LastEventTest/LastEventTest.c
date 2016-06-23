@@ -58,8 +58,7 @@ void process_last_error () {
 /* -------------------------------------------------------------------------- */
 
 void listener(int event_type, dxf_const_string_t symbol_name,
-              const dxf_event_data_t* data, int data_count,
-              const dxf_event_params_t* event_params, void* user_data) {
+              const dxf_event_data_t* data, int data_count, void* user_data) {
     dxf_int_t i = 0;
     dx_event_id_t eid = dx_eid_begin;
     

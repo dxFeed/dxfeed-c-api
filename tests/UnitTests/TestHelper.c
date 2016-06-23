@@ -132,6 +132,7 @@ DX_IS_EQUAL_FUNCTION_DEFINITION(int, L"%d")
 DX_IS_EQUAL_FUNCTION_DEFINITION(ERRORCODE, L"%d")
 DX_IS_EQUAL_STRING_FUNCTION_DEFINITION(dxf_const_string_t, L"%ls")
 DX_IS_EQUAL_STRING_FUNCTION_DEFINITION(dxf_string_t, L"%ls")
+DX_IS_EQUAL_FUNCTION_DEFINITION(dxf_uint_t, L"%u")
 
 bool dx_is_not_null(void* actual) {
     if (actual == NULL) {

@@ -29,23 +29,17 @@ static const dxf_const_string_t g_symbols[] = { {L"IBM"}, {L"MSFT"}, {L"YHOO"}, 
 
 /* -------------------------------------------------------------------------- */
 void trade_listener(int event_type, dxf_const_string_t symbol_name,
-                    const dxf_event_data_t* data, int data_count,
-                    const dxf_event_params_t* event_params, void* user_data);
+                    const dxf_event_data_t* data, int data_count, void* user_data);
 void quote_listener(int event_type, dxf_const_string_t symbol_name,
-                    const dxf_event_data_t* data, int data_count,
-                    const dxf_event_params_t* event_params, void* user_data);
+                    const dxf_event_data_t* data, int data_count, void* user_data);
 void summary_listener(int event_type, dxf_const_string_t symbol_name,
-                      const dxf_event_data_t* data, int data_count,
-                      const dxf_event_params_t* event_params, void* user_data);
+                      const dxf_event_data_t* data, int data_count, void* user_data);
 void profile_listener(int event_type, dxf_const_string_t symbol_name,
-                      const dxf_event_data_t* data, int data_count,
-                      const dxf_event_params_t* event_params, void* user_data);
+                      const dxf_event_data_t* data, int data_count, void* user_data);
 void order_listener(int event_type, dxf_const_string_t symbol_name,
-                    const dxf_event_data_t* data, int data_count,
-                    const dxf_event_params_t* event_params, void* user_data);
+                    const dxf_event_data_t* data, int data_count, void* user_data);
 void time_and_sale_listener(int event_type, dxf_const_string_t symbol_name,
-                            const dxf_event_data_t* data, int data_count,
-                            const dxf_event_params_t* event_params, void* user_data);
+                            const dxf_event_data_t* data, int data_count, void* user_data);
 
 struct event_info_t {
     dx_event_id_t       id;
@@ -109,8 +103,7 @@ int get_symbol_index(dxf_const_string_t symbol_name) {
 /* -------------------------------------------------------------------------- */
 
 void trade_listener(int event_type, dxf_const_string_t symbol_name,
-                    const dxf_event_data_t* data, int data_count,
-                    const dxf_event_params_t* event_params, void* user_data) {
+                    const dxf_event_data_t* data, int data_count, void* user_data) {
     dxf_int_t i = 0;
     wchar_t str[200];
     int ind;
@@ -141,8 +134,7 @@ void trade_listener(int event_type, dxf_const_string_t symbol_name,
 /* -------------------------------------------------------------------------- */
 
 void quote_listener(int event_type, dxf_const_string_t symbol_name,
-                    const dxf_event_data_t* data, int data_count,
-                    const dxf_event_params_t* event_params, void* user_data) {
+                    const dxf_event_data_t* data, int data_count, void* user_data) {
     dxf_int_t i = 0;
     wchar_t str[200];
     int ind;
@@ -175,8 +167,7 @@ void quote_listener(int event_type, dxf_const_string_t symbol_name,
 /* -------------------------------------------------------------------------- */
 
 void summary_listener(int event_type, dxf_const_string_t symbol_name,
-                      const dxf_event_data_t* data, int data_count,
-                      const dxf_event_params_t* event_params, void* user_data) {
+                      const dxf_event_data_t* data, int data_count, void* user_data) {
     dxf_int_t i = 0;
     wchar_t str[200];
     int ind;
@@ -208,8 +199,7 @@ void summary_listener(int event_type, dxf_const_string_t symbol_name,
 /* -------------------------------------------------------------------------- */
 
 void profile_listener(int event_type, dxf_const_string_t symbol_name,
-                      const dxf_event_data_t* data, int data_count,
-                      const dxf_event_params_t* event_params, void* user_data) {
+                      const dxf_event_data_t* data, int data_count, void* user_data) {
     dxf_int_t i = 0;
     wchar_t str[200];
     int ind;
@@ -241,8 +231,7 @@ void profile_listener(int event_type, dxf_const_string_t symbol_name,
 /* -------------------------------------------------------------------------- */
 
 void order_listener(int event_type, dxf_const_string_t symbol_name,
-                    const dxf_event_data_t* data, int data_count,
-                    const dxf_event_params_t* event_params, void* user_data) {
+                    const dxf_event_data_t* data, int data_count, void* user_data) {
     dxf_int_t i = 0;
     wchar_t str[200];
     int ind;
@@ -274,8 +263,7 @@ void order_listener(int event_type, dxf_const_string_t symbol_name,
 /* -------------------------------------------------------------------------- */
 
 void time_and_sale_listener(int event_type, dxf_const_string_t symbol_name,
-                            const dxf_event_data_t* data, int data_count,
-                            const dxf_event_params_t* event_params, void* user_data) {
+                            const dxf_event_data_t* data, int data_count, void* user_data) {
     dxf_int_t i = 0;
     wchar_t str[200];
     int ind;

@@ -202,6 +202,31 @@ DXFEED_API ERRORCODE dxf_attach_event_listener (dxf_subscription_t subscription,
 DXFEED_API ERRORCODE dxf_detach_event_listener (dxf_subscription_t subscription, dxf_event_listener_t event_listener);
 
 /*
+*  Attaches a extended listener callback to the subscription.
+*  This callback will be invoked when the new event data for the subscription symbols arrives.
+*  No error occurs if it's attempted to attach the same listener twice or more.
+* 
+*  This listener differs with extend number of callback parameters.
+*
+*  subscription - a handle of the subscription to which a listener is to be attached
+*  event_listener - a listener callback function pointer
+*  user_data - if there isn't user data pass NULL
+*/
+DXFEED_API ERRORCODE dxf_attach_event_listener_v2(dxf_subscription_t subscription, 
+                                                  dxf_event_listener_v2_t event_listener,
+                                                  void* user_data);
+
+/*
+*  Detaches a extended listener from the subscription.
+*  No error occurs if it's attempted to detach a listener which wasn't previously attached.
+
+*  subscription - a handle of the subscription from which a listener is to be detached
+*  event_listener - a listener callback function pointer
+*/
+DXFEED_API ERRORCODE dxf_detach_event_listener_v2(dxf_subscription_t subscription, 
+                                                  dxf_event_listener_v2_t event_listener);
+
+/*
  *	Retrieves the subscription event types.
  
  *  subscription - a handle of the subscription whose event types are to be retrieved

@@ -191,7 +191,6 @@ int dx_get_event_subscription_params(dxf_connection_t connection, dx_order_sourc
                                      dxf_uint_t subscr_flags, OUT dx_event_subscription_param_list_t* params) {
     bool result = true;
     dx_event_subscription_param_list_t param_list = { NULL, 0, 0 };
-
     switch (event_id) {
     case dx_eid_trade:
         result = dx_get_trade_subscription_params(connection, &param_list);
