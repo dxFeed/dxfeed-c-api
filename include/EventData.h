@@ -149,50 +149,54 @@ typedef enum {
     dxf_cpa_mark,
     dxf_cpa_settlement,
 
-    dxf_cpa_count
-} dxf_candle_price_attribute_t;
+    dxf_cpa_count,
 
-static const dxf_candle_price_attribute_t DXF_CANDLE_PRICE_DEFAULT_ATTRIBUTE = dxf_cpa_last;
+    dxf_cpa_default = dxf_cpa_last
+} dxf_candle_price_attribute_t;
 
 typedef enum {
     dxf_csa_any,
     dxf_csa_regular,
 
-    dxf_csa_count
+    dxf_csa_count,
+
+    dxf_csa_default = dxf_csa_any
 } dxf_candle_session_attribute_t;
 
-static const dxf_candle_session_attribute_t DXF_CANDLE_SESSION_DEFAULT_ATTRIBUTE = dxf_csa_any;
-
-static const dxf_double_t DXF_CANDLE_PERIOD_VALUE_DEFAULT_ATTRIBUTE = 1;
+static const dxf_double_t DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT = 1;
 
 typedef enum {
-    dxf_ctp_tick,
-    dxf_ctp_second,
-    dxf_ctp_minute,
-    dxf_ctp_hour,
-    dxf_ctp_day,
-    dxf_ctp_week,
-    dxf_ctp_month,
-    dxf_ctp_optexp,
-    dxf_ctp_year,
-    dxf_ctp_volume,
-    dxf_ctp_price,
-    dxf_ctp_price_momentum,
-    dxf_ctp_price_renko,
+    dxf_ctpa_tick,
+    dxf_ctpa_second,
+    dxf_ctpa_minute,
+    dxf_ctpa_hour,
+    dxf_ctpa_day,
+    dxf_ctpa_week,
+    dxf_ctpa_month,
+    dxf_ctpa_optexp,
+    dxf_ctpa_year,
+    dxf_ctpa_volume,
+    dxf_ctpa_price,
+    dxf_ctpa_price_momentum,
+    dxf_ctpa_price_renko,
 
-    dxf_ctp_count
+    dxf_ctpa_count,
+
+    dxf_ctpa_default = dxf_ctpa_tick
 } dxf_candle_type_period_attribute_t;
 
-static const dxf_candle_type_period_attribute_t DXF_CANDLE_PERIOD_TYPE_DEFAULT_ATTRIBUTE = dxf_ctp_tick;
+//static const dxf_candle_type_period_attribute_t DXF_CANDLE_PERIOD_TYPE_DEFAULT_ATTRIBUTE = dxf_ctp_tick;
 
 typedef enum {
     dxf_caa_midnight,
     dxf_caa_session,
 
-    dxf_caa_count
+    dxf_caa_count,
+
+    dxf_caa_default = dxf_caa_midnight
 } dxf_candle_alignment_attribute_t;
 
-static const dxf_candle_alignment_attribute_t DXF_CANDLE_ALIGNMENT_DEFAULT_ATTRIBUTE = dxf_caa_midnight;
+//static const dxf_candle_alignment_attribute_t DXF_CANDLE_ALIGNMENT_DEFAULT_ATTRIBUTE = dxf_caa_midnight;
 
 /* -------------------------------------------------------------------------- */
 /*

@@ -42,7 +42,7 @@ typedef struct {
     dxf_long_t period_interval_millis;
 } dx_candle_type;
 
-static const dx_candle_type g_candle_type_period[dxf_ctp_count] = {
+static const dx_candle_type g_candle_type_period[dxf_ctpa_count] = {
     {L"t", 0LL},
     {L"s", 1000LL},
     {L"m", 60LL * 1000LL},
@@ -147,9 +147,9 @@ bool dx_candle_symbol_to_string(dxf_candle_attributes_t _attr, OUT dxf_string_t*
     dx_concatenate_strings(buffer_str, L"{");
 
     /*attribute (period) has no name and is written the first, and the rest should be sorted alphabetically.*/
-    if (attributes->period_type != DXF_CANDLE_PERIOD_TYPE_DEFAULT_ATTRIBUTE) {
+    if (attributes->period_type != dxf_ctpa_default) {
         dx_concatenate_strings(buffer_str, L"=");
-        if (attributes->period_value != DXF_CANDLE_PERIOD_VALUE_DEFAULT_ATTRIBUTE) {
+        if (attributes->period_value != DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT) {
             dxf_char_t tmpstr[100];
             swprintf(tmpstr, 99, L"%f", attributes->period_value);
             dx_concatenate_strings(buffer_str, tmpstr);
@@ -158,7 +158,7 @@ bool dx_candle_symbol_to_string(dxf_candle_attributes_t _attr, OUT dxf_string_t*
         put_comma = true;
     }
 
-    if (attributes->alignment != DXF_CANDLE_ALIGNMENT_DEFAULT_ATTRIBUTE) {
+    if (attributes->alignment != dxf_caa_default) {
         if (put_comma) {
             dx_concatenate_strings(buffer_str, L",");
         }
@@ -168,7 +168,7 @@ bool dx_candle_symbol_to_string(dxf_candle_attributes_t _attr, OUT dxf_string_t*
         put_comma = true;
     }
 
-    if (attributes->price != DXF_CANDLE_PRICE_DEFAULT_ATTRIBUTE) {
+    if (attributes->price != dxf_cpa_default) {
         if (put_comma) {
             dx_concatenate_strings(buffer_str, L",");
         }
@@ -178,7 +178,7 @@ bool dx_candle_symbol_to_string(dxf_candle_attributes_t _attr, OUT dxf_string_t*
         put_comma = true;
     }
 
-    if (attributes->session != DXF_CANDLE_SESSION_DEFAULT_ATTRIBUTE) {
+    if (attributes->session != dxf_csa_default) {
         if (put_comma) {
             dx_concatenate_strings(buffer_str, L",");
         }
