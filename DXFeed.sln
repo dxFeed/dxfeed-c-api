@@ -30,7 +30,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PerformanceTest", "tests\Pe
 		{98DF2375-3C29-4806-A832-7C666F8BF54C} = {98DF2375-3C29-4806-A832-7C666F8BF54C}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CandleTest", "tests\CandleTest\CandleTest.vcxproj", "{E1C87477-6078-4BD2-9B2D-1E6C10F39CC3}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CandleSample", "tests\CandleSample\CandleSample.vcxproj", "{E1C87477-6078-4BD2-9B2D-1E6C10F39CC3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

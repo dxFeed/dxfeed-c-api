@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 2.6)
 
 cmake_policy(SET CMP0015 NEW)
  
-set(PROJECT CandleTest) 
+set(PROJECT CandleSample) 
 set(INCLUDE_DIR ../../include)
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(POSTFIX "d")
@@ -25,7 +25,7 @@ add_subdirectory(${LIB_DXFEED_SRC_DIR} ${LIB_DXFEED_OUT_DIR})
 link_directories(${LIB_DXFEED_OUT_DIR})
  
 set(SOURCE_FILES
-    CandleTest.c
+    CandleSample.c
     )
     
 set(ADDITIONAL_PROPERTIES "")

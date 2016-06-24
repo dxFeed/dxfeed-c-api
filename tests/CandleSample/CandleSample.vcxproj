@@ -168,7 +168,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="CandleTest.c" />
+    <ClCompile Include="CandleSample.c" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\DXFeed.vcxproj">
