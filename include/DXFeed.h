@@ -285,7 +285,7 @@ DXFEED_API ERRORCODE dxf_set_order_source(dxf_subscription_t subscription, const
 DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const char* source);
 
 /*
- *	Api that allows user to create candle symbol attributes
+ *	API that allows user to create candle symbol attributes
 
  *  base_symbol the - symbols to add
  *  exchange_code, period_value, period_type, price, session, alignment - candle attributes
@@ -301,7 +301,7 @@ DXFEED_API ERRORCODE dxf_initialize_candle_symbol_attributes(dxf_const_string_t 
                                                              OUT dxf_candle_attributes_t* candle_attributes);
 
 /*
- *	Free memory wich allocated by dxf_initialise_candle_symbol_attributes(...) function
+ *	Free memory allocated by dxf_initialize_candle_symbol_attributes(...) function
 
  *  candle_attributes - pointer to the candle struct
  */
