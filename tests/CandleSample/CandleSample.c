@@ -69,15 +69,51 @@ void print_timestamp(dxf_long_t timestamp){
 		wcsftime(timefmt,80, L"%Y%m%d-%H%M%S" ,timeinfo);
 		wprintf(L"%ls",timefmt);
 }
+
+dxf_const_string_t dx_event_type_to_string(int event_type) {
+    switch (event_type) {
+    case DXF_ET_TRADE: return L"Trade";
+    case DXF_ET_QUOTE: return L"Quote";
+    case DXF_ET_SUMMARY: return L"Summary";
+    case DXF_ET_PROFILE: return L"Profile";
+    case DXF_ET_ORDER: return L"Order";
+    case DXF_ET_TIME_AND_SALE: return L"Time&Sale";
+    case DXF_ET_CANDLE: return L"Candle";
+    default: return L"";
+    }
+}
+
 /* -------------------------------------------------------------------------- */
 
 void listener(int event_type, dxf_const_string_t symbol_name,
-    const dxf_event_data_t* data, int data_count,
-    const dxf_event_params_t* event_params, void* user_data) {
+              const dxf_event_data_t* data, int data_count,
+              const dxf_event_params_t* event_params, void* user_data) {
     dxf_int_t i = 0;
+    dxf_candle_t* candles = NULL;
 
-	//wprintf(L"%ls{symbol=%ls, flags=%d, ",dx_event_type_to_string(event_type), symbol_name, flags);
-	
+    wprintf(L"%ls{symbol=%ls, ", dx_event_type_to_string(event_type), symbol_name);
+
+    if (event_type != DXF_ET_CANDLE)
+        return;
+    candles = (dxf_candle_t*)data;
+
+    for (; i < data_count; ++i) {
+        wprintf(L"time=");
+        print_timestamp(candles[i].time);
+        wprintf(L", sequence=%d, count=%I64i, ",
+            candles[i].sequence,
+            candles[i].count);
+        wprintf(L"open=%f, high=%f, low=%f, close=%f, ",
+            candles[i].open,
+            candles[i].high,
+            candles[i].low,
+            candles[i].close);
+        wprintf(L"volume=%I64i, VWAP=%f, bidVolume=%I64i, askVolume=%I64i}\n",
+            candles[i].volume,
+            candles[i].vwap,
+            candles[i].bid_volume,
+            candles[i].ask_volume);
+    }
 }
 /* -------------------------------------------------------------------------- */
 
@@ -171,7 +207,9 @@ int main (int argc, char* argv[]) {
         return -1;
     };
 
-    if (!dxf_initialize_candle_symbol_attributes(symbol, DXF_CANDLE_EXCHANGE_CODE_ATTRIBUTE_DEFAULT, DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT, dxf_ctpa_day, dxf_cpa_mark, dxf_csa_any, dxf_caa_midnight, &candle_attributes)) {
+    if (!dxf_initialize_candle_symbol_attributes(symbol, DXF_CANDLE_EXCHANGE_CODE_ATTRIBUTE_DEFAULT, 
+                                                 DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT, dxf_ctpa_day, 
+                                                 dxf_cpa_mark, dxf_csa_default, dxf_caa_default, &candle_attributes)) {
         process_last_error();
         return -1;
     }
@@ -198,7 +236,15 @@ int main (int argc, char* argv[]) {
     
     wprintf(L"Disconnecting from host...\n");
 
-    dxf_delete_candle_symbol_attributes(candle_attributes);
+    if (!dxf_delete_candle_symbol_attributes(candle_attributes)) {
+        process_last_error();
+        return -1;
+    }
+
+    if (!dxf_close_subscription(subscription)) {
+        process_last_error();
+        return -1;
+    }
 
     if (!dxf_close_connection(connection)) {
         process_last_error();
