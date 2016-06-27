@@ -136,7 +136,7 @@ int main (int argc, char* argv[]) {
     int loop_counter = 100000;
     int event_type = DXF_ET_CANDLE;
     dxf_candle_attributes_t candle_attributes;
-    dxf_string_t symbol = L"IBM";
+    dxf_string_t symbol = L"AAPL";
     char* dxfeed_host = "mddqa.in.devexperts.com:7400";
     dxf_string_t dxfeed_host_u = L"mddqa.in.devexperts.com:7400";
     struct tm time_struct;
@@ -145,8 +145,8 @@ int main (int argc, char* argv[]) {
     time_struct.tm_sec = 0;
     time_struct.tm_min = 0;
     time_struct.tm_hour = 0;
-    time_struct.tm_mday = 1;
-    time_struct.tm_mon = 4; /*May*/
+    time_struct.tm_mday = 15;
+    time_struct.tm_mon = 5; /*June*/
     time_struct.tm_year = 2016 - 1900;
     time = mktime(&time_struct);
 
@@ -171,7 +171,7 @@ int main (int argc, char* argv[]) {
         return -1;
     };
 
-    if (!dxf_initialize_candle_symbol_attributes(symbol, DXF_CANDLE_EXCHANGE_CODE_ATTRIBUTE_DEFAULT, DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT, dxf_ctpa_year, dxf_cpa_last, dxf_csa_any, dxf_caa_midnight, &candle_attributes)) {
+    if (!dxf_initialize_candle_symbol_attributes(symbol, DXF_CANDLE_EXCHANGE_CODE_ATTRIBUTE_DEFAULT, DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT, dxf_ctpa_day, dxf_cpa_mark, dxf_csa_any, dxf_caa_midnight, &candle_attributes)) {
         process_last_error();
         return -1;
     }
