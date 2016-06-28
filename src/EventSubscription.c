@@ -1114,7 +1114,7 @@ bool dx_process_event_data (dxf_connection_t connection, dx_event_id_t event_id,
         
         for (; cur_listener_index < subscr_data->listeners.size; ++cur_listener_index) {
             dx_listener_context_t* listener_context = subscr_data->listeners.elements + cur_listener_index;
-            listener_context->listener(event_bitmask, symbol_name, data, data_count, event_params, listener_context->user_data);
+            listener_context->listener(event_bitmask, symbol_name, data, event_params->flags, data_count, listener_context->user_data);
         }
     }
     
