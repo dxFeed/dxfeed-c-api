@@ -155,15 +155,15 @@ void DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, exch_sale_conds) (void* obj
 
 FIELD_SETTER_BODY(dx_candle_t, time, dxf_int_t)
 FIELD_SETTER_BODY(dx_candle_t, sequence, dxf_int_t)
-FIELD_SETTER_BODY(dx_candle_t, count, dxf_long_t)
+FIELD_SETTER_BODY(dx_candle_t, count, dxf_double_t)
 FIELD_SETTER_BODY(dx_candle_t, open, dxf_double_t)
 FIELD_SETTER_BODY(dx_candle_t, high, dxf_double_t)
 FIELD_SETTER_BODY(dx_candle_t, low, dxf_double_t)
 FIELD_SETTER_BODY(dx_candle_t, close, dxf_double_t)
-FIELD_SETTER_BODY(dx_candle_t, volume, dxf_long_t)
+FIELD_SETTER_BODY(dx_candle_t, volume, dxf_double_t)
 FIELD_SETTER_BODY(dx_candle_t, vwap, dxf_double_t)
-FIELD_SETTER_BODY(dx_candle_t, bid_volume, dxf_long_t)
-FIELD_SETTER_BODY(dx_candle_t, ask_volume, dxf_long_t)
+FIELD_SETTER_BODY(dx_candle_t, bid_volume, dxf_double_t)
+FIELD_SETTER_BODY(dx_candle_t, ask_volume, dxf_double_t)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -367,15 +367,15 @@ FIELD_DEF_VAL_BODY(dx_time_and_sale_t, type, dxf_int_t)
 
 FIELD_DEF_VAL_BODY(dx_candle_t, time, dxf_int_t)
 FIELD_DEF_VAL_BODY(dx_candle_t, sequence, dxf_int_t)
-FIELD_DEF_VAL_BODY(dx_candle_t, count, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_candle_t, count, dxf_double_t)
 FIELD_DEF_VAL_BODY(dx_candle_t, open, dxf_double_t)
 FIELD_DEF_VAL_BODY(dx_candle_t, high, dxf_double_t)
 FIELD_DEF_VAL_BODY(dx_candle_t, low, dxf_double_t)
 FIELD_DEF_VAL_BODY(dx_candle_t, close, dxf_double_t)
-FIELD_DEF_VAL_BODY(dx_candle_t, volume, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_candle_t, volume, dxf_double_t)
 FIELD_DEF_VAL_BODY(dx_candle_t, vwap, dxf_double_t)
-FIELD_DEF_VAL_BODY(dx_candle_t, bid_volume, dxf_int_t)
-FIELD_DEF_VAL_BODY(dx_candle_t, ask_volume, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_candle_t, bid_volume, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_candle_t, ask_volume, dxf_double_t)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -498,12 +498,12 @@ void DX_RECORD_FIELD_GETTER_NAME(dx_time_and_sale_t, exch_sale_conds) (void* obj
 
 FIELD_GETTER_BODY(dx_candle_t, time, dxf_int_t)
 FIELD_GETTER_BODY(dx_candle_t, sequence, dxf_int_t)
-FIELD_GETTER_BODY(dx_candle_t, count, dxf_long_t)
+FIELD_GETTER_BODY(dx_candle_t, count, dxf_double_t)
 FIELD_GETTER_BODY(dx_candle_t, open, dxf_double_t)
 FIELD_GETTER_BODY(dx_candle_t, high, dxf_double_t)
 FIELD_GETTER_BODY(dx_candle_t, low, dxf_double_t)
 FIELD_GETTER_BODY(dx_candle_t, close, dxf_double_t)
-FIELD_GETTER_BODY(dx_candle_t, volume, dxf_long_t)
+FIELD_GETTER_BODY(dx_candle_t, volume, dxf_double_t)
 FIELD_GETTER_BODY(dx_candle_t, vwap, dxf_double_t)
-FIELD_GETTER_BODY(dx_candle_t, bid_volume, dxf_long_t)
-FIELD_GETTER_BODY(dx_candle_t, ask_volume, dxf_long_t)
+FIELD_GETTER_BODY(dx_candle_t, bid_volume, dxf_double_t)
+FIELD_GETTER_BODY(dx_candle_t, ask_volume, dxf_double_t)

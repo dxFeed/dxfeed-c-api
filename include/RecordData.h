@@ -141,15 +141,15 @@ typedef struct {
     dxf_event_flags_t flags;*/
     dxf_int_t time;
     dxf_int_t sequence;
-    dxf_long_t count;
+    dxf_double_t count;
     dxf_double_t open;
     dxf_double_t high;
     dxf_double_t low;
     dxf_double_t close;
-    dxf_long_t volume;
+    dxf_double_t volume;
     dxf_double_t vwap;
-    dxf_long_t bid_volume;
-    dxf_long_t ask_volume;
+    dxf_double_t bid_volume;
+    dxf_double_t ask_volume;
 } dx_candle_t;
 
 #endif /* RECORD_DATA_H_INCLUDED */

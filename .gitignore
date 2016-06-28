@@ -47,6 +47,10 @@
 /wrappers/COM/src/*.user
 /wrappers/COM/src/build
 
+# /tests/CandleSample/
+/tests/CandleSample/*.user
+/tests/CandleSample/build
+
 log.log
 /tests/UnitTests/*.log
 /.vs
