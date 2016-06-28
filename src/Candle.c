@@ -17,6 +17,7 @@
 *
 */
 
+#include <wctype.h>
 
 #include "Candle.h"
 #include "DXFeed.h"
