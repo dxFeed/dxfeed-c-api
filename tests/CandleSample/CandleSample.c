@@ -101,19 +101,11 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
     for (; i < data_count; ++i) {
         wprintf(L"time=");
         print_timestamp(candles[i].time);
-        wprintf(L", sequence=%d, count=%I64i, ",
-            candles[i].sequence,
-            candles[i].count);
-        wprintf(L"open=%f, high=%f, low=%f, close=%f, ",
-            candles[i].open,
-            candles[i].high,
-            candles[i].low,
-            candles[i].close);
-        wprintf(L"volume=%I64i, VWAP=%f, bidVolume=%I64i, askVolume=%I64i}\n",
-            candles[i].volume,
-            candles[i].vwap,
-            candles[i].bid_volume,
-            candles[i].ask_volume);
+        wprintf(L", sequence=%d, count=%f, open=%f, high=%f, low=%f, close=%f, volume=%f, "
+            L"VWAP=%f, bidVolume=%f, askVolume=%f}\n",
+            candles[i].sequence, candles[i].count, candles[i].open, candles[i].high,
+            candles[i].low, candles[i].close, candles[i].volume, candles[i].vwap,
+            candles[i].bid_volume, candles[i].ask_volume);
     }
 }
 /* -------------------------------------------------------------------------- */
@@ -173,14 +165,14 @@ dxf_string_t ansi_to_unicode (const char* ansi_str) {
  */
 bool parse_date(const char* date_str, struct tm* time_struct) {
     int i;
-    int len = strlen(date_str);
+    int date_string_len = strlen(date_str);
     int separator_count = 0;
     char buf[DATE_TIME_BUF_SIZE + 1] = { 0 };
     int buf_len = 0;
     int mday = 0;
     int month = 0;
     int year = 0;
-    for (i = 0; i < len; i++) {
+    for (i = 0; i < date_string_len; i++) {
         if (date_str[i] == '-') {
             if (separator_count == 0)
                 mday = atoi(buf);

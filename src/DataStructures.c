@@ -275,11 +275,11 @@ static const dx_field_info_t dx_fields_time_and_sale[] = {
 /* -------------------------------------------------------------------------- */
 
 static const dx_field_info_t dx_fields_candle[] = {
-    { dx_fid_compact_int, L"Time", DX_RECORD_FIELD_SETTER_NAME(dx_candle_t, time),
+    { dx_fid_compact_int | dx_fid_flag_time, L"Time", DX_RECORD_FIELD_SETTER_NAME(dx_candle_t, time),
     DX_RECORD_FIELD_DEF_VAL_NAME(dx_candle_t, time), DX_RECORD_FIELD_GETTER_NAME(dx_candle_t, time),
     dx_ft_first_time_int_field },
 
-    { dx_fid_compact_int, L"Sequence", DX_RECORD_FIELD_SETTER_NAME(dx_candle_t, sequence),
+    { dx_fid_compact_int | dx_fid_flag_sequence, L"Sequence", DX_RECORD_FIELD_SETTER_NAME(dx_candle_t, sequence),
     DX_RECORD_FIELD_DEF_VAL_NAME(dx_candle_t, sequence), DX_RECORD_FIELD_GETTER_NAME(dx_candle_t, sequence),
     dx_ft_second_time_int_field },
 

@@ -139,7 +139,7 @@ typedef struct {
     //private CandleSymbol eventSymbol
     /*dxf_long_t index;
     dxf_event_flags_t flags;*/
-    dxf_int_t time;
+    dxf_long_t time;
     dxf_int_t sequence;
     dxf_double_t count;
     dxf_double_t open;

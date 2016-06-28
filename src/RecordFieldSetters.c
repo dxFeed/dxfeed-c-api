@@ -496,7 +496,7 @@ void DX_RECORD_FIELD_GETTER_NAME(dx_time_and_sale_t, exch_sale_conds) (void* obj
 */
 /* -------------------------------------------------------------------------- */
 
-FIELD_GETTER_BODY(dx_candle_t, time, dxf_int_t)
+FIELD_GETTER_BODY(dx_candle_t, time, dxf_long_t)
 FIELD_GETTER_BODY(dx_candle_t, sequence, dxf_int_t)
 FIELD_GETTER_BODY(dx_candle_t, count, dxf_double_t)
 FIELD_GETTER_BODY(dx_candle_t, open, dxf_double_t)

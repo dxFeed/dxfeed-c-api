@@ -574,10 +574,16 @@ bool RECORD_TRANSCODER_NAME(dx_candle_t) (dx_record_transcoder_connection_contex
                                           const dx_record_params_t* record_params,
                                           const dxf_event_params_t* event_params,
                                           void* record_buffer, int record_count) {
-    /* no transcoding actions are required */
+    dxf_candle_t* event_buffer = (dxf_candle_t*)record_buffer;
+    int i = 0;
+
+    for (; i < record_count; ++i) {
+        dxf_candle_t* cur_event = event_buffer + i;
+        cur_event->time *= 1000L;
+    }
 
     return dx_process_event_data(context->connection, dx_eid_candle, record_params->symbol_name,
-        record_params->symbol_cipher, record_buffer, record_count, event_params);
+        record_params->symbol_cipher, event_buffer, record_count, event_params);
 }
 
 /* -------------------------------------------------------------------------- */
