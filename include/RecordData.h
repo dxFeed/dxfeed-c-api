@@ -136,9 +136,6 @@ typedef struct {
 
 //TODO: add to EventManager
 typedef struct {
-    //private CandleSymbol eventSymbol
-    /*dxf_long_t index;
-    dxf_event_flags_t flags;*/
     dxf_long_t time;
     dxf_int_t sequence;
     dxf_double_t count;

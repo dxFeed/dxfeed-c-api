@@ -140,7 +140,7 @@ bool dx_candle_symbol_to_string(dxf_candle_attributes_t _attr, OUT dxf_string_t*
 
     dx_copy_string(buffer_str, attributes->base_symbol);
     if (iswalpha(attributes->exchange_code)) {
-        dxf_char_t tmpstr[3];
+        dxf_char_t tmpstr[3] = { 0 };
         tmpstr[0] = L'&';
         tmpstr[1] = attributes->exchange_code;
         dx_concatenate_strings(buffer_str, tmpstr);
@@ -148,10 +148,11 @@ bool dx_candle_symbol_to_string(dxf_candle_attributes_t _attr, OUT dxf_string_t*
     dx_concatenate_strings(buffer_str, L"{");
 
     /*attribute (period) has no name and is written the first, and the rest should be sorted alphabetically.*/
-    if (attributes->period_type != dxf_ctpa_default) {
+    if (attributes->period_type != dxf_ctpa_default || 
+        attributes->period_value != DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT) {
+
         dx_concatenate_strings(buffer_str, L"=");
-        /*if (attributes->period_value != DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT) {*/ 
-        {
+        if (attributes->period_value != DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT) {
             dxf_char_t tmpstr[100];
             swprintf(tmpstr, 99, L"%g", attributes->period_value);
             dx_concatenate_strings(buffer_str, tmpstr);

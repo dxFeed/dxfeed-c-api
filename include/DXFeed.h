@@ -287,9 +287,14 @@ DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const
 /*
  *	API that allows user to create candle symbol attributes
 
- *  base_symbol the - symbols to add
- *  exchange_code, period_value, period_type, price, session, alignment - candle attributes
- *  candle_attributes - pointer to the candle struct
+ *  base_symbol - the symbols to add
+ *  exchange_code - exchange attribute of this symbol
+ *  period_value -  aggregation period value of this symbol
+ *  period_type - aggregation period type of this symbol
+ *  price - price type attribute of this symbol
+ *  session - session attribute of this symbol
+ *  alignment - alignment attribute of this symbol
+ *  candle_attributes - pointer to the configured candle attributes struct
  */
 DXFEED_API ERRORCODE dxf_initialize_candle_symbol_attributes(dxf_const_string_t base_symbol,
                                                              dxf_char_t exchange_code,

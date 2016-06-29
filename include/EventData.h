@@ -139,8 +139,9 @@ static dxf_const_string_t DXF_ORDER_COMPOSITE_ASK_STR = L"COMPOSITE_ASK";
  */
 /* -------------------------------------------------------------------------- */
 
-#define DXF_CANDLE_EXCHANGE_CODE_COMPOSITE_ATTRIBUTE '\0';
-static const dxf_char_t DXF_CANDLE_EXCHANGE_CODE_ATTRIBUTE_DEFAULT = DXF_CANDLE_EXCHANGE_CODE_COMPOSITE_ATTRIBUTE;
+#define DXF_CANDLE_EXCHANGE_CODE_COMPOSITE_ATTRIBUTE L'\0'
+#define DXF_CANDLE_EXCHANGE_CODE_ATTRIBUTE_DEFAULT DXF_CANDLE_EXCHANGE_CODE_COMPOSITE_ATTRIBUTE
+#define DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT 1.0
 
 typedef enum {
     dxf_cpa_last,
@@ -162,8 +163,6 @@ typedef enum {
 
     dxf_csa_default = dxf_csa_any
 } dxf_candle_session_attribute_t;
-
-static const dxf_double_t DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT = 1;
 
 typedef enum {
     dxf_ctpa_tick,
