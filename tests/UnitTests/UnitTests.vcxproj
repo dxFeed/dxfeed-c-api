@@ -168,6 +168,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\Candle.c" />
+    <ClCompile Include="CandleTest.c" />
     <ClCompile Include="EventDynamicSubscriptionTest.cpp" />
     <ClCompile Include="EventSubscriptionTest.c" />
     <ClCompile Include="OrderSourceConfigurationTest.c" />
@@ -199,6 +201,7 @@
     <ClCompile Include="..\..\src\SymbolCodec.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\src\Candle.h" />
     <ClInclude Include="..\..\src\DXAlgorithms.h" />
     <ClInclude Include="..\..\include\DXErrorCodes.h" />
     <ClInclude Include="..\..\src\DXErrorHandling.h" />
@@ -208,6 +211,7 @@
     <ClInclude Include="..\..\src\PrimitiveTypes.h" />
     <ClInclude Include="..\..\src\TaskQueue.h" />
     <ClInclude Include="..\..\src\EventSubscription.h" />
+    <ClInclude Include="CandleTest.h" />
     <ClInclude Include="EventDynamicSubscriptionTest.h" />
     <ClInclude Include="EventSubscriptionTest.h" />
     <ClInclude Include="..\..\src\EventDataFieldSetters.h" />
