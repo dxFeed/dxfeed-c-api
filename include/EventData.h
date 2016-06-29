@@ -282,31 +282,6 @@ int dx_get_event_subscription_params(dxf_connection_t connection, dx_order_sourc
 
 /* -------------------------------------------------------------------------- */
 /*
-*  Snapshot data structs
-*/
-/* -------------------------------------------------------------------------- */
-
-typedef struct {
-    int event_type;
-    dxf_string_t symbol;
-
-    int records_count;
-    const dxf_event_data_t* records;
-} dxf_snapshot_data_t, *dxf_snapshot_data_ptr_t;
-
-/* -------------------------------------------------------------------------- */
-/*
-*  Snapshot listener prototype
-
-*  snapshot_data - pointer to the received snapshot data
-*  user_data     - pointer to user struct, use NULL by default
-*/
-/* -------------------------------------------------------------------------- */
-
-typedef void(*dxf_snapshot_listener_t) (const dxf_snapshot_data_ptr_t snapshot_data, void* user_data);
-
-/* -------------------------------------------------------------------------- */
-/*
  *	Event data navigation functions
  */
 /* -------------------------------------------------------------------------- */

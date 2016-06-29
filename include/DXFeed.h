@@ -267,7 +267,7 @@ DXFEED_API ERRORCODE dxf_get_last_error (OUT int* error_code, OUT dxf_const_stri
 DXFEED_API ERRORCODE dxf_initialize_logger (const char* file_name, int rewrite_file, int show_timezone_info, int verbose);
 
 /*
- *	Clear current sources and add new one to subscription
+ *  Clear current sources and add new one to subscription
  *  Warning: you must configure order source before dxf_add_symbols/dxf_add_symbol call
 
  *  subscription - a handle of the subscription where source will be changed
@@ -276,7 +276,7 @@ DXFEED_API ERRORCODE dxf_initialize_logger (const char* file_name, int rewrite_f
 DXFEED_API ERRORCODE dxf_set_order_source(dxf_subscription_t subscription, const char* source);
 
 /*
- *	Add a new source to subscription
+ *  Add a new source to subscription
  *  Warning: you must configure order source before dxf_add_symbols/dxf_add_symbol call
 
  *  subscription - a handle of the subscription where source will be changed
@@ -286,7 +286,7 @@ DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const
 
 /*
  *	API that allows user to create candle symbol attributes
-
+ *
  *  base_symbol - the symbols to add
  *  exchange_code - exchange attribute of this symbol
  *  period_value -  aggregation period value of this symbol
@@ -296,19 +296,19 @@ DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const
  *  alignment - alignment attribute of this symbol
  *  candle_attributes - pointer to the configured candle attributes struct
  */
-DXFEED_API ERRORCODE dxf_initialize_candle_symbol_attributes(dxf_const_string_t base_symbol,
-                                                             dxf_char_t exchange_code,
-                                                             dxf_double_t period_value,
-                                                             dxf_candle_type_period_attribute_t period_type,
-                                                             dxf_candle_price_attribute_t price,
-                                                             dxf_candle_session_attribute_t session,
-                                                             dxf_candle_alignment_attribute_t alignment,
-                                                             OUT dxf_candle_attributes_t* candle_attributes);
+DXFEED_API ERRORCODE dxf_create_candle_symbol_attributes(dxf_const_string_t base_symbol,
+                                                         dxf_char_t exchange_code,
+                                                         dxf_double_t period_value,
+                                                         dxf_candle_type_period_attribute_t period_type,
+                                                         dxf_candle_price_attribute_t price,
+                                                         dxf_candle_session_attribute_t session,
+                                                         dxf_candle_alignment_attribute_t alignment,
+                                                         OUT dxf_candle_attributes_t* candle_attributes);
 
 /*
  *	Free memory allocated by dxf_initialize_candle_symbol_attributes(...) function
 
- *  candle_attributes - pointer to the candle struct
+ *  candle_attributes - pointer to the candle attributes struct
  */
 DXFEED_API ERRORCODE dxf_delete_candle_symbol_attributes(dxf_candle_attributes_t candle_attributes);
 

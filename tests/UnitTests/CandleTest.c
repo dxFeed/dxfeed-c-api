@@ -272,7 +272,7 @@ bool create_candle_subscription(dxf_connection_t connection, dxf_const_string_t 
         return false;
     };
 
-    if (!dxf_initialize_candle_symbol_attributes(symbol, DXF_CANDLE_EXCHANGE_CODE_ATTRIBUTE_DEFAULT,
+    if (!dxf_create_candle_symbol_attributes(symbol, DXF_CANDLE_EXCHANGE_CODE_ATTRIBUTE_DEFAULT,
         DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT, dxf_ctpa_day,
         dxf_cpa_mark, dxf_csa_default, dxf_caa_default, &candle_attributes)) {
 
@@ -355,7 +355,7 @@ bool candle_attributes_test(void) {
         candle_attribute_test_case_t* params = &g_candle_attribute_cases[i];
         dxf_string_t attributes_string = NULL;
         bool res = true;
-        dxf_initialize_candle_symbol_attributes(params->symbol, params->exchange_code,
+        dxf_create_candle_symbol_attributes(params->symbol, params->exchange_code,
             params->period_value, params->period_type, params->price, params->session, 
             params->alignment, &attributes);
         if (!dx_candle_symbol_to_string(attributes, &attributes_string)) {

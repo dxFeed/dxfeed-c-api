@@ -78,14 +78,14 @@ static const dxf_string_t g_candle_alignment[dxf_caa_count] = {
 };
 
 
-DXFEED_API ERRORCODE dxf_initialize_candle_symbol_attributes(dxf_const_string_t base_symbol,
-                                                             dxf_char_t exchange_code,
-                                                             dxf_double_t period_value,
-                                                             dxf_candle_type_period_attribute_t period_type,
-                                                             dxf_candle_price_attribute_t price,
-                                                             dxf_candle_session_attribute_t session,
-                                                             dxf_candle_alignment_attribute_t alignment,
-                                                             OUT dxf_candle_attributes_t* candle_attributes) {
+DXFEED_API ERRORCODE dxf_create_candle_symbol_attributes(dxf_const_string_t base_symbol,
+                                                         dxf_char_t exchange_code,
+                                                         dxf_double_t period_value,
+                                                         dxf_candle_type_period_attribute_t period_type,
+                                                         dxf_candle_price_attribute_t price,
+                                                         dxf_candle_session_attribute_t session,
+                                                         dxf_candle_alignment_attribute_t alignment,
+                                                         OUT dxf_candle_attributes_t* candle_attributes) {
     dx_candle_attributes_data_t* attributes;
     if (candle_attributes == NULL) {
         dx_set_error_code(dx_ec_invalid_func_param);
