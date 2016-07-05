@@ -119,6 +119,12 @@
     <ClCompile Include="OrderSourceConfigurationTest.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CandleTest.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Candle.c">
+      <Filter>Common\Sources</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Snapshot.c">
       <Filter>Common\Sources</Filter>
     </ClCompile>
@@ -183,6 +189,12 @@
     </ClInclude>
     <ClInclude Include="OrderSourceConfigurationTest.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CandleTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Candle.h">
+      <Filter>Common\Headers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Snapshot.h">
       <Filter>Common\Headers</Filter>

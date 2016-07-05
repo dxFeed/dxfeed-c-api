@@ -41,13 +41,13 @@ typedef enum {
     dx_rid_market_maker,
     dx_rid_order,
     dx_rid_time_and_sale,
+    dx_rid_candle,
 
     /* add new values above this line */
 
     dx_rid_count,
     dx_rid_invalid
 } dx_record_info_id_t;
-//TODO: possible need to rename elements
 
 typedef int dx_record_id_t;
 
@@ -132,5 +132,19 @@ typedef struct {
     dxf_bool_t is_trade;
     dxf_int_t type;    
 } dx_time_and_sale_t;
+
+typedef struct {
+    dxf_long_t time;
+    dxf_int_t sequence;
+    dxf_double_t count;
+    dxf_double_t open;
+    dxf_double_t high;
+    dxf_double_t low;
+    dxf_double_t close;
+    dxf_double_t volume;
+    dxf_double_t vwap;
+    dxf_double_t bid_volume;
+    dxf_double_t ask_volume;
+} dx_candle_t;
 
 #endif /* RECORD_DATA_H_INCLUDED */

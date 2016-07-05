@@ -109,6 +109,35 @@ void process_last_error() {
 
 /* -------------------------------------------------------------------------- */
 
+bool create_event_subscription(dxf_connection_t connection, int event_type,
+                               dxf_const_string_t symbol,
+                               dxf_event_listener_t event_listener,
+                               OUT dxf_subscription_t* res_subscription) {
+    dxf_subscription_t subscription = NULL;
+
+    if (!dxf_create_subscription(connection, event_type, &subscription)) {
+        process_last_error();
+        return false;
+    };
+
+    if (!dxf_add_symbol(subscription, symbol)) {
+        process_last_error();
+        dxf_close_subscription(subscription);
+        return false;
+    };
+
+    if (!dxf_attach_event_listener(subscription, event_listener, NULL)) {
+        process_last_error();
+        dxf_close_subscription(subscription);
+        return false;
+    };
+
+    *res_subscription = subscription;
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
 #define DX_IS_EQUAL_FUNCTION_DEFINITION(type, tmpl) \
 DX_IS_EQUAL_FUNCTION_DECLARATION(type) { \
     if (expected != actual) { \

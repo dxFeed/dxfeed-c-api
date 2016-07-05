@@ -446,6 +446,7 @@ int dx_compare_strings_num (dxf_const_string_t s1, dxf_const_string_t s2, size_t
 dxf_char_t dx_toupper (dxf_char_t c);
 dxf_string_t dx_ansi_to_unicode (const char* ansi_str);
 dxf_string_t dx_decode_from_integer (dxf_long_t code);
+dxf_string_t dx_concatenate_strings(dxf_string_t dest, dxf_const_string_t src);
 
 /* -------------------------------------------------------------------------- */
 /*

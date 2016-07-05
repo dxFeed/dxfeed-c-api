@@ -62,8 +62,9 @@ dxf_const_string_t dx_event_type_to_string (int event_type) {
     case DXF_ET_PROFILE: return L"Profile"; 
     case DXF_ET_ORDER: return L"Order"; 
     case DXF_ET_TIME_AND_SALE: return L"Time&Sale"; 
+    case DXF_ET_CANDLE: return L"Candle";
     default: return L"";
-    }	
+    }
 }
 
 /* -------------------------------------------------------------------------- */
@@ -191,6 +192,7 @@ int dx_get_event_subscription_params(dxf_connection_t connection, dx_order_sourc
                                      dxf_uint_t subscr_flags, OUT dx_event_subscription_param_list_t* params) {
     bool result = true;
     dx_event_subscription_param_list_t param_list = { NULL, 0, 0 };
+
     switch (event_id) {
     case dx_eid_trade:
         result = dx_get_trade_subscription_params(connection, &param_list);
@@ -209,6 +211,9 @@ int dx_get_event_subscription_params(dxf_connection_t connection, dx_order_sourc
         break;
     case dx_eid_time_and_sale:
         result = dx_add_subscription_param_to_list(connection, &param_list, L"TimeAndSale", dx_st_stream);
+        break;
+    case dx_eid_candle:
+        result = dx_add_subscription_param_to_list(connection, &param_list, L"Candle", dx_st_history);
         break;
     }
 
@@ -244,6 +249,7 @@ EVENT_DATA_NAVIGATOR_BODY(dxf_summary_t)
 EVENT_DATA_NAVIGATOR_BODY(dxf_profile_t)
 EVENT_DATA_NAVIGATOR_BODY(dxf_order_t)
 EVENT_DATA_NAVIGATOR_BODY(dxf_time_and_sale_t)
+EVENT_DATA_NAVIGATOR_BODY(dxf_candle_t)
 
 static const dx_event_data_navigator g_event_data_navigators[dx_eid_count] = {
     EVENT_DATA_NAVIGATOR_NAME(dxf_trade_t),
@@ -251,7 +257,8 @@ static const dx_event_data_navigator g_event_data_navigators[dx_eid_count] = {
     EVENT_DATA_NAVIGATOR_NAME(dxf_summary_t),
     EVENT_DATA_NAVIGATOR_NAME(dxf_profile_t),
     EVENT_DATA_NAVIGATOR_NAME(dxf_order_t),
-    EVENT_DATA_NAVIGATOR_NAME(dxf_time_and_sale_t)
+    EVENT_DATA_NAVIGATOR_NAME(dxf_time_and_sale_t),
+    EVENT_DATA_NAVIGATOR_NAME(dxf_candle_t)
 };
 
 /* -------------------------------------------------------------------------- */

@@ -23,6 +23,7 @@
 #include "DXErrorHandling.h"
 #include "DXErrorCodes.h"
 #include "DXMemory.h"
+#include "Candle.h"
 #include "ClientMessageProcessor.h"
 #include "SymbolCodec.h"
 #include "EventSubscription.h"
@@ -297,6 +298,11 @@ DXFEED_API ERRORCODE dxf_create_subscription(dxf_connection_t connection, int ev
 }
 
 /* -------------------------------------------------------------------------- */
+
+DXFEED_API ERRORCODE dxf_create_subscription_timed(dxf_connection_t connection, int event_types, dxf_long_t time,
+                                                   OUT dxf_subscription_t* subscription) {
+    return dxf_create_subscription_impl(connection, event_types, DEFAULT_SUBSCRIPTION_FLAGS, time, subscription);
+}
 
 DXFEED_API ERRORCODE dxf_close_subscription (dxf_subscription_t subscription) {
     dxf_connection_t connection;
@@ -615,16 +621,14 @@ DXFEED_API ERRORCODE dxf_get_last_error (OUT int* error_code, OUT dxf_const_stri
 
 /* -------------------------------------------------------------------------- */
 
-DXFEED_API ERRORCODE dxf_set_order_source(dxf_subscription_t subscription, const char * source)
-{
+DXFEED_API ERRORCODE dxf_set_order_source(dxf_subscription_t subscription, const char * source) {
     dx_clear_order_source(subscription);
     return dxf_add_order_source(subscription, source);
 }
 
 /* -------------------------------------------------------------------------- */
 
-DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const char * source)
-{
+DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const char * source) {
     dxf_connection_t connection;
     dxf_string_t str;
     dxf_const_string_t* symbols;
@@ -675,7 +679,6 @@ ERRORCODE dxf_create_snapshot_impl(dxf_connection_t connection, dx_event_id_t ev
     int source_len = (source == NULL ? 0 : dx_string_length(source));
     dxf_uint_t subscr_flags = DX_SUBSCR_FLAG_SINGLE_RECORD;
 
-    //TODO: add candle event
     if (event_id == dx_eid_order) {
         if (source_len > 0 &&
             (dx_compare_strings(source, DXF_ORDER_COMPOSITE_BID_STR) == 0 ||
@@ -688,6 +691,9 @@ ERRORCODE dxf_create_snapshot_impl(dxf_connection_t connection, dx_event_id_t ev
             if (source_len > 0)
                 order_source_value = source;
         }
+    }
+    else if (event_id == dx_eid_candle) {
+        record_info_id = dx_rid_candle;
     }
     else {
         dx_set_error_code(dx_ssec_invalid_event_id);
@@ -717,7 +723,8 @@ ERRORCODE dxf_create_snapshot_impl(dxf_connection_t connection, dx_event_id_t ev
             dx_add_order_source(subscription, order_source_value);
     }
 
-    *snapshot = dx_create_snapshot(connection, subscription, event_id, record_info_id, symbol, order_source_value, time);
+    *snapshot = dx_create_snapshot(connection, subscription, event_id, record_info_id, 
+        symbol, order_source_value, time);
     if (*snapshot == dx_invalid_snapshot) {
         dxf_close_subscription(subscription);
         return DXF_FAILURE;
@@ -735,15 +742,30 @@ ERRORCODE dxf_create_snapshot_impl(dxf_connection_t connection, dx_event_id_t ev
 
 }
 
-DXFEED_API ERRORCODE dxf_create_snapshot(dxf_connection_t connection, dx_event_id_t event_id,
-                                         dxf_const_string_t symbol, const char* source,
-                                         dxf_long_t time, OUT dxf_snapshot_t* snapshot) {
+DXFEED_API ERRORCODE dxf_create_order_snapshot(dxf_connection_t connection, 
+                                               dxf_const_string_t symbol, const char* source,
+                                               dxf_long_t time, OUT dxf_snapshot_t* snapshot) {
     dxf_string_t source_str = NULL;
     ERRORCODE res;
     if (source != NULL)
         source_str = dx_ansi_to_unicode(source);
-    res = dxf_create_snapshot_impl(connection, event_id, symbol, source_str, time, snapshot);
+    res = dxf_create_snapshot_impl(connection, dx_eid_order, symbol, source_str, time, snapshot);
     dx_free(source_str);
+    return res;
+}
+
+DXFEED_API ERRORCODE dxf_create_candle_snapshot(dxf_connection_t connection, 
+                                                dxf_candle_attributes_t candle_attributes, 
+                                                dxf_long_t time, OUT dxf_snapshot_t* snapshot) {
+    ERRORCODE res;
+    dxf_string_t candle_symbol;
+
+    if (!dx_candle_symbol_to_string(candle_attributes, &candle_symbol)) {
+        return DXF_FAILURE;
+    }
+
+    res = dxf_create_snapshot_impl(connection, dx_eid_candle, candle_symbol, NULL, time, snapshot);
+
     return res;
 }
 

@@ -6,6 +6,23 @@
 #include "DXErrorCodes.h"
 #include "PrimitiveTypes.h"
 
+/* -------------------------------------------------------------------------- */
+
+typedef struct {
+    dxf_const_string_t symbol;
+    dxf_char_t exchange_code;
+    dxf_double_t period_value;
+    dxf_candle_type_period_attribute_t period_type;
+    dxf_candle_price_attribute_t price;
+    dxf_candle_session_attribute_t session;
+    dxf_candle_alignment_attribute_t alignment;
+
+    dxf_const_string_t expected;
+    int line;
+} candle_attribute_test_case_t;
+
+/* -------------------------------------------------------------------------- */
+
 typedef void* dxf_listener_thread_data_t;
 
 void init_listener_thread_data(OUT dxf_listener_thread_data_t* data);
@@ -17,6 +34,10 @@ void reset_thread_terminate(dxf_listener_thread_data_t data);
 /* -------------------------------------------------------------------------- */
 
 void process_last_error();
+bool create_event_subscription(dxf_connection_t connection, int event_type,
+                               dxf_const_string_t symbol,
+                               dxf_event_listener_t event_listener,
+                               OUT dxf_subscription_t* res_subscription);
 
 /* -------------------------------------------------------------------------- */
 

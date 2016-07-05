@@ -270,6 +270,58 @@ static const dx_field_info_t dx_fields_time_and_sale[] = {
 
 /* -------------------------------------------------------------------------- */
 /*
+*	Candle data fields
+*/
+/* -------------------------------------------------------------------------- */
+
+static const dx_field_info_t dx_fields_candle[] = {
+    { dx_fid_compact_int | dx_fid_flag_time, L"Time", DX_RECORD_FIELD_SETTER_NAME(dx_candle_t, time),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_candle_t, time), DX_RECORD_FIELD_GETTER_NAME(dx_candle_t, time),
+    dx_ft_first_time_int_field },
+
+    { dx_fid_compact_int | dx_fid_flag_sequence, L"Sequence", DX_RECORD_FIELD_SETTER_NAME(dx_candle_t, sequence),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_candle_t, sequence), DX_RECORD_FIELD_GETTER_NAME(dx_candle_t, sequence),
+    dx_ft_second_time_int_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Count", DX_RECORD_FIELD_SETTER_NAME(dx_candle_t, count),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_candle_t, count), DX_RECORD_FIELD_GETTER_NAME(dx_candle_t, count),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Open", DX_RECORD_FIELD_SETTER_NAME(dx_candle_t, open),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_candle_t, open), DX_RECORD_FIELD_GETTER_NAME(dx_candle_t, open),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"High", DX_RECORD_FIELD_SETTER_NAME(dx_candle_t, high),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_candle_t, high), DX_RECORD_FIELD_GETTER_NAME(dx_candle_t, high),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Low", DX_RECORD_FIELD_SETTER_NAME(dx_candle_t, low),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_candle_t, low), DX_RECORD_FIELD_GETTER_NAME(dx_candle_t, low),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Close", DX_RECORD_FIELD_SETTER_NAME(dx_candle_t, close),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_candle_t, close), DX_RECORD_FIELD_GETTER_NAME(dx_candle_t, close),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Volume", DX_RECORD_FIELD_SETTER_NAME(dx_candle_t, volume),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_candle_t, volume), DX_RECORD_FIELD_GETTER_NAME(dx_candle_t, volume),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"VWAP", DX_RECORD_FIELD_SETTER_NAME(dx_candle_t, vwap),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_candle_t, vwap), DX_RECORD_FIELD_GETTER_NAME(dx_candle_t, vwap),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Bid.Volume", DX_RECORD_FIELD_SETTER_NAME(dx_candle_t, bid_volume),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_candle_t, bid_volume), DX_RECORD_FIELD_GETTER_NAME(dx_candle_t, bid_volume),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Ask.Volume", DX_RECORD_FIELD_SETTER_NAME(dx_candle_t, ask_volume),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_candle_t, ask_volume), DX_RECORD_FIELD_GETTER_NAME(dx_candle_t, ask_volume),
+    dx_ft_common_field }
+};
+
+/* -------------------------------------------------------------------------- */
+/*
  *	Records
  */
 /* -------------------------------------------------------------------------- */
@@ -281,7 +333,8 @@ static const int g_record_field_counts[dx_rid_count] = {
     sizeof(dx_fields_profile) / sizeof(dx_fields_profile[0]),
     sizeof(dx_fields_market_maker) / sizeof(dx_fields_market_maker[0]),
     sizeof(dx_fields_order) / sizeof(dx_fields_order[0]),
-    sizeof(dx_fields_time_and_sale) / sizeof(dx_fields_time_and_sale[0])
+    sizeof(dx_fields_time_and_sale) / sizeof(dx_fields_time_and_sale[0]),
+    sizeof(dx_fields_candle) / sizeof(dx_fields_candle[0])
 };
 
 static const dx_record_info_t g_record_info[dx_rid_count] = {
@@ -291,7 +344,8 @@ static const dx_record_info_t g_record_info[dx_rid_count] = {
     { L"Profile", sizeof(dx_fields_profile) / sizeof(dx_fields_profile[0]), dx_fields_profile },
     { L"MarketMaker", sizeof(dx_fields_market_maker) / sizeof(dx_fields_market_maker[0]), dx_fields_market_maker },
     { L"Order", sizeof(dx_fields_order) / sizeof(dx_fields_order[0]), dx_fields_order },
-    { L"TimeAndSale", sizeof(dx_fields_time_and_sale) / sizeof(dx_fields_time_and_sale[0]), dx_fields_time_and_sale }
+    { L"TimeAndSale", sizeof(dx_fields_time_and_sale) / sizeof(dx_fields_time_and_sale[0]), dx_fields_time_and_sale },
+    { L"Candle", sizeof(dx_fields_candle) / sizeof(dx_fields_candle[0]), dx_fields_candle }
 };
 
 /* List stores records. The list is not cleared until at least one connection is opened. */
@@ -683,6 +737,9 @@ dx_record_info_id_t dx_string_to_record_info(dxf_const_string_t name)
     else if (dx_compare_strings_num(name, g_record_info[dx_rid_time_and_sale].default_name, 
                                     dx_string_length(g_record_info[dx_rid_time_and_sale].default_name)) == 0)
         return dx_rid_time_and_sale;
+    else if (dx_compare_strings_num(name, g_record_info[dx_rid_candle].default_name,
+                                    dx_string_length(g_record_info[dx_rid_candle].default_name)) == 0)
+        return dx_rid_candle;
     else
         return dx_rid_invalid;
 }

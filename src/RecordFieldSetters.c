@@ -149,6 +149,24 @@ void DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, exch_sale_conds) (void* obj
 
 /* -------------------------------------------------------------------------- */
 /*
+*	Candle field setters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_SETTER_BODY(dx_candle_t, time, dxf_int_t)
+FIELD_SETTER_BODY(dx_candle_t, sequence, dxf_int_t)
+FIELD_SETTER_BODY(dx_candle_t, count, dxf_double_t)
+FIELD_SETTER_BODY(dx_candle_t, open, dxf_double_t)
+FIELD_SETTER_BODY(dx_candle_t, high, dxf_double_t)
+FIELD_SETTER_BODY(dx_candle_t, low, dxf_double_t)
+FIELD_SETTER_BODY(dx_candle_t, close, dxf_double_t)
+FIELD_SETTER_BODY(dx_candle_t, volume, dxf_double_t)
+FIELD_SETTER_BODY(dx_candle_t, vwap, dxf_double_t)
+FIELD_SETTER_BODY(dx_candle_t, bid_volume, dxf_double_t)
+FIELD_SETTER_BODY(dx_candle_t, ask_volume, dxf_double_t)
+
+/* -------------------------------------------------------------------------- */
+/*
  *	Default value getter functions
  */
 /* -------------------------------------------------------------------------- */
@@ -343,6 +361,24 @@ FIELD_DEF_VAL_BODY(dx_time_and_sale_t, type, dxf_int_t)
 
 /* -------------------------------------------------------------------------- */
 /*
+*	Candle field value getters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_DEF_VAL_BODY(dx_candle_t, time, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_candle_t, sequence, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_candle_t, count, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_candle_t, open, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_candle_t, high, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_candle_t, low, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_candle_t, close, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_candle_t, volume, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_candle_t, vwap, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_candle_t, bid_volume, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_candle_t, ask_volume, dxf_double_t)
+
+/* -------------------------------------------------------------------------- */
+/*
 *	Getter body macro
 */
 /* -------------------------------------------------------------------------- */
@@ -453,3 +489,21 @@ void DX_RECORD_FIELD_GETTER_NAME(dx_time_and_sale_t, exch_sale_conds) (void* obj
     dxf_ulong_t event_id = ((dx_time_and_sale_t*)object)->event_id;
     *(dxf_int_t*)field = (dxf_int_t)((event_id >> 32) & 0x00000000FFFFFFFFL);
 }
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Candle field getters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_GETTER_BODY(dx_candle_t, time, dxf_long_t)
+FIELD_GETTER_BODY(dx_candle_t, sequence, dxf_int_t)
+FIELD_GETTER_BODY(dx_candle_t, count, dxf_double_t)
+FIELD_GETTER_BODY(dx_candle_t, open, dxf_double_t)
+FIELD_GETTER_BODY(dx_candle_t, high, dxf_double_t)
+FIELD_GETTER_BODY(dx_candle_t, low, dxf_double_t)
+FIELD_GETTER_BODY(dx_candle_t, close, dxf_double_t)
+FIELD_GETTER_BODY(dx_candle_t, volume, dxf_double_t)
+FIELD_GETTER_BODY(dx_candle_t, vwap, dxf_double_t)
+FIELD_GETTER_BODY(dx_candle_t, bid_volume, dxf_double_t)
+FIELD_GETTER_BODY(dx_candle_t, ask_volume, dxf_double_t)

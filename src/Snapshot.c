@@ -217,11 +217,13 @@ int dx_snapshot_records_comparator(dxf_time_int_field_t t1, dxf_time_int_field_t
 bool dx_snapshot_insert_record(dx_snapshot_data_ptr_t snapshot_data, dxf_event_data_t obj, 
                                const int position) {
     bool failed = false;
-    //TODO: add Candle
-    switch (snapshot_data->event_id)
-    {
+    switch (snapshot_data->event_id) {
     case dx_eid_order:
         DX_ARRAY_INSERT(snapshot_data->records, dxf_order_t, *((dxf_order_t*)obj), position, 
+            dx_capacity_manager_halfer, failed);
+        break;
+    case dx_eid_candle:
+        DX_ARRAY_INSERT(snapshot_data->records, dxf_candle_t, *((dxf_candle_t*)obj), position,
             dx_capacity_manager_halfer, failed);
         break;
     default:
@@ -233,12 +235,14 @@ bool dx_snapshot_insert_record(dx_snapshot_data_ptr_t snapshot_data, dxf_event_d
 
 bool dx_snapshot_delete_record(dx_snapshot_data_ptr_t snapshot_data, const int position) {
     bool failed = false;
-    //TODO: add Candle
-    switch (snapshot_data->event_id)
-    {
+    switch (snapshot_data->event_id) {
     case dx_eid_order:
-        DX_ARRAY_DELETE(snapshot_data->records, dxf_order_t, position, dx_capacity_manager_halfer, 
-            failed);
+        DX_ARRAY_DELETE(snapshot_data->records, dxf_order_t, position, 
+            dx_capacity_manager_halfer, failed);
+        break;
+    case dx_eid_candle:
+        DX_ARRAY_DELETE(snapshot_data->records, dxf_candle_t, position, 
+            dx_capacity_manager_halfer, failed);
         break;
     default:
         return dx_set_error_code(dx_ssec_invalid_event_id);
@@ -249,12 +253,14 @@ bool dx_snapshot_delete_record(dx_snapshot_data_ptr_t snapshot_data, const int p
 
 bool dx_snapshot_set_record(dx_snapshot_data_ptr_t snapshot_data, dxf_event_data_t obj, 
                             const int position) {
-    //TODO: add Candle
-    switch (snapshot_data->event_id)
-    {
+    switch (snapshot_data->event_id) {
     case dx_eid_order:
         dx_memcpy(&(((dxf_order_t*)snapshot_data->records.elements)[position]), (dxf_order_t*)obj, 
             sizeof(dxf_order_t));
+        break;
+    case dx_eid_candle:
+        dx_memcpy(&(((dxf_candle_t*)snapshot_data->records.elements)[position]), (dxf_candle_t*)obj,
+            sizeof(dxf_candle_t));
         break;
     default:
         return dx_set_error_code(dx_ssec_invalid_event_id);

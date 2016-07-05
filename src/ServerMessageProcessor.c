@@ -1013,8 +1013,8 @@ bool dx_read_records (dx_server_msg_proc_connection_context_t* context,
 
 dxf_time_int_field_t dx_get_time_int_field(dx_record_id_t record_id, void* record_buffer) {
     int i;
-    dxf_uint_t high = 0;
-    dxf_uint_t low = 0;
+    dxf_ulong_t high = 0;
+    dxf_ulong_t low = 0;
     dxf_time_int_field_t time = 0;
     const dx_record_item_t* record_info = dx_get_record_by_id(record_id);
 
@@ -1028,7 +1028,7 @@ dxf_time_int_field_t dx_get_time_int_field(dx_record_id_t record_id, void* recor
         }
     }
 
-    time = ((dxf_ulong_t)high << 32) | low;
+    time = (high << 32) | (low & 0xFFFFFFFF);
 
     return time;
 }
@@ -1106,7 +1106,7 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 			
 			return false;
 		}
-		// TODO add assert to overlimit in context->bicc limit
+		// TODO: add assert to overlimit in context->bicc limit
 
         record_params.record_id = record_id;
         record_params.record_info_id = record_info->info_id;

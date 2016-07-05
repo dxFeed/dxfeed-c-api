@@ -46,6 +46,7 @@ set (HEADER_FILES
     StringArray.h
     TaskQueue.h
     Version.h
+    Candle.h
     )
  
  set (PARSER_HEADERS
@@ -96,6 +97,7 @@ set (SOURCE_FILES
     StringArray.c
     TaskQueue.c
     Win32.c
+    Candle.c
     ${DEF_FILE}) 
     
 set (ALL_HEADERS

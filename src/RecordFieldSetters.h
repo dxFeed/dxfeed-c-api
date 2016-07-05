@@ -142,6 +142,24 @@ DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_time_and_sale_t, type);
 
 /* -------------------------------------------------------------------------- */
 /*
+*	Candle field setters
+*/
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_candle_t, time);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_candle_t, sequence);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_candle_t, count);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_candle_t, open);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_candle_t, high);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_candle_t, low);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_candle_t, close);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_candle_t, volume);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_candle_t, vwap);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_candle_t, bid_volume);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_candle_t, ask_volume);
+
+/* -------------------------------------------------------------------------- */
+/*
  *	Default field value functions
  */
 /* -------------------------------------------------------------------------- */
@@ -261,6 +279,24 @@ DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_time_and_sale_t, type);
 
 /* -------------------------------------------------------------------------- */
 /*
+*	Candle field default value getters
+*/
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_candle_t, time);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_candle_t, sequence);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_candle_t, count);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_candle_t, open);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_candle_t, high);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_candle_t, low);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_candle_t, close);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_candle_t, volume);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_candle_t, vwap);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_candle_t, bid_volume);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_candle_t, ask_volume);
+
+/* -------------------------------------------------------------------------- */
+/*
 *	Generic setter prototype
 */
 /* -------------------------------------------------------------------------- */
@@ -373,5 +409,23 @@ DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_time_and_sale_t, bid_price);
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_time_and_sale_t, ask_price);
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_time_and_sale_t, exch_sale_conds);
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_time_and_sale_t, type);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Candle field getters
+*/
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_candle_t, time);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_candle_t, sequence);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_candle_t, count);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_candle_t, open);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_candle_t, high);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_candle_t, low);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_candle_t, close);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_candle_t, volume);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_candle_t, vwap);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_candle_t, bid_volume);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_candle_t, ask_volume);
 
 #endif /* RECORD_FIELD_SETTERS_H_INCLUDED */

@@ -26,13 +26,14 @@ typedef int bool;
 
 dxf_const_string_t dx_event_type_to_string(int event_type) {
     switch (event_type) {
-    case DXF_ET_TRADE: return L"Trade";
-    case DXF_ET_QUOTE: return L"Quote";
-    case DXF_ET_SUMMARY: return L"Summary";
-    case DXF_ET_PROFILE: return L"Profile";
-    case DXF_ET_ORDER: return L"Order";
-    case DXF_ET_TIME_AND_SALE: return L"Time&Sale";
-    default: return L"";
+        case DXF_ET_TRADE: return L"Trade";
+        case DXF_ET_QUOTE: return L"Quote";
+        case DXF_ET_SUMMARY: return L"Summary";
+        case DXF_ET_PROFILE: return L"Profile";
+        case DXF_ET_ORDER: return L"Order";
+        case DXF_ET_TIME_AND_SALE: return L"Time&Sale";
+        case DXF_ET_CANDLE: return L"Candle";
+        default: return L"";
     }
 }
 
@@ -141,19 +142,20 @@ dxf_string_t ansi_to_unicode(const char* ansi_str) {
 /* -------------------------------------------------------------------------- */
 
 void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
-    dxf_int_t i = 0;
+    dxf_int_t i;
+    int records_count = snapshot_data->records_count;
 
     wprintf(L"Snapshot %ls{symbol=%ls, records_count=%d}\n", 
             dx_event_type_to_string(snapshot_data->event_type), snapshot_data->symbol, 
-            snapshot_data->records_count);
+            records_count);
 
     if (snapshot_data->event_type == DXF_ET_ORDER) {
         dxf_order_t* order_records = (dxf_order_t*)snapshot_data->records;
-        for (; i < snapshot_data->records_count; ++i) {
+        for (i = 0; i < records_count; ++i) {
             dxf_order_t order = order_records[i];
 
             if (i >= RECORDS_PRINT_LIMIT) {
-                wprintf(L"   { ... %d records left ...}\n", snapshot_data->records_count - i);
+                wprintf(L"   { ... %d records left ...}\n", records_count - i);
                 break;
             }
 
@@ -167,6 +169,25 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
             wprintf(L", count=%d}\n", order.count);
         }
     }
+    else if (snapshot_data->event_type == DXF_ET_CANDLE) {
+        dxf_candle_t* candle_records = (dxf_candle_t*)snapshot_data->records;
+        for (i = 0; i < snapshot_data->records_count; ++i) {
+            dxf_candle_t candle = candle_records[i];
+
+            if (i >= RECORDS_PRINT_LIMIT) {
+                wprintf(L"   { ... %d records left ...}\n", records_count - i);
+                break;
+            }
+
+            wprintf(L"time=");
+            print_timestamp(candle.time);
+            wprintf(L", sequence=%d, count=%f, open=%f, high=%f, low=%f, close=%f, volume=%f, "
+                L"VWAP=%f, bidVolume=%f, askVolume=%f}\n",
+                candle.sequence, candle.count, candle.open, candle.high,
+                candle.low, candle.close, candle.volume, candle.vwap,
+                candle.bid_volume, candle.ask_volume);
+        }
+    }
 }
 
 /* -------------------------------------------------------------------------- */
@@ -174,9 +195,10 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
 int main(int argc, char* argv[]) {
     dxf_connection_t connection;
     dxf_snapshot_t snapshot;
+    dxf_candle_attributes_t candle_attributes = NULL;
     char* event_type_name = NULL;
     dx_event_id_t event_id;
-    dxf_string_t symbol = NULL;
+    dxf_string_t base_symbol = NULL;
     char* dxfeed_host = NULL;
     dxf_string_t dxfeed_host_u = NULL;
     char order_source[MAX_SOURCE_SIZE + 1] = { 0 };
@@ -191,9 +213,9 @@ int main(int argc, char* argv[]) {
             L"  <event type> - an event type, one of the following: ORDER, CANDLE\n"
             L"  <symbol> - a trade symbol, e.g. C, MSFT, YHOO, IBM\n"
             L"  [order_source] - a) source for Order (also can be empty), e.g. NTV, BYX, BZX, DEA,\n"
-            L"                     ISE, DEX, IST\n"
+            L"                      ISE, DEX, IST\n"
             L"                   b) source for MarketMaker, one of following: COMPOSITE_BID or \n"
-            L"                     COMPOSITE_ASK\n");
+            L"                      COMPOSITE_ASK\n");
         
         return 0;
     }
@@ -206,22 +228,20 @@ int main(int argc, char* argv[]) {
     if (stricmp(event_type_name, "ORDER") == 0) {
         event_id = dx_eid_order;
     } else if (stricmp(event_type_name, "CANDLE") == 0) {
-        //TODO: candle
-        event_id = dx_eid_order;
+        event_id = dx_eid_candle;
     } else {
         wprintf(L"Unknown event type.\n");
         return -1;
     }
 
-    symbol = ansi_to_unicode(argv[3]);
-
-    if (symbol == NULL) {
+    base_symbol = ansi_to_unicode(argv[3]);
+    if (base_symbol == NULL) {
         return -1;
     }
     else {
         int i = 0;
-        for (; symbol[i]; i++)
-            symbol[i] = towupper(symbol[i]);
+        for (; base_symbol[i]; i++)
+            base_symbol[i] = towupper(base_symbol[i]);
     }
 
     if (argc == 5) {
@@ -251,19 +271,42 @@ int main(int argc, char* argv[]) {
 
     wprintf(L"Connection successful!\n");
 
-    if (!dxf_create_snapshot(connection, event_id, symbol, order_source_ptr, 0, &snapshot)) {
-        process_last_error();
+    if (event_id == dx_eid_candle) {
+        if (!dxf_create_candle_symbol_attributes(base_symbol,
+            DXF_CANDLE_EXCHANGE_CODE_ATTRIBUTE_DEFAULT,
+            DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT,
+            dxf_ctpa_day, dxf_cpa_mark, dxf_csa_default,
+            dxf_caa_default, &candle_attributes)) {
 
-        return -1;
-    };
+            process_last_error();
+            dxf_close_connection(connection);
+            return -1;
+        }
+
+        if (!dxf_create_candle_snapshot(connection, candle_attributes, 0, &snapshot)) {
+            process_last_error();
+            dxf_delete_candle_symbol_attributes(candle_attributes);
+            dxf_close_connection(connection);
+            return -1;
+        };
+    }
+    else {
+        if (!dxf_create_order_snapshot(connection, base_symbol, order_source_ptr, 0, &snapshot)) {
+            process_last_error();
+            dxf_close_connection(connection);
+            return -1;
+        };
+    }
 
     if (!dxf_attach_snapshot_listener(snapshot, listener, NULL)) {
         process_last_error();
-
+        if (candle_attributes != NULL)
+            dxf_delete_candle_symbol_attributes(candle_attributes);
+        dxf_close_connection(connection);
         return -1;
     };
     wprintf(L"Subscription successful!\n");
-    //TODO: implement stop
+
     while (!is_thread_terminate()) {
 #ifdef _WIN32
         Sleep(100);
@@ -274,7 +317,15 @@ int main(int argc, char* argv[]) {
 
     if (!dxf_close_snapshot(snapshot)) {
         process_last_error();
+        if (candle_attributes != NULL)
+            dxf_delete_candle_symbol_attributes(candle_attributes);
+        dxf_close_connection(connection);
+        return -1;
+    }
 
+    if (!dxf_delete_candle_symbol_attributes(candle_attributes)) {
+        process_last_error();
+        dxf_close_connection(connection);
         return -1;
     }
 
