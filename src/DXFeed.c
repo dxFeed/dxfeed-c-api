@@ -758,13 +758,15 @@ DXFEED_API ERRORCODE dxf_create_candle_snapshot(dxf_connection_t connection,
                                                 dxf_candle_attributes_t candle_attributes, 
                                                 dxf_long_t time, OUT dxf_snapshot_t* snapshot) {
     ERRORCODE res;
-    dxf_string_t candle_symbol;
+    dxf_string_t candle_symbol = NULL;
 
     if (!dx_candle_symbol_to_string(candle_attributes, &candle_symbol)) {
         return DXF_FAILURE;
     }
 
     res = dxf_create_snapshot_impl(connection, dx_eid_candle, candle_symbol, NULL, time, snapshot);
+
+    dx_free(candle_symbol);
 
     return res;
 }

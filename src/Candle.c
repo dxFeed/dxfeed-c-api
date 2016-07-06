@@ -44,19 +44,19 @@ typedef struct {
 } dx_candle_type;
 
 static const dx_candle_type g_candle_type_period[dxf_ctpa_count] = {
-    {L"t", 0LL},
-    {L"s", 1000LL},
-    {L"m", 60LL * 1000LL},
-    {L"h", 60LL * 60LL * 1000LL},
-    {L"d", 24LL * 60LL * 60LL * 1000LL},
-    {L"w", 7LL * 24LL * 60LL * 60LL * 1000LL},
-    {L"mo", 30LL * 24LL * 60LL * 60LL * 1000LL},
-    {L"o", 30LL * 24LL * 60LL * 60LL * 1000LL},
-    {L"y", 365LL * 24LL * 60LL * 60LL * 1000LL},
-    {L"v", 0LL},
-    {L"p", 0LL},
-    {L"pm", 0LL},
-    {L"pr", 0LL}
+    { L"t", 0LL },
+    { L"s", 1000LL },
+    { L"m", 60LL * 1000LL },
+    { L"h", 60LL * 60LL * 1000LL },
+    { L"d", 24LL * 60LL * 60LL * 1000LL },
+    { L"w", 7LL * 24LL * 60LL * 60LL * 1000LL },
+    { L"mo", 30LL * 24LL * 60LL * 60LL * 1000LL },
+    { L"o", 30LL * 24LL * 60LL * 60LL * 1000LL },
+    { L"y", 365LL * 24LL * 60LL * 60LL * 1000LL },
+    { L"v", 0LL },
+    { L"p", 0LL },
+    { L"pm", 0LL },
+    { L"pr", 0LL }
 };
 
 static const dxf_string_t g_candle_price[dxf_cpa_count] = {
@@ -206,8 +206,7 @@ bool dx_candle_symbol_to_string(dxf_candle_attributes_t _attr, OUT dxf_string_t*
     return true;
 }
 
-DXFEED_API ERRORCODE dxf_add_candle_symbol(dxf_subscription_t subscription, dxf_candle_attributes_t candle_attributes)
-{
+DXFEED_API ERRORCODE dxf_add_candle_symbol(dxf_subscription_t subscription, dxf_candle_attributes_t candle_attributes) {
     dxf_string_t candle_symbol;
 
     if (!dx_candle_symbol_to_string(candle_attributes, &candle_symbol)) {

@@ -282,7 +282,7 @@ DXFEED_API ERRORCODE dxf_get_last_error (OUT int* error_code, OUT dxf_const_stri
  *	Initializes the internal logger.
  *  Various actions and events, including the errors, are being logged throughout the library. They may be stored
  *  into the file.
- 
+ *
  *  file_name - a full path to the file where the log is to be stored
  *  rewrite_file - a flag defining the file open mode; if it's nonzero then the log file will be rewritten
  *  show_timezone_info - a flag defining the time display option in the log file; if it's nonzero then
@@ -294,7 +294,7 @@ DXFEED_API ERRORCODE dxf_initialize_logger (const char* file_name, int rewrite_f
 /*
  *  Clear current sources and add new one to subscription
  *  Warning: you must configure order source before dxf_add_symbols/dxf_add_symbol call
-
+ *
  *  subscription - a handle of the subscription where source will be changed
  *  source - source of order to set, 4 symbols maximum length
  */
@@ -303,7 +303,7 @@ DXFEED_API ERRORCODE dxf_set_order_source(dxf_subscription_t subscription, const
 /*
  *  Add a new source to subscription
  *  Warning: you must configure order source before dxf_add_symbols/dxf_add_symbol call
-
+ *
  *  subscription - a handle of the subscription where source will be changed
  *  source - source of order event to add, 4 symbols maximum length
  */
@@ -332,7 +332,7 @@ DXFEED_API ERRORCODE dxf_create_candle_symbol_attributes(dxf_const_string_t base
 
 /*
  *	Free memory allocated by dxf_initialize_candle_symbol_attributes(...) function
-
+ *
  *  candle_attributes - pointer to the candle attributes struct
  */
 DXFEED_API ERRORCODE dxf_delete_candle_symbol_attributes(dxf_candle_attributes_t candle_attributes);
