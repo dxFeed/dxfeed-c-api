@@ -54,7 +54,7 @@ int main (int argc, char* argv[]) {
         run_test(NULL);
     }
     else {
-        /* run tests wchich names in command line */
+        /* run tests which names in command line */
         for (i = 1; i < argc; i++) {
             run_test(argv[i]);
         }
