@@ -23,9 +23,11 @@
 #define EVENTS_READ_TIMEOUT 120000
 #define EVENTS_LOOP_SLEEP_TIME 100
 
-#define CANDLE_DEFAULT_SYMBOL L"AAPL"
+#define CANDLE_DEFAULT_SYMBOL L"XBT/USD"
 #define CANDLE_USER_EXCHANGE L'A'
 #define CANDLE_USER_PERIOD_VALUE 2
+
+#define CANDLE_FULL_SYMBOL CANDLE_DEFAULT_SYMBOL L"{=d}"
 
 #define SYMBOL_DEFAULT L"AAPL"
 #define SYMBOL_IBM L"IBM"
@@ -455,10 +457,10 @@ bool create_candle_snapshot(dxf_connection_t connection, OUT dxf_snapshot_t *res
     dxf_snapshot_data_ptr_t snapshot_candle_data = NULL;
     dxf_candle_attributes_t candle_attributes;
 
-    if (!dxf_create_candle_symbol_attributes(g_default_symbol,
+    if (!dxf_create_candle_symbol_attributes(CANDLE_DEFAULT_SYMBOL,
         DXF_CANDLE_EXCHANGE_CODE_ATTRIBUTE_DEFAULT,
         DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT,
-        dxf_ctpa_day, dxf_cpa_mark, dxf_csa_default,
+        dxf_ctpa_day, dxf_cpa_default, dxf_csa_default,
         dxf_caa_default, &candle_attributes)) {
 
         process_last_error();
@@ -497,7 +499,7 @@ bool check_candle_snapshot_data_test(dxf_connection_t connection, dxf_snapshot_t
 
     snapshot_candle_data = snapshot_candle_data_get_obj();
     res &= dx_is_equal_int(DX_EVENT_BIT_MASK(g_candle_event_id), snapshot_candle_data->event_type);
-    res &= dx_is_equal_dxf_string_t(g_default_symbol, snapshot_candle_data->symbol);
+    res &= dx_is_equal_dxf_string_t(CANDLE_FULL_SYMBOL, snapshot_candle_data->symbol);
 
     if (!res) {
         PRINT_TEST_FAILED;
