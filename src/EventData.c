@@ -62,8 +62,9 @@ dxf_const_string_t dx_event_type_to_string (int event_type) {
     case DXF_ET_PROFILE: return L"Profile"; 
     case DXF_ET_ORDER: return L"Order"; 
     case DXF_ET_TIME_AND_SALE: return L"Time&Sale"; 
+    case DXF_ET_CANDLE: return L"Candle";
     default: return L"";
-    }	
+    }
 }
 
 /* -------------------------------------------------------------------------- */
@@ -110,18 +111,50 @@ bool dx_add_subscription_param_to_list(dxf_connection_t connection, dx_event_sub
     return !failed;
 }
 
-bool dx_get_order_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source, OUT dx_event_subscription_param_list_t* param_list) {
+bool dx_get_single_order_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source, 
+                                             dxf_uint_t subscr_flags,
+                                             OUT dx_event_subscription_param_list_t* param_list) {
+    dxf_char_t order_name_buf[ORDER_TMPL_LEN + DXF_RECORD_SUFFIX_SIZE] = { 0 };
+
+    if (!IS_FLAG_SET(subscr_flags, DX_SUBSCR_FLAG_SINGLE_RECORD)) {
+        return false;
+    }
+    if (IS_FLAG_SET(subscr_flags, DX_SUBSCR_FLAG_SR_MARKET_MAKER_ORDER)) {
+        CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"MarketMaker", dx_st_history);
+    }
+    else {
+        if (order_source->size > 1) {
+            return false;
+        }
+        CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Order", dx_st_history);
+        if (order_source->size != 0) {
+            dx_copy_string(order_name_buf, g_order_tmpl);
+            dx_copy_string_len(&order_name_buf[ORDER_TMPL_LEN], order_source->elements[0].suffix, DXF_RECORD_SUFFIX_SIZE);
+            CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, order_name_buf, dx_st_history);
+        }
+    }
+    return true;
+}
+
+bool dx_get_order_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source, 
+                                      dxf_uint_t subscr_flags,
+                                      OUT dx_event_subscription_param_list_t* param_list) {
     dxf_char_t ch = 'A';
-    dxf_char_t order_name_buf[ORDER_TMPL_LEN + RECORD_SUFFIX_SIZE] = { 0 };
+    dxf_char_t order_name_buf[ORDER_TMPL_LEN + DXF_RECORD_SUFFIX_SIZE] = { 0 };
     dxf_char_t quote_name_buf[QUOTE_TMPL_LEN + 2] = { 0 };
     int i;
+
+    if (IS_FLAG_SET(subscr_flags, DX_SUBSCR_FLAG_SINGLE_RECORD)) {
+        return dx_get_single_order_subscription_params(connection, order_source, subscr_flags, param_list);
+    }
+
     CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Quote", dx_st_ticker);
     CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"MarketMaker", dx_st_history);
     CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Order", dx_st_history);
 
     dx_copy_string(order_name_buf, g_order_tmpl);
     for (i = 0; i < order_source->size; ++i) {
-        dx_copy_string_len(&order_name_buf[ORDER_TMPL_LEN], order_source->elements[i].suffix, RECORD_SUFFIX_SIZE);
+        dx_copy_string_len(&order_name_buf[ORDER_TMPL_LEN], order_source->elements[i].suffix, DXF_RECORD_SUFFIX_SIZE);
         CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, order_name_buf, dx_st_history);
     }
 
@@ -156,9 +189,10 @@ bool dx_get_trade_subscription_params(dxf_connection_t connection, OUT dx_event_
  * You need to call dx_free(params.elements) to free resources.
 */
 int dx_get_event_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source, dx_event_id_t event_id,
-                                      OUT dx_event_subscription_param_list_t* params) {
-    bool result = true;
+                                     dxf_uint_t subscr_flags, OUT dx_event_subscription_param_list_t* params) {
+    bool result = false;
     dx_event_subscription_param_list_t param_list = { NULL, 0, 0 };
+
     switch (event_id) {
     case dx_eid_trade:
         result = dx_get_trade_subscription_params(connection, &param_list);
@@ -173,10 +207,13 @@ int dx_get_event_subscription_params(dxf_connection_t connection, dx_order_sourc
         result = dx_add_subscription_param_to_list(connection, &param_list, L"Profile", dx_st_ticker);
         break;
     case dx_eid_order:
-        result = dx_get_order_subscription_params(connection, order_source, &param_list);
+        result = dx_get_order_subscription_params(connection, order_source, subscr_flags, &param_list);
         break;
     case dx_eid_time_and_sale:
         result = dx_add_subscription_param_to_list(connection, &param_list, L"TimeAndSale", dx_st_stream);
+        break;
+    case dx_eid_candle:
+        result = dx_add_subscription_param_to_list(connection, &param_list, L"Candle", dx_st_history);
         break;
     }
 
@@ -212,6 +249,7 @@ EVENT_DATA_NAVIGATOR_BODY(dxf_summary_t)
 EVENT_DATA_NAVIGATOR_BODY(dxf_profile_t)
 EVENT_DATA_NAVIGATOR_BODY(dxf_order_t)
 EVENT_DATA_NAVIGATOR_BODY(dxf_time_and_sale_t)
+EVENT_DATA_NAVIGATOR_BODY(dxf_candle_t)
 
 static const dx_event_data_navigator g_event_data_navigators[dx_eid_count] = {
     EVENT_DATA_NAVIGATOR_NAME(dxf_trade_t),
@@ -219,7 +257,8 @@ static const dx_event_data_navigator g_event_data_navigators[dx_eid_count] = {
     EVENT_DATA_NAVIGATOR_NAME(dxf_summary_t),
     EVENT_DATA_NAVIGATOR_NAME(dxf_profile_t),
     EVENT_DATA_NAVIGATOR_NAME(dxf_order_t),
-    EVENT_DATA_NAVIGATOR_NAME(dxf_time_and_sale_t)
+    EVENT_DATA_NAVIGATOR_NAME(dxf_time_and_sale_t),
+    EVENT_DATA_NAVIGATOR_NAME(dxf_candle_t)
 };
 
 /* -------------------------------------------------------------------------- */

@@ -83,6 +83,7 @@ typedef struct {
     dxf_const_string_t name;
     dx_record_field_setter_t setter;
     dx_record_field_def_val_getter_t def_val_getter;
+    dx_record_field_getter_t getter;
     dx_scheme_field_time_t time;
 } dx_field_info_t;
 
@@ -99,7 +100,7 @@ typedef struct {
     int field_count;
     const dx_field_info_t* fields;
     dx_record_info_id_t info_id;
-    dxf_char_t suffix[RECORD_SUFFIX_SIZE];
+    dxf_char_t suffix[DXF_RECORD_SUFFIX_SIZE];
     dxf_char_t exchange_code;
 } dx_record_item_t;
 

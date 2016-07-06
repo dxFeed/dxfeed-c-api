@@ -163,7 +163,11 @@ typedef enum {
     dx_cec_invalid_connection_handle_internal,
     dx_cec_connection_context_not_initialized,
     dx_cec_invalid_connection_context_subsystem_id,
-    
+
+    /* candle event error codes*/
+
+    dx_ceec_invalid_candle_period_value,
+
     /* miscellaneous error codes */
     
     /* error code count */

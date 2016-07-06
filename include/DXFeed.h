@@ -107,6 +107,19 @@ DXFEED_API ERRORCODE dxf_close_connection (dxf_connection_t connection);
  */
 DXFEED_API ERRORCODE dxf_create_subscription (dxf_connection_t connection, int event_types,
                                               OUT dxf_subscription_t* subscription);
+
+/*
+ *	Creates a subscription with the specified parameters.
+
+ *  connection - a handle of a previously created connection which the subscription will be using
+ *  event_types - a bitmask of the subscription event types. See 'dx_event_id_t' and 'DX_EVENT_BIT_MASK'
+ *                for information on how to create an event type bitmask
+ *  time - time in the past (unix time in milliseconds)
+ *  OUT subscription - a handle of the created subscription
+ */
+DXFEED_API ERRORCODE dxf_create_subscription_timed(dxf_connection_t connection, int event_types, dxf_long_t time,
+                                                   OUT dxf_subscription_t* subscription);
+
 /*
  *	Closes a subscription.
  *  All the data associated with it will be freed.
@@ -132,6 +145,14 @@ DXFEED_API ERRORCODE dxf_add_symbol (dxf_subscription_t subscription, dxf_const_
  *  symbol_count - a number of symbols
  */
 DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dxf_const_string_t* symbols, int symbol_count);
+
+/*
+ *	Adds a candle symbol to the subscription.
+ 
+ *  subscription - a handle of the subscription to which a symbol is added
+ *  candle_attributes - pointer to the candle struct
+ */
+DXFEED_API ERRORCODE dxf_add_candle_symbol(dxf_subscription_t subscription, dxf_candle_attributes_t candle_attributes);
 
 /*
  *	Removes a single symbol from the subscription.
@@ -248,7 +269,7 @@ DXFEED_API ERRORCODE dxf_initialize_logger (const char* file_name, int rewrite_f
 /*
  *  Clear current sources and add new one to subscription
  *  Warning: you must configure order source before dxf_add_symbols/dxf_add_symbol call
- *
+
  *  subscription - a handle of the subscription where source will be changed
  *  source - source of order to set, 4 symbols maximum length
  */
@@ -257,10 +278,38 @@ DXFEED_API ERRORCODE dxf_set_order_source(dxf_subscription_t subscription, const
 /*
  *  Add a new source to subscription
  *  Warning: you must configure order source before dxf_add_symbols/dxf_add_symbol call
- *
+
  *  subscription - a handle of the subscription where source will be changed
  *  source - source of order event to add, 4 symbols maximum length
  */
 DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const char* source);
+
+/*
+ *	API that allows user to create candle symbol attributes
+ *
+ *  base_symbol - the symbols to add
+ *  exchange_code - exchange attribute of this symbol
+ *  period_value -  aggregation period value of this symbol
+ *  period_type - aggregation period type of this symbol
+ *  price - price type attribute of this symbol
+ *  session - session attribute of this symbol
+ *  alignment - alignment attribute of this symbol
+ *  candle_attributes - pointer to the configured candle attributes struct
+ */
+DXFEED_API ERRORCODE dxf_create_candle_symbol_attributes(dxf_const_string_t base_symbol,
+                                                         dxf_char_t exchange_code,
+                                                         dxf_double_t period_value,
+                                                         dxf_candle_type_period_attribute_t period_type,
+                                                         dxf_candle_price_attribute_t price,
+                                                         dxf_candle_session_attribute_t session,
+                                                         dxf_candle_alignment_attribute_t alignment,
+                                                         OUT dxf_candle_attributes_t* candle_attributes);
+
+/*
+ *	Free memory allocated by dxf_initialize_candle_symbol_attributes(...) function
+
+ *  candle_attributes - pointer to the candle attributes struct
+ */
+DXFEED_API ERRORCODE dxf_delete_candle_symbol_attributes(dxf_candle_attributes_t candle_attributes);
 
 #endif /* DXFEED_API_H_INCLUDED */

@@ -113,12 +113,21 @@
     <ClCompile Include="src\TestParser.c">
       <Filter>Parser\Test</Filter>
     </ClCompile>
+    <ClCompile Include="src\Candle.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="DXFeed.def">
       <Filter>Source Files</Filter>
     </None>
     <None Include="DXFeedd.def">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="DXFeed_64.def">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="DXFeedd_64.def">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
@@ -204,7 +213,7 @@
     <ClInclude Include="include\EventData.h">
       <Filter>Export</Filter>
     </ClInclude>
-    <ClInclude Include="src\RecordData.h">
+    <ClInclude Include="include\RecordData.h">
       <Filter>Export</Filter>
     </ClInclude>
     <ClInclude Include="include\pthreads\pthread.h">
@@ -217,6 +226,9 @@
       <Filter>Third Party\pthreads</Filter>
     </ClInclude>
     <ClInclude Include="src\Version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Candle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
