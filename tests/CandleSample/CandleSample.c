@@ -164,11 +164,11 @@ dxf_string_t ansi_to_unicode (const char* ansi_str) {
  * Parse date string in format 'DD-MM-YYYY'
  */
 bool parse_date(const char* date_str, struct tm* time_struct) {
-    int i;
-    int date_string_len = strlen(date_str);
+    size_t i;
+    size_t date_string_len = strlen(date_str);
     int separator_count = 0;
     char buf[DATE_TIME_BUF_SIZE + 1] = { 0 };
-    int buf_len = 0;
+    size_t buf_len = 0;
     int mday = 0;
     int month = 0;
     int year = 0;
