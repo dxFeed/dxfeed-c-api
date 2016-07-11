@@ -155,6 +155,14 @@ DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dxf_const
 DXFEED_API ERRORCODE dxf_add_candle_symbol(dxf_subscription_t subscription, dxf_candle_attributes_t candle_attributes);
 
 /*
+*	Remove a candle symbol from the subscription.
+
+*  subscription - a handle of the subscription from symbol will be removed
+*  candle_attributes - pointer to the candle struct
+*/
+DXFEED_API ERRORCODE dxf_remove_candle_symbol(dxf_subscription_t subscription, dxf_candle_attributes_t candle_attributes);
+
+/*
  *	Removes a single symbol from the subscription.
 
  *  subscription - a handle of the subscription from which a symbol is removed
@@ -184,7 +192,7 @@ DXFEED_API ERRORCODE dxf_remove_symbols (dxf_subscription_t subscription, dxf_co
  */
 DXFEED_API ERRORCODE dxf_get_symbols (dxf_subscription_t subscription, OUT dxf_const_string_t** symbols, OUT int* symbol_count);
 
-/*f lj
+/*
  *	Sets the symbols for the subscription.
  *  The difference between this function and 'dxf_add_symbols' is that all the previously added symbols
  *  that do not belong to the symbol list passed to this function will be removed.
@@ -397,6 +405,15 @@ DXFEED_API ERRORCODE dxf_attach_snapshot_listener(dxf_snapshot_t snapshot,
  */
 DXFEED_API ERRORCODE dxf_detach_snapshot_listener(dxf_snapshot_t snapshot, 
                                                   dxf_snapshot_listener_t snapshot_listener);
+
+/*
+*  Retrieves the symbol currently added to the snapshot subscription.
+*  The memory for the resulting symbol is allocated internally, so no actions to free it are required.
+*
+*  snapshot - a handle of the snapshot to which a listener is to be detached
+*  OUT symbol - a pointer to the string array object to which the symbol list is to be stored
+*/
+DXFEED_API ERRORCODE dxf_get_snapshot_symbol(dxf_snapshot_t snapshot, OUT dxf_string_t* symbol);
 
 
 #endif /* DXFEED_API_H_INCLUDED */

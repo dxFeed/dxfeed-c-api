@@ -882,3 +882,14 @@ bool dx_get_snapshot_subscription(dxf_snapshot_t snapshot, OUT dxf_subscription_
     *subscription = ((dx_snapshot_data_t*)snapshot)->subscription;
     return true;
 }
+
+dxf_string_t dx_get_snapshot_symbol(dxf_snapshot_t snapshot) {
+    dx_snapshot_data_ptr_t snapshot_data = (dx_snapshot_data_ptr_t)snapshot;
+
+    if (snapshot == dx_invalid_snapshot) {
+        dx_set_error_code(dx_ssec_invalid_snapshot_id);
+        return NULL;
+    }
+
+    return snapshot_data->symbol;
+}

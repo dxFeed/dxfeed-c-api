@@ -830,3 +830,15 @@ DXFEED_API ERRORCODE dxf_detach_snapshot_listener(dxf_snapshot_t snapshot, dxf_s
 
     return DXF_SUCCESS;
 }
+
+DXFEED_API ERRORCODE dxf_get_snapshot_symbol(dxf_snapshot_t snapshot, OUT dxf_string_t* symbol) {
+    dx_perform_common_actions();
+
+    if (snapshot == dx_invalid_subscription) {
+        dx_set_error_code(dx_ec_invalid_func_param);
+        return DXF_FAILURE;
+    }
+
+    *symbol = dx_get_snapshot_symbol(snapshot);
+    return DXF_SUCCESS;
+}

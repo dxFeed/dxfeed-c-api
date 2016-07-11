@@ -8,6 +8,7 @@ bool snapshot_duplicates_test(void);
 bool snapshot_subscription_test(void);
 bool snapshot_multiply_subscription_test(void);
 bool snapshot_subscription_and_events_test(void);
+bool snapshot_symbols_test(void);
 
 bool snapshot_all_test(void);
 

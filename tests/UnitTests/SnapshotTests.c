@@ -799,6 +799,81 @@ bool snapshot_subscription_and_events_test(void) {
     return true;
 }
 
+bool snapshot_symbols_test(void) {
+    dxf_connection_t connection;
+    dxf_snapshot_t snapshot;
+    bool res = true;
+    dxf_string_t returned_symbol = NULL;
+
+    snapshot_order_data_reset();
+    reset_thread_terminate(g_st_listener_thread_data);
+
+    if (!dxf_create_connection(g_dxfeed_host, snapshot_tests_on_thread_terminate, NULL, NULL, NULL, &connection)) {
+        process_last_error();
+        PRINT_TEST_FAILED;
+        return false;
+    }
+
+    if (!create_order_snapshot(connection, &snapshot)) {
+        dxf_close_connection(connection);
+        PRINT_TEST_FAILED;
+        return false;
+    }
+    
+    if (!dxf_get_snapshot_symbol(snapshot, &returned_symbol) ||
+        !dx_is_equal_dxf_string_t(g_default_symbol, returned_symbol)) {
+
+        PRINT_TEST_FAILED;
+        dxf_close_snapshot(snapshot);
+        dxf_close_connection(connection);
+        return false;
+    }
+
+    //close order subscription
+    if (!dxf_close_snapshot(snapshot)) {
+        process_last_error();
+        dxf_close_connection(connection);
+        PRINT_TEST_FAILED;
+        return false;
+    }
+    snapshot = NULL;
+
+    //open other subscriprion
+    snapshot_candle_data_reset();
+    reset_thread_terminate(g_st_listener_thread_data);
+
+    if (!create_candle_snapshot(connection, &snapshot)) {
+        dxf_close_connection(connection);
+        PRINT_TEST_FAILED;
+        return false;
+    }
+    
+    if (!dxf_get_snapshot_symbol(snapshot, &returned_symbol) ||
+        !dx_is_equal_dxf_string_t(CANDLE_FULL_SYMBOL, returned_symbol)) {
+
+        PRINT_TEST_FAILED;
+        dxf_close_snapshot(snapshot);
+        dxf_close_connection(connection);
+        return false;
+    }
+
+    //close candle subscription
+    if (!dxf_close_snapshot(snapshot)) {
+        process_last_error();
+        dxf_close_connection(connection);
+        PRINT_TEST_FAILED;
+        return false;
+    }
+    snapshot = NULL;
+
+    if (!dxf_close_connection(connection)) {
+        process_last_error();
+        PRINT_TEST_FAILED;
+        return false;
+    }
+    return true;
+}
+
 bool snapshot_all_test(void) {
     bool res = true;
     init_listener_thread_data(&g_st_listener_thread_data);
@@ -810,7 +885,8 @@ bool snapshot_all_test(void) {
         !snapshot_duplicates_test() ||
         !snapshot_subscription_test() ||
         !snapshot_multiply_subscription_test() ||
-        !snapshot_subscription_and_events_test()) {
+        !snapshot_subscription_and_events_test() ||
+        !snapshot_symbols_test()) {
 
         res = false;
     }

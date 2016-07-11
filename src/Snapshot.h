@@ -52,5 +52,6 @@ bool dx_remove_snapshot_listener(dxf_snapshot_t snapshot, dxf_snapshot_listener_
 bool dx_get_snapshot_subscription(dxf_snapshot_t snapshot, OUT dxf_subscription_t *subscription);
 dxf_ulong_t dx_new_snapshot_key(dx_record_info_id_t record_info_id, dxf_const_string_t symbol,
                                 dxf_const_string_t order_source);
+dxf_string_t dx_get_snapshot_symbol(dxf_snapshot_t snapshot);
 
 #endif /* SNAPSHOT_H_INCLUDED */
