@@ -407,11 +407,11 @@ DXFEED_API ERRORCODE dxf_detach_snapshot_listener(dxf_snapshot_t snapshot,
                                                   dxf_snapshot_listener_t snapshot_listener);
 
 /*
-*  Retrieves the symbol currently added to the snapshot subscription.
-*  The memory for the resulting symbol is allocated internally, so no actions to free it are required.
-*
-*  snapshot - a handle of the snapshot to which a listener is to be detached
-*  OUT symbol - a pointer to the string array object to which the symbol list is to be stored
+ *  Retrieves the symbol currently added to the snapshot subscription.
+ *  The memory for the resulting symbol is allocated internally, so no actions to free it are required.
+ *
+ *  snapshot - a handle of the snapshot to which a listener is to be detached
+ *  OUT symbol - a pointer to the string object to which the symbol is to be stored
 */
 DXFEED_API ERRORCODE dxf_get_snapshot_symbol(dxf_snapshot_t snapshot, OUT dxf_string_t* symbol);
 
