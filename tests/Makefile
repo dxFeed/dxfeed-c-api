@@ -12,7 +12,9 @@
 # Portions created by the Initial Developer are Copyright (C) 2010
 # the Initial Developer. All Rights Reserved.
 
-SUBDIRS = CommandLineSample
+SUBDIRS = CandleSample \
+	  CommandLineSample \
+	  SnapshotConsoleSample
 
 .PHONY: all $(SUBDIRS)
 
