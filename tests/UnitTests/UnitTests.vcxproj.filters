@@ -125,6 +125,21 @@
     <ClCompile Include="..\..\src\Candle.c">
       <Filter>Common\Sources</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Snapshot.c">
+      <Filter>Common\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\StringArray.c">
+      <Filter>Common\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\EventManager.c">
+      <Filter>Common\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="SnapshotTests.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TestHelper.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\DXAlgorithms.h">
@@ -180,6 +195,21 @@
     </ClInclude>
     <ClInclude Include="..\..\src\Candle.h">
       <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Snapshot.h">
+      <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\EventManager.h">
+      <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\StringArray.h">
+      <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="SnapshotTests.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TestHelper.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

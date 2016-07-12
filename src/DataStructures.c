@@ -675,7 +675,7 @@ bool dx_add_record_to_list(dxf_connection_t connection, dx_record_item_t record,
     dx_record_server_support_state_t new_state;
     dx_data_structures_connection_context_t* dscc = NULL;
 
-    // Update records list
+    /* Update records list */
     new_record.name = dx_create_string_src(record.name);
     new_record.field_count = record.field_count;
     new_record.fields = record.fields;
@@ -689,7 +689,7 @@ bool dx_add_record_to_list(dxf_connection_t connection, dx_record_item_t record,
         return dx_set_error_code(dx_sec_not_enough_memory);
     }
 
-    // Update record server support states
+    /* Update record server support states */
     dscc = dx_get_data_structures_connection_context(connection);
     if (dscc == NULL) {
         DX_ARRAY_DELETE(g_records_list, dx_record_item_t, index, dx_capacity_manager_halfer, failed);
@@ -704,7 +704,7 @@ bool dx_add_record_to_list(dxf_connection_t connection, dx_record_item_t record,
         return dx_set_error_code(dx_sec_not_enough_memory);
     }
 
-    //Update record digests
+    /* Update record digests */
     if (!dx_add_record_digest_to_list(connection, index)) {
         DX_ARRAY_DELETE(g_records_list, dx_record_item_t, index, dx_capacity_manager_halfer, failed);
         DX_ARRAY_DELETE(dscc->record_server_support_states, dx_record_server_support_state_t, index, dx_capacity_manager_halfer, failed);

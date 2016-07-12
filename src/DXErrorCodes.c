@@ -168,6 +168,17 @@ dxf_const_string_t dx_get_error_description (dx_error_code_t code) {
 
     case dx_ceec_invalid_candle_period_value: return L"Invalid candle event period value";
 
+
+    /* snapshot error codes */
+
+    case dx_ssec_invalid_snapshot_id: return L"Invalid snapshot descriptor";
+    case dx_ssec_invalid_event_id: return L"Invalid event id";
+    case dx_ssec_invalid_symbol: return L"Invalid or empty symbol string";
+    case dx_ssec_snapshot_exist: return L"Snapshot with such event id and symbol already exists";
+    case dx_ssec_invalid_listener: return L"Invalid snapshot listener";
+    case dx_ssec_unknown_state: return L"Unknown state of snapshot flags";
+    case dx_ssec_duplicate_record: return L"Inserted record is already exist";
+    
     /* miscellaneous error codes */
     
     default: return L"Invalid error code";

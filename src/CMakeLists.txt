@@ -36,11 +36,14 @@ set (HEADER_FILES
     DXPMessageData.h
     DXSockets.h
     DXThreads.h
+    EventManager.h
     EventSubscription.h
     Logger.h
     PrimitiveTypes.h
     RecordTranscoder.h
     ServerMessageProcessor.h
+    Snapshot.h
+    StringArray.h
     TaskQueue.h
     Version.h
     Candle.h
@@ -85,10 +88,13 @@ set (SOURCE_FILES
     DXSockets.c
     DXThreads.c
     EventData.c
+    EventManager.c
     EventSubscription.c
     Logger.c
     RecordTranscoder.c
     ServerMessageProcessor.c
+    Snapshot.c
+    StringArray.c
     TaskQueue.c
     Win32.c
     Candle.c

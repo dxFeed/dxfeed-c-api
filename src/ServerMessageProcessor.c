@@ -35,6 +35,7 @@
 #include "DXThreads.h"
 #include "TaskQueue.h"
 #include "DXNetwork.h"
+#include "Snapshot.h"
 
 #include <limits.h>
 
@@ -1117,6 +1118,7 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 
         event_params.flags = record_params.flags;
         event_params.time_int_field = record_params.time_int_field;
+        event_params.snapshot_key = dx_new_snapshot_key(record_info->info_id, record_params.symbol_name, suffix);
 
         if (!dx_transcode_record_data(context->connection, &record_params, &event_params, 
             g_buffer_managers[record_info->info_id].record_buffer_getter(context->rbcc), record_count)) {
@@ -1391,7 +1393,7 @@ bool dx_process_describe_protocol (dx_server_msg_proc_connection_context_t* cont
         return false;
 	}
 
-    //All additional data must be skipped according to message length
+    /* All additional data must be skipped according to message length */
     buf_pos = dx_get_in_buffer_position(context->bicc);
     buf_limit = dx_get_in_buffer_limit(context->bicc);
     if (buf_pos < buf_limit)

@@ -42,14 +42,14 @@ static dx_fundamental_t* summaries[SYMBOLS_COUNT] = {0};
 static dx_profile_t*     profiles[SYMBOLS_COUNT] = {0};
 
 /* -------------------------------------------------------------------------- */
-void trade_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, 
-                    dxf_event_flags_t flags, int data_count, void* user_data);
-void quote_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, 
-                    dxf_event_flags_t flags, int data_count, void* user_data);
-void summary_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, 
-                      dxf_event_flags_t flags, int data_count, void* user_data);
-void profile_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, 
-                      dxf_event_flags_t flags, int data_count, void* user_data);
+void trade_listener(int event_type, dxf_const_string_t symbol_name,
+                    const dxf_event_data_t* data, int data_count, void* user_data);
+void quote_listener(int event_type, dxf_const_string_t symbol_name,
+                    const dxf_event_data_t* data, int data_count, void* user_data);
+void summary_listener(int event_type, dxf_const_string_t symbol_name,
+                      const dxf_event_data_t* data, int data_count, void* user_data);
+void profile_listener(int event_type, dxf_const_string_t symbol_name,
+                      const dxf_event_data_t* data, int data_count, void* user_data);
 
 static struct event_info_t event_info[EVENTS_COUNT] = { {DXF_ET_TRADE, trade_listener},
 {DXF_ET_QUOTE, quote_listener},
@@ -156,8 +156,8 @@ dxf_event_data_t getData(int event_type, int i) {
     else return NULL;
 }
 
-void trade_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, 
-                    dxf_event_flags_t flags, int data_count, void* user_data) {
+void trade_listener(int event_type, dxf_const_string_t symbol_name,
+                    const dxf_event_data_t* data, int data_count, void* user_data) {
     dx_trade_t* trades_data = (dx_trade_t*)data;
     dx_trade_t* dst_trade;
     int i = 0;
@@ -186,8 +186,8 @@ void trade_listener(int event_type, dxf_const_string_t symbol_name, const dxf_ev
 
 /* -------------------------------------------------------------------------- */
 
-void quote_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, 
-                    dxf_event_flags_t flags, int data_count, void* user_data) {
+void quote_listener(int event_type, dxf_const_string_t symbol_name,
+                    const dxf_event_data_t* data, int data_count, void* user_data) {
     dx_quote_t* quotes_data = (dx_quote_t*)data;
     dx_quote_t* dst_quote;
     int i = 0;
@@ -216,8 +216,8 @@ void quote_listener(int event_type, dxf_const_string_t symbol_name, const dxf_ev
 
 /* -------------------------------------------------------------------------- */
 
-void summary_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, 
-                      dxf_event_flags_t flags, int data_count, void* user_data) {
+void summary_listener(int event_type, dxf_const_string_t symbol_name,
+                      const dxf_event_data_t* data, int data_count, void* user_data) {
     dx_fundamental_t* summaries_data = (dx_fundamental_t*)data;
     dx_fundamental_t* dst_summary;
     int i = 0;
@@ -246,8 +246,8 @@ void summary_listener(int event_type, dxf_const_string_t symbol_name, const dxf_
 
 /* -------------------------------------------------------------------------- */
 
-void profile_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, 
-                      dxf_event_flags_t flags, int data_count, void* user_data) {
+void profile_listener(int event_type, dxf_const_string_t symbol_name,
+                      const dxf_event_data_t* data, int data_count, void* user_data) {
     dx_profile_t* profiles_data = (dx_profile_t*)data;
     dx_profile_t* dst_profile;
     int i = 0;

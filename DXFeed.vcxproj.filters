@@ -116,6 +116,15 @@
     <ClCompile Include="src\Candle.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Snapshot.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\StringArray.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EventManager.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="DXFeed.def">
@@ -229,6 +238,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Candle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Snapshot.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\StringArray.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\EventManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

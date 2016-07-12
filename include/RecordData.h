@@ -48,7 +48,6 @@ typedef enum {
     dx_rid_count,
     dx_rid_invalid
 } dx_record_info_id_t;
-//TODO: possible need to rename elements
 
 typedef int dx_record_id_t;
 
@@ -134,7 +133,6 @@ typedef struct {
     dxf_int_t type;    
 } dx_time_and_sale_t;
 
-//TODO: add to EventManager
 typedef struct {
     dxf_long_t time;
     dxf_int_t sequence;

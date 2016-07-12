@@ -155,6 +155,14 @@ DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dxf_const
 DXFEED_API ERRORCODE dxf_add_candle_symbol(dxf_subscription_t subscription, dxf_candle_attributes_t candle_attributes);
 
 /*
+*	Remove a candle symbol from the subscription.
+
+*  subscription - a handle of the subscription from symbol will be removed
+*  candle_attributes - pointer to the candle struct
+*/
+DXFEED_API ERRORCODE dxf_remove_candle_symbol(dxf_subscription_t subscription, dxf_candle_attributes_t candle_attributes);
+
+/*
  *	Removes a single symbol from the subscription.
 
  *  subscription - a handle of the subscription from which a symbol is removed
@@ -184,7 +192,7 @@ DXFEED_API ERRORCODE dxf_remove_symbols (dxf_subscription_t subscription, dxf_co
  */
 DXFEED_API ERRORCODE dxf_get_symbols (dxf_subscription_t subscription, OUT dxf_const_string_t** symbols, OUT int* symbol_count);
 
-/*f lj
+/*
  *	Sets the symbols for the subscription.
  *  The difference between this function and 'dxf_add_symbols' is that all the previously added symbols
  *  that do not belong to the symbol list passed to this function will be removed.
@@ -223,6 +231,31 @@ DXFEED_API ERRORCODE dxf_attach_event_listener (dxf_subscription_t subscription,
 DXFEED_API ERRORCODE dxf_detach_event_listener (dxf_subscription_t subscription, dxf_event_listener_t event_listener);
 
 /*
+*  Attaches a extended listener callback to the subscription.
+*  This callback will be invoked when the new event data for the subscription symbols arrives.
+*  No error occurs if it's attempted to attach the same listener twice or more.
+* 
+*  This listener differs with extend number of callback parameters.
+*
+*  subscription - a handle of the subscription to which a listener is to be attached
+*  event_listener - a listener callback function pointer
+*  user_data - if there isn't user data pass NULL
+*/
+DXFEED_API ERRORCODE dxf_attach_event_listener_v2(dxf_subscription_t subscription, 
+                                                  dxf_event_listener_v2_t event_listener,
+                                                  void* user_data);
+
+/*
+*  Detaches a extended listener from the subscription.
+*  No error occurs if it's attempted to detach a listener which wasn't previously attached.
+
+*  subscription - a handle of the subscription from which a listener is to be detached
+*  event_listener - a listener callback function pointer
+*/
+DXFEED_API ERRORCODE dxf_detach_event_listener_v2(dxf_subscription_t subscription, 
+                                                  dxf_event_listener_v2_t event_listener);
+
+/*
  *	Retrieves the subscription event types.
  
  *  subscription - a handle of the subscription whose event types are to be retrieved
@@ -257,7 +290,7 @@ DXFEED_API ERRORCODE dxf_get_last_error (OUT int* error_code, OUT dxf_const_stri
  *	Initializes the internal logger.
  *  Various actions and events, including the errors, are being logged throughout the library. They may be stored
  *  into the file.
- 
+ *
  *  file_name - a full path to the file where the log is to be stored
  *  rewrite_file - a flag defining the file open mode; if it's nonzero then the log file will be rewritten
  *  show_timezone_info - a flag defining the time display option in the log file; if it's nonzero then
@@ -269,7 +302,7 @@ DXFEED_API ERRORCODE dxf_initialize_logger (const char* file_name, int rewrite_f
 /*
  *  Clear current sources and add new one to subscription
  *  Warning: you must configure order source before dxf_add_symbols/dxf_add_symbol call
-
+ *
  *  subscription - a handle of the subscription where source will be changed
  *  source - source of order to set, 4 symbols maximum length
  */
@@ -278,7 +311,7 @@ DXFEED_API ERRORCODE dxf_set_order_source(dxf_subscription_t subscription, const
 /*
  *  Add a new source to subscription
  *  Warning: you must configure order source before dxf_add_symbols/dxf_add_symbol call
-
+ *
  *  subscription - a handle of the subscription where source will be changed
  *  source - source of order event to add, 4 symbols maximum length
  */
@@ -307,9 +340,80 @@ DXFEED_API ERRORCODE dxf_create_candle_symbol_attributes(dxf_const_string_t base
 
 /*
  *	Free memory allocated by dxf_initialize_candle_symbol_attributes(...) function
-
+ *
  *  candle_attributes - pointer to the candle attributes struct
  */
 DXFEED_API ERRORCODE dxf_delete_candle_symbol_attributes(dxf_candle_attributes_t candle_attributes);
+
+/*
+ *  Creates Order snapshot with the specified parameters.
+ *
+ *  If source is NULL string subscription on Order event will be performed. You can specify order 
+ *  source for Order event by passing suffix: "BYX", "BZX", "DEA", "DEX", "ISE", "IST", "NTV".
+ *  If source is equal to "COMPOSITE_BID" or "COMPOSITE_ASK" subscription on MarketMaker event will 
+ *  be performed.
+ *
+ *  connection - a handle of a previously created connection which the subscription will be using
+ *  symbol - the symbol to add
+ *  source - order source for Order event with 4 symbols maximum length OR keyword which can be 
+ *           one of COMPOSITE_BID or COMPOSITE_ASK
+ *  time - time in the past (unix time in milliseconds)
+ *  OUT snapshot - a handle of the created snapshot
+ */
+DXFEED_API ERRORCODE dxf_create_order_snapshot(dxf_connection_t connection, 
+                                               dxf_const_string_t symbol, const char* source,
+                                               dxf_long_t time, OUT dxf_snapshot_t* snapshot);
+
+/*
+ *  Creates Candle snapshot with the specified parameters.
+ *
+ *  connection - a handle of a previously created connection which the subscription will be using
+ *  candle_attributes - object specified symbol attributes of candle
+ *  time - time in the past (unix time in milliseconds)
+ *  OUT snapshot - a handle of the created snapshot
+ */
+DXFEED_API ERRORCODE dxf_create_candle_snapshot(dxf_connection_t connection, 
+                                                dxf_candle_attributes_t candle_attributes, 
+                                                dxf_long_t time, OUT dxf_snapshot_t* snapshot);
+
+/*
+ *  Closes a snapshot.
+ *  All the data associated with it will be freed.
+ *
+ *  snapshot - a handle of the snapshot to close
+ */
+DXFEED_API ERRORCODE dxf_close_snapshot(dxf_snapshot_t snapshot);
+
+/*
+ *  Attaches a listener callback to the snapshot.
+ *  This callback will be invoked when the new snapshot arrives or existing updates.
+ *  No error occurs if it's attempted to attach the same listener twice or more.
+ *
+ *  snapshot - a handle of the snapshot to which a listener is to be attached
+ *  snapshot_listener - a listener callback function pointer
+ */
+DXFEED_API ERRORCODE dxf_attach_snapshot_listener(dxf_snapshot_t snapshot, 
+                                                  dxf_snapshot_listener_t snapshot_listener,
+                                                  void* user_data);
+
+/*
+ *  Detaches a listener from the snapshot.
+ *  No error occurs if it's attempted to detach a listener which wasn't previously attached.
+ *
+ *  snapshot - a handle of the snapshot to which a listener is to be detached
+ *  snapshot_listener - a listener callback function pointer
+ */
+DXFEED_API ERRORCODE dxf_detach_snapshot_listener(dxf_snapshot_t snapshot, 
+                                                  dxf_snapshot_listener_t snapshot_listener);
+
+/*
+ *  Retrieves the symbol currently added to the snapshot subscription.
+ *  The memory for the resulting symbol is allocated internally, so no actions to free it are required.
+ *
+ *  snapshot - a handle of the snapshot to which a listener is to be detached
+ *  OUT symbol - a pointer to the string object to which the symbol is to be stored
+*/
+DXFEED_API ERRORCODE dxf_get_snapshot_symbol(dxf_snapshot_t snapshot, OUT dxf_string_t* symbol);
+
 
 #endif /* DXFEED_API_H_INCLUDED */

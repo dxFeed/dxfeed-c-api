@@ -168,6 +168,17 @@ typedef enum {
 
     dx_ceec_invalid_candle_period_value,
 
+
+    /* snapshot error codes */
+
+    dx_ssec_invalid_snapshot_id,
+    dx_ssec_invalid_event_id,
+    dx_ssec_invalid_symbol,
+    dx_ssec_snapshot_exist,
+    dx_ssec_invalid_listener,
+    dx_ssec_unknown_state,
+    dx_ssec_duplicate_record,
+    
     /* miscellaneous error codes */
     
     /* error code count */

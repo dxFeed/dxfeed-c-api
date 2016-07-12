@@ -30,9 +30,9 @@
 */
 /* -------------------------------------------------------------------------- */
 
-//used for subscribing on one record only in case of snapshots
+/* used for subscribing on one record only in case of snapshots */
 #define DX_SUBSCR_FLAG_SINGLE_RECORD            0x1
-//use with DX_SUBSCR_FLAG_SINGLE_RECORD flag and for dx_eid_order (Order) event
+/* use with DX_SUBSCR_FLAG_SINGLE_RECORD flag and for dx_eid_order (Order) event */
 #define DX_SUBSCR_FLAG_SR_MARKET_MAKER_ORDER    0x2
 
 extern const dxf_subscription_t dx_invalid_subscription;
@@ -62,7 +62,9 @@ bool dx_close_event_subscription (dxf_subscription_t subscr_id);
 bool dx_add_symbols (dxf_subscription_t subscr_id, dxf_const_string_t* symbols, int symbol_count);
 bool dx_remove_symbols (dxf_subscription_t subscr_id, dxf_const_string_t* symbols, int symbol_count);
 bool dx_add_listener (dxf_subscription_t subscr_id, dxf_event_listener_t listener, void* user_data);
+bool dx_add_listener_v2(dxf_subscription_t subscr_id, dxf_event_listener_v2_t listener, void* user_data);
 bool dx_remove_listener (dxf_subscription_t subscr_id, dxf_event_listener_t listener);
+bool dx_remove_listener_v2(dxf_subscription_t subscr_id, dxf_event_listener_v2_t listener);
 bool dx_get_subscription_connection (dxf_subscription_t subscr_id, OUT dxf_connection_t* connection);
 bool dx_get_event_subscription_event_types (dxf_subscription_t subscr_id, OUT int* event_types);
 bool dx_get_event_subscription_symbols (dxf_subscription_t subscr_id,

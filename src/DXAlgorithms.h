@@ -319,10 +319,10 @@ double dx_random_double (double max_value);
         } \
         \
         if (_buffer_to_free == NULL) { \
-            dx_memmove((void*)(_new_elem_buffer + position + 1), (const void*)((array_obj).elements + position), \
+            dx_memmove((void*)(_new_elem_buffer + position + 1), (const void*)((elem_type*)(array_obj).elements + position), \
                        ((array_obj).size - position) * sizeof(elem_type)); \
         } else { \
-            dx_memcpy((void*)(_new_elem_buffer + position + 1), (const void*)((array_obj).elements + position), \
+            dx_memcpy((void*)(_new_elem_buffer + position + 1), (const void*)((elem_type*)(array_obj).elements + position), \
                       ((array_obj).size - position) * sizeof(elem_type)); \
             dx_free(_buffer_to_free); \
         } \
@@ -381,10 +381,10 @@ double dx_random_double (double max_value);
         } \
         \
         if (_buffer_to_free == NULL) { \
-            dx_memmove((void*)(_new_elem_buffer + position), (const void*)((array_obj).elements + position + 1), \
+            dx_memmove((void*)(_new_elem_buffer + position), (const void*)((elem_type*)(array_obj).elements + position + 1), \
                        ((array_obj).size - position - 1) * sizeof(elem_type)); \
         } else { \
-            dx_memcpy((void*)(_new_elem_buffer + position), (const void*)((array_obj).elements + position + 1), \
+            dx_memcpy((void*)(_new_elem_buffer + position), (const void*)((elem_type*)(array_obj).elements + position + 1), \
                       ((array_obj).size - position - 1) * sizeof(elem_type)); \
             dx_free(_buffer_to_free); \
         } \

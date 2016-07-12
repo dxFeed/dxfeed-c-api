@@ -22,11 +22,11 @@ dxf_const_string_t dx_event_type_to_string (int event_type) {
 
 /* -------------------------------------------------------------------------- */
 
-void first_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, 
-                    dxf_event_flags_t flags, int data_count, void* user_data) {
+void first_listener(int event_type, dxf_const_string_t symbol_name,
+                    const dxf_event_data_t* data, int data_count, void* user_data) {
 	dxf_int_t i = 0;
 
-	wprintf(L"First listener. Event: %s Symbol: %s\n",dx_event_type_to_string(event_type), symbol_name);
+    wprintf(L"First listener. Event: %s Symbol: %s\n", dx_event_type_to_string(event_type), symbol_name);
 
     if (event_type == DXF_ET_QUOTE) {
         dxf_quote_t* quotes = (dxf_quote_t*)data;
@@ -91,11 +91,11 @@ void first_listener(int event_type, dxf_const_string_t symbol_name, const dxf_ev
 
 /* -------------------------------------------------------------------------- */
 
-void second_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, 
-                     dxf_event_flags_t flags, int data_count, void* user_data) {
+void second_listener(int event_type, dxf_const_string_t symbol_name,
+                     const dxf_event_data_t* data, int data_count, void* user_data) {
 	dxf_int_t i = 0;
 
-	wprintf(L"Second listener. Event: %s Symbol: %s\n",dx_event_type_to_string(event_type), symbol_name);
+    wprintf(L"Second listener. Event: %s Symbol: %s\n", dx_event_type_to_string(event_type), symbol_name);
 }
 
 /* -------------------------------------------------------------------------- */

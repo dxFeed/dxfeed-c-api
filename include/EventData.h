@@ -231,10 +231,15 @@ typedef struct {
  */
 /* -------------------------------------------------------------------------- */
 
+
 typedef void (*dxf_event_listener_t) (int event_type, dxf_const_string_t symbol_name,
-                                      const dxf_event_data_t* data, dxf_event_flags_t flags,
-                                      int data_count, void* user_data);
-                                     
+                                      const dxf_event_data_t* data, int data_count,
+                                      void* user_data);
+
+typedef void (*dxf_event_listener_v2_t) (int event_type, dxf_const_string_t symbol_name,
+                                      const dxf_event_data_t* data, int data_count, 
+                                      const dxf_event_params_t* event_params, void* user_data);
+
 /* -------------------------------------------------------------------------- */
 /*
  *	Various event functions
@@ -279,6 +284,31 @@ typedef struct {
  */
 int dx_get_event_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source, dx_event_id_t event_id,
                                      dxf_uint_t subscr_flags, OUT dx_event_subscription_param_list_t* params);
+
+/* -------------------------------------------------------------------------- */
+/*
+*  Snapshot data structs
+*/
+/* -------------------------------------------------------------------------- */
+
+typedef struct {
+    int event_type;
+    dxf_string_t symbol;
+
+    int records_count;
+    const dxf_event_data_t* records;
+} dxf_snapshot_data_t, *dxf_snapshot_data_ptr_t;
+
+/* -------------------------------------------------------------------------- */
+/*
+*  Snapshot listener prototype
+
+*  snapshot_data - pointer to the received snapshot data
+*  user_data     - pointer to user struct, use NULL by default
+*/
+/* -------------------------------------------------------------------------- */
+
+typedef void(*dxf_snapshot_listener_t) (const dxf_snapshot_data_ptr_t snapshot_data, void* user_data);
 
 /* -------------------------------------------------------------------------- */
 /*
