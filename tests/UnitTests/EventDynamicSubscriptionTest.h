@@ -4,6 +4,6 @@
 
 #include "PrimitiveTypes.h"
 
-bool event_dynamic_subscription_test(void);
+bool event_dynamic_subscription_all_test(void);
 
 #endif /* EVENT_DYNAMIC_SUBSCRIPTION_TEST_H_INCLUDED */

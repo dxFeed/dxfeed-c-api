@@ -23,6 +23,7 @@
 #include "DXMemory.h"
 #include "DXAlgorithms.h"
 #include "ConnectionContextData.h"
+#include "StringArray.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -34,12 +35,6 @@ typedef struct {
     void* buffer;
     int capacity;
 } dx_event_record_buffer_t;
-
-typedef struct {
-    dxf_const_string_t* elements;
-    int size;
-    int capacity;
-} dx_string_array_t;
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -174,6 +169,8 @@ GET_RECORD_PTR_BODY(dx_rid_order, dx_order_t)
 GET_RECORD_BUF_PTR_BODY(dx_rid_order)
 GET_RECORD_PTR_BODY(dx_rid_time_and_sale, dx_time_and_sale_t)
 GET_RECORD_BUF_PTR_BODY(dx_rid_time_and_sale)
+GET_RECORD_PTR_BODY(dx_rid_candle, dx_candle_t)
+GET_RECORD_BUF_PTR_BODY(dx_rid_candle)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -188,7 +185,8 @@ const dx_buffer_manager_collection_t g_buffer_managers[dx_rid_count] = {
     { GET_RECORD_PTR_NAME(dx_rid_profile), GET_RECORD_BUF_PTR_NAME(dx_rid_profile) },
     { GET_RECORD_PTR_NAME(dx_rid_market_maker), GET_RECORD_BUF_PTR_NAME(dx_rid_market_maker) },
     { GET_RECORD_PTR_NAME(dx_rid_order), GET_RECORD_BUF_PTR_NAME(dx_rid_order) },
-    { GET_RECORD_PTR_NAME(dx_rid_time_and_sale), GET_RECORD_BUF_PTR_NAME(dx_rid_time_and_sale) }
+    { GET_RECORD_PTR_NAME(dx_rid_time_and_sale), GET_RECORD_BUF_PTR_NAME(dx_rid_time_and_sale) },
+    { GET_RECORD_PTR_NAME(dx_rid_candle), GET_RECORD_BUF_PTR_NAME(dx_rid_candle) }
 };
 
 void dx_clear_record_buffers (dx_event_record_buffer_t* record_buffers) {
@@ -211,30 +209,13 @@ void dx_clear_record_buffers (dx_event_record_buffer_t* record_buffers) {
 /* -------------------------------------------------------------------------- */
 
 bool dx_store_string_buffer (void* context, dxf_const_string_t buf) {
-    bool failed = false;
-    dx_string_array_t* string_buffers = &(CTX(context)->string_buffers);
-    
-    DX_ARRAY_INSERT(*string_buffers, dxf_const_string_t, buf, string_buffers->size, dx_capacity_manager_halfer, failed);
-    
-    return !failed;
+    return dx_string_array_add(&(CTX(context)->string_buffers), buf);
 }
 
 /* -------------------------------------------------------------------------- */
 
 void dx_free_string_buffers_impl (dx_string_array_t* string_buffers) {
-    int i = 0;
-
-    for (; i < string_buffers->size; ++i) {
-        dx_free((void*)string_buffers->elements[i]);
-    }
-
-    if (string_buffers->elements != NULL) {
-        dx_free((void*)string_buffers->elements);
-    }
-
-    string_buffers->elements = NULL;
-    string_buffers->size = 0;
-    string_buffers->capacity = 0;
+    dx_string_array_free(string_buffers);
 }
 
 /* ---------------------------------- */

@@ -149,6 +149,24 @@ void DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, exch_sale_conds) (void* obj
 
 /* -------------------------------------------------------------------------- */
 /*
+*	Candle field setters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_SETTER_BODY(dx_candle_t, time, dxf_int_t)
+FIELD_SETTER_BODY(dx_candle_t, sequence, dxf_int_t)
+FIELD_SETTER_BODY(dx_candle_t, count, dxf_double_t)
+FIELD_SETTER_BODY(dx_candle_t, open, dxf_double_t)
+FIELD_SETTER_BODY(dx_candle_t, high, dxf_double_t)
+FIELD_SETTER_BODY(dx_candle_t, low, dxf_double_t)
+FIELD_SETTER_BODY(dx_candle_t, close, dxf_double_t)
+FIELD_SETTER_BODY(dx_candle_t, volume, dxf_double_t)
+FIELD_SETTER_BODY(dx_candle_t, vwap, dxf_double_t)
+FIELD_SETTER_BODY(dx_candle_t, bid_volume, dxf_double_t)
+FIELD_SETTER_BODY(dx_candle_t, ask_volume, dxf_double_t)
+
+/* -------------------------------------------------------------------------- */
+/*
  *	Default value getter functions
  */
 /* -------------------------------------------------------------------------- */
@@ -340,3 +358,152 @@ FIELD_DEF_VAL_BODY(dx_time_and_sale_t, bid_price, dxf_double_t)
 FIELD_DEF_VAL_BODY(dx_time_and_sale_t, ask_price, dxf_double_t)
 FIELD_DEF_VAL_BODY(dx_time_and_sale_t, exch_sale_conds, dxf_int_t)
 FIELD_DEF_VAL_BODY(dx_time_and_sale_t, type, dxf_int_t)
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Candle field value getters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_DEF_VAL_BODY(dx_candle_t, time, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_candle_t, sequence, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_candle_t, count, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_candle_t, open, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_candle_t, high, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_candle_t, low, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_candle_t, close, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_candle_t, volume, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_candle_t, vwap, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_candle_t, bid_volume, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_candle_t, ask_volume, dxf_double_t)
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Getter body macro
+*/
+/* -------------------------------------------------------------------------- */
+
+#define FIELD_GETTER_BODY(struct_name, field_name, field_type) \
+    DX_RECORD_FIELD_GETTER_PROTOTYPE(struct_name, field_name) { \
+        *(field_type*)field = ((struct_name*)object)->field_name; \
+    }
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Trade field getters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_GETTER_BODY(dx_trade_t, time, dxf_long_t)
+FIELD_GETTER_BODY(dx_trade_t, exchange_code, dxf_char_t)
+FIELD_GETTER_BODY(dx_trade_t, price, dxf_double_t)
+FIELD_GETTER_BODY(dx_trade_t, size, dxf_long_t)
+FIELD_GETTER_BODY(dx_trade_t, day_volume, dxf_double_t)
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Quote field getters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_GETTER_BODY(dx_quote_t, bid_time, dxf_long_t)
+FIELD_GETTER_BODY(dx_quote_t, bid_exchange_code, dxf_char_t)
+FIELD_GETTER_BODY(dx_quote_t, bid_price, dxf_double_t)
+FIELD_GETTER_BODY(dx_quote_t, bid_size, dxf_long_t)
+FIELD_GETTER_BODY(dx_quote_t, ask_time, dxf_long_t)
+FIELD_GETTER_BODY(dx_quote_t, ask_exchange_code, dxf_char_t)
+FIELD_GETTER_BODY(dx_quote_t, ask_price, dxf_double_t)
+FIELD_GETTER_BODY(dx_quote_t, ask_size, dxf_long_t)
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Fundamental field getters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_GETTER_BODY(dx_fundamental_t, day_high_price, dxf_double_t)
+FIELD_GETTER_BODY(dx_fundamental_t, day_low_price, dxf_double_t)
+FIELD_GETTER_BODY(dx_fundamental_t, day_open_price, dxf_double_t)
+FIELD_GETTER_BODY(dx_fundamental_t, prev_day_close_price, dxf_double_t)
+FIELD_GETTER_BODY(dx_fundamental_t, open_interest, dxf_long_t)
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Profile field getters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_GETTER_BODY(dx_profile_t, description, dxf_const_string_t)
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Market maker field getters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_GETTER_BODY(dx_market_maker_t, mm_exchange, dxf_char_t)
+FIELD_GETTER_BODY(dx_market_maker_t, mm_id, dxf_int_t)
+FIELD_GETTER_BODY(dx_market_maker_t, mmbid_time, dxf_int_t)
+FIELD_GETTER_BODY(dx_market_maker_t, mmbid_price, dxf_double_t)
+FIELD_GETTER_BODY(dx_market_maker_t, mmbid_size, dxf_int_t)
+FIELD_GETTER_BODY(dx_market_maker_t, mmask_time, dxf_int_t)
+FIELD_GETTER_BODY(dx_market_maker_t, mmask_price, dxf_double_t)
+FIELD_GETTER_BODY(dx_market_maker_t, mmask_size, dxf_int_t)
+FIELD_GETTER_BODY(dx_market_maker_t, mmbid_count, dxf_int_t)
+FIELD_GETTER_BODY(dx_market_maker_t, mmask_count, dxf_int_t)
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Order field getters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_GETTER_BODY(dx_order_t, index, dxf_int_t)
+FIELD_GETTER_BODY(dx_order_t, time, dxf_int_t)
+FIELD_GETTER_BODY(dx_order_t, sequence, dxf_int_t)
+FIELD_GETTER_BODY(dx_order_t, price, dxf_double_t)
+FIELD_GETTER_BODY(dx_order_t, size, dxf_int_t)
+FIELD_GETTER_BODY(dx_order_t, flags, dxf_int_t)
+FIELD_GETTER_BODY(dx_order_t, mmid, dxf_int_t)
+FIELD_GETTER_BODY(dx_order_t, count, dxf_int_t)
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Time and Sale field getters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_GETTER_BODY(dx_time_and_sale_t, time, dxf_long_t)
+FIELD_GETTER_BODY(dx_time_and_sale_t, exchange_code, dxf_char_t)
+FIELD_GETTER_BODY(dx_time_and_sale_t, price, dxf_double_t)
+FIELD_GETTER_BODY(dx_time_and_sale_t, size, dxf_long_t)
+FIELD_GETTER_BODY(dx_time_and_sale_t, bid_price, dxf_double_t)
+FIELD_GETTER_BODY(dx_time_and_sale_t, ask_price, dxf_double_t)
+FIELD_GETTER_BODY(dx_time_and_sale_t, type, dxf_int_t)
+
+void DX_RECORD_FIELD_GETTER_NAME(dx_time_and_sale_t, sequence) (void* object, OUT void* field) {
+    *(dxf_int_t*)field = (dxf_int_t)(((dx_time_and_sale_t*)object)->event_id & 0x00000000FFFFFFFFL);
+}
+
+void DX_RECORD_FIELD_GETTER_NAME(dx_time_and_sale_t, exch_sale_conds) (void* object, OUT void* field) {
+    dxf_ulong_t event_id = ((dx_time_and_sale_t*)object)->event_id;
+    *(dxf_int_t*)field = (dxf_int_t)((event_id >> 32) & 0x00000000FFFFFFFFL);
+}
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Candle field getters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_GETTER_BODY(dx_candle_t, time, dxf_long_t)
+FIELD_GETTER_BODY(dx_candle_t, sequence, dxf_int_t)
+FIELD_GETTER_BODY(dx_candle_t, count, dxf_double_t)
+FIELD_GETTER_BODY(dx_candle_t, open, dxf_double_t)
+FIELD_GETTER_BODY(dx_candle_t, high, dxf_double_t)
+FIELD_GETTER_BODY(dx_candle_t, low, dxf_double_t)
+FIELD_GETTER_BODY(dx_candle_t, close, dxf_double_t)
+FIELD_GETTER_BODY(dx_candle_t, volume, dxf_double_t)
+FIELD_GETTER_BODY(dx_candle_t, vwap, dxf_double_t)
+FIELD_GETTER_BODY(dx_candle_t, bid_volume, dxf_double_t)
+FIELD_GETTER_BODY(dx_candle_t, ask_volume, dxf_double_t)

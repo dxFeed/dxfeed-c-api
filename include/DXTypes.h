@@ -23,6 +23,8 @@
 typedef int ERRORCODE;
 typedef void* dxf_subscription_t;
 typedef void* dxf_connection_t;
+typedef void* dxf_candle_attributes_t;
+typedef void* dxf_snapshot_t;
 
 #ifdef _WIN32
 
@@ -68,4 +70,7 @@ typedef dxf_char_t*        dxf_string_t;
 typedef const dxf_char_t*  dxf_const_string_t;
 
 #endif /* _WIN32/POSIX */
+
+typedef dxf_uint_t dxf_event_flags_t;
+
 #endif /* DX_TYPES_H_INCLUDED */

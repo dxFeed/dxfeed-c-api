@@ -234,6 +234,10 @@ dxf_string_t dx_decode_from_integer (dxf_long_t code) {
     return dx_create_string_src_len(decoded, offset);
 }
 
+dxf_string_t dx_concatenate_strings(dxf_string_t dest, dxf_const_string_t src) {
+    return wcscat(dest, src);
+}
+
 /* -------------------------------------------------------------------------- */
 /*
  *	Time functions implementation

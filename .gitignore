@@ -39,6 +39,11 @@
 # /tests/UnitTests/
 /tests/UnitTests/*.user
 
+# /tests/SnapshotConsoleSample/
+/tests/SnapshotConsoleSample/*.user
+/tests/SnapshotConsoleSample/*.suo
+/tests/SnapshotConsoleSample/build
+
 # /wrappers/COM/samples/C++/
 /wrappers/COM/samples/C++/*.user
 /wrappers/COM/samples/C++/build
@@ -47,4 +52,12 @@
 /wrappers/COM/src/*.user
 /wrappers/COM/src/build
 
+# /tests/CandleSample/
+/tests/CandleSample/*.user
+/tests/CandleSample/build
+
 log.log
+/tests/UnitTests/*.log
+/.vs
+/DXFeed.VC.db
+/DXFeed.VC.VC.opendb

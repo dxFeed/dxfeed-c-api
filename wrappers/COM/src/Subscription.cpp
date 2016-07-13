@@ -59,8 +59,8 @@ private:
 
     DXSubscription (dxf_connection_t connection, int eventTypes, IUnknown* parent);
     
-    static void OnNewData (int eventType, dxf_const_string_t symbol, const dxf_event_data_t* data,
-                           dxf_event_flags_t flags, int dataCount, void* userData);
+    static void OnNewData(int eventType, dxf_const_string_t symbolName,
+                          const dxf_event_data_t* data, int dataCount, void* userData);
     void ClearListeners ();
     void CreateListenerParams (IDispatch* subscription, int eventType, _bstr_t& symbol, IDispatch* dataCollection,
                                variant_vector_t& storage, OUT DISPPARAMS& params);
@@ -291,8 +291,8 @@ HRESULT STDMETHODCALLTYPE DXSubscription::GetEventTypes (INT* eventTypes) {
 
 /* -------------------------------------------------------------------------- */
 
-void DXSubscription::OnNewData (int eventType, dxf_const_string_t symbol, const dxf_event_data_t* data,
-                                dxf_event_flags_t flags, int dataCount, void* userData) {
+void DXSubscription::OnNewData(int eventType, dxf_const_string_t symbolName,
+                               const dxf_event_data_t* data, int dataCount, void* userData) {
     if (userData == NULL) {
         return;
     }
@@ -318,7 +318,7 @@ void DXSubscription::OnNewData (int eventType, dxf_const_string_t symbol, const 
         listener_set_t::const_iterator itEnd = thisPtr->m_listeners.end();
         variant_vector_t storage;
         DISPPARAMS listenerParams;
-        _bstr_t symbolWrapper(symbol);
+        _bstr_t symbolWrapper(symbolName);
 
         thisPtr->CreateListenerParams(static_cast<IDXSubscription*>(thisPtr), eventType, symbolWrapper,
                                       dataCollection, storage, listenerParams);

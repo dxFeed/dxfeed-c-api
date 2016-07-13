@@ -54,8 +54,16 @@ typedef struct {
     dxf_event_data_t* last_events_accessed;
 } dx_symbol_data_t, *dx_symbol_data_ptr_t;
 
+typedef void* dx_event_listener_ptr_t;
+
+typedef enum {
+    dx_elv_default = 1,
+    dx_elv_v2 = 2
+} dx_event_listener_version_t;
+
 typedef struct {
-    dxf_event_listener_t listener;
+    dx_event_listener_ptr_t listener;
+    dx_event_listener_version_t version;
     void* user_data;
 } dx_listener_context_t;
 
@@ -76,6 +84,8 @@ struct dx_subscription_data_struct_t {
     dx_symbol_data_array_t symbols;
     dx_listener_array_t listeners;
     dx_order_source_array_t order_source;
+    dxf_uint_t subscr_flags;
+    dxf_long_t time;
 
     dxf_const_string_t* symbol_name_array;
     int symbol_name_array_capacity;
@@ -541,9 +551,10 @@ int dx_listener_comparator (dx_listener_context_t e1, dx_listener_context_t e2) 
 
 /* -------------------------------------------------------------------------- */
 
-int dx_find_listener_in_array (dx_listener_array_t* listeners, dxf_event_listener_t listener, OUT bool* found) {
+int dx_find_listener_in_array (dx_listener_array_t* listeners, dx_event_listener_ptr_t listener, OUT bool* found) {
     int listener_index;
-    dx_listener_context_t listener_context = { listener, NULL };
+    /* There is comparing listeners by address, so fill version and user_data with default values */
+    dx_listener_context_t listener_context = { listener, dx_elv_default, NULL };
     
     DX_ARRAY_SEARCH(listeners->elements, 0, listeners->size, listener_context, dx_listener_comparator, false, *found, listener_index);
     
@@ -663,7 +674,8 @@ void dx_free_event_subscription_data (dx_subscription_data_ptr_t subscr_data) {
  
 const dxf_subscription_t dx_invalid_subscription = (dxf_subscription_t)NULL;
 
-dxf_subscription_t dx_create_event_subscription (dxf_connection_t connection, int event_types) {
+dxf_subscription_t dx_create_event_subscription(dxf_connection_t connection, int event_types, 
+                                                dxf_uint_t subscr_flags, dxf_long_t time) {
     dx_subscription_data_ptr_t subscr_data = NULL;
     bool res = true;
     dx_event_subscription_connection_context_t* context = NULL;
@@ -696,6 +708,8 @@ dxf_subscription_t dx_create_event_subscription (dxf_connection_t connection, in
     
     subscr_data->event_types = event_types;
     subscr_data->escc = context;
+    subscr_data->subscr_flags = subscr_flags;
+    subscr_data->time = time;
 
     res = true;
     if (event_types & DXF_ET_ORDER) {
@@ -870,7 +884,8 @@ bool dx_remove_symbols (dxf_subscription_t subscr_id, dxf_const_string_t* symbol
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_add_listener (dxf_subscription_t subscr_id, dxf_event_listener_t listener, void* user_data) {
+bool dx_add_listener_impl(dxf_subscription_t subscr_id, dx_event_listener_ptr_t listener, 
+                          dx_event_listener_version_t version, void* user_data) {
     dx_subscription_data_ptr_t subscr_data = (dx_subscription_data_ptr_t)subscr_id;
     int listener_index;
     bool failed;
@@ -901,7 +916,7 @@ bool dx_add_listener (dxf_subscription_t subscr_id, dxf_event_listener_t listene
     CHECKED_CALL(dx_mutex_lock, &(context->subscr_guard));
     
     {
-        dx_listener_context_t listener_context = { listener, user_data };
+        dx_listener_context_t listener_context = { listener, version, user_data };
         
         DX_ARRAY_INSERT(subscr_data->listeners, dx_listener_context_t, listener_context, listener_index, dx_capacity_manager_halfer, failed);
     }
@@ -911,7 +926,19 @@ bool dx_add_listener (dxf_subscription_t subscr_id, dxf_event_listener_t listene
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_remove_listener (dxf_subscription_t subscr_id, dxf_event_listener_t listener) {
+bool dx_add_listener(dxf_subscription_t subscr_id, dxf_event_listener_t listener, void* user_data) {
+    return dx_add_listener_impl(subscr_id, (dx_event_listener_ptr_t)listener, dx_elv_default, user_data);
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_add_listener_v2(dxf_subscription_t subscr_id, dxf_event_listener_v2_t listener, void* user_data) {
+    return dx_add_listener_impl(subscr_id, (dx_event_listener_ptr_t)listener, dx_elv_v2, user_data);
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_remove_listener_impl(dxf_subscription_t subscr_id, dx_event_listener_ptr_t listener) {
     dx_subscription_data_ptr_t subscr_data = (dx_subscription_data_ptr_t)subscr_id;
     int listener_index;
     bool failed;
@@ -944,6 +971,16 @@ bool dx_remove_listener (dxf_subscription_t subscr_id, dxf_event_listener_t list
     DX_ARRAY_DELETE(subscr_data->listeners, dx_listener_context_t, listener_index, dx_capacity_manager_halfer, failed);
 
     return dx_mutex_unlock(&(context->subscr_guard)) && !failed;
+}
+
+bool dx_remove_listener(dxf_subscription_t subscr_id, dxf_event_listener_t listener) {
+    return dx_remove_listener_impl(subscr_id, (dx_event_listener_ptr_t)listener);
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_remove_listener_v2(dxf_subscription_t subscr_id, dxf_event_listener_v2_t listener) {
+    return dx_remove_listener_impl(subscr_id, (dx_event_listener_ptr_t)listener);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1024,9 +1061,46 @@ bool dx_get_event_subscription_symbols (dxf_subscription_t subscr_id, OUT dxf_co
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_process_event_data (dxf_connection_t connection,
-                            dx_event_id_t event_id, dxf_const_string_t symbol_name, dxf_int_t symbol_cipher,
-                            dxf_event_flags_t flags, const dxf_event_data_t data, int data_count) {
+bool dx_get_event_subscription_flags(dxf_subscription_t subscr_id, OUT dxf_uint_t* subscr_flags) {
+    dx_subscription_data_ptr_t subscr_data = (dx_subscription_data_ptr_t)subscr_id;
+
+    if (subscr_id == dx_invalid_subscription) {
+        return dx_set_error_code(dx_esec_invalid_subscr_id);
+    }
+
+    if (subscr_flags == NULL) {
+        return dx_set_error_code(dx_ec_invalid_func_param_internal);
+    }
+
+    *subscr_flags = subscr_data->subscr_flags;
+
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_get_event_subscription_time(dxf_subscription_t subscr_id, OUT dxf_long_t* time) {
+    dx_subscription_data_ptr_t subscr_data = (dx_subscription_data_ptr_t)subscr_id;
+
+    if (subscr_id == dx_invalid_subscription) {
+        return dx_set_error_code(dx_esec_invalid_subscr_id);
+    }
+
+    if (time == NULL) {
+        return dx_set_error_code(dx_ec_invalid_func_param_internal);
+    }
+
+    *time = subscr_data->time;
+
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_process_event_data (dxf_connection_t connection, dx_event_id_t event_id, 
+                            dxf_const_string_t symbol_name, dxf_int_t symbol_cipher, 
+                            const dxf_event_data_t data, int data_count, 
+                            const dxf_event_params_t* event_params) {
     dx_symbol_data_ptr_t symbol_data = NULL;
     int cur_subscr_index = 0;
     int event_bitmask = DX_EVENT_BIT_MASK(event_id);
@@ -1072,8 +1146,15 @@ bool dx_process_event_data (dxf_connection_t connection,
         
         for (; cur_listener_index < subscr_data->listeners.size; ++cur_listener_index) {
             dx_listener_context_t* listener_context = subscr_data->listeners.elements + cur_listener_index;
-            
-            listener_context->listener(event_bitmask, symbol_name, data, flags, data_count, listener_context->user_data);
+            if (listener_context->version == dx_elv_default) {
+                dxf_event_listener_t listener = (dxf_event_listener_t)listener_context->listener;
+                listener(event_bitmask, symbol_name, data, data_count, listener_context->user_data);
+            } else if (listener_context->version == dx_elv_v2) {
+                dxf_event_listener_v2_t listener = (dxf_event_listener_v2_t)listener_context->listener;
+                listener(event_bitmask, symbol_name, data, data_count, event_params, listener_context->user_data);
+            } else {
+                dx_set_error_code(dx_esec_invalid_listener);
+            }
         }
     }
     
@@ -1152,10 +1233,14 @@ bool dx_process_connection_subscriptions (dxf_connection_t connection, dx_subscr
         dxf_const_string_t* symbols = NULL;
         int symbol_count = 0;
         int event_types = 0;
+        dxf_uint_t subscr_flags = 0;
+        dxf_long_t time;
 
         if (!dx_get_event_subscription_symbols(subscriptions->elements[i], &symbols, &symbol_count) ||
             !dx_get_event_subscription_event_types(subscriptions->elements[i], &event_types) ||
-            !processor(connection, dx_get_order_source(subscriptions->elements[i]), symbols, symbol_count, event_types)) {
+            !dx_get_event_subscription_flags(subscriptions->elements[i], &subscr_flags) ||
+            !dx_get_event_subscription_time(subscriptions->elements[i], &time) ||
+            !processor(connection, dx_get_order_source(subscriptions->elements[i]), symbols, symbol_count, event_types, subscr_flags, time)) {
 
             dx_mutex_unlock(&(context->subscr_guard));
 
@@ -1181,7 +1266,7 @@ bool dx_add_order_source(dxf_subscription_t subscr_id, dxf_const_string_t source
     dx_suffix_t new_source;
     bool found = false;
     int index = 0;
-    dx_copy_string_len(new_source.suffix, source, RECORD_SUFFIX_SIZE);
+    dx_copy_string_len(new_source.suffix, source, DXF_RECORD_SUFFIX_SIZE);
     if (subscr_data->order_source.elements == NULL) {
         DX_ARRAY_INSERT(subscr_data->order_source, dx_suffix_t, new_source, index, dx_capacity_manager_halfer, failed);
     }

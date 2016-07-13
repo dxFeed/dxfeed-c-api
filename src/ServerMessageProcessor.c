@@ -35,6 +35,7 @@
 #include "DXThreads.h"
 #include "TaskQueue.h"
 #include "DXNetwork.h"
+#include "Snapshot.h"
 
 #include <limits.h>
 
@@ -1005,6 +1006,35 @@ bool dx_read_records (dx_server_msg_proc_connection_context_t* context,
 
 /* -------------------------------------------------------------------------- */
 
+#define CHECKED_GET_VALUE(getter, buffer, value) \
+    if (getter != NULL) { \
+        getter(buffer, value); \
+    }
+
+dxf_time_int_field_t dx_get_time_int_field(dx_record_id_t record_id, void* record_buffer) {
+    int i;
+    dxf_ulong_t high = 0;
+    dxf_ulong_t low = 0;
+    dxf_time_int_field_t time = 0;
+    const dx_record_item_t* record_info = dx_get_record_by_id(record_id);
+
+    for (i = 0; i < record_info->field_count; ++i) {
+        dx_field_info_t field = record_info->fields[i];
+        if (field.time == dx_ft_first_time_int_field) {
+            CHECKED_GET_VALUE(field.getter, record_buffer, &high);
+        }
+        else if (field.time == dx_ft_second_time_int_field) {
+            CHECKED_GET_VALUE(field.getter, record_buffer, &low);
+        }
+    }
+
+    time = (high << 32) | (low & 0xFFFFFFFF);
+
+    return time;
+}
+
+/* -------------------------------------------------------------------------- */
+
 bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) {
     dx_logging_verbose_info(L"Process data");
     context->last_cipher = 0;
@@ -1020,6 +1050,8 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 		dxf_const_string_t symbol = NULL;
         const dx_record_item_t* record_info = NULL;
         dx_record_digest_t* record_digest = NULL;
+        dx_record_params_t record_params;
+        dxf_event_params_t event_params;
 		
 		CHECKED_CALL_1(dx_read_symbol, context);
 		
@@ -1074,14 +1106,27 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 			
 			return false;
 		}
-		// TODO add assert to overlimit in context->bicc limit
+		// TODO: add assert to overlimit in context->bicc limit
 
-        if (!dx_transcode_record_data(context->connection, record_id, suffix, context->last_symbol, context->last_cipher, 
-            context->last_flags, g_buffer_managers[record_info->info_id].record_buffer_getter(context->rbcc), record_count)) {
+        record_params.record_id = record_id;
+        record_params.record_info_id = record_info->info_id;
+        record_params.suffix = suffix;
+        record_params.symbol_name = context->last_symbol;
+        record_params.symbol_cipher = context->last_cipher;
+        record_params.flags = context->last_flags;
+        record_params.time_int_field = dx_get_time_int_field(record_id, record_buffer);
+
+        event_params.flags = record_params.flags;
+        event_params.time_int_field = record_params.time_int_field;
+        event_params.snapshot_key = dx_new_snapshot_key(record_info->info_id, record_params.symbol_name, suffix);
+
+        if (!dx_transcode_record_data(context->connection, &record_params, &event_params, 
+            g_buffer_managers[record_info->info_id].record_buffer_getter(context->rbcc), record_count)) {
+
 			dx_free_string_buffers(context->rbcc);
 
 			return false;
-	        }
+	    }
 
 		dx_free_string_buffers(context->rbcc);
 	}
@@ -1348,7 +1393,7 @@ bool dx_process_describe_protocol (dx_server_msg_proc_connection_context_t* cont
         return false;
 	}
 
-    //All additional data must be skipped according to message length
+    /* All additional data must be skipped according to message length */
     buf_pos = dx_get_in_buffer_position(context->bicc);
     buf_limit = dx_get_in_buffer_limit(context->bicc);
     if (buf_pos < buf_limit)
