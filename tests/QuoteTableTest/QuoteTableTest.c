@@ -104,7 +104,7 @@ void output_data(int i) {
     
     wprintf(L"\nSymbol: %s, Last: %f, LastEx: %c, Change: %+f, Bid: %f, BidEx: %c, \
             Ask: %f, AskEx: %c, High: %f, Low: %f, Open: %f, BidSize: %i, AskSize: %i,\
-            LastSize: %i, Volume: %i, Description: %s\n",
+            LastSize: %i, LastTick: %i, LastChange: %i, Volume: %i, Description: %s\n",
             g_symbols[i],
             trade ? trade->price : 0.0,
             trade ? trade->exchange_code : dummy[0],
@@ -119,6 +119,8 @@ void output_data(int i) {
             quote ? (int)quote->bid_size : 0,
             quote ? (int)quote->ask_size : 0,
             trade ? (int)trade->size : 0,
+            trade ? (int)trade->tick : 0,
+            trade ? (int)trade->change : 0,
             trade ? (int)trade->day_volume : 0,
             profile ? profile->description : dummy);
 }

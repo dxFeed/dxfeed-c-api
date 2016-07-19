@@ -69,6 +69,8 @@ typedef struct {
     dxf_char_t exchange_code;
     dxf_double_t price;
     dxf_long_t size;
+    dxf_long_t tick;
+    dxf_long_t change;
     dxf_double_t day_volume;	
 } dx_trade_t;
 

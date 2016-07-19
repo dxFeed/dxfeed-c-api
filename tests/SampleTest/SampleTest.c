@@ -96,13 +96,13 @@ void listener(int event_type, dxf_const_string_t symbol_name,
     }
     
     if (event_type == DXF_ET_TRADE) {
-	    dxf_trade_t* trades = (dx_trade_t*)data;
+        dxf_trade_t* trades = (dx_trade_t*)data;
 
-		for (; i < data_count; ++i) {
-			print_timestamp(trades[i].time);
-			wprintf(L", exchangeCode=%c, price=%f, size=%I64i, day volume=%.0f}\n",
-		            trades[i].exchange_code, trades[i].price, trades[i].size, trades[i].day_volume);
-		}
+        for (; i < data_count; ++i) {
+            print_timestamp(trades[i].time);
+            wprintf(L", exchangeCode=%c, price=%f, size=%I64i, tick=%I64i, change=%I64i, day volume=%.0f}\n",
+                    trades[i].exchange_code, trades[i].price, trades[i].size, trades[i].tick, trades[i].change, trades[i].day_volume);
+        }
     }
     
     if (event_type == DXF_ET_SUMMARY) {

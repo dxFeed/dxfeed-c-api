@@ -55,6 +55,8 @@ DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_trade_t, time);
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_trade_t, exchange_code);
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_trade_t, price);
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_trade_t, size);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_trade_t, tick);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_trade_t, change);
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_trade_t, day_volume);
 
 /* -------------------------------------------------------------------------- */
@@ -192,6 +194,8 @@ DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_trade_t, time);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_trade_t, exchange_code);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_trade_t, price);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_trade_t, size);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_trade_t, tick);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_trade_t, change);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_trade_t, day_volume);
 
 /* -------------------------------------------------------------------------- */
@@ -325,6 +329,8 @@ DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_trade_t, time);
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_trade_t, exchange_code);
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_trade_t, price);
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_trade_t, size);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_trade_t, tick);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_trade_t, change);
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_trade_t, day_volume);
 
 /* -------------------------------------------------------------------------- */
