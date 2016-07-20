@@ -98,7 +98,7 @@ typedef struct {
     dxf_double_t eps;
     dxf_long_t div_freq;
     dxf_double_t exd_div_amount;
-    dxf_long_t exd_div_date;
+    dxf_dayid_t exd_div_date;
     dxf_double_t _52_high_price;
     dxf_double_t _52_low_price;
     dxf_double_t shares;

@@ -89,7 +89,7 @@ FIELD_SETTER_BODY(dx_profile_t, beta, dxf_double_t)
 FIELD_SETTER_BODY(dx_profile_t, eps, dxf_double_t)
 FIELD_SETTER_BODY(dx_profile_t, div_freq, dxf_int_t)
 FIELD_SETTER_BODY(dx_profile_t, exd_div_amount, dxf_double_t)
-FIELD_SETTER_BODY(dx_profile_t, exd_div_date, dxf_int_t)
+FIELD_SETTER_BODY(dx_profile_t, exd_div_date, dxf_dayid_t)
 FIELD_SETTER_BODY(dx_profile_t, _52_high_price, dxf_double_t)
 FIELD_SETTER_BODY(dx_profile_t, _52_low_price, dxf_double_t)
 FIELD_SETTER_BODY(dx_profile_t, shares, dxf_double_t)
@@ -269,6 +269,14 @@ GENERIC_VALUE_GETTER_NAME_PROTO(dxf_double_t) {
 
 /* -------------------------------------------------------------------------- */
 
+GENERIC_VALUE_GETTER_NAME_PROTO(dxf_dayid_t) {
+    static dxf_dayid_t d_id = 0;
+
+    return &d_id;
+}
+
+/* -------------------------------------------------------------------------- */
+
 GENERIC_VALUE_GETTER_NAME_PROTO(dxf_const_string_t) {
     static dxf_const_string_t s = L"<Default>";
     
@@ -333,7 +341,7 @@ FIELD_DEF_VAL_BODY(dx_profile_t, beta, dxf_double_t)
 FIELD_DEF_VAL_BODY(dx_profile_t, eps, dxf_double_t)
 FIELD_DEF_VAL_BODY(dx_profile_t, div_freq, dxf_long_t)
 FIELD_DEF_VAL_BODY(dx_profile_t, exd_div_amount, dxf_double_t)
-FIELD_DEF_VAL_BODY(dx_profile_t, exd_div_date, dxf_long_t)
+FIELD_DEF_VAL_BODY(dx_profile_t, exd_div_date, dxf_dayid_t)
 FIELD_DEF_VAL_BODY(dx_profile_t, _52_high_price, dxf_double_t)
 FIELD_DEF_VAL_BODY(dx_profile_t, _52_low_price, dxf_double_t)
 FIELD_DEF_VAL_BODY(dx_profile_t, shares, dxf_double_t)
@@ -472,7 +480,7 @@ FIELD_GETTER_BODY(dx_profile_t, beta, dxf_double_t)
 FIELD_GETTER_BODY(dx_profile_t, eps, dxf_double_t)
 FIELD_GETTER_BODY(dx_profile_t, div_freq, dxf_long_t)
 FIELD_GETTER_BODY(dx_profile_t, exd_div_amount, dxf_double_t)
-FIELD_GETTER_BODY(dx_profile_t, exd_div_date, dxf_long_t)
+FIELD_GETTER_BODY(dx_profile_t, exd_div_date, dxf_dayid_t)
 FIELD_GETTER_BODY(dx_profile_t, _52_high_price, dxf_double_t)
 FIELD_GETTER_BODY(dx_profile_t, _52_low_price, dxf_double_t)
 FIELD_GETTER_BODY(dx_profile_t, shares, dxf_double_t)
