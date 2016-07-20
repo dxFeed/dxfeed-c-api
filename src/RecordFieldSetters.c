@@ -85,7 +85,21 @@ FIELD_SETTER_BODY(dx_fundamental_t, open_interest, dxf_int_t)
  */
 /* -------------------------------------------------------------------------- */
 
+FIELD_SETTER_BODY(dx_profile_t, beta, dxf_double_t)
+FIELD_SETTER_BODY(dx_profile_t, eps, dxf_double_t)
+FIELD_SETTER_BODY(dx_profile_t, div_freq, dxf_int_t)
+FIELD_SETTER_BODY(dx_profile_t, exd_div_amount, dxf_double_t)
+FIELD_SETTER_BODY(dx_profile_t, exd_div_date, dxf_int_t)
+FIELD_SETTER_BODY(dx_profile_t, _52_high_price, dxf_double_t)
+FIELD_SETTER_BODY(dx_profile_t, _52_low_price, dxf_double_t)
+FIELD_SETTER_BODY(dx_profile_t, shares, dxf_double_t)
 FIELD_SETTER_BODY(dx_profile_t, description, dxf_const_string_t)
+FIELD_SETTER_BODY(dx_profile_t, flags, dxf_int_t)
+FIELD_SETTER_BODY(dx_profile_t, status_reason, dxf_const_string_t)
+FIELD_SETTER_BODY(dx_profile_t, halt_start_time, dxf_int_t)
+FIELD_SETTER_BODY(dx_profile_t, halt_end_time, dxf_int_t)
+FIELD_SETTER_BODY(dx_profile_t, high_limit_price, dxf_double_t)
+FIELD_SETTER_BODY(dx_profile_t, low_limit_price, dxf_double_t)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -315,8 +329,21 @@ FIELD_DEF_VAL_BODY(dx_fundamental_t, open_interest, dxf_int_t)
  *	Profile field value getters implementation
  */
 /* -------------------------------------------------------------------------- */
-
+FIELD_DEF_VAL_BODY(dx_profile_t, beta, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_profile_t, eps, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_profile_t, div_freq, dxf_long_t)
+FIELD_DEF_VAL_BODY(dx_profile_t, exd_div_amount, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_profile_t, exd_div_date, dxf_long_t)
+FIELD_DEF_VAL_BODY(dx_profile_t, _52_high_price, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_profile_t, _52_low_price, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_profile_t, shares, dxf_double_t)
 FIELD_DEF_VAL_BODY(dx_profile_t, description, dxf_const_string_t)
+FIELD_DEF_VAL_BODY(dx_profile_t, flags, dxf_long_t)
+FIELD_DEF_VAL_BODY(dx_profile_t, status_reason, dxf_const_string_t)
+FIELD_DEF_VAL_BODY(dx_profile_t, halt_start_time, dxf_long_t)
+FIELD_DEF_VAL_BODY(dx_profile_t, halt_end_time, dxf_long_t)
+FIELD_DEF_VAL_BODY(dx_profile_t, high_limit_price, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_profile_t, low_limit_price, dxf_double_t)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -441,7 +468,21 @@ FIELD_GETTER_BODY(dx_fundamental_t, open_interest, dxf_long_t)
 */
 /* -------------------------------------------------------------------------- */
 
+FIELD_GETTER_BODY(dx_profile_t, beta, dxf_double_t)
+FIELD_GETTER_BODY(dx_profile_t, eps, dxf_double_t)
+FIELD_GETTER_BODY(dx_profile_t, div_freq, dxf_long_t)
+FIELD_GETTER_BODY(dx_profile_t, exd_div_amount, dxf_double_t)
+FIELD_GETTER_BODY(dx_profile_t, exd_div_date, dxf_long_t)
+FIELD_GETTER_BODY(dx_profile_t, _52_high_price, dxf_double_t)
+FIELD_GETTER_BODY(dx_profile_t, _52_low_price, dxf_double_t)
+FIELD_GETTER_BODY(dx_profile_t, shares, dxf_double_t)
 FIELD_GETTER_BODY(dx_profile_t, description, dxf_const_string_t)
+FIELD_GETTER_BODY(dx_profile_t, flags, dxf_long_t)
+FIELD_GETTER_BODY(dx_profile_t, status_reason, dxf_const_string_t)
+FIELD_GETTER_BODY(dx_profile_t, halt_start_time, dxf_long_t)
+FIELD_GETTER_BODY(dx_profile_t, halt_end_time, dxf_long_t)
+FIELD_GETTER_BODY(dx_profile_t, high_limit_price, dxf_double_t)
+FIELD_GETTER_BODY(dx_profile_t, low_limit_price, dxf_double_t)
 
 /* -------------------------------------------------------------------------- */
 /*

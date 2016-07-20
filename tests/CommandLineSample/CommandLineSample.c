@@ -142,12 +142,17 @@ void listener(int event_type, dxf_const_string_t symbol_name,
     }
     
     if (event_type == DXF_ET_PROFILE) {
-	    dxf_profile_t* p = (dxf_profile_t*)data;
+        dxf_profile_t* p = (dxf_profile_t*)data;
 
-	    for (; i < data_count ; ++i) {
-			wprintf(L"Description=%ls}\n",
-				    p[i].description);
-	    }
+        for (; i < data_count ; ++i) {
+            //wprintf(L"Beta=%f, eps=%f, div freq=%I64i, exd div amount=%f, exd div date=%I64i, 52 high price=%f, 52 low price=%f, shares=%f, Description=%ls}\n",
+            //    p[i].beta, p[i].eps, p[i].div_freq, p[i].exd_div_amount, p[i].exd_div_date, p[i]._52_high_price,
+            //    p[i]._52_low_price, p[i].shares, p[i].description);
+            wprintf(L"Beta=%f, eps=%f, div freq=%I64i, exd div amount=%f, exd div date=%I64i, 52 high price=%f, 52 low price=%f, shares=%f, Description=%ls, flags=%I64i, status_reason=%ls halt start time=%I64i, halt end time=%I64i, high limit price=%f, low limit price=%f}\n",
+                p[i].beta, p[i].eps, p[i].div_freq, p[i].exd_div_amount, p[i].exd_div_date, p[i]._52_high_price,
+                p[i]._52_low_price, p[i].shares, p[i].description, p[i].flags, p[i].status_reason,
+                p[i].halt_start_time, p[i].halt_end_time, p[i].high_limit_price, p[i].low_limit_price);
+        }
     }
     
     if (event_type == DXF_ET_TIME_AND_SALE) {

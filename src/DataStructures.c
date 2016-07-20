@@ -139,8 +139,64 @@ static const dx_field_info_t dx_fields_fundamental[] = {
 /* -------------------------------------------------------------------------- */
 
 static const dx_field_info_t dx_fields_profile[] = { 
-	{ dx_fid_utf_char_array, L"Description", DX_RECORD_FIELD_SETTER_NAME(dx_profile_t, description), 
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Beta", DX_RECORD_FIELD_SETTER_NAME(dx_profile_t, beta),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_profile_t, beta), DX_RECORD_FIELD_GETTER_NAME(dx_profile_t, beta),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Eps", DX_RECORD_FIELD_SETTER_NAME(dx_profile_t, eps),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_profile_t, eps), DX_RECORD_FIELD_GETTER_NAME(dx_profile_t, eps),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int, L"DivFreq", DX_RECORD_FIELD_SETTER_NAME(dx_profile_t, div_freq),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_profile_t, div_freq), DX_RECORD_FIELD_GETTER_NAME(dx_profile_t, div_freq),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"ExdDiv.Amount", DX_RECORD_FIELD_SETTER_NAME(dx_profile_t, exd_div_amount),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_profile_t, exd_div_amount), DX_RECORD_FIELD_GETTER_NAME(dx_profile_t, exd_div_amount),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_date, L"ExdDiv.Date", DX_RECORD_FIELD_SETTER_NAME(dx_profile_t, exd_div_date),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_profile_t, exd_div_date), DX_RECORD_FIELD_GETTER_NAME(dx_profile_t, exd_div_date),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"52High.Price", DX_RECORD_FIELD_SETTER_NAME(dx_profile_t, _52_high_price),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_profile_t, _52_high_price), DX_RECORD_FIELD_GETTER_NAME(dx_profile_t, _52_high_price),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"52Low.Price", DX_RECORD_FIELD_SETTER_NAME(dx_profile_t, _52_low_price),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_profile_t, _52_low_price), DX_RECORD_FIELD_GETTER_NAME(dx_profile_t, _52_low_price),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Shares", DX_RECORD_FIELD_SETTER_NAME(dx_profile_t, shares),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_profile_t, shares), DX_RECORD_FIELD_GETTER_NAME(dx_profile_t, shares),
+    dx_ft_common_field },
+
+    { dx_fid_utf_char_array, L"Description", DX_RECORD_FIELD_SETTER_NAME(dx_profile_t, description), 
     DX_RECORD_FIELD_DEF_VAL_NAME(dx_profile_t, description), DX_RECORD_FIELD_GETTER_NAME(dx_profile_t, description),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int, L"Flags", DX_RECORD_FIELD_SETTER_NAME(dx_profile_t, flags),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_profile_t, flags), DX_RECORD_FIELD_GETTER_NAME(dx_profile_t, flags),
+    dx_ft_common_field },
+
+    { dx_fid_utf_char_array, L"StatusReason", DX_RECORD_FIELD_SETTER_NAME(dx_profile_t, status_reason), 
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_profile_t, status_reason), DX_RECORD_FIELD_GETTER_NAME(dx_profile_t, status_reason),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_time, L"Halt.StartTime", DX_RECORD_FIELD_SETTER_NAME(dx_profile_t, halt_start_time),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_profile_t, halt_start_time), DX_RECORD_FIELD_GETTER_NAME(dx_profile_t, halt_start_time),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_time, L"Halt.EndTime", DX_RECORD_FIELD_SETTER_NAME(dx_profile_t, halt_end_time),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_profile_t, halt_end_time), DX_RECORD_FIELD_GETTER_NAME(dx_profile_t, halt_end_time),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"HighLimitPrice", DX_RECORD_FIELD_SETTER_NAME(dx_profile_t, high_limit_price),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_profile_t, high_limit_price), DX_RECORD_FIELD_GETTER_NAME(dx_profile_t, high_limit_price),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"LowLimitPrice", DX_RECORD_FIELD_SETTER_NAME(dx_profile_t, low_limit_price),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_profile_t, low_limit_price), DX_RECORD_FIELD_GETTER_NAME(dx_profile_t, low_limit_price),
     dx_ft_common_field }
 };
 

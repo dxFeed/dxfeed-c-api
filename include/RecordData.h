@@ -94,7 +94,21 @@ typedef struct {
 } dx_fundamental_t;
 
 typedef struct {
+    dxf_double_t beta;
+    dxf_double_t eps;
+    dxf_long_t div_freq;
+    dxf_double_t exd_div_amount;
+    dxf_long_t exd_div_date;
+    dxf_double_t _52_high_price;
+    dxf_double_t _52_low_price;
+    dxf_double_t shares;
     dxf_const_string_t description;
+    dxf_long_t flags;
+    dxf_const_string_t status_reason;
+    dxf_long_t halt_start_time;
+    dxf_long_t halt_end_time;
+    dxf_double_t high_limit_price;
+    dxf_double_t low_limit_price;
 } dx_profile_t;
 
 typedef struct {

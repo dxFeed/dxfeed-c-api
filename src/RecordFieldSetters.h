@@ -92,7 +92,21 @@ DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_fundamental_t, open_interest);
  */
 /* -------------------------------------------------------------------------- */
 
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_profile_t, beta);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_profile_t, eps);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_profile_t, div_freq);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_profile_t, exd_div_amount);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_profile_t, exd_div_date);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_profile_t, _52_high_price);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_profile_t, _52_low_price);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_profile_t, shares);
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_profile_t, description);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_profile_t, flags);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_profile_t, status_reason);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_profile_t, halt_start_time);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_profile_t, halt_end_time);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_profile_t, high_limit_price);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_profile_t, low_limit_price);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -231,7 +245,21 @@ DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_fundamental_t, open_interest);
  */
 /* -------------------------------------------------------------------------- */
 
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_profile_t, beta);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_profile_t, eps);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_profile_t, div_freq);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_profile_t, exd_div_amount);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_profile_t, exd_div_date);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_profile_t, _52_high_price);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_profile_t, _52_low_price);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_profile_t, shares);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_profile_t, description);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_profile_t, flags);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_profile_t, status_reason);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_profile_t, halt_start_time);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_profile_t, halt_end_time);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_profile_t, high_limit_price);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_profile_t, low_limit_price);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -366,7 +394,21 @@ DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_fundamental_t, open_interest);
 */
 /* -------------------------------------------------------------------------- */
 
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_profile_t, beta);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_profile_t, eps);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_profile_t, div_freq);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_profile_t, exd_div_amount);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_profile_t, exd_div_date);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_profile_t, _52_high_price);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_profile_t, _52_low_price);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_profile_t, shares);
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_profile_t, description);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_profile_t, flags);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_profile_t, status_reason);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_profile_t, halt_start_time);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_profile_t, halt_end_time);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_profile_t, high_limit_price);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_profile_t, low_limit_price);
 
 /* -------------------------------------------------------------------------- */
 /*
