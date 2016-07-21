@@ -49,7 +49,7 @@ FIELD_SETTER_BODY(dx_trade_t, exchange_code, dxf_char_t)
 FIELD_SETTER_BODY(dx_trade_t, price, dxf_double_t)
 FIELD_SETTER_BODY(dx_trade_t, size, dxf_int_t)
 FIELD_SETTER_BODY(dx_trade_t, tick, dxf_int_t)
-FIELD_SETTER_BODY(dx_trade_t, change, dxf_int_t)
+FIELD_SETTER_BODY(dx_trade_t, change, dxf_double_t)
 FIELD_SETTER_BODY(dx_trade_t, day_volume, dxf_double_t)
 
 /* -------------------------------------------------------------------------- */
@@ -302,7 +302,7 @@ FIELD_DEF_VAL_BODY(dx_trade_t, exchange_code, dxf_char_t)
 FIELD_DEF_VAL_BODY(dx_trade_t, price, dxf_double_t)
 FIELD_DEF_VAL_BODY(dx_trade_t, size, dxf_long_t)
 FIELD_DEF_VAL_BODY(dx_trade_t, tick, dxf_long_t)
-FIELD_DEF_VAL_BODY(dx_trade_t, change, dxf_long_t)
+FIELD_DEF_VAL_BODY(dx_trade_t, change, dxf_double_t)
 FIELD_DEF_VAL_BODY(dx_trade_t, day_volume, dxf_double_t)
 
 /* -------------------------------------------------------------------------- */
@@ -440,7 +440,7 @@ FIELD_GETTER_BODY(dx_trade_t, exchange_code, dxf_char_t)
 FIELD_GETTER_BODY(dx_trade_t, price, dxf_double_t)
 FIELD_GETTER_BODY(dx_trade_t, size, dxf_long_t)
 FIELD_GETTER_BODY(dx_trade_t, tick, dxf_long_t)
-FIELD_GETTER_BODY(dx_trade_t, change, dxf_long_t)
+FIELD_GETTER_BODY(dx_trade_t, change, dxf_double_t)
 FIELD_GETTER_BODY(dx_trade_t, day_volume, dxf_double_t)
 
 /* -------------------------------------------------------------------------- */

@@ -70,7 +70,7 @@ typedef struct {
     dxf_double_t price;
     dxf_long_t size;
     dxf_long_t tick;
-    dxf_long_t change;
+    dxf_double_t change;
     dxf_double_t day_volume;	
 } dx_trade_t;
 
@@ -122,7 +122,6 @@ typedef struct {
     dxf_int_t mmask_size;
     dxf_int_t mmbid_count;
     dxf_int_t mmask_count;
-
 } dx_market_maker_t;
 
 typedef struct {
@@ -146,7 +145,7 @@ typedef struct {
     dxf_double_t ask_price;
     dxf_const_string_t exchange_sale_conditions;
     dxf_bool_t is_trade;
-    dxf_int_t type;    
+    dxf_int_t type;
 } dx_time_and_sale_t;
 
 typedef struct {

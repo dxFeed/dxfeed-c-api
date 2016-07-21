@@ -58,7 +58,7 @@ private:
     virtual HRESULT STDMETHODCALLTYPE GetPrice (DOUBLE* value);
     virtual HRESULT STDMETHODCALLTYPE GetSize (LONGLONG* value);
     virtual HRESULT STDMETHODCALLTYPE GetTick(LONGLONG* value);
-    virtual HRESULT STDMETHODCALLTYPE GetChange(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetChange(DOUBLE* value);
     virtual HRESULT STDMETHODCALLTYPE GetDayVolume (LONGLONG* value);
     
 private:
@@ -133,7 +133,7 @@ HRESULT STDMETHODCALLTYPE DXTrade::GetTick(LONGLONG* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXTrade::GetChange(LONGLONG* value) {
+HRESULT STDMETHODCALLTYPE DXTrade::GetChange(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->change;

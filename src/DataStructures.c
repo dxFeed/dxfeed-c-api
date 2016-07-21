@@ -55,7 +55,7 @@ static const dx_field_info_t dx_fields_trade[] = {
     DX_RECORD_FIELD_DEF_VAL_NAME(dx_trade_t, tick), DX_RECORD_FIELD_GETTER_NAME(dx_trade_t, tick),
     dx_ft_common_field },
 
-    { dx_fid_compact_int, L"Last.Change", DX_RECORD_FIELD_SETTER_NAME(dx_trade_t, change),
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Last.Change", DX_RECORD_FIELD_SETTER_NAME(dx_trade_t, change),
     DX_RECORD_FIELD_DEF_VAL_NAME(dx_trade_t, change), DX_RECORD_FIELD_GETTER_NAME(dx_trade_t, change),
     dx_ft_common_field },
 
