@@ -146,12 +146,13 @@ void listener(int event_type, dxf_const_string_t symbol_name,
 
         for (; i < data_count ; ++i) {
             wprintf(L"Beta=%f, eps=%f, div freq=%I64i, exd div amount=%f, exd div date=%i, 52 high price=%f, "
-                L"52 low price=%f, shares=%f, Description=%ls, flags=%I64i, status_reason=%ls halt start time=%I64i, "
-                L"halt end time=%I64i, high limit price=%f, low limit price=%f}\n",
+                L"52 low price=%f, shares=%f, Description=%ls, flags=%I64i, status_reason=%ls, halt start time=",
                 p[i].beta, p[i].eps, p[i].div_freq, p[i].exd_div_amount, p[i].exd_div_date, p[i]._52_high_price,
-                p[i]._52_low_price, p[i].shares, p[i].description, p[i].flags, p[i].status_reason,
-                p[i].halt_start_time, p[i].halt_end_time, p[i].high_limit_price, p[i].low_limit_price);
-            print_timestamp(p[i].exd_div_date*1000);
+                p[i]._52_low_price, p[i].shares, p[i].description, p[i].flags, p[i].status_reason);
+            print_timestamp(p[i].halt_start_time);
+            wprintf(L", halt end time=");
+            print_timestamp(p[i].halt_end_time);
+            wprintf(L", high limit price=%f, low limit price=%f}\n", p[i].high_limit_price, p[i].low_limit_price);
         }
     }
     
