@@ -352,7 +352,7 @@ bool RECORD_TRANSCODER_NAME(dx_profile_t) (dx_record_transcoder_connection_conte
     }
 
     return dx_process_event_data(context->connection, dx_eid_profile, record_params->symbol_name,
-        record_params->symbol_cipher, record_buffer, record_count, event_params);
+        record_params->symbol_cipher, event_buffer, record_count, event_params);
 }
 
 /* -------------------------------------------------------------------------- */
