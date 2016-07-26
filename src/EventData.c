@@ -36,7 +36,8 @@ static const int g_event_data_sizes[dx_eid_count] = {
     sizeof(dxf_summary_t),
     sizeof(dxf_profile_t),
     sizeof(dxf_order_t),
-    sizeof(dxf_time_and_sale_t)
+    sizeof(dxf_time_and_sale_t),
+    sizeof(dxf_candle_t)
 };
 
 static const dxf_char_t g_quote_tmpl[] = L"Quote&";

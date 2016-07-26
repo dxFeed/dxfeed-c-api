@@ -43,6 +43,7 @@ typedef float              dxf_float_t;          // 32 bit
 typedef long long          dxf_long_t;           // 64 bit
 typedef unsigned long long dxf_ulong_t;  // 64 bit
 typedef double             dxf_double_t;         // 64 bit
+typedef int                dxf_dayid_t;
 
 typedef dxf_char_t*        dxf_string_t;
 typedef const dxf_char_t*  dxf_const_string_t;
@@ -65,6 +66,7 @@ typedef float            dxf_float_t;          // 32 bit
 typedef int64_t          dxf_long_t;           // 64 bit
 typedef uint64_t         dxf_ulong_t;  // 64 bit
 typedef double           dxf_double_t;         // 64 bit
+typedef int32_t          dxf_dayid_t;
 
 typedef dxf_char_t*        dxf_string_t;
 typedef const dxf_char_t*  dxf_const_string_t;

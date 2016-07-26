@@ -22,6 +22,18 @@ dxf_const_string_t dx_event_type_to_string (int event_type) {
 
 /* -------------------------------------------------------------------------- */
 
+void print_timestamp(dxf_long_t timestamp) {
+    char timefmt[80];
+
+    struct tm * timeinfo;
+    time_t tmpint = (int)(timestamp / 1000);
+    timeinfo = localtime(&tmpint);
+    strftime(timefmt, 80, "%Y%m%d-%H%M%S", timeinfo);
+    printf("%s", timefmt);
+}
+
+/* -------------------------------------------------------------------------- */
+
 void first_listener(int event_type, dxf_const_string_t symbol_name,
                     const dxf_event_data_t* data, int data_count, void* user_data) {
 	dxf_int_t i = 0;
@@ -53,8 +65,9 @@ void first_listener(int event_type, dxf_const_string_t symbol_name,
         dxf_trade_t* trades = (dx_trade_t*)data;
 
         for (; i < data_count; ++i) {
-            wprintf(L"time=%i, exchange code=%C, price=%f, size=%i, day volume=%i\n",
-                (int)trades[i].time, trades[i].exchange_code, trades[i].price, (int)trades[i].size, trades[i].day_volume);
+            wprintf(L"time=%i, exchange code=%C, price=%f, size=%i, tick=%i, change=%f, day volume=%i\n",
+                (int)trades[i].time, trades[i].exchange_code, trades[i].price, (int)trades[i].size, trades[i].tick,
+                trades[i].change, trades[i].day_volume);
         }
     }
 
@@ -71,8 +84,14 @@ void first_listener(int event_type, dxf_const_string_t symbol_name,
         dxf_profile_t* p = (dxf_profile_t*)data;
 
         for (; i < data_count ; ++i) {
-            wprintf(L"Description=%s\n",
-                p[i].description);
+            wprintf(L"Beta=%f, eps=%f, div freq=%I64i, exd div amount=%f, exd div date=%i, 52 high price=%f, "
+                L"52 low price=%f, shares=%f, Description=%ls, flags=%I64i, status_reason=%ls, halt start time=",
+                p[i].beta, p[i].eps, p[i].div_freq, p[i].exd_div_amount, p[i].exd_div_date, p[i]._52_high_price,
+                p[i]._52_low_price, p[i].shares, p[i].description, p[i].flags, p[i].status_reason);
+            print_timestamp(p[i].halt_start_time);
+            wprintf(L", halt end time=");
+            print_timestamp(p[i].halt_end_time);
+            wprintf(L", high limit price=%f, low limit price=%f}\n", p[i].high_limit_price, p[i].low_limit_price);
         }
     }
 

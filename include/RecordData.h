@@ -69,6 +69,8 @@ typedef struct {
     dxf_char_t exchange_code;
     dxf_double_t price;
     dxf_long_t size;
+    dxf_long_t tick;
+    dxf_double_t change;
     dxf_double_t day_volume;	
 } dx_trade_t;
 
@@ -92,7 +94,21 @@ typedef struct {
 } dx_fundamental_t;
 
 typedef struct {
+    dxf_double_t beta;
+    dxf_double_t eps;
+    dxf_long_t div_freq;
+    dxf_double_t exd_div_amount;
+    dxf_dayid_t exd_div_date;
+    dxf_double_t _52_high_price;
+    dxf_double_t _52_low_price;
+    dxf_double_t shares;
     dxf_const_string_t description;
+    dxf_long_t flags;
+    dxf_const_string_t status_reason;
+    dxf_long_t halt_start_time;
+    dxf_long_t halt_end_time;
+    dxf_double_t high_limit_price;
+    dxf_double_t low_limit_price;
 } dx_profile_t;
 
 typedef struct {
@@ -106,7 +122,6 @@ typedef struct {
     dxf_int_t mmask_size;
     dxf_int_t mmbid_count;
     dxf_int_t mmask_count;
-
 } dx_market_maker_t;
 
 typedef struct {
@@ -130,7 +145,7 @@ typedef struct {
     dxf_double_t ask_price;
     dxf_const_string_t exchange_sale_conditions;
     dxf_bool_t is_trade;
-    dxf_int_t type;    
+    dxf_int_t type;
 } dx_time_and_sale_t;
 
 typedef struct {
