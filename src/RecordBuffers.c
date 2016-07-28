@@ -159,8 +159,8 @@ GET_RECORD_PTR_BODY(dx_rid_trade, dx_trade_t)
 GET_RECORD_BUF_PTR_BODY(dx_rid_trade)
 GET_RECORD_PTR_BODY(dx_rid_quote, dx_quote_t)
 GET_RECORD_BUF_PTR_BODY(dx_rid_quote)
-GET_RECORD_PTR_BODY(dx_rid_fundamental, dx_fundamental_t)
-GET_RECORD_BUF_PTR_BODY(dx_rid_fundamental)
+GET_RECORD_PTR_BODY(dx_rid_summary, dx_summary_t)
+GET_RECORD_BUF_PTR_BODY(dx_rid_summary)
 GET_RECORD_PTR_BODY(dx_rid_profile, dx_profile_t)
 GET_RECORD_BUF_PTR_BODY(dx_rid_profile)
 GET_RECORD_PTR_BODY(dx_rid_market_maker, dx_market_maker_t)
@@ -181,7 +181,7 @@ GET_RECORD_BUF_PTR_BODY(dx_rid_candle)
 const dx_buffer_manager_collection_t g_buffer_managers[dx_rid_count] = {
     { GET_RECORD_PTR_NAME(dx_rid_trade), GET_RECORD_BUF_PTR_NAME(dx_rid_trade) },
     { GET_RECORD_PTR_NAME(dx_rid_quote), GET_RECORD_BUF_PTR_NAME(dx_rid_quote) },
-    { GET_RECORD_PTR_NAME(dx_rid_fundamental), GET_RECORD_BUF_PTR_NAME(dx_rid_fundamental) },
+    { GET_RECORD_PTR_NAME(dx_rid_summary), GET_RECORD_BUF_PTR_NAME(dx_rid_summary) },
     { GET_RECORD_PTR_NAME(dx_rid_profile), GET_RECORD_BUF_PTR_NAME(dx_rid_profile) },
     { GET_RECORD_PTR_NAME(dx_rid_market_maker), GET_RECORD_BUF_PTR_NAME(dx_rid_market_maker) },
     { GET_RECORD_PTR_NAME(dx_rid_order), GET_RECORD_BUF_PTR_NAME(dx_rid_order) },
