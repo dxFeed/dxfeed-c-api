@@ -325,14 +325,23 @@ bool RECORD_TRANSCODER_NAME(dx_quote_t) (dx_record_transcoder_connection_context
 
 /* -------------------------------------------------------------------------- */
 
-bool RECORD_TRANSCODER_NAME(dx_fundamental_t) (dx_record_transcoder_connection_context_t* context,
-                                               const dx_record_params_t* record_params,
-                                               const dxf_event_params_t* event_params,
-                                               void* record_buffer, int record_count) {
-    /* no transcoding actions are required */
-    
+bool RECORD_TRANSCODER_NAME(dx_summary_t) (dx_record_transcoder_connection_context_t* context,
+                                           const dx_record_params_t* record_params,
+                                           const dxf_event_params_t* event_params,
+                                           void* record_buffer, int record_count) {
+
+    dxf_summary_t* event_buffer = (dxf_summary_t*)record_buffer;
+    dxf_const_string_t suffix = record_params->suffix;
+    dxf_char_t exchange_code = (suffix == NULL ? 0 : suffix[0]);
+    int i = 0;
+
+    for (; i < record_count; ++i) {
+        dxf_summary_t* cur_event = event_buffer + i;
+        cur_event->exchange_code = exchange_code;
+    }
+
     return dx_process_event_data(context->connection, dx_eid_summary, record_params->symbol_name,
-        record_params->symbol_cipher, record_buffer, record_count, event_params);
+        record_params->symbol_cipher, event_buffer, record_count, event_params);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -603,7 +612,7 @@ bool RECORD_TRANSCODER_NAME(dx_candle_t) (dx_record_transcoder_connection_contex
 static const dx_record_transcoder_t g_record_transcoders[dx_rid_count] = {
     RECORD_TRANSCODER_NAME(dx_trade_t),
     RECORD_TRANSCODER_NAME(dx_quote_t),
-    RECORD_TRANSCODER_NAME(dx_fundamental_t),
+    RECORD_TRANSCODER_NAME(dx_summary_t),
     RECORD_TRANSCODER_NAME(dx_profile_t),
     RECORD_TRANSCODER_NAME(dx_market_maker_t),
     RECORD_TRANSCODER_NAME(dx_order_t),

@@ -5,6 +5,7 @@
 #include "Logger.h"
 #include <stdio.h>
 #include <Windows.h>
+#include <time.h>
 
 const char dxfeed_host[] = "demo.dxfeed.com:7300";
 

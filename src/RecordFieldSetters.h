@@ -76,15 +76,20 @@ DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_quote_t, ask_size);
 
 /* -------------------------------------------------------------------------- */
 /*
- *	Fundamental field setters
- */
+*	Summary field setters
+*/
 /* -------------------------------------------------------------------------- */
 
-DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_fundamental_t, day_high_price);
-DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_fundamental_t, day_low_price);
-DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_fundamental_t, day_open_price);
-DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_fundamental_t, prev_day_close_price);
-DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_fundamental_t, open_interest);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_summary_t, day_id);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_summary_t, day_open_price);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_summary_t, day_high_price);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_summary_t, day_low_price);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_summary_t, day_close_price);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_summary_t, prev_day_id);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_summary_t, prev_day_close_price);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_summary_t, open_interest);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_summary_t, flags);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_summary_t, exchange_code);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -229,15 +234,20 @@ DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_quote_t, ask_size);
 
 /* -------------------------------------------------------------------------- */
 /*
- *	Fundamental field default value getters
- */
+*	Summary field default value getters
+*/
 /* -------------------------------------------------------------------------- */
 
-DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_fundamental_t, day_high_price);
-DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_fundamental_t, day_low_price);
-DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_fundamental_t, day_open_price);
-DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_fundamental_t, prev_day_close_price);
-DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_fundamental_t, open_interest);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_summary_t, day_id);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_summary_t, day_open_price);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_summary_t, day_high_price);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_summary_t, day_low_price);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_summary_t, day_close_price);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_summary_t, prev_day_id);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_summary_t, prev_day_close_price);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_summary_t, open_interest);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_summary_t, flags);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_summary_t, exchange_code);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -378,15 +388,20 @@ DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_quote_t, ask_size);
 
 /* -------------------------------------------------------------------------- */
 /*
-*	Fundamental field getters
+*	Summary field getters
 */
 /* -------------------------------------------------------------------------- */
 
-DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_fundamental_t, day_high_price);
-DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_fundamental_t, day_low_price);
-DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_fundamental_t, day_open_price);
-DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_fundamental_t, prev_day_close_price);
-DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_fundamental_t, open_interest);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_summary_t, day_id);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_summary_t, day_open_price);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_summary_t, day_high_price);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_summary_t, day_low_price);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_summary_t, day_close_price);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_summary_t, prev_day_id);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_summary_t, prev_day_close_price);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_summary_t, open_interest);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_summary_t, flags);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_summary_t, exchange_code);
 
 /* -------------------------------------------------------------------------- */
 /*
