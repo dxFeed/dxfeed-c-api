@@ -287,8 +287,8 @@ int main (int argc, char* argv[]) {
     };
 
     if (!dxf_create_candle_symbol_attributes(symbol, DXF_CANDLE_EXCHANGE_CODE_ATTRIBUTE_DEFAULT,
-                                             DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT, dxf_ctpa_day, 
-                                             dxf_cpa_mark, dxf_csa_default, dxf_caa_default, &candle_attributes)) {
+                                             DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT, dxf_ctpa_default, 
+                                             dxf_cpa_default, dxf_csa_default, dxf_caa_default, &candle_attributes)) {
         dxf_close_subscription(subscription);
         dxf_close_connection(connection);
         free(symbol);
