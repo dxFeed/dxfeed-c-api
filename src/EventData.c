@@ -43,11 +43,13 @@ static const int g_event_data_sizes[dx_eid_count] = {
 static const dxf_char_t g_quote_tmpl[] = L"Quote&";
 static const dxf_char_t g_order_tmpl[] = L"Order#";
 static const dxf_char_t g_trade_tmpl[] = L"Trade&";
+static const dxf_char_t g_summary_tmpl[] = L"Summary&";
 
 #define STRLEN(char_array) (sizeof(char_array) / sizeof(char_array[0]) - 1)
 #define QUOTE_TMPL_LEN STRLEN(g_quote_tmpl)
 #define ORDER_TMPL_LEN STRLEN(g_order_tmpl)
 #define TRADE_TMPL_LEN STRLEN(g_trade_tmpl)
+#define SUMMARY_TMPL_LEN STRLEN(g_summary_tmpl)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -184,6 +186,21 @@ bool dx_get_trade_subscription_params(dxf_connection_t connection, OUT dx_event_
     return true;
 }
 
+bool dx_get_summary_subscription_params(dxf_connection_t connection, OUT dx_event_subscription_param_list_t* param_list) {
+    dxf_char_t ch = 'A';
+    dxf_char_t summary_name_buf[SUMMARY_TMPL_LEN + 2] = { 0 };
+    CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Summary", dx_st_ticker);
+
+    /* fill summaries Summary&A..Summary&Z */
+    dx_copy_string(summary_name_buf, g_summary_tmpl);
+    for (; ch <= 'Z'; ch++) {
+        summary_name_buf[SUMMARY_TMPL_LEN] = ch;
+        CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, summary_name_buf, dx_st_ticker);
+    }
+
+    return true;
+}
+
 /*
  * Returns the list of subscription params. Fills records list according to event_id.
  *
@@ -202,7 +219,7 @@ int dx_get_event_subscription_params(dxf_connection_t connection, dx_order_sourc
         result = dx_add_subscription_param_to_list(connection, &param_list, L"Quote", dx_st_ticker);
         break;
     case dx_eid_summary:
-        result = dx_add_subscription_param_to_list(connection, &param_list, L"Fundamental", dx_st_ticker);
+        result = dx_get_summary_subscription_params(connection, &param_list);
         break;
     case dx_eid_profile:
         result = dx_add_subscription_param_to_list(connection, &param_list, L"Profile", dx_st_ticker);

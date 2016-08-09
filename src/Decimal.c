@@ -19,7 +19,7 @@
 
 #include "Decimal.h"
 
-#include <float.h>
+#include <math.h>
 
 static const dxf_int_t STANDARD_MANTISSA_SHIFT = 4;
 static const dxf_int_t FLAG_MASK = 0x7F;
@@ -29,8 +29,10 @@ static const dxf_int_t EXTRA_PRECISION_MANTISSA_SHIFT = 7;
 static const dxf_long_t P7_M128_CONVERTER = 10000000;
 static const dxf_int_t UNITY_POWER = 9;
 
-static const dxf_double_t MULTIPLIERS[] = {
-	DBL_MAX,//std::numeric_limits< double>::infinity(), 
+static const dxf_ulong_t __inf = 0x7f80000000000000;
+
+static dxf_double_t MULTIPLIERS[] = {
+	0, // Will be replaced with infinity
 	100000000.0, 
 	10000000.0,
 	1000000.0, 
@@ -79,6 +81,10 @@ static const dxf_int_t EXTRA_PRECISION_DIVISORS[] = {
 };
 
 
+void dx_init_decimals() {
+	double tmp = 1.0;
+	MULTIPLIERS[0] = tmp / (tmp - 1.0);
+}
 
 bool dx_int_to_double (dxf_int_t integer, OUT dxf_double_t* decimal) {
 	dxf_int_t power = integer & 0x0F;

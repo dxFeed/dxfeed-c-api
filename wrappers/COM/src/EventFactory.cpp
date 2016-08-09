@@ -326,11 +326,16 @@ private:
         return InvokeImpl(this, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
     }
 
+    virtual HRESULT STDMETHODCALLTYPE GetDayId(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetDayOpenPrice(DOUBLE* value);
     virtual HRESULT STDMETHODCALLTYPE GetDayHighPrice (DOUBLE* value);
     virtual HRESULT STDMETHODCALLTYPE GetDayLowPrice (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetDayOpenPrice (DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetDayClosePrice(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetPrevDayId(LONGLONG* value);
     virtual HRESULT STDMETHODCALLTYPE GetPrevDayClosePrice (DOUBLE* value);
     virtual HRESULT STDMETHODCALLTYPE GetOpenInterest (LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetFlags(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetExchange(SHORT* value);
 
 private:
 
@@ -350,6 +355,26 @@ private:
 DXSummary::DXSummary (dxf_event_data_t data, IUnknown* parent)
 : DefIDispatchImpl(IID_IDXSummary, parent)
 , m_data(reinterpret_cast<dxf_summary_t*>(data)) {
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXSummary::GetDayId(LONGLONG* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->day_id;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXSummary::GetDayOpenPrice(DOUBLE* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->day_open_price;
+
+    return S_OK;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -374,10 +399,20 @@ HRESULT STDMETHODCALLTYPE DXSummary::GetDayLowPrice (DOUBLE* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXSummary::GetDayOpenPrice (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXSummary::GetDayClosePrice(DOUBLE* value) {
     CHECK_PTR(value);
 
-    *value = m_data->day_open_price;
+    *value = m_data->day_close_price;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXSummary::GetPrevDayId(LONGLONG* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->prev_day_id;
 
     return S_OK;
 }
@@ -398,6 +433,26 @@ HRESULT STDMETHODCALLTYPE DXSummary::GetOpenInterest (LONGLONG* value) {
     CHECK_PTR(value);
 
     *value = m_data->open_interest;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXSummary::GetFlags(LONGLONG* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->flags;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXSummary::GetExchange(SHORT* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->exchange_code;
 
     return S_OK;
 }

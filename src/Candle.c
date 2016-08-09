@@ -149,6 +149,22 @@ bool dx_candle_symbol_to_string(dxf_candle_attributes_t _attr, OUT dxf_string_t*
         tmpstr[1] = attributes->exchange_code;
         dx_concatenate_strings(buffer_str, tmpstr);
     }
+
+    if (attributes->period_value == DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT &&
+        attributes->period_type == dxf_ctpa_default &&
+        attributes->alignment == dxf_caa_default &&
+        attributes->price == dxf_cpa_default &&
+        attributes->session == dxf_csa_default) {
+
+        *string = dx_create_string_src(buffer_str);
+        if (*string == NULL) {
+            dx_set_error_code(dx_mec_insufficient_memory);
+            return false;
+        }
+
+        return true;
+    }
+
     dx_concatenate_strings(buffer_str, L"{");
 
     /*attribute (period) has no name and is written the first, and the rest should be sorted alphabetically.*/

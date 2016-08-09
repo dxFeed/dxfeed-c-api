@@ -36,7 +36,7 @@ typedef enum {
     dx_rid_begin,
     dx_rid_trade = dx_rid_begin,
     dx_rid_quote,
-    dx_rid_fundamental,
+    dx_rid_summary,
     dx_rid_profile,
     dx_rid_market_maker,
     dx_rid_order,
@@ -86,12 +86,17 @@ typedef struct {
 } dx_quote_t;
 
 typedef struct {
+    dxf_dayid_t day_id;
+    dxf_double_t day_open_price;
     dxf_double_t day_high_price;
     dxf_double_t day_low_price;
-    dxf_double_t day_open_price;
+    dxf_double_t day_close_price;
+    dxf_dayid_t prev_day_id;
     dxf_double_t prev_day_close_price;
     dxf_long_t open_interest;
-} dx_fundamental_t;
+    dxf_long_t flags;
+    dxf_char_t exchange_code;
+} dx_summary_t;
 
 typedef struct {
     dxf_double_t beta;
