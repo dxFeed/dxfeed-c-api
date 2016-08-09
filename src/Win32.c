@@ -20,6 +20,7 @@
 #ifdef _WIN32
 #include <windows.h>
 
+#include "Decimal.h"
 #include "DXMemory.h"
 #include "Logger.h"
 #include "DXAlgorithms.h"
@@ -98,6 +99,7 @@ BOOL APIENTRY DllMain (HANDLE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 	switch (ul_reason_for_call) {
 	case DLL_PROCESS_ATTACH:
 		dx_log_debug_message(L"DXFeed: Process attach");
+		dx_init_decimals();
 		dx_init_cb_queue(&g_thread_constructors);
 		dx_init_cb_queue(&g_thread_destructors);
 		dx_init_cb_queue(&g_process_destructors);

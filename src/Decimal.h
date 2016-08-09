@@ -22,8 +22,10 @@
 
 #include "BufferedIOCommon.h"
 
-// Parse decimals stored as compact int 
+// Init constants whic could not be expressed as constants in MSVC
+void dx_init_decimals();
 
+// Parse decimals stored as compact int 
 bool dx_int_to_double(dxf_int_t integer, OUT dxf_double_t* decimal);
 
 #endif // DECIMAL_H
