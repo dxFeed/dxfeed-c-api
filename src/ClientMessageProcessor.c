@@ -239,7 +239,7 @@ static bool dx_subscribe_symbol_to_record(dxf_connection_t connection, dx_messag
 
     if (!dx_compose_message_header(bocc, type) ||
         !dx_compose_body(bocc, record_id, cipher, symbol) ||
-        ((type == MESSAGE_HISTORY_ADD_SUBSCRIPTION) && !dx_write_compact_long(bocc, time)) || 
+        ((type == MESSAGE_HISTORY_ADD_SUBSCRIPTION) && !dx_write_compact_long(bocc, time << 32)) || 
         !dx_finish_composing_message(bocc)) {
 
         dx_free(dx_get_out_buffer(bocc));
