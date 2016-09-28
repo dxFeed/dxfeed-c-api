@@ -5,9 +5,12 @@ EXPORTS
     dxf_create_connection 
     dxf_close_connection 
     dxf_create_subscription 
+    dxf_create_subscription_timed 
     dxf_close_subscription 
     dxf_add_symbol 
     dxf_add_symbols 
+    dxf_add_candle_symbol 
+    dxf_remove_candle_symbol 
     dxf_remove_symbol 
     dxf_remove_symbols 
     dxf_get_symbols 
@@ -15,8 +18,20 @@ EXPORTS
     dxf_clear_symbols 
     dxf_attach_event_listener 
     dxf_detach_event_listener 
+    dxf_attach_event_listener_v2 
+    dxf_detach_event_listener_v2 
     dxf_get_subscription_event_types 
     dxf_get_last_event 
     dxf_get_last_error 
     dxf_initialize_logger 
+    dxf_set_order_source 
+    dxf_add_order_source 
+    dxf_create_candle_symbol_attributes 
+    dxf_delete_candle_symbol_attributes 
+    dxf_create_order_snapshot 
+    dxf_create_candle_snapshot 
+    dxf_close_snapshot 
+    dxf_attach_snapshot_listener 
+    dxf_detach_snapshot_listener 
+    dxf_get_snapshot_symbol 
     dx_get_event_data_item

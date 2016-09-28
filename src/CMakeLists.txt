@@ -5,14 +5,22 @@ cmake_policy(SET CMP0015 NEW)
 set(PROJECT DXFeed) 
 set(INCLUDE_DIR ../include)
 set(PTHREADS_INCLUDE_DIR ../include/pthreads)
+set(TARGET_PLATFORM "x86" CACHE STRING "Target platform specification")
+set(POSTFIX "")
+set(PLATFORM_POSTFIX "")
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(POSTFIX "d")
-else()
-    set(POSTFIX "")
 endif()
+if(TARGET_PLATFORM STREQUAL "x64")
+    set(PLATFORM_POSTFIX "_64")
+    set(POSTFIX "${POSTFIX}${PLATFORM_POSTFIX}")
+endif()
+
 set(DEF_FILE ../${PROJECT}${POSTFIX}.def)
 
 set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE TYPE INTERNAL FORCE)
+set(CMAKE_DEBUG_POSTFIX "d${PLATFORM_POSTFIX}")
+set(CMAKE_RELEASE_POSTFIX "${PLATFORM_POSTFIX}")
  
 project(${PROJECT}) 
 
@@ -27,6 +35,7 @@ set(EXPORT_HEADERS
     )
  
 set (HEADER_FILES 
+    Candle.h
     ClientMessageProcessor.h
     ConnectionContextData.h
     DXAlgorithms.h
@@ -46,7 +55,6 @@ set (HEADER_FILES
     StringArray.h
     TaskQueue.h
     Version.h
-    Candle.h
     )
  
  set (PARSER_HEADERS
@@ -76,6 +84,7 @@ set (PARSER_TESTS
 )
  
 set (SOURCE_FILES
+    Candle.c
     ClientMessageProcessor.c
     ConnectionContextData.c
     DXAlgorithms.c
@@ -97,7 +106,6 @@ set (SOURCE_FILES
     StringArray.c
     TaskQueue.c
     Win32.c
-    Candle.c
     ${DEF_FILE}) 
     
 set (ALL_HEADERS
@@ -174,4 +182,4 @@ add_library (${PROJECT} SHARED ${ALL_HEADERS} ${ALL_SOURCES})
 
 target_link_libraries (${PROJECT} ${ADDITIONAL_LIBRARIES})
 
-set_target_properties(${PROJECT} PROPERTIES DEBUG_POSTFIX "d")
+#set_target_properties(${PROJECT} PROPERTIES DEBUG_POSTFIX ${POSTFIX} RELEASE_POSTFIX ${POSTFIX})
