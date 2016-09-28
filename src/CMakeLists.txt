@@ -181,5 +181,3 @@ source_group ("Source Files" FILES ${SOURCE_FILES})
 add_library (${PROJECT} SHARED ${ALL_HEADERS} ${ALL_SOURCES})
 
 target_link_libraries (${PROJECT} ${ADDITIONAL_LIBRARIES})
-
-#set_target_properties(${PROJECT} PROPERTIES DEBUG_POSTFIX ${POSTFIX} RELEASE_POSTFIX ${POSTFIX})
