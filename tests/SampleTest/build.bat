@@ -4,7 +4,7 @@ set BUILD_DIR=build
 set CONFIG=
 set PLATFORM=
 set CMAKE_PLATFORM=
-set MSBUILD_PLATFORM=
+set MSBUILD_PLATFORM=Win32
 
 for %%A in (%*) do (
     if [%%A] EQU [Debug] (
@@ -13,7 +13,6 @@ for %%A in (%*) do (
         set CONFIG=%%A
     ) else if [%%A] EQU [x86] (
         set PLATFORM=%%A
-        set MSBUILD_PLATFORM=Win32
     ) else if [%%A] EQU [x64] (
         set PLATFORM=%%A
         set CMAKE_PLATFORM= Win64
