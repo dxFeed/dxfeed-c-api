@@ -25,7 +25,9 @@ include_directories(
     ../../src
     )
 
-add_subdirectory(${LIB_DXFEED_SRC_DIR} ${LIB_DXFEED_OUT_DIR})
+if (NOT TARGET ${LIB_DXFEED_PROJ})
+    add_subdirectory(${LIB_DXFEED_SRC_DIR} ${LIB_DXFEED_OUT_DIR})
+endif()
 
 link_directories(${LIB_DXFEED_OUT_DIR})
 

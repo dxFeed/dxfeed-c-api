@@ -40,7 +40,9 @@ project(${PROJECT})
 
 include_directories(${INCLUDE_DIR})
 
-add_subdirectory(${LIB_DXFEED_SRC_DIR} ${LIB_DXFEED_OUT_DIR})
+if (NOT TARGET ${LIB_DXFEED_PROJ})
+    add_subdirectory(${LIB_DXFEED_SRC_DIR} ${LIB_DXFEED_OUT_DIR})
+endif()
 
 link_directories(${LIB_DXFEED_OUT_DIR})
 
@@ -106,7 +108,6 @@ target_link_libraries(${PROJECT} ${LIB_DXFEED_NAME} comsupp.lib Advapi32.lib)
 
 set_target_properties(${PROJECT} 
     PROPERTIES 
-    #DEBUG_POSTFIX "d"
     LINK_FLAGS "${ADDITIONAL_PROPERTIES}"
 )
 
@@ -120,4 +121,13 @@ add_custom_command(
     TARGET ${PROJECT}
     POST_BUILD
     COMMAND midl /env win32 /h "${MIDL_H_FILE}" /W1 /char signed /tlb "${MIDL_TLB_FILE}" "${IDL_FILE}"
+)
+
+set(TLB_OUT_DIR ${CMAKE_BINARY_DIR}/$(Configuration))
+ADD_CUSTOM_COMMAND(
+    TARGET ${PROJECT}
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${MIDL_TLB_FILE} ${TLB_OUT_DIR}/${MIDL_TLB_FILE}
+    COMMAND ${CMAKE_COMMAND} -E copy ${MIDL_H_FILE} ${TLB_OUT_DIR}/${MIDL_H_FILE}
+    COMMAND ${CMAKE_COMMAND} -E copy ${MIDL_C_FILE} ${TLB_OUT_DIR}/${MIDL_C_FILE}
 )
