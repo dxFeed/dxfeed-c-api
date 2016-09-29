@@ -19,6 +19,7 @@ dxf_const_string_t dx_event_type_to_string (int event_type) {
     case DXF_ET_PROFILE: return L"Profile";
     case DXF_ET_ORDER: return L"Order";
     case DXF_ET_TIME_AND_SALE: return L"Time&Sale";
+    case DXF_ET_CANDLE: return L"Candle";
     default: return L"";
     }
 }
@@ -40,6 +41,8 @@ void order_listener(int event_type, dxf_const_string_t symbol_name,
                     const dxf_event_data_t* data, int data_count, void* user_data);
 void time_and_sale_listener(int event_type, dxf_const_string_t symbol_name,
                             const dxf_event_data_t* data, int data_count, void* user_data);
+void candle_listener(int event_type, dxf_const_string_t symbol_name,
+                     const dxf_event_data_t* data, int data_count, void* user_data);
 
 struct event_info_t {
     dx_event_id_t       id;
@@ -49,12 +52,15 @@ struct event_info_t {
     unsigned int        total_data_count[SYMBOLS_COUNT];
 };
 
-static struct event_info_t event_info[dx_eid_count] = { {dx_eid_trade, DXF_ET_TRADE, {0, 0}, trade_listener, 0},
-{dx_eid_quote, DXF_ET_QUOTE, {0, 6}, quote_listener, 0},
-{dx_eid_summary, DXF_ET_SUMMARY, {0, 12}, summary_listener, 0},
-{dx_eid_profile, DXF_ET_PROFILE, {0, 18}, profile_listener, 0},
-{dx_eid_order, DXF_ET_ORDER, {0, 24}, order_listener, 0},
-{dx_eid_time_and_sale, DXF_ET_TIME_AND_SALE, {0, 30}, time_and_sale_listener, 0}};
+static struct event_info_t event_info[dx_eid_count] = {
+    { dx_eid_trade, DXF_ET_TRADE, { 0, 0 }, trade_listener, 0 },
+    { dx_eid_quote, DXF_ET_QUOTE, { 0, 6 }, quote_listener, 0 },
+    { dx_eid_summary, DXF_ET_SUMMARY, { 0, 12 }, summary_listener, 0 },
+    { dx_eid_profile, DXF_ET_PROFILE, { 0, 18 }, profile_listener, 0 },
+    { dx_eid_order, DXF_ET_ORDER, { 0, 24 }, order_listener, 0 },
+    { dx_eid_time_and_sale, DXF_ET_TIME_AND_SALE, { 0, 30 }, time_and_sale_listener, 0 },
+    { dx_eid_candle, DXF_ET_CANDLE,{ 0, 36 }, candle_listener, 0 }
+};
 
 /* -------------------------------------------------------------------------- */
 
@@ -292,6 +298,33 @@ void time_and_sale_listener(int event_type, dxf_const_string_t symbol_name,
     //print_at( event_info[dx_eid_time_and_sale].coord, str);
 }
 
+void candle_listener(int event_type, dxf_const_string_t symbol_name,
+                     const dxf_event_data_t* data, int data_count, void* user_data) {
+    dxf_int_t i = 0;
+    wchar_t str[200];
+    int ind;
+    COORD coord = event_info[dx_eid_candle].coord;
+
+    if (event_type != DXF_ET_CANDLE) {
+        swprintf(str, sizeof(str), L"Error: event: %s Symbol: %s, expected event: Candle\n", dx_event_type_to_string(event_type), symbol_name);
+        print_at(coord, str);
+        return;
+    }
+
+    print_at(coord, L"Event Candle:                              ");
+    ind = get_symbol_index(symbol_name);
+    if (ind == -1) {
+        return;
+    }
+
+    event_info[dx_eid_candle].total_data_count[ind] += data_count;
+
+    coord.X += 5;
+    coord.Y += ind + 1;
+    swprintf(str, sizeof(str), L"Symbol: \"%s\" Data count: %d, Total data count: %d            ", symbol_name, data_count, event_info[dx_eid_candle].total_data_count[ind]);
+    print_at(coord, str);
+}
+
 /* -------------------------------------------------------------------------- */
 
 void process_last_error () {
@@ -365,7 +398,7 @@ dxf_subscription_t create_subscription(dxf_connection_t connection, int event_id
 bool initialize_console() {
     CONSOLE_SCREEN_BUFFER_INFO info;
     COORD c = {80, 40};
-    SMALL_RECT rect = {0, 0, 79, 39};
+    SMALL_RECT rect = {0, 0, 79, 45};
     DWORD buffer_size, dummy;
 
     g_out_console = GetStdHandle(STD_OUTPUT_HANDLE);
