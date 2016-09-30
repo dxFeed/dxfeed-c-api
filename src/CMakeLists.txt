@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8.1)
 
 cmake_policy(SET CMP0015 NEW)
  
@@ -6,6 +6,7 @@ set(PROJECT DXFeed)
 set(INCLUDE_DIR ../include)
 set(PTHREADS_INCLUDE_DIR ../include/pthreads)
 set(TARGET_PLATFORM "x86" CACHE STRING "Target platform specification")
+set(APP_VERSION "" CACHE STRING "The version of library")
 set(POSTFIX "")
 set(PLATFORM_POSTFIX "")
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -21,8 +22,14 @@ set(DEF_FILE ../${PROJECT}${POSTFIX}.def)
 set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE TYPE INTERNAL FORCE)
 set(CMAKE_DEBUG_POSTFIX "d${PLATFORM_POSTFIX}")
 set(CMAKE_RELEASE_POSTFIX "${PLATFORM_POSTFIX}")
- 
-project(${PROJECT}) 
+
+project(${PROJECT})
+
+# If library version is not specified through parameters version from the source will be used
+if(NOT ${APP_VERSION} STREQUAL "")
+    configure_file("${PROJECT_SOURCE_DIR}/Version.h.in" "${PROJECT_SOURCE_DIR}/Version.h")
+    configure_file("${PROJECT_SOURCE_DIR}/${PROJECT}${POSTFIX}.def.in" "${PROJECT_SOURCE_DIR}/${DEF_FILE}")
+endif()
 
 include_directories(${INCLUDE_DIR})
 
