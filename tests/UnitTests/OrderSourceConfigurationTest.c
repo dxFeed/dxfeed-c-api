@@ -38,6 +38,18 @@ get_counter_function_t g_all_counters[] = { ost_get_ntv_counter, ost_get_dex_cou
 
 /* -------------------------------------------------------------------------- */
 
+static void close_data(dxf_connection_t connection, dxf_subscription_t subscription, 
+                       dxf_event_listener_t listener) {
+    if (!dxf_detach_event_listener(subscription, listener))
+        process_last_error();
+    if (!dxf_close_subscription(subscription))
+        process_last_error();
+    if (!dxf_close_connection(connection))
+        process_last_error();
+}
+
+/* -------------------------------------------------------------------------- */
+
 void order_source_tests_on_thread_terminate(dxf_connection_t connection, void* user_data) {
     if (g_ost_listener_thread_data == NULL)
         return;
@@ -105,6 +117,7 @@ bool ost_wait_two_events(get_counter_function_t f1, get_counter_function_t f2) {
     return ost_wait_multiple_events(counters, SIZE_OF_ARRAY(counters));
 }
 
+/*Test*/
 bool mixed_order_source_test() {
     dxf_connection_t connection = NULL;
     dxf_subscription_t subscription = NULL;
@@ -126,12 +139,14 @@ bool mixed_order_source_test() {
 
     if (!ost_wait_multiple_events(g_all_counters, SIZE_OF_ARRAY(g_all_counters))) {
         process_last_error();
+        close_data(connection, subscription, listener);
         return false;
     }
 
     if (!dxf_set_order_source(subscription, "NTV")) {
         process_last_error();
         PRINT_TEST_FAILED;
+        close_data(connection, subscription, listener);
         return false;
     }
     Sleep(1000);
@@ -145,12 +160,14 @@ bool mixed_order_source_test() {
         printf("    Expected: ntv=%5s, dex=%5s, dea=%5s; \n", ">0", "0", "0");
         printf("    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n", 
             ost_get_ntv_counter(), ost_get_dex_counter(), ost_get_dea_counter());
+        close_data(connection, subscription, listener);
         return false;
     }
 
     if (!dxf_add_order_source(subscription, "DEX")) {
         process_last_error();
         PRINT_TEST_FAILED;
+        close_data(connection, subscription, listener);
         return false;
     }
     Sleep(1000);
@@ -163,6 +180,7 @@ bool mixed_order_source_test() {
         printf("    Expected: ntv=%5s, dex=%5s, dea=%5s; \n", ">0", ">0", "0");
         printf("    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n",
             ost_get_ntv_counter(), ost_get_dex_counter(), ost_get_dea_counter());
+        close_data(connection, subscription, listener);
         return false;
     }
 
@@ -176,6 +194,7 @@ bool mixed_order_source_test() {
     return true;
 }
 
+/*Test*/
 bool set_order_source_test() {
     dxf_connection_t connection = NULL;
     dxf_subscription_t subscription = NULL;
@@ -197,12 +216,14 @@ bool set_order_source_test() {
 
     if (!ost_wait_multiple_events(g_all_counters, SIZE_OF_ARRAY(g_all_counters))) {
         process_last_error();
+        close_data(connection, subscription, listener);
         return false;
     }
 
     if (!dxf_set_order_source(subscription, "NTV")) {
         process_last_error();
         PRINT_TEST_FAILED;
+        close_data(connection, subscription, listener);
         return false;
     }
     Sleep(1000);
@@ -218,12 +239,14 @@ bool set_order_source_test() {
                "    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n",
                __FUNCTION__, __LINE__, ">0", "0", "0", 
                ost_get_ntv_counter(), ost_get_dex_counter(), ost_get_dea_counter());
+        close_data(connection, subscription, listener);
         return false;
     }
 
     if (!dxf_set_order_source(subscription, "DEX")) {
         process_last_error();
         PRINT_TEST_FAILED;
+        close_data(connection, subscription, listener);
         return false;
     }
     Sleep(1000);
@@ -239,6 +262,7 @@ bool set_order_source_test() {
                "    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n",
                __FUNCTION__, __LINE__, "0", ">0", "0", 
                ost_get_ntv_counter(), ost_get_dex_counter(), ost_get_dea_counter());
+        close_data(connection, subscription, listener);
         return false;
     }
 
@@ -252,6 +276,7 @@ bool set_order_source_test() {
     return true;
 }
 
+/*Test*/
 bool add_order_source_test() {
     dxf_connection_t connection = NULL;
     dxf_subscription_t subscription = NULL;
@@ -281,12 +306,14 @@ bool add_order_source_test() {
                "    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n",
                __FUNCTION__, __LINE__, ">0", "0", "0", 
                ost_get_ntv_counter(), ost_get_dex_counter(), ost_get_dea_counter());
+        close_data(connection, subscription, listener);
         return false;
     }
 
     if (!dxf_add_order_source(subscription, "DEX")) {
         process_last_error();
         PRINT_TEST_FAILED;
+        close_data(connection, subscription, listener);
         return false;
     }
     Sleep(1000);
@@ -301,12 +328,14 @@ bool add_order_source_test() {
                "    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n",
                __FUNCTION__, __LINE__, ">0", ">0", "0", 
                ost_get_ntv_counter(), ost_get_dex_counter(), ost_get_dea_counter());
+        close_data(connection, subscription, listener);
         return false;
     }
 
     if (!dxf_add_order_source(subscription, "DEA")) {
         process_last_error();
         PRINT_TEST_FAILED;
+        close_data(connection, subscription, listener);
         return false;
     }
     Sleep(1000);
@@ -319,6 +348,7 @@ bool add_order_source_test() {
                "    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n",
                __FUNCTION__, __LINE__, ">0", ">0", ">0", 
                ost_get_ntv_counter(), ost_get_dex_counter(), ost_get_dea_counter());
+        close_data(connection, subscription, listener);
         return false;
     }
 
