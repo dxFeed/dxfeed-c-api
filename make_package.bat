@@ -1,9 +1,8 @@
 @echo off
-rem TODO
-rem Script builds, checks and makes package
-rem Script build all targets from CMakeLists.txt
-rem It is sequentionally calls ../build.bat for next configurations: Debug x86, Release x86, Debug x64, Release x64
-rem It one of configurations fail the process stopped.
+rem Script builds, tests and makes package.
+rem Script build all targets from CMakeLists.txt by sequentionally calling 
+rem build.bat for next configurations: Debug x86, Release x86, Debug x64, Release x64.
+rem Iа one of configurations fail the process stopped.
 
 setlocal
 
@@ -33,7 +32,6 @@ if %ERRORLEVEL% GEQ 1 (
 )
 
 set VERSION=
-set BUILD_DIR=build
 set DO_TEST=1
 
 for %%A in (%*) do (
@@ -50,6 +48,11 @@ for %%A in (%*) do (
         set VERSION=%%A
     )
 )
+
+set BUILD_DIR=%~dp0\build
+set PROJECT_NAME=DXFeedAll
+set PACKAGE_WORK_DIR=_CPack_Packages
+set TARGET_PACKAGE=dxfeed-c-api-%VERSION%
 
 echo Start building package %VERSION%
 
@@ -85,21 +88,22 @@ rem === MAKE PACKAGE ===
 echo Start make release package %VERSION%
 set HOME_DIR=%cd%
 cd %BUILD_DIR%
-call %~dp0\scripts\combine_package Debug x86 %VERSION%
+call %~dp0\scripts\combine_package %PROJECT_NAME% Debug x86 %VERSION%
 set CPACK_LEVEL=%ERRORLEVEL%
-call %~dp0\scripts\combine_package Release x86 %VERSION%
+call %~dp0\scripts\combine_package %PROJECT_NAME% Release x86 %VERSION%
 set CPACK_LEVEL=%CPACK_LEVEL%+%ERRORLEVEL%
-call %~dp0\scripts\combine_package Debug x64 %VERSION%
+call %~dp0\scripts\combine_package %PROJECT_NAME% Debug x64 %VERSION%
 set CPACK_LEVEL=%CPACK_LEVEL%+%ERRORLEVEL%
-call %~dp0\scripts\combine_package Release x64 %VERSION%
+call %~dp0\scripts\combine_package %PROJECT_NAME% Release x64 %VERSION%
 set CPACK_LEVEL=%CPACK_LEVEL%+%ERRORLEVEL%
 
-set TARGET_PACKAGE=dxfeed-c-api-%VERSION%
+cd %PACKAGE_WORK_DIR%
 if EXIST %TARGET_PACKAGE% rmdir %TARGET_PACKAGE% /S /Q
 mkdir %TARGET_PACKAGE%
-xcopy /Y /S DXFeedAll-%VERSION%-x86 %TARGET_PACKAGE%
-xcopy /Y /S DXFeedAll-%VERSION%-x64 %TARGET_PACKAGE%
+xcopy /Y /S %PROJECT_NAME%-%VERSION%-x86 %TARGET_PACKAGE%
+xcopy /Y /S %PROJECT_NAME%-%VERSION%-x64 %TARGET_PACKAGE%
 7z a %TARGET_PACKAGE%.zip %TARGET_PACKAGE%
+move /Y %TARGET_PACKAGE%.zip %BUILD_DIR%\%TARGET_PACKAGE%.zip
 cd %HOME_DIR%
 if %CPACK_LEVEL% GEQ 1 goto exit_error
 

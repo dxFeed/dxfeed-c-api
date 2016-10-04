@@ -2,8 +2,9 @@
 rem Script CPack archives with specified platform and configuration. After
 rem packing all files extracted to single release directory.
 rem Usage:
-rem     combine_package <configuration> <platform> <version>
+rem     combine_package <project-name> <configuration> <platform> <version>
 rem where:
+rem     project-name    - The name of target project package
 rem     configuration   - Debug or Release
 rem     platform        - x86 or x64
 rem     version         - version of application i.e. 1.2.6
@@ -23,9 +24,15 @@ if %ERRORLEVEL% GEQ 1 (
     goto exit_error
 )
 
-set CONFIG=%1
-set PLATFORM=%2
-set VERSION=%3
+set PROJECT_NAME=%1
+set CONFIG=%2
+set PLATFORM=%3
+set VERSION=%4
+
+if [%PROJECT_NAME%] EQU [] (
+    echo ERROR: Project package name is not specified!
+    goto exit_error
+)
 
 if [%CONFIG%] NEQ [Debug] (
     if [%CONFIG%] NEQ [Release] (
@@ -39,17 +46,18 @@ if [%PLATFORM%] NEQ [x86] (
         goto exit_error
     )
 )
-if [%VERSION%] EQU [] (
-    echo ERROR: Version is not specified!
-    goto exit_error
-)
+rem if [%VERSION%] EQU [] (
+rem     echo ERROR: Version is not specified!
+rem     goto exit_error
+rem )
 
 cpack -G ZIP -C %CONFIG% --config %PLATFORM%\DXFeedAllCPackConfig.cmake
 if %ERRORLEVEL% GEQ 1 goto exit_error
-set PACKAGE_NAME=DXFeedAll-%VERSION%-%PLATFORM%
-set ARCHIVE_NAME=DXFeedAll-%VERSION%-%PLATFORM%%CONFIG%
-move /Y %PACKAGE_NAME%.zip %ARCHIVE_NAME%.zip
-7z x -y %ARCHIVE_NAME%.zip
+set WORK_DIR=_CPack_Packages
+set PACKAGE_NAME=%PROJECT_NAME%-%VERSION%-%PLATFORM%
+set ARCHIVE_NAME=%PROJECT_NAME%-%VERSION%-%PLATFORM%%CONFIG%
+move /Y %PACKAGE_NAME%.zip %WORK_DIR%\%ARCHIVE_NAME%.zip
+7z x -y -o%WORK_DIR% %WORK_DIR%\%ARCHIVE_NAME%.zip
 if %ERRORLEVEL% GEQ 1 goto exit_error
 
 :exit_success
