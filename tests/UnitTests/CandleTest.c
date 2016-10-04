@@ -27,11 +27,6 @@
 
 #define EPSILON 0.000001
 
-typedef struct {
-    dxf_uint_t event_counter;
-    CRITICAL_SECTION event_counter_guard;
-} event_counter_data_t, *event_counter_data_ptr_t;
-
 static const char dxfeed_host[] = "mddqa.in.devexperts.com:7400";
 
 candle_attribute_test_case_t g_candle_attribute_cases[] = {
@@ -123,37 +118,6 @@ void candle_tests_on_thread_terminate(dxf_connection_t connection, void* user_da
     if (g_ct_listener_thread_data == NULL)
         return;
     on_reader_thread_terminate(g_ct_listener_thread_data, connection, user_data);
-}
-
-/* -------------------------------------------------------------------------- */
-
-void init_event_counter(event_counter_data_ptr_t counter_data) {
-    InitializeCriticalSection(&counter_data->event_counter_guard);
-    counter_data->event_counter = 0;
-}
-
-void free_event_counter(event_counter_data_ptr_t counter_data) {
-    DeleteCriticalSection(&counter_data->event_counter_guard);
-}
-
-void inc_event_counter(event_counter_data_ptr_t counter_data) {
-    EnterCriticalSection(&counter_data->event_counter_guard);
-    counter_data->event_counter++;
-    LeaveCriticalSection(&counter_data->event_counter_guard);
-}
-
-dxf_uint_t get_event_counter(event_counter_data_ptr_t counter_data) {
-    dxf_uint_t value = 0;
-    EnterCriticalSection(&counter_data->event_counter_guard);
-    value = counter_data->event_counter;
-    LeaveCriticalSection(&counter_data->event_counter_guard);
-    return value;
-}
-
-void drop_event_counter(event_counter_data_ptr_t counter_data) {
-    EnterCriticalSection(&counter_data->event_counter_guard);
-    counter_data->event_counter = 0;
-    LeaveCriticalSection(&counter_data->event_counter_guard);
 }
 
 /* -------------------------------------------------------------------------- */
