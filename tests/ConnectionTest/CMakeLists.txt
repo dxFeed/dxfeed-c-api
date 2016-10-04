@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8.1)
 
 cmake_policy(SET CMP0015 NEW)
  
@@ -74,3 +74,28 @@ set_target_properties(${LIB_DXFEED_PROJ}
 )
 
 add_dependencies(${PROJECT} ${LIB_DXFEED_PROJ})
+
+
+
+set(PROJECT_FILES
+    ${PROJECT}.vcxproj
+    ${PROJECT}.vcxproj.filters
+)
+set(BUILD_FILES
+    build.bat
+    CMakeLists.txt
+)
+set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/DXFeedAllCPackConfig.cmake")
+install(TARGETS ${PROJECT}
+    DESTINATION "bin/${TARGET_PLATFORM}"
+    CONFIGURATIONS Release
+)
+install(FILES ${SOURCE_FILES} ${PROJECT_FILES} ${BUILD_FILES}
+    DESTINATION "tests/${PROJECT}"
+    CONFIGURATIONS Release
+)
+set(CPACK_PACKAGE_VENDOR "Devexperts")
+set(CPACK_PACKAGE_NAME "${PROJECT}")
+set(CPACK_PACKAGE_VERSION "${APP_VERSION}")
+set(CPACK_PACKAGE_FILE_NAME "${PROJECT}-${APP_VERSION}-${TARGET_PLATFORM}")
+include(CPack)

@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8.1)
 
 cmake_policy(SET CMP0015 NEW)
 
@@ -105,11 +105,26 @@ set_target_properties(${LIB_COM_PROJ}
 
 add_dependencies(${PROJECT} ${LIB_COM_PROJ})
 
-#set(LIB_COM_OBJ_DIR ${CMAKE_BINARY_DIR}/${LIB_COM_PROJ})
-#ADD_CUSTOM_COMMAND(
-#    TARGET ${PROJECT}
-#    POST_BUILD
-#    COMMAND ${CMAKE_COMMAND} -E copy ${LIB_COM_OBJ_DIR}/${LIB_COM_PROJ}.tlb ${CMAKE_BINARY_DIR}
-#    COMMAND ${CMAKE_COMMAND} -E copy ${LIB_COM_OBJ_DIR}/${LIB_COM_PROJ}.h ${CMAKE_BINARY_DIR}
-#    COMMAND ${CMAKE_COMMAND} -E copy ${LIB_COM_OBJ_DIR}/${LIB_COM_PROJ}_i.c ${CMAKE_BINARY_DIR}
-#)
+
+set(PROJECT_FILES
+    ${PROJECT}.vcxproj
+    ${PROJECT}.vcxproj.filters
+)
+set(BUILD_FILES
+    build.bat
+    CMakeLists.txt
+)
+set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/DXFeedAllCPackConfig.cmake")
+install(TARGETS ${PROJECT}
+    DESTINATION "bin/${TARGET_PLATFORM}"
+    CONFIGURATIONS Release
+)
+install(FILES ${HEADER_FILES} ${SOURCE_FILES} ${PROJECT_FILES} ${BUILD_FILES}
+    DESTINATION "wrappers/COM/samples/C++"
+    CONFIGURATIONS Release
+)
+set(CPACK_PACKAGE_VENDOR "Devexperts")
+set(CPACK_PACKAGE_NAME "${PROJECT}")
+set(CPACK_PACKAGE_VERSION "${APP_VERSION}")
+set(CPACK_PACKAGE_FILE_NAME "${PROJECT}-${APP_VERSION}-${TARGET_PLATFORM}")
+include(CPack)

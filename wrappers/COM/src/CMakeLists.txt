@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8.1)
 
 cmake_policy(SET CMP0015 NEW)
 
@@ -131,3 +131,37 @@ ADD_CUSTOM_COMMAND(
     COMMAND ${CMAKE_COMMAND} -E copy ${MIDL_H_FILE} ${TLB_OUT_DIR}/${MIDL_H_FILE}
     COMMAND ${CMAKE_COMMAND} -E copy ${MIDL_C_FILE} ${TLB_OUT_DIR}/${MIDL_C_FILE}
 )
+
+
+set(PROJECT_FILES
+    ${PROJECT}.vcxproj
+    ${PROJECT}.vcxproj.filters
+)
+set(BUILD_FILES
+    build.bat
+    CMakeLists.txt
+)
+set(ALL_DEF_FILES
+    ${PROJECT}.def
+    ${PROJECT}d.def
+    ${PROJECT}_64.def
+    ${PROJECT}d_64.def
+)
+set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/DXFeedAllCPackConfig.cmake")
+install(TARGETS ${PROJECT}
+    DESTINATION "bin/${TARGET_PLATFORM}"
+)
+install(DIRECTORY "${LIB_COM_INCLUDE_DIR}"
+    DESTINATION "wrappers/COM"
+)
+install(FILES ${HEADER_FILES} ${SOURCE_FILES} ${ALL_DEF_FILES} ${PROJECT_FILES} ${BUILD_FILES}
+    DESTINATION "wrappers/COM/src"
+)
+install(FILES "${PROJECT_BINARY_DIR}/DXFeedCOM.tlb" "${PROJECT_BINARY_DIR}/DXFeedCOM.h" "${PROJECT_BINARY_DIR}/DXFeedCOM_i.c"
+    DESTINATION "bin/${TARGET_PLATFORM}/tlb"
+)
+set(CPACK_PACKAGE_VENDOR "Devexperts")
+set(CPACK_PACKAGE_NAME "${PROJECT}")
+set(CPACK_PACKAGE_VERSION "${APP_VERSION}")
+set(CPACK_PACKAGE_FILE_NAME "${PROJECT}-${APP_VERSION}-${TARGET_PLATFORM}")
+include(CPack)

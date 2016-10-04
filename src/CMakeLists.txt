@@ -188,3 +188,23 @@ source_group ("Source Files" FILES ${SOURCE_FILES})
 add_library (${PROJECT} SHARED ${ALL_HEADERS} ${ALL_SOURCES})
 
 target_link_libraries (${PROJECT} ${ADDITIONAL_LIBRARIES})
+
+
+set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/DXFeedAllCPackConfig.cmake")
+install(TARGETS ${PROJECT}
+    DESTINATION "bin/${TARGET_PLATFORM}"
+)
+install(DIRECTORY "${INCLUDE_DIR}" "../scripts" "../src"
+    DESTINATION "."
+    PATTERN "build" EXCLUDE
+)
+install(FILES "../DXFeed.def" "../DXFeedd.def" "../DXFeed_64.def" "../DXFeedd_64.def" 
+    "../DXFeed.sln" "../DXFeed.vcxproj" "../DXFeed.vcxproj.filters" "../Makefile" 
+    "../CMakeLists.txt" "../build.bat" "../make_package.bat"
+    DESTINATION "."
+)
+set(CPACK_PACKAGE_VENDOR "Devexperts")
+set(CPACK_PACKAGE_NAME "${PROJECT}")
+set(CPACK_PACKAGE_VERSION "${APP_VERSION}")
+set(CPACK_PACKAGE_FILE_NAME "${PROJECT}-${APP_VERSION}-${TARGET_PLATFORM}")
+include(CPack)
