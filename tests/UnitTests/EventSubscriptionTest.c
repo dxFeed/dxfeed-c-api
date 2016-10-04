@@ -27,6 +27,10 @@ bool event_subscription_test (void) {
     dxf_const_string_t small_symbol_set[] = { L"SYMB" };
     dxf_int_t symbol_code;
     dxf_event_params_t empty_event_params = { 0, 0, 0 };
+    dxf_quote_t quote_data = { 0, 'A', 1.0, 1, 0, 'A', 2.0, 1 };
+    const dxf_event_data_t quote_event_data = &quote_data;
+    dxf_trade_t trade_data = { 0, 'A', 1.0, 1, 1, 1.0, 1.0 };
+    const dxf_event_data_t trade_event_data = &trade_data;
     
     if (dx_init_symbol_codec() != true) {
         return false;
@@ -83,7 +87,7 @@ bool event_subscription_test (void) {
     
     symbol_code = dx_encode_symbol_name(L"SYMB");
     
-    if (!dx_process_event_data(connection, DXF_ET_QUOTE, L"SYMB", symbol_code, NULL, 5, &empty_event_params)) {
+    if (!dx_process_event_data(connection, dx_eid_quote, L"SYMB", symbol_code, quote_event_data, 1, &empty_event_params)) {
         return false;
     }
     
@@ -97,13 +101,15 @@ bool event_subscription_test (void) {
     
     // unknown symbol SYMZ must be rejected
     
-    if (dx_process_event_data(connection, DXF_ET_TRADE, L"SYMZ", symbol_code, NULL, 5, &empty_event_params)) {
+    if (!dx_process_event_data(connection, dx_eid_trade, L"SYMZ", symbol_code, trade_event_data, 1, &empty_event_params) ||
+        dx_compare_strings(last_symbol, L"SYMB") || 
+        visit_count > 2) {
         return false;
     }
     
     symbol_code = dx_encode_symbol_name(L"SYMD");
 
-    if (!dx_process_event_data(connection, DXF_ET_TRADE, L"SYMD", symbol_code, NULL, 5, &empty_event_params)) {
+    if (!dx_process_event_data(connection, dx_eid_trade, L"SYMD", symbol_code, trade_event_data, 1, &empty_event_params)) {
         return false;
     }
     
@@ -121,7 +127,7 @@ bool event_subscription_test (void) {
     
     symbol_code = dx_encode_symbol_name(L"SYMB");
     
-    if (!dx_process_event_data(connection, DXF_ET_QUOTE, L"SYMB", symbol_code, NULL, 5, &empty_event_params)) {
+    if (!dx_process_event_data(connection, dx_eid_quote, L"SYMB", symbol_code, quote_event_data, 1, &empty_event_params)) {
         return false;
     }
     
@@ -133,7 +139,7 @@ bool event_subscription_test (void) {
     
     symbol_code = dx_encode_symbol_name(L"SYMA");
     
-    if (!dx_process_event_data(connection, DXF_ET_TRADE, L"SYMA", symbol_code, NULL, 5, &empty_event_params)) {
+    if (!dx_process_event_data(connection, dx_eid_trade, L"SYMA", symbol_code, trade_event_data, 1, &empty_event_params)) {
         return false;
     }
     
@@ -151,7 +157,7 @@ bool event_subscription_test (void) {
 
     // SYMB is still supported by sub2, but sub2 no longer has a listener
     
-    if (!dx_process_event_data(connection, DXF_ET_QUOTE, L"SYMB", symbol_code, NULL, 5, &empty_event_params)) {
+    if (!dx_process_event_data(connection, dx_eid_quote, L"SYMB", symbol_code, quote_event_data, 1, &empty_event_params)) {
         return false;
     }
     
