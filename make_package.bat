@@ -3,6 +3,7 @@ rem Script builds, tests and makes package.
 rem Script build all targets from CMakeLists.txt by sequentionally calling 
 rem build.bat for next configurations: Debug x86, Release x86, Debug x64, Release x64.
 rem Iа one of configurations fail the process stopped.
+rem Usage: make_package [<major>[.<minor>[.<patch>]]] [rebuild|clean] [no-test]
 
 setlocal
 
