@@ -13,6 +13,7 @@ set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE TYPE INTERNAL FORCE)
 project(${PROJECT})
 link_directories(${CMAKE_BINARY_DIR})
 
+#Note: add projects to build and package below
 add_subdirectory(src)
 add_subdirectory(tests/APITest)
 add_subdirectory(tests/CandleSample)
