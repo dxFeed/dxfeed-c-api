@@ -16,7 +16,6 @@
 #define EVENTS_TIMEOUT 180000
 #define EVENTS_LOOP_SLEEP_TIME 100
 
-/*#define DXFEED_HOST "demo.dxfeed.com:7300"*/
 #define DXFEED_HOST "mddqa.in.devexperts.com:7400"
 
 #define SIZE_OF_ARRAY(counter_function_atatic_array) sizeof(counter_function_atatic_array) / sizeof(counter_function_atatic_array[0])

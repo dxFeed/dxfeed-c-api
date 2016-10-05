@@ -12,10 +12,10 @@
 #define EVENTS_TIMEOUT 120000
 #define EVENTS_LOOP_SLEEP_TIME 100
 
-const char dxfeed_host[] = "demo.dxfeed.com:7300";
+const char dxfeed_host[] = "mddqa.in.devexperts.com:7400";
 
 #define SYMBOLS_COUNT 4
-static dxf_const_string_t g_symbols[] = { { L"IBM" }, { L"MSFT" }, { L"YHOO" }, { L"C" } };
+static dxf_const_string_t g_symbols[] = { { L"IBM" }, { L"AAPL" }, { L"XBT/USD" }, { L"C" } };
 
 dxf_listener_thread_data_t g_listener_thread_data;
 
