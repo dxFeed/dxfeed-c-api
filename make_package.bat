@@ -3,7 +3,13 @@ rem Script builds, tests and makes package.
 rem Script build all targets from CMakeLists.txt by sequentionally calling 
 rem build.bat for next configurations: Debug x86, Release x86, Debug x64, Release x64.
 rem Iа one of configurations fail the process stopped.
-rem Usage: make_package [<major>[.<minor>[.<patch>]]] [rebuild|clean] [no-test]
+rem Usage: 
+rem     make_package [<major>[.<minor>[.<patch>]]] [rebuild|clean] [no-test]
+rem Where
+rem     [<major>.<minor>[.<patch>]] - Version of package, i.e. 1.2.6
+rem     clean                       - removes build directory
+rem     rebuild                     - performs clean and build
+rem     no-test                     - build tests will not be started
 
 setlocal
 
@@ -76,16 +82,17 @@ if %ERRORLEVEL% GEQ 1 goto exit_error
 
 rem === TEST BUILDS ===
 
-if %DO_TEST% GTR 0 (
-    echo Start checking build %VERSION%
-    call %~dp0\scripts\check_build %BUILD_DIR%
-    if %ERRORLEVEL% GEQ 1 goto exit_error
-) else (
-    echo Checking will be skipped.
+if %DO_TEST% EQU 0 (
+    echo Build checking will be skipped.
+    goto make_package
 )
+echo Start checking build %VERSION%
+call %~dp0\scripts\check_build %BUILD_DIR%
+if %ERRORLEVEL% GEQ 1 goto exit_error
 
 rem === MAKE PACKAGE ===
 
+:make_package
 echo Start make release package %VERSION%
 set HOME_DIR=%cd%
 cd %BUILD_DIR%

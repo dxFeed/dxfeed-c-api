@@ -9,8 +9,9 @@ setlocal EnableDelayedExpansion
 
 set BUILD_DIR=%1
 
-rem Write list of runable tests here
-set TESTS=FullTest
+rem Write list of runable tests in the next file
+set TESTS_LIST_FILE_NAME=tests.list
+set TESTS_LIST_FILE_PATH=%~dp0\%TESTS_LIST_FILE_NAME%
 rem Write list of platforms here
 rem Allowed platforms is x64 x86
 set PLATFORMS=x64 x86
@@ -18,7 +19,12 @@ rem Write list of configurations here
 rem Allowed configurations is Debug Release
 set CONFIGURATIONS=Debug Release
 
-for %%T in (%TESTS%) do (
+if NOT EXIST %TESTS_LIST_FILE_PATH% (
+    echo ERROR: The tests list file '%TESTS_LIST_FILE_NAME%' not found!
+    goto exit_error
+)
+
+for /F "tokens=*" %%T in (%TESTS_LIST_FILE_PATH%) do (
     for %%P in (%PLATFORMS%) do (
         for %%C in (%CONFIGURATIONS%) do (
             echo Test %%T on %%P %%C
