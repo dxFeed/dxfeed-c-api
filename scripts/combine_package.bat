@@ -8,6 +8,9 @@ rem     project-name    - The name of target project package
 rem     configuration   - Debug or Release
 rem     platform        - x86 or x64
 rem     version         - version of application i.e. 1.2.6
+rem
+rem WARNING: you must set the next environment variables
+rem     PACKAGE_WORK_DIR - the working directory where cpack result arhive will be stored and unpacked
 
 setlocal
 
@@ -21,6 +24,13 @@ rem Check 7z archiver in PATH
 where /q 7z
 if %ERRORLEVEL% GEQ 1 (
     echo The '7z' application is missing. Ensure it is installed and placed in your PATH.
+    goto exit_error
+)
+
+rem Check PACKAGE_WORK_DIR environment variable
+if [%PACKAGE_WORK_DIR%] EQU [] (
+    echo ERROR: Environment variable PACKAGE_WORK_DIR is not specified!
+    echo Please set 'set PACKAGE_WORK_DIR=...' in your caller script or command line.
     goto exit_error
 )
 
@@ -53,11 +63,10 @@ rem )
 
 cpack -G ZIP -C %CONFIG% --config %PLATFORM%\DXFeedAllCPackConfig.cmake
 if %ERRORLEVEL% GEQ 1 goto exit_error
-set WORK_DIR=_CPack_Packages
 set PACKAGE_NAME=%PROJECT_NAME%-%VERSION%-%PLATFORM%
 set ARCHIVE_NAME=%PROJECT_NAME%-%VERSION%-%PLATFORM%%CONFIG%
-move /Y %PACKAGE_NAME%.zip %WORK_DIR%\%ARCHIVE_NAME%.zip
-7z x -y -o%WORK_DIR% %WORK_DIR%\%ARCHIVE_NAME%.zip
+move /Y %PACKAGE_NAME%.zip %PACKAGE_WORK_DIR%\%ARCHIVE_NAME%.zip
+7z x -y -o%PACKAGE_WORK_DIR% %PACKAGE_WORK_DIR%\%ARCHIVE_NAME%.zip
 if %ERRORLEVEL% GEQ 1 goto exit_error
 
 :exit_success

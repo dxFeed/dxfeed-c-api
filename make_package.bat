@@ -90,14 +90,15 @@ echo Start make release package %VERSION%
 set HOME_DIR=%cd%
 cd %BUILD_DIR%
 call %~dp0\scripts\combine_package %PROJECT_NAME% Debug x86 %VERSION%
-set CPACK_LEVEL=%ERRORLEVEL%
+if %ERRORLEVEL% GEQ 1 goto cpack_error
 call %~dp0\scripts\combine_package %PROJECT_NAME% Release x86 %VERSION%
-set CPACK_LEVEL=%CPACK_LEVEL%+%ERRORLEVEL%
+if %ERRORLEVEL% GEQ 1 goto cpack_error
 call %~dp0\scripts\combine_package %PROJECT_NAME% Debug x64 %VERSION%
-set CPACK_LEVEL=%CPACK_LEVEL%+%ERRORLEVEL%
+if %ERRORLEVEL% GEQ 1 goto cpack_error
 call %~dp0\scripts\combine_package %PROJECT_NAME% Release x64 %VERSION%
-set CPACK_LEVEL=%CPACK_LEVEL%+%ERRORLEVEL%
+if %ERRORLEVEL% GEQ 1 goto cpack_error
 
+if NOT EXIST %PACKAGE_WORK_DIR% mkdir %PACKAGE_WORK_DIR%
 cd %PACKAGE_WORK_DIR%
 if EXIST %TARGET_PACKAGE% rmdir %TARGET_PACKAGE% /S /Q
 mkdir %TARGET_PACKAGE%
@@ -106,7 +107,6 @@ xcopy /Y /S %PROJECT_NAME%-%VERSION%-x64 %TARGET_PACKAGE%
 7z a %TARGET_PACKAGE%.zip %TARGET_PACKAGE%
 move /Y %TARGET_PACKAGE%.zip %BUILD_DIR%\%TARGET_PACKAGE%.zip
 cd %HOME_DIR%
-if %CPACK_LEVEL% GEQ 1 goto exit_error
 
 rem === FINISH ===
 echo Making package complete successfully.
@@ -122,6 +122,9 @@ goto exit_success
 
 :exit_success
 exit /b 0
+:cpack_error
+cd %HOME_DIR%
+goto exit_error
 :exit_error
 echo Making package failed!
 exit /b 1
