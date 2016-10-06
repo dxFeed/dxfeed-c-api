@@ -4,6 +4,17 @@ rem Run format:
 rem     check_build <build_dir>
 rem Where:
 rem     build_dir - home direcory of the build
+rem
+rem Tests list is received from TESTS_LIST_FILE_NAME file which located at the
+rem current directory. Each line of this file must contains only the name of 
+rem test executable without postfixes, extension, parameters and any other 
+rem symbols, e.g.:
+rem ---------------- The content of TESTS_LIST_FILE_NAME ----------------------
+rem |Test1                                                                    |
+rem |Test2                                                                    |
+rem |...                                                                      |
+rem |TestN                                                                    |
+rem -------------- The end of TESTS_LIST_FILE_NAME content---------------------
 
 setlocal EnableDelayedExpansion
 
@@ -20,7 +31,7 @@ rem Allowed configurations is Debug Release
 set CONFIGURATIONS=Debug Release
 
 if NOT EXIST %TESTS_LIST_FILE_PATH% (
-    echo ERROR: The tests list file '%TESTS_LIST_FILE_NAME%' not found!
+    echo ERROR: The tests list file '%TESTS_LIST_FILE_NAME%' not found^^!
     goto exit_error
 )
 

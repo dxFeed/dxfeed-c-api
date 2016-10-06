@@ -1,15 +1,25 @@
 @echo off
 rem Script builds, tests and makes package.
 rem Script build all targets from CMakeLists.txt by sequentionally calling 
-rem build.bat for next configurations: Debug x86, Release x86, Debug x64, Release x64.
-rem Iа one of configurations fail the process stopped.
+rem build.bat for next configurations: Debug x86, Release x86, Debug x64, 
+rem Release x64. If one of configurations fail the process stopped.
 rem Usage: 
 rem     make_package [<major>[.<minor>[.<patch>]]] [rebuild|clean] [no-test]
 rem Where
 rem     [<major>.<minor>[.<patch>]] - Version of package, i.e. 1.2.6
 rem     clean                       - removes build directory
 rem     rebuild                     - performs clean and build
-rem     no-test                     - build tests will not be started
+rem     no-test                     - build testing will not be started
+rem 
+rem The operation order:
+rem     1. Build sources in next configurations Debug x86, Release x86, 
+rem        Debug x64, Release x64. The result of build is located into the 
+rem        BUILD_DIR directory. Building performes with build.bat script from
+rem        current directory where this script is located.
+rem     2. Run tests of build with scripts\check_build.bat.
+rem     3. Create individual packages for each configuration with 
+rem        scripts\combine_package.bat. Then create the target package which
+rem        will be placed into BUILD_DIR directory.
 
 setlocal
 
