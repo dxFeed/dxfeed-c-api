@@ -15,17 +15,10 @@ link_directories(${CMAKE_BINARY_DIR})
 
 #Note: add projects to build and package below
 add_subdirectory(src)
-add_subdirectory(tests/APITest)
 add_subdirectory(tests/CandleSample)
 add_subdirectory(tests/CommandLineSample)
-add_subdirectory(tests/ConnectionTest)
 add_subdirectory(tests/FullTest)
-add_subdirectory(tests/LastEventTest)
-add_subdirectory(tests/PerformanceTest)
-add_subdirectory(tests/QuoteTableTest)
-add_subdirectory(tests/SampleTest)
 add_subdirectory(tests/SnapshotConsoleSample)
-add_subdirectory(tests/UnitTests)
 add_subdirectory(wrappers/COM/src)
 add_subdirectory(wrappers/COM/samples/C++)
 
