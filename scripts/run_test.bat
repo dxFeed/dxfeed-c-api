@@ -26,15 +26,21 @@ set CONF_POSTFIX=
 if [%CONFIGURATION%] EQU [Debug] set CONF_POSTFIX=d
 set POSTFIX=%CONF_POSTFIX%%PLATFORM_POSTFIX%
 set WORKING_DIR=%BUILD_DIR%\%PLATFORM%\%CONFIGURATION%
+set EXEC_FULL_PATH=%WORKING_DIR%\%EXEC%%POSTFIX%.exe
 set ARGS_FILE=%~dp0\%EXEC%.args
+
+if NOT EXIST %EXEC_FULL_PATH% (
+    echo ERROR: The test executable '%EXEC%%POSTFIX%' not found^^! Abort testing.
+    exit /b 1
+)
 
 if EXIST %ARGS_FILE% (
     for /F "tokens=*" %%A in (%ARGS_FILE%) do (
         echo Run %EXEC%%POSTFIX% %%A
-        %WORKING_DIR%\%EXEC%%POSTFIX% %%A
+        %EXEC_FULL_PATH% %%A
         if %errorlevel% GEQ 1 exit /b %errorlevel%
     )
 ) else (
-    %WORKING_DIR%\%EXEC%%POSTFIX%
+    %EXEC_FULL_PATH%
 )
 exit /b %errorlevel%
