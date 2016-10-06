@@ -554,7 +554,6 @@ int main (int argc, char* argv[]) {
     dxf_connection_t connection;
     dxf_subscription_t subscriptions[dx_eid_count];
     int loop_counter = 10000;
-
     int i;
     char* dxfeed_host = NULL;
     
