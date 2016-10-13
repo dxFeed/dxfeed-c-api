@@ -1,8 +1,24 @@
 @echo off
+rem This script runs building project using CMakeLists.txt from current folder.
+rem The result of building places into BUILD_DIR directory.
+rem Usage: 
+rem     build.bat [<configuration>] [<platform>] [rebuild|clean]
+rem Where
+rem     <configuration> - Debug or Release
+rem     <platform>      - x86 or x64
+rem     clean           - removes build directory
+rem     rebuild         - performs clean and build
+rem The default configuration is 'Release x86'.
+rem
+rem WARNING: you can set the next environment variables
+rem     APP_VERSION - the version of target in format major[.minor[.patch]], i.e. 1.2.6
+rem                   If you want to specify version you must set 'set APP_VERSION=...'
+rem                   in your caller script or command line. Otherwise the default version 
+rem                   from sources will be used.
 
 setlocal
 
-set BUILD_DIR=build
+set BUILD_DIR=%~dp0\build
 set CONFIG=
 set PLATFORM=
 set CMAKE_PLATFORM=

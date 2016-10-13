@@ -4,12 +4,12 @@ rem Script build all targets from CMakeLists.txt by sequentionally calling
 rem build.bat for next configurations: Debug x86, Release x86, Debug x64, 
 rem Release x64. If one of configurations fail the process stopped.
 rem Usage: 
-rem     make_package [<major>.<minor>[.<patch>]] [rebuild|clean] [no-test]
+rem     make_package <major>.<minor>[.<patch>] [rebuild|clean] [no-test]
 rem Where
-rem     [<major>.<minor>[.<patch>]] - Version of package, i.e. 1.2.6
-rem     clean                       - removes build directory
-rem     rebuild                     - performs clean and build
-rem     no-test                     - build testing will not be started
+rem     <major>.<minor>[.<patch>] - Version of package, i.e. 1.2.6
+rem     clean                     - removes build directory
+rem     rebuild                   - performs clean and build
+rem     no-test                   - build testing will not be started
 rem 
 rem The operation order:
 rem     1. Build sources in next configurations Debug x86, Release x86, 
@@ -20,6 +20,11 @@ rem     2. Run tests of build with scripts\check_build.bat.
 rem     3. Create individual packages for each configuration with 
 rem        scripts\combine_package.bat. Then create the target package which
 rem        will be placed into BUILD_DIR directory.
+rem Dependencies:
+rem     1. CMake x64 + CPack
+rem     2. MSBuild
+rem     3. MSBuild Command Prompt x64
+rem     4. 7z
 
 setlocal
 

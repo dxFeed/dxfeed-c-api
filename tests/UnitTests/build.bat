@@ -18,7 +18,7 @@ rem                   from sources will be used.
 
 setlocal
 
-set BUILD_DIR=build
+set BUILD_DIR=%~dp0\build
 set CONFIG=
 set PLATFORM=
 set CMAKE_PLATFORM=
