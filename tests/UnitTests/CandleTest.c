@@ -31,9 +31,9 @@ static const char dxfeed_host[] = "mddqa.in.devexperts.com:7400";
 
 candle_attribute_test_case_t g_candle_attribute_cases[] = {
     { CANDLE_DEFAULT_SYMBOL, DXF_CANDLE_EXCHANGE_CODE_ATTRIBUTE_DEFAULT, DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT, 
-    dxf_ctpa_default, dxf_cpa_default, dxf_csa_default, dxf_caa_default, L"AAPL{}", __LINE__ }, 
+    dxf_ctpa_default, dxf_cpa_default, dxf_csa_default, dxf_caa_default, L"AAPL", __LINE__ }, 
     { CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT,
-    dxf_ctpa_default, dxf_cpa_default, dxf_csa_default, dxf_caa_default, L"AAPL&A{}", __LINE__ },
+    dxf_ctpa_default, dxf_cpa_default, dxf_csa_default, dxf_caa_default, L"AAPL&A", __LINE__ },
 
     { CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT,
     dxf_ctpa_second, dxf_cpa_default, dxf_csa_default, dxf_caa_default, L"AAPL&A{=s}", __LINE__ },
@@ -281,6 +281,7 @@ bool dx_is_greater(double a, double b) {
 
 /* -------------------------------------------------------------------------- */
 
+/*Test*/
 bool candle_attributes_test(void) {
     int candle_attribute_cases_size = sizeof(g_candle_attribute_cases) / sizeof(g_candle_attribute_cases[0]);
     int i;
@@ -311,6 +312,7 @@ bool candle_attributes_test(void) {
 
 /* -------------------------------------------------------------------------- */
 
+/*Test*/
 bool candle_subscription_test(void) {
     dxf_connection_t connection = NULL;
     dxf_subscription_t subscription = NULL;
@@ -365,6 +367,7 @@ bool candle_subscription_test(void) {
     return true;
 }
 
+/*Test*/
 bool candle_multiply_subscription_test(void) {
     dxf_connection_t connection = NULL;
     dxf_subscription_t aapl_candle_subscription = NULL;
@@ -460,6 +463,7 @@ bool candle_multiply_subscription_test(void) {
     return true;
 }
 
+/*Test*/
 bool candle_symbol_test(void) {
     dxf_connection_t connection = NULL;
     dxf_subscription_t subscription = NULL;
