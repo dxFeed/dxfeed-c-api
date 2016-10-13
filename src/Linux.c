@@ -17,6 +17,7 @@
  *
  */
 
+#include "Decimal.h"
 #include "DXMemory.h"
 #include "Logger.h"
 #include "DXAlgorithms.h"
@@ -83,6 +84,7 @@ extern void dx_init_threads();
 __attribute__((constructor)) void init(void)
 {
     dx_log_debug_message(L"DXFeed: Process attach");
+    dx_init_decimals();
     dx_init_cb_queue(&g_process_destructors);
 }
 

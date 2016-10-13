@@ -38,7 +38,7 @@ static const dxf_int_t g_symbols_size = sizeof (g_symbols) / sizeof (g_symbols[0
 
 static dx_trade_t*       trades[SYMBOLS_COUNT] = {0};
 static dx_quote_t*       quotes[SYMBOLS_COUNT] = {0};
-static dx_fundamental_t* summaries[SYMBOLS_COUNT] = {0};
+static dx_summary_t* summaries[SYMBOLS_COUNT] = {0};
 static dx_profile_t*     profiles[SYMBOLS_COUNT] = {0};
 
 /* -------------------------------------------------------------------------- */
@@ -98,13 +98,13 @@ int get_symbol_index(dxf_const_string_t symbol_name) {
 void output_data(int i) {
     dx_trade_t* trade = trades[i];
     dx_quote_t* quote = quotes[i];
-    dx_fundamental_t* summary = summaries[i];
+    dx_summary_t* summary = summaries[i];
     dx_profile_t* profile = profiles[i];
     wchar_t dummy[2] = L"-";
     
     wprintf(L"\nSymbol: %s, Last: %f, LastEx: %c, Change: %+f, Bid: %f, BidEx: %c, \
             Ask: %f, AskEx: %c, High: %f, Low: %f, Open: %f, BidSize: %i, AskSize: %i,\
-            LastSize: %i, Volume: %i, Description: %s\n",
+            LastSize: %i, LastTick: %i, LastChange: %f, Volume: %i, Description: %s\n",
             g_symbols[i],
             trade ? trade->price : 0.0,
             trade ? trade->exchange_code : dummy[0],
@@ -119,6 +119,8 @@ void output_data(int i) {
             quote ? (int)quote->bid_size : 0,
             quote ? (int)quote->ask_size : 0,
             trade ? (int)trade->size : 0,
+            trade ? (int)trade->tick : 0,
+            trade ? (int)trade->change : 0,
             trade ? (int)trade->day_volume : 0,
             profile ? profile->description : dummy);
 }
@@ -141,7 +143,7 @@ dxf_event_data_t getData(int event_type, int i) {
     }
     else if (event_type == DXF_ET_SUMMARY) {
         if (summaries[i] == NULL) {
-            summaries[i] = (dx_fundamental_t*)calloc(1, sizeof(dx_fundamental_t));
+            summaries[i] = (dx_summary_t*)calloc(1, sizeof(dx_summary_t));
         }
 
         return summaries[i];
@@ -218,8 +220,8 @@ void quote_listener(int event_type, dxf_const_string_t symbol_name,
 
 void summary_listener(int event_type, dxf_const_string_t symbol_name,
                       const dxf_event_data_t* data, int data_count, void* user_data) {
-    dx_fundamental_t* summaries_data = (dx_fundamental_t*)data;
-    dx_fundamental_t* dst_summary;
+    dx_summary_t* summaries_data = (dx_summary_t*)data;
+    dx_summary_t* dst_summary;
     int i = 0;
     int symb_ind = get_symbol_index(symbol_name);
     if (symb_ind == -1) {
@@ -232,7 +234,7 @@ void summary_listener(int event_type, dxf_const_string_t symbol_name,
         return;
     }
 
-    dst_summary = (dx_fundamental_t*)getData(event_type, symb_ind);
+    dst_summary = (dx_summary_t*)getData(event_type, symb_ind);
     if (dst_summary == NULL) {
         wprintf(L"Internal error");
         return;

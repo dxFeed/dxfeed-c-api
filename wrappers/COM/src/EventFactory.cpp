@@ -57,6 +57,8 @@ private:
     virtual HRESULT STDMETHODCALLTYPE GetExchangeCode (SHORT* value);
     virtual HRESULT STDMETHODCALLTYPE GetPrice (DOUBLE* value);
     virtual HRESULT STDMETHODCALLTYPE GetSize (LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetTick(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetChange(DOUBLE* value);
     virtual HRESULT STDMETHODCALLTYPE GetDayVolume (LONGLONG* value);
     
 private:
@@ -115,6 +117,26 @@ HRESULT STDMETHODCALLTYPE DXTrade::GetSize (LONGLONG* value) {
     CHECK_PTR(value);
 
     *value = m_data->size;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXTrade::GetTick(LONGLONG* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->tick;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXTrade::GetChange(DOUBLE* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->change;
 
     return S_OK;
 }
@@ -304,11 +326,16 @@ private:
         return InvokeImpl(this, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
     }
 
+    virtual HRESULT STDMETHODCALLTYPE GetDayId(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetDayOpenPrice(DOUBLE* value);
     virtual HRESULT STDMETHODCALLTYPE GetDayHighPrice (DOUBLE* value);
     virtual HRESULT STDMETHODCALLTYPE GetDayLowPrice (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetDayOpenPrice (DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetDayClosePrice(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetPrevDayId(LONGLONG* value);
     virtual HRESULT STDMETHODCALLTYPE GetPrevDayClosePrice (DOUBLE* value);
     virtual HRESULT STDMETHODCALLTYPE GetOpenInterest (LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetFlags(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetExchange(SHORT* value);
 
 private:
 
@@ -328,6 +355,26 @@ private:
 DXSummary::DXSummary (dxf_event_data_t data, IUnknown* parent)
 : DefIDispatchImpl(IID_IDXSummary, parent)
 , m_data(reinterpret_cast<dxf_summary_t*>(data)) {
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXSummary::GetDayId(LONGLONG* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->day_id;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXSummary::GetDayOpenPrice(DOUBLE* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->day_open_price;
+
+    return S_OK;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -352,10 +399,20 @@ HRESULT STDMETHODCALLTYPE DXSummary::GetDayLowPrice (DOUBLE* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXSummary::GetDayOpenPrice (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXSummary::GetDayClosePrice(DOUBLE* value) {
     CHECK_PTR(value);
 
-    *value = m_data->day_open_price;
+    *value = m_data->day_close_price;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXSummary::GetPrevDayId(LONGLONG* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->prev_day_id;
 
     return S_OK;
 }
@@ -376,6 +433,26 @@ HRESULT STDMETHODCALLTYPE DXSummary::GetOpenInterest (LONGLONG* value) {
     CHECK_PTR(value);
 
     *value = m_data->open_interest;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXSummary::GetFlags(LONGLONG* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->flags;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXSummary::GetExchange(SHORT* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->exchange_code;
 
     return S_OK;
 }
@@ -413,7 +490,21 @@ private:
         return InvokeImpl(this, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
     }
 
+    virtual HRESULT STDMETHODCALLTYPE GetBeta(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetEps(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetDivFreq(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetExdDivAmount(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetExdDiveDate(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE Get52HighPrice(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE Get52LowPrice(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetShares(DOUBLE* value);
     virtual HRESULT STDMETHODCALLTYPE GetDescription (BSTR* value);
+    virtual HRESULT STDMETHODCALLTYPE GetFlags(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetStatusReason(BSTR* value);
+    virtual HRESULT STDMETHODCALLTYPE GetHaltStartTime(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetHaltEndTime(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetHighLimitPrice(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetLowLimitPrice(DOUBLE* value);
 
 private:
 
@@ -437,6 +528,78 @@ DXProfile::DXProfile (dxf_event_data_t data, IUnknown* parent)
 
 /* -------------------------------------------------------------------------- */
 
+HRESULT DXProfile::GetBeta(DOUBLE * value)
+{
+    CHECK_PTR(value);
+
+    *value = m_data->beta;
+
+    return S_OK;
+}
+
+HRESULT DXProfile::GetEps(DOUBLE * value)
+{
+    CHECK_PTR(value);
+
+    *value = m_data->eps;
+
+    return S_OK;
+}
+
+HRESULT DXProfile::GetDivFreq(LONGLONG * value)
+{
+    CHECK_PTR(value);
+
+    *value = m_data->div_freq;
+
+    return S_OK;
+}
+
+HRESULT DXProfile::GetExdDivAmount(DOUBLE * value)
+{
+    CHECK_PTR(value);
+
+    *value = m_data->exd_div_amount;
+
+    return S_OK;
+}
+
+HRESULT DXProfile::GetExdDiveDate(LONGLONG * value)
+{
+    CHECK_PTR(value);
+
+    *value = m_data->exd_div_date;
+
+    return S_OK;
+}
+
+HRESULT DXProfile::Get52HighPrice(DOUBLE * value)
+{
+    CHECK_PTR(value);
+
+    *value = m_data->_52_high_price;
+
+    return S_OK;
+}
+
+HRESULT DXProfile::Get52LowPrice(DOUBLE * value)
+{
+    CHECK_PTR(value);
+
+    *value = m_data->_52_low_price;
+
+    return S_OK;
+}
+
+HRESULT DXProfile::GetShares(DOUBLE * value)
+{
+    CHECK_PTR(value);
+
+    *value = m_data->shares;
+
+    return S_OK;
+}
+
 HRESULT STDMETHODCALLTYPE DXProfile::GetDescription (BSTR* value) {
     CHECK_PTR(value);
     
@@ -451,6 +614,69 @@ HRESULT STDMETHODCALLTYPE DXProfile::GetDescription (BSTR* value) {
     }
     
     return hr;
+}
+
+HRESULT DXProfile::GetFlags(LONGLONG * value)
+{
+    CHECK_PTR(value);
+
+    *value = m_data->flags;
+
+    return S_OK;
+}
+
+HRESULT DXProfile::GetStatusReason(BSTR * value)
+{
+    CHECK_PTR(value);
+
+    HRESULT hr = S_OK;
+
+    try {
+        _bstr_t descrWrapper(m_data->status_reason);
+
+        *value = descrWrapper.Detach();
+    }
+    catch (const _com_error& e) {
+        hr = e.Error();
+    }
+
+    return hr;
+}
+
+HRESULT DXProfile::GetHaltStartTime(LONGLONG * value)
+{
+    CHECK_PTR(value);
+
+    *value = m_data->halt_start_time;
+
+    return S_OK;
+}
+
+HRESULT DXProfile::GetHaltEndTime(LONGLONG * value)
+{
+    CHECK_PTR(value);
+
+    *value = m_data->halt_end_time;
+
+    return S_OK;
+}
+
+HRESULT DXProfile::GetHighLimitPrice(DOUBLE * value)
+{
+    CHECK_PTR(value);
+
+    *value = m_data->high_limit_price;
+
+    return S_OK;
+}
+
+HRESULT DXProfile::GetLowLimitPrice(DOUBLE * value)
+{
+    CHECK_PTR(value);
+
+    *value = m_data->low_limit_price;
+
+    return S_OK;
 }
 
 /* -------------------------------------------------------------------------- */

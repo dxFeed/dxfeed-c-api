@@ -37,12 +37,7 @@
     DX_RECORD_FIELD_SETTER_PROTOTYPE(struct_name, field_name) { \
         ((struct_name*)object)->field_name = *(field_type*)field; \
     }
-    
-#define FIELD_SETTER_BODY_TWO_CASTS(struct_name, field_name, value_type, field_type) \
-    DX_RECORD_FIELD_SETTER_PROTOTYPE(struct_name, field_name) { \
-        ((struct_name*)object)->field_name = (field_type)(*(value_type*)field); \
-    }
-    
+
 /* -------------------------------------------------------------------------- */
 /*
  *	Trade field setters implementation
@@ -53,8 +48,9 @@ FIELD_SETTER_BODY(dx_trade_t, time, dxf_int_t)
 FIELD_SETTER_BODY(dx_trade_t, exchange_code, dxf_char_t)
 FIELD_SETTER_BODY(dx_trade_t, price, dxf_double_t)
 FIELD_SETTER_BODY(dx_trade_t, size, dxf_int_t)
+FIELD_SETTER_BODY(dx_trade_t, tick, dxf_int_t)
+FIELD_SETTER_BODY(dx_trade_t, change, dxf_double_t)
 FIELD_SETTER_BODY(dx_trade_t, day_volume, dxf_double_t)
-//FIELD_SETTER_BODY_TWO_CASTS(dx_trade_t, day_volume, dxf_double_t, dxf_long_t)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -73,15 +69,20 @@ FIELD_SETTER_BODY(dx_quote_t, ask_size, dxf_int_t)
 
 /* -------------------------------------------------------------------------- */
 /*
- *	Fundamental field setters implementation
- */
+*	Summary field setters implementation
+*/
 /* -------------------------------------------------------------------------- */
 
-FIELD_SETTER_BODY(dx_fundamental_t, day_high_price, dxf_double_t)
-FIELD_SETTER_BODY(dx_fundamental_t, day_low_price, dxf_double_t)
-FIELD_SETTER_BODY(dx_fundamental_t, day_open_price, dxf_double_t)
-FIELD_SETTER_BODY(dx_fundamental_t, prev_day_close_price, dxf_double_t)
-FIELD_SETTER_BODY(dx_fundamental_t, open_interest, dxf_int_t)
+FIELD_SETTER_BODY(dx_summary_t, day_id, dxf_dayid_t)
+FIELD_SETTER_BODY(dx_summary_t, day_open_price, dxf_double_t);
+FIELD_SETTER_BODY(dx_summary_t, day_high_price, dxf_double_t);
+FIELD_SETTER_BODY(dx_summary_t, day_low_price, dxf_double_t);
+FIELD_SETTER_BODY(dx_summary_t, day_close_price, dxf_double_t);
+FIELD_SETTER_BODY(dx_summary_t, prev_day_id, dxf_dayid_t);
+FIELD_SETTER_BODY(dx_summary_t, prev_day_close_price, dxf_double_t);
+FIELD_SETTER_BODY(dx_summary_t, open_interest, dxf_int_t);
+FIELD_SETTER_BODY(dx_summary_t, flags, dxf_int_t);
+FIELD_SETTER_BODY(dx_summary_t, exchange_code, dxf_char_t);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -89,7 +90,21 @@ FIELD_SETTER_BODY(dx_fundamental_t, open_interest, dxf_int_t)
  */
 /* -------------------------------------------------------------------------- */
 
+FIELD_SETTER_BODY(dx_profile_t, beta, dxf_double_t)
+FIELD_SETTER_BODY(dx_profile_t, eps, dxf_double_t)
+FIELD_SETTER_BODY(dx_profile_t, div_freq, dxf_int_t)
+FIELD_SETTER_BODY(dx_profile_t, exd_div_amount, dxf_double_t)
+FIELD_SETTER_BODY(dx_profile_t, exd_div_date, dxf_dayid_t)
+FIELD_SETTER_BODY(dx_profile_t, _52_high_price, dxf_double_t)
+FIELD_SETTER_BODY(dx_profile_t, _52_low_price, dxf_double_t)
+FIELD_SETTER_BODY(dx_profile_t, shares, dxf_double_t)
 FIELD_SETTER_BODY(dx_profile_t, description, dxf_const_string_t)
+FIELD_SETTER_BODY(dx_profile_t, flags, dxf_int_t)
+FIELD_SETTER_BODY(dx_profile_t, status_reason, dxf_const_string_t)
+FIELD_SETTER_BODY(dx_profile_t, halt_start_time, dxf_int_t)
+FIELD_SETTER_BODY(dx_profile_t, halt_end_time, dxf_int_t)
+FIELD_SETTER_BODY(dx_profile_t, high_limit_price, dxf_double_t)
+FIELD_SETTER_BODY(dx_profile_t, low_limit_price, dxf_double_t)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -243,10 +258,26 @@ GENERIC_VALUE_GETTER_NAME_PROTO(dxf_int_t) {
 
 /* -------------------------------------------------------------------------- */
 
+GENERIC_VALUE_GETTER_NAME_PROTO(dxf_long_t) {
+    static dxf_long_t l = 0;
+
+    return &l;
+}
+
+/* -------------------------------------------------------------------------- */
+
 GENERIC_VALUE_GETTER_NAME_PROTO(dxf_double_t) {
     static dxf_double_t d = 0;
 
     return &d;
+}
+
+/* -------------------------------------------------------------------------- */
+
+GENERIC_VALUE_GETTER_NAME_PROTO(dxf_dayid_t) {
+    static dxf_dayid_t d_id = 0;
+
+    return &d_id;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -261,7 +292,7 @@ GENERIC_VALUE_GETTER_NAME_PROTO(dxf_const_string_t) {
 
 RECORD_EXCHANGE_CODE_GETTER_BODY(dx_rid_trade)
 RECORD_EXCHANGE_CODE_GETTER_BODY(dx_rid_quote)
-RECORD_EXCHANGE_CODE_GETTER_BODY(dx_rid_fundamental)
+RECORD_EXCHANGE_CODE_GETTER_BODY(dx_rid_summary)
 RECORD_EXCHANGE_CODE_GETTER_BODY(dx_rid_profile)
 RECORD_EXCHANGE_CODE_GETTER_BODY(dx_rid_market_maker)
 
@@ -271,10 +302,12 @@ RECORD_EXCHANGE_CODE_GETTER_BODY(dx_rid_market_maker)
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_DEF_VAL_BODY(dx_trade_t, time, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_trade_t, time, dxf_long_t)
 FIELD_DEF_VAL_BODY(dx_trade_t, exchange_code, dxf_char_t)
 FIELD_DEF_VAL_BODY(dx_trade_t, price, dxf_double_t)
-FIELD_DEF_VAL_BODY(dx_trade_t, size, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_trade_t, size, dxf_long_t)
+FIELD_DEF_VAL_BODY(dx_trade_t, tick, dxf_long_t)
+FIELD_DEF_VAL_BODY(dx_trade_t, change, dxf_double_t)
 FIELD_DEF_VAL_BODY(dx_trade_t, day_volume, dxf_double_t)
 
 /* -------------------------------------------------------------------------- */
@@ -294,23 +327,41 @@ FIELD_DEF_VAL_BODY(dx_quote_t, ask_size, dxf_int_t)
 
 /* -------------------------------------------------------------------------- */
 /*
- *	Fundamental field value getters implementation
- */
+*	Summary field value getters implementation
+*/
 /* -------------------------------------------------------------------------- */
 
-FIELD_DEF_VAL_BODY(dx_fundamental_t, day_high_price, dxf_double_t)
-FIELD_DEF_VAL_BODY(dx_fundamental_t, day_low_price, dxf_double_t)
-FIELD_DEF_VAL_BODY(dx_fundamental_t, day_open_price, dxf_double_t)
-FIELD_DEF_VAL_BODY(dx_fundamental_t, prev_day_close_price, dxf_double_t)
-FIELD_DEF_VAL_BODY(dx_fundamental_t, open_interest, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_summary_t, day_id, dxf_dayid_t)
+FIELD_DEF_VAL_BODY(dx_summary_t, day_open_price, dxf_double_t);
+FIELD_DEF_VAL_BODY(dx_summary_t, day_high_price, dxf_double_t);
+FIELD_DEF_VAL_BODY(dx_summary_t, day_low_price, dxf_double_t);
+FIELD_DEF_VAL_BODY(dx_summary_t, day_close_price, dxf_double_t);
+FIELD_DEF_VAL_BODY(dx_summary_t, prev_day_id, dxf_dayid_t);
+FIELD_DEF_VAL_BODY(dx_summary_t, prev_day_close_price, dxf_double_t);
+FIELD_DEF_VAL_BODY(dx_summary_t, open_interest, dxf_int_t);
+FIELD_DEF_VAL_BODY(dx_summary_t, flags, dxf_int_t);
+FIELD_DEF_VAL_BODY_CUSTOM_FUN(dx_summary_t, exchange_code, RECORD_EXCHANGE_CODE_GETTER_FUN, dx_rid_summary);
 
 /* -------------------------------------------------------------------------- */
 /*
  *	Profile field value getters implementation
  */
 /* -------------------------------------------------------------------------- */
-
+FIELD_DEF_VAL_BODY(dx_profile_t, beta, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_profile_t, eps, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_profile_t, div_freq, dxf_long_t)
+FIELD_DEF_VAL_BODY(dx_profile_t, exd_div_amount, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_profile_t, exd_div_date, dxf_dayid_t)
+FIELD_DEF_VAL_BODY(dx_profile_t, _52_high_price, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_profile_t, _52_low_price, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_profile_t, shares, dxf_double_t)
 FIELD_DEF_VAL_BODY(dx_profile_t, description, dxf_const_string_t)
+FIELD_DEF_VAL_BODY(dx_profile_t, flags, dxf_long_t)
+FIELD_DEF_VAL_BODY(dx_profile_t, status_reason, dxf_const_string_t)
+FIELD_DEF_VAL_BODY(dx_profile_t, halt_start_time, dxf_long_t)
+FIELD_DEF_VAL_BODY(dx_profile_t, halt_end_time, dxf_long_t)
+FIELD_DEF_VAL_BODY(dx_profile_t, high_limit_price, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_profile_t, low_limit_price, dxf_double_t)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -398,6 +449,8 @@ FIELD_GETTER_BODY(dx_trade_t, time, dxf_long_t)
 FIELD_GETTER_BODY(dx_trade_t, exchange_code, dxf_char_t)
 FIELD_GETTER_BODY(dx_trade_t, price, dxf_double_t)
 FIELD_GETTER_BODY(dx_trade_t, size, dxf_long_t)
+FIELD_GETTER_BODY(dx_trade_t, tick, dxf_long_t)
+FIELD_GETTER_BODY(dx_trade_t, change, dxf_double_t)
 FIELD_GETTER_BODY(dx_trade_t, day_volume, dxf_double_t)
 
 /* -------------------------------------------------------------------------- */
@@ -417,15 +470,20 @@ FIELD_GETTER_BODY(dx_quote_t, ask_size, dxf_long_t)
 
 /* -------------------------------------------------------------------------- */
 /*
-*	Fundamental field getters implementation
+*	Summary field getters implementation
 */
 /* -------------------------------------------------------------------------- */
 
-FIELD_GETTER_BODY(dx_fundamental_t, day_high_price, dxf_double_t)
-FIELD_GETTER_BODY(dx_fundamental_t, day_low_price, dxf_double_t)
-FIELD_GETTER_BODY(dx_fundamental_t, day_open_price, dxf_double_t)
-FIELD_GETTER_BODY(dx_fundamental_t, prev_day_close_price, dxf_double_t)
-FIELD_GETTER_BODY(dx_fundamental_t, open_interest, dxf_long_t)
+FIELD_GETTER_BODY(dx_summary_t, day_id, dxf_dayid_t)
+FIELD_GETTER_BODY(dx_summary_t, day_open_price, dxf_double_t);
+FIELD_GETTER_BODY(dx_summary_t, day_high_price, dxf_double_t);
+FIELD_GETTER_BODY(dx_summary_t, day_low_price, dxf_double_t);
+FIELD_GETTER_BODY(dx_summary_t, day_close_price, dxf_double_t);
+FIELD_GETTER_BODY(dx_summary_t, prev_day_id, dxf_dayid_t);
+FIELD_GETTER_BODY(dx_summary_t, prev_day_close_price, dxf_double_t);
+FIELD_GETTER_BODY(dx_summary_t, open_interest, dxf_long_t);
+FIELD_GETTER_BODY(dx_summary_t, flags, dxf_long_t);
+FIELD_GETTER_BODY(dx_summary_t, exchange_code, dxf_char_t);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -433,7 +491,21 @@ FIELD_GETTER_BODY(dx_fundamental_t, open_interest, dxf_long_t)
 */
 /* -------------------------------------------------------------------------- */
 
+FIELD_GETTER_BODY(dx_profile_t, beta, dxf_double_t)
+FIELD_GETTER_BODY(dx_profile_t, eps, dxf_double_t)
+FIELD_GETTER_BODY(dx_profile_t, div_freq, dxf_long_t)
+FIELD_GETTER_BODY(dx_profile_t, exd_div_amount, dxf_double_t)
+FIELD_GETTER_BODY(dx_profile_t, exd_div_date, dxf_dayid_t)
+FIELD_GETTER_BODY(dx_profile_t, _52_high_price, dxf_double_t)
+FIELD_GETTER_BODY(dx_profile_t, _52_low_price, dxf_double_t)
+FIELD_GETTER_BODY(dx_profile_t, shares, dxf_double_t)
 FIELD_GETTER_BODY(dx_profile_t, description, dxf_const_string_t)
+FIELD_GETTER_BODY(dx_profile_t, flags, dxf_long_t)
+FIELD_GETTER_BODY(dx_profile_t, status_reason, dxf_const_string_t)
+FIELD_GETTER_BODY(dx_profile_t, halt_start_time, dxf_long_t)
+FIELD_GETTER_BODY(dx_profile_t, halt_end_time, dxf_long_t)
+FIELD_GETTER_BODY(dx_profile_t, high_limit_price, dxf_double_t)
+FIELD_GETTER_BODY(dx_profile_t, low_limit_price, dxf_double_t)
 
 /* -------------------------------------------------------------------------- */
 /*

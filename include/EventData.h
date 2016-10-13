@@ -94,7 +94,7 @@ typedef void* dxf_event_data_t;
 
 typedef dx_trade_t dxf_trade_t;
 typedef dx_quote_t dxf_quote_t;
-typedef dx_fundamental_t dxf_summary_t;
+typedef dx_summary_t dxf_summary_t;
 typedef dx_profile_t dxf_profile_t;
 typedef dx_time_and_sale_t dxf_time_and_sale_t;
 typedef dx_candle_t dxf_candle_t;
