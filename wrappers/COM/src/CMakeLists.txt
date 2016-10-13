@@ -15,6 +15,10 @@ set(INCLUDE_DIR
     ${LIB_COM_INCLUDE_DIR}
 )
 set(TARGET_PLATFORM "x86" CACHE STRING "Target platform specification")
+set(APP_VERSION "" CACHE STRING "The version of library")
+set(C_API_VERSION_MAJOR 0)
+set(C_API_VERSION_MINOR 0)
+set(C_API_VERSION_PATCH 0)
 set(POSTFIX "")
 set(PLATFORM_POSTFIX "")
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -36,7 +40,24 @@ set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE TYPE INTERNAL FORCE)
 set(CMAKE_DEBUG_POSTFIX "d${PLATFORM_POSTFIX}")
 set(CMAKE_RELEASE_POSTFIX "${PLATFORM_POSTFIX}")
  
-project(${PROJECT}) 
+project(${PROJECT})
+
+# If library version is not specified through parameters version from the source will be used
+if(NOT ${APP_VERSION} STREQUAL "")
+
+    #separate version string on components
+    string(REPLACE "." ";" VERSION_COMPONENTS_LIST ${APP_VERSION})
+    list(LENGTH VERSION_COMPONENTS_LIST VERSION_COMPONENTS_COUNT)
+    list(GET VERSION_COMPONENTS_LIST 0 C_API_VERSION_MAJOR)
+    if(VERSION_COMPONENTS_COUNT GREATER 1)
+        list(GET VERSION_COMPONENTS_LIST 1 C_API_VERSION_MINOR)
+    endif()
+    if(VERSION_COMPONENTS_COUNT GREATER 2)
+        list(GET VERSION_COMPONENTS_LIST 2 C_API_VERSION_PATCH)
+    endif()
+    
+    configure_file("${PROJECT_SOURCE_DIR}/${DEF_FILE}.in" "${PROJECT_SOURCE_DIR}/${DEF_FILE}")
+endif()
 
 include_directories(${INCLUDE_DIR})
 
@@ -147,6 +168,12 @@ set(ALL_DEF_FILES
     ${PROJECT}_64.def
     ${PROJECT}d_64.def
 )
+set(ALL_DEF_TEMPLATES
+    ${PROJECT}.def.in
+    ${PROJECT}d.def.in
+    ${PROJECT}_64.def.in
+    ${PROJECT}d_64.def.in
+)
 set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/DXFeedAllCPackConfig.cmake")
 install(TARGETS ${PROJECT}
     DESTINATION "bin/${TARGET_PLATFORM}"
@@ -154,7 +181,7 @@ install(TARGETS ${PROJECT}
 install(DIRECTORY "${LIB_COM_INCLUDE_DIR}"
     DESTINATION "wrappers/COM"
 )
-install(FILES ${HEADER_FILES} ${SOURCE_FILES} ${ALL_DEF_FILES} ${PROJECT_FILES} ${BUILD_FILES}
+install(FILES ${HEADER_FILES} ${SOURCE_FILES} ${ALL_DEF_FILES} ${PROJECT_FILES} ${BUILD_FILES} ${ALL_DEF_TEMPLATES}
     DESTINATION "wrappers/COM/src"
 )
 install(FILES "${PROJECT_BINARY_DIR}/DXFeedCOM.tlb" "${PROJECT_BINARY_DIR}/DXFeedCOM.h" "${PROJECT_BINARY_DIR}/DXFeedCOM_i.c"

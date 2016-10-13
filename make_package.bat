@@ -4,7 +4,7 @@ rem Script build all targets from CMakeLists.txt by sequentionally calling
 rem build.bat for next configurations: Debug x86, Release x86, Debug x64, 
 rem Release x64. If one of configurations fail the process stopped.
 rem Usage: 
-rem     make_package [<major>[.<minor>[.<patch>]]] [rebuild|clean] [no-test]
+rem     make_package [<major>.<minor>[.<patch>]] [rebuild|clean] [no-test]
 rem Where
 rem     [<major>.<minor>[.<patch>]] - Version of package, i.e. 1.2.6
 rem     clean                       - removes build directory
@@ -48,28 +48,29 @@ if %ERRORLEVEL% GEQ 1 (
     goto exit_error
 )
 
-set VERSION=
+set VERSION=%1
 set DO_TEST=1
+set BUILD_DIR=%~dp0\build
+set PROJECT_NAME=DXFeedAll
+set PACKAGE_WORK_DIR=_CPack_Packages
+set TARGET_PACKAGE=dxfeed-c-api-%VERSION%
 
 for %%A in (%*) do (
-    if [%%A] EQU [/^?] (
-        goto usage
-    ) else if [%%A] EQU [clean] (
+    if [%%A] EQU [clean] (
         call build.bat clean
         goto end
     ) else if [%%A] EQU [rebuild] (
         call build.bat clean
     ) else if [%%A] EQU [no-test] (
         set DO_TEST=0
-    ) else (
-        set VERSION=%%A
     )
 )
 
-set BUILD_DIR=%~dp0\build
-set PROJECT_NAME=DXFeedAll
-set PACKAGE_WORK_DIR=_CPack_Packages
-set TARGET_PACKAGE=dxfeed-c-api-%VERSION%
+rem Check version parameter
+if [%VERSION%] EQU [] (
+    echo ERROR: The version of package is not specified or invalid^!
+    goto usage
+)
 
 echo Start building package %VERSION%
 
@@ -126,23 +127,25 @@ move /Y %TARGET_PACKAGE%.zip %BUILD_DIR%\%TARGET_PACKAGE%.zip
 cd %HOME_DIR%
 
 rem === FINISH ===
-echo Making package complete successfully.
 goto exit_success
 
 :usage
-echo Usage: %0 [^<major^>.^<minor^>[.^<patch^>]] [rebuild^|clean] [no-test]
-echo    [^<major^>.^<minor^>[.^<patch^>]] - Version of package, i.e. 1.2.6
-echo    clean                       - removes build directory
-echo    rebuild                     - performs clean and build
-echo    no-test                     - build tests will not be started
-goto exit_success
+echo Usage: %0 ^<major^>.^<minor^>[.^<patch^>] [rebuild^|clean] [no-test]
+echo    ^<major^>.^<minor^>[.^<patch^>] - Version of package, i.e. 1.2.6
+echo    clean                     - removes build directory
+echo    rebuild                   - performs clean and build
+echo    no-test                   - build tests will not be started
+goto exit_error
 
 :exit_success
+echo.
+echo Making package complete successfully.
 exit /b 0
 :cpack_error
 cd %HOME_DIR%
 goto exit_error
 :exit_error
+echo.
 echo Making package failed!
 exit /b 1
 :end

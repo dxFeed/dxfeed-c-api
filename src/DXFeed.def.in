@@ -1,6 +1,6 @@
 ; The following line has the only difference between release and debug versions of DXFeed lib
 LIBRARY DXFeed
-VERSION @APP_VERSION@
+VERSION @C_API_VERSION_MAJOR@.@C_API_VERSION_MINOR@
 EXPORTS
     dxf_create_connection 
     dxf_close_connection 

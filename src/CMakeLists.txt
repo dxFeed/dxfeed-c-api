@@ -7,6 +7,9 @@ set(INCLUDE_DIR ../include)
 set(PTHREADS_INCLUDE_DIR ../include/pthreads)
 set(TARGET_PLATFORM "x86" CACHE STRING "Target platform specification")
 set(APP_VERSION "" CACHE STRING "The version of library")
+set(C_API_VERSION_MAJOR 0)
+set(C_API_VERSION_MINOR 0)
+set(C_API_VERSION_PATCH 0)
 set(POSTFIX "")
 set(PLATFORM_POSTFIX "")
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -27,6 +30,18 @@ project(${PROJECT})
 
 # If library version is not specified through parameters version from the source will be used
 if(NOT ${APP_VERSION} STREQUAL "")
+
+    #separate version string on components
+    string(REPLACE "." ";" VERSION_COMPONENTS_LIST ${APP_VERSION})
+    list(LENGTH VERSION_COMPONENTS_LIST VERSION_COMPONENTS_COUNT)
+    list(GET VERSION_COMPONENTS_LIST 0 C_API_VERSION_MAJOR)
+    if(VERSION_COMPONENTS_COUNT GREATER 1)
+        list(GET VERSION_COMPONENTS_LIST 1 C_API_VERSION_MINOR)
+    endif()
+    if(VERSION_COMPONENTS_COUNT GREATER 2)
+        list(GET VERSION_COMPONENTS_LIST 2 C_API_VERSION_PATCH)
+    endif()
+    
     configure_file("${PROJECT_SOURCE_DIR}/Version.h.in" "${PROJECT_SOURCE_DIR}/Version.h")
     configure_file("${PROJECT_SOURCE_DIR}/${PROJECT}${POSTFIX}.def.in" "${PROJECT_SOURCE_DIR}/${DEF_FILE}")
 endif()
