@@ -15,6 +15,8 @@
 //Timeout in milliseconds for waiting some events is 3 minutes.
 #define EVENTS_TIMEOUT 180000
 #define EVENTS_LOOP_SLEEP_TIME 100
+//The maximum milliseconds interval of expecting between two events
+#define WAIT_EVENTS_INTERVAL 200
 
 #define DXFEED_HOST "mddqa.in.devexperts.com:7400"
 
@@ -116,7 +118,44 @@ bool ost_wait_two_events(get_counter_function_t f1, get_counter_function_t f2) {
     return ost_wait_multiple_events(counters, SIZE_OF_ARRAY(counters));
 }
 
-/*Test*/
+/*
+ * Function wait while all events in the input buffer will be handled. It is
+ * useful when expected a large amount of data after subscribing.
+ * 
+ * counter_data - event counter data object
+ */
+static bool wait_all_events_received(event_counter_data_ptr_t counter_data) {
+    int timestamp = dx_millisecond_timestamp();
+    int prev_value = 0;
+    int last_value = 0;
+    while ((last_value = get_event_counter(counter_data)) != prev_value) {
+        prev_value = last_value;
+        if (is_thread_terminate(g_ost_listener_thread_data)) {
+            printf("Test failed: thread was terminated!\n");
+            return false;
+        }
+        if (dx_millisecond_timestamp_diff(dx_millisecond_timestamp(), timestamp) > EVENTS_TIMEOUT) {
+            printf("Test failed: timeout is elapsed! Interval of waiting "
+                "'%s' events possible too much...", 
+                get_event_counter_name(counter_data));
+            return false;
+        }
+        Sleep(WAIT_EVENTS_INTERVAL);
+    }
+    return true;
+}
+
+/*
+ * Test
+ *
+ * Test a mixed set of function as dxf_set_order_source as dxf_add_order_source.
+ * - Perform default subscription on symbols and sources
+ * - Wait events with NTV, DEX and DEA sources.
+ * - Sets a new sources: NTV only
+ * - Wait events with NTV sources and checks that count of DEX and DEA is zero.
+ * - Adds a new source to current set: DEX
+ * - Wait events with NTV and DEX sources and checks that count of DEA is zero.
+ */
 bool mixed_order_source_test() {
     dxf_connection_t connection = NULL;
     dxf_subscription_t subscription = NULL;
@@ -148,7 +187,14 @@ bool mixed_order_source_test() {
         close_data(connection, subscription, listener);
         return false;
     }
-    Sleep(1000);
+    if (!wait_all_events_received(g_ntv_counter) ||
+        !wait_all_events_received(g_dex_counter) ||
+        !wait_all_events_received(g_dea_counter)) {
+
+        PRINT_TEST_FAILED;
+        close_data(connection, subscription, listener);
+        return false;
+    }
     drop_event_counter(g_ntv_counter);
     drop_event_counter(g_dex_counter);
     drop_event_counter(g_dea_counter);
@@ -156,8 +202,10 @@ bool mixed_order_source_test() {
         !dx_is_equal_int(0, ost_get_dex_counter()) ||
         !dx_is_equal_int(0, ost_get_dea_counter())) {
 
-        printf("    Expected: ntv=%5s, dex=%5s, dea=%5s; \n", ">0", "0", "0");
-        printf("    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n", 
+        printf("at %s, line: %d\n"
+               "    Expected: ntv=%5s, dex=%5s, dea=%5s; \n"
+               "    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n", 
+            __FUNCTION__, __LINE__, ">0", "0", "0",
             ost_get_ntv_counter(), ost_get_dex_counter(), ost_get_dea_counter());
         close_data(connection, subscription, listener);
         return false;
@@ -169,15 +217,24 @@ bool mixed_order_source_test() {
         close_data(connection, subscription, listener);
         return false;
     }
-    Sleep(1000);
+    if (!wait_all_events_received(g_ntv_counter) ||
+        !wait_all_events_received(g_dex_counter) ||
+        !wait_all_events_received(g_dea_counter)) {
+
+        PRINT_TEST_FAILED;
+        close_data(connection, subscription, listener);
+        return false;
+    }
     drop_event_counter(g_ntv_counter);
     drop_event_counter(g_dex_counter);
     drop_event_counter(g_dea_counter);
     if (!ost_wait_two_events(ost_get_ntv_counter, ost_get_dex_counter) ||
         !dx_is_equal_int(0, ost_get_dea_counter())) {
         
-        printf("    Expected: ntv=%5s, dex=%5s, dea=%5s; \n", ">0", ">0", "0");
-        printf("    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n",
+        printf("at %s, line: %d\n"
+               "    Expected: ntv=%5s, dex=%5s, dea=%5s; \n"
+               "    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n",
+            __FUNCTION__, __LINE__, ">0", ">0", "0",
             ost_get_ntv_counter(), ost_get_dex_counter(), ost_get_dea_counter());
         close_data(connection, subscription, listener);
         return false;
@@ -193,7 +250,17 @@ bool mixed_order_source_test() {
     return true;
 }
 
-/*Test*/
+/*
+* Test
+*
+* Test a set function: dxf_set_order_source.
+* - Perform default subscription on symbols and sources
+* - Wait events with NTV, DEX and DEA sources.
+* - Sets a new sources: NTV only
+* - Wait events with NTV sources and checks that count of DEX and DEA is zero.
+* - Sets a new sources: DEX only
+* - Wait events with DEX sources and checks that count of NTV and DEA is zero.
+*/
 bool set_order_source_test() {
     dxf_connection_t connection = NULL;
     dxf_subscription_t subscription = NULL;
@@ -225,7 +292,14 @@ bool set_order_source_test() {
         close_data(connection, subscription, listener);
         return false;
     }
-    Sleep(1000);
+    if (!wait_all_events_received(g_ntv_counter) ||
+        !wait_all_events_received(g_dex_counter) ||
+        !wait_all_events_received(g_dea_counter)) {
+
+        PRINT_TEST_FAILED;
+        close_data(connection, subscription, listener);
+        return false;
+    }
     drop_event_counter(g_ntv_counter);
     drop_event_counter(g_dex_counter);
     drop_event_counter(g_dea_counter);
@@ -248,7 +322,14 @@ bool set_order_source_test() {
         close_data(connection, subscription, listener);
         return false;
     }
-    Sleep(1000);
+    if (!wait_all_events_received(g_ntv_counter) ||
+        !wait_all_events_received(g_dex_counter) ||
+        !wait_all_events_received(g_dea_counter)) {
+
+        PRINT_TEST_FAILED;
+        close_data(connection, subscription, listener);
+        return false;
+    }
     drop_event_counter(g_ntv_counter);
     drop_event_counter(g_dex_counter);
     drop_event_counter(g_dea_counter);
@@ -275,7 +356,17 @@ bool set_order_source_test() {
     return true;
 }
 
-/*Test*/
+/*
+* Test
+*
+* Test a add function: dxf_add_order_source.
+* - Perform subscription on symbols and NTV source only
+* - Wait events with NTV sources and checks that count of DEX and DEA is zero.
+* - Adds a new source to current set: DEX
+* - Wait events with NTV and DEX sources and checks that count of DEA is zero.
+* - Adds a new source to current set: DEA
+* - Wait events with NTV, DEX and DEA sources.
+*/
 bool add_order_source_test() {
     dxf_connection_t connection = NULL;
     dxf_subscription_t subscription = NULL;
@@ -315,7 +406,14 @@ bool add_order_source_test() {
         close_data(connection, subscription, listener);
         return false;
     }
-    Sleep(1000);
+    if (!wait_all_events_received(g_ntv_counter) ||
+        !wait_all_events_received(g_dex_counter) ||
+        !wait_all_events_received(g_dea_counter)) {
+
+        PRINT_TEST_FAILED;
+        close_data(connection, subscription, listener);
+        return false;
+    }
     drop_event_counter(g_ntv_counter);
     drop_event_counter(g_dex_counter);
     drop_event_counter(g_dea_counter);
@@ -337,7 +435,14 @@ bool add_order_source_test() {
         close_data(connection, subscription, listener);
         return false;
     }
-    Sleep(1000);
+    if (!wait_all_events_received(g_ntv_counter) ||
+        !wait_all_events_received(g_dex_counter) ||
+        !wait_all_events_received(g_dea_counter)) {
+
+        PRINT_TEST_FAILED;
+        close_data(connection, subscription, listener);
+        return false;
+    }
     drop_event_counter(g_ntv_counter);
     drop_event_counter(g_dex_counter);
     drop_event_counter(g_dea_counter);
@@ -368,9 +473,9 @@ bool order_source_configuration_test(void) {
     dxf_initialize_logger("log.log", true, true, true);
 
     init_listener_thread_data(&g_ost_listener_thread_data);
-    init_event_counter(g_ntv_counter);
-    init_event_counter(g_dex_counter);
-    init_event_counter(g_dea_counter);
+    init_event_counter2(g_ntv_counter, "NTV");
+    init_event_counter2(g_dex_counter, "DEX");
+    init_event_counter2(g_dea_counter, "DEA");
 
     if (!add_order_source_test() ||
         !set_order_source_test() ||

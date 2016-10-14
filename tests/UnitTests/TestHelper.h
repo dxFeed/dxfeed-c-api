@@ -42,16 +42,19 @@ bool create_event_subscription(dxf_connection_t connection, int event_type,
 /* -------------------------------------------------------------------------- */
 /* Event counter data */
 typedef struct {
+    const char *counter_name;
     dxf_uint_t event_counter;
     CRITICAL_SECTION event_counter_guard;
 } event_counter_data_t, *event_counter_data_ptr_t;
 
 /* Event counter functions */
 void init_event_counter(event_counter_data_ptr_t counter_data);
+void init_event_counter2(event_counter_data_ptr_t counter_data, const char *name);
 void free_event_counter(event_counter_data_ptr_t counter_data);
 void inc_event_counter(event_counter_data_ptr_t counter_data);
 dxf_uint_t get_event_counter(event_counter_data_ptr_t counter_data);
 void drop_event_counter(event_counter_data_ptr_t counter_data);
+const char *get_event_counter_name(event_counter_data_ptr_t counter_data);
 
 /* -------------------------------------------------------------------------- */
 
