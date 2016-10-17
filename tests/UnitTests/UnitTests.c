@@ -23,25 +23,40 @@ const char* result_to_text (bool res) {
 }
 
 static test_function_data_t g_tests[] = {
-    { "event_subscription_tests", event_subscription_test },
-    { "event_dymamic_subscription_tests", event_dynamic_subscription_all_test }, 
-    { "order_source_tests", order_source_configuration_test },
-    { "candle_tests", candle_all_tests },
-    { "snapshot_tests", snapshot_all_test }
+    { "event_subscription_test", event_subscription_test },
+    { "event_dymamic_subscription_test", event_dynamic_subscription_all_test }, 
+    { "order_source_test", order_source_configuration_test },
+    { "candle_test", candle_all_tests },
+    { "snapshot_test", snapshot_all_test }
 };
 
 #define TESTS_COUNT (sizeof(g_tests) / sizeof(g_tests[0]))
 
-void run_test(const char* test_name) {
+void print_usage() {
     int i;
+    printf("Usage: UnitTests [<test-name>]...\n"
+        "where test-name is empty or any combination of next values:\n");
+    for (i = 0; i < TESTS_COUNT; i++)
+        printf("   %s\n", g_tests[i].name);
+}
+
+bool run_test(const char* test_name) {
+    int i;
+    bool res = false;
     for (i = 0; i < TESTS_COUNT; i++) {
         if (test_name == NULL || stricmp(test_name, g_tests[i].name) == 0) {
-            printf("\t%-30s:\t%s\n", g_tests[i].name, result_to_text((g_tests[i].function)()));
-            return;
+            res = (g_tests[i].function)();
+            printf("\t%-35s:\t%s\n", g_tests[i].name, result_to_text(res));
+            if (!res)
+                return false;
         }
     }
-    if (test_name != NULL)
+    if (test_name != NULL && !res) {
         printf("Unknown test procedure: '%s'\n", test_name);
+        print_usage();
+        return false;
+    }
+    return true;
 }
 
 int main (int argc, char* argv[]) {
@@ -51,12 +66,14 @@ int main (int argc, char* argv[]) {
 
     if (argc == 1) {
         /* run all tests */
-        run_test(NULL);
+        if (!run_test(NULL))
+            return 1;
     }
     else {
         /* run tests which names in command line */
         for (i = 1; i < argc; i++) {
-            run_test(argv[i]);
+            if (!run_test(argv[i]))
+                return 1;
         }
     }
 

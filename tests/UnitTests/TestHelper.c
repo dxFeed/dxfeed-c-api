@@ -138,6 +138,54 @@ bool create_event_subscription(dxf_connection_t connection, int event_type,
 
 /* -------------------------------------------------------------------------- */
 
+/* Event counter functions */
+
+void init_event_counter(event_counter_data_ptr_t counter_data) {
+    InitializeCriticalSection(&counter_data->event_counter_guard);
+    counter_data->event_counter = 0;
+    counter_data->counter_name = NULL;
+}
+
+void init_event_counter2(event_counter_data_ptr_t counter_data, const char *name) {
+    InitializeCriticalSection(&counter_data->event_counter_guard);
+    counter_data->event_counter = 0;
+    counter_data->counter_name = name;
+}
+
+void free_event_counter(event_counter_data_ptr_t counter_data) {
+    DeleteCriticalSection(&counter_data->event_counter_guard);
+}
+
+void inc_event_counter(event_counter_data_ptr_t counter_data) {
+    EnterCriticalSection(&counter_data->event_counter_guard);
+    counter_data->event_counter++;
+    LeaveCriticalSection(&counter_data->event_counter_guard);
+}
+
+dxf_uint_t get_event_counter(event_counter_data_ptr_t counter_data) {
+    dxf_uint_t value = 0;
+    EnterCriticalSection(&counter_data->event_counter_guard);
+    value = counter_data->event_counter;
+    LeaveCriticalSection(&counter_data->event_counter_guard);
+    return value;
+}
+
+void drop_event_counter(event_counter_data_ptr_t counter_data) {
+    EnterCriticalSection(&counter_data->event_counter_guard);
+    counter_data->event_counter = 0;
+    LeaveCriticalSection(&counter_data->event_counter_guard);
+}
+
+const char *get_event_counter_name(event_counter_data_ptr_t counter_data) {
+    const char * value = 0;
+    EnterCriticalSection(&counter_data->event_counter_guard);
+    value = counter_data->counter_name;
+    LeaveCriticalSection(&counter_data->event_counter_guard);
+    return value;
+}
+
+/* -------------------------------------------------------------------------- */
+
 #define DX_IS_EQUAL_FUNCTION_DEFINITION(type, tmpl) \
 DX_IS_EQUAL_FUNCTION_DECLARATION(type) { \
     if (expected != actual) { \

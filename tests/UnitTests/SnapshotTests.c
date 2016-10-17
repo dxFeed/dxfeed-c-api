@@ -153,6 +153,7 @@ const dxf_snapshot_data_ptr_t snapshot_candle_data_get_obj() {
     return obj;
 }
 
+/*Test*/
 bool snapshot_initialization_test(void) {
     dxf_connection_t connection;
     dxf_snapshot_t snapshot;
@@ -320,6 +321,7 @@ dxf_const_string_t g_order_symbol_cases[] = {
 };
 #define ORDER_CASES_SIZE sizeof(g_order_source_cases) / sizeof(g_order_source_cases[0])
 
+/*Test*/
 bool snapshot_duplicates_test(void) {
     dxf_connection_t connection;
     dxf_snapshot_t invalid_snapshot = NULL;
@@ -509,6 +511,7 @@ bool check_candle_snapshot_data_test(dxf_connection_t connection, dxf_snapshot_t
     return true;
 }
 
+/*Test*/
 bool snapshot_subscription_test(void) {
     dxf_connection_t connection;
     dxf_snapshot_t snapshot;
@@ -577,6 +580,7 @@ bool snapshot_subscription_test(void) {
     return true;
 }
 
+/*Test*/
 bool snapshot_multiply_subscription_test(void) {
     dxf_connection_t connection;
     dxf_snapshot_t order_snapshot;
@@ -720,6 +724,7 @@ bool check_event_subscription_test() {
 
 /* -------------------------------------------------------------------------- */
 
+/*Test*/
 bool snapshot_subscription_and_events_test(void) {
     dxf_connection_t connection;
     dxf_snapshot_t order_snapshot;
@@ -799,6 +804,7 @@ bool snapshot_subscription_and_events_test(void) {
     return true;
 }
 
+/*Test*/
 bool snapshot_symbols_test(void) {
     dxf_connection_t connection;
     dxf_snapshot_t snapshot;
