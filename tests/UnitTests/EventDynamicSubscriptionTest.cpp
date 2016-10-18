@@ -12,10 +12,10 @@
 #define EVENTS_TIMEOUT 120000
 #define EVENTS_LOOP_SLEEP_TIME 100
 
-const char dxfeed_host[] = "demo.dxfeed.com:7300";
+const char dxfeed_host[] = "mddqa.in.devexperts.com:7400";
 
 #define SYMBOLS_COUNT 4
-static dxf_const_string_t g_symbols[] = { { L"IBM" }, { L"MSFT" }, { L"YHOO" }, { L"C" } };
+static dxf_const_string_t g_symbols[] = { { L"IBM" }, { L"AAPL" }, { L"XBT/USD" }, { L"C" } };
 
 dxf_listener_thread_data_t g_listener_thread_data;
 
@@ -81,8 +81,7 @@ void print_timestamp(dxf_long_t timestamp){
 }
 /* -------------------------------------------------------------------------- */
 
-static dxf_uint_t buf_hash(const unsigned char *buf, int size)
-{
+static dxf_uint_t buf_hash(const unsigned char *buf, int size) {
     dxf_uint_t hash = 0;
     dxf_int_t c;
     int i;
@@ -170,15 +169,11 @@ void set_event_listener_data(int event_type, dxf_const_string_t symbol_name,
 
 void trade_listener(int event_type, dxf_const_string_t symbol_name,
                     const dxf_event_data_t* data, int data_count, void* user_data) {
-    wprintf(L"%s{symbol=%s}\n", dx_event_type_to_string(event_type), symbol_name);
-
     inc_trade_counter();
 }
 
 void order_listener(int event_type, dxf_const_string_t symbol_name,
                     const dxf_event_data_t* data, int data_count, void* user_data) {
-    wprintf(L"%s{symbol=%s}\n", dx_event_type_to_string(event_type), symbol_name);
-
     inc_order_counter();
 }
 
@@ -220,7 +215,7 @@ bool subscribe_to_event(dxf_connection_t connection, dxf_subscription_t* subscri
 
         return false;
     };
-    wprintf(L"Subscription on %ls is successful!\n", dx_event_type_to_string(event_type));
+
     return true;
 }
 
@@ -234,6 +229,7 @@ void on_thread_terminate(dxf_connection_t connection, void* user_data) {
 
 /* -------------------------------------------------------------------------- */
 
+/*Test*/
 bool event_dynamic_subscription_test(void) {
     dxf_connection_t connection = NULL;
     dxf_subscription_t trade_subscription = NULL;
@@ -347,6 +343,7 @@ bool event_dynamic_subscription_test(void) {
     return true;
 }
 
+/*Test*/
 bool listener_v2_test(void) {
     dxf_connection_t connection = NULL;
     dxf_subscription_t order_subscription = NULL;
@@ -370,6 +367,7 @@ bool listener_v2_test(void) {
         return false;
     }
     if (!dxf_attach_event_listener_v2(order_subscription, order_event_copy_listener_v2, (void*)&user_data)) {
+        dxf_close_subscription(order_subscription);
         dxf_close_connection(connection);
         PRINT_TEST_FAILED;
         process_last_error();
