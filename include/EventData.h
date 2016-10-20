@@ -46,21 +46,31 @@ typedef enum {
     dx_eid_order,
     dx_eid_time_and_sale,
     dx_eid_candle,
-    
+    /*here will be new candle types*/
+    dx_eid_greeks,
+    dx_eid_theo_price,
+    dx_eid_underlying,
+    dx_eid_series,
+
     /* add new event id above this line */
-    
+
     dx_eid_count,
     dx_eid_invalid
 } dx_event_id_t;
 
-#define DXF_ET_TRADE		 (1 << dx_eid_trade)
-#define DXF_ET_QUOTE		 (1 << dx_eid_quote)
-#define DXF_ET_SUMMARY	     (1 << dx_eid_summary)
-#define DXF_ET_PROFILE		 (1 << dx_eid_profile)
-#define DXF_ET_ORDER	     (1 << dx_eid_order)
+#define DXF_ET_TRADE         (1 << dx_eid_trade)
+#define DXF_ET_QUOTE         (1 << dx_eid_quote)
+#define DXF_ET_SUMMARY       (1 << dx_eid_summary)
+#define DXF_ET_PROFILE       (1 << dx_eid_profile)
+#define DXF_ET_ORDER         (1 << dx_eid_order)
 #define DXF_ET_TIME_AND_SALE (1 << dx_eid_time_and_sale)
 #define DXF_ET_CANDLE        (1 << dx_eid_candle)
-#define DXF_ET_UNUSED		 (~((1 << dx_eid_count) - 1))
+/*here will be new candle types*/
+#define DXF_ET_GREEKS        (1 << dx_eid_greeks)
+#define DXF_ET_THEO_PRICE    (1 << dx_eid_theo_price)
+#define DXF_ET_UNDERLYING    (1 << dx_eid_underlying)
+#define DXF_ET_SERIES        (1 << dx_eid_series)
+#define DXF_ET_UNUSED        (~((1 << dx_eid_count) - 1))
 
 #define DX_EVENT_BIT_MASK(event_id) (1 << event_id)
 

@@ -42,6 +42,11 @@ typedef enum {
     dx_rid_order,
     dx_rid_time_and_sale,
     dx_rid_candle,
+    /*here will be new candle types*/
+    dx_rid_greeks,
+    dx_rid_theo_price,
+    dx_rid_underlying,
+    dx_rid_series,
 
     /* add new values above this line */
 
