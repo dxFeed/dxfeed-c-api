@@ -1003,6 +1003,126 @@ HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetType (INT* value) {
 
 /* -------------------------------------------------------------------------- */
 /*
+*	DXTradeETH class
+
+*  default implementation of the IDXTradeETH interface
+*/
+/* -------------------------------------------------------------------------- */
+
+class DXTradeETH : private IDXTradeETH, private DefIDispatchImpl {
+    friend struct EventDataFactory;
+
+private:
+
+    virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObject) {
+        return QueryInterfaceImpl(this, riid, ppvObject);
+    }
+    virtual ULONG STDMETHODCALLTYPE AddRef() { return AddRefImpl(); }
+    virtual ULONG STDMETHODCALLTYPE Release() { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
+
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount(UINT *pctinfo) { return GetTypeInfoCountImpl(pctinfo); }
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
+        return GetTypeInfoImpl(iTInfo, lcid, ppTInfo);
+    }
+    virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames(REFIID riid, LPOLESTR *rgszNames,
+        UINT cNames, LCID lcid, DISPID *rgDispId) {
+        return GetIDsOfNamesImpl(riid, rgszNames, cNames, lcid, rgDispId);
+    }
+    virtual HRESULT STDMETHODCALLTYPE Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
+        DISPPARAMS *pDispParams, VARIANT *pVarResult,
+        EXCEPINFO *pExcepInfo, UINT *puArgErr) {
+        return InvokeImpl(this, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
+    }
+
+    virtual HRESULT STDMETHODCALLTYPE GetTime(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetFlags(INT* value);
+    virtual HRESULT STDMETHODCALLTYPE GetExchangeCode(SHORT* value);
+    virtual HRESULT STDMETHODCALLTYPE GetPrice(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetSize(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetDayVolume(LONGLONG* value);
+
+private:
+
+    DXTradeETH(dxf_event_data_t data, IUnknown* parent);
+
+private:
+
+    dxf_trade_eth_t* m_data;
+};
+
+/* -------------------------------------------------------------------------- */
+/*
+*	DXTrade methods implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+DXTradeETH::DXTradeETH(dxf_event_data_t data, IUnknown* parent)
+    : DefIDispatchImpl(IID_IDXTradeETH, parent)
+    , m_data(reinterpret_cast<dxf_trade_eth_t*>(data)) {
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXTradeETH::GetTime(LONGLONG* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->time;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXTradeETH::GetFlags(INT* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->flags;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXTradeETH::GetExchangeCode(SHORT* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->exchange;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXTradeETH::GetPrice(DOUBLE* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->price;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXTradeETH::GetSize(LONGLONG* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->size;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXTradeETH::GetDayVolume(LONGLONG* value) {
+    CHECK_PTR(value);
+
+    *value = *((LONGLONG*)&m_data->eth_volume);
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+/*
  *	EventDataFactory methods implementation
  */
 /* -------------------------------------------------------------------------- */
@@ -1016,6 +1136,7 @@ IDispatch* EventDataFactory::CreateInstance (int eventType, dxf_event_data_t eve
         case DXF_ET_PROFILE: return static_cast<IDXProfile*>(new DXProfile(eventData, parent));
         case DXF_ET_ORDER: return static_cast<IDXOrder*>(new DXOrder(eventData, parent));
         case DXF_ET_TIME_AND_SALE: return static_cast<IDXTimeAndSale*>(new DXTimeAndSale(eventData, parent));
+        case DXF_ET_TRADE_ETH: return static_cast<IDXTradeETH*>(new DXTradeETH(eventData, parent));
         default: return NULL;
         }
     } catch (...) {

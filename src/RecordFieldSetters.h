@@ -181,6 +181,19 @@ DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_candle_t, ask_volume);
 
 /* -------------------------------------------------------------------------- */
 /*
+*	TradeETH field setters
+*/
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_trade_eth_t, time);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_trade_eth_t, flags);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_trade_eth_t, exchange);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_trade_eth_t, price);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_trade_eth_t, size);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_trade_eth_t, eth_volume);
+
+/* -------------------------------------------------------------------------- */
+/*
  *	Default field value functions
  */
 /* -------------------------------------------------------------------------- */
@@ -339,6 +352,19 @@ DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_candle_t, ask_volume);
 
 /* -------------------------------------------------------------------------- */
 /*
+*	TradeETH field default value getters
+*/
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_trade_eth_t, time);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_trade_eth_t, flags);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_trade_eth_t, exchange);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_trade_eth_t, price);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_trade_eth_t, size);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_trade_eth_t, eth_volume);
+
+/* -------------------------------------------------------------------------- */
+/*
 *	Generic setter prototype
 */
 /* -------------------------------------------------------------------------- */
@@ -490,5 +516,18 @@ DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_candle_t, volume);
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_candle_t, vwap);
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_candle_t, bid_volume);
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_candle_t, ask_volume);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	TradeETH field getters
+*/
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_trade_eth_t, time);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_trade_eth_t, flags);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_trade_eth_t, exchange);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_trade_eth_t, price);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_trade_eth_t, size);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_trade_eth_t, eth_volume);
 
 #endif /* RECORD_FIELD_SETTERS_H_INCLUDED */

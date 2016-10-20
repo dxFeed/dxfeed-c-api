@@ -42,6 +42,7 @@ typedef enum {
     dx_rid_order,
     dx_rid_time_and_sale,
     dx_rid_candle,
+    dx_rid_trade_eth,
 
     /* add new values above this line */
 
@@ -166,5 +167,14 @@ typedef struct {
     dxf_double_t bid_volume;
     dxf_double_t ask_volume;
 } dx_candle_t;
+
+typedef struct {
+    dxf_long_t time;
+    dxf_int_t flags;
+    dxf_char_t exchange;
+    dxf_double_t price;
+    dxf_long_t size;
+    dxf_double_t eth_volume;
+} dx_trade_eth_t;
 
 #endif /* RECORD_DATA_H_INCLUDED */

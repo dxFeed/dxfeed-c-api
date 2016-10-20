@@ -182,6 +182,19 @@ FIELD_SETTER_BODY(dx_candle_t, ask_volume, dxf_double_t)
 
 /* -------------------------------------------------------------------------- */
 /*
+*	TradeETH field setters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_SETTER_BODY(dx_trade_eth_t, time, dxf_int_t)
+FIELD_SETTER_BODY(dx_trade_eth_t, flags, dxf_int_t)
+FIELD_SETTER_BODY(dx_trade_eth_t, exchange, dxf_char_t)
+FIELD_SETTER_BODY(dx_trade_eth_t, price, dxf_double_t)
+FIELD_SETTER_BODY(dx_trade_eth_t, size, dxf_int_t)
+FIELD_SETTER_BODY(dx_trade_eth_t, eth_volume, dxf_double_t)
+
+/* -------------------------------------------------------------------------- */
+/*
  *	Default value getter functions
  */
 /* -------------------------------------------------------------------------- */
@@ -295,6 +308,7 @@ RECORD_EXCHANGE_CODE_GETTER_BODY(dx_rid_quote)
 RECORD_EXCHANGE_CODE_GETTER_BODY(dx_rid_summary)
 RECORD_EXCHANGE_CODE_GETTER_BODY(dx_rid_profile)
 RECORD_EXCHANGE_CODE_GETTER_BODY(dx_rid_market_maker)
+RECORD_EXCHANGE_CODE_GETTER_BODY(dx_rid_trade_eth)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -427,6 +441,19 @@ FIELD_DEF_VAL_BODY(dx_candle_t, volume, dxf_double_t)
 FIELD_DEF_VAL_BODY(dx_candle_t, vwap, dxf_double_t)
 FIELD_DEF_VAL_BODY(dx_candle_t, bid_volume, dxf_double_t)
 FIELD_DEF_VAL_BODY(dx_candle_t, ask_volume, dxf_double_t)
+
+/* -------------------------------------------------------------------------- */
+/*
+*	TradeETH field value getters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_DEF_VAL_BODY(dx_trade_eth_t, time, dxf_long_t)
+FIELD_DEF_VAL_BODY(dx_trade_eth_t, flags, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_trade_eth_t, exchange, dxf_char_t)
+FIELD_DEF_VAL_BODY(dx_trade_eth_t, price, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_trade_eth_t, size, dxf_long_t)
+FIELD_DEF_VAL_BODY(dx_trade_eth_t, eth_volume, dxf_double_t)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -579,3 +606,16 @@ FIELD_GETTER_BODY(dx_candle_t, volume, dxf_double_t)
 FIELD_GETTER_BODY(dx_candle_t, vwap, dxf_double_t)
 FIELD_GETTER_BODY(dx_candle_t, bid_volume, dxf_double_t)
 FIELD_GETTER_BODY(dx_candle_t, ask_volume, dxf_double_t)
+
+/* -------------------------------------------------------------------------- */
+/*
+*	TradeETH field getters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_GETTER_BODY(dx_trade_eth_t, time, dxf_long_t)
+FIELD_GETTER_BODY(dx_trade_eth_t, flags, dxf_int_t)
+FIELD_GETTER_BODY(dx_trade_eth_t, exchange, dxf_char_t)
+FIELD_GETTER_BODY(dx_trade_eth_t, price, dxf_double_t)
+FIELD_GETTER_BODY(dx_trade_eth_t, size, dxf_long_t)
+FIELD_GETTER_BODY(dx_trade_eth_t, eth_volume, dxf_double_t)

@@ -27,6 +27,7 @@ dxf_const_string_t dx_event_type_to_string (int event_type) {
     case DXF_ET_PROFILE: return L"Profile";
     case DXF_ET_ORDER: return L"Order";
     case DXF_ET_TIME_AND_SALE: return L"Time&Sale";
+    case DXF_ET_TRADE_ETH: return L"TradeETH";
     default: return L"";
     }
 }
@@ -169,6 +170,16 @@ void listener(int event_type, dxf_const_string_t symbol_name,
                     tns[i].is_trade ? L"True" : L"False", tns[i].type);
         }
     }
+
+    if (event_type == DXF_ET_TRADE) {
+        dxf_trade_eth_t* trades = (dxf_trade_eth_t*)data;
+
+        for (; i < data_count; ++i) {
+            print_timestamp(trades[i].time);
+            wprintf(L", exchangeCode=%c, flags=%d, price=%f, size=%I64i, day volume=%.0f}\n",
+                trades[i].flags, trades[i].exchange, trades[i].price, trades[i].size, trades[i].eth_volume);
+        }
+    }
 }
 /* -------------------------------------------------------------------------- */
 
@@ -237,7 +248,7 @@ int main (int argc, char* argv[]) {
                 L"Usage: CommandLineSample <server address> <event type> <symbol>\n"
                 L"  <server address> - a DXFeed server address, e.g. demo.dxfeed.com:7300\n"
                 L"  <event type> - an event type, one of the following: TRADE, QUOTE, SUMMARY,\n"
-                L"                 PROFILE, ORDER, TIME_AND_SALE\n"
+                L"                 PROFILE, ORDER, TIME_AND_SALE, TRADE_ETH\n"
                 L"  <symbol> - a trade symbol, e.g. C, MSFT, YHOO, IBM\n");
         
         return 0;
@@ -260,6 +271,8 @@ int main (int argc, char* argv[]) {
         event_type = DXF_ET_ORDER;
     } else if (stricmp(event_type_name, "TIME_AND_SALE") == 0) {
         event_type = DXF_ET_TIME_AND_SALE;
+    } else if (stricmp(event_type_name, "TRADE_ETH") == 0) {
+        event_type = DXF_ET_TRADE_ETH;
     } else {
         wprintf(L"Unknown event type.\n");
         return -1;

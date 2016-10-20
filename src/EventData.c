@@ -44,12 +44,14 @@ static const dxf_char_t g_quote_tmpl[] = L"Quote&";
 static const dxf_char_t g_order_tmpl[] = L"Order#";
 static const dxf_char_t g_trade_tmpl[] = L"Trade&";
 static const dxf_char_t g_summary_tmpl[] = L"Summary&";
+static const dxf_char_t g_trade_eth_tmpl[] = L"TradeETH&";
 
 #define STRLEN(char_array) (sizeof(char_array) / sizeof(char_array[0]) - 1)
 #define QUOTE_TMPL_LEN STRLEN(g_quote_tmpl)
 #define ORDER_TMPL_LEN STRLEN(g_order_tmpl)
 #define TRADE_TMPL_LEN STRLEN(g_trade_tmpl)
 #define SUMMARY_TMPL_LEN STRLEN(g_summary_tmpl)
+#define TRADE_ETH_TMPL_LEN STRLEN(g_trade_eth_tmpl)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -59,13 +61,14 @@ static const dxf_char_t g_summary_tmpl[] = L"Summary&";
 
 dxf_const_string_t dx_event_type_to_string (int event_type) {
     switch (event_type) {
-    case DXF_ET_TRADE: return L"Trade"; 
-    case DXF_ET_QUOTE: return L"Quote"; 
-    case DXF_ET_SUMMARY: return L"Summary"; 
-    case DXF_ET_PROFILE: return L"Profile"; 
-    case DXF_ET_ORDER: return L"Order"; 
-    case DXF_ET_TIME_AND_SALE: return L"Time&Sale"; 
+    case DXF_ET_TRADE: return L"Trade";
+    case DXF_ET_QUOTE: return L"Quote";
+    case DXF_ET_SUMMARY: return L"Summary";
+    case DXF_ET_PROFILE: return L"Profile";
+    case DXF_ET_ORDER: return L"Order";
+    case DXF_ET_TIME_AND_SALE: return L"Time&Sale";
     case DXF_ET_CANDLE: return L"Candle";
+    case DXF_ET_TRADE_ETH: return L"TradeETH";
     default: return L"";
     }
 }
@@ -201,6 +204,21 @@ bool dx_get_summary_subscription_params(dxf_connection_t connection, OUT dx_even
     return true;
 }
 
+bool dx_get_trade_eth_subscription_params(dxf_connection_t connection, OUT dx_event_subscription_param_list_t* param_list) {
+    dxf_char_t ch = 'A';
+    dxf_char_t trade_name_buf[TRADE_ETH_TMPL_LEN + 2] = { 0 };
+    CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"TradeETH", dx_st_ticker);
+
+    /* fill trades TradeETH&A..TradeETH&Z */
+    dx_copy_string(trade_name_buf, g_trade_eth_tmpl);
+    for (; ch <= 'Z'; ch++) {
+        trade_name_buf[TRADE_ETH_TMPL_LEN] = ch;
+        CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, trade_name_buf, dx_st_ticker);
+    }
+
+    return true;
+}
+
 /*
  * Returns the list of subscription params. Fills records list according to event_id.
  *
@@ -232,6 +250,9 @@ int dx_get_event_subscription_params(dxf_connection_t connection, dx_order_sourc
         break;
     case dx_eid_candle:
         result = dx_add_subscription_param_to_list(connection, &param_list, L"Candle", dx_st_history);
+        break;
+    case dx_eid_trade_eth:
+        result = dx_get_trade_eth_subscription_params(connection, &param_list);
         break;
     }
 

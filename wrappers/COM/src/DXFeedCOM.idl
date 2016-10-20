@@ -100,6 +100,22 @@ library DXFeedCOM {
         [id(10), propget, helpstring("Type value getter")]
         HRESULT type ([out, retval] INT*);
     };
+
+    [uuid(8114B930-C1EF-4E0E-BF57-15386A53F546), helpstring("TradeETH data wrapper"), dual, oleautomation, nonextensible]
+    interface IDXTradeETH : IDispatch {
+        [id(1), propget, helpstring("Time value getter")]
+        HRESULT time([out, retval] LONGLONG*);
+        [id(2), propget, helpstring("Flag value getter")]
+        HRESULT type([out, retval] INT*);
+        [id(3), propget, helpstring("Exchange code value getter")]
+        HRESULT exchangeCode([out, retval] SHORT*);
+        [id(4), propget, helpstring("Price value getter")]
+        HRESULT price([out, retval] DOUBLE*);
+        [id(5), propget, helpstring("Size value getter")]
+        HRESULT size([out, retval] LONGLONG*);
+        [id(6), propget, helpstring("Day volume value getter")]
+        HRESULT dayVolume([out, retval] LONGLONG*);
+    };
     
     [uuid(C334BBB7-AE1E-448e-9C1C-A0C7CCB2A126), helpstring("Event data collection"), dual, oleautomation, nonextensible]
     interface IDXEventDataCollection : IDispatch {

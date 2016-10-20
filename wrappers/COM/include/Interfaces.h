@@ -167,6 +167,23 @@ struct IDXTimeAndSale : public IDispatch {
 
 /* -------------------------------------------------------------------------- */
 /*
+*	IDXTradeETH interface
+
+*  defines the TradeETH data accessor
+*/
+/* -------------------------------------------------------------------------- */
+
+struct IDXTradeETH : public IDispatch {
+    virtual HRESULT STDMETHODCALLTYPE GetTime(LONGLONG* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetFlags(INT* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetExchangeCode(SHORT* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetPrice(DOUBLE* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetSize(LONGLONG* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetDayVolume(LONGLONG* value) = 0;
+};
+
+/* -------------------------------------------------------------------------- */
+/*
  *	IDXConnectionTerminationNotifier sink interface
  */
 /* -------------------------------------------------------------------------- */

@@ -402,6 +402,37 @@ static const dx_field_info_t dx_fields_candle[] = {
 
 /* -------------------------------------------------------------------------- */
 /*
+*	TradeETH data fields
+*/
+/* -------------------------------------------------------------------------- */
+
+static const dx_field_info_t dx_fields_trade_eth[] = {
+    { dx_fid_compact_int | dx_fid_flag_time, L"ETHLast.Time", DX_RECORD_FIELD_SETTER_NAME(dx_trade_eth_t, time),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_trade_eth_t, time), DX_RECORD_FIELD_GETTER_NAME(dx_trade_eth_t, time),
+    dx_ft_first_time_int_field },
+
+    { dx_fid_compact_int, L"ETHLast.Flags", DX_RECORD_FIELD_SETTER_NAME(dx_trade_eth_t, size),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_trade_eth_t, size), DX_RECORD_FIELD_GETTER_NAME(dx_trade_eth_t, size),
+    dx_ft_common_field },
+
+    { dx_fid_utf_char, L"ETHLast.Exchange", DX_RECORD_FIELD_SETTER_NAME(dx_trade_eth_t, exchange),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_trade_eth_t, exchange), DX_RECORD_FIELD_GETTER_NAME(dx_trade_eth_t, exchange),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"ETHLast.Price", DX_RECORD_FIELD_SETTER_NAME(dx_trade_eth_t, price),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_trade_eth_t, price), DX_RECORD_FIELD_GETTER_NAME(dx_trade_eth_t, price),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int, L"ETHLast.Size", DX_RECORD_FIELD_SETTER_NAME(dx_trade_eth_t, size),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_trade_eth_t, size), DX_RECORD_FIELD_GETTER_NAME(dx_trade_eth_t, size),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"ETHVolume", DX_RECORD_FIELD_SETTER_NAME(dx_trade_eth_t, eth_volume),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_trade_eth_t, eth_volume), DX_RECORD_FIELD_GETTER_NAME(dx_trade_eth_t, eth_volume),
+    dx_ft_common_field }
+};
+/* -------------------------------------------------------------------------- */
+/*
  *	Records
  */
 /* -------------------------------------------------------------------------- */
@@ -414,7 +445,8 @@ static const int g_record_field_counts[dx_rid_count] = {
     sizeof(dx_fields_market_maker) / sizeof(dx_fields_market_maker[0]),
     sizeof(dx_fields_order) / sizeof(dx_fields_order[0]),
     sizeof(dx_fields_time_and_sale) / sizeof(dx_fields_time_and_sale[0]),
-    sizeof(dx_fields_candle) / sizeof(dx_fields_candle[0])
+    sizeof(dx_fields_candle) / sizeof(dx_fields_candle[0]),
+    sizeof(dx_fields_trade_eth) / sizeof(dx_fields_trade_eth[0])
 };
 
 static const dx_record_info_t g_record_info[dx_rid_count] = {
@@ -425,7 +457,8 @@ static const dx_record_info_t g_record_info[dx_rid_count] = {
     { L"MarketMaker", sizeof(dx_fields_market_maker) / sizeof(dx_fields_market_maker[0]), dx_fields_market_maker },
     { L"Order", sizeof(dx_fields_order) / sizeof(dx_fields_order[0]), dx_fields_order },
     { L"TimeAndSale", sizeof(dx_fields_time_and_sale) / sizeof(dx_fields_time_and_sale[0]), dx_fields_time_and_sale },
-    { L"Candle", sizeof(dx_fields_candle) / sizeof(dx_fields_candle[0]), dx_fields_candle }
+    { L"Candle", sizeof(dx_fields_candle) / sizeof(dx_fields_candle[0]), dx_fields_candle },
+    { L"TradeETH", sizeof(dx_fields_trade_eth) / sizeof(dx_fields_trade_eth[0]), dx_fields_trade_eth }
 };
 
 /* List stores records. The list is not cleared until at least one connection is opened. */
@@ -820,6 +853,9 @@ dx_record_info_id_t dx_string_to_record_info(dxf_const_string_t name)
     else if (dx_compare_strings_num(name, g_record_info[dx_rid_candle].default_name,
                                     dx_string_length(g_record_info[dx_rid_candle].default_name)) == 0)
         return dx_rid_candle;
+    else if (dx_compare_strings_num(name, g_record_info[dx_rid_trade_eth].default_name,
+        dx_string_length(g_record_info[dx_rid_trade_eth].default_name)) == 0)
+        return dx_rid_trade_eth;
     else
         return dx_rid_invalid;
 }
@@ -853,7 +889,8 @@ bool init_record_info(dx_record_item_t *record, dxf_const_string_t name) {
         dx_copy_string_len(record->suffix, &record->name[suffix_index + 1], name_length - suffix_index);
     } else if (record_info_id == dx_rid_trade || 
                record_info_id == dx_rid_quote || 
-               record_info_id == dx_rid_summary) {
+               record_info_id == dx_rid_summary ||
+               record_info_id == dx_rid_trade_eth) {
         if (record->name[suffix_index] != L'&')
             return true;
         dx_copy_string_len(record->suffix, &record->name[suffix_index + 1], 1);

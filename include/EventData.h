@@ -46,6 +46,7 @@ typedef enum {
     dx_eid_order,
     dx_eid_time_and_sale,
     dx_eid_candle,
+    dx_eid_trade_eth,
     
     /* add new event id above this line */
     
@@ -60,6 +61,7 @@ typedef enum {
 #define DXF_ET_ORDER	     (1 << dx_eid_order)
 #define DXF_ET_TIME_AND_SALE (1 << dx_eid_time_and_sale)
 #define DXF_ET_CANDLE        (1 << dx_eid_candle)
+#define DXF_ET_TRADE_ETH     (1 << dx_eid_trade_eth)
 #define DXF_ET_UNUSED		 (~((1 << dx_eid_count) - 1))
 
 #define DX_EVENT_BIT_MASK(event_id) (1 << event_id)
@@ -98,6 +100,7 @@ typedef dx_summary_t dxf_summary_t;
 typedef dx_profile_t dxf_profile_t;
 typedef dx_time_and_sale_t dxf_time_and_sale_t;
 typedef dx_candle_t dxf_candle_t;
+typedef dx_trade_eth_t dxf_trade_eth_t;
 
 typedef struct {
     dxf_long_t index;
