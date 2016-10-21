@@ -615,11 +615,15 @@ bool RECORD_TRANSCODER_NAME(dx_trade_eth_t) (dx_record_transcoder_connection_con
                                              const dxf_event_params_t* event_params,
                                              void* record_buffer, int record_count) {
     dxf_trade_eth_t* event_buffer = (dxf_trade_eth_t*)record_buffer;
+    dxf_const_string_t suffix = record_params->suffix;
     int i = 0;
 
     for (; i < record_count; ++i) {
         dxf_trade_eth_t* cur_event = event_buffer + i;
+        dxf_char_t exchange_code = (suffix == NULL ? 0 : suffix[0]);
         cur_event->time *= 1000L;
+        cur_event->exchange = exchange_code;
+        dx_set_record_exchange_code(record_params->record_id, exchange_code);
     }
 
     return dx_process_event_data(context->connection, dx_eid_trade_eth, record_params->symbol_name,

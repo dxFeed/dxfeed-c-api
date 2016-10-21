@@ -872,8 +872,13 @@ bool dx_add_record_to_list(dxf_connection_t connection, dx_record_item_t record,
 
 dx_record_info_id_t dx_string_to_record_info(dxf_const_string_t name)
 {
-    if (dx_compare_strings_num(name, g_record_info[dx_rid_trade].default_name, 
-                               dx_string_length(g_record_info[dx_rid_trade].default_name)) == 0)
+    // Note: dx_rid_trade_eth must be always go before dx_rid_trade to avoid 
+    //       wrong record detection by name
+    if (dx_compare_strings_num(name, g_record_info[dx_rid_trade_eth].default_name,
+                               dx_string_length(g_record_info[dx_rid_trade_eth].default_name)) == 0)
+        return dx_rid_trade_eth;
+    else if (dx_compare_strings_num(name, g_record_info[dx_rid_trade].default_name, 
+                                    dx_string_length(g_record_info[dx_rid_trade].default_name)) == 0)
         return dx_rid_trade;
     else if (dx_compare_strings_num(name, g_record_info[dx_rid_quote].default_name, 
                                     dx_string_length(g_record_info[dx_rid_quote].default_name)) == 0)
@@ -896,9 +901,6 @@ dx_record_info_id_t dx_string_to_record_info(dxf_const_string_t name)
     else if (dx_compare_strings_num(name, g_record_info[dx_rid_candle].default_name,
                                     dx_string_length(g_record_info[dx_rid_candle].default_name)) == 0)
         return dx_rid_candle;
-    else if (dx_compare_strings_num(name, g_record_info[dx_rid_trade_eth].default_name,
-                                    dx_string_length(g_record_info[dx_rid_trade_eth].default_name)) == 0)
-        return dx_rid_trade_eth;
     else if (dx_compare_strings_num(name, g_record_info[dx_rid_spread_order].default_name,
                                     dx_string_length(g_record_info[dx_rid_spread_order].default_name)) == 0)
         return dx_rid_spread_order;
