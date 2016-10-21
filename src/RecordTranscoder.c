@@ -617,7 +617,11 @@ static const dx_record_transcoder_t g_record_transcoders[dx_rid_count] = {
     RECORD_TRANSCODER_NAME(dx_market_maker_t),
     RECORD_TRANSCODER_NAME(dx_order_t),
     RECORD_TRANSCODER_NAME(dx_time_and_sale_t),
-    RECORD_TRANSCODER_NAME(dx_candle_t)
+    RECORD_TRANSCODER_NAME(dx_candle_t),
+    RECORD_TRANSCODER_NAME(dx_greeks_t),
+    RECORD_TRANSCODER_NAME(dx_theo_price_t),
+    RECORD_TRANSCODER_NAME(dx_underlying_t),
+    RECORD_TRANSCODER_NAME(dx_series_t)
 };
 
 /* -------------------------------------------------------------------------- */

@@ -172,4 +172,43 @@ typedef struct {
     dxf_double_t ask_volume;
 } dx_candle_t;
 
+typedef struct {
+    dxf_long_t time;
+    dxf_int_t sequence;
+    dxf_double_t greeks_price;
+    dxf_double_t volatility;
+    dxf_double_t delta;
+    dxf_double_t gamma;
+    dxf_double_t theta;
+    dxf_double_t rho;
+    dxf_double_t vega;
+} dx_greeks_t;
+
+typedef struct {
+    dxf_long_t theo_time;
+    dxf_double_t theo_price;
+    dxf_double_t theo_underlying_price;
+    dxf_double_t theo_delta;
+    dxf_double_t theo_gamma;
+    dxf_double_t theo_dividend;
+    dxf_double_t theo_interest;
+} dx_theo_price_t;
+
+typedef struct {
+    dxf_double_t volatility;
+    dxf_double_t front_volatility;
+    dxf_double_t back_volatility;
+    dxf_double_t put_call_ratio;
+} dx_underlying_t;
+
+typedef struct {
+    dxf_dayid_t expiration;
+    dxf_int_t sequence;
+    dxf_double_t volatility;
+    dxf_double_t put_call_ratio;
+    dxf_double_t forward_price;
+    dxf_double_t dividend;
+    dxf_double_t interest;
+} dx_series_t;
+
 #endif /* RECORD_DATA_H_INCLUDED */

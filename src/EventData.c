@@ -37,7 +37,11 @@ static const int g_event_data_sizes[dx_eid_count] = {
     sizeof(dxf_profile_t),
     sizeof(dxf_order_t),
     sizeof(dxf_time_and_sale_t),
-    sizeof(dxf_candle_t)
+    sizeof(dxf_candle_t),
+    sizeof(dxf_greeks_t),
+    sizeof(dxf_theo_price_t),
+    sizeof(dxf_underlying_t),
+    sizeof(dxf_series_t)
 };
 
 static const dxf_char_t g_quote_tmpl[] = L"Quote&";
@@ -66,6 +70,10 @@ dxf_const_string_t dx_event_type_to_string (int event_type) {
     case DXF_ET_ORDER: return L"Order"; 
     case DXF_ET_TIME_AND_SALE: return L"Time&Sale"; 
     case DXF_ET_CANDLE: return L"Candle";
+    case DXF_ET_GREEKS: return L"Greeks";
+    case DXF_ET_THEO_PRICE: return L"TheoPrice";
+    case DXF_ET_UNDERLYING: return L"Underlying";
+    case DXF_ET_SERIES: return L"Series";
     default: return L"";
     }
 }
@@ -268,6 +276,10 @@ EVENT_DATA_NAVIGATOR_BODY(dxf_profile_t)
 EVENT_DATA_NAVIGATOR_BODY(dxf_order_t)
 EVENT_DATA_NAVIGATOR_BODY(dxf_time_and_sale_t)
 EVENT_DATA_NAVIGATOR_BODY(dxf_candle_t)
+EVENT_DATA_NAVIGATOR_BODY(dxf_greeks_t)
+EVENT_DATA_NAVIGATOR_BODY(dxf_theo_price_t)
+EVENT_DATA_NAVIGATOR_BODY(dxf_underlying_t)
+EVENT_DATA_NAVIGATOR_BODY(dxf_series_t)
 
 static const dx_event_data_navigator g_event_data_navigators[dx_eid_count] = {
     EVENT_DATA_NAVIGATOR_NAME(dxf_trade_t),
@@ -276,7 +288,11 @@ static const dx_event_data_navigator g_event_data_navigators[dx_eid_count] = {
     EVENT_DATA_NAVIGATOR_NAME(dxf_profile_t),
     EVENT_DATA_NAVIGATOR_NAME(dxf_order_t),
     EVENT_DATA_NAVIGATOR_NAME(dxf_time_and_sale_t),
-    EVENT_DATA_NAVIGATOR_NAME(dxf_candle_t)
+    EVENT_DATA_NAVIGATOR_NAME(dxf_candle_t),
+    EVENT_DATA_NAVIGATOR_NAME(dxf_greeks_t),
+    EVENT_DATA_NAVIGATOR_NAME(dxf_theo_price_t),
+    EVENT_DATA_NAVIGATOR_NAME(dxf_underlying_t),
+    EVENT_DATA_NAVIGATOR_NAME(dxf_series_t)
 };
 
 /* -------------------------------------------------------------------------- */
