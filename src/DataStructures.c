@@ -431,6 +431,47 @@ static const dx_field_info_t dx_fields_trade_eth[] = {
     DX_RECORD_FIELD_DEF_VAL_NAME(dx_trade_eth_t, eth_volume), DX_RECORD_FIELD_GETTER_NAME(dx_trade_eth_t, eth_volume),
     dx_ft_common_field }
 };
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Order data fields
+*/
+/* -------------------------------------------------------------------------- */
+
+static const dx_field_info_t dx_fields_spread_order[] = {
+    { dx_fid_compact_int, L"Index", DX_RECORD_FIELD_SETTER_NAME(dx_spread_order_t, index),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_spread_order_t, index), DX_RECORD_FIELD_GETTER_NAME(dx_spread_order_t, index),
+    dx_ft_second_time_int_field },
+
+    { dx_fid_compact_int, L"Time", DX_RECORD_FIELD_SETTER_NAME(dx_spread_order_t, time),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_spread_order_t, time), DX_RECORD_FIELD_GETTER_NAME(dx_spread_order_t, time),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int, L"Sequence", DX_RECORD_FIELD_SETTER_NAME(dx_spread_order_t, sequence),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_spread_order_t, sequence), DX_RECORD_FIELD_GETTER_NAME(dx_spread_order_t, sequence),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Price", DX_RECORD_FIELD_SETTER_NAME(dx_spread_order_t, price),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_spread_order_t, price), DX_RECORD_FIELD_GETTER_NAME(dx_spread_order_t, price),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int, L"Size", DX_RECORD_FIELD_SETTER_NAME(dx_spread_order_t, size),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_spread_order_t, size), DX_RECORD_FIELD_GETTER_NAME(dx_spread_order_t, size),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int, L"Count", DX_RECORD_FIELD_SETTER_NAME(dx_spread_order_t, count),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_spread_order_t, count), DX_RECORD_FIELD_GETTER_NAME(dx_spread_order_t, count),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int, L"Flags", DX_RECORD_FIELD_SETTER_NAME(dx_spread_order_t, flags),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_spread_order_t, flags), DX_RECORD_FIELD_GETTER_NAME(dx_spread_order_t, flags),
+    dx_ft_common_field },
+
+    { dx_fid_utf_char_array, L"SpreadSymbol", DX_RECORD_FIELD_SETTER_NAME(dx_spread_order_t, spread_symbol),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_spread_order_t, spread_symbol), DX_RECORD_FIELD_GETTER_NAME(dx_spread_order_t, spread_symbol),
+    dx_ft_common_field }
+};
+
 /* -------------------------------------------------------------------------- */
 /*
  *	Records
@@ -446,7 +487,8 @@ static const int g_record_field_counts[dx_rid_count] = {
     sizeof(dx_fields_order) / sizeof(dx_fields_order[0]),
     sizeof(dx_fields_time_and_sale) / sizeof(dx_fields_time_and_sale[0]),
     sizeof(dx_fields_candle) / sizeof(dx_fields_candle[0]),
-    sizeof(dx_fields_trade_eth) / sizeof(dx_fields_trade_eth[0])
+    sizeof(dx_fields_trade_eth) / sizeof(dx_fields_trade_eth[0]),
+    sizeof(dx_fields_spread_order) / sizeof(dx_fields_spread_order[0])
 };
 
 static const dx_record_info_t g_record_info[dx_rid_count] = {
@@ -458,7 +500,8 @@ static const dx_record_info_t g_record_info[dx_rid_count] = {
     { L"Order", sizeof(dx_fields_order) / sizeof(dx_fields_order[0]), dx_fields_order },
     { L"TimeAndSale", sizeof(dx_fields_time_and_sale) / sizeof(dx_fields_time_and_sale[0]), dx_fields_time_and_sale },
     { L"Candle", sizeof(dx_fields_candle) / sizeof(dx_fields_candle[0]), dx_fields_candle },
-    { L"TradeETH", sizeof(dx_fields_trade_eth) / sizeof(dx_fields_trade_eth[0]), dx_fields_trade_eth }
+    { L"TradeETH", sizeof(dx_fields_trade_eth) / sizeof(dx_fields_trade_eth[0]), dx_fields_trade_eth },
+    { L"SpreadOrder", sizeof(dx_fields_spread_order) / sizeof(dx_fields_spread_order[0]), dx_fields_spread_order }
 };
 
 /* List stores records. The list is not cleared until at least one connection is opened. */
@@ -854,8 +897,11 @@ dx_record_info_id_t dx_string_to_record_info(dxf_const_string_t name)
                                     dx_string_length(g_record_info[dx_rid_candle].default_name)) == 0)
         return dx_rid_candle;
     else if (dx_compare_strings_num(name, g_record_info[dx_rid_trade_eth].default_name,
-        dx_string_length(g_record_info[dx_rid_trade_eth].default_name)) == 0)
+                                    dx_string_length(g_record_info[dx_rid_trade_eth].default_name)) == 0)
         return dx_rid_trade_eth;
+    else if (dx_compare_strings_num(name, g_record_info[dx_rid_spread_order].default_name,
+                                    dx_string_length(g_record_info[dx_rid_spread_order].default_name)) == 0)
+        return dx_rid_spread_order;
     else
         return dx_rid_invalid;
 }
@@ -883,7 +929,8 @@ bool init_record_info(dx_record_item_t *record, dxf_const_string_t name) {
     suffix_index = dx_string_length(record_info.default_name);
     if (name_length < suffix_index + 1)
         return true;
-    if (record_info_id == dx_rid_order) {
+    if (record_info_id == dx_rid_order ||
+        record_info_id == dx_rid_spread_order) {
         if (record->name[suffix_index] != L'#')
             return true;
         dx_copy_string_len(record->suffix, &record->name[suffix_index + 1], name_length - suffix_index);

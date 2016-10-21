@@ -33,6 +33,8 @@ dxf_const_string_t dx_event_type_to_string(int event_type) {
         case DXF_ET_ORDER: return L"Order";
         case DXF_ET_TIME_AND_SALE: return L"Time&Sale";
         case DXF_ET_CANDLE: return L"Candle";
+        case DXF_ET_TRADE_ETH: return L"TradeETH";
+        case DXF_ET_SPREAD_ORDER: return L"SpreadOrder";
         default: return L"";
     }
 }
@@ -210,7 +212,7 @@ int main(int argc, char* argv[]) {
         wprintf(L"DXFeed command line sample.\n"
             L"Usage: SnapshotConsoleSample <server address> <event type> <symbol> [order_source]\n"
             L"  <server address> - a DXFeed server address, e.g. demo.dxfeed.com:7300\n"
-            L"  <event type> - an event type, one of the following: ORDER, CANDLE\n"
+            L"  <event type> - an event type, one of the following: ORDER, CANDLE, SPREAD_ORDER\n"
             L"  <symbol> - a trade symbol, e.g. C, MSFT, YHOO, IBM\n"
             L"  [order_source] - a) source for Order (also can be empty), e.g. NTV, BYX, BZX, DEA,\n"
             L"                      ISE, DEX, IST\n"
@@ -229,6 +231,8 @@ int main(int argc, char* argv[]) {
         event_id = dx_eid_order;
     } else if (stricmp(event_type_name, "CANDLE") == 0) {
         event_id = dx_eid_candle;
+    } else if (stricmp(event_type_name, "SPREAD_ORDER") == 0) {
+        event_id = dx_eid_spread_order;
     } else {
         wprintf(L"Unknown event type.\n");
         return -1;
@@ -288,14 +292,19 @@ int main(int argc, char* argv[]) {
             dxf_delete_candle_symbol_attributes(candle_attributes);
             dxf_close_connection(connection);
             return -1;
-        };
-    }
-    else {
+        }
+    } else if (event_id == dx_eid_order) {
         if (!dxf_create_order_snapshot(connection, base_symbol, order_source_ptr, 0, &snapshot)) {
             process_last_error();
             dxf_close_connection(connection);
             return -1;
-        };
+        }
+    } else {
+        if (!dxf_create_snapshot(connection, event_id, base_symbol, NULL, 0, &snapshot)) {
+            process_last_error();
+            dxf_close_connection(connection);
+            return -1;
+        }
     }
 
     if (!dxf_attach_snapshot_listener(snapshot, listener, NULL)) {

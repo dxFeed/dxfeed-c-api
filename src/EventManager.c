@@ -127,6 +127,8 @@ EVENT_COPY_WITH_2_STRINGS_FUNCTION_BODY(dxf_profile_t, description, status_reaso
 EVENT_COPY_WITH_STRING_FUNCTION_BODY(dxf_order_t, market_maker)
 EVENT_COPY_WITH_STRING_FUNCTION_BODY(dxf_time_and_sale_t, exchange_sale_conditions)
 EVENT_COPY_FUNCTION_BODY(dxf_candle_t)
+EVENT_COPY_FUNCTION_BODY(dxf_trade_eth_t)
+EVENT_COPY_WITH_STRING_FUNCTION_BODY(dxf_spread_order_t, spread_symbol)
 
 static const dx_event_copy_function_t g_event_copy_functions[dx_eid_count] = {
     EVENT_COPY_FUNCTION_NAME(dxf_trade_t),
@@ -135,7 +137,9 @@ static const dx_event_copy_function_t g_event_copy_functions[dx_eid_count] = {
     EVENT_COPY_FUNCTION_NAME(dxf_profile_t),
     EVENT_COPY_FUNCTION_NAME(dxf_order_t),
     EVENT_COPY_FUNCTION_NAME(dxf_time_and_sale_t),
-    EVENT_COPY_FUNCTION_NAME(dxf_candle_t)
+    EVENT_COPY_FUNCTION_NAME(dxf_candle_t),
+    EVENT_COPY_FUNCTION_NAME(dxf_trade_eth_t),
+    EVENT_COPY_FUNCTION_NAME(dxf_spread_order_t)
 };
 
 dx_event_copy_function_t dx_get_event_copy_function(dx_event_id_t event_id) {
@@ -161,6 +165,8 @@ EVENT_FREE_FUNCTION_BODY(dxf_profile_t)
 EVENT_FREE_FUNCTION_BODY(dxf_order_t)
 EVENT_FREE_FUNCTION_BODY(dxf_time_and_sale_t)
 EVENT_FREE_FUNCTION_BODY(dxf_candle_t)
+EVENT_FREE_FUNCTION_BODY(dxf_trade_eth_t)
+EVENT_FREE_FUNCTION_BODY(dxf_spread_order_t)
 
 static const dx_event_free_function_t g_event_free_functions[dx_eid_count] = {
     EVENT_FREE_FUNCTION_NAME(dxf_trade_t),
@@ -169,7 +175,9 @@ static const dx_event_free_function_t g_event_free_functions[dx_eid_count] = {
     EVENT_FREE_FUNCTION_NAME(dxf_profile_t),
     EVENT_FREE_FUNCTION_NAME(dxf_order_t),
     EVENT_FREE_FUNCTION_NAME(dxf_time_and_sale_t),
-    EVENT_FREE_FUNCTION_NAME(dxf_candle_t)
+    EVENT_FREE_FUNCTION_NAME(dxf_candle_t),
+    EVENT_FREE_FUNCTION_NAME(dxf_trade_eth_t),
+    EVENT_FREE_FUNCTION_NAME(dxf_spread_order_t)
 };
 
 dx_event_free_function_t dx_get_event_free_function(dx_event_id_t event_id) {

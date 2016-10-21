@@ -116,6 +116,34 @@ library DXFeedCOM {
         [id(6), propget, helpstring("Day volume value getter")]
         HRESULT dayVolume([out, retval] LONGLONG*);
     };
+
+    [uuid(C2074CD9-D8E9-45E8-8D54-C120DF2DA830), helpstring("SpreadOrder data wrapper"), dual, oleautomation, nonextensible]
+    interface IDXSpreadOrder : IDispatch {
+        [id(1), propget, helpstring("Index value getter")]
+        HRESULT index([out, retval] LONGLONG*);
+        [id(2), propget, helpstring("Side value getter")]
+        HRESULT side([out, retval] INT*);
+        [id(3), propget, helpstring("Level value getter")]
+        HRESULT level([out, retval] INT*);
+        [id(4), propget, helpstring("Time value getter")]
+        HRESULT time([out, retval] LONGLONG*);
+        [id(5), propget, helpstring("Sequence value getter")]
+        HRESULT sequence([out, retval] INT*);
+        [id(6), propget, helpstring("Exchange code value getter")]
+        HRESULT exchangeCode([out, retval] SHORT*);
+        [id(7), propget, helpstring("Price value getter")]
+        HRESULT price([out, retval] DOUBLE*);
+        [id(8), propget, helpstring("Source value getter")]
+        HRESULT orderSource([out, retval] BSTR*);
+        [id(9), propget, helpstring("Size value getter")]
+        HRESULT size([out, retval] LONGLONG*);
+        [id(10), propget, helpstring("Count value getter")]
+        HRESULT count([out, retval] INT*);
+        [id(11), propget, helpstring("Flags value getter")]
+        HRESULT flags([out, retval] INT*);
+        [id(12), propget, helpstring("Spread symbol value getter")]
+        HRESULT spreadSymbol([out, retval] BSTR*);
+    }
     
     [uuid(C334BBB7-AE1E-448e-9C1C-A0C7CCB2A126), helpstring("Event data collection"), dual, oleautomation, nonextensible]
     interface IDXEventDataCollection : IDispatch {

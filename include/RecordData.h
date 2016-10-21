@@ -43,6 +43,7 @@ typedef enum {
     dx_rid_time_and_sale,
     dx_rid_candle,
     dx_rid_trade_eth,
+    dx_rid_spread_order,
 
     /* add new values above this line */
 
@@ -176,5 +177,16 @@ typedef struct {
     dxf_long_t size;
     dxf_double_t eth_volume;
 } dx_trade_eth_t;
+
+typedef struct {
+    dxf_int_t index;
+    dxf_int_t time;
+    dxf_int_t sequence;
+    dxf_double_t price;
+    dxf_int_t size;
+    dxf_int_t count;
+    dxf_int_t flags;
+    dxf_const_string_t spread_symbol;
+} dx_spread_order_t;
 
 #endif /* RECORD_DATA_H_INCLUDED */

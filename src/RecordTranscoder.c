@@ -133,9 +133,14 @@ DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_record_transcoder) {
  */
 /* -------------------------------------------------------------------------- */
 
-dxf_event_data_t dx_get_event_data_buffer (dx_record_transcoder_connection_context_t* context,
+dxf_event_data_t dx_get_event_data_buffer(dx_record_transcoder_connection_context_t* context,
                                           dx_event_id_t event_id, int count) {
-    if (event_id != dx_eid_order) {
+    int struct_size = 0;
+    if (event_id == dx_eid_order)
+        struct_size = sizeof(dxf_order_t);
+    else if (event_id == dx_eid_spread_order)
+        struct_size = sizeof(dxf_spread_order_t);
+    else {
         /* these other types don't require separate buffers yet */
         
         dx_set_error_code(dx_ec_internal_assert_violation);
@@ -151,7 +156,7 @@ dxf_event_data_t dx_get_event_data_buffer (dx_record_transcoder_connection_conte
             
             context->cur_count = 0;
             
-            if ((context->buffer = dx_calloc(count, sizeof(dxf_order_t))) != NULL) {
+            if ((context->buffer = dx_calloc(count, struct_size)) != NULL) {
                 context->cur_count = count;
             }
         }
@@ -622,6 +627,51 @@ bool RECORD_TRANSCODER_NAME(dx_trade_eth_t) (dx_record_transcoder_connection_con
 }
 
 /* -------------------------------------------------------------------------- */
+
+bool RECORD_TRANSCODER_NAME(dx_spread_order_t) (dx_record_transcoder_connection_context_t* context,
+                                                const dx_record_params_t* record_params,
+                                                const dxf_event_params_t* event_params,
+                                                void* record_buffer, int record_count) {
+    int i = 0;
+    dxf_spread_order_t* event_buffer = (dxf_spread_order_t*)dx_get_event_data_buffer(context, dx_eid_spread_order, record_count);
+    dxf_const_string_t suffix = record_params->suffix;
+
+    if (event_buffer == NULL) {
+        return false;
+    }
+
+    for (; i < record_count; ++i) {
+        dxf_spread_order_t* cur_record = (dxf_spread_order_t*)record_buffer + i;
+        dxf_spread_order_t* cur_event = event_buffer + i;
+        dxf_char_t exchange_code = (cur_record->flags & DX_RECORD_SUFFIX_MASK) >> DX_RECORD_SUFFIX_IN_FLAG_SHIFT;
+        if (exchange_code > 0)
+            exchange_code |= DX_RECORD_SUFFIX_HIGH_BITS;
+        dx_set_record_exchange_code(record_params->record_id, exchange_code);
+
+        cur_event->index = (suffix_to_long(suffix) << DX_ORDER_SOURCE_ID_SHIFT) | cur_record->index;
+        cur_event->side = ((cur_record->flags >> DX_ORDER_SIDE_SHIFT) & DX_ORDER_SIDE_MASK) == DX_ORDER_SIDE_SELL ? DXF_ORDER_SIDE_SELL : DXF_ORDER_SIDE_BUY;
+        cur_event->level = cur_record->flags & DX_ORDER_SCOPE_MASK;
+        cur_event->time = cur_record->time * 1000LL + ((cur_record->sequence >> 22) & 0x3ff);
+        cur_event->sequence = cur_record->sequence;
+        cur_event->exchange_code = exchange_code;
+        cur_event->price = cur_record->price;
+        cur_event->size = cur_record->size;
+        dx_memset(cur_event->source, 0, sizeof(cur_event->source));
+        dx_copy_string_len(cur_event->source, suffix, dx_string_length(suffix));
+        cur_event->count = cur_record->count;
+        cur_event->flags = cur_record->flags;
+        if (cur_record->spread_symbol != NULL) {
+            cur_event->spread_symbol = dx_create_string_src(cur_record->spread_symbol);
+            if (!dx_store_string_buffer(context->rbcc, cur_event->spread_symbol))
+                return false;
+        }
+    }
+
+    return dx_process_event_data(context->connection, dx_eid_spread_order, record_params->symbol_name,
+        record_params->symbol_cipher, event_buffer, record_count, event_params);
+}
+
+/* -------------------------------------------------------------------------- */
 /*
  *	Interface functions implementation
  */
@@ -636,7 +686,8 @@ static const dx_record_transcoder_t g_record_transcoders[dx_rid_count] = {
     RECORD_TRANSCODER_NAME(dx_order_t),
     RECORD_TRANSCODER_NAME(dx_time_and_sale_t),
     RECORD_TRANSCODER_NAME(dx_candle_t),
-    RECORD_TRANSCODER_NAME(dx_trade_eth_t)
+    RECORD_TRANSCODER_NAME(dx_trade_eth_t),
+    RECORD_TRANSCODER_NAME(dx_spread_order_t)
 };
 
 /* -------------------------------------------------------------------------- */

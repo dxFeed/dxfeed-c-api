@@ -1003,10 +1003,10 @@ HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetType (INT* value) {
 
 /* -------------------------------------------------------------------------- */
 /*
-*	DXTradeETH class
+ *	DXTradeETH class
 
-*  default implementation of the IDXTradeETH interface
-*/
+ *  default implementation of the IDXTradeETH interface
+ */
 /* -------------------------------------------------------------------------- */
 
 class DXTradeETH : private IDXTradeETH, private DefIDispatchImpl {
@@ -1052,8 +1052,8 @@ private:
 
 /* -------------------------------------------------------------------------- */
 /*
-*	DXTrade methods implementation
-*/
+ *	DXTradeETH methods implementation
+ */
 /* -------------------------------------------------------------------------- */
 
 DXTradeETH::DXTradeETH(dxf_event_data_t data, IUnknown* parent)
@@ -1123,6 +1123,210 @@ HRESULT STDMETHODCALLTYPE DXTradeETH::GetDayVolume(LONGLONG* value) {
 
 /* -------------------------------------------------------------------------- */
 /*
+ *	DXSpreadOrder class
+
+ *  default implementation of the IDXSpreadOrder interface
+ */
+/* -------------------------------------------------------------------------- */
+
+class DXSpreadOrder : private IDXSpreadOrder, private DefIDispatchImpl {
+    friend struct EventDataFactory;
+
+private:
+
+    virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObject) {
+        return QueryInterfaceImpl(this, riid, ppvObject);
+    }
+    virtual ULONG STDMETHODCALLTYPE AddRef() { return AddRefImpl(); }
+    virtual ULONG STDMETHODCALLTYPE Release() { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
+
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount(UINT *pctinfo) { return GetTypeInfoCountImpl(pctinfo); }
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
+        return GetTypeInfoImpl(iTInfo, lcid, ppTInfo);
+    }
+    virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames(REFIID riid, LPOLESTR *rgszNames,
+        UINT cNames, LCID lcid, DISPID *rgDispId) {
+        return GetIDsOfNamesImpl(riid, rgszNames, cNames, lcid, rgDispId);
+    }
+    virtual HRESULT STDMETHODCALLTYPE Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
+        DISPPARAMS *pDispParams, VARIANT *pVarResult,
+        EXCEPINFO *pExcepInfo, UINT *puArgErr) {
+        return InvokeImpl(this, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
+    }
+
+    virtual HRESULT STDMETHODCALLTYPE GetIndex(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetSide(INT* value);
+    virtual HRESULT STDMETHODCALLTYPE GetLevel(INT* value);
+    virtual HRESULT STDMETHODCALLTYPE GetTime(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetSequence(INT* value);
+    virtual HRESULT STDMETHODCALLTYPE GetExchangeCode(SHORT* value);
+    virtual HRESULT STDMETHODCALLTYPE GetPrice(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetOrderSource(BSTR* value);
+    virtual HRESULT STDMETHODCALLTYPE GetSize(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetCount(INT* value);
+    virtual HRESULT STDMETHODCALLTYPE GetFlags(INT* value);
+    virtual HRESULT STDMETHODCALLTYPE GetSpreadSymbol(BSTR* value);
+
+private:
+
+    DXSpreadOrder(dxf_event_data_t data, IUnknown* parent);
+
+private:
+
+    dxf_spread_order_t* m_data;
+};
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	DXSpreadOrder methods implementation
+ */
+/* -------------------------------------------------------------------------- */
+
+DXSpreadOrder::DXSpreadOrder(dxf_event_data_t data, IUnknown* parent)
+    : DefIDispatchImpl(IID_IDXSpreadOrder, parent)
+    , m_data(reinterpret_cast<dxf_spread_order_t*>(data)) {
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXSpreadOrder::GetIndex(LONGLONG* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->index;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXSpreadOrder::GetSide(INT* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->side;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXSpreadOrder::GetLevel(INT* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->level;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXSpreadOrder::GetTime(LONGLONG* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->time;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXSpreadOrder::GetSequence(INT* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->sequence;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXSpreadOrder::GetExchangeCode(SHORT* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->exchange_code;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXSpreadOrder::GetPrice(DOUBLE* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->price;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXSpreadOrder::GetOrderSource(BSTR* value) {
+    CHECK_PTR(value);
+
+    HRESULT hr = S_OK;
+
+    try {
+        _bstr_t wrapper(m_data->source);
+
+        *value = wrapper.Detach();
+    }
+    catch (const _com_error& e) {
+        hr = e.Error();
+    }
+
+    return hr;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXSpreadOrder::GetSize(LONGLONG* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->size;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXSpreadOrder::GetCount(INT* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->count;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXSpreadOrder::GetFlags(INT* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->flags;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXSpreadOrder::GetSpreadSymbol(BSTR* value) {
+    CHECK_PTR(value);
+
+    HRESULT hr = S_OK;
+
+    try {
+        _bstr_t wrapper(m_data->spread_symbol);
+
+        *value = wrapper.Detach();
+    }
+    catch (const _com_error& e) {
+        hr = e.Error();
+    }
+
+    return hr;
+}
+
+/* -------------------------------------------------------------------------- */
+/*
  *	EventDataFactory methods implementation
  */
 /* -------------------------------------------------------------------------- */
@@ -1137,6 +1341,7 @@ IDispatch* EventDataFactory::CreateInstance (int eventType, dxf_event_data_t eve
         case DXF_ET_ORDER: return static_cast<IDXOrder*>(new DXOrder(eventData, parent));
         case DXF_ET_TIME_AND_SALE: return static_cast<IDXTimeAndSale*>(new DXTimeAndSale(eventData, parent));
         case DXF_ET_TRADE_ETH: return static_cast<IDXTradeETH*>(new DXTradeETH(eventData, parent));
+        case DXF_ET_SPREAD_ORDER: return static_cast<IDXSpreadOrder*>(new DXSpreadOrder(eventData, parent));
         default: return NULL;
         }
     } catch (...) {

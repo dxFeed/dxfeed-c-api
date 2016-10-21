@@ -733,17 +733,16 @@ ERRORCODE dxf_create_snapshot_impl(dxf_connection_t connection, dx_event_id_t ev
             dx_compare_strings(source, DXF_ORDER_COMPOSITE_ASK_STR) == 0)) {
             record_info_id = dx_rid_market_maker;
             subscr_flags |= DX_SUBSCR_FLAG_SR_MARKET_MAKER_ORDER;
-        }
-        else {
+        } else {
             record_info_id = dx_rid_order;
             if (source_len > 0)
                 order_source_value = source;
         }
-    }
-    else if (event_id == dx_eid_candle) {
+    } else if (event_id == dx_eid_candle) {
         record_info_id = dx_rid_candle;
-    }
-    else {
+    } else if (event_id == dx_eid_spread_order) {
+        record_info_id = dx_rid_spread_order;
+    } else {
         dx_set_error_code(dx_ssec_invalid_event_id);
         return DXF_FAILURE;
     }
@@ -790,16 +789,22 @@ ERRORCODE dxf_create_snapshot_impl(dxf_connection_t connection, dx_event_id_t ev
 
 }
 
-DXFEED_API ERRORCODE dxf_create_order_snapshot(dxf_connection_t connection, 
-                                               dxf_const_string_t symbol, const char* source,
-                                               dxf_long_t time, OUT dxf_snapshot_t* snapshot) {
+DXFEED_API ERRORCODE dxf_create_snapshot(dxf_connection_t connection, dx_event_id_t event_id,
+                                         dxf_const_string_t symbol, const char* source,
+                                         dxf_long_t time,  OUT dxf_snapshot_t* snapshot) {
     dxf_string_t source_str = NULL;
     ERRORCODE res;
     if (source != NULL)
         source_str = dx_ansi_to_unicode(source);
-    res = dxf_create_snapshot_impl(connection, dx_eid_order, symbol, source_str, time, snapshot);
+    res = dxf_create_snapshot_impl(connection, event_id, symbol, source_str, time, snapshot);
     dx_free(source_str);
     return res;
+}
+
+DXFEED_API ERRORCODE dxf_create_order_snapshot(dxf_connection_t connection, 
+                                               dxf_const_string_t symbol, const char* source,
+                                               dxf_long_t time, OUT dxf_snapshot_t* snapshot) {
+    return dxf_create_snapshot(connection, dx_eid_order, symbol, source, time, snapshot);
 }
 
 DXFEED_API ERRORCODE dxf_create_candle_snapshot(dxf_connection_t connection, 

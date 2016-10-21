@@ -195,6 +195,21 @@ FIELD_SETTER_BODY(dx_trade_eth_t, eth_volume, dxf_double_t)
 
 /* -------------------------------------------------------------------------- */
 /*
+*	SpreadOrder field setters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_SETTER_BODY(dx_spread_order_t, index, dxf_int_t)
+FIELD_SETTER_BODY(dx_spread_order_t, time, dxf_int_t)
+FIELD_SETTER_BODY(dx_spread_order_t, sequence, dxf_int_t)
+FIELD_SETTER_BODY(dx_spread_order_t, price, dxf_double_t)
+FIELD_SETTER_BODY(dx_spread_order_t, size, dxf_int_t)
+FIELD_SETTER_BODY(dx_spread_order_t, count, dxf_int_t)
+FIELD_SETTER_BODY(dx_spread_order_t, flags, dxf_int_t)
+FIELD_SETTER_BODY(dx_spread_order_t, spread_symbol, dxf_string_t)
+
+/* -------------------------------------------------------------------------- */
+/*
  *	Default value getter functions
  */
 /* -------------------------------------------------------------------------- */
@@ -457,6 +472,20 @@ FIELD_DEF_VAL_BODY(dx_trade_eth_t, eth_volume, dxf_double_t)
 
 /* -------------------------------------------------------------------------- */
 /*
+*	SpreadOrder field value getters implementation
+*/
+/* -------------------------------------------------------------------------- */
+FIELD_DEF_VAL_BODY(dx_spread_order_t, index, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_spread_order_t, time, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_spread_order_t, sequence, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_spread_order_t, price, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_spread_order_t, size, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_spread_order_t, count, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_spread_order_t, flags, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_spread_order_t, spread_symbol, dxf_const_string_t)
+
+/* -------------------------------------------------------------------------- */
+/*
 *	Getter body macro
 */
 /* -------------------------------------------------------------------------- */
@@ -619,3 +648,18 @@ FIELD_GETTER_BODY(dx_trade_eth_t, exchange, dxf_char_t)
 FIELD_GETTER_BODY(dx_trade_eth_t, price, dxf_double_t)
 FIELD_GETTER_BODY(dx_trade_eth_t, size, dxf_long_t)
 FIELD_GETTER_BODY(dx_trade_eth_t, eth_volume, dxf_double_t)
+
+/* -------------------------------------------------------------------------- */
+/*
+*	SpreadOrder field getters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_GETTER_BODY(dx_spread_order_t, index, dxf_int_t)
+FIELD_GETTER_BODY(dx_spread_order_t, time, dxf_int_t)
+FIELD_GETTER_BODY(dx_spread_order_t, sequence, dxf_int_t)
+FIELD_GETTER_BODY(dx_spread_order_t, price, dxf_double_t)
+FIELD_GETTER_BODY(dx_spread_order_t, size, dxf_int_t)
+FIELD_GETTER_BODY(dx_spread_order_t, count, dxf_int_t)
+FIELD_GETTER_BODY(dx_spread_order_t, flags, dxf_int_t)
+FIELD_GETTER_BODY(dx_spread_order_t, spread_symbol, dxf_const_string_t)

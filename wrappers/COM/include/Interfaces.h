@@ -167,10 +167,10 @@ struct IDXTimeAndSale : public IDispatch {
 
 /* -------------------------------------------------------------------------- */
 /*
-*	IDXTradeETH interface
+ *	IDXTradeETH interface
 
-*  defines the TradeETH data accessor
-*/
+ *  defines the TradeETH data accessor
+ */
 /* -------------------------------------------------------------------------- */
 
 struct IDXTradeETH : public IDispatch {
@@ -180,6 +180,29 @@ struct IDXTradeETH : public IDispatch {
     virtual HRESULT STDMETHODCALLTYPE GetPrice(DOUBLE* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetSize(LONGLONG* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetDayVolume(LONGLONG* value) = 0;
+};
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	IDXSpreadOrder interface
+
+ *  defines the spread order data accessor
+ */
+/* -------------------------------------------------------------------------- */
+
+struct IDXSpreadOrder : public IDispatch {
+    virtual HRESULT STDMETHODCALLTYPE GetIndex(LONGLONG* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetSide(INT* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetLevel(INT* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetTime(LONGLONG* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetSequence(INT* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetExchangeCode(SHORT* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetPrice(DOUBLE* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetOrderSource(BSTR* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetSize(LONGLONG* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetCount(INT* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetFlags(INT* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetSpreadSymbol(BSTR* value) = 0;
 };
 
 /* -------------------------------------------------------------------------- */

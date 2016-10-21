@@ -27,7 +27,9 @@ dxf_const_string_t dx_event_type_to_string (int event_type) {
     case DXF_ET_PROFILE: return L"Profile";
     case DXF_ET_ORDER: return L"Order";
     case DXF_ET_TIME_AND_SALE: return L"Time&Sale";
+    case DXF_ET_CANDLE: return L"Candle";
     case DXF_ET_TRADE_ETH: return L"TradeETH";
+    case DXF_ET_SPREAD_ORDER: return L"SpreadOrder";
     default: return L"";
     }
 }
@@ -171,13 +173,29 @@ void listener(int event_type, dxf_const_string_t symbol_name,
         }
     }
 
-    if (event_type == DXF_ET_TRADE) {
+    if (event_type == DXF_ET_TRADE_ETH) {
         dxf_trade_eth_t* trades = (dxf_trade_eth_t*)data;
 
         for (; i < data_count; ++i) {
             print_timestamp(trades[i].time);
             wprintf(L", exchangeCode=%c, flags=%d, price=%f, size=%I64i, day volume=%.0f}\n",
                 trades[i].flags, trades[i].exchange, trades[i].price, trades[i].size, trades[i].eth_volume);
+        }
+    }
+
+    if (event_type == DXF_ET_SPREAD_ORDER) {
+        dxf_spread_order_t* orders = (dxf_spread_order_t*)data;
+
+        for (; i < data_count; ++i) {
+            wprintf(L"index=0x%llX, side=%i, level=%i, time=",
+                orders[i].index, orders[i].side, orders[i].level);
+            print_timestamp(orders[i].time);
+            wprintf(L", sequence=%i, exchange code=%c, price=%f, size=%lld, source=%ls, "
+                L"count=%i, flags=%i, spread symbol=%ls}\n",
+                orders[i].sequence, orders[i].exchange_code, orders[i].price, orders[i].size, 
+                wcslen(orders[i].source) > 0 ? orders[i].source : "", 
+                orders[i].count, orders[i].flags, 
+                wcslen(orders[i].spread_symbol) > 0 ? orders[i].spread_symbol : "");
         }
     }
 }
@@ -248,7 +266,7 @@ int main (int argc, char* argv[]) {
                 L"Usage: CommandLineSample <server address> <event type> <symbol>\n"
                 L"  <server address> - a DXFeed server address, e.g. demo.dxfeed.com:7300\n"
                 L"  <event type> - an event type, one of the following: TRADE, QUOTE, SUMMARY,\n"
-                L"                 PROFILE, ORDER, TIME_AND_SALE, TRADE_ETH\n"
+                L"                 PROFILE, ORDER, TIME_AND_SALE, TRADE_ETH, SPREAD_ORDER\n"
                 L"  <symbol> - a trade symbol, e.g. C, MSFT, YHOO, IBM\n");
         
         return 0;
@@ -273,6 +291,8 @@ int main (int argc, char* argv[]) {
         event_type = DXF_ET_TIME_AND_SALE;
     } else if (stricmp(event_type_name, "TRADE_ETH") == 0) {
         event_type = DXF_ET_TRADE_ETH;
+    } else if (stricmp(event_type_name, "SPREAD_ORDER") == 0) {
+        event_type = DXF_ET_SPREAD_ORDER;
     } else {
         wprintf(L"Unknown event type.\n");
         return -1;
