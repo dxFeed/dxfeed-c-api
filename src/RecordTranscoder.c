@@ -604,6 +604,66 @@ bool RECORD_TRANSCODER_NAME(dx_candle_t) (dx_record_transcoder_connection_contex
 }
 
 /* -------------------------------------------------------------------------- */
+
+bool RECORD_TRANSCODER_NAME(dx_greeks_t) (dx_record_transcoder_connection_context_t* context,
+                                          const dx_record_params_t* record_params,
+                                          const dxf_event_params_t* event_params,
+                                          void* record_buffer, int record_count) {
+    dxf_greeks_t* event_buffer = (dxf_greeks_t*)record_buffer;
+    int i = 0;
+
+    for (; i < record_count; ++i) {
+        dxf_greeks_t* cur_event = event_buffer + i;
+        cur_event->time *= 1000L;
+    }
+
+    return dx_process_event_data(context->connection, dx_eid_greeks, record_params->symbol_name,
+        record_params->symbol_cipher, event_buffer, record_count, event_params);
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool RECORD_TRANSCODER_NAME(dx_theo_price_t) (dx_record_transcoder_connection_context_t* context,
+                                          const dx_record_params_t* record_params,
+                                          const dxf_event_params_t* event_params,
+                                          void* record_buffer, int record_count) {
+    dx_theo_price_t* event_buffer = (dx_theo_price_t*)record_buffer;
+    int i = 0;
+
+    for (; i < record_count; ++i) {
+        dx_theo_price_t* cur_event = event_buffer + i;
+        cur_event->theo_time *= 1000L;
+    }
+
+    return dx_process_event_data(context->connection, dx_eid_theo_price, record_params->symbol_name,
+        record_params->symbol_cipher, event_buffer, record_count, event_params);
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool RECORD_TRANSCODER_NAME(dx_underlying_t) (dx_record_transcoder_connection_context_t* context,
+                                          const dx_record_params_t* record_params,
+                                          const dxf_event_params_t* event_params,
+                                          void* record_buffer, int record_count) {
+    dx_underlying_t* event_buffer = (dx_underlying_t*)record_buffer;
+
+    return dx_process_event_data(context->connection, dx_eid_underlying, record_params->symbol_name,
+        record_params->symbol_cipher, event_buffer, record_count, event_params);
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool RECORD_TRANSCODER_NAME(dx_series_t) (dx_record_transcoder_connection_context_t* context,
+                                          const dx_record_params_t* record_params,
+                                          const dxf_event_params_t* event_params,
+                                          void* record_buffer, int record_count) {
+    dx_series_t* event_buffer = (dx_series_t*)record_buffer;
+
+    return dx_process_event_data(context->connection, dx_eid_series, record_params->symbol_name,
+        record_params->symbol_cipher, event_buffer, record_count, event_params);
+}
+
+/* -------------------------------------------------------------------------- */
 /*
  *	Interface functions implementation
  */
