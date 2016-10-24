@@ -193,9 +193,9 @@ void listener(int event_type, dxf_const_string_t symbol_name,
             wprintf(L", sequence=%i, exchange code=%c, price=%f, size=%lld, source=%ls, "
                 L"count=%i, flags=%i, spread symbol=%ls}\n",
                 orders[i].sequence, orders[i].exchange_code, orders[i].price, orders[i].size, 
-                wcslen(orders[i].source) > 0 ? orders[i].source : "", 
+                wcslen(orders[i].source) > 0 ? orders[i].source : L"", 
                 orders[i].count, orders[i].flags, 
-                wcslen(orders[i].spread_symbol) > 0 ? orders[i].spread_symbol : "");
+                wcslen(orders[i].spread_symbol) > 0 ? orders[i].spread_symbol : L"");
         }
     }
 }

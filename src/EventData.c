@@ -249,7 +249,10 @@ int dx_get_event_subscription_params(dxf_connection_t connection, dx_order_sourc
         result = dx_get_order_subscription_params(connection, order_source, subscr_flags, &param_list);
         break;
     case dx_eid_time_and_sale:
-        result = dx_add_subscription_param_to_list(connection, &param_list, L"TimeAndSale", dx_st_stream);
+        if (IS_FLAG_SET(subscr_flags, DX_SUBSCR_FLAG_TIME_SERIES))
+            result = dx_add_subscription_param_to_list(connection, &param_list, L"TimeAndSale", dx_st_history);
+        else
+            result = dx_add_subscription_param_to_list(connection, &param_list, L"TimeAndSale", dx_st_stream);
         break;
     case dx_eid_candle:
         result = dx_add_subscription_param_to_list(connection, &param_list, L"Candle", dx_st_history);

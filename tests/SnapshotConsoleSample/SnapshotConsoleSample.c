@@ -170,8 +170,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
                 wprintf(L", source=%ls", order.source);
             wprintf(L", count=%d}\n", order.count);
         }
-    }
-    else if (snapshot_data->event_type == DXF_ET_CANDLE) {
+    } else if (snapshot_data->event_type == DXF_ET_CANDLE) {
         dxf_candle_t* candle_records = (dxf_candle_t*)snapshot_data->records;
         for (i = 0; i < snapshot_data->records_count; ++i) {
             dxf_candle_t candle = candle_records[i];
@@ -188,6 +187,42 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
                 candle.sequence, candle.count, candle.open, candle.high,
                 candle.low, candle.close, candle.volume, candle.vwap,
                 candle.bid_volume, candle.ask_volume);
+        }
+    } else if (snapshot_data->event_type == DXF_ET_SPREAD_ORDER) {
+        dxf_spread_order_t* order_records = (dxf_spread_order_t*)snapshot_data->records;
+        for (i = 0; i < records_count; ++i) {
+            dxf_spread_order_t order = order_records[i];
+
+            if (i >= RECORDS_PRINT_LIMIT) {
+                wprintf(L"   { ... %d records left ...}\n", records_count - i);
+                break;
+            }
+
+            wprintf(L"   {index=0x%llX, side=%i, level=%i, time=",
+                order.index, order.side, order.level);
+            print_timestamp(order.time);
+            wprintf(L", sequence=%i, exchange code=%c, price=%f, size=%lld, source=%ls, "
+                L"count=%i, flags=%i, spread symbol=%ls}\n",
+                order.sequence, order.exchange_code, order.price, order.size,
+                wcslen(order.source) > 0 ? order.source : L"",
+                order.count, order.flags,
+                wcslen(order.spread_symbol) > 0 ? order.spread_symbol : L"");
+        }
+    } else if (snapshot_data->event_type == DXF_ET_TIME_AND_SALE) {
+        dxf_time_and_sale_t* time_and_sale_records = (dxf_time_and_sale_t*)snapshot_data->records;
+        for (i = 0; i < snapshot_data->records_count; ++i) {
+            dxf_time_and_sale_t tns = time_and_sale_records[i];
+
+            if (i >= RECORDS_PRINT_LIMIT) {
+                wprintf(L"   { ... %d records left ...}\n", records_count - i);
+                break;
+            }
+
+            wprintf(L"event id=%I64i, time=%I64i, exchange code=%c, price=%f, size=%I64i, bid price=%f, ask price=%f, "
+                L"exchange sale conditions=\'%ls\', is trade=%ls, type=%i}\n",
+                tns.event_id, tns.time, tns.exchange_code, tns.price, tns.size,
+                tns.bid_price, tns.ask_price, tns.exchange_sale_conditions,
+                tns.is_trade ? L"True" : L"False", tns.type);
         }
     }
 }
@@ -212,7 +247,8 @@ int main(int argc, char* argv[]) {
         wprintf(L"DXFeed command line sample.\n"
             L"Usage: SnapshotConsoleSample <server address> <event type> <symbol> [order_source]\n"
             L"  <server address> - a DXFeed server address, e.g. demo.dxfeed.com:7300\n"
-            L"  <event type> - an event type, one of the following: ORDER, CANDLE, SPREAD_ORDER\n"
+            L"  <event type> - an event type, one of the following: ORDER, CANDLE, SPREAD_ORDER,\n"
+            L"                 TIME_AND_SALE\n"
             L"  <symbol> - a trade symbol, e.g. C, MSFT, YHOO, IBM\n"
             L"  [order_source] - a) source for Order (also can be empty), e.g. NTV, BYX, BZX, DEA,\n"
             L"                      ISE, DEX, IST\n"
@@ -233,6 +269,8 @@ int main(int argc, char* argv[]) {
         event_id = dx_eid_candle;
     } else if (stricmp(event_type_name, "SPREAD_ORDER") == 0) {
         event_id = dx_eid_spread_order;
+    } else if (stricmp(event_type_name, "TIME_AND_SALE") == 0) {
+        event_id = dx_eid_time_and_sale;
     } else {
         wprintf(L"Unknown event type.\n");
         return -1;

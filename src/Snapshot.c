@@ -230,6 +230,10 @@ bool dx_snapshot_insert_record(dx_snapshot_data_ptr_t snapshot_data, dxf_event_d
         DX_ARRAY_INSERT(snapshot_data->records, dxf_spread_order_t, *((dxf_spread_order_t*)obj), position,
             dx_capacity_manager_halfer, failed);
         break;
+    case dx_eid_time_and_sale:
+        DX_ARRAY_INSERT(snapshot_data->records, dxf_time_and_sale_t, *((dxf_time_and_sale_t*)obj), position,
+            dx_capacity_manager_halfer, failed);
+        break;
     default:
         return dx_set_error_code(dx_ssec_invalid_event_id);
     }
@@ -250,6 +254,10 @@ bool dx_snapshot_delete_record(dx_snapshot_data_ptr_t snapshot_data, const int p
         break;
     case dx_eid_spread_order:
         DX_ARRAY_DELETE(snapshot_data->records, dxf_spread_order_t, position,
+            dx_capacity_manager_halfer, failed);
+        break;
+    case dx_eid_time_and_sale:
+        DX_ARRAY_DELETE(snapshot_data->records, dxf_time_and_sale_t, position,
             dx_capacity_manager_halfer, failed);
         break;
     default:
@@ -273,6 +281,10 @@ bool dx_snapshot_set_record(dx_snapshot_data_ptr_t snapshot_data, dxf_event_data
     case dx_eid_spread_order:
         dx_memcpy(&(((dxf_spread_order_t*)snapshot_data->records.elements)[position]), (dxf_spread_order_t*)obj,
             sizeof(dxf_spread_order_t));
+        break;
+    case dx_eid_time_and_sale:
+        dx_memcpy(&(((dxf_time_and_sale_t*)snapshot_data->records.elements)[position]), (dxf_time_and_sale_t*)obj,
+            sizeof(dxf_time_and_sale_t));
         break;
     default:
         return dx_set_error_code(dx_ssec_invalid_event_id);
