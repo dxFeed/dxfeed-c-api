@@ -150,7 +150,7 @@ FIELD_SETTER_BODY(dx_time_and_sale_t, price, dxf_double_t)
 FIELD_SETTER_BODY(dx_time_and_sale_t, size, dxf_int_t)
 FIELD_SETTER_BODY(dx_time_and_sale_t, bid_price, dxf_double_t)
 FIELD_SETTER_BODY(dx_time_and_sale_t, ask_price, dxf_double_t)
-FIELD_SETTER_BODY(dx_time_and_sale_t, type, dxf_int_t)
+FIELD_SETTER_BODY(dx_time_and_sale_t, flags, dxf_int_t)
 
 void DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, sequence) (void* object, const void* field) {
     ((dx_time_and_sale_t*)object)->event_id &= 0xFFFFFFFF00000000L;
@@ -437,7 +437,7 @@ FIELD_DEF_VAL_BODY(dx_time_and_sale_t, size, dxf_int_t)
 FIELD_DEF_VAL_BODY(dx_time_and_sale_t, bid_price, dxf_double_t)
 FIELD_DEF_VAL_BODY(dx_time_and_sale_t, ask_price, dxf_double_t)
 FIELD_DEF_VAL_BODY(dx_time_and_sale_t, exch_sale_conds, dxf_int_t)
-FIELD_DEF_VAL_BODY(dx_time_and_sale_t, type, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_time_and_sale_t, flags, dxf_int_t)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -607,7 +607,7 @@ FIELD_GETTER_BODY(dx_time_and_sale_t, price, dxf_double_t)
 FIELD_GETTER_BODY(dx_time_and_sale_t, size, dxf_long_t)
 FIELD_GETTER_BODY(dx_time_and_sale_t, bid_price, dxf_double_t)
 FIELD_GETTER_BODY(dx_time_and_sale_t, ask_price, dxf_double_t)
-FIELD_GETTER_BODY(dx_time_and_sale_t, type, dxf_int_t)
+FIELD_GETTER_BODY(dx_time_and_sale_t, flags, dxf_int_t)
 
 void DX_RECORD_FIELD_GETTER_NAME(dx_time_and_sale_t, sequence) (void* object, OUT void* field) {
     *(dxf_int_t*)field = (dxf_int_t)(((dx_time_and_sale_t*)object)->event_id & 0x00000000FFFFFFFFL);

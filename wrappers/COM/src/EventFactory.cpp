@@ -862,16 +862,22 @@ private:
         return InvokeImpl(this, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
     }
 
-    virtual HRESULT STDMETHODCALLTYPE GetEventId (LONGLONG* value);
-    virtual HRESULT STDMETHODCALLTYPE GetTime (LONGLONG* value);
-    virtual HRESULT STDMETHODCALLTYPE GetExchangeCode (SHORT* value);
-    virtual HRESULT STDMETHODCALLTYPE GetPrice (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetSize (LONGLONG* value);
-    virtual HRESULT STDMETHODCALLTYPE GetBidPrice (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetAskPrice (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetExchangeSaleCondition (BSTR* value);
-    virtual HRESULT STDMETHODCALLTYPE GetTradeFlag (VARIANT_BOOL* value);
-    virtual HRESULT STDMETHODCALLTYPE GetType (INT* value);
+    virtual HRESULT STDMETHODCALLTYPE GetEventId(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetTime(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetSequence(INT* value);
+    virtual HRESULT STDMETHODCALLTYPE GetExchangeCode(SHORT* value);
+    virtual HRESULT STDMETHODCALLTYPE GetPrice(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetSize(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetBidPrice(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetAskPrice(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetExchangeSaleCondition(BSTR* value);
+    virtual HRESULT STDMETHODCALLTYPE GetEventFlags(INT* value);
+    virtual HRESULT STDMETHODCALLTYPE GetIndex(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetAgressorSide(INT* value);
+    virtual HRESULT STDMETHODCALLTYPE GetSpreadLeg(VARIANT_BOOL* value);
+    virtual HRESULT STDMETHODCALLTYPE GetTradeFlag(VARIANT_BOOL* value);
+    virtual HRESULT STDMETHODCALLTYPE GetValidTick(VARIANT_BOOL* value);
+    virtual HRESULT STDMETHODCALLTYPE GetType(INT* value);
 
 private:
 
@@ -909,6 +915,16 @@ HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetTime (LONGLONG* value) {
     CHECK_PTR(value);
 
     *value = m_data->time;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetSequence(INT* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->sequence;
 
     return S_OK;
 }
@@ -983,10 +999,60 @@ HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetExchangeSaleCondition (BSTR* value) 
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetTradeFlag (VARIANT_BOOL* value) {
+HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetEventFlags(INT* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->event_flags;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetIndex(LONGLONG* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->index;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetAgressorSide(INT* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->side;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetSpreadLeg(VARIANT_BOOL* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->is_spread_leg ? VARIANT_TRUE : VARIANT_FALSE;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetTradeFlag(VARIANT_BOOL* value) {
     CHECK_PTR(value);
 
     *value = m_data->is_trade ? VARIANT_TRUE : VARIANT_FALSE;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetValidTick(VARIANT_BOOL* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->is_valid_tick ? VARIANT_TRUE : VARIANT_FALSE;
 
     return S_OK;
 }

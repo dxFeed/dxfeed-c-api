@@ -155,13 +155,19 @@ struct IDXOrder : public IDispatch {
 struct IDXTimeAndSale : public IDispatch {
     virtual HRESULT STDMETHODCALLTYPE GetEventId (LONGLONG* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetTime (LONGLONG* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetSequence(INT* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetExchangeCode (SHORT* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetPrice (DOUBLE* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetSize (LONGLONG* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetBidPrice (DOUBLE* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetAskPrice (DOUBLE* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetExchangeSaleCondition (BSTR* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetEventFlags(INT* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetIndex(LONGLONG* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetAgressorSide(INT* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetSpreadLeg(VARIANT_BOOL* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetTradeFlag (VARIANT_BOOL* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetValidTick(VARIANT_BOOL* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetType (INT* value) = 0;
 };
 

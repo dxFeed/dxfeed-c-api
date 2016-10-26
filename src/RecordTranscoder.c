@@ -51,6 +51,18 @@ static const dxf_int_t DX_ORDER_SIDE_SELL = 2;
 
 static const dxf_int_t DX_ORDER_SCOPE_MASK = 3;
 
+/* -------------------------------------------------------------------------- */
+/*
+*	TimeAndSale calculation constants
+*/
+/* -------------------------------------------------------------------------- */
+static const dxf_int_t DX_TIME_AND_SALE_EVENT_FLAGS_SHIFT = 24;
+static const dxf_int_t DX_TIME_AND_SALE_SIDE_MASK = 3;
+static const dxf_int_t DX_TIME_AND_SALE_SIDE_SHIFT = 5;
+static const dxf_int_t DX_TIME_AND_SALE_SPREAD_LEG = 1 << 4;
+static const dxf_int_t DX_TIME_AND_SALE_ETH = 1 << 3;
+static const dxf_int_t DX_TIME_AND_SALE_VALID_TICK = 1 << 2;
+static const dxf_int_t DX_TIME_AND_SALE_TYPE_MASK = 3;
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -560,13 +572,20 @@ bool RECORD_TRANSCODER_NAME(dx_time_and_sale_t) (dx_record_transcoder_connection
         const dxf_int_t sequence = (dxf_int_t)(cur_event->event_id & 0xFFFFFFFFL);
         const dxf_int_t exchange_sale_conditions = (dxf_int_t)(cur_event->event_id >> 32);
         const dxf_int_t time = (dxf_int_t)cur_event->time;
-        const dxf_int_t flags = cur_event->type;
+        const dxf_int_t flags = cur_event->flags;
 
         cur_event->event_id = ((dxf_long_t)time << 32) | ((dxf_long_t)sequence & 0xFFFFFFFFL);
         cur_event->time = ((dxf_long_t)time * 1000L) + (((dxf_long_t)sequence >> 22) & 0x000003FFL);
 
+        cur_event->event_flags = (dxf_uint_t)flags >> DX_TIME_AND_SALE_EVENT_FLAGS_SHIFT;
+        cur_event->sequence = sequence;
         cur_event->exchange_sale_conditions = dx_decode_from_integer((((dxf_long_t)flags & 0xFF00L) << 24 ) | exchange_sale_conditions);
-        cur_event->is_trade = ((flags & 0x4) != 0);
+        cur_event->index = cur_event->event_id;
+        cur_event->side = (flags >> DX_TIME_AND_SALE_SIDE_SHIFT) & DX_TIME_AND_SALE_SIDE_MASK;
+        cur_event->is_spread_leg = ((flags & DX_TIME_AND_SALE_SPREAD_LEG) != 0);
+        cur_event->is_trade = ((flags & DX_TIME_AND_SALE_ETH) != 0);
+        cur_event->is_valid_tick = ((flags & DX_TIME_AND_SALE_VALID_TICK) != 0);
+        cur_event->type = flags & DX_TIME_AND_SALE_TYPE_MASK;
         
         /* when we get REMOVE_EVENT flag almost all fields of record is null;
            in this case no fileds are checked for null*/

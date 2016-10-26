@@ -83,21 +83,33 @@ library DXFeedCOM {
         HRESULT eventId ([out, retval] LONGLONG*);
         [id(2), propget, helpstring("Time value getter")]
         HRESULT time ([out, retval] LONGLONG*);
-        [id(3), propget, helpstring("Exchange code value getter")]
+        [id(3), propget, helpstring("Sequence value getter")]
+        HRESULT sequence([out, retval] INT*);
+        [id(4), propget, helpstring("Exchange code value getter")]
         HRESULT exchangeCode ([out, retval] SHORT*);
-        [id(4), propget, helpstring("Price value getter")]
+        [id(5), propget, helpstring("Price value getter")]
         HRESULT price ([out, retval] DOUBLE*);
-        [id(5), propget, helpstring("Size value getter")]
+        [id(6), propget, helpstring("Size value getter")]
         HRESULT size ([out, retval] LONGLONG*);
-        [id(6), propget, helpstring("Bid price value getter")]
+        [id(7), propget, helpstring("Bid price value getter")]
         HRESULT bidPrice ([out, retval] DOUBLE*);
-        [id(7), propget, helpstring("Ask price value getter")]
+        [id(8), propget, helpstring("Ask price value getter")]
         HRESULT askPrice ([out, retval] DOUBLE*);
-        [id(8), propget, helpstring("Exchange sale condition value getter")]
+        [id(9), propget, helpstring("Exchange sale condition value getter")]
         HRESULT exchangeSaleCondition ([out, retval] BSTR*);
-        [id(9), propget, helpstring("Trade flag value getter")]
-        HRESULT isTrade ([out, retval] VARIANT_BOOL*);
-        [id(10), propget, helpstring("Type value getter")]
+        [id(10), propget, helpstring("Event flags value getter")]
+        HRESULT eventFlags([out, retval] INT*);
+        [id(11), propget, helpstring("Index value getter")]
+        HRESULT index([out, retval] LONGLONG*);
+        [id(12), propget, helpstring("Agressor side value getter")]
+        HRESULT agressorSide([out, retval] INT*);
+        [id(13), propget, helpstring("Spread leg flag value getter")]
+        HRESULT spreadLeg([out, retval] VARIANT_BOOL*);
+        [id(14), propget, helpstring("Extended trading hours flag value getter")]
+        HRESULT tradeFlag([out, retval] VARIANT_BOOL*);
+        [id(15), propget, helpstring("Valid tick flag value getter")]
+        HRESULT validTick([out, retval] VARIANT_BOOL*);
+        [id(16), propget, helpstring("Type value getter")]
         HRESULT type ([out, retval] INT*);
     };
 
