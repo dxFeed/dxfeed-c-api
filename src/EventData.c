@@ -231,6 +231,7 @@ int dx_get_event_subscription_params(dxf_connection_t connection, dx_order_sourc
                                      dxf_uint_t subscr_flags, OUT dx_event_subscription_param_list_t* params) {
     bool result = true;
     dx_event_subscription_param_list_t param_list = { NULL, 0, 0 };
+    dx_subscription_type_t sub_type;
 
     switch (event_id) {
     case dx_eid_trade:
@@ -249,13 +250,12 @@ int dx_get_event_subscription_params(dxf_connection_t connection, dx_order_sourc
         result = dx_get_order_subscription_params(connection, order_source, subscr_flags, &param_list);
         break;
     case dx_eid_time_and_sale:
-        if (IS_FLAG_SET(subscr_flags, DX_SUBSCR_FLAG_TIME_SERIES))
-            result = dx_add_subscription_param_to_list(connection, &param_list, L"TimeAndSale", dx_st_history);
-        else
-            result = dx_add_subscription_param_to_list(connection, &param_list, L"TimeAndSale", dx_st_stream);
+        sub_type = IS_FLAG_SET(subscr_flags, DX_SUBSCR_FLAG_TIME_SERIES) ? dx_st_history : dx_st_stream;
+        result = dx_add_subscription_param_to_list(connection, &param_list, L"TimeAndSale", sub_type);
         break;
     case dx_eid_candle:
-        result = dx_add_subscription_param_to_list(connection, &param_list, L"Candle", dx_st_history);
+        sub_type = IS_FLAG_SET(subscr_flags, DX_SUBSCR_FLAG_TIME_SERIES) ? dx_st_history : dx_st_ticker;
+        result = dx_add_subscription_param_to_list(connection, &param_list, L"Candle", sub_type);
         break;
     case dx_eid_trade_eth:
         result = dx_get_trade_eth_subscription_params(connection, &param_list);

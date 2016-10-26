@@ -349,8 +349,9 @@ DXFEED_API ERRORCODE dxf_delete_candle_symbol_attributes(dxf_candle_attributes_t
 /*
  *  Creates snapshot with the specified parameters.
  *
- *  For Order or Candle events (dx_eid_order or dx_eid_candle respectively) please use short form
- *  of this function: dxf_create_order_snapshot or dxf_create_candle_snapshot.
+ *  For Order or Candle events (dx_eid_order or dx_eid_candle) please use 
+ *  short form of this function: dxf_create_order_snapshot or dxf_create_candle_snapshot
+ *  respectively.
  *
  *  For order events (event_id is 'dx_eid_order')
  *  If source is NULL string subscription on Order event will be performed. You can specify order 
@@ -360,7 +361,7 @@ DXFEED_API ERRORCODE dxf_delete_candle_symbol_attributes(dxf_candle_attributes_t
  *
  *  connection - a handle of a previously created connection which the subscription will be using
  *  event_id - single event id. Next events is supported: dxf_eid_order, dxf_eid_candle, 
-               dx_eid_spread_order.
+               dx_eid_spread_order, dx_eid_time_and_sale.
  *  symbol - the symbol to add.
  *  source - order source for Order, which can be one of following: "BYX", "BZX", "DEA", "DEX", 
  *           "ISE", "IST", "NTV". For MarketMaker subscription use "COMPOSITE_BID" or 

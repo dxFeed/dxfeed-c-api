@@ -173,6 +173,31 @@ struct IDXTimeAndSale : public IDispatch {
 
 /* -------------------------------------------------------------------------- */
 /*
+*	IDXCandle interface
+
+*  defines the candle data accessor
+*/
+/* -------------------------------------------------------------------------- */
+
+struct IDXCandle : public IDispatch {
+    virtual HRESULT STDMETHODCALLTYPE GetTime(LONGLONG* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetSequence(INT* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetCount(DOUBLE* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetOpen(DOUBLE* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetHigh(DOUBLE* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetLow(DOUBLE* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetClose(DOUBLE* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetVolume(DOUBLE* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetVwap(DOUBLE* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetBidVolume(DOUBLE* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetAskVolume(DOUBLE* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetOpenInterest(DOUBLE* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetImpVolacility(DOUBLE* value) = 0;
+    
+};
+
+/* -------------------------------------------------------------------------- */
+/*
  *	IDXTradeETH interface
 
  *  defines the TradeETH data accessor

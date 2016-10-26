@@ -178,6 +178,8 @@ DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_candle_t, volume);
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_candle_t, vwap);
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_candle_t, bid_volume);
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_candle_t, ask_volume);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_candle_t, open_interest);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_candle_t, imp_volatility);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -364,6 +366,8 @@ DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_candle_t, volume);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_candle_t, vwap);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_candle_t, bid_volume);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_candle_t, ask_volume);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_candle_t, open_interest);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_candle_t, imp_volatility);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -546,6 +550,8 @@ DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_candle_t, volume);
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_candle_t, vwap);
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_candle_t, bid_volume);
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_candle_t, ask_volume);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_candle_t, open_interest);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_candle_t, imp_volatility);
 
 /* -------------------------------------------------------------------------- */
 /*

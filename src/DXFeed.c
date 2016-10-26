@@ -794,6 +794,8 @@ ERRORCODE dxf_create_snapshot_impl(dxf_connection_t connection, dx_event_id_t ev
 
 }
 
+/* -------------------------------------------------------------------------- */
+
 DXFEED_API ERRORCODE dxf_create_snapshot(dxf_connection_t connection, dx_event_id_t event_id,
                                          dxf_const_string_t symbol, const char* source,
                                          dxf_long_t time,  OUT dxf_snapshot_t* snapshot) {
@@ -806,11 +808,15 @@ DXFEED_API ERRORCODE dxf_create_snapshot(dxf_connection_t connection, dx_event_i
     return res;
 }
 
+/* -------------------------------------------------------------------------- */
+
 DXFEED_API ERRORCODE dxf_create_order_snapshot(dxf_connection_t connection, 
                                                dxf_const_string_t symbol, const char* source,
                                                dxf_long_t time, OUT dxf_snapshot_t* snapshot) {
     return dxf_create_snapshot(connection, dx_eid_order, symbol, source, time, snapshot);
 }
+
+/* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_create_candle_snapshot(dxf_connection_t connection, 
                                                 dxf_candle_attributes_t candle_attributes, 

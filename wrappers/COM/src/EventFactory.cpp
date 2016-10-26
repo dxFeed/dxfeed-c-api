@@ -1067,6 +1067,204 @@ HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetType (INT* value) {
     return S_OK;
 }
 
+
+/* -------------------------------------------------------------------------- */
+/*
+*	DXCandle class
+
+*  default implementation of the IDXCandle interface
+*/
+/* -------------------------------------------------------------------------- */
+
+class DXCandle : private IDXCandle, private DefIDispatchImpl {
+    friend struct EventDataFactory;
+
+private:
+
+    virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObject) {
+        return QueryInterfaceImpl(this, riid, ppvObject);
+    }
+    virtual ULONG STDMETHODCALLTYPE AddRef() { return AddRefImpl(); }
+    virtual ULONG STDMETHODCALLTYPE Release() { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
+
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount(UINT *pctinfo) { return GetTypeInfoCountImpl(pctinfo); }
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
+        return GetTypeInfoImpl(iTInfo, lcid, ppTInfo);
+    }
+    virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames(REFIID riid, LPOLESTR *rgszNames,
+        UINT cNames, LCID lcid, DISPID *rgDispId) {
+        return GetIDsOfNamesImpl(riid, rgszNames, cNames, lcid, rgDispId);
+    }
+    virtual HRESULT STDMETHODCALLTYPE Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
+        DISPPARAMS *pDispParams, VARIANT *pVarResult,
+        EXCEPINFO *pExcepInfo, UINT *puArgErr) {
+        return InvokeImpl(this, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
+    }
+
+    virtual HRESULT STDMETHODCALLTYPE GetTime(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetSequence(INT* value);
+    virtual HRESULT STDMETHODCALLTYPE GetCount(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetOpen(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetHigh(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetLow(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetClose(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetVolume(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetVwap(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetBidVolume(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetAskVolume(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetOpenInterest(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetImpVolacility(DOUBLE* value);
+
+private:
+
+    DXCandle(dxf_event_data_t data, IUnknown* parent);
+
+private:
+
+    dxf_candle_t* m_data;
+};
+
+/* -------------------------------------------------------------------------- */
+/*
+*	DXTCandle methods implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+DXCandle::DXCandle(dxf_event_data_t data, IUnknown* parent)
+    : DefIDispatchImpl(IID_IDXCandle, parent)
+    , m_data(reinterpret_cast<dxf_candle_t*>(data)) {
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXCandle::GetTime(LONGLONG* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->time;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXCandle::GetSequence(INT* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->sequence;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXCandle::GetCount(DOUBLE* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->count;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXCandle::GetOpen(DOUBLE* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->open;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXCandle::GetHigh(DOUBLE* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->high;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXCandle::GetLow(DOUBLE* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->low;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXCandle::GetClose(DOUBLE* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->close;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXCandle::GetVolume(DOUBLE* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->volume;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXCandle::GetVwap(DOUBLE* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->vwap;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXCandle::GetBidVolume(DOUBLE* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->bid_volume;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXCandle::GetAskVolume(DOUBLE* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->ask_volume;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXCandle::GetOpenInterest(DOUBLE* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->open_interest;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXCandle::GetImpVolacility(DOUBLE* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->imp_volatility;
+
+    return S_OK;
+}
+
 /* -------------------------------------------------------------------------- */
 /*
  *	DXTradeETH class
@@ -1406,6 +1604,7 @@ IDispatch* EventDataFactory::CreateInstance (int eventType, dxf_event_data_t eve
         case DXF_ET_PROFILE: return static_cast<IDXProfile*>(new DXProfile(eventData, parent));
         case DXF_ET_ORDER: return static_cast<IDXOrder*>(new DXOrder(eventData, parent));
         case DXF_ET_TIME_AND_SALE: return static_cast<IDXTimeAndSale*>(new DXTimeAndSale(eventData, parent));
+        case DXF_ET_CANDLE: return static_cast<IDXCandle*>(new DXCandle(eventData, parent));
         case DXF_ET_TRADE_ETH: return static_cast<IDXTradeETH*>(new DXTradeETH(eventData, parent));
         case DXF_ET_SPREAD_ORDER: return static_cast<IDXSpreadOrder*>(new DXSpreadOrder(eventData, parent));
         default: return NULL;

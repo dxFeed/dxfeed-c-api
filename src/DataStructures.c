@@ -397,7 +397,15 @@ static const dx_field_info_t dx_fields_candle[] = {
 
     { dx_fid_compact_int | dx_fid_flag_decimal, L"Ask.Volume", DX_RECORD_FIELD_SETTER_NAME(dx_candle_t, ask_volume),
     DX_RECORD_FIELD_DEF_VAL_NAME(dx_candle_t, ask_volume), DX_RECORD_FIELD_GETTER_NAME(dx_candle_t, ask_volume),
-    dx_ft_common_field }
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"OpenInterest", DX_RECORD_FIELD_SETTER_NAME(dx_candle_t, open_interest),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_candle_t, open_interest), DX_RECORD_FIELD_GETTER_NAME(dx_candle_t, open_interest),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"ImpVolatility", DX_RECORD_FIELD_SETTER_NAME(dx_candle_t, imp_volatility),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_candle_t, imp_volatility), DX_RECORD_FIELD_GETTER_NAME(dx_candle_t, imp_volatility),
+    dx_ft_common_field },
 };
 
 /* -------------------------------------------------------------------------- */
