@@ -115,6 +115,10 @@ typedef struct {
     dxf_long_t size;
     dxf_char_t source[DXF_RECORD_SUFFIX_SIZE];
     dxf_int_t count;
+    dxf_int_t event_flags;
+    dxf_long_t time_sequence;
+    dxf_int_t sequence;
+    dxf_int_t scope;
 } dxf_order_t;
 
 typedef struct {
@@ -128,7 +132,9 @@ typedef struct {
     dxf_long_t size;
     dxf_char_t source[DXF_RECORD_SUFFIX_SIZE];
     dxf_int_t count;
-    dxf_int_t flags;
+    dxf_int_t event_flags;
+    dxf_long_t time_sequence;
+    dxf_int_t scope;
     dxf_const_string_t spread_symbol;
 } dxf_spread_order_t;
 

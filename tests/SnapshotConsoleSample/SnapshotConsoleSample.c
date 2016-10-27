@@ -205,7 +205,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
                 L"count=%i, flags=%i, spread symbol=%ls}\n",
                 order.sequence, order.exchange_code, order.price, order.size,
                 wcslen(order.source) > 0 ? order.source : L"",
-                order.count, order.flags,
+                order.count, order.event_flags,
                 wcslen(order.spread_symbol) > 0 ? order.spread_symbol : L"");
         }
     } else if (snapshot_data->event_type == DXF_ET_TIME_AND_SALE) {

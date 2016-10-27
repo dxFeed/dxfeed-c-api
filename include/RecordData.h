@@ -153,6 +153,7 @@ typedef struct {
     dxf_double_t ask_price;
     dxf_const_string_t exchange_sale_conditions;
     dxf_int_t flags;
+
     dxf_int_t event_flags;
     dxf_long_t index;
     dxf_int_t side;
@@ -178,12 +179,14 @@ typedef struct {
        daily candle */
     dxf_double_t open_interest;
     dxf_double_t imp_volatility;
+    /* Note: calculated fields */
+    dxf_long_t index;
 } dx_candle_t;
 
 typedef struct {
     dxf_long_t time;
     dxf_int_t flags;
-    dxf_char_t exchange;
+    dxf_char_t exchange_code;
     dxf_double_t price;
     dxf_long_t size;
     dxf_double_t eth_volume;

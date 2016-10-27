@@ -189,7 +189,7 @@ DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_candle_t, imp_volatility);
 
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_trade_eth_t, time);
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_trade_eth_t, flags);
-DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_trade_eth_t, exchange);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_trade_eth_t, exchange_code);
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_trade_eth_t, price);
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_trade_eth_t, size);
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_trade_eth_t, eth_volume);
@@ -377,7 +377,7 @@ DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_candle_t, imp_volatility);
 
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_trade_eth_t, time);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_trade_eth_t, flags);
-DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_trade_eth_t, exchange);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_trade_eth_t, exchange_code);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_trade_eth_t, price);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_trade_eth_t, size);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_trade_eth_t, eth_volume);
@@ -561,7 +561,7 @@ DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_candle_t, imp_volatility);
 
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_trade_eth_t, time);
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_trade_eth_t, flags);
-DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_trade_eth_t, exchange);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_trade_eth_t, exchange_code);
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_trade_eth_t, price);
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_trade_eth_t, size);
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_trade_eth_t, eth_volume);

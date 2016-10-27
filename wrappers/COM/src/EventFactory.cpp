@@ -720,6 +720,12 @@ private:
     virtual HRESULT STDMETHODCALLTYPE GetMarketMaker (BSTR* value);
     virtual HRESULT STDMETHODCALLTYPE GetPrice (DOUBLE* value);
     virtual HRESULT STDMETHODCALLTYPE GetSize (LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetOrderSource(BSTR* value);
+    virtual HRESULT STDMETHODCALLTYPE GetCount(INT* value);
+    virtual HRESULT STDMETHODCALLTYPE GetEventFlags(INT* value);
+    virtual HRESULT STDMETHODCALLTYPE GetTimeSequence(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetSequence(INT* value);
+    virtual HRESULT STDMETHODCALLTYPE GetScope(INT* value);
 
 private:
 
@@ -825,6 +831,75 @@ HRESULT STDMETHODCALLTYPE DXOrder::GetSize (LONGLONG* value) {
     CHECK_PTR(value);
 
     *value = m_data->size;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXOrder::GetOrderSource(BSTR* value) {
+    CHECK_PTR(value);
+
+    HRESULT hr = S_OK;
+
+    try {
+        _bstr_t wrapper(m_data->source);
+
+        *value = wrapper.Detach();
+    }
+    catch (const _com_error& e) {
+        hr = e.Error();
+    }
+
+    return hr;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXOrder::GetCount(INT* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->count;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXOrder::GetEventFlags(INT* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->event_flags;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXOrder::GetTimeSequence(LONGLONG* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->time_sequence;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXOrder::GetSequence(INT* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->sequence;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXOrder::GetScope(INT* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->scope;
 
     return S_OK;
 }
@@ -1114,6 +1189,7 @@ private:
     virtual HRESULT STDMETHODCALLTYPE GetAskVolume(DOUBLE* value);
     virtual HRESULT STDMETHODCALLTYPE GetOpenInterest(DOUBLE* value);
     virtual HRESULT STDMETHODCALLTYPE GetImpVolacility(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetIndex(LONGLONG* value);
 
 private:
 
@@ -1266,6 +1342,16 @@ HRESULT STDMETHODCALLTYPE DXCandle::GetImpVolacility(DOUBLE* value) {
 }
 
 /* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXCandle::GetIndex(LONGLONG* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->index;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
 /*
  *	DXTradeETH class
 
@@ -1350,7 +1436,7 @@ HRESULT STDMETHODCALLTYPE DXTradeETH::GetFlags(INT* value) {
 HRESULT STDMETHODCALLTYPE DXTradeETH::GetExchangeCode(SHORT* value) {
     CHECK_PTR(value);
 
-    *value = m_data->exchange;
+    *value = m_data->exchange_code;
 
     return S_OK;
 }
@@ -1428,8 +1514,10 @@ private:
     virtual HRESULT STDMETHODCALLTYPE GetOrderSource(BSTR* value);
     virtual HRESULT STDMETHODCALLTYPE GetSize(LONGLONG* value);
     virtual HRESULT STDMETHODCALLTYPE GetCount(INT* value);
-    virtual HRESULT STDMETHODCALLTYPE GetFlags(INT* value);
+    virtual HRESULT STDMETHODCALLTYPE GetEventFlags(INT* value);
     virtual HRESULT STDMETHODCALLTYPE GetSpreadSymbol(BSTR* value);
+    virtual HRESULT STDMETHODCALLTYPE GetTimeSequence(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetScope(INT* value);
 
 private:
 
@@ -1562,10 +1650,10 @@ HRESULT STDMETHODCALLTYPE DXSpreadOrder::GetCount(INT* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXSpreadOrder::GetFlags(INT* value) {
+HRESULT STDMETHODCALLTYPE DXSpreadOrder::GetEventFlags(INT* value) {
     CHECK_PTR(value);
 
-    *value = m_data->flags;
+    *value = m_data->event_flags;
 
     return S_OK;
 }
@@ -1587,6 +1675,26 @@ HRESULT STDMETHODCALLTYPE DXSpreadOrder::GetSpreadSymbol(BSTR* value) {
     }
 
     return hr;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXSpreadOrder::GetTimeSequence(LONGLONG* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->time_sequence;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXSpreadOrder::GetScope(INT* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->scope;
+
+    return S_OK;
 }
 
 /* -------------------------------------------------------------------------- */

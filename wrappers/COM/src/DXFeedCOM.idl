@@ -75,6 +75,18 @@ library DXFeedCOM {
         HRESULT price ([out, retval] DOUBLE*);
         [id(8), propget, helpstring("Size value getter")]
         HRESULT size ([out, retval] LONGLONG*);
+        [id(9), propget, helpstring("Source value getter")]
+        HRESULT orderSource([out, retval] BSTR*);
+        [id(10), propget, helpstring("Count value getter")]
+        HRESULT count([out, retval] INT*);
+        [id(11), propget, helpstring("Event flags value getter")]
+        HRESULT eventFlags([out, retval] INT*);
+        [id(12), propget, helpstring("Time sequence value getter")]
+        HRESULT timeSequence([out, retval] LONGLONG*);
+        [id(13), propget, helpstring("Sequence value getter")]
+        HRESULT sequence([out, retval] INT*);
+        [id(14), propget, helpstring("Scope value getter")]
+        HRESULT scope([out, retval] INT*);
     }
 
     [uuid(443B7441-8EA3-44F7-8BFB-6B3AA13EF6A7), helpstring("Candle data wrapper"), dual, oleautomation, nonextensible]
@@ -103,8 +115,10 @@ library DXFeedCOM {
         HRESULT askVolume([out, retval] DOUBLE*);
         [id(12), propget, helpstring("Open interest value getter")]
         HRESULT openInterest([out, retval] DOUBLE*);
-        [id(13), propget, helpstring("Imp volatility value getter")]
+        [id(13), propget, helpstring("Implied volatility value getter")]
         HRESULT impVolatility([out, retval] DOUBLE*);
+        [id(14), propget, helpstring("Index value getter")]
+        HRESULT index([out, retval] LONGLONG*);
     };
     
     [uuid(A12D2830-6B0B-405c-990D-5B960CB9C33B), helpstring("Time&Sale data wrapper"), dual, oleautomation, nonextensible]
@@ -181,10 +195,14 @@ library DXFeedCOM {
         HRESULT size([out, retval] LONGLONG*);
         [id(10), propget, helpstring("Count value getter")]
         HRESULT count([out, retval] INT*);
-        [id(11), propget, helpstring("Flags value getter")]
-        HRESULT flags([out, retval] INT*);
+        [id(11), propget, helpstring("Event flags value getter")]
+        HRESULT eventFlags([out, retval] INT*);
         [id(12), propget, helpstring("Spread symbol value getter")]
         HRESULT spreadSymbol([out, retval] BSTR*);
+        [id(13), propget, helpstring("Time sequence value getter")]
+        HRESULT timeSequence([out, retval] LONGLONG*);
+        [id(14), propget, helpstring("Scope value getter")]
+        HRESULT scope([out, retval] INT*);
     }
     
     [uuid(C334BBB7-AE1E-448e-9C1C-A0C7CCB2A126), helpstring("Event data collection"), dual, oleautomation, nonextensible]

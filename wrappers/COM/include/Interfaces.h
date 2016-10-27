@@ -142,6 +142,12 @@ struct IDXOrder : public IDispatch {
     virtual HRESULT STDMETHODCALLTYPE GetMarketMaker (BSTR* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetPrice (DOUBLE* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetSize (LONGLONG* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetOrderSource(BSTR* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetCount(INT* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetEventFlags(INT* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetTimeSequence(LONGLONG* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetSequence(INT* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetScope(INT* value) = 0;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -193,7 +199,7 @@ struct IDXCandle : public IDispatch {
     virtual HRESULT STDMETHODCALLTYPE GetAskVolume(DOUBLE* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetOpenInterest(DOUBLE* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetImpVolacility(DOUBLE* value) = 0;
-    
+    virtual HRESULT STDMETHODCALLTYPE GetIndex(LONGLONG* value) = 0;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -232,8 +238,10 @@ struct IDXSpreadOrder : public IDispatch {
     virtual HRESULT STDMETHODCALLTYPE GetOrderSource(BSTR* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetSize(LONGLONG* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetCount(INT* value) = 0;
-    virtual HRESULT STDMETHODCALLTYPE GetFlags(INT* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetEventFlags(INT* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetSpreadSymbol(BSTR* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetTimeSequence(LONGLONG* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetScope(INT* value) = 0;
 };
 
 /* -------------------------------------------------------------------------- */

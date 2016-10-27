@@ -179,7 +179,7 @@ void listener(int event_type, dxf_const_string_t symbol_name,
         for (; i < data_count; ++i) {
             print_timestamp(trades[i].time);
             wprintf(L", exchangeCode=%c, flags=%d, price=%f, size=%I64i, day volume=%.0f}\n",
-                trades[i].exchange, trades[i].flags, trades[i].price, trades[i].size, trades[i].eth_volume);
+                trades[i].exchange_code, trades[i].flags, trades[i].price, trades[i].size, trades[i].eth_volume);
         }
     }
 
@@ -194,7 +194,7 @@ void listener(int event_type, dxf_const_string_t symbol_name,
                 L"count=%i, flags=%i, spread symbol=%ls}\n",
                 orders[i].sequence, orders[i].exchange_code, orders[i].price, orders[i].size, 
                 wcslen(orders[i].source) > 0 ? orders[i].source : L"", 
-                orders[i].count, orders[i].flags, 
+                orders[i].count, orders[i].event_flags, 
                 wcslen(orders[i].spread_symbol) > 0 ? orders[i].spread_symbol : L"");
         }
     }

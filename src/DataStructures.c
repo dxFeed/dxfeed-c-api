@@ -423,8 +423,8 @@ static const dx_field_info_t dx_fields_trade_eth[] = {
     DX_RECORD_FIELD_DEF_VAL_NAME(dx_trade_eth_t, size), DX_RECORD_FIELD_GETTER_NAME(dx_trade_eth_t, size),
     dx_ft_common_field },
 
-    { dx_fid_utf_char, L"ETHLast.Exchange", DX_RECORD_FIELD_SETTER_NAME(dx_trade_eth_t, exchange),
-    DX_RECORD_FIELD_DEF_VAL_NAME(dx_trade_eth_t, exchange), DX_RECORD_FIELD_GETTER_NAME(dx_trade_eth_t, exchange),
+    { dx_fid_utf_char, L"ETHLast.Exchange", DX_RECORD_FIELD_SETTER_NAME(dx_trade_eth_t, exchange_code),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_trade_eth_t, exchange_code), DX_RECORD_FIELD_GETTER_NAME(dx_trade_eth_t, exchange_code),
     dx_ft_common_field },
 
     { dx_fid_compact_int | dx_fid_flag_decimal, L"ETHLast.Price", DX_RECORD_FIELD_SETTER_NAME(dx_trade_eth_t, price),

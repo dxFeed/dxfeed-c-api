@@ -51,10 +51,13 @@ static const dxf_int_t DX_ORDER_SIDE_SELL = 2;
 
 static const dxf_int_t DX_ORDER_SCOPE_MASK = 3;
 
+static const dxf_int_t DX_ORDER_EVENT_FLAGS_SHIFT = 24;
+static const dxf_int_t DX_ORDER_MAX_SEQUENCE = (1 << 22) - 1;
+
 /* -------------------------------------------------------------------------- */
 /*
-*	TimeAndSale calculation constants
-*/
+ *	TimeAndSale calculation constants
+ */
 /* -------------------------------------------------------------------------- */
 static const dxf_int_t DX_TIME_AND_SALE_EVENT_FLAGS_SHIFT = 24;
 static const dxf_int_t DX_TIME_AND_SALE_SIDE_MASK = 3;
@@ -63,6 +66,16 @@ static const dxf_int_t DX_TIME_AND_SALE_SPREAD_LEG = 1 << 4;
 static const dxf_int_t DX_TIME_AND_SALE_ETH = 1 << 3;
 static const dxf_int_t DX_TIME_AND_SALE_VALID_TICK = 1 << 2;
 static const dxf_int_t DX_TIME_AND_SALE_TYPE_MASK = 3;
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Time util calculation constants
+ */
+/* -------------------------------------------------------------------------- */
+/**
+ * Number of milliseconds in a second.
+ */
+static const dxf_long_t TIME_UTIL_SECOND = 1000L;
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -175,6 +188,34 @@ dxf_event_data_t dx_get_event_data_buffer(dx_record_transcoder_connection_contex
         
         return context->buffer;
     }
+}
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Time utils
+ */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Returns correct number of seconds with proper handling negative values and overflows.
+ * Idea is that number of milliseconds shall be within [0..999]
+ * as that the following equation always holds
+ * dx_get_seconds_from_time(millis) * 1000L + dx_get_millis_from_time(millis) == millis
+ */
+dxf_int_t dx_get_seconds_from_time(dxf_long_t millis) {
+    return millis >= 0 ? (dxf_int_t)MIN(millis / TIME_UTIL_SECOND, INT_MAX) :
+        (dxf_int_t)MAX((millis + 1) / TIME_UTIL_SECOND - 1, INT_MIN);
+}
+
+/**
+ * Returns correct number of milliseconds with proper handling negative values.
+ * Idea is that number of milliseconds shall be within [0..999]
+ * as that the following equation always holds
+ * dx_get_seconds_from_time(millis) * 1000L + dx_get_millis_from_time(millis) == millis
+ */
+dxf_int_t dx_get_millis_from_time(dxf_long_t millis) {
+    dxf_int_t r = (dxf_int_t)(millis % TIME_UTIL_SECOND);
+    return r >= 0 ? r : r + (dxf_int_t)TIME_UTIL_SECOND;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -543,6 +584,12 @@ bool RECORD_TRANSCODER_NAME(dx_order_t) (dx_record_transcoder_connection_context
         dx_memset(cur_event->source, 0, sizeof(cur_event->source));
         dx_copy_string_len(cur_event->source, suffix, dx_string_length(suffix));
         cur_event->count = cur_record->count;
+        cur_event->event_flags = (dxf_uint_t)cur_record->flags >> DX_ORDER_EVENT_FLAGS_SHIFT;
+        cur_event->time_sequence = ((dxf_long_t)dx_get_seconds_from_time(cur_event->time) << 32) 
+            | ((dxf_long_t)dx_get_millis_from_time(cur_event->time) << 22)
+            | cur_record->sequence;
+        cur_event->sequence = (dxf_int_t)cur_event->time_sequence & DX_ORDER_MAX_SEQUENCE;
+        cur_event->scope = cur_record->flags & DX_ORDER_SCOPE_MASK;
 
         if (cur_event->market_maker != NULL &&
             !dx_store_string_buffer(context->rbcc, cur_event->market_maker)) {
@@ -561,14 +608,14 @@ bool RECORD_TRANSCODER_NAME(dx_time_and_sale_t) (dx_record_transcoder_connection
                                                  const dx_record_params_t* record_params,
                                                  const dxf_event_params_t* event_params,
                                                  void* record_buffer, int record_count) {
-    dx_time_and_sale_t* event_buffer = (dx_time_and_sale_t*)record_buffer;
+    dxf_time_and_sale_t* event_buffer = (dxf_time_and_sale_t*)record_buffer;
     int i = 0;
 
     for (; i < record_count; ++i) {
         /* 'event_id' and 'type' fields were deliberately used to store the different values,
            so that the structure might be reused without any new buffer allocations */
         
-        dx_time_and_sale_t* cur_event = event_buffer + i;
+        dxf_time_and_sale_t* cur_event = event_buffer + i;
         const dxf_int_t sequence = (dxf_int_t)(cur_event->event_id & 0xFFFFFFFFL);
         const dxf_int_t exchange_sale_conditions = (dxf_int_t)(cur_event->event_id >> 32);
         const dxf_int_t time = (dxf_int_t)cur_event->time;
@@ -621,6 +668,9 @@ bool RECORD_TRANSCODER_NAME(dx_candle_t) (dx_record_transcoder_connection_contex
     for (; i < record_count; ++i) {
         dxf_candle_t* cur_event = event_buffer + i;
         cur_event->time *= 1000L;
+        cur_event->index = ((dxf_long_t)dx_get_seconds_from_time(cur_event->time) << 32) 
+            | ((dxf_long_t)dx_get_millis_from_time(cur_event->time) << 22) 
+            | cur_event->sequence;
     }
 
     return dx_process_event_data(context->connection, dx_eid_candle, record_params->symbol_name,
@@ -641,7 +691,7 @@ bool RECORD_TRANSCODER_NAME(dx_trade_eth_t) (dx_record_transcoder_connection_con
         dxf_trade_eth_t* cur_event = event_buffer + i;
         dxf_char_t exchange_code = (suffix == NULL ? 0 : suffix[0]);
         cur_event->time *= 1000L;
-        cur_event->exchange = exchange_code;
+        cur_event->exchange_code = exchange_code;
         dx_set_record_exchange_code(record_params->record_id, exchange_code);
     }
 
@@ -664,7 +714,7 @@ bool RECORD_TRANSCODER_NAME(dx_spread_order_t) (dx_record_transcoder_connection_
     }
 
     for (; i < record_count; ++i) {
-        dxf_spread_order_t* cur_record = (dxf_spread_order_t*)record_buffer + i;
+        dx_spread_order_t* cur_record = (dx_spread_order_t*)record_buffer + i;
         dxf_spread_order_t* cur_event = event_buffer + i;
         dxf_char_t exchange_code = (cur_record->flags & DX_RECORD_SUFFIX_MASK) >> DX_RECORD_SUFFIX_IN_FLAG_SHIFT;
         if (exchange_code > 0)
@@ -682,7 +732,12 @@ bool RECORD_TRANSCODER_NAME(dx_spread_order_t) (dx_record_transcoder_connection_
         dx_memset(cur_event->source, 0, sizeof(cur_event->source));
         dx_copy_string_len(cur_event->source, suffix, dx_string_length(suffix));
         cur_event->count = cur_record->count;
-        cur_event->flags = cur_record->flags;
+        cur_event->event_flags = (dxf_uint_t)cur_record->flags >> DX_ORDER_EVENT_FLAGS_SHIFT;
+        cur_event->time_sequence = ((dxf_long_t)dx_get_seconds_from_time(cur_event->time) << 32)
+            | ((dxf_long_t)dx_get_millis_from_time(cur_event->time) << 22)
+            | cur_record->sequence;
+        cur_event->sequence = (dxf_int_t)cur_event->time_sequence & DX_ORDER_MAX_SEQUENCE;
+        cur_event->scope = cur_record->flags & DX_ORDER_SCOPE_MASK;
         if (cur_record->spread_symbol != NULL) {
             cur_event->spread_symbol = dx_create_string_src(cur_record->spread_symbol);
             if (!dx_store_string_buffer(context->rbcc, cur_event->spread_symbol))
