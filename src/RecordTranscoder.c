@@ -627,11 +627,11 @@ bool RECORD_TRANSCODER_NAME(dx_theo_price_t) (dx_record_transcoder_connection_co
                                           const dx_record_params_t* record_params,
                                           const dxf_event_params_t* event_params,
                                           void* record_buffer, int record_count) {
-    dx_theo_price_t* event_buffer = (dx_theo_price_t*)record_buffer;
+    dxf_theo_price_t* event_buffer = (dxf_theo_price_t*)record_buffer;
     int i = 0;
 
     for (; i < record_count; ++i) {
-        dx_theo_price_t* cur_event = event_buffer + i;
+        dxf_theo_price_t* cur_event = event_buffer + i;
         cur_event->theo_time *= 1000L;
     }
 
@@ -645,7 +645,7 @@ bool RECORD_TRANSCODER_NAME(dx_underlying_t) (dx_record_transcoder_connection_co
                                           const dx_record_params_t* record_params,
                                           const dxf_event_params_t* event_params,
                                           void* record_buffer, int record_count) {
-    dx_underlying_t* event_buffer = (dx_underlying_t*)record_buffer;
+    dxf_underlying_t* event_buffer = (dxf_underlying_t*)record_buffer;
 
     return dx_process_event_data(context->connection, dx_eid_underlying, record_params->symbol_name,
         record_params->symbol_cipher, event_buffer, record_count, event_params);
@@ -657,7 +657,7 @@ bool RECORD_TRANSCODER_NAME(dx_series_t) (dx_record_transcoder_connection_contex
                                           const dx_record_params_t* record_params,
                                           const dxf_event_params_t* event_params,
                                           void* record_buffer, int record_count) {
-    dx_series_t* event_buffer = (dx_series_t*)record_buffer;
+    dxf_series_t* event_buffer = (dxf_series_t*)record_buffer;
 
     return dx_process_event_data(context->connection, dx_eid_series, record_params->symbol_name,
         record_params->symbol_cipher, event_buffer, record_count, event_params);

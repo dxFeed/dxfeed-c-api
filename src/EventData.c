@@ -218,6 +218,7 @@ int dx_get_event_subscription_params(dxf_connection_t connection, dx_order_sourc
                                      dxf_uint_t subscr_flags, OUT dx_event_subscription_param_list_t* params) {
     bool result = true;
     dx_event_subscription_param_list_t param_list = { NULL, 0, 0 };
+    dx_subscription_type_t sub_type;
 
     switch (event_id) {
     case dx_eid_trade:
@@ -240,6 +241,19 @@ int dx_get_event_subscription_params(dxf_connection_t connection, dx_order_sourc
         break;
     case dx_eid_candle:
         result = dx_add_subscription_param_to_list(connection, &param_list, L"Candle", dx_st_history);
+        break;
+    case dx_eid_greeks:
+        sub_type = IS_FLAG_SET(subscr_flags, DX_SUBSCR_FLAG_TIME_SERIES) ? dx_st_history : dx_st_ticker;
+        result = dx_add_subscription_param_to_list(connection, &param_list, L"Greeks", sub_type);
+        break;
+    case dx_eid_theo_price:
+        result = dx_add_subscription_param_to_list(connection, &param_list, L"TheoPrice", dx_st_ticker);
+        break;
+    case dx_eid_underlying:
+        result = dx_add_subscription_param_to_list(connection, &param_list, L"Underlying", dx_st_ticker);
+        break;
+    case dx_eid_series:
+        result = dx_add_subscription_param_to_list(connection, &param_list, L"Series", dx_st_history);
         break;
     }
 

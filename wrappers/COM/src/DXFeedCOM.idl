@@ -13,7 +13,11 @@ library DXFeedCOM {
         HRESULT price ([out, retval] DOUBLE*);
         [id(4), propget, helpstring("Size value getter")]
         HRESULT size ([out, retval] LONGLONG*);
-        [id(5), propget, helpstring("Day volume value getter")]
+        [id(5), propget, helpstring("Tick value getter")]
+        HRESULT tick ([out, retval] LONGLONG*);
+        [id(6), propget, helpstring("Change value getter")]
+        HRESULT change ([out, retval] DOUBLE*);
+        [id(7), propget, helpstring("Day volume value getter")]
         HRESULT dayVolume ([out, retval] LONGLONG*);
     };
     
@@ -39,22 +43,60 @@ library DXFeedCOM {
     
     [uuid(6582F081-CCB3-4ca3-8490-D25D0C4C0837), helpstring("Summary data wrapper"), dual, oleautomation, nonextensible]
     interface IDXSummary : IDispatch {
-        [id(1), propget, helpstring("Day high price value getter")]
-        HRESULT dayHighPrice ([out, retval] DOUBLE*);
-        [id(2), propget, helpstring("Day low price value getter")]
-        HRESULT dayLowPrice ([out, retval] DOUBLE*);
-        [id(3), propget, helpstring("Day open price value getter")]
+        [id(1), propget, helpstring("Day id value getter")]
+        HRESULT dayId ([out, retval] LONGLONG*);
+        [id(2), propget, helpstring("Day open price value getter")]
         HRESULT dayOpenPrice ([out, retval] DOUBLE*);
-        [id(4), propget, helpstring("Previous day close price value getter")]
+        [id(3), propget, helpstring("Day high price value getter")]
+        HRESULT dayHighPrice ([out, retval] DOUBLE*);
+        [id(4), propget, helpstring("Day low price value getter")]
+        HRESULT dayLowPrice ([out, retval] DOUBLE*);
+        [id(5), propget, helpstring("Day close price value getter")]
+        HRESULT dayClosePrice ([out, retval] DOUBLE*);
+        [id(6), propget, helpstring("Previous day id value getter")]
+        HRESULT prevDayId ([out, retval] LONGLONG*);
+        [id(7), propget, helpstring("Previous day close price value getter")]
         HRESULT prevDayClosePrice ([out, retval] DOUBLE*);
-        [id(5), propget, helpstring("Open interest value getter")]
+        [id(8), propget, helpstring("Open interest value getter")]
         HRESULT openInterest ([out, retval] LONGLONG*);
+        [id(9), propget, helpstring("Flags value getter")]
+        HRESULT flags ([out, retval] LONGLONG*);
+        [id(10), propget, helpstring("Exchange code value getter")]
+        HRESULT exchangeCode ([out, retval] SHORT*);
     };
     
     [uuid(74E10B0F-4C80-4792-96DD-D3BFFF40D675), helpstring("Profile data wrapper"), dual, oleautomation, nonextensible]
     interface IDXProfile : IDispatch {
-        [id(1), propget, helpstring("Description value getter")]
+        [id(1), propget, helpstring("Beta value getter")]
+        HRESULT beta ([out, retval] DOUBLE*);
+        [id(2), propget, helpstring("Eps value getter")]
+        HRESULT eps ([out, retval] DOUBLE*);
+        [id(3), propget, helpstring("Div freq value getter")]
+        HRESULT divFreq ([out, retval] LONGLONG*);
+        [id(4), propget, helpstring("Exd div amount value getter")]
+        HRESULT exdDivAmount ([out, retval] DOUBLE*);
+        [id(5), propget, helpstring("Exd div date value getter")]
+        HRESULT exdDivDate ([out, retval] LONGLONG*);
+        [id(6), propget, helpstring("52 high price value getter")]
+        HRESULT _52HighPrice ([out, retval] DOUBLE*);
+        [id(7), propget, helpstring("52 low price value getter")]
+        HRESULT _52LowPrice ([out, retval] DOUBLE*);
+        [id(8), propget, helpstring("Shares value getter")]
+        HRESULT shares ([out, retval] DOUBLE*);
+        [id(9), propget, helpstring("Description value getter")]
         HRESULT description ([out, retval] BSTR*);
+        [id(10), propget, helpstring("Flags value getter")]
+        HRESULT flags ([out, retval] LONGLONG*);
+        [id(11), propget, helpstring("Status reason value getter")]
+        HRESULT statusReason ([out, retval] BSTR*);
+        [id(12), propget, helpstring("Halt start time value getter")]
+        HRESULT haltStartTime ([out, retval] LONGLONG*);
+        [id(13), propget, helpstring("Halt end time value getter")]
+        HRESULT haltEndTime ([out, retval] LONGLONG*);
+        [id(14), propget, helpstring("High limit price value getter")]
+        HRESULT highLimitPrice ([out, retval] DOUBLE*);
+        [id(15), propget, helpstring("Low limit price value getter")]
+        HRESULT lowLimitPrice ([out, retval] DOUBLE*);
     };
     
     [uuid(2A6760EA-A547-4597-A12E-9E14794273C6), helpstring("Order data wrapper"), dual, oleautomation, nonextensible]
@@ -99,6 +141,76 @@ library DXFeedCOM {
         HRESULT isTrade ([out, retval] VARIANT_BOOL*);
         [id(10), propget, helpstring("Type value getter")]
         HRESULT type ([out, retval] INT*);
+    };
+    
+    [uuid(C798FC80-5AF7-41D3-B5C9-A20C6E0F3628), helpstring("Greeks data wrapper"), dual, oleautomation, nonextensible]
+    interface IDXGreeks : IDispatch {
+        [id(1), propget, helpstring("Time value getter")]
+        HRESULT time ([out, retval] LONGLONG*);
+        [id(2), propget, helpstring("Sequence value getter")]
+        HRESULT sequence ([out, retval] INT*);
+        [id(3), propget, helpstring("Greeks price value getter")]
+        HRESULT greeksPrice ([out, retval] DOUBLE*);
+        [id(4), propget, helpstring("Volatility value getter")]
+        HRESULT volatility ([out, retval] DOUBLE*);
+        [id(5), propget, helpstring("Delta value getter")]
+        HRESULT delta ([out, retval] DOUBLE*);
+        [id(6), propget, helpstring("Gamma value getter")]
+        HRESULT gamma ([out, retval] DOUBLE*);
+        [id(7), propget, helpstring("Theta value getter")]
+        HRESULT theta ([out, retval] DOUBLE*);
+        [id(8), propget, helpstring("Rho value getter")]
+        HRESULT rho ([out, retval] DOUBLE*);
+        [id(9), propget, helpstring("Vega value getter")]
+        HRESULT vega ([out, retval] DOUBLE*);
+    };
+    
+    [uuid(5D2A9476-FB2C-4846-A0EE-BFCB7207AAB5), helpstring("TheoPrice data wrapper"), dual, oleautomation, nonextensible]
+    interface IDXTheoPrice : IDispatch {
+        [id(1), propget, helpstring("Theo time value getter")]
+        HRESULT theoTime ([out, retval] LONGLONG*);
+        [id(2), propget, helpstring("Theo price value getter")]
+        HRESULT theoPrice ([out, retval] DOUBLE*);
+        [id(3), propget, helpstring("Theo underlying price value getter")]
+        HRESULT theoUnderlyingPrice ([out, retval] DOUBLE*);
+        [id(4), propget, helpstring("Theo delta value getter")]
+        HRESULT theoDelta ([out, retval] DOUBLE*);
+        [id(5), propget, helpstring("Theo gamma value getter")]
+        HRESULT theoGamma ([out, retval] DOUBLE*);
+        [id(6), propget, helpstring("Theo dividend value getter")]
+        HRESULT theoDividend ([out, retval] DOUBLE*);
+        [id(7), propget, helpstring("Theo interest value getter")]
+        HRESULT theoInterest ([out, retval] DOUBLE*);
+    };
+    
+    [uuid(B6F446D0-48AD-4912-AB92-CB7B3E6106BF), helpstring("Underlying data wrapper"), dual, oleautomation, nonextensible]
+    interface IDXUnderlying : IDispatch {
+        [id(1), propget, helpstring("Volatility value getter")]
+        HRESULT volatility ([out, retval] DOUBLE*);
+        [id(2), propget, helpstring("Front volatility value getter")]
+        HRESULT frontVolatility ([out, retval] DOUBLE*);
+        [id(3), propget, helpstring("Back volatility value getter")]
+        HRESULT backVolatility ([out, retval] DOUBLE*);
+        [id(4), propget, helpstring("Put call ratio value getter")]
+        HRESULT putCallRatio ([out, retval] DOUBLE*);
+    };
+    
+    [uuid(14D9E022-828C-45BD-92E3-8B1E62FB8DE7), helpstring("Series data wrapper"), dual, oleautomation, nonextensible]
+    interface IDXSeries : IDispatch {
+        [id(1), propget, helpstring("Expiration value getter")]
+        HRESULT expiration ([out, retval] LONGLONG*);
+        [id(2), propget, helpstring("Sequence value getter")]
+        HRESULT sequence ([out, retval] INT*);
+        [id(3), propget, helpstring("Volatility value getter")]
+        HRESULT volatility ([out, retval] DOUBLE*);
+        [id(4), propget, helpstring("Put call ratio value getter")]
+        HRESULT putCallRatio ([out, retval] DOUBLE*);
+        [id(5), propget, helpstring("Forward price value getter")]
+        HRESULT forwardPrice ([out, retval] DOUBLE*);
+        [id(6), propget, helpstring("Dividend price value getter")]
+        HRESULT dividend ([out, retval] DOUBLE*);
+        [id(7), propget, helpstring("Interest price value getter")]
+        HRESULT interest ([out, retval] DOUBLE*);
     };
     
     [uuid(C334BBB7-AE1E-448e-9C1C-A0C7CCB2A126), helpstring("Event data collection"), dual, oleautomation, nonextensible]
