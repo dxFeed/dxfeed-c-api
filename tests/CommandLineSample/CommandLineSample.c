@@ -146,7 +146,7 @@ void listener(int event_type, dxf_const_string_t symbol_name,
     if (event_type == DXF_ET_PROFILE) {
         dxf_profile_t* p = (dxf_profile_t*)data;
 
-        for (; i < data_count ; ++i) {
+        for (; i < data_count; ++i) {
             wprintf(L"Beta=%f, eps=%f, div freq=%I64i, exd div amount=%f, exd div date=%i, 52 high price=%f, "
                 L"52 low price=%f, shares=%f, Description=%ls, flags=%I64i, status_reason=%ls, halt start time=",
                 p[i].beta, p[i].eps, p[i].div_freq, p[i].exd_div_amount, p[i].exd_div_date, p[i]._52_high_price,
@@ -161,12 +161,53 @@ void listener(int event_type, dxf_const_string_t symbol_name,
     if (event_type == DXF_ET_TIME_AND_SALE) {
         dxf_time_and_sale_t* tns = (dxf_time_and_sale_t*)data;
 
-        for (; i < data_count ; ++i) {
+        for (; i < data_count; ++i) {
             wprintf(L"event id=%I64i, time=%I64i, exchange code=%c, price=%f, size=%I64i, bid price=%f, ask price=%f, "
 				L"exchange sale conditions=\'%ls\', is trade=%ls, type=%i}\n",
                     tns[i].event_id, tns[i].time, tns[i].exchange_code, tns[i].price, tns[i].size,
                     tns[i].bid_price, tns[i].ask_price, tns[i].exchange_sale_conditions,
                     tns[i].is_trade ? L"True" : L"False", tns[i].type);
+        }
+    }
+
+    if (event_type == DXF_ET_GREEKS) {
+        dxf_greeks_t* grks = (dxf_greeks_t*)data;
+
+        for (; i < data_count; ++i) {
+            wprintf(L"time=%I64i, sequence=%d, greeks price=%f, volatility=%f, "
+                L"delta=%f, gamma=%f, theta=%f, rho=%f, vega=%f}\n", 
+                grks[i].time, grks[i].sequence, grks[i].greeks_price, grks[i].volatility,
+                grks[i].delta, grks[i].gamma, grks[i].theta, grks[i].rho, grks[i].vega);
+        }
+    }
+
+    if (event_type == DXF_ET_THEO_PRICE) {
+        dxf_theo_price_t* tp = (dxf_theo_price_t*)data;
+
+        for (; i < data_count; ++i) {
+            wprintf(L"theo time=%I64i, theo price=%f, theo underlying price=%f, theo delta=%f, "
+                L"theo gamma=%f, theo dividend=%f, theo_interest=%f",
+                tp[i].theo_time, tp[i].theo_price, tp[i].theo_underlying_price, tp[i].theo_delta,
+                tp[i].theo_gamma, tp[i].theo_dividend, tp[i].theo_interest);
+        }
+    }
+
+    if (event_type == DXF_ET_UNDERLYING) {
+        dxf_underlying_t* u = (dxf_underlying_t*)data;
+
+        for (; i < data_count; ++i) {
+            wprintf(L"volatility=%f, front volatility=%f, back volatility=%f, put call ratio=%f}\n",
+                u[i].volatility, u[i].front_volatility, u[i].back_volatility, u[i].put_call_ratio);
+        }
+    }
+
+    if (event_type == DXF_ET_SERIES) {
+        dxf_series_t* srs = (dxf_series_t*)data;
+
+        for (; i < data_count; ++i) {
+            wprintf(L"expiration=%d, sequence=%d, volatility=%f, put call ratio=%f, forward_price=%f, dividend=%f, interest=%f}\n",
+                srs[i].expiration, srs[i].sequence, srs[i].volatility, srs[i].put_call_ratio, 
+                srs[i].forward_price, srs[i].dividend, srs[i].interest);
         }
     }
 }
@@ -237,7 +278,8 @@ int main (int argc, char* argv[]) {
                 L"Usage: CommandLineSample <server address> <event type> <symbol>\n"
                 L"  <server address> - a DXFeed server address, e.g. demo.dxfeed.com:7300\n"
                 L"  <event type> - an event type, one of the following: TRADE, QUOTE, SUMMARY,\n"
-                L"                 PROFILE, ORDER, TIME_AND_SALE\n"
+                L"                 PROFILE, ORDER, TIME_AND_SALE,"
+                L"                 GREEKS, THEO_PRICE, UNDERLYING, SERIES\n"
                 L"  <symbol> - a trade symbol, e.g. C, MSFT, YHOO, IBM\n");
         
         return 0;
@@ -260,6 +302,14 @@ int main (int argc, char* argv[]) {
         event_type = DXF_ET_ORDER;
     } else if (stricmp(event_type_name, "TIME_AND_SALE") == 0) {
         event_type = DXF_ET_TIME_AND_SALE;
+    } else if (stricmp(event_type_name, "GREEKS") == 0) {
+        event_type = DXF_ET_GREEKS;
+    } else if (stricmp(event_type_name, "THEO_PRICE") == 0) {
+        event_type = DXF_ET_THEO_PRICE;
+    } else if (stricmp(event_type_name, "UNDERLYING") == 0) {
+        event_type = DXF_ET_UNDERLYING;
+    } else if (stricmp(event_type_name, "SERIES") == 0) {
+        event_type = DXF_ET_SERIES;
     } else {
         wprintf(L"Unknown event type.\n");
         return -1;
