@@ -226,6 +226,14 @@ bool dx_snapshot_insert_record(dx_snapshot_data_ptr_t snapshot_data, dxf_event_d
         DX_ARRAY_INSERT(snapshot_data->records, dxf_candle_t, *((dxf_candle_t*)obj), position,
             dx_capacity_manager_halfer, failed);
         break;
+    case dx_eid_greeks:
+        DX_ARRAY_INSERT(snapshot_data->records, dxf_greeks_t, *((dxf_greeks_t*)obj), position,
+            dx_capacity_manager_halfer, failed);
+        break;
+    case dx_eid_series:
+        DX_ARRAY_INSERT(snapshot_data->records, dxf_series_t, *((dxf_series_t*)obj), position,
+            dx_capacity_manager_halfer, failed);
+        break;
     default:
         return dx_set_error_code(dx_ssec_invalid_event_id);
     }
@@ -242,6 +250,14 @@ bool dx_snapshot_delete_record(dx_snapshot_data_ptr_t snapshot_data, const int p
         break;
     case dx_eid_candle:
         DX_ARRAY_DELETE(snapshot_data->records, dxf_candle_t, position, 
+            dx_capacity_manager_halfer, failed);
+        break;
+    case dx_eid_greeks:
+        DX_ARRAY_DELETE(snapshot_data->records, dxf_greeks_t, position,
+            dx_capacity_manager_halfer, failed);
+        break;
+    case dx_eid_series:
+        DX_ARRAY_DELETE(snapshot_data->records, dxf_series_t, position,
             dx_capacity_manager_halfer, failed);
         break;
     default:
@@ -261,6 +277,14 @@ bool dx_snapshot_set_record(dx_snapshot_data_ptr_t snapshot_data, dxf_event_data
     case dx_eid_candle:
         dx_memcpy(&(((dxf_candle_t*)snapshot_data->records.elements)[position]), (dxf_candle_t*)obj,
             sizeof(dxf_candle_t));
+        break;
+    case dx_eid_greeks:
+        dx_memcpy(&(((dxf_greeks_t*)snapshot_data->records.elements)[position]), (dxf_greeks_t*)obj,
+            sizeof(dxf_greeks_t));
+        break;
+    case dx_eid_series:
+        dx_memcpy(&(((dxf_series_t*)snapshot_data->records.elements)[position]), (dxf_candle_t*)obj,
+            sizeof(dxf_series_t));
         break;
     default:
         return dx_set_error_code(dx_ssec_invalid_event_id);

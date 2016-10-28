@@ -30,6 +30,8 @@
 */
 /* -------------------------------------------------------------------------- */
 
+/* used for default subscription */
+#define DX_SUBSCR_FLAG_DEFAULT                  0
 /* used for subscribing on one record only in case of snapshots */
 #define DX_SUBSCR_FLAG_SINGLE_RECORD            0x1
 /* use with DX_SUBSCR_FLAG_SINGLE_RECORD flag and for dx_eid_order (Order) event */
