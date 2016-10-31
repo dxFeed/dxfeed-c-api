@@ -171,6 +171,10 @@ GET_RECORD_PTR_BODY(dx_rid_time_and_sale, dx_time_and_sale_t)
 GET_RECORD_BUF_PTR_BODY(dx_rid_time_and_sale)
 GET_RECORD_PTR_BODY(dx_rid_candle, dx_candle_t)
 GET_RECORD_BUF_PTR_BODY(dx_rid_candle)
+GET_RECORD_PTR_BODY(dx_rid_trade_eth, dx_trade_eth_t)
+GET_RECORD_BUF_PTR_BODY(dx_rid_trade_eth)
+GET_RECORD_PTR_BODY(dx_rid_spread_order, dx_spread_order_t)
+GET_RECORD_BUF_PTR_BODY(dx_rid_spread_order)
 GET_RECORD_PTR_BODY(dx_rid_greeks, dx_greeks_t)
 GET_RECORD_BUF_PTR_BODY(dx_rid_greeks)
 GET_RECORD_PTR_BODY(dx_rid_theo_price, dx_theo_price_t)
@@ -195,6 +199,8 @@ const dx_buffer_manager_collection_t g_buffer_managers[dx_rid_count] = {
     { GET_RECORD_PTR_NAME(dx_rid_order), GET_RECORD_BUF_PTR_NAME(dx_rid_order) },
     { GET_RECORD_PTR_NAME(dx_rid_time_and_sale), GET_RECORD_BUF_PTR_NAME(dx_rid_time_and_sale) },
     { GET_RECORD_PTR_NAME(dx_rid_candle), GET_RECORD_BUF_PTR_NAME(dx_rid_candle) },
+    { GET_RECORD_PTR_NAME(dx_rid_trade_eth), GET_RECORD_BUF_PTR_NAME(dx_rid_trade_eth) },
+    { GET_RECORD_PTR_NAME(dx_rid_spread_order), GET_RECORD_BUF_PTR_NAME(dx_rid_spread_order) },
     { GET_RECORD_PTR_NAME(dx_rid_greeks), GET_RECORD_BUF_PTR_NAME(dx_rid_greeks) },
     { GET_RECORD_PTR_NAME(dx_rid_theo_price), GET_RECORD_BUF_PTR_NAME(dx_rid_theo_price) },
     { GET_RECORD_PTR_NAME(dx_rid_underlying), GET_RECORD_BUF_PTR_NAME(dx_rid_underlying) },

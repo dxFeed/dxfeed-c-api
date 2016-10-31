@@ -743,6 +743,10 @@ ERRORCODE dxf_create_snapshot_impl(dxf_connection_t connection, dx_event_id_t ev
         }
     } else if (event_id == dx_eid_candle) {
         record_info_id = dx_rid_candle;
+    } else if (event_id == dx_eid_spread_order) {
+        record_info_id = dx_rid_spread_order;
+    } else if (event_id == dx_eid_time_and_sale) {
+        record_info_id = dx_rid_time_and_sale;
     } else if (event_id == dx_eid_greeks) {
         record_info_id = dx_rid_greeks;
     } else if (event_id == dx_eid_series) {
@@ -794,9 +798,11 @@ ERRORCODE dxf_create_snapshot_impl(dxf_connection_t connection, dx_event_id_t ev
 
 }
 
+/* -------------------------------------------------------------------------- */
+
 DXFEED_API ERRORCODE dxf_create_snapshot(dxf_connection_t connection, dx_event_id_t event_id,
                                          dxf_const_string_t symbol, const char* source,
-                                         dxf_long_t time, OUT dxf_snapshot_t* snapshot) {
+                                         dxf_long_t time,  OUT dxf_snapshot_t* snapshot) {
     dxf_string_t source_str = NULL;
     ERRORCODE res;
     if (source != NULL)
@@ -806,11 +812,15 @@ DXFEED_API ERRORCODE dxf_create_snapshot(dxf_connection_t connection, dx_event_i
     return res;
 }
 
+/* -------------------------------------------------------------------------- */
+
 DXFEED_API ERRORCODE dxf_create_order_snapshot(dxf_connection_t connection, 
                                                dxf_const_string_t symbol, const char* source,
                                                dxf_long_t time, OUT dxf_snapshot_t* snapshot) {
     return dxf_create_snapshot(connection, dx_eid_order, symbol, source, time, snapshot);
 }
+
+/* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_create_candle_snapshot(dxf_connection_t connection, 
                                                 dxf_candle_attributes_t candle_attributes, 

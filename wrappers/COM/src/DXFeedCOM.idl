@@ -117,7 +117,51 @@ library DXFeedCOM {
         HRESULT price ([out, retval] DOUBLE*);
         [id(8), propget, helpstring("Size value getter")]
         HRESULT size ([out, retval] LONGLONG*);
+        [id(9), propget, helpstring("Source value getter")]
+        HRESULT orderSource([out, retval] BSTR*);
+        [id(10), propget, helpstring("Count value getter")]
+        HRESULT count([out, retval] INT*);
+        [id(11), propget, helpstring("Event flags value getter")]
+        HRESULT eventFlags([out, retval] INT*);
+        [id(12), propget, helpstring("Time sequence value getter")]
+        HRESULT timeSequence([out, retval] LONGLONG*);
+        [id(13), propget, helpstring("Sequence value getter")]
+        HRESULT sequence([out, retval] INT*);
+        [id(14), propget, helpstring("Scope value getter")]
+        HRESULT scope([out, retval] INT*);
     }
+
+    [uuid(443B7441-8EA3-44F7-8BFB-6B3AA13EF6A7), helpstring("Candle data wrapper"), dual, oleautomation, nonextensible]
+    interface IDXCandle : IDispatch {
+        [id(1), propget, helpstring("Time value getter")]
+        HRESULT time([out, retval] LONGLONG*);
+        [id(2), propget, helpstring("Sequence value getter")]
+        HRESULT sequence([out, retval] INT*);
+        [id(3), propget, helpstring("Count value getter")]
+        HRESULT count([out, retval] DOUBLE*);
+        [id(4), propget, helpstring("Open price value getter")]
+        HRESULT open([out, retval] DOUBLE*);
+        [id(5), propget, helpstring("High price value getter")]
+        HRESULT high([out, retval] DOUBLE*);
+        [id(6), propget, helpstring("Low price value getter")]
+        HRESULT low([out, retval] DOUBLE*);
+        [id(7), propget, helpstring("Close price value getter")]
+        HRESULT close([out, retval] DOUBLE*);
+        [id(8), propget, helpstring("Volume value getter")]
+        HRESULT volume([out, retval] DOUBLE*);
+        [id(9), propget, helpstring("VWAP value getter")]
+        HRESULT vwap([out, retval] DOUBLE*);
+        [id(10), propget, helpstring("Bid volume value getter")]
+        HRESULT bidVolume([out, retval] DOUBLE*);
+        [id(11), propget, helpstring("Ask volume value getter")]
+        HRESULT askVolume([out, retval] DOUBLE*);
+        [id(12), propget, helpstring("Open interest value getter")]
+        HRESULT openInterest([out, retval] DOUBLE*);
+        [id(13), propget, helpstring("Implied volatility value getter")]
+        HRESULT impVolatility([out, retval] DOUBLE*);
+        [id(14), propget, helpstring("Index value getter")]
+        HRESULT index([out, retval] LONGLONG*);
+    };
     
     [uuid(A12D2830-6B0B-405c-990D-5B960CB9C33B), helpstring("Time&Sale data wrapper"), dual, oleautomation, nonextensible]
     interface IDXTimeAndSale : IDispatch {
@@ -125,23 +169,83 @@ library DXFeedCOM {
         HRESULT eventId ([out, retval] LONGLONG*);
         [id(2), propget, helpstring("Time value getter")]
         HRESULT time ([out, retval] LONGLONG*);
-        [id(3), propget, helpstring("Exchange code value getter")]
+        [id(3), propget, helpstring("Sequence value getter")]
+        HRESULT sequence([out, retval] INT*);
+        [id(4), propget, helpstring("Exchange code value getter")]
         HRESULT exchangeCode ([out, retval] SHORT*);
-        [id(4), propget, helpstring("Price value getter")]
+        [id(5), propget, helpstring("Price value getter")]
         HRESULT price ([out, retval] DOUBLE*);
-        [id(5), propget, helpstring("Size value getter")]
+        [id(6), propget, helpstring("Size value getter")]
         HRESULT size ([out, retval] LONGLONG*);
-        [id(6), propget, helpstring("Bid price value getter")]
+        [id(7), propget, helpstring("Bid price value getter")]
         HRESULT bidPrice ([out, retval] DOUBLE*);
-        [id(7), propget, helpstring("Ask price value getter")]
+        [id(8), propget, helpstring("Ask price value getter")]
         HRESULT askPrice ([out, retval] DOUBLE*);
-        [id(8), propget, helpstring("Exchange sale condition value getter")]
+        [id(9), propget, helpstring("Exchange sale condition value getter")]
         HRESULT exchangeSaleCondition ([out, retval] BSTR*);
-        [id(9), propget, helpstring("Trade flag value getter")]
-        HRESULT isTrade ([out, retval] VARIANT_BOOL*);
-        [id(10), propget, helpstring("Type value getter")]
+        [id(10), propget, helpstring("Event flags value getter")]
+        HRESULT eventFlags([out, retval] INT*);
+        [id(11), propget, helpstring("Index value getter")]
+        HRESULT index([out, retval] LONGLONG*);
+        [id(12), propget, helpstring("Agressor side value getter")]
+        HRESULT agressorSide([out, retval] INT*);
+        [id(13), propget, helpstring("Spread leg flag value getter")]
+        HRESULT spreadLeg([out, retval] VARIANT_BOOL*);
+        [id(14), propget, helpstring("Extended trading hours flag value getter")]
+        HRESULT tradeFlag([out, retval] VARIANT_BOOL*);
+        [id(15), propget, helpstring("Valid tick flag value getter")]
+        HRESULT validTick([out, retval] VARIANT_BOOL*);
+        [id(16), propget, helpstring("Type value getter")]
         HRESULT type ([out, retval] INT*);
     };
+
+    [uuid(8114B930-C1EF-4E0E-BF57-15386A53F546), helpstring("TradeETH data wrapper"), dual, oleautomation, nonextensible]
+    interface IDXTradeETH : IDispatch {
+        [id(1), propget, helpstring("Time value getter")]
+        HRESULT time([out, retval] LONGLONG*);
+        [id(2), propget, helpstring("Flag value getter")]
+        HRESULT type([out, retval] INT*);
+        [id(3), propget, helpstring("Exchange code value getter")]
+        HRESULT exchangeCode([out, retval] SHORT*);
+        [id(4), propget, helpstring("Price value getter")]
+        HRESULT price([out, retval] DOUBLE*);
+        [id(5), propget, helpstring("Size value getter")]
+        HRESULT size([out, retval] LONGLONG*);
+        [id(6), propget, helpstring("Day volume value getter")]
+        HRESULT dayVolume([out, retval] LONGLONG*);
+    };
+
+    [uuid(C2074CD9-D8E9-45E8-8D54-C120DF2DA830), helpstring("SpreadOrder data wrapper"), dual, oleautomation, nonextensible]
+    interface IDXSpreadOrder : IDispatch {
+        [id(1), propget, helpstring("Index value getter")]
+        HRESULT index([out, retval] LONGLONG*);
+        [id(2), propget, helpstring("Side value getter")]
+        HRESULT side([out, retval] INT*);
+        [id(3), propget, helpstring("Level value getter")]
+        HRESULT level([out, retval] INT*);
+        [id(4), propget, helpstring("Time value getter")]
+        HRESULT time([out, retval] LONGLONG*);
+        [id(5), propget, helpstring("Sequence value getter")]
+        HRESULT sequence([out, retval] INT*);
+        [id(6), propget, helpstring("Exchange code value getter")]
+        HRESULT exchangeCode([out, retval] SHORT*);
+        [id(7), propget, helpstring("Price value getter")]
+        HRESULT price([out, retval] DOUBLE*);
+        [id(8), propget, helpstring("Source value getter")]
+        HRESULT orderSource([out, retval] BSTR*);
+        [id(9), propget, helpstring("Size value getter")]
+        HRESULT size([out, retval] LONGLONG*);
+        [id(10), propget, helpstring("Count value getter")]
+        HRESULT count([out, retval] INT*);
+        [id(11), propget, helpstring("Event flags value getter")]
+        HRESULT eventFlags([out, retval] INT*);
+        [id(12), propget, helpstring("Spread symbol value getter")]
+        HRESULT spreadSymbol([out, retval] BSTR*);
+        [id(13), propget, helpstring("Time sequence value getter")]
+        HRESULT timeSequence([out, retval] LONGLONG*);
+        [id(14), propget, helpstring("Scope value getter")]
+        HRESULT scope([out, retval] INT*);
+    }
     
     [uuid(C798FC80-5AF7-41D3-B5C9-A20C6E0F3628), helpstring("Greeks data wrapper"), dual, oleautomation, nonextensible]
     interface IDXGreeks : IDispatch {

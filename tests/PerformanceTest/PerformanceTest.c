@@ -20,6 +20,9 @@ dxf_const_string_t dx_event_type_to_string (int event_type) {
 	case DXF_ET_PROFILE: return L"Profile";
 	case DXF_ET_ORDER: return L"Order";
 	case DXF_ET_TIME_AND_SALE: return L"Time&Sale";
+    case DXF_ET_CANDLE: return L"Candle";
+    case DXF_ET_TRADE_ETH: return L"TradeETH";
+    case DXF_ET_SPREAD_ORDER: return L"SpreadOrder";
     case DXF_ET_GREEKS: return L"Greeks";
     case DXF_ET_THEO_PRICE: return L"THEO_PRICE";
     case DXF_ET_UNDERLYING: return L"Underlying";

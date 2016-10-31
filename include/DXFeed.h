@@ -117,7 +117,8 @@ DXFEED_API ERRORCODE dxf_create_subscription (dxf_connection_t connection, int e
  *  time - time in the past (unix time in milliseconds)
  *  OUT subscription - a handle of the created subscription
  */
-DXFEED_API ERRORCODE dxf_create_subscription_timed(dxf_connection_t connection, int event_types, dxf_long_t time,
+DXFEED_API ERRORCODE dxf_create_subscription_timed(dxf_connection_t connection, int event_types, 
+                                                   dxf_long_t time,
                                                    OUT dxf_subscription_t* subscription);
 
 /*
@@ -382,8 +383,9 @@ DXFEED_API ERRORCODE dxf_create_snapshot(dxf_connection_t connection, dx_event_i
  *
  *  connection - a handle of a previously created connection which the subscription will be using
  *  symbol - the symbol to add
- *  source - order source for Order event with 4 symbols maximum length OR keyword which can be 
- *           one of COMPOSITE_BID or COMPOSITE_ASK
+ *  source - order source for Order, which can be one of following: "BYX", "BZX", "DEA", "DEX", 
+ *           "ISE", "IST", "NTV". For MarketMaker subscription use "COMPOSITE_BID" or 
+ *           "COMPOSITE_ASK" keyword.
  *  time - time in the past (unix time in milliseconds)
  *  OUT snapshot - a handle of the created snapshot
  */

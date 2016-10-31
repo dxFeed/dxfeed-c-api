@@ -33,6 +33,8 @@ dxf_const_string_t dx_event_type_to_string(int event_type) {
         case DXF_ET_ORDER: return L"Order";
         case DXF_ET_TIME_AND_SALE: return L"Time&Sale";
         case DXF_ET_CANDLE: return L"Candle";
+        case DXF_ET_TRADE_ETH: return L"TradeETH";
+        case DXF_ET_SPREAD_ORDER: return L"SpreadOrder";
         case DXF_ET_GREEKS: return L"Greeks";
         case DXF_ET_SERIES: return L"Series";
         default: return L"";
@@ -188,6 +190,42 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
                 candle.low, candle.close, candle.volume, candle.vwap,
                 candle.bid_volume, candle.ask_volume);
         }
+    } else if (snapshot_data->event_type == DXF_ET_SPREAD_ORDER) {
+        dxf_spread_order_t* order_records = (dxf_spread_order_t*)snapshot_data->records;
+        for (i = 0; i < records_count; ++i) {
+            dxf_spread_order_t order = order_records[i];
+
+            if (i >= RECORDS_PRINT_LIMIT) {
+                wprintf(L"   { ... %d records left ...}\n", records_count - i);
+                break;
+            }
+
+            wprintf(L"   {index=0x%llX, side=%i, level=%i, time=",
+                order.index, order.side, order.level);
+            print_timestamp(order.time);
+            wprintf(L", sequence=%i, exchange code=%c, price=%f, size=%lld, source=%ls, "
+                L"count=%i, flags=%i, spread symbol=%ls}\n",
+                order.sequence, order.exchange_code, order.price, order.size,
+                wcslen(order.source) > 0 ? order.source : L"",
+                order.count, order.event_flags,
+                wcslen(order.spread_symbol) > 0 ? order.spread_symbol : L"");
+        }
+    } else if (snapshot_data->event_type == DXF_ET_TIME_AND_SALE) {
+        dxf_time_and_sale_t* time_and_sale_records = (dxf_time_and_sale_t*)snapshot_data->records;
+        for (i = 0; i < snapshot_data->records_count; ++i) {
+            dxf_time_and_sale_t tns = time_and_sale_records[i];
+
+            if (i >= RECORDS_PRINT_LIMIT) {
+                wprintf(L"   { ... %d records left ...}\n", records_count - i);
+                break;
+            }
+
+            wprintf(L"event id=%I64i, time=%I64i, exchange code=%c, price=%f, size=%I64i, bid price=%f, ask price=%f, "
+                L"exchange sale conditions=\'%ls\', is trade=%ls, type=%i}\n",
+                tns.event_id, tns.time, tns.exchange_code, tns.price, tns.size,
+                tns.bid_price, tns.ask_price, tns.exchange_sale_conditions,
+                tns.is_trade ? L"True" : L"False", tns.type);
+        }
     } else if (snapshot_data->event_type == DXF_ET_GREEKS) {
         dxf_greeks_t* greeks_records = (dxf_greeks_t*)snapshot_data->records;
         for (i = 0; i < snapshot_data->records_count; ++i) {
@@ -261,6 +299,10 @@ int main(int argc, char* argv[]) {
         event_id = dx_eid_order;
     } else if (stricmp(event_type_name, "CANDLE") == 0) {
         event_id = dx_eid_candle;
+    } else if (stricmp(event_type_name, "SPREAD_ORDER") == 0) {
+        event_id = dx_eid_spread_order;
+    } else if (stricmp(event_type_name, "TIME_AND_SALE") == 0) {
+        event_id = dx_eid_time_and_sale;
     } else if (stricmp(event_type_name, "GREEKS") == 0) {
         event_id = dx_eid_greeks;
     } else if (stricmp(event_type_name, "SERIES") == 0) {
@@ -324,19 +366,19 @@ int main(int argc, char* argv[]) {
             dxf_delete_candle_symbol_attributes(candle_attributes);
             dxf_close_connection(connection);
             return -1;
-        };
+        }
     } else if (event_id == dx_eid_order) {
         if (!dxf_create_order_snapshot(connection, base_symbol, order_source_ptr, 0, &snapshot)) {
             process_last_error();
             dxf_close_connection(connection);
             return -1;
-        };
+        }
     } else {
         if (!dxf_create_snapshot(connection, event_id, base_symbol, NULL, 0, &snapshot)) {
             process_last_error();
             dxf_close_connection(connection);
             return -1;
-        };
+        }
     }
 
     if (!dxf_attach_snapshot_listener(snapshot, listener, NULL)) {
