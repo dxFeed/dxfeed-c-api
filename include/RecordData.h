@@ -157,8 +157,11 @@ typedef struct {
     dxf_int_t event_flags;
     dxf_long_t index;
     dxf_int_t side;
-    dxf_bool_t is_spread_leg;
+    dxf_bool_t is_cancel;
+    dxf_bool_t is_correction;
     dxf_bool_t is_trade;
+    dxf_bool_t is_new;
+    dxf_bool_t is_spread_leg;
     dxf_bool_t is_valid_tick;
     dxf_int_t type;
 } dx_time_and_sale_t;

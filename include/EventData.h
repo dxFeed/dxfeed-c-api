@@ -105,36 +105,36 @@ typedef dx_candle_t dxf_candle_t;
 typedef dx_trade_eth_t dxf_trade_eth_t;
 
 typedef struct {
-    dxf_long_t index;
-    dxf_int_t side;
-    dxf_int_t level;
-    dxf_long_t time;
-    dxf_char_t exchange_code;
-    dxf_const_string_t market_maker;
-    dxf_double_t price;
-    dxf_long_t size;
-    dxf_char_t source[DXF_RECORD_SUFFIX_SIZE];
     dxf_int_t count;
     dxf_int_t event_flags;
-    dxf_long_t time_sequence;
-    dxf_int_t sequence;
+    dxf_char_t exchange_code;
+    dxf_long_t index;
+    dxf_int_t level;
+    dxf_int_t side;
+    dxf_double_t price;
     dxf_int_t scope;
+    dxf_int_t sequence;
+    dxf_long_t size;
+    dxf_char_t source[DXF_RECORD_SUFFIX_SIZE];
+    dxf_long_t time;
+    dxf_long_t time_sequence;
+    dxf_const_string_t market_maker;
 } dxf_order_t;
 
 typedef struct {
-    dxf_long_t index;
-    dxf_int_t side;
-    dxf_int_t level;
-    dxf_long_t time;
-    dxf_int_t sequence;
-    dxf_char_t exchange_code;
-    dxf_double_t price;
-    dxf_long_t size;
-    dxf_char_t source[DXF_RECORD_SUFFIX_SIZE];
     dxf_int_t count;
     dxf_int_t event_flags;
-    dxf_long_t time_sequence;
+    dxf_char_t exchange_code;
+    dxf_long_t index;
+    dxf_int_t level;
+    dxf_int_t side;
+    dxf_double_t price;
     dxf_int_t scope;
+    dxf_int_t sequence;
+    dxf_long_t size;
+    dxf_char_t source[DXF_RECORD_SUFFIX_SIZE];
+    dxf_long_t time;
+    dxf_long_t time_sequence;
     dxf_const_string_t spread_symbol;
 } dxf_spread_order_t;
 

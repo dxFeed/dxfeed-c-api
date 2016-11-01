@@ -628,28 +628,31 @@ bool RECORD_TRANSCODER_NAME(dx_time_and_sale_t) (dx_record_transcoder_connection
         cur_event->sequence = sequence;
         cur_event->exchange_sale_conditions = dx_decode_from_integer((((dxf_long_t)flags & 0xFF00L) << 24 ) | exchange_sale_conditions);
         cur_event->index = cur_event->event_id;
-        cur_event->side = (flags >> DX_TIME_AND_SALE_SIDE_SHIFT) & DX_TIME_AND_SALE_SIDE_MASK;
+        cur_event->side = (flags >> DX_TIME_AND_SALE_SIDE_SHIFT) & DX_TIME_AND_SALE_SIDE_MASK == DX_ORDER_SIDE_SELL ? DXF_ORDER_SIDE_SELL : DXF_ORDER_SIDE_BUY;
         cur_event->is_spread_leg = ((flags & DX_TIME_AND_SALE_SPREAD_LEG) != 0);
         cur_event->is_trade = ((flags & DX_TIME_AND_SALE_ETH) != 0);
         cur_event->is_valid_tick = ((flags & DX_TIME_AND_SALE_VALID_TICK) != 0);
-        cur_event->type = flags & DX_TIME_AND_SALE_TYPE_MASK;
         
         /* when we get REMOVE_EVENT flag almost all fields of record is null;
            in this case no fileds are checked for null*/
-        if (!IS_FLAG_SET(flags, dxf_ef_remove_event)) {
+        if (!IS_FLAG_SET(event_params->flags, dxf_ef_remove_event)) {
             if (cur_event->exchange_sale_conditions != NULL &&
                 !dx_store_string_buffer(context->rbcc, cur_event->exchange_sale_conditions)) {
 
                 return false;
             }
 
-            switch (flags & 0x3) {
+            switch (flags & DX_TIME_AND_SALE_TYPE_MASK) {
             case 0: cur_event->type = DXF_TIME_AND_SALE_TYPE_NEW; break;
             case 1: cur_event->type = DXF_TIME_AND_SALE_TYPE_CORRECTION; break;
             case 2: cur_event->type = DXF_TIME_AND_SALE_TYPE_CANCEL; break;
             default: return false;
             }
         }
+
+        cur_event->is_cancel = (cur_event->type == DXF_TIME_AND_SALE_TYPE_CANCEL);
+        cur_event->is_correction = (cur_event->type == DXF_TIME_AND_SALE_TYPE_CORRECTION);
+        cur_event->is_new = (cur_event->type == DXF_TIME_AND_SALE_TYPE_NEW);
     }
 
     return dx_process_event_data(context->connection, dx_eid_time_and_sale, record_params->symbol_name,
