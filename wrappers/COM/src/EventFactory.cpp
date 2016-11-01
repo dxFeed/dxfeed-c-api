@@ -36,34 +36,34 @@ private:
     virtual HRESULT STDMETHODCALLTYPE QueryInterface (REFIID riid, void **ppvObject) {
         return QueryInterfaceImpl(this, riid, ppvObject);
     }
-    virtual ULONG STDMETHODCALLTYPE AddRef () { return AddRefImpl(); }
-    virtual ULONG STDMETHODCALLTYPE Release () { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
+    virtual ULONG STDMETHODCALLTYPE AddRef() { return AddRefImpl(); }
+    virtual ULONG STDMETHODCALLTYPE Release() { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
 
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo) { return GetTypeInfoCountImpl(pctinfo); }
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfo (UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount(UINT *pctinfo) { return GetTypeInfoCountImpl(pctinfo); }
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
         return GetTypeInfoImpl(iTInfo, lcid, ppTInfo);
     }
-    virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames (REFIID riid, LPOLESTR *rgszNames,
+    virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames(REFIID riid, LPOLESTR *rgszNames,
                                                      UINT cNames, LCID lcid, DISPID *rgDispId) {
         return GetIDsOfNamesImpl(riid, rgszNames, cNames, lcid, rgDispId);
     }
-    virtual HRESULT STDMETHODCALLTYPE Invoke (DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
-                                              DISPPARAMS *pDispParams, VARIANT *pVarResult,
-                                              EXCEPINFO *pExcepInfo, UINT *puArgErr) {
+    virtual HRESULT STDMETHODCALLTYPE Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
+                                             DISPPARAMS *pDispParams, VARIANT *pVarResult,
+                                             EXCEPINFO *pExcepInfo, UINT *puArgErr) {
         return InvokeImpl(this, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
     }
     
-    virtual HRESULT STDMETHODCALLTYPE GetTime (LONGLONG* value);
-    virtual HRESULT STDMETHODCALLTYPE GetExchangeCode (SHORT* value);
-    virtual HRESULT STDMETHODCALLTYPE GetPrice (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetSize (LONGLONG* value);
-    virtual HRESULT STDMETHODCALLTYPE GetTick (LONGLONG* value);
-    virtual HRESULT STDMETHODCALLTYPE GetChange (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetDayVolume (LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetTime(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetExchangeCode(SHORT* value);
+    virtual HRESULT STDMETHODCALLTYPE GetPrice(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetSize(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetTick(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetChange(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetDayVolume(LONGLONG* value);
     
 private:
 
-    DXTrade (dxf_event_data_t data, IUnknown* parent);
+    DXTrade(dxf_event_data_t data, IUnknown* parent);
 
 private:
 
@@ -76,14 +76,14 @@ private:
  */
 /* -------------------------------------------------------------------------- */
 
-DXTrade::DXTrade (dxf_event_data_t data, IUnknown* parent)
+DXTrade::DXTrade(dxf_event_data_t data, IUnknown* parent)
 : DefIDispatchImpl(IID_IDXTrade, parent)
 , m_data(reinterpret_cast<dxf_trade_t*>(data)) {
 }
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXTrade::GetTime (LONGLONG* value) {
+HRESULT STDMETHODCALLTYPE DXTrade::GetTime(LONGLONG* value) {
     CHECK_PTR(value);
     
     *value = m_data->time;
@@ -93,7 +93,7 @@ HRESULT STDMETHODCALLTYPE DXTrade::GetTime (LONGLONG* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXTrade::GetExchangeCode (SHORT* value) {
+HRESULT STDMETHODCALLTYPE DXTrade::GetExchangeCode(SHORT* value) {
     CHECK_PTR(value);
     
     *value = m_data->exchange_code;
@@ -103,7 +103,7 @@ HRESULT STDMETHODCALLTYPE DXTrade::GetExchangeCode (SHORT* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXTrade::GetPrice (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXTrade::GetPrice(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->price;
@@ -113,7 +113,7 @@ HRESULT STDMETHODCALLTYPE DXTrade::GetPrice (DOUBLE* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXTrade::GetSize (LONGLONG* value) {
+HRESULT STDMETHODCALLTYPE DXTrade::GetSize(LONGLONG* value) {
     CHECK_PTR(value);
 
     *value = m_data->size;
@@ -123,7 +123,7 @@ HRESULT STDMETHODCALLTYPE DXTrade::GetSize (LONGLONG* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXTrade::GetTick (LONGLONG* value) {
+HRESULT STDMETHODCALLTYPE DXTrade::GetTick(LONGLONG* value) {
     CHECK_PTR(value);
 
     *value = m_data->tick;
@@ -133,7 +133,7 @@ HRESULT STDMETHODCALLTYPE DXTrade::GetTick (LONGLONG* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXTrade::GetChange (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXTrade::GetChange(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->change;
@@ -143,7 +143,7 @@ HRESULT STDMETHODCALLTYPE DXTrade::GetChange (DOUBLE* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXTrade::GetDayVolume (LONGLONG* value) {
+HRESULT STDMETHODCALLTYPE DXTrade::GetDayVolume(LONGLONG* value) {
     CHECK_PTR(value);
 
     *value = *((LONGLONG*)&m_data->day_volume);
@@ -164,38 +164,38 @@ class DXQuote : private IDXQuote, private DefIDispatchImpl {
 
 private:
 
-    virtual HRESULT STDMETHODCALLTYPE QueryInterface (REFIID riid, void **ppvObject) {
+    virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObject) {
         return QueryInterfaceImpl(this, riid, ppvObject);
     }
-    virtual ULONG STDMETHODCALLTYPE AddRef () { return AddRefImpl(); }
-    virtual ULONG STDMETHODCALLTYPE Release () { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
+    virtual ULONG STDMETHODCALLTYPE AddRef() { return AddRefImpl(); }
+    virtual ULONG STDMETHODCALLTYPE Release() { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
 
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo) { return GetTypeInfoCountImpl(pctinfo); }
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfo (UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount(UINT *pctinfo) { return GetTypeInfoCountImpl(pctinfo); }
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
         return GetTypeInfoImpl(iTInfo, lcid, ppTInfo);
     }
-    virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames (REFIID riid, LPOLESTR *rgszNames,
+    virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames(REFIID riid, LPOLESTR *rgszNames,
                                                      UINT cNames, LCID lcid, DISPID *rgDispId) {
          return GetIDsOfNamesImpl(riid, rgszNames, cNames, lcid, rgDispId);
     }
-    virtual HRESULT STDMETHODCALLTYPE Invoke (DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
-                                              DISPPARAMS *pDispParams, VARIANT *pVarResult,
-                                              EXCEPINFO *pExcepInfo, UINT *puArgErr) {
+    virtual HRESULT STDMETHODCALLTYPE Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
+                                             DISPPARAMS *pDispParams, VARIANT *pVarResult,
+                                             EXCEPINFO *pExcepInfo, UINT *puArgErr) {
         return InvokeImpl(this, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
     }
 
-    virtual HRESULT STDMETHODCALLTYPE GetBidTime (LONGLONG* value);
-    virtual HRESULT STDMETHODCALLTYPE GetBidExchangeCode (SHORT* value);
-    virtual HRESULT STDMETHODCALLTYPE GetBidPrice (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetBidSize (LONGLONG* value);
-    virtual HRESULT STDMETHODCALLTYPE GetAskTime (LONGLONG* value);
-    virtual HRESULT STDMETHODCALLTYPE GetAskExchangeCode (SHORT* value);
-    virtual HRESULT STDMETHODCALLTYPE GetAskPrice (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetAskSize (LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetBidTime(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetBidExchangeCode(SHORT* value);
+    virtual HRESULT STDMETHODCALLTYPE GetBidPrice(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetBidSize(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetAskTime(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetAskExchangeCode(SHORT* value);
+    virtual HRESULT STDMETHODCALLTYPE GetAskPrice(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetAskSize(LONGLONG* value);
     
 private:
 
-    DXQuote (dxf_event_data_t data, IUnknown* parent);
+    DXQuote(dxf_event_data_t data, IUnknown* parent);
 
 private:
 
@@ -208,14 +208,14 @@ private:
  */
 /* -------------------------------------------------------------------------- */
 
-DXQuote::DXQuote (dxf_event_data_t data, IUnknown* parent)
+DXQuote::DXQuote(dxf_event_data_t data, IUnknown* parent)
 : DefIDispatchImpl(IID_IDXQuote, parent)
 , m_data(reinterpret_cast<dxf_quote_t*>(data)) {
 }
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXQuote::GetBidTime (LONGLONG* value) {
+HRESULT STDMETHODCALLTYPE DXQuote::GetBidTime(LONGLONG* value) {
     CHECK_PTR(value);
 
     *value = m_data->bid_time;
@@ -225,7 +225,7 @@ HRESULT STDMETHODCALLTYPE DXQuote::GetBidTime (LONGLONG* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXQuote::GetBidExchangeCode (SHORT* value) {
+HRESULT STDMETHODCALLTYPE DXQuote::GetBidExchangeCode(SHORT* value) {
     CHECK_PTR(value);
 
     *value = m_data->bid_exchange_code;
@@ -235,7 +235,7 @@ HRESULT STDMETHODCALLTYPE DXQuote::GetBidExchangeCode (SHORT* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXQuote::GetBidPrice (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXQuote::GetBidPrice(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->bid_price;
@@ -245,7 +245,7 @@ HRESULT STDMETHODCALLTYPE DXQuote::GetBidPrice (DOUBLE* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXQuote::GetBidSize (LONGLONG* value) {
+HRESULT STDMETHODCALLTYPE DXQuote::GetBidSize(LONGLONG* value) {
     CHECK_PTR(value);
 
     *value = m_data->bid_size;
@@ -255,7 +255,7 @@ HRESULT STDMETHODCALLTYPE DXQuote::GetBidSize (LONGLONG* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXQuote::GetAskTime (LONGLONG* value) {
+HRESULT STDMETHODCALLTYPE DXQuote::GetAskTime(LONGLONG* value) {
     CHECK_PTR(value);
 
     *value = m_data->ask_time;
@@ -265,7 +265,7 @@ HRESULT STDMETHODCALLTYPE DXQuote::GetAskTime (LONGLONG* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXQuote::GetAskExchangeCode (SHORT* value) {
+HRESULT STDMETHODCALLTYPE DXQuote::GetAskExchangeCode(SHORT* value) {
     CHECK_PTR(value);
 
     *value = m_data->ask_exchange_code;
@@ -275,7 +275,7 @@ HRESULT STDMETHODCALLTYPE DXQuote::GetAskExchangeCode (SHORT* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXQuote::GetAskPrice (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXQuote::GetAskPrice(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->ask_price;
@@ -285,7 +285,7 @@ HRESULT STDMETHODCALLTYPE DXQuote::GetAskPrice (DOUBLE* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXQuote::GetAskSize (LONGLONG* value) {
+HRESULT STDMETHODCALLTYPE DXQuote::GetAskSize(LONGLONG* value) {
     CHECK_PTR(value);
 
     *value = m_data->ask_size;
@@ -306,40 +306,40 @@ class DXSummary : private IDXSummary, private DefIDispatchImpl {
 
 private:
 
-    virtual HRESULT STDMETHODCALLTYPE QueryInterface (REFIID riid, void **ppvObject) {
+    virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObject) {
         return QueryInterfaceImpl(this, riid, ppvObject);
     }
-    virtual ULONG STDMETHODCALLTYPE AddRef () { return AddRefImpl(); }
-    virtual ULONG STDMETHODCALLTYPE Release () { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
+    virtual ULONG STDMETHODCALLTYPE AddRef() { return AddRefImpl(); }
+    virtual ULONG STDMETHODCALLTYPE Release() { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
 
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo) { return GetTypeInfoCountImpl(pctinfo); }
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfo (UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount(UINT *pctinfo) { return GetTypeInfoCountImpl(pctinfo); }
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
         return GetTypeInfoImpl(iTInfo, lcid, ppTInfo);
     }
-    virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames (REFIID riid, LPOLESTR *rgszNames,
+    virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames(REFIID riid, LPOLESTR *rgszNames,
                                                      UINT cNames, LCID lcid, DISPID *rgDispId) {
         return GetIDsOfNamesImpl(riid, rgszNames, cNames, lcid, rgDispId);
     }
-    virtual HRESULT STDMETHODCALLTYPE Invoke (DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
-                                              DISPPARAMS *pDispParams, VARIANT *pVarResult,
-                                              EXCEPINFO *pExcepInfo, UINT *puArgErr) {
+    virtual HRESULT STDMETHODCALLTYPE Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
+                                             DISPPARAMS *pDispParams, VARIANT *pVarResult,
+                                             EXCEPINFO *pExcepInfo, UINT *puArgErr) {
         return InvokeImpl(this, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
     }
 
-    virtual HRESULT STDMETHODCALLTYPE GetDayId (LONGLONG* value);
-    virtual HRESULT STDMETHODCALLTYPE GetDayOpenPrice (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetDayHighPrice (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetDayLowPrice (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetDayClosePrice (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetPrevDayId (LONGLONG* value);
-    virtual HRESULT STDMETHODCALLTYPE GetPrevDayClosePrice (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetOpenInterest (LONGLONG* value);
-    virtual HRESULT STDMETHODCALLTYPE GetFlags (LONGLONG* value);
-    virtual HRESULT STDMETHODCALLTYPE GetExchange (SHORT* value);
+    virtual HRESULT STDMETHODCALLTYPE GetDayId(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetDayOpenPrice(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetDayHighPrice(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetDayLowPrice(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetDayClosePrice(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetPrevDayId(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetPrevDayClosePrice(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetOpenInterest(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetFlags(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetExchange(SHORT* value);
 
 private:
 
-    DXSummary (dxf_event_data_t data, IUnknown* parent);
+    DXSummary(dxf_event_data_t data, IUnknown* parent);
 
 private:
 
@@ -352,14 +352,14 @@ private:
  */
 /* -------------------------------------------------------------------------- */
 
-DXSummary::DXSummary (dxf_event_data_t data, IUnknown* parent)
+DXSummary::DXSummary(dxf_event_data_t data, IUnknown* parent)
 : DefIDispatchImpl(IID_IDXSummary, parent)
 , m_data(reinterpret_cast<dxf_summary_t*>(data)) {
 }
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXSummary::GetDayId (LONGLONG* value) {
+HRESULT STDMETHODCALLTYPE DXSummary::GetDayId(LONGLONG* value) {
     CHECK_PTR(value);
 
     *value = m_data->day_id;
@@ -369,7 +369,7 @@ HRESULT STDMETHODCALLTYPE DXSummary::GetDayId (LONGLONG* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXSummary::GetDayOpenPrice (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXSummary::GetDayOpenPrice(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->day_open_price;
@@ -379,7 +379,7 @@ HRESULT STDMETHODCALLTYPE DXSummary::GetDayOpenPrice (DOUBLE* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXSummary::GetDayHighPrice (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXSummary::GetDayHighPrice(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->day_high_price;
@@ -389,7 +389,7 @@ HRESULT STDMETHODCALLTYPE DXSummary::GetDayHighPrice (DOUBLE* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXSummary::GetDayLowPrice (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXSummary::GetDayLowPrice(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->day_low_price;
@@ -399,7 +399,7 @@ HRESULT STDMETHODCALLTYPE DXSummary::GetDayLowPrice (DOUBLE* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXSummary::GetDayClosePrice (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXSummary::GetDayClosePrice(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->day_close_price;
@@ -409,7 +409,7 @@ HRESULT STDMETHODCALLTYPE DXSummary::GetDayClosePrice (DOUBLE* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXSummary::GetPrevDayId (LONGLONG* value) {
+HRESULT STDMETHODCALLTYPE DXSummary::GetPrevDayId(LONGLONG* value) {
     CHECK_PTR(value);
 
     *value = m_data->prev_day_id;
@@ -419,7 +419,7 @@ HRESULT STDMETHODCALLTYPE DXSummary::GetPrevDayId (LONGLONG* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXSummary::GetPrevDayClosePrice (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXSummary::GetPrevDayClosePrice(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->prev_day_close_price;
@@ -429,7 +429,7 @@ HRESULT STDMETHODCALLTYPE DXSummary::GetPrevDayClosePrice (DOUBLE* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXSummary::GetOpenInterest (LONGLONG* value) {
+HRESULT STDMETHODCALLTYPE DXSummary::GetOpenInterest(LONGLONG* value) {
     CHECK_PTR(value);
 
     *value = m_data->open_interest;
@@ -439,7 +439,7 @@ HRESULT STDMETHODCALLTYPE DXSummary::GetOpenInterest (LONGLONG* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXSummary::GetFlags (LONGLONG* value) {
+HRESULT STDMETHODCALLTYPE DXSummary::GetFlags(LONGLONG* value) {
     CHECK_PTR(value);
 
     *value = m_data->flags;
@@ -449,7 +449,7 @@ HRESULT STDMETHODCALLTYPE DXSummary::GetFlags (LONGLONG* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXSummary::GetExchange (SHORT* value) {
+HRESULT STDMETHODCALLTYPE DXSummary::GetExchange(SHORT* value) {
     CHECK_PTR(value);
 
     *value = m_data->exchange_code;
@@ -470,45 +470,45 @@ class DXProfile : private IDXProfile, private DefIDispatchImpl {
 
 private:
 
-    virtual HRESULT STDMETHODCALLTYPE QueryInterface (REFIID riid, void **ppvObject) {
+    virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObject) {
         return QueryInterfaceImpl(this, riid, ppvObject);
     }
-    virtual ULONG STDMETHODCALLTYPE AddRef () { return AddRefImpl(); }
-    virtual ULONG STDMETHODCALLTYPE Release () { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
+    virtual ULONG STDMETHODCALLTYPE AddRef() { return AddRefImpl(); }
+    virtual ULONG STDMETHODCALLTYPE Release() { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
 
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo) { return GetTypeInfoCountImpl(pctinfo); }
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfo (UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount(UINT *pctinfo) { return GetTypeInfoCountImpl(pctinfo); }
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
         return GetTypeInfoImpl(iTInfo, lcid, ppTInfo);
     }
-    virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames (REFIID riid, LPOLESTR *rgszNames,
+    virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames(REFIID riid, LPOLESTR *rgszNames,
                                                      UINT cNames, LCID lcid, DISPID *rgDispId) {
         return GetIDsOfNamesImpl(riid, rgszNames, cNames, lcid, rgDispId);
     }
-    virtual HRESULT STDMETHODCALLTYPE Invoke (DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
-                                              DISPPARAMS *pDispParams, VARIANT *pVarResult,
-                                              EXCEPINFO *pExcepInfo, UINT *puArgErr) {
+    virtual HRESULT STDMETHODCALLTYPE Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
+                                             DISPPARAMS *pDispParams, VARIANT *pVarResult,
+                                             EXCEPINFO *pExcepInfo, UINT *puArgErr) {
         return InvokeImpl(this, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
     }
 
-    virtual HRESULT STDMETHODCALLTYPE GetBeta (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetEps (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetDivFreq (LONGLONG* value);
-    virtual HRESULT STDMETHODCALLTYPE GetExdDivAmount (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetExdDiveDate (LONGLONG* value);
-    virtual HRESULT STDMETHODCALLTYPE Get52HighPrice (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE Get52LowPrice (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetShares (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetDescription (BSTR* value);
-    virtual HRESULT STDMETHODCALLTYPE GetFlags (LONGLONG* value);
-    virtual HRESULT STDMETHODCALLTYPE GetStatusReason (BSTR* value);
-    virtual HRESULT STDMETHODCALLTYPE GetHaltStartTime (LONGLONG* value);
-    virtual HRESULT STDMETHODCALLTYPE GetHaltEndTime (LONGLONG* value);
-    virtual HRESULT STDMETHODCALLTYPE GetHighLimitPrice (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetLowLimitPrice (DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetBeta(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetEps(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetDivFreq(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetExdDivAmount(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetExdDiveDate(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE Get52HighPrice(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE Get52LowPrice(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetShares(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetDescription(BSTR* value);
+    virtual HRESULT STDMETHODCALLTYPE GetFlags(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetStatusReason(BSTR* value);
+    virtual HRESULT STDMETHODCALLTYPE GetHaltStartTime(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetHaltEndTime(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetHighLimitPrice(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetLowLimitPrice(DOUBLE* value);
 
 private:
 
-    DXProfile (dxf_event_data_t data, IUnknown* parent);
+    DXProfile(dxf_event_data_t data, IUnknown* parent);
 
 private:
 
@@ -521,14 +521,14 @@ private:
  */
 /* -------------------------------------------------------------------------- */
 
-DXProfile::DXProfile (dxf_event_data_t data, IUnknown* parent)
+DXProfile::DXProfile(dxf_event_data_t data, IUnknown* parent)
 : DefIDispatchImpl(IID_IDXProfile, parent)
 , m_data(reinterpret_cast<dxf_profile_t*>(data)) {
 }
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT DXProfile::GetBeta (DOUBLE * value)
+HRESULT DXProfile::GetBeta(DOUBLE * value)
 {
     CHECK_PTR(value);
 
@@ -537,7 +537,7 @@ HRESULT DXProfile::GetBeta (DOUBLE * value)
     return S_OK;
 }
 
-HRESULT DXProfile::GetEps (DOUBLE * value)
+HRESULT DXProfile::GetEps(DOUBLE * value)
 {
     CHECK_PTR(value);
 
@@ -546,7 +546,7 @@ HRESULT DXProfile::GetEps (DOUBLE * value)
     return S_OK;
 }
 
-HRESULT DXProfile::GetDivFreq (LONGLONG * value)
+HRESULT DXProfile::GetDivFreq(LONGLONG * value)
 {
     CHECK_PTR(value);
 
@@ -555,7 +555,7 @@ HRESULT DXProfile::GetDivFreq (LONGLONG * value)
     return S_OK;
 }
 
-HRESULT DXProfile::GetExdDivAmount (DOUBLE * value)
+HRESULT DXProfile::GetExdDivAmount(DOUBLE * value)
 {
     CHECK_PTR(value);
 
@@ -564,7 +564,7 @@ HRESULT DXProfile::GetExdDivAmount (DOUBLE * value)
     return S_OK;
 }
 
-HRESULT DXProfile::GetExdDiveDate (LONGLONG * value)
+HRESULT DXProfile::GetExdDiveDate(LONGLONG * value)
 {
     CHECK_PTR(value);
 
@@ -573,7 +573,7 @@ HRESULT DXProfile::GetExdDiveDate (LONGLONG * value)
     return S_OK;
 }
 
-HRESULT DXProfile::Get52HighPrice (DOUBLE * value)
+HRESULT DXProfile::Get52HighPrice(DOUBLE * value)
 {
     CHECK_PTR(value);
 
@@ -582,7 +582,7 @@ HRESULT DXProfile::Get52HighPrice (DOUBLE * value)
     return S_OK;
 }
 
-HRESULT DXProfile::Get52LowPrice (DOUBLE * value)
+HRESULT DXProfile::Get52LowPrice(DOUBLE * value)
 {
     CHECK_PTR(value);
 
@@ -591,7 +591,7 @@ HRESULT DXProfile::Get52LowPrice (DOUBLE * value)
     return S_OK;
 }
 
-HRESULT DXProfile::GetShares (DOUBLE * value)
+HRESULT DXProfile::GetShares(DOUBLE * value)
 {
     CHECK_PTR(value);
 
@@ -600,7 +600,7 @@ HRESULT DXProfile::GetShares (DOUBLE * value)
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE DXProfile::GetDescription (BSTR* value) {
+HRESULT STDMETHODCALLTYPE DXProfile::GetDescription(BSTR* value) {
     CHECK_PTR(value);
     
     HRESULT hr = S_OK;
@@ -616,7 +616,7 @@ HRESULT STDMETHODCALLTYPE DXProfile::GetDescription (BSTR* value) {
     return hr;
 }
 
-HRESULT DXProfile::GetFlags (LONGLONG * value)
+HRESULT DXProfile::GetFlags(LONGLONG * value)
 {
     CHECK_PTR(value);
 
@@ -625,7 +625,7 @@ HRESULT DXProfile::GetFlags (LONGLONG * value)
     return S_OK;
 }
 
-HRESULT DXProfile::GetStatusReason (BSTR * value)
+HRESULT DXProfile::GetStatusReason(BSTR * value)
 {
     CHECK_PTR(value);
 
@@ -643,7 +643,7 @@ HRESULT DXProfile::GetStatusReason (BSTR * value)
     return hr;
 }
 
-HRESULT DXProfile::GetHaltStartTime (LONGLONG * value)
+HRESULT DXProfile::GetHaltStartTime(LONGLONG * value)
 {
     CHECK_PTR(value);
 
@@ -652,7 +652,7 @@ HRESULT DXProfile::GetHaltStartTime (LONGLONG * value)
     return S_OK;
 }
 
-HRESULT DXProfile::GetHaltEndTime (LONGLONG * value)
+HRESULT DXProfile::GetHaltEndTime(LONGLONG * value)
 {
     CHECK_PTR(value);
 
@@ -661,7 +661,7 @@ HRESULT DXProfile::GetHaltEndTime (LONGLONG * value)
     return S_OK;
 }
 
-HRESULT DXProfile::GetHighLimitPrice (DOUBLE * value)
+HRESULT DXProfile::GetHighLimitPrice(DOUBLE * value)
 {
     CHECK_PTR(value);
 
@@ -670,7 +670,7 @@ HRESULT DXProfile::GetHighLimitPrice (DOUBLE * value)
     return S_OK;
 }
 
-HRESULT DXProfile::GetLowLimitPrice (DOUBLE * value)
+HRESULT DXProfile::GetLowLimitPrice(DOUBLE * value)
 {
     CHECK_PTR(value);
 
@@ -692,34 +692,34 @@ class DXOrder : private IDXOrder, private DefIDispatchImpl {
 
 private:
 
-    virtual HRESULT STDMETHODCALLTYPE QueryInterface (REFIID riid, void **ppvObject) {
+    virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObject) {
         return QueryInterfaceImpl(this, riid, ppvObject);
     }
-    virtual ULONG STDMETHODCALLTYPE AddRef () { return AddRefImpl(); }
-    virtual ULONG STDMETHODCALLTYPE Release () { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
+    virtual ULONG STDMETHODCALLTYPE AddRef() { return AddRefImpl(); }
+    virtual ULONG STDMETHODCALLTYPE Release() { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
 
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo) { return GetTypeInfoCountImpl(pctinfo); }
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfo (UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount(UINT *pctinfo) { return GetTypeInfoCountImpl(pctinfo); }
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
         return GetTypeInfoImpl(iTInfo, lcid, ppTInfo);
     }
-    virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames (REFIID riid, LPOLESTR *rgszNames,
+    virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames(REFIID riid, LPOLESTR *rgszNames,
                                                      UINT cNames, LCID lcid, DISPID *rgDispId) {
         return GetIDsOfNamesImpl(riid, rgszNames, cNames, lcid, rgDispId);
     }
-    virtual HRESULT STDMETHODCALLTYPE Invoke (DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
-                                              DISPPARAMS *pDispParams, VARIANT *pVarResult,
-                                              EXCEPINFO *pExcepInfo, UINT *puArgErr) {
+    virtual HRESULT STDMETHODCALLTYPE Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
+                                             DISPPARAMS *pDispParams, VARIANT *pVarResult,
+                                             EXCEPINFO *pExcepInfo, UINT *puArgErr) {
         return InvokeImpl(this, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
     }
 
-    virtual HRESULT STDMETHODCALLTYPE GetIndex (LONGLONG* value);
-    virtual HRESULT STDMETHODCALLTYPE GetSide (INT* value);
-    virtual HRESULT STDMETHODCALLTYPE GetLevel (INT* value);
-    virtual HRESULT STDMETHODCALLTYPE GetTime (LONGLONG* value);
-    virtual HRESULT STDMETHODCALLTYPE GetExchangeCode (SHORT* value);
-    virtual HRESULT STDMETHODCALLTYPE GetMarketMaker (BSTR* value);
-    virtual HRESULT STDMETHODCALLTYPE GetPrice (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetSize (LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetIndex(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetSide(INT* value);
+    virtual HRESULT STDMETHODCALLTYPE GetLevel(INT* value);
+    virtual HRESULT STDMETHODCALLTYPE GetTime(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetExchangeCode(SHORT* value);
+    virtual HRESULT STDMETHODCALLTYPE GetMarketMaker(BSTR* value);
+    virtual HRESULT STDMETHODCALLTYPE GetPrice(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetSize(LONGLONG* value);
     virtual HRESULT STDMETHODCALLTYPE GetOrderSource(BSTR* value);
     virtual HRESULT STDMETHODCALLTYPE GetCount(INT* value);
     virtual HRESULT STDMETHODCALLTYPE GetEventFlags(INT* value);
@@ -729,7 +729,7 @@ private:
 
 private:
 
-    DXOrder (dxf_event_data_t data, IUnknown* parent);
+    DXOrder(dxf_event_data_t data, IUnknown* parent);
 
 private:
 
@@ -742,14 +742,14 @@ private:
  */
 /* -------------------------------------------------------------------------- */
 
-DXOrder::DXOrder (dxf_event_data_t data, IUnknown* parent)
+DXOrder::DXOrder(dxf_event_data_t data, IUnknown* parent)
 : DefIDispatchImpl(IID_IDXOrder, parent)
 , m_data(reinterpret_cast<dxf_order_t*>(data)) {
 }
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXOrder::GetIndex (LONGLONG* value) {
+HRESULT STDMETHODCALLTYPE DXOrder::GetIndex(LONGLONG* value) {
     CHECK_PTR(value);
 
     *value = m_data->index;
@@ -759,7 +759,7 @@ HRESULT STDMETHODCALLTYPE DXOrder::GetIndex (LONGLONG* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXOrder::GetSide (INT* value) {
+HRESULT STDMETHODCALLTYPE DXOrder::GetSide(INT* value) {
     CHECK_PTR(value);
 
     *value = m_data->side;
@@ -769,7 +769,7 @@ HRESULT STDMETHODCALLTYPE DXOrder::GetSide (INT* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXOrder::GetLevel (INT* value) {
+HRESULT STDMETHODCALLTYPE DXOrder::GetLevel(INT* value) {
     CHECK_PTR(value);
 
     *value = m_data->level;
@@ -779,7 +779,7 @@ HRESULT STDMETHODCALLTYPE DXOrder::GetLevel (INT* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXOrder::GetTime (LONGLONG* value) {
+HRESULT STDMETHODCALLTYPE DXOrder::GetTime(LONGLONG* value) {
     CHECK_PTR(value);
 
     *value = m_data->time;
@@ -789,7 +789,7 @@ HRESULT STDMETHODCALLTYPE DXOrder::GetTime (LONGLONG* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXOrder::GetExchangeCode (SHORT* value) {
+HRESULT STDMETHODCALLTYPE DXOrder::GetExchangeCode(SHORT* value) {
     CHECK_PTR(value);
 
     *value = m_data->exchange_code;
@@ -799,7 +799,7 @@ HRESULT STDMETHODCALLTYPE DXOrder::GetExchangeCode (SHORT* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXOrder::GetMarketMaker (BSTR* value) {
+HRESULT STDMETHODCALLTYPE DXOrder::GetMarketMaker(BSTR* value) {
     CHECK_PTR(value);
 
     HRESULT hr = S_OK;
@@ -817,7 +817,7 @@ HRESULT STDMETHODCALLTYPE DXOrder::GetMarketMaker (BSTR* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXOrder::GetPrice (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXOrder::GetPrice(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->price;
@@ -827,7 +827,7 @@ HRESULT STDMETHODCALLTYPE DXOrder::GetPrice (DOUBLE* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXOrder::GetSize (LONGLONG* value) {
+HRESULT STDMETHODCALLTYPE DXOrder::GetSize(LONGLONG* value) {
     CHECK_PTR(value);
 
     *value = m_data->size;
@@ -917,23 +917,23 @@ class DXTimeAndSale : private IDXTimeAndSale, private DefIDispatchImpl {
 
 private:
 
-    virtual HRESULT STDMETHODCALLTYPE QueryInterface (REFIID riid, void **ppvObject) {
+    virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObject) {
         return QueryInterfaceImpl(this, riid, ppvObject);
     }
-    virtual ULONG STDMETHODCALLTYPE AddRef () { return AddRefImpl(); }
-    virtual ULONG STDMETHODCALLTYPE Release () { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
+    virtual ULONG STDMETHODCALLTYPE AddRef() { return AddRefImpl(); }
+    virtual ULONG STDMETHODCALLTYPE Release() { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
 
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo) { return GetTypeInfoCountImpl(pctinfo); }
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfo (UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount(UINT *pctinfo) { return GetTypeInfoCountImpl(pctinfo); }
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
         return GetTypeInfoImpl(iTInfo, lcid, ppTInfo);
     }
-    virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames (REFIID riid, LPOLESTR *rgszNames,
+    virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames(REFIID riid, LPOLESTR *rgszNames,
                                                      UINT cNames, LCID lcid, DISPID *rgDispId) {
         return GetIDsOfNamesImpl(riid, rgszNames, cNames, lcid, rgDispId);
     }
-    virtual HRESULT STDMETHODCALLTYPE Invoke (DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
-                                              DISPPARAMS *pDispParams, VARIANT *pVarResult,
-                                              EXCEPINFO *pExcepInfo, UINT *puArgErr) {
+    virtual HRESULT STDMETHODCALLTYPE Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
+                                             DISPPARAMS *pDispParams, VARIANT *pVarResult,
+                                             EXCEPINFO *pExcepInfo, UINT *puArgErr) {
         return InvokeImpl(this, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
     }
 
@@ -956,7 +956,7 @@ private:
 
 private:
 
-    DXTimeAndSale (dxf_event_data_t data, IUnknown* parent);
+    DXTimeAndSale(dxf_event_data_t data, IUnknown* parent);
 
 private:
 
@@ -969,14 +969,14 @@ private:
  */
 /* -------------------------------------------------------------------------- */
 
-DXTimeAndSale::DXTimeAndSale (dxf_event_data_t data, IUnknown* parent)
+DXTimeAndSale::DXTimeAndSale(dxf_event_data_t data, IUnknown* parent)
 : DefIDispatchImpl(IID_IDXTimeAndSale, parent)
 , m_data(reinterpret_cast<dxf_time_and_sale_t*>(data)) {
 }
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetEventId (LONGLONG* value) {
+HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetEventId(LONGLONG* value) {
     CHECK_PTR(value);
     
     *value = m_data->event_id;
@@ -986,7 +986,7 @@ HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetEventId (LONGLONG* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetTime (LONGLONG* value) {
+HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetTime(LONGLONG* value) {
     CHECK_PTR(value);
 
     *value = m_data->time;
@@ -1006,7 +1006,7 @@ HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetSequence(INT* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetExchangeCode (SHORT* value) {
+HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetExchangeCode(SHORT* value) {
     CHECK_PTR(value);
 
     *value = m_data->exchange_code;
@@ -1016,7 +1016,7 @@ HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetExchangeCode (SHORT* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetPrice (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetPrice(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->price;
@@ -1026,7 +1026,7 @@ HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetPrice (DOUBLE* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetSize (LONGLONG* value) {
+HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetSize(LONGLONG* value) {
     CHECK_PTR(value);
 
     *value = m_data->size;
@@ -1036,7 +1036,7 @@ HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetSize (LONGLONG* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetBidPrice (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetBidPrice(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->bid_price;
@@ -1046,7 +1046,7 @@ HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetBidPrice (DOUBLE* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetAskPrice (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetAskPrice(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->ask_price;
@@ -1056,7 +1056,7 @@ HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetAskPrice (DOUBLE* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetExchangeSaleCondition (BSTR* value) {
+HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetExchangeSaleCondition(BSTR* value) {
     CHECK_PTR(value);
 
     HRESULT hr = S_OK;
@@ -1134,7 +1134,7 @@ HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetValidTick(VARIANT_BOOL* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetType (INT* value) {
+HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetType(INT* value) {
     CHECK_PTR(value);
 
     *value = m_data->type;
@@ -1167,12 +1167,12 @@ private:
         return GetTypeInfoImpl(iTInfo, lcid, ppTInfo);
     }
     virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames(REFIID riid, LPOLESTR *rgszNames,
-        UINT cNames, LCID lcid, DISPID *rgDispId) {
+                                                    UINT cNames, LCID lcid, DISPID *rgDispId) {
         return GetIDsOfNamesImpl(riid, rgszNames, cNames, lcid, rgDispId);
     }
     virtual HRESULT STDMETHODCALLTYPE Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
-        DISPPARAMS *pDispParams, VARIANT *pVarResult,
-        EXCEPINFO *pExcepInfo, UINT *puArgErr) {
+                                             DISPPARAMS *pDispParams, VARIANT *pVarResult,
+                                             EXCEPINFO *pExcepInfo, UINT *puArgErr) {
         return InvokeImpl(this, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
     }
 
@@ -1375,12 +1375,12 @@ private:
         return GetTypeInfoImpl(iTInfo, lcid, ppTInfo);
     }
     virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames(REFIID riid, LPOLESTR *rgszNames,
-        UINT cNames, LCID lcid, DISPID *rgDispId) {
+                                                    UINT cNames, LCID lcid, DISPID *rgDispId) {
         return GetIDsOfNamesImpl(riid, rgszNames, cNames, lcid, rgDispId);
     }
     virtual HRESULT STDMETHODCALLTYPE Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
-        DISPPARAMS *pDispParams, VARIANT *pVarResult,
-        EXCEPINFO *pExcepInfo, UINT *puArgErr) {
+                                             DISPPARAMS *pDispParams, VARIANT *pVarResult,
+                                             EXCEPINFO *pExcepInfo, UINT *puArgErr) {
         return InvokeImpl(this, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
     }
 
@@ -1495,12 +1495,12 @@ private:
         return GetTypeInfoImpl(iTInfo, lcid, ppTInfo);
     }
     virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames(REFIID riid, LPOLESTR *rgszNames,
-        UINT cNames, LCID lcid, DISPID *rgDispId) {
+                                                    UINT cNames, LCID lcid, DISPID *rgDispId) {
         return GetIDsOfNamesImpl(riid, rgszNames, cNames, lcid, rgDispId);
     }
     virtual HRESULT STDMETHODCALLTYPE Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
-        DISPPARAMS *pDispParams, VARIANT *pVarResult,
-        EXCEPINFO *pExcepInfo, UINT *puArgErr) {
+                                             DISPPARAMS *pDispParams, VARIANT *pVarResult,
+                                             EXCEPINFO *pExcepInfo, UINT *puArgErr) {
         return InvokeImpl(this, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
     }
 
@@ -1710,39 +1710,39 @@ class DXGreeks : private IDXGreeks, private DefIDispatchImpl {
 
 private:
 
-    virtual HRESULT STDMETHODCALLTYPE QueryInterface (REFIID riid, void **ppvObject) {
+    virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObject) {
         return QueryInterfaceImpl(this, riid, ppvObject);
     }
-    virtual ULONG STDMETHODCALLTYPE AddRef () { return AddRefImpl(); }
-    virtual ULONG STDMETHODCALLTYPE Release () { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
+    virtual ULONG STDMETHODCALLTYPE AddRef() { return AddRefImpl(); }
+    virtual ULONG STDMETHODCALLTYPE Release() { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
 
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo) { return GetTypeInfoCountImpl(pctinfo); }
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfo (UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount(UINT *pctinfo) { return GetTypeInfoCountImpl(pctinfo); }
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
         return GetTypeInfoImpl(iTInfo, lcid, ppTInfo);
     }
-    virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames (REFIID riid, LPOLESTR *rgszNames,
-                                                     UINT cNames, LCID lcid, DISPID *rgDispId) {
+    virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames(REFIID riid, LPOLESTR *rgszNames,
+                                                    UINT cNames, LCID lcid, DISPID *rgDispId) {
         return GetIDsOfNamesImpl(riid, rgszNames, cNames, lcid, rgDispId);
     }
-    virtual HRESULT STDMETHODCALLTYPE Invoke (DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
-                                              DISPPARAMS *pDispParams, VARIANT *pVarResult,
-                                              EXCEPINFO *pExcepInfo, UINT *puArgErr) {
+    virtual HRESULT STDMETHODCALLTYPE Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
+                                             DISPPARAMS *pDispParams, VARIANT *pVarResult,
+                                             EXCEPINFO *pExcepInfo, UINT *puArgErr) {
         return InvokeImpl(this, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
     }
 
-    virtual HRESULT STDMETHODCALLTYPE GetTime (LONGLONG* value);
-    virtual HRESULT STDMETHODCALLTYPE GetSequence (INT* value);
-    virtual HRESULT STDMETHODCALLTYPE GetGreeksPrice (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetVolatility (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetDelta (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetGamma (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetTheta (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetRho (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetVega (DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetTime(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetSequence(INT* value);
+    virtual HRESULT STDMETHODCALLTYPE GetGreeksPrice(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetVolatility(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetDelta(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetGamma(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetTheta(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetRho(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetVega(DOUBLE* value);
 
 private:
 
-    DXGreeks (dxf_event_data_t data, IUnknown* parent);
+    DXGreeks(dxf_event_data_t data, IUnknown* parent);
 
 private:
 
@@ -1755,14 +1755,14 @@ private:
  */
 /* -------------------------------------------------------------------------- */
 
-DXGreeks::DXGreeks (dxf_event_data_t data, IUnknown* parent)
+DXGreeks::DXGreeks(dxf_event_data_t data, IUnknown* parent)
 : DefIDispatchImpl(IID_IDXGreeks, parent)
 , m_data(reinterpret_cast<dxf_greeks_t*>(data)) {
 }
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXGreeks::GetTime (LONGLONG* value) {
+HRESULT STDMETHODCALLTYPE DXGreeks::GetTime(LONGLONG* value) {
     CHECK_PTR(value);
 
     *value = m_data->time;
@@ -1772,7 +1772,7 @@ HRESULT STDMETHODCALLTYPE DXGreeks::GetTime (LONGLONG* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXGreeks::GetSequence (INT* value) {
+HRESULT STDMETHODCALLTYPE DXGreeks::GetSequence(INT* value) {
     CHECK_PTR(value);
 
     *value = m_data->sequence;
@@ -1782,7 +1782,7 @@ HRESULT STDMETHODCALLTYPE DXGreeks::GetSequence (INT* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXGreeks::GetGreeksPrice (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXGreeks::GetGreeksPrice(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->greeks_price;
@@ -1792,7 +1792,7 @@ HRESULT STDMETHODCALLTYPE DXGreeks::GetGreeksPrice (DOUBLE* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXGreeks::GetVolatility (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXGreeks::GetVolatility(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->volatility;
@@ -1802,7 +1802,7 @@ HRESULT STDMETHODCALLTYPE DXGreeks::GetVolatility (DOUBLE* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXGreeks::GetDelta (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXGreeks::GetDelta(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->delta;
@@ -1812,7 +1812,7 @@ HRESULT STDMETHODCALLTYPE DXGreeks::GetDelta (DOUBLE* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXGreeks::GetGamma (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXGreeks::GetGamma(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->gamma;
@@ -1822,7 +1822,7 @@ HRESULT STDMETHODCALLTYPE DXGreeks::GetGamma (DOUBLE* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXGreeks::GetTheta (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXGreeks::GetTheta(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->theta;
@@ -1832,7 +1832,7 @@ HRESULT STDMETHODCALLTYPE DXGreeks::GetTheta (DOUBLE* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXGreeks::GetRho (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXGreeks::GetRho(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->rho;
@@ -1842,7 +1842,7 @@ HRESULT STDMETHODCALLTYPE DXGreeks::GetRho (DOUBLE* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXGreeks::GetVega (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXGreeks::GetVega(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->vega;
@@ -1863,33 +1863,33 @@ class DXTheoPrice : private IDXTheoPrice, private DefIDispatchImpl {
 
 private:
 
-    virtual HRESULT STDMETHODCALLTYPE QueryInterface (REFIID riid, void **ppvObject) {
+    virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObject) {
         return QueryInterfaceImpl(this, riid, ppvObject);
     }
-    virtual ULONG STDMETHODCALLTYPE AddRef () { return AddRefImpl(); }
-    virtual ULONG STDMETHODCALLTYPE Release () { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
+    virtual ULONG STDMETHODCALLTYPE AddRef() { return AddRefImpl(); }
+    virtual ULONG STDMETHODCALLTYPE Release() { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
 
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo) { return GetTypeInfoCountImpl(pctinfo); }
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfo (UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount(UINT *pctinfo) { return GetTypeInfoCountImpl(pctinfo); }
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
         return GetTypeInfoImpl(iTInfo, lcid, ppTInfo);
     }
-    virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames (REFIID riid, LPOLESTR *rgszNames,
-                                                     UINT cNames, LCID lcid, DISPID *rgDispId) {
+    virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames(REFIID riid, LPOLESTR *rgszNames,
+                                                    UINT cNames, LCID lcid, DISPID *rgDispId) {
         return GetIDsOfNamesImpl(riid, rgszNames, cNames, lcid, rgDispId);
     }
-    virtual HRESULT STDMETHODCALLTYPE Invoke (DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
-                                              DISPPARAMS *pDispParams, VARIANT *pVarResult,
-                                              EXCEPINFO *pExcepInfo, UINT *puArgErr) {
+    virtual HRESULT STDMETHODCALLTYPE Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
+                                             DISPPARAMS *pDispParams, VARIANT *pVarResult,
+                                             EXCEPINFO *pExcepInfo, UINT *puArgErr) {
         return InvokeImpl(this, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
     }
 
-    virtual HRESULT STDMETHODCALLTYPE GetTheoTime (LONGLONG* value);
-    virtual HRESULT STDMETHODCALLTYPE GetTheoPrice (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetTheoUnderlyingPrice (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetTheoDelta (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetTheoGamma (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetTheoDividend (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetTheoInterest (DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetTheoTime(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetTheoPrice(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetTheoUnderlyingPrice(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetTheoDelta(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetTheoGamma(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetTheoDividend(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetTheoInterest(DOUBLE* value);
 
 private:
 
@@ -1913,7 +1913,7 @@ DXTheoPrice::DXTheoPrice(dxf_event_data_t data, IUnknown* parent)
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXTheoPrice::GetTheoTime (LONGLONG* value) {
+HRESULT STDMETHODCALLTYPE DXTheoPrice::GetTheoTime(LONGLONG* value) {
     CHECK_PTR(value);
 
     *value = m_data->theo_time;
@@ -1923,7 +1923,7 @@ HRESULT STDMETHODCALLTYPE DXTheoPrice::GetTheoTime (LONGLONG* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXTheoPrice::GetTheoPrice (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXTheoPrice::GetTheoPrice(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->theo_price;
@@ -1933,7 +1933,7 @@ HRESULT STDMETHODCALLTYPE DXTheoPrice::GetTheoPrice (DOUBLE* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXTheoPrice::GetTheoUnderlyingPrice (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXTheoPrice::GetTheoUnderlyingPrice(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->theo_underlying_price;
@@ -1943,7 +1943,7 @@ HRESULT STDMETHODCALLTYPE DXTheoPrice::GetTheoUnderlyingPrice (DOUBLE* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXTheoPrice::GetTheoDelta (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXTheoPrice::GetTheoDelta(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->theo_delta;
@@ -1953,7 +1953,7 @@ HRESULT STDMETHODCALLTYPE DXTheoPrice::GetTheoDelta (DOUBLE* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXTheoPrice::GetTheoGamma (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXTheoPrice::GetTheoGamma(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->theo_gamma;
@@ -1963,7 +1963,7 @@ HRESULT STDMETHODCALLTYPE DXTheoPrice::GetTheoGamma (DOUBLE* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXTheoPrice::GetTheoDividend (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXTheoPrice::GetTheoDividend(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->theo_dividend;
@@ -1973,7 +1973,7 @@ HRESULT STDMETHODCALLTYPE DXTheoPrice::GetTheoDividend (DOUBLE* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXTheoPrice::GetTheoInterest (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXTheoPrice::GetTheoInterest(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->theo_interest;
@@ -1994,30 +1994,30 @@ class DXUnderlying : private IDXUnderlying, private DefIDispatchImpl {
 
 private:
 
-    virtual HRESULT STDMETHODCALLTYPE QueryInterface (REFIID riid, void **ppvObject) {
+    virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObject) {
         return QueryInterfaceImpl(this, riid, ppvObject);
     }
-    virtual ULONG STDMETHODCALLTYPE AddRef () { return AddRefImpl(); }
-    virtual ULONG STDMETHODCALLTYPE Release () { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
+    virtual ULONG STDMETHODCALLTYPE AddRef() { return AddRefImpl(); }
+    virtual ULONG STDMETHODCALLTYPE Release() { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
 
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo) { return GetTypeInfoCountImpl(pctinfo); }
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfo (UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount(UINT *pctinfo) { return GetTypeInfoCountImpl(pctinfo); }
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
         return GetTypeInfoImpl(iTInfo, lcid, ppTInfo);
     }
-    virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames (REFIID riid, LPOLESTR *rgszNames,
-                                                     UINT cNames, LCID lcid, DISPID *rgDispId) {
+    virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames(REFIID riid, LPOLESTR *rgszNames,
+                                                    UINT cNames, LCID lcid, DISPID *rgDispId) {
         return GetIDsOfNamesImpl(riid, rgszNames, cNames, lcid, rgDispId);
     }
-    virtual HRESULT STDMETHODCALLTYPE Invoke (DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
-                                              DISPPARAMS *pDispParams, VARIANT *pVarResult,
-                                              EXCEPINFO *pExcepInfo, UINT *puArgErr) {
+    virtual HRESULT STDMETHODCALLTYPE Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
+                                             DISPPARAMS *pDispParams, VARIANT *pVarResult,
+                                             EXCEPINFO *pExcepInfo, UINT *puArgErr) {
         return InvokeImpl(this, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
     }
 
-    virtual HRESULT STDMETHODCALLTYPE GetVolatility (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetFrontVolatility (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetBackVolatility (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetPutCallRatio (DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetVolatility(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetFrontVolatility(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetBackVolatility(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetPutCallRatio(DOUBLE* value);
 
 private:
 
@@ -2041,7 +2041,7 @@ DXUnderlying::DXUnderlying(dxf_event_data_t data, IUnknown* parent)
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXUnderlying::GetVolatility (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXUnderlying::GetVolatility(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->volatility;
@@ -2051,7 +2051,7 @@ HRESULT STDMETHODCALLTYPE DXUnderlying::GetVolatility (DOUBLE* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXUnderlying::GetFrontVolatility (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXUnderlying::GetFrontVolatility(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->front_volatility;
@@ -2061,7 +2061,7 @@ HRESULT STDMETHODCALLTYPE DXUnderlying::GetFrontVolatility (DOUBLE* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXUnderlying::GetBackVolatility (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXUnderlying::GetBackVolatility(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->back_volatility;
@@ -2071,7 +2071,7 @@ HRESULT STDMETHODCALLTYPE DXUnderlying::GetBackVolatility (DOUBLE* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXUnderlying::GetPutCallRatio (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXUnderlying::GetPutCallRatio(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->put_call_ratio;
@@ -2092,33 +2092,33 @@ class DXSeries : private IDXSeries, private DefIDispatchImpl {
 
 private:
 
-    virtual HRESULT STDMETHODCALLTYPE QueryInterface (REFIID riid, void **ppvObject) {
+    virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObject) {
         return QueryInterfaceImpl(this, riid, ppvObject);
     }
-    virtual ULONG STDMETHODCALLTYPE AddRef () { return AddRefImpl(); }
-    virtual ULONG STDMETHODCALLTYPE Release () { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
+    virtual ULONG STDMETHODCALLTYPE AddRef() { return AddRefImpl(); }
+    virtual ULONG STDMETHODCALLTYPE Release() { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
 
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount (UINT *pctinfo) { return GetTypeInfoCountImpl(pctinfo); }
-    virtual HRESULT STDMETHODCALLTYPE GetTypeInfo (UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount(UINT *pctinfo) { return GetTypeInfoCountImpl(pctinfo); }
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
         return GetTypeInfoImpl(iTInfo, lcid, ppTInfo);
     }
-    virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames (REFIID riid, LPOLESTR *rgszNames,
-                                                     UINT cNames, LCID lcid, DISPID *rgDispId) {
+    virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames(REFIID riid, LPOLESTR *rgszNames,
+                                                    UINT cNames, LCID lcid, DISPID *rgDispId) {
         return GetIDsOfNamesImpl(riid, rgszNames, cNames, lcid, rgDispId);
     }
-    virtual HRESULT STDMETHODCALLTYPE Invoke (DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
-                                              DISPPARAMS *pDispParams, VARIANT *pVarResult,
-                                              EXCEPINFO *pExcepInfo, UINT *puArgErr) {
+    virtual HRESULT STDMETHODCALLTYPE Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
+                                             DISPPARAMS *pDispParams, VARIANT *pVarResult,
+                                             EXCEPINFO *pExcepInfo, UINT *puArgErr) {
         return InvokeImpl(this, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
     }
 
-    virtual HRESULT STDMETHODCALLTYPE GetExpiration (LONGLONG* value);
-    virtual HRESULT STDMETHODCALLTYPE GetSequence (INT* value);
-    virtual HRESULT STDMETHODCALLTYPE GetVolatility (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetPutCallRatio (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetForwardPrice (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetDividend (DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetInterest (DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetExpiration(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetSequence(INT* value);
+    virtual HRESULT STDMETHODCALLTYPE GetVolatility(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetPutCallRatio(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetForwardPrice(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetDividend(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetInterest(DOUBLE* value);
 
 private:
 
@@ -2142,7 +2142,7 @@ DXSeries::DXSeries(dxf_event_data_t data, IUnknown* parent)
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXSeries::GetExpiration (LONGLONG* value) {
+HRESULT STDMETHODCALLTYPE DXSeries::GetExpiration(LONGLONG* value) {
     CHECK_PTR(value);
 
     *value = m_data->expiration;
@@ -2152,7 +2152,7 @@ HRESULT STDMETHODCALLTYPE DXSeries::GetExpiration (LONGLONG* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXSeries::GetSequence (INT* value) {
+HRESULT STDMETHODCALLTYPE DXSeries::GetSequence(INT* value) {
     CHECK_PTR(value);
 
     *value = m_data->sequence;
@@ -2162,7 +2162,7 @@ HRESULT STDMETHODCALLTYPE DXSeries::GetSequence (INT* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXSeries::GetVolatility (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXSeries::GetVolatility(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->volatility;
@@ -2172,7 +2172,7 @@ HRESULT STDMETHODCALLTYPE DXSeries::GetVolatility (DOUBLE* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXSeries::GetPutCallRatio (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXSeries::GetPutCallRatio(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->put_call_ratio;
@@ -2182,7 +2182,7 @@ HRESULT STDMETHODCALLTYPE DXSeries::GetPutCallRatio (DOUBLE* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXSeries::GetForwardPrice (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXSeries::GetForwardPrice(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->forward_price;
@@ -2192,7 +2192,7 @@ HRESULT STDMETHODCALLTYPE DXSeries::GetForwardPrice (DOUBLE* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXSeries::GetDividend (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXSeries::GetDividend(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->dividend;
@@ -2202,7 +2202,7 @@ HRESULT STDMETHODCALLTYPE DXSeries::GetDividend (DOUBLE* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXSeries::GetInterest (DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXSeries::GetInterest(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->interest;
@@ -2216,7 +2216,7 @@ HRESULT STDMETHODCALLTYPE DXSeries::GetInterest (DOUBLE* value) {
  */
 /* -------------------------------------------------------------------------- */
 
-IDispatch* EventDataFactory::CreateInstance (int eventType, dxf_event_data_t eventData, IUnknown* parent) {
+IDispatch* EventDataFactory::CreateInstance(int eventType, dxf_event_data_t eventData, IUnknown* parent) {
     try {
         switch (eventType) {
         case DXF_ET_TRADE: return static_cast<IDXTrade*>(new DXTrade(eventData, parent));
