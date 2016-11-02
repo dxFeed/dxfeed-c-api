@@ -1187,9 +1187,9 @@ private:
     virtual HRESULT STDMETHODCALLTYPE GetVwap(DOUBLE* value);
     virtual HRESULT STDMETHODCALLTYPE GetBidVolume(DOUBLE* value);
     virtual HRESULT STDMETHODCALLTYPE GetAskVolume(DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetOpenInterest(DOUBLE* value);
-    virtual HRESULT STDMETHODCALLTYPE GetImpVolacility(DOUBLE* value);
     virtual HRESULT STDMETHODCALLTYPE GetIndex(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetOpenInterest(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetImpVolacility(DOUBLE* value);
 
 private:
 
@@ -1323,7 +1323,17 @@ HRESULT STDMETHODCALLTYPE DXCandle::GetAskVolume(DOUBLE* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXCandle::GetOpenInterest(DOUBLE* value) {
+HRESULT STDMETHODCALLTYPE DXCandle::GetIndex(LONGLONG* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->index;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXCandle::GetOpenInterest(LONGLONG* value) {
     CHECK_PTR(value);
 
     *value = m_data->open_interest;
@@ -1337,16 +1347,6 @@ HRESULT STDMETHODCALLTYPE DXCandle::GetImpVolacility(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->imp_volatility;
-
-    return S_OK;
-}
-
-/* -------------------------------------------------------------------------- */
-
-HRESULT STDMETHODCALLTYPE DXCandle::GetIndex(LONGLONG* value) {
-    CHECK_PTR(value);
-
-    *value = m_data->index;
 
     return S_OK;
 }

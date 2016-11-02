@@ -197,9 +197,9 @@ struct IDXCandle : public IDispatch {
     virtual HRESULT STDMETHODCALLTYPE GetVwap(DOUBLE* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetBidVolume(DOUBLE* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetAskVolume(DOUBLE* value) = 0;
-    virtual HRESULT STDMETHODCALLTYPE GetOpenInterest(DOUBLE* value) = 0;
-    virtual HRESULT STDMETHODCALLTYPE GetImpVolacility(DOUBLE* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetIndex(LONGLONG* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetOpenInterest(LONGLONG* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetImpVolacility(DOUBLE* value) = 0;
 };
 
 /* -------------------------------------------------------------------------- */

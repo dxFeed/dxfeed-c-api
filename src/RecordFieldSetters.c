@@ -179,7 +179,7 @@ FIELD_SETTER_BODY(dx_candle_t, volume, dxf_double_t)
 FIELD_SETTER_BODY(dx_candle_t, vwap, dxf_double_t)
 FIELD_SETTER_BODY(dx_candle_t, bid_volume, dxf_double_t)
 FIELD_SETTER_BODY(dx_candle_t, ask_volume, dxf_double_t)
-FIELD_SETTER_BODY(dx_candle_t, open_interest, dxf_double_t)
+FIELD_SETTER_BODY(dx_candle_t, open_interest, dxf_int_t)
 FIELD_SETTER_BODY(dx_candle_t, imp_volatility, dxf_double_t)
 
 /* -------------------------------------------------------------------------- */
@@ -458,7 +458,7 @@ FIELD_DEF_VAL_BODY(dx_candle_t, volume, dxf_double_t)
 FIELD_DEF_VAL_BODY(dx_candle_t, vwap, dxf_double_t)
 FIELD_DEF_VAL_BODY(dx_candle_t, bid_volume, dxf_double_t)
 FIELD_DEF_VAL_BODY(dx_candle_t, ask_volume, dxf_double_t)
-FIELD_DEF_VAL_BODY(dx_candle_t, open_interest, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_candle_t, open_interest, dxf_int_t)
 FIELD_DEF_VAL_BODY(dx_candle_t, imp_volatility, dxf_double_t)
 
 /* -------------------------------------------------------------------------- */
@@ -639,7 +639,7 @@ FIELD_GETTER_BODY(dx_candle_t, volume, dxf_double_t)
 FIELD_GETTER_BODY(dx_candle_t, vwap, dxf_double_t)
 FIELD_GETTER_BODY(dx_candle_t, bid_volume, dxf_double_t)
 FIELD_GETTER_BODY(dx_candle_t, ask_volume, dxf_double_t)
-FIELD_GETTER_BODY(dx_candle_t, open_interest, dxf_double_t)
+FIELD_GETTER_BODY(dx_candle_t, open_interest, dxf_long_t)
 FIELD_GETTER_BODY(dx_candle_t, imp_volatility, dxf_double_t)
 
 /* -------------------------------------------------------------------------- */

@@ -628,7 +628,7 @@ bool RECORD_TRANSCODER_NAME(dx_time_and_sale_t) (dx_record_transcoder_connection
         cur_event->sequence = sequence;
         cur_event->exchange_sale_conditions = dx_decode_from_integer((((dxf_long_t)flags & 0xFF00L) << 24 ) | exchange_sale_conditions);
         cur_event->index = cur_event->event_id;
-        cur_event->side = (flags >> DX_TIME_AND_SALE_SIDE_SHIFT) & DX_TIME_AND_SALE_SIDE_MASK == DX_ORDER_SIDE_SELL ? DXF_ORDER_SIDE_SELL : DXF_ORDER_SIDE_BUY;
+        cur_event->side = ((flags >> DX_TIME_AND_SALE_SIDE_SHIFT) & DX_TIME_AND_SALE_SIDE_MASK) == DX_ORDER_SIDE_SELL ? DXF_ORDER_SIDE_SELL : DXF_ORDER_SIDE_BUY;
         cur_event->is_spread_leg = ((flags & DX_TIME_AND_SALE_SPREAD_LEG) != 0);
         cur_event->is_trade = ((flags & DX_TIME_AND_SALE_ETH) != 0);
         cur_event->is_valid_tick = ((flags & DX_TIME_AND_SALE_VALID_TICK) != 0);

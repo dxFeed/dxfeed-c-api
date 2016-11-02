@@ -113,12 +113,12 @@ library DXFeedCOM {
         HRESULT bidVolume([out, retval] DOUBLE*);
         [id(11), propget, helpstring("Ask volume value getter")]
         HRESULT askVolume([out, retval] DOUBLE*);
-        [id(12), propget, helpstring("Open interest value getter")]
-        HRESULT openInterest([out, retval] DOUBLE*);
-        [id(13), propget, helpstring("Implied volatility value getter")]
-        HRESULT impVolatility([out, retval] DOUBLE*);
-        [id(14), propget, helpstring("Index value getter")]
+        [id(12), propget, helpstring("Index value getter")]
         HRESULT index([out, retval] LONGLONG*);
+        [id(13), propget, helpstring("Open interest value getter")]
+        HRESULT openInterest([out, retval] LONGLONG*);
+        [id(14), propget, helpstring("Implied volatility value getter")]
+        HRESULT impVolatility([out, retval] DOUBLE*);
     };
     
     [uuid(A12D2830-6B0B-405c-990D-5B960CB9C33B), helpstring("Time&Sale data wrapper"), dual, oleautomation, nonextensible]
