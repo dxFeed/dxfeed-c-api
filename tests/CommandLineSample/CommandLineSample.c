@@ -207,9 +207,11 @@ void listener(int event_type, dxf_const_string_t symbol_name,
         dxf_greeks_t* grks = (dxf_greeks_t*)data;
 
         for (; i < data_count; ++i) {
-            wprintf(L"time=%I64i, sequence=%d, greeks price=%f, volatility=%f, "
+            wprintf(L"time=");
+            print_timestamp(grks[i].time);
+            wprintf(L", sequence=%d, greeks price=%f, volatility=%f, "
                 L"delta=%f, gamma=%f, theta=%f, rho=%f, vega=%f}\n", 
-                grks[i].time, grks[i].sequence, grks[i].greeks_price, grks[i].volatility,
+                grks[i].sequence, grks[i].greeks_price, grks[i].volatility,
                 grks[i].delta, grks[i].gamma, grks[i].theta, grks[i].rho, grks[i].vega);
         }
     }
@@ -218,9 +220,11 @@ void listener(int event_type, dxf_const_string_t symbol_name,
         dxf_theo_price_t* tp = (dxf_theo_price_t*)data;
 
         for (; i < data_count; ++i) {
-            wprintf(L"theo time=%I64i, theo price=%f, theo underlying price=%f, theo delta=%f, "
-                L"theo gamma=%f, theo dividend=%f, theo_interest=%f",
-                tp[i].theo_time, tp[i].theo_price, tp[i].theo_underlying_price, tp[i].theo_delta,
+            wprintf(L"theo time=");
+            print_timestamp(tp[i].theo_time);
+            wprintf(L", theo price=%f, theo underlying price=%f, theo delta=%f, "
+                L"theo gamma=%f, theo dividend=%f, theo_interest=%f}\n",
+                tp[i].theo_price, tp[i].theo_underlying_price, tp[i].theo_delta,
                 tp[i].theo_gamma, tp[i].theo_dividend, tp[i].theo_interest);
         }
     }
@@ -422,4 +426,3 @@ int main (int argc, char* argv[]) {
     
     return 0;
 }
-
