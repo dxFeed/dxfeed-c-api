@@ -254,8 +254,7 @@ int dx_get_event_subscription_params(dxf_connection_t connection, dx_order_sourc
         result = dx_add_subscription_param_to_list(connection, &param_list, L"TimeAndSale", sub_type);
         break;
     case dx_eid_candle:
-        sub_type = IS_FLAG_SET(subscr_flags, DX_SUBSCR_FLAG_TIME_SERIES) ? dx_st_history : dx_st_ticker;
-        result = dx_add_subscription_param_to_list(connection, &param_list, L"Candle", sub_type);
+        result = dx_add_subscription_param_to_list(connection, &param_list, L"Candle", dx_st_history);
         break;
     case dx_eid_trade_eth:
         result = dx_get_trade_eth_subscription_params(connection, &param_list);
