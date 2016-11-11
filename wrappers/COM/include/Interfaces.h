@@ -16,6 +16,7 @@ struct IDXFeed : public IDispatch {
     virtual HRESULT STDMETHODCALLTYPE GetLastErrorDescr (BSTR* descr) = 0;
     virtual HRESULT STDMETHODCALLTYPE InitLogger (BSTR file, VARIANT_BOOL overwrite,
                                                   VARIANT_BOOL showTimezone, VARIANT_BOOL verbose) = 0;
+    virtual HRESULT STDMETHODCALLTYPE CreateCandleSymbol(IDispatch** candleSymbol) = 0;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -27,6 +28,7 @@ struct IDXFeed : public IDispatch {
 struct IDXConnection : public IDispatch {
     virtual HRESULT STDMETHODCALLTYPE CreateSubscription (INT eventTypes, IDispatch** subscription) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetLastEvent (INT eventType, BSTR symbol, IDispatch** eventData) = 0;
+    virtual HRESULT STDMETHODCALLTYPE CreateSubscriptionTimed(INT eventTypes, LONGLONG time, IDispatch** subscription) = 0;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -34,6 +36,8 @@ struct IDXConnection : public IDispatch {
  *	IDXSubscrption interface
  */
 /* -------------------------------------------------------------------------- */
+
+struct IDXCandleSymbol;
 
 struct IDXSubscription : public IDispatch {
     virtual HRESULT STDMETHODCALLTYPE AddSymbol (BSTR symbol) = 0;
@@ -44,6 +48,8 @@ struct IDXSubscription : public IDispatch {
     virtual HRESULT STDMETHODCALLTYPE SetSymbols (SAFEARRAY* symbols) = 0;
     virtual HRESULT STDMETHODCALLTYPE ClearSymbols () = 0;
     virtual HRESULT STDMETHODCALLTYPE GetEventTypes (INT* eventTypes) = 0;
+    virtual HRESULT STDMETHODCALLTYPE AddCandleSymbol(IDXCandleSymbol* symbol) = 0;
+    virtual HRESULT STDMETHODCALLTYPE RemoveCandleSymbol(IDXCandleSymbol* symbol) = 0;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -263,4 +269,27 @@ struct IDXConnectionTerminationNotifier : public IDispatch {
 struct IDXEventListener : public IDispatch {
     virtual HRESULT STDMETHODCALLTYPE OnNewData (IDispatch* subscription, INT eventType, BSTR symbol,
                                                  IDispatch* dataCollection) = 0;
+};
+
+/* -------------------------------------------------------------------------- */
+/*
+*	IDXCandleSymbol sink interface
+*/
+/* -------------------------------------------------------------------------- */
+
+struct IDXCandleSymbol : public IDispatch {
+    virtual HRESULT STDMETHODCALLTYPE get_BaseSymbol(BSTR* baseSymbol) = 0;
+    virtual HRESULT STDMETHODCALLTYPE put_BaseSymbol(BSTR baseSymbol) = 0;
+    virtual HRESULT STDMETHODCALLTYPE get_ExchangeCode(CHAR* exchangeCode) = 0;
+    virtual HRESULT STDMETHODCALLTYPE put_ExchangeCode(CHAR exchangeCode) = 0;
+    virtual HRESULT STDMETHODCALLTYPE get_Price(INT* price) = 0;
+    virtual HRESULT STDMETHODCALLTYPE put_Price(INT price) = 0;
+    virtual HRESULT STDMETHODCALLTYPE get_Session(INT* session) = 0;
+    virtual HRESULT STDMETHODCALLTYPE put_Session(INT session) = 0;
+    virtual HRESULT STDMETHODCALLTYPE get_PeriodType(INT* periodType) = 0;
+    virtual HRESULT STDMETHODCALLTYPE put_PeriodType(INT periodType) = 0;
+    virtual HRESULT STDMETHODCALLTYPE get_PeriodValue(DOUBLE* periodValue) = 0;
+    virtual HRESULT STDMETHODCALLTYPE put_PeriodValue(DOUBLE periodValue) = 0;
+    virtual HRESULT STDMETHODCALLTYPE get_Alignment(INT* alignment) = 0;
+    virtual HRESULT STDMETHODCALLTYPE put_Alignment(INT alignment) = 0;
 };

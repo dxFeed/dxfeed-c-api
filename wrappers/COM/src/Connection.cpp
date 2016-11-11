@@ -48,6 +48,7 @@ class DXConnection : private IDXConnection, private DefIDispatchImpl,
     
     virtual HRESULT STDMETHODCALLTYPE CreateSubscription (INT eventTypes, IDispatch** subscription);
     virtual HRESULT STDMETHODCALLTYPE GetLastEvent (INT eventType, BSTR symbol, IDispatch** eventData);
+    virtual HRESULT STDMETHODCALLTYPE CreateSubscriptionTimed(INT eventTypes, LONGLONG time, IDispatch** subscription);
 
 private:
 
@@ -177,6 +178,22 @@ HRESULT STDMETHODCALLTYPE DXConnection::GetLastEvent (INT eventType, BSTR symbol
     symbolWrapper.Detach();
     
     return hr;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXConnection::CreateSubscriptionTimed(INT eventTypes, LONGLONG time, IDispatch** subscription) {
+    if (subscription == NULL) {
+        return E_POINTER;
+    }
+
+    IUnknown* parent = static_cast<IDXConnection*>(this);
+
+    if ((*subscription = DefDXSubscriptionFactory::CreateInstance(m_connHandle, eventTypes, time, parent)) == NULL) {
+        return E_FAIL;
+    }
+
+    return NOERROR;
 }
 
 /* -------------------------------------------------------------------------- */

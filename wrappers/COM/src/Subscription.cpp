@@ -54,10 +54,13 @@ private:
     virtual HRESULT STDMETHODCALLTYPE SetSymbols (SAFEARRAY* symbols);
     virtual HRESULT STDMETHODCALLTYPE ClearSymbols ();
     virtual HRESULT STDMETHODCALLTYPE GetEventTypes (INT* eventTypes);
+    virtual HRESULT STDMETHODCALLTYPE AddCandleSymbol(IDXCandleSymbol* symbol);
+    virtual HRESULT STDMETHODCALLTYPE RemoveCandleSymbol(IDXCandleSymbol* symbol);
     
 private:
 
     DXSubscription (dxf_connection_t connection, int eventTypes, IUnknown* parent);
+    DXSubscription(dxf_connection_t connection, int eventTypes, LONGLONG time, IUnknown* parent);
     
     static void OnNewData(int eventType, dxf_const_string_t symbolName,
                           const dxf_event_data_t* data, int dataCount, void* userData);
@@ -105,6 +108,29 @@ DXSubscription::DXSubscription (dxf_connection_t connection, int eventTypes, IUn
         m_listenerMethodId = 0;
     }
     
+    if (dxf_attach_event_listener(m_subscrHandle, OnNewData, this) != DXF_SUCCESS) {
+        throw "Failed to attach an internal event listener";
+    }
+}
+
+/* -------------------------------------------------------------------------- */
+
+DXSubscription::DXSubscription(dxf_connection_t connection, int eventTypes, LONGLONG time, IUnknown* parent)
+    : DefIDispatchImpl(IID_IDXSubscription, parent)
+    , DefIConnectionPointImpl(DIID_IDXEventListener)
+    , m_eventTypes(0)
+    , m_subscrHandle(NULL)
+    , m_listenerMethodId(0) {
+    SetBehaviorCustomizer(this);
+
+    if (dxf_create_subscription_timed(connection, eventTypes, time, &m_subscrHandle) == DXF_FAILURE) {
+        throw "Failed to create a subscription";
+    }
+
+    if (DispUtils::GetMethodId(DIID_IDXEventListener, _bstr_t("OnNewData"), OUT m_listenerMethodId) != S_OK) {
+        m_listenerMethodId = 0;
+    }
+
     if (dxf_attach_event_listener(m_subscrHandle, OnNewData, this) != DXF_SUCCESS) {
         throw "Failed to attach an internal event listener";
     }
@@ -291,6 +317,94 @@ HRESULT STDMETHODCALLTYPE DXSubscription::GetEventTypes (INT* eventTypes) {
 
 /* -------------------------------------------------------------------------- */
 
+class NativeCandleSymbol {
+public:
+    NativeCandleSymbol(IDXCandleSymbol*);
+    virtual ~NativeCandleSymbol();
+    dxf_candle_attributes_t& operator*();
+
+private:
+    NativeCandleSymbol();
+    dxf_candle_attributes_t mCandleAttributes;
+};
+
+NativeCandleSymbol::NativeCandleSymbol()
+    : mCandleAttributes(NULL) {}
+
+NativeCandleSymbol::NativeCandleSymbol(IDXCandleSymbol* symbol) {
+    _bstr_t baseSymbolWrapper;
+    CHAR exchangeCode;
+    INT price;
+    INT session;
+    INT periodType;
+    DOUBLE periodValue;
+    INT alignment;
+    if (FAILED(symbol->get_BaseSymbol(baseSymbolWrapper.GetAddress())) ||
+        FAILED(symbol->get_ExchangeCode(&exchangeCode)) ||
+        FAILED(symbol->get_Price(&price)) ||
+        FAILED(symbol->get_Session(&session)) ||
+        FAILED(symbol->get_PeriodType(&periodType)) ||
+        FAILED(symbol->get_PeriodValue(&periodValue)) ||
+        FAILED(symbol->get_Alignment(&alignment))) {
+
+        throw std::exception("Can't get symbol parameters.");
+    }
+    ERRORCODE errCode = dxf_create_candle_symbol_attributes((const wchar_t*)baseSymbolWrapper,
+        exchangeCode, periodValue, (dxf_candle_type_period_attribute_t)periodType,
+        (dxf_candle_price_attribute_t)price, (dxf_candle_session_attribute_t)session,
+        (dxf_candle_alignment_attribute_t)alignment, &mCandleAttributes);
+    if (errCode == DXF_FAILURE)
+        throw std::exception("Can't create Candle symbol attribute object.");
+}
+
+NativeCandleSymbol::~NativeCandleSymbol() {
+    if (mCandleAttributes != NULL) {
+        dxf_delete_candle_symbol_attributes(mCandleAttributes);
+    }
+}
+
+dxf_candle_attributes_t& NativeCandleSymbol::operator*() {
+    return mCandleAttributes;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXSubscription::AddCandleSymbol(IDXCandleSymbol* symbol) {
+    HRESULT hr = S_OK;
+
+    try {
+        NativeCandleSymbol nativeCandleSymbol(symbol);
+        if (dxf_add_candle_symbol(m_subscrHandle, *nativeCandleSymbol) != DXF_SUCCESS) {
+            return E_FAIL;
+        }
+
+    } catch (const _com_error& e) {
+        hr = e.Error();
+    }
+
+    return hr;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXSubscription::RemoveCandleSymbol(IDXCandleSymbol* symbol) {
+    HRESULT hr = S_OK;
+
+    try {
+        NativeCandleSymbol nativeCandleSymbol(symbol);
+        if (dxf_remove_candle_symbol(m_subscrHandle, *nativeCandleSymbol) != DXF_SUCCESS) {
+            return E_FAIL;
+        }
+    }
+    catch (const _com_error& e) {
+        hr = e.Error();
+    }
+
+    return hr;
+}
+
+/* -------------------------------------------------------------------------- */
+
 void DXSubscription::OnNewData(int eventType, dxf_const_string_t symbolName,
                                const dxf_event_data_t* data, int dataCount, void* userData) {
     if (userData == NULL) {
@@ -458,6 +572,21 @@ IDXSubscription* DefDXSubscriptionFactory::CreateInstance (dxf_connection_t conn
     } catch (...) {    
     }
     
+    return subscription;
+}
+
+IDXSubscription* DefDXSubscriptionFactory::CreateInstance(dxf_connection_t connection, int eventTypes,
+                                                          LONGLONG time, IUnknown* parent) {
+    IDXSubscription* subscription = NULL;
+
+    try {
+        subscription = new DXSubscription(connection, eventTypes, time, parent);
+
+        subscription->AddRef();
+    }
+    catch (...) {
+    }
+
     return subscription;
 }
 
