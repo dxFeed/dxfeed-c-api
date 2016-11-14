@@ -156,6 +156,11 @@ typedef struct {
  */
 /* -------------------------------------------------------------------------- */
 
+static const dxf_byte_t DXF_SUMMARY_PRICE_TYPE_REGULAR = 0;
+static const dxf_byte_t DXF_SUMMARY_PRICE_TYPE_INDICATIVE = 1;
+static const dxf_byte_t DXF_SUMMARY_PRICE_TYPE_PRELIMINARY = 2;
+static const dxf_byte_t DXF_SUMMARY_PRICE_TYPE_FINAL = 3;
+
 static const dxf_int_t DXF_ORDER_SIDE_BUY = 0;
 static const dxf_int_t DXF_ORDER_SIDE_SELL = 1;
 

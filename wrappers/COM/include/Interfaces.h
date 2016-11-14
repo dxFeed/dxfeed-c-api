@@ -113,6 +113,8 @@ struct IDXSummary : public IDispatch {
     virtual HRESULT STDMETHODCALLTYPE GetOpenInterest(LONGLONG* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetFlags(LONGLONG* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetExchange(SHORT* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetDayClosePriceType(CHAR* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetPrevDayClosePriceType(CHAR* value) = 0;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -278,6 +280,7 @@ struct IDXGreeks : public IDispatch {
     virtual HRESULT STDMETHODCALLTYPE GetTheta(DOUBLE* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetRho(DOUBLE* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetVega(DOUBLE* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetIndex(LONGLONG* value) = 0;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -329,6 +332,7 @@ struct IDXSeries : public IDispatch {
     virtual HRESULT STDMETHODCALLTYPE GetForwardPrice(DOUBLE* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetDividend(DOUBLE* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetInterest(DOUBLE* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetIndex(LONGLONG* value) = 0;
 };
 
 /* -------------------------------------------------------------------------- */

@@ -102,6 +102,9 @@ typedef struct {
     dxf_long_t open_interest;
     dxf_long_t flags;
     dxf_char_t exchange_code;
+    /* Note: calculated fields */
+    dxf_byte_t day_close_price_type;
+    dxf_byte_t prev_day_close_price_type;
 } dx_summary_t;
 
 typedef struct {
@@ -217,6 +220,8 @@ typedef struct {
     dxf_double_t theta;
     dxf_double_t rho;
     dxf_double_t vega;
+    /* Note: calculated fields */
+    dxf_long_t index;
 } dx_greeks_t;
 
 typedef struct {
@@ -244,6 +249,8 @@ typedef struct {
     dxf_double_t forward_price;
     dxf_double_t dividend;
     dxf_double_t interest;
+    /* Note: calculated fields */
+    dxf_long_t index;
 } dx_series_t;
 
 #endif /* RECORD_DATA_H_INCLUDED */

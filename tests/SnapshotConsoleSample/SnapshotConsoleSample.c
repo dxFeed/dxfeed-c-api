@@ -239,9 +239,9 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
             wprintf(L"time=");
             print_timestamp(grks.time);
             wprintf(L", sequence=%d, greeks price=%f, volatility=%f, "
-                L"delta=%f, gamma=%f, theta=%f, rho=%f, vega=%f}\n",
+                L"delta=%f, gamma=%f, theta=%f, rho=%f, vega=%f, index=0x%I64X}\n",
                 grks.sequence, grks.greeks_price, grks.volatility, grks.delta,
-                grks.gamma, grks.theta, grks.rho, grks.vega);
+                grks.gamma, grks.theta, grks.rho, grks.vega, grks.index);
         }
     } else if (snapshot_data->event_type == DXF_ET_SERIES) {
         dxf_series_t* series_records = (dxf_series_t*)snapshot_data->records;
@@ -252,9 +252,10 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
                 wprintf(L"   { ... %d records left ...}\n", records_count - i);
                 break;
             }
-            wprintf(L"expiration=%d, sequence=%d, volatility=%f, put call ratio=%f, forward_price=%f, dividend=%f, interest=%f}\n",
+            wprintf(L"expiration=%d, sequence=%d, volatility=%f, put call ratio=%f, "
+                L"forward_price=%f, dividend=%f, interest=%f, index=0x%I64X}\n",
                 srs.expiration, srs.sequence, srs.volatility, srs.put_call_ratio,
-                srs.forward_price, srs.dividend, srs.interest);
+                srs.forward_price, srs.dividend, srs.interest, srs.index);
         }
     }
 }

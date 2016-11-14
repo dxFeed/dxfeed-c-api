@@ -63,6 +63,10 @@ library DXFeedCOM {
         HRESULT flags ([out, retval] LONGLONG*);
         [id(10), propget, helpstring("Exchange code value getter")]
         HRESULT exchangeCode ([out, retval] SHORT*);
+        [id(11), propget, helpstring("Day close price type value getter")]
+        HRESULT dayClosePriceType([out, retval] CHAR*);
+        [id(12), propget, helpstring("Prev day close price type value getter")]
+        HRESULT prevDayClosePriceType([out, retval] CHAR*);
     };
     
     [uuid(74E10B0F-4C80-4792-96DD-D3BFFF40D675), helpstring("Profile data wrapper"), dual, oleautomation, nonextensible]
@@ -267,6 +271,8 @@ library DXFeedCOM {
         HRESULT rho ([out, retval] DOUBLE*);
         [id(9), propget, helpstring("Vega value getter")]
         HRESULT vega ([out, retval] DOUBLE*);
+        [id(10), propget, helpstring("Index value getter")]
+        HRESULT index([out, retval] LONGLONG*);
     };
     
     [uuid(5D2A9476-FB2C-4846-A0EE-BFCB7207AAB5), helpstring("TheoPrice data wrapper"), dual, oleautomation, nonextensible]
@@ -315,6 +321,8 @@ library DXFeedCOM {
         HRESULT dividend ([out, retval] DOUBLE*);
         [id(7), propget, helpstring("Interest price value getter")]
         HRESULT interest ([out, retval] DOUBLE*);
+        [id(8), propget, helpstring("Index value getter")]
+        HRESULT index([out, retval] LONGLONG*);
     };
     
     [uuid(C334BBB7-AE1E-448e-9C1C-A0C7CCB2A126), helpstring("Event data collection"), dual, oleautomation, nonextensible]

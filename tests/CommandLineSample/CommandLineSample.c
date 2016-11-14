@@ -210,9 +210,9 @@ void listener(int event_type, dxf_const_string_t symbol_name,
             wprintf(L"time=");
             print_timestamp(grks[i].time);
             wprintf(L", sequence=%d, greeks price=%f, volatility=%f, "
-                L"delta=%f, gamma=%f, theta=%f, rho=%f, vega=%f}\n", 
+                L"delta=%f, gamma=%f, theta=%f, rho=%f, vega=%f, index=0x%I64X}\n", 
                 grks[i].sequence, grks[i].greeks_price, grks[i].volatility,
-                grks[i].delta, grks[i].gamma, grks[i].theta, grks[i].rho, grks[i].vega);
+                grks[i].delta, grks[i].gamma, grks[i].theta, grks[i].rho, grks[i].vega, grks[i].index);
         }
     }
 
@@ -242,9 +242,10 @@ void listener(int event_type, dxf_const_string_t symbol_name,
         dxf_series_t* srs = (dxf_series_t*)data;
 
         for (; i < data_count; ++i) {
-            wprintf(L"expiration=%d, sequence=%d, volatility=%f, put call ratio=%f, forward_price=%f, dividend=%f, interest=%f}\n",
+            wprintf(L"expiration=%d, sequence=%d, volatility=%f, put call ratio=%f, "
+                L"forward_price=%f, dividend=%f, interest=%f, index=0x%I64X}\n",
                 srs[i].expiration, srs[i].sequence, srs[i].volatility, srs[i].put_call_ratio, 
-                srs[i].forward_price, srs[i].dividend, srs[i].interest);
+                srs[i].forward_price, srs[i].dividend, srs[i].interest, srs[i].index);
         }
     }
 }

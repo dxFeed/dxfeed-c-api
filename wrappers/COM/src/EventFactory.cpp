@@ -336,6 +336,8 @@ private:
     virtual HRESULT STDMETHODCALLTYPE GetOpenInterest(LONGLONG* value);
     virtual HRESULT STDMETHODCALLTYPE GetFlags(LONGLONG* value);
     virtual HRESULT STDMETHODCALLTYPE GetExchange(SHORT* value);
+    virtual HRESULT STDMETHODCALLTYPE GetDayClosePriceType(CHAR* value);
+    virtual HRESULT STDMETHODCALLTYPE GetPrevDayClosePriceType(CHAR* value);
 
 private:
 
@@ -453,6 +455,26 @@ HRESULT STDMETHODCALLTYPE DXSummary::GetExchange(SHORT* value) {
     CHECK_PTR(value);
 
     *value = m_data->exchange_code;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXSummary::GetDayClosePriceType(CHAR* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->day_close_price_type;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXSummary::GetPrevDayClosePriceType(CHAR* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->prev_day_close_price_type;
 
     return S_OK;
 }
@@ -1739,6 +1761,7 @@ private:
     virtual HRESULT STDMETHODCALLTYPE GetTheta(DOUBLE* value);
     virtual HRESULT STDMETHODCALLTYPE GetRho(DOUBLE* value);
     virtual HRESULT STDMETHODCALLTYPE GetVega(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetIndex(LONGLONG* value);
 
 private:
 
@@ -1846,6 +1869,16 @@ HRESULT STDMETHODCALLTYPE DXGreeks::GetVega(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->vega;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXGreeks::GetIndex(LONGLONG* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->index;
 
     return S_OK;
 }
@@ -2119,6 +2152,7 @@ private:
     virtual HRESULT STDMETHODCALLTYPE GetForwardPrice(DOUBLE* value);
     virtual HRESULT STDMETHODCALLTYPE GetDividend(DOUBLE* value);
     virtual HRESULT STDMETHODCALLTYPE GetInterest(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetIndex(LONGLONG* value);
 
 private:
 
@@ -2206,6 +2240,16 @@ HRESULT STDMETHODCALLTYPE DXSeries::GetInterest(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->interest;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXSeries::GetIndex(LONGLONG* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->index;
 
     return S_OK;
 }
