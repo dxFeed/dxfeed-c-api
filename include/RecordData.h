@@ -164,8 +164,11 @@ typedef struct {
     dxf_int_t event_flags;
     dxf_long_t index;
     dxf_int_t side;
-    dxf_bool_t is_spread_leg;
+    dxf_bool_t is_cancel;
+    dxf_bool_t is_correction;
     dxf_bool_t is_trade;
+    dxf_bool_t is_new;
+    dxf_bool_t is_spread_leg;
     dxf_bool_t is_valid_tick;
     dxf_int_t type;
 } dx_time_and_sale_t;
@@ -182,12 +185,11 @@ typedef struct {
     dxf_double_t vwap;
     dxf_double_t bid_volume;
     dxf_double_t ask_volume;
+    dxf_long_t index;
     /* Note: next two fields open_interest and imp_volatility introduced for 
        daily candle */
-    dxf_double_t open_interest;
+    dxf_long_t open_interest;
     dxf_double_t imp_volatility;
-    /* Note: calculated fields */
-    dxf_long_t index;
 } dx_candle_t;
 
 typedef struct {

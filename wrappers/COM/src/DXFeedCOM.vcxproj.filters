@@ -50,12 +50,21 @@
     <ClCompile Include="TypeLibraryManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CandleSymbol.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="DXFeedCOM.def">
       <Filter>Source Files</Filter>
     </None>
     <None Include="DXFeedCOMd.def">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="DXFeedCOM_64.def">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="DXFeedCOMd_64.def">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
@@ -97,6 +106,9 @@
     </ClInclude>
     <ClInclude Include="..\include\Interfaces.h">
       <Filter>External interface</Filter>
+    </ClInclude>
+    <ClInclude Include="CandleSymbol.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

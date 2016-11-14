@@ -367,7 +367,7 @@ int main (int argc, char* argv[]) {
             symbol[i] = towupper(symbol[i]);
     }
 
-    wprintf(L"Sample test started.\n");
+    wprintf(L"CommandLineSample started.\n");
 	dxfeed_host_u = ansi_to_unicode(dxfeed_host);
     wprintf(L"Connecting to host %ls...\n", dxfeed_host_u);
 	free(dxfeed_host_u);

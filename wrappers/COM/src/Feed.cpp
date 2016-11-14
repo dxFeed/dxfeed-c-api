@@ -7,6 +7,7 @@
 #include "DispatchImpl.h"
 #include "Connection.h"
 #include "Interfaces.h"
+#include "CandleSymbol.h"
 
 #include <comdef.h>
 
@@ -48,6 +49,7 @@ struct DXFeed : public IDXFeed, private DefIDispatchImpl {
     virtual HRESULT STDMETHODCALLTYPE GetLastErrorDescr (BSTR* descr);
     virtual HRESULT STDMETHODCALLTYPE InitLogger (BSTR file, VARIANT_BOOL overwrite,
                                                   VARIANT_BOOL showTimezone, VARIANT_BOOL verbose);
+    virtual HRESULT STDMETHODCALLTYPE CreateCandleSymbol(IDispatch** candleSymbol);
                                               
 private:
 
@@ -150,6 +152,28 @@ HRESULT STDMETHODCALLTYPE DXFeed::InitLogger (BSTR file, VARIANT_BOOL overwrite,
     
     fileWrapper.Detach();
     
+    return hr;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXFeed::CreateCandleSymbol(IDispatch** candleSymbol) {
+    if (candleSymbol == NULL) {
+        return E_POINTER;
+    }
+
+    HRESULT hr = S_OK;
+
+    try {
+
+        *candleSymbol = DefDXCandleSymbolFactory::CreateInstance();
+    }
+    catch (const _com_error& e) {
+        hr = e.Error();
+    }
+    catch (...) {
+    }
+
     return hr;
 }
 

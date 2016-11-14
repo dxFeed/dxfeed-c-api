@@ -331,7 +331,8 @@ void setSymbols (IDXFeed* feed, IDXSubscription* subscr, const SymbolPack& symbo
 
 void getSubscrEvents (IDXFeed* feed, IDXSubscription* subscr) {
     static const char* eventTypeNames[dx_eid_count] = {
-        "Trade", "Quote", "Summary", "Profile", "Order", "Time&Sale"
+        "Trade", "Quote", "Summary", "Profile", "Order", "Time&Sale", "Candle", 
+        "TradeETH", "SpreadOrder"
     };
     
     INT eventTypes;
@@ -350,6 +351,26 @@ void getSubscrEvents (IDXFeed* feed, IDXSubscription* subscr) {
     }
     
     cout << std::endl;
+}
+
+/* -------------------------------------------------------------------------- */
+
+void addCandleSymbol(IDXFeed* feed, IDXSubscription* subscr, IDXCandleSymbol* candleSymbol) {
+    _bstr_t baseSymbolWrapper;
+    candleSymbol->get_BaseSymbol(baseSymbolWrapper.GetAddress());
+    wcout << "\tThe candle symbol on " << (const wchar_t*)baseSymbolWrapper << std::endl;
+
+    processError(subscr->AddCandleSymbol(candleSymbol), feed);
+}
+
+/* -------------------------------------------------------------------------- */
+
+void removeCandleSymbol(IDXFeed* feed, IDXSubscription* subscr, IDXCandleSymbol* candleSymbol) {
+    _bstr_t baseSymbolWrapper;
+    candleSymbol->get_BaseSymbol(baseSymbolWrapper.GetAddress());
+    wcout << "\tThe candle symbol on " << (const wchar_t*)baseSymbolWrapper << std::endl;
+
+    processError(subscr->RemoveCandleSymbol(candleSymbol), feed);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -442,18 +463,18 @@ int _tmain(int argc, _TCHAR* argv[]) {
         IDXSubscription* subscr = NULL;
         
         {
-            int eventTypes = DXF_ET_TRADE;
+            int eventTypes = DXF_ET_TRADE | DXF_ET_CANDLE;
             
             cout << "Creating a subscription based on the created connection: event type bitmask = " << eventTypes << "...\n";
             
-            processError(connection->CreateSubscription(eventTypes, (IDispatch**)&subscr), feed);
+            processError(connection->CreateSubscriptionTimed(eventTypes, 0, (IDispatch**)&subscr), feed);
         }
         
         ComReleaser subscrReleaser(subscr);
         
         cout << "Adding a single symbol to the subscription...\n";        
         addSymbol(feed, subscr, std::string(symbolPacks[0].symbols[0]));
-        
+
         cout << "Attaching an event data listener to the subscription object...\n";        
         attachSink(subscr, (IDXEventListener*)&el, DIID_IDXEventListener);
         
@@ -480,13 +501,34 @@ int _tmain(int argc, _TCHAR* argv[]) {
         cout << "Adding new symbols to the subscription...\n";
         addSymbols(feed, subscr, symbolPacks[2]);
         pauseThread(5000);
+
+        cout << "Adding new Candle symbol [XBT/USD{=d}] to the subscription...\n";
+        IDXCandleSymbol* candleSymbol = NULL; 
+        processError(feed->CreateCandleSymbol((IDispatch**)&candleSymbol), feed);
+        ComReleaser candleSymbolReleaser(candleSymbol);
+        candleSymbol->put_BaseSymbol(L"XBT/USD");
+        candleSymbol->put_PeriodValue(1.0);
+        candleSymbol->put_PeriodType(dxf_ctpa_day);
+        addCandleSymbol(feed, subscr, candleSymbol);
+        pauseThread(5000);
+
+        cout << "Adding new Candle symbol [AAPL{=d}] to the subscription...\n";
+        candleSymbol->put_BaseSymbol(L"AAPL");
+        addCandleSymbol(feed, subscr, candleSymbol);
+        getSymbols(feed, subscr);
+        pauseThread(5000);
+
+        cout << "Removing Candle symbol [AAPL{=d}] from the subscription...\n";
+        removeCandleSymbol(feed, subscr, candleSymbol);
+        pauseThread(5000);
         
         cout << "Getting the subscription symbols...\n";
         getSymbols(feed, subscr);
         pauseThread(5000);
         
         pauseThread(100000);
-        
+
+        subscr->ClearSymbols();
 	
 	} catch (const DXFeedError&) {
 	    return -1;

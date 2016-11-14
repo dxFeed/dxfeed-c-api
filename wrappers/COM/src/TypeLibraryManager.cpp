@@ -34,6 +34,7 @@ static GUIDPTR const g_interfaceGuids[] = {
     &IID_IDXUnderlying,
     &IID_IDXSeries,
     
+    &IID_IDXCandleSymbol,
     &DIID_IDXConnectionTerminationNotifier,
     &DIID_IDXEventListener
 };
