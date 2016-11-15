@@ -140,13 +140,15 @@ void listener(int event_type, dxf_const_string_t symbol_name,
     }
     
     if (event_type == DXF_ET_SUMMARY) {
-	    dxf_summary_t* s = (dxf_summary_t*)data;
+        dxf_summary_t* s = (dxf_summary_t*)data;
 
-	    for (; i < data_count; ++i) {
-			wprintf(L"day id=%d, day open price=%f, day high price=%f, day low price=%f, day close price=%f, "
-                L"prev day id=%d, prev day close price=%f, open interest=%I64i, flags=%I64i, exchange=%c}\n", 
-                s[i].day_id, s[i].day_open_price, s[i].day_high_price, s[i].day_low_price, s[i].day_close_price, 
-                s[i].prev_day_id, s[i].prev_day_close_price, s[i].open_interest, s[i].flags, s[i].exchange_code);
+        for (; i < data_count; ++i) {
+            wprintf(L"day id=%d, day open price=%f, day high price=%f, day low price=%f, day close price=%f, "
+                L"prev day id=%d, prev day close price=%f, open interest=%I64i, flags=0x%I64X, exchange=%c, "
+                L"day close price type=%i, prev day close price type=%i}\n", 
+                s[i].day_id, s[i].day_open_price, s[i].day_high_price, s[i].day_low_price, s[i].day_close_price,
+                s[i].prev_day_id, s[i].prev_day_close_price, s[i].open_interest, s[i].flags, s[i].exchange_code,
+                s[i].day_close_price_type, s[i].prev_day_close_price_type);
         }
     }
 
