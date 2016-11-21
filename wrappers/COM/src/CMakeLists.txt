@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8.1)
 
 cmake_policy(SET CMP0015 NEW)
 
@@ -14,11 +14,21 @@ set(INCLUDE_DIR
     ${LIB_DXFEED_INCLUDE_DIR}
     ${LIB_COM_INCLUDE_DIR}
 )
+set(TARGET_PLATFORM "x86" CACHE STRING "Target platform specification")
+set(APP_VERSION "" CACHE STRING "The version of library")
+set(C_API_VERSION_MAJOR 0)
+set(C_API_VERSION_MINOR 0)
+set(C_API_VERSION_PATCH 0)
+set(POSTFIX "")
+set(PLATFORM_POSTFIX "")
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(POSTFIX "d")
-else()
-    set(POSTFIX "")
 endif()
+if(TARGET_PLATFORM STREQUAL "x64")
+    set(PLATFORM_POSTFIX "_64")
+    set(POSTFIX "${POSTFIX}${PLATFORM_POSTFIX}")
+endif()
+
 set(DEF_FILE ${PROJECT}${POSTFIX}.def)
 set(IDL_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT}.idl)
 set(LIB_DXFEED_SRC_DIR ../../../src)
@@ -27,12 +37,33 @@ set(LIB_DXFEED_NAME ${LIB_DXFEED_PROJ}${POSTFIX})
 set(LIB_DXFEED_OUT_DIR ${CMAKE_BINARY_DIR}/${LIB_DXFEED_PROJ})
 
 set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE TYPE INTERNAL FORCE)
+set(CMAKE_DEBUG_POSTFIX "d${PLATFORM_POSTFIX}")
+set(CMAKE_RELEASE_POSTFIX "${PLATFORM_POSTFIX}")
  
-project(${PROJECT}) 
+project(${PROJECT})
+
+# If library version is not specified through parameters version from the source will be used
+if(NOT ${APP_VERSION} STREQUAL "")
+
+    #separate version string on components
+    string(REPLACE "." ";" VERSION_COMPONENTS_LIST ${APP_VERSION})
+    list(LENGTH VERSION_COMPONENTS_LIST VERSION_COMPONENTS_COUNT)
+    list(GET VERSION_COMPONENTS_LIST 0 C_API_VERSION_MAJOR)
+    if(VERSION_COMPONENTS_COUNT GREATER 1)
+        list(GET VERSION_COMPONENTS_LIST 1 C_API_VERSION_MINOR)
+    endif()
+    if(VERSION_COMPONENTS_COUNT GREATER 2)
+        list(GET VERSION_COMPONENTS_LIST 2 C_API_VERSION_PATCH)
+    endif()
+    
+    configure_file("${PROJECT_SOURCE_DIR}/${DEF_FILE}.in" "${PROJECT_SOURCE_DIR}/${DEF_FILE}")
+endif()
 
 include_directories(${INCLUDE_DIR})
 
-add_subdirectory(${LIB_DXFEED_SRC_DIR} ${LIB_DXFEED_OUT_DIR})
+if (NOT TARGET ${LIB_DXFEED_PROJ})
+    add_subdirectory(${LIB_DXFEED_SRC_DIR} ${LIB_DXFEED_OUT_DIR})
+endif()
 
 link_directories(${LIB_DXFEED_OUT_DIR})
 
@@ -98,7 +129,6 @@ target_link_libraries(${PROJECT} ${LIB_DXFEED_NAME} comsupp.lib Advapi32.lib)
 
 set_target_properties(${PROJECT} 
     PROPERTIES 
-    DEBUG_POSTFIX "d"
     LINK_FLAGS "${ADDITIONAL_PROPERTIES}"
 )
 
@@ -113,3 +143,52 @@ add_custom_command(
     POST_BUILD
     COMMAND midl /env win32 /h "${MIDL_H_FILE}" /W1 /char signed /tlb "${MIDL_TLB_FILE}" "${IDL_FILE}"
 )
+
+set(TLB_OUT_DIR ${CMAKE_BINARY_DIR}/$(Configuration))
+ADD_CUSTOM_COMMAND(
+    TARGET ${PROJECT}
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${MIDL_TLB_FILE} ${TLB_OUT_DIR}/${MIDL_TLB_FILE}
+    COMMAND ${CMAKE_COMMAND} -E copy ${MIDL_H_FILE} ${TLB_OUT_DIR}/${MIDL_H_FILE}
+    COMMAND ${CMAKE_COMMAND} -E copy ${MIDL_C_FILE} ${TLB_OUT_DIR}/${MIDL_C_FILE}
+)
+
+
+set(PROJECT_FILES
+    ${PROJECT}.vcxproj
+    ${PROJECT}.vcxproj.filters
+)
+set(BUILD_FILES
+    build.bat
+    CMakeLists.txt
+)
+set(ALL_DEF_FILES
+    ${PROJECT}.def
+    ${PROJECT}d.def
+    ${PROJECT}_64.def
+    ${PROJECT}d_64.def
+)
+set(ALL_DEF_TEMPLATES
+    ${PROJECT}.def.in
+    ${PROJECT}d.def.in
+    ${PROJECT}_64.def.in
+    ${PROJECT}d_64.def.in
+)
+set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/DXFeedAllCPackConfig.cmake")
+install(TARGETS ${PROJECT}
+    DESTINATION "bin/${TARGET_PLATFORM}"
+)
+install(DIRECTORY "${LIB_COM_INCLUDE_DIR}"
+    DESTINATION "wrappers/COM"
+)
+install(FILES ${HEADER_FILES} ${SOURCE_FILES} ${ALL_DEF_FILES} ${PROJECT_FILES} ${BUILD_FILES} ${ALL_DEF_TEMPLATES}
+    DESTINATION "wrappers/COM/src"
+)
+install(FILES "${PROJECT_BINARY_DIR}/DXFeedCOM.tlb" "${PROJECT_BINARY_DIR}/DXFeedCOM.h" "${PROJECT_BINARY_DIR}/DXFeedCOM_i.c"
+    DESTINATION "bin/${TARGET_PLATFORM}/tlb"
+)
+set(CPACK_PACKAGE_VENDOR "Devexperts")
+set(CPACK_PACKAGE_NAME "${PROJECT}")
+set(CPACK_PACKAGE_VERSION "${APP_VERSION}")
+set(CPACK_PACKAGE_FILE_NAME "${PROJECT}-${APP_VERSION}-${TARGET_PLATFORM}")
+include(CPack)

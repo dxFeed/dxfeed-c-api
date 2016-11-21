@@ -13,6 +13,7 @@
 
 # /tests/APITest/
 /tests/APITest/*.user
+/tests/APITest/build
 
 # /tests/CommandLineSample/
 /tests/CommandLineSample/*.user
@@ -20,24 +21,32 @@
 
 # /tests/ConnectionTest/
 /tests/ConnectionTest/*.user
+/tests/ConnectionTest/build
 
 # /tests/FullTest/
 /tests/FullTest/*.user
+/tests/FullTest/build
 
 # /tests/LastEventTest/
 /tests/LastEventTest/*.user
+/tests/LastEventTest/build
 
 # /tests/PerformanceTest/
 /tests/PerformanceTest/*.user
+/tests/PerformanceTest/build
 
 # /tests/QuoteTableTest/
 /tests/QuoteTableTest/*.user
+/tests/QuoteTableTest/build
 
 # /tests/SampleTest/
 /tests/SampleTest/*.user
+/tests/SampleTest/build
 
 # /tests/UnitTests/
 /tests/UnitTests/*.user
+/tests/UnitTests/*.log
+/tests/UnitTests/build
 
 # /tests/SnapshotConsoleSample/
 /tests/SnapshotConsoleSample/*.user
@@ -57,7 +66,6 @@
 /tests/CandleSample/build
 
 log.log
-/tests/UnitTests/*.log
 /.vs
 /DXFeed.VC.db
 /DXFeed.VC.VC.opendb
