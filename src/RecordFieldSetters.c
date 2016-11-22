@@ -150,7 +150,7 @@ FIELD_SETTER_BODY(dx_time_and_sale_t, price, dxf_double_t)
 FIELD_SETTER_BODY(dx_time_and_sale_t, size, dxf_int_t)
 FIELD_SETTER_BODY(dx_time_and_sale_t, bid_price, dxf_double_t)
 FIELD_SETTER_BODY(dx_time_and_sale_t, ask_price, dxf_double_t)
-FIELD_SETTER_BODY(dx_time_and_sale_t, type, dxf_int_t)
+FIELD_SETTER_BODY(dx_time_and_sale_t, flags, dxf_int_t)
 
 void DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, sequence) (void* object, const void* field) {
     ((dx_time_and_sale_t*)object)->event_id &= 0xFFFFFFFF00000000L;
@@ -179,6 +179,91 @@ FIELD_SETTER_BODY(dx_candle_t, volume, dxf_double_t)
 FIELD_SETTER_BODY(dx_candle_t, vwap, dxf_double_t)
 FIELD_SETTER_BODY(dx_candle_t, bid_volume, dxf_double_t)
 FIELD_SETTER_BODY(dx_candle_t, ask_volume, dxf_double_t)
+FIELD_SETTER_BODY(dx_candle_t, open_interest, dxf_int_t)
+FIELD_SETTER_BODY(dx_candle_t, imp_volatility, dxf_double_t)
+
+/* -------------------------------------------------------------------------- */
+/*
+*	TradeETH field setters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_SETTER_BODY(dx_trade_eth_t, time, dxf_int_t)
+FIELD_SETTER_BODY(dx_trade_eth_t, flags, dxf_int_t)
+FIELD_SETTER_BODY(dx_trade_eth_t, exchange_code, dxf_char_t)
+FIELD_SETTER_BODY(dx_trade_eth_t, price, dxf_double_t)
+FIELD_SETTER_BODY(dx_trade_eth_t, size, dxf_int_t)
+FIELD_SETTER_BODY(dx_trade_eth_t, eth_volume, dxf_double_t)
+
+/* -------------------------------------------------------------------------- */
+/*
+*	SpreadOrder field setters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_SETTER_BODY(dx_spread_order_t, index, dxf_int_t)
+FIELD_SETTER_BODY(dx_spread_order_t, time, dxf_int_t)
+FIELD_SETTER_BODY(dx_spread_order_t, sequence, dxf_int_t)
+FIELD_SETTER_BODY(dx_spread_order_t, price, dxf_double_t)
+FIELD_SETTER_BODY(dx_spread_order_t, size, dxf_int_t)
+FIELD_SETTER_BODY(dx_spread_order_t, count, dxf_int_t)
+FIELD_SETTER_BODY(dx_spread_order_t, flags, dxf_int_t)
+FIELD_SETTER_BODY(dx_spread_order_t, spread_symbol, dxf_string_t)
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Greeks field setters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_SETTER_BODY(dx_greeks_t, time, dxf_int_t);
+FIELD_SETTER_BODY(dx_greeks_t, sequence, dxf_int_t);
+FIELD_SETTER_BODY(dx_greeks_t, greeks_price, dxf_double_t);
+FIELD_SETTER_BODY(dx_greeks_t, volatility, dxf_double_t);
+FIELD_SETTER_BODY(dx_greeks_t, delta, dxf_double_t);
+FIELD_SETTER_BODY(dx_greeks_t, gamma, dxf_double_t);
+FIELD_SETTER_BODY(dx_greeks_t, theta, dxf_double_t);
+FIELD_SETTER_BODY(dx_greeks_t, rho, dxf_double_t);
+FIELD_SETTER_BODY(dx_greeks_t, vega, dxf_double_t);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	TheoPrice field setters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_SETTER_BODY(dx_theo_price_t, theo_time, dxf_int_t);
+FIELD_SETTER_BODY(dx_theo_price_t, theo_price, dxf_double_t);
+FIELD_SETTER_BODY(dx_theo_price_t, theo_underlying_price, dxf_double_t);
+FIELD_SETTER_BODY(dx_theo_price_t, theo_delta, dxf_double_t);
+FIELD_SETTER_BODY(dx_theo_price_t, theo_gamma, dxf_double_t);
+FIELD_SETTER_BODY(dx_theo_price_t, theo_dividend, dxf_double_t);
+FIELD_SETTER_BODY(dx_theo_price_t, theo_interest, dxf_double_t);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Underlying field setters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_SETTER_BODY(dx_underlying_t, volatility, dxf_double_t);
+FIELD_SETTER_BODY(dx_underlying_t, front_volatility, dxf_double_t);
+FIELD_SETTER_BODY(dx_underlying_t, back_volatility, dxf_double_t);
+FIELD_SETTER_BODY(dx_underlying_t, put_call_ratio, dxf_double_t);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Series field setters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_SETTER_BODY(dx_series_t, expiration, dxf_dayid_t);
+FIELD_SETTER_BODY(dx_series_t, sequence, dxf_int_t);
+FIELD_SETTER_BODY(dx_series_t, volatility, dxf_double_t);
+FIELD_SETTER_BODY(dx_series_t, put_call_ratio, dxf_double_t);
+FIELD_SETTER_BODY(dx_series_t, forward_price, dxf_double_t);
+FIELD_SETTER_BODY(dx_series_t, dividend, dxf_double_t);
+FIELD_SETTER_BODY(dx_series_t, interest, dxf_double_t);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -295,6 +380,7 @@ RECORD_EXCHANGE_CODE_GETTER_BODY(dx_rid_quote)
 RECORD_EXCHANGE_CODE_GETTER_BODY(dx_rid_summary)
 RECORD_EXCHANGE_CODE_GETTER_BODY(dx_rid_profile)
 RECORD_EXCHANGE_CODE_GETTER_BODY(dx_rid_market_maker)
+RECORD_EXCHANGE_CODE_GETTER_BODY(dx_rid_trade_eth)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -408,7 +494,7 @@ FIELD_DEF_VAL_BODY(dx_time_and_sale_t, size, dxf_int_t)
 FIELD_DEF_VAL_BODY(dx_time_and_sale_t, bid_price, dxf_double_t)
 FIELD_DEF_VAL_BODY(dx_time_and_sale_t, ask_price, dxf_double_t)
 FIELD_DEF_VAL_BODY(dx_time_and_sale_t, exch_sale_conds, dxf_int_t)
-FIELD_DEF_VAL_BODY(dx_time_and_sale_t, type, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_time_and_sale_t, flags, dxf_int_t)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -427,6 +513,90 @@ FIELD_DEF_VAL_BODY(dx_candle_t, volume, dxf_double_t)
 FIELD_DEF_VAL_BODY(dx_candle_t, vwap, dxf_double_t)
 FIELD_DEF_VAL_BODY(dx_candle_t, bid_volume, dxf_double_t)
 FIELD_DEF_VAL_BODY(dx_candle_t, ask_volume, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_candle_t, open_interest, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_candle_t, imp_volatility, dxf_double_t)
+
+/* -------------------------------------------------------------------------- */
+/*
+*	TradeETH field value getters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_DEF_VAL_BODY(dx_trade_eth_t, time, dxf_long_t)
+FIELD_DEF_VAL_BODY(dx_trade_eth_t, flags, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_trade_eth_t, exchange_code, dxf_char_t)
+FIELD_DEF_VAL_BODY(dx_trade_eth_t, price, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_trade_eth_t, size, dxf_long_t)
+FIELD_DEF_VAL_BODY(dx_trade_eth_t, eth_volume, dxf_double_t)
+
+/* -------------------------------------------------------------------------- */
+/*
+*	SpreadOrder field value getters implementation
+*/
+/* -------------------------------------------------------------------------- */
+FIELD_DEF_VAL_BODY(dx_spread_order_t, index, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_spread_order_t, time, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_spread_order_t, sequence, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_spread_order_t, price, dxf_double_t)
+FIELD_DEF_VAL_BODY(dx_spread_order_t, size, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_spread_order_t, count, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_spread_order_t, flags, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_spread_order_t, spread_symbol, dxf_const_string_t)
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Greeks field value getters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_DEF_VAL_BODY(dx_greeks_t, time, dxf_int_t);
+FIELD_DEF_VAL_BODY(dx_greeks_t, sequence, dxf_int_t);
+FIELD_DEF_VAL_BODY(dx_greeks_t, greeks_price, dxf_double_t);
+FIELD_DEF_VAL_BODY(dx_greeks_t, volatility, dxf_double_t);
+FIELD_DEF_VAL_BODY(dx_greeks_t, delta, dxf_double_t);
+FIELD_DEF_VAL_BODY(dx_greeks_t, gamma, dxf_double_t);
+FIELD_DEF_VAL_BODY(dx_greeks_t, theta, dxf_double_t);
+FIELD_DEF_VAL_BODY(dx_greeks_t, rho, dxf_double_t);
+FIELD_DEF_VAL_BODY(dx_greeks_t, vega, dxf_double_t);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	TheoPrice field value getters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_DEF_VAL_BODY(dx_theo_price_t, theo_time, dxf_int_t);
+FIELD_DEF_VAL_BODY(dx_theo_price_t, theo_price, dxf_double_t);
+FIELD_DEF_VAL_BODY(dx_theo_price_t, theo_underlying_price, dxf_double_t);
+FIELD_DEF_VAL_BODY(dx_theo_price_t, theo_delta, dxf_double_t);
+FIELD_DEF_VAL_BODY(dx_theo_price_t, theo_gamma, dxf_double_t);
+FIELD_DEF_VAL_BODY(dx_theo_price_t, theo_dividend, dxf_double_t);
+FIELD_DEF_VAL_BODY(dx_theo_price_t, theo_interest, dxf_double_t);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Underlying field value getters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_DEF_VAL_BODY(dx_underlying_t, volatility, dxf_double_t);
+FIELD_DEF_VAL_BODY(dx_underlying_t, front_volatility, dxf_double_t);
+FIELD_DEF_VAL_BODY(dx_underlying_t, back_volatility, dxf_double_t);
+FIELD_DEF_VAL_BODY(dx_underlying_t, put_call_ratio, dxf_double_t);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Series field value getters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_DEF_VAL_BODY(dx_series_t, expiration, dxf_dayid_t);
+FIELD_DEF_VAL_BODY(dx_series_t, sequence, dxf_int_t);
+FIELD_DEF_VAL_BODY(dx_series_t, volatility, dxf_double_t);
+FIELD_DEF_VAL_BODY(dx_series_t, put_call_ratio, dxf_double_t);
+FIELD_DEF_VAL_BODY(dx_series_t, forward_price, dxf_double_t);
+FIELD_DEF_VAL_BODY(dx_series_t, dividend, dxf_double_t);
+FIELD_DEF_VAL_BODY(dx_series_t, interest, dxf_double_t);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -551,7 +721,7 @@ FIELD_GETTER_BODY(dx_time_and_sale_t, price, dxf_double_t)
 FIELD_GETTER_BODY(dx_time_and_sale_t, size, dxf_long_t)
 FIELD_GETTER_BODY(dx_time_and_sale_t, bid_price, dxf_double_t)
 FIELD_GETTER_BODY(dx_time_and_sale_t, ask_price, dxf_double_t)
-FIELD_GETTER_BODY(dx_time_and_sale_t, type, dxf_int_t)
+FIELD_GETTER_BODY(dx_time_and_sale_t, flags, dxf_int_t)
 
 void DX_RECORD_FIELD_GETTER_NAME(dx_time_and_sale_t, sequence) (void* object, OUT void* field) {
     *(dxf_int_t*)field = (dxf_int_t)(((dx_time_and_sale_t*)object)->event_id & 0x00000000FFFFFFFFL);
@@ -579,3 +749,88 @@ FIELD_GETTER_BODY(dx_candle_t, volume, dxf_double_t)
 FIELD_GETTER_BODY(dx_candle_t, vwap, dxf_double_t)
 FIELD_GETTER_BODY(dx_candle_t, bid_volume, dxf_double_t)
 FIELD_GETTER_BODY(dx_candle_t, ask_volume, dxf_double_t)
+FIELD_GETTER_BODY(dx_candle_t, open_interest, dxf_long_t)
+FIELD_GETTER_BODY(dx_candle_t, imp_volatility, dxf_double_t)
+
+/* -------------------------------------------------------------------------- */
+/*
+*	TradeETH field getters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_GETTER_BODY(dx_trade_eth_t, time, dxf_long_t)
+FIELD_GETTER_BODY(dx_trade_eth_t, flags, dxf_int_t)
+FIELD_GETTER_BODY(dx_trade_eth_t, exchange_code, dxf_char_t)
+FIELD_GETTER_BODY(dx_trade_eth_t, price, dxf_double_t)
+FIELD_GETTER_BODY(dx_trade_eth_t, size, dxf_long_t)
+FIELD_GETTER_BODY(dx_trade_eth_t, eth_volume, dxf_double_t)
+
+/* -------------------------------------------------------------------------- */
+/*
+*	SpreadOrder field getters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_GETTER_BODY(dx_spread_order_t, index, dxf_int_t)
+FIELD_GETTER_BODY(dx_spread_order_t, time, dxf_int_t)
+FIELD_GETTER_BODY(dx_spread_order_t, sequence, dxf_int_t)
+FIELD_GETTER_BODY(dx_spread_order_t, price, dxf_double_t)
+FIELD_GETTER_BODY(dx_spread_order_t, size, dxf_int_t)
+FIELD_GETTER_BODY(dx_spread_order_t, count, dxf_int_t)
+FIELD_GETTER_BODY(dx_spread_order_t, flags, dxf_int_t)
+FIELD_GETTER_BODY(dx_spread_order_t, spread_symbol, dxf_const_string_t)
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Greeks field getters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_GETTER_BODY(dx_greeks_t, time, dxf_long_t);
+FIELD_GETTER_BODY(dx_greeks_t, sequence, dxf_int_t);
+FIELD_GETTER_BODY(dx_greeks_t, greeks_price, dxf_double_t);
+FIELD_GETTER_BODY(dx_greeks_t, volatility, dxf_double_t);
+FIELD_GETTER_BODY(dx_greeks_t, delta, dxf_double_t);
+FIELD_GETTER_BODY(dx_greeks_t, gamma, dxf_double_t);
+FIELD_GETTER_BODY(dx_greeks_t, theta, dxf_double_t);
+FIELD_GETTER_BODY(dx_greeks_t, rho, dxf_double_t);
+FIELD_GETTER_BODY(dx_greeks_t, vega, dxf_double_t);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	TheoPrice field getters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_GETTER_BODY(dx_theo_price_t, theo_time, dxf_long_t);
+FIELD_GETTER_BODY(dx_theo_price_t, theo_price, dxf_double_t);
+FIELD_GETTER_BODY(dx_theo_price_t, theo_underlying_price, dxf_double_t);
+FIELD_GETTER_BODY(dx_theo_price_t, theo_delta, dxf_double_t);
+FIELD_GETTER_BODY(dx_theo_price_t, theo_gamma, dxf_double_t);
+FIELD_GETTER_BODY(dx_theo_price_t, theo_dividend, dxf_double_t);
+FIELD_GETTER_BODY(dx_theo_price_t, theo_interest, dxf_double_t);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Underlying field getters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_GETTER_BODY(dx_underlying_t, volatility, dxf_double_t);
+FIELD_GETTER_BODY(dx_underlying_t, front_volatility, dxf_double_t);
+FIELD_GETTER_BODY(dx_underlying_t, back_volatility, dxf_double_t);
+FIELD_GETTER_BODY(dx_underlying_t, put_call_ratio, dxf_double_t);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Series field getters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_GETTER_BODY(dx_series_t, expiration, dxf_dayid_t);
+FIELD_GETTER_BODY(dx_series_t, sequence, dxf_int_t);
+FIELD_GETTER_BODY(dx_series_t, volatility, dxf_double_t);
+FIELD_GETTER_BODY(dx_series_t, put_call_ratio, dxf_double_t);
+FIELD_GETTER_BODY(dx_series_t, forward_price, dxf_double_t);
+FIELD_GETTER_BODY(dx_series_t, dividend, dxf_double_t);
+FIELD_GETTER_BODY(dx_series_t, interest, dxf_double_t);

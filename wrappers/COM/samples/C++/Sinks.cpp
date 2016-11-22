@@ -170,6 +170,8 @@ HRESULT STDMETHODCALLTYPE DXEventListener::OnNewData (IDispatch* subscription, I
     
     if (eventType == DXF_ET_TRADE) {
         cout << ", event type is Trade";
+    } else if (eventType == DXF_ET_CANDLE) {
+        cout << ", event type is Candle";
     }
     
     IDXEventDataCollection* dc = reinterpret_cast<IDXEventDataCollection*>(dataCollection);
@@ -201,6 +203,23 @@ HRESULT STDMETHODCALLTYPE DXEventListener::OnNewData (IDispatch* subscription, I
             }
             
             cout << "\t\t\tevent[" << i << "].price = " << price << std::endl;
+        } else if (eventType == DXF_ET_CANDLE) {
+            IDXCandle* c = (IDXCandle*)eventData;
+            DOUBLE open, high, low, close;
+
+            if ((res = c->GetOpen(&open)) != S_OK ||
+                (res = c->GetHigh(&high)) != S_OK ||
+                (res = c->GetLow(&low)) != S_OK ||
+                (res = c->GetClose(&close)) != S_OK) {
+                return res;
+            }
+
+            cout << "\t\tevent[" << i << "].open = " << open 
+                << "\tevent[" << i << "].high = " << high
+                << std::endl
+                << "\t\tevent[" << i << "].low = " << low
+                << "\tevent[" << i << "].close = " << close
+                << std::endl;
         }
     }
     

@@ -117,7 +117,8 @@ DXFEED_API ERRORCODE dxf_create_subscription (dxf_connection_t connection, int e
  *  time - time in the past (unix time in milliseconds)
  *  OUT subscription - a handle of the created subscription
  */
-DXFEED_API ERRORCODE dxf_create_subscription_timed(dxf_connection_t connection, int event_types, dxf_long_t time,
+DXFEED_API ERRORCODE dxf_create_subscription_timed(dxf_connection_t connection, int event_types, 
+                                                   dxf_long_t time,
                                                    OUT dxf_subscription_t* subscription);
 
 /*
@@ -346,6 +347,33 @@ DXFEED_API ERRORCODE dxf_create_candle_symbol_attributes(dxf_const_string_t base
 DXFEED_API ERRORCODE dxf_delete_candle_symbol_attributes(dxf_candle_attributes_t candle_attributes);
 
 /*
+ *  Creates snapshot with the specified parameters.
+ *
+ *  For Order or Candle events (dx_eid_order or dx_eid_candle) please use 
+ *  short form of this function: dxf_create_order_snapshot or dxf_create_candle_snapshot
+ *  respectively.
+ *
+ *  For order events (event_id is 'dx_eid_order')
+ *  If source is NULL string subscription on Order event will be performed. You can specify order 
+ *  source for Order event by passing suffix: "BYX", "BZX", "DEA", "DEX", "ISE", "IST", "NTV".
+ *  If source is equal to "COMPOSITE_BID" or "COMPOSITE_ASK" subscription on MarketMaker event will 
+ *  be performed. For other events source parameter does not matter.
+ *
+ *  connection - a handle of a previously created connection which the subscription will be using
+ *  event_id - single event id. Next events is supported: dxf_eid_order, dxf_eid_candle, 
+               dx_eid_spread_order, dx_eid_time_and_sale, dx_eid_greeks, dx_eid_series.
+ *  symbol - the symbol to add.
+ *  source - order source for Order, which can be one of following: "BYX", "BZX", "DEA", "DEX", 
+ *           "ISE", "IST", "NTV". For MarketMaker subscription use "COMPOSITE_BID" or 
+ *           "COMPOSITE_ASK" keyword.
+ *  time - time in the past (unix time in milliseconds).
+ *  OUT snapshot - a handle of the created snapshot
+ */
+DXFEED_API ERRORCODE dxf_create_snapshot(dxf_connection_t connection, dx_event_id_t event_id,
+                                         dxf_const_string_t symbol, const char* source, 
+                                         dxf_long_t time, OUT dxf_snapshot_t* snapshot);
+
+/*
  *  Creates Order snapshot with the specified parameters.
  *
  *  If source is NULL string subscription on Order event will be performed. You can specify order 
@@ -355,8 +383,9 @@ DXFEED_API ERRORCODE dxf_delete_candle_symbol_attributes(dxf_candle_attributes_t
  *
  *  connection - a handle of a previously created connection which the subscription will be using
  *  symbol - the symbol to add
- *  source - order source for Order event with 4 symbols maximum length OR keyword which can be 
- *           one of COMPOSITE_BID or COMPOSITE_ASK
+ *  source - order source for Order, which can be one of following: "BYX", "BZX", "DEA", "DEX", 
+ *           "ISE", "IST", "NTV". For MarketMaker subscription use "COMPOSITE_BID" or 
+ *           "COMPOSITE_ASK" keyword.
  *  time - time in the past (unix time in milliseconds)
  *  OUT snapshot - a handle of the created snapshot
  */

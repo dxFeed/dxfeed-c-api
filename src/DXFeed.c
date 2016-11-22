@@ -172,7 +172,6 @@ ERRORCODE dx_perform_common_actions () {
 */
 /* -------------------------------------------------------------------------- */
 
-#define DEFAULT_SUBSCRIPTION_FLAGS 0
 #define DEFAULT_SUBSCRIPTION_TIME 0
 
 /* -------------------------------------------------------------------------- */
@@ -293,15 +292,17 @@ ERRORCODE dxf_create_subscription_impl (dxf_connection_t connection, int event_t
 
 DXFEED_API ERRORCODE dxf_create_subscription(dxf_connection_t connection, int event_types, 
                                              OUT dxf_subscription_t* subscription) {
-    return dxf_create_subscription_impl(connection, event_types, DEFAULT_SUBSCRIPTION_FLAGS, 
+    return dxf_create_subscription_impl(connection, event_types, DX_SUBSCR_FLAG_DEFAULT,
         DEFAULT_SUBSCRIPTION_TIME, subscription);
 }
 
 /* -------------------------------------------------------------------------- */
 
-DXFEED_API ERRORCODE dxf_create_subscription_timed(dxf_connection_t connection, int event_types, dxf_long_t time,
+DXFEED_API ERRORCODE dxf_create_subscription_timed(dxf_connection_t connection, int event_types,
+                                                   dxf_long_t time,
                                                    OUT dxf_subscription_t* subscription) {
-    return dxf_create_subscription_impl(connection, event_types, DEFAULT_SUBSCRIPTION_FLAGS, time, subscription);
+    return dxf_create_subscription_impl(connection, event_types, DX_SUBSCR_FLAG_TIME_SERIES, time,
+        subscription);
 }
 
 DXFEED_API ERRORCODE dxf_close_subscription (dxf_subscription_t subscription) {
@@ -412,7 +413,8 @@ DXFEED_API ERRORCODE dxf_remove_symbols (dxf_subscription_t subscription, dxf_co
 
 /* -------------------------------------------------------------------------- */
 
-DXFEED_API ERRORCODE dxf_get_symbols (dxf_subscription_t subscription, OUT dxf_const_string_t** symbols, int* symbol_count){
+DXFEED_API ERRORCODE dxf_get_symbols (dxf_subscription_t subscription,
+                                      OUT dxf_const_string_t** symbols, OUT int* symbol_count) {
     dx_perform_common_actions();
 
     if (subscription == dx_invalid_subscription || symbols == NULL || symbol_count == NULL) {
@@ -725,25 +727,31 @@ ERRORCODE dxf_create_snapshot_impl(dxf_connection_t connection, dx_event_id_t ev
     ERRORCODE error_code;
     int event_types = DX_EVENT_BIT_MASK(event_id);
     int source_len = (source == NULL ? 0 : dx_string_length(source));
-    dxf_uint_t subscr_flags = DX_SUBSCR_FLAG_SINGLE_RECORD;
+    dxf_uint_t subscr_flags = DX_SUBSCR_FLAG_TIME_SERIES;
 
     if (event_id == dx_eid_order) {
+        subscr_flags |= DX_SUBSCR_FLAG_SINGLE_RECORD;
         if (source_len > 0 &&
             (dx_compare_strings(source, DXF_ORDER_COMPOSITE_BID_STR) == 0 ||
             dx_compare_strings(source, DXF_ORDER_COMPOSITE_ASK_STR) == 0)) {
             record_info_id = dx_rid_market_maker;
             subscr_flags |= DX_SUBSCR_FLAG_SR_MARKET_MAKER_ORDER;
-        }
-        else {
+        } else {
             record_info_id = dx_rid_order;
             if (source_len > 0)
                 order_source_value = source;
         }
-    }
-    else if (event_id == dx_eid_candle) {
+    } else if (event_id == dx_eid_candle) {
         record_info_id = dx_rid_candle;
-    }
-    else {
+    } else if (event_id == dx_eid_spread_order) {
+        record_info_id = dx_rid_spread_order;
+    } else if (event_id == dx_eid_time_and_sale) {
+        record_info_id = dx_rid_time_and_sale;
+    } else if (event_id == dx_eid_greeks) {
+        record_info_id = dx_rid_greeks;
+    } else if (event_id == dx_eid_series) {
+        record_info_id = dx_rid_series;
+    } else {
         dx_set_error_code(dx_ssec_invalid_event_id);
         return DXF_FAILURE;
     }
@@ -790,17 +798,29 @@ ERRORCODE dxf_create_snapshot_impl(dxf_connection_t connection, dx_event_id_t ev
 
 }
 
-DXFEED_API ERRORCODE dxf_create_order_snapshot(dxf_connection_t connection, 
-                                               dxf_const_string_t symbol, const char* source,
-                                               dxf_long_t time, OUT dxf_snapshot_t* snapshot) {
+/* -------------------------------------------------------------------------- */
+
+DXFEED_API ERRORCODE dxf_create_snapshot(dxf_connection_t connection, dx_event_id_t event_id,
+                                         dxf_const_string_t symbol, const char* source,
+                                         dxf_long_t time, OUT dxf_snapshot_t* snapshot) {
     dxf_string_t source_str = NULL;
     ERRORCODE res;
     if (source != NULL)
         source_str = dx_ansi_to_unicode(source);
-    res = dxf_create_snapshot_impl(connection, dx_eid_order, symbol, source_str, time, snapshot);
+    res = dxf_create_snapshot_impl(connection, event_id, symbol, source_str, time, snapshot);
     dx_free(source_str);
     return res;
 }
+
+/* -------------------------------------------------------------------------- */
+
+DXFEED_API ERRORCODE dxf_create_order_snapshot(dxf_connection_t connection, 
+                                               dxf_const_string_t symbol, const char* source,
+                                               dxf_long_t time, OUT dxf_snapshot_t* snapshot) {
+    return dxf_create_snapshot(connection, dx_eid_order, symbol, source, time, snapshot);
+}
+
+/* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_create_candle_snapshot(dxf_connection_t connection, 
                                                 dxf_candle_attributes_t candle_attributes, 

@@ -179,6 +179,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AuxAlgo.cpp" />
+    <ClCompile Include="CandleSymbol.cpp" />
     <ClCompile Include="ClassFactory.cpp" />
     <ClCompile Include="Connection.cpp" />
     <ClCompile Include="ConnectionPointImpl.cpp" />
@@ -202,6 +203,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AuxAlgo.h" />
+    <ClInclude Include="CandleSymbol.h" />
     <ClInclude Include="Connection.h" />
     <ClInclude Include="ConnectionPointImpl.h" />
     <ClInclude Include="DispatchImpl.h" />
