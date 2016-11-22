@@ -74,6 +74,7 @@ set(EXTERNAL_HEADERS
 
 set(HEADER_FILES
     AuxAlgo.h
+    CandleSymbol.h
     Connection.h
     ConnectionPointImpl.h
     DispatchImpl.h
@@ -91,6 +92,7 @@ set(ALL_HEADERS
  
 set(SOURCE_FILES
     AuxAlgo.cpp
+    CandleSymbol.cpp
     ClassFactory.cpp
     Connection.cpp
     ConnectionPointImpl.cpp

@@ -343,8 +343,8 @@ static const dx_field_info_t dx_fields_time_and_sale[] = {
     DX_RECORD_FIELD_DEF_VAL_NAME(dx_time_and_sale_t, exch_sale_conds), DX_RECORD_FIELD_GETTER_NAME(dx_time_and_sale_t, exch_sale_conds),
     dx_ft_common_field },
 
-    { dx_fid_compact_int, L"Flags", DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, type), 
-    DX_RECORD_FIELD_DEF_VAL_NAME(dx_time_and_sale_t, type), DX_RECORD_FIELD_GETTER_NAME(dx_time_and_sale_t, type),
+    { dx_fid_compact_int, L"Flags", DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, flags), 
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_time_and_sale_t, flags), DX_RECORD_FIELD_GETTER_NAME(dx_time_and_sale_t, flags),
     dx_ft_common_field }
 };
 
@@ -397,6 +397,226 @@ static const dx_field_info_t dx_fields_candle[] = {
 
     { dx_fid_compact_int | dx_fid_flag_decimal, L"Ask.Volume", DX_RECORD_FIELD_SETTER_NAME(dx_candle_t, ask_volume),
     DX_RECORD_FIELD_DEF_VAL_NAME(dx_candle_t, ask_volume), DX_RECORD_FIELD_GETTER_NAME(dx_candle_t, ask_volume),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int, L"OpenInterest", DX_RECORD_FIELD_SETTER_NAME(dx_candle_t, open_interest),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_candle_t, open_interest), DX_RECORD_FIELD_GETTER_NAME(dx_candle_t, open_interest),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"ImpVolatility", DX_RECORD_FIELD_SETTER_NAME(dx_candle_t, imp_volatility),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_candle_t, imp_volatility), DX_RECORD_FIELD_GETTER_NAME(dx_candle_t, imp_volatility),
+    dx_ft_common_field },
+};
+
+/* -------------------------------------------------------------------------- */
+/*
+*	TradeETH data fields
+*/
+/* -------------------------------------------------------------------------- */
+
+static const dx_field_info_t dx_fields_trade_eth[] = {
+    { dx_fid_compact_int | dx_fid_flag_time, L"ETHLast.Time", DX_RECORD_FIELD_SETTER_NAME(dx_trade_eth_t, time),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_trade_eth_t, time), DX_RECORD_FIELD_GETTER_NAME(dx_trade_eth_t, time),
+    dx_ft_first_time_int_field },
+
+    { dx_fid_compact_int, L"ETHLast.Flags", DX_RECORD_FIELD_SETTER_NAME(dx_trade_eth_t, size),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_trade_eth_t, size), DX_RECORD_FIELD_GETTER_NAME(dx_trade_eth_t, size),
+    dx_ft_common_field },
+
+    { dx_fid_utf_char, L"ETHLast.Exchange", DX_RECORD_FIELD_SETTER_NAME(dx_trade_eth_t, exchange_code),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_trade_eth_t, exchange_code), DX_RECORD_FIELD_GETTER_NAME(dx_trade_eth_t, exchange_code),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"ETHLast.Price", DX_RECORD_FIELD_SETTER_NAME(dx_trade_eth_t, price),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_trade_eth_t, price), DX_RECORD_FIELD_GETTER_NAME(dx_trade_eth_t, price),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int, L"ETHLast.Size", DX_RECORD_FIELD_SETTER_NAME(dx_trade_eth_t, size),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_trade_eth_t, size), DX_RECORD_FIELD_GETTER_NAME(dx_trade_eth_t, size),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"ETHVolume", DX_RECORD_FIELD_SETTER_NAME(dx_trade_eth_t, eth_volume),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_trade_eth_t, eth_volume), DX_RECORD_FIELD_GETTER_NAME(dx_trade_eth_t, eth_volume),
+    dx_ft_common_field }
+};
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Spread Order data fields
+*/
+/* -------------------------------------------------------------------------- */
+
+static const dx_field_info_t dx_fields_spread_order[] = {
+    { dx_fid_compact_int, L"Index", DX_RECORD_FIELD_SETTER_NAME(dx_spread_order_t, index),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_spread_order_t, index), DX_RECORD_FIELD_GETTER_NAME(dx_spread_order_t, index),
+    dx_ft_second_time_int_field },
+
+    { dx_fid_compact_int, L"Time", DX_RECORD_FIELD_SETTER_NAME(dx_spread_order_t, time),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_spread_order_t, time), DX_RECORD_FIELD_GETTER_NAME(dx_spread_order_t, time),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int, L"Sequence", DX_RECORD_FIELD_SETTER_NAME(dx_spread_order_t, sequence),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_spread_order_t, sequence), DX_RECORD_FIELD_GETTER_NAME(dx_spread_order_t, sequence),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Price", DX_RECORD_FIELD_SETTER_NAME(dx_spread_order_t, price),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_spread_order_t, price), DX_RECORD_FIELD_GETTER_NAME(dx_spread_order_t, price),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int, L"Size", DX_RECORD_FIELD_SETTER_NAME(dx_spread_order_t, size),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_spread_order_t, size), DX_RECORD_FIELD_GETTER_NAME(dx_spread_order_t, size),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int, L"Count", DX_RECORD_FIELD_SETTER_NAME(dx_spread_order_t, count),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_spread_order_t, count), DX_RECORD_FIELD_GETTER_NAME(dx_spread_order_t, count),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int, L"Flags", DX_RECORD_FIELD_SETTER_NAME(dx_spread_order_t, flags),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_spread_order_t, flags), DX_RECORD_FIELD_GETTER_NAME(dx_spread_order_t, flags),
+    dx_ft_common_field },
+
+    { dx_fid_utf_char_array, L"SpreadSymbol", DX_RECORD_FIELD_SETTER_NAME(dx_spread_order_t, spread_symbol),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_spread_order_t, spread_symbol), DX_RECORD_FIELD_GETTER_NAME(dx_spread_order_t, spread_symbol),
+    dx_ft_common_field }
+};
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Greeks data fields
+*/
+/* -------------------------------------------------------------------------- */
+
+static const dx_field_info_t dx_fields_greeks[] = {
+    { dx_fid_compact_int | dx_fid_flag_time, L"Time", DX_RECORD_FIELD_SETTER_NAME(dx_greeks_t, time),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_greeks_t, time), DX_RECORD_FIELD_GETTER_NAME(dx_greeks_t, time),
+    dx_ft_first_time_int_field },
+
+    { dx_fid_compact_int | dx_fid_flag_sequence, L"Sequence", DX_RECORD_FIELD_SETTER_NAME(dx_greeks_t, sequence),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_greeks_t, sequence), DX_RECORD_FIELD_GETTER_NAME(dx_greeks_t, sequence),
+    dx_ft_second_time_int_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Greeks.Price", DX_RECORD_FIELD_SETTER_NAME(dx_greeks_t, greeks_price),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_greeks_t, greeks_price), DX_RECORD_FIELD_GETTER_NAME(dx_greeks_t, greeks_price),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Volatility", DX_RECORD_FIELD_SETTER_NAME(dx_greeks_t, volatility),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_greeks_t, volatility), DX_RECORD_FIELD_GETTER_NAME(dx_greeks_t, volatility),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Delta", DX_RECORD_FIELD_SETTER_NAME(dx_greeks_t, delta),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_greeks_t, delta), DX_RECORD_FIELD_GETTER_NAME(dx_greeks_t, delta),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Gamma", DX_RECORD_FIELD_SETTER_NAME(dx_greeks_t, gamma),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_greeks_t, gamma), DX_RECORD_FIELD_GETTER_NAME(dx_greeks_t, gamma),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Theta", DX_RECORD_FIELD_SETTER_NAME(dx_greeks_t, theta),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_greeks_t, theta), DX_RECORD_FIELD_GETTER_NAME(dx_greeks_t, theta),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Rho", DX_RECORD_FIELD_SETTER_NAME(dx_greeks_t, rho),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_greeks_t, rho), DX_RECORD_FIELD_GETTER_NAME(dx_greeks_t, rho),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Vega", DX_RECORD_FIELD_SETTER_NAME(dx_greeks_t, vega),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_greeks_t, vega), DX_RECORD_FIELD_GETTER_NAME(dx_greeks_t, vega),
+    dx_ft_common_field }
+};
+
+/* -------------------------------------------------------------------------- */
+/*
+*	TheoPrice data fields
+*/
+/* -------------------------------------------------------------------------- */
+
+static const dx_field_info_t dx_fields_theo_price[] = {
+    { dx_fid_compact_int | dx_fid_flag_time, L"Theo.Time", DX_RECORD_FIELD_SETTER_NAME(dx_theo_price_t, theo_time),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_theo_price_t, theo_time), DX_RECORD_FIELD_GETTER_NAME(dx_theo_price_t, theo_time),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Theo.Price", DX_RECORD_FIELD_SETTER_NAME(dx_theo_price_t, theo_price),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_theo_price_t, theo_price), DX_RECORD_FIELD_GETTER_NAME(dx_theo_price_t, theo_price),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Theo.UnderlyingPrice", DX_RECORD_FIELD_SETTER_NAME(dx_theo_price_t, theo_underlying_price),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_theo_price_t, theo_underlying_price), DX_RECORD_FIELD_GETTER_NAME(dx_theo_price_t, theo_underlying_price),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Theo.Delta", DX_RECORD_FIELD_SETTER_NAME(dx_theo_price_t, theo_delta),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_theo_price_t, theo_delta), DX_RECORD_FIELD_GETTER_NAME(dx_theo_price_t, theo_delta),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Theo.Gamma", DX_RECORD_FIELD_SETTER_NAME(dx_theo_price_t, theo_gamma),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_theo_price_t, theo_gamma), DX_RECORD_FIELD_GETTER_NAME(dx_theo_price_t, theo_gamma),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Theo.Dividend", DX_RECORD_FIELD_SETTER_NAME(dx_theo_price_t, theo_dividend),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_theo_price_t, theo_dividend), DX_RECORD_FIELD_GETTER_NAME(dx_theo_price_t, theo_dividend),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Theo.Interest", DX_RECORD_FIELD_SETTER_NAME(dx_theo_price_t, theo_interest),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_theo_price_t, theo_interest), DX_RECORD_FIELD_GETTER_NAME(dx_theo_price_t, theo_interest),
+    dx_ft_common_field }
+};
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Underlying data fields
+*/
+/* -------------------------------------------------------------------------- */
+
+static const dx_field_info_t dx_fields_underlying[] = {
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Volatility", DX_RECORD_FIELD_SETTER_NAME(dx_underlying_t, volatility),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_underlying_t, volatility), DX_RECORD_FIELD_GETTER_NAME(dx_underlying_t, volatility),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"FrontVolatility", DX_RECORD_FIELD_SETTER_NAME(dx_underlying_t, front_volatility),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_underlying_t, front_volatility), DX_RECORD_FIELD_GETTER_NAME(dx_underlying_t, front_volatility),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"BackVolatility", DX_RECORD_FIELD_SETTER_NAME(dx_underlying_t, back_volatility),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_underlying_t, back_volatility), DX_RECORD_FIELD_GETTER_NAME(dx_underlying_t, back_volatility),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"PutCallRatio", DX_RECORD_FIELD_SETTER_NAME(dx_underlying_t, put_call_ratio),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_underlying_t, put_call_ratio), DX_RECORD_FIELD_GETTER_NAME(dx_underlying_t, put_call_ratio),
+    dx_ft_common_field }
+};
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Series data fields
+*/
+/* -------------------------------------------------------------------------- */
+
+static const dx_field_info_t dx_fields_series[] = {
+    { dx_fid_compact_int | dx_fid_flag_date, L"Expiration", DX_RECORD_FIELD_SETTER_NAME(dx_series_t, expiration),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_series_t, expiration), DX_RECORD_FIELD_GETTER_NAME(dx_series_t, expiration),
+    dx_ft_first_time_int_field },
+
+    { dx_fid_compact_int | dx_fid_flag_sequence, L"Sequence", DX_RECORD_FIELD_SETTER_NAME(dx_series_t, sequence),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_series_t, sequence), DX_RECORD_FIELD_GETTER_NAME(dx_series_t, sequence),
+    dx_ft_second_time_int_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Volatility", DX_RECORD_FIELD_SETTER_NAME(dx_series_t, volatility),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_series_t, volatility), DX_RECORD_FIELD_GETTER_NAME(dx_series_t, volatility),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"PutCallRatio", DX_RECORD_FIELD_SETTER_NAME(dx_series_t, put_call_ratio),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_series_t, put_call_ratio), DX_RECORD_FIELD_GETTER_NAME(dx_series_t, put_call_ratio),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"ForwardPrice", DX_RECORD_FIELD_SETTER_NAME(dx_series_t, forward_price),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_series_t, forward_price), DX_RECORD_FIELD_GETTER_NAME(dx_series_t, forward_price),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Dividend", DX_RECORD_FIELD_SETTER_NAME(dx_series_t, dividend),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_series_t, dividend), DX_RECORD_FIELD_GETTER_NAME(dx_series_t, dividend),
+    dx_ft_common_field },
+
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Interest", DX_RECORD_FIELD_SETTER_NAME(dx_series_t, interest),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_series_t, interest), DX_RECORD_FIELD_GETTER_NAME(dx_series_t, interest),
     dx_ft_common_field }
 };
 
@@ -414,7 +634,13 @@ static const int g_record_field_counts[dx_rid_count] = {
     sizeof(dx_fields_market_maker) / sizeof(dx_fields_market_maker[0]),
     sizeof(dx_fields_order) / sizeof(dx_fields_order[0]),
     sizeof(dx_fields_time_and_sale) / sizeof(dx_fields_time_and_sale[0]),
-    sizeof(dx_fields_candle) / sizeof(dx_fields_candle[0])
+    sizeof(dx_fields_candle) / sizeof(dx_fields_candle[0]),
+    sizeof(dx_fields_trade_eth) / sizeof(dx_fields_trade_eth[0]),
+    sizeof(dx_fields_spread_order) / sizeof(dx_fields_spread_order[0]),
+    sizeof(dx_fields_greeks) / sizeof(dx_fields_greeks[0]),
+    sizeof(dx_fields_theo_price) / sizeof(dx_fields_theo_price[0]),
+    sizeof(dx_fields_underlying) / sizeof(dx_fields_underlying[0]),
+    sizeof(dx_fields_series) / sizeof(dx_fields_series[0])
 };
 
 static const dx_record_info_t g_record_info[dx_rid_count] = {
@@ -425,7 +651,13 @@ static const dx_record_info_t g_record_info[dx_rid_count] = {
     { L"MarketMaker", sizeof(dx_fields_market_maker) / sizeof(dx_fields_market_maker[0]), dx_fields_market_maker },
     { L"Order", sizeof(dx_fields_order) / sizeof(dx_fields_order[0]), dx_fields_order },
     { L"TimeAndSale", sizeof(dx_fields_time_and_sale) / sizeof(dx_fields_time_and_sale[0]), dx_fields_time_and_sale },
-    { L"Candle", sizeof(dx_fields_candle) / sizeof(dx_fields_candle[0]), dx_fields_candle }
+    { L"Candle", sizeof(dx_fields_candle) / sizeof(dx_fields_candle[0]), dx_fields_candle },
+    { L"TradeETH", sizeof(dx_fields_trade_eth) / sizeof(dx_fields_trade_eth[0]), dx_fields_trade_eth },
+    { L"SpreadOrder", sizeof(dx_fields_spread_order) / sizeof(dx_fields_spread_order[0]), dx_fields_spread_order },
+    { L"Greeks", sizeof(dx_fields_greeks) / sizeof(dx_fields_greeks[0]), dx_fields_greeks },
+    { L"TheoPrice", sizeof(dx_fields_theo_price) / sizeof(dx_fields_theo_price[0]), dx_fields_theo_price },
+    { L"Underlying", sizeof(dx_fields_underlying) / sizeof(dx_fields_underlying[0]), dx_fields_underlying },
+    { L"Series", sizeof(dx_fields_series) / sizeof(dx_fields_series[0]), dx_fields_series }
 };
 
 /* List stores records. The list is not cleared until at least one connection is opened. */
@@ -796,8 +1028,13 @@ bool dx_add_record_to_list(dxf_connection_t connection, dx_record_item_t record,
 
 dx_record_info_id_t dx_string_to_record_info(dxf_const_string_t name)
 {
-    if (dx_compare_strings_num(name, g_record_info[dx_rid_trade].default_name, 
-                               dx_string_length(g_record_info[dx_rid_trade].default_name)) == 0)
+    // Note: dx_rid_trade_eth must be always go before dx_rid_trade to avoid 
+    //       wrong record detection by name
+    if (dx_compare_strings_num(name, g_record_info[dx_rid_trade_eth].default_name,
+                               dx_string_length(g_record_info[dx_rid_trade_eth].default_name)) == 0)
+        return dx_rid_trade_eth;
+    else if (dx_compare_strings_num(name, g_record_info[dx_rid_trade].default_name, 
+                                    dx_string_length(g_record_info[dx_rid_trade].default_name)) == 0)
         return dx_rid_trade;
     else if (dx_compare_strings_num(name, g_record_info[dx_rid_quote].default_name, 
                                     dx_string_length(g_record_info[dx_rid_quote].default_name)) == 0)
@@ -820,6 +1057,21 @@ dx_record_info_id_t dx_string_to_record_info(dxf_const_string_t name)
     else if (dx_compare_strings_num(name, g_record_info[dx_rid_candle].default_name,
                                     dx_string_length(g_record_info[dx_rid_candle].default_name)) == 0)
         return dx_rid_candle;
+    else if (dx_compare_strings_num(name, g_record_info[dx_rid_spread_order].default_name,
+                                    dx_string_length(g_record_info[dx_rid_spread_order].default_name)) == 0)
+        return dx_rid_spread_order;
+    else if (dx_compare_strings_num(name, g_record_info[dx_rid_greeks].default_name,
+                                    dx_string_length(g_record_info[dx_rid_greeks].default_name)) == 0)
+        return dx_rid_greeks;
+    else if (dx_compare_strings_num(name, g_record_info[dx_rid_theo_price].default_name,
+                                    dx_string_length(g_record_info[dx_rid_theo_price].default_name)) == 0)
+        return dx_rid_theo_price;
+    else if (dx_compare_strings_num(name, g_record_info[dx_rid_underlying].default_name,
+                                    dx_string_length(g_record_info[dx_rid_underlying].default_name)) == 0)
+        return dx_rid_underlying;
+    else if (dx_compare_strings_num(name, g_record_info[dx_rid_series].default_name,
+                                    dx_string_length(g_record_info[dx_rid_series].default_name)) == 0)
+        return dx_rid_series;
     else
         return dx_rid_invalid;
 }
@@ -847,13 +1099,15 @@ bool init_record_info(dx_record_item_t *record, dxf_const_string_t name) {
     suffix_index = dx_string_length(record_info.default_name);
     if (name_length < suffix_index + 1)
         return true;
-    if (record_info_id == dx_rid_order) {
+    if (record_info_id == dx_rid_order ||
+        record_info_id == dx_rid_spread_order) {
         if (record->name[suffix_index] != L'#')
             return true;
         dx_copy_string_len(record->suffix, &record->name[suffix_index + 1], name_length - suffix_index);
     } else if (record_info_id == dx_rid_trade || 
                record_info_id == dx_rid_quote || 
-               record_info_id == dx_rid_summary) {
+               record_info_id == dx_rid_summary ||
+               record_info_id == dx_rid_trade_eth) {
         if (record->name[suffix_index] != L'&')
             return true;
         dx_copy_string_len(record->suffix, &record->name[suffix_index + 1], 1);

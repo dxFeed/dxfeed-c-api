@@ -26,7 +26,15 @@ static GUIDPTR const g_interfaceGuids[] = {
     &IID_IDXProfile,
     &IID_IDXOrder,
     &IID_IDXTimeAndSale,
+    &IID_IDXCandle,
+    &IID_IDXTradeETH,
+    &IID_IDXSpreadOrder,
+    &IID_IDXGreeks,
+    &IID_IDXTheoPrice,
+    &IID_IDXUnderlying,
+    &IID_IDXSeries,
     
+    &IID_IDXCandleSymbol,
     &DIID_IDXConnectionTerminationNotifier,
     &DIID_IDXEventListener
 };

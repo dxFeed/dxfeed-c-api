@@ -46,21 +46,33 @@ typedef enum {
     dx_eid_order,
     dx_eid_time_and_sale,
     dx_eid_candle,
-    
+    dx_eid_trade_eth,
+    dx_eid_spread_order,
+    dx_eid_greeks,
+    dx_eid_theo_price,
+    dx_eid_underlying,
+    dx_eid_series,
+
     /* add new event id above this line */
-    
+
     dx_eid_count,
     dx_eid_invalid
 } dx_event_id_t;
 
-#define DXF_ET_TRADE		 (1 << dx_eid_trade)
-#define DXF_ET_QUOTE		 (1 << dx_eid_quote)
-#define DXF_ET_SUMMARY	     (1 << dx_eid_summary)
-#define DXF_ET_PROFILE		 (1 << dx_eid_profile)
-#define DXF_ET_ORDER	     (1 << dx_eid_order)
+#define DXF_ET_TRADE         (1 << dx_eid_trade)
+#define DXF_ET_QUOTE         (1 << dx_eid_quote)
+#define DXF_ET_SUMMARY       (1 << dx_eid_summary)
+#define DXF_ET_PROFILE       (1 << dx_eid_profile)
+#define DXF_ET_ORDER         (1 << dx_eid_order)
 #define DXF_ET_TIME_AND_SALE (1 << dx_eid_time_and_sale)
 #define DXF_ET_CANDLE        (1 << dx_eid_candle)
-#define DXF_ET_UNUSED		 (~((1 << dx_eid_count) - 1))
+#define DXF_ET_TRADE_ETH     (1 << dx_eid_trade_eth)
+#define DXF_ET_SPREAD_ORDER  (1 << dx_eid_spread_order)
+#define DXF_ET_GREEKS        (1 << dx_eid_greeks)
+#define DXF_ET_THEO_PRICE    (1 << dx_eid_theo_price)
+#define DXF_ET_UNDERLYING    (1 << dx_eid_underlying)
+#define DXF_ET_SERIES        (1 << dx_eid_series)
+#define DXF_ET_UNUSED        (~((1 << dx_eid_count) - 1))
 
 #define DX_EVENT_BIT_MASK(event_id) (1 << event_id)
 
@@ -98,25 +110,56 @@ typedef dx_summary_t dxf_summary_t;
 typedef dx_profile_t dxf_profile_t;
 typedef dx_time_and_sale_t dxf_time_and_sale_t;
 typedef dx_candle_t dxf_candle_t;
+typedef dx_trade_eth_t dxf_trade_eth_t;
+typedef dx_greeks_t dxf_greeks_t;;
+typedef dx_theo_price_t dxf_theo_price_t;
+typedef dx_underlying_t dxf_underlying_t;
+typedef dx_series_t dxf_series_t;
 
 typedef struct {
-    dxf_long_t index;
-    dxf_int_t side;
-    dxf_int_t level;
-    dxf_long_t time;
+    dxf_int_t count;
+    dxf_int_t event_flags;
     dxf_char_t exchange_code;
-    dxf_const_string_t market_maker;
+    dxf_long_t index;
+    dxf_int_t level;
+    dxf_int_t side;
     dxf_double_t price;
+    dxf_int_t scope;
+    dxf_int_t sequence;
     dxf_long_t size;
     dxf_char_t source[DXF_RECORD_SUFFIX_SIZE];
-    dxf_int_t count;
+    dxf_long_t time;
+    dxf_long_t time_sequence;
+    dxf_const_string_t market_maker;
 } dxf_order_t;
+
+typedef struct {
+    dxf_int_t count;
+    dxf_int_t event_flags;
+    dxf_char_t exchange_code;
+    dxf_long_t index;
+    dxf_int_t level;
+    dxf_int_t side;
+    dxf_double_t price;
+    dxf_int_t scope;
+    dxf_int_t sequence;
+    dxf_long_t size;
+    dxf_char_t source[DXF_RECORD_SUFFIX_SIZE];
+    dxf_long_t time;
+    dxf_long_t time_sequence;
+    dxf_const_string_t spread_symbol;
+} dxf_spread_order_t;
 
 /* -------------------------------------------------------------------------- */
 /*
  *	Event data constants
  */
 /* -------------------------------------------------------------------------- */
+
+static const dxf_byte_t DXF_SUMMARY_PRICE_TYPE_REGULAR = 0;
+static const dxf_byte_t DXF_SUMMARY_PRICE_TYPE_INDICATIVE = 1;
+static const dxf_byte_t DXF_SUMMARY_PRICE_TYPE_PRELIMINARY = 2;
+static const dxf_byte_t DXF_SUMMARY_PRICE_TYPE_FINAL = 3;
 
 static const dxf_int_t DXF_ORDER_SIDE_BUY = 0;
 static const dxf_int_t DXF_ORDER_SIDE_SELL = 1;

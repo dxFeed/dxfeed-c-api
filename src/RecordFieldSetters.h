@@ -159,7 +159,7 @@ DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_time_and_sale_t, size);
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_time_and_sale_t, bid_price);
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_time_and_sale_t, ask_price);
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_time_and_sale_t, exch_sale_conds);
-DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_time_and_sale_t, type);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_time_and_sale_t, flags);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -178,6 +178,91 @@ DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_candle_t, volume);
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_candle_t, vwap);
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_candle_t, bid_volume);
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_candle_t, ask_volume);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_candle_t, open_interest);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_candle_t, imp_volatility);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	TradeETH field setters
+*/
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_trade_eth_t, time);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_trade_eth_t, flags);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_trade_eth_t, exchange_code);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_trade_eth_t, price);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_trade_eth_t, size);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_trade_eth_t, eth_volume);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	SpreadOrder field setters
+*/
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_spread_order_t, index);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_spread_order_t, time);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_spread_order_t, sequence);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_spread_order_t, price);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_spread_order_t, size);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_spread_order_t, count);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_spread_order_t, flags);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_spread_order_t, spread_symbol);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Greeks field setters
+*/
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_greeks_t, time);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_greeks_t, sequence);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_greeks_t, greeks_price);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_greeks_t, volatility);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_greeks_t, delta);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_greeks_t, gamma);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_greeks_t, theta);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_greeks_t, rho);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_greeks_t, vega);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	TheoPrice field setters
+*/
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_theo_price_t, theo_time);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_theo_price_t, theo_price);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_theo_price_t, theo_underlying_price);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_theo_price_t, theo_delta);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_theo_price_t, theo_gamma);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_theo_price_t, theo_dividend);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_theo_price_t, theo_interest);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Underlying field setters
+*/
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_underlying_t, volatility);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_underlying_t, front_volatility);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_underlying_t, back_volatility);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_underlying_t, put_call_ratio);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Series field setters
+*/
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_series_t, expiration);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_series_t, sequence);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_series_t, volatility);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_series_t, put_call_ratio);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_series_t, forward_price);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_series_t, dividend);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_series_t, interest);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -317,7 +402,7 @@ DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_time_and_sale_t, size);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_time_and_sale_t, bid_price);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_time_and_sale_t, ask_price);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_time_and_sale_t, exch_sale_conds);
-DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_time_and_sale_t, type);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_time_and_sale_t, flags);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -336,6 +421,91 @@ DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_candle_t, volume);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_candle_t, vwap);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_candle_t, bid_volume);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_candle_t, ask_volume);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_candle_t, open_interest);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_candle_t, imp_volatility);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	TradeETH field default value getters
+*/
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_trade_eth_t, time);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_trade_eth_t, flags);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_trade_eth_t, exchange_code);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_trade_eth_t, price);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_trade_eth_t, size);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_trade_eth_t, eth_volume);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	SpreadOrder field default value getters
+*/
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_spread_order_t, index);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_spread_order_t, time);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_spread_order_t, sequence);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_spread_order_t, price);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_spread_order_t, size);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_spread_order_t, count);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_spread_order_t, flags);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_spread_order_t, spread_symbol);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Greeks field default value getters
+*/
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_greeks_t, time);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_greeks_t, sequence);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_greeks_t, greeks_price);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_greeks_t, volatility);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_greeks_t, delta);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_greeks_t, gamma);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_greeks_t, theta);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_greeks_t, rho);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_greeks_t, vega);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	TheoPrice field default value getters
+*/
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_theo_price_t, theo_time);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_theo_price_t, theo_price);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_theo_price_t, theo_underlying_price);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_theo_price_t, theo_delta);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_theo_price_t, theo_gamma);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_theo_price_t, theo_dividend);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_theo_price_t, theo_interest);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Underlying field default value getters
+*/
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_underlying_t, volatility);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_underlying_t, front_volatility);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_underlying_t, back_volatility);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_underlying_t, put_call_ratio);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Series field default value getters
+*/
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_series_t, expiration);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_series_t, sequence);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_series_t, volatility);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_series_t, put_call_ratio);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_series_t, forward_price);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_series_t, dividend);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_series_t, interest);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -471,7 +641,7 @@ DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_time_and_sale_t, size);
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_time_and_sale_t, bid_price);
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_time_and_sale_t, ask_price);
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_time_and_sale_t, exch_sale_conds);
-DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_time_and_sale_t, type);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_time_and_sale_t, flags);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -490,5 +660,90 @@ DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_candle_t, volume);
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_candle_t, vwap);
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_candle_t, bid_volume);
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_candle_t, ask_volume);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_candle_t, open_interest);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_candle_t, imp_volatility);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	TradeETH field getters
+*/
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_trade_eth_t, time);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_trade_eth_t, flags);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_trade_eth_t, exchange_code);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_trade_eth_t, price);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_trade_eth_t, size);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_trade_eth_t, eth_volume);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	SpreadOrder field getters
+*/
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_spread_order_t, index);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_spread_order_t, time);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_spread_order_t, sequence);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_spread_order_t, price);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_spread_order_t, size);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_spread_order_t, count);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_spread_order_t, flags);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_spread_order_t, spread_symbol);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Greeks field getters
+*/
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_greeks_t, time);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_greeks_t, sequence);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_greeks_t, greeks_price);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_greeks_t, volatility);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_greeks_t, delta);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_greeks_t, gamma);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_greeks_t, theta);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_greeks_t, rho);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_greeks_t, vega);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	TheoPrice field getters
+*/
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_theo_price_t, theo_time);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_theo_price_t, theo_price);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_theo_price_t, theo_underlying_price);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_theo_price_t, theo_delta);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_theo_price_t, theo_gamma);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_theo_price_t, theo_dividend);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_theo_price_t, theo_interest);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Underlying field getters
+*/
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_underlying_t, volatility);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_underlying_t, front_volatility);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_underlying_t, back_volatility);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_underlying_t, put_call_ratio);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Series field getters
+*/
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_series_t, expiration);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_series_t, sequence);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_series_t, volatility);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_series_t, put_call_ratio);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_series_t, forward_price);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_series_t, dividend);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_series_t, interest);
 
 #endif /* RECORD_FIELD_SETTERS_H_INCLUDED */

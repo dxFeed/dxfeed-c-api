@@ -27,6 +27,13 @@ dxf_const_string_t dx_event_type_to_string (int event_type) {
     case DXF_ET_PROFILE: return L"Profile";
     case DXF_ET_ORDER: return L"Order";
     case DXF_ET_TIME_AND_SALE: return L"Time&Sale";
+    case DXF_ET_CANDLE: return L"Candle";
+    case DXF_ET_TRADE_ETH: return L"TradeETH";
+    case DXF_ET_SPREAD_ORDER: return L"SpreadOrder";
+    case DXF_ET_GREEKS: return L"Greeks";
+    case DXF_ET_THEO_PRICE: return L"THEO_PRICE";
+    case DXF_ET_UNDERLYING: return L"Underlying";
+    case DXF_ET_SERIES: return L"Series";
     default: return L"";
     }
 }
@@ -123,7 +130,7 @@ void listener(int event_type, dxf_const_string_t symbol_name,
     }
     
     if (event_type == DXF_ET_TRADE) {
-        dxf_trade_t* trades = (dx_trade_t*)data;
+        dxf_trade_t* trades = (dxf_trade_t*)data;
 
         for (; i < data_count; ++i) {
             print_timestamp(trades[i].time);
@@ -133,20 +140,22 @@ void listener(int event_type, dxf_const_string_t symbol_name,
     }
     
     if (event_type == DXF_ET_SUMMARY) {
-	    dxf_summary_t* s = (dxf_summary_t*)data;
+        dxf_summary_t* s = (dxf_summary_t*)data;
 
-	    for (; i < data_count; ++i) {
-			wprintf(L"day id=%d, day open price=%f, day high price=%f, day low price=%f, day close price=%f, "
-                L"prev day id=%d, prev day close price=%f, open interest=%I64i, flags=%I64i, exchange=%c}\n", 
-                s[i].day_id, s[i].day_open_price, s[i].day_high_price, s[i].day_low_price, s[i].day_close_price, 
-                s[i].prev_day_id, s[i].prev_day_close_price, s[i].open_interest, s[i].flags, s[i].exchange_code);
+        for (; i < data_count; ++i) {
+            wprintf(L"day id=%d, day open price=%f, day high price=%f, day low price=%f, day close price=%f, "
+                L"prev day id=%d, prev day close price=%f, open interest=%I64i, flags=0x%I64X, exchange=%c, "
+                L"day close price type=%i, prev day close price type=%i}\n", 
+                s[i].day_id, s[i].day_open_price, s[i].day_high_price, s[i].day_low_price, s[i].day_close_price,
+                s[i].prev_day_id, s[i].prev_day_close_price, s[i].open_interest, s[i].flags, s[i].exchange_code,
+                s[i].day_close_price_type, s[i].prev_day_close_price_type);
         }
     }
 
     if (event_type == DXF_ET_PROFILE) {
         dxf_profile_t* p = (dxf_profile_t*)data;
 
-        for (; i < data_count ; ++i) {
+        for (; i < data_count; ++i) {
             wprintf(L"Beta=%f, eps=%f, div freq=%I64i, exd div amount=%f, exd div date=%i, 52 high price=%f, "
                 L"52 low price=%f, shares=%f, Description=%ls, flags=%I64i, status_reason=%ls, halt start time=",
                 p[i].beta, p[i].eps, p[i].div_freq, p[i].exd_div_amount, p[i].exd_div_date, p[i]._52_high_price,
@@ -161,12 +170,84 @@ void listener(int event_type, dxf_const_string_t symbol_name,
     if (event_type == DXF_ET_TIME_AND_SALE) {
         dxf_time_and_sale_t* tns = (dxf_time_and_sale_t*)data;
 
-        for (; i < data_count ; ++i) {
+        for (; i < data_count; ++i) {
             wprintf(L"event id=%I64i, time=%I64i, exchange code=%c, price=%f, size=%I64i, bid price=%f, ask price=%f, "
 				L"exchange sale conditions=\'%ls\', is trade=%ls, type=%i}\n",
                     tns[i].event_id, tns[i].time, tns[i].exchange_code, tns[i].price, tns[i].size,
                     tns[i].bid_price, tns[i].ask_price, tns[i].exchange_sale_conditions,
                     tns[i].is_trade ? L"True" : L"False", tns[i].type);
+        }
+    }
+
+    if (event_type == DXF_ET_TRADE_ETH) {
+        dxf_trade_eth_t* trades = (dxf_trade_eth_t*)data;
+
+        for (; i < data_count; ++i) {
+            print_timestamp(trades[i].time);
+            wprintf(L", exchangeCode=%c, flags=%d, price=%f, size=%I64i, day volume=%.0f}\n",
+                trades[i].exchange_code, trades[i].flags, trades[i].price, trades[i].size, trades[i].eth_volume);
+        }
+    }
+
+    if (event_type == DXF_ET_SPREAD_ORDER) {
+        dxf_spread_order_t* orders = (dxf_spread_order_t*)data;
+
+        for (; i < data_count; ++i) {
+            wprintf(L"index=0x%llX, side=%i, level=%i, time=",
+                orders[i].index, orders[i].side, orders[i].level);
+            print_timestamp(orders[i].time);
+            wprintf(L", sequence=%i, exchange code=%c, price=%f, size=%lld, source=%ls, "
+                L"count=%i, flags=%i, spread symbol=%ls}\n",
+                orders[i].sequence, orders[i].exchange_code, orders[i].price, orders[i].size, 
+                wcslen(orders[i].source) > 0 ? orders[i].source : L"", 
+                orders[i].count, orders[i].event_flags, 
+                wcslen(orders[i].spread_symbol) > 0 ? orders[i].spread_symbol : L"");
+        }
+    }
+
+    if (event_type == DXF_ET_GREEKS) {
+        dxf_greeks_t* grks = (dxf_greeks_t*)data;
+
+        for (; i < data_count; ++i) {
+            wprintf(L"time=");
+            print_timestamp(grks[i].time);
+            wprintf(L", sequence=%d, greeks price=%f, volatility=%f, "
+                L"delta=%f, gamma=%f, theta=%f, rho=%f, vega=%f, index=0x%I64X}\n", 
+                grks[i].sequence, grks[i].greeks_price, grks[i].volatility,
+                grks[i].delta, grks[i].gamma, grks[i].theta, grks[i].rho, grks[i].vega, grks[i].index);
+        }
+    }
+
+    if (event_type == DXF_ET_THEO_PRICE) {
+        dxf_theo_price_t* tp = (dxf_theo_price_t*)data;
+
+        for (; i < data_count; ++i) {
+            wprintf(L"theo time=");
+            print_timestamp(tp[i].theo_time);
+            wprintf(L", theo price=%f, theo underlying price=%f, theo delta=%f, "
+                L"theo gamma=%f, theo dividend=%f, theo_interest=%f}\n",
+                tp[i].theo_price, tp[i].theo_underlying_price, tp[i].theo_delta,
+                tp[i].theo_gamma, tp[i].theo_dividend, tp[i].theo_interest);
+        }
+    }
+
+    if (event_type == DXF_ET_UNDERLYING) {
+        dxf_underlying_t* u = (dxf_underlying_t*)data;
+
+        for (; i < data_count; ++i) {
+            wprintf(L"volatility=%f, front volatility=%f, back volatility=%f, put call ratio=%f}\n",
+                u[i].volatility, u[i].front_volatility, u[i].back_volatility, u[i].put_call_ratio);
+        }
+    }
+
+    if (event_type == DXF_ET_SERIES) {
+        dxf_series_t* srs = (dxf_series_t*)data;
+
+        for (; i < data_count; ++i) {
+            wprintf(L"expiration=%d, sequence=%d, volatility=%f, put call ratio=%f, "
+                L"forward_price=%f, dividend=%f, interest=%f, index=0x%I64X}\n",
+                srs[i].expiration, srs[i].sequence, srs[i].volatility, srs[i].put_call_ratio, 
+                srs[i].forward_price, srs[i].dividend, srs[i].interest, srs[i].index);
         }
     }
 }
@@ -237,7 +318,8 @@ int main (int argc, char* argv[]) {
                 L"Usage: CommandLineSample <server address> <event type> <symbol>\n"
                 L"  <server address> - a DXFeed server address, e.g. demo.dxfeed.com:7300\n"
                 L"  <event type> - an event type, one of the following: TRADE, QUOTE, SUMMARY,\n"
-                L"                 PROFILE, ORDER, TIME_AND_SALE\n"
+                L"                 PROFILE, ORDER, TIME_AND_SALE, TRADE_ETH, SPREAD_ORDER\n"
+                L"                 GREEKS, THEO_PRICE, UNDERLYING, SERIES\n"
                 L"  <symbol> - a trade symbol, e.g. C, MSFT, YHOO, IBM\n");
         
         return 0;
@@ -260,6 +342,18 @@ int main (int argc, char* argv[]) {
         event_type = DXF_ET_ORDER;
     } else if (stricmp(event_type_name, "TIME_AND_SALE") == 0) {
         event_type = DXF_ET_TIME_AND_SALE;
+    } else if (stricmp(event_type_name, "TRADE_ETH") == 0) {
+        event_type = DXF_ET_TRADE_ETH;
+    } else if (stricmp(event_type_name, "SPREAD_ORDER") == 0) {
+        event_type = DXF_ET_SPREAD_ORDER;
+    } else if (stricmp(event_type_name, "GREEKS") == 0) {
+        event_type = DXF_ET_GREEKS;
+    } else if (stricmp(event_type_name, "THEO_PRICE") == 0) {
+        event_type = DXF_ET_THEO_PRICE;
+    } else if (stricmp(event_type_name, "UNDERLYING") == 0) {
+        event_type = DXF_ET_UNDERLYING;
+    } else if (stricmp(event_type_name, "SERIES") == 0) {
+        event_type = DXF_ET_SERIES;
     } else {
         wprintf(L"Unknown event type.\n");
         return -1;
@@ -275,7 +369,7 @@ int main (int argc, char* argv[]) {
             symbol[i] = towupper(symbol[i]);
     }
 
-    wprintf(L"Sample test started.\n");
+    wprintf(L"CommandLineSample started.\n");
 	dxfeed_host_u = ansi_to_unicode(dxfeed_host);
     wprintf(L"Connecting to host %ls...\n", dxfeed_host_u);
 	free(dxfeed_host_u);
@@ -335,4 +429,3 @@ int main (int argc, char* argv[]) {
     
     return 0;
 }
-
