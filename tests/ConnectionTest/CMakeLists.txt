@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 2.8.1)
 
 cmake_policy(SET CMP0015 NEW)
  
-set(PROJECT CandleSample) 
+set(PROJECT ConnectionTest) 
 set(INCLUDE_DIR ../../include)
 set(TARGET_PLATFORM "x86" CACHE STRING "Target platform specification")
 set(PLATFORM_POSTFIX "")
@@ -17,7 +17,7 @@ set(LIB_DXFEED_NAME ${LIB_DXFEED_PROJ})
 set(LIB_DXFEED_OUT_DIR ${CMAKE_BINARY_DIR}/${LIB_DXFEED_PROJ})
 
 set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE TYPE INTERNAL FORCE)
- 
+
 project(${PROJECT}) 
 
 include_directories(${INCLUDE_DIR})
@@ -29,7 +29,7 @@ endif()
 link_directories(${LIB_DXFEED_OUT_DIR})
  
 set(SOURCE_FILES
-    CandleSample.c
+    ConnectionTest.c
     )
     
 set(ADDITIONAL_PROPERTIES "")
@@ -84,8 +84,6 @@ set(PROJECT_FILES
 set(BUILD_FILES
     build.bat
     CMakeLists.txt
-    build.sh
-    Makefile
 )
 set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/DXFeedAllCPackConfig.cmake")
 install(TARGETS ${PROJECT}
@@ -94,10 +92,6 @@ install(TARGETS ${PROJECT}
 )
 install(FILES ${SOURCE_FILES} ${PROJECT_FILES} ${BUILD_FILES}
     DESTINATION "tests/${PROJECT}"
-    CONFIGURATIONS Release
-)
-install(FILES "../Makefile"
-    DESTINATION "tests"
     CONFIGURATIONS Release
 )
 set(CPACK_PACKAGE_VENDOR "Devexperts")

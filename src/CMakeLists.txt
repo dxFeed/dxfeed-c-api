@@ -1,20 +1,50 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8.1)
 
 cmake_policy(SET CMP0015 NEW)
  
 set(PROJECT DXFeed) 
 set(INCLUDE_DIR ../include)
 set(PTHREADS_INCLUDE_DIR ../include/pthreads)
+set(TARGET_PLATFORM "x86" CACHE STRING "Target platform specification")
+set(APP_VERSION "" CACHE STRING "The version of library")
+set(C_API_VERSION_MAJOR 0)
+set(C_API_VERSION_MINOR 0)
+set(C_API_VERSION_PATCH 0)
+set(POSTFIX "")
+set(PLATFORM_POSTFIX "")
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(POSTFIX "d")
-else()
-    set(POSTFIX "")
 endif()
+if(TARGET_PLATFORM STREQUAL "x64")
+    set(PLATFORM_POSTFIX "_64")
+    set(POSTFIX "${POSTFIX}${PLATFORM_POSTFIX}")
+endif()
+
 set(DEF_FILE ../${PROJECT}${POSTFIX}.def)
 
 set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE TYPE INTERNAL FORCE)
- 
-project(${PROJECT}) 
+set(CMAKE_DEBUG_POSTFIX "d${PLATFORM_POSTFIX}")
+set(CMAKE_RELEASE_POSTFIX "${PLATFORM_POSTFIX}")
+
+project(${PROJECT})
+
+# If library version is not specified through parameters version from the source will be used
+if(NOT ${APP_VERSION} STREQUAL "")
+
+    #separate version string on components
+    string(REPLACE "." ";" VERSION_COMPONENTS_LIST ${APP_VERSION})
+    list(LENGTH VERSION_COMPONENTS_LIST VERSION_COMPONENTS_COUNT)
+    list(GET VERSION_COMPONENTS_LIST 0 C_API_VERSION_MAJOR)
+    if(VERSION_COMPONENTS_COUNT GREATER 1)
+        list(GET VERSION_COMPONENTS_LIST 1 C_API_VERSION_MINOR)
+    endif()
+    if(VERSION_COMPONENTS_COUNT GREATER 2)
+        list(GET VERSION_COMPONENTS_LIST 2 C_API_VERSION_PATCH)
+    endif()
+    
+    configure_file("${PROJECT_SOURCE_DIR}/Version.h.in" "${PROJECT_SOURCE_DIR}/Version.h")
+    configure_file("${PROJECT_SOURCE_DIR}/${PROJECT}${POSTFIX}.def.in" "${PROJECT_SOURCE_DIR}/${DEF_FILE}")
+endif()
 
 include_directories(${INCLUDE_DIR})
 
@@ -27,6 +57,7 @@ set(EXPORT_HEADERS
     )
  
 set (HEADER_FILES 
+    Candle.h
     ClientMessageProcessor.h
     ConnectionContextData.h
     DXAlgorithms.h
@@ -46,7 +77,6 @@ set (HEADER_FILES
     StringArray.h
     TaskQueue.h
     Version.h
-    Candle.h
     )
  
  set (PARSER_HEADERS
@@ -76,6 +106,7 @@ set (PARSER_TESTS
 )
  
 set (SOURCE_FILES
+    Candle.c
     ClientMessageProcessor.c
     ConnectionContextData.c
     DXAlgorithms.c
@@ -97,7 +128,6 @@ set (SOURCE_FILES
     StringArray.c
     TaskQueue.c
     Win32.c
-    Candle.c
     ${DEF_FILE}) 
     
 set (ALL_HEADERS
@@ -174,4 +204,22 @@ add_library (${PROJECT} SHARED ${ALL_HEADERS} ${ALL_SOURCES})
 
 target_link_libraries (${PROJECT} ${ADDITIONAL_LIBRARIES})
 
-set_target_properties(${PROJECT} PROPERTIES DEBUG_POSTFIX "d")
+
+set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/DXFeedAllCPackConfig.cmake")
+install(TARGETS ${PROJECT}
+    DESTINATION "bin/${TARGET_PLATFORM}"
+)
+install(DIRECTORY "${INCLUDE_DIR}" "../scripts" "../src"
+    DESTINATION "."
+    PATTERN "build" EXCLUDE
+)
+install(FILES "../DXFeed.def" "../DXFeedd.def" "../DXFeed_64.def" "../DXFeedd_64.def" 
+    "../DXFeed.sln" "../DXFeed.vcxproj" "../DXFeed.vcxproj.filters" "../Makefile" 
+    "../CMakeLists.txt" "../build.bat" "../make_package.bat"
+    DESTINATION "."
+)
+set(CPACK_PACKAGE_VENDOR "Devexperts")
+set(CPACK_PACKAGE_NAME "${PROJECT}")
+set(CPACK_PACKAGE_VERSION "${APP_VERSION}")
+set(CPACK_PACKAGE_FILE_NAME "${PROJECT}-${APP_VERSION}-${TARGET_PLATFORM}")
+include(CPack)

@@ -20,6 +20,6 @@
 #ifndef VERSION_H
 #define VERSION_H
 
-#define DX_LIBRARY_VERSION L"DXFeed.cpp v 3.1.0 (c) Devexperts"
+#define DX_LIBRARY_VERSION L"DXFeed.cpp v @APP_VERSION@ (c) Devexperts"
 
 #endif // VERSION_H
