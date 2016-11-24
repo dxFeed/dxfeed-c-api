@@ -71,6 +71,7 @@ set (HEADER_FILES
     EventSubscription.h
     Logger.h
     PrimitiveTypes.h
+    resource.h
     RecordTranscoder.h
     ServerMessageProcessor.h
     Snapshot.h
@@ -130,6 +131,10 @@ set (SOURCE_FILES
     Win32.c
     ${DEF_FILE}) 
     
+set (RESOURCE_FILES
+    DXFeed.rc
+    )
+
 set (ALL_HEADERS
     ${HEADER_FILES}
     ${EXPORT_HEADERS}
@@ -140,6 +145,7 @@ set (ALL_SOURCES
     ${SOURCE_FILES}
     ${PARSER_SOURCES}
     ${PARSER_TESTS}
+    ${RESOURCE_FILES}
     )
     
 set (ADDITIONAL_LIBRARIES "")
@@ -174,7 +180,7 @@ if (MSVC)
     source_group("Third Party\\pthreads" FILES ${PTHREAD_HEADERS})
     
 elseif (CMAKE_COMPILER_IS_GNUCC)
-	add_definitions (-O2 -DUSE_PTHREADS -std=gnu99 -fPIC)
+    add_definitions (-O2 -DUSE_PTHREADS -std=gnu99 -fPIC)
     
     set (SOURCE_FILES
         ${SOURCE_FILES}
@@ -190,7 +196,7 @@ elseif (CMAKE_COMPILER_IS_GNUCC)
     )
     
 else ()
-	message ("Unknown compiler")
+    message ("Unknown compiler")
 endif ()
 
 source_group ("Export" FILES ${EXPORT_HEADERS})    
