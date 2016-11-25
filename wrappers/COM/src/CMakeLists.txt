@@ -82,6 +82,7 @@ set(HEADER_FILES
     EventFactory.h
     Feed.h
     LibraryLocker.h
+    resource.h
     Subscription.h
     TypeLibraryManager.h
     Version.h
@@ -187,6 +188,9 @@ set(ALL_DEF_TEMPLATES
     ${PROJECT}_64.def.in
     ${PROJECT}d_64.def.in
 )
+set(ALL_VERSION_TEMPLATES
+    Version.h.in
+)
 set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/DXFeedAllCPackConfig.cmake")
 install(TARGETS ${PROJECT}
     DESTINATION "bin/${TARGET_PLATFORM}"
@@ -194,7 +198,7 @@ install(TARGETS ${PROJECT}
 install(DIRECTORY "${LIB_COM_INCLUDE_DIR}"
     DESTINATION "wrappers/COM"
 )
-install(FILES ${HEADER_FILES} ${ALL_SOURCES} ${ALL_DEF_FILES} ${PROJECT_FILES} ${BUILD_FILES} ${ALL_DEF_TEMPLATES}
+install(FILES ${HEADER_FILES} ${ALL_SOURCES} ${ALL_DEF_FILES} ${PROJECT_FILES} ${BUILD_FILES} ${ALL_DEF_TEMPLATES} ${ALL_VERSION_TEMPLATES}
     DESTINATION "wrappers/COM/src"
 )
 install(FILES "${PROJECT_BINARY_DIR}/DXFeedCOM.tlb" "${PROJECT_BINARY_DIR}/DXFeedCOM.h" "${PROJECT_BINARY_DIR}/DXFeedCOM_i.c"

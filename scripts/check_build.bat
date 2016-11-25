@@ -40,7 +40,7 @@ for /F "tokens=*" %%T in (%TESTS_LIST_FILE_PATH%) do (
         for %%C in (%CONFIGURATIONS%) do (
             echo Test %%T on %%P %%C
             call %~dp0\run_test %BUILD_DIR% %%T %%P %%C
-            if !ERRORLEVEL! GEQ 1 goto exit_error
+            if !ERRORLEVEL! NEQ 0 goto exit_error
         )
     )
 )
