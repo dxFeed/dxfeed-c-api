@@ -56,6 +56,7 @@ if(NOT ${APP_VERSION} STREQUAL "")
         list(GET VERSION_COMPONENTS_LIST 2 C_API_VERSION_PATCH)
     endif()
     
+    configure_file("${PROJECT_SOURCE_DIR}/Version.h.in" "${PROJECT_SOURCE_DIR}/Version.h")
     configure_file("${PROJECT_SOURCE_DIR}/${DEF_FILE}.in" "${PROJECT_SOURCE_DIR}/${DEF_FILE}")
 endif()
 
@@ -83,6 +84,7 @@ set(HEADER_FILES
     LibraryLocker.h
     Subscription.h
     TypeLibraryManager.h
+    Version.h
 )
 
 set(ALL_HEADERS
@@ -108,6 +110,15 @@ set(SOURCE_FILES
     ${DEF_FILE}
 )
 
+set (RESOURCE_FILES
+    DXFeedCOM.rc
+    )
+
+set (ALL_SOURCES
+    ${SOURCE_FILES}
+    ${RESOURCE_FILES}
+    )
+
 set(CMAKE_CXX_FLAGS_DEBUG "/RTC1 /MTd /Od -D_DEBUG /ZI")
 set(CMAKE_CXX_FLAGS_RELEASE "/Ox /MT -DNDEBUG")
 add_definitions(-D_WIN32_WINNT=0x0500 -D_CONSOLE -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE /Gd /Zc:wchar_t /Zc:forScope /Gm- /W3)
@@ -125,7 +136,7 @@ source_group("External interface" FILES ${EXTERNAL_HEADERS})
 source_group("Header Files" FILES ${HEADER_FILES}) 
 source_group("Source Files" FILES ${SOURCE_FILES}) 
 
-add_library(${PROJECT} SHARED ${ALL_HEADERS} ${SOURCE_FILES})
+add_library(${PROJECT} SHARED ${ALL_HEADERS} ${ALL_SOURCES})
 
 target_link_libraries(${PROJECT} ${LIB_DXFEED_NAME} comsupp.lib Advapi32.lib)
 
