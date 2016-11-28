@@ -398,7 +398,7 @@ bool listener_v2_test(void) {
         !dx_is_equal_dxf_const_string_t(order_data.symbol, order_data_v2.symbol) ||
         !dx_is_equal_dxf_uint_t(order_data.obj_hash, order_data_v2.obj_hash) ||
         !dx_is_equal_int(order_data.data_count, order_data_v2.data_count) ||
-        !dx_is_equal_int((int)order_data.user_data, (int)order_data_v2.user_data) ||
+        !dx_is_equal_ptr(order_data.user_data, order_data_v2.user_data) ||
         !dx_is_not_null(order_data_v2.params)) {
 
         res = false;
