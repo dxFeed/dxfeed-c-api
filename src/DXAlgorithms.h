@@ -450,11 +450,38 @@ dxf_string_t dx_concatenate_strings(dxf_string_t dest, dxf_const_string_t src);
 
 /* -------------------------------------------------------------------------- */
 /*
+ *	Time constants
+ */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Number of milliseconds in a second.
+ */
+static const dxf_long_t DX_TIME_SECOND = 1000L;
+
+/* -------------------------------------------------------------------------- */
+/*
  *	Time functions
  */
 /* -------------------------------------------------------------------------- */
 
 int dx_millisecond_timestamp (void);
 int dx_millisecond_timestamp_diff (int newer, int older);
+
+/**
+ * Returns correct number of seconds with proper handling negative values and overflows.
+ * Idea is that number of milliseconds shall be within [0..999]
+ * as that the following equation always holds
+ * dx_get_seconds_from_time(millis) * 1000L + dx_get_millis_from_time(millis) == millis
+ */
+dxf_int_t dx_get_seconds_from_time(dxf_long_t millis);
+
+/**
+ * Returns correct number of milliseconds with proper handling negative values.
+ * Idea is that number of milliseconds shall be within [0..999]
+ * as that the following equation always holds
+ * dx_get_seconds_from_time(millis) * 1000L + dx_get_millis_from_time(millis) == millis
+ */
+dxf_int_t dx_get_millis_from_time(dxf_long_t millis);
 
 #endif /* DX_ALGORITHMS_H_INCLUDED */
