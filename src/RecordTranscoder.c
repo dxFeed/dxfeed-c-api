@@ -79,16 +79,6 @@ static const dxf_byte_t DX_SUMMARY_PREV_DAY_CLOSE_PRICE_TYPE_SHIFT = 0;
 
 /* -------------------------------------------------------------------------- */
 /*
- *	Time util calculation constants
- */
-/* -------------------------------------------------------------------------- */
-/**
- * Number of milliseconds in a second.
- */
-static const dxf_long_t TIME_UTIL_SECOND = 1000L;
-
-/* -------------------------------------------------------------------------- */
-/*
  *	Record transcoder connection context
  */
 /* -------------------------------------------------------------------------- */
@@ -198,34 +188,6 @@ dxf_event_data_t dx_get_event_data_buffer(dx_record_transcoder_connection_contex
         
         return context->buffer;
     }
-}
-
-/* -------------------------------------------------------------------------- */
-/*
- *	Time utils
- */
-/* -------------------------------------------------------------------------- */
-
-/**
- * Returns correct number of seconds with proper handling negative values and overflows.
- * Idea is that number of milliseconds shall be within [0..999]
- * as that the following equation always holds
- * dx_get_seconds_from_time(millis) * 1000L + dx_get_millis_from_time(millis) == millis
- */
-dxf_int_t dx_get_seconds_from_time(dxf_long_t millis) {
-    return millis >= 0 ? (dxf_int_t)MIN(millis / TIME_UTIL_SECOND, INT_MAX) :
-        (dxf_int_t)MAX((millis + 1) / TIME_UTIL_SECOND - 1, INT_MIN);
-}
-
-/**
- * Returns correct number of milliseconds with proper handling negative values.
- * Idea is that number of milliseconds shall be within [0..999]
- * as that the following equation always holds
- * dx_get_seconds_from_time(millis) * 1000L + dx_get_millis_from_time(millis) == millis
- */
-dxf_int_t dx_get_millis_from_time(dxf_long_t millis) {
-    dxf_int_t r = (dxf_int_t)(millis % TIME_UTIL_SECOND);
-    return r >= 0 ? r : r + (dxf_int_t)TIME_UTIL_SECOND;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -682,7 +644,7 @@ bool RECORD_TRANSCODER_NAME(dx_candle_t) (dx_record_transcoder_connection_contex
 
     for (; i < record_count; ++i) {
         dxf_candle_t* cur_event = event_buffer + i;
-        cur_event->time *= TIME_UTIL_SECOND;
+        cur_event->time *= DX_TIME_SECOND;
         cur_event->index = ((dxf_long_t)dx_get_seconds_from_time(cur_event->time) << 32) 
             | ((dxf_long_t)dx_get_millis_from_time(cur_event->time) << 22) 
             | cur_event->sequence;
@@ -775,7 +737,7 @@ bool RECORD_TRANSCODER_NAME(dx_greeks_t) (dx_record_transcoder_connection_contex
 
     for (; i < record_count; ++i) {
         dxf_greeks_t* cur_event = event_buffer + i;
-        cur_event->time *= TIME_UTIL_SECOND;
+        cur_event->time *= DX_TIME_SECOND;
         cur_event->index = ((dxf_long_t)dx_get_seconds_from_time(cur_event->time) << 32)
             | ((dxf_long_t)dx_get_millis_from_time(cur_event->time) << 22)
             | cur_event->sequence;

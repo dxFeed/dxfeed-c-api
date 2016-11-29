@@ -9,7 +9,7 @@
 
 #include <ComDef.h>
 
-#include <set>
+#include <map>
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -21,7 +21,7 @@ class DXSubscription : private IDXSubscription, private DefIDispatchImpl,
                        private DefIConnectionPointImpl, private IDispBehaviorCustomizer {
     friend struct DefDXSubscriptionFactory;
     
-    typedef std::set<IDispatch*> listener_set_t;
+    typedef std::map<DWORD, IDispatch*> listener_map_t;
     typedef std::vector<VARIANTARG> variant_vector_t;
     
 private:    
@@ -86,8 +86,9 @@ private:
     dxf_subscription_t m_subscrHandle;
     
     CriticalSection m_listenerGuard;
-    listener_set_t m_listeners;
+    listener_map_t m_listeners;
     DISPID m_listenerMethodId;
+    DWORD m_listener_next_id;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -97,7 +98,8 @@ DXSubscription::DXSubscription (dxf_connection_t connection, int eventTypes, IUn
 , DefIConnectionPointImpl(DIID_IDXEventListener)
 , m_eventTypes(0)
 , m_subscrHandle(NULL)
-, m_listenerMethodId(0) {
+, m_listenerMethodId(0)
+, m_listener_next_id(1) {
     SetBehaviorCustomizer(this);
     
     if (dxf_create_subscription(connection, eventTypes, &m_subscrHandle) == DXF_FAILURE) {
@@ -120,7 +122,8 @@ DXSubscription::DXSubscription(dxf_connection_t connection, int eventTypes, LONG
     , DefIConnectionPointImpl(DIID_IDXEventListener)
     , m_eventTypes(0)
     , m_subscrHandle(NULL)
-    , m_listenerMethodId(0) {
+    , m_listenerMethodId(0)
+    , m_listener_next_id(1) {
     SetBehaviorCustomizer(this);
 
     if (dxf_create_subscription_timed(connection, eventTypes, time, &m_subscrHandle) == DXF_FAILURE) {
@@ -428,8 +431,8 @@ void DXSubscription::OnNewData(int eventType, dxf_const_string_t symbolName,
     IUnknownWrapper dcw(dataCollection);
     
     try {
-        listener_set_t::const_iterator it = thisPtr->m_listeners.begin();
-        listener_set_t::const_iterator itEnd = thisPtr->m_listeners.end();
+        listener_map_t::const_iterator it = thisPtr->m_listeners.begin();
+        listener_map_t::const_iterator itEnd = thisPtr->m_listeners.end();
         variant_vector_t storage;
         DISPPARAMS listenerParams;
         _bstr_t symbolWrapper(symbolName);
@@ -438,7 +441,7 @@ void DXSubscription::OnNewData(int eventType, dxf_const_string_t symbolName,
                                       dataCollection, storage, listenerParams);
 
         for (; it != itEnd; ++it) {
-            (*it)->Invoke(thisPtr->m_listenerMethodId, IID_NULL, 0, DISPATCH_METHOD, &listenerParams, NULL, NULL, NULL);
+            (*it).second->Invoke(thisPtr->m_listenerMethodId, IID_NULL, 0, DISPATCH_METHOD, &listenerParams, NULL, NULL, NULL);
         }
     } catch (...) {    
     }
@@ -449,11 +452,11 @@ void DXSubscription::OnNewData(int eventType, dxf_const_string_t symbolName,
 void DXSubscription::ClearListeners () {
     AutoCriticalSection acs(m_listenerGuard);
     
-    listener_set_t::iterator it = m_listeners.begin();
-    listener_set_t::iterator itEnd = m_listeners.end();
+    listener_map_t::iterator it = m_listeners.begin();
+    listener_map_t::iterator itEnd = m_listeners.end();
     
     for (; it != itEnd; ++it) {
-        (*it)->Release();
+        (*it).second->Release();
     }
 	m_listeners.clear();
 }
@@ -513,18 +516,22 @@ HRESULT STDMETHODCALLTYPE DXSubscription::Advise (IUnknown *pUnkSink, DWORD *pdw
     
     AutoCriticalSection acs(m_listenerGuard);
     
-    if (m_listeners.find(listener) != m_listeners.end()) {
-        // this listener is already added
-        
-        return S_OK;
+    listener_map_t::const_iterator it = m_listeners.begin();
+    listener_map_t::const_iterator itEnd = m_listeners.end();
+    for (; it != itEnd; ++it) {
+        if (it->second == listener) {
+            // this listener is already added
+
+            return S_OK;
+        }
     }
     
     if (m_listenerMethodId == 0) {        
         return DISP_E_UNKNOWNNAME;
     }
     
-    m_listeners.insert(listener);
-    *pdwCookie = reinterpret_cast<DWORD>(listener);
+    *pdwCookie = m_listener_next_id++;
+    m_listeners[*pdwCookie] = listener;
 
     return S_OK;
 }
@@ -534,14 +541,13 @@ HRESULT STDMETHODCALLTYPE DXSubscription::Advise (IUnknown *pUnkSink, DWORD *pdw
 HRESULT STDMETHODCALLTYPE DXSubscription::Unadvise (DWORD dwCookie) {
     AutoCriticalSection acs(m_listenerGuard);
 
-    IDispatch* listener = reinterpret_cast<IDispatch*>(dwCookie);
-    listener_set_t::iterator it = m_listeners.find(listener);
+    listener_map_t::iterator it = m_listeners.find(dwCookie);
 
     if (it == m_listeners.end()) {
         return E_POINTER;
     }
 
-    listener->Release();
+    it->second->Release();
     m_listeners.erase(it);
 
     return S_OK;

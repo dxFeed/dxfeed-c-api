@@ -37,6 +37,8 @@
 typedef pthread_t dx_thread_t;
 typedef pthread_key_t dx_key_t;
 typedef pthread_mutex_t dx_mutex_t;
+typedef void* (*dx_start_routine_t)(void*);
+#define DX_THREAD_RETVAL_NULL NULL
 #else /* !defined(_WIN32) || defined(USE_PTHREADS) */
 #	include <windows.h>
 #	define USE_WIN32_THREADS
@@ -44,6 +46,8 @@ typedef HANDLE dx_thread_t;
 typedef DWORD dx_key_t;
 typedef HANDLE dx_mutex_t;
 typedef void pthread_attr_t;
+typedef unsigned (*dx_start_routine_t)(void*);
+#define DX_THREAD_RETVAL_NULL 0
 #endif /* !defined(_WIN32) || defined(USE_PTHREADS) */
 
 #include "PrimitiveTypes.h"
@@ -78,7 +82,7 @@ bool dx_is_thread_master (void);
 /* -------------------------------------------------------------------------- */
 
 bool dx_thread_create (dx_thread_t* thread_id, const pthread_attr_t* attr,
-                       void* (*start_routine)(void*), void *arg);
+                       dx_start_routine_t start_routine, void *arg);
 bool dx_wait_for_thread (dx_thread_t thread_id, void **value_ptr);
 bool dx_close_thread_handle (dx_thread_t thread_id);
 bool dx_thread_data_key_create (dx_key_t* key, void (*destructor)(void*));

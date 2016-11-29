@@ -227,6 +227,15 @@ bool dx_is_null(void* actual) {
     return true;
 }
 
+bool dx_is_equal_ptr(void* expected, void* actual)
+{
+    if (expected != actual) {
+        wprintf(L"%ls failed: expected=%p, but was=%p\n", __FUNCTIONW__, expected, actual);
+        return false;
+    }
+    return true;
+}
+
 #define DX_IS_GREATER_OR_EQUAL_FUNCTION_DEFINITION(type, tmpl) \
 DX_IS_GREATER_OR_EQUAL_FUNCTION_DECLARATION(type) { \
     if (actual < param) { \

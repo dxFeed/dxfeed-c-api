@@ -279,7 +279,7 @@ DXFEED_API ERRORCODE dxf_initialize_logger (const char* file_name, int rewrite_f
     g_log_file = fopen(file_name, rewrite_file ? "w" : "a");
     
     if (g_log_file == NULL) {
-        wprintf(L"\nCan not open log-file %s", file_name);
+        printf("\nCan not open log-file %s", file_name);
         return DXF_FAILURE;
     }
 

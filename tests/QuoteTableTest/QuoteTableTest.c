@@ -127,7 +127,7 @@ void output_data(int i) {
             quote ? (int)quote->ask_size : 0,
             trade ? (int)trade->size : 0,
             trade ? (int)trade->tick : 0,
-            trade ? (int)trade->change : 0,
+            trade ? trade->change : 0.0,
             trade ? (int)trade->day_volume : 0,
             profile ? profile->description : dummy);
 }
