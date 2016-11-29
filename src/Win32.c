@@ -20,7 +20,6 @@
 #ifdef _WIN32
 #include <windows.h>
 
-#include "Decimal.h"
 #include "DXMemory.h"
 #include "Logger.h"
 #include "DXAlgorithms.h"
