@@ -20,6 +20,9 @@
 #include "Decimal.h"
 
 #include <math.h>
+#include <float.h>
+
+#define DX_POSITIVE_INFINITY DBL_MAX * 10
 
 static const dxf_int_t STANDARD_MANTISSA_SHIFT = 4;
 static const dxf_int_t FLAG_MASK = 0x7F;
@@ -32,7 +35,7 @@ static const dxf_int_t UNITY_POWER = 9;
 static const dxf_ulong_t __inf = 0x7f80000000000000;
 
 static dxf_double_t MULTIPLIERS[] = {
-	0, // Will be replaced with infinity
+    DX_POSITIVE_INFINITY,
 	100000000.0, 
 	10000000.0,
 	1000000.0, 
@@ -80,12 +83,6 @@ static const dxf_int_t EXTRA_PRECISION_DIVISORS[] = {
 	0, // for canonical negative infinity
 };
 
-
-void dx_init_decimals() {
-	double tmp = 1.0;
-	MULTIPLIERS[0] = tmp / (tmp - 1.0);
-}
-
 bool dx_int_to_double (dxf_int_t integer, OUT dxf_double_t* decimal) {
 	dxf_int_t power = integer & 0x0F;
 	dxf_int_t mantissa ;
@@ -106,4 +103,3 @@ bool dx_int_to_double (dxf_int_t integer, OUT dxf_double_t* decimal) {
 	
 	return true;
 }
-
