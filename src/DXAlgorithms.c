@@ -266,3 +266,29 @@ int dx_millisecond_timestamp_diff (int newer, int older) {
     
     return (int)(res + (unsigned)newer - (unsigned)older);
 }
+
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Returns correct number of seconds with proper handling negative values and overflows.
+ * Idea is that number of milliseconds shall be within [0..999]
+ * as that the following equation always holds
+ * dx_get_seconds_from_time(millis) * 1000L + dx_get_millis_from_time(millis) == millis
+ */
+dxf_int_t dx_get_seconds_from_time(dxf_long_t millis) {
+    return millis >= 0 ? (dxf_int_t)MIN(millis / DX_TIME_SECOND, INT_MAX) :
+        (dxf_int_t)MAX((millis + 1) / DX_TIME_SECOND - 1, INT_MIN);
+}
+
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Returns correct number of milliseconds with proper handling negative values.
+ * Idea is that number of milliseconds shall be within [0..999]
+ * as that the following equation always holds
+ * dx_get_seconds_from_time(millis) * 1000L + dx_get_millis_from_time(millis) == millis
+ */
+dxf_int_t dx_get_millis_from_time(dxf_long_t millis) {
+    dxf_int_t r = (dxf_int_t)(millis % DX_TIME_SECOND);
+    return r >= 0 ? r : r + (dxf_int_t)DX_TIME_SECOND;
+}

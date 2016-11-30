@@ -16,6 +16,8 @@
 
 #include <string>
 
+#define LOW_DWORD_FROM_PTR(ptr) static_cast<DWORD>((DWORD_PTR)ptr & 0xFFFFFFFF)
+
 /* -------------------------------------------------------------------------- */
 /*
  *	DXConnection class
@@ -281,7 +283,9 @@ HRESULT STDMETHODCALLTYPE DXConnection::Advise (IUnknown *pUnkSink, DWORD *pdwCo
     m_notifierMethodParams.cArgs = 1;
     m_notifierMethodParams.cNamedArgs = 0;
 
-    *pdwCookie = reinterpret_cast<DWORD>(m_termNotifier);
+    //Note: use low 4 bytes of address as cookie for crossplatform build.
+    //      Don't use this cookie to converting into real pointer.
+    *pdwCookie = LOW_DWORD_FROM_PTR(m_termNotifier);
     
     return S_OK;
 }
@@ -295,7 +299,9 @@ HRESULT STDMETHODCALLTYPE DXConnection::Unadvise (DWORD dwCookie) {
         return CONNECT_E_NOCONNECTION;
     }
     
-    if (dwCookie != reinterpret_cast<DWORD>(m_termNotifier)) {
+    //Note: use low 4 bytes of address as cookie for crossplatform build.
+    //      Don't use this cookie to converting into real pointer.
+    if (dwCookie != LOW_DWORD_FROM_PTR(m_termNotifier)) {
         return E_POINTER;
     }
     
