@@ -77,7 +77,7 @@ void listener(int event_type, dxf_const_string_t symbol_name,
         dxf_trade_t* trades = (dx_trade_t*)data;
 
         for (; i < data_count; ++i) {
-            wprintf(L"time=%i, exchange code=%C, price=%f, size=%i, tick=%i, change=%f, day volume=%f\n",
+            wprintf(L"time=%lld, exchange code=%C, price=%f, size=%lld, tick=%lld, change=%f, day volume=%f\n",
                     trades[i].time, trades[i].exchange_code, trades[i].price, trades[i].size, trades[i].tick, trades[i].change, trades[i].day_volume);
         }
     }
@@ -113,7 +113,7 @@ int main (int argc, char* argv[]) {
 
     wprintf(L"Adding symbols:");
     for (i = 0; i < g_symbols_size; ++i) {
-        wprintf(L" %S", g_symbols[i]);
+        wprintf(L" %ls", g_symbols[i]);
     }
     wprintf(L"\n");
 
@@ -142,7 +142,7 @@ int main (int argc, char* argv[]) {
             if (data) {
                 trade = (dxf_trade_t*)data;
                 
-                wprintf(L"\nSymbol: %s; time=%i, exchange code=%C, price=%f, size=%i, tick=%i, change=%i, day volume=%f\n",
+                wprintf(L"\nSymbol: %s; time=%lld, exchange code=%C, price=%f, size=%lld, tick=%lld, change=%f, day volume=%f\n",
                         g_symbols[i], trade->time, trade->exchange_code, trade->price, trade->size, trade->tick, trade->change, trade->day_volume);
                 
             }

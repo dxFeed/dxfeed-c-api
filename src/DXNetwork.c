@@ -286,7 +286,11 @@ void dx_notify_conn_termination (dx_network_connection_context_t* context, OUT b
 
 /* -------------------------------------------------------------------------- */
 
+#if !defined(_WIN32) || defined(USE_PTHREADS)
 void* dx_queue_executor (void* arg) {
+#else
+unsigned dx_queue_executor(void* arg) {
+#endif
     static int s_idle_timeout = 100;
     static int s_small_timeout = 25;
     static int s_heartbeat_timeout = 60; // in seconds
@@ -300,7 +304,7 @@ void* dx_queue_executor (void* arg) {
            but we cannot report it anywhere so simply exit */
         dx_set_error_code(dx_ec_invalid_func_param_internal);
 
-        return NULL;
+        return DX_THREAD_RETVAL_NULL;
     }
     
     context = (dx_network_connection_context_t*)arg;
@@ -309,7 +313,7 @@ void* dx_queue_executor (void* arg) {
         context->queue_thread_error = dx_ec_error_subsystem_failure;
         context->queue_thread_state = false;
         
-        return NULL;
+        return DX_THREAD_RETVAL_NULL;
     }
 
 	time (&context->next_heartbeat);
@@ -361,14 +365,18 @@ void* dx_queue_executor (void* arg) {
         dx_sleep(s_small_timeout);
     }
     
-    return NULL;
+    return DX_THREAD_RETVAL_NULL;
 }
 
 /* -------------------------------------------------------------------------- */
 
 void dx_socket_reader (dx_network_connection_context_t* context);
 
-void* dx_socket_reader_wrapper (void* arg) {
+#if !defined(_WIN32) || defined(USE_PTHREADS)
+void* dx_socket_reader_wrapper(void* arg) {
+#else
+unsigned dx_socket_reader_wrapper(void* arg) {
+#endif
     dx_network_connection_context_t* context = NULL;
     dx_connection_context_data_t* context_data = NULL;
         
@@ -377,7 +385,7 @@ void* dx_socket_reader_wrapper (void* arg) {
            but we cannot report it anywhere so simply exit */
         dx_set_error_code(dx_ec_invalid_func_param_internal);
 
-        return NULL;
+        return DX_THREAD_RETVAL_NULL;
     }
     
     context = (dx_network_connection_context_t*)arg;
@@ -387,7 +395,7 @@ void* dx_socket_reader_wrapper (void* arg) {
         if (context_data->stcn(context->connection, context_data->notifier_user_data) == 0) {
             /* zero return value means fatal client side error */
             
-            return NULL;
+            return DX_THREAD_RETVAL_NULL;
         }
     }
     
@@ -397,7 +405,7 @@ void* dx_socket_reader_wrapper (void* arg) {
         context_data->stdn(context->connection, context_data->notifier_user_data);
     }
     
-    return NULL;
+    return DX_THREAD_RETVAL_NULL;
 }
 
 /* -------------------------------------------------------------------------- */

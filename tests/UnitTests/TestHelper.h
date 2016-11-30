@@ -75,4 +75,6 @@ DX_IS_GREATER_OR_EQUAL_FUNCTION_DECLARATION(dxf_uint_t);
 bool dx_is_not_null(void* actual);
 bool dx_is_null(void* actual);
 
+bool dx_is_equal_ptr(void* expected, void* actual);
+
 #endif //TEST_HELPER_H_INCLUDED

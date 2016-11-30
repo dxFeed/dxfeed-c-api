@@ -79,7 +79,7 @@ bool dx_is_thread_master (void) {
 
 #ifdef USE_PTHREADS
 bool dx_thread_create (dx_thread_t* thread_id, const pthread_attr_t* attr,
-                       void* (*start_routine)(void*), void *arg) {
+                       dx_start_routine_t start_routine, void *arg) {
     int res = pthread_create(thread_id, attr, start_routine, arg);
     
     switch (res) {
@@ -300,16 +300,16 @@ bool dx_set_thread_data_no_ehm (dx_key_t key, const void* data) {
 
 /* Wrapper for thread start function */
 typedef struct dx_thread_wrapper_args_tag {
-	void* (*start_routine)(void*);
+	dx_start_routine_t start_routine;
 	void *args;
 } dx_thread_wrapper_args_t;
 
 static unsigned __stdcall dx_thread_start_routine(void *a) {
 	dx_thread_wrapper_args_t *args = (dx_thread_wrapper_args_t*)a;
-	void *rv;
+	unsigned rv;
 	rv = args->start_routine(args->args);
 	dx_free(args);
-	return (unsigned)rv;
+	return rv;
 }
 
 /* Way to process destructors for TLS */
@@ -396,7 +396,7 @@ void dx_init_threads() {
 /* Public API */
 
 bool dx_thread_create (dx_thread_t* thread_id, const pthread_attr_t* attr,
-                       void* (*start_routine)(void*), void *arg) {
+                       dx_start_routine_t start_routine, void *arg) {
 	dx_thread_wrapper_args_t *wargs = dx_calloc(1, sizeof(*wargs));
 
 	wargs->start_routine = start_routine;
