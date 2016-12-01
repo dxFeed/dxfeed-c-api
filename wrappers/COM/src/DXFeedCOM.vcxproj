@@ -215,16 +215,21 @@
     <ClInclude Include="EventFactory.h" />
     <ClInclude Include="Feed.h" />
     <ClInclude Include="LibraryLocker.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="Subscription.h" />
     <ClInclude Include="TypeLibraryManager.h" />
     <ClInclude Include="..\include\Guids.h" />
     <ClInclude Include="..\include\Interfaces.h" />
+    <ClInclude Include="Version.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\DXFeed.vcxproj">
       <Project>{98df2375-3c29-4806-a832-7c666f8bf54c}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="DXFeedCOM.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

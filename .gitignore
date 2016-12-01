@@ -9,6 +9,7 @@
 /*.sdf
 /*.opensdf
 
+/src/*.aps
 /src/build
 
 # /tests/APITest/
@@ -58,6 +59,7 @@
 /wrappers/COM/samples/C++/build
 
 # /wrappers/COM/src/
+/wrappers/COM/src/*.aps
 /wrappers/COM/src/*.user
 /wrappers/COM/src/build
 
