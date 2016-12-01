@@ -796,6 +796,25 @@ bool RECORD_TRANSCODER_NAME(dx_series_t) (dx_record_transcoder_connection_contex
 }
 
 /* -------------------------------------------------------------------------- */
+
+bool RECORD_TRANSCODER_NAME(dx_configuration_t) (dx_record_transcoder_connection_context_t* context,
+                                                 const dx_record_params_t* record_params,
+                                                 const dxf_event_params_t* event_params,
+                                                 void* record_buffer, int record_count) {
+    dx_configuration_t* event_buffer = (dx_configuration_t*)record_buffer;
+    int i = 0;
+
+    //TODO:
+    /*for (; i < record_count; ++i) {
+        dxf_series_t* cur_event = event_buffer + i;
+        cur_event->index = (dxf_long_t)cur_event->expiration << 32 | cur_event->sequence;
+    }*/
+
+    return dx_process_event_data(context->connection, dx_eid_configuration, record_params->symbol_name,
+        record_params->symbol_cipher, event_buffer, record_count, event_params);
+}
+
+/* -------------------------------------------------------------------------- */
 /*
  *	Interface functions implementation
  */
@@ -815,7 +834,8 @@ static const dx_record_transcoder_t g_record_transcoders[dx_rid_count] = {
     RECORD_TRANSCODER_NAME(dx_greeks_t),
     RECORD_TRANSCODER_NAME(dx_theo_price_t),
     RECORD_TRANSCODER_NAME(dx_underlying_t),
-    RECORD_TRANSCODER_NAME(dx_series_t)
+    RECORD_TRANSCODER_NAME(dx_series_t),
+    RECORD_TRANSCODER_NAME(dx_configuration_t)
 };
 
 /* -------------------------------------------------------------------------- */

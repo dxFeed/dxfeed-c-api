@@ -48,6 +48,7 @@ typedef enum {
     dx_rid_theo_price,
     dx_rid_underlying,
     dx_rid_series,
+    dx_rid_configuration,
 
     /* add new values above this line */
 
@@ -254,5 +255,10 @@ typedef struct {
     /* Note: calculated fields */
     dxf_long_t index;
 } dx_series_t;
+
+typedef struct {
+    dxf_int_t version;
+    dxf_const_byte_array_t object;
+} dx_configuration_t;
 
 #endif /* RECORD_DATA_H_INCLUDED */

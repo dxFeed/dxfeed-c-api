@@ -52,6 +52,7 @@ typedef enum {
     dx_eid_theo_price,
     dx_eid_underlying,
     dx_eid_series,
+    dx_eid_configuration,
 
     /* add new event id above this line */
 
@@ -72,6 +73,7 @@ typedef enum {
 #define DXF_ET_THEO_PRICE    (1 << dx_eid_theo_price)
 #define DXF_ET_UNDERLYING    (1 << dx_eid_underlying)
 #define DXF_ET_SERIES        (1 << dx_eid_series)
+#define DXF_ET_CONFIGURATION (1 << dx_eid_configuration)
 #define DXF_ET_UNUSED        (~((1 << dx_eid_count) - 1))
 
 #define DX_EVENT_BIT_MASK(event_id) (1 << event_id)
@@ -149,6 +151,10 @@ typedef struct {
     dxf_long_t time_sequence;
     dxf_const_string_t spread_symbol;
 } dxf_spread_order_t;
+
+typedef struct {
+    dxf_const_string_t object;
+} dxf_configuration_t;
 
 /* -------------------------------------------------------------------------- */
 /*

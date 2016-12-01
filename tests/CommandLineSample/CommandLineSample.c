@@ -34,6 +34,7 @@ dxf_const_string_t dx_event_type_to_string (int event_type) {
     case DXF_ET_THEO_PRICE: return L"THEO_PRICE";
     case DXF_ET_UNDERLYING: return L"Underlying";
     case DXF_ET_SERIES: return L"Series";
+    case DXF_ET_CONFIGURATION: return L"Configuration";
     default: return L"";
     }
 }
@@ -250,6 +251,15 @@ void listener(int event_type, dxf_const_string_t symbol_name,
                 srs[i].forward_price, srs[i].dividend, srs[i].interest, srs[i].index);
         }
     }
+
+    if (event_type == DXF_ET_CONFIGURATION) {
+        dxf_configuration_t* srs = (dxf_configuration_t*)data;
+
+        for (; i < data_count; ++i) {
+            wprintf(L"object=%ls}\n",
+                srs[i].object);
+        }
+    }
 }
 /* -------------------------------------------------------------------------- */
 
@@ -319,7 +329,7 @@ int main (int argc, char* argv[]) {
                 L"  <server address> - a DXFeed server address, e.g. demo.dxfeed.com:7300\n"
                 L"  <event type> - an event type, one of the following: TRADE, QUOTE, SUMMARY,\n"
                 L"                 PROFILE, ORDER, TIME_AND_SALE, TRADE_ETH, SPREAD_ORDER\n"
-                L"                 GREEKS, THEO_PRICE, UNDERLYING, SERIES\n"
+                L"                 GREEKS, THEO_PRICE, UNDERLYING, SERIES, CONFIGURATION\n"
                 L"  <symbol> - a trade symbol, e.g. C, MSFT, YHOO, IBM\n");
         
         return 0;
@@ -354,6 +364,8 @@ int main (int argc, char* argv[]) {
         event_type = DXF_ET_UNDERLYING;
     } else if (stricmp(event_type_name, "SERIES") == 0) {
         event_type = DXF_ET_SERIES;
+    } else if (stricmp(event_type_name, "CONFIGURATION") == 0) {
+        event_type = DXF_ET_CONFIGURATION;
     } else {
         wprintf(L"Unknown event type.\n");
         return -1;

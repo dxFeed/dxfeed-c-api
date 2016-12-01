@@ -47,6 +47,8 @@ typedef int                dxf_dayid_t;
 
 typedef dxf_char_t*        dxf_string_t;
 typedef const dxf_char_t*  dxf_const_string_t;
+typedef dxf_ubyte_t*       dxf_byte_array_t;
+typedef const dxf_ubyte_t* dxf_const_byte_array_t;
 
 #else /* POSIX? */
 

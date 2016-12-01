@@ -43,7 +43,8 @@ static const int g_event_data_sizes[dx_eid_count] = {
     sizeof(dxf_greeks_t),
     sizeof(dxf_theo_price_t),
     sizeof(dxf_underlying_t),
-    sizeof(dxf_series_t)
+    sizeof(dxf_series_t),
+    sizeof(dxf_configuration_t)
 };
 
 static const dxf_char_t g_quote_tmpl[] = L"Quote&";
@@ -80,6 +81,7 @@ dxf_const_string_t dx_event_type_to_string (int event_type) {
     case DXF_ET_THEO_PRICE: return L"TheoPrice";
     case DXF_ET_UNDERLYING: return L"Underlying";
     case DXF_ET_SERIES: return L"Series";
+    case DXF_ET_CONFIGURATION: return L"Configuration";
     default: return L"";
     }
 }
@@ -284,6 +286,9 @@ int dx_get_event_subscription_params(dxf_connection_t connection, dx_order_sourc
     case dx_eid_series:
         result = dx_add_subscription_param_to_list(connection, &param_list, L"Series", dx_st_history);
         break;
+    case dx_eid_configuration:
+        result = dx_add_subscription_param_to_list(connection, &param_list, L"Configuration", dx_st_ticker);
+        break;
     }
 
     if (!result) {
@@ -325,6 +330,7 @@ EVENT_DATA_NAVIGATOR_BODY(dxf_greeks_t)
 EVENT_DATA_NAVIGATOR_BODY(dxf_theo_price_t)
 EVENT_DATA_NAVIGATOR_BODY(dxf_underlying_t)
 EVENT_DATA_NAVIGATOR_BODY(dxf_series_t)
+EVENT_DATA_NAVIGATOR_BODY(dxf_configuration_t)
 
 static const dx_event_data_navigator g_event_data_navigators[dx_eid_count] = {
     EVENT_DATA_NAVIGATOR_NAME(dxf_trade_t),
@@ -339,7 +345,8 @@ static const dx_event_data_navigator g_event_data_navigators[dx_eid_count] = {
     EVENT_DATA_NAVIGATOR_NAME(dxf_greeks_t),
     EVENT_DATA_NAVIGATOR_NAME(dxf_theo_price_t),
     EVENT_DATA_NAVIGATOR_NAME(dxf_underlying_t),
-    EVENT_DATA_NAVIGATOR_NAME(dxf_series_t)
+    EVENT_DATA_NAVIGATOR_NAME(dxf_series_t),
+    EVENT_DATA_NAVIGATOR_NAME(dxf_configuration_t)
 };
 
 /* -------------------------------------------------------------------------- */

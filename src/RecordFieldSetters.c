@@ -267,6 +267,15 @@ FIELD_SETTER_BODY(dx_series_t, interest, dxf_double_t);
 
 /* -------------------------------------------------------------------------- */
 /*
+*	Configuration field setters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_SETTER_BODY(dx_configuration_t, version, dxf_int_t);
+FIELD_SETTER_BODY(dx_configuration_t, object, dxf_const_byte_array_t);
+
+/* -------------------------------------------------------------------------- */
+/*
  *	Default value getter functions
  */
 /* -------------------------------------------------------------------------- */
@@ -371,6 +380,14 @@ GENERIC_VALUE_GETTER_NAME_PROTO(dxf_const_string_t) {
     static dxf_const_string_t s = L"<Default>";
     
     return &s;
+}
+
+/* -------------------------------------------------------------------------- */
+
+GENERIC_VALUE_GETTER_NAME_PROTO(dxf_const_byte_array_t) {
+    static dxf_const_byte_array_t cba = NULL;
+
+    return &cba;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -597,6 +614,15 @@ FIELD_DEF_VAL_BODY(dx_series_t, put_call_ratio, dxf_double_t);
 FIELD_DEF_VAL_BODY(dx_series_t, forward_price, dxf_double_t);
 FIELD_DEF_VAL_BODY(dx_series_t, dividend, dxf_double_t);
 FIELD_DEF_VAL_BODY(dx_series_t, interest, dxf_double_t);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Configuration field value getters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_DEF_VAL_BODY(dx_configuration_t, version, dxf_int_t);
+FIELD_DEF_VAL_BODY(dx_configuration_t, object, dxf_const_byte_array_t);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -834,3 +860,12 @@ FIELD_GETTER_BODY(dx_series_t, put_call_ratio, dxf_double_t);
 FIELD_GETTER_BODY(dx_series_t, forward_price, dxf_double_t);
 FIELD_GETTER_BODY(dx_series_t, dividend, dxf_double_t);
 FIELD_GETTER_BODY(dx_series_t, interest, dxf_double_t);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Configuration field getters implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+FIELD_GETTER_BODY(dx_configuration_t, version, dxf_int_t);
+FIELD_GETTER_BODY(dx_configuration_t, object, dxf_const_byte_array_t);

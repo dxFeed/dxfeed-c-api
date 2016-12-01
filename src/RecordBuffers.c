@@ -183,6 +183,8 @@ GET_RECORD_PTR_BODY(dx_rid_underlying, dx_underlying_t)
 GET_RECORD_BUF_PTR_BODY(dx_rid_underlying)
 GET_RECORD_PTR_BODY(dx_rid_series, dx_series_t)
 GET_RECORD_BUF_PTR_BODY(dx_rid_series)
+GET_RECORD_PTR_BODY(dx_rid_configuration, dx_configuration_t)
+GET_RECORD_BUF_PTR_BODY(dx_rid_configuration)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -204,7 +206,8 @@ const dx_buffer_manager_collection_t g_buffer_managers[dx_rid_count] = {
     { GET_RECORD_PTR_NAME(dx_rid_greeks), GET_RECORD_BUF_PTR_NAME(dx_rid_greeks) },
     { GET_RECORD_PTR_NAME(dx_rid_theo_price), GET_RECORD_BUF_PTR_NAME(dx_rid_theo_price) },
     { GET_RECORD_PTR_NAME(dx_rid_underlying), GET_RECORD_BUF_PTR_NAME(dx_rid_underlying) },
-    { GET_RECORD_PTR_NAME(dx_rid_series), GET_RECORD_BUF_PTR_NAME(dx_rid_series) }
+    { GET_RECORD_PTR_NAME(dx_rid_series), GET_RECORD_BUF_PTR_NAME(dx_rid_series) },
+    { GET_RECORD_PTR_NAME(dx_rid_configuration), GET_RECORD_BUF_PTR_NAME(dx_rid_configuration) }
 };
 
 void dx_clear_record_buffers (dx_event_record_buffer_t* record_buffers) {

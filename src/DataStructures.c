@@ -622,6 +622,21 @@ static const dx_field_info_t dx_fields_series[] = {
 
 /* -------------------------------------------------------------------------- */
 /*
+*	Configuration data fields
+*/
+/* -------------------------------------------------------------------------- */
+
+static const dx_field_info_t dx_fields_configuration[] = {
+    { dx_fid_compact_int, L"Version", DX_RECORD_FIELD_SETTER_NAME(dx_configuration_t, version),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_configuration_t, version), DX_RECORD_FIELD_GETTER_NAME(dx_configuration_t, version),
+    dx_ft_common_field },
+    { dx_fid_flag_serial_object, L"Configuration", DX_RECORD_FIELD_SETTER_NAME(dx_configuration_t, object),
+    DX_RECORD_FIELD_DEF_VAL_NAME(dx_configuration_t, object), DX_RECORD_FIELD_GETTER_NAME(dx_configuration_t, object),
+    dx_ft_common_field }
+};
+
+/* -------------------------------------------------------------------------- */
+/*
  *	Records
  */
 /* -------------------------------------------------------------------------- */
@@ -640,7 +655,8 @@ static const int g_record_field_counts[dx_rid_count] = {
     sizeof(dx_fields_greeks) / sizeof(dx_fields_greeks[0]),
     sizeof(dx_fields_theo_price) / sizeof(dx_fields_theo_price[0]),
     sizeof(dx_fields_underlying) / sizeof(dx_fields_underlying[0]),
-    sizeof(dx_fields_series) / sizeof(dx_fields_series[0])
+    sizeof(dx_fields_series) / sizeof(dx_fields_series[0]),
+    sizeof(dx_fields_configuration) / sizeof(dx_fields_configuration[0])
 };
 
 static const dx_record_info_t g_record_info[dx_rid_count] = {
@@ -657,7 +673,8 @@ static const dx_record_info_t g_record_info[dx_rid_count] = {
     { L"Greeks", sizeof(dx_fields_greeks) / sizeof(dx_fields_greeks[0]), dx_fields_greeks },
     { L"TheoPrice", sizeof(dx_fields_theo_price) / sizeof(dx_fields_theo_price[0]), dx_fields_theo_price },
     { L"Underlying", sizeof(dx_fields_underlying) / sizeof(dx_fields_underlying[0]), dx_fields_underlying },
-    { L"Series", sizeof(dx_fields_series) / sizeof(dx_fields_series[0]), dx_fields_series }
+    { L"Series", sizeof(dx_fields_series) / sizeof(dx_fields_series[0]), dx_fields_series },
+    { L"Configuration", sizeof(dx_fields_configuration) / sizeof(dx_fields_configuration[0]), dx_fields_configuration }
 };
 
 /* List stores records. The list is not cleared until at least one connection is opened. */
@@ -1072,6 +1089,9 @@ dx_record_info_id_t dx_string_to_record_info(dxf_const_string_t name)
     else if (dx_compare_strings_num(name, g_record_info[dx_rid_series].default_name,
                                     dx_string_length(g_record_info[dx_rid_series].default_name)) == 0)
         return dx_rid_series;
+    else if (dx_compare_strings_num(name, g_record_info[dx_rid_configuration].default_name,
+                                    dx_string_length(g_record_info[dx_rid_configuration].default_name)) == 0)
+        return dx_rid_configuration;
     else
         return dx_rid_invalid;
 }

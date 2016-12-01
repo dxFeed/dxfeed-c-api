@@ -266,6 +266,15 @@ DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_series_t, interest);
 
 /* -------------------------------------------------------------------------- */
 /*
+*	Configuration field setters
+*/
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_configuration_t, version);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_configuration_t, object);
+
+/* -------------------------------------------------------------------------- */
+/*
  *	Default field value functions
  */
 /* -------------------------------------------------------------------------- */
@@ -509,6 +518,15 @@ DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_series_t, interest);
 
 /* -------------------------------------------------------------------------- */
 /*
+*	Configuration field default value getters
+*/
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_configuration_t, version);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_configuration_t, object);
+
+/* -------------------------------------------------------------------------- */
+/*
 *	Generic setter prototype
 */
 /* -------------------------------------------------------------------------- */
@@ -745,5 +763,14 @@ DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_series_t, put_call_ratio);
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_series_t, forward_price);
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_series_t, dividend);
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_series_t, interest);
+
+/* -------------------------------------------------------------------------- */
+/*
+*	Configuration field getters
+*/
+/* -------------------------------------------------------------------------- */
+
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_configuration_t, version);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_configuration_t, object);
 
 #endif /* RECORD_FIELD_SETTERS_H_INCLUDED */
