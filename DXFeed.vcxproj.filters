@@ -119,10 +119,10 @@
     <ClCompile Include="src\Snapshot.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\StringArray.c">
+    <ClCompile Include="src\EventManager.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\EventManager.c">
+    <ClCompile Include="src\ObjectArray.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -243,10 +243,10 @@
     <ClInclude Include="src\Snapshot.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\StringArray.h">
+    <ClInclude Include="src\EventManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\EventManager.h">
+    <ClInclude Include="src\ObjectArray.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

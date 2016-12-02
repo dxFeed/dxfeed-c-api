@@ -23,7 +23,7 @@
 #include "DXTypes.h"
 #include "EventData.h"
 #include "PrimitiveTypes.h"
-#include "StringArray.h"
+#include "ObjectArray.h"
 
 /* -------------------------------------------------------------------------- */
 /*

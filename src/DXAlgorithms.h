@@ -175,6 +175,22 @@ double dx_random_double (double max_value);
 
 /* -------------------------------------------------------------------------- */
 /*
+ *	Array constats
+ */
+/* -------------------------------------------------------------------------- */
+
+/*
+ *  Sets the empty array value.
+ *  Returns the array descriptor structure. this structure must contain at 
+    least three fields:
+        elements - a pointer to the array buffer (of type 'elem_type*')
+        size - an integer value containing the number of elements in the buffer
+        capacity - the current buffer capacity, may be greater than size
+ */
+#define DX_EMPTY_ARRAY { NULL, 0, 0 }
+
+/* -------------------------------------------------------------------------- */
+/*
  *	Array operations and functions
  
  *  A set of operations implementing various array algorithms: search,
@@ -414,6 +430,48 @@ double dx_random_double (double max_value);
             \
             DX_SWAP(elem_type, (a)[_idx], (a)[_rand_idx]); \
         } \
+    } while (false)
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Reservation
+
+ *  array_obj - an array descriptor structure. this structure must contain
+                at least three fields:
+        elements - a pointer to the array buffer (of type 'elem_type*')
+        size - an integer value containing the number of elements in the buffer
+        capacity - the current buffer capacity, may be greater than size
+ *  elem_type - type of elements in the buffer
+ *  reserve_size - a new size to reservation
+ *  error - a boolean return value, is true if some error occurred during 
+            reservation, is false otherwise
+ */
+/* -------------------------------------------------------------------------- */
+
+#define DX_ARRAY_RESERVE(array_obj, elem_type, reserve_size, error) \
+    do { \
+        elem_type* _new_elem_buffer = (array_obj).elements; \
+        error = false; \
+        if (reserve_size <= (array_obj.size)) { \
+            break; \
+        } \
+        \
+        if (reserve_size > (array_obj).capacity) { \
+            _new_elem_buffer = (elem_type*)dx_calloc(reserve_size, sizeof(elem_type)); \
+            \
+            if (_new_elem_buffer == NULL) { \
+                error = true; \
+                \
+                break; \
+            } \
+            \
+            dx_memcpy((void*)_new_elem_buffer, (const void*)(array_obj).elements, (array_obj).size * sizeof(elem_type)); \
+            (array_obj).capacity = reserve_size; \
+            dx_free((void*)(array_obj).elements); \
+        } \
+        \
+        (array_obj).elements = _new_elem_buffer; \
+        (array_obj).size = reserve_size; \
     } while (false)
 
 /* -------------------------------------------------------------------------- */

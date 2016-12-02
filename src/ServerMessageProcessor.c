@@ -892,7 +892,7 @@ bool dx_read_records (dx_server_msg_proc_connection_context_t* context,
 	dxf_char_t read_utf_char;
 	dxf_double_t read_double;
 	dxf_string_t read_string;
-	dxf_byte_t* read_byte_array;
+	dxf_byte_array_t read_byte_array;
     const dx_record_digest_t* record_digest = dx_get_record_digest(context, record_id);
     if (record_digest == NULL)
         return dx_set_error_code(dx_ec_invalid_func_param_internal);
@@ -978,6 +978,8 @@ bool dx_read_records (dx_server_msg_proc_connection_context_t* context,
 				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_string);
 			} else {
 				CHECKED_CALL_2(dx_read_byte_array, context->bicc, &read_byte_array);
+
+                dx_store_byte_array_buffer(context->rbcc, read_byte_array);
 				/* Objects goes as byte array to.
 				 According to specification (DESCRIBE_RECORDS.txt):
 				 
@@ -1065,7 +1067,7 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 			dxf_int_t id;
 
 			if (!dx_read_compact_int(context->bicc, &id)) {
-				dx_free_string_buffers(context->rbcc);
+				dx_free_buffers(context->rbcc);
 			    
 				return false;
 			}
@@ -1074,18 +1076,18 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 		}
 		
 		if (record_id < 0) {
-			dx_free_string_buffers(context->rbcc);
+            dx_free_buffers(context->rbcc);
 
 			return dx_set_error_code(dx_pec_record_not_supported);
 		}
 	    
         record_digest = dx_get_record_digest(context, record_id);
         if (record_digest == NULL) {
-            dx_free_string_buffers(context->rbcc);
+            dx_free_buffers(context->rbcc);
             return dx_set_error_code(dx_ec_invalid_func_param_internal);
         }
 		if (!record_digest->in_sync_with_server) {
-			dx_free_string_buffers(context->rbcc);
+            dx_free_buffers(context->rbcc);
 			
 			return dx_set_error_code(dx_pec_record_description_not_received);
 		}
@@ -1095,14 +1097,14 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
         suffix = dx_string_length(record_info->suffix) > 0 ? record_info->suffix : NULL;
 		
 		if (record_buffer == NULL) {
-			dx_free_string_buffers(context->rbcc);
+            dx_free_buffers(context->rbcc);
 		    
 			return false;
 		}
 		
 
         if (!dx_read_records(context, record_id, record_buffer)) {
-			dx_free_string_buffers(context->rbcc);
+            dx_free_buffers(context->rbcc);
 			
 			return false;
 		}
@@ -1123,12 +1125,12 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
         if (!dx_transcode_record_data(context->connection, &record_params, &event_params, 
             g_buffer_managers[record_info->info_id].record_buffer_getter(context->rbcc), record_count)) {
 
-			dx_free_string_buffers(context->rbcc);
+            dx_free_buffers(context->rbcc);
 
 			return false;
 	    }
 
-		dx_free_string_buffers(context->rbcc);
+        dx_free_buffers(context->rbcc);
 	}
 	
 	return true;

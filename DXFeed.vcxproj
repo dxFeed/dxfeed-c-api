@@ -207,7 +207,7 @@
     <ClCompile Include="src\RecordTranscoder.c" />
     <ClCompile Include="src\ServerMessageProcessor.c" />
     <ClCompile Include="src\Snapshot.c" />
-    <ClCompile Include="src\StringArray.c" />
+    <ClCompile Include="src\ObjectArray.c" />
     <ClCompile Include="src\TaskQueue.c" />
     <ClCompile Include="src\Win32.c" />
     <ClCompile Include="src\BufferedInput.c" />
@@ -244,7 +244,7 @@
     <ClInclude Include="src\RecordTranscoder.h" />
     <ClInclude Include="src\ServerMessageProcessor.h" />
     <ClInclude Include="src\Snapshot.h" />
-    <ClInclude Include="src\StringArray.h" />
+    <ClInclude Include="src\ObjectArray.h" />
     <ClInclude Include="src\TaskQueue.h" />
     <ClInclude Include="src\BufferedInput.h" />
     <ClInclude Include="src\BufferedIOCommon.h" />

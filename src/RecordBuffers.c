@@ -23,7 +23,7 @@
 #include "DXMemory.h"
 #include "DXAlgorithms.h"
 #include "ConnectionContextData.h"
-#include "StringArray.h"
+#include "ObjectArray.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -45,6 +45,7 @@ typedef struct {
 typedef struct {
     dx_event_record_buffer_t record_buffer_array[dx_rid_count];
     dx_string_array_t string_buffers;
+    dx_byte_buffer_array_t byte_array_buffers;
 } dx_record_buffers_connection_context_t;
 
 #define CTX(context) \
@@ -235,12 +236,23 @@ bool dx_store_string_buffer (void* context, dxf_const_string_t buf) {
 
 /* -------------------------------------------------------------------------- */
 
+bool dx_store_byte_array_buffer(void* context, dxf_byte_array_t buf) {
+    return dx_byte_buffer_array_add(&(CTX(context)->byte_array_buffers), buf);
+}
+
+/* -------------------------------------------------------------------------- */
+
 void dx_free_string_buffers_impl (dx_string_array_t* string_buffers) {
     dx_string_array_free(string_buffers);
 }
 
+void dx_free_byte_array_buffers_impl(dx_byte_buffer_array_t* byte_array_buffers) {
+    dx_byte_buffer_array_free(byte_array_buffers);
+}
+
 /* ---------------------------------- */
 
-void dx_free_string_buffers (void* context) {
+void dx_free_buffers(void* context) {
     dx_free_string_buffers_impl(&(CTX(context)->string_buffers));
+    dx_free_byte_array_buffers_impl(&(CTX(context)->byte_array_buffers));
 }

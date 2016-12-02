@@ -74,7 +74,7 @@ set (HEADER_FILES
     RecordTranscoder.h
     ServerMessageProcessor.h
     Snapshot.h
-    StringArray.h
+    ObjectArray.h
     TaskQueue.h
     Version.h
     )
@@ -125,7 +125,7 @@ set (SOURCE_FILES
     RecordTranscoder.c
     ServerMessageProcessor.c
     Snapshot.c
-    StringArray.c
+    ObjectArray.c
     TaskQueue.c
     Win32.c
     ${DEF_FILE}) 

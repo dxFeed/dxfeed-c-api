@@ -630,7 +630,7 @@ static const dx_field_info_t dx_fields_configuration[] = {
     { dx_fid_compact_int, L"Version", DX_RECORD_FIELD_SETTER_NAME(dx_configuration_t, version),
     DX_RECORD_FIELD_DEF_VAL_NAME(dx_configuration_t, version), DX_RECORD_FIELD_GETTER_NAME(dx_configuration_t, version),
     dx_ft_common_field },
-    { dx_fid_flag_serial_object, L"Configuration", DX_RECORD_FIELD_SETTER_NAME(dx_configuration_t, object),
+    { dx_fid_byte_array | dx_fid_flag_serial_object, L"Configuration", DX_RECORD_FIELD_SETTER_NAME(dx_configuration_t, object),
     DX_RECORD_FIELD_DEF_VAL_NAME(dx_configuration_t, object), DX_RECORD_FIELD_GETTER_NAME(dx_configuration_t, object),
     dx_ft_common_field }
 };

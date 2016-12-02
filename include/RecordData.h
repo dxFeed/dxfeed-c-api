@@ -258,7 +258,7 @@ typedef struct {
 
 typedef struct {
     dxf_int_t version;
-    dxf_const_byte_array_t object;
+    dxf_byte_array_t object;
 } dx_configuration_t;
 
 #endif /* RECORD_DATA_H_INCLUDED */
