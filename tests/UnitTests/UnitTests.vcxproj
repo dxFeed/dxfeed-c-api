@@ -173,6 +173,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Candle.c" />
+    <ClCompile Include="..\..\src\ConfigurationDeserializer.c" />
     <ClCompile Include="CandleTest.c" />
     <ClCompile Include="..\..\src\EventManager.c" />
     <ClCompile Include="..\..\src\Snapshot.c" />
@@ -211,6 +212,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Candle.h" />
+    <ClInclude Include="..\..\src\ConfigurationDeserializer.h" />
     <ClInclude Include="..\..\src\DXAlgorithms.h" />
     <ClInclude Include="..\..\include\DXErrorCodes.h" />
     <ClInclude Include="..\..\src\DXErrorHandling.h" />

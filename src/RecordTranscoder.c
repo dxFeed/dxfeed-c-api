@@ -28,6 +28,7 @@
 #include "RecordBuffers.h"
 #include "ConnectionContextData.h"
 #include "DXErrorHandling.h"
+#include "ConfigurationDeserializer.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -165,6 +166,8 @@ dxf_event_data_t dx_get_event_data_buffer(dx_record_transcoder_connection_contex
         struct_size = sizeof(dxf_order_t);
     else if (event_id == dx_eid_spread_order)
         struct_size = sizeof(dxf_spread_order_t);
+    else if (event_id == dx_eid_configuration)
+        struct_size = sizeof(dxf_configuration_t);
     else {
         /* these other types don't require separate buffers yet */
         
@@ -816,14 +819,24 @@ bool RECORD_TRANSCODER_NAME(dx_configuration_t) (dx_record_transcoder_connection
                                                  const dx_record_params_t* record_params,
                                                  const dxf_event_params_t* event_params,
                                                  void* record_buffer, int record_count) {
-    dx_configuration_t* event_buffer = (dx_configuration_t*)record_buffer;
     int i = 0;
+    dxf_configuration_t* event_buffer = (dxf_configuration_t*)dx_get_event_data_buffer(context, dx_eid_configuration, record_count);
 
-    //TODO:
-    /*for (; i < record_count; ++i) {
-        dxf_series_t* cur_event = event_buffer + i;
-        cur_event->index = (dxf_long_t)cur_event->expiration << 32 | cur_event->sequence;
-    }*/
+    if (event_buffer == NULL) {
+        return false;
+    }
+
+    for (; i < record_count; ++i) {
+        dx_configuration_t* cur_record = (dx_configuration_t*)record_buffer + i;
+        dxf_configuration_t* cur_event = event_buffer + i;
+        const dxf_byte_array_t* const_array_ptr = &(cur_record->object);
+
+        DX_RESET_RECORD_DATA(dxf_configuration_t, cur_event);
+
+        if (!dx_configuration_deserialize_string(const_array_ptr, &(cur_event->object))) {
+            return false;
+        }
+    }
 
     return dx_process_event_data(context->connection, dx_eid_configuration, record_params->symbol_name,
         record_params->symbol_cipher, event_buffer, record_count, event_params);

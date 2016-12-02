@@ -140,6 +140,9 @@
     <ClCompile Include="..\..\src\ObjectArray.c">
       <Filter>Common\Sources</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\ConfigurationDeserializer.c">
+      <Filter>Parser\Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\DXAlgorithms.h">
@@ -210,6 +213,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\ObjectArray.h">
       <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\ConfigurationDeserializer.h">
+      <Filter>Parser\Headers</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

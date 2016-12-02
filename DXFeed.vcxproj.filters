@@ -125,6 +125,9 @@
     <ClCompile Include="src\ObjectArray.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\ConfigurationDeserializer.c">
+      <Filter>Parser\Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="DXFeed.def">
@@ -251,6 +254,9 @@
     </ClInclude>
     <ClInclude Include="src\resource.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ConfigurationDeserializer.h">
+      <Filter>Parser\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -190,6 +190,7 @@
   <ItemGroup>
     <ClCompile Include="src\Candle.c" />
     <ClCompile Include="src\ClientMessageProcessor.c" />
+    <ClCompile Include="src\ConfigurationDeserializer.c" />
     <ClCompile Include="src\ConnectionContextData.c" />
     <ClCompile Include="src\DXAlgorithms.c" />
     <ClCompile Include="src\DXErrorCodes.c" />
@@ -227,6 +228,7 @@
     <None Include="DXFeedd_64.def" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\ConfigurationDeserializer.h" />
     <ClInclude Include="src\resource.h" />
     <ClInclude Include="src\Candle.h" />
     <ClInclude Include="src\ClientMessageProcessor.h" />
