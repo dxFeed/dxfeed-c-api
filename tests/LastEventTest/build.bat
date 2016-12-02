@@ -60,7 +60,7 @@ if not exist %BUILD_DIR% (mkdir %BUILD_DIR%)
 cd %BUILD_DIR%
 
 echo Start building %CONFIG% %PLATFORM%...
-cmake -DCMAKE_BUILD_TYPE=%CONFIG% -G "Visual Studio 10 2010%CMAKE_PLATFORM%" -DTARGET_PLATFORM=%PLATFORM% -DAPP_VERSION=%APP_VERSION% ..\..
+cmake -DCMAKE_BUILD_TYPE=%CONFIG% -G "Visual Studio 14 2015%CMAKE_PLATFORM%" -DTARGET_PLATFORM=%PLATFORM% -DAPP_VERSION=%APP_VERSION% ..\..
 if %ERRORLEVEL% GEQ 1 goto build_error
 
 msbuild /p:Configuration=%CONFIG% /p:Platform=%MSBUILD_PLATFORM% /m /t:build /ignore:.vcproj,.vcxproj

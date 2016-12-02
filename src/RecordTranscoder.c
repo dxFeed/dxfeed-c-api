@@ -203,6 +203,9 @@ typedef bool (*dx_record_transcoder_t) (dx_record_transcoder_connection_context_
                                         const dx_record_params_t* record_params,
                                         const dxf_event_params_t* event_params,
                                         void* record_buffer, int record_count);
+
+// Fill struct data with zero's.
+#define DX_RESET_RECORD_DATA(type, data_ptr) memset(data_ptr, 0, sizeof(##type))
     
 /* -------------------------------------------------------------------------- */
 /*
@@ -249,6 +252,8 @@ bool dx_transcode_quote_to_order_bid (dx_record_transcoder_connection_context_t*
         dx_quote_t* cur_record = record_buffer + i;
         dxf_order_t* cur_event = event_buffer + i;
         dxf_char_t exchange_code = (suffix == NULL ? 0 : suffix[0]);
+
+        DX_RESET_RECORD_DATA(dxf_order_t, cur_event);
         
         cur_event->time = ((dxf_long_t)(cur_record->bid_time) * 1000L);
         cur_event->price = cur_record->bid_price;
@@ -282,6 +287,8 @@ bool dx_transcode_quote_to_order_ask (dx_record_transcoder_connection_context_t*
         dx_quote_t* cur_record = record_buffer + i;
         dxf_order_t* cur_event = event_buffer + i;
         dxf_char_t exchange_code = (suffix == NULL ? 0 : suffix[0]);
+
+        DX_RESET_RECORD_DATA(dxf_order_t, cur_event);
 
         cur_event->time = ((dxf_long_t)(cur_record->ask_time) * 1000L);
         cur_event->price = cur_record->ask_price;
@@ -415,6 +422,8 @@ bool dx_transcode_market_maker_to_order_bid (dx_record_transcoder_connection_con
         dxf_char_t exchange_code = (dxf_char_t)cur_record->mm_exchange;
         dx_set_record_exchange_code(record_params->record_id, exchange_code);
 
+        DX_RESET_RECORD_DATA(dxf_order_t, cur_event);
+
         cur_event->exchange_code = exchange_code;
         cur_event->market_maker = dx_decode_from_integer(cur_record->mm_id);
         cur_event->time = ((dxf_long_t)cur_record->mmbid_time) * 1000L;
@@ -457,6 +466,8 @@ bool dx_transcode_market_maker_to_order_ask (dx_record_transcoder_connection_con
         dxf_order_t* cur_event = event_buffer + i;
         dxf_char_t exchange_code = (dxf_char_t)cur_record->mm_exchange;
         dx_set_record_exchange_code(record_params->record_id, exchange_code);
+
+        DX_RESET_RECORD_DATA(dxf_order_t, cur_event);
 
         cur_event->exchange_code = exchange_code;
         cur_event->market_maker = dx_decode_from_integer(cur_record->mm_id);
@@ -546,6 +557,8 @@ bool RECORD_TRANSCODER_NAME(dx_order_t) (dx_record_transcoder_connection_context
         if (exchange_code > 0)
             exchange_code |= DX_RECORD_SUFFIX_HIGH_BITS;
         dx_set_record_exchange_code(record_params->record_id, exchange_code);
+
+        DX_RESET_RECORD_DATA(dxf_order_t, cur_event);
 
         cur_event->index = (suffix_to_long(suffix) << DX_ORDER_SOURCE_ID_SHIFT) | cur_record->index;
         cur_event->side = ((cur_record->flags >> DX_ORDER_SIDE_SHIFT) & DX_ORDER_SIDE_MASK) == DX_ORDER_SIDE_SELL ? DXF_ORDER_SIDE_SELL : DXF_ORDER_SIDE_BUY;
@@ -697,6 +710,8 @@ bool RECORD_TRANSCODER_NAME(dx_spread_order_t) (dx_record_transcoder_connection_
         if (exchange_code > 0)
             exchange_code |= DX_RECORD_SUFFIX_HIGH_BITS;
         dx_set_record_exchange_code(record_params->record_id, exchange_code);
+
+        DX_RESET_RECORD_DATA(dxf_spread_order_t, cur_event);
 
         cur_event->index = (suffix_to_long(suffix) << DX_ORDER_SOURCE_ID_SHIFT) | cur_record->index;
         cur_event->side = ((cur_record->flags >> DX_ORDER_SIDE_SHIFT) & DX_ORDER_SIDE_MASK) == DX_ORDER_SIDE_SELL ? DXF_ORDER_SIDE_SELL : DXF_ORDER_SIDE_BUY;

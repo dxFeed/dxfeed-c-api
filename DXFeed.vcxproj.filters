@@ -249,5 +249,11 @@
     <ClInclude Include="src\ObjectArray.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="src\DXFeed.rc" />
   </ItemGroup>
 </Project>
