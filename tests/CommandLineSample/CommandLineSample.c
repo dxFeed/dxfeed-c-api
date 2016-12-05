@@ -253,11 +253,11 @@ void listener(int event_type, dxf_const_string_t symbol_name,
     }
 
     if (event_type == DXF_ET_CONFIGURATION) {
-        dxf_configuration_t* srs = (dxf_configuration_t*)data;
+        dxf_configuration_t* cnf = (dxf_configuration_t*)data;
 
         for (; i < data_count; ++i) {
             wprintf(L"object=%ls}\n",
-                srs[i].object);
+                cnf[i].object);
         }
     }
 }

@@ -26,6 +26,7 @@ dxf_const_string_t dx_event_type_to_string(int event_type) {
         case DXF_ET_THEO_PRICE: return L"THEO_PRICE";
         case DXF_ET_UNDERLYING: return L"Underlying";
         case DXF_ET_SERIES: return L"Series";
+        case DXF_ET_CONFIGURATION: return L"Configuration";
         default: return L"";
     }
 }
@@ -61,6 +62,8 @@ void underlying_listener(int event_type, dxf_const_string_t symbol_name,
                          const dxf_event_data_t* data, int data_count, void* user_data);
 void series_listener(int event_type, dxf_const_string_t symbol_name,
                      const dxf_event_data_t* data, int data_count, void* user_data);
+void configuration_listener(int event_type, dxf_const_string_t symbol_name,
+                            const dxf_event_data_t* data, int data_count, void* user_data);
 void snapshot_listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data);
 
 struct event_info_t {
@@ -85,6 +88,7 @@ static struct event_info_t event_info[dx_eid_count] = {
     { dx_eid_theo_price, DXF_ET_THEO_PRICE, { 0, 60 }, theo_price_listener, 0 },
     { dx_eid_underlying, DXF_ET_UNDERLYING, { 0, 66 }, underlying_listener, 0 },
     { dx_eid_series, DXF_ET_SERIES, { 0, 72 }, series_listener, 0 },
+    { dx_eid_configuration, DXF_ET_CONFIGURATION,{ 0, 78 }, configuration_listener, 0 }
 };
 
 struct snapshot_info_t {
@@ -99,7 +103,7 @@ struct snapshot_info_t {
 
 #define SNAPSHOT_COUNT 1
 static struct snapshot_info_t snapshot_info[SNAPSHOT_COUNT] = {
-    { dx_eid_order, DXF_ET_ORDER, "NTV", {0, 78}, snapshot_listener, 0 }
+    { dx_eid_order, DXF_ET_ORDER, "NTV", {0, 84}, snapshot_listener, 0 }
 };
 
 /* -------------------------------------------------------------------------- */
@@ -538,6 +542,35 @@ void series_listener(int event_type, dxf_const_string_t symbol_name,
     coord.X += 5;
     coord.Y += ind + 1;
     swprintf(str, sizeof(str), L"Symbol: \"%s\" Data count: %d, Total data count: %d            ", symbol_name, data_count, event_info[dx_eid_series].total_data_count[ind]);
+    print_at(coord, str);
+}
+
+/* -------------------------------------------------------------------------- */
+
+void configuration_listener(int event_type, dxf_const_string_t symbol_name,
+                            const dxf_event_data_t* data, int data_count, void* user_data) {
+    dxf_int_t i = 0;
+    wchar_t str[200];
+    int ind;
+    COORD coord = event_info[dx_eid_configuration].coord;
+
+    if (event_type != DXF_ET_CONFIGURATION) {
+        swprintf(str, sizeof(str), L"Error: event: %s Symbol: %s, expected event: Configuration\n", dx_event_type_to_string(event_type), symbol_name);
+        print_at(coord, str);
+        return;
+    }
+
+    print_at(coord, L"Event Configuration:                       ");
+    ind = get_symbol_index(symbol_name);
+    if (ind == -1) {
+        return;
+    }
+
+    event_info[dx_eid_configuration].total_data_count[ind] += data_count;
+
+    coord.X += 5;
+    coord.Y += ind + 1;
+    swprintf(str, sizeof(str), L"Symbol: \"%s\" Data count: %d, Total data count: %d            ", symbol_name, data_count, event_info[dx_eid_configuration].total_data_count[ind]);
     print_at(coord, str);
 }
 

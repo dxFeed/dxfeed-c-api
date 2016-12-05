@@ -37,6 +37,7 @@ dxf_const_string_t dx_event_type_to_string(int event_type) {
         case DXF_ET_SPREAD_ORDER: return L"SpreadOrder";
         case DXF_ET_GREEKS: return L"Greeks";
         case DXF_ET_SERIES: return L"Series";
+        case DXF_ET_CONFIGURATION: return L"Configuration";
         default: return L"";
     }
 }
