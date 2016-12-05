@@ -28,6 +28,6 @@
  *       string deserialization
  */
 
-bool dx_configuration_deserialize_string(const dxf_byte_array_t* object, OUT dxf_string_t* string);
+bool dx_configuration_deserialize_string(dxf_byte_array_t* object, OUT dxf_string_t* string);
 
 #endif /* CONFIGURATION_PARSER_H_INCLUDED */

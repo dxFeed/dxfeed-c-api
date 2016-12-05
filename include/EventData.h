@@ -153,7 +153,7 @@ typedef struct {
 } dxf_spread_order_t;
 
 typedef struct {
-    dxf_const_string_t object;
+    dxf_string_t object;
 } dxf_configuration_t;
 
 /* -------------------------------------------------------------------------- */

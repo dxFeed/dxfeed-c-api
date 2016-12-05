@@ -257,7 +257,6 @@ typedef struct {
 } dx_series_t;
 
 typedef struct {
-    dxf_int_t version;
     dxf_byte_array_t object;
 } dx_configuration_t;
 

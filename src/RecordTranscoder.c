@@ -829,11 +829,10 @@ bool RECORD_TRANSCODER_NAME(dx_configuration_t) (dx_record_transcoder_connection
     for (; i < record_count; ++i) {
         dx_configuration_t* cur_record = (dx_configuration_t*)record_buffer + i;
         dxf_configuration_t* cur_event = event_buffer + i;
-        const dxf_byte_array_t* const_array_ptr = &(cur_record->object);
 
         DX_RESET_RECORD_DATA(dxf_configuration_t, cur_event);
 
-        if (!dx_configuration_deserialize_string(const_array_ptr, &(cur_event->object))) {
+        if (!dx_configuration_deserialize_string(&(cur_record->object), &(cur_event->object))) {
             return false;
         }
     }

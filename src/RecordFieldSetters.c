@@ -271,7 +271,6 @@ FIELD_SETTER_BODY(dx_series_t, interest, dxf_double_t);
 */
 /* -------------------------------------------------------------------------- */
 
-FIELD_SETTER_BODY(dx_configuration_t, version, dxf_int_t);
 FIELD_SETTER_BODY(dx_configuration_t, object, dxf_byte_array_t);
 
 /* -------------------------------------------------------------------------- */
@@ -621,7 +620,6 @@ FIELD_DEF_VAL_BODY(dx_series_t, interest, dxf_double_t);
 */
 /* -------------------------------------------------------------------------- */
 
-FIELD_DEF_VAL_BODY(dx_configuration_t, version, dxf_int_t);
 FIELD_DEF_VAL_BODY(dx_configuration_t, object, dxf_byte_array_t);
 
 /* -------------------------------------------------------------------------- */
@@ -867,5 +865,4 @@ FIELD_GETTER_BODY(dx_series_t, interest, dxf_double_t);
 */
 /* -------------------------------------------------------------------------- */
 
-FIELD_GETTER_BODY(dx_configuration_t, version, dxf_int_t);
 FIELD_GETTER_BODY(dx_configuration_t, object, dxf_byte_array_t);

@@ -270,7 +270,6 @@ DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_series_t, interest);
 */
 /* -------------------------------------------------------------------------- */
 
-DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_configuration_t, version);
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_configuration_t, object);
 
 /* -------------------------------------------------------------------------- */
@@ -522,7 +521,6 @@ DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_series_t, interest);
 */
 /* -------------------------------------------------------------------------- */
 
-DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_configuration_t, version);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_configuration_t, object);
 
 /* -------------------------------------------------------------------------- */
@@ -770,7 +768,6 @@ DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_series_t, interest);
 */
 /* -------------------------------------------------------------------------- */
 
-DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_configuration_t, version);
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_configuration_t, object);
 
 #endif /* RECORD_FIELD_SETTERS_H_INCLUDED */
