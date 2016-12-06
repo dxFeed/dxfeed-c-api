@@ -32,7 +32,7 @@ static const dxf_short_t STREAM_VERSION = 5;
 #define TC_LONGSTRING   0x7C
 
 #define READ_MULTIMBYTE_VALUE_BODY(multibyte_type, alias) \
-static bool read_##alias##(dxf_byte_array_t* object, dx_byte_array_pos_t *pos, \
+static bool read_##alias(dxf_byte_array_t* object, dx_byte_array_pos_t *pos, \
                            OUT multibyte_type *value) { \
     dx_byte_array_pos_t last = *pos + sizeof(dxf_short_t); \
     if (last >= object->size) \
