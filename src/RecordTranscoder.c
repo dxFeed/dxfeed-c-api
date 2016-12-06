@@ -208,7 +208,7 @@ typedef bool (*dx_record_transcoder_t) (dx_record_transcoder_connection_context_
                                         void* record_buffer, int record_count);
 
 // Fill struct data with zero's.
-#define DX_RESET_RECORD_DATA(type, data_ptr) memset(data_ptr, 0, sizeof(##type))
+#define DX_RESET_RECORD_DATA(type, data_ptr) memset(data_ptr, 0, sizeof(type))
     
 /* -------------------------------------------------------------------------- */
 /*
