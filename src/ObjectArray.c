@@ -70,7 +70,7 @@ DX_OBJECT_ARRAY_ADD_PROTOTYPE(type, alias) {\
 
 #define DX_OBJECT_ARRAY_FREE_BODY(alias, free_function) \
 DX_OBJECT_ARRAY_FREE_PROTOTYPE(alias) { \
-    int i = 0; \
+    size_t i = 0; \
     \
     if (object_array == NULL) { \
         return;\

@@ -523,8 +523,8 @@ bool RECORD_TRANSCODER_NAME(dx_market_maker_t) (dx_record_transcoder_connection_
 
 dxf_long_t suffix_to_long(dxf_const_string_t suffix)
 {
-    int suffix_length = 0;
-    int i = 0;
+    size_t suffix_length = 0;
+    size_t i = 0;
     dxf_long_t ret = 0;
     if (suffix == NULL)
         return 0;

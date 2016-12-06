@@ -97,7 +97,7 @@ struct snapshot_info_t {
     const char              source[100];
     COORD                   coord;
     dxf_snapshot_listener_t listener;
-    unsigned int            total_data_count[SYMBOLS_COUNT];
+    size_t                  total_data_count[SYMBOLS_COUNT];
     dxf_snapshot_t          obj[SYMBOLS_COUNT];
 };
 
@@ -603,7 +603,7 @@ void snapshot_listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_d
 
     coord.X += 5;
     coord.Y += ind + 1;
-    swprintf(str, sizeof(str), L"Symbol: \"%s\" Data count: %d, Total data count: %d            ", 
+    swprintf(str, sizeof(str), L"Symbol: \"%s\" Data count: %zu, Total data count: %zu            ", 
              snapshot_data->symbol, snapshot_data->records_count, info->total_data_count[ind]);
     print_at(coord, str);
 }

@@ -76,8 +76,8 @@ typedef struct {
 
 typedef struct {
     dx_record_digest_t* elements;
-    int size;
-    int capacity;
+    size_t size;
+    size_t capacity;
 } dx_record_digest_list_t;
 
 /* -------------------------------------------------------------------------- */
@@ -231,7 +231,7 @@ dx_record_digest_t* dx_get_record_digest(dx_server_msg_proc_connection_context_t
     if (context == NULL)
         return NULL;
     record_digests = &(context->record_digests);
-    if (record_digests->elements == NULL || record_id < 0 || record_id >= record_digests->size)
+    if (record_digests->elements == NULL || record_id < 0 || record_id >= (dx_record_id_t)record_digests->size)
         return NULL;
     return &(record_digests->elements[record_id]);
 }
@@ -366,11 +366,11 @@ void dx_clear_record_digest (dx_record_digest_t* digest) {
 /* -------------------------------------------------------------------------- */
 
 void dx_clear_record_digests (dx_server_msg_proc_connection_context_t* context) {
-    int i = 0;
-    int count = 0;
+    dx_record_id_t i = 0;
+    dx_record_id_t count = 0;
     if (context->record_digests.elements == NULL)
         return;
-    count = context->record_digests.size;
+    count = (dx_record_id_t)context->record_digests.size;
     for (; i < count; ++i) {
         dx_record_digest_t* record_digest = dx_get_record_digest(context, i);
         if (record_digest == NULL)
@@ -385,8 +385,8 @@ void dx_clear_record_digests (dx_server_msg_proc_connection_context_t* context) 
 /* -------------------------------------------------------------------------- */
 
 void dx_init_record_digests(dxf_connection_t connection) {
-    int i;
-    int count = dx_get_records_list_count();
+    size_t i;
+    size_t count = dx_get_records_list_count();
     for (i = 0; i < count; i++) {
         dx_add_record_digest_to_list(connection, (dx_record_id_t)i);
     }
@@ -412,7 +412,7 @@ bool dx_clear_server_info (dxf_connection_t connection) {
     }
     
     /* stage 1 - resetting all the field flags */
-    for (rid = 0; rid < dx_get_records_list_count(); ++rid) {
+    for (rid = 0; rid < (dx_record_id_t)dx_get_records_list_count(); ++rid) {
         dx_record_server_support_state_t* state;
         if (!dx_get_record_server_support_state_value(context->record_server_support_states, rid, &state)) {
             return false;
@@ -461,8 +461,8 @@ bool dx_lock_describe_protocol_processing (dxf_connection_t connection, bool loc
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_get_msg_support_state (int msg, const int* roster, int count, int bitmask) {
-    int idx;
+static bool dx_get_msg_support_state (int msg, const int* roster, size_t count, int bitmask) {
+    size_t idx;
     bool found = false;
 
     DX_ARRAY_SEARCH(roster, 0, count, msg, DX_NUMERIC_COMPARATOR, false, found, idx);
@@ -552,11 +552,11 @@ bool dx_legacy_send_msg_bitmask (OUT int* bitmask) {
     
     if (s_msg_bitmask == 0) {
         const int* msg_roster = dx_get_send_message_roster();
-        int roster_size = dx_get_send_message_roster_size();
+        size_t roster_size = dx_get_send_message_roster_size();
         int i = 0;
         
         for (; i < s_msg_count; ++i) {
-            int msg_index = 0;
+            size_t msg_index = 0;
             bool found = false;
 
             DX_ARRAY_SEARCH(msg_roster, 0, roster_size, s_legacy_msg_list[i], DX_NUMERIC_COMPARATOR, false, found, msg_index);
@@ -595,11 +595,11 @@ bool dx_legacy_recv_msg_bitmask (int* bitmask) {
 
     if (s_msg_bitmask == 0) {
         const int* msg_roster = dx_get_recv_message_roster();
-        int roster_size = dx_get_recv_message_roster_size();
+        size_t roster_size = dx_get_recv_message_roster_size();
         int i = 0;
 
         for (; i < s_msg_count; ++i) {
-            int msg_index = 0;
+            size_t msg_index = 0;
             bool found = false;
 
             DX_ARRAY_SEARCH(msg_roster, 0, roster_size, s_legacy_msg_list[i], DX_NUMERIC_COMPARATOR, false, found, msg_index);
@@ -1261,10 +1261,10 @@ typedef void (*dx_message_type_processor_t)(dx_server_msg_proc_connection_contex
 /* ---------------------------------- */
 
 static void dx_process_server_send_message_type (dx_server_msg_proc_connection_context_t* context, int message_id, dxf_string_t message_name) {
-    int msg_index;
+    size_t msg_index;
     bool found = false;
     const int* msg_roster = dx_get_recv_message_roster();
-    int roster_size = dx_get_recv_message_roster_size();
+    size_t roster_size = dx_get_recv_message_roster_size();
     
     /* Note: this function processes the _server_ send messages, i.e. they should be compared to the messages
        our application _receives_. */
@@ -1287,10 +1287,10 @@ static void dx_process_server_send_message_type (dx_server_msg_proc_connection_c
 /* ---------------------------------- */
 
 static void dx_process_server_recv_message_type (dx_server_msg_proc_connection_context_t* context, int message_id, dxf_string_t message_name) {
-    int msg_index;
+    size_t msg_index;
     bool found = false;
     const int* msg_roster = dx_get_send_message_roster();
-    int roster_size = dx_get_send_message_roster_size();
+    size_t roster_size = dx_get_send_message_roster_size();
 
     /* Note: this function processes the _server_ recv messages, i.e. they should be compared to the messages
        our application _sends_. */
@@ -1684,7 +1684,7 @@ bool dx_add_record_digest_to_list(dxf_connection_t connection, dx_record_id_t in
         return false;
     }
 
-    if (index < mpcc->record_digests.size) {
+    if (index < (dx_record_id_t)(mpcc->record_digests.size)) {
         /* Digest with such index already exist, don't insert new record*/
         return true;
     }

@@ -161,7 +161,7 @@ bool dx_get_order_subscription_params(dxf_connection_t connection, dx_order_sour
     dxf_char_t ch = 'A';
     dxf_char_t order_name_buf[ORDER_TMPL_LEN + DXF_RECORD_SUFFIX_SIZE] = { 0 };
     dxf_char_t quote_name_buf[QUOTE_TMPL_LEN + 2] = { 0 };
-    int i;
+    size_t i;
 
     if (IS_FLAG_SET(subscr_flags, DX_SUBSCR_FLAG_SINGLE_RECORD)) {
         return dx_get_single_order_subscription_params(connection, order_source, subscr_flags, param_list);
@@ -237,7 +237,7 @@ bool dx_get_trade_eth_subscription_params(dxf_connection_t connection, OUT dx_ev
  *
  * You need to call dx_free(params.elements) to free resources.
 */
-int dx_get_event_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source, dx_event_id_t event_id,
+size_t dx_get_event_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source, dx_event_id_t event_id,
                                      dxf_uint_t subscr_flags, OUT dx_event_subscription_param_list_t* params) {
     bool result = true;
     dx_event_subscription_param_list_t param_list = { NULL, 0, 0 };

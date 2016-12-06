@@ -147,10 +147,10 @@ dxf_string_t ansi_to_unicode(const char* ansi_str) {
 /* -------------------------------------------------------------------------- */
 
 void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
-    dxf_int_t i;
-    int records_count = snapshot_data->records_count;
+    size_t i;
+    size_t records_count = snapshot_data->records_count;
 
-    wprintf(L"Snapshot %ls{symbol=%ls, records_count=%d}\n", 
+    wprintf(L"Snapshot %ls{symbol=%ls, records_count=%zu}\n", 
             dx_event_type_to_string(snapshot_data->event_type), snapshot_data->symbol, 
             records_count);
 
@@ -160,7 +160,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
             dxf_order_t order = order_records[i];
 
             if (i >= RECORDS_PRINT_LIMIT) {
-                wprintf(L"   { ... %d records left ...}\n", records_count - i);
+                wprintf(L"   { ... %zu records left ...}\n", records_count - i);
                 break;
             }
 
@@ -179,7 +179,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
             dxf_candle_t candle = candle_records[i];
 
             if (i >= RECORDS_PRINT_LIMIT) {
-                wprintf(L"   { ... %d records left ...}\n", records_count - i);
+                wprintf(L"   { ... %zu records left ...}\n", records_count - i);
                 break;
             }
 
@@ -197,7 +197,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
             dxf_spread_order_t order = order_records[i];
 
             if (i >= RECORDS_PRINT_LIMIT) {
-                wprintf(L"   { ... %d records left ...}\n", records_count - i);
+                wprintf(L"   { ... %zu records left ...}\n", records_count - i);
                 break;
             }
 
@@ -217,7 +217,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
             dxf_time_and_sale_t tns = time_and_sale_records[i];
 
             if (i >= RECORDS_PRINT_LIMIT) {
-                wprintf(L"   { ... %d records left ...}\n", records_count - i);
+                wprintf(L"   { ... %zu records left ...}\n", records_count - i);
                 break;
             }
 
@@ -233,7 +233,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
             dxf_greeks_t grks = greeks_records[i];
 
             if (i >= RECORDS_PRINT_LIMIT) {
-                wprintf(L"   { ... %d records left ...}\n", records_count - i);
+                wprintf(L"   { ... %zu records left ...}\n", records_count - i);
                 break;
             }
 
@@ -250,7 +250,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
             dxf_series_t srs = series_records[i];
 
             if (i >= RECORDS_PRINT_LIMIT) {
-                wprintf(L"   { ... %d records left ...}\n", records_count - i);
+                wprintf(L"   { ... %zu records left ...}\n", records_count - i);
                 break;
             }
             wprintf(L"expiration=%d, sequence=%d, volatility=%f, put call ratio=%f, "

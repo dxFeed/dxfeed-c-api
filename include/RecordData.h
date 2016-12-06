@@ -56,7 +56,7 @@ typedef enum {
     dx_rid_invalid
 } dx_record_info_id_t;
 
-typedef int dx_record_id_t;
+typedef dxf_int_t dx_record_id_t;
 
 static const dxf_int_t DX_RECORD_SUFFIX_MASK = 0x7C00;
 static const dxf_int_t DX_RECORD_SUFFIX_IN_FLAG_SHIFT = 10;

@@ -67,8 +67,8 @@ bool event_subscription_test (void) {
     // testing the symbol retrieval
     {
         dxf_const_string_t* symbols = NULL;
-        int symbol_count = 0;
-        int i = 0;
+        size_t symbol_count = 0;
+        size_t i = 0;
         
         if (!dx_get_event_subscription_symbols(sub2, &symbols, &symbol_count)) {
             return false;

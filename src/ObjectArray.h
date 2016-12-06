@@ -37,8 +37,8 @@ dx_##alias##_array_ptr_t
 #define DX_OBJECT_ARRAY_STRUCT(type, alias) \
 typedef struct { \
     type* elements; \
-    int size; \
-    int capacity; \
+    size_t size; \
+    size_t capacity; \
 } DX_OBJECT_ARRAY_NAME(alias), *DX_OBJECT_ARRAY_NAME_PTR(alias); 
 //} dx_##alias##_array_t, *dx_##alias##_array_ptr_t; 
 

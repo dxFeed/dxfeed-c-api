@@ -69,7 +69,7 @@ typedef struct {
     dxf_connection_t connection;
     dx_order_source_array_t order_source;
     dxf_const_string_t* symbols;
-    int symbol_count;
+    size_t symbol_count;
     int event_types;
     bool unsubscribe;
     dxf_uint_t subscr_flags;
@@ -100,9 +100,9 @@ void* dx_destroy_event_subscription_task_data (dx_event_subscription_task_data_t
 /* -------------------------------------------------------------------------- */
 
 void* dx_create_event_subscription_task_data (dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
-                                              dxf_const_string_t* symbols, int symbol_count, int event_types, 
+                                              dxf_const_string_t* symbols, size_t symbol_count, int event_types,
                                               bool unsubscribe, dxf_uint_t subscr_flags, dxf_long_t time) {
-    int i = 0;
+    size_t i = 0;
     dx_event_subscription_task_data_t* data = dx_calloc(1, sizeof(dx_event_subscription_task_data_t));
     
     if (data == NULL) {
@@ -325,7 +325,7 @@ static bool dx_write_event_record(void* bocc, const dx_record_item_t* record, dx
 
 bool dx_write_event_records (void* bocc) {
     dx_record_id_t record_id = dx_get_next_unsubscribed_record_id(false);
-    int count = dx_get_records_list_count();
+    dx_record_id_t count = (dx_record_id_t)dx_get_records_list_count();
 
     while (record_id < count) {
         CHECKED_CALL_3(dx_write_event_record, bocc, dx_get_record_by_id(record_id), record_id);
@@ -366,9 +366,9 @@ bool dx_get_event_server_support (dxf_connection_t connection, dx_order_source_a
 
     for (; eid < dx_eid_count; ++eid) {
         if (event_types & DX_EVENT_BIT_MASK(eid)) {
-            int j = 0;
+            size_t j = 0;
             dx_event_subscription_param_list_t subscr_params;
-            int param_count = dx_get_event_subscription_params(connection, order_source, eid, subscr_flags, &subscr_params);
+            size_t param_count = dx_get_event_subscription_params(connection, order_source, eid, subscr_flags, &subscr_params);
 
             for (; j < param_count; ++j) {
                 const dx_event_subscription_param_t* cur_param = subscr_params.elements + j;
@@ -512,9 +512,9 @@ int dx_describe_protocol_sender_task (void* data, int command) {
 /* -------------------------------------------------------------------------- */
 
 bool dx_subscribe_symbols_to_events (dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
-                                     dxf_const_string_t* symbols, int symbol_count, int event_types, bool unsubscribe,
+                                     dxf_const_string_t* symbols, size_t symbol_count, int event_types, bool unsubscribe,
                                      bool task_mode, dxf_uint_t subscr_flags, dxf_long_t time) {
-    int i = 0;
+    size_t i = 0;
 
     CHECKED_CALL_2(dx_validate_connection_handle, connection, true);
     
@@ -554,9 +554,9 @@ bool dx_subscribe_symbols_to_events (dxf_connection_t connection, dx_order_sourc
 
         for (; eid < dx_eid_count; ++eid) {
             if (event_types & DX_EVENT_BIT_MASK(eid)) {
-                int j = 0;
+                size_t j = 0;
                 dx_event_subscription_param_list_t subscr_params;
-                int param_count = dx_get_event_subscription_params(connection, order_source, eid, 
+                size_t param_count = dx_get_event_subscription_params(connection, order_source, eid,
                     subscr_flags, &subscr_params);
 
                 for (; j < param_count; ++j) {

@@ -47,26 +47,26 @@ typedef struct {
 
 typedef struct {
     dx_snapshot_listener_context_t* elements;
-    int size;
-    int capacity;
+    size_t size;
+    size_t capacity;
 } dx_snapshot_listener_array_t;
 
 typedef struct {
     dxf_event_data_t elements;
-    int size;
-    int capacity;
+    size_t size;
+    size_t capacity;
 } dx_snapshot_records_array_t;
 
 typedef struct {
     dxf_time_int_field_t* elements;
-    int size;
-    int capacity;
+    size_t size;
+    size_t capacity;
 } dx_snapshot_record_time_ints_t;
 
 typedef struct {
     dx_string_array_ptr_t* elements;
-    int size;
-    int capacity;
+    size_t size;
+    size_t capacity;
 } dx_snapshot_record_buffers_t;
 
 typedef struct {
@@ -99,8 +99,8 @@ typedef struct {
  */
 typedef struct {
     dx_snapshot_data_ptr_t* elements;
-    int size;
-    int capacity;
+    size_t size;
+    size_t capacity;
 } dx_snapshots_data_array_t;
 
 const dxf_snapshot_t dx_invalid_snapshot = (dxf_snapshot_t)NULL;
@@ -185,7 +185,7 @@ DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_snapshot_subscription) {
 
 bool dx_clear_snapshot_subscription_connection_context(dx_snapshot_subscription_connection_context_t* context) {
     bool res = true;
-    int i = 0;
+    size_t i = 0;
 
     for (; i < context->snapshots_array.size; ++i) {
         res = dx_free_snapshot_data((dx_snapshot_data_t*)context->snapshots_array.elements[i]) && res;
@@ -215,7 +215,7 @@ int dx_snapshot_records_comparator(dxf_time_int_field_t t1, dxf_time_int_field_t
 }
 
 bool dx_snapshot_insert_record(dx_snapshot_data_ptr_t snapshot_data, dxf_event_data_t obj, 
-                               const int position) {
+                               const size_t position) {
     bool failed = false;
     switch (snapshot_data->event_id) {
     case dx_eid_order:
@@ -249,7 +249,7 @@ bool dx_snapshot_insert_record(dx_snapshot_data_ptr_t snapshot_data, dxf_event_d
     return !failed;
 }
 
-bool dx_snapshot_delete_record(dx_snapshot_data_ptr_t snapshot_data, const int position) {
+bool dx_snapshot_delete_record(dx_snapshot_data_ptr_t snapshot_data, const size_t position) {
     bool failed = false;
     switch (snapshot_data->event_id) {
     case dx_eid_order:
@@ -284,7 +284,7 @@ bool dx_snapshot_delete_record(dx_snapshot_data_ptr_t snapshot_data, const int p
 }
 
 bool dx_snapshot_set_record(dx_snapshot_data_ptr_t snapshot_data, dxf_event_data_t obj, 
-                            const int position) {
+                            const size_t position) {
     switch (snapshot_data->event_id) {
     case dx_eid_order:
         dx_memcpy(&(((dxf_order_t*)snapshot_data->records.elements)[position]), (dxf_order_t*)obj, 
@@ -319,7 +319,7 @@ bool dx_snapshot_set_record(dx_snapshot_data_ptr_t snapshot_data, dxf_event_data
 
 bool dx_snapshot_add_event_record(dx_snapshot_data_ptr_t snapshot_data, 
                                   const dxf_event_params_t* event_params, 
-                                  const dxf_event_data_t event_row, const int position) {
+                                  const dxf_event_data_t event_row, const size_t position) {
     bool failed = false;
     dxf_event_data_t obj = NULL;
     dx_event_copy_function_t clone_event = dx_get_event_copy_function(snapshot_data->event_id);
@@ -373,7 +373,7 @@ bool dx_snapshot_add_event_records(dx_snapshot_data_ptr_t snapshot_data, const d
 
     for (i = 0; i < data_count; ++i) {
         bool found = false;
-        int position = 0;
+        size_t position = 0;
         DX_ARRAY_BINARY_SEARCH(snapshot_data->record_time_ints.elements, 0, 
             snapshot_data->record_time_ints.size, event_params->time_int_field, 
             dx_snapshot_records_comparator, found, position);
@@ -390,7 +390,7 @@ bool dx_snapshot_add_event_records(dx_snapshot_data_ptr_t snapshot_data, const d
 }
 
 bool dx_snapshot_clear_records_array(dx_snapshot_data_ptr_t snapshot_data) {
-    int i;
+    size_t i;
     dx_snapshot_records_array_t* records;
     dx_snapshot_record_time_ints_t* time_ints;
     dx_snapshot_record_buffers_t* string_buffers;
@@ -427,7 +427,7 @@ bool dx_snapshot_clear_records_array(dx_snapshot_data_ptr_t snapshot_data) {
     return true;
 }
 
-bool dx_snapshot_remove_event_record(dx_snapshot_data_ptr_t snapshot_data, int position) {
+bool dx_snapshot_remove_event_record(dx_snapshot_data_ptr_t snapshot_data, size_t position) {
     bool failed = false;
 
     if (snapshot_data == NULL || position < 0 || position >= snapshot_data->records.size) {
@@ -462,7 +462,7 @@ bool dx_snapshot_remove_event_records(dx_snapshot_data_ptr_t snapshot_data, cons
 
     for (i = 0; i < data_count; ++i) {
         bool found = false;
-        int index = 0;
+        size_t index = 0;
 
         DX_ARRAY_BINARY_SEARCH(time_ints->elements, 0, time_ints->size, event_params->time_int_field, 
             dx_snapshot_records_comparator, found, index);
@@ -478,7 +478,7 @@ bool dx_snapshot_remove_event_records(dx_snapshot_data_ptr_t snapshot_data, cons
     return true;
 }
 
-bool dx_snapshot_replace_record(dx_snapshot_data_ptr_t snapshot_data, int position, 
+bool dx_snapshot_replace_record(dx_snapshot_data_ptr_t snapshot_data, size_t position,
                                 const dxf_event_data_t new_record) {
     dx_event_free_function_t free_event = NULL;
     dx_event_copy_function_t clone_event = NULL;
@@ -523,7 +523,7 @@ bool dx_snapshot_update_event_records(dx_snapshot_data_ptr_t snapshot_data, cons
 
     for (i = 0; i < data_count; ++i) {
         bool found = false;
-        int index = 0;
+        size_t index = 0;
 
         DX_ARRAY_BINARY_SEARCH(time_ints->elements, 0, time_ints->size, event_params->time_int_field, 
             dx_snapshot_records_comparator, found, index);
@@ -547,7 +547,7 @@ bool dx_snapshot_update_event_records(dx_snapshot_data_ptr_t snapshot_data, cons
 }
 
 bool dx_snapshot_call_listeners(dx_snapshot_data_ptr_t snapshot_data) {
-    int cur_listener_index = 0;
+    size_t cur_listener_index = 0;
 
     for (; cur_listener_index < snapshot_data->listeners.size; ++cur_listener_index) {
         dx_snapshot_listener_context_t* listener_context = snapshot_data->listeners.elements + cur_listener_index;
@@ -583,7 +583,7 @@ bool dx_is_snapshot_event(const dx_snapshot_data_ptr_t snapshot_data, int event_
 void event_listener(int event_type, dxf_const_string_t symbol_name,
                     const dxf_event_data_t* data, int data_count,
                     const dxf_event_params_t* event_params, void* user_data) {
-    int i;
+    size_t i;
     dxf_event_flags_t flags = event_params->flags;
     dx_snapshot_subscription_connection_context_t* context = CTX(user_data);
 
@@ -697,9 +697,9 @@ int dx_snapshot_listener_comparator(dx_snapshot_listener_context_t e1,
     return DX_NUMERIC_COMPARATOR(e1.listener, e2.listener);
 }
 
-int dx_find_snapshot_listener_in_array(dx_snapshot_listener_array_t* listeners, 
+size_t dx_find_snapshot_listener_in_array(dx_snapshot_listener_array_t* listeners,
                                        dxf_snapshot_listener_t listener, OUT bool* found) {
-    int listener_index;
+    size_t listener_index;
     dx_snapshot_listener_context_t listener_context = { listener, NULL };
 
     DX_ARRAY_SEARCH(listeners->elements, 0, listeners->size, listener_context, 
@@ -746,7 +746,7 @@ dxf_snapshot_t dx_create_snapshot(dxf_connection_t connection,
     bool failed = false;
     bool found = false;
     bool res = false;
-    int position = 0;
+    size_t position = 0;
     int event_types;
 
     if (!dx_validate_connection_handle(connection, false)) {
@@ -819,7 +819,7 @@ bool dx_close_snapshot(dxf_snapshot_t snapshot) {
     dx_snapshot_data_ptr_t snapshot_data = NULL;
     bool found = false;
     bool failed = false;
-    int position = 0;
+    size_t position = 0;
 
     if (snapshot == dx_invalid_snapshot) {
         return dx_set_error_code(dx_ssec_invalid_snapshot_id);
@@ -853,7 +853,7 @@ bool dx_close_snapshot(dxf_snapshot_t snapshot) {
 bool dx_add_snapshot_listener(dxf_snapshot_t snapshot, dxf_snapshot_listener_t listener, void* user_data) {
     dx_snapshot_subscription_connection_context_t* context = NULL;
     dx_snapshot_data_ptr_t snapshot_data = (dx_snapshot_data_ptr_t)snapshot;
-    int listener_index;
+    size_t listener_index;
     bool failed;
     bool found = false;
 
@@ -873,7 +873,7 @@ bool dx_add_snapshot_listener(dxf_snapshot_t snapshot, dxf_snapshot_listener_t l
         return true;
     }
 
-    dx_logging_verbose_info(L"Add snapshot listener: %d", listener_index);
+    dx_logging_verbose_info(L"Add snapshot listener: %zu", listener_index);
 
     /* a guard mutex is required to protect the internal containers
     from the secondary data retriever threads */
@@ -891,7 +891,7 @@ bool dx_add_snapshot_listener(dxf_snapshot_t snapshot, dxf_snapshot_listener_t l
 bool dx_remove_snapshot_listener(dxf_snapshot_t snapshot, dxf_snapshot_listener_t listener) {
     dx_snapshot_subscription_connection_context_t* context = NULL;
     dx_snapshot_data_ptr_t snapshot_data = (dx_snapshot_data_ptr_t)snapshot;
-    int listener_index;
+    size_t listener_index;
     bool failed;
     bool found = false;
 
@@ -911,7 +911,7 @@ bool dx_remove_snapshot_listener(dxf_snapshot_t snapshot, dxf_snapshot_listener_
         return true;
     }
 
-    dx_logging_verbose_info(L"Remove snapshot listener: %d", listener_index);
+    dx_logging_verbose_info(L"Remove snapshot listener: %zu", listener_index);
 
     /* a guard mutex is required to protect the internal containers
     from the secondary data retriever threads */

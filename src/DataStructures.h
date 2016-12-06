@@ -113,16 +113,16 @@ typedef struct {
  */
 typedef struct {
     dx_record_item_t* elements;
-    int size;
-    int capacity;
+    size_t size;
+    size_t capacity;
     dx_record_id_t new_record_id;
 } dx_record_list_t;
 
 typedef int dx_record_server_support_state_t;
 typedef struct {
     dx_record_server_support_state_t* elements;
-    int size;
-    int capacity;
+    size_t size;
+    size_t capacity;
 } dx_record_server_support_state_list_t;
 
 /* -------------------------------------------------------------------------- */
@@ -154,6 +154,6 @@ bool dx_get_record_server_support_state_value(dx_record_server_support_state_lis
 /* Functions for working with records list */
 dx_record_id_t dx_add_or_get_record_id(dxf_connection_t connection, dxf_const_string_t name);
 void dx_clear_records_list();
-int dx_get_records_list_count();
+size_t dx_get_records_list_count();
 
 #endif /* DATA_STRUCTURES_H_INCLUDED */

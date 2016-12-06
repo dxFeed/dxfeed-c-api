@@ -92,8 +92,8 @@ typedef struct {
 
 typedef struct {
     dx_suffix_t *elements;
-    int size;
-    int capacity;
+    size_t size;
+    size_t capacity;
 } dx_order_source_array_t;
 
 typedef dx_order_source_array_t* dx_order_source_array_ptr_t;
@@ -322,8 +322,8 @@ typedef struct {
 
 typedef struct {
     dx_event_subscription_param_t* elements;
-    int size;
-    int capacity;
+    size_t size;
+    size_t capacity;
 } dx_event_subscription_param_list_t;
 
 /*
@@ -331,7 +331,7 @@ typedef struct {
  *
  * You need to call dx_free(params.elements) to free resources.
  */
-int dx_get_event_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source, dx_event_id_t event_id,
+size_t dx_get_event_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source, dx_event_id_t event_id,
                                      dxf_uint_t subscr_flags, OUT dx_event_subscription_param_list_t* params);
 
 /* -------------------------------------------------------------------------- */
@@ -344,7 +344,7 @@ typedef struct {
     int event_type;
     dxf_string_t symbol;
 
-    int records_count;
+    size_t records_count;
     const dxf_event_data_t* records;
 } dxf_snapshot_data_t, *dxf_snapshot_data_ptr_t;
 

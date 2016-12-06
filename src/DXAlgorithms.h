@@ -123,7 +123,7 @@
 
 #define FREE_ARRAY(array_ptr, size) \
     do { \
-        int _array_ind = 0; \
+        size_t _array_ind = 0; \
         \
         if (array_ptr == NULL) { \
             break; \
@@ -172,6 +172,7 @@ bool dx_is_only_single_bit_set (int value);
 
 int dx_random_integer (int max_value);
 double dx_random_double (double max_value);
+size_t dx_random_size(size_t max_value);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -217,9 +218,9 @@ double dx_random_double (double max_value);
 
 #define DX_ARRAY_BINARY_SEARCH(a, start_index, end_index, elem, comparator, found, res_index) \
     do { \
-        int _begin = start_index; \
-        int _end = end_index; \
-        int _mid; \
+        size_t _begin = start_index; \
+        size_t _end = end_index; \
+        size_t _mid; \
         int _comp_res; \
         \
         found = false; \
@@ -271,7 +272,7 @@ double dx_random_double (double max_value);
         if (is_binary) { \
             DX_ARRAY_BINARY_SEARCH(a, start_index, end_index, elem, comparator, found, res_index); \
         } else { \
-            int _index = start_index; \
+            size_t _index = start_index; \
             \
             for (; _index < end_index; ++_index) { \
                 if (comparator((a)[_index], (elem)) == 0) { \
@@ -299,9 +300,9 @@ double dx_random_double (double max_value);
  *  position - an index of a position where the new element is to be inserted,
                is determined by a previous call of DX_ARRAY_SEARCH
  *  capacity_mgr - a function with two parameters:
-        new_size - an integer parameter passed by value, contains the desired
+        new_size - an size_t parameter passed by value, contains the desired
                    new size of the array
-        capacity - an integer parameter passed by pointer, contains the current
+        capacity - an size_t parameter passed by pointer, contains the current
                    array capacity
         
         Return value:
@@ -361,9 +362,9 @@ double dx_random_double (double max_value);
  *  position - an index of a position where the new element is to be inserted,
                is determined by a previous call of DX_ARRAY_SEARCH
  *  capacity_mgr - a function with two parameters:
-        new_size - an integer parameter passed by value, contains the desired
+        new_size - an size_t parameter passed by value, contains the desired
                    new size of the array
-        capacity - an integer parameter passed by pointer, contains the current
+        capacity - an size_t parameter passed by pointer, contains the current
                    array capacity
 
         Return value:
@@ -422,11 +423,11 @@ double dx_random_double (double max_value);
 
 #define DX_ARRAY_SHUFFLE(a, elem_type, size) \
     do { \
-        int _idx = (size) - 1; \
-        int _rand_idx; \
+        size_t _idx = (size) - 1; \
+        size_t _rand_idx; \
         \
         for (; _idx > 0; --_idx) { \
-            _rand_idx = dx_random_integer(_idx); \
+            _rand_idx = dx_random_size(_idx); \
             \
             DX_SWAP(elem_type, (a)[_idx], (a)[_rand_idx]); \
         } \
@@ -484,7 +485,7 @@ double dx_random_double (double max_value);
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_capacity_manager_halfer (int new_size, int* capacity);
+bool dx_capacity_manager_halfer (size_t new_size, size_t* capacity);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -492,13 +493,13 @@ bool dx_capacity_manager_halfer (int new_size, int* capacity);
  */
 /* -------------------------------------------------------------------------- */
 
-dxf_string_t dx_create_string (int size);
+dxf_string_t dx_create_string (size_t size);
 dxf_string_t dx_create_string_src (dxf_const_string_t src);
 char* dx_ansi_create_string_src (const char* src);
-dxf_string_t dx_create_string_src_len (dxf_const_string_t src, int len);
+dxf_string_t dx_create_string_src_len (dxf_const_string_t src, size_t len);
 dxf_string_t dx_copy_string (dxf_string_t dest, dxf_const_string_t src);
-dxf_string_t dx_copy_string_len (dxf_string_t dest, dxf_const_string_t src, int len);
-int dx_string_length (dxf_const_string_t str);
+dxf_string_t dx_copy_string_len (dxf_string_t dest, dxf_const_string_t src, size_t len);
+size_t dx_string_length (dxf_const_string_t str);
 int dx_compare_strings (dxf_const_string_t s1, dxf_const_string_t s2);
 int dx_compare_strings_num (dxf_const_string_t s1, dxf_const_string_t s2, size_t num);
 dxf_char_t dx_toupper (dxf_char_t c);

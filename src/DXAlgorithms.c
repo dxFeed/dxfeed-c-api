@@ -29,6 +29,7 @@
 #include "DXMemory.h"
 
 #include <time.h>
+#include <stdint.h>
 #include <string.h>
 #include <limits.h>
 
@@ -48,6 +49,8 @@ bool dx_is_only_single_bit_set (int value) {
  */
 /* -------------------------------------------------------------------------- */
 
+static uint64_t seed;
+
 static void dx_init_randomizer (void) {
     static bool is_randomizer_initialized = false;
 
@@ -55,6 +58,7 @@ static void dx_init_randomizer (void) {
         is_randomizer_initialized = true;
 
         srand((unsigned int)time(NULL));
+        seed = time(NULL);
     }
 }
 
@@ -75,14 +79,25 @@ double dx_random_double (double max_value) {
 }
 
 /* -------------------------------------------------------------------------- */
+
+size_t dx_random_size(size_t max_value) {
+    dx_init_randomizer();
+    //use 64bit xorshift64star
+    seed ^= seed >> 12;
+    seed ^= seed << 25;
+    seed ^= seed >> 27;
+    return (size_t)(max_value * ((double)(seed * UINT64_C(2685821657736338717)) / ULLONG_MAX));
+}
+
+/* -------------------------------------------------------------------------- */
 /*
  *	Array functions implementation
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_capacity_manager_halfer (int new_size, int* capacity) {
+bool dx_capacity_manager_halfer (size_t new_size, size_t* capacity) {
     if (new_size > *capacity) {
-        *capacity = (int)((double)*capacity * 1.5) + 1;
+        *capacity = (size_t)((double)*capacity * 1.5) + 1;
 
         return true;
     }
@@ -102,7 +117,7 @@ bool dx_capacity_manager_halfer (int new_size, int* capacity) {
  */
 /* -------------------------------------------------------------------------- */
 
-dxf_string_t dx_create_string (int size) {
+dxf_string_t dx_create_string (size_t size) {
     return (dxf_string_t)dx_calloc(size + 1, sizeof(dxf_char_t));
 }
 
@@ -115,7 +130,7 @@ dxf_string_t dx_create_string_src (dxf_const_string_t src) {
 /* -------------------------------------------------------------------------- */
 
 char* dx_ansi_create_string_src (const char* src) {
-    char* res = (char*)dx_calloc((int)strlen(src) + 1, sizeof(char));
+    char* res = (char*)dx_calloc(strlen(src) + 1, sizeof(char));
     
     if (res == NULL) {
         return NULL;
@@ -126,7 +141,7 @@ char* dx_ansi_create_string_src (const char* src) {
 
 /* -------------------------------------------------------------------------- */
 
-dxf_string_t dx_create_string_src_len (dxf_const_string_t src, int len) {
+dxf_string_t dx_create_string_src_len (dxf_const_string_t src, size_t len) {
     dxf_string_t res = NULL;
 
     if (len == 0) {
@@ -150,14 +165,14 @@ dxf_string_t dx_copy_string (dxf_string_t dest, dxf_const_string_t src) {
 
 /* -------------------------------------------------------------------------- */
 
-dxf_string_t dx_copy_string_len (dxf_string_t dest, dxf_const_string_t src, int len) {
+dxf_string_t dx_copy_string_len (dxf_string_t dest, dxf_const_string_t src, size_t len) {
     return wcsncpy(dest, src, len);
 }
 
 /* -------------------------------------------------------------------------- */
 
-int dx_string_length (dxf_const_string_t str) {
-    return (int)wcslen(str);
+size_t dx_string_length (dxf_const_string_t str) {
+    return wcslen(str);
 }
 
 /* -------------------------------------------------------------------------- */
