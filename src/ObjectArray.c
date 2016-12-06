@@ -77,7 +77,7 @@ DX_OBJECT_ARRAY_FREE_PROTOTYPE(alias) { \
     }\
     \
     for (; i < object_array->size; ++i) { \
-        ##free_function##(object_array->elements[i]); \
+        free_function(object_array->elements[i]); \
     } \
     \
     if (object_array->elements != NULL) { \
