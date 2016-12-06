@@ -70,12 +70,12 @@ set (HEADER_FILES
     EventManager.h
     EventSubscription.h
     Logger.h
+    ObjectArray.h
     PrimitiveTypes.h
     resource.h
     RecordTranscoder.h
     ServerMessageProcessor.h
     Snapshot.h
-    ObjectArray.h
     TaskQueue.h
     Version.h
     )
@@ -84,6 +84,7 @@ set (HEADER_FILES
     BufferedInput.h
     BufferedIOCommon.h
     BufferedOutput.h
+    ConfigurationDeserializer.h
     DataStructures.h
     Decimal.h
     RecordBuffers.h
@@ -95,6 +96,7 @@ set (PARSER_SOURCES
     BufferedInput.c
     BufferedIOCommon.c
     BufferedOutput.c
+    ConfigurationDeserializer.c
     DataStructures.c
     Decimal.c
     RecordBuffers.c
@@ -123,10 +125,10 @@ set (SOURCE_FILES
     EventManager.c
     EventSubscription.c
     Logger.c
+    ObjectArray.c
     RecordTranscoder.c
     ServerMessageProcessor.c
     Snapshot.c
-    ObjectArray.c
     TaskQueue.c
     Win32.c
     ${DEF_FILE}) 
