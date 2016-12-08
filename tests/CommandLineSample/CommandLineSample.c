@@ -325,6 +325,8 @@ static event_type_data_t types_data[] = {
     { DXF_ET_PROFILE, "PROFILE" },
     { DXF_ET_ORDER, "ORDER" },
     { DXF_ET_TIME_AND_SALE, "TIME_AND_SALE" },
+    /* The Candle event is not supported in this sample
+    { DXF_ET_CANDLE, "CANDLE" },*/
     { DXF_ET_TRADE_ETH, "TRADE_ETH" },
     { DXF_ET_SPREAD_ORDER, "SPREAD_ORDER" },
     { DXF_ET_GREEKS, "GREEKS" },
@@ -341,7 +343,8 @@ bool get_next_substring(OUT char** substring_start, OUT size_t* substring_length
     char* sep_pos;
     if (strlen(string) == 0)
         return false;
-    while ((sep_pos = strchr(string, ',')) == string) { //remove separators from string begining
+    //remove separators from begin of string
+    while ((sep_pos = strchr(string, ',')) == string) { 
         string++;
         if (strlen(string) == 0)
             return false;
@@ -380,9 +383,9 @@ bool parse_event_types(char* types_string, OUT int* types_bitmask) {
 }
 
 void free_symbols(dxf_string_t* symbols, int symbol_count) {
+    int i;
     if (symbols == NULL)
         return;
-    int i;
     for (i = 0; i < symbol_count; i++) {
         free(symbols[i]);
     }
@@ -425,7 +428,7 @@ bool parse_symbols(char* symbols_string, OUT dxf_string_t** symbols, OUT int* sy
                 free(symbol);
                 return false;
             }
-            memcpy_s(temp, (count + 1) * sizeof(dxf_string_t), symbol_array, count * sizeof(dxf_string_t));
+            memcpy(temp, symbol_array, count * sizeof(dxf_string_t));
             temp[count] = symbol;
             free(symbol_array);
             symbol_array = temp;
@@ -447,7 +450,6 @@ int main (int argc, char* argv[]) {
     dxf_connection_t connection;
     dxf_subscription_t subscription;
     int loop_counter = 100000;
-    char* event_type_name = NULL;
     int event_type;
     dxf_string_t* symbols = NULL;
     int symbol_count = 0;
@@ -470,50 +472,9 @@ int main (int argc, char* argv[]) {
     dxf_initialize_logger( "log.log", true, true, true );
 
     dxfeed_host = argv[1];
-
-    event_type_name = argv[2];
-    //if (stricmp(event_type_name, "TRADE") == 0) {
-    //    event_type = DXF_ET_TRADE;
-    //} else if (stricmp(event_type_name, "QUOTE") == 0) {
-    //    event_type = DXF_ET_QUOTE;
-    //} else if (stricmp(event_type_name, "SUMMARY") == 0) {
-    //    event_type = DXF_ET_SUMMARY;
-    //} else if (stricmp(event_type_name, "PROFILE") == 0) {
-    //    event_type = DXF_ET_PROFILE;
-    //} else if (stricmp(event_type_name, "ORDER") == 0) {
-    //    event_type = DXF_ET_ORDER;
-    //} else if (stricmp(event_type_name, "TIME_AND_SALE") == 0) {
-    //    event_type = DXF_ET_TIME_AND_SALE;
-    //} else if (stricmp(event_type_name, "TRADE_ETH") == 0) {
-    //    event_type = DXF_ET_TRADE_ETH;
-    //} else if (stricmp(event_type_name, "SPREAD_ORDER") == 0) {
-    //    event_type = DXF_ET_SPREAD_ORDER;
-    //} else if (stricmp(event_type_name, "GREEKS") == 0) {
-    //    event_type = DXF_ET_GREEKS;
-    //} else if (stricmp(event_type_name, "THEO_PRICE") == 0) {
-    //    event_type = DXF_ET_THEO_PRICE;
-    //} else if (stricmp(event_type_name, "UNDERLYING") == 0) {
-    //    event_type = DXF_ET_UNDERLYING;
-    //} else if (stricmp(event_type_name, "SERIES") == 0) {
-    //    event_type = DXF_ET_SERIES;
-    //} else if (stricmp(event_type_name, "CONFIGURATION") == 0) {
-    //    event_type = DXF_ET_CONFIGURATION;
-    //} else {
-    //    wprintf(L"Unknown event type.\n");
-    //    return -1;
-    //}
-    if (!parse_event_types(event_type_name, &event_type))
+    
+    if (!parse_event_types(argv[2], &event_type))
         return -1;
-
-    //symbol = ansi_to_unicode(argv[3]);
-
-    //if (symbol == NULL) {
-    //    return -1;
-    //} else {
-    //    int i = 0;
-    //    for (; symbol[i]; i++)
-    //        symbol[i] = towupper(symbol[i]);
-    //}
 
     if (!parse_symbols(argv[3], &symbols, &symbol_count))
         return -1;
