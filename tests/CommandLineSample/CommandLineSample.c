@@ -461,10 +461,11 @@ int main (int argc, char* argv[]) {
         wprintf(L"DXFeed command line sample.\n"
                 L"Usage: CommandLineSample <server address> <event type> <symbol>\n"
                 L"  <server address> - a DXFeed server address, e.g. demo.dxfeed.com:7300\n"
-                L"  <event type> - an event type, one of the following: TRADE, QUOTE, SUMMARY,\n"
+                L"  <event type> - an event type, any of the following: TRADE, QUOTE, SUMMARY,\n"
                 L"                 PROFILE, ORDER, TIME_AND_SALE, TRADE_ETH, SPREAD_ORDER\n"
                 L"                 GREEKS, THEO_PRICE, UNDERLYING, SERIES, CONFIGURATION\n"
-                L"  <symbol> - a trade symbol, e.g. C, MSFT, YHOO, IBM\n");
+                L"  <symbol> - a trade symbols, e.g. C, MSFT, YHOO, IBM\n"
+                L"Example: CommandLineSample.exe demo.dxfeed.com:7300 TRADE,ORDER MSFT,IBM");
         
         return 0;
     }
