@@ -286,9 +286,8 @@ void process_last_error () {
 }
 
 /* -------------------------------------------------------------------------- */
-dxf_string_t ansi_to_unicode (const char* ansi_str) {
+dxf_string_t ansi_to_unicode (const char* ansi_str, size_t len) {
 #ifdef _WIN32
-    size_t len = strlen(ansi_str);
     dxf_string_t wide_str = NULL;
 
     // get required size
@@ -302,7 +301,7 @@ dxf_string_t ansi_to_unicode (const char* ansi_str) {
     return wide_str;
 #else /* _WIN32 */
     dxf_string_t wide_str = NULL;
-    size_t wide_size = mbstowcs(NULL, ansi_str, 0);
+    size_t wide_size = mbstowcs(NULL, ansi_str, len);
     if (wide_size > 0) {
         wide_str = calloc(wide_size + 1, sizeof(dxf_char_t));
         mbstowcs(wide_str, ansi_str, wide_size + 1);
@@ -312,13 +311,146 @@ dxf_string_t ansi_to_unicode (const char* ansi_str) {
 #endif /* _WIN32 */
 }
 
+/* -------------------------------------------------------------------------- */
+
+typedef struct {
+    int type;
+    const char* name;
+} event_type_data_t;
+
+static event_type_data_t types_data[] = {
+    { DXF_ET_TRADE, "TRADE" },
+    { DXF_ET_QUOTE, "QUOTE" },
+    { DXF_ET_SUMMARY, "SUMMARY" },
+    { DXF_ET_PROFILE, "PROFILE" },
+    { DXF_ET_ORDER, "ORDER" },
+    { DXF_ET_TIME_AND_SALE, "TIME_AND_SALE" },
+    { DXF_ET_TRADE_ETH, "TRADE_ETH" },
+    { DXF_ET_SPREAD_ORDER, "SPREAD_ORDER" },
+    { DXF_ET_GREEKS, "GREEKS" },
+    { DXF_ET_THEO_PRICE, "THEO_PRICE" },
+    { DXF_ET_UNDERLYING, "UNDERLYING" },
+    { DXF_ET_SERIES, "SERIES" },
+    { DXF_ET_CONFIGURATION, "CONFIGURATION" }
+};
+
+static const int types_count = sizeof(types_data) / sizeof(types_data[0]);
+
+bool get_next_substring(OUT char** substring_start, OUT size_t* substring_length) {
+    char* string = *substring_start;
+    char* sep_pos;
+    if (strlen(string) == 0)
+        return false;
+    while ((sep_pos = strchr(string, ',')) == string) { //remove separators from string begining
+        string++;
+        if (strlen(string) == 0)
+            return false;
+    }
+    if (sep_pos == NULL)
+        *substring_length = strlen(string);
+    else
+        *substring_length = sep_pos - string;
+    *substring_start = string;
+    return true;
+}
+
+bool parse_event_types(char* types_string, OUT int* types_bitmask) {
+    char* next_string = types_string;
+    size_t next_len = 0;
+    int i;
+    if (types_string == NULL || types_bitmask == NULL) {
+        printf("Invalid input parameter.\n");
+        return false;
+    }
+    *types_bitmask = 0;
+    while (get_next_substring(&next_string, &next_len)) {
+        bool is_found = false;
+        for (i = 0; i < types_count; i++) {
+            if (strlen(types_data[i].name) == next_len &&
+                strnicmp(types_data[i].name, next_string, next_len) == 0) {
+                *types_bitmask |= types_data[i].type;
+                is_found = true;
+            }
+        }
+        if (!is_found)
+            printf("Invalid type parameter begining with:%s\n", next_string);
+        next_string += next_len;
+    }
+    return true;
+}
+
+void free_symbols(dxf_string_t* symbols, int symbol_count) {
+    if (symbols == NULL)
+        return;
+    int i;
+    for (i = 0; i < symbol_count; i++) {
+        free(symbols[i]);
+    }
+    free(symbols);
+}
+
+bool parse_symbols(char* symbols_string, OUT dxf_string_t** symbols, OUT int* symbol_count) {
+    int count = 0;
+    char* next_string = symbols_string;
+    size_t next_len = 0;
+    dxf_string_t* symbol_array = NULL;
+    if (symbols_string == NULL || symbols == NULL || symbol_count == NULL) {
+        printf("Invalid input parameter.\n");
+        return false;
+    }
+    while (get_next_substring(&next_string, &next_len)) {
+        dxf_string_t symbol = ansi_to_unicode(next_string, next_len);
+
+        if (symbol == NULL) {
+            free_symbols(symbol_array, count);
+            return false;
+        }
+        else {
+            int i = 0;
+            for (; symbol[i]; i++)
+                symbol[i] = towupper(symbol[i]);
+        }
+
+        if (symbol_array == NULL) {
+            symbol_array = calloc(count + 1, sizeof(dxf_string_t));
+            if (symbol_array == NULL) {
+                free(symbol);
+                return false;
+            }
+            symbol_array[count] = symbol;
+        } else {
+            dxf_string_t* temp = calloc(count + 1, sizeof(dxf_string_t));
+            if (temp == NULL) {
+                free_symbols(symbol_array, count);
+                free(symbol);
+                return false;
+            }
+            memcpy_s(temp, (count + 1) * sizeof(dxf_string_t), symbol_array, count * sizeof(dxf_string_t));
+            temp[count] = symbol;
+            free(symbol_array);
+            symbol_array = temp;
+        }
+
+        count++;
+        next_string += next_len;
+    }
+
+    *symbols = symbol_array;
+    *symbol_count = count;
+
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
 int main (int argc, char* argv[]) {
     dxf_connection_t connection;
     dxf_subscription_t subscription;
     int loop_counter = 100000;
     char* event_type_name = NULL;
     int event_type;
-    dxf_string_t symbol = NULL;
+    dxf_string_t* symbols = NULL;
+    int symbol_count = 0;
     char* dxfeed_host = NULL;
 	dxf_string_t dxfeed_host_u = NULL;
 
@@ -340,49 +472,54 @@ int main (int argc, char* argv[]) {
     dxfeed_host = argv[1];
 
     event_type_name = argv[2];
-    if (stricmp(event_type_name, "TRADE") == 0) {
-        event_type = DXF_ET_TRADE;
-    } else if (stricmp(event_type_name, "QUOTE") == 0) {
-        event_type = DXF_ET_QUOTE;
-    } else if (stricmp(event_type_name, "SUMMARY") == 0) {
-        event_type = DXF_ET_SUMMARY;
-    } else if (stricmp(event_type_name, "PROFILE") == 0) {
-        event_type = DXF_ET_PROFILE;
-    } else if (stricmp(event_type_name, "ORDER") == 0) {
-        event_type = DXF_ET_ORDER;
-    } else if (stricmp(event_type_name, "TIME_AND_SALE") == 0) {
-        event_type = DXF_ET_TIME_AND_SALE;
-    } else if (stricmp(event_type_name, "TRADE_ETH") == 0) {
-        event_type = DXF_ET_TRADE_ETH;
-    } else if (stricmp(event_type_name, "SPREAD_ORDER") == 0) {
-        event_type = DXF_ET_SPREAD_ORDER;
-    } else if (stricmp(event_type_name, "GREEKS") == 0) {
-        event_type = DXF_ET_GREEKS;
-    } else if (stricmp(event_type_name, "THEO_PRICE") == 0) {
-        event_type = DXF_ET_THEO_PRICE;
-    } else if (stricmp(event_type_name, "UNDERLYING") == 0) {
-        event_type = DXF_ET_UNDERLYING;
-    } else if (stricmp(event_type_name, "SERIES") == 0) {
-        event_type = DXF_ET_SERIES;
-    } else if (stricmp(event_type_name, "CONFIGURATION") == 0) {
-        event_type = DXF_ET_CONFIGURATION;
-    } else {
-        wprintf(L"Unknown event type.\n");
+    //if (stricmp(event_type_name, "TRADE") == 0) {
+    //    event_type = DXF_ET_TRADE;
+    //} else if (stricmp(event_type_name, "QUOTE") == 0) {
+    //    event_type = DXF_ET_QUOTE;
+    //} else if (stricmp(event_type_name, "SUMMARY") == 0) {
+    //    event_type = DXF_ET_SUMMARY;
+    //} else if (stricmp(event_type_name, "PROFILE") == 0) {
+    //    event_type = DXF_ET_PROFILE;
+    //} else if (stricmp(event_type_name, "ORDER") == 0) {
+    //    event_type = DXF_ET_ORDER;
+    //} else if (stricmp(event_type_name, "TIME_AND_SALE") == 0) {
+    //    event_type = DXF_ET_TIME_AND_SALE;
+    //} else if (stricmp(event_type_name, "TRADE_ETH") == 0) {
+    //    event_type = DXF_ET_TRADE_ETH;
+    //} else if (stricmp(event_type_name, "SPREAD_ORDER") == 0) {
+    //    event_type = DXF_ET_SPREAD_ORDER;
+    //} else if (stricmp(event_type_name, "GREEKS") == 0) {
+    //    event_type = DXF_ET_GREEKS;
+    //} else if (stricmp(event_type_name, "THEO_PRICE") == 0) {
+    //    event_type = DXF_ET_THEO_PRICE;
+    //} else if (stricmp(event_type_name, "UNDERLYING") == 0) {
+    //    event_type = DXF_ET_UNDERLYING;
+    //} else if (stricmp(event_type_name, "SERIES") == 0) {
+    //    event_type = DXF_ET_SERIES;
+    //} else if (stricmp(event_type_name, "CONFIGURATION") == 0) {
+    //    event_type = DXF_ET_CONFIGURATION;
+    //} else {
+    //    wprintf(L"Unknown event type.\n");
+    //    return -1;
+    //}
+    if (!parse_event_types(event_type_name, &event_type))
         return -1;
-    }
 
-    symbol = ansi_to_unicode(argv[3]);
+    //symbol = ansi_to_unicode(argv[3]);
 
-    if (symbol == NULL) {
+    //if (symbol == NULL) {
+    //    return -1;
+    //} else {
+    //    int i = 0;
+    //    for (; symbol[i]; i++)
+    //        symbol[i] = towupper(symbol[i]);
+    //}
+
+    if (!parse_symbols(argv[3], &symbols, &symbol_count))
         return -1;
-    } else {
-        int i = 0;
-        for (; symbol[i]; i++)
-            symbol[i] = towupper(symbol[i]);
-    }
 
     wprintf(L"CommandLineSample started.\n");
-	dxfeed_host_u = ansi_to_unicode(dxfeed_host);
+	dxfeed_host_u = ansi_to_unicode(dxfeed_host, strlen(dxfeed_host));
     wprintf(L"Connecting to host %ls...\n", dxfeed_host_u);
 	free(dxfeed_host_u);
 
@@ -392,6 +529,7 @@ int main (int argc, char* argv[]) {
 
     if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, &connection)) {
         process_last_error();
+        free_symbols(symbols, symbol_count);
         return -1;
     }
 
@@ -399,15 +537,17 @@ int main (int argc, char* argv[]) {
 
     if (!dxf_create_subscription(connection, event_type, &subscription)) {
         process_last_error();
-
+        free_symbols(symbols, symbol_count);
         return -1;
     };
 
-    if (!dxf_add_symbol(subscription, symbol)) {
+    if (!dxf_add_symbols(subscription, symbols, symbol_count)) {
         process_last_error();
-
+        free_symbols(symbols, symbol_count);
         return -1;
-    }; 
+    };
+
+    free_symbols(symbols, symbol_count);
 
     if (!dxf_attach_event_listener(subscription, listener, NULL)) {
         process_last_error();
