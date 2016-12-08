@@ -76,6 +76,7 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_record_buffers) {
 
 void dx_clear_record_buffers (dx_event_record_buffer_t* record_buffers);
 void dx_free_string_buffers_impl (dx_string_array_t* string_buffers);
+void dx_free_byte_array_buffers_impl(dx_byte_buffer_array_t* byte_array_buffers);
 
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_record_buffers) {
     bool res = true;
@@ -87,6 +88,7 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_record_buffers) {
     
     dx_clear_record_buffers(context->record_buffer_array);
     dx_free_string_buffers_impl(&(context->string_buffers));
+    dx_free_byte_array_buffers_impl(&(context->byte_array_buffers));
     dx_free(context);
     
     return true;
