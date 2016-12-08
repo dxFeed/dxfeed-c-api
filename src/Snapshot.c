@@ -567,7 +567,6 @@ bool dx_snapshot_call_listeners(dx_snapshot_data_ptr_t snapshot_data) {
 bool dx_is_snapshot_event(const dx_snapshot_data_ptr_t snapshot_data, int event_type, 
                           const dxf_event_params_t* event_params, 
                           const dxf_event_data_t event_row) {
-    dxf_order_t* order = NULL;
     dxf_ulong_t mask = ~(dxf_ulong_t)SNAPSHOT_KEY_SOURCE_MASK;
     /* if received event is Order event (without order source) apply it to all Order record snapshots */
     if (event_type == DXF_ET_ORDER) {
