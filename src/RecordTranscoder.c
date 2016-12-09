@@ -155,10 +155,10 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_record_transcoder) {
         dx_free(context->order_buffer.buffer);
     }
     if (context->spread_order_buffer.buffer != NULL) {
-        dx_free(context->order_buffer.buffer);
+        dx_free(context->spread_order_buffer.buffer);
     }
     if (context->configuration_buffer.buffer != NULL) {
-        dx_free(context->order_buffer.buffer);
+        dx_free(context->configuration_buffer.buffer);
     }
     
     dx_free(context);
