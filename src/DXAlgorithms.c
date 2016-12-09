@@ -49,7 +49,7 @@ bool dx_is_only_single_bit_set (int value) {
  */
 /* -------------------------------------------------------------------------- */
 
-static uint64_t seed;
+static dxf_ulong_t dx_seed;
 
 static void dx_init_randomizer (void) {
     static bool is_randomizer_initialized = false;
@@ -57,8 +57,8 @@ static void dx_init_randomizer (void) {
     if (!is_randomizer_initialized) {
         is_randomizer_initialized = true;
 
-        srand((unsigned int)time(NULL));
-        seed = time(NULL);
+        dx_seed = time(NULL);
+        srand((unsigned int)dx_seed);
     }
 }
 
@@ -83,10 +83,10 @@ double dx_random_double (double max_value) {
 size_t dx_random_size(size_t max_value) {
     dx_init_randomizer();
     //use 64bit xorshift64star
-    seed ^= seed >> 12;
-    seed ^= seed << 25;
-    seed ^= seed >> 27;
-    return (size_t)(max_value * ((double)(seed * UINT64_C(2685821657736338717)) / ULLONG_MAX));
+    dx_seed ^= dx_seed >> 12;
+    dx_seed ^= dx_seed << 25;
+    dx_seed ^= dx_seed >> 27;
+    return (size_t)(max_value * ((double)(dx_seed * UINT64_C(2685821657736338717)) / ULLONG_MAX));
 }
 
 /* -------------------------------------------------------------------------- */
