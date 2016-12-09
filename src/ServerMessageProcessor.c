@@ -1049,7 +1049,7 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
         dx_record_id_t record_id;
 		dxf_const_string_t suffix;
 		int record_count = 0;
-		dxf_const_string_t symbol = NULL;
+		//dxf_const_string_t symbol = NULL;
         const dx_record_item_t* record_info = NULL;
         dx_record_digest_t* record_digest = NULL;
         dx_record_params_t record_params;
@@ -1060,8 +1060,8 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 		if (context->last_symbol == NULL && !dx_decode_symbol_name(context->last_cipher, (dxf_const_string_t*)&context->last_symbol)) {
 			return false;
 		}
-		symbol = dx_create_string_src(context->last_symbol);
-		dx_store_string_buffer(context->rbcc, symbol);
+		//symbol = dx_create_string_src(context->last_symbol);
+		//dx_store_string_buffer(context->rbcc, symbol);
 
 		{
 			dxf_int_t id;

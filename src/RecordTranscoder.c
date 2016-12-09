@@ -213,7 +213,7 @@ dxf_event_data_t dx_get_event_data_buffer(dx_record_transcoder_connection_contex
 
     } else if (event_id == dx_eid_configuration) {
         return dx_initialize_event_data_buffer(count, sizeof(dxf_configuration_t), 
-            &context->order_buffer.buffer, &context->order_buffer.count);
+            &context->configuration_buffer.buffer, &context->configuration_buffer.count);
 
     } else {
         /* these other types don't require separate buffers yet */
