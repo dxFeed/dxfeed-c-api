@@ -37,7 +37,7 @@
 /* use with DX_SUBSCR_FLAG_SINGLE_RECORD flag and for dx_eid_order (Order) event */
 #define DX_SUBSCR_FLAG_SR_MARKET_MAKER_ORDER    0x2
 /* used for time series subscription */
-#define DX_SUBSCR_FLAG_TIME_SERIES              0x3
+#define DX_SUBSCR_FLAG_TIME_SERIES              0x4
 
 extern const dxf_subscription_t dx_invalid_subscription;
 
