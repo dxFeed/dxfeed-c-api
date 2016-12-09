@@ -357,6 +357,14 @@ bool get_next_substring(OUT char** substring_start, OUT size_t* substring_length
     return true;
 }
 
+bool is_equal_type_names(event_type_data_t type_data, const char* type_name, size_t len) {
+#ifdef _WIN32
+    return strlen(type_data.name) == len && strnicmp(type_data.name, type_name, len) == 0;
+#else
+    return strlen(type_data.name) == len && strncasecmp(type_data.name, type_name, len) == 0;
+#endif
+}
+
 bool parse_event_types(char* types_string, OUT int* types_bitmask) {
     char* next_string = types_string;
     size_t next_len = 0;
@@ -369,8 +377,7 @@ bool parse_event_types(char* types_string, OUT int* types_bitmask) {
     while (get_next_substring(&next_string, &next_len)) {
         bool is_found = false;
         for (i = 0; i < types_count; i++) {
-            if (strlen(types_data[i].name) == next_len &&
-                strnicmp(types_data[i].name, next_string, next_len) == 0) {
+            if (is_equal_type_names(types_data[i], (const char*)next_string, next_len)) {
                 *types_bitmask |= types_data[i].type;
                 is_found = true;
             }
@@ -503,7 +510,7 @@ int main (int argc, char* argv[]) {
         return -1;
     };
 
-    if (!dxf_add_symbols(subscription, symbols, symbol_count)) {
+    if (!dxf_add_symbols(subscription, (dxf_const_string_t*)symbols, symbol_count)) {
         process_last_error();
         free_symbols(symbols, symbol_count);
         return -1;
