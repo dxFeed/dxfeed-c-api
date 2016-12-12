@@ -1202,7 +1202,7 @@ void dx_clear_records_list() {
     guard_is_initialized = false;
 }
 
-size_t dx_get_records_list_count() {
+dx_record_id_t dx_get_records_list_count() {
     size_t size = 0;
 
     dx_init_records_list_guard();
@@ -1212,5 +1212,5 @@ size_t dx_get_records_list_count() {
 
     dx_mutex_unlock(&guard);
 
-    return size;
+    return (dx_record_id_t)size;
 }

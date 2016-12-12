@@ -385,10 +385,10 @@ void dx_clear_record_digests (dx_server_msg_proc_connection_context_t* context) 
 /* -------------------------------------------------------------------------- */
 
 void dx_init_record_digests(dxf_connection_t connection) {
-    size_t i;
-    size_t count = dx_get_records_list_count();
+    dx_record_id_t i;
+    dx_record_id_t count = dx_get_records_list_count();
     for (i = 0; i < count; i++) {
-        dx_add_record_digest_to_list(connection, (dx_record_id_t)i);
+        dx_add_record_digest_to_list(connection, i);
     }
 }
 
@@ -412,7 +412,7 @@ bool dx_clear_server_info (dxf_connection_t connection) {
     }
     
     /* stage 1 - resetting all the field flags */
-    for (rid = 0; rid < (dx_record_id_t)dx_get_records_list_count(); ++rid) {
+    for (rid = 0; rid < dx_get_records_list_count(); ++rid) {
         dx_record_server_support_state_t* state;
         if (!dx_get_record_server_support_state_value(context->record_server_support_states, rid, &state)) {
             return false;

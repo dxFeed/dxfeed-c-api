@@ -564,7 +564,7 @@ bool dx_write_utf_char (void* context, dxf_int_t code_point) {
 
 bool dx_write_utf_string (void* context, dxf_const_string_t value) {
     size_t strlen;
-    size_t utflen;
+    dxf_int_t utflen;
     size_t i = 0;
 
     if (value == NULL) {
@@ -589,11 +589,11 @@ bool dx_write_utf_string (void* context, dxf_const_string_t value) {
         }
     }
     
-    if (utflen < strlen) {
+    if ((size_t)utflen < strlen) {
         return dx_set_error_code(dx_utfec_bad_utf_data_format);
     }
 
-    CHECKED_CALL_2(dx_write_compact_int, context, (dxf_int_t)utflen);
+    CHECKED_CALL_2(dx_write_compact_int, context, utflen);
 
     for (i = 0; i < strlen; ) {
         dxf_char_t c;
