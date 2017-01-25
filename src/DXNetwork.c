@@ -95,6 +95,8 @@ typedef struct {
     dx_error_code_t queue_thread_error;
     
     dx_task_queue_t tq;
+
+	FILE* tape_file;
     
     int set_fields_flags;
 } dx_network_connection_context_t;
@@ -104,6 +106,7 @@ typedef struct {
 #define MUTEX_FIELD_FLAG            (1 << 2)
 #define TASK_QUEUE_FIELD_FLAG       (1 << 3)
 #define QUEUE_THREAD_FIELD_FLAG     (1 << 4)
+#define TAPE_FIELD_FLAG				(1 << 5)
 
 /* -------------------------------------------------------------------------- */
 
@@ -245,6 +248,12 @@ bool dx_clear_connection_data (dx_network_connection_context_t* context) {
     if (IS_FLAG_SET(set_fields_flags, TASK_QUEUE_FIELD_FLAG)) {
         success = dx_destroy_task_queue(context->tq) && success;
     }
+
+	if (IS_FLAG_SET(set_fields_flags, TAPE_FIELD_FLAG)) {
+		if (context->tape_file != NULL)
+			success = (fclose(context->tape_file) == 0) && success;
+		context->tape_file = NULL;
+	}
     
     CHECKED_FREE(context->address);
     
@@ -466,7 +475,16 @@ void dx_socket_reader (dx_network_connection_context_t* context) {
             }
         }
 
-        number_of_bytes_read = dx_recv(context->s, (void*)read_buf, READ_CHUNK_SIZE);
+		if (IS_FLAG_SET(context->set_fields_flags, TAPE_FIELD_FLAG)) {
+			while (feof(context->tape_file));
+			number_of_bytes_read = fread((void*)read_buf, sizeof(char), READ_CHUNK_SIZE, context->tape_file);
+			if (ferror(context->tape_file)) {
+				dx_logging_error(L"Tape file read error.");
+				number_of_bytes_read = INVALID_DATA_SIZE;
+			}
+		} else {
+			number_of_bytes_read = dx_recv(context->s, (void*)read_buf, READ_CHUNK_SIZE);
+		}
         
         if (number_of_bytes_read == INVALID_DATA_SIZE) {
             context->reader_thread_state = false;
@@ -632,12 +650,24 @@ bool dx_resolve_address (dx_network_connection_context_t* context) {
     dx_address_array_t addresses;
     struct addrinfo hints;
     int i = 0;
+	FILE* tape_file = NULL;
     
     if (context == NULL) {
         dx_set_last_error(dx_ec_invalid_func_param_internal);
 
         return false;
     }
+
+	//check tape file is used
+	if (IS_FLAG_SET(context->set_fields_flags, TAPE_FIELD_FLAG))
+		return true;
+	//check address is local file
+	tape_file = fopen(context->address, "r");
+	if (tape_file != NULL) {
+		fclose(tape_file);
+		context->set_fields_flags |= TAPE_FIELD_FLAG;
+		return true;
+	}
     
     dx_memset(&addresses, 0, sizeof(dx_address_array_t));
     
@@ -693,6 +723,19 @@ bool dx_resolve_address (dx_network_connection_context_t* context) {
 
 bool dx_connect_to_resolved_addresses (dx_network_connection_context_t* context) {
     dx_address_resolution_context_t* ctx = &(context->addr_context);
+
+	//tape file
+	if (IS_FLAG_SET(context->set_fields_flags, TAPE_FIELD_FLAG)) {
+		if (context->tape_file != NULL)
+			return true;
+		dx_logging_info(L"Initialize reading from tape file...");
+		context->tape_file = fopen(context->address, "r");
+		if (context->tape_file == NULL) {
+			dx_logging_error(L"Cannot open tape file!");
+			return false;
+		}
+		return true;
+	}
     
     CHECKED_CALL(dx_mutex_lock, &(context->socket_guard));
 
@@ -864,7 +907,12 @@ bool dx_send_data (dxf_connection_t connection, const void* buffer, int buffer_s
     }
 
     do {
-        int sent_count = dx_send(context->s, (const void*)char_buf, buffer_size);
+        int sent_count = INVALID_DATA_SIZE;
+		if (IS_FLAG_SET(context->set_fields_flags, TAPE_FIELD_FLAG)) {
+			sent_count = buffer_size;
+		} else {
+			sent_count = dx_send(context->s, (const void*)char_buf, buffer_size);
+		}
         
         if (sent_count == INVALID_DATA_SIZE) {
             dx_mutex_unlock(&(context->socket_guard));
