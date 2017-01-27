@@ -60,10 +60,17 @@ bool dx_socket_data_receiver (dxf_connection_t connection, const void* buffer, i
 
 /* -------------------------------------------------------------------------- */
 /*
-*	Records digest management
-*/
+ *	Records digest management
+ */
 /* -------------------------------------------------------------------------- */
 
 bool dx_add_record_digest_to_list(dxf_connection_t connection, dx_record_id_t index);
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Start dumping incoming raw data into specific file
+ */
+/* -------------------------------------------------------------------------- */
+bool dx_add_raw_dump_file(dxf_connection_t connection, const char* raw_file_name);
 
 #endif /* SERVER_MESSAGE_PROCESSOR_H_INCLUDED */

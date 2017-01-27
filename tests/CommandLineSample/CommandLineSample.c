@@ -311,6 +311,7 @@ int main (int argc, char* argv[]) {
     dxf_string_t symbol = NULL;
     char* dxfeed_host = NULL;
 	dxf_string_t dxfeed_host_u = NULL;
+    char* dump_file_name = NULL;
 
 
     if ( argc < 4 ) {
@@ -385,6 +386,12 @@ int main (int argc, char* argv[]) {
 
     wprintf(L"Connection successful!\n");
 
+    if (argc >= 6 && stricmp(argv[4], "dump") == 0)
+    {
+        dump_file_name = argv[5];
+        dxf_start_dumping_raw_data(connection, dump_file_name);
+    }
+
     if (!dxf_create_subscription(connection, event_type, &subscription)) {
         process_last_error();
 
@@ -395,7 +402,9 @@ int main (int argc, char* argv[]) {
         process_last_error();
 
         return -1;
-    }; 
+    };
+
+    dxf_set_order_source(subscription, "BZX");
 
     if (!dxf_attach_event_listener(subscription, listener, NULL)) {
         process_last_error();
