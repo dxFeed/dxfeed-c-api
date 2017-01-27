@@ -316,12 +316,16 @@ int main (int argc, char* argv[]) {
 
     if ( argc < 4 ) {
         wprintf(L"DXFeed command line sample.\n"
-                L"Usage: CommandLineSample <server address> <event type> <symbol>\n"
+                L"Usage: CommandLineSample <server address> <event type> <symbol> <dump filename>\n"
                 L"  <server address> - a DXFeed server address, e.g. demo.dxfeed.com:7300\n"
+                L"                     if you wont to use file instead of server data just\n"
+                L"                     just wrie there path to file e.g. c:\\temp\\raw.bin\n"
                 L"  <event type> - an event type, one of the following: TRADE, QUOTE, SUMMARY,\n"
                 L"                 PROFILE, ORDER, TIME_AND_SALE, TRADE_ETH, SPREAD_ORDER\n"
                 L"                 GREEKS, THEO_PRICE, UNDERLYING, SERIES\n"
-                L"  <symbol> - a trade symbol, e.g. C, MSFT, YHOO, IBM\n");
+                L"  <symbol> - a trade symbol, e.g. C, MSFT, YHOO, IBM\n"
+                L"  <dump filename> - to dump incoming raw data into file simply write\n"
+                L"                    word \"dump\" and filename\n");
         
         return 0;
     }
