@@ -319,7 +319,7 @@ int main (int argc, char* argv[]) {
                 L"Usage: CommandLineSample <server address> <event type> <symbol> <dump filename>\n"
                 L"  <server address> - a DXFeed server address, e.g. demo.dxfeed.com:7300\n"
                 L"                     if you wont to use file instead of server data just\n"
-                L"                     just wrie there path to file e.g. c:\\temp\\raw.bin\n"
+                L"                     just wrie there path to file e.g. path\\to\\raw.bin\n"
                 L"  <event type> - an event type, one of the following: TRADE, QUOTE, SUMMARY,\n"
                 L"                 PROFILE, ORDER, TIME_AND_SALE, TRADE_ETH, SPREAD_ORDER\n"
                 L"                 GREEKS, THEO_PRICE, UNDERLYING, SERIES\n"
@@ -390,8 +390,7 @@ int main (int argc, char* argv[]) {
 
     wprintf(L"Connection successful!\n");
 
-    if (argc >= 6 && stricmp(argv[4], "dump") == 0)
-    {
+    if (argc >= 6 && stricmp(argv[4], "dump") == 0) {
         dump_file_name = argv[5];
         dxf_start_dumping_raw_data(connection, dump_file_name);
     }
