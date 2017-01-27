@@ -261,7 +261,7 @@ bool dx_transcode_quote_to_order_bid (dx_record_transcoder_connection_context_t*
         cur_event->time = ((dxf_long_t)(cur_record->bid_time) * 1000L);
         cur_event->price = cur_record->bid_price;
         cur_event->size = cur_record->bid_size;
-		cur_event->index = ((exchange_code == 0 ? DX_ORDER_SOURCE_COMPOSITE_BID : DX_ORDER_SOURCE_REGIONAL_BID) << DX_ORDER_SOURCE_ID_SHIFT) | ((dxf_long_t)exchange_code << DX_ORDER_EXCHANGE_SHIFT_IN_INDEX);
+        cur_event->index = ((exchange_code == 0 ? DX_ORDER_SOURCE_COMPOSITE_BID : DX_ORDER_SOURCE_REGIONAL_BID) << DX_ORDER_SOURCE_ID_SHIFT) | ((dxf_long_t)exchange_code << DX_ORDER_EXCHANGE_SHIFT_IN_INDEX);
         cur_event->side = DXF_ORDER_SIDE_BUY;
         cur_event->level = (exchange_code == 0 ? DXF_ORDER_LEVEL_COMPOSITE : DXF_ORDER_LEVEL_REGIONAL);
         cur_event->exchange_code = (exchange_code == 0 ? cur_record->bid_exchange_code : exchange_code);
@@ -296,7 +296,7 @@ bool dx_transcode_quote_to_order_ask (dx_record_transcoder_connection_context_t*
         cur_event->time = ((dxf_long_t)(cur_record->ask_time) * 1000L);
         cur_event->price = cur_record->ask_price;
         cur_event->size = cur_record->ask_size;
-		cur_event->index = ((exchange_code == 0 ? DX_ORDER_SOURCE_COMPOSITE_ASK : DX_ORDER_SOURCE_REGIONAL_ASK) << DX_ORDER_SOURCE_ID_SHIFT) | ((dxf_long_t)exchange_code << DX_ORDER_EXCHANGE_SHIFT_IN_INDEX);
+        cur_event->index = ((exchange_code == 0 ? DX_ORDER_SOURCE_COMPOSITE_ASK : DX_ORDER_SOURCE_REGIONAL_ASK) << DX_ORDER_SOURCE_ID_SHIFT) | ((dxf_long_t)exchange_code << DX_ORDER_EXCHANGE_SHIFT_IN_INDEX);
         cur_event->side = DXF_ORDER_SIDE_SELL;
         cur_event->level = (exchange_code == 0 ? DXF_ORDER_LEVEL_COMPOSITE : DXF_ORDER_LEVEL_REGIONAL);
         cur_event->exchange_code = (exchange_code == 0 ? cur_record->ask_exchange_code : exchange_code);
@@ -432,7 +432,7 @@ bool dx_transcode_market_maker_to_order_bid (dx_record_transcoder_connection_con
         cur_event->time = ((dxf_long_t)cur_record->mmbid_time) * 1000L;
         cur_event->price = cur_record->mmbid_price;
         cur_event->size = cur_record->mmbid_size;
-		cur_event->index = (DX_ORDER_SOURCE_AGGREGATE_BID << DX_ORDER_SOURCE_ID_SHIFT) 
+        cur_event->index = (DX_ORDER_SOURCE_AGGREGATE_BID << DX_ORDER_SOURCE_ID_SHIFT)
             | ((dxf_long_t)exchange_code << DX_ORDER_EXCHANGE_SHIFT_IN_INDEX) | ((dxf_long_t)cur_record->mm_id);
         cur_event->side = DXF_ORDER_SIDE_BUY;
         cur_event->level = DXF_ORDER_LEVEL_AGGREGATE;
