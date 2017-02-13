@@ -146,7 +146,7 @@ HRESULT STDMETHODCALLTYPE DXTrade::GetChange(DOUBLE* value) {
 HRESULT STDMETHODCALLTYPE DXTrade::GetDayVolume(LONGLONG* value) {
     CHECK_PTR(value);
 
-    *value = *((LONGLONG*)&m_data->day_volume);
+    *value = (LONGLONG)std::round(m_data->day_volume);
 
     return S_OK;
 }
@@ -1488,7 +1488,7 @@ HRESULT STDMETHODCALLTYPE DXTradeETH::GetSize(LONGLONG* value) {
 HRESULT STDMETHODCALLTYPE DXTradeETH::GetDayVolume(LONGLONG* value) {
     CHECK_PTR(value);
 
-    *value = *((LONGLONG*)&m_data->eth_volume);
+    *value = (LONGLONG)std::round(m_data->eth_volume);
 
     return S_OK;
 }
