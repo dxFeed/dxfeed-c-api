@@ -428,7 +428,7 @@ void DXSubscription::OnNewData(int eventType, dxf_const_string_t symbolName,
         return;
     }
     
-    IUnknownWrapper dcw(dataCollection);
+    IUnknownWrapper dcw(dataCollection, false);
     
     try {
         listener_map_t::const_iterator it = thisPtr->m_listeners.begin();

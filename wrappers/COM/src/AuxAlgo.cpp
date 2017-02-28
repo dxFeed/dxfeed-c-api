@@ -67,7 +67,7 @@ HRESULT SafeArrayToStringArray (SAFEARRAY* safeArray, string_vector_t& storage,
         stringArray.reserve(elemCount);
 
         for (int i = 0; i < elemCount; ++i) {
-            storage.push_back((const wchar_t*)_bstr_t(data[i], false));
+            storage.push_back(std::wstring((wchar_t*)data[i]));
         }
         
         for (int i = 0; i < elemCount; ++i) {
