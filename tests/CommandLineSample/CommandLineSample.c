@@ -399,21 +399,19 @@ int main (int argc, char* argv[]) {
         process_last_error();
 
         return -1;
-    };
+    }
 
     if (!dxf_add_symbol(subscription, symbol)) {
         process_last_error();
 
         return -1;
-    };
-
-    dxf_set_order_source(subscription, "BZX");
+    }
 
     if (!dxf_attach_event_listener(subscription, listener, NULL)) {
         process_last_error();
 
         return -1;
-    };
+    }
     wprintf(L"Subscription successful!\n");
 
     while (!is_thread_terminate() && loop_counter--) {

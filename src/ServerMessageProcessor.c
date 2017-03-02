@@ -37,9 +37,6 @@
 #include "DXNetwork.h"
 #include "Snapshot.h"
 
-#include <limits.h>
-#include <stdio.h>
-
 /* -------------------------------------------------------------------------- */
 /*
  *	Common data
@@ -1039,32 +1036,6 @@ dxf_time_int_field_t dx_get_time_int_field(dx_record_id_t record_id, void* recor
 
 /* -------------------------------------------------------------------------- */
 
-typedef struct {
-    dxf_order_t* buffer;
-    int cur_count;
-
-    dxf_connection_t connection;
-    void* rbcc;
-} dx_record_transcoder_connection_context_t;
-
-void print_input_buf(dx_server_msg_proc_connection_context_t* context, dxf_const_string_t descr) {
-    dxf_ubyte_t* raw = NULL;
-    dxf_int_t raw_len = 0;
-    int i = 0;
-    int toprint_len = 0;
-    dx_get_raw(context->bicc, &raw, &raw_len);
-    toprint_len = raw_len * 3 + 2;
-    dxf_string_t toprint = dx_create_string(toprint_len);
-    toprint[0] = '[';
-    for (i = 0; i < raw_len; i++) {
-        swprintf(&(toprint[dx_string_length(toprint)]), toprint_len, L"%X ", raw[i]);
-    }
-    toprint[dx_string_length(toprint)] = ']';
-    dx_logging_info(L"%ls: %ls", descr, toprint);
-    dx_free(raw);
-    dx_free(toprint);
-}
-
 bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) {
     dx_logging_verbose_info(L"Process data");
     context->last_cipher = 0;
@@ -1082,8 +1053,6 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
         dx_record_digest_t* record_digest = NULL;
         dx_record_params_t record_params;
         dxf_event_params_t event_params;
-		
-        print_input_buf(context, L"Full data");
 
 		CHECKED_CALL_1(dx_read_symbol, context);
 		
@@ -1160,20 +1129,7 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 			return false;
 	    }
 
-        // creating log file for received orders
-        dx_record_transcoder_connection_context_t* _context = dx_get_subsystem_data(context->connection, dx_ccs_record_transcoder, NULL);
-        dxf_order_t* event_buffer = (dxf_order_t*)dx_get_event_data_buffer(_context, dx_eid_order, record_count);
-        {
-            FILE *stream;
-            char out_string[256];
-            stream = fopen("received_events.txt", "a");
-            sprintf(out_string, "index=%lld, %lld, price=%f, size=%lld",
-                (event_buffer->index & 0xFFFFFFFFFF), event_buffer->index, event_buffer->price, event_buffer->size);
-            fprintf(stream, "%s\n", out_string);
-            fclose(stream);
-            dx_logging_info(L"Index=%lld, %lld, price=%f", (event_buffer->index & 0xFFFFFFFFFF), event_buffer->index, event_buffer->price);
-        }
-		dx_free_string_buffers(context->rbcc);
+        dx_free_string_buffers(context->rbcc);
 	}
 	
 	return true;
@@ -1709,22 +1665,6 @@ bool dx_socket_data_receiver (dxf_connection_t connection, const void* buffer, i
 
     bool conn_ctx_res = true;
     dx_server_msg_proc_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_server_msg_processor, &conn_ctx_res);
-
-    dxf_ubyte_t* raw = (dxf_ubyte_t*) buffer;
-    dxf_int_t raw_len = buffer_size;
-    int i = 0;
-    int toprint_len = 0;
-    dxf_string_t toprint;
-    toprint_len = raw_len * 4 + 2;
-    toprint = dx_create_string(toprint_len);
-    toprint[0] = '[';
-    for (i = 0; i < raw_len; i++) {
-        swprintf(&(toprint[dx_string_length(toprint)]), toprint_len, L"%X ", raw[i]);
-    }
-    toprint[dx_string_length(toprint)] = ']';
-    dx_logging_info(L"%ls: %ls", L"Received bytes", toprint);
-    //dx_free(raw);
-    dx_free(toprint);
 
     if (context != NULL && context->raw_dump_file_name != NULL) {
         FILE* raw_out = fopen(context->raw_dump_file_name, "ab+");
