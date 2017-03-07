@@ -43,6 +43,7 @@
 
 #define CURRENT_TIME_STR_LENGTH 31
 #define CURRENT_TIME_STR_TIME_OFFSET 24
+#define TIME_ZONE_BIAS_TO_HOURS -60
 
 static dxf_const_string_t g_error_prefix = L"Error:";
 static dxf_const_string_t g_info_prefix = L"";
@@ -105,7 +106,7 @@ const dxf_char_t* dx_get_current_time (void) {
     if (g_show_timezone) {
         TIME_ZONE_INFORMATION time_zone;
         GetTimeZoneInformation(&time_zone);
-        _snwprintf(time_buffer + CURRENT_TIME_STR_TIME_OFFSET, 7, L" GMT%+.2d", time_zone.Bias / 60);
+        _snwprintf(time_buffer + CURRENT_TIME_STR_TIME_OFFSET, 7, L" GMT%+.2d", time_zone.Bias / TIME_ZONE_BIAS_TO_HOURS);
     }
 
     return time_buffer;
