@@ -57,10 +57,6 @@ typedef enum {
 
 typedef int dx_record_id_t;
 
-static const dxf_int_t DX_RECORD_SUFFIX_MASK = 0x7C00;
-static const dxf_int_t DX_RECORD_SUFFIX_IN_FLAG_SHIFT = 10;
-static const dxf_int_t DX_RECORD_SUFFIX_HIGH_BITS = 0x40;
-
 /* Invalid or empty record id */
 static const dx_record_id_t DX_RECORD_ID_INVALID = -1;
 
