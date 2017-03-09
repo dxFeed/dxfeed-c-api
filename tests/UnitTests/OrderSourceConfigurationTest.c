@@ -20,8 +20,6 @@
 
 #define DXFEED_HOST "mddqa.in.devexperts.com:7400"
 
-#define SIZE_OF_ARRAY(counter_function_atatic_array) sizeof(counter_function_atatic_array) / sizeof(counter_function_atatic_array[0])
-
 typedef int(*get_counter_function_t)();
 
 dxf_listener_thread_data_t g_ost_listener_thread_data = NULL;
