@@ -76,6 +76,7 @@ typedef enum {
 
 #define DX_EVENT_BIT_MASK(event_id) (1 << event_id)
 
+// The length of record suffix including including the terminating null character 
 #define DXF_RECORD_SUFFIX_SIZE 5
 
 /* -------------------------------------------------------------------------- */
