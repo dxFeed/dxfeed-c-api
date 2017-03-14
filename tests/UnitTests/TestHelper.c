@@ -1,3 +1,4 @@
+#include <math.h>
 #ifdef _WIN32
 #include <Windows.h>
 #else
@@ -186,6 +187,8 @@ const char *get_event_counter_name(event_counter_data_ptr_t counter_data) {
 
 /* -------------------------------------------------------------------------- */
 
+#define DX_TOLLERANCE 0.000001
+
 #define DX_IS_EQUAL_FUNCTION_DEFINITION(type, tmpl) \
 DX_IS_EQUAL_FUNCTION_DECLARATION(type) { \
     if (expected != actual) { \
@@ -210,6 +213,21 @@ DX_IS_EQUAL_FUNCTION_DEFINITION(ERRORCODE, L"%d")
 DX_IS_EQUAL_STRING_FUNCTION_DEFINITION(dxf_const_string_t, L"%ls")
 DX_IS_EQUAL_STRING_FUNCTION_DEFINITION(dxf_string_t, L"%ls")
 DX_IS_EQUAL_FUNCTION_DEFINITION(dxf_uint_t, L"%u")
+DX_IS_EQUAL_FUNCTION_DEFINITION(dxf_long_t, L"%lld")
+DX_IS_EQUAL_FUNCTION_DEFINITION(dxf_ulong_t, L"%llu")
+
+DX_IS_EQUAL_FUNCTION_DECLARATION(double) {
+    double abs_expected = fabs(expected);
+    double max = fabs(actual);
+    double rel_dif;
+    max = abs_expected > max ? abs_expected : max;
+    rel_dif = (max == 0.0 ? 0.0 : fabs(expected - actual) / max);
+    if (rel_dif > DX_TOLLERANCE) {
+        wprintf(L"%ls failed: expected=%f, but was=%f\n", __FUNCTIONW__, expected, actual);
+        return false;
+    }
+    return true;
+}
 
 bool dx_is_not_null(void* actual) {
     if (actual == NULL) {

@@ -140,6 +140,9 @@
     <ClCompile Include="TestHelper.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SnapshotUnitTests.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\DXAlgorithms.h">
