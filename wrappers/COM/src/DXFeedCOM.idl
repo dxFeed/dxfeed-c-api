@@ -394,6 +394,12 @@ library DXFeedCOM {
         [id(8), propget, helpstring("Index value getter")]
         HRESULT index([out, retval] LONGLONG*);
     };
+
+    [uuid(059D84E0-5795-4092-95E3-417D78B5DDB8), helpstring("Configuration data wrapper"), dual, oleautomation, nonextensible]
+    interface IDXConfiguration : IDispatch {
+        [id(1), propget, helpstring("Gets configuration object as string.")]
+        HRESULT stringObject([out, retval] BSTR*);
+    };
     
     [uuid(C334BBB7-AE1E-448e-9C1C-A0C7CCB2A126), helpstring("Event data collection"), dual, oleautomation, nonextensible]
     interface IDXEventDataCollection : IDispatch {

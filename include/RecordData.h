@@ -48,6 +48,7 @@ typedef enum {
     dx_rid_theo_price,
     dx_rid_underlying,
     dx_rid_series,
+    dx_rid_configuration,
 
     /* add new values above this line */
 
@@ -55,7 +56,7 @@ typedef enum {
     dx_rid_invalid
 } dx_record_info_id_t;
 
-typedef int dx_record_id_t;
+typedef dxf_int_t dx_record_id_t;
 
 /* Invalid or empty record id */
 static const dx_record_id_t DX_RECORD_ID_INVALID = -1;
@@ -253,5 +254,9 @@ typedef struct {
     dxf_long_t index;
     dxf_event_flags_t event_flags;
 } dx_series_t;
+
+typedef struct {
+    dxf_byte_array_t object;
+} dx_configuration_t;
 
 #endif /* RECORD_DATA_H_INCLUDED */

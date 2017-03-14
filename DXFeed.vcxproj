@@ -190,6 +190,7 @@
   <ItemGroup>
     <ClCompile Include="src\Candle.c" />
     <ClCompile Include="src\ClientMessageProcessor.c" />
+    <ClCompile Include="src\ConfigurationDeserializer.c" />
     <ClCompile Include="src\ConnectionContextData.c" />
     <ClCompile Include="src\DXAlgorithms.c" />
     <ClCompile Include="src\DXErrorCodes.c" />
@@ -207,7 +208,7 @@
     <ClCompile Include="src\RecordTranscoder.c" />
     <ClCompile Include="src\ServerMessageProcessor.c" />
     <ClCompile Include="src\Snapshot.c" />
-    <ClCompile Include="src\StringArray.c" />
+    <ClCompile Include="src\ObjectArray.c" />
     <ClCompile Include="src\TaskQueue.c" />
     <ClCompile Include="src\Win32.c" />
     <ClCompile Include="src\BufferedInput.c" />
@@ -227,6 +228,7 @@
     <None Include="DXFeedd_64.def" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\ConfigurationDeserializer.h" />
     <ClInclude Include="src\resource.h" />
     <ClInclude Include="src\Candle.h" />
     <ClInclude Include="src\ClientMessageProcessor.h" />
@@ -245,7 +247,7 @@
     <ClInclude Include="src\RecordTranscoder.h" />
     <ClInclude Include="src\ServerMessageProcessor.h" />
     <ClInclude Include="src\Snapshot.h" />
-    <ClInclude Include="src\StringArray.h" />
+    <ClInclude Include="src\ObjectArray.h" />
     <ClInclude Include="src\TaskQueue.h" />
     <ClInclude Include="src\BufferedInput.h" />
     <ClInclude Include="src\BufferedIOCommon.h" />

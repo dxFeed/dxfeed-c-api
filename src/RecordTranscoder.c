@@ -28,6 +28,7 @@
 #include "RecordBuffers.h"
 #include "ConnectionContextData.h"
 #include "DXErrorHandling.h"
+#include "ConfigurationDeserializer.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -88,7 +89,23 @@ static const dxf_byte_t DX_SUMMARY_PREV_DAY_CLOSE_PRICE_TYPE_SHIFT = 0;
 
 typedef struct {
     dxf_order_t* buffer;
-    int cur_count;
+    int count;
+} dx_order_buffer_t;
+
+typedef struct {
+    dxf_spread_order_t* buffer;
+    int count;
+} dx_spread_order_buffer_t;
+
+typedef struct {
+    dxf_configuration_t* buffer;
+    int count;
+} dx_configuration_buffer_t;
+
+typedef struct {
+    dx_order_buffer_t order_buffer;
+    dx_spread_order_buffer_t spread_order_buffer;
+    dx_configuration_buffer_t configuration_buffer;
     
     dxf_connection_t connection;
     void* rbcc;
@@ -137,8 +154,14 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_record_transcoder) {
         return res;
     }
     
-    if (context->buffer != NULL) {
-        dx_free(context->buffer);
+    if (context->order_buffer.buffer != NULL) {
+        dx_free(context->order_buffer.buffer);
+    }
+    if (context->spread_order_buffer.buffer != NULL) {
+        dx_free(context->spread_order_buffer.buffer);
+    }
+    if (context->configuration_buffer.buffer != NULL) {
+        dx_free(context->configuration_buffer.buffer);
     }
     
     dx_free(context);
@@ -161,35 +184,46 @@ DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_record_transcoder) {
  */
 /* -------------------------------------------------------------------------- */
 
+void* dx_initialize_event_data_buffer(int count, int struct_size, 
+                                      OUT void** buffer_data, OUT int* buffer_count) {
+    if (*buffer_count >= count) {
+        return *buffer_data;
+    }
+
+    if (*buffer_data != NULL) {
+        dx_free(*buffer_data);
+    }
+
+    *buffer_data = NULL;
+    *buffer_count = 0;
+
+    if ((*buffer_data = dx_calloc(count, struct_size)) != NULL) {
+        *buffer_count = count;
+    }
+
+    return *buffer_data;
+}
+
 dxf_event_data_t dx_get_event_data_buffer(dx_record_transcoder_connection_context_t* context,
                                           dx_event_id_t event_id, int count) {
-    int struct_size = 0;
-    if (event_id == dx_eid_order)
-        struct_size = sizeof(dxf_order_t);
-    else if (event_id == dx_eid_spread_order)
-        struct_size = sizeof(dxf_spread_order_t);
-    else {
+    if (event_id == dx_eid_order) {
+        return dx_initialize_event_data_buffer(count, sizeof(dxf_order_t), 
+            (void**)&(context->order_buffer.buffer), &(context->order_buffer.count));
+
+    } else if (event_id == dx_eid_spread_order) {
+        return dx_initialize_event_data_buffer(count, sizeof(dxf_spread_order_t),
+            (void**)&(context->spread_order_buffer.buffer), &(context->spread_order_buffer.count));
+
+    } else if (event_id == dx_eid_configuration) {
+        return dx_initialize_event_data_buffer(count, sizeof(dxf_configuration_t), 
+            (void**)&(context->configuration_buffer.buffer), &(context->configuration_buffer.count));
+
+    } else {
         /* these other types don't require separate buffers yet */
         
         dx_set_error_code(dx_ec_internal_assert_violation);
         
         return NULL;
-    }
-    
-    {
-        if (context->cur_count < count) {
-            if (context->buffer != NULL) {
-                dx_free(context->buffer);
-            }
-            
-            context->cur_count = 0;
-            
-            if ((context->buffer = dx_calloc(count, struct_size)) != NULL) {
-                context->cur_count = count;
-            }
-        }
-        
-        return context->buffer;
     }
 }
 
@@ -208,7 +242,7 @@ typedef bool (*dx_record_transcoder_t) (dx_record_transcoder_connection_context_
                                         void* record_buffer, int record_count);
 
 // Fill struct data with zero's.
-#define DX_RESET_RECORD_DATA(type, data_ptr) memset(data_ptr, 0, sizeof(##type))
+#define DX_RESET_RECORD_DATA(type, data_ptr) dx_memset(data_ptr, 0, sizeof(type))
     
 /* -------------------------------------------------------------------------- */
 /*
@@ -523,8 +557,8 @@ bool RECORD_TRANSCODER_NAME(dx_market_maker_t) (dx_record_transcoder_connection_
 
 dxf_long_t suffix_to_long(dxf_const_string_t suffix)
 {
-    int suffix_length = 0;
-    int i = 0;
+    size_t suffix_length = 0;
+    size_t i = 0;
     dxf_long_t ret = 0;
     if (suffix == NULL)
         return 0;
@@ -813,6 +847,35 @@ bool RECORD_TRANSCODER_NAME(dx_series_t) (dx_record_transcoder_connection_contex
 }
 
 /* -------------------------------------------------------------------------- */
+
+bool RECORD_TRANSCODER_NAME(dx_configuration_t) (dx_record_transcoder_connection_context_t* context,
+                                                 const dx_record_params_t* record_params,
+                                                 const dxf_event_params_t* event_params,
+                                                 void* record_buffer, int record_count) {
+    int i = 0;
+    dxf_configuration_t* event_buffer = (dxf_configuration_t*)dx_get_event_data_buffer(context, dx_eid_configuration, record_count);
+
+    if (event_buffer == NULL) {
+        return false;
+    }
+
+    for (; i < record_count; ++i) {
+        dx_configuration_t* cur_record = (dx_configuration_t*)record_buffer + i;
+        dxf_configuration_t* cur_event = event_buffer + i;
+
+        DX_RESET_RECORD_DATA(dxf_configuration_t, cur_event);
+
+        if (!dx_configuration_deserialize_string(&(cur_record->object), &(cur_event->object)) ||
+            !dx_store_string_buffer(context->rbcc, cur_event->object)) {
+            return false;
+        }
+    }
+
+    return dx_process_event_data(context->connection, dx_eid_configuration, record_params->symbol_name,
+        record_params->symbol_cipher, event_buffer, record_count, event_params);
+}
+
+/* -------------------------------------------------------------------------- */
 /*
  *	Interface functions implementation
  */
@@ -832,7 +895,8 @@ static const dx_record_transcoder_t g_record_transcoders[dx_rid_count] = {
     RECORD_TRANSCODER_NAME(dx_greeks_t),
     RECORD_TRANSCODER_NAME(dx_theo_price_t),
     RECORD_TRANSCODER_NAME(dx_underlying_t),
-    RECORD_TRANSCODER_NAME(dx_series_t)
+    RECORD_TRANSCODER_NAME(dx_series_t),
+    RECORD_TRANSCODER_NAME(dx_configuration_t)
 };
 
 /* -------------------------------------------------------------------------- */

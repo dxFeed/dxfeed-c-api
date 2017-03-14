@@ -133,6 +133,7 @@ EVENT_COPY_FUNCTION_BODY(dxf_greeks_t)
 EVENT_COPY_FUNCTION_BODY(dxf_theo_price_t)
 EVENT_COPY_FUNCTION_BODY(dxf_underlying_t)
 EVENT_COPY_FUNCTION_BODY(dxf_series_t)
+EVENT_COPY_WITH_STRING_FUNCTION_BODY(dxf_configuration_t, object)
 
 static const dx_event_copy_function_t g_event_copy_functions[dx_eid_count] = {
     EVENT_COPY_FUNCTION_NAME(dxf_trade_t),
@@ -147,7 +148,8 @@ static const dx_event_copy_function_t g_event_copy_functions[dx_eid_count] = {
     EVENT_COPY_FUNCTION_NAME(dxf_greeks_t),
     EVENT_COPY_FUNCTION_NAME(dxf_theo_price_t),
     EVENT_COPY_FUNCTION_NAME(dxf_underlying_t),
-    EVENT_COPY_FUNCTION_NAME(dxf_series_t)
+    EVENT_COPY_FUNCTION_NAME(dxf_series_t),
+    EVENT_COPY_FUNCTION_NAME(dxf_configuration_t)
 };
 
 dx_event_copy_function_t dx_get_event_copy_function(dx_event_id_t event_id) {
@@ -179,6 +181,7 @@ EVENT_FREE_FUNCTION_BODY(dxf_greeks_t)
 EVENT_FREE_FUNCTION_BODY(dxf_theo_price_t)
 EVENT_FREE_FUNCTION_BODY(dxf_underlying_t)
 EVENT_FREE_FUNCTION_BODY(dxf_series_t)
+EVENT_FREE_FUNCTION_BODY(dxf_configuration_t)
 
 static const dx_event_free_function_t g_event_free_functions[dx_eid_count] = {
     EVENT_FREE_FUNCTION_NAME(dxf_trade_t),
@@ -193,7 +196,8 @@ static const dx_event_free_function_t g_event_free_functions[dx_eid_count] = {
     EVENT_FREE_FUNCTION_NAME(dxf_greeks_t),
     EVENT_FREE_FUNCTION_NAME(dxf_theo_price_t),
     EVENT_FREE_FUNCTION_NAME(dxf_underlying_t),
-    EVENT_FREE_FUNCTION_NAME(dxf_series_t)
+    EVENT_FREE_FUNCTION_NAME(dxf_series_t),
+    EVENT_FREE_FUNCTION_NAME(dxf_configuration_t)
 };
 
 dx_event_free_function_t dx_get_event_free_function(dx_event_id_t event_id) {

@@ -2018,7 +2018,7 @@ HRESULT STDMETHODCALLTYPE DXTheoPrice::GetTheoInterest(DOUBLE* value) {
 /*
  *	DXUnderlying class
 
- *  default implementation of the IDXTheoPrice interface
+ *  default implementation of the IDXUnderlying interface
  */
 /* -------------------------------------------------------------------------- */
 
@@ -2116,7 +2116,7 @@ HRESULT STDMETHODCALLTYPE DXUnderlying::GetPutCallRatio(DOUBLE* value) {
 /*
  *	DXSeries class
 
- *  default implementation of the IDXTheoPrice interface
+ *  default implementation of the IDXSeries interface
  */
 /* -------------------------------------------------------------------------- */
 
@@ -2256,6 +2256,80 @@ HRESULT STDMETHODCALLTYPE DXSeries::GetIndex(LONGLONG* value) {
 
 /* -------------------------------------------------------------------------- */
 /*
+*	DXConfiguration class
+
+*  default implementation of the IDXConfiguration interface
+*/
+/* -------------------------------------------------------------------------- */
+
+class DXConfiguration : private IDXConfiguration, private DefIDispatchImpl {
+    friend struct EventDataFactory;
+
+private:
+
+    virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObject) {
+        return QueryInterfaceImpl(this, riid, ppvObject);
+    }
+    virtual ULONG STDMETHODCALLTYPE AddRef() { return AddRefImpl(); }
+    virtual ULONG STDMETHODCALLTYPE Release() { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
+
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount(UINT *pctinfo) { return GetTypeInfoCountImpl(pctinfo); }
+    virtual HRESULT STDMETHODCALLTYPE GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
+        return GetTypeInfoImpl(iTInfo, lcid, ppTInfo);
+    }
+    virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames(REFIID riid, LPOLESTR *rgszNames,
+        UINT cNames, LCID lcid, DISPID *rgDispId) {
+        return GetIDsOfNamesImpl(riid, rgszNames, cNames, lcid, rgDispId);
+    }
+    virtual HRESULT STDMETHODCALLTYPE Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
+        DISPPARAMS *pDispParams, VARIANT *pVarResult,
+        EXCEPINFO *pExcepInfo, UINT *puArgErr) {
+        return InvokeImpl(this, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
+    }
+
+    virtual HRESULT STDMETHODCALLTYPE GetStringObject(BSTR* value);
+
+private:
+
+    DXConfiguration(dxf_event_data_t data, IUnknown* parent);
+
+private:
+
+    dxf_configuration_t* m_data;
+};
+
+/* -------------------------------------------------------------------------- */
+/*
+*	DXConfiguration methods implementation
+*/
+/* -------------------------------------------------------------------------- */
+
+DXConfiguration::DXConfiguration(dxf_event_data_t data, IUnknown* parent)
+    : DefIDispatchImpl(IID_IDXConfiguration, parent)
+    , m_data(reinterpret_cast<dxf_configuration_t*>(data)) {
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXConfiguration::GetStringObject(BSTR* value) {
+    CHECK_PTR(value);
+
+    HRESULT hr = S_OK;
+
+    try {
+        _bstr_t wrapper(m_data->object);
+
+        *value = wrapper.Detach();
+    }
+    catch (const _com_error& e) {
+        hr = e.Error();
+    }
+
+    return hr;
+}
+
+/* -------------------------------------------------------------------------- */
+/*
  *	EventDataFactory methods implementation
  */
 /* -------------------------------------------------------------------------- */
@@ -2302,6 +2376,9 @@ IDispatch* EventDataFactory::CreateInstance(int eventType, dxf_event_data_t even
             break;
         case DXF_ET_SERIES: 
             instance = static_cast<IDXSeries*>(new DXSeries(eventData, parent));
+            break;
+        case DXF_ET_CONFIGURATION: 
+            instance = static_cast<IDXConfiguration*>(new DXConfiguration(eventData, parent));
             break;
         default: 
             return NULL;

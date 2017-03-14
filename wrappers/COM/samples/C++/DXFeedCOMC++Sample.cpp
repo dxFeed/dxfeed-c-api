@@ -332,7 +332,8 @@ void setSymbols (IDXFeed* feed, IDXSubscription* subscr, const SymbolPack& symbo
 void getSubscrEvents (IDXFeed* feed, IDXSubscription* subscr) {
     static const char* eventTypeNames[dx_eid_count] = {
         "Trade", "Quote", "Summary", "Profile", "Order", "Time&Sale", "Candle", 
-        "TradeETH", "SpreadOrder"
+        "TradeETH", "SpreadOrder","Greeks", "TheoPrice", "Underlying", "Series",
+        "Configuration"
     };
     
     INT eventTypes;

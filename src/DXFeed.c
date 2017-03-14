@@ -42,7 +42,7 @@
 /* -------------------------------------------------------------------------- */
 
 bool dx_subscribe (dxf_connection_t connection, dx_order_source_array_ptr_t order_source, 
-                   dxf_const_string_t* symbols, int symbols_count, int event_types, 
+                   dxf_const_string_t* symbols, size_t symbols_count, int event_types,
                    dxf_uint_t subscr_flags, dxf_long_t time) {
     return dx_subscribe_symbols_to_events(connection, order_source, symbols, symbols_count, 
                                           event_types, false, false, subscr_flags, time);
@@ -51,7 +51,7 @@ bool dx_subscribe (dxf_connection_t connection, dx_order_source_array_ptr_t orde
 /* -------------------------------------------------------------------------- */
 
 bool dx_unsubscribe(dxf_connection_t connection, dx_order_source_array_ptr_t order_source, 
-                    dxf_const_string_t* symbols, int symbols_count, int event_types, 
+                    dxf_const_string_t* symbols, size_t symbols_count, int event_types,
                     dxf_uint_t subscr_flags, dxf_long_t time) {
     return dx_subscribe_symbols_to_events(connection, order_source, symbols, symbols_count, 
                                           event_types, true, false, subscr_flags, time);
@@ -65,8 +65,8 @@ bool dx_unsubscribe(dxf_connection_t connection, dx_order_source_array_ptr_t ord
 
 typedef struct {
     dxf_connection_t* elements;
-    int size;
-    int capacity;
+    size_t size;
+    size_t capacity;
     
     dx_mutex_t guard;
     bool guard_initialized;
@@ -79,7 +79,7 @@ static dxf_uint_t g_connections_count = 0;
 
 bool dx_queue_connection_for_close (dxf_connection_t connection) {
     bool conn_exists = false;
-    int conn_index;
+    size_t conn_index;
     bool failed = false;
     
     if (!g_connection_queue.guard_initialized) {
@@ -111,7 +111,7 @@ bool dx_queue_connection_for_close (dxf_connection_t connection) {
 /* -------------------------------------------------------------------------- */
 
 void dx_close_queued_connections (void) {
-    int i = 0;
+    size_t i = 0;
     
     if (g_connection_queue.size == 0) {
         return;
@@ -310,7 +310,7 @@ DXFEED_API ERRORCODE dxf_close_subscription (dxf_subscription_t subscription) {
     int events;
     
     dxf_const_string_t* symbols;
-    int symbol_count;
+    size_t symbol_count;
     dxf_uint_t subscr_flags;
     dxf_long_t time;
 
@@ -415,6 +415,7 @@ DXFEED_API ERRORCODE dxf_remove_symbols (dxf_subscription_t subscription, dxf_co
 
 DXFEED_API ERRORCODE dxf_get_symbols (dxf_subscription_t subscription,
                                       OUT dxf_const_string_t** symbols, OUT int* symbol_count) {
+    size_t symbols_size = 0;
     dx_perform_common_actions();
 
     if (subscription == dx_invalid_subscription || symbols == NULL || symbol_count == NULL) {
@@ -423,10 +424,10 @@ DXFEED_API ERRORCODE dxf_get_symbols (dxf_subscription_t subscription,
         return DXF_FAILURE;
     }
     
-    if (!dx_get_event_subscription_symbols(subscription, symbols, symbol_count)) {
+    if (!dx_get_event_subscription_symbols(subscription, symbols, &symbols_size)) {
         return DXF_FAILURE;
     }
-
+    *symbol_count = (int)symbols_size;
     return DXF_SUCCESS;
 }
 
@@ -457,7 +458,7 @@ DXFEED_API ERRORCODE dxf_clear_symbols (dxf_subscription_t subscription) {
     int events; 
     
     dxf_const_string_t* symbols;
-    int symbol_count;
+    size_t symbol_count;
     dxf_uint_t subscr_flags;
     dxf_long_t time;
 
@@ -627,11 +628,11 @@ DXFEED_API ERRORCODE dxf_set_order_source(dxf_subscription_t subscription, const
     dxf_connection_t connection;
     dxf_string_t str;
     dxf_const_string_t* symbols;
-    int symbol_count;
+    size_t symbol_count;
     int events;
     dxf_uint_t subscr_flags;
     dxf_long_t time;
-    int source_len;
+    size_t source_len;
 
     dx_perform_common_actions();
 
@@ -683,11 +684,11 @@ DXFEED_API ERRORCODE dxf_set_order_source(dxf_subscription_t subscription, const
 DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const char * source) {
     dxf_connection_t connection;
     dxf_string_t wide_source = NULL;
-    int source_len;
+    size_t source_len;
     dx_suffix_t elem = { {0} };
     dx_order_source_array_t new_source_array = { NULL, 0, 0 };
     dxf_const_string_t* symbols;
-    int symbol_count;
+    size_t symbol_count;
     int events;
     dxf_uint_t subscr_flags;
     dxf_long_t time;
@@ -740,7 +741,7 @@ ERRORCODE dxf_create_snapshot_impl(dxf_connection_t connection, dx_event_id_t ev
     dxf_const_string_t order_source_value = NULL;
     ERRORCODE error_code;
     int event_types = DX_EVENT_BIT_MASK(event_id);
-    int source_len = (source == NULL ? 0 : dx_string_length(source));
+    size_t source_len = (source == NULL ? 0 : dx_string_length(source));
     dxf_uint_t subscr_flags = DX_SUBSCR_FLAG_TIME_SERIES;
 
     if (event_id == dx_eid_order) {

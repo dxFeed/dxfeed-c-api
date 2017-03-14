@@ -343,6 +343,18 @@ struct IDXSeries : public IDispatch {
 
 /* -------------------------------------------------------------------------- */
 /*
+*	IDXConfiguration interface
+
+*  defines the series data accessor
+*/
+/* -------------------------------------------------------------------------- */
+
+struct IDXConfiguration : public IDispatch {
+    virtual HRESULT STDMETHODCALLTYPE GetStringObject(BSTR* value) = 0;
+};
+
+/* -------------------------------------------------------------------------- */
+/*
  *	IDXConnectionTerminationNotifier sink interface
  */
 /* -------------------------------------------------------------------------- */
