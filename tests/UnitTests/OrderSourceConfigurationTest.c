@@ -464,6 +464,62 @@ bool add_order_source_test() {
     return true;
 }
 
+/*
+* Test
+*
+* Test a mixed set of function as dxf_set_order_source as dxf_add_order_source.
+* - Perform default subscription on symbols and sources
+* - Wait events with NTV, DEX and DEA sources.
+* - Sets a new sources: NTV only
+* - Wait events with NTV sources and checks that count of DEX and DEA is zero.
+* - Adds a new source to current set: DEX
+* - Wait events with NTV and DEX sources and checks that count of DEA is zero.
+*/
+bool input_order_source_test() {
+    dxf_connection_t connection = NULL;
+    dxf_subscription_t subscription = NULL;
+    dxf_const_string_t symbols[] = { { L"IBM" },{ L"MSFT" },{ L"YHOO" },{ L"C" },{ L"AAPL" } };
+    dxf_int_t symbol_count = sizeof(symbols) / sizeof(symbols[0]);
+
+    if (!dxf_create_connection(DXFEED_HOST, order_source_tests_on_thread_terminate, NULL, NULL, NULL, &connection) ||
+        !dxf_create_subscription(connection, DXF_ET_ORDER, &subscription)) {
+
+        process_last_error();
+        return false;
+    }
+
+    if (
+        //Try to add order source with NULL subscription
+        dxf_add_order_source(NULL, "NTV") ||
+        //Try to add NULL order source
+        dxf_add_order_source(subscription, NULL) ||
+        //Try to add empty-string order source
+        dxf_add_order_source(subscription, "") ||
+        //Try to add very-long-string order source
+        dxf_add_order_source(subscription, "abcde") ||
+        //Try to set order source with NULL subscription
+        dxf_set_order_source(NULL, "NTV") ||
+        //Try to set NULL order source
+        dxf_set_order_source(subscription, NULL) ||
+        //Try to set empty-string order source
+        dxf_set_order_source(subscription, "") ||
+        //Try to set very-long-string order source
+        dxf_set_order_source(subscription, "abcde")
+        ) {
+
+        PRINT_TEST_FAILED;
+        close_data(connection, subscription, listener);
+        return false;
+    }
+
+    if (!dxf_close_subscription(subscription) ||
+        !dxf_close_connection(connection)) {
+
+        process_last_error();
+        return false;
+    }
+    return true;
+}
 
 bool order_source_configuration_test(void) {
     bool res = true;
@@ -475,7 +531,8 @@ bool order_source_configuration_test(void) {
     init_event_counter2(g_dex_counter, "DEX");
     init_event_counter2(g_dea_counter, "DEA");
 
-    if (!add_order_source_test() ||
+    if (!input_order_source_test() ||
+        !add_order_source_test() ||
         !set_order_source_test() ||
         !mixed_order_source_test()) {
 
