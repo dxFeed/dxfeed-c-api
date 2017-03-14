@@ -145,8 +145,9 @@ bool dx_get_single_order_subscription_params(dxf_connection_t connection, dx_ord
         if (order_source->size > 1) {
             return false;
         }
-        CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Order", dx_st_history);
-        if (order_source->size != 0) {
+        if (order_source->size == 0) {
+            CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Order", dx_st_history);
+        } else {
             dx_copy_string(order_name_buf, g_order_tmpl);
             dx_copy_string_len(&order_name_buf[ORDER_TMPL_LEN], order_source->elements[0].suffix, DXF_RECORD_SUFFIX_SIZE);
             CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, order_name_buf, dx_st_history);

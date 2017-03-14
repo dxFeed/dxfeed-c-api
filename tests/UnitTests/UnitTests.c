@@ -27,7 +27,8 @@ static test_function_data_t g_tests[] = {
     { "event_dymamic_subscription_test", event_dynamic_subscription_all_test }, 
     { "order_source_test", order_source_configuration_test },
     { "candle_test", candle_all_tests },
-    { "snapshot_test", snapshot_all_test }
+    { "snapshot_test", snapshot_all_test },
+    { "snapshot_unit_test", snapshot_all_unit_test }
 };
 
 #define TESTS_COUNT (sizeof(g_tests) / sizeof(g_tests[0]))

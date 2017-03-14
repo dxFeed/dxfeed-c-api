@@ -6,6 +6,8 @@
 #include "DXErrorCodes.h"
 #include "PrimitiveTypes.h"
 
+#define SIZE_OF_ARRAY(static_array) sizeof(static_array) / sizeof(static_array[0])
+
 /* -------------------------------------------------------------------------- */
 
 typedef struct {
@@ -69,6 +71,10 @@ DX_IS_EQUAL_FUNCTION_DECLARATION(ERRORCODE);
 DX_IS_EQUAL_FUNCTION_DECLARATION(dxf_const_string_t);
 DX_IS_EQUAL_FUNCTION_DECLARATION(dxf_string_t);
 DX_IS_EQUAL_FUNCTION_DECLARATION(dxf_uint_t);
+DX_IS_EQUAL_FUNCTION_DECLARATION(dxf_long_t);
+DX_IS_EQUAL_FUNCTION_DECLARATION(dxf_ulong_t);
+DX_IS_EQUAL_FUNCTION_DECLARATION(double);
+DX_IS_EQUAL_FUNCTION_DECLARATION(size_t);
 
 DX_IS_GREATER_OR_EQUAL_FUNCTION_DECLARATION(dxf_uint_t);
 

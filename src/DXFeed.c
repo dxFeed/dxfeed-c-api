@@ -632,10 +632,17 @@ DXFEED_API ERRORCODE dxf_set_order_source(dxf_subscription_t subscription, const
     int events;
     dxf_uint_t subscr_flags;
     dxf_long_t time;
+    size_t source_len;
 
     dx_perform_common_actions();
 
-    if (source == NULL || source == "") {
+    if (subscription == dx_invalid_subscription) {
+        dx_set_error_code(dx_ec_invalid_func_param);
+        return DXF_FAILURE;
+    }
+
+    source_len = source == NULL ? 0 : strlen(source);
+    if (source_len == 0 || source_len >= DXF_RECORD_SUFFIX_SIZE) {
         dx_set_error_code(dx_ec_invalid_func_param);
         return DXF_FAILURE;
     }
@@ -677,6 +684,7 @@ DXFEED_API ERRORCODE dxf_set_order_source(dxf_subscription_t subscription, const
 DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const char * source) {
     dxf_connection_t connection;
     dxf_string_t wide_source = NULL;
+    size_t source_len;
     dx_suffix_t elem = { {0} };
     dx_order_source_array_t new_source_array = { NULL, 0, 0 };
     dxf_const_string_t* symbols;
@@ -688,13 +696,19 @@ DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const
     
     dx_perform_common_actions();
 
-    if (source == NULL || source == "") {
+    if (subscription == dx_invalid_subscription) {
+        dx_set_error_code(dx_ec_invalid_func_param);
+        return DXF_FAILURE;
+    }
+
+    source_len = source == NULL ? 0 : strlen(source);
+    if (source_len == 0 || source_len >= DXF_RECORD_SUFFIX_SIZE) {
         dx_set_error_code(dx_ec_invalid_func_param);
         return DXF_FAILURE;
     }
 
     wide_source = dx_ansi_to_unicode(source);
-    dx_copy_string_len(elem.suffix, wide_source, DXF_RECORD_SUFFIX_SIZE);
+    dx_copy_string_len(elem.suffix, wide_source, source_len);
     dx_free(wide_source);
     DX_ARRAY_INSERT(new_source_array, dx_suffix_t, elem, new_source_array.size, dx_capacity_manager_halfer, failed);
     if (failed)

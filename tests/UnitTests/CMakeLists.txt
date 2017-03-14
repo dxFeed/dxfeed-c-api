@@ -107,6 +107,7 @@ set(SOURCE_FILES
     EventSubscriptionTest.c
     OrderSourceConfigurationTest.c
     SnapshotTests.c
+    SnapshotUnitTests.c
     TestHelper.c
     UnitTests.c
     )

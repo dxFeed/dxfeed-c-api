@@ -158,7 +158,7 @@ typedef struct {
     dxf_const_string_t exchange_sale_conditions;
     dxf_int_t flags;
 
-    dxf_int_t event_flags;
+    dxf_event_flags_t event_flags;
     dxf_long_t index;
     dxf_int_t side;
     dxf_bool_t is_cancel;
@@ -187,6 +187,7 @@ typedef struct {
        daily candle */
     dxf_long_t open_interest;
     dxf_double_t imp_volatility;
+    dxf_event_flags_t event_flags;
 } dx_candle_t;
 
 typedef struct {
@@ -221,6 +222,7 @@ typedef struct {
     dxf_double_t vega;
     /* Note: calculated fields */
     dxf_long_t index;
+    dxf_event_flags_t event_flags;
 } dx_greeks_t;
 
 typedef struct {
@@ -250,6 +252,7 @@ typedef struct {
     dxf_double_t interest;
     /* Note: calculated fields */
     dxf_long_t index;
+    dxf_event_flags_t event_flags;
 } dx_series_t;
 
 typedef struct {

@@ -606,7 +606,7 @@ bool RECORD_TRANSCODER_NAME(dx_order_t) (dx_record_transcoder_connection_context
         dx_memset(cur_event->source, 0, sizeof(cur_event->source));
         dx_copy_string_len(cur_event->source, suffix, dx_string_length(suffix));
         cur_event->count = cur_record->count;
-        cur_event->event_flags = (dxf_uint_t)cur_record->flags >> DX_ORDER_EVENT_FLAGS_SHIFT;
+        cur_event->event_flags = event_params->flags;
         cur_event->time_sequence = ((dxf_long_t)dx_get_seconds_from_time(cur_event->time) << 32) 
             | ((dxf_long_t)dx_get_millis_from_time(cur_event->time) << 22)
             | cur_record->sequence;
@@ -646,7 +646,7 @@ bool RECORD_TRANSCODER_NAME(dx_time_and_sale_t) (dx_record_transcoder_connection
         cur_event->event_id = ((dxf_long_t)time << 32) | ((dxf_long_t)sequence & 0xFFFFFFFFL);
         cur_event->time = ((dxf_long_t)time * 1000L) + (((dxf_long_t)sequence >> 22) & 0x000003FFL);
 
-        cur_event->event_flags = (dxf_uint_t)flags >> DX_TIME_AND_SALE_EVENT_FLAGS_SHIFT;
+        cur_event->event_flags = event_params->flags;
         cur_event->sequence = sequence;
         cur_event->exchange_sale_conditions = dx_decode_from_integer((((dxf_long_t)flags & 0xFF00L) << 24 ) | exchange_sale_conditions);
         cur_event->index = cur_event->event_id;
@@ -696,6 +696,7 @@ bool RECORD_TRANSCODER_NAME(dx_candle_t) (dx_record_transcoder_connection_contex
         cur_event->index = ((dxf_long_t)dx_get_seconds_from_time(cur_event->time) << 32) 
             | ((dxf_long_t)dx_get_millis_from_time(cur_event->time) << 22) 
             | cur_event->sequence;
+        cur_event->event_flags = event_params->flags;
     }
 
     return dx_process_event_data(context->connection, dx_eid_candle, record_params->symbol_name,
@@ -757,7 +758,7 @@ bool RECORD_TRANSCODER_NAME(dx_spread_order_t) (dx_record_transcoder_connection_
         dx_memset(cur_event->source, 0, sizeof(cur_event->source));
         dx_copy_string_len(cur_event->source, suffix, dx_string_length(suffix));
         cur_event->count = cur_record->count;
-        cur_event->event_flags = (dxf_uint_t)cur_record->flags >> DX_ORDER_EVENT_FLAGS_SHIFT;
+        cur_event->event_flags = event_params->flags;
         cur_event->time_sequence = ((dxf_long_t)dx_get_seconds_from_time(cur_event->time) << 32)
             | ((dxf_long_t)dx_get_millis_from_time(cur_event->time) << 22)
             | cur_record->sequence;
@@ -789,6 +790,7 @@ bool RECORD_TRANSCODER_NAME(dx_greeks_t) (dx_record_transcoder_connection_contex
         cur_event->index = ((dxf_long_t)dx_get_seconds_from_time(cur_event->time) << 32)
             | ((dxf_long_t)dx_get_millis_from_time(cur_event->time) << 22)
             | cur_event->sequence;
+        cur_event->event_flags = event_params->flags;
     }
 
     return dx_process_event_data(context->connection, dx_eid_greeks, record_params->symbol_name,
@@ -837,6 +839,7 @@ bool RECORD_TRANSCODER_NAME(dx_series_t) (dx_record_transcoder_connection_contex
     for (; i < record_count; ++i) {
         dxf_series_t* cur_event = event_buffer + i;
         cur_event->index = (dxf_long_t)cur_event->expiration << 32 | cur_event->sequence;
+        cur_event->event_flags = event_params->flags;
     }
 
     return dx_process_event_data(context->connection, dx_eid_series, record_params->symbol_name,

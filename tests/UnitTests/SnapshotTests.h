@@ -12,4 +12,6 @@ bool snapshot_symbols_test(void);
 
 bool snapshot_all_test(void);
 
+bool snapshot_all_unit_test(void);
+
 #endif /* SNAPSHOT_TESTS_H_INCLUDED */

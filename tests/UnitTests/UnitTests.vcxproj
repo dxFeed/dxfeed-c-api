@@ -182,6 +182,7 @@
     <ClCompile Include="EventSubscriptionTest.c" />
     <ClCompile Include="OrderSourceConfigurationTest.c" />
     <ClCompile Include="SnapshotTests.c" />
+    <ClCompile Include="SnapshotUnitTests.c" />
     <ClCompile Include="TestHelper.c" />
     <ClCompile Include="UnitTests.c" />
     <ClCompile Include="..\..\src\ConnectionContextData.c" />
