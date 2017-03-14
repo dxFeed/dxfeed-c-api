@@ -146,7 +146,7 @@ HRESULT STDMETHODCALLTYPE DXTrade::GetChange(DOUBLE* value) {
 HRESULT STDMETHODCALLTYPE DXTrade::GetDayVolume(LONGLONG* value) {
     CHECK_PTR(value);
 
-    *value = *((LONGLONG*)&m_data->day_volume);
+    *value = (LONGLONG)std::round(m_data->day_volume);
 
     return S_OK;
 }
@@ -1488,7 +1488,7 @@ HRESULT STDMETHODCALLTYPE DXTradeETH::GetSize(LONGLONG* value) {
 HRESULT STDMETHODCALLTYPE DXTradeETH::GetDayVolume(LONGLONG* value) {
     CHECK_PTR(value);
 
-    *value = *((LONGLONG*)&m_data->eth_volume);
+    *value = (LONGLONG)std::round(m_data->eth_volume);
 
     return S_OK;
 }
@@ -2335,25 +2335,57 @@ HRESULT STDMETHODCALLTYPE DXConfiguration::GetStringObject(BSTR* value) {
 /* -------------------------------------------------------------------------- */
 
 IDispatch* EventDataFactory::CreateInstance(int eventType, dxf_event_data_t eventData, IUnknown* parent) {
+    IDispatch* instance = NULL;
     try {
         switch (eventType) {
-        case DXF_ET_TRADE: return static_cast<IDXTrade*>(new DXTrade(eventData, parent));
-        case DXF_ET_QUOTE: return static_cast<IDXQuote*>(new DXQuote(eventData, parent));
-        case DXF_ET_SUMMARY: return static_cast<IDXSummary*>(new DXSummary(eventData, parent));
-        case DXF_ET_PROFILE: return static_cast<IDXProfile*>(new DXProfile(eventData, parent));
-        case DXF_ET_ORDER: return static_cast<IDXOrder*>(new DXOrder(eventData, parent));
-        case DXF_ET_TIME_AND_SALE: return static_cast<IDXTimeAndSale*>(new DXTimeAndSale(eventData, parent));
-        case DXF_ET_CANDLE: return static_cast<IDXCandle*>(new DXCandle(eventData, parent));
-        case DXF_ET_TRADE_ETH: return static_cast<IDXTradeETH*>(new DXTradeETH(eventData, parent));
-        case DXF_ET_SPREAD_ORDER: return static_cast<IDXSpreadOrder*>(new DXSpreadOrder(eventData, parent));
-        case DXF_ET_GREEKS: return static_cast<IDXGreeks*>(new DXGreeks(eventData, parent));
-        case DXF_ET_THEO_PRICE: return static_cast<IDXTheoPrice*>(new DXTheoPrice(eventData, parent));
-        case DXF_ET_UNDERLYING: return static_cast<IDXUnderlying*>(new DXUnderlying(eventData, parent));
-        case DXF_ET_SERIES: return static_cast<IDXSeries*>(new DXSeries(eventData, parent));
-        case DXF_ET_CONFIGURATION: return static_cast<IDXConfiguration*>(new DXConfiguration(eventData, parent));
-        default: return NULL;
+        case DXF_ET_TRADE: 
+            instance = static_cast<IDXTrade*>(new DXTrade(eventData, parent));
+            break;
+        case DXF_ET_QUOTE: 
+            instance = static_cast<IDXQuote*>(new DXQuote(eventData, parent));
+            break;
+        case DXF_ET_SUMMARY: 
+            instance = static_cast<IDXSummary*>(new DXSummary(eventData, parent));
+            break;
+        case DXF_ET_PROFILE: 
+            instance = static_cast<IDXProfile*>(new DXProfile(eventData, parent));
+            break;
+        case DXF_ET_ORDER: 
+            instance = static_cast<IDXOrder*>(new DXOrder(eventData, parent));
+            break;
+        case DXF_ET_TIME_AND_SALE: 
+            instance = static_cast<IDXTimeAndSale*>(new DXTimeAndSale(eventData, parent));
+            break;
+        case DXF_ET_CANDLE: 
+            instance = static_cast<IDXCandle*>(new DXCandle(eventData, parent));
+            break;
+        case DXF_ET_TRADE_ETH: 
+            instance = static_cast<IDXTradeETH*>(new DXTradeETH(eventData, parent));
+            break;
+        case DXF_ET_SPREAD_ORDER: 
+            instance = static_cast<IDXSpreadOrder*>(new DXSpreadOrder(eventData, parent));
+            break;
+        case DXF_ET_GREEKS: 
+            instance = static_cast<IDXGreeks*>(new DXGreeks(eventData, parent));
+            break;
+        case DXF_ET_THEO_PRICE: 
+            instance = static_cast<IDXTheoPrice*>(new DXTheoPrice(eventData, parent));
+            break;
+        case DXF_ET_UNDERLYING: 
+            instance = static_cast<IDXUnderlying*>(new DXUnderlying(eventData, parent));
+            break;
+        case DXF_ET_SERIES: 
+            instance = static_cast<IDXSeries*>(new DXSeries(eventData, parent));
+            break;
+        case DXF_ET_CONFIGURATION: 
+            instance = static_cast<IDXConfiguration*>(new DXConfiguration(eventData, parent));
+            break;
+        default: 
+            return NULL;
         }
     } catch (...) {
         return NULL;
     }
+    instance->AddRef();
+    return instance;
 }
