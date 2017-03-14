@@ -659,9 +659,10 @@ bool dx_read_compact_long (void* context, OUT dxf_long_t* value) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_read_byte_array (void* context, OUT dxf_byte_t** value) {
-    dxf_byte_t* buffer;
+bool dx_read_byte_array (void* context, OUT dxf_byte_array_t* value) {
+    dxf_byte_array_t buffer = DX_EMPTY_ARRAY;
     dxf_long_t buffer_length;
+    bool failed = false;
     
     if (value == NULL) {
         return dx_set_error_code(dx_ec_invalid_func_param_internal);
@@ -674,30 +675,23 @@ bool dx_read_byte_array (void* context, OUT dxf_byte_t** value) {
     }
     
     if (buffer_length == -1) {
-        *value = NULL;
-        
+        *value = buffer;
         return true;
     }
     
     if (buffer_length == 0) {
-        *value = (dxf_byte_t*)dx_malloc(0);
-        
-        if (*value == NULL) {
-            return false;
-        }
-        
+        *value = buffer;
         return true;
     }
 
-    buffer = dx_malloc((int)buffer_length);
+    DX_ARRAY_RESERVE(buffer, dxf_byte_t, (int)buffer_length, failed);
     
-    if (buffer == NULL) {
+    if (failed) {
         return false;
     }
     
-    if (!dx_read_byte_buffer_segment(context, buffer, (int)buffer_length, 0, (int)buffer_length)) {
-        dx_free(buffer);
-        
+    if (!dx_read_byte_buffer_segment(context, buffer.elements, (int)buffer_length, 0, (int)buffer_length)) {
+        CHECKED_FREE(buffer.elements);
         return false;
     }
     

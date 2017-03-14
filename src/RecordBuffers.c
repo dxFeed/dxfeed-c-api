@@ -23,7 +23,7 @@
 #include "DXMemory.h"
 #include "DXAlgorithms.h"
 #include "ConnectionContextData.h"
-#include "StringArray.h"
+#include "ObjectArray.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -45,6 +45,7 @@ typedef struct {
 typedef struct {
     dx_event_record_buffer_t record_buffer_array[dx_rid_count];
     dx_string_array_t string_buffers;
+    dx_byte_buffer_array_t byte_array_buffers;
 } dx_record_buffers_connection_context_t;
 
 #define CTX(context) \
@@ -75,6 +76,7 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_record_buffers) {
 
 void dx_clear_record_buffers (dx_event_record_buffer_t* record_buffers);
 void dx_free_string_buffers_impl (dx_string_array_t* string_buffers);
+void dx_free_byte_array_buffers_impl(dx_byte_buffer_array_t* byte_array_buffers);
 
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_record_buffers) {
     bool res = true;
@@ -86,6 +88,7 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_record_buffers) {
     
     dx_clear_record_buffers(context->record_buffer_array);
     dx_free_string_buffers_impl(&(context->string_buffers));
+    dx_free_byte_array_buffers_impl(&(context->byte_array_buffers));
     dx_free(context);
     
     return true;
@@ -183,6 +186,8 @@ GET_RECORD_PTR_BODY(dx_rid_underlying, dx_underlying_t)
 GET_RECORD_BUF_PTR_BODY(dx_rid_underlying)
 GET_RECORD_PTR_BODY(dx_rid_series, dx_series_t)
 GET_RECORD_BUF_PTR_BODY(dx_rid_series)
+GET_RECORD_PTR_BODY(dx_rid_configuration, dx_configuration_t)
+GET_RECORD_BUF_PTR_BODY(dx_rid_configuration)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -204,7 +209,8 @@ const dx_buffer_manager_collection_t g_buffer_managers[dx_rid_count] = {
     { GET_RECORD_PTR_NAME(dx_rid_greeks), GET_RECORD_BUF_PTR_NAME(dx_rid_greeks) },
     { GET_RECORD_PTR_NAME(dx_rid_theo_price), GET_RECORD_BUF_PTR_NAME(dx_rid_theo_price) },
     { GET_RECORD_PTR_NAME(dx_rid_underlying), GET_RECORD_BUF_PTR_NAME(dx_rid_underlying) },
-    { GET_RECORD_PTR_NAME(dx_rid_series), GET_RECORD_BUF_PTR_NAME(dx_rid_series) }
+    { GET_RECORD_PTR_NAME(dx_rid_series), GET_RECORD_BUF_PTR_NAME(dx_rid_series) },
+    { GET_RECORD_PTR_NAME(dx_rid_configuration), GET_RECORD_BUF_PTR_NAME(dx_rid_configuration) }
 };
 
 void dx_clear_record_buffers (dx_event_record_buffer_t* record_buffers) {
@@ -232,12 +238,23 @@ bool dx_store_string_buffer (void* context, dxf_const_string_t buf) {
 
 /* -------------------------------------------------------------------------- */
 
+bool dx_store_byte_array_buffer(void* context, dxf_byte_array_t buf) {
+    return dx_byte_buffer_array_add(&(CTX(context)->byte_array_buffers), buf);
+}
+
+/* -------------------------------------------------------------------------- */
+
 void dx_free_string_buffers_impl (dx_string_array_t* string_buffers) {
     dx_string_array_free(string_buffers);
 }
 
+void dx_free_byte_array_buffers_impl(dx_byte_buffer_array_t* byte_array_buffers) {
+    dx_byte_buffer_array_free(byte_array_buffers);
+}
+
 /* ---------------------------------- */
 
-void dx_free_string_buffers (void* context) {
+void dx_free_buffers(void* context) {
     dx_free_string_buffers_impl(&(CTX(context)->string_buffers));
+    dx_free_byte_array_buffers_impl(&(CTX(context)->byte_array_buffers));
 }

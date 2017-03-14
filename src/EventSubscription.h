@@ -49,7 +49,7 @@ extern const dxf_subscription_t dx_invalid_subscription;
 
 typedef bool (*dx_subscription_processor_t) (dxf_connection_t connection, 
                                              dx_order_source_array_ptr_t order_source,
-                                             dxf_const_string_t* symbols, int symbol_count, 
+                                             dxf_const_string_t* symbols, size_t symbol_count,
                                              int event_types, dxf_uint_t subscr_flags, 
                                              dxf_long_t time);
 
@@ -64,7 +64,7 @@ dxf_subscription_t dx_create_event_subscription (dxf_connection_t connection, in
                                                  dxf_uint_t subscr_flags, dxf_long_t time); 
 bool dx_close_event_subscription (dxf_subscription_t subscr_id);
 bool dx_add_symbols (dxf_subscription_t subscr_id, dxf_const_string_t* symbols, int symbol_count);
-bool dx_remove_symbols (dxf_subscription_t subscr_id, dxf_const_string_t* symbols, int symbol_count);
+bool dx_remove_symbols (dxf_subscription_t subscr_id, dxf_const_string_t* symbols, size_t symbol_count);
 bool dx_add_listener (dxf_subscription_t subscr_id, dxf_event_listener_t listener, void* user_data);
 bool dx_add_listener_v2(dxf_subscription_t subscr_id, dxf_event_listener_v2_t listener, void* user_data);
 bool dx_remove_listener (dxf_subscription_t subscr_id, dxf_event_listener_t listener);
@@ -72,7 +72,7 @@ bool dx_remove_listener_v2(dxf_subscription_t subscr_id, dxf_event_listener_v2_t
 bool dx_get_subscription_connection (dxf_subscription_t subscr_id, OUT dxf_connection_t* connection);
 bool dx_get_event_subscription_event_types (dxf_subscription_t subscr_id, OUT int* event_types);
 bool dx_get_event_subscription_symbols (dxf_subscription_t subscr_id,
-                                        OUT dxf_const_string_t** symbols, OUT int* symbol_count);
+                                        OUT dxf_const_string_t** symbols, OUT size_t* symbol_count);
 bool dx_get_event_subscription_flags(dxf_subscription_t subscr_id, OUT dxf_uint_t* subscr_flags);
 bool dx_get_event_subscription_time(dxf_subscription_t subscr_id, OUT dxf_long_t* time);
 bool dx_process_event_data (dxf_connection_t connection, dx_event_id_t event_id, 

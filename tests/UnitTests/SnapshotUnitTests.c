@@ -96,11 +96,11 @@ bool snapshot_test_runner(dx_event_data_t* events, size_t size, dxf_snapshot_lis
 }
 
 //Compare snapshots by index and size
-bool dx_compare_snapshots(const dxf_snapshot_data_ptr_t snapshot_data, dxf_order_t* test_snap_data, int test_snap_size) {
-    int i;
+bool dx_compare_snapshots(const dxf_snapshot_data_ptr_t snapshot_data, dxf_order_t* test_snap_data, size_t test_snap_size) {
+    size_t i;
     bool res = true;
     dxf_order_t* order_records = (dxf_order_t*)snapshot_data->records;
-    if (!dx_is_equal_int(test_snap_size, snapshot_data->records_count)) {
+    if (!dx_is_equal_size_t(test_snap_size, snapshot_data->records_count)) {
         return false;
     }
     for (i = 0; i < snapshot_data->records_count; i++) {
@@ -159,7 +159,7 @@ static dx_event_data_t empty_test_data[] = {
 void empty_test_listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
     dx_snap_test_state_t* state = (dx_snap_test_state_t*)user_data;
     state->listener_call_counter++;
-    state->result &= dx_is_equal_int(0, snapshot_data->records_count);
+    state->result &= dx_is_equal_size_t(0, snapshot_data->records_count);
 }
 
 /*
@@ -291,7 +291,7 @@ static dxf_order_t bid_ask_test_snap_1_data[] = {
 static int bid_ask_test_snap_1_size = SIZE_OF_ARRAY(bid_ask_test_snap_1_data);
 
 void bid_ask_test_listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
-    int i;
+    size_t i;
     dxf_order_t* order_records = (dxf_order_t*)snapshot_data->records;
     dx_snap_test_state_t* state = (dx_snap_test_state_t*)user_data;
     double max_bid = -1;

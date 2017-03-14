@@ -229,6 +229,10 @@ DX_IS_EQUAL_FUNCTION_DECLARATION(double) {
     return true;
 }
 
+DX_IS_EQUAL_FUNCTION_DECLARATION(size_t) {
+    return dx_is_equal_dxf_ulong_t((dxf_ulong_t)expected, actual);
+}
+
 bool dx_is_not_null(void* actual) {
     if (actual == NULL) {
         wprintf(L"%ls failed: expected is not NULL, but was NULL\n", __FUNCTIONW__);

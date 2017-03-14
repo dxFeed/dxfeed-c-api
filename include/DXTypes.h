@@ -75,4 +75,10 @@ typedef const dxf_char_t*  dxf_const_string_t;
 
 typedef dxf_uint_t dxf_event_flags_t;
 
+typedef struct {
+    dxf_byte_t* elements;
+    int size;
+    int capacity;
+} dxf_byte_array_t;
+
 #endif /* DX_TYPES_H_INCLUDED */

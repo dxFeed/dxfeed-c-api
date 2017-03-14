@@ -207,8 +207,8 @@ dxf_int_t dx_get_codec_valid_cipher (void) {
 dxf_int_t dx_encode_symbol_name (dxf_const_string_t symbol) {
     dxf_long_t penta = 0;
     dxf_int_t penta_length = 0;
-    int i = 0;
-    int length;
+    size_t i = 0;
+    size_t length;
 
     if (symbol == NULL) {
         return 0;
