@@ -65,6 +65,7 @@ extern const dx_buffer_manager_collection_t g_buffer_managers[dx_rid_count];
 /* -------------------------------------------------------------------------- */
 
 bool dx_store_string_buffer (void* context, dxf_const_string_t buf);
-void dx_free_string_buffers (void* context);
+bool dx_store_byte_array_buffer(void* context, dxf_byte_array_t buf);
+void dx_free_buffers(void* context);
 
 #endif /* RECORD_BUFFERS_H_INCLUDED */

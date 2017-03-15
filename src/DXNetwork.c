@@ -48,14 +48,14 @@ typedef struct addrinfo* dx_addrinfo_ptr;
 
 typedef struct {
     dx_addrinfo_ptr* elements;
-    int size;
-    int capacity;
+    size_t size;
+    size_t capacity;
     
     dx_addrinfo_ptr* elements_to_free;
     int elements_to_free_count;
     
     int last_resolution_timestamp;
-    int cur_addr_index;
+    size_t cur_addr_index;
 } dx_address_resolution_context_t;
 
 typedef struct {
@@ -65,8 +65,8 @@ typedef struct {
 
 typedef struct {
     dx_address_t* elements;
-    int size;
-    int capacity;
+    size_t size;
+    size_t capacity;
 } dx_address_array_t;
 
 /* -------------------------------------------------------------------------- */
@@ -546,7 +546,7 @@ bool dx_split_address (const char* host, OUT dx_address_t* addr) {
 /* -------------------------------------------------------------------------- */
 
 void dx_clear_address_array (dx_address_array_t* addresses) {
-    int i = 0;
+    size_t i = 0;
     
     if (addresses->elements == NULL) {
         return;
@@ -569,7 +569,7 @@ bool dx_get_addresses_from_collection (const char* collection, OUT dx_address_ar
     char* cur_address = NULL;
     char* splitter_pos = NULL;
     const char* last_port = NULL;
-    int i = 0;
+    size_t i = 0;
     
     if (collection == NULL || addresses == NULL) {
         dx_set_last_error(dx_ec_invalid_func_param_internal);
@@ -656,7 +656,7 @@ void dx_shuffle_addrs (dx_address_resolution_context_t* addrs) {
 bool dx_resolve_address (dx_network_connection_context_t* context) {
     dx_address_array_t addresses;
     struct addrinfo hints;
-    int i = 0;
+    size_t i = 0;
     FILE* raw_dump_file = NULL;
     
     if (context == NULL) {
@@ -785,7 +785,7 @@ bool dx_connect_to_resolved_addresses (dx_network_connection_context_t* context)
 
 static bool dx_server_event_subscription_refresher (dxf_connection_t connection, 
                                                     dx_order_source_array_ptr_t order_source,
-                                                    dxf_const_string_t* symbols, int symbol_count, 
+                                                    dxf_const_string_t* symbols, size_t symbol_count,
                                                     int event_types, dxf_uint_t subscr_flags, 
                                                     dxf_long_t time) {
     return dx_subscribe_symbols_to_events(connection, order_source, symbols, symbol_count, 

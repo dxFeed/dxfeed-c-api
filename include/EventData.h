@@ -52,6 +52,7 @@ typedef enum {
     dx_eid_theo_price,
     dx_eid_underlying,
     dx_eid_series,
+    dx_eid_configuration,
 
     /* add new event id above this line */
 
@@ -72,10 +73,12 @@ typedef enum {
 #define DXF_ET_THEO_PRICE    (1 << dx_eid_theo_price)
 #define DXF_ET_UNDERLYING    (1 << dx_eid_underlying)
 #define DXF_ET_SERIES        (1 << dx_eid_series)
+#define DXF_ET_CONFIGURATION (1 << dx_eid_configuration)
 #define DXF_ET_UNUSED        (~((1 << dx_eid_count) - 1))
 
 #define DX_EVENT_BIT_MASK(event_id) (1 << event_id)
 
+// The length of record suffix including including the terminating null character 
 #define DXF_RECORD_SUFFIX_SIZE 5
 
 /* -------------------------------------------------------------------------- */
@@ -90,8 +93,8 @@ typedef struct {
 
 typedef struct {
     dx_suffix_t *elements;
-    int size;
-    int capacity;
+    size_t size;
+    size_t capacity;
 } dx_order_source_array_t;
 
 typedef dx_order_source_array_t* dx_order_source_array_ptr_t;
@@ -111,14 +114,14 @@ typedef dx_profile_t dxf_profile_t;
 typedef dx_time_and_sale_t dxf_time_and_sale_t;
 typedef dx_candle_t dxf_candle_t;
 typedef dx_trade_eth_t dxf_trade_eth_t;
-typedef dx_greeks_t dxf_greeks_t;;
+typedef dx_greeks_t dxf_greeks_t;
 typedef dx_theo_price_t dxf_theo_price_t;
 typedef dx_underlying_t dxf_underlying_t;
 typedef dx_series_t dxf_series_t;
 
 typedef struct {
     dxf_int_t count;
-    dxf_int_t event_flags;
+    dxf_event_flags_t event_flags;
     dxf_char_t exchange_code;
     dxf_long_t index;
     dxf_int_t level;
@@ -135,7 +138,7 @@ typedef struct {
 
 typedef struct {
     dxf_int_t count;
-    dxf_int_t event_flags;
+    dxf_event_flags_t event_flags;
     dxf_char_t exchange_code;
     dxf_long_t index;
     dxf_int_t level;
@@ -149,6 +152,10 @@ typedef struct {
     dxf_long_t time_sequence;
     dxf_const_string_t spread_symbol;
 } dxf_spread_order_t;
+
+typedef struct {
+    dxf_string_t object;
+} dxf_configuration_t;
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -316,8 +323,8 @@ typedef struct {
 
 typedef struct {
     dx_event_subscription_param_t* elements;
-    int size;
-    int capacity;
+    size_t size;
+    size_t capacity;
 } dx_event_subscription_param_list_t;
 
 /*
@@ -325,7 +332,7 @@ typedef struct {
  *
  * You need to call dx_free(params.elements) to free resources.
  */
-int dx_get_event_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source, dx_event_id_t event_id,
+size_t dx_get_event_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source, dx_event_id_t event_id,
                                      dxf_uint_t subscr_flags, OUT dx_event_subscription_param_list_t* params);
 
 /* -------------------------------------------------------------------------- */
@@ -338,7 +345,7 @@ typedef struct {
     int event_type;
     dxf_string_t symbol;
 
-    int records_count;
+    size_t records_count;
     const dxf_event_data_t* records;
 } dxf_snapshot_data_t, *dxf_snapshot_data_ptr_t;
 

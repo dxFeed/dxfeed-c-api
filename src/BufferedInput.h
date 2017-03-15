@@ -93,8 +93,10 @@ bool dx_read_compact_long (void* context, OUT dxf_long_t* value);
  * This method defines length as a number of bytes.
  *
  * @param value - the byte array read
+ *
+ * Note: you must to free returned byte array itself.
  */
-bool dx_read_byte_array (void* context, OUT dxf_byte_t** value);
+bool dx_read_byte_array (void* context, OUT dxf_byte_array_t* value);
 
 /* -------------------------------------------------------------------------- */
 /*

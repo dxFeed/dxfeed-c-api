@@ -119,11 +119,14 @@
     <ClCompile Include="src\Snapshot.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\StringArray.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\EventManager.c">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ObjectArray.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ConfigurationDeserializer.c">
+      <Filter>Parser\Sources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -243,14 +246,17 @@
     <ClInclude Include="src\Snapshot.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\StringArray.h">
+    <ClInclude Include="src\EventManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\EventManager.h">
+    <ClInclude Include="src\ObjectArray.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\resource.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ConfigurationDeserializer.h">
+      <Filter>Parser\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

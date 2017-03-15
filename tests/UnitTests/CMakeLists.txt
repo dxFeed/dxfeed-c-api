@@ -40,9 +40,9 @@ set(COMMON_HEADERS
     ${LIB_DXFEED_SRC_DIR}/DXThreads.h
     ${INCLUDE_DIR}/EventData.h
     ${LIB_DXFEED_SRC_DIR}/EventManager.h
+    ${LIB_DXFEED_SRC_DIR}/ObjectArray.h
     ${LIB_DXFEED_SRC_DIR}/PrimitiveTypes.h
     ${LIB_DXFEED_SRC_DIR}/Snapshot.h
-    ${LIB_DXFEED_SRC_DIR}/StringArray.h
     ${LIB_DXFEED_SRC_DIR}/TaskQueue.h
     )
     
@@ -59,8 +59,8 @@ set(COMMON_SOURCES
     ${LIB_DXFEED_SRC_DIR}/DXThreads.c
     ${LIB_DXFEED_SRC_DIR}/EventData.c
     ${LIB_DXFEED_SRC_DIR}/EventManager.c
+    ${LIB_DXFEED_SRC_DIR}/ObjectArray.c
     ${LIB_DXFEED_SRC_DIR}/Snapshot.c
-    ${LIB_DXFEED_SRC_DIR}/StringArray.c
     ${LIB_DXFEED_SRC_DIR}/TaskQueue.c
     ${LIB_DXFEED_SRC_DIR}/Win32.c
     )
@@ -80,6 +80,7 @@ set(HEADER_FILES
     )
     
 set(PARSER_HEADERS
+    ${LIB_DXFEED_SRC_DIR}/ConfigurationDeserializer.h
     ${LIB_DXFEED_SRC_DIR}/Logger.h
     ${LIB_DXFEED_SRC_DIR}/SymbolCodec.h
     )
@@ -89,6 +90,7 @@ set(PARSER_SOURCES
     ${LIB_DXFEED_SRC_DIR}/BufferedIOCommon.c
     ${LIB_DXFEED_SRC_DIR}/BufferedOutput.c
     ${LIB_DXFEED_SRC_DIR}/ClientMessageProcessor.c
+    ${LIB_DXFEED_SRC_DIR}/ConfigurationDeserializer.c
     ${LIB_DXFEED_SRC_DIR}/DataStructures.c
     ${LIB_DXFEED_SRC_DIR}/Decimal.c
     ${LIB_DXFEED_SRC_DIR}/Logger.c
@@ -105,6 +107,7 @@ set(SOURCE_FILES
     EventSubscriptionTest.c
     OrderSourceConfigurationTest.c
     SnapshotTests.c
+    SnapshotUnitTests.c
     TestHelper.c
     UnitTests.c
     )

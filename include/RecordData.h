@@ -48,6 +48,7 @@ typedef enum {
     dx_rid_theo_price,
     dx_rid_underlying,
     dx_rid_series,
+    dx_rid_configuration,
 
     /* add new values above this line */
 
@@ -55,7 +56,7 @@ typedef enum {
     dx_rid_invalid
 } dx_record_info_id_t;
 
-typedef int dx_record_id_t;
+typedef dxf_int_t dx_record_id_t;
 
 /* Invalid or empty record id */
 static const dx_record_id_t DX_RECORD_ID_INVALID = -1;
@@ -157,7 +158,7 @@ typedef struct {
     dxf_const_string_t exchange_sale_conditions;
     dxf_int_t flags;
 
-    dxf_int_t event_flags;
+    dxf_event_flags_t event_flags;
     dxf_long_t index;
     dxf_int_t side;
     dxf_bool_t is_cancel;
@@ -186,6 +187,7 @@ typedef struct {
        daily candle */
     dxf_long_t open_interest;
     dxf_double_t imp_volatility;
+    dxf_event_flags_t event_flags;
 } dx_candle_t;
 
 typedef struct {
@@ -220,6 +222,7 @@ typedef struct {
     dxf_double_t vega;
     /* Note: calculated fields */
     dxf_long_t index;
+    dxf_event_flags_t event_flags;
 } dx_greeks_t;
 
 typedef struct {
@@ -249,6 +252,11 @@ typedef struct {
     dxf_double_t interest;
     /* Note: calculated fields */
     dxf_long_t index;
+    dxf_event_flags_t event_flags;
 } dx_series_t;
+
+typedef struct {
+    dxf_byte_array_t object;
+} dx_configuration_t;
 
 #endif /* RECORD_DATA_H_INCLUDED */

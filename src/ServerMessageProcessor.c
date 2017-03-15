@@ -74,8 +74,8 @@ typedef struct {
 
 typedef struct {
     dx_record_digest_t* elements;
-    int size;
-    int capacity;
+    size_t size;
+    size_t capacity;
 } dx_record_digest_list_t;
 
 /* -------------------------------------------------------------------------- */
@@ -232,7 +232,7 @@ dx_record_digest_t* dx_get_record_digest(dx_server_msg_proc_connection_context_t
     if (context == NULL)
         return NULL;
     record_digests = &(context->record_digests);
-    if (record_digests->elements == NULL || record_id < 0 || record_id >= record_digests->size)
+    if (record_digests->elements == NULL || record_id < 0 || record_id >= (dx_record_id_t)record_digests->size)
         return NULL;
     return &(record_digests->elements[record_id]);
 }
@@ -367,11 +367,11 @@ void dx_clear_record_digest (dx_record_digest_t* digest) {
 /* -------------------------------------------------------------------------- */
 
 void dx_clear_record_digests (dx_server_msg_proc_connection_context_t* context) {
-    int i = 0;
-    int count = 0;
+    dx_record_id_t i = 0;
+    dx_record_id_t count = 0;
     if (context->record_digests.elements == NULL)
         return;
-    count = context->record_digests.size;
+    count = (dx_record_id_t)context->record_digests.size;
     for (; i < count; ++i) {
         dx_record_digest_t* record_digest = dx_get_record_digest(context, i);
         if (record_digest == NULL)
@@ -386,10 +386,10 @@ void dx_clear_record_digests (dx_server_msg_proc_connection_context_t* context) 
 /* -------------------------------------------------------------------------- */
 
 void dx_init_record_digests(dxf_connection_t connection) {
-    int i;
-    int count = dx_get_records_list_count();
+    dx_record_id_t i;
+    dx_record_id_t count = dx_get_records_list_count();
     for (i = 0; i < count; i++) {
-        dx_add_record_digest_to_list(connection, (dx_record_id_t)i);
+        dx_add_record_digest_to_list(connection, i);
     }
 }
 
@@ -462,8 +462,8 @@ bool dx_lock_describe_protocol_processing (dxf_connection_t connection, bool loc
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_get_msg_support_state (int msg, const int* roster, int count, int bitmask) {
-    int idx;
+static bool dx_get_msg_support_state (int msg, const int* roster, size_t count, int bitmask) {
+    size_t idx;
     bool found = false;
 
     DX_ARRAY_SEARCH(roster, 0, count, msg, DX_NUMERIC_COMPARATOR, false, found, idx);
@@ -553,11 +553,11 @@ bool dx_legacy_send_msg_bitmask (OUT int* bitmask) {
     
     if (s_msg_bitmask == 0) {
         const int* msg_roster = dx_get_send_message_roster();
-        int roster_size = dx_get_send_message_roster_size();
+        size_t roster_size = dx_get_send_message_roster_size();
         int i = 0;
         
         for (; i < s_msg_count; ++i) {
-            int msg_index = 0;
+            size_t msg_index = 0;
             bool found = false;
 
             DX_ARRAY_SEARCH(msg_roster, 0, roster_size, s_legacy_msg_list[i], DX_NUMERIC_COMPARATOR, false, found, msg_index);
@@ -596,11 +596,11 @@ bool dx_legacy_recv_msg_bitmask (int* bitmask) {
 
     if (s_msg_bitmask == 0) {
         const int* msg_roster = dx_get_recv_message_roster();
-        int roster_size = dx_get_recv_message_roster_size();
+        size_t roster_size = dx_get_recv_message_roster_size();
         int i = 0;
 
         for (; i < s_msg_count; ++i) {
-            int msg_index = 0;
+            size_t msg_index = 0;
             bool found = false;
 
             DX_ARRAY_SEARCH(msg_roster, 0, roster_size, s_legacy_msg_list[i], DX_NUMERIC_COMPARATOR, false, found, msg_index);
@@ -893,7 +893,7 @@ bool dx_read_records (dx_server_msg_proc_connection_context_t* context,
 	dxf_char_t read_utf_char;
 	dxf_double_t read_double;
 	dxf_string_t read_string;
-	dxf_byte_t* read_byte_array;
+	dxf_byte_array_t read_byte_array;
     const dx_record_digest_t* record_digest = dx_get_record_digest(context, record_id);
     if (record_digest == NULL)
         return dx_set_error_code(dx_ec_invalid_func_param_internal);
@@ -979,6 +979,8 @@ bool dx_read_records (dx_server_msg_proc_connection_context_t* context,
 				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_string);
 			} else {
 				CHECKED_CALL_2(dx_read_byte_array, context->bicc, &read_byte_array);
+
+                dx_store_byte_array_buffer(context->rbcc, read_byte_array);
 				/* Objects goes as byte array to.
 				 According to specification (DESCRIBE_RECORDS.txt):
 				 
@@ -1048,7 +1050,6 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
         dx_record_id_t record_id;
 		dxf_const_string_t suffix;
 		int record_count = 0;
-		dxf_const_string_t symbol = NULL;
         const dx_record_item_t* record_info = NULL;
         dx_record_digest_t* record_digest = NULL;
         dx_record_params_t record_params;
@@ -1059,14 +1060,12 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 		if (context->last_symbol == NULL && !dx_decode_symbol_name(context->last_cipher, (dxf_const_string_t*)&context->last_symbol)) {
 			return false;
 		}
-		symbol = dx_create_string_src(context->last_symbol);
-		dx_store_string_buffer(context->rbcc, symbol);
 
 		{
 			dxf_int_t id;
 
 			if (!dx_read_compact_int(context->bicc, &id)) {
-				dx_free_string_buffers(context->rbcc);
+				dx_free_buffers(context->rbcc);
 			    
 				return false;
 			}
@@ -1075,18 +1074,18 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 		}
 		
 		if (record_id < 0) {
-			dx_free_string_buffers(context->rbcc);
+            dx_free_buffers(context->rbcc);
 
 			return dx_set_error_code(dx_pec_record_not_supported);
 		}
 	    
         record_digest = dx_get_record_digest(context, record_id);
         if (record_digest == NULL) {
-            dx_free_string_buffers(context->rbcc);
+            dx_free_buffers(context->rbcc);
             return dx_set_error_code(dx_ec_invalid_func_param_internal);
         }
 		if (!record_digest->in_sync_with_server) {
-			dx_free_string_buffers(context->rbcc);
+            dx_free_buffers(context->rbcc);
 			
 			return dx_set_error_code(dx_pec_record_description_not_received);
 		}
@@ -1096,14 +1095,14 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
         suffix = dx_string_length(record_info->suffix) > 0 ? record_info->suffix : NULL;
 		
 		if (record_buffer == NULL) {
-			dx_free_string_buffers(context->rbcc);
+            dx_free_buffers(context->rbcc);
 		    
 			return false;
 		}
 		
 
         if (!dx_read_records(context, record_id, record_buffer)) {
-			dx_free_string_buffers(context->rbcc);
+            dx_free_buffers(context->rbcc);
 			
 			return false;
 		}
@@ -1124,12 +1123,12 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
         if (!dx_transcode_record_data(context->connection, &record_params, &event_params, 
             g_buffer_managers[record_info->info_id].record_buffer_getter(context->rbcc), record_count)) {
 
-			dx_free_string_buffers(context->rbcc);
+            dx_free_buffers(context->rbcc);
 
 			return false;
 	    }
 
-        dx_free_string_buffers(context->rbcc);
+        dx_free_buffers(context->rbcc);
 	}
 	
 	return true;
@@ -1260,10 +1259,10 @@ typedef void (*dx_message_type_processor_t)(dx_server_msg_proc_connection_contex
 /* ---------------------------------- */
 
 static void dx_process_server_send_message_type (dx_server_msg_proc_connection_context_t* context, int message_id, dxf_string_t message_name) {
-    int msg_index;
+    size_t msg_index;
     bool found = false;
     const int* msg_roster = dx_get_recv_message_roster();
-    int roster_size = dx_get_recv_message_roster_size();
+    size_t roster_size = dx_get_recv_message_roster_size();
     
     /* Note: this function processes the _server_ send messages, i.e. they should be compared to the messages
        our application _receives_. */
@@ -1286,10 +1285,10 @@ static void dx_process_server_send_message_type (dx_server_msg_proc_connection_c
 /* ---------------------------------- */
 
 static void dx_process_server_recv_message_type (dx_server_msg_proc_connection_context_t* context, int message_id, dxf_string_t message_name) {
-    int msg_index;
+    size_t msg_index;
     bool found = false;
     const int* msg_roster = dx_get_send_message_roster();
-    int roster_size = dx_get_send_message_roster_size();
+    size_t roster_size = dx_get_send_message_roster_size();
 
     /* Note: this function processes the _server_ recv messages, i.e. they should be compared to the messages
        our application _sends_. */
@@ -1692,7 +1691,7 @@ bool dx_add_record_digest_to_list(dxf_connection_t connection, dx_record_id_t in
         return false;
     }
 
-    if (index < mpcc->record_digests.size) {
+    if (index < (dx_record_id_t)(mpcc->record_digests.size)) {
         /* Digest with such index already exist, don't insert new record*/
         return true;
     }

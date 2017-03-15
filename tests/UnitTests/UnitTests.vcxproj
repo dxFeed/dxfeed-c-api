@@ -173,14 +173,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Candle.c" />
+    <ClCompile Include="..\..\src\ConfigurationDeserializer.c" />
     <ClCompile Include="CandleTest.c" />
     <ClCompile Include="..\..\src\EventManager.c" />
     <ClCompile Include="..\..\src\Snapshot.c" />
-    <ClCompile Include="..\..\src\StringArray.c" />
+    <ClCompile Include="..\..\src\ObjectArray.c" />
     <ClCompile Include="EventDynamicSubscriptionTest.cpp" />
     <ClCompile Include="EventSubscriptionTest.c" />
     <ClCompile Include="OrderSourceConfigurationTest.c" />
     <ClCompile Include="SnapshotTests.c" />
+    <ClCompile Include="SnapshotUnitTests.c" />
     <ClCompile Include="TestHelper.c" />
     <ClCompile Include="UnitTests.c" />
     <ClCompile Include="..\..\src\ConnectionContextData.c" />
@@ -211,6 +213,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Candle.h" />
+    <ClInclude Include="..\..\src\ConfigurationDeserializer.h" />
     <ClInclude Include="..\..\src\DXAlgorithms.h" />
     <ClInclude Include="..\..\include\DXErrorCodes.h" />
     <ClInclude Include="..\..\src\DXErrorHandling.h" />
@@ -220,7 +223,7 @@
     <ClInclude Include="..\..\src\EventManager.h" />
     <ClInclude Include="..\..\src\PrimitiveTypes.h" />
     <ClInclude Include="..\..\src\Snapshot.h" />
-    <ClInclude Include="..\..\src\StringArray.h" />
+    <ClInclude Include="..\..\src\ObjectArray.h" />
     <ClInclude Include="..\..\src\TaskQueue.h" />
     <ClInclude Include="..\..\src\EventSubscription.h" />
     <ClInclude Include="CandleTest.h" />

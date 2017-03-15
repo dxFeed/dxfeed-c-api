@@ -178,6 +178,11 @@ dxf_const_string_t dx_get_error_description (dx_error_code_t code) {
     case dx_ssec_invalid_listener: return L"Invalid snapshot listener";
     case dx_ssec_unknown_state: return L"Unknown state of snapshot flags";
     case dx_ssec_duplicate_record: return L"Inserted record is already exist";
+
+    /* configuration record serialization deserialization error codes */
+
+    case dx_csdec_protocol_error: return L"Unexpected token is reached or data is damaged";
+    case dx_csdec_unsupported_version: return L"Current stream version of protocol is not supported";
     
     /* miscellaneous error codes */
     

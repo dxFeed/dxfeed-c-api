@@ -38,8 +38,8 @@ typedef struct {
     dx_mutex_t guard;
     
     dx_task_data_t* elements;
-    int size;
-    int capacity;
+    size_t size;
+    size_t capacity;
     
     int set_fields_flags;
 } dx_task_queue_data_t;
@@ -103,7 +103,7 @@ bool dx_create_task_queue (OUT dx_task_queue_t* tq) {
 
 bool dx_destroy_task_queue (dx_task_queue_t tq) {
     dx_task_queue_data_t* tqd = tq;
-    int i = 0;
+    size_t i = 0;
     bool res = true;
     
     if (tq == NULL) {
@@ -146,7 +146,7 @@ bool dx_add_task_to_queue (dx_task_queue_t tq, dx_task_processor_t processor, vo
 
 bool dx_execute_task_queue (dx_task_queue_t tq) {
     dx_task_queue_data_t* tqd = tq;
-    int i = 0;
+    size_t i = 0;
     bool res = true;
     
     if (tq == NULL) {

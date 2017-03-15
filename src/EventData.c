@@ -43,7 +43,8 @@ static const int g_event_data_sizes[dx_eid_count] = {
     sizeof(dxf_greeks_t),
     sizeof(dxf_theo_price_t),
     sizeof(dxf_underlying_t),
-    sizeof(dxf_series_t)
+    sizeof(dxf_series_t),
+    sizeof(dxf_configuration_t)
 };
 
 static const dxf_char_t g_quote_tmpl[] = L"Quote&";
@@ -80,6 +81,7 @@ dxf_const_string_t dx_event_type_to_string (int event_type) {
     case DXF_ET_THEO_PRICE: return L"TheoPrice";
     case DXF_ET_UNDERLYING: return L"Underlying";
     case DXF_ET_SERIES: return L"Series";
+    case DXF_ET_CONFIGURATION: return L"Configuration";
     default: return L"";
     }
 }
@@ -143,8 +145,9 @@ bool dx_get_single_order_subscription_params(dxf_connection_t connection, dx_ord
         if (order_source->size > 1) {
             return false;
         }
-        CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Order", dx_st_history);
-        if (order_source->size != 0) {
+        if (order_source->size == 0) {
+            CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Order", dx_st_history);
+        } else {
             dx_copy_string(order_name_buf, g_order_tmpl);
             dx_copy_string_len(&order_name_buf[ORDER_TMPL_LEN], order_source->elements[0].suffix, DXF_RECORD_SUFFIX_SIZE);
             CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, order_name_buf, dx_st_history);
@@ -159,7 +162,7 @@ bool dx_get_order_subscription_params(dxf_connection_t connection, dx_order_sour
     dxf_char_t ch = 'A';
     dxf_char_t order_name_buf[ORDER_TMPL_LEN + DXF_RECORD_SUFFIX_SIZE] = { 0 };
     dxf_char_t quote_name_buf[QUOTE_TMPL_LEN + 2] = { 0 };
-    int i;
+    size_t i;
 
     if (IS_FLAG_SET(subscr_flags, DX_SUBSCR_FLAG_SINGLE_RECORD)) {
         return dx_get_single_order_subscription_params(connection, order_source, subscr_flags, param_list);
@@ -235,7 +238,7 @@ bool dx_get_trade_eth_subscription_params(dxf_connection_t connection, OUT dx_ev
  *
  * You need to call dx_free(params.elements) to free resources.
 */
-int dx_get_event_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source, dx_event_id_t event_id,
+size_t dx_get_event_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source, dx_event_id_t event_id,
                                      dxf_uint_t subscr_flags, OUT dx_event_subscription_param_list_t* params) {
     bool result = true;
     dx_event_subscription_param_list_t param_list = { NULL, 0, 0 };
@@ -284,6 +287,9 @@ int dx_get_event_subscription_params(dxf_connection_t connection, dx_order_sourc
     case dx_eid_series:
         result = dx_add_subscription_param_to_list(connection, &param_list, L"Series", dx_st_history);
         break;
+    case dx_eid_configuration:
+        result = dx_add_subscription_param_to_list(connection, &param_list, L"Configuration", dx_st_ticker);
+        break;
     }
 
     if (!result) {
@@ -325,6 +331,7 @@ EVENT_DATA_NAVIGATOR_BODY(dxf_greeks_t)
 EVENT_DATA_NAVIGATOR_BODY(dxf_theo_price_t)
 EVENT_DATA_NAVIGATOR_BODY(dxf_underlying_t)
 EVENT_DATA_NAVIGATOR_BODY(dxf_series_t)
+EVENT_DATA_NAVIGATOR_BODY(dxf_configuration_t)
 
 static const dx_event_data_navigator g_event_data_navigators[dx_eid_count] = {
     EVENT_DATA_NAVIGATOR_NAME(dxf_trade_t),
@@ -339,7 +346,8 @@ static const dx_event_data_navigator g_event_data_navigators[dx_eid_count] = {
     EVENT_DATA_NAVIGATOR_NAME(dxf_greeks_t),
     EVENT_DATA_NAVIGATOR_NAME(dxf_theo_price_t),
     EVENT_DATA_NAVIGATOR_NAME(dxf_underlying_t),
-    EVENT_DATA_NAVIGATOR_NAME(dxf_series_t)
+    EVENT_DATA_NAVIGATOR_NAME(dxf_series_t),
+    EVENT_DATA_NAVIGATOR_NAME(dxf_configuration_t)
 };
 
 /* -------------------------------------------------------------------------- */
