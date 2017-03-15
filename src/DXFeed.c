@@ -911,7 +911,7 @@ DXFEED_API ERRORCODE dxf_get_snapshot_symbol(dxf_snapshot_t snapshot, OUT dxf_st
     return DXF_SUCCESS;
 }
 
-DXFEED_API ERRORCODE dxf_start_dumping_raw_data(dxf_connection_t connection, const char * raw_file_name)
+DXFEED_API ERRORCODE dxf_write_raw_data(dxf_connection_t connection, const char * raw_file_name)
 {
     if (!dx_add_raw_dump_file(connection, raw_file_name)) {
         return DXF_FAILURE;

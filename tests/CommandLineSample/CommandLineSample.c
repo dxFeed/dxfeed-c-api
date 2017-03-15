@@ -392,7 +392,7 @@ int main (int argc, char* argv[]) {
 
     if (argc >= 6 && stricmp(argv[4], "dump") == 0) {
         dump_file_name = argv[5];
-        dxf_start_dumping_raw_data(connection, dump_file_name);
+        dxf_write_raw_data(connection, dump_file_name);
     }
 
     if (!dxf_create_subscription(connection, event_type, &subscription)) {
@@ -436,6 +436,6 @@ int main (int argc, char* argv[]) {
 #ifdef _WIN32
     DeleteCriticalSection(&listener_thread_guard);
 #endif
-    
+    system("pause");
     return 0;
 }
