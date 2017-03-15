@@ -555,5 +555,6 @@ int main (int argc, char* argv[]) {
 #ifdef _WIN32
     DeleteCriticalSection(&listener_thread_guard);
 #endif
+
     return 0;
 }
