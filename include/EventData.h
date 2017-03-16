@@ -374,10 +374,10 @@ typedef struct {
 typedef struct {
     dxf_const_string_t symbol;
 
-    int bids_count;
+    size_t bids_count;
     const dxf_price_level_element_t *bids;
 
-    int asks_count;
+    size_t asks_count;
     const dxf_price_level_element_t *asks;
 } dxf_price_level_book_data_t, *dxf_price_level_book_data_ptr_t;
 

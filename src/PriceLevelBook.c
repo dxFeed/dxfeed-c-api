@@ -49,14 +49,14 @@ typedef struct {
 
 typedef struct {
 	dx_plb_listener_context_t* elements;
-    int size;
-    int capacity;
+    size_t size;
+    size_t capacity;
 } dx_plb_listener_array_t;
 
 typedef struct {
 	dxf_order_t **elements;
-    int size;
-    int capacity;
+    size_t size;
+    size_t capacity;
 } dx_plb_records_array_t;
 
 typedef struct dx_plb_source_consumer {
@@ -67,7 +67,7 @@ typedef struct dx_plb_source_consumer {
 } dx_plb_source_consumer_t;
 
 typedef struct {
-    int count;
+    size_t count;
     dxf_price_level_element_t levels[MAX_PRICE_LEVELS];
     int (*cmp)(dxf_price_level_element_t p1, dxf_price_level_element_t p2);
     bool rebuild;
@@ -223,7 +223,7 @@ static bool dx_plb_ctx_grow_sources_hashtable(dx_plb_connection_context_t* conte
     dx_plb_source_t **oldArray;
     size_t oldSize;
     size_t pos;
-    int i = 0;
+    size_t i = 0;
 
     newArray = dx_calloc(context->src_capacity * 2, sizeof(newArray[0]));
     if (newArray == NULL) {
@@ -579,7 +579,7 @@ static void dx_plb_source_reset_snapshot(dx_plb_source_t *source) {
 /* -------------------------------------------------------------------------- */
 
 static void dx_plb_source_remove_order_from_levels(dx_plb_price_level_side_t *ob, const dxf_order_t *order) {
-    int pos;
+    size_t pos;
     bool found;
     dxf_price_level_element_t key = { order->price, 0, 0 };
     DX_ARRAY_BINARY_SEARCH(ob->levels, 0, ob->count, key, ob->cmp, found, pos);
@@ -595,7 +595,7 @@ static void dx_plb_source_remove_order_from_levels(dx_plb_price_level_side_t *ob
 /* -------------------------------------------------------------------------- */
 
 static void dx_plb_source_add_order_to_levels(dx_plb_price_level_side_t *ob, const dxf_order_t *order) {
-    int pos;
+    size_t pos;
     bool found;
     dxf_price_level_element_t key = { order->price, 0, 0 };
     DX_ARRAY_BINARY_SEARCH(ob->levels, 0, ob->count, key, ob->cmp, found, pos);
@@ -642,8 +642,8 @@ static void dx_plb_source_rebuild_levels(dx_plb_records_array_t *snapshot, dx_pl
 /* -------------------------------------------------------------------------- */
 
 static void dx_plb_source_process_order(dx_plb_source_t *source, const dxf_order_t *order, bool rm) {
-    int orderIdx;
-    int top, bottom;
+    size_t orderIdx;
+    size_t top, bottom;
     bool found = true;
     bool error;
     dxf_order_t *oo;
@@ -1012,7 +1012,7 @@ bool dx_add_price_level_book_listener(dxf_price_level_book_t book,
     dx_plb_listener_context_t ctx = { book_listener, user_data };
     bool found = false;
     bool error = false;
-    int idx;
+    size_t idx;
 
     DX_ARRAY_SEARCH(b->listeners.elements, 0, b->listeners.size, ctx, dx_plb_listener_comparator, false, found, idx);
 
