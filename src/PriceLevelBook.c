@@ -490,14 +490,19 @@ static bool dx_plb_add_book_to_source(dx_plb_source_t *source, dx_price_level_bo
 /* -------------------------------------------------------------------------- */
 
 static void dx_plb_clear_snapshot(dx_plb_source_t *source) {
+    int i = 0;
     source->snapshot.size = 0;
     dx_memset(source->snapshot.elements, 0, source->snapshot.capacity * sizeof(source->snapshot.elements[0]));
 
     dx_memset(source->bids.levels, 0, sizeof(source->bids.levels));
     source->bids.count = 0;
+    for (i = 0; i < sizeof(source->bids.levels) / sizeof(source->bids.levels[0]); i++)
+        source->bids.levels[i].price = NAN;
 
     dx_memset(source->asks.levels, 0, sizeof(source->asks.levels));
     source->asks.count = 0;
+    for (i = 0; i < sizeof(source->bids.levels) / sizeof(source->bids.levels[0]); i++)
+        source->asks.levels[i].price = NAN;
 }
 
 
