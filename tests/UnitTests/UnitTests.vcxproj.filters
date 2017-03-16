@@ -146,6 +146,9 @@
     <ClCompile Include="SnapshotUnitTests.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\PriceLevelBook.c">
+      <Filter>Common\Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\DXAlgorithms.h">
@@ -219,6 +222,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\ConfigurationDeserializer.h">
       <Filter>Parser\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\PriceLevelBook.h">
+      <Filter>Common\Headers</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
