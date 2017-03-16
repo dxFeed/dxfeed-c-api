@@ -674,11 +674,23 @@ void dx_free_event_subscription_data (dx_subscription_data_ptr_t subscr_data) {
  
 const dxf_subscription_t dx_invalid_subscription = (dxf_subscription_t)NULL;
 
+const dxf_const_string_t dx_all_order_sources[] = {
+	L"NTV",
+	L"BYX",
+	L"BZX",
+	L"DEA",
+	L"ISE",
+	L"DEX",
+	L"IST",
+	NULL
+};
+
 dxf_subscription_t dx_create_event_subscription(dxf_connection_t connection, int event_types, 
                                                 dxf_uint_t subscr_flags, dxf_long_t time) {
     dx_subscription_data_ptr_t subscr_data = NULL;
     bool res = true;
     dx_event_subscription_connection_context_t* context = NULL;
+	int i = 0;
     
     if (!dx_validate_connection_handle(connection, false)) {
         return dx_invalid_subscription;
@@ -713,13 +725,9 @@ dxf_subscription_t dx_create_event_subscription(dxf_connection_t connection, int
 
     res = true;
     if (event_types & DXF_ET_ORDER) {
-        res &= dx_add_order_source(subscr_data, L"NTV");
-        res &= dx_add_order_source(subscr_data, L"BYX");
-        res &= dx_add_order_source(subscr_data, L"BZX");
-        res &= dx_add_order_source(subscr_data, L"DEA");
-        res &= dx_add_order_source(subscr_data, L"ISE");
-        res &= dx_add_order_source(subscr_data, L"DEX");
-        res &= dx_add_order_source(subscr_data, L"IST");
+		for (; dx_all_order_sources[i]; i++) {
+			res &= dx_add_order_source(subscr_data, dx_all_order_sources[i]);
+		}
     }
     if (!res) {
         dx_free_event_subscription_data(subscr_data);

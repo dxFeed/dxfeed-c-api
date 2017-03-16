@@ -362,6 +362,42 @@ typedef void(*dxf_snapshot_listener_t) (const dxf_snapshot_data_ptr_t snapshot_d
 
 /* -------------------------------------------------------------------------- */
 /*
+*  Price Level data structs
+*/
+/* -------------------------------------------------------------------------- */
+typedef struct {
+    dxf_double_t price;
+    dxf_long_t size;
+    dxf_long_t time;
+} dxf_price_level_element_t;
+
+typedef struct {
+    dxf_const_string_t symbol;
+
+    int bids_count;
+    const dxf_price_level_element_t *bids;
+
+    int asks_count;
+    const dxf_price_level_element_t *asks;
+} dxf_price_level_book_data_t, *dxf_price_level_book_data_ptr_t;
+
+/* -------------------------------------------------------------------------- */
+/*
+*  Price Level listener prototype
+
+*  book          - pointer to the received price book data.
+*                  bids and asks are sorted by price,
+*                  best bid (with largest price) and best ask
+*                  (with smallest price) are first elements
+*                  of corresponding arrays.
+*  user_data     - pointer to user struct, use NULL by default
+*/
+/* -------------------------------------------------------------------------- */
+
+typedef void(*dxf_price_level_book_listener_t) (const dxf_price_level_book_data_ptr_t book, void* user_data);
+
+/* -------------------------------------------------------------------------- */
+/*
  *	Event data navigation functions
  */
 /* -------------------------------------------------------------------------- */
