@@ -130,7 +130,7 @@ dxf_string_t ansi_to_unicode(const char* ansi_str) {
 
 void listener(const dxf_price_level_book_data_ptr_t book_data, void* user_data) {
     int i = 0;
-    wprintf(L"New Price Level Order Book for %s%s:\n", book_data->symbol, (dxf_const_string_t)user_data);
+    wprintf(L"New Price Level Order Book for %s:\n", book_data->symbol);
     /* Time is 4 + 2 + 2 + 1 + 2 + 2 + 2 = 15 */
     wprintf(L" %-7s %-8s %-15s |  %-7s %-8s %-15s\n", L"Ask", L"Size", L"Time", L"Bid", L"Size", L"Time");
     for (; i < max(book_data->asks_count, book_data->bids_count); i++) {
@@ -149,16 +149,13 @@ void listener(const dxf_price_level_book_data_ptr_t book_data, void* user_data) 
     }
 }
 
-static const char *s_BZX[] = { "BZX", NULL };
-static const char *s_NTV[] = { "NTV", NULL };
+static const char *s_Default_Sources[] = { "BZX", "DEX", NULL };
 
 /* -------------------------------------------------------------------------- */
 
 int main(int argc, char* argv[]) {
     dxf_connection_t connection;
-    dxf_price_level_book_t book1;
-    dxf_price_level_book_t book2;
-    dxf_price_level_book_t book3;
+    dxf_price_level_book_t book;
     dxf_string_t base_symbol = NULL;
     dxf_string_t dxfeed_host_u;
     char* dxfeed_host = NULL;
@@ -170,8 +167,8 @@ int main(int argc, char* argv[]) {
             L"Usage: PriceLevelBookSample <server address> <symbol> [order_source [order_soure [...]]]\n"
             L"  <server address> - a DXFeed server address, e.g. demo.dxfeed.com:7300\n"
             L"  <symbol> - a trade symbol, e.g. C, MSFT, YHOO, IBM\n"
-            L"  [order_source] - a) One or more order sources, e.g.. NTV, BYX, BZX, DEA,\n"
-            L"                      ISE, DEX, IST\n");
+            L"  [order_source] - One or more order sources, e.g.. NTV, BYX, BZX, DEA,\n"
+            L"                   ISE, DEX, IST. Default is BZX DEX\n");
         return 0;
     }
 
@@ -184,11 +181,12 @@ int main(int argc, char* argv[]) {
     }
 
     if (argc > 3) {
+        /* Add NULL at end of list */
         order_sources = calloc(argc - 3 + 1, sizeof(order_sources[0]));
         for (int i = 3; i < argc; i++)
             order_sources[i - 3] = argv[i];
     } else {
-        order_sources = NULL;
+        order_sources = s_Default_Sources;
     }
 
     wprintf(L"PriceLevelBookSample test started.\n");
@@ -207,43 +205,21 @@ int main(int argc, char* argv[]) {
 
     wprintf(L"Connection successful!\n");
     
-    if (!dxf_create_price_level_book(connection, base_symbol, order_sources, &book1)) {
+    if (!dxf_create_price_level_book(connection, base_symbol, order_sources, &book)) {
         process_last_error();
         dxf_close_connection(connection);
         return -1;
     }
-    if (!dxf_attach_price_level_book_listener(book1, &listener, L"#<ALL>")) {
+    if (!dxf_attach_price_level_book_listener(book, &listener, NULL)) {
         process_last_error();
         dxf_close_connection(connection);
         return -1;
     }
-
-    if (!dxf_create_price_level_book(connection, base_symbol, s_BZX, &book2)) {
-        process_last_error();
-        dxf_close_connection(connection);
-        return -1;
-    }
-    if (!dxf_attach_price_level_book_listener(book2, &listener, L"#BZX")) {
-        process_last_error();
-        dxf_close_connection(connection);
-        return -1;
-    }
-
-    if (!dxf_create_price_level_book(connection, base_symbol, s_NTV, &book3)) {
-        process_last_error();
-        dxf_close_connection(connection);
-        return -1;
-    }
-    if (!dxf_attach_price_level_book_listener(book3, &listener, L"#NTV")) {
-        process_last_error();
-        dxf_close_connection(connection);
-        return -1;
-    }
-
 
     wprintf(L"Subscription successful!\n");
-    /* free(NULL) is no-op */
-    free(order_sources);
+    if (argc > 3) {
+        free(order_sources);
+    }
 
     while (!is_thread_terminate()) {
 #ifdef _WIN32
@@ -253,17 +229,7 @@ int main(int argc, char* argv[]) {
 #endif
     }
 
-    if (!dxf_close_price_level_book(book1)) {
-        process_last_error();
-        dxf_close_connection(connection);
-        return -1;
-    }
-    if (!dxf_close_price_level_book(book2)) {
-        process_last_error();
-        dxf_close_connection(connection);
-        return -1;
-    }
-    if (!dxf_close_price_level_book(book3)) {
+    if (!dxf_close_price_level_book(book)) {
         process_last_error();
         dxf_close_connection(connection);
         return -1;
