@@ -977,7 +977,7 @@ DXFEED_API ERRORCODE dxf_create_price_level_book(dxf_connection_t connection,
             }
             wsrc = dx_ansi_to_unicode(sources[i]);
             found = false;
-            for (s = 0; dx_all_order_sources[s] != NULL; s++) {
+            for (s = 0; !found && dx_all_order_sources[s] != NULL; s++) {
                 if (!dx_compare_strings(wsrc, dx_all_order_sources[s])) {
                     found = true;
                     if ((srcflags & (1ULL << s)) == 0)
