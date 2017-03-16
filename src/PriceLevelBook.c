@@ -887,10 +887,10 @@ static void plb_event_listener(int event_type, dxf_const_string_t symbol_name,
         if ((source->asks.updated || source->bids.updated) && source->snapshot_status == dx_status_full && !tx) {
             /* Maybe, rebuild full books */
             if (source->asks.rebuild) {
-                dx_plb_source_rebuild_levels(&source->snapshot, &source->asks, DXF_ORDER_SIDE_BUY);
+                dx_plb_source_rebuild_levels(&source->snapshot, &source->asks, DXF_ORDER_SIDE_SELL);
             }
             if (source->bids.rebuild) {
-                dx_plb_source_rebuild_levels(&source->snapshot, &source->bids, DXF_ORDER_SIDE_SELL);
+                dx_plb_source_rebuild_levels(&source->snapshot, &source->bids, DXF_ORDER_SIDE_BUY);
             }
 
             for (c = source->consumers; c != NULL; c = c->next)
