@@ -1032,7 +1032,7 @@ bool dx_remove_price_level_book_listener(dxf_price_level_book_t book,
     dx_plb_listener_context_t ctx = { book_listener, NULL };
     bool found = false;
     bool error = false;
-    int idx;
+    size_t idx;
 
     DX_ARRAY_SEARCH(b->listeners.elements, 0, b->listeners.size, ctx, dx_plb_listener_comparator, false, found, idx);
     if (!found) {
