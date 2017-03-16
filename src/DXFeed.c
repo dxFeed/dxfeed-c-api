@@ -941,11 +941,13 @@ DXFEED_API ERRORCODE dxf_create_price_level_book(dxf_connection_t connection,
                                                  dxf_const_string_t symbol,
                                                  const char** sources,
                                                  OUT dxf_price_level_book_t* book) {
-    dxf_subscription_t subscription = NULL;
-    const dxf_uint_t subscr_flags = DX_SUBSCR_FLAG_TIME_SERIES | DX_SUBSCR_FLAG_SINGLE_RECORD;
 	int i = 0;
-
-
+    int s = 0;
+    dxf_ulong_t srcflags = 0;
+    dxf_string_t wsrc;
+    size_t srccount = 0;
+    bool found;
+    
     dx_logging_verbose_info(L"Create price level book, symbol: %s", symbol);
 
     dx_perform_common_actions();
@@ -963,7 +965,39 @@ DXFEED_API ERRORCODE dxf_create_price_level_book(dxf_connection_t connection,
         return DXF_FAILURE;
     }
 
-	*book = dx_create_price_level_book(connection, symbol, sources);
+    /* Check sources */
+    if (sources == NULL) {
+        srcflags = ~0ULL;
+        srccount = dx_all_order_sources_count;
+    } else {
+        for (; sources[i]; i++) {
+            if (!sources[i] || strlen(sources[i]) < 1 || strlen(sources[i]) > 4) {
+                dx_set_error_code(dx_ec_invalid_func_param);
+                return DXF_FAILURE;
+            }
+            wsrc = dx_ansi_to_unicode(sources[i]);
+            found = false;
+            for (s = 0; dx_all_order_sources[s] != NULL; s++) {
+                if (!dx_compare_strings(wsrc, dx_all_order_sources[s])) {
+                    found = true;
+                    if ((srcflags & (1ULL << s)) == 0)
+                        srccount++;
+                    srcflags |= (1ULL << s);
+                }
+            }
+            dx_free(wsrc);
+            if (!found) {
+                dx_set_error_code(dx_ec_invalid_func_param);
+                return DXF_FAILURE;
+            }
+        }
+    }
+    if (srccount == 0) {
+        dx_set_error_code(dx_ec_invalid_func_param);
+        return DXF_FAILURE;
+    }
+
+	*book = dx_create_price_level_book(connection, symbol, srccount, srcflags);
 	if (*book == NULL) {
 		return DXF_FAILURE;
 	}

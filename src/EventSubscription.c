@@ -35,6 +35,18 @@
  */
 /* -------------------------------------------------------------------------- */
 
+const dxf_const_string_t dx_all_order_sources[] = {
+	L"NTV",
+	L"BYX",
+	L"BZX",
+	L"DEA",
+	L"ISE",
+	L"DEX",
+	L"IST",
+	NULL
+};
+const size_t dx_all_order_sources_count = sizeof(dx_all_order_sources) / sizeof(dx_all_order_sources[0]) - 1;
+
 struct dx_subscription_data_struct_t;
 typedef struct dx_subscription_data_struct_t dx_subscription_data_t;
 typedef dx_subscription_data_t* dx_subscription_data_ptr_t;
@@ -673,17 +685,6 @@ void dx_free_event_subscription_data (dx_subscription_data_ptr_t subscr_data) {
 /* -------------------------------------------------------------------------- */
  
 const dxf_subscription_t dx_invalid_subscription = (dxf_subscription_t)NULL;
-
-const dxf_const_string_t dx_all_order_sources[] = {
-	L"NTV",
-	L"BYX",
-	L"BZX",
-	L"DEA",
-	L"ISE",
-	L"DEX",
-	L"IST",
-	NULL
-};
 
 dxf_subscription_t dx_create_event_subscription(dxf_connection_t connection, int event_types, 
                                                 dxf_uint_t subscr_flags, dxf_long_t time) {

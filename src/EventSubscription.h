@@ -42,6 +42,7 @@
 extern const dxf_subscription_t dx_invalid_subscription;
 
 extern const dxf_const_string_t dx_all_order_sources[];
+extern const size_t dx_all_order_sources_count;
 
 /* -------------------------------------------------------------------------- */
 /*

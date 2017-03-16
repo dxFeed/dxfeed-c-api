@@ -906,13 +906,13 @@ static void plb_event_listener(int event_type, dxf_const_string_t symbol_name,
 
 dxf_price_level_book_t dx_create_price_level_book(dxf_connection_t connection,
                                                   dxf_const_string_t symbol,
-                                                  const char** sources) {
+                                                  size_t srccount, dxf_ulong_t srcflags) {
 	bool res = true;
 	dx_plb_connection_context_t *context = NULL;
 	dx_price_level_book_t *book = NULL;
-    dxf_const_string_t src;
     dx_plb_source_t *source;
 	int i = 0;
+    int sidx = 0;
 
 	context = dx_get_subsystem_data(connection, dx_ccs_price_level_book, &res);
 	if (context == NULL) {
@@ -944,30 +944,20 @@ dxf_price_level_book_t dx_create_price_level_book(dxf_connection_t connection,
     book->book.asks = &book->asks.levels[0];
     book->book.bids = &book->bids.levels[0];
 
-	/* Renumerate sources */
-	if (sources == NULL) {
-        for (; dx_all_order_sources[book->sources_count] != NULL; book->sources_count++);
-	} else {
-        for (; sources[book->sources_count] != NULL; book->sources_count++);
-    }
-    if (book->sources_count == 0) {
-        dx_plb_book_free(book);
-        dx_set_error_code(dx_ec_invalid_func_param);
-        return NULL;
-    }
-    book->sources = calloc(book->sources_count, sizeof(book->sources[0]));
+    book->sources_count = (int)srccount;
+    book->sources = dx_calloc(book->sources_count, sizeof(book->sources[0]));
     if (book->sources == NULL) {
         dx_plb_book_free(book);
         dx_set_error_code(dx_mec_insufficient_memory);
         return NULL;
     }
-    book->src_bids = calloc(book->sources_count, sizeof(book->src_bids[0]));
+    book->src_bids = dx_calloc(book->sources_count, sizeof(book->src_bids[0]));
     if (book->src_bids == NULL) {
         dx_plb_book_free(book);
         dx_set_error_code(dx_mec_insufficient_memory);
         return NULL;
     }
-    book->src_asks = calloc(book->sources_count, sizeof(book->src_asks[0]));
+    book->src_asks = dx_calloc(book->sources_count, sizeof(book->src_asks[0]));
     if (book->src_asks == NULL) {
         dx_plb_book_free(book);
         dx_set_error_code(dx_mec_insufficient_memory);
@@ -978,22 +968,15 @@ dxf_price_level_book_t dx_create_price_level_book(dxf_connection_t connection,
     CHECKED_CALL(dx_mutex_lock, &(context->guard));
 
     /* Add or create sources */
-    for (; i < book->sources_count; i++) {
-        if (sources == NULL) {
-            src = dx_all_order_sources[i];
-        } else {
-            src = dx_ansi_to_unicode(sources[i]);
-        }
+    for (i = 0; dx_all_order_sources[i] != NULL; i++) {
+        if ((srcflags & (1ULL << i)) == 0)
+            continue;
 
         /* We have src & symbol */
-        source = dx_plb_ctx_find_source(context, symbol, src);
+        source = dx_plb_ctx_find_source(context, symbol, dx_all_order_sources[i]);
         if (source == NULL) {
-            source = dx_plb_source_create(connection, symbol, src);
-            if (source == NULL) {
-                if (sources != NULL
-                    || !dx_plb_ctx_add_source(context, source)) {
-                    dx_free((dxf_string_t)src);
-                }
+            source = dx_plb_source_create(connection, symbol, dx_all_order_sources[i]);
+            if (source == NULL || !dx_plb_ctx_add_source(context, source)) {
                 dx_plb_book_clear(book);
                 /* Remove all new sources from hash */
                 dx_plb_ctx_cleanup_sources(context);
@@ -1001,21 +984,14 @@ dxf_price_level_book_t dx_create_price_level_book(dxf_connection_t connection,
                 return NULL;
             }
         }
-        book->sources[i] = source;
-        book->src_bids[i] = &source->bids;
-        book->src_asks[i] = &source->asks;
-
-        if (!dx_plb_source_add_book(source, book, i)) {
-            if (sources != NULL) {
-                dx_free((dxf_string_t)src);
-            }
+        book->sources[sidx] = source;
+        book->src_bids[sidx] = &source->bids;
+        book->src_asks[sidx] = &source->asks;
+        
+        sidx++;
+        if (!dx_plb_source_add_book(source, book, sidx)) {
             dx_plb_book_clear(book);
             return NULL;
-        }
-
-        /* Ready! */
-        if (sources != NULL) {
-            dx_free((dxf_string_t)src);
         }
     }
     dx_mutex_unlock(&context->guard);

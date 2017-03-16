@@ -26,7 +26,7 @@
 
 dxf_price_level_book_t dx_create_price_level_book(dxf_connection_t connection,
                                                   dxf_const_string_t symbol,
-                                                  const char** sources);
+                                                  size_t srccount, dxf_ulong_t srcflags);
 bool dx_close_price_level_book(dxf_price_level_book_t book);
 bool dx_add_price_level_book_listener(dxf_price_level_book_t book,
                                       dxf_price_level_book_listener_t book_listener,
