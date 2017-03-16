@@ -651,7 +651,7 @@ static void dx_plb_process_order(dx_plb_source_t *source, const dxf_order_t *ord
             dx_memcpy(oo, order, sizeof(*oo));
             dx_plb_add_order_to_ob(oo->side == DXF_ORDER_SIDE_BUY ? &source->bids : &source->asks, oo);
         }
-    } else {
+    } else if (!rm && order->size != 0) {
         /* Not found: Add it */
         oo = dx_calloc(1, sizeof(*oo));
         if (oo == NULL) {
