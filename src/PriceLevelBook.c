@@ -564,8 +564,11 @@ static bool dx_plb_source_add_book(dx_plb_source_t *source, dx_price_level_book_
 
 static void dx_plb_source_reset_snapshot(dx_plb_source_t *source) {
     int i = 0;
+    for (i = 0; i < source->snapshot.size; i++) {
+        dx_free(source->snapshot.elements[i]);
+        source->snapshot.elements[i] = NULL;
+    }
     source->snapshot.size = 0;
-    dx_memset(source->snapshot.elements, 0, source->snapshot.capacity * sizeof(source->snapshot.elements[0]));
 
     dx_memset(source->bids.levels, 0, sizeof(source->bids.levels));
     source->bids.count = 0;
