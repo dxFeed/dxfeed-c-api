@@ -564,8 +564,11 @@ static bool dx_plb_source_add_book(dx_plb_source_t *source, dx_price_level_book_
 
 static void dx_plb_source_reset_snapshot(dx_plb_source_t *source) {
     int i = 0;
+    for (i = 0; i < source->snapshot.size; i++) {
+        dx_free(source->snapshot.elements[i]);
+        source->snapshot.elements[i] = NULL;
+    }
     source->snapshot.size = 0;
-    dx_memset(source->snapshot.elements, 0, source->snapshot.capacity * sizeof(source->snapshot.elements[0]));
 
     dx_memset(source->bids.levels, 0, sizeof(source->bids.levels));
     source->bids.count = 0;
@@ -593,8 +596,8 @@ static void dx_plb_source_remove_order_from_levels(dx_plb_price_level_side_t *ob
         return;
     ob->levels[pos].size -= order->size;
     ob->levels[pos].time = order->time;
-    /* If size is zero, we should rebuild whole order book */
-    ob->rebuild = ob->levels[pos].size <= 0;
+    /* If size is zero, we should rebuild whole order book (maybe, other zeroes was in same tx) */
+    ob->rebuild |= ob->levels[pos].size <= 0;
     ob->updated = true;
 }
 
@@ -692,7 +695,7 @@ static void dx_plb_source_process_order(dx_plb_source_t *source, const dxf_order
             /* Update order */
             /* Add first, to minimize chances to hit zero size */
             dx_plb_source_add_order_to_levels(order->side == DXF_ORDER_SIDE_BUY ? &source->bids : &source->asks, order);
-            /* Remove old order, which is replaced by this one*/
+            /* Remove old order, which is replaced by this one */
             dx_plb_source_remove_order_from_levels(oo->side == DXF_ORDER_SIDE_BUY ? &source->bids : &source->asks, oo);
             /* And replace order */
             *oo = *order;
