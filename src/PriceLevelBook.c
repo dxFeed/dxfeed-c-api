@@ -695,7 +695,7 @@ static void dx_plb_source_process_order(dx_plb_source_t *source, const dxf_order
             /* Update order */
             /* Add first, to minimize chances to hit zero size */
             dx_plb_source_add_order_to_levels(order->side == DXF_ORDER_SIDE_BUY ? &source->bids : &source->asks, order);
-            /* Remove old order, which is replaced by this one*/
+            /* Remove old order, which is replaced by this one */
             dx_plb_source_remove_order_from_levels(oo->side == DXF_ORDER_SIDE_BUY ? &source->bids : &source->asks, oo);
             /* And replace order */
             *oo = *order;
