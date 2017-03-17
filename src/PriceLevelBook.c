@@ -90,7 +90,9 @@ typedef struct {
 	dx_plb_source_consumer_t *consumers;
 
     dx_plb_price_level_side_t bids;
+    dx_plb_price_level_side_t final_bids;
     dx_plb_price_level_side_t asks;
+    dx_plb_price_level_side_t final_asks;
 } dx_plb_source_t;
 
 struct dx_price_level_book {
@@ -569,11 +571,15 @@ static void dx_plb_source_reset_snapshot(dx_plb_source_t *source) {
     source->bids.count = 0;
     for (i = 0; i < sizeof(source->bids.levels) / sizeof(source->bids.levels[0]); i++)
         source->bids.levels[i].price = NAN;
+    /* Clean up final book */
+    source->final_bids = source->bids;
 
     dx_memset(source->asks.levels, 0, sizeof(source->asks.levels));
     source->asks.count = 0;
-    for (i = 0; i < sizeof(source->bids.levels) / sizeof(source->bids.levels[0]); i++)
+    for (i = 0; i < sizeof(source->asks.levels) / sizeof(source->asks.levels[0]); i++)
         source->asks.levels[i].price = NAN;
+    /* Clean up final book */
+    source->final_asks = source->asks;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -684,9 +690,12 @@ static void dx_plb_source_process_order(dx_plb_source_t *source, const dxf_order
         }
         else {
             /* Update order */
+            /* Add first, to minimize chances to hit zero size */
+            dx_plb_source_add_order_to_levels(order->side == DXF_ORDER_SIDE_BUY ? &source->bids : &source->asks, order);
+            /* Remove old order, which is replaced by this one*/
             dx_plb_source_remove_order_from_levels(oo->side == DXF_ORDER_SIDE_BUY ? &source->bids : &source->asks, oo);
-            dx_memcpy(oo, order, sizeof(*oo));
-            dx_plb_source_add_order_to_levels(oo->side == DXF_ORDER_SIDE_BUY ? &source->bids : &source->asks, oo);
+            /* And replace order */
+            *oo = *order;
         }
     }
     else if (!rm && order->size != 0) {
@@ -882,15 +891,26 @@ static void plb_event_listener(int event_type, dxf_const_string_t symbol_name,
         if (se) {
             source->snapshot_status = dx_status_full;
         }
+        if (tx && source->snapshot_status == dx_status_full) {
+            source->snapshot_status = dx_status_pending;
+        } else if (!tx && source->snapshot_status == dx_status_pending) {
+            source->snapshot_status = dx_status_full;
+        }
 
         /* And call all consumers  if it is end of transaction */
-        if ((source->asks.updated || source->bids.updated) && source->snapshot_status == dx_status_full && !tx) {
-            /* Maybe, rebuild full books */
+        if ((source->asks.updated || source->bids.updated) && source->snapshot_status == dx_status_full) {
+            if (source->bids.rebuild) {
+                dx_plb_source_rebuild_levels(&source->snapshot, &source->bids, DXF_ORDER_SIDE_BUY);
+            }
+            if (source->bids.updated) {
+                source->final_bids = source->bids;
+            }
+
             if (source->asks.rebuild) {
                 dx_plb_source_rebuild_levels(&source->snapshot, &source->asks, DXF_ORDER_SIDE_SELL);
             }
-            if (source->bids.rebuild) {
-                dx_plb_source_rebuild_levels(&source->snapshot, &source->bids, DXF_ORDER_SIDE_BUY);
+            if (source->asks.updated) {
+                source->final_asks = source->asks;
             }
 
             for (c = source->consumers; c != NULL; c = c->next)
@@ -941,8 +961,8 @@ dxf_price_level_book_t dx_create_price_level_book(dxf_connection_t connection,
     }
 
     book->book.symbol = book->symbol;
-    book->book.asks = &book->asks.levels[0];
     book->book.bids = &book->bids.levels[0];
+    book->book.asks = &book->asks.levels[0];
 
     book->sources_count = (int)srccount;
     book->sources = dx_calloc(book->sources_count, sizeof(book->sources[0]));
@@ -985,8 +1005,8 @@ dxf_price_level_book_t dx_create_price_level_book(dxf_connection_t connection,
             }
         }
         book->sources[sidx] = source;
-        book->src_bids[sidx] = &source->bids;
-        book->src_asks[sidx] = &source->asks;
+        book->src_bids[sidx] = &source->final_bids;
+        book->src_asks[sidx] = &source->final_asks;
         
         sidx++;
         if (!dx_plb_source_add_book(source, book, sidx)) {
