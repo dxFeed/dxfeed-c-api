@@ -596,8 +596,8 @@ static void dx_plb_source_remove_order_from_levels(dx_plb_price_level_side_t *ob
         return;
     ob->levels[pos].size -= order->size;
     ob->levels[pos].time = order->time;
-    /* If size is zero, we should rebuild whole order book */
-    ob->rebuild = ob->levels[pos].size <= 0;
+    /* If size is zero, we should rebuild whole order book (maybe, other zeroes was in same tx) */
+    ob->rebuild |= ob->levels[pos].size <= 0;
     ob->updated = true;
 }
 
