@@ -138,7 +138,7 @@ void listener(const dxf_price_level_book_data_ptr_t book_data, void* user_data) 
             wprintf(L"$%-7.2f %-8lld ", book_data->asks[i].price, book_data->asks[i].size);
             print_timestamp(book_data->asks[i].time);
         } else {
-            wprintf(L" %-7s %-8s %-15s\n", L"", L"", L"");
+            wprintf(L" %-7s %-8s %-15s", L"", L"", L"");
         }
         wprintf(L" | ");
         if (i < book_data->bids_count) {
