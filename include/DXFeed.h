@@ -445,7 +445,7 @@ DXFEED_API ERRORCODE dxf_detach_snapshot_listener(dxf_snapshot_t snapshot,
 DXFEED_API ERRORCODE dxf_get_snapshot_symbol(dxf_snapshot_t snapshot, OUT dxf_string_t* symbol);
 
 /*
- * Add dumping of incoming traffic into specific file
+ *  Add dumping of incoming traffic into specific file
  *
  *  connection - a handle of a previously created connection which the subscription will be using
  *  raw_file_name - raw data file name
