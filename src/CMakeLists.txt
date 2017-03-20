@@ -71,6 +71,7 @@ set (HEADER_FILES
     EventSubscription.h
     Logger.h
     ObjectArray.h
+    PriceLevelBook.h
     PrimitiveTypes.h
     resource.h
     RecordTranscoder.h
@@ -126,6 +127,7 @@ set (SOURCE_FILES
     EventSubscription.c
     Logger.c
     ObjectArray.c
+    PriceLevelBook.c
     RecordTranscoder.c
     ServerMessageProcessor.c
     Snapshot.c

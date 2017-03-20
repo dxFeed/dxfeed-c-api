@@ -444,5 +444,47 @@ DXFEED_API ERRORCODE dxf_detach_snapshot_listener(dxf_snapshot_t snapshot,
 */
 DXFEED_API ERRORCODE dxf_get_snapshot_symbol(dxf_snapshot_t snapshot, OUT dxf_string_t* symbol);
 
+/*
+ *  Creates Price Level book with the specified parameters.
+ *
+ *  connection - a handle of a previously created connection which the subscription will be using
+ *  symbol - the symbol to use
+ *  sources - order sources for Order, NULL-terminated list. Each element can be one of following:
+ *            "BYX", "BZX", "DEA", "DEX", "ISE", "IST", "NTV".
+ *  OUT book - a handle of the created price level book
+ */
+DXFEED_API ERRORCODE dxf_create_price_level_book(dxf_connection_t connection, 
+                                                 dxf_const_string_t symbol, const char** sources,
+                                                 OUT dxf_price_level_book_t* book);
+
+/*
+ *  Closes a price level book.
+ *  All the data associated with it will be freed.
+ *
+ *  book - a handle of the price level book to close
+ */
+DXFEED_API ERRORCODE dxf_close_price_level_book(dxf_price_level_book_t book);
+
+/*
+ *  Attaches a listener callback to the snapshot.
+ *  This callback will be invoked when the new snapshot arrives or existing updates.
+ *  No error occurs if it's attempted to attach the same listener twice or more.
+ *
+ *  snapshot - a handle of the snapshot to which a listener is to be attached
+ *  snapshot_listener - a listener callback function pointer
+ */
+DXFEED_API ERRORCODE dxf_attach_price_level_book_listener(dxf_price_level_book_t book, 
+                                                          dxf_price_level_book_listener_t book_listener,
+                                                          void* user_data);
+
+/*
+ *  Detaches a listener from the snapshot.
+ *  No error occurs if it's attempted to detach a listener which wasn't previously attached.
+ *
+ *  snapshot - a handle of the snapshot to which a listener is to be detached
+ *  snapshot_listener - a listener callback function pointer
+ */
+DXFEED_API ERRORCODE dxf_detach_price_level_book_listener(dxf_price_level_book_t book, 
+                                                          dxf_price_level_book_listener_t book_listener);
 
 #endif /* DXFEED_API_H_INCLUDED */

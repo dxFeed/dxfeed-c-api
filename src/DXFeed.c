@@ -34,6 +34,7 @@
 #include "ConnectionContextData.h"
 #include "DXThreads.h"
 #include "Snapshot.h"
+#include "PriceLevelBook.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -166,6 +167,17 @@ ERRORCODE dx_perform_common_actions () {
     return DXF_SUCCESS;
 }
 
+static ERRORCODE dx_init_codec() {
+    static bool symbol_codec_initialized = false;
+    if (!symbol_codec_initialized) {
+        symbol_codec_initialized = true;
+        if (dx_init_symbol_codec() != true) {
+            return DXF_FAILURE;
+        }
+    }
+    return DXF_SUCCESS;
+}
+
 /* -------------------------------------------------------------------------- */
 /*
 *	DXFeed API constants
@@ -259,30 +271,25 @@ DXFEED_API ERRORCODE dxf_close_connection (dxf_connection_t connection) {
 ERRORCODE dxf_create_subscription_impl (dxf_connection_t connection, int event_types, 
                                         dxf_uint_t subscr_flags, dxf_long_t time, 
                                         OUT dxf_subscription_t* subscription) {
-	static bool symbol_codec_initialized = false;
 
     dx_logging_verbose_info(L"Create subscription, event types: %x", event_types);
 
     dx_perform_common_actions();
 	
+    if (!dx_init_codec()) {
+        return DXF_FAILURE;
+    }
+
     if (!dx_validate_connection_handle(connection, false)) {
         return DXF_FAILURE;
     }
     
     if (subscription == NULL) {
         dx_set_error_code(dx_ec_invalid_func_param);
-        
         return DXF_FAILURE;
     }
-	
-	if (!symbol_codec_initialized) {
-		symbol_codec_initialized = true;
-		
-		if (dx_init_symbol_codec() != true) {
-		    return DXF_FAILURE;
-		}
-	}
-	
+
+
 	if ((*subscription = dx_create_event_subscription(connection, event_types, subscr_flags, time)) == dx_invalid_subscription) {
 	    return DXF_FAILURE;
 	}
@@ -914,6 +921,8 @@ DXFEED_API ERRORCODE dxf_detach_snapshot_listener(dxf_snapshot_t snapshot, dxf_s
     return DXF_SUCCESS;
 }
 
+/* -------------------------------------------------------------------------- */
+
 DXFEED_API ERRORCODE dxf_get_snapshot_symbol(dxf_snapshot_t snapshot, OUT dxf_string_t* symbol) {
     dx_perform_common_actions();
 
@@ -924,4 +933,132 @@ DXFEED_API ERRORCODE dxf_get_snapshot_symbol(dxf_snapshot_t snapshot, OUT dxf_st
 
     *symbol = dx_get_snapshot_symbol(snapshot);
     return DXF_SUCCESS;
+}
+
+/* -------------------------------------------------------------------------- */
+
+DXFEED_API ERRORCODE dxf_create_price_level_book(dxf_connection_t connection, 
+                                                 dxf_const_string_t symbol,
+                                                 const char** sources,
+                                                 OUT dxf_price_level_book_t* book) {
+	int i = 0;
+    int s = 0;
+    dxf_ulong_t srcflags = 0;
+    dxf_string_t wsrc;
+    size_t srccount = 0;
+    bool found;
+    
+    dx_logging_verbose_info(L"Create price level book, symbol: %s", symbol);
+
+    dx_perform_common_actions();
+    if (!dx_init_codec()) {
+        return DXF_FAILURE;
+    }
+
+    if (book == NULL) {
+        dx_set_error_code(dx_ec_invalid_func_param);
+        return DXF_FAILURE;
+    }
+
+    if (symbol == NULL || dx_string_length(symbol) == 0) {
+        dx_set_error_code(dx_ssec_invalid_symbol);
+        return DXF_FAILURE;
+    }
+
+    /* Check sources */
+    if (sources == NULL) {
+        srcflags = ~0ULL;
+        srccount = dx_all_order_sources_count;
+    } else {
+        for (; sources[i]; i++) {
+            if (!sources[i] || strlen(sources[i]) < 1 || strlen(sources[i]) > 4) {
+                dx_set_error_code(dx_ec_invalid_func_param);
+                return DXF_FAILURE;
+            }
+            wsrc = dx_ansi_to_unicode(sources[i]);
+            found = false;
+            for (s = 0; !found && dx_all_order_sources[s] != NULL; s++) {
+                if (!dx_compare_strings(wsrc, dx_all_order_sources[s])) {
+                    found = true;
+                    if ((srcflags & (1ULL << s)) == 0)
+                        srccount++;
+                    srcflags |= (1ULL << s);
+                }
+            }
+            dx_free(wsrc);
+            if (!found) {
+                dx_set_error_code(dx_ec_invalid_func_param);
+                return DXF_FAILURE;
+            }
+        }
+    }
+    if (srccount == 0) {
+        dx_set_error_code(dx_ec_invalid_func_param);
+        return DXF_FAILURE;
+    }
+
+	*book = dx_create_price_level_book(connection, symbol, srccount, srcflags);
+	if (*book == NULL) {
+		return DXF_FAILURE;
+	}
+
+    return DXF_SUCCESS;
+}
+
+/* -------------------------------------------------------------------------- */
+
+DXFEED_API ERRORCODE dxf_close_price_level_book(dxf_price_level_book_t book) {
+	dxf_subscription_t subscription = NULL;
+
+	dx_perform_common_actions();
+
+	dx_logging_verbose_info(L"Close Price Level Book");
+
+	if (book == NULL) {
+		dx_set_error_code(dx_ec_invalid_func_param);
+		return DXF_FAILURE;
+	}
+    if (!dx_close_price_level_book(book)) {
+        return DXF_FAILURE;
+    }
+
+	return DXF_SUCCESS;
+}
+
+/* -------------------------------------------------------------------------- */
+
+DXFEED_API ERRORCODE dxf_attach_price_level_book_listener(dxf_price_level_book_t book, 
+                                                          dxf_price_level_book_listener_t book_listener,
+                                                          void* user_data) {
+	dx_perform_common_actions();
+
+	if (book == NULL) {
+		dx_set_error_code(dx_ec_invalid_func_param);
+		return DXF_FAILURE;
+	}
+
+	if (!dx_add_price_level_book_listener(book, book_listener, user_data)) {
+		return DXF_FAILURE;
+	}
+
+	return DXF_SUCCESS;
+}
+
+/* -------------------------------------------------------------------------- */
+
+DXFEED_API ERRORCODE dxf_detach_price_level_book_listener(dxf_price_level_book_t book, 
+                                                          dxf_price_level_book_listener_t book_listener) {
+	dx_perform_common_actions();
+
+	if (book == NULL) {
+		dx_set_error_code(dx_ec_invalid_func_param);
+
+		return DXF_FAILURE;
+	}
+
+	if (!dx_remove_price_level_book_listener(book, book_listener)) {
+		return DXF_FAILURE;
+	}
+
+	return DXF_SUCCESS;
 }
