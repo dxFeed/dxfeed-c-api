@@ -128,6 +128,9 @@
     <ClCompile Include="src\ConfigurationDeserializer.c">
       <Filter>Parser\Sources</Filter>
     </ClCompile>
+    <ClCompile Include="src\PriceLevelBook.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="DXFeed.def">
@@ -257,6 +260,9 @@
     </ClInclude>
     <ClInclude Include="src\ConfigurationDeserializer.h">
       <Filter>Parser\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PriceLevelBook.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
