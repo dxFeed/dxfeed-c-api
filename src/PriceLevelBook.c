@@ -76,7 +76,6 @@ typedef struct {
 
 typedef struct {
     dx_mutex_t guard;
-    volatile bool exiting;
         
     dxf_ulong_t hash;
 	dxf_string_t symbol;
@@ -97,10 +96,10 @@ typedef struct {
 
 struct dx_price_level_book {
     dx_mutex_t guard;
-    volatile bool exiting;
-
+    
     dxf_string_t symbol;
-	int sources_count;
+    
+    size_t sources_count;
 	dx_plb_source_t **sources;
 	dx_plb_listener_array_t listeners;
 
@@ -133,7 +132,7 @@ typedef struct {
 /************************/
 /* Forward declarations */
 /************************/
-static void dx_plb_clear_connection_context(dx_plb_connection_context_t* context);
+static bool dx_plb_clear_connection_context(dx_plb_connection_context_t* context);
 static bool dx_plb_source_clear(dx_plb_source_t *source, bool force);
 static size_t dx_plb_source_find_pos(dx_plb_connection_context_t* context, dxf_const_string_t symbol, dxf_const_string_t src);
 static dxf_ulong_t dx_plb_source_hash(dxf_const_string_t symbol, dxf_const_string_t src);
@@ -185,30 +184,27 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_price_level_book) {
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_price_level_book) {
 	bool res = true;
     dx_plb_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_price_level_book, &res);
-
 	if (context == NULL) {
 		return res;
 	}
-
-    dx_plb_clear_connection_context(context);
-
+    res = dx_plb_clear_connection_context(context);
     return res;
 }
 
 /* -------------------------------------------------------------------------- */
-static void dx_plb_clear_connection_context(dx_plb_connection_context_t* context) {
+static bool dx_plb_clear_connection_context(dx_plb_connection_context_t* context) {
     bool res = true;
     int i = 0;
-
     if (context->sources != NULL) {
         for (; i < context->src_size; i++) {
             if (context->sources[i] != NULL)
-                dx_plb_source_clear(context->sources[i], true);
+                res &= dx_plb_source_clear(context->sources[i], true);
         }
         free(context->sources);
     }
     res &= dx_mutex_destroy(&(context->guard));
     dx_free(context);
+    return res;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -349,61 +345,60 @@ static inline int dx_plb_listener_comparator(dx_plb_listener_context_t e1, dx_pl
 /*******************************/
 
 /* This function should be called without source guard */
-static void dx_plb_source_free(dx_plb_source_t *source, bool killGuard) {
+static void dx_plb_source_free(dx_plb_source_t *source) {
     if (source->subscription != NULL)
         dxf_close_subscription(source->subscription);
-    if (killGuard)
-        dx_mutex_destroy(&source->guard);
     CHECKED_FREE(source->symbol);
     FREE_ARRAY(source->snapshot.elements, source->snapshot.size);
+    dx_mutex_destroy(&source->guard);
     CHECKED_FREE(source);
 }
+
+/* -------------------------------------------------------------------------- */
 
 /* This function should be called without source guard */
 static bool dx_plb_source_clear(dx_plb_source_t *source, bool force) {
 	ERRORCODE err = DXF_SUCCESS;
-    dx_mutex_t guard = source->guard;
 	dx_plb_source_consumer_t *c, *n;
 	bool res = true;
 
-    /* Get lock */
-    CHECKED_CALL(dx_mutex_lock, &guard);
-
+    /* Check death condition */
     if (!force && source->consumers) {
-        dx_logging_error(L"Removing source with active consumers!");
-        dx_mutex_unlock(&guard);
         return false;
     }
 
-    /* Close subscription. It will detach listener */
-	err = dxf_close_subscription(source->subscription);
+    /*
+    Close subscription. It will detach listener, under subscription lock,
+    so it is guarenteed, that listener with this source will not be run
+    */
+    err = dxf_close_subscription(source->subscription);
     source->subscription = NULL;
     
-    /* Flag that we are exiting for listener */
-    source->exiting = true;
-    /* Unlock lock to give listener last chance */
-    CHECKED_CALL(dx_mutex_unlock, guard);
-    /* Lock back to finish destroy */
-    CHECKED_CALL(dx_mutex_lock, guard);
-
-	/* Find end of consumers list */
-    if (force) {
-        for (c = source->consumers; c != NULL; c = n) {
-            n = c->next;
-            /* Free consumer only if we zeroth source of it, to avoid double-free */
-            if (c->sourceidx == 0)
-                res &= dx_plb_book_free(c->consumer);
-            dx_free(c);
-        }
+    /* Free up all consumers, it is force exit */
+    for (c = source->consumers; c != NULL; c = n) {
+        n = c->next;
+        /* Free consumer only if we zeroth source of it, to avoid double-free */
+        if (c->sourceidx == 0)
+            res &= dx_plb_book_free(c->consumer);
+        dx_free(c);
     }
 
     /* Free all data */
-    dx_plb_source_free(source, false);
-
-    dx_mutex_unlock(&guard);
-    dx_mutex_destroy(&guard);
-
+    dx_plb_source_free(source);
 	return res && err == DXF_SUCCESS;
+}
+
+/* -------------------------------------------------------------------------- */
+
+/* This function should be called without source guard, but with context guard taken */
+static void dx_plb_source_cleanup(dx_plb_connection_context_t* context, dx_plb_source_t *source) {
+    /* Adding of book to source is always under context taken, so we are safe here */
+    if (source->consumers != NULL) {
+        return;
+    }
+    dx_plb_ctx_remove_source(context, source);
+    /* Subscription lock in this call guarantee absence of race in event listener */
+    dx_plb_source_clear(source, false);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -445,14 +440,14 @@ static dx_plb_source_t *dx_plb_source_create(dxf_connection_t connection, dxf_co
     }
 
     if (!dx_mutex_create(&source->guard)) {
-        dx_plb_source_free(source, false);
+        dx_free(source);
         return NULL;
     }
 
     source->hash = dx_plb_source_hash(symbol, src);
     source->symbol = dx_create_string_src(symbol);
     if (source->symbol == NULL) {
-        dx_plb_source_free(source, true);
+        dx_plb_source_free(source);
         dx_set_error_code(dx_mec_insufficient_memory);
         return NULL;
     }
@@ -461,7 +456,7 @@ static dx_plb_source_t *dx_plb_source_create(dxf_connection_t connection, dxf_co
 
     /* Add some place for snapshot */
     source->snapshot.capacity = 16;
-    source->snapshot.elements = dx_calloc(source->snapshot.capacity = 16, sizeof(source->snapshot.elements[0]));
+    source->snapshot.elements = dx_calloc(source->snapshot.capacity, sizeof(source->snapshot.elements[0]));
 
     /* Prepare comparators */
     source->bids.cmp = &dx_plb_pricelvel_comparator_bid;
@@ -469,27 +464,27 @@ static dx_plb_source_t *dx_plb_source_create(dxf_connection_t connection, dxf_co
 
     /* Create subscription */
     if ((source->subscription = dx_create_event_subscription(connection, DXF_ET_ORDER, subscr_flags, 0)) == dx_invalid_subscription) {
-        dx_plb_source_free(source, true);
+        dx_plb_source_free(source);
         dx_set_error_code(dx_mec_insufficient_memory);
         return NULL;
     }
 
     /* Attach event listener */
     if (!dxf_attach_event_listener_v2(source->subscription, &plb_event_listener, source)) {
-        dx_plb_source_free(source, true);
+        dx_plb_source_free(source);
         return NULL;
     }
 
     /* Set source */
     dx_clear_order_source(source->subscription);
     if (!dx_add_order_source(source->subscription, source->source)) {
-        dx_plb_source_free(source, true);
+        dx_plb_source_free(source);
         return NULL;
     }
 
     /* Add symbol */
     if (!dx_add_symbols(source->subscription, &symbol, 1)) {
-        dx_plb_source_free(source, true);
+        dx_plb_source_free(source);
         return NULL;
     }
 
@@ -497,7 +492,7 @@ static dx_plb_source_t *dx_plb_source_create(dxf_connection_t connection, dxf_co
     if (!dx_send_record_description(connection, false) ||
         !dx_subscribe_symbols_to_events(connection, dx_get_order_source(source->subscription),
             &symbol, 1, DXF_ET_ORDER, false, false, subscr_flags, 0)) {
-        dx_plb_source_free(source, true);
+        dx_plb_source_free(source);
         return NULL;
     }
 
@@ -505,12 +500,12 @@ static dx_plb_source_t *dx_plb_source_create(dxf_connection_t connection, dxf_co
 }
 
 /* -------------------------------------------------------------------------- */
-
+/* This must be called without source guard taken */
 static void dx_plb_source_remove_book(dx_plb_source_t *source, dx_price_level_book_t *book, int idx) {
     dx_plb_source_consumer_t *c, **p;
-    if (!dx_mutex_lock(&source->guard))
+    if (!dx_mutex_lock(&source->guard)) {
         return;
-
+    }
     p = &source->consumers;
     for (c = source->consumers; c != NULL; c = c->next) {
         if (c->consumer == book) {
@@ -520,28 +515,18 @@ static void dx_plb_source_remove_book(dx_plb_source_t *source, dx_price_level_bo
             }
             (*p) = c->next;
             dx_free(c);
-            
-            /* It was last source? Kill myself */
-            if (source->consumers == NULL) {
-                dx_mutex_lock(&CTX(book->context)->guard);
-                dx_plb_ctx_remove_source(CTX(book->context), source);
-                dx_mutex_unlock(&CTX(book->context)->guard);
-                /* Called with guard taken */
-                dx_plb_source_clear(source, false);
-                return;
-            }
             dx_mutex_unlock(&source->guard);
             return;
         }
         p = &c->next;
     }
-    dx_mutex_unlock(&source->guard);
     /* Problems! */
+    dx_mutex_unlock(&source->guard);
     dx_logging_error(L"PLB Internal error: can not find consumer for source\n");
 }
 
 /* -------------------------------------------------------------------------- */
-
+/* This must be called without source guard takenm but with context guard taken (!) */
 static bool dx_plb_source_add_book(dx_plb_source_t *source, dx_price_level_book_t *book, int idx) {
     dx_plb_source_consumer_t *c;
 
@@ -553,10 +538,14 @@ static bool dx_plb_source_add_book(dx_plb_source_t *source, dx_price_level_book_
 
     c->consumer = book;
     c->sourceidx = idx;
-    CHECKED_CALL(dx_mutex_lock, &(source->guard));
+
+    if (!dx_mutex_lock(&source->guard)) {
+        dx_free(c);
+        return false;
+    }
     c->next = source->consumers;
     source->consumers = c;
-    CHECKED_CALL(dx_mutex_unlock, &(source->guard));
+    dx_mutex_unlock(&source->guard);
     return true;
 }
 
@@ -719,12 +708,11 @@ static void dx_plb_source_process_order(dx_plb_source_t *source, const dxf_order
 /*****************************/
 
 static bool dx_plb_book_free(dx_price_level_book_t *book) {
-	/* We don't notify sources here, as it is last step */
-    dx_mutex_destroy(&book->guard);
     CHECKED_FREE(book->symbol);
     CHECKED_FREE(book->src_bids);
     CHECKED_FREE(book->src_asks);
     CHECKED_FREE(book->sources);
+    dx_mutex_destroy(&book->guard);
     CHECKED_FREE(book);
     return true;
 }
@@ -734,27 +722,41 @@ static bool dx_plb_book_free(dx_price_level_book_t *book) {
 /* This functuions must be called without guard */
 static void dx_plb_book_clear(dx_price_level_book_t *book) {
     int i = 0;
-    /* Lock, set flag, unlock, lock */
-    dx_mutex_lock(&book->guard);
-    book->exiting = true;
-    dx_mutex_unlock(&book->guard);
-    dx_mutex_lock(&book->guard);
-    /* Remove this book from all sources, under guard */
+
+    /*
+    Remove this book from all sources
+    Each removal is under source guard.
+    Nothing is changing in book itself, so it could be called
+    by other sources without problems
+    */
     if (book->sources != NULL) {
         /* Check sources, they could be not fully initialized */
         for (; i < book->sources_count && book->sources[i] != NULL; i++) {
             dx_plb_source_remove_book(book->sources[i], book, i);
         }
+        /* After this point, no source could call this book, so it is safe to simply remove it */
+
+        /*
+        And cleanup all "dead" sources
+        It could not be done in loop above to avoid situation when next source call book and book
+        uses deleted source.
+        */
+        dx_mutex_lock(&CTX(book->context));
+        for (i = 0; i < book->sources_count && book->sources[i] != NULL; i++) {
+            dx_plb_source_cleanup(CTX(book->context), book->sources[i]);
+        }
+        dx_mutex_unlock(&CTX(book->context));
     }
-    dx_mutex_unlock(&book->guard);
+    /* Now nothing could call book methods, kill it */
     dx_plb_book_free(book);
+    
 }
 
 
 /* -------------------------------------------------------------------------- */
 
-/* This functuions must be called book guard */
-static bool dx_plb_book_update_one_side(dx_plb_price_level_side_t *dst, dx_plb_price_level_side_t **srcs, int src_count, double startValue) {
+/* This functuions must be called with book guard taken */
+static bool dx_plb_book_update_one_side(dx_plb_price_level_side_t *dst, dx_plb_price_level_side_t **srcs, size_t src_count, double startValue) {
     bool changed = false;
     int didx = 0;
     int *sidx = dx_calloc(src_count, sizeof(int));
@@ -807,18 +809,6 @@ static void dx_plb_book_update(dx_price_level_book_t *book, dx_plb_source_t *src
     bool changed = false;
     int i = 0;
 
-    /* Double-check, that we are not exiting */
-    if (book->exiting) {
-        return;
-    }
-    if (!dx_mutex_lock(&book->guard)) {
-        return;
-    }
-    if (book->exiting) {
-        dx_mutex_unlock(&book->guard);
-        return;
-    }
-
     if (src->bids.updated) {
         changed |= dx_plb_book_update_one_side(&book->bids, book->src_bids, book->sources_count, 0.0);
     }
@@ -828,16 +818,23 @@ static void dx_plb_book_update(dx_price_level_book_t *book, dx_plb_source_t *src
     if (changed) {
         book->book.bids_count = book->bids.count;
         book->book.asks_count = book->asks.count;
+        if (!dx_mutex_lock(&book->guard)) {
+            return;
+        }
         for (; i < book->listeners.size; i++)
             book->listeners.elements[i].listener(&book->book, book->listeners.elements[i].user_data);
+        dx_mutex_unlock(&book->guard);
     }
-    dx_mutex_unlock(&book->guard);
 }
 
 /******************/
 /* EVENT LISTENER */
 /******************/
 
+/*
+ This is called with subscription lock, so it is imposisble to delete source 
+  when this code is executing.
+*/
 static void plb_event_listener(int event_type, dxf_const_string_t symbol_name,
                               const dxf_event_data_t* data, int data_count,
                               const dxf_event_params_t* event_params, void* user_data) {
@@ -850,16 +847,6 @@ static void plb_event_listener(int event_type, dxf_const_string_t symbol_name,
     /* Check params */
     if (event_type != DXF_ET_ORDER) {
         dx_logging_error(L"Listener for Price Level Book was called with wrong event type\n");
-        return;
-    }
-
-    /* Lock guard */
-    if (!dx_mutex_lock(&source->guard))
-        return;
-
-    /* Check exit condition */
-    if (source->exiting) {
-        dx_mutex_unlock(&source->guard);
         return;
     }
 
@@ -916,11 +903,15 @@ static void plb_event_listener(int event_type, dxf_const_string_t symbol_name,
                 source->final_asks = source->asks;
             }
 
-            for (c = source->consumers; c != NULL; c = c->next)
+            /* Lock guard to be sure that source list is intact */
+            if (!dx_mutex_lock(&source->guard))
+                return;
+            for (c = source->consumers; c != NULL; c = c->next) {
                 dx_plb_book_update(c->consumer, source);
+            }
+            dx_mutex_unlock(&source->guard);
         }
     }
-    dx_mutex_unlock(&source->guard);
 }
 
 /*******/
@@ -935,7 +926,6 @@ dxf_price_level_book_t dx_create_price_level_book(dxf_connection_t connection,
 	dx_price_level_book_t *book = NULL;
     dx_plb_source_t *source;
 	int i = 0;
-    int sidx = 0;
 
 	context = dx_get_subsystem_data(connection, dx_ccs_price_level_book, &res);
 	if (context == NULL) {
@@ -967,27 +957,26 @@ dxf_price_level_book_t dx_create_price_level_book(dxf_connection_t connection,
     book->book.bids = &book->bids.levels[0];
     book->book.asks = &book->asks.levels[0];
 
-    book->sources_count = (int)srccount;
-    book->sources = dx_calloc(book->sources_count, sizeof(book->sources[0]));
+    book->sources = dx_calloc(srccount, sizeof(book->sources[0]));
     if (book->sources == NULL) {
         dx_plb_book_free(book);
         dx_set_error_code(dx_mec_insufficient_memory);
         return NULL;
     }
-    book->src_bids = dx_calloc(book->sources_count, sizeof(book->src_bids[0]));
+    book->src_bids = dx_calloc(srccount, sizeof(book->src_bids[0]));
     if (book->src_bids == NULL) {
         dx_plb_book_free(book);
         dx_set_error_code(dx_mec_insufficient_memory);
         return NULL;
     }
-    book->src_asks = dx_calloc(book->sources_count, sizeof(book->src_asks[0]));
+    book->src_asks = dx_calloc(srccount, sizeof(book->src_asks[0]));
     if (book->src_asks == NULL) {
         dx_plb_book_free(book);
         dx_set_error_code(dx_mec_insufficient_memory);
         return NULL;
     }
 
-    /* Get mutex to prepare all sources, all ctx functions must ve called under guard */
+    /* Get mutex to prepare all sources, all ctx functions must be called under guard */
     CHECKED_CALL(dx_mutex_lock, &(context->guard));
 
     /* Add or create sources */
@@ -1007,18 +996,22 @@ dxf_price_level_book_t dx_create_price_level_book(dxf_connection_t connection,
                 return NULL;
             }
         }
-        book->sources[sidx] = source;
-        book->src_bids[sidx] = &source->final_bids;
-        book->src_asks[sidx] = &source->final_asks;
-        
-        sidx++;
-        if (!dx_plb_source_add_book(source, book, sidx)) {
+        book->sources[book->sources_count] = source;
+        book->src_bids[book->sources_count] = &source->final_bids;
+        book->src_asks[book->sources_count] = &source->final_asks;
+        book->sources_count++;
+        /*
+        If this source call callback before full sources initialization, it is not a problem
+        as book knows only added sources!
+        */
+        if (!dx_plb_source_add_book(source, book, i)) {
             dx_plb_book_clear(book);
+            dx_plb_ctx_cleanup_sources(context);
+            dx_mutex_unlock(&context->guard);
             return NULL;
         }
     }
     dx_mutex_unlock(&context->guard);
-
 	return book;
 }
 
