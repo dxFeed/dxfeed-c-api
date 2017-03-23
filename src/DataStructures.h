@@ -104,20 +104,6 @@ typedef struct {
     dxf_char_t exchange_code;
 } dx_record_item_t;
 
-/* Struct is stores record items
- *      elements        - pointer to record items array
- *      size            - size of elements array
- *      capacity        - capacity of elements array
- *      new_record_id   - the index of the first unsubscribe record to server;
- *                        when record will be subscribe, this value will be equal to 'size'
- */
-typedef struct {
-    dx_record_item_t* elements;
-    size_t size;
-    size_t capacity;
-    dx_record_id_t new_record_id;
-} dx_record_list_t;
-
 typedef int dx_record_server_support_state_t;
 typedef struct {
     dx_record_server_support_state_t* elements;
@@ -134,16 +120,23 @@ typedef struct {
 dx_record_id_t dx_get_record_id(void* context, dxf_int_t server_record_id);
 bool dx_assign_server_record_id(void* context, dx_record_id_t record_id, dxf_int_t server_record_id);
 
-/* Don't try to change any field of struct. You shouldn't free this resources */
-const dx_record_item_t* dx_get_record_by_id(dx_record_id_t record_id);
-dx_record_id_t dx_get_record_id_by_name(dxf_const_string_t record_name);
-dx_record_id_t dx_get_next_unsubscribed_record_id(bool isUpdate);
-void dx_drop_unsubscribe_counter();
+/*
+* Returns pointer to record data.
+* Don't modify any field of struct and don't free this resources.
+*
+* context - a data structures connection context.
+* record_id - id of record to get data.
+* Return: pointer to records item or NULL if connection or record_id is not valid.
+*/
+const dx_record_item_t* dx_get_record_by_id(void* context, dx_record_id_t record_id);
+dx_record_id_t dx_get_record_id_by_name(void* context, dxf_const_string_t record_name);
+dx_record_id_t dx_get_next_unsubscribed_record_id(void* context, bool isUpdate);
+void dx_drop_unsubscribe_counter(void* context);
 
 int dx_find_record_field(const dx_record_item_t* record_info, dxf_const_string_t field_name,
                           dxf_int_t field_type);
-dxf_char_t dx_get_record_exchange_code(dx_record_id_t record_id);
-bool dx_set_record_exchange_code(dx_record_id_t record_id, dxf_char_t exchange_code);
+dxf_char_t dx_get_record_exchange_code(void* context, dx_record_id_t record_id);
+bool dx_set_record_exchange_code(void* context, dx_record_id_t record_id, dxf_char_t exchange_code);
 
 dx_record_server_support_state_list_t* dx_get_record_server_support_states(void* context);
 bool dx_get_record_server_support_state_value(dx_record_server_support_state_list_t* states, 
@@ -153,7 +146,6 @@ bool dx_get_record_server_support_state_value(dx_record_server_support_state_lis
 
 /* Functions for working with records list */
 dx_record_id_t dx_add_or_get_record_id(dxf_connection_t connection, dxf_const_string_t name);
-void dx_clear_records_list();
-dx_record_id_t dx_get_records_list_count();
+dx_record_id_t dx_get_records_list_count(void* context);
 
 #endif /* DATA_STRUCTURES_H_INCLUDED */

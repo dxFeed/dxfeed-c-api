@@ -109,6 +109,7 @@ typedef struct {
     
     dxf_connection_t connection;
     void* rbcc;
+    void* dscc;
 } dx_record_transcoder_connection_context_t;
 
 #define CTX(context) \
@@ -132,6 +133,12 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_record_transcoder) {
     if ((context->rbcc = dx_get_record_buffers_connection_context(connection)) == NULL) {
         dx_free(context);
         
+        return dx_set_error_code(dx_cec_connection_context_not_initialized);
+    }
+
+    if ((context->dscc = dx_get_data_structures_connection_context(connection)) == NULL) {
+        dx_free(context);
+
         return dx_set_error_code(dx_cec_connection_context_not_initialized);
     }
     
@@ -264,7 +271,7 @@ bool RECORD_TRANSCODER_NAME(dx_trade_t) (dx_record_transcoder_connection_context
         
         cur_event->time *= 1000L;
         cur_event->exchange_code = exchange_code;
-        dx_set_record_exchange_code(record_params->record_id, exchange_code);
+        dx_set_record_exchange_code(context->dscc, record_params->record_id, exchange_code);
     }
     
     return dx_process_event_data(context->connection, dx_eid_trade, record_params->symbol_name, 
@@ -361,7 +368,7 @@ bool dx_transcode_quote (dx_record_transcoder_connection_context_t* context,
         cur_event->ask_time *= 1000L;
 		if (exchange_code != 0)
             cur_event->ask_exchange_code = exchange_code;
-        dx_set_record_exchange_code(record_params->record_id, cur_event->bid_exchange_code);
+        dx_set_record_exchange_code(context->dscc, record_params->record_id, cur_event->bid_exchange_code);
     }
 
     return dx_process_event_data(context->connection, dx_eid_quote, record_params->symbol_name,
@@ -457,7 +464,7 @@ bool dx_transcode_market_maker_to_order_bid (dx_record_transcoder_connection_con
         dx_market_maker_t* cur_record = record_buffer + i;
         dxf_order_t* cur_event = event_buffer + i;
         dxf_char_t exchange_code = (dxf_char_t)cur_record->mm_exchange;
-        dx_set_record_exchange_code(record_params->record_id, exchange_code);
+        dx_set_record_exchange_code(context->dscc, record_params->record_id, exchange_code);
 
         DX_RESET_RECORD_DATA(dxf_order_t, cur_event);
 
@@ -502,7 +509,7 @@ bool dx_transcode_market_maker_to_order_ask (dx_record_transcoder_connection_con
         dx_market_maker_t* cur_record = record_buffer + i;
         dxf_order_t* cur_event = event_buffer + i;
         dxf_char_t exchange_code = (dxf_char_t)cur_record->mm_exchange;
-        dx_set_record_exchange_code(record_params->record_id, exchange_code);
+        dx_set_record_exchange_code(context->dscc, record_params->record_id, exchange_code);
 
         DX_RESET_RECORD_DATA(dxf_order_t, cur_event);
 
@@ -591,7 +598,7 @@ bool RECORD_TRANSCODER_NAME(dx_order_t) (dx_record_transcoder_connection_context
         dx_order_t* cur_record = (dx_order_t*)record_buffer + i;
         dxf_order_t* cur_event = event_buffer + i;
         dxf_char_t exchange_code = ((cur_record->flags >> DX_ORDER_EXCHANGE_SHIFT) & DX_ORDER_EXCHANGE_MASK);
-        dx_set_record_exchange_code(record_params->record_id, exchange_code);
+        dx_set_record_exchange_code(context->dscc, record_params->record_id, exchange_code);
 
         DX_RESET_RECORD_DATA(dxf_order_t, cur_event);
 
@@ -718,7 +725,7 @@ bool RECORD_TRANSCODER_NAME(dx_trade_eth_t) (dx_record_transcoder_connection_con
         dxf_char_t exchange_code = (suffix == NULL ? 0 : suffix[0]);
         cur_event->time *= 1000L;
         cur_event->exchange_code = exchange_code;
-        dx_set_record_exchange_code(record_params->record_id, exchange_code);
+        dx_set_record_exchange_code(context->dscc, record_params->record_id, exchange_code);
     }
 
     return dx_process_event_data(context->connection, dx_eid_trade_eth, record_params->symbol_name,
@@ -743,7 +750,7 @@ bool RECORD_TRANSCODER_NAME(dx_spread_order_t) (dx_record_transcoder_connection_
         dx_spread_order_t* cur_record = (dx_spread_order_t*)record_buffer + i;
         dxf_spread_order_t* cur_event = event_buffer + i;
         dxf_char_t exchange_code = ((cur_record->flags >> DX_ORDER_EXCHANGE_SHIFT) & DX_ORDER_EXCHANGE_MASK);
-        dx_set_record_exchange_code(record_params->record_id, exchange_code);
+        dx_set_record_exchange_code(context->dscc, record_params->record_id, exchange_code);
 
         DX_RESET_RECORD_DATA(dxf_spread_order_t, cur_event);
 
