@@ -1,11 +1,13 @@
 
-#include "EventSubscriptionTest.h"
 #include <stdio.h>
 #include <string.h>
+#include "ConnectionTest.h"
+#include "EventSubscriptionTest.h"
 #include "EventDynamicSubscriptionTest.h"
 #include "OrderSourceConfigurationTest.h"
 #include "CandleTest.h"
 #include "SnapshotTests.h"
+
 
 typedef bool(*test_function_t)(void);
 
@@ -27,6 +29,7 @@ static test_function_data_t g_tests[] = {
     { "event_dymamic_subscription_test", event_dynamic_subscription_all_test }, 
     { "order_source_test", order_source_configuration_test },
     { "candle_test", candle_all_tests },
+    { "connection_test", connection_all_test },
     { "snapshot_test", snapshot_all_test },
     { "snapshot_unit_test", snapshot_all_unit_test }
 };

@@ -384,11 +384,11 @@ void dx_clear_record_digests (dx_server_msg_proc_connection_context_t* context) 
 
 /* -------------------------------------------------------------------------- */
 
-void dx_init_record_digests(dxf_connection_t connection) {
+void dx_init_record_digests(dx_server_msg_proc_connection_context_t* context) {
     dx_record_id_t i;
-    dx_record_id_t count = dx_get_records_list_count();
+    dx_record_id_t count = dx_get_records_list_count(context->dscc);
     for (i = 0; i < count; i++) {
-        dx_add_record_digest_to_list(connection, i);
+        dx_add_record_digest_to_list(context->connection, i);
     }
 }
 
@@ -402,6 +402,7 @@ bool dx_clear_server_info (dxf_connection_t connection) {
     bool res = true;
     dx_server_msg_proc_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_server_msg_processor, &res);
     dx_record_id_t rid;
+    dx_record_id_t records_count;
 
     if (context == NULL) {
         if (res) {
@@ -412,7 +413,8 @@ bool dx_clear_server_info (dxf_connection_t connection) {
     }
     
     /* stage 1 - resetting all the field flags */
-    for (rid = 0; rid < dx_get_records_list_count(); ++rid) {
+    records_count = dx_get_records_list_count(context->dscc);
+    for (rid = 0; rid < records_count; ++rid) {
         dx_record_server_support_state_t* state;
         if (!dx_get_record_server_support_state_value(context->record_server_support_states, rid, &state)) {
             return false;
@@ -422,13 +424,13 @@ bool dx_clear_server_info (dxf_connection_t connection) {
 
     /* stage 2 - freeing all the memory allocated by previous synchronization */
     dx_clear_record_digests(context);
-    dx_init_record_digests(connection);
+    dx_init_record_digests(context);
     
     /* stage 3 - dropping all the info about supported message types */
     CHECKED_CALL(dx_mutex_lock, &(context->describe_protocol_guard));
     context->send_msgs_bitmask = context->recv_msgs_bitmask = 0;
     context->describe_protocol_status = dx_dps_not_sent;
-    dx_drop_unsubscribe_counter();
+    dx_drop_unsubscribe_counter(context->dscc);
     CHECKED_CALL(dx_mutex_unlock, &(context->describe_protocol_guard));
     
     return true;
@@ -864,7 +866,10 @@ bool dx_read_qdtime_on_remove_event(dx_server_msg_proc_connection_context_t* con
     dxf_int_t high;
     dxf_int_t low;
     dxf_ulong_t qdtime;
-    const dx_record_item_t* record_info = dx_get_record_by_id(record_id);
+    const dx_record_item_t* record_info = dx_get_record_by_id(context->dscc, record_id);
+
+    if (record_info == NULL)
+        return dx_set_error_code(dx_ec_invalid_func_param_internal);
 
     CHECKED_CALL_2(dx_read_compact_long, context->bicc, &qdtime);
     dx_logging_verbose_info(L"REMOVE_EVENT flag received, flags=%lX, compact long QDTime=%ld", context->last_flags, qdtime);
@@ -1013,12 +1018,15 @@ bool dx_read_records (dx_server_msg_proc_connection_context_t* context,
         getter(buffer, value); \
     }
 
-dxf_time_int_field_t dx_get_time_int_field(dx_record_id_t record_id, void* record_buffer) {
+dxf_time_int_field_t dx_get_time_int_field(void* dscc, dx_record_id_t record_id, void* record_buffer) {
     int i;
     dxf_ulong_t high = 0;
     dxf_ulong_t low = 0;
     dxf_time_int_field_t time = 0;
-    const dx_record_item_t* record_info = dx_get_record_by_id(record_id);
+    const dx_record_item_t* record_info = dx_get_record_by_id(dscc, record_id);
+
+    if (record_info == NULL)
+        return ULLONG_MAX;
 
     for (i = 0; i < record_info->field_count; ++i) {
         dx_field_info_t field = record_info->fields[i];
@@ -1089,7 +1097,10 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 			return dx_set_error_code(dx_pec_record_description_not_received);
 		}
 
-        record_info = dx_get_record_by_id(record_id);
+        record_info = dx_get_record_by_id(context->dscc, record_id);
+        if (record_info == NULL)
+            return false;
+
 		record_buffer = g_buffer_managers[record_info->info_id].record_getter(context->rbcc, record_count++);
         suffix = dx_string_length(record_info->suffix) > 0 ? record_info->suffix : NULL;
 		
@@ -1113,7 +1124,7 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
         record_params.symbol_name = context->last_symbol;
         record_params.symbol_cipher = context->last_cipher;
         record_params.flags = context->last_flags;
-        record_params.time_int_field = dx_get_time_int_field(record_id, record_buffer);
+        record_params.time_int_field = dx_get_time_int_field(context->dscc, record_id, record_buffer);
 
         event_params.flags = record_params.flags;
         event_params.time_int_field = record_params.time_int_field;
@@ -1187,7 +1198,7 @@ bool dx_process_describe_records (dx_server_msg_proc_connection_context_t* conte
         
         dx_logging_verbose_info(L"Record ID: %d, record name: %s, field count: %d", server_record_id, record_name, server_field_count);
 
-        local_record_id = dx_get_record_id_by_name(record_name);
+        local_record_id = dx_get_record_id_by_name(context->dscc, record_name);
         
         dx_free(record_name);
         
@@ -1196,7 +1207,10 @@ bool dx_process_describe_records (dx_server_msg_proc_connection_context_t* conte
         } else {
             CHECKED_CALL_3(dx_assign_server_record_id, context->dscc, local_record_id, server_record_id);
 
-            record_info = dx_get_record_by_id(local_record_id);
+            record_info = dx_get_record_by_id(context->dscc, local_record_id);
+            if (record_info == NULL)
+                return false;
+
             record_digest = dx_get_record_digest(context, local_record_id);
             if (record_digest == NULL)
                 return dx_set_error_code(dx_ec_invalid_func_param_internal);
