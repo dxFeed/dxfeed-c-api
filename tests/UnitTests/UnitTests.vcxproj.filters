@@ -149,6 +149,9 @@
     <ClCompile Include="..\..\src\PriceLevelBook.c">
       <Filter>Common\Sources</Filter>
     </ClCompile>
+    <ClCompile Include="ConnectionTest.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\DXAlgorithms.h">
@@ -224,6 +227,15 @@
       <Filter>Parser\Headers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\PriceLevelBook.h">
+      <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="ConnectionTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\DXPMessageData.h">
+      <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\ClientMessageProcessor.h">
       <Filter>Common\Headers</Filter>
     </ClInclude>
   </ItemGroup>
