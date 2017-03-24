@@ -314,15 +314,15 @@ FIELD_SETTER_BODY(dx_configuration_t, object, dxf_byte_array_t);
     record_id##_exchange_code_getter
     
 #define RECORD_EXCHANGE_CODE_GETTER_FUN(record_id) \
-    record_id##_exchange_code_getter()
+    record_id##_exchange_code_getter(void* dscc)
     
 #define RECORD_EXCHANGE_CODE_GETTER_BODY(record_id) \
-    const void* RECORD_EXCHANGE_CODE_GETTER_NAME(record_id) (void) { \
+    const void* RECORD_EXCHANGE_CODE_GETTER_NAME(record_id) (void* dscc) { \
         bool is_initialized = false; \
         static dxf_char_t exchange_code = 0; \
         \
         if (!is_initialized) { \
-            exchange_code = dx_get_record_exchange_code(record_id); \
+            exchange_code = dx_get_record_exchange_code(dscc, record_id); \
             is_initialized = true; \
         } \
         \
@@ -419,11 +419,11 @@ FIELD_DEF_VAL_BODY(dx_trade_t, day_volume, dxf_double_t)
 /* -------------------------------------------------------------------------- */
 
 FIELD_DEF_VAL_BODY(dx_quote_t, bid_time, dxf_int_t)
-FIELD_DEF_VAL_BODY_CUSTOM_FUN(dx_quote_t, bid_exchange_code, RECORD_EXCHANGE_CODE_GETTER_FUN, dx_rid_quote)
+FIELD_DEF_VAL_BODY(dx_quote_t, bid_exchange_code, dxf_char_t)
 FIELD_DEF_VAL_BODY(dx_quote_t, bid_price, dxf_double_t)
 FIELD_DEF_VAL_BODY(dx_quote_t, bid_size, dxf_int_t)
 FIELD_DEF_VAL_BODY(dx_quote_t, ask_time, dxf_int_t)
-FIELD_DEF_VAL_BODY_CUSTOM_FUN(dx_quote_t, ask_exchange_code, RECORD_EXCHANGE_CODE_GETTER_FUN, dx_rid_quote)
+FIELD_DEF_VAL_BODY(dx_quote_t, ask_exchange_code, dxf_char_t)
 FIELD_DEF_VAL_BODY(dx_quote_t, ask_price, dxf_double_t)
 FIELD_DEF_VAL_BODY(dx_quote_t, ask_size, dxf_int_t)
 
@@ -442,7 +442,7 @@ FIELD_DEF_VAL_BODY(dx_summary_t, prev_day_id, dxf_dayid_t);
 FIELD_DEF_VAL_BODY(dx_summary_t, prev_day_close_price, dxf_double_t);
 FIELD_DEF_VAL_BODY(dx_summary_t, open_interest, dxf_int_t);
 FIELD_DEF_VAL_BODY(dx_summary_t, flags, dxf_int_t);
-FIELD_DEF_VAL_BODY_CUSTOM_FUN(dx_summary_t, exchange_code, RECORD_EXCHANGE_CODE_GETTER_FUN, dx_rid_summary);
+FIELD_DEF_VAL_BODY(dx_summary_t, exchange_code, dxf_char_t);
 
 /* -------------------------------------------------------------------------- */
 /*

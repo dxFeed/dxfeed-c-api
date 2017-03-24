@@ -323,13 +323,13 @@ static bool dx_write_event_record(void* bocc, const dx_record_item_t* record, dx
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_write_event_records (void* bocc) {
-    dx_record_id_t record_id = dx_get_next_unsubscribed_record_id(false);
-    dx_record_id_t count = dx_get_records_list_count();
+bool dx_write_event_records (void* bocc, void* dscc) {
+    dx_record_id_t record_id = dx_get_next_unsubscribed_record_id(dscc, false);
+    dx_record_id_t count = dx_get_records_list_count(dscc);
 
     while (record_id < count) {
-        CHECKED_CALL_3(dx_write_event_record, bocc, dx_get_record_by_id(record_id), record_id);
-        record_id = dx_get_next_unsubscribed_record_id(true);
+        CHECKED_CALL_3(dx_write_event_record, bocc, dx_get_record_by_id(dscc, record_id), record_id);
+        record_id = dx_get_next_unsubscribed_record_id(dscc, true);
     }
 
     return true;
@@ -585,6 +585,7 @@ bool dx_send_record_description (dxf_connection_t connection, bool task_mode) {
     static const int initial_size = 1024;
     
     void* bocc = NULL;
+    void* dscc = NULL;
     dxf_byte_t* initial_buffer = NULL;
     int message_size = 0;
     
@@ -598,8 +599,9 @@ bool dx_send_record_description (dxf_connection_t connection, bool task_mode) {
     }
     
     bocc = dx_get_buffered_output_connection_context(connection);
+    dscc = dx_get_data_structures_connection_context(connection);
 
-    if (bocc == NULL) {
+    if (bocc == NULL || dscc == NULL) {
         return dx_set_error_code(dx_cec_connection_context_not_initialized);
     }
     
@@ -616,7 +618,7 @@ bool dx_send_record_description (dxf_connection_t connection, bool task_mode) {
     dx_set_out_buffer(bocc, initial_buffer, initial_size);
 
     if (!dx_compose_message_header(bocc, MESSAGE_DESCRIBE_RECORDS) ||
-        !dx_write_event_records(bocc) ||
+        !dx_write_event_records(bocc, dscc) ||
         !dx_finish_composing_message(bocc)) {
         
         dx_free(dx_get_out_buffer(bocc));
