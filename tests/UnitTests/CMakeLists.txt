@@ -33,14 +33,17 @@ link_directories(${LIB_DXFEED_OUT_DIR})
 
 set(COMMON_HEADERS
     ${LIB_DXFEED_SRC_DIR}/Candle.h
+    ${LIB_DXFEED_SRC_DIR}/ClientMessageProcessor.h
     ${LIB_DXFEED_SRC_DIR}/DXAlgorithms.h
     ${INCLUDE_DIR}/DXErrorCodes.h
     ${LIB_DXFEED_SRC_DIR}/DXErrorHandling.h
     ${LIB_DXFEED_SRC_DIR}/DXMemory.h
+    ${LIB_DXFEED_SRC_DIR}/DXPMessageData.h
     ${LIB_DXFEED_SRC_DIR}/DXThreads.h
     ${INCLUDE_DIR}/EventData.h
     ${LIB_DXFEED_SRC_DIR}/EventManager.h
     ${LIB_DXFEED_SRC_DIR}/ObjectArray.h
+    ${LIB_DXFEED_SRC_DIR}/PriceLevelBook.h
     ${LIB_DXFEED_SRC_DIR}/PrimitiveTypes.h
     ${LIB_DXFEED_SRC_DIR}/Snapshot.h
     ${LIB_DXFEED_SRC_DIR}/TaskQueue.h
@@ -60,6 +63,7 @@ set(COMMON_SOURCES
     ${LIB_DXFEED_SRC_DIR}/EventData.c
     ${LIB_DXFEED_SRC_DIR}/EventManager.c
     ${LIB_DXFEED_SRC_DIR}/ObjectArray.c
+    ${LIB_DXFEED_SRC_DIR}/PriceLevelBook.c
     ${LIB_DXFEED_SRC_DIR}/Snapshot.c
     ${LIB_DXFEED_SRC_DIR}/TaskQueue.c
     ${LIB_DXFEED_SRC_DIR}/Win32.c
@@ -72,6 +76,7 @@ set(EVENT_SUBSCRIPTION_SOURCES
     
 set(HEADER_FILES
     CandleTest.h
+    ConnectionTest.h
     EventDynamicSubscriptionTest.h
     EventSubscriptionTest.h
     OrderSourceConfigurationTest.h
@@ -103,6 +108,7 @@ set(PARSER_SOURCES
  
 set(SOURCE_FILES
     CandleTest.c
+    ConnectionTest.c
     EventDynamicSubscriptionTest.cpp
     EventSubscriptionTest.c
     OrderSourceConfigurationTest.c

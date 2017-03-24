@@ -49,7 +49,7 @@ unsigned multiple_connection_routine(void* arg) {
 #ifdef _WIN32
     Sleep(2000);
 #else
-    sleep(3);
+    sleep(2);
 #endif
     return 1;
 }

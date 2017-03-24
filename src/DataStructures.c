@@ -907,7 +907,7 @@ bool dx_assign_server_record_id(void* context, dx_record_id_t record_id, dxf_int
 
 bool dx_validate_record_id(void* context, dx_record_id_t record_id) {
     dx_record_list_t* records_list = &(CTX(context)->records_list);
-    if (record_id < 0 || record_id >= records_list->size) {
+    if (record_id < 0 || record_id >= (dx_record_id_t)records_list->size) {
         return dx_set_error_code(dx_ec_invalid_func_param_internal);
     }
     return true;
