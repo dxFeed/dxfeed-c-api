@@ -109,7 +109,7 @@ static event_counter_data_t g_order_event_counter_data;
 static event_counter_data_ptr_t g_aapl_candle_data = &g_aapl_candle_event_counter_data;
 static event_counter_data_ptr_t g_ibm_candle_data = &g_ibm_candle_event_counter_data;
 static event_counter_data_ptr_t g_order_data = &g_order_event_counter_data;
-static dxf_candle_t g_last_candle = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+static dxf_candle_t g_last_candle = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
 dxf_listener_thread_data_t g_ct_listener_thread_data = NULL;
 
 /* -------------------------------------------------------------------------- */
@@ -262,23 +262,6 @@ int get_order_event_counter() {
     return get_event_counter(g_order_data);
 }
 
-bool dx_is_non_zero(dxf_long_t actual) {
-    if (actual == 0) {
-        wprintf(L"%ls failed: expected non-zero, but was 0\n", __FUNCTIONW__);
-        return false;
-    }
-    return true;
-}
-
-bool dx_is_greater(double a, double b) {
-    bool res = (a - b) > ((fabs(a) < fabs(b) ? fabs(b) : fabs(a)) * DBL_EPSILON);
-    if (!res) {
-        wprintf(L"%ls failed: %f > %f\n", __FUNCTIONW__, a, b);
-        return false;
-    }
-    return true;
-}
-
 /* -------------------------------------------------------------------------- */
 
 /*Test*/
@@ -338,12 +321,12 @@ bool candle_subscription_test(void) {
         return false;
     }
 
-    if (!dx_is_non_zero(g_last_candle.time) ||
-        !dx_is_greater(g_last_candle.count, 0.0) ||
-        !dx_is_greater(g_last_candle.open, 0.0) ||
-        !dx_is_greater(g_last_candle.high, 0.0) ||
-        !dx_is_greater(g_last_candle.low, 0.0) ||
-        !dx_is_greater(g_last_candle.close, 0.0)) {
+    if (!dx_ge_dxf_long_t(g_last_candle.time, 0) ||
+        !dx_ge_double(g_last_candle.count, 0.0) ||
+        !dx_ge_double(g_last_candle.open, 0.0) ||
+        !dx_ge_double(g_last_candle.high, 0.0) ||
+        !dx_ge_double(g_last_candle.low, 0.0) ||
+        !dx_ge_double(g_last_candle.close, 0.0)) {
 
         PRINT_TEST_FAILED;
         dxf_close_subscription(subscription);

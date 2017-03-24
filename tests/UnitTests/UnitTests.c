@@ -66,7 +66,9 @@ int main (int argc, char* argv[]) {
     int i;
     bool result = true;
 
-    printf("DXFeed unit test procedure started...\n");
+    print_usage();
+
+    printf("\nDXFeed unit test procedure started...\n");
 
     if (argc == 1) {
         /* run all tests */
@@ -80,11 +82,6 @@ int main (int argc, char* argv[]) {
     }
 
     printf("DXFeed unit test procedure finished: %s.\n", result_to_text(result));
-
-    if (!result) {
-        printf("\nOne of test name is unknown. Please see 'Usage' section to run tests.\n");
-        print_usage();
-    }
 
     return 0;
 }
