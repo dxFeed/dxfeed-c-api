@@ -184,12 +184,6 @@
     <ClInclude Include="EventSubscriptionTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\EventDataFieldSetters.h">
-      <Filter>Parser\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\EventRecordBuffers.h">
-      <Filter>Parser\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Logger.h">
       <Filter>Parser\Headers</Filter>
     </ClInclude>
