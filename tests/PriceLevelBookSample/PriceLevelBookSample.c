@@ -129,7 +129,7 @@ dxf_string_t ansi_to_unicode(const char* ansi_str) {
 /* -------------------------------------------------------------------------- */
 
 void listener(const dxf_price_level_book_data_ptr_t book_data, void* user_data) {
-    int i = 0;
+    size_t i = 0;
     wprintf(L"New Price Level Order Book for %s:\n", book_data->symbol);
     /* Time is 4 + 2 + 2 + 1 + 2 + 2 + 2 = 15 */
     wprintf(L" %-7s %-8s %-15s |  %-7s %-8s %-15s\n", L"Ask", L"Size", L"Time", L"Bid", L"Size", L"Time");

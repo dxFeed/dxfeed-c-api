@@ -501,7 +501,7 @@ static dx_plb_source_t *dx_plb_source_create(dxf_connection_t connection, dxf_co
 
 /* -------------------------------------------------------------------------- */
 /* This must be called without source guard taken */
-static void dx_plb_source_remove_book(dx_plb_source_t *source, dx_price_level_book_t *book, int idx) {
+static void dx_plb_source_remove_book(dx_plb_source_t *source, dx_price_level_book_t *book, size_t idx) {
     dx_plb_source_consumer_t *c, **p;
     if (!dx_mutex_lock(&source->guard)) {
         return;
@@ -552,7 +552,7 @@ static bool dx_plb_source_add_book(dx_plb_source_t *source, dx_price_level_book_
 /* -------------------------------------------------------------------------- */
 
 static void dx_plb_source_reset_snapshot(dx_plb_source_t *source) {
-    int i = 0;
+    size_t i = 0;
     for (i = 0; i < source->snapshot.size; i++) {
         dx_free(source->snapshot.elements[i]);
         source->snapshot.elements[i] = NULL;
@@ -625,7 +625,7 @@ static void dx_plb_source_add_order_to_levels(dx_plb_price_level_side_t *ob, con
 /* -------------------------------------------------------------------------- */
 
 static void dx_plb_source_rebuild_levels(dx_plb_records_array_t *snapshot, dx_plb_price_level_side_t *ob, int side) {
-    int i = 0;
+    size_t i = 0;
     dx_memset(ob->levels, 0, sizeof(ob->levels));
     ob->count = 0;
     for (; i < snapshot->size; i++) {
@@ -721,7 +721,7 @@ static bool dx_plb_book_free(dx_price_level_book_t *book) {
 
 /* This functuions must be called without guard */
 static void dx_plb_book_clear(dx_price_level_book_t *book) {
-    int i = 0;
+    size_t i = 0;
 
     /*
     Remove this book from all sources
@@ -758,9 +758,10 @@ static void dx_plb_book_clear(dx_price_level_book_t *book) {
 /* This functuions must be called with book guard taken */
 static bool dx_plb_book_update_one_side(dx_plb_price_level_side_t *dst, dx_plb_price_level_side_t **srcs, size_t src_count, double startValue) {
     bool changed = false;
-    int didx = 0;
-    int *sidx = dx_calloc(src_count, sizeof(int));
-    int i, cmp;
+    size_t didx = 0;
+    size_t *sidx = dx_calloc(src_count, sizeof(size_t));
+    size_t i;
+    int cmp;
     dxf_price_level_element_t best;
 
     /* It is merge-sort of src_count sources */
@@ -807,7 +808,7 @@ static bool dx_plb_book_update_one_side(dx_plb_price_level_side_t *dst, dx_plb_p
 /* This functuions must be called without book guard */
 static void dx_plb_book_update(dx_price_level_book_t *book, dx_plb_source_t *src) {
     bool changed = false;
-    int i = 0;
+    size_t i = 0;
 
     if (src->bids.updated) {
         changed |= dx_plb_book_update_one_side(&book->bids, book->src_bids, book->sources_count, 0.0);
