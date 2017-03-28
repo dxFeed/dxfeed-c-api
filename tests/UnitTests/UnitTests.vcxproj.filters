@@ -232,5 +232,8 @@
     <ClInclude Include="..\..\src\ClientMessageProcessor.h">
       <Filter>Common\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\DataStructures.h">
+      <Filter>Parser\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

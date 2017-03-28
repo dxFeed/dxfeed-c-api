@@ -86,6 +86,7 @@ set(HEADER_FILES
     
 set(PARSER_HEADERS
     ${LIB_DXFEED_SRC_DIR}/ConfigurationDeserializer.h
+    ${LIB_DXFEED_SRC_DIR}/DataStructures.h
     ${LIB_DXFEED_SRC_DIR}/Logger.h
     ${LIB_DXFEED_SRC_DIR}/SymbolCodec.h
     )
