@@ -287,7 +287,8 @@ int main (int argc, char* argv[]) {
 
     wprintf(L"Connection successful!\n");
 
-    if (!dxf_create_subscription_timed(connection, event_type, time_value, &subscription)) {
+    //Note: The docs requires time as unix time in milliseconds. So convert time_value to milliseconds timestamp.
+    if (!dxf_create_subscription_timed(connection, event_type, time_value * 1000, &subscription)) {
         free(symbol);
         process_last_error();
         return -1;
