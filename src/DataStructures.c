@@ -311,11 +311,11 @@ static const dx_field_info_t dx_fields_order[] = {
 /* -------------------------------------------------------------------------- */
 
 static const dx_field_info_t dx_fields_time_and_sale[] = {
-    { dx_fid_compact_int, L"Time", DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, time), 
+    { dx_fid_compact_int | dx_fid_flag_time, L"Time", DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, time), 
     DX_RECORD_FIELD_DEF_VAL_NAME(dx_time_and_sale_t, time), DX_RECORD_FIELD_GETTER_NAME(dx_time_and_sale_t, time),
     dx_ft_first_time_int_field },
 
-    { dx_fid_compact_int, L"Sequence", DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, sequence), 
+    { dx_fid_compact_int | dx_fid_flag_sequence, L"Sequence", DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, sequence), 
     DX_RECORD_FIELD_DEF_VAL_NAME(dx_time_and_sale_t, sequence), DX_RECORD_FIELD_GETTER_NAME(dx_time_and_sale_t, sequence),
     dx_ft_second_time_int_field },
 
@@ -1056,12 +1056,17 @@ dxf_long_t dx_create_subscription_time(void* context, dx_record_id_t record_id, 
     int i;
     bool has_first_time = false;
     bool has_second_time = false;
+    bool is_timed_record = false;
     dxf_int_t seconds = dx_get_seconds_from_time(time);
     dxf_int_t millis = dx_get_millis_from_time(time);
     dxf_long_t subscription_time = 0;
     dx_data_structures_connection_context_t* dscc = CTX(context);
-    const dx_record_item_t* record_info = dx_get_record_by_id(dscc, record_id);
+    const dx_record_item_t* record_info = NULL;
 
+    if (time == 0)
+        return 0;
+
+    record_info = dx_get_record_by_id(dscc, record_id);
     if (record_info == NULL)
         return dx_set_error_code(dx_ec_invalid_func_param_internal);
 
@@ -1070,17 +1075,18 @@ dxf_long_t dx_create_subscription_time(void* context, dx_record_id_t record_id, 
         if (field.time == dx_ft_first_time_int_field) {
             subscription_time |= ((dxf_long_t)seconds) << 32;
             has_first_time = true;
+            is_timed_record = ((field.type & dx_fid_flag_time) & ~dx_fid_flag_decimal) != 0;
         } else if (field.time == dx_ft_second_time_int_field) {
             subscription_time |= millis;
             has_second_time = true;
         }
         if (has_first_time && has_second_time)
-            return subscription_time;
+            break;
     }
 
-    //if record haven't dx_ft_first_time_int_field just writes seconds part into low significant bits
-    if (!has_first_time)
-        subscription_time = seconds;
+    //if record have pseudo time field just returns input time value
+    if (!is_timed_record)
+        subscription_time = time;
 
     return subscription_time;
 }
