@@ -197,16 +197,16 @@ static subscription_time_struct_t g_subscr_time_structs_list[] = {
     { L"Quote", NON_HISTORY_RECORD_TIME },
     { L"Summary", NON_HISTORY_RECORD_TIME },
     { L"Profile", NON_HISTORY_RECORD_TIME },
-    { L"MarketMaker", 0x58DA10860000007B },
-    { L"Order", 0x58DA1086 },
+    { L"MarketMaker", TIME_STAMP },
+    { L"Order", TIME_STAMP },
     { L"TimeAndSale", 0x58DA10860000007B },
     { L"Candle", 0x58DA10860000007B },
     { L"TradeETH", NON_HISTORY_RECORD_TIME },
-    { L"SpreadOrder", 0x58DA1086 },
+    { L"SpreadOrder", TIME_STAMP },
     { L"Greeks", 0x58DA10860000007B },
     { L"TheoPrice", NON_HISTORY_RECORD_TIME },
     { L"Underlying", NON_HISTORY_RECORD_TIME },
-    { L"Series", 0x58DA10860000007B },
+    { L"Series", TIME_STAMP },
     { L"Configuration", NON_HISTORY_RECORD_TIME }
 };
 static size_t g_subscr_time_structs_count = SIZE_OF_ARRAY(g_subscr_time_structs_list);
@@ -266,6 +266,7 @@ bool subscription_time_test(void) {
 
         subscription_time = dx_create_subscription_time(dscc, record_id, TIME_STAMP);
         if (!dx_is_equal_dxf_long_t(g_subscr_time_structs_list[i].expected_subscr_time, subscription_time)) {
+            wprintf(L"Invalid subscription time for %ls record!\n", g_subscr_time_structs_list[i].name);
             PRINT_TEST_FAILED;
             return false;
         }
