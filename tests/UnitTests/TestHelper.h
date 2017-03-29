@@ -61,6 +61,7 @@ const char *get_event_counter_name(event_counter_data_ptr_t counter_data);
 /* -------------------------------------------------------------------------- */
 
 #define PRINT_TEST_FAILED printf("%s failed! File: %s, line: %d\n", __FUNCTION__, __FILE__, __LINE__);
+#define PRINT_TEST_FAILED_MESSAGE(message) printf("%s failed! File: %s, line: %d\nMessage:%s\n", __FUNCTION__, __FILE__, __LINE__, message);
 
 #define DX_IS_EQUAL_FUNCTION_DECLARATION(type) bool dx_is_equal_##type##(type expected, type actual)
 #define DX_IS_GREATER_OR_EQUAL_FUNCTION_DECLARATION(type) bool dx_ge_##type##(type actual, type param)
