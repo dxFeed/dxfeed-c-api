@@ -264,7 +264,10 @@ bool subscription_time_test(void) {
         if (!is_history_record(record_info))
             continue;
 
-        subscription_time = dx_create_subscription_time(dscc, record_id, TIME_STAMP);
+        if (!dx_create_subscription_time(dscc, record_id, TIME_STAMP, OUT &subscription_time)) {
+            PRINT_TEST_FAILED_MESSAGE("Create subscription time error!");
+            return false;
+        }
         if (!dx_is_equal_dxf_long_t(g_subscr_time_structs_list[i].expected_subscr_time, subscription_time)) {
             wprintf(L"Invalid subscription time for %ls record!\n", g_subscr_time_structs_list[i].name);
             PRINT_TEST_FAILED;

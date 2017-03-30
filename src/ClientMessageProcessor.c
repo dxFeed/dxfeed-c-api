@@ -240,11 +240,10 @@ static bool dx_subscribe_symbol_to_record(dxf_connection_t connection, dx_messag
 
     dx_set_out_buffer(bocc, subscr_buffer, initial_buffer_size);
 
-    subscription_time = dx_create_subscription_time(dscc, record_id, time);
-
     if (!dx_compose_message_header(bocc, type) ||
         !dx_compose_body(bocc, record_id, cipher, symbol) ||
-        ((type == MESSAGE_HISTORY_ADD_SUBSCRIPTION) && !dx_write_compact_long(bocc, subscription_time)) || 
+        ((type == MESSAGE_HISTORY_ADD_SUBSCRIPTION) && !dx_create_subscription_time(dscc, record_id, time, OUT &subscription_time)) ||
+        ((type == MESSAGE_HISTORY_ADD_SUBSCRIPTION) && !dx_write_compact_long(bocc, subscription_time)) ||
         !dx_finish_composing_message(bocc)) {
 
         dx_free(dx_get_out_buffer(bocc));

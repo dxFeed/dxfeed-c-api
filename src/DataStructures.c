@@ -1048,11 +1048,14 @@ bool dx_set_record_exchange_code(void* context, dx_record_id_t record_id,
  * record to compose time value. This time value is necessary for correct event
  * subscription.
  *
- * context   - data structures connection context pointer
- * record_id - subscribed record id
- * time      - unix time in milliseconds
+ * context      - data structures connection context pointer
+ * record_id    - subscribed record id
+ * time         - unix time in milliseconds
+ * value        - the result subscription time
+ * return true if no errors occur otherwise returns false
  */
-dxf_long_t dx_create_subscription_time(void* context, dx_record_id_t record_id, dxf_long_t time) {
+bool dx_create_subscription_time(void* context, dx_record_id_t record_id, 
+                                 dxf_long_t time, OUT dxf_long_t* value) {
     int i;
     bool has_first_time = false;
     bool has_second_time = false;
@@ -1063,8 +1066,13 @@ dxf_long_t dx_create_subscription_time(void* context, dx_record_id_t record_id, 
     dx_data_structures_connection_context_t* dscc = CTX(context);
     const dx_record_item_t* record_info = NULL;
 
-    if (time == 0)
-        return 0;
+    if (context == NULL || value == NULL)
+        return dx_set_error_code(dx_ec_invalid_func_param_internal);
+
+    if (time == 0) {
+        *value = 0;
+        return true;
+    }
 
     record_info = dx_get_record_by_id(dscc, record_id);
     if (record_info == NULL)
@@ -1085,10 +1093,9 @@ dxf_long_t dx_create_subscription_time(void* context, dx_record_id_t record_id, 
     }
 
     //if record have pseudo time field just returns input time value
-    if (!is_timed_record)
-        subscription_time = time;
+    *value = is_timed_record ? subscription_time : time;
 
-    return subscription_time;
+    return true;
 }
 
 /* -------------------------------------------------------------------------- */
