@@ -258,6 +258,7 @@ bool subscription_time_test(void) {
     }
 
     for (i = 0; i < g_subscr_time_structs_count; i++) {
+        subscription_time = LLONG_MAX;
         record_id = dx_add_or_get_record_id(connection, g_subscr_time_structs_list[i].name);
         record_info = dx_get_record_by_id(dscc, record_id);
 
@@ -273,6 +274,12 @@ bool subscription_time_test(void) {
             PRINT_TEST_FAILED;
             return false;
         }
+    }
+
+    if (!dx_is_equal_bool(false, dx_create_subscription_time(NULL, record_id, TIME_STAMP, OUT &subscription_time)) ||
+        !dx_is_equal_bool(false, dx_create_subscription_time(dscc, -1, TIME_STAMP, OUT &subscription_time)) ||
+        !dx_is_equal_bool(false, dx_create_subscription_time(dscc, record_id, TIME_STAMP, NULL))) {
+        return false;
     }
 
     return true;
