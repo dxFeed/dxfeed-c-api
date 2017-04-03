@@ -493,6 +493,47 @@ bool snapshot_key_test(void) {
 
 /* -------------------------------------------------------------------------- */
 
+typedef struct {
+    dxf_int_t* elements;
+    size_t size;
+    size_t capacity;
+} hashs_array_t;
+
+/*
+* Test
+*/
+bool symbol_name_hasher_test(void) {
+    size_t symbol_index;
+    dxf_int_t hash;
+    hashs_array_t all_hashs = DX_EMPTY_ARRAY;
+    bool found = false;
+    bool error = false;
+    size_t position = 0;
+    for (symbol_index = 0; symbol_index < g_symbols_count; symbol_index++) {
+        dxf_const_string_t symbol = g_symbols[symbol_index];
+        hash = dx_symbol_name_hasher(symbol);
+        DX_ARRAY_BINARY_SEARCH(all_hashs.elements, 0, all_hashs.size, hash, DX_NUMERIC_COMPARATOR, found, position);
+        if (found) {
+            wprintf(L"Duplicate hashs detected: %llu! symbol:'%ls'.\n", hash, symbol);
+            PRINT_TEST_FAILED;
+            dx_free(all_hashs.elements);
+            return false;
+        }
+        else {
+            DX_ARRAY_INSERT(all_hashs, dxf_int_t, hash, position, dx_capacity_manager_halfer, error);
+            if (!dx_is_equal_bool(false, error)) {
+                PRINT_TEST_FAILED_MESSAGE("Insert array error!");
+                dx_free(all_hashs.elements);
+                return false;
+            }
+        }
+    }
+    dx_free(all_hashs.elements);
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
 bool snapshot_all_unit_test(void) {
     bool res = true;
 
@@ -502,7 +543,8 @@ bool snapshot_all_unit_test(void) {
         !snapshot_bid_ask_test() ||
         !snapshot_duplicate_index_test() ||
         !snapshot_buildin_update_test() ||
-        !snapshot_key_test()) {
+        !snapshot_key_test() ||
+        !symbol_name_hasher_test()) {
 
         res = false;
     }

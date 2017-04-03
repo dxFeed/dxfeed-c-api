@@ -227,7 +227,7 @@ dxf_int_t dx_symbol_name_hasher (dxf_const_string_t symbol_name) {
     len = dx_string_length(symbol_name);
     
     for (; i < len; ++i) {
-        h = 5 * h + dx_toupper(symbol_name[i]);
+        h = 37 * h + dx_toupper(symbol_name[i]);
     }
     
     return h;

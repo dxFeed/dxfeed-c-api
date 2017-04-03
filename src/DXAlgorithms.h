@@ -198,6 +198,7 @@ size_t dx_random_size(size_t max_value);
  *  insertion, deletion etc
  */
 /* -------------------------------------------------------------------------- */
+
 /*
  *	Binary search
 
@@ -214,8 +215,6 @@ size_t dx_random_size(size_t max_value);
                 or the index of an element where the key might be inserted without breaking
                 the ordering, if the element wasn't found
  */
-/* -------------------------------------------------------------------------- */
-
 #define DX_ARRAY_BINARY_SEARCH(a, start_index, end_index, elem, comparator, found, res_index) \
     do { \
         size_t _begin = start_index; \
@@ -263,8 +262,6 @@ size_t dx_random_size(size_t max_value);
                 or the index of an element where the key might be inserted without breaking
                 the ordering, if the element wasn't found
  */
-/* -------------------------------------------------------------------------- */
-
 #define DX_ARRAY_SEARCH(a, start_index, end_index, elem, comparator, is_binary, found, res_index) \
     do { \
         found = false; \
@@ -312,8 +309,6 @@ size_t dx_random_size(size_t max_value);
  *  error - a boolean return value, is true if some error occurred during insertion,
             is false otherwise
  */
-/* -------------------------------------------------------------------------- */
-
 #define DX_ARRAY_INSERT(array_obj, elem_type, new_elem, position, capacity_mgr, error) \
     do { \
         void* _buffer_to_free = NULL; \
@@ -374,8 +369,6 @@ size_t dx_random_size(size_t max_value);
  *  error - a boolean return value, is true if some error occurred during insertion,
             is false otherwise
 */
-/* -------------------------------------------------------------------------- */
-
 #define DX_ARRAY_DELETE(array_obj, elem_type, position, capacity_mgr, error) \
     do { \
         void* _buffer_to_free = NULL; \
@@ -419,8 +412,6 @@ size_t dx_random_size(size_t max_value);
  *  elem_type - type of elements in the array
  *  size - the number of elements in the array
  */
-/* -------------------------------------------------------------------------- */
-
 #define DX_ARRAY_SHUFFLE(a, elem_type, size) \
     do { \
         size_t _idx = (size) - 1; \
@@ -447,8 +438,6 @@ size_t dx_random_size(size_t max_value);
  *  error - a boolean return value, is true if some error occurred during 
             reservation, is false otherwise
  */
-/* -------------------------------------------------------------------------- */
-
 #define DX_ARRAY_RESERVE(array_obj, elem_type, reserve_size, error) \
     do { \
         elem_type* _new_elem_buffer = (array_obj).elements; \
@@ -479,8 +468,6 @@ size_t dx_random_size(size_t max_value);
 /*
  *	Functions and predicates used in array operations
  */
-/* -------------------------------------------------------------------------- */
-
 #define DX_NUMERIC_COMPARATOR(l, r) (((l)>(r)?1:((l)<(r)?-1:0)))
 
 /* -------------------------------------------------------------------------- */
