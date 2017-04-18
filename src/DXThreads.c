@@ -485,9 +485,7 @@ void* dx_get_thread_data (dx_key_t key) {
 /* -------------------------------------------------------------------------- */
 
 dx_thread_t dx_get_thread_id () {
-	HANDLE rv;
-	DuplicateHandle(GetCurrentProcess(), GetCurrentThread(), GetCurrentProcess(), &rv, 0, FALSE, DUPLICATE_SAME_ACCESS);
-	return rv;
+    return GetCurrentThread();
 }
 
 /* -------------------------------------------------------------------------- */
