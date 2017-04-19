@@ -83,12 +83,39 @@ bool multiple_connection_test(void) {
     return true;
 }
 
+/*
+ * Test
+ * Tries to create connection with invalid address and other input parameters cases.
+ * No real connections opens in this test.
+ * Expected: application shouldn't crash; all attempts to create connection with invalid data 
+ *           should completes with error state.
+ */
+bool invalid_connection_address_test(void) {
+    const char* invalid_address = "demo.dxfeed.com::7300";
+    dxf_connection_t connection;
+
+    //invalid connection handler
+    DX_CHECK(dx_is_equal_ERRORCODE(DXF_FAILURE, dxf_create_connection("demo.dxfeed.com:7300", NULL, NULL, NULL, NULL, NULL)));
+    //invalid address
+    DX_CHECK(dx_is_equal_ERRORCODE(DXF_FAILURE, dxf_create_connection(invalid_address, NULL, NULL, NULL, NULL, &connection)));
+    DX_CHECK(dx_is_equal_ptr(NULL, connection));
+    DX_CHECK(dx_is_equal_ERRORCODE(DXF_FAILURE, dxf_create_connection("no-port", NULL, NULL, NULL, NULL, &connection)));
+    DX_CHECK(dx_is_equal_ptr(NULL, connection));
+    DX_CHECK(dx_is_equal_ERRORCODE(DXF_FAILURE, dxf_create_connection(":123", NULL, NULL, NULL, NULL, &connection)));
+    DX_CHECK(dx_is_equal_ptr(NULL, connection));
+    DX_CHECK(dx_is_equal_ERRORCODE(DXF_FAILURE, dxf_create_connection("a:123", NULL, NULL, NULL, NULL, &connection)));
+    DX_CHECK(dx_is_equal_ptr(NULL, connection));
+
+    return true;
+}
+
 /* -------------------------------------------------------------------------- */
 
 bool connection_all_test(void) {
     bool res = true;
 
-    if (!multiple_connection_test()) {
+    if (!multiple_connection_test() ||
+        !invalid_connection_address_test()) {
 
         res = false;
     }
