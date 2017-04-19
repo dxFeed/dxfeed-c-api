@@ -514,7 +514,7 @@ bool symbol_name_hasher_test(void) {
         hash = dx_symbol_name_hasher(symbol);
         DX_ARRAY_BINARY_SEARCH(all_hashs.elements, 0, all_hashs.size, hash, DX_NUMERIC_COMPARATOR, found, position);
         if (found) {
-            wprintf(L"Duplicate hashs detected: %llu! symbol:'%ls'.\n", hash, symbol);
+            wprintf(L"Duplicate hashs detected: %d! symbol:'%ls'.\n", hash, symbol);
             PRINT_TEST_FAILED;
             dx_free(all_hashs.elements);
             return false;
