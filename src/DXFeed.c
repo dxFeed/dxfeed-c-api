@@ -1054,3 +1054,12 @@ DXFEED_API ERRORCODE dxf_detach_price_level_book_listener(dxf_price_level_book_t
 
 	return DXF_SUCCESS;
 }
+
+DXFEED_API ERRORCODE dxf_write_raw_data(dxf_connection_t connection, const char * raw_file_name)
+{
+    if (!dx_add_raw_dump_file(connection, raw_file_name)) {
+        return DXF_FAILURE;
+    }
+
+    return DXF_SUCCESS;
+}

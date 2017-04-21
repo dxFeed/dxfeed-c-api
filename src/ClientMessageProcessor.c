@@ -212,12 +212,15 @@ static bool dx_subscribe_symbol_to_record(dxf_connection_t connection, dx_messag
     static const dxf_int_t initial_buffer_size = 100;
 
     void* bocc = NULL;
+    void* dscc = NULL;
     dxf_byte_t* subscr_buffer = NULL;
     int message_size = 0;
+    dxf_long_t subscription_time;
 
     bocc = dx_get_buffered_output_connection_context(connection);
+    dscc = dx_get_data_structures_connection_context(connection);
 
-    if (bocc == NULL) {
+    if (bocc == NULL || dscc == NULL) {
         return dx_set_error_code(dx_cec_connection_context_not_initialized);
     }
 
@@ -239,7 +242,8 @@ static bool dx_subscribe_symbol_to_record(dxf_connection_t connection, dx_messag
 
     if (!dx_compose_message_header(bocc, type) ||
         !dx_compose_body(bocc, record_id, cipher, symbol) ||
-        ((type == MESSAGE_HISTORY_ADD_SUBSCRIPTION) && !dx_write_compact_long(bocc, time << 32)) || 
+        ((type == MESSAGE_HISTORY_ADD_SUBSCRIPTION) && !dx_create_subscription_time(dscc, record_id, time, OUT &subscription_time)) ||
+        ((type == MESSAGE_HISTORY_ADD_SUBSCRIPTION) && !dx_write_compact_long(bocc, subscription_time)) ||
         !dx_finish_composing_message(bocc)) {
 
         dx_free(dx_get_out_buffer(bocc));
