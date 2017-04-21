@@ -11,6 +11,7 @@
 #endif
 
 #include "ConnectionContextData.h"
+#include "DXAlgorithms.h"
 #include "DXFeed.h"
 #include "DXTypes.h"
 #include "EventSubscription.h"
@@ -414,6 +415,125 @@ bool snapshot_buildin_update_test(void) {
 
 /* -------------------------------------------------------------------------- */
 
+static dx_record_info_id_t g_record_info_ids_list[] = { 
+    dx_rid_order, dx_rid_time_and_sale, dx_rid_candle, 
+    dx_rid_spread_order, dx_rid_greeks, dx_rid_series 
+};
+static size_t g_record_info_ids_count = SIZE_OF_ARRAY(g_record_info_ids_list);
+
+static dxf_const_string_t g_symbols[] = { 
+    L"AAPL", L"FB", L"QQQ", L"AMZN", L"MSFT", L"GOOGL", L"BAC", L"GOOG", L"NFLX", L"TSLA", L"PFE", 
+    L"AGN", L"BABA", L"VRX", L"GE", L"TLT", L"XOM", L"JPM", L"GILD", L"C", L"WFC", L"T", L"JNJ", 
+    L"DIS", L"PCLN", L"XIV", L"CVX", L"MCD", L"INTC", L"VZ", L"CHTR", L"CSCO", L"HD", L"V", L"BIDU", 
+    L"NKE", L"BA", L"WMT", L"KO", L"IBM", L"PG", L"SLB", L"CMCSA", L"SHPG", L"IBB", L"YHOO", 
+    L"ABBV", L"GS", L"FCX", L"ORCL", L"QCOM", L"CVS", L"MRK", L"SBUX", L"BIIB", L"CMG", L"PEP", 
+    L"BAX", L"DAL", L"TGT", L"CELG", L"MON", L"BRK-B", L"AMGN", L"UNH", L"HAL", L"MDT", L"F", 
+    L"BMY", L"AVGO", L"PM", L"CAT", L"COST", L"NVDA", L"JD", L"UNP", L"ABT", L"UTX", L"COP", 
+    L"AIG", L"MO", L"MS", L"LNKD", L"WBA", L"REGN", L"LOW", L"GM", L"TWTR", L"NXPI", L"AAL", L"DVN", 
+    L"MA", L"TEVA", L"MDLZ", L"ABX", L"VLO", L"DOW", L"MMM", L"UA", L"PXD" };
+static size_t g_symbols_count = SIZE_OF_ARRAY(g_symbols);
+
+const dxf_const_string_t g_sources_list[] = {
+    L"NTV",
+    L"BYX",
+    L"BZX",
+    L"DEA",
+    L"ISE",
+    L"DEX",
+    L"IST",
+    NULL
+};
+const size_t g_sources_count = SIZE_OF_ARRAY(g_sources_list);
+
+typedef struct {
+    dxf_ulong_t* elements;
+    size_t size;
+    size_t capacity;
+} snapshot_key_array_t;
+
+/*
+ * Test
+ */
+bool snapshot_key_test(void) {
+    size_t record_index;
+    size_t symbol_index;
+    size_t source_index;
+    dxf_ulong_t key;
+    snapshot_key_array_t all_keys = DX_EMPTY_ARRAY;
+    bool found = false;
+    bool error = false;
+    size_t position = 0;
+    for (record_index = 0; record_index < g_record_info_ids_count; record_index++) {
+        for (symbol_index = 0; symbol_index < g_symbols_count; symbol_index++) {
+            for (source_index = 0; source_index < g_sources_count; source_index++) {
+                dx_record_info_id_t info_id = g_record_info_ids_list[record_index];
+                dxf_const_string_t symbol = g_symbols[symbol_index];
+                dxf_const_string_t source = g_sources_list[source_index];
+                key = dx_new_snapshot_key(info_id, symbol, source);
+                DX_ARRAY_BINARY_SEARCH(all_keys.elements, 0, all_keys.size, key, DX_NUMERIC_COMPARATOR, found, position);
+                if (found) {
+                    wprintf(L"Duplicate snapshot keys detected: %llu! Record id: %d, symbol:'%ls', source:'%ls'.\n", key, info_id, symbol, source);
+                    PRINT_TEST_FAILED;
+                    dx_free(all_keys.elements);
+                    return false;
+                } else {
+                    DX_ARRAY_INSERT(all_keys, dxf_ulong_t, key, position, dx_capacity_manager_halfer, error);
+                    if (!dx_is_equal_bool(false, error)) {
+                        PRINT_TEST_FAILED_MESSAGE("Insert array error!");
+                        dx_free(all_keys.elements);
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+    dx_free(all_keys.elements);
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+typedef struct {
+    dxf_int_t* elements;
+    size_t size;
+    size_t capacity;
+} hashs_array_t;
+
+/*
+* Test
+*/
+bool symbol_name_hasher_test(void) {
+    size_t symbol_index;
+    dxf_int_t hash;
+    hashs_array_t all_hashs = DX_EMPTY_ARRAY;
+    bool found = false;
+    bool error = false;
+    size_t position = 0;
+    for (symbol_index = 0; symbol_index < g_symbols_count; symbol_index++) {
+        dxf_const_string_t symbol = g_symbols[symbol_index];
+        hash = dx_symbol_name_hasher(symbol);
+        DX_ARRAY_BINARY_SEARCH(all_hashs.elements, 0, all_hashs.size, hash, DX_NUMERIC_COMPARATOR, found, position);
+        if (found) {
+            wprintf(L"Duplicate hashs detected: %d! symbol:'%ls'.\n", hash, symbol);
+            PRINT_TEST_FAILED;
+            dx_free(all_hashs.elements);
+            return false;
+        }
+        else {
+            DX_ARRAY_INSERT(all_hashs, dxf_int_t, hash, position, dx_capacity_manager_halfer, error);
+            if (!dx_is_equal_bool(false, error)) {
+                PRINT_TEST_FAILED_MESSAGE("Insert array error!");
+                dx_free(all_hashs.elements);
+                return false;
+            }
+        }
+    }
+    dx_free(all_hashs.elements);
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
 bool snapshot_all_unit_test(void) {
     bool res = true;
 
@@ -422,7 +542,9 @@ bool snapshot_all_unit_test(void) {
         !snapshot_update_test() ||
         !snapshot_bid_ask_test() ||
         !snapshot_duplicate_index_test() ||
-        !snapshot_buildin_update_test()) {
+        !snapshot_buildin_update_test() ||
+        !snapshot_key_test() ||
+        !symbol_name_hasher_test()) {
 
         res = false;
     }
