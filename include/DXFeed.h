@@ -91,6 +91,76 @@ DXFEED_API ERRORCODE dxf_create_connection (const char* address,
                                             OUT dxf_connection_t* connection);
 
 /*
+ *	Creates connection with the specified parameters and basic authorization.
+ 
+ *  address - "[host[:port],]host:port"
+ *  user - the user name;
+ *  password - the user password;
+ *  notifier - the callback to inform the client side that the connection has stumbled upon and error and will go reconnecting
+ *  stcn - the callback for informing the client side about the socket thread creation;
+           may be set to NULL if no specific action is required to perform on the client side on a new thread creation
+ *  shdn - the callback for informing the client side about the socket thread destruction;
+           may be set to NULL if no specific action is required to perform on the client side on a thread destruction;
+ *  user_data - the user defined value passed to the termination notifier callback along with the connection handle; may be set
+                to whatever value;
+ *  OUT connection - the handle of the created connection.
+ */
+DXFEED_API ERRORCODE dxf_create_connection_auth_basic(const char* address,
+                                                      const char* user,
+                                                      const char* password,
+                                                      dxf_conn_termination_notifier_t notifier,
+                                                      dxf_socket_thread_creation_notifier_t stcn,
+                                                      dxf_socket_thread_destruction_notifier_t stdn,
+                                                      void* user_data,
+                                                      OUT dxf_connection_t* connection);
+
+/*
+ *	Creates connection with the specified parameters and token authorization.
+ 
+ *  address - "[host[:port],]host:port"
+ *  token - the authorization token;
+ *  notifier - the callback to inform the client side that the connection has stumbled upon and error and will go reconnecting
+ *  stcn - the callback for informing the client side about the socket thread creation;
+           may be set to NULL if no specific action is required to perform on the client side on a new thread creation
+ *  shdn - the callback for informing the client side about the socket thread destruction;
+           may be set to NULL if no specific action is required to perform on the client side on a thread destruction;
+ *  user_data - the user defined value passed to the termination notifier callback along with the connection handle; may be set
+                to whatever value;
+ *  OUT connection - the handle of the created connection.
+ */
+DXFEED_API ERRORCODE dxf_create_connection_auth_bearer(const char* address,
+                                                       const char* token,
+                                                       dxf_conn_termination_notifier_t notifier,
+                                                       dxf_socket_thread_creation_notifier_t stcn,
+                                                       dxf_socket_thread_destruction_notifier_t stdn,
+                                                       void* user_data,
+                                                       OUT dxf_connection_t* connection);
+
+/*
+ *	Creates connection with the specified parameters and custom described authorization.
+ 
+ *  address - "[host[:port],]host:port"
+ *  authscheme - the authorization scheme;
+ *  authdata - the authorization data;
+ *  notifier - the callback to inform the client side that the connection has stumbled upon and error and will go reconnecting
+ *  stcn - the callback for informing the client side about the socket thread creation;
+           may be set to NULL if no specific action is required to perform on the client side on a new thread creation
+ *  shdn - the callback for informing the client side about the socket thread destruction;
+           may be set to NULL if no specific action is required to perform on the client side on a thread destruction;
+ *  user_data - the user defined value passed to the termination notifier callback along with the connection handle; may be set
+                to whatever value;
+ *  OUT connection - the handle of the created connection.
+ */
+DXFEED_API ERRORCODE dxf_create_connection_auth_custom(const char* address,
+                                                       const char* authscheme,
+                                                       const char* authdata,
+                                                       dxf_conn_termination_notifier_t notifier,
+                                                       dxf_socket_thread_creation_notifier_t stcn,
+                                                       dxf_socket_thread_destruction_notifier_t stdn,
+                                                       void* user_data,
+                                                       OUT dxf_connection_t* connection);
+
+/*
  *	Closes a connection.
  
  *  connection - a handle of a previously created connection

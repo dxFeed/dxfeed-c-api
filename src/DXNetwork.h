@@ -37,6 +37,17 @@
 typedef bool (*dx_socket_data_receiver_t) (dxf_connection_t connection, const void* buffer, int buffer_size);
 
 typedef struct {
+    dxf_const_string_t key;
+    dxf_const_string_t value;
+} dx_property_item_t;
+
+typedef struct {
+    dx_property_item_t* elements;
+    size_t size;
+    size_t capacity;
+} dx_property_map_t;
+
+typedef struct {
     dx_socket_data_receiver_t receiver; /* a callback to pass the read data to */
     dxf_conn_termination_notifier_t notifier; /* a callback to notify client the current connection is to be finished and reestablished */
     dxf_socket_thread_creation_notifier_t stcn; /* a callback that's called on a socket thread creation */
@@ -104,5 +115,14 @@ bool dx_send_data (dxf_connection_t connection, const void* buffer, int buffer_s
  */
 
 bool dx_add_worker_thread_task (dxf_connection_t connection, dx_task_processor_t processor, void* data);
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Protocol properties functions
+ */
+/* -------------------------------------------------------------------------- */
+
+bool dx_protocol_property_set(dxf_connection_t connection, dxf_const_string_t key, dxf_const_string_t value);
+const dx_property_map_t* dx_protocol_property_all(dxf_connection_t connection);
 
 #endif /* DX_NETWORK_H_INCLUDED */

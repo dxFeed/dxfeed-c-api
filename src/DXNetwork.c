@@ -95,6 +95,9 @@ typedef struct {
     dx_error_code_t queue_thread_error;
     
     dx_task_queue_t tq;
+
+    /* protocol description properties */
+    dx_property_map_t properties;
     
     int set_fields_flags;
 } dx_network_connection_context_t;
@@ -904,4 +907,46 @@ bool dx_add_worker_thread_task (dxf_connection_t connection, dx_task_processor_t
     }
     
     return dx_add_task_to_queue(context->tq, processor, data);
+}
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Protocol properties functions
+ */
+/* -------------------------------------------------------------------------- */
+
+bool protocol_propert_set(dx_network_connection_context_t* context, dxf_const_string_t key, dxf_const_string_t value) {
+
+}
+
+bool dx_protocol_property_set(dxf_connection_t connection, dxf_const_string_t key, dxf_const_string_t value) {
+    dx_network_connection_context_t* context = NULL;
+    bool res = true;
+
+    context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
+
+    if (context == NULL) {
+        if (res) {
+            dx_set_error_code(dx_cec_connection_context_not_initialized);
+        }
+        return false;
+    }
+
+    return protocol_propert_set(context, key, value);
+}
+
+const dx_property_map_t* dx_protocol_property_all(dxf_connection_t connection) {
+    dx_network_connection_context_t* context = NULL;
+    bool res = true;
+
+    context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
+
+    if (context == NULL) {
+        if (res) {
+            dx_set_error_code(dx_cec_connection_context_not_initialized);
+        }
+        return NULL;
+    }
+
+    return (const dx_property_map_t*)&context->properties;
 }
