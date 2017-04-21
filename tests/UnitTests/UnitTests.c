@@ -24,7 +24,7 @@ const char* result_to_text (bool res) {
 }
 
 static test_function_data_t g_tests[] = {
-    { "event_subscription_test", event_subscription_test },
+    { "event_subscription_test", event_subscription_all_test },
     { "event_dymamic_subscription_test", event_dynamic_subscription_all_test }, 
     { "order_source_test", order_source_configuration_test },
     { "candle_test", candle_all_tests },

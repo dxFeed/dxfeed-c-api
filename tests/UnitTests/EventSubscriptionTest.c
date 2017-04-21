@@ -1,11 +1,13 @@
+#include <stdio.h>
 #include "DXFeed.h"
-
+#include "DataStructures.h"
 #include "EventSubscriptionTest.h"
 #include "EventSubscription.h"
 #include "SymbolCodec.h"
 #include "BufferedIOCommon.h"
 #include "DXAlgorithms.h"
 #include "ConnectionContextData.h"
+#include "TestHelper.h"
 
 static int last_event_type = 0;
 static dxf_const_string_t last_symbol = NULL;
@@ -18,6 +20,9 @@ void dummy_listener(int event_type, dxf_const_string_t symbol_name,
     last_symbol = symbol_name;
 }
 
+/*
+ * Test
+ */
 bool event_subscription_test (void) {
     dxf_connection_t connection;
     dxf_subscription_t sub1;
@@ -174,4 +179,121 @@ bool event_subscription_test (void) {
     }
     
     return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+#define NON_HISTORY_RECORD_TIME -1
+//UTC2017-03-28T07:28:06.123
+#define TIME_STAMP 0x15B13D08BEB
+
+typedef struct {
+    dxf_const_string_t name;
+    dxf_long_t expected_subscr_time;
+} subscription_time_struct_t;
+
+static subscription_time_struct_t g_subscr_time_structs_list[] = {
+    { L"Trade", NON_HISTORY_RECORD_TIME },
+    { L"Quote", NON_HISTORY_RECORD_TIME },
+    { L"Summary", NON_HISTORY_RECORD_TIME },
+    { L"Profile", NON_HISTORY_RECORD_TIME },
+    { L"MarketMaker", TIME_STAMP },
+    { L"Order", TIME_STAMP },
+    { L"TimeAndSale", 0x58DA10860000007B },
+    { L"Candle", 0x58DA10860000007B },
+    { L"TradeETH", NON_HISTORY_RECORD_TIME },
+    { L"SpreadOrder", TIME_STAMP },
+    { L"Greeks", 0x58DA10860000007B },
+    { L"TheoPrice", NON_HISTORY_RECORD_TIME },
+    { L"Underlying", NON_HISTORY_RECORD_TIME },
+    { L"Series", TIME_STAMP },
+    { L"Configuration", NON_HISTORY_RECORD_TIME }
+};
+static size_t g_subscr_time_structs_count = SIZE_OF_ARRAY(g_subscr_time_structs_list);
+
+bool is_history_record(const dx_record_item_t* record_info) {
+    int i;
+    for (i = 0; i < record_info->field_count; ++i) {
+        dx_field_info_t field = record_info->fields[i];
+        if (field.time == dx_ft_first_time_int_field || field.time == dx_ft_second_time_int_field) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/*
+ * Test
+ *
+ * Tests dx_create_subscription_time function that should generate 8-byte time value depending on 
+ * record fields model. Test uses g_subscr_time_structs_list as subscription list and source of 
+ * time valid data. It filters history records and performs checking for them only.
+ *
+ * Expected: all generated subscription times via dx_create_subscription_time should be equals to 
+ * etalon data from g_subscr_time_structs_list. If checking performs succesfully returns true, 
+ * otherwise returns false.
+ */
+bool subscription_time_test(void) {
+    size_t i;
+    dxf_connection_t connection;
+    dx_record_id_t record_id;
+    const dx_record_item_t* record_info;
+    void* dscc = NULL;
+    dxf_long_t subscription_time;
+
+    if (!dx_is_equal_size_t(dx_rid_count, g_subscr_time_structs_count)) {
+        PRINT_TEST_FAILED_MESSAGE("Update g_records_names_list in EventSubscriptionTest.");
+        return false;
+    }
+
+    if (dx_init_symbol_codec() != true) {
+        return false;
+    }
+
+    connection = dx_init_connection();
+    dscc = dx_get_data_structures_connection_context(connection);
+    if (!dx_is_not_null(dscc)) {
+        PRINT_TEST_FAILED_MESSAGE("Unable to receive data structures connection context.");
+        return false;
+    }
+
+    for (i = 0; i < g_subscr_time_structs_count; i++) {
+        subscription_time = LLONG_MAX;
+        record_id = dx_add_or_get_record_id(connection, g_subscr_time_structs_list[i].name);
+        record_info = dx_get_record_by_id(dscc, record_id);
+
+        if (!is_history_record(record_info))
+            continue;
+
+        if (!dx_create_subscription_time(dscc, record_id, TIME_STAMP, OUT &subscription_time)) {
+            PRINT_TEST_FAILED_MESSAGE("Create subscription time error!");
+            return false;
+        }
+        if (!dx_is_equal_dxf_long_t(g_subscr_time_structs_list[i].expected_subscr_time, subscription_time)) {
+            wprintf(L"Invalid subscription time for %ls record!\n", g_subscr_time_structs_list[i].name);
+            PRINT_TEST_FAILED;
+            return false;
+        }
+    }
+
+    if (!dx_is_equal_bool(false, dx_create_subscription_time(NULL, record_id, TIME_STAMP, OUT &subscription_time)) ||
+        !dx_is_equal_bool(false, dx_create_subscription_time(dscc, -1, TIME_STAMP, OUT &subscription_time)) ||
+        !dx_is_equal_bool(false, dx_create_subscription_time(dscc, record_id, TIME_STAMP, NULL))) {
+        return false;
+    }
+
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool event_subscription_all_test(void) {
+    bool res = true;
+
+    if (!event_subscription_test() ||
+        !subscription_time_test()) {
+
+        res = false;
+    }
+    return res;
 }
