@@ -130,4 +130,6 @@ bool dx_read_utf_char_array (void* context, OUT dxf_string_t* value);
  */
 bool dx_read_utf_string (void* context, OUT dxf_string_t* value);
 
+void dx_get_raw(void* context, OUT dxf_ubyte_t** raw, OUT dxf_int_t* len);
+
 #endif /* BUFFERED_INPUT_H_INCLUDED */

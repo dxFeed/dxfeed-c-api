@@ -487,4 +487,12 @@ DXFEED_API ERRORCODE dxf_attach_price_level_book_listener(dxf_price_level_book_t
 DXFEED_API ERRORCODE dxf_detach_price_level_book_listener(dxf_price_level_book_t book, 
                                                           dxf_price_level_book_listener_t book_listener);
 
+/*
+ *  Add dumping of incoming traffic into specific file
+ *
+ *  connection - a handle of a previously created connection which the subscription will be using
+ *  raw_file_name - raw data file name
+ */
+DXFEED_API ERRORCODE dxf_write_raw_data(dxf_connection_t connection, const char* raw_file_name);
+
 #endif /* DXFEED_API_H_INCLUDED */
