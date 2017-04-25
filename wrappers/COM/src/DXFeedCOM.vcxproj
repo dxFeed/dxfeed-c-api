@@ -193,7 +193,9 @@
     <ClCompile Include="EventFactory.cpp" />
     <ClCompile Include="Feed.cpp" />
     <ClCompile Include="LibraryLocker.cpp" />
+    <ClCompile Include="NativeCandleSymbol.cpp" />
     <ClCompile Include="SelfRegistration.cpp" />
+    <ClCompile Include="Snapshot.cpp" />
     <ClCompile Include="Subscription.cpp" />
     <ClCompile Include="TypeLibraryManager.cpp" />
   </ItemGroup>
@@ -215,7 +217,9 @@
     <ClInclude Include="EventFactory.h" />
     <ClInclude Include="Feed.h" />
     <ClInclude Include="LibraryLocker.h" />
+    <ClInclude Include="NativeCandleSymbol.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="Snapshot.h" />
     <ClInclude Include="Subscription.h" />
     <ClInclude Include="TypeLibraryManager.h" />
     <ClInclude Include="..\include\Guids.h" />

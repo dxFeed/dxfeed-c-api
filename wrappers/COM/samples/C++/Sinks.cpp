@@ -176,7 +176,7 @@ HRESULT STDMETHODCALLTYPE DXEventListener::OnNewData (IDispatch* subscription, I
     
     IDXEventDataCollection* dc = reinterpret_cast<IDXEventDataCollection*>(dataCollection);
     
-    INT dataCount;
+    ULONGLONG dataCount;
     HRESULT res = dc->GetEventCount(&dataCount);
     
     if (res != S_OK) {
@@ -185,7 +185,7 @@ HRESULT STDMETHODCALLTYPE DXEventListener::OnNewData (IDispatch* subscription, I
     
     cout << ", event data count = " << dataCount << "\n";
     
-    for (int i = 0; i < dataCount; ++i) {
+    for (ULONGLONG i = 0; i < dataCount; ++i) {
         IDispatch* eventData = NULL;
         
         if ((res = dc->GetEvent(i, &eventData)) != S_OK) {

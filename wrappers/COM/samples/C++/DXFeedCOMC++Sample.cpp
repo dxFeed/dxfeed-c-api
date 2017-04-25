@@ -385,13 +385,15 @@ const char* symbol_pack_2[] = { "MSFT", "YHOO", "C" };
 const char* symbol_pack_3[] = { "C" };
 const char* symbol_pack_4[] = { "MSFT", "YHOO", "IBM" };
 const char* symbol_pack_5[] = { "MSFT", "YHOO" };
+const char* symbol_pack_6[] = { "MSFT" };
 
 const SymbolPack symbolPacks[] = {
     { symbol_pack_1, sizeof(symbol_pack_1) / sizeof(symbol_pack_1[0]) },
     { symbol_pack_2, sizeof(symbol_pack_2) / sizeof(symbol_pack_2[0]) },
     { symbol_pack_3, sizeof(symbol_pack_3) / sizeof(symbol_pack_3[0]) },
     { symbol_pack_4, sizeof(symbol_pack_4) / sizeof(symbol_pack_4[0]) },
-    { symbol_pack_5, sizeof(symbol_pack_5) / sizeof(symbol_pack_5[0]) }
+    { symbol_pack_5, sizeof(symbol_pack_5) / sizeof(symbol_pack_5[0]) },
+    { symbol_pack_6, sizeof(symbol_pack_6) / sizeof(symbol_pack_6[0]) }
 };
 
 /* -------------------------------------------------------------------------- */
@@ -461,75 +463,95 @@ int _tmain(int argc, _TCHAR* argv[]) {
         cout << "Attaching a termination notification sink to the connection object...\n";            
         attachSink(connection, (IDXConnectionTerminationNotifier*)&ctn, DIID_IDXConnectionTerminationNotifier);
         
-        IDXSubscription* subscr = NULL;
-        
-        {
-            int eventTypes = DXF_ET_TRADE | DXF_ET_CANDLE;
-            
-            cout << "Creating a subscription based on the created connection: event type bitmask = " << eventTypes << "...\n";
-            
-            processError(connection->CreateSubscriptionTimed(eventTypes, 0, (IDispatch**)&subscr), feed);
-        }
-        
-        ComReleaser subscrReleaser(subscr);
-        
-        cout << "Adding a single symbol to the subscription...\n";        
-        addSymbol(feed, subscr, std::string(symbolPacks[0].symbols[0]));
+        //IDXSubscription* subscr = NULL;
+        //
+        //{
+        //    int eventTypes = DXF_ET_TRADE | DXF_ET_CANDLE;
+        //    
+        //    cout << "Creating a subscription based on the created connection: event type bitmask = " << eventTypes << "...\n";
+        //    
+        //    processError(connection->CreateSubscriptionTimed(eventTypes, 0, (IDispatch**)&subscr), feed);
+        //}
+        //
+        //ComReleaser subscrReleaser(subscr);
+        //
+        //cout << "Adding a single symbol to the subscription...\n";        
+        //addSymbol(feed, subscr, std::string(symbolPacks[0].symbols[0]));
 
-        cout << "Attaching an event data listener to the subscription object...\n";        
-        attachSink(subscr, (IDXEventListener*)&el, DIID_IDXEventListener);
-        
-        cout << "Adding multiple symbols to the subscription...\n";
-        addSymbols(feed, subscr, symbolPacks[1]);
-        pauseThread(5000);
-        
-        cout << "Clearing the subscription symbols...\n";
-        processError(subscr->ClearSymbols(), feed);
-        pauseThread(5000);
-        
-        cout << "Removing multiple symbols from the subscription...\n";
-        removeSymbols(feed, subscr, symbolPacks[3]);
-        pauseThread(5000);
-        
-        cout << "Setting the subscription symbols...\n";
-        setSymbols(feed, subscr, symbolPacks[4]);
-        pauseThread(5000);
-        
-        cout << "Retrieving the subscription event types...\n";
-        getSubscrEvents(feed, subscr);
-        pauseThread(5000);
-        
-        cout << "Adding new symbols to the subscription...\n";
-        addSymbols(feed, subscr, symbolPacks[2]);
-        pauseThread(5000);
+        //cout << "Attaching an event data listener to the subscription object...\n";        
+        //attachSink(subscr, (IDXEventListener*)&el, DIID_IDXEventListener);
+        //
+        //cout << "Adding multiple symbols to the subscription...\n";
+        //addSymbols(feed, subscr, symbolPacks[1]);
+        //pauseThread(5000);
+        //
+        //cout << "Clearing the subscription symbols...\n";
+        //processError(subscr->ClearSymbols(), feed);
+        //pauseThread(5000);
+        //
+        //cout << "Removing multiple symbols from the subscription...\n";
+        //removeSymbols(feed, subscr, symbolPacks[3]);
+        //pauseThread(5000);
+        //
+        //cout << "Setting the subscription symbols...\n";
+        //setSymbols(feed, subscr, symbolPacks[4]);
+        //pauseThread(5000);
+        //
+        //cout << "Retrieving the subscription event types...\n";
+        //getSubscrEvents(feed, subscr);
+        //pauseThread(5000);
+        //
+        //cout << "Adding new symbols to the subscription...\n";
+        //addSymbols(feed, subscr, symbolPacks[2]);
+        //pauseThread(5000);
 
-        cout << "Adding new Candle symbol [XBT/USD{=d}] to the subscription...\n";
-        IDXCandleSymbol* candleSymbol = NULL; 
-        processError(feed->CreateCandleSymbol((IDispatch**)&candleSymbol), feed);
-        ComReleaser candleSymbolReleaser(candleSymbol);
-        candleSymbol->put_BaseSymbol(L"XBT/USD");
-        candleSymbol->put_PeriodValue(1.0);
-        candleSymbol->put_PeriodType(dxf_ctpa_day);
-        addCandleSymbol(feed, subscr, candleSymbol);
-        pauseThread(5000);
+        //cout << "Adding new Candle symbol [XBT/USD{=d}] to the subscription...\n";
+        //IDXCandleSymbol* candleSymbol = NULL; 
+        //processError(feed->CreateCandleSymbol((IDispatch**)&candleSymbol), feed);
+        //ComReleaser candleSymbolReleaser(candleSymbol);
+        //candleSymbol->put_BaseSymbol(L"XBT/USD");
+        //candleSymbol->put_PeriodValue(1.0);
+        //candleSymbol->put_PeriodType(dxf_ctpa_day);
+        //addCandleSymbol(feed, subscr, candleSymbol);
+        //pauseThread(5000);
 
-        cout << "Adding new Candle symbol [AAPL{=d}] to the subscription...\n";
-        candleSymbol->put_BaseSymbol(L"AAPL");
-        addCandleSymbol(feed, subscr, candleSymbol);
-        getSymbols(feed, subscr);
-        pauseThread(5000);
+        //cout << "Adding new Candle symbol [AAPL{=d}] to the subscription...\n";
+        //candleSymbol->put_BaseSymbol(L"AAPL");
+        //addCandleSymbol(feed, subscr, candleSymbol);
+        //getSymbols(feed, subscr);
+        //pauseThread(5000);
 
-        cout << "Removing Candle symbol [AAPL{=d}] from the subscription...\n";
-        removeCandleSymbol(feed, subscr, candleSymbol);
-        pauseThread(5000);
-        
-        cout << "Getting the subscription symbols...\n";
-        getSymbols(feed, subscr);
-        pauseThread(5000);
-        
-        pauseThread(100000);
+        //cout << "Removing Candle symbol [AAPL{=d}] from the subscription...\n";
+        //removeCandleSymbol(feed, subscr, candleSymbol);
+        //pauseThread(5000);
+        //
+        //cout << "Getting the subscription symbols...\n";
+        //getSymbols(feed, subscr);
+        //pauseThread(5000);
+        //
+        //pauseThread(100000);
 
-        subscr->ClearSymbols();
+        //subscr->ClearSymbols();
+
+        IDXSubscription* snapshot = NULL;
+        cout << "Creating a snapshot based on the created connection: event type bitmask = " << DXF_ET_ORDER << "...\n";
+        processError(connection->CreateSnapshot(DXF_ET_ORDER, L"IBM", L"NTV", 0, (IDispatch**)&snapshot), feed);
+
+        ComReleaser snapshotReleaser(snapshot);
+        cout << "Attaching an event data listener to the snapshot object...\n";
+        attachSink(snapshot, (IDXEventListener*)&el, DIID_IDXEventListener);
+        getSymbols(feed, snapshot);
+
+        pauseThread(10000);
+
+        cout << "Change symbol of snapshot...\n";
+
+        setSymbols(feed, snapshot, symbolPacks[5]);
+        getSymbols(feed, snapshot);
+
+        pauseThread(10000);
+
+        snapshot->ClearSymbols();
 	
 	} catch (const DXFeedError&) {
 	    return -1;
