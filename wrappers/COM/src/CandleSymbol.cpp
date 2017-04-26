@@ -263,7 +263,7 @@ HRESULT STDMETHODCALLTYPE DXCandleSymbol::ToString(BSTR* value) {
         price == dxf_cpa_default &&
         session == dxf_csa_default) {
 
-        *value = SysAllocStringLen(buf.c_str(), buf.size());
+        *value = SysAllocStringLen(buf.c_str(), (UINT)buf.size());
         if (*value == NULL)
             return E_OUTOFMEMORY;
         return S_OK;
@@ -311,7 +311,7 @@ HRESULT STDMETHODCALLTYPE DXCandleSymbol::ToString(BSTR* value) {
 
     buf.append(L"}");
 
-    *value = SysAllocStringLen(buf.c_str(), buf.size());
+    *value = SysAllocStringLen(buf.c_str(), (UINT)buf.size());
     if (*value == NULL)
         return E_OUTOFMEMORY;
     return S_OK;

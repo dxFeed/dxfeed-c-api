@@ -71,7 +71,7 @@ private:
     void CreateListenerParams(IDispatch* subscription, int eventType, _bstr_t& symbol, IDispatch* dataCollection,
         variant_vector_t& storage, OUT DISPPARAMS& params);
     static dx_event_id_t GetEventId(int eventType);
-    HRESULT GetSymbol(BSTR* symbol);
+    HRESULT GetSymbol(_bstr_t& symbol);
     HRESULT HasSymbol(bool& result);
     void CloseSnapshot();
 private:
@@ -116,7 +116,8 @@ DXSnapshot::DXSnapshot(dxf_connection_t connection, int eventType, BSTR symbol, 
     , m_listener_next_id(1) {
     SetBehaviorCustomizer(this);
 
-    if (dxf_create_snapshot(connection, GetEventId(eventType), (const wchar_t*)symbol, (const char*)m_source, time, &m_snapshotHandle) == DXF_FAILURE) {
+    _bstr_t symbolWrapper(symbol);
+    if (dxf_create_snapshot(connection, GetEventId(eventType), (const wchar_t*)symbolWrapper, (const char*)m_source, time, &m_snapshotHandle) == DXF_FAILURE) {
         throw "Failed to create a snapshot";
     }
 
@@ -197,7 +198,7 @@ HRESULT STDMETHODCALLTYPE DXSnapshot::AddSymbol(BSTR symbol) {
 
     hr = E_FAIL;
     try {
-        symbolWrapper = _bstr_t(symbol, false);
+        symbolWrapper = _bstr_t(symbol, true);
 
         if (dxf_create_snapshot(m_connection, GetEventId(m_eventType), (const wchar_t*)symbolWrapper, (const char*)m_source, m_time, &m_snapshotHandle) == DXF_SUCCESS) {
             if (dxf_attach_snapshot_listener(m_snapshotHandle, OnNewData, this) == DXF_SUCCESS) {
@@ -210,8 +211,6 @@ HRESULT STDMETHODCALLTYPE DXSnapshot::AddSymbol(BSTR symbol) {
     } catch (const _com_error& e) {
         hr = e.Error();
     }
-
-    symbolWrapper.Detach();
 
     return hr;
 }
@@ -250,12 +249,12 @@ HRESULT STDMETHODCALLTYPE DXSnapshot::RemoveSymbol(BSTR symbol) {
     if (symbol == NULL || SysStringLen(symbol) == 0)
         return E_INVALIDARG;
 
-    BSTR current;
-    HRESULT hr = GetSymbol(&current);
+    _bstr_t current;
+    HRESULT hr = GetSymbol(current);
     if (FAILED(hr))
         return hr;
 
-    if (wcscmp(symbol, current) == 0)
+    if (wcscmp(symbol, (const wchar_t*)current) == 0)
         CloseSnapshot();
 
     return S_OK;
@@ -268,8 +267,8 @@ HRESULT STDMETHODCALLTYPE DXSnapshot::RemoveSymbols(SAFEARRAY* symbols) {
         return E_POINTER;
     }
 
-    BSTR current;
-    HRESULT hr = GetSymbol(&current);
+    _bstr_t current;
+    HRESULT hr = GetSymbol(current);
     if (FAILED(hr))
         return hr;
 
@@ -283,7 +282,7 @@ HRESULT STDMETHODCALLTYPE DXSnapshot::RemoveSymbols(SAFEARRAY* symbols) {
 
     for (size_t i = 0; i < symbolArray.size(); i++) {
         _bstr_t symbol = _bstr_t(symbolArray[i]);
-        if (wcscmp(current, symbol) == 0) {
+        if (wcscmp((const wchar_t*)current, symbol) == 0) {
             CloseSnapshot();
             break;
         }
@@ -388,8 +387,8 @@ HRESULT STDMETHODCALLTYPE DXSnapshot::AddCandleSymbol(IDXCandleSymbol* symbol) {
 /* -------------------------------------------------------------------------- */
 
 HRESULT STDMETHODCALLTYPE DXSnapshot::RemoveCandleSymbol(IDXCandleSymbol* symbol) {
-    BSTR current;
-    HRESULT hr = GetSymbol(&current);
+    _bstr_t current;
+    HRESULT hr = GetSymbol(current);
     if (FAILED(hr))
         return hr;
     BSTR other;
@@ -397,7 +396,7 @@ HRESULT STDMETHODCALLTYPE DXSnapshot::RemoveCandleSymbol(IDXCandleSymbol* symbol
     if (FAILED(hr))
         return hr;
     _bstr_t otherWrapper(other, false);
-    if (wcscmp(current, other) == 0)
+    if (wcscmp((const wchar_t*)current, other) == 0)
         CloseSnapshot();
 
     return S_OK;
@@ -518,15 +517,15 @@ dx_event_id_t DXSnapshot::GetEventId(int eventType) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT DXSnapshot::GetSymbol(BSTR* symbol) {
+HRESULT DXSnapshot::GetSymbol(_bstr_t& symbol) {
     if (m_snapshotHandle == NULL) {
-        return E_FAIL;
+        return E_POINTER;
     }
     dxf_string_t nativeSymbol;
     if (dxf_get_snapshot_symbol(m_snapshotHandle, &nativeSymbol) == DXF_FAILURE) {
         return E_FAIL;
     }
-    *symbol = nativeSymbol;
+    symbol = _bstr_t(nativeSymbol);
     return S_OK;
 }
 
