@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "ConnectionTest.h"
+#include "DataCollectionsTests.h"
 #include "EventSubscriptionTest.h"
 #include "EventDynamicSubscriptionTest.h"
 #include "OrderSourceConfigurationTest.h"
@@ -24,6 +25,7 @@ const char* result_to_text (bool res) {
 }
 
 static test_function_data_t g_tests[] = {
+    { "data_collections_test", data_collections_all_test },
     { "event_subscription_test", event_subscription_test },
     { "event_dymamic_subscription_test", event_dynamic_subscription_all_test }, 
     { "order_source_test", order_source_configuration_test },

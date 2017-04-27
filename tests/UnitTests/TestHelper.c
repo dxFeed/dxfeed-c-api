@@ -249,6 +249,22 @@ bool dx_is_null(void* actual) {
     return true;
 }
 
+bool dx_is_true(bool actual) {
+    if (actual != true) {
+        wprintf(L"%ls failed: expected 'true', but was 'false'\n", __FUNCTIONW__);
+        return false;
+    }
+    return true;
+}
+
+bool dx_is_false(bool actual) {
+    if (actual != false) {
+        wprintf(L"%ls failed: expected 'false', but was 'true'\n", __FUNCTIONW__);
+        return false;
+    }
+    return true;
+}
+
 bool dx_is_equal_ptr(void* expected, void* actual)
 {
     if (expected != actual) {

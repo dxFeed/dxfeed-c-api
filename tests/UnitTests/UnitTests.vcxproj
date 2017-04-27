@@ -180,6 +180,7 @@
     <ClCompile Include="..\..\src\Snapshot.c" />
     <ClCompile Include="..\..\src\ObjectArray.c" />
     <ClCompile Include="ConnectionTest.c" />
+    <ClCompile Include="DataCollectionsTests.c" />
     <ClCompile Include="EventDynamicSubscriptionTest.cpp" />
     <ClCompile Include="EventSubscriptionTest.c" />
     <ClCompile Include="OrderSourceConfigurationTest.c" />
@@ -233,6 +234,7 @@
     <ClInclude Include="..\..\src\EventSubscription.h" />
     <ClInclude Include="CandleTest.h" />
     <ClInclude Include="ConnectionTest.h" />
+    <ClInclude Include="DataCollectionsTests.h" />
     <ClInclude Include="EventDynamicSubscriptionTest.h" />
     <ClInclude Include="EventSubscriptionTest.h" />
     <ClInclude Include="..\..\src\Logger.h" />

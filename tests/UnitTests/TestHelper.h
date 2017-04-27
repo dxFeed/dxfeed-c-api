@@ -1,6 +1,7 @@
 #ifndef TEST_HELPER_H_INCLUDED
 #define TEST_HELPER_H_INCLUDED
 
+#include <Windows.h>
 
 #include "DXFeed.h"
 #include "DXErrorCodes.h"
@@ -46,6 +47,7 @@ bool create_event_subscription(dxf_connection_t connection, int event_type,
 typedef struct {
     const char *counter_name;
     dxf_uint_t event_counter;
+    //TODO: hide implementation into c-file; remove Windows.h header from this
     CRITICAL_SECTION event_counter_guard;
 } event_counter_data_t, *event_counter_data_ptr_t;
 
@@ -91,6 +93,8 @@ DX_IS_GREATER_OR_EQUAL_FUNCTION_DECLARATION(double);
 
 bool dx_is_not_null(void* actual);
 bool dx_is_null(void* actual);
+bool dx_is_true(bool actual);
+bool dx_is_false(bool actual);
 
 bool dx_is_equal_ptr(void* expected, void* actual);
 
