@@ -37,8 +37,8 @@
 typedef bool (*dx_socket_data_receiver_t) (dxf_connection_t connection, const void* buffer, int buffer_size);
 
 typedef struct {
-    dxf_const_string_t key;
-    dxf_const_string_t value;
+    dxf_string_t key;
+    dxf_string_t value;
 } dx_property_item_t;
 
 typedef struct {
@@ -123,6 +123,6 @@ bool dx_add_worker_thread_task (dxf_connection_t connection, dx_task_processor_t
 /* -------------------------------------------------------------------------- */
 
 bool dx_protocol_property_set(dxf_connection_t connection, dxf_const_string_t key, dxf_const_string_t value);
-const dx_property_map_t* dx_protocol_property_all(dxf_connection_t connection);
+const dx_property_map_t* dx_protocol_property_get_all(dxf_connection_t connection);
 
 #endif /* DX_NETWORK_H_INCLUDED */

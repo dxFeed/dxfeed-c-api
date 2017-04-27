@@ -139,6 +139,7 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_network) {
 /* -------------------------------------------------------------------------- */
 
 static bool dx_close_socket (dx_network_connection_context_t* context);
+static void dx_protocol_property_clear(dx_network_connection_context_t* context);
 
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_network) {
     bool res = true;
@@ -250,6 +251,8 @@ bool dx_clear_connection_data (dx_network_connection_context_t* context) {
     }
     
     CHECKED_FREE(context->address);
+
+    dx_protocol_property_clear(context);
     
     dx_free(context);
     
@@ -915,8 +918,74 @@ bool dx_add_worker_thread_task (dxf_connection_t connection, dx_task_processor_t
  */
 /* -------------------------------------------------------------------------- */
 
-bool protocol_propert_set(dx_network_connection_context_t* context, dxf_const_string_t key, dxf_const_string_t value) {
+static void dx_protocol_property_free_item(void* obj) {
+    if (obj == NULL)
+        return;
+    dx_property_item_t* item = (dx_property_item_t*) obj;
+    if (item->key != NULL)
+        dx_free(item->key);
+    if (item->value != NULL)
+        dx_free(item->value);
+}
 
+static void dx_protocol_property_clear(dx_network_connection_context_t* context) {
+    if (context == NULL)
+        return;
+    dx_property_map_t* props = &context->properties;
+    dx_property_item_t* item = props->elements;
+    size_t i;
+    for (i = 0; i < props->size; i++) {
+        dx_protocol_property_free_item((void*)item++);
+    }
+    dx_free(props->elements);
+    props->elements = NULL;
+    props->size = 0;
+    props->capacity = 0;
+}
+
+static inline int dx_property_item_comparator(dx_property_item_t item1, dx_property_item_t item2) {
+    return dx_compare_strings((dxf_const_string_t)item1.key, (dxf_const_string_t)item2.key);
+}
+
+//Note: not fast map-dictionary realization, but enough for properties
+static bool dx_protocol_property_set_impl(dx_network_connection_context_t* context, dxf_const_string_t key, dxf_const_string_t value) {
+    dx_property_map_t* props = &context->properties;
+    dx_property_item_t item = { (dxf_string_t)key, (dxf_string_t)value };
+    bool found;
+    size_t index;
+
+    if (context == NULL)
+        return dx_set_error_code(dx_ec_invalid_func_param_internal);
+    if (key == NULL || value == NULL)
+        return dx_set_error_code(dx_ec_invalid_func_param);
+
+    DX_ARRAY_BINARY_SEARCH(props->elements, 0, props->size, item, dx_property_item_comparator, found, index);
+    if (found) {
+        dx_property_item_t* item_ptr = props->elements + index;
+        if (dx_compare_strings(item_ptr->value, value) == 0) {
+            // map already contains such key-value pair
+            return true;
+        }
+        dxf_string_t value_copy = dx_create_string_src(value);
+        if (value_copy == NULL)
+            return false;
+        dx_free(item_ptr->value);
+        item_ptr->value = value_copy;
+    } else {
+        dx_property_item_t new_item = { dx_create_string_src(key), dx_create_string_src(value) };
+        bool insertion_failed;
+        if (new_item.key == NULL || new_item.value == NULL) {
+            dx_protocol_property_free_item((void*)&new_item);
+            return false;
+        }
+        DX_ARRAY_INSERT(*props, dx_property_item_t, new_item, index, dx_capacity_manager_halfer, insertion_failed);
+        if (insertion_failed) {
+            dx_protocol_property_free_item((void*)&new_item);
+            return false;
+        }
+    }
+
+    return true;
 }
 
 bool dx_protocol_property_set(dxf_connection_t connection, dxf_const_string_t key, dxf_const_string_t value) {
@@ -932,10 +1001,10 @@ bool dx_protocol_property_set(dxf_connection_t connection, dxf_const_string_t ke
         return false;
     }
 
-    return protocol_propert_set(context, key, value);
+    return dx_protocol_property_set_impl(context, key, value);
 }
 
-const dx_property_map_t* dx_protocol_property_all(dxf_connection_t connection) {
+const dx_property_map_t* dx_protocol_property_get_all(dxf_connection_t connection) {
     dx_network_connection_context_t* context = NULL;
     bool res = true;
 

@@ -438,12 +438,18 @@ static bool dx_write_describe_protocol_magic (void* bocc) {
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_write_describe_protocol_properties (void* bocc) {
-    CHECKED_CALL_2(dx_write_compact_int, bocc, 2); /* count of properties */
-    CHECKED_CALL_2(dx_write_utf_string, bocc, L"version"); 
-    CHECKED_CALL_2(dx_write_utf_string, bocc, DX_LIBRARY_VERSION);
-    CHECKED_CALL_2(dx_write_utf_string, bocc, L"opt");
-    CHECKED_CALL_2(dx_write_utf_string, bocc, L"hs");
+static bool dx_write_describe_protocol_properties (void* bocc, const dx_property_map_t* properties) {
+    size_t i;
+
+    if (properties == NULL)
+        return false;
+
+    CHECKED_CALL_2(dx_write_compact_int, bocc, properties->size); /* count of properties */
+    for (i = 0; i < properties->size; i++) {
+        dx_property_item_t* item_ptr = properties->elements + i;
+        CHECKED_CALL_2(dx_write_utf_string, bocc, item_ptr->key);
+        CHECKED_CALL_2(dx_write_utf_string, bocc, item_ptr->value);
+    }
   
     return true;
 }
@@ -666,6 +672,13 @@ bool dx_send_protocol_description (dxf_connection_t connection, bool task_mode) 
         return true;
     }
 
+    // set default protocol properties values
+    if (!dx_protocol_property_set(connection, L"version", DX_LIBRARY_VERSION) ||
+        !dx_protocol_property_set(connection, L"opt", L"hs")) {
+
+        return false;
+    }
+
     bocc = dx_get_buffered_output_connection_context(connection);
 
     if (bocc == NULL) {
@@ -686,7 +699,7 @@ bool dx_send_protocol_description (dxf_connection_t connection, bool task_mode) 
 
     if (!dx_compose_message_header(bocc, MESSAGE_DESCRIBE_PROTOCOL) ||
         !dx_write_describe_protocol_magic(bocc) ||
-        !dx_write_describe_protocol_properties(bocc) ||
+        !dx_write_describe_protocol_properties(bocc, dx_protocol_property_get_all(connection)) ||
         !dx_write_describe_protocol_sends(bocc) ||
         !dx_write_describe_protocol_recvs(bocc) ||
         !dx_finish_composing_message(bocc)) {
