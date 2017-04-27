@@ -444,7 +444,7 @@ static bool dx_write_describe_protocol_properties (void* bocc, const dx_property
     if (properties == NULL)
         return false;
 
-    CHECKED_CALL_2(dx_write_compact_int, bocc, properties->size); /* count of properties */
+    CHECKED_CALL_2(dx_write_compact_int, bocc, (dxf_int_t)properties->size); /* count of properties */
     for (i = 0; i < properties->size; i++) {
         dx_property_item_t* item_ptr = properties->elements + i;
         CHECKED_CALL_2(dx_write_utf_string, bocc, item_ptr->key);

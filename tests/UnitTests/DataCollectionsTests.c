@@ -25,7 +25,7 @@ bool protocol_properties_set_null_test(void) {
     dxf_connection_t connection = dx_init_connection();
 
     DX_CHECK(dx_is_false(dx_protocol_property_set(connection, NULL, NULL)));
-    DX_CHECK(dx_is_false(dx_protocol_property_set(connection, NULL, L"valA")));
+    DX_CHECK(dx_is_false(dx_protocol_property_set(connection, NULL, L"A")));
     DX_CHECK(dx_is_false(dx_protocol_property_set(connection, L"a", NULL)));
 
     dx_deinit_connection(connection);
