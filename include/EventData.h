@@ -405,6 +405,6 @@ typedef void(*dxf_price_level_book_listener_t) (const dxf_price_level_book_data_
 #ifdef __cplusplus
     extern "C"
 #endif
-const dxf_event_data_t dx_get_event_data_item (int event_mask, const dxf_event_data_t data, int index);
+const dxf_event_data_t dx_get_event_data_item (int event_mask, const dxf_event_data_t data, size_t index);
  
 #endif /* EVENT_DATA_H_INCLUDED */

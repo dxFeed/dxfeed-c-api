@@ -17,6 +17,8 @@
  *
  */
 
+#include <stdio.h>
+
 #include "DXFeed.h"
 
 #include "ServerMessageProcessor.h"

@@ -24,17 +24,17 @@ using namespace std;
 /*
  *	Helper classes
  */
-/* -------------------------------------------------------------------------- */
+ /* -------------------------------------------------------------------------- */
 
 struct CoInitializer {
-    CoInitializer (DWORD modes = COINIT_MULTITHREADED) {
+    CoInitializer(DWORD modes = COINIT_MULTITHREADED) {
         HRESULT res = ::CoInitializeEx(NULL, modes);
-        
+
         if (!(res == S_OK || res == S_FALSE)) {
             throw "Failed to initialize COM";
         }
     }
-    ~CoInitializer () {
+    ~CoInitializer() {
         ::CoUninitialize();
     }
 };
@@ -44,14 +44,15 @@ typedef std::auto_ptr<CoInitializer> CoInitializerPtr;
 /* -------------------------------------------------------------------------- */
 
 struct SafeArrayDestroyer {
-    SafeArrayDestroyer (SAFEARRAY* sa)
-    : m_sa(sa) {}
-    ~SafeArrayDestroyer () {
+    SafeArrayDestroyer(SAFEARRAY* sa)
+        : m_sa(sa) {
+    }
+    ~SafeArrayDestroyer() {
         if (m_sa != NULL) {
             ::SafeArrayDestroy(m_sa);
         }
     }
-    
+
 private:
 
     SAFEARRAY* m_sa;
@@ -72,42 +73,42 @@ typedef std::vector<std::string> StringVector;
 /*
  *	Helper functions
  */
-/* -------------------------------------------------------------------------- */
+ /* -------------------------------------------------------------------------- */
 
 struct DXFeedError {};
 
-void processError (HRESULT res, IDXFeed* feed = NULL) {
+void processError(HRESULT res, IDXFeed* feed = NULL) {
     if (res == S_OK) {
         cout << "\tSuccess!\n";
-        
+
         return;
     }
-    
+
     cout << "\tFailure! Operation error code = " << res;
-    
+
     if (feed == NULL) {
         cout << "!\n";
-        
+
         throw DXFeedError();
     }
-    
+
     INT errorCode = 0;
     HRESULT errRes = feed->GetLastError(&errorCode);
-    
+
     if (errRes != S_OK) {
         cout << ", DXFeed code retrieval failed!\n";
-        
+
         throw DXFeedError();
     }
-    
+
     cout << ", DXFeed error code = " << errorCode << "!\n";
-    
+
     throw DXFeedError();
 }
 
 /* -------------------------------------------------------------------------- */
 
-DWORD attachSink (IDispatch* obj, IDispatch* sink, REFGUID sinkId) {
+DWORD attachSink(IDispatch* obj, IDispatch* sink, REFGUID sinkId) {
     IConnectionPointContainer* connContainer = NULL;
 
     cout << "\tRetrieving an IConnectionPointContainer implementation from the object...\n";
@@ -129,26 +130,26 @@ DWORD attachSink (IDispatch* obj, IDispatch* sink, REFGUID sinkId) {
     cout << "\tAttaching a sink object...\n";
 
     processError(connPt->Advise(sink, &cookie));
-    
+
     return cookie;
 }
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT SymbolPackToSafeArray (const SymbolPack& pack, OUT SAFEARRAY*& safeArray) {
+HRESULT SymbolPackToSafeArray(const SymbolPack& pack, OUT SAFEARRAY*& safeArray) {
     if ((safeArray = ::SafeArrayCreateVector(VT_BSTR, 0, pack.symbolCount)) == NULL) {
         return E_FAIL;
     }
 
     BSTR* data = NULL;
     HRESULT hr = ::SafeArrayAccessData(safeArray, (void**)&data);
-    
+
     if (hr != S_OK) {
         ::SafeArrayDestroy(safeArray);
-        
+
         return hr;
     }
-    
+
     try {
         for (int i = 0; i < pack.symbolCount; ++i) {
             data[i] = _bstr_t(pack.symbols[i]).Detach();
@@ -171,7 +172,7 @@ HRESULT SymbolPackToSafeArray (const SymbolPack& pack, OUT SAFEARRAY*& safeArray
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT SafeArrayToStringVector (SAFEARRAY* safeArray, OUT StringVector& stringVector) {
+HRESULT SafeArrayToStringVector(SAFEARRAY* safeArray, OUT StringVector& stringVector) {
     {
         VARTYPE vt;
 
@@ -212,56 +213,56 @@ HRESULT SafeArrayToStringVector (SAFEARRAY* safeArray, OUT StringVector& stringV
 
     return hr;
 }
-                              
+
 /* -------------------------------------------------------------------------- */
 
-void addSymbol (IDXFeed* feed, IDXSubscription* subscr, const std::string& symbol) {
+void addSymbol(IDXFeed* feed, IDXSubscription* subscr, const std::string& symbol) {
     cout << "\tThe symbol is " << symbol.c_str() << std::endl;
-    
+
     processError(subscr->AddSymbol(_bstr_t(symbol.c_str()).GetBSTR()), feed);
 }
 
 /* -------------------------------------------------------------------------- */
 
-void addSymbols (IDXFeed* feed, IDXSubscription* subscr, const SymbolPack& symbols) {
+void addSymbols(IDXFeed* feed, IDXSubscription* subscr, const SymbolPack& symbols) {
     cout << "\tThe symbols are: ";
-    
+
     for (int i = 0; i < symbols.symbolCount - 1; ++i) {
         cout << symbols.symbols[i] << ", ";
     }
-    
+
     cout << symbols.symbols[symbols.symbolCount - 1] << std::endl << std::endl;
-    
+
     cout << "\tConverting the symbols into a SAFEARRAY...\n";
-    
+
     SAFEARRAY* safeArray;
-    
+
     processError(SymbolPackToSafeArray(symbols, safeArray));
-    
+
     SafeArrayDestroyer sad(safeArray);
-    
+
     cout << "\tCalling the AddSymbols method...\n";
-    
+
     processError(subscr->AddSymbols(safeArray), feed);
 }
 
 /* -------------------------------------------------------------------------- */
 
-void getSymbols (IDXFeed* feed, IDXSubscription* subscr) {
+void getSymbols(IDXFeed* feed, IDXSubscription* subscr) {
     cout << "\tCalling the GetSymbols method...\n";
-    
+
     SAFEARRAY* safeArray;
-    
+
     processError(subscr->GetSymbols(&safeArray), feed);
-    
+
     SafeArrayDestroyer sad(safeArray);
-    
+
     cout << "\tTransforming the SAFEARRAY into a string vector...\n";
-    
+
     StringVector strings;
-    
+
     processError(SafeArrayToStringVector(safeArray, strings));
-    
+
     cout << "\tThe symbols are: ";
 
     for (int i = 0; i < (int)strings.size() - 1; ++i) {
@@ -273,15 +274,15 @@ void getSymbols (IDXFeed* feed, IDXSubscription* subscr) {
 
 /* -------------------------------------------------------------------------- */
 
-void pauseThread (int timeout) {
+void pauseThread(int timeout) {
     cout << "Master thread sleeping for " << timeout << " ms...\n";
-    ::Sleep (timeout);
+    ::Sleep(timeout);
     cout << "Master thread woke up\n";
 }
 
 /* -------------------------------------------------------------------------- */
 
-void removeSymbols (IDXFeed* feed, IDXSubscription* subscr, const SymbolPack& symbols) {
+void removeSymbols(IDXFeed* feed, IDXSubscription* subscr, const SymbolPack& symbols) {
     cout << "\tThe symbols are: ";
 
     for (int i = 0; i < symbols.symbolCount - 1; ++i) {
@@ -305,7 +306,7 @@ void removeSymbols (IDXFeed* feed, IDXSubscription* subscr, const SymbolPack& sy
 
 /* -------------------------------------------------------------------------- */
 
-void setSymbols (IDXFeed* feed, IDXSubscription* subscr, const SymbolPack& symbols) {
+void setSymbols(IDXFeed* feed, IDXSubscription* subscr, const SymbolPack& symbols) {
     cout << "\tThe symbols are: ";
 
     for (int i = 0; i < symbols.symbolCount - 1; ++i) {
@@ -329,20 +330,20 @@ void setSymbols (IDXFeed* feed, IDXSubscription* subscr, const SymbolPack& symbo
 
 /* -------------------------------------------------------------------------- */
 
-void getSubscrEvents (IDXFeed* feed, IDXSubscription* subscr) {
+void getSubscrEvents(IDXFeed* feed, IDXSubscription* subscr) {
     static const char* eventTypeNames[dx_eid_count] = {
-        "Trade", "Quote", "Summary", "Profile", "Order", "Time&Sale", "Candle", 
+        "Trade", "Quote", "Summary", "Profile", "Order", "Time&Sale", "Candle",
         "TradeETH", "SpreadOrder","Greeks", "TheoPrice", "Underlying", "Series",
         "Configuration"
     };
-    
+
     INT eventTypes;
-    
+
     cout << "\tCalling the GetEventTypes method...\n";
     processError(subscr->GetEventTypes(&eventTypes), feed);
-    
+
     cout << "\tThe event types are: ";
-    
+
     int eid = dx_eid_begin;
 
     for (; eid < dx_eid_count; ++eid) {
@@ -350,7 +351,7 @@ void getSubscrEvents (IDXFeed* feed, IDXSubscription* subscr) {
             cout << eventTypeNames[eid] << " ";
         }
     }
-    
+
     cout << std::endl;
 }
 
@@ -378,35 +379,37 @@ void removeCandleSymbol(IDXFeed* feed, IDXSubscription* subscr, IDXCandleSymbol*
 /*
  *	Helper data
  */
-/* -------------------------------------------------------------------------- */
+ /* -------------------------------------------------------------------------- */
 
 const char* symbol_pack_1[] = { "IBM" };
 const char* symbol_pack_2[] = { "MSFT", "YHOO", "C" };
 const char* symbol_pack_3[] = { "C" };
 const char* symbol_pack_4[] = { "MSFT", "YHOO", "IBM" };
 const char* symbol_pack_5[] = { "MSFT", "YHOO" };
+const char* symbol_pack_6[] = { "MSFT" };
 
 const SymbolPack symbolPacks[] = {
     { symbol_pack_1, sizeof(symbol_pack_1) / sizeof(symbol_pack_1[0]) },
     { symbol_pack_2, sizeof(symbol_pack_2) / sizeof(symbol_pack_2[0]) },
     { symbol_pack_3, sizeof(symbol_pack_3) / sizeof(symbol_pack_3[0]) },
     { symbol_pack_4, sizeof(symbol_pack_4) / sizeof(symbol_pack_4[0]) },
-    { symbol_pack_5, sizeof(symbol_pack_5) / sizeof(symbol_pack_5[0]) }
+    { symbol_pack_5, sizeof(symbol_pack_5) / sizeof(symbol_pack_5[0]) },
+    { symbol_pack_6, sizeof(symbol_pack_6) / sizeof(symbol_pack_6[0]) }
 };
 
 /* -------------------------------------------------------------------------- */
 /*
  *	Main sample function
  */
-/* -------------------------------------------------------------------------- */
+ /* -------------------------------------------------------------------------- */
 
 int _tmain(int argc, _TCHAR* argv[]) {
-	try {
+    try {
         TypeLibraryMgrStorage::SetContent(DefTypeLibMgrFactory::CreateInstance());
 
         DXConnectionTerminationNotifier ctn;
         DXEventListener el;
-        
+
         cout << "\nDXFeed COM wrapper C++ sample started...\n";
 
         cout << "Initializing the COM subsystem...\n";
@@ -427,7 +430,7 @@ int _tmain(int argc, _TCHAR* argv[]) {
         IDXFeed* feed = NULL;
 
         processError(::CoCreateInstance(CLSID_DXFeed, NULL, CLSCTX_INPROC_SERVER, IID_IDXFeed, (void**)&feed));
-        
+
         ComReleaser feedReleaser(feed);
 
         {
@@ -440,27 +443,27 @@ int _tmain(int argc, _TCHAR* argv[]) {
                 ", timezone display is " << showTimezone << ", verbose mode is " << verboseMode << "...\n";
 
             _bstr_t loggerPathBstr = loggerPath.c_str();
-            
+
             processError(feed->InitLogger(loggerPathBstr.GetBSTR(), overwriteLog, showTimezone, verboseMode), feed);
         }
-        
+
         IDXConnection* connection = NULL;
-        
+
         {
             std::string address("demo.dxfeed.com:7300");
-                        
+
             cout << "Creating a connection: address is '" << address.c_str() << "...\n";
-            
+
             _bstr_t addressBstr = address.c_str();
-            
+
             processError(feed->CreateConnection(addressBstr.GetBSTR(), (IDispatch**)&connection), feed);
         }
-        
-        ComReleaser connReleaser(connection);        
-        
-        cout << "Attaching a termination notification sink to the connection object...\n";            
+
+        ComReleaser connReleaser(connection);
+
+        cout << "Attaching a termination notification sink to the connection object...\n";
         attachSink(connection, (IDXConnectionTerminationNotifier*)&ctn, DIID_IDXConnectionTerminationNotifier);
-        
+
         IDXSubscription* subscr = NULL;
         
         {
@@ -530,15 +533,39 @@ int _tmain(int argc, _TCHAR* argv[]) {
         pauseThread(100000);
 
         subscr->ClearSymbols();
-	
-	} catch (const DXFeedError&) {
-	    return -1;
-	} catch (...) {
-	    cout << "UNEXPECTED FATAL ERROR!!!\n";
-	    
-	    return -1;
-	}
-	
-	return 0;
+
+        IDXSubscription* snapshot = NULL;
+        cout << "Creating a snapshot based on the created connection: event type bitmask = " << DXF_ET_ORDER << "...\n";
+        processError(connection->CreateSnapshot(DXF_ET_ORDER, L"IBM", L"NTV", 0, (IDispatch**)&snapshot), feed);
+
+        /* For Candle snapshot subscription use CreateCandleSnapshot method, e.g.
+        processError(connection->CreateCandleSnapshot(candleSymbol, 0, (IDispatch**)&snapshot), feed);
+        */
+
+        ComReleaser snapshotReleaser(snapshot);
+        cout << "Attaching an event data listener to the snapshot object...\n";
+        attachSink(snapshot, (IDXEventListener*)&el, DIID_IDXEventListener);
+        getSymbols(feed, snapshot);
+
+        pauseThread(20000);
+
+        cout << "Change symbol of snapshot...\n";
+
+        setSymbols(feed, snapshot, symbolPacks[5]);
+        getSymbols(feed, snapshot);
+
+        pauseThread(20000);
+
+        snapshot->ClearSymbols();
+
+    } catch (const DXFeedError&) {
+        return -1;
+    } catch (...) {
+        cout << "UNEXPECTED FATAL ERROR!!!\n";
+
+        return -1;
+    }
+
+    return 0;
 }
 

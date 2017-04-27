@@ -8,6 +8,7 @@
 #include "AuxAlgo.h"
 #include "Guids.h"
 #include "Interfaces.h"
+#include "Snapshot.h"
 
 #include "DXFeed.h"
 
@@ -51,6 +52,8 @@ class DXConnection : private IDXConnection, private DefIDispatchImpl,
     virtual HRESULT STDMETHODCALLTYPE CreateSubscription (INT eventTypes, IDispatch** subscription);
     virtual HRESULT STDMETHODCALLTYPE GetLastEvent (INT eventType, BSTR symbol, IDispatch** eventData);
     virtual HRESULT STDMETHODCALLTYPE CreateSubscriptionTimed(INT eventTypes, LONGLONG time, IDispatch** subscription);
+    virtual HRESULT STDMETHODCALLTYPE CreateSnapshot(INT eventType, BSTR symbol, BSTR source, LONGLONG time, IDispatch** snapshot);
+    virtual HRESULT STDMETHODCALLTYPE CreateCandleSnapshot(IDXCandleSymbol* symbol, LONGLONG time, IDispatch** snapshot);
 
 private:
 
@@ -192,6 +195,38 @@ HRESULT STDMETHODCALLTYPE DXConnection::CreateSubscriptionTimed(INT eventTypes, 
     IUnknown* parent = static_cast<IDXConnection*>(this);
 
     if ((*subscription = DefDXSubscriptionFactory::CreateInstance(m_connHandle, eventTypes, time, parent)) == NULL) {
+        return E_FAIL;
+    }
+
+    return NOERROR;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXConnection::CreateSnapshot(INT eventType, BSTR symbol, BSTR source, LONGLONG time, IDispatch** snapshot) {
+    if (snapshot == NULL) {
+        return E_POINTER;
+    }
+
+    IUnknown* parent = static_cast<IDXConnection*>(this);
+
+    if ((*snapshot = DefDXSnapshotFactory::CreateSnapshot(m_connHandle, eventType, symbol, source, time, parent)) == NULL) {
+        return E_FAIL;
+    }
+
+    return NOERROR;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXConnection::CreateCandleSnapshot(IDXCandleSymbol* symbol, LONGLONG time, IDispatch** snapshot) {
+    if (snapshot == NULL) {
+        return E_POINTER;
+    }
+
+    IUnknown* parent = static_cast<IDXConnection*>(this);
+
+    if ((*snapshot = DefDXSnapshotFactory::CreateSnapshot(m_connHandle, symbol, time, parent)) == NULL) {
         return E_FAIL;
     }
 

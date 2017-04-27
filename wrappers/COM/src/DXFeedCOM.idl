@@ -296,9 +296,9 @@ library DXFeedCOM {
         [id(1), propput, helpstring("Sets base market symbol without attributes.")]
         HRESULT BaseSymbol([in] BSTR);
         [id(2), propget, helpstring("Gets exchange attribute of this symbol.")]
-        HRESULT ExchangeCode([out, retval] CHAR*);
+        HRESULT ExchangeCode([out, retval] WCHAR*);
         [id(2), propput, helpstring("Sets exchange attribute of this symbol.")]
-        HRESULT ExchangeCode([in] CHAR);
+        HRESULT ExchangeCode([in] WCHAR);
         [id(3), propget, helpstring("Gets price type attribute of this symbol.")]
         HRESULT Price([out, retval] CandlePriceAttribute*);
         [id(3), propput, helpstring("Sets price type attribute of this symbol.")]
@@ -319,6 +319,8 @@ library DXFeedCOM {
         HRESULT Alignment([out, retval] CandleAlignmentAttribute*);
         [id(7), propput, helpstring("Sets alignment attribute of this symbol.")]
         HRESULT Alignment([in] CandleAlignmentAttribute);
+        [id(8), helpstring("Gets the string representation of this object.")]
+        HRESULT ToString([out, retval] BSTR*);
     };
     
     [uuid(C798FC80-5AF7-41D3-B5C9-A20C6E0F3628), helpstring("Greeks data wrapper"), dual, oleautomation, nonextensible]
@@ -404,7 +406,7 @@ library DXFeedCOM {
     [uuid(C334BBB7-AE1E-448e-9C1C-A0C7CCB2A126), helpstring("Event data collection"), dual, oleautomation, nonextensible]
     interface IDXEventDataCollection : IDispatch {
         [id(1), propget, helpstring("Event count value getter")]
-        HRESULT eventCount ([out, retval] INT*);
+        HRESULT eventCount ([out, retval] ULONGLONG*);
         [id(2), helpstring("Event object retriever")]
         HRESULT GetEvent ([in] INT, [out, retval] IDispatch**);
     };
@@ -453,6 +455,10 @@ library DXFeedCOM {
         HRESULT GetLastEvent ([in] INT, [in] BSTR, [out, retval] IDispatch**);
         [id(3), helpstring("Creates a new time subscription"), source]
         HRESULT CreateSubscriptionTimed([in] INT, [in] LONGLONG, [out, retval] IDispatch**);
+        [id(4), helpstring("Creates a new snapshot subscription"), source]
+        HRESULT CreateSnapshot([in] INT, [in] BSTR, [in] BSTR, [in] LONGLONG, [out, retval] IDispatch**);
+        [id(5), helpstring("Creates a new candle snapshot subscription"), source]
+        HRESULT CreateCandleSnapshot([in] IDXCandleSymbol*, [in] LONGLONG, [out, retval] IDispatch**);
     };
     
     [uuid(1CD222F3-8683-44a0-8EC9-32BF8BD3421D), helpstring("The main library interface"), dual, oleautomation, nonextensible]
