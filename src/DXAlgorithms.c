@@ -393,9 +393,8 @@ bool dx_base64_encode(const char* in, size_t in_len, char* out, size_t out_len) 
             out[resultIndex++] = '=';
         }
     }
-    if (resultIndex >= out_len) 
-        return false;   /* indicate failure: buffer too small */
-    out[resultIndex] = 0;
+    if (out_len > resultIndex)
+        out[resultIndex] = 0;
     return true;   /* indicate success */
 }
 
