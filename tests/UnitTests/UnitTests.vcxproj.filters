@@ -155,6 +155,9 @@
     <ClCompile Include="DataCollectionsTests.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AlgorithmsTest.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\DXAlgorithms.h">
@@ -236,6 +239,9 @@
       <Filter>Common\Headers</Filter>
     </ClInclude>
     <ClInclude Include="DataCollectionsTests.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AlgorithmsTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

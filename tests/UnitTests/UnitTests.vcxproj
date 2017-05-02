@@ -175,6 +175,7 @@
     <ClCompile Include="..\..\src\Candle.c" />
     <ClCompile Include="..\..\src\ConfigurationDeserializer.c" />
     <ClCompile Include="..\..\src\PriceLevelBook.c" />
+    <ClCompile Include="AlgorithmsTest.c" />
     <ClCompile Include="CandleTest.c" />
     <ClCompile Include="..\..\src\EventManager.c" />
     <ClCompile Include="..\..\src\Snapshot.c" />
@@ -232,6 +233,7 @@
     <ClInclude Include="..\..\src\ObjectArray.h" />
     <ClInclude Include="..\..\src\TaskQueue.h" />
     <ClInclude Include="..\..\src\EventSubscription.h" />
+    <ClInclude Include="AlgorithmsTest.h" />
     <ClInclude Include="CandleTest.h" />
     <ClInclude Include="ConnectionTest.h" />
     <ClInclude Include="DataCollectionsTests.h" />
