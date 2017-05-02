@@ -75,8 +75,10 @@ set(EVENT_SUBSCRIPTION_SOURCES
     )
     
 set(HEADER_FILES
+    AlgorithmsTest.h
     CandleTest.h
     ConnectionTest.h
+    DataCollectionsTests.h
     EventDynamicSubscriptionTest.h
     EventSubscriptionTest.h
     OrderSourceConfigurationTest.h
@@ -107,8 +109,10 @@ set(PARSER_SOURCES
     )
  
 set(SOURCE_FILES
+    AlgorithmsTest.c
     CandleTest.c
     ConnectionTest.c
+    DataCollectionsTests.c
     EventDynamicSubscriptionTest.cpp
     EventSubscriptionTest.c
     OrderSourceConfigurationTest.c
