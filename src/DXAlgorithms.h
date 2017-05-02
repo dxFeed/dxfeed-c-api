@@ -482,6 +482,7 @@ bool dx_capacity_manager_halfer (size_t new_size, size_t* capacity);
 
 dxf_string_t dx_create_string (size_t size);
 dxf_string_t dx_create_string_src (dxf_const_string_t src);
+char* dx_ansi_create_string (size_t size);
 char* dx_ansi_create_string_src (const char* src);
 dxf_string_t dx_create_string_src_len (dxf_const_string_t src, size_t len);
 dxf_string_t dx_copy_string (dxf_string_t dest, dxf_const_string_t src);
@@ -529,5 +530,15 @@ dxf_int_t dx_get_seconds_from_time(dxf_long_t millis);
  * dx_get_seconds_from_time(millis) * 1000L + dx_get_millis_from_time(millis) == millis
  */
 dxf_int_t dx_get_millis_from_time(dxf_long_t millis);
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Base64 encoding operations implementation
+ */
+ /* -------------------------------------------------------------------------- */
+
+bool dx_base64_encode(const char* in, size_t in_len, char* out, size_t out_len);
+bool dx_base64_decode(const char* in, size_t in_len, char* out, size_t *out_len);
+size_t dx_base64_length(size_t in_len);
 
 #endif /* DX_ALGORITHMS_H_INCLUDED */
