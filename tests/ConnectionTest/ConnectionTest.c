@@ -35,6 +35,7 @@ void process_last_error () {
 /* -------------------------------------------------------------------------- */
 
 int main (int argc, char* argv[]) {
+
     dxf_connection_t connection;
     
     printf("Connection test started.\n");
@@ -58,8 +59,30 @@ int main (int argc, char* argv[]) {
         return -1;
     }
     
+    printf("Disconnect successful!\n");
+
+    printf("Connecting to host via basic authorization %s...\n", dxfeed_host);
+    //TODO: finish test
+    if (!dxf_create_connection_auth_basic(dxfeed_host, "demo", "demo", NULL, NULL, NULL, NULL, &connection)) {
+        process_last_error();
+
+        return -1;
+    }
+
+    printf("Connection successful!\n");
+
+    Sleep(121000);//2m01s
+
+    printf("Disconnecting from host...\n");
+
+    if (!dxf_close_connection(connection)) {
+        process_last_error();
+
+        return -1;
+    }
+
     printf("Disconnect successful!\n"
-           "Connection test completed successfully!\n");
+        "Connection test completed successfully!\n");
            
     return 0;
 }
