@@ -59,8 +59,24 @@ typedef struct {
 } dx_address_resolution_context_t;
 
 typedef struct {
+    bool enabled;
+    char* key_store;
+    char* key_store_password;
+    char* trust_store;
+    char* trust_store_password;
+} dx_codec_tls_t;
+
+typedef struct {
+    bool enabled;
+} dx_codec_gzip_t;
+
+typedef struct {
     const char* host;
     const char* port;
+    const char* username;
+    const char* password;
+    dx_codec_tls_t tls;
+    dx_codec_gzip_t gzip;
 } dx_address_t;
 
 typedef struct {
@@ -608,6 +624,484 @@ bool dx_get_addresses_from_collection (const char* collection, OUT dx_address_ar
         }
     }
     
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+#ifdef ADDRESS_CODEC_TLS_ENABLED
+#define DX_CODEC_TLS_STATUS true
+#else
+#define DX_CODEC_TLS_STATUS false
+#endif
+
+#ifdef ADDRESS_CODEC_GZIP_ENABLED
+#define DX_CODEC_GZIP_STATUS true
+#else
+#define DX_CODEC_GZIP_STATUS false
+#endif
+
+typedef bool(*dx_codec_parser_t)(const char* codec, size_t size, dx_address_t* addr);
+
+typedef struct {
+    const char* name;
+    bool supported;
+    dx_codec_parser_t parser;
+} dx_codec_info_t;
+
+typedef struct {
+    char* key;
+    char* value;
+} dx_address_property_t;
+
+//function forward declaration
+bool dx_codec_tls_parser(const char* codec, size_t size, OUT dx_address_t* addr);
+//function forward declaration
+bool dx_codec_gzip_parser(const char* codec, size_t size, OUT dx_address_t* addr);
+
+static const dx_codec_info_t codecs[] = {
+    { "tls", DX_CODEC_TLS_STATUS, dx_codec_tls_parser },
+    { "gzip", DX_CODEC_GZIP_STATUS, dx_codec_gzip_parser }
+};
+static const char null_symbol = 0;
+static const char entry_begin_symbol = '(';
+static const char entry_end_symbol = ')';
+static const char whitespace = ' ';
+static const char codec_splitter = '+';
+static const char properties_begin_symbol = '[';
+static const char properties_end_symbol = ']';
+static const char properties_splitter = ',';
+static const char property_value_splitter = '=';
+
+static bool dx_is_empty_entry(const char* entry_begin, const char* entry_end) {
+    if (entry_begin > entry_end)
+        return true;
+    while (*entry_begin == whitespace) {
+        if (entry_begin == entry_end)
+            return true;
+        entry_begin++;
+    }
+    return false;
+}
+
+static char* dx_find_first(char* from, char* end, int ch) {
+    char* pos = strchr(from, ch);
+    if (pos > end)
+        return NULL;
+    return pos;
+}
+
+static bool dx_has_next(char* next) {
+    return next != NULL && *next != null_symbol;
+}
+
+static bool dx_address_get_next_entry(OUT char** next, OUT char** entry, OUT size_t* size) {
+    char* begin = NULL;
+    char* end = NULL;
+    char* collection = NULL;
+    if (entry == NULL || size == NULL || next == NULL)
+        return dx_set_error_code(dx_ec_invalid_func_param_internal);
+
+    *entry = NULL;
+    *size = 0;
+    collection = *next;
+    if (*collection == null_symbol)
+        return true;
+    while (*entry == NULL && *collection != null_symbol) {
+        begin = strchr(collection, entry_begin_symbol);
+        end = strchr(collection, entry_end_symbol);
+
+        if (begin == NULL && end == NULL) {
+            if (!dx_is_empty_entry(collection, collection + strlen(collection))) {
+                *entry = collection;
+                *size = strlen(collection);
+            }
+            *next += *size;
+            return true;
+        } else if (begin != NULL && end != NULL) {
+            collection = begin + 1;
+            if (dx_is_empty_entry(collection, end)) {
+                collection = end + 1;
+                continue;
+            }
+            *entry = collection;
+            *size = (end - collection) / sizeof(char);
+            *next = end + 1;
+            return true;
+        } else {
+            return dx_set_error_code(dx_ec_invalid_func_param);
+        }
+    }
+    return true;
+}
+
+static bool dx_address_get_next_codec(OUT char** next, OUT char** codec, OUT size_t* size) {
+    char* end = NULL;
+    char* collection = NULL;
+    if (codec == NULL || size == NULL || next == NULL)
+        return dx_set_error_code(dx_ec_invalid_func_param_internal);
+
+    *codec = NULL;
+    *size = 0;
+    collection = *next;
+    if (collection == null_symbol)
+        return true;
+    while (*codec == NULL && *collection != null_symbol) {
+        end = strchr(collection, codec_splitter);
+        if (end == NULL)
+            return true;
+        if (dx_is_empty_entry(collection, end)) {
+            collection = end + 1;
+            continue;
+        }
+        *codec = collection;
+        *size = (end - collection) / sizeof(char);
+        *next = end + 1;
+        return true;
+    }
+
+    return true;
+}
+
+static bool dx_address_get_codec_name(const char* codec, size_t codec_size, OUT char** name, OUT size_t* name_size) {
+    char* end = NULL;
+    if (codec == NULL || name == NULL || name_size == NULL) {
+        return dx_set_error_code(dx_ec_invalid_func_param_internal);
+    }
+
+    *name = NULL;
+    *name_size = 0;
+    if (codec_size == 0)
+        return true;
+
+    end = strchr(codec, properties_begin_symbol);
+    *name = codec;
+    if (end == NULL || end >= codec + codec_size) {
+        *name_size = codec_size;
+    } else {
+        *name_size = (end - codec) / sizeof(char);
+    }
+    return true;
+}
+
+static bool dx_address_get_codec_properties(const char* codec, size_t codec_size, OUT char** props, OUT size_t* props_size) {
+    char* name;
+    size_t name_size;
+    char* props_begin;
+    char* props_end;
+    if (codec == NULL || props == NULL || props_size == NULL) {
+        return dx_set_error_code(dx_ec_invalid_func_param_internal);
+    }
+    *props = NULL;
+    *props_size = 0;
+    if (!dx_address_get_codec_name(codec, codec_size, &name, &name_size))
+        return false;
+    if (codec_size == name_size)
+        return true;
+    //check proprties starts with '[' and finishes with ']' symbol
+    props_begin = codec + name_size;
+    props_end = codec + codec_size;
+    if (*props_begin != properties_begin_symbol || *props_end != properties_end_symbol)
+        return dx_set_error_code(dx_ec_invalid_func_param);
+    if (!dx_is_empty_entry(props_begin, props_end)) {
+        *props = props_begin;
+        *props_size = props_end - props_begin;
+    }
+    return true;
+}
+
+static bool dx_address_get_next_property(OUT char** next, OUT size_t* next_size, OUT char** prop, OUT size_t* prop_size) {
+    if (next == NULL || next_size == NULL || prop == NULL || prop_size == NULL) {
+        return dx_set_error_code(dx_ec_invalid_func_param_internal);
+    }
+    *prop = NULL;
+    *prop_size = 0;
+    while (*next != null_symbol && next_size > 0) {
+        //points to special symbol ',' or '[' that indicates begining of next property entry
+        char* collection_begin = *next;
+        //points to special symbol ']' that indicates ending of all properties
+        char* collection_end = collection_begin + *next_size;
+        //points to useful data of current property
+        char* begin = collection_begin;
+        //points to to special symbol ']' that indicates ending of current property
+        char* end;
+        //skip first ',' or '[' symbol
+        if (*begin == properties_begin_symbol || *begin == properties_splitter)
+            begin++;
+        end = MIN(
+            dx_find_first(begin, collection_end, properties_end_symbol),
+            dx_find_first(begin, collection_end, properties_splitter));
+        if (begin == NULL || end == NULL) {
+            return dx_set_error_code(dx_ec_invalid_func_param);
+        } else {
+            *next = (*end == properties_end_symbol) ? end + 1 : end;
+            *next_size -= *next - collection_begin;
+            if (dx_is_empty_entry((const char*)begin, (const char*)end)) {
+                continue;
+            }
+            *prop = begin;
+            *prop_size = end - begin - 1;
+        }
+    }
+    return true;
+}
+
+static bool dx_address_get_host_port_pair(const char* str, OUT char** address, OUT size_t* size) {
+    char* begin;
+    char* end;
+    if (str == NULL || address == NULL || size == NULL) {
+        return dx_set_error_code(dx_ec_invalid_func_param_internal);
+    }
+    begin = strchr(str, codec_splitter);
+    if (begin == NULL) {
+        begin = str;
+    } else {
+        begin++;
+    }
+    end = strchr(begin, properties_begin_symbol);
+    *size = (end == NULL) ? strlen(begin) : end - begin - 1;
+    *address = begin;
+    return true;
+}
+
+static bool dx_address_get_properties(const char* str, OUT char** props, OUT size_t* props_size) {
+    char* begin;
+    char* end;
+    char* address;
+    size_t address_size;
+    if (str == NULL || *props == NULL || props_size == NULL) {
+        return dx_set_error_code(dx_ec_invalid_func_param_internal);
+    }
+    if (!dx_address_get_host_port_pair(str, &address, &address_size))
+        return false;
+    begin = address + address_size;
+    end = strlen(str);
+    if (*begin != properties_begin_symbol || *end != properties_end_symbol)
+        return dx_set_error_code(dx_ec_invalid_func_param);
+    if (!dx_is_empty_entry(begin, end)) {
+        *props = begin;
+        *props_size = end - begin;
+    }
+    return true;
+}
+
+void dx_address_clear_property(OUT dx_address_property_t* prop) {
+    if (prop == NULL)
+        return;
+    if (prop->key != NULL)
+        dx_free(prop->key);
+    if (prop->value != NULL)
+        dx_free(prop->value);
+    prop->key = NULL;
+    prop->value = NULL;
+}
+
+//Note: free allocated memory for prop!
+bool dx_address_parse_property(const char* str, size_t size, OUT dx_address_property_t* prop) {
+    char* splitter = dx_find_first(str, str + size, property_value_splitter);
+    size_t key_size;
+    size_t value_size;
+    if (splitter == NULL || dx_is_empty_entry(str, splitter - 1) || dx_is_empty_entry(splitter + 1, str + size)) {
+        dx_logging_info(L"Invalid property from: ...%s", str);
+        return dx_set_error_code(dx_nec_invalid_function_arg);
+    }
+    key_size = splitter - str;
+    value_size = size - key_size - 1;
+    dx_address_clear_property(prop);
+    prop->key = dx_ansi_create_string_src_len(str, key_size);
+    prop->value = dx_ansi_create_string_src_len(splitter + 1, value_size);
+    if (prop->key == NULL || prop->value == NULL) {
+        dx_address_clear_property(prop);
+        return false;
+    }
+    return true;
+}
+
+void dx_codec_tls_free(OUT dx_codec_tls_t* tls) {
+    if (tls->key_store != NULL)
+        dx_free(tls->key_store);
+    if (tls->key_store_password != NULL)
+        dx_free(tls->key_store_password);
+    if (tls->trust_store != NULL)
+        dx_free(tls->trust_store);
+    if (tls->trust_store_password != NULL)
+        dx_free(tls->trust_store_password);
+    tls->key_store = NULL;
+    tls->key_store_password = NULL;
+    tls->trust_store = NULL;
+    tls->trust_store_password = NULL;
+}
+
+bool dx_codec_tls_parser(const char* codec, size_t size, OUT dx_address_t* addr) {
+    char* next;
+    size_t next_size;
+    dx_codec_tls_t tls = { true, NULL, NULL, NULL, NULL };
+    if (!dx_address_get_codec_properties(codec, size, &next, &next_size))
+        return false;
+    do {
+        char* str;
+        size_t str_size;
+        dx_address_property_t prop;
+        if (!dx_address_get_next_property(&next, &next_size, &str, &str_size)) {
+            dx_codec_tls_free(&tls);
+            return false;
+        }
+        if (str == NULL)
+            continue;
+        if (!dx_address_parse_property((const char*)str, str_size, &prop)) {
+            dx_codec_tls_free(&tls);
+            return false;
+        }
+
+        if (strcmp(prop.key, "keyStore") == 0) {
+            DX_SWAP(char*, tls.key_store, prop.value);
+        } else if (strcmp(prop.key, "keyStorePassword") == 0) {
+            DX_SWAP(char*, tls.key_store_password, prop.value);
+        } else if (strcmp(prop.key, "trustStore") == 0) {
+            DX_SWAP(char*, tls.trust_store, prop.value);
+        } else if (strcmp(prop.key, "trustStorePassword") == 0) {
+            DX_SWAP(char*, tls.trust_store_password, prop.value);
+        } else {
+            dx_logging_info(L"Unknown property for TLS: %s=%s", prop.key, prop.value);
+            dx_address_clear_property(&prop);
+            dx_codec_tls_free(&tls);
+            return dx_set_error_code(dx_nec_invalid_function_arg);
+        }
+        dx_address_clear_property(&prop);
+
+    } while (dx_has_next(next));
+
+    addr->tls = tls;
+    return true;
+}
+
+bool dx_codec_gzip_parser(const char* codec, size_t size, OUT dx_address_t* addr) {
+    addr->gzip.enabled = true;
+    return true;
+}
+
+static bool dx_get_codec(const char* codec, size_t codec_size, OUT dx_address_t* addr) {
+    char* codec_name;
+    size_t codec_name_size;
+    size_t count = sizeof(codecs) / sizeof(codecs[0]);
+    size_t i;
+    if (!dx_address_get_codec_name(codec, codec_size, OUT &codec_name, OUT &codec_name_size))
+        return false;
+    for (i = 0; i < count; ++i) {
+        dx_codec_info_t info = codecs[i];
+        if (strlen(info.name) != codec_name_size || stricmp(info.name, codec_name) != 0)
+            continue;
+        if (!info.supported)
+            return dx_set_error_code(dx_nec_unknown_codec);
+        if (!info.parser(codec, codec_size, addr))
+            return false;
+        break;
+    }
+    return true;
+}
+
+//TODO: free address everywhere...
+static bool dx_address_parse(char* entry, size_t size, OUT dx_address_t* addr) {
+    char* next = entry;
+    char* codec;
+    size_t codec_size;
+    char* address;
+    size_t address_size;
+    //TODO: remove with function
+    memset((void*)addr, 0, sizeof(dx_address_t));
+    //get codecs
+    do {
+        if (!dx_address_get_next_codec(OUT &next, OUT &codec, OUT &codec_size))
+            return false;
+        if (codec == NULL)
+            continue;
+        if (!dx_get_codec(codec, codec_size, addr))
+            return false;
+    } while (dx_has_next(next));
+    
+TODO:continue here
+    //get host and port
+    if (!dx_address_get_host_port_pair(entry, &address, &address_size) ||
+        !dx_split_address(, addr)) {
+        return false;
+    }
+    
+}
+
+bool dx_get_addresses_from_collection2(const char* collection, OUT dx_address_array_t* addresses) {
+    char* collection_copied = NULL;
+    char* cur_address = NULL;
+    char* splitter_pos = NULL;
+    const char* last_port = NULL;
+    size_t i = 0;
+
+    char* next = (char*)collection;
+
+    if (collection == NULL || addresses == NULL) {
+        dx_set_last_error(dx_ec_invalid_func_param_internal);
+
+        return false;
+    }
+
+    cur_address = collection_copied = dx_ansi_create_string_src(collection);
+
+    if (collection_copied == NULL) {
+        return false;
+    }
+
+    do {
+        dx_address_t addr;
+        bool failed;
+
+        char* entry;
+        size_t entry_size;
+
+        if (!dx_address_get_next_entry(&next, &entry, &entry_size)) {
+            dx_clear_address_array(addresses);
+            dx_free(collection_copied);
+            return false;
+        }
+
+        splitter_pos = strchr(cur_address, (int)host_splitter);
+
+        if (splitter_pos != NULL) {
+            *(splitter_pos++) = 0;
+        }
+
+        if (!dx_split_address(cur_address, &addr)) {
+            dx_clear_address_array(addresses);
+            dx_free(collection_copied);
+
+            return false;
+        }
+
+        DX_ARRAY_INSERT(*addresses, dx_address_t, addr, addresses->size, dx_capacity_manager_halfer, failed);
+
+        if (failed) {
+            dx_clear_address_array(addresses);
+            dx_free(collection_copied);
+            dx_free((void*)addr.host);
+
+            return false;
+        }
+
+        cur_address = splitter_pos;
+    } while (next != null_symbol);
+
+    dx_free(collection_copied);
+
+    if ((last_port = addresses->elements[addresses->size - 1].port) == NULL) {
+        dx_clear_address_array(addresses);
+
+        return false;
+    }
+
+    for (; i < addresses->size; ++i) {
+        if (addresses->elements[i].port == NULL) {
+            addresses->elements[i].port = last_port;
+        }
+    }
+
     return true;
 }
 

@@ -136,13 +136,24 @@ char* dx_ansi_create_string(size_t size) {
 /* -------------------------------------------------------------------------- */
 
 char* dx_ansi_create_string_src(const char* src) {
-    char* res = dx_ansi_create_string(strlen(src));
+    return dx_ansi_create_string_src_len(src, strlen(src));
+}
+
+/* -------------------------------------------------------------------------- */
+
+char* dx_ansi_create_string_src_len(const char* src, size_t len) {
+    char* res = NULL;
+    if (len == 0) {
+        return res;
+    }
+
+    res = dx_ansi_create_string(strlen(src));
 
     if (res == NULL) {
         return NULL;
     }
 
-    return strcpy(res, src);
+    return strncpy(res, src, len);
 }
 
 /* -------------------------------------------------------------------------- */

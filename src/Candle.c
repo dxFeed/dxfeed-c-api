@@ -26,7 +26,6 @@
 #include "DXAlgorithms.h"
 #include "EventData.h"
 #include "DXErrorHandling.h"
-#include "DXErrorCodes.h"
 
 typedef struct {
     dxf_string_t base_symbol;

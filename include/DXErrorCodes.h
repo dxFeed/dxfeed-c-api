@@ -104,6 +104,7 @@ typedef enum {
     dx_nec_invalid_port_value,
     dx_nec_invalid_function_arg,
     dx_nec_connection_closed,
+    dx_nec_unknown_codec,
     
     /* buffered I/O error codes */
     
