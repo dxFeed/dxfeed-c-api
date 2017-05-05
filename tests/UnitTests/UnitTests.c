@@ -1,6 +1,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include "AddressParserTest.h"
 #include "AlgorithmsTest.h"
 #include "ConnectionTest.h"
 #include "DataCollectionsTests.h"
@@ -26,6 +27,7 @@ const char* result_to_text (bool res) {
 }
 
 static test_function_data_t g_tests[] = {
+    { "address_parser_test", address_parser_all_tests },
     { "algorithms_test", algorithms_all_tests },
     { "data_collections_test", data_collections_all_test },
     { "event_subscription_test", event_subscription_test },

@@ -2,6 +2,7 @@
 #define TEST_HELPER_H_INCLUDED
 
 #include <Windows.h>
+#include <stdio.h>
 
 #include "DXFeed.h"
 #include "DXErrorCodes.h"
@@ -76,6 +77,8 @@ const char *get_event_counter_name(event_counter_data_ptr_t counter_data);
 #define DX_IS_EQUAL_FUNCTION_DECLARATION(type) bool dx_is_equal_##type##(type expected, type actual)
 #define DX_IS_GREATER_OR_EQUAL_FUNCTION_DECLARATION(type) bool dx_ge_##type##(type actual, type param)
 
+#define DX_IS_EQUAL_FUNCTION_DECLARATION_A(type, alias) bool dx_is_equal_##alias##(type expected, type actual)
+
 DX_IS_EQUAL_FUNCTION_DECLARATION(bool);
 DX_IS_EQUAL_FUNCTION_DECLARATION(int);
 DX_IS_EQUAL_FUNCTION_DECLARATION(ERRORCODE);
@@ -90,6 +93,9 @@ DX_IS_EQUAL_FUNCTION_DECLARATION(size_t);
 DX_IS_GREATER_OR_EQUAL_FUNCTION_DECLARATION(dxf_uint_t);
 DX_IS_GREATER_OR_EQUAL_FUNCTION_DECLARATION(dxf_long_t);
 DX_IS_GREATER_OR_EQUAL_FUNCTION_DECLARATION(double);
+
+DX_IS_EQUAL_FUNCTION_DECLARATION_A(char*, ansi);
+DX_IS_EQUAL_FUNCTION_DECLARATION_A(const char*, const_ansi);
 
 bool dx_is_not_null(void* actual);
 bool dx_is_null(void* actual);

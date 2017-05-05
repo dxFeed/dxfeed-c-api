@@ -158,6 +158,12 @@
     <ClCompile Include="AlgorithmsTest.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\DXAddressParser.c">
+      <Filter>Common\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="AddressParserTest.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\DXAlgorithms.h">
@@ -242,6 +248,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AlgorithmsTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\DXAddressParser.h">
+      <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="AddressParserTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

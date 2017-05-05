@@ -174,7 +174,9 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\Candle.c" />
     <ClCompile Include="..\..\src\ConfigurationDeserializer.c" />
+    <ClCompile Include="..\..\src\DXAddressParser.c" />
     <ClCompile Include="..\..\src\PriceLevelBook.c" />
+    <ClCompile Include="AddressParserTest.c" />
     <ClCompile Include="AlgorithmsTest.c" />
     <ClCompile Include="CandleTest.c" />
     <ClCompile Include="..\..\src\EventManager.c" />
@@ -219,6 +221,7 @@
     <ClInclude Include="..\..\src\Candle.h" />
     <ClInclude Include="..\..\src\ClientMessageProcessor.h" />
     <ClInclude Include="..\..\src\ConfigurationDeserializer.h" />
+    <ClInclude Include="..\..\src\DXAddressParser.h" />
     <ClInclude Include="..\..\src\DXAlgorithms.h" />
     <ClInclude Include="..\..\include\DXErrorCodes.h" />
     <ClInclude Include="..\..\src\DXErrorHandling.h" />
@@ -233,6 +236,7 @@
     <ClInclude Include="..\..\src\ObjectArray.h" />
     <ClInclude Include="..\..\src\TaskQueue.h" />
     <ClInclude Include="..\..\src\EventSubscription.h" />
+    <ClInclude Include="AddressParserTest.h" />
     <ClInclude Include="AlgorithmsTest.h" />
     <ClInclude Include="CandleTest.h" />
     <ClInclude Include="ConnectionTest.h" />

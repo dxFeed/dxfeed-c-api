@@ -207,6 +207,15 @@ DX_IS_EQUAL_FUNCTION_DECLARATION(type) { \
     return true; \
 }
 
+#define DX_IS_EQUAL_ANSI_FUNCTION_DEFINITION(type, tmpl, alias) \
+DX_IS_EQUAL_FUNCTION_DECLARATION_A(type, alias) { \
+    if (strcmp(expected, actual) != 0) { \
+        printf("%s failed: expected=" tmpl ", but was=" tmpl "\n", __FUNCTION__, expected, actual); \
+        return false; \
+                } \
+    return true; \
+}
+
 DX_IS_EQUAL_FUNCTION_DEFINITION(bool, L"%d")
 DX_IS_EQUAL_FUNCTION_DEFINITION(int, L"%d")
 DX_IS_EQUAL_FUNCTION_DEFINITION(ERRORCODE, L"%d")
@@ -215,6 +224,9 @@ DX_IS_EQUAL_STRING_FUNCTION_DEFINITION(dxf_string_t, L"%ls")
 DX_IS_EQUAL_FUNCTION_DEFINITION(dxf_uint_t, L"%u")
 DX_IS_EQUAL_FUNCTION_DEFINITION(dxf_long_t, L"%lld")
 DX_IS_EQUAL_FUNCTION_DEFINITION(dxf_ulong_t, L"%llu")
+
+DX_IS_EQUAL_ANSI_FUNCTION_DEFINITION(char*, "%s", ansi)
+DX_IS_EQUAL_ANSI_FUNCTION_DEFINITION(const char*, "%s", const_ansi)
 
 DX_IS_EQUAL_FUNCTION_DECLARATION(double) {
     double abs_expected = fabs(expected);
