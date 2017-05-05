@@ -104,7 +104,7 @@ dxf_const_string_t dx_get_error_description (dx_error_code_t code) {
     case dx_nec_invalid_port_value: return L"Server address has invalid port value";
     case dx_nec_invalid_function_arg: return s_internal_error_descr;
     case dx_nec_connection_closed: return L"Attempt to use an already closed connection or an internal connection error";
-    case dx_nec_invalid_codec: return L"One of codecs in your address string is unknown or not supported";
+    case dx_nec_unknown_codec: return L"One of codecs in your address string is unknown or not supported";
     
     /* buffered I/O error codes */
     

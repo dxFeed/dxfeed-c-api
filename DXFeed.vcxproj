@@ -192,6 +192,7 @@
     <ClCompile Include="src\ClientMessageProcessor.c" />
     <ClCompile Include="src\ConfigurationDeserializer.c" />
     <ClCompile Include="src\ConnectionContextData.c" />
+    <ClCompile Include="src\DXAddressParser.c" />
     <ClCompile Include="src\DXAlgorithms.c" />
     <ClCompile Include="src\DXErrorCodes.c" />
     <ClCompile Include="src\DXErrorHandling.c" />
@@ -230,6 +231,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ConfigurationDeserializer.h" />
+    <ClInclude Include="src\DXAddressParser.h" />
     <ClInclude Include="src\PriceLevelBook.h" />
     <ClInclude Include="src\resource.h" />
     <ClInclude Include="src\Candle.h" />
