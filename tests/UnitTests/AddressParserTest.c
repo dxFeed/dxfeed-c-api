@@ -1,10 +1,36 @@
 #include "AddressParserTest.h"
 #include "DXAddressParser.h"
+#include "DXAlgorithms.h"
 #include "TestHelper.h"
+
+/* To add TLS codec support for test add 'ADDRESS_CODEC_TLS_ENABLED' string to 
+ * C/C++ compiller definition. 
+ *
+ * Note: the DXFeed library also must support 'ADDRESS_CODEC_TLS_ENABLED' 
+ * definition to successful test passing.
+ */
+#ifdef ADDRESS_CODEC_TLS_ENABLED
+#define WITH_TLS_RESULT true
+#else
+#define WITH_TLS_RESULT false
+#endif
+
+/* To add GZIP codec support for test add 'ADDRESS_CODEC_GZIP_ENABLED' string to 
+ * C/C++ compiller definition. 
+ *
+ * Note: the DXFeed library also must support 'ADDRESS_CODEC_GZIP_ENABLED' 
+ * definition to successful test passing.
+ */
+#ifdef ADDRESS_CODEC_GZIP_ENABLED
+#define WITH_GZIP_RESULT true
+#else
+#define WITH_GZIP_RESULT false
+#endif
 
 typedef struct {
     const char* collection;
     dx_address_array_t expected;
+    bool result;
 } dx_test_case_t;
 
 static dx_address_t addresses[] = {
@@ -23,28 +49,44 @@ static dx_address_t addresses[] = {
     //6 - tls[trustStore=C:/data/CA.pem]+192.168.1.1:4242[username=xxx,password=yyyy]
     { "192.168.1.1", "4242", "xxx", "yyyy", { true, NULL, NULL, "C:/data/CA.pem", NULL }, { false } },
     //7 - tls[trustStore=C:/data/CA.pem]+gzip+192.168.1.1:4242[username=xxx,password=yyyy]
-    //    or
-    //    gzip+tls[trustStore=C:/data/CA.pem]+192.168.1.1:4242[username=xxx,password=yyyy]
     { "192.168.1.1", "4242", "xxx", "yyyy", { true, NULL, NULL, "C:/data/CA.pem", NULL }, { true } },
+    //8 - tls[trustStore=C:/data/CA.pem,trustStorePassword=123]+192.168.1.1:4242
+    { "192.168.1.1", "4242", NULL, NULL,{ true, NULL, NULL, "C:/data/CA.pem", "123" },{ false } },
 };
 
-static dx_test_case_t valid_cases[] = {
-    { "demo.dxfeed.com:7300",                                                               { &addresses[0], 1, 1 } },
-    { "192.168.1.1:4242",                                                                   { &addresses[1], 1, 1 } },
-    { "192.168.1.1:4242[username=xxx,password=yyyy]",                                       { &addresses[2], 1, 1 } },
-    { "tls+192.168.1.1:4242",                                                               { &addresses[3], 1, 1 } },
-    { "tls+gzip+192.168.1.1:4242",                                                          { &addresses[4], 1, 1 } },
-    { "tls[trustStore=C:/data/CA.pem]+192.168.1.1:4242",                                    { &addresses[5], 1, 1 } },
-    { "tls[trustStore=C:/data/CA.pem]+192.168.1.1:4242[username=xxx,password=yyyy]",        { &addresses[6], 1, 1 } },
-    { "tls[trustStore=C:/data/CA.pem]+gzip+192.168.1.1:4242[username=xxx,password=yyyy]",   { &addresses[7], 1, 1 } },
-    { "gzip+tls[trustStore=C:/data/CA.pem]+192.168.1.1:4242[username=xxx,password=yyyy]",   { &addresses[7], 1, 1 } },
-    { "(demo.dxfeed.com:7300)",                                                             { &addresses[0], 1, 1 } },
-    { "()(demo.dxfeed.com:7300)",                                                           { &addresses[0], 1, 1 } },
-    { "(demo.dxfeed.com:7300)()",                                                           { &addresses[0], 1, 1 } },
-    { "(demo.dxfeed.com:7300)(192.168.1.1:4242)",                                           { &addresses[0], 2, 2 } },
-    { "(demo.dxfeed.com:7300)()(192.168.1.1:4242)",                                         { &addresses[0], 2, 2 } },
+static dx_test_case_t all_cases[] = {
+    /* valid cases */
+    //{ "demo.dxfeed.com:7300",                                                               { &addresses[0], 1, 1 }, true },
+    //{ "192.168.1.1:4242",                                                                   { &addresses[1], 1, 1 }, true },
+    //{ "192.168.1.1:4242[username=xxx,password=yyyy]",                                       { &addresses[2], 1, 1 }, true },
+    //{ "192.168.1.1:4242[,username=xxx,,,password=yyyy,]",                                   { &addresses[2], 1, 1 }, true },
+    //{ "192.168.1.1:4242[username=xxx][password=yyyy]",                                      { &addresses[2], 1, 1 }, true },
+    //{ "192.168.1.1:4242[][username=xxx][][][password=yyyy][]",                              { &addresses[2], 1, 1 }, true },
+    //{ "tls+192.168.1.1:4242",                                                               { &addresses[3], 1, 1 }, WITH_TLS_RESULT },
+    //{ "tls++192.168.1.1:4242",                                                              { &addresses[3], 1, 1 }, WITH_TLS_RESULT },
+    //{ "tls+gzip+192.168.1.1:4242",                                                          { &addresses[4], 1, 1 }, WITH_TLS_RESULT & WITH_GZIP_RESULT },
+    //{ "tls[trustStore=C:/data/CA.pem]+192.168.1.1:4242",                                    { &addresses[5], 1, 1 }, WITH_TLS_RESULT },
+    //{ "tls[trustStore=C:/data/CA.pem]+192.168.1.1:4242[username=xxx,password=yyyy]",        { &addresses[6], 1, 1 }, WITH_TLS_RESULT },
+    //{ "tls[trustStore=C:/data/CA.pem]+gzip+192.168.1.1:4242[username=xxx,password=yyyy]",   { &addresses[7], 1, 1 }, WITH_TLS_RESULT & WITH_GZIP_RESULT },
+    //{ "gzip+tls[trustStore=C:/data/CA.pem]+192.168.1.1:4242[username=xxx,password=yyyy]",   { &addresses[7], 1, 1 }, WITH_TLS_RESULT & WITH_GZIP_RESULT },
+    //{ "tls[trustStore=C:/data/CA.pem,trustStorePassword=123]+192.168.1.1:4242",             { &addresses[8], 1, 1 }, WITH_TLS_RESULT },
+    //{ "tls[,trustStore=C:/data/CA.pem,,,trustStorePassword=123,]+192.168.1.1:4242",         { &addresses[8], 1, 1 }, WITH_TLS_RESULT },
+    //{ "tls[trustStore=C:/data/CA.pem][trustStorePassword=123]+192.168.1.1:4242",            { &addresses[8], 1, 1 }, WITH_TLS_RESULT },
+    //{ "tls[][trustStore=C:/data/CA.pem][][][trustStorePassword=123][]+192.168.1.1:4242",    { &addresses[8], 1, 1 }, WITH_TLS_RESULT },
+    //{ "+demo.dxfeed.com:7300",                                                              { &addresses[0], 1, 1 }, true },
+    //{ "(demo.dxfeed.com:7300)",                                                             { &addresses[0], 1, 1 }, true },
+    //{ "(+demo.dxfeed.com:7300[])",                                                          { &addresses[0], 1, 1 }, true },
+    //{ "()(demo.dxfeed.com:7300)",                                                           { &addresses[0], 1, 1 }, true },
+    //{ "(demo.dxfeed.com:7300)(192.168.1.1:4242)",                                           { &addresses[0], 2, 2 }, true },
+    //{ "()(demo.dxfeed.com:7300)()()(192.168.1.1:4242)",                                     { &addresses[0], 2, 2 }, true },
+
+    ///* invalid cases */
+    //{ "",                                                                                   DX_EMPTY_ARRAY, false },
+    //{ "()",                                                                                 DX_EMPTY_ARRAY, false },
+    //{ "(demo.dxfeed.com:7300)()",                                                           DX_EMPTY_ARRAY, false },
+    { "(demo.dxfeed.com:7300()",                                                            DX_EMPTY_ARRAY, false },
 };
-static const size_t valid_cases_count = SIZE_OF_ARRAY(valid_cases);
+static const size_t all_cases_count = SIZE_OF_ARRAY(all_cases);
 
 /* -------------------------------------------------------------------------- */
 
@@ -76,36 +118,25 @@ static bool dx_is_equal_address_array(const dx_address_array_t* expected, const 
 }
 
 /* -------------------------------------------------------------------------- */
-//TODO:
+
 /*
  * Test
  *
- * Tries to calculate a future base64 string length and compare it with etalon value.
+ * Tries to parse various addresses listed in all_cases.
  *
  * Expected: application shouldn't crash; all checks should be passed.
  */
 static bool get_addresses_from_collection_test(void) {
     size_t i;
-    for (i = 0; i < valid_cases_count; i++) {
-        dx_address_array_t actual;
-        dx_test_case_t c = valid_cases[i];
-        DX_CHECK(dx_is_true(dx_get_addresses_from_collection(c.collection, &actual)));
-        DX_CHECK(dx_is_equal_address_array((const dx_address_array_t*)&c.expected, (const dx_address_array_t*)&actual));
+    for (i = 0; i < all_cases_count; i++) {
+        dx_address_array_t actual = DX_EMPTY_ARRAY;
+        dx_test_case_t c = all_cases[i];
+        DX_CHECK_MESSAGE(dx_is_equal_bool(c.result, dx_get_addresses_from_collection(c.collection, &actual)), c.collection);
+        if (c.result)
+            DX_CHECK(dx_is_equal_address_array((const dx_address_array_t*)&c.expected, (const dx_address_array_t*)&actual));
         dx_clear_address_array(&actual);
     }
     return true;
-}
-//TODO:
-/*
- * Test
- *
- * Tries to calculate a future base64 string length and compare it with etalon value.
- *
- * Expected: application shouldn't crash; all checks should be passed.
- */
-static bool bad_addresses_collection_test(void) {
-
-    return false;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -113,8 +144,7 @@ static bool bad_addresses_collection_test(void) {
 bool address_parser_all_tests(void) {
     bool res = true;
 
-    if (!get_addresses_from_collection_test() ||
-        !bad_addresses_collection_test()) {
+    if (!get_addresses_from_collection_test()) {
 
         res = false;
     }

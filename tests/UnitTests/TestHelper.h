@@ -6,6 +6,7 @@
 
 #include "DXFeed.h"
 #include "DXErrorCodes.h"
+#include "DXErrorHandling.h"
 #include "PrimitiveTypes.h"
 
 #define SIZE_OF_ARRAY(static_array) sizeof(static_array) / sizeof(static_array[0])
@@ -70,9 +71,33 @@ const char *get_event_counter_name(event_counter_data_ptr_t counter_data);
     do { \
         if (!(predicate)) { \
             PRINT_TEST_FAILED \
+            { \
+                int error_code; \
+                dxf_const_string_t error_descr = L""; \
+                if (dx_get_last_error(&error_code) == dx_efr_success && error_code != dx_ec_success) { \
+                    wprintf(L"Last error: #%d %ls\n", error_code, dx_get_error_description(error_code)); \
+                    dx_pop_last_error(); \
+                } \
+            } \
             return false; \
         } \
-    } while (false) \
+    } while (false)
+
+#define DX_CHECK_MESSAGE(predicate, message) \
+    do { \
+        if (!(predicate)) { \
+            PRINT_TEST_FAILED_MESSAGE(message) \
+            { \
+                int error_code; \
+                dxf_const_string_t error_descr = L""; \
+                if (dx_get_last_error(&error_code) == dx_efr_success && error_code != dx_ec_success) { \
+                    wprintf(L"Last error: #%d %ls\n", error_code, dx_get_error_description(error_code)); \
+                    dx_pop_last_error(); \
+                } \
+            } \
+            return false; \
+        } \
+    } while (false)
 
 #define DX_IS_EQUAL_FUNCTION_DECLARATION(type) bool dx_is_equal_##type##(type expected, type actual)
 #define DX_IS_GREATER_OR_EQUAL_FUNCTION_DECLARATION(type) bool dx_ge_##type##(type actual, type param)

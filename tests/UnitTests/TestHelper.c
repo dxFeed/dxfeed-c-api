@@ -209,10 +209,19 @@ DX_IS_EQUAL_FUNCTION_DECLARATION(type) { \
 
 #define DX_IS_EQUAL_ANSI_FUNCTION_DEFINITION(type, tmpl, alias) \
 DX_IS_EQUAL_FUNCTION_DECLARATION_A(type, alias) { \
+    if (expected == NULL && actual == NULL) { \
+        return true; \
+    } else if (expected == NULL) { \
+        printf("%s failed: expected=NULL, but was=" tmpl "\n", __FUNCTION__, actual); \
+        return false; \
+    } else if (actual == NULL) { \
+        printf("%s failed: expected=" tmpl ", but was=NULL\n", __FUNCTION__, expected); \
+        return false; \
+    } \
     if (strcmp(expected, actual) != 0) { \
         printf("%s failed: expected=" tmpl ", but was=" tmpl "\n", __FUNCTION__, expected, actual); \
         return false; \
-                } \
+    } \
     return true; \
 }
 
