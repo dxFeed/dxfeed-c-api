@@ -17,6 +17,7 @@
  *
  */
 
+#include <ctype.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -26,12 +27,18 @@
 #include "DXErrorHandling.h"
 #include "Logger.h"
 
+/* To add TLS codec support for library add 'ADDRESS_CODEC_TLS_ENABLED' string 
+ * to C/C++ compiller definition.
+ */
 #ifdef ADDRESS_CODEC_TLS_ENABLED
 #define DX_CODEC_TLS_STATUS true
 #else
 #define DX_CODEC_TLS_STATUS false
 #endif
 
+/* To add TLS codec support for library add 'ADDRESS_CODEC_GZIP_ENABLED' string 
+ * to C/C++ compiller definition.
+ */
 #ifdef ADDRESS_CODEC_GZIP_ENABLED
 #define DX_CODEC_GZIP_STATUS true
 #else
@@ -77,7 +84,7 @@ static const char property_value_splitter = '=';
 /* -------------------------------------------------------------------------- */
 
 static bool dx_is_empty_entry(const char* entry_begin, const char* entry_end) {
-    if (entry_begin > entry_end)
+    if (entry_begin >= entry_end)
         return true;
     while (*entry_begin == whitespace) {
         if (entry_begin == entry_end)
@@ -116,44 +123,64 @@ static char* dx_find_last(const char* from, const char* to, int ch) {
 
 /* -------------------------------------------------------------------------- */
 
+static const char* dx_find_first_of_values(const char* from, const char* to, int first, int second) {
+    const char* first_pos = dx_find_first(from, to, first);
+    const char* second_pos = dx_find_first(from, to, second);
+    if (first_pos == NULL)
+        return second_pos;
+    else if (second_pos == NULL)
+        return first_pos;
+    return MIN(first_pos, second_pos);
+}
+
+/* -------------------------------------------------------------------------- */
+
 static bool dx_has_next(const char* next) {
     return next != NULL && *next != null_symbol;
 }
 
 /* -------------------------------------------------------------------------- */
 
+static bool dx_is_numeric(const char* str) {
+    const char* next = str;
+    if (str == NULL || strlen(str) == 0)
+        return false;
+    while (dx_has_next(next)) {
+        if (!isdigit((int)*(next++)))
+            return false;
+    }
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
 static bool dx_get_next_entry(OUT char** next, OUT char** entry, OUT size_t* size) {
-    char* begin = NULL;
-    char* end = NULL;
-    char* collection = NULL;
     if (entry == NULL || size == NULL || next == NULL)
         return dx_set_error_code(dx_ec_invalid_func_param_internal);
 
     *entry = NULL;
     *size = 0;
-    collection = *next;
-    if (*collection == null_symbol)
-        return true;
-    while (*entry == NULL && *collection != null_symbol) {
-        begin = strchr(collection, entry_begin_symbol);
-        end = strchr(collection, entry_end_symbol);
+    while (dx_has_next(*next)) {
+        size_t next_len = strlen(*next);
+        const char* begin = strchr(*next, entry_begin_symbol);
+        const char* end = strchr(*next, entry_end_symbol);
 
         if (begin == NULL && end == NULL) {
-            if (!dx_is_empty_entry(collection, collection + strlen(collection))) {
-                *entry = collection;
-                *size = strlen(collection);
+            begin = *next;
+            if (!dx_is_empty_entry(begin, begin + next_len)) {
+                *entry = begin;
+                *size = next_len;
             }
-            *next += *size;
+            *next += next_len;
             return true;
         } else if (begin != NULL && end != NULL) {
-            collection = begin + 1;
-            if (dx_is_empty_entry(collection, end)) {
-                collection = end + 1;
+            *next = end + 1;
+            begin += 1;
+            if (dx_is_empty_entry(begin, end)) {
                 continue;
             }
-            *entry = collection;
-            *size = (end - collection) / sizeof(char);
-            *next = end + 1;
+            *entry = begin;
+            *size = (end - begin) / sizeof(char);
             return true;
         } else {
             return dx_set_error_code(dx_ec_invalid_func_param);
@@ -165,24 +192,25 @@ static bool dx_get_next_entry(OUT char** next, OUT char** entry, OUT size_t* siz
 /* -------------------------------------------------------------------------- */
 
 static bool dx_get_next_codec(OUT char** next, OUT char** codec, OUT size_t* size) {
-    char* end = NULL;
-    char* collection = NULL;
     if (codec == NULL || size == NULL || next == NULL)
         return dx_set_error_code(dx_ec_invalid_func_param_internal);
 
     *codec = NULL;
     *size = 0;
-    collection = *next;
-    while (*codec == NULL && *collection != null_symbol) {
-        end = strchr(collection, codec_splitter);
-        if (end == NULL)
+    while (dx_has_next(*next)) {
+        char* begin = *next;
+        char* end = strchr(begin, codec_splitter);
+        if (end == NULL) {
+            //move pointer to null terminating symbol
+            *next += strlen(*next);
             return true;
-        if (dx_is_empty_entry(collection, end)) {
-            collection = end + 1;
+        }
+        if (dx_is_empty_entry(begin, end)) {
+            *next = end + 1;
             continue;
         }
-        *codec = collection;
-        *size = (end - collection) / sizeof(char);
+        *codec = begin;
+        *size = (end - begin) / sizeof(char);
         *next = end + 1;
         return true;
     }
@@ -232,14 +260,14 @@ static bool dx_get_codec_properties(const char* codec, size_t codec_size, OUT ch
         return false;
     if (codec_size == name_size)
         return true;
-    //check proprties starts with '[' and finishes with ']' symbol
+    //check properties starts with '[' and finishes with ']' symbol
     props_begin = codec + name_size;
-    props_end = codec + codec_size;
+    props_end = codec + codec_size - 1;
     if (*props_begin != properties_begin_symbol || *props_end != properties_end_symbol)
         return dx_set_error_code(dx_ec_invalid_func_param);
     if (!dx_is_empty_entry(props_begin, props_end)) {
         *props = props_begin;
-        *props_size = props_end - props_begin;
+        *props_size = props_end - props_begin + 1;
     }
     return true;
 }
@@ -252,11 +280,11 @@ static bool dx_get_next_property(OUT char** next, OUT size_t* next_size, OUT cha
     }
     *prop = NULL;
     *prop_size = 0;
-    while (**next != null_symbol && next_size > 0) {
+    while (dx_has_next(*next) && *next_size > 0) {
         //points to special symbol ',' or '[' that indicates begining of next property entry
         char* collection_begin = *next;
         //points to special symbol ']' that indicates ending of all properties
-        char* collection_end = collection_begin + *next_size;
+        char* collection_end = collection_begin + *next_size - 1;
         //points to useful data of current property
         char* begin = collection_begin;
         //points to to special symbol ']' that indicates ending of current property
@@ -264,9 +292,7 @@ static bool dx_get_next_property(OUT char** next, OUT size_t* next_size, OUT cha
         //skip first ',' or '[' symbol
         if (*begin == properties_begin_symbol || *begin == properties_splitter)
             begin++;
-        end = MIN(
-            dx_find_first(begin, collection_end, properties_end_symbol),
-            dx_find_first(begin, collection_end, properties_splitter));
+        end = dx_find_first_of_values(begin, collection_end, properties_end_symbol, properties_splitter);
         if (begin == NULL || end == NULL) {
             return dx_set_error_code(dx_ec_invalid_func_param);
         } else {
@@ -276,7 +302,8 @@ static bool dx_get_next_property(OUT char** next, OUT size_t* next_size, OUT cha
                 continue;
             }
             *prop = begin;
-            *prop_size = end - begin - 1;
+            *prop_size = end - begin;
+            return true;
         }
     }
     return true;
@@ -298,7 +325,7 @@ static bool dx_get_host_port_string(const char* entry, size_t entry_size, OUT ch
         begin++;
     }
     end = dx_find_first(begin, entry_end, properties_begin_symbol);
-    *size = (end == NULL) ? entry_end - begin : end - begin - 1;
+    *size = (end == NULL) ? entry_end - begin : end - begin;
     *address = begin;
     return true;
 }
@@ -313,15 +340,19 @@ static bool dx_get_properties(const char* entry, size_t entry_size, OUT char** p
     if (entry == NULL || *props == NULL || props_size == NULL) {
         return dx_set_error_code(dx_ec_invalid_func_param_internal);
     }
+    *props = NULL;
+    *props_size = 0;
     if (!dx_get_host_port_string(entry, entry_size, &address, &address_size))
         return false;
     begin = address + address_size;
-    end = entry + entry_size;
+    end = entry + entry_size - 1;
+    if (!dx_has_next(begin) || begin >= end)
+        return true;
     if (*begin != properties_begin_symbol || *end != properties_end_symbol)
         return dx_set_error_code(dx_ec_invalid_func_param);
     if (!dx_is_empty_entry(begin, end)) {
         *props = begin;
-        *props_size = end - begin;
+        *props_size = end - begin + 1;
     }
     return true;
 }
@@ -390,7 +421,7 @@ static bool dx_codec_tls_parser(const char* codec, size_t size, OUT dx_address_t
     do {
         char* str;
         size_t str_size;
-        dx_address_property_t prop;
+        dx_address_property_t prop = { 0 };
         if (!dx_get_next_property(&next, &next_size, &str, &str_size)) {
             dx_codec_tls_free(&tls);
             return false;
@@ -418,7 +449,7 @@ static bool dx_codec_tls_parser(const char* codec, size_t size, OUT dx_address_t
         }
         dx_free_property(&prop);
 
-    } while (dx_has_next(next));
+    } while (dx_has_next(next) && next_size > 0);
 
     addr->tls = tls;
     return true;
@@ -442,7 +473,7 @@ static bool dx_codec_parse(const char* codec, size_t codec_size, OUT dx_address_
         return false;
     for (i = 0; i < count; ++i) {
         dx_codec_info_t info = codecs[i];
-        if (strlen(info.name) != codec_name_size || stricmp(info.name, codec_name) != 0)
+        if (strlen(info.name) != codec_name_size || strnicmp(info.name, codec_name, codec_name_size) != 0)
             continue;
         if (!info.supported)
             return dx_set_error_code(dx_nec_unknown_codec);
@@ -465,23 +496,23 @@ static bool dx_parse_host_port(const char* host, size_t size, OUT dx_address_t* 
         return false;
     }
 
-    port_start = strrchr(host, (int)host_port_splitter);
+    port_start = dx_find_last(addr->host, addr->host + size - 1, (int)host_port_splitter);
 
     if (port_start != NULL) {
         int port;
+        int res = sscanf(port_start + 1, "%d", &port);
 
-        if (sscanf(port_start + 1, "%d", &port) == 1) {
-            if (port < port_min || port > port_max) {
-                dx_free((void*)addr->host);
+        if (!dx_is_numeric(port_start + 1) || res != 1 || port < port_min || port > port_max) {
+            dx_free((void*)addr->host);
+            addr->host = NULL;
 
-                return dx_set_error_code(dx_nec_invalid_port_value);
-            }
-
-            addr->port = addr->host + (port_start - host);
-
-            /* separating host from port with zero symbol and advancing to the first port symbol */
-            *(char*)(addr->port++) = 0;
+            return dx_set_error_code(dx_nec_invalid_port_value);
         }
+
+        addr->port = port_start;
+
+        /* separating host from port with zero symbol and advancing to the first port symbol */
+        *(char*)(addr->port++) = 0;
     }
 
     return true;
@@ -513,6 +544,10 @@ static bool dx_parse_address(const char* entry, size_t entry_size, OUT dx_addres
     size_t next_size;
     char* address;
     size_t address_size;
+    if (entry == NULL || entry_size == 0 || addr == NULL) {
+        dx_logging_info(L"Empty address entry.");
+        return dx_set_error_code(dx_ec_invalid_func_param);
+    }
     dx_free_address(addr);
     //get codecs
     do {
@@ -545,7 +580,7 @@ static bool dx_parse_address(const char* entry, size_t entry_size, OUT dx_addres
     do {
         char* str;
         size_t str_size;
-        dx_address_property_t prop;
+        dx_address_property_t prop = { 0 };
         if (!dx_get_next_property(OUT &next, OUT &next_size, OUT &str, OUT &str_size)) {
             dx_free_address(addr);
             return false;
@@ -567,7 +602,7 @@ static bool dx_parse_address(const char* entry, size_t entry_size, OUT dx_addres
             return dx_set_error_code(dx_nec_invalid_function_arg);
         }
         dx_free_property(&prop);
-    } while (dx_has_next(next));
+    } while (dx_has_next(next) && next_size > 0);
 
     return true;
 }
@@ -586,6 +621,7 @@ void dx_clear_address_array(dx_address_array_t* addresses) {
     }
 
     dx_free(addresses->elements);
+    memset((void*)addresses, 0, sizeof(dx_address_array_t));
 }
 
 /* -------------------------------------------------------------------------- */
@@ -612,7 +648,7 @@ bool dx_get_addresses_from_collection(const char* collection, OUT dx_address_arr
     }
 
     do {
-        dx_address_t addr;
+        dx_address_t addr = { 0 };
         bool failed;
 
         char* entry;
@@ -637,7 +673,7 @@ bool dx_get_addresses_from_collection(const char* collection, OUT dx_address_arr
         }
 
         cur_address = splitter_pos;
-    } while (next != null_symbol);
+    } while (dx_has_next(next));
 
     dx_free(collection_copied);
 
