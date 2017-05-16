@@ -184,7 +184,7 @@ DXFEED_API ERRORCODE dxf_create_subscription (dxf_connection_t connection, int e
  *  connection - a handle of a previously created connection which the subscription will be using
  *  event_types - a bitmask of the subscription event types. See 'dx_event_id_t' and 'DX_EVENT_BIT_MASK'
  *                for information on how to create an event type bitmask
- *  time - time in the past (unix time in milliseconds)
+ *  time - UTC time in the past (unix time in milliseconds)
  *  OUT subscription - a handle of the created subscription
  */
 DXFEED_API ERRORCODE dxf_create_subscription_timed(dxf_connection_t connection, int event_types, 
@@ -556,5 +556,13 @@ DXFEED_API ERRORCODE dxf_attach_price_level_book_listener(dxf_price_level_book_t
  */
 DXFEED_API ERRORCODE dxf_detach_price_level_book_listener(dxf_price_level_book_t book, 
                                                           dxf_price_level_book_listener_t book_listener);
+
+/*
+ *  Add dumping of incoming traffic into specific file
+ *
+ *  connection - a handle of a previously created connection which the subscription will be using
+ *  raw_file_name - raw data file name
+ */
+DXFEED_API ERRORCODE dxf_write_raw_data(dxf_connection_t connection, const char* raw_file_name);
 
 #endif /* DXFEED_API_H_INCLUDED */

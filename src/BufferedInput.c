@@ -773,3 +773,15 @@ bool dx_read_utf_string (void* context, OUT dxf_string_t* value) {
     
     return dx_read_utf_sequence(context, (int)utflen, false, value);
 }
+
+void dx_get_raw(void* context, OUT dxf_ubyte_t** raw, OUT dxf_int_t* len) {
+    int pos = CTX(context)->current_in_buffer_position;
+    dxf_int_t count = CTX(context)->in_buffer_limit - pos;
+    dxf_ubyte_t* buf = dx_calloc(count, sizeof(dxf_ubyte_t));
+    int i = 0;
+    for (; pos < CTX(context)->in_buffer_limit; pos++) {
+        buf[i++] = CTX(context)->in_buffer[pos];
+    }
+    *raw = buf;
+    *len = count;
+}

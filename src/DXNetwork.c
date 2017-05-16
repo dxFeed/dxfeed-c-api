@@ -96,6 +96,8 @@ typedef struct {
     
     dx_task_queue_t tq;
 
+    FILE* raw_dump_file;
+
     /* protocol description properties */
     dx_property_map_t properties;
     
@@ -107,6 +109,7 @@ typedef struct {
 #define MUTEX_FIELD_FLAG            (1 << 2)
 #define TASK_QUEUE_FIELD_FLAG       (1 << 3)
 #define QUEUE_THREAD_FIELD_FLAG     (1 << 4)
+#define DUMPING_RAW_DATA_FIELD_FLAG (1 << 5)
 
 /* -------------------------------------------------------------------------- */
 
@@ -249,7 +252,13 @@ bool dx_clear_connection_data (dx_network_connection_context_t* context) {
     if (IS_FLAG_SET(set_fields_flags, TASK_QUEUE_FIELD_FLAG)) {
         success = dx_destroy_task_queue(context->tq) && success;
     }
-    
+
+    if (IS_FLAG_SET(set_fields_flags, DUMPING_RAW_DATA_FIELD_FLAG)) {
+        if (context->raw_dump_file != NULL)
+            success = (fclose(context->raw_dump_file) == 0) && success;
+        context->raw_dump_file = NULL;
+    }
+
     CHECKED_FREE(context->address);
 
     dx_protocol_property_clear(context);
@@ -472,7 +481,23 @@ void dx_socket_reader (dx_network_connection_context_t* context) {
             }
         }
 
-        number_of_bytes_read = dx_recv(context->s, (void*)read_buf, READ_CHUNK_SIZE);
+        if (IS_FLAG_SET(context->set_fields_flags, DUMPING_RAW_DATA_FIELD_FLAG)) {
+            number_of_bytes_read = fread((void*)read_buf, sizeof(char), READ_CHUNK_SIZE, context->raw_dump_file);
+
+            if (feof(context->raw_dump_file)) {
+                number_of_bytes_read = INVALID_DATA_SIZE;
+                context->set_fields_flags |= READER_THREAD_FIELD_FLAG;
+                dx_notify_conn_termination(context, &is_thread_idle);
+                context->reader_thread_termination_trigger = true;
+            }
+
+            if (ferror(context->raw_dump_file)) {
+                dx_logging_error(L"Raw data file read error.");
+                number_of_bytes_read = INVALID_DATA_SIZE;
+            }
+        } else {
+            number_of_bytes_read = dx_recv(context->s, (void*)read_buf, READ_CHUNK_SIZE);
+        }
         
         if (number_of_bytes_read == INVALID_DATA_SIZE) {
             context->reader_thread_state = false;
@@ -480,7 +505,7 @@ void dx_socket_reader (dx_network_connection_context_t* context) {
             continue;
         }
         
-        /* reporting the read data */        
+        /* reporting the read data */
         context->reader_thread_state = context_data->receiver(context->connection, (const void*)read_buf, number_of_bytes_read);
     }
 }
@@ -638,11 +663,23 @@ bool dx_resolve_address (dx_network_connection_context_t* context) {
     dx_address_array_t addresses;
     struct addrinfo hints;
     size_t i = 0;
+    FILE* raw_dump_file = NULL;
     
     if (context == NULL) {
         dx_set_last_error(dx_ec_invalid_func_param_internal);
 
         return false;
+    }
+
+    //check raw data file is used
+    if (IS_FLAG_SET(context->set_fields_flags, DUMPING_RAW_DATA_FIELD_FLAG))
+        return true;
+    //check address is local file
+    raw_dump_file = fopen(context->address, "rb");
+    if (raw_dump_file != NULL) {
+        fclose(raw_dump_file);
+        context->set_fields_flags |= DUMPING_RAW_DATA_FIELD_FLAG;
+        return true;
     }
     
     dx_memset(&addresses, 0, sizeof(dx_address_array_t));
@@ -703,6 +740,19 @@ bool dx_resolve_address (dx_network_connection_context_t* context) {
 
 bool dx_connect_to_resolved_addresses (dx_network_connection_context_t* context) {
     dx_address_resolution_context_t* ctx = &(context->addr_context);
+
+    //raw data file
+    if (IS_FLAG_SET(context->set_fields_flags, DUMPING_RAW_DATA_FIELD_FLAG)) {
+        if (context->raw_dump_file != NULL)
+            return true;
+        dx_logging_info(L"Initialize reading from raw file...");
+        context->raw_dump_file = fopen(context->address, "rb");
+        if (context->raw_dump_file == NULL) {
+            dx_logging_error(L"Cannot open raw file!");
+            return false;
+        }
+        return true;
+    }
     
     CHECKED_CALL(dx_mutex_lock, &(context->socket_guard));
 
@@ -867,14 +917,19 @@ bool dx_send_data (dxf_connection_t connection, const void* buffer, int buffer_s
     
     CHECKED_CALL(dx_mutex_lock, &(context->socket_guard));
     
-    if (!IS_FLAG_SET(context->set_fields_flags, SOCKET_FIELD_FLAG)) {
+    if (!IS_FLAG_SET(context->set_fields_flags, SOCKET_FIELD_FLAG | DUMPING_RAW_DATA_FIELD_FLAG)) {
         dx_mutex_unlock(&(context->socket_guard));
         
         return dx_set_error_code(dx_nec_connection_closed);
     }
 
     do {
-        int sent_count = dx_send(context->s, (const void*)char_buf, buffer_size);
+        int sent_count = INVALID_DATA_SIZE;
+        if (IS_FLAG_SET(context->set_fields_flags, DUMPING_RAW_DATA_FIELD_FLAG)) {
+            sent_count = buffer_size;
+        } else {
+            sent_count = dx_send(context->s, (const void*)char_buf, buffer_size);
+        }
         
         if (sent_count == INVALID_DATA_SIZE) {
             dx_mutex_unlock(&(context->socket_guard));

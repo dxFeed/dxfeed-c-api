@@ -25,10 +25,14 @@ struct IDXFeed : public IDispatch {
  */
 /* -------------------------------------------------------------------------- */
 
+struct IDXCandleSymbol;
+
 struct IDXConnection : public IDispatch {
     virtual HRESULT STDMETHODCALLTYPE CreateSubscription(INT eventTypes, IDispatch** subscription) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetLastEvent(INT eventType, BSTR symbol, IDispatch** eventData) = 0;
     virtual HRESULT STDMETHODCALLTYPE CreateSubscriptionTimed(INT eventTypes, LONGLONG time, IDispatch** subscription) = 0;
+    virtual HRESULT STDMETHODCALLTYPE CreateSnapshot(INT eventType, BSTR symbol, BSTR source, LONGLONG time, IDispatch** snapshot) = 0;
+    virtual HRESULT STDMETHODCALLTYPE CreateCandleSnapshot(IDXCandleSymbol* symbol, LONGLONG time, IDispatch** snapshot) = 0;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -36,8 +40,6 @@ struct IDXConnection : public IDispatch {
  *	IDXSubscrption interface
  */
 /* -------------------------------------------------------------------------- */
-
-struct IDXCandleSymbol;
 
 struct IDXSubscription : public IDispatch {
     virtual HRESULT STDMETHODCALLTYPE AddSymbol(BSTR symbol) = 0;
@@ -59,8 +61,8 @@ struct IDXSubscription : public IDispatch {
 /* -------------------------------------------------------------------------- */
 
 struct IDXEventDataCollection : public IDispatch {
-    virtual HRESULT STDMETHODCALLTYPE GetEventCount(INT* count) = 0;
-    virtual HRESULT STDMETHODCALLTYPE GetEvent(INT index, IDispatch** eventData) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetEventCount(ULONGLONG* count) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetEvent(ULONGLONG index, IDispatch** eventData) = 0;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -383,8 +385,8 @@ struct IDXEventListener : public IDispatch {
 struct IDXCandleSymbol : public IDispatch {
     virtual HRESULT STDMETHODCALLTYPE get_BaseSymbol(BSTR* baseSymbol) = 0;
     virtual HRESULT STDMETHODCALLTYPE put_BaseSymbol(BSTR baseSymbol) = 0;
-    virtual HRESULT STDMETHODCALLTYPE get_ExchangeCode(CHAR* exchangeCode) = 0;
-    virtual HRESULT STDMETHODCALLTYPE put_ExchangeCode(CHAR exchangeCode) = 0;
+    virtual HRESULT STDMETHODCALLTYPE get_ExchangeCode(WCHAR* exchangeCode) = 0;
+    virtual HRESULT STDMETHODCALLTYPE put_ExchangeCode(WCHAR exchangeCode) = 0;
     virtual HRESULT STDMETHODCALLTYPE get_Price(INT* price) = 0;
     virtual HRESULT STDMETHODCALLTYPE put_Price(INT price) = 0;
     virtual HRESULT STDMETHODCALLTYPE get_Session(INT* session) = 0;
@@ -395,4 +397,5 @@ struct IDXCandleSymbol : public IDispatch {
     virtual HRESULT STDMETHODCALLTYPE put_PeriodValue(DOUBLE periodValue) = 0;
     virtual HRESULT STDMETHODCALLTYPE get_Alignment(INT* alignment) = 0;
     virtual HRESULT STDMETHODCALLTYPE put_Alignment(INT alignment) = 0;
+    virtual HRESULT STDMETHODCALLTYPE ToString(BSTR* value) = 0;
 };

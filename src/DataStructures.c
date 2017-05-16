@@ -311,11 +311,11 @@ static const dx_field_info_t dx_fields_order[] = {
 /* -------------------------------------------------------------------------- */
 
 static const dx_field_info_t dx_fields_time_and_sale[] = {
-    { dx_fid_compact_int, L"Time", DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, time), 
+    { dx_fid_compact_int | dx_fid_flag_time, L"Time", DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, time), 
     DX_RECORD_FIELD_DEF_VAL_NAME(dx_time_and_sale_t, time), DX_RECORD_FIELD_GETTER_NAME(dx_time_and_sale_t, time),
     dx_ft_first_time_int_field },
 
-    { dx_fid_compact_int, L"Sequence", DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, sequence), 
+    { dx_fid_compact_int | dx_fid_flag_sequence, L"Sequence", DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, sequence), 
     DX_RECORD_FIELD_DEF_VAL_NAME(dx_time_and_sale_t, sequence), DX_RECORD_FIELD_GETTER_NAME(dx_time_and_sale_t, sequence),
     dx_ft_second_time_int_field },
 
@@ -417,7 +417,7 @@ static const dx_field_info_t dx_fields_candle[] = {
 static const dx_field_info_t dx_fields_trade_eth[] = {
     { dx_fid_compact_int | dx_fid_flag_time, L"ETHLast.Time", DX_RECORD_FIELD_SETTER_NAME(dx_trade_eth_t, time),
     DX_RECORD_FIELD_DEF_VAL_NAME(dx_trade_eth_t, time), DX_RECORD_FIELD_GETTER_NAME(dx_trade_eth_t, time),
-    dx_ft_first_time_int_field },
+    dx_ft_common_field },
 
     { dx_fid_compact_int, L"ETHLast.Flags", DX_RECORD_FIELD_SETTER_NAME(dx_trade_eth_t, size),
     DX_RECORD_FIELD_DEF_VAL_NAME(dx_trade_eth_t, size), DX_RECORD_FIELD_GETTER_NAME(dx_trade_eth_t, size),
@@ -1036,6 +1036,64 @@ bool dx_set_record_exchange_code(void* context, dx_record_id_t record_id,
     records_list->elements[record_id].exchange_code = exchange_code;
 
     dx_mutex_unlock(&dscc->guard_records_list);
+
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+/*
+ * Creates subscription time field according to record model. Function uses
+ * dx_ft_first_time_int_field and dx_ft_second_time_int_field flags of the
+ * record to compose time value. This time value is necessary for correct event
+ * subscription.
+ *
+ * context      - data structures connection context pointer
+ * record_id    - subscribed record id
+ * time         - unix time in milliseconds
+ * value        - the result subscription time
+ * return true if no errors occur otherwise returns false
+ */
+bool dx_create_subscription_time(void* context, dx_record_id_t record_id, 
+                                 dxf_long_t time, OUT dxf_long_t* value) {
+    int i;
+    bool has_first_time = false;
+    bool has_second_time = false;
+    bool is_timed_record = false;
+    dxf_int_t seconds = dx_get_seconds_from_time(time);
+    dxf_int_t millis = dx_get_millis_from_time(time);
+    dxf_long_t subscription_time = 0;
+    dx_data_structures_connection_context_t* dscc = CTX(context);
+    const dx_record_item_t* record_info = NULL;
+
+    if (context == NULL || value == NULL)
+        return dx_set_error_code(dx_ec_invalid_func_param_internal);
+
+    if (time == 0) {
+        *value = 0;
+        return true;
+    }
+
+    record_info = dx_get_record_by_id(dscc, record_id);
+    if (record_info == NULL)
+        return dx_set_error_code(dx_ec_invalid_func_param_internal);
+
+    for (i = 0; i < record_info->field_count; ++i) {
+        dx_field_info_t field = record_info->fields[i];
+        if (field.time == dx_ft_first_time_int_field) {
+            subscription_time |= ((dxf_long_t)seconds) << 32;
+            has_first_time = true;
+            is_timed_record = ((field.type & dx_fid_flag_time) & ~dx_fid_flag_decimal) != 0;
+        } else if (field.time == dx_ft_second_time_int_field) {
+            subscription_time |= millis;
+            has_second_time = true;
+        }
+        if (has_first_time && has_second_time)
+            break;
+    }
+
+    //if record have pseudo time field just returns input time value
+    *value = is_timed_record ? subscription_time : time;
 
     return true;
 }

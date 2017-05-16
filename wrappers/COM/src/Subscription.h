@@ -31,5 +31,5 @@ struct DefDXSubscriptionFactory {
 
 struct DefDXEventDataCollectionFactory {
     static IDXEventDataCollection* CreateInstance (int eventType, const dxf_event_data_t* eventData,
-                                                   int eventCount, IUnknown* parent);
+                                                   size_t eventCount, IUnknown* parent);
 };

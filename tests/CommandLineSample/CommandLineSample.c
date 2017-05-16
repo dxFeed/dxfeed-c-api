@@ -172,11 +172,13 @@ void listener(int event_type, dxf_const_string_t symbol_name,
         dxf_time_and_sale_t* tns = (dxf_time_and_sale_t*)data;
 
         for (; i < data_count; ++i) {
-            wprintf(L"event id=%I64i, time=%I64i, exchange code=%c, price=%f, size=%I64i, bid price=%f, ask price=%f, "
-				L"exchange sale conditions=\'%ls\', is trade=%ls, type=%i}\n",
-                    tns[i].event_id, tns[i].time, tns[i].exchange_code, tns[i].price, tns[i].size,
-                    tns[i].bid_price, tns[i].ask_price, tns[i].exchange_sale_conditions,
-                    tns[i].is_trade ? L"True" : L"False", tns[i].type);
+            wprintf(L"event id=%I64i, time=", tns[i].event_id);
+            print_timestamp(tns[i].time);
+            wprintf(L", exchange code=%c, price=%f, size=%I64i, bid price=%f, ask price=%f, "
+                L"exchange sale conditions=\'%ls\', is trade=%ls, type=%i}\n",
+                tns[i].exchange_code, tns[i].price, tns[i].size,
+                tns[i].bid_price, tns[i].ask_price, tns[i].exchange_sale_conditions,
+                tns[i].is_trade ? L"True" : L"False", tns[i].type);
         }
     }
 
@@ -462,12 +464,15 @@ int main (int argc, char* argv[]) {
     int symbol_count = 0;
     char* dxfeed_host = NULL;
 	dxf_string_t dxfeed_host_u = NULL;
+    char* dump_file_name = NULL;
 
 
     if ( argc < 4 ) {
         wprintf(L"DXFeed command line sample.\n"
-                L"Usage: CommandLineSample <server address> <event type> <symbol>\n"
+                L"Usage: CommandLineSample <server address> <event type> <symbol> <dump filename>\n"
                 L"  <server address> - a DXFeed server address, e.g. demo.dxfeed.com:7300\n"
+                L"                     if you wont to use file instead of server data just\n"
+                L"                     just wrie there path to file e.g. path\\to\\raw.bin\n"
                 L"  <event type> - an event type, any of the following: TRADE, QUOTE, SUMMARY,\n"
                 L"                 PROFILE, ORDER, TIME_AND_SALE, TRADE_ETH, SPREAD_ORDER\n"
                 L"                 GREEKS, THEO_PRICE, UNDERLYING, SERIES, CONFIGURATION\n"
@@ -477,7 +482,7 @@ int main (int argc, char* argv[]) {
         return 0;
     }
 
-    dxf_initialize_logger( "log.log", true, true, true );
+    dxf_initialize_logger("log.log", true, true, true );
 
     dxfeed_host = argv[1];
     
@@ -504,17 +509,22 @@ int main (int argc, char* argv[]) {
 
     wprintf(L"Connection successful!\n");
 
+    if (argc >= 6 && stricmp(argv[4], "dump") == 0) {
+        dump_file_name = argv[5];
+        dxf_write_raw_data(connection, dump_file_name);
+    }
+
     if (!dxf_create_subscription(connection, event_type, &subscription)) {
         process_last_error();
         free_symbols(symbols, symbol_count);
         return -1;
-    };
+    }
 
     if (!dxf_add_symbols(subscription, (dxf_const_string_t*)symbols, symbol_count)) {
         process_last_error();
         free_symbols(symbols, symbol_count);
         return -1;
-    };
+    }
 
     free_symbols(symbols, symbol_count);
 
@@ -522,7 +532,7 @@ int main (int argc, char* argv[]) {
         process_last_error();
 
         return -1;
-    };
+    }
     wprintf(L"Subscription successful!\n");
 
     while (!is_thread_terminate() && loop_counter--) {
@@ -547,6 +557,6 @@ int main (int argc, char* argv[]) {
 #ifdef _WIN32
     DeleteCriticalSection(&listener_thread_guard);
 #endif
-    
+
     return 0;
 }

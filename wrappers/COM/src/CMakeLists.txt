@@ -82,7 +82,9 @@ set(HEADER_FILES
     EventFactory.h
     Feed.h
     LibraryLocker.h
+    NativeCandleSymbol.h
     resource.h
+    Snapshot.h
     Subscription.h
     TypeLibraryManager.h
     Version.h
@@ -104,7 +106,9 @@ set(SOURCE_FILES
     EventFactory.cpp
     Feed.cpp
     LibraryLocker.cpp
+    NativeCandleSymbol.cpp
     SelfRegistration.cpp
+    Snapshot.cpp
     Subscription.cpp
     TypeLibraryManager.cpp
     ${IDL_FILE}
