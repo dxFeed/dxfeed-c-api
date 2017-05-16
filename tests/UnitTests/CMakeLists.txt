@@ -34,6 +34,7 @@ link_directories(${LIB_DXFEED_OUT_DIR})
 set(COMMON_HEADERS
     ${LIB_DXFEED_SRC_DIR}/Candle.h
     ${LIB_DXFEED_SRC_DIR}/ClientMessageProcessor.h
+    ${LIB_DXFEED_SRC_DIR}/DXAddressParser.h
     ${LIB_DXFEED_SRC_DIR}/DXAlgorithms.h
     ${INCLUDE_DIR}/DXErrorCodes.h
     ${LIB_DXFEED_SRC_DIR}/DXErrorHandling.h
@@ -52,6 +53,7 @@ set(COMMON_HEADERS
 set(COMMON_SOURCES
     ${LIB_DXFEED_SRC_DIR}/Candle.c
     ${LIB_DXFEED_SRC_DIR}/ConnectionContextData.c
+    ${LIB_DXFEED_SRC_DIR}/DXAddressParser.c
     ${LIB_DXFEED_SRC_DIR}/DXAlgorithms.c
     ${LIB_DXFEED_SRC_DIR}/DXErrorCodes.c
     ${LIB_DXFEED_SRC_DIR}/DXErrorHandling.c
@@ -75,6 +77,7 @@ set(EVENT_SUBSCRIPTION_SOURCES
     )
     
 set(HEADER_FILES
+    AddressParserTest.h
     AlgorithmsTest.h
     CandleTest.h
     ConnectionTest.h
@@ -110,6 +113,7 @@ set(PARSER_SOURCES
     )
  
 set(SOURCE_FILES
+    AddressParserTest.c
     AlgorithmsTest.c
     CandleTest.c
     ConnectionTest.c

@@ -60,6 +60,7 @@ set (HEADER_FILES
     Candle.h
     ClientMessageProcessor.h
     ConnectionContextData.h
+    DXAddressParser.h
     DXAlgorithms.h
     DXErrorHandling.h
     DXMemory.h
@@ -113,6 +114,7 @@ set (SOURCE_FILES
     Candle.c
     ClientMessageProcessor.c
     ConnectionContextData.c
+    DXAddressParser.c
     DXAlgorithms.c
     DXErrorCodes.c
     DXErrorHandling.c
