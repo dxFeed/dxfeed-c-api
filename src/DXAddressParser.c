@@ -492,7 +492,7 @@ static bool dx_codec_parse(const char* codec, size_t codec_size, OUT dx_address_
 /* -------------------------------------------------------------------------- */
 
 static bool dx_parse_host_port(const char* host, size_t size, OUT dx_address_t* addr) {
-    int i;
+    size_t i;
     const char* host_start = NULL;
     const char* port_start = NULL;
 
