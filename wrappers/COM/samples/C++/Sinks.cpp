@@ -156,6 +156,26 @@ private:
     bool m_trigger; 
 };
 
+const char* eventTypeToString(int eventType) {
+    switch (eventType) {
+        case DXF_ET_TRADE: return "Trade";
+        case DXF_ET_QUOTE: return "Quote";
+        case DXF_ET_SUMMARY: return "Summary";
+        case DXF_ET_PROFILE: return "Profile";
+        case DXF_ET_ORDER: return "Order";
+        case DXF_ET_TIME_AND_SALE: return "Time&Sale";
+        case DXF_ET_CANDLE: return "Candle";
+        case DXF_ET_TRADE_ETH: return "TradeETH";
+        case DXF_ET_SPREAD_ORDER: return "SpreadOrder";
+        case DXF_ET_GREEKS: return "Greeks";
+        case DXF_ET_THEO_PRICE: return "TheoPrice";
+        case DXF_ET_UNDERLYING: return "Underlying";
+        case DXF_ET_SERIES: return "Series";
+        case DXF_ET_CONFIGURATION: return "Configuration";
+        default: return "";
+    }
+}
+
 HRESULT STDMETHODCALLTYPE DXEventListener::OnNewData (IDispatch* subscription, INT eventType, BSTR symbol,
                                                       IDispatch* dataCollection) {
     Alerter a;
@@ -168,15 +188,11 @@ HRESULT STDMETHODCALLTYPE DXEventListener::OnNewData (IDispatch* subscription, I
     cout << "\t\tData received: symbol is " << std::string((const char*)symWrp).c_str();
     symWrp.Detach();
     
-    if (eventType == DXF_ET_TRADE) {
-        cout << ", event type is Trade";
-    } else if (eventType == DXF_ET_CANDLE) {
-        cout << ", event type is Candle";
-    }
+    cout << ", event type is " << eventTypeToString(eventType);
     
     IDXEventDataCollection* dc = reinterpret_cast<IDXEventDataCollection*>(dataCollection);
     
-    INT dataCount;
+    ULONGLONG dataCount;
     HRESULT res = dc->GetEventCount(&dataCount);
     
     if (res != S_OK) {
@@ -185,7 +201,7 @@ HRESULT STDMETHODCALLTYPE DXEventListener::OnNewData (IDispatch* subscription, I
     
     cout << ", event data count = " << dataCount << "\n";
     
-    for (int i = 0; i < dataCount; ++i) {
+    for (ULONGLONG i = 0; i < dataCount; ++i) {
         IDispatch* eventData = NULL;
         
         if ((res = dc->GetEvent(i, &eventData)) != S_OK) {
@@ -203,7 +219,29 @@ HRESULT STDMETHODCALLTYPE DXEventListener::OnNewData (IDispatch* subscription, I
             }
             
             cout << "\t\t\tevent[" << i << "].price = " << price << std::endl;
-        } else if (eventType == DXF_ET_CANDLE) {
+        } 
+
+        if (eventType == DXF_ET_QUOTE) {
+            IDXQuote* q = (IDXQuote*)eventData;
+        }
+
+        if (eventType == DXF_ET_SUMMARY) {
+            IDXSummary* s = (IDXSummary*)eventData;
+        }
+
+        if (eventType == DXF_ET_PROFILE) {
+            IDXProfile* p = (IDXProfile*)eventData;
+        }
+
+        if (eventType == DXF_ET_ORDER) {
+            IDXOrder* o = (IDXOrder*)eventData;
+        }
+
+        if (eventType == DXF_ET_TIME_AND_SALE) {
+            IDXTimeAndSale* ts = (IDXTimeAndSale*)eventData;
+        }
+        
+        if (eventType == DXF_ET_CANDLE) {
             IDXCandle* c = (IDXCandle*)eventData;
             DOUBLE open, high, low, close;
 
@@ -221,6 +259,35 @@ HRESULT STDMETHODCALLTYPE DXEventListener::OnNewData (IDispatch* subscription, I
                 << "\tevent[" << i << "].close = " << close
                 << std::endl;
         }
+
+        if (eventType == DXF_ET_TRADE_ETH) {
+            IDXTradeETH* t = (IDXTradeETH*)eventData;
+        }
+
+        if (eventType == DXF_ET_SPREAD_ORDER) {
+            IDXSpreadOrder* so = (IDXSpreadOrder*)eventData;
+        }
+
+        if (eventType == DXF_ET_GREEKS) {
+            IDXGreeks* g = (IDXGreeks*)eventData;
+        }
+
+        if (eventType == DXF_ET_THEO_PRICE) {
+            IDXTheoPrice* tp = (IDXTheoPrice*)eventData;
+        }
+
+        if (eventType == DXF_ET_UNDERLYING) {
+            IDXUnderlying* u = (IDXUnderlying*)eventData;
+        }
+
+        if (eventType == DXF_ET_SERIES) {
+            IDXSeries* s = (IDXSeries*)eventData;
+        }
+
+        if (eventType == DXF_ET_CONFIGURATION) {
+            IDXConfiguration* c = (IDXConfiguration*)eventData;
+        }
+
     }
     
     a.disarm();

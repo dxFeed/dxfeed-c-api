@@ -221,6 +221,7 @@
     <ClInclude Include="..\..\src\Candle.h" />
     <ClInclude Include="..\..\src\ClientMessageProcessor.h" />
     <ClInclude Include="..\..\src\ConfigurationDeserializer.h" />
+    <ClInclude Include="..\..\src\DataStructures.h" />
     <ClInclude Include="..\..\src\DXAddressParser.h" />
     <ClInclude Include="..\..\src\DXAlgorithms.h" />
     <ClInclude Include="..\..\include\DXErrorCodes.h" />

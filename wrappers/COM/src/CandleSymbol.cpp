@@ -52,8 +52,8 @@ private:
 
     virtual HRESULT STDMETHODCALLTYPE get_BaseSymbol(BSTR* value);
     virtual HRESULT STDMETHODCALLTYPE put_BaseSymbol(BSTR value);
-    virtual HRESULT STDMETHODCALLTYPE get_ExchangeCode(CHAR* value);
-    virtual HRESULT STDMETHODCALLTYPE put_ExchangeCode(CHAR value);
+    virtual HRESULT STDMETHODCALLTYPE get_ExchangeCode(WCHAR* value);
+    virtual HRESULT STDMETHODCALLTYPE put_ExchangeCode(WCHAR value);
     virtual HRESULT STDMETHODCALLTYPE get_Price(INT* value);
     virtual HRESULT STDMETHODCALLTYPE put_Price(INT value);
     virtual HRESULT STDMETHODCALLTYPE get_Session(INT* value);
@@ -64,6 +64,7 @@ private:
     virtual HRESULT STDMETHODCALLTYPE put_PeriodValue(DOUBLE value);
     virtual HRESULT STDMETHODCALLTYPE get_Alignment(INT* value);
     virtual HRESULT STDMETHODCALLTYPE put_Alignment(INT value);
+    virtual HRESULT STDMETHODCALLTYPE ToString(BSTR* value);
 
 public:
 
@@ -72,7 +73,7 @@ public:
 private:
 
     _bstr_t baseSymbol;
-    CHAR exchangeCode;
+    WCHAR exchangeCode;
     INT price;
     INT session;
     INT periodType;
@@ -117,7 +118,7 @@ HRESULT STDMETHODCALLTYPE DXCandleSymbol::put_BaseSymbol(BSTR value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXCandleSymbol::get_ExchangeCode(CHAR* value) {
+HRESULT STDMETHODCALLTYPE DXCandleSymbol::get_ExchangeCode(WCHAR* value) {
     CHECK_PTR(value);
     *value = exchangeCode;
     return S_OK;
@@ -125,7 +126,7 @@ HRESULT STDMETHODCALLTYPE DXCandleSymbol::get_ExchangeCode(CHAR* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXCandleSymbol::put_ExchangeCode(CHAR value) {
+HRESULT STDMETHODCALLTYPE DXCandleSymbol::put_ExchangeCode(WCHAR value) {
     exchangeCode = value;
     return S_OK;
 }
@@ -202,6 +203,117 @@ HRESULT STDMETHODCALLTYPE DXCandleSymbol::get_Alignment(INT* value) {
 
 HRESULT STDMETHODCALLTYPE DXCandleSymbol::put_Alignment(INT value) {
     alignment = value;
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+typedef struct {
+    dxf_string_t string;
+    dxf_long_t period_interval_millis;
+} dx_candle_type;
+
+static const dx_candle_type g_candle_type_period[dxf_ctpa_count] = {
+    { L"t", 0LL },
+    { L"s", 1000LL },
+    { L"m", 60LL * 1000LL },
+    { L"h", 60LL * 60LL * 1000LL },
+    { L"d", 24LL * 60LL * 60LL * 1000LL },
+    { L"w", 7LL * 24LL * 60LL * 60LL * 1000LL },
+    { L"mo", 30LL * 24LL * 60LL * 60LL * 1000LL },
+    { L"o", 30LL * 24LL * 60LL * 60LL * 1000LL },
+    { L"y", 365LL * 24LL * 60LL * 60LL * 1000LL },
+    { L"v", 0LL },
+    { L"p", 0LL },
+    { L"pm", 0LL },
+    { L"pr", 0LL }
+};
+
+static const dxf_string_t g_candle_price[dxf_cpa_count] = {
+    L"last",
+    L"bid",
+    L"ask",
+    L"mark",
+    L"s"
+};
+
+static const dxf_string_t g_candle_session[dxf_csa_count] = {
+    L"false", /*ANY*/
+    L"true"   /*REGULAR*/
+};
+
+static const dxf_string_t g_candle_alignment[dxf_caa_count] = {
+    L"m", /*MIDNIGHT*/
+    L"s"  /*SESSION*/
+};
+
+HRESULT STDMETHODCALLTYPE DXCandleSymbol::ToString(BSTR* value) {
+    CHECK_PTR(value);
+    std::wstring buf;
+    bool put_comma = false;
+
+    buf.append((const wchar_t*)baseSymbol);
+    if (iswalpha(exchangeCode)) {
+        buf.append(1, L'&').append(1, exchangeCode);
+    }
+
+    if (periodValue == DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT &&
+        periodType == dxf_ctpa_default &&
+        alignment == dxf_caa_default &&
+        price == dxf_cpa_default &&
+        session == dxf_csa_default) {
+
+        *value = SysAllocStringLen(buf.c_str(), (UINT)buf.size());
+        if (*value == NULL)
+            return E_OUTOFMEMORY;
+        return S_OK;
+    }
+
+    buf.append(L"{");
+
+    /*attribute (period) has no name and is written the first, and the rest should be sorted alphabetically.*/
+    if (periodType != dxf_ctpa_default ||
+        periodValue != DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT) {
+
+        buf.append(L"=");
+        if (periodValue != DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT) {
+            buf.append(std::to_wstring(periodValue));
+        }
+        buf.append(g_candle_type_period[periodType].string);
+        put_comma = true;
+    }
+
+    if (alignment != dxf_caa_default) {
+        if (put_comma) {
+            buf.append(L",");
+        }
+        buf.append(L"a=").append(g_candle_alignment[alignment]);
+        put_comma = true;
+    }
+
+    if (price != dxf_cpa_default) {
+        if (put_comma) {
+            buf.append(L",");
+        }
+        buf.append(L"price=").append(g_candle_price[price]);
+
+        put_comma = true;
+    }
+
+    if (session != dxf_csa_default) {
+        if (put_comma) {
+            buf.append(L",");
+        }
+        buf.append(L"tho=").append(g_candle_session[session]);
+
+        put_comma = true;
+    }
+
+    buf.append(L"}");
+
+    *value = SysAllocStringLen(buf.c_str(), (UINT)buf.size());
+    if (*value == NULL)
+        return E_OUTOFMEMORY;
     return S_OK;
 }
 

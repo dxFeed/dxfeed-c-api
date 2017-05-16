@@ -137,6 +137,20 @@ int dx_find_record_field(const dx_record_item_t* record_info, dxf_const_string_t
                           dxf_int_t field_type);
 dxf_char_t dx_get_record_exchange_code(void* context, dx_record_id_t record_id);
 bool dx_set_record_exchange_code(void* context, dx_record_id_t record_id, dxf_char_t exchange_code);
+/*
+* Creates subscription time field according to record model. Function uses
+* dx_ft_first_time_int_field and dx_ft_second_time_int_field flags of the
+* record to compose time value. This time value is necessary for correct event
+* subscription.
+*
+* context      - data structures connection context pointer
+* record_id    - subscribed record id
+* time         - unix time in milliseconds
+* value        - the result subscription time
+* return true if no errors occur otherwise returns false
+*/
+bool dx_create_subscription_time(void* context, dx_record_id_t record_id,
+                                 dxf_long_t time, OUT dxf_long_t* value);
 
 dx_record_server_support_state_list_t* dx_get_record_server_support_states(void* context);
 bool dx_get_record_server_support_state_value(dx_record_server_support_state_list_t* states, 

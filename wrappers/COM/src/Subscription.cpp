@@ -6,6 +6,7 @@
 #include "Guids.h"
 #include "EventFactory.h"
 #include "Interfaces.h"
+#include "NativeCandleSymbol.h"
 
 #include <ComDef.h>
 
@@ -320,58 +321,6 @@ HRESULT STDMETHODCALLTYPE DXSubscription::GetEventTypes (INT* eventTypes) {
 
 /* -------------------------------------------------------------------------- */
 
-class NativeCandleSymbol {
-public:
-    NativeCandleSymbol(IDXCandleSymbol*);
-    virtual ~NativeCandleSymbol();
-    dxf_candle_attributes_t& operator*();
-
-private:
-    NativeCandleSymbol();
-    dxf_candle_attributes_t mCandleAttributes;
-};
-
-NativeCandleSymbol::NativeCandleSymbol()
-    : mCandleAttributes(NULL) {}
-
-NativeCandleSymbol::NativeCandleSymbol(IDXCandleSymbol* symbol) {
-    _bstr_t baseSymbolWrapper;
-    CHAR exchangeCode;
-    INT price;
-    INT session;
-    INT periodType;
-    DOUBLE periodValue;
-    INT alignment;
-    if (FAILED(symbol->get_BaseSymbol(baseSymbolWrapper.GetAddress())) ||
-        FAILED(symbol->get_ExchangeCode(&exchangeCode)) ||
-        FAILED(symbol->get_Price(&price)) ||
-        FAILED(symbol->get_Session(&session)) ||
-        FAILED(symbol->get_PeriodType(&periodType)) ||
-        FAILED(symbol->get_PeriodValue(&periodValue)) ||
-        FAILED(symbol->get_Alignment(&alignment))) {
-
-        throw std::exception("Can't get symbol parameters.");
-    }
-    ERRORCODE errCode = dxf_create_candle_symbol_attributes((const wchar_t*)baseSymbolWrapper,
-        exchangeCode, periodValue, (dxf_candle_type_period_attribute_t)periodType,
-        (dxf_candle_price_attribute_t)price, (dxf_candle_session_attribute_t)session,
-        (dxf_candle_alignment_attribute_t)alignment, &mCandleAttributes);
-    if (errCode == DXF_FAILURE)
-        throw std::exception("Can't create Candle symbol attribute object.");
-}
-
-NativeCandleSymbol::~NativeCandleSymbol() {
-    if (mCandleAttributes != NULL) {
-        dxf_delete_candle_symbol_attributes(mCandleAttributes);
-    }
-}
-
-dxf_candle_attributes_t& NativeCandleSymbol::operator*() {
-    return mCandleAttributes;
-}
-
-/* -------------------------------------------------------------------------- */
-
 HRESULT STDMETHODCALLTYPE DXSubscription::AddCandleSymbol(IDXCandleSymbol* symbol) {
     HRESULT hr = S_OK;
 
@@ -629,18 +578,18 @@ private:
         return InvokeImpl(this, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
     }
     
-    HRESULT STDMETHODCALLTYPE GetEventCount (INT* count);
-    HRESULT STDMETHODCALLTYPE GetEvent (INT index, IDispatch** eventData);
+    HRESULT STDMETHODCALLTYPE GetEventCount (ULONGLONG* count);
+    HRESULT STDMETHODCALLTYPE GetEvent (ULONGLONG index, IDispatch** eventData);
     
 private:
 
-    DXEventDataCollection (int eventType, const dxf_event_data_t* eventData, int eventCount, IUnknown* parent);
+    DXEventDataCollection (int eventType, const dxf_event_data_t* eventData, size_t eventCount, IUnknown* parent);
     
 private:
 
     int m_eventType;
     dxf_event_data_t m_eventData;
-    int m_eventCount;
+    size_t m_eventCount;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -649,7 +598,7 @@ private:
  */
 /* -------------------------------------------------------------------------- */
 
-DXEventDataCollection::DXEventDataCollection (int eventType, const dxf_event_data_t* eventData, int eventCount, IUnknown* parent)
+DXEventDataCollection::DXEventDataCollection (int eventType, const dxf_event_data_t* eventData, size_t eventCount, IUnknown* parent)
 : DefIDispatchImpl(IID_IDXEventDataCollection, parent)
 , m_eventType(eventType)
 , m_eventData(reinterpret_cast<dxf_event_data_t>(const_cast<dxf_event_data_t*>(eventData)))
@@ -658,7 +607,7 @@ DXEventDataCollection::DXEventDataCollection (int eventType, const dxf_event_dat
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXEventDataCollection::GetEventCount (INT* count) {
+HRESULT STDMETHODCALLTYPE DXEventDataCollection::GetEventCount (ULONGLONG* count) {
     if (count == NULL) {
         return E_POINTER;
     }
@@ -670,7 +619,7 @@ HRESULT STDMETHODCALLTYPE DXEventDataCollection::GetEventCount (INT* count) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXEventDataCollection::GetEvent (INT index, IDispatch** eventData) {
+HRESULT STDMETHODCALLTYPE DXEventDataCollection::GetEvent (ULONGLONG index, IDispatch** eventData) {
     if (eventData == NULL) {
         return E_POINTER;
     }
@@ -681,7 +630,7 @@ HRESULT STDMETHODCALLTYPE DXEventDataCollection::GetEvent (INT index, IDispatch*
         return E_FAIL;
     }
     
-    dxf_event_data_t singleEventData = dx_get_event_data_item(m_eventType, m_eventData, index);
+    dxf_event_data_t singleEventData = dx_get_event_data_item(m_eventType, m_eventData, (size_t)index);
     
     if ((*eventData = EventDataFactory::CreateInstance(m_eventType, singleEventData, this)) == NULL) {
         return E_FAIL;
@@ -697,7 +646,7 @@ HRESULT STDMETHODCALLTYPE DXEventDataCollection::GetEvent (INT index, IDispatch*
 /* -------------------------------------------------------------------------- */
 
 IDXEventDataCollection* DefDXEventDataCollectionFactory::CreateInstance (int eventType, const dxf_event_data_t* eventData,
-                                                                         int eventCount, IUnknown* parent) {
+                                                                         size_t eventCount, IUnknown* parent) {
     IDXEventDataCollection* dataCollection = NULL;
     
     try {

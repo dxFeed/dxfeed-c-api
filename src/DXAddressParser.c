@@ -558,7 +558,6 @@ static void dx_free_address(OUT dx_address_t* addr) {
 
 /* -------------------------------------------------------------------------- */
 
-//TODO: free address everywhere...
 static bool dx_parse_address(const char* entry, size_t entry_size, OUT dx_address_t* addr) {
     const char* next = entry;
     size_t next_size;
