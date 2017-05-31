@@ -590,11 +590,12 @@ bool dx_resolve_address (dx_network_connection_context_t* context) {
         }
     }
 
+    dx_clear_address_array(&addresses);
+
     //all addresses in collection cannot be resolved
     if (context->addr_context.size == 0)
         return false;
     
-    dx_clear_address_array(&addresses);
     dx_shuffle_addrs(&(context->addr_context));
     
     return true;

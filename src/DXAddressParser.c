@@ -27,19 +27,19 @@
 #include "DXErrorHandling.h"
 #include "Logger.h"
 
-/* To add TLS codec support for library add 'ADDRESS_CODEC_TLS_ENABLED' string 
+/* To add TLS codec support for library add 'DXFEED_CODEC_TLS_ENABLED' string 
  * to C/C++ compiller definition.
  */
-#ifdef ADDRESS_CODEC_TLS_ENABLED
+#ifdef DXFEED_CODEC_TLS_ENABLED
 #define DX_CODEC_TLS_STATUS true
 #else
 #define DX_CODEC_TLS_STATUS false
 #endif
 
-/* To add TLS codec support for library add 'ADDRESS_CODEC_GZIP_ENABLED' string 
+/* To add TLS codec support for library add 'DXFEED_CODEC_GZIP_ENABLED' string 
  * to C/C++ compiller definition.
  */
-#ifdef ADDRESS_CODEC_GZIP_ENABLED
+#ifdef DXFEED_CODEC_GZIP_ENABLED
 #define DX_CODEC_GZIP_STATUS true
 #else
 #define DX_CODEC_GZIP_STATUS false

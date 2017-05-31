@@ -3,25 +3,25 @@
 #include "DXAlgorithms.h"
 #include "TestHelper.h"
 
-/* To add TLS codec support for test add 'ADDRESS_CODEC_TLS_ENABLED' string to 
+/* To add TLS codec support for test add 'DXFEED_CODEC_TLS_ENABLED' string to 
  * C/C++ compiller definition. 
  *
- * Note: the DXFeed library also must support 'ADDRESS_CODEC_TLS_ENABLED' 
+ * Note: the DXFeed library also must support 'DXFEED_CODEC_TLS_ENABLED' 
  * definition to successful test passing.
  */
-#ifdef ADDRESS_CODEC_TLS_ENABLED
+#ifdef DXFEED_CODEC_TLS_ENABLED
 #define WITH_TLS_RESULT true
 #else
 #define WITH_TLS_RESULT false
 #endif
 
-/* To add GZIP codec support for test add 'ADDRESS_CODEC_GZIP_ENABLED' string to 
+/* To add GZIP codec support for test add 'DXFEED_CODEC_GZIP_ENABLED' string to 
  * C/C++ compiller definition. 
  *
- * Note: the DXFeed library also must support 'ADDRESS_CODEC_GZIP_ENABLED' 
+ * Note: the DXFeed library also must support 'DXFEED_CODEC_GZIP_ENABLED' 
  * definition to successful test passing.
  */
-#ifdef ADDRESS_CODEC_GZIP_ENABLED
+#ifdef DXFEED_CODEC_GZIP_ENABLED
 #define WITH_GZIP_RESULT true
 #else
 #define WITH_GZIP_RESULT false
