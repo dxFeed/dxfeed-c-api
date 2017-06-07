@@ -853,9 +853,12 @@ static void plb_event_listener(int event_type, dxf_const_string_t symbol_name,
 
     if (dx_compare_strings(source->symbol, symbol_name) != 0) {
         dx_logging_error(L"Listener for Price Level Book was called with wrong symbol\n");
-        dx_mutex_unlock(&source->guard);
         return;
     }
+
+    sb = IS_FLAG_SET(event_params->flags, dxf_ef_snapshot_begin);
+    se = IS_FLAG_SET(event_params->flags, dxf_ef_snapshot_end) || IS_FLAG_SET(event_params->flags, dxf_ef_snapshot_snip);
+    tx = IS_FLAG_SET(event_params->flags, dxf_ef_tx_pending);
 
     /* Ok, process data */
     for (; i < data_count; i++) {
@@ -864,10 +867,7 @@ static void plb_event_listener(int event_type, dxf_const_string_t symbol_name,
             continue;
         }
 
-        sb = (event_params[i].flags & dxf_ef_snapshot_begin) != 0;
-        se = (event_params[i].flags & (dxf_ef_snapshot_end | dxf_ef_snapshot_snip)) != 0;
-        rm = (event_params[i].flags & dxf_ef_remove_event) != 0;
-        tx = (event_params[i].flags & dxf_ef_tx_pending) != 0;
+        rm = IS_FLAG_SET(event_params->flags, dxf_ef_remove_event) || orders[i].size == 0;
 
         /* Ok, process this event */
         if (sb) {

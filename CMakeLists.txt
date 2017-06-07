@@ -20,6 +20,7 @@ add_subdirectory(tests/CommandLineSample)
 add_subdirectory(tests/FullTest)
 add_subdirectory(tests/PriceLevelBookSample)
 add_subdirectory(tests/SnapshotConsoleSample)
+add_subdirectory(tests/IncSnapshotConsoleSample)
 add_subdirectory(wrappers/COM/src)
 add_subdirectory(wrappers/COM/samples/C++)
 

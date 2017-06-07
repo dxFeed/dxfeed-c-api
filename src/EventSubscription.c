@@ -1204,7 +1204,7 @@ bool dx_process_event_data (dxf_connection_t connection, dx_event_id_t event_id,
                         break;
                 }
 
-                dx_call_subscr_listeners(subscr_data, event_bitmask, symbol_name, &orders[start_index], end_index - start_index, &event_params[start_index]);
+                dx_call_subscr_listeners(subscr_data, event_bitmask, symbol_name, &orders[start_index], end_index - start_index, event_params);
             }
         } else {
             dx_call_subscr_listeners(subscr_data, event_bitmask, symbol_name, data, data_count, event_params);
