@@ -1010,7 +1010,7 @@ dxf_price_level_book_t dx_create_price_level_book(dxf_connection_t connection,
         If this source call callback before full sources initialization, it is not a problem
         as book knows only added sources!
         */
-        if (!dx_plb_source_add_book(source, book, book->sources_count - 1)) {
+        if (!dx_plb_source_add_book(source, book, (int)book->sources_count - 1)) {
             dx_plb_book_clear(book);
             dx_plb_ctx_cleanup_sources(context);
             dx_mutex_unlock(&context->guard);
