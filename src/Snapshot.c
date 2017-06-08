@@ -42,6 +42,7 @@ typedef enum {
 
 typedef struct {
     bool incremental;
+    bool full_snapshot_seen;
     union {
         dxf_snapshot_listener_t full_listener;
         dxf_snapshot_inc_listener_t inc_listener;
@@ -547,10 +548,11 @@ bool dx_snapshot_call_listeners(dx_snapshot_data_ptr_t snapshot_data, bool new_s
         callback_data.symbol = dx_create_string_src(snapshot_data->symbol);
 
         if (listener_context->incremental) {
-            if (new_snapshot) {
+            if (new_snapshot || !listener_context->full_snapshot_seen) {
                 callback_data.records_count = snapshot_data->snapshot_records.records.size;
                 callback_data.records = snapshot_data->snapshot_records.records.elements;
                 listener_context->inc_listener(&callback_data, true, listener_context->user_data);
+                listener_context->full_snapshot_seen = true;
             } else {
                 callback_data.records_count = snapshot_data->last_tx_records.records.size;
                 callback_data.records = snapshot_data->last_tx_records.records.elements;
@@ -619,7 +621,7 @@ void event_listener(int event_type, dxf_const_string_t symbol_name,
         } else {
             dx_snapshot_update_event_records(snapshot_data, &snapshot_data->snapshot_records, data, data_count, event_params);
         }
-        /* Add to the record, if it is pending transaction, may be only with one event, add even "rm" event */
+        /* Add to the current tx, if it is pending transaction, may be only with one event, add even "rm" event */
         if (snapshot_data->has_inc_listeners && snapshot_data->full_snapshot_published) {
             dx_snapshot_update_event_records(snapshot_data, &snapshot_data->last_tx_records, data, data_count, event_params);
         }
@@ -690,7 +692,7 @@ int dx_snapshot_listener_comparator(dx_snapshot_listener_context_t e1,
 size_t dx_find_snapshot_listener_in_array(dx_snapshot_listener_array_t* listeners,
                                        bool incremental, void *listener, OUT bool* found) {
     size_t listener_index;
-    dx_snapshot_listener_context_t listener_context = { incremental, listener, NULL };
+    dx_snapshot_listener_context_t listener_context = { incremental, false, listener, NULL };
 
     DX_ARRAY_SEARCH(listeners->elements, 0, listeners->size, listener_context, 
         dx_snapshot_listener_comparator, false, *found, listener_index);
@@ -874,6 +876,7 @@ bool dx_add_snapshot_listener(dxf_snapshot_t snapshot, dxf_snapshot_listener_t l
     {
         dx_snapshot_listener_context_t listener_context = {
             .incremental = false,
+            .full_snapshot_seen = false,
             .full_listener = listener,
             .user_data = user_data
         };
@@ -942,6 +945,7 @@ bool dx_add_snapshot_inc_listener(dxf_snapshot_t snapshot, dxf_snapshot_inc_list
     {
         dx_snapshot_listener_context_t listener_context = {
             .incremental = true,
+            .full_snapshot_seen = false,
             .inc_listener = listener,
             .user_data = user_data
         };
