@@ -50,7 +50,10 @@ typedef struct {
     size_t capacity;
 } dx_address_array_t;
 
-bool dx_get_addresses_from_collection(const char* collection, OUT dx_address_array_t* addresses);
 void dx_clear_address_array(dx_address_array_t* addresses);
+bool dx_codec_gzip_copy(const dx_codec_gzip_t* src, OUT dx_codec_gzip_t* dest);
+bool dx_codec_tls_copy(const dx_codec_tls_t* src, OUT dx_codec_tls_t* dest);
+void dx_codec_tls_free(dx_codec_tls_t* tls);
+bool dx_get_addresses_from_collection(const char* collection, OUT dx_address_array_t* addresses);
 
 #endif /* DX_ADDRESS_PARSER_H_INCLUDED */

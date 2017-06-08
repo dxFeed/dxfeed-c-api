@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
+#include <stdint.h>
 
 #ifdef DXFEED_CODEC_TLS_ENABLED
 #include <tls.h>
@@ -53,17 +54,33 @@
 typedef struct addrinfo* dx_addrinfo_ptr;
 
 typedef struct {
-    /* array of struct with parsed adresses, properties and codecs */
-    dx_address_array_t addresses;
+    char* host;
+    char* port;
+    char* username;
+    char* password;
+    dx_codec_tls_t tls;
+    dx_codec_gzip_t gzip;
 
-#ifndef DXFEED_CODEC_TLS_ENABLED
     dx_addrinfo_ptr* elements;
+    size_t size;
+    size_t capacity;
+    size_t cur_info_index;
+
+#ifdef DXFEED_CODEC_TLS_ENABLED
+    uint8_t* key_store_mem;
+    size_t key_store_len;
+    uint8_t* trust_store_mem;
+    size_t trust_store_len;
+#endif // DXFEED_CODEC_TLS_ENABLED
+} dx_ext_address_t;
+
+typedef struct {
+    dx_ext_address_t* elements;
     size_t size;
     size_t capacity;
     
     dx_addrinfo_ptr* elements_to_free;
     int elements_to_free_count;
-#endif // DXFEED_CODEC_TLS_ENABLED
     
     int last_resolution_timestamp;
     size_t cur_addr_index;
@@ -87,6 +104,7 @@ typedef struct {
     dx_address_resolution_context_t addr_context;
     
     const char* address;
+    dx_socket_t s;
 	time_t next_heartbeat;
     dx_thread_t reader_thread;
     dx_thread_t queue_thread;
@@ -95,8 +113,6 @@ typedef struct {
 #ifdef DXFEED_CODEC_TLS_ENABLED
     dx_tls tls_context;
     dx_tls_config tls_config;
-#else
-    dx_socket_t s;
 #endif // DXFEED_CODEC_TLS_ENABLED
     
     bool reader_thread_termination_trigger;
@@ -213,6 +229,7 @@ DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_network) {
 /* -------------------------------------------------------------------------- */
 
 #define READ_CHUNK_SIZE 1024
+#define TRUST_STORE_DEFAULT_NAME "ca_cert.pem"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -220,32 +237,89 @@ DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_network) {
  */
 /* -------------------------------------------------------------------------- */
 
-void dx_clear_addr_context_data (dx_address_resolution_context_t* context_data) {
-    if (context_data->addresses.elements != NULL) {
-        dx_clear_address_array(&(context_data->addresses));
-        context_data->cur_addr_index = 0;
-    }
+static void dx_unload_tls_file(uint8_t* mem, size_t len) {
+    dx_memset((void*)mem, 0, len);
+    dx_free((void*)mem);
+}
 
-#ifndef DXFEED_CODEC_TLS_ENABLED
+/* -------------------------------------------------------------------------- */
+
+static void dx_logging_ansi_error(const char* ansi_error) {
+    dxf_string_t w_error = dx_ansi_to_unicode(ansi_error);
+    dx_logging_error(w_error);
+    dx_free(w_error);
+}
+
+/* -------------------------------------------------------------------------- */
+
+static dx_ext_address_t* dx_get_current_address(dx_network_connection_context_t* context) {
+    return &(context->addr_context.elements[context->addr_context.cur_addr_index]);
+}
+
+/* -------------------------------------------------------------------------- */
+
+void dx_clear_addr_context_data (dx_address_resolution_context_t* context_data) {
     if (context_data->elements_to_free != NULL) {
         int i = 0;
-        
+
         for (; i < context_data->elements_to_free_count; ++i) {
             dx_freeaddrinfo(context_data->elements_to_free[i]);
         }
-        
-        dx_free(context_data->elements);
+
         dx_free(context_data->elements_to_free);
-        
-        context_data->elements = NULL;
+
         context_data->elements_to_free = NULL;
+        context_data->elements_to_free_count = 0;
+    }
+
+    if (context_data->elements != NULL) {
+        int i;
+        for (i = 0; i < context_data->size; i++) {
+            dx_ext_address_t* addr = &(context_data->elements[i]);
+            if (addr->host != NULL) {
+                dx_free(addr->host);
+                addr->host = NULL;
+            }
+            if (addr->port != NULL) {
+                dx_free(addr->port);
+                addr->port = NULL;
+            }
+            if (addr->username != NULL) {
+                dx_free(addr->username);
+                addr->username = NULL;
+            }
+            if (addr->password != NULL) {
+                dx_free(addr->password);
+                addr->password = NULL;
+            }
+
+            dx_codec_tls_free(&addr->tls);
+
+            dx_free(addr->elements);
+            addr->elements = NULL;
+            addr->size = 0;
+            addr->capacity = 0;
+
+#ifdef DXFEED_CODEC_TLS_ENABLED
+            if (addr->key_store_mem != NULL) {
+                dx_unload_tls_file(addr->key_store_mem, addr->key_store_len);
+                addr->key_store_mem = NULL;
+                addr->key_store_len = 0;
+            }
+            if (addr->trust_store_mem != NULL) {
+                dx_unload_tls_file(addr->trust_store_mem, addr->trust_store_len);
+                addr->trust_store_mem = NULL;
+                addr->trust_store_len = 0;
+            }
+#endif // DXFEED_CODEC_TLS_ENABLED
+        }
+
+        dx_free(context_data->elements);
+        context_data->elements = NULL;
         context_data->size = 0;
         context_data->capacity = 0;
-        context_data->elements_to_free_count = 0;
-        
         context_data->cur_addr_index = 0;
     }
-#endif // DXFEED_CODEC_TLS_ENABLED
 }
 
 /* -------------------------------------------------------------------------- */
@@ -264,9 +338,13 @@ bool dx_clear_connection_data (dx_network_connection_context_t* context) {
 
     if (IS_FLAG_SET(set_fields_flags, SOCKET_FIELD_FLAG)) {
 #ifdef DXFEED_CODEC_TLS_ENABLED
-        tls_close(context->tls_context);
-        tls_free(context->tls_context);
-        tls_config_free(context->tls_config);
+        if (dx_get_current_address(context)->tls.enabled) {
+            tls_close(context->tls_context);
+            tls_free(context->tls_context);
+            tls_config_free(context->tls_config);
+        } else {
+            success = dx_close(context->s) && success;
+        }
 #else
         success = dx_close(context->s) && success;
 #endif // DXFEED_CODEC_TLS_ENABLED
@@ -311,9 +389,13 @@ static bool dx_close_socket (dx_network_connection_context_t* context) {
     CHECKED_CALL(dx_mutex_lock, &(context->socket_guard));
     
 #ifdef DXFEED_CODEC_TLS_ENABLED
-    tls_close(context->tls_context);
-    tls_free(context->tls_context);
-    tls_config_free(context->tls_config);
+    if (dx_get_current_address(context)->tls.enabled) {
+        tls_close(context->tls_context);
+        tls_free(context->tls_context);
+        tls_config_free(context->tls_config);
+    } else {
+        res = dx_close(context->s);
+    }
 #else
     res = dx_close(context->s);
 #endif // DXFEED_CODEC_TLS_ENABLED
@@ -534,7 +616,14 @@ void dx_socket_reader (dx_network_connection_context_t* context) {
             }
         } else {
 #ifdef DXFEED_CODEC_TLS_ENABLED
-            number_of_bytes_read = tls_read(context->tls_context, (void*)read_buf, READ_CHUNK_SIZE);
+            if (dx_get_current_address(context)->tls.enabled) {
+                number_of_bytes_read = tls_read(context->tls_context, (void*)read_buf, READ_CHUNK_SIZE);
+                //TODO: temp?
+                if (number_of_bytes_read == -1)
+                    dx_logging_ansi_error(tls_error(context->tls_context));
+            } else {
+                number_of_bytes_read = dx_recv(context->s, (void*)read_buf, READ_CHUNK_SIZE);
+            }
 #else
             number_of_bytes_read = dx_recv(context->s, (void*)read_buf, READ_CHUNK_SIZE);
 #endif // DXFEED_CODEC_TLS_ENABLED
@@ -569,11 +658,50 @@ void dx_sleep_before_resolve (dx_network_connection_context_t* context) {
 /* -------------------------------------------------------------------------- */
 
 void dx_shuffle_addrs (dx_address_resolution_context_t* addrs) {
+    DX_ARRAY_SHUFFLE(addrs->elements, dx_ext_address_t, addrs->size);
+}
+
+/* -------------------------------------------------------------------------- */
+
+static bool dx_create_ext_address(const dx_address_t* source, OUT dx_ext_address_t* dest) {
+    if (source == NULL || dest == NULL)
+        return dx_set_error_code(dx_ec_invalid_func_param_internal);
+    dx_memset((void*)dest, 0, sizeof(dx_ext_address_t));
+
+    if (source->host != NULL) {
+        dest->host = dx_ansi_create_string_src(source->host);
+        if (dest->host == NULL)
+            return false;
+    }
+
+    if (source->port != NULL) {
+        dest->port = dx_ansi_create_string_src(source->port);
+        if (dest->port == NULL)
+            return false;
+    }
+
+    if (source->username != NULL) {
+        dest->username = dx_ansi_create_string_src(source->username);
+        if (dest->username == NULL)
+            return false;
+    }
+
+    if (source->password != NULL) {
+        dest->password = dx_ansi_create_string_src(source->password);
+        if (dest->password == NULL)
+            return false;
+    }
+
+    if (!dx_codec_tls_copy(&(source->tls), OUT &(dest->tls)) ||
+        !dx_codec_gzip_copy(&(source->gzip), OUT &(dest->gzip)))
+        return false;
+
 #ifdef DXFEED_CODEC_TLS_ENABLED
-    DX_ARRAY_SHUFFLE(addrs->addresses.elements, dx_address_t, addrs->addresses.size);
-#else
-    DX_ARRAY_SHUFFLE(addrs->elements, dx_addrinfo_ptr, addrs->size);
+    if (dest->tls.enabled && dest->tls.trust_store == NULL)
+        dest->tls.trust_store = dx_ansi_create_string_src(TRUST_STORE_DEFAULT_NAME);
 #endif // !DXFEED_CODEC_TLS_ENABLED
+
+    return true;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -582,6 +710,8 @@ bool dx_resolve_address(dx_network_connection_context_t* context) {
     struct addrinfo hints;
     size_t i = 0;
     FILE* raw_dump_file = NULL;
+    dx_address_array_t addresses;
+    int resolved_count = 0;
 
     if (context == NULL) {
         dx_set_last_error(dx_ec_invalid_func_param_internal);
@@ -602,12 +732,9 @@ bool dx_resolve_address(dx_network_connection_context_t* context) {
 
     dx_sleep_before_resolve(context);
 
-    CHECKED_CALL_2(dx_get_addresses_from_collection, context->address, &(context->addr_context.addresses));
-
-#ifdef DXFEED_CODEC_TLS_ENABLED
-    if (context->addr_context.addresses.size == 0)
+    CHECKED_CALL_2(dx_get_addresses_from_collection, context->address, &addresses);
+    if (addresses.size == 0)
         return false;
-#else
 
     dx_memset(&hints, 0, sizeof(hints));
 
@@ -615,18 +742,33 @@ bool dx_resolve_address(dx_network_connection_context_t* context) {
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_protocol = IPPROTO_TCP;
 
-    context->addr_context.elements_to_free = dx_calloc(context->addr_context.addresses.size, sizeof(dx_addrinfo_ptr));
+    context->addr_context.elements_to_free = dx_calloc(addresses.size, sizeof(dx_addrinfo_ptr));
 
     if (context->addr_context.elements_to_free == NULL) {
-
+        dx_clear_address_array(&addresses);
         return false;
     }
 
-    for (; i < context->addr_context.addresses.size; ++i) {
+    for (i = 0; i < addresses.size; ++i) {
         dx_addrinfo_ptr addr = NULL;
         dx_addrinfo_ptr cur_addr = NULL;
+        dx_ext_address_t address;
+        bool failed = false;
+        
+        if (!dx_create_ext_address(&(addresses.elements[i]), OUT &address)) {
+            dx_clear_addr_context_data(&(context->addr_context));
+            dx_clear_address_array(&addresses);
+            return false;
+        }
 
-        if (!dx_getaddrinfo(context->addr_context.addresses.elements[i].host, context->addr_context.addresses.elements[i].port, &hints, &addr)) {
+        DX_ARRAY_INSERT(context->addr_context, dx_ext_address_t, address, context->addr_context.size, dx_capacity_manager_halfer, failed);
+        if (failed) {
+            dx_clear_addr_context_data(&(context->addr_context));
+            dx_clear_address_array(&addresses);
+            return false;
+        }
+
+        if (!dx_getaddrinfo(addresses.elements[i].host, addresses.elements[i].port, &hints, &addr)) {
             continue;
         }
 
@@ -634,21 +776,26 @@ bool dx_resolve_address(dx_network_connection_context_t* context) {
 
         for (; cur_addr != NULL; cur_addr = cur_addr->ai_next) {
             bool failed = false;
+            dx_ext_address_t* last = &(context->addr_context.elements[context->addr_context.size - 1]);
 
-            DX_ARRAY_INSERT(context->addr_context, dx_addrinfo_ptr, cur_addr, context->addr_context.size, dx_capacity_manager_halfer, failed);
+            DX_ARRAY_INSERT(*last, dx_addrinfo_ptr, cur_addr, last->size, dx_capacity_manager_halfer, failed);
 
             if (failed) {
                 dx_clear_addr_context_data(&(context->addr_context));
-
+                dx_clear_address_array(&addresses);
                 return false;
             }
+            resolved_count++;
         }
     }
 
+    dx_clear_address_array(&addresses);
+
     //all addresses in collection cannot be resolved
-    if (context->addr_context.size == 0)
+    if (resolved_count == 0) {
+
         return false;
-#endif // !DXFEED_CODEC_TLS_ENABLED
+    }
 
     dx_shuffle_addrs(&(context->addr_context));
 
@@ -657,11 +804,96 @@ bool dx_resolve_address(dx_network_connection_context_t* context) {
 
 /* -------------------------------------------------------------------------- */
 
-void dx_logging_ansi_error(const char* ansi_error) {
-    dxf_string_t w_error = dx_ansi_to_unicode(ansi_error);
-    dx_logging_error(w_error);
-    dx_free(w_error);
+static bool dx_connect_via_socket(dx_network_connection_context_t* context, dx_ext_address_t* address) {
+    for (; address->cur_info_index < address->size; ++address->cur_info_index) {
+        dx_addrinfo_ptr cur_addr = address->elements[address->cur_info_index];
+
+        context->s = dx_socket(cur_addr->ai_family, cur_addr->ai_socktype, cur_addr->ai_protocol);
+
+        if (context->s == INVALID_SOCKET) {
+            /* failed to create a new socket */
+
+            continue;
+        }
+
+        if (!dx_connect(context->s, cur_addr->ai_addr, (socklen_t)cur_addr->ai_addrlen)) {
+            /* failed to connect */
+
+            dx_close(context->s);
+
+            continue;
+        }
+
+        return true;
+    }
+    return false;
 }
+
+/* -------------------------------------------------------------------------- */
+
+#ifdef DXFEED_CODEC_TLS_ENABLED
+static bool dx_connect_via_tls(dx_network_connection_context_t* context, dx_ext_address_t* address) {
+    context->tls_config = tls_config_new();
+    if (context->tls_config == NULL) {
+        /* failed to create TLS config */
+
+        return false;
+    }
+
+    //TODO: fill config with credentials here?
+    /* load root CA */
+    if (address->tls.trust_store_password == NULL) {
+        if (tls_config_set_ca_file(context->tls_config, address->tls.trust_store) < 0) {
+            tls_config_free(context->tls_config);
+            return false;
+        }
+    } else {
+        address->trust_store_mem = tls_load_file(address->tls.trust_store, &(address->trust_store_len), address->tls.trust_store_password);
+        if (address->trust_store_mem == NULL ||
+            tls_config_set_ca_mem(context->tls_config, address->trust_store_mem, address->trust_store_len) < 0) {
+            tls_config_free(context->tls_config);
+            return false;
+        }
+    }
+    /* load public certificate */
+    if (address->tls.key_store_password == NULL) {
+        if (tls_config_set_cert_file(context->tls_config, address->tls.key_store) < 0) {
+            tls_config_free(context->tls_config);
+            return false;
+        }
+    } else {
+        address->key_store_mem = tls_load_file(address->tls.key_store, &(address->key_store_len), address->tls.key_store_password);
+        if (address->key_store_mem == NULL ||
+            tls_config_set_cert_mem(context->tls_config, address->key_store_mem, address->key_store_len) < 0) {
+            tls_config_free(context->tls_config);
+            return false;
+        }
+    }
+
+    context->tls_context = tls_client();
+    if (context->tls_context == NULL) {
+        /* failed to create TLS context */
+        tls_config_free(context->tls_config);
+
+        return false;
+    }
+    if (tls_configure(context->tls_context, context->tls_config) < 0 ||
+        tls_connect(context->tls_context, address->host, address->port) < 0) {
+
+        dx_logging_ansi_error(tls_error(context->tls_context));
+
+        /* failed to configure or connect */
+        tls_config_free(context->tls_config);
+        tls_free(context->tls_context);
+
+        return false;
+    }
+
+    return true;
+}
+#endif // DXFEED_CODEC_TLS_ENABLED
+
+/* -------------------------------------------------------------------------- */
 
 bool dx_connect_to_resolved_addresses(dx_network_connection_context_t* context) {
     dx_address_resolution_context_t* ctx = &(context->addr_context);
@@ -681,79 +913,30 @@ bool dx_connect_to_resolved_addresses(dx_network_connection_context_t* context) 
 
     CHECKED_CALL(dx_mutex_lock, &(context->socket_guard));
 
+    for (; ctx->cur_addr_index < ctx->size; ++ctx->cur_addr_index) {
+        dx_ext_address_t* cur_addr = &(ctx->elements[ctx->cur_addr_index]);
+
 #ifdef DXFEED_CODEC_TLS_ENABLED
-    for (; ctx->cur_addr_index < ctx->addresses.size; ++ctx->cur_addr_index) {
-        dx_address_t cur_addr = ctx->addresses.elements[ctx->cur_addr_index];
-
-        context->tls_config = tls_config_new();
-        if (context->tls_config == NULL) {
-            /* failed to create TLS config */
-
-            continue;
+        if (cur_addr->tls.enabled) {
+            if (dx_connect_via_tls(context, cur_addr))
+                break;
+        } else {
+            if (dx_connect_via_socket(context, cur_addr))
+                break;
         }
-
-        //TODO: fill config with credentials here?
-
-        context->tls_context = tls_client();
-        if (context->tls_context == NULL) {
-            /* failed to create TLS context */
-            tls_config_free(context->tls_config);
-
-            continue;
-        }
-        if (tls_configure(context->tls_context, context->tls_config) < 0 ||
-            tls_connect(context->tls_context, cur_addr.host, cur_addr.port) < 0) {
-
-            dx_logging_ansi_error(tls_error(context->tls_context));
-
-            /* failed to configure or connect */
-            tls_config_free(context->tls_config);
-            tls_free(context->tls_context);
-
-            continue;
-        }
-
-        break;
+#else
+        if (dx_connect_via_socket(context, cur_addr))
+            break;
+#endif // DXFEED_CODEC_TLS_ENABLED
     }
 
-    if (ctx->cur_addr_index == ctx->addresses.size) {
+    if (ctx->cur_addr_index == ctx->size) {
         /* we failed to establish a TLS connection */
 
         dx_mutex_unlock(&(context->socket_guard));
 
         return false;
     }
-#else
-    for (; ctx->cur_addr_index < ctx->size; ++ctx->cur_addr_index) {
-        dx_addrinfo_ptr cur_addr = ctx->elements[ctx->cur_addr_index];
-
-        context->s = dx_socket(cur_addr->ai_family, cur_addr->ai_socktype, cur_addr->ai_protocol);
-
-        if (context->s == INVALID_SOCKET) {
-            /* failed to create a new socket */
-
-            continue;
-        }
-
-        if (!dx_connect(context->s, cur_addr->ai_addr, (socklen_t)cur_addr->ai_addrlen)) {
-            /* failed to connect */
-
-            dx_close(context->s);
-
-            continue;
-        }
-
-        break;
-    }
-
-    if (ctx->cur_addr_index == ctx->size) {
-        /* we failed to establish a socket connection */
-
-        dx_mutex_unlock(&(context->socket_guard));
-
-        return false;
-    }
-#endif // DXFEED_CODEC_TLS_ENABLED
 
     context->set_fields_flags |= SOCKET_FIELD_FLAG;
 
@@ -898,7 +1081,14 @@ bool dx_send_data (dxf_connection_t connection, const void* buffer, int buffer_s
             sent_count = buffer_size;
         } else {
 #ifdef DXFEED_CODEC_TLS_ENABLED
-            sent_count = tls_write(context->tls_context, (const void*)char_buf, buffer_size);
+            if (dx_get_current_address(context)->tls.enabled) {
+                sent_count = tls_write(context->tls_context, (const void*)char_buf, buffer_size);
+                //TODO: temp?
+                if (sent_count == -1)
+                    dx_logging_ansi_error(tls_error(context->tls_context));
+            } else {
+                sent_count = dx_send(context->s, (const void*)char_buf, buffer_size);
+            }
 #else
             sent_count = dx_send(context->s, (const void*)char_buf, buffer_size);
 #endif // DXFEED_CODEC_TLS_ENABLED

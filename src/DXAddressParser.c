@@ -402,7 +402,28 @@ static bool dx_parse_property(const char* str, size_t size, OUT dx_address_prope
 
 /* -------------------------------------------------------------------------- */
 
-static void dx_codec_tls_free(OUT dx_codec_tls_t* tls) {
+bool dx_codec_tls_copy(const dx_codec_tls_t* src, OUT dx_codec_tls_t* dest) {
+    if (src == NULL || dest == NULL)
+        return dx_set_error_code(dx_ec_invalid_func_param_internal);
+
+    dx_memset((void*)dest, 0, sizeof(dx_codec_tls_t));
+
+    dest->enabled = src->enabled;
+    if (src->key_store != NULL)
+        dest->key_store = dx_ansi_create_string_src(src->key_store);
+    if (src->key_store_password != NULL)
+        dest->key_store_password = dx_ansi_create_string_src(src->key_store_password);
+    if (src->trust_store != NULL)
+        dest->trust_store = dx_ansi_create_string_src(src->trust_store);
+    if (src->trust_store_password != NULL)
+        dest->trust_store_password = dx_ansi_create_string_src(src->trust_store_password);
+
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+void dx_codec_tls_free(dx_codec_tls_t* tls) {
     if (tls->key_store != NULL)
         dx_free(tls->key_store);
     if (tls->key_store_password != NULL)
@@ -459,6 +480,16 @@ static bool dx_codec_tls_parser(const char* codec, size_t size, OUT dx_address_t
     } while (dx_has_next(next) && next_size > 0);
 
     addr->tls = tls;
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_codec_gzip_copy(const dx_codec_gzip_t* src, OUT dx_codec_gzip_t* dest) {
+    if (src == NULL || dest == NULL)
+        return dx_set_error_code(dx_ec_invalid_func_param_internal);
+
+    dest->enabled = src->enabled;
     return true;
 }
 
@@ -666,6 +697,8 @@ bool dx_get_addresses_from_collection(const char* collection, OUT dx_address_arr
         return false;
     }
 
+    dx_memset((void*)addresses, 0, sizeof(dx_address_array_t));
+
     do {
         dx_address_t addr = { 0 };
         bool failed;
@@ -695,19 +728,6 @@ bool dx_get_addresses_from_collection(const char* collection, OUT dx_address_arr
     } while (dx_has_next(next));
 
     dx_free(collection_copied);
-
-    //TODO: what doing with this code?
-    //if ((last_port = addresses->elements[addresses->size - 1].port) == NULL) {
-    //    dx_clear_address_array(addresses);
-
-    //    return false;
-    //}
-
-    //for (; i < addresses->size; ++i) {
-    //    if (addresses->elements[i].port == NULL) {
-    //        addresses->elements[i].port = last_port;
-    //    }
-    //}
 
     return true;
 }
