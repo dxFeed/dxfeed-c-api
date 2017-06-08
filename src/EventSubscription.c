@@ -1107,7 +1107,27 @@ bool dx_get_event_subscription_time(dxf_subscription_t subscr_id, OUT dxf_long_t
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_process_event_data (dxf_connection_t connection, dx_event_id_t event_id, 
+static dx_call_subscr_listeners(dx_subscription_data_ptr_t subscr_data, int event_bitmask, dxf_const_string_t symbol_name, const dxf_event_data_t data, int data_count, const dxf_event_params_t* event_params) {
+    size_t cur_listener_index = 0;
+    for (; cur_listener_index < subscr_data->listeners.size; ++cur_listener_index) {
+        dx_listener_context_t* listener_context = subscr_data->listeners.elements + cur_listener_index;
+        if (listener_context->version == dx_elv_default) {
+            dxf_event_listener_t listener = (dxf_event_listener_t)listener_context->listener;
+            listener(event_bitmask, symbol_name, data, data_count, listener_context->user_data);
+        }
+        else if (listener_context->version == dx_elv_v2) {
+            dxf_event_listener_v2_t listener = (dxf_event_listener_v2_t)listener_context->listener;
+            listener(event_bitmask, symbol_name, data, data_count, event_params, listener_context->user_data);
+        }
+        else {
+            dx_set_error_code(dx_esec_invalid_listener);
+        }
+    }
+}
+
+#define DX_ORDER_SOURCE_COMPARATOR_NONSYM(l, r) (dx_compare_strings(l.suffix, r))
+
+bool dx_process_event_data (dxf_connection_t connection, dx_event_id_t event_id,
                             dxf_const_string_t symbol_name, dxf_int_t symbol_cipher, 
                             const dxf_event_data_t data, int data_count, 
                             const dxf_event_params_t* event_params) {
@@ -1148,23 +1168,46 @@ bool dx_process_event_data (dxf_connection_t connection, dx_event_id_t event_id,
     /* passing the event data to listeners */
     for (; cur_subscr_index < symbol_data->subscriptions.size; ++cur_subscr_index) {
         dx_subscription_data_ptr_t subscr_data = symbol_data->subscriptions.elements[cur_subscr_index];
-        size_t cur_listener_index = 0;
         
         if (!(subscr_data->event_types & event_bitmask)) { /* subscription doesn't want this specific event type */
             continue;
         }
-        
-        for (; cur_listener_index < subscr_data->listeners.size; ++cur_listener_index) {
-            dx_listener_context_t* listener_context = subscr_data->listeners.elements + cur_listener_index;
-            if (listener_context->version == dx_elv_default) {
-                dxf_event_listener_t listener = (dxf_event_listener_t)listener_context->listener;
-                listener(event_bitmask, symbol_name, data, data_count, listener_context->user_data);
-            } else if (listener_context->version == dx_elv_v2) {
-                dxf_event_listener_v2_t listener = (dxf_event_listener_v2_t)listener_context->listener;
-                listener(event_bitmask, symbol_name, data, data_count, event_params, listener_context->user_data);
-            } else {
-                dx_set_error_code(dx_esec_invalid_listener);
+
+        /* Check order source, it must be done by record ids, really! */
+        if (event_id == dx_eid_order && subscr_data->order_source.size) {
+            /* We need to filter data in parts, unfortunately */
+            dxf_order_t *orders = (dxf_order_t *)data;
+            int start_index, end_index;
+            end_index = start_index = 0;
+            while (end_index != data_count) {
+                /* Skip all non-needed orders */
+                while (start_index < data_count) {
+                    bool found = false;
+                    size_t index = 0;
+                    DX_ARRAY_SEARCH(subscr_data->order_source.elements, 0, subscr_data->order_source.size, orders[start_index].source, DX_ORDER_SOURCE_COMPARATOR_NONSYM, false, found, index);
+                    if (!found)
+                        start_index++;
+                    else
+                        break;
+                }
+                if (start_index == data_count)
+                    break;
+                /* Count all suitable orders */
+                end_index = start_index;
+                while (end_index < data_count) {
+                    bool found = false;
+                    size_t index = 0;
+                    DX_ARRAY_SEARCH(subscr_data->order_source.elements, 0, subscr_data->order_source.size, orders[end_index].source, DX_ORDER_SOURCE_COMPARATOR_NONSYM, false, found, index);
+                    if (found)
+                        end_index++;
+                    else
+                        break;
+                }
+
+                dx_call_subscr_listeners(subscr_data, event_bitmask, symbol_name, &orders[start_index], end_index - start_index, event_params);
             }
+        } else {
+            dx_call_subscr_listeners(subscr_data, event_bitmask, symbol_name, data, data_count, event_params);
         }
     }
     

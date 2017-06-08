@@ -362,6 +362,23 @@ typedef void(*dxf_snapshot_listener_t) (const dxf_snapshot_data_ptr_t snapshot_d
 
 /* -------------------------------------------------------------------------- */
 /*
+*  Incremental Snapshot listener prototype
+
+*  snapshot_data - pointer to the received snapshot data
+*  new_snapshot  - flag, is this call with new snapshot or incremental update.
+*  user_data     - pointer to user struct, use NULL by default
+*/
+/* -------------------------------------------------------------------------- */
+#define DXF_IS_CANDLE_REMOVAL(c) (((c)->event_flags & dxf_ef_remove_event) != 0)
+#define DXF_IS_ORDER_REMOVAL(o) ((o)->size == 0)
+#define DXF_IS_SPREAD_ORDER_REMOVAL(o) ((o)->size == 0)
+#define DXF_IS_TIME_AND_SALE_REMOVAL(t) (((t)->event_flags & dxf_ef_remove_event) != 0)
+#define DXF_IS_GREEKS_REMOVAL(g) (((g)->event_flags & dxf_ef_remove_event) != 0)
+#define DXF_IS_SERIES_REMOVAL(s) (((s)->event_flags & dxf_ef_remove_event) != 0)
+typedef void(*dxf_snapshot_inc_listener_t) (const dxf_snapshot_data_ptr_t snapshot_data, int new_snapshot, void* user_data);
+
+/* -------------------------------------------------------------------------- */
+/*
 *  Price Level data structs
 */
 /* -------------------------------------------------------------------------- */
