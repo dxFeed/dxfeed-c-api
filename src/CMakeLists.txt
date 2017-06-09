@@ -228,6 +228,15 @@ install(FILES "../DXFeed.def" "../DXFeedd.def" "../DXFeed_64.def" "../DXFeedd_64
     "../CMakeLists.txt" "../build.bat" "../make_package.bat"
     DESTINATION "."
 )
+if(MSVC)
+    set(DEBUG_PDB_PATH ${EXECUTABLE_OUTPUT_PATH}/Debug)
+    install(FILES ${DEBUG_PDB_PATH}/${PROJECT}d.pdb ${DEBUG_PDB_PATH}/${PROJECT}d_64.pdb
+        DESTINATION "bin/${TARGET_PLATFORM}"
+        CONFIGURATIONS Debug
+        OPTIONAL
+    )
+endif(MSVC)
+
 set(CPACK_PACKAGE_VENDOR "Devexperts")
 set(CPACK_PACKAGE_NAME "${PROJECT}")
 set(CPACK_PACKAGE_VERSION "${APP_VERSION}")
