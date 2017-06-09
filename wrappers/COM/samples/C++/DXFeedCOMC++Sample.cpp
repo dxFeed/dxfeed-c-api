@@ -536,10 +536,10 @@ int _tmain(int argc, _TCHAR* argv[]) {
 
         IDXSubscription* snapshot = NULL;
         cout << "Creating a snapshot based on the created connection: event type bitmask = " << DXF_ET_ORDER << "...\n";
-        processError(connection->CreateSnapshot(DXF_ET_ORDER, L"IBM", L"NTV", 0, (IDispatch**)&snapshot), feed);
+        processError(connection->CreateSnapshot(DXF_ET_ORDER, L"IBM", L"NTV", 0, FALSE, (IDispatch**)&snapshot), feed);
 
         /* For Candle snapshot subscription use CreateCandleSnapshot method, e.g.
-        processError(connection->CreateCandleSnapshot(candleSymbol, 0, (IDispatch**)&snapshot), feed);
+        processError(connection->CreateCandleSnapshot(candleSymbol, 0, FALSE, (IDispatch**)&snapshot), feed);
         */
 
         ComReleaser snapshotReleaser(snapshot);

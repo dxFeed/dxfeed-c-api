@@ -52,8 +52,8 @@ class DXConnection : private IDXConnection, private DefIDispatchImpl,
     virtual HRESULT STDMETHODCALLTYPE CreateSubscription (INT eventTypes, IDispatch** subscription);
     virtual HRESULT STDMETHODCALLTYPE GetLastEvent (INT eventType, BSTR symbol, IDispatch** eventData);
     virtual HRESULT STDMETHODCALLTYPE CreateSubscriptionTimed(INT eventTypes, LONGLONG time, IDispatch** subscription);
-    virtual HRESULT STDMETHODCALLTYPE CreateSnapshot(INT eventType, BSTR symbol, BSTR source, LONGLONG time, IDispatch** snapshot);
-    virtual HRESULT STDMETHODCALLTYPE CreateCandleSnapshot(IDXCandleSymbol* symbol, LONGLONG time, IDispatch** snapshot);
+    virtual HRESULT STDMETHODCALLTYPE CreateSnapshot(INT eventType, BSTR symbol, BSTR source, LONGLONG time, BOOL incremental, IDispatch** snapshot);
+    virtual HRESULT STDMETHODCALLTYPE CreateCandleSnapshot(IDXCandleSymbol* symbol, LONGLONG time, BOOL incremental, IDispatch** snapshot);
 
 private:
 
@@ -203,14 +203,14 @@ HRESULT STDMETHODCALLTYPE DXConnection::CreateSubscriptionTimed(INT eventTypes, 
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXConnection::CreateSnapshot(INT eventType, BSTR symbol, BSTR source, LONGLONG time, IDispatch** snapshot) {
+HRESULT STDMETHODCALLTYPE DXConnection::CreateSnapshot(INT eventType, BSTR symbol, BSTR source, LONGLONG time, BOOL incremental, IDispatch** snapshot) {
     if (snapshot == NULL) {
         return E_POINTER;
     }
 
     IUnknown* parent = static_cast<IDXConnection*>(this);
 
-    if ((*snapshot = DefDXSnapshotFactory::CreateSnapshot(m_connHandle, eventType, symbol, source, time, parent)) == NULL) {
+    if ((*snapshot = DefDXSnapshotFactory::CreateSnapshot(m_connHandle, eventType, symbol, source, time, incremental, parent)) == NULL) {
         return E_FAIL;
     }
 
@@ -219,14 +219,14 @@ HRESULT STDMETHODCALLTYPE DXConnection::CreateSnapshot(INT eventType, BSTR symbo
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXConnection::CreateCandleSnapshot(IDXCandleSymbol* symbol, LONGLONG time, IDispatch** snapshot) {
+HRESULT STDMETHODCALLTYPE DXConnection::CreateCandleSnapshot(IDXCandleSymbol* symbol, LONGLONG time, BOOL incremental, IDispatch** snapshot) {
     if (snapshot == NULL) {
         return E_POINTER;
     }
 
     IUnknown* parent = static_cast<IDXConnection*>(this);
 
-    if ((*snapshot = DefDXSnapshotFactory::CreateSnapshot(m_connHandle, symbol, time, parent)) == NULL) {
+    if ((*snapshot = DefDXSnapshotFactory::CreateSnapshot(m_connHandle, symbol, time, incremental, parent)) == NULL) {
         return E_FAIL;
     }
 
