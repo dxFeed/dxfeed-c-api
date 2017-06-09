@@ -2,7 +2,17 @@
 library DXFeedCOM {
     
     importlib("STDOLE2.TLB");
-    
+
+    [uuid(F1D6D11E-FE7C-48BE-B7A9-DCAE2220063D)]
+    typedef enum EventFlags {
+        TXPending = 0x01,
+        RemoveEvent = 0x02,
+        SnapshotBegin = 0x04,
+        SnapshotEnd = 0x08,
+        SnapshotSnip = 0x10,
+        RemoveSymbol = 0x20
+    } EventFlags;
+
     [uuid(FC98632E-DEE9-4a56-B422-7AADFF5EDA66), helpstring("Trade data wrapper"), dual, oleautomation, nonextensible]
     interface IDXTrade : IDispatch {
         [id(1), propget, helpstring("Time value getter")]
@@ -133,6 +143,8 @@ library DXFeedCOM {
         HRESULT sequence([out, retval] INT*);
         [id(14), propget, helpstring("Scope value getter")]
         HRESULT scope([out, retval] INT*);
+        [id(15), propget, helpstring("Removal flag getter")]
+        HRESULT isRemoved([out, retval] VARIANT_BOOL*);
     }
 
     [uuid(443B7441-8EA3-44F7-8BFB-6B3AA13EF6A7), helpstring("Candle data wrapper"), dual, oleautomation, nonextensible]
@@ -165,6 +177,10 @@ library DXFeedCOM {
         HRESULT openInterest([out, retval] LONGLONG*);
         [id(14), propget, helpstring("Implied volatility value getter")]
         HRESULT impVolatility([out, retval] DOUBLE*);
+        [id(15), propget, helpstring("Event flags value getter")]
+        HRESULT eventFlags([out, retval] INT*);
+        [id(16), propget, helpstring("Removal flag getter")]
+        HRESULT isRemoved([out, retval] VARIANT_BOOL*);
     };
     
     [uuid(A12D2830-6B0B-405c-990D-5B960CB9C33B), helpstring("Time&Sale data wrapper"), dual, oleautomation, nonextensible]
@@ -201,6 +217,8 @@ library DXFeedCOM {
         HRESULT validTick([out, retval] VARIANT_BOOL*);
         [id(16), propget, helpstring("Type value getter")]
         HRESULT type ([out, retval] INT*);
+        [id(17), propget, helpstring("Removal flag getter")]
+        HRESULT isRemoved([out, retval] VARIANT_BOOL*);
     };
 
     [uuid(8114B930-C1EF-4E0E-BF57-15386A53F546), helpstring("TradeETH data wrapper"), dual, oleautomation, nonextensible]
@@ -249,6 +267,8 @@ library DXFeedCOM {
         HRESULT timeSequence([out, retval] LONGLONG*);
         [id(14), propget, helpstring("Scope value getter")]
         HRESULT scope([out, retval] INT*);
+        [id(15), propget, helpstring("Removal flag getter")]
+        HRESULT isRemoved([out, retval] VARIANT_BOOL*);
     }
 
     [uuid(D3DF5E92-1BD5-4DFE-8168-2F7B0A2DEF39)]
@@ -345,6 +365,10 @@ library DXFeedCOM {
         HRESULT vega ([out, retval] DOUBLE*);
         [id(10), propget, helpstring("Index value getter")]
         HRESULT index([out, retval] LONGLONG*);
+        [id(11), propget, helpstring("Event flags value getter")]
+        HRESULT eventFlags([out, retval] INT*);
+        [id(12), propget, helpstring("Removal flag getter")]
+        HRESULT isRemoved([out, retval] VARIANT_BOOL*);
     };
     
     [uuid(5D2A9476-FB2C-4846-A0EE-BFCB7207AAB5), helpstring("TheoPrice data wrapper"), dual, oleautomation, nonextensible]
@@ -395,6 +419,10 @@ library DXFeedCOM {
         HRESULT interest ([out, retval] DOUBLE*);
         [id(8), propget, helpstring("Index value getter")]
         HRESULT index([out, retval] LONGLONG*);
+        [id(9), propget, helpstring("Event flags value getter")]
+        HRESULT eventFlags([out, retval] INT*);
+        [id(10), propget, helpstring("Removal flag getter")]
+        HRESULT isRemoved([out, retval] VARIANT_BOOL*);
     };
 
     [uuid(059D84E0-5795-4092-95E3-417D78B5DDB8), helpstring("Configuration data wrapper"), dual, oleautomation, nonextensible]
@@ -417,6 +445,14 @@ library DXFeedCOM {
         HRESULT OnNewData ([in] IDispatch*, [in] INT, [in] BSTR, [in] IDispatch*);
     };
     
+    [uuid(056ECE41-265A-40ca-B998-3A4E455F931F), helpstring("Incremental snapshot data receiver sink"), oleautomation, nonextensible]
+    interface IDXIncrementalEventListener : IDispatch {
+        [id(1), helpstring("Full snapshot data processor")]
+        HRESULT OnNewSnapshot ([in] IDispatch*, [in] INT, [in] BSTR, [in] IDispatch*);
+        [id(2), helpstring("Update for snapshot data processor")]
+        HRESULT OnUpdate ([in] IDispatch*, [in] INT, [in] BSTR, [in] IDispatch*);
+    };
+
     [uuid(6B8FD5AA-2511-485e-BD4F-B832216C0480), dual, oleautomation, nonextensible]
     interface IDXSubscription : IDispatch {
         [id(1), helpstring("Adds a single symbol to the subscription")]
@@ -456,9 +492,9 @@ library DXFeedCOM {
         [id(3), helpstring("Creates a new time subscription"), source]
         HRESULT CreateSubscriptionTimed([in] INT, [in] LONGLONG, [out, retval] IDispatch**);
         [id(4), helpstring("Creates a new snapshot subscription"), source]
-        HRESULT CreateSnapshot([in] INT, [in] BSTR, [in] BSTR, [in] LONGLONG, [out, retval] IDispatch**);
+        HRESULT CreateSnapshot([in] INT, [in] BSTR, [in] BSTR, [in] LONGLONG, [in] BOOL, [out, retval] IDispatch**);
         [id(5), helpstring("Creates a new candle snapshot subscription"), source]
-        HRESULT CreateCandleSnapshot([in] IDXCandleSymbol*, [in] LONGLONG, [out, retval] IDispatch**);
+        HRESULT CreateCandleSnapshot([in] IDXCandleSymbol*, [in] LONGLONG, [in] BOOL, [out, retval] IDispatch**);
     };
     
     [uuid(1CD222F3-8683-44a0-8EC9-32BF8BD3421D), helpstring("The main library interface"), dual, oleautomation, nonextensible]
