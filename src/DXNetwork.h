@@ -28,6 +28,10 @@
 #include "DXFeed.h"
 #include "TaskQueue.h"
 
+#define DX_AUTH_KEY L"authorization"
+#define DX_AUTH_BASIC_KEY L"basic"
+#define DX_AUTH_BEARER_KEY L"bearer"
+
 /* -------------------------------------------------------------------------- */
 /*
  *	Auxiliary structures and types
@@ -124,5 +128,9 @@ bool dx_add_worker_thread_task (dxf_connection_t connection, dx_task_processor_t
 
 bool dx_protocol_property_set(dxf_connection_t connection, dxf_const_string_t key, dxf_const_string_t value);
 const dx_property_map_t* dx_protocol_property_get_all(dxf_connection_t connection);
+bool dx_protocol_property_contains(dxf_connection_t connection, dxf_const_string_t key);
+bool dx_protocol_configure_basic_auth(dxf_connection_t connection,
+                                      const char* user, const char* password);
+bool dx_protocol_configure_bearer_auth(dxf_connection_t connection, const char* token);
 
 #endif /* DX_NETWORK_H_INCLUDED */

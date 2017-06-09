@@ -105,7 +105,7 @@ typedef struct {
     
     const char* address;
     dx_socket_t s;
-	time_t next_heartbeat;
+    time_t next_heartbeat;
     dx_thread_t reader_thread;
     dx_thread_t queue_thread;
     dx_mutex_t socket_guard;
@@ -127,6 +127,7 @@ typedef struct {
 
     /* protocol description properties */
     dx_property_map_t properties;
+    dx_property_map_t prop_backup; //TODO: need another solution?
     
     int set_fields_flags;
 } dx_network_connection_context_t;
@@ -177,6 +178,7 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_network) {
 
 static bool dx_close_socket (dx_network_connection_context_t* context);
 static void dx_protocol_property_clear(dx_network_connection_context_t* context);
+static bool dx_protocol_property_contains_impl(dx_network_connection_context_t* context, dxf_const_string_t key);
 
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_network) {
     bool res = true;
@@ -332,8 +334,6 @@ bool dx_clear_connection_data (dx_network_connection_context_t* context) {
         return true;
     }
     
-    dx_clear_addr_context_data(&(context->addr_context));
-    
     set_fields_flags = context->set_fields_flags;
 
     if (IS_FLAG_SET(set_fields_flags, SOCKET_FIELD_FLAG)) {
@@ -349,6 +349,8 @@ bool dx_clear_connection_data (dx_network_connection_context_t* context) {
         success = dx_close(context->s) && success;
 #endif // DXFEED_CODEC_TLS_ENABLED
     }
+
+    dx_clear_addr_context_data(&(context->addr_context));
     
     if (IS_FLAG_SET(set_fields_flags, MUTEX_FIELD_FLAG)) {
         success = dx_mutex_destroy(&(context->socket_guard)) && success;
@@ -916,6 +918,14 @@ bool dx_connect_to_resolved_addresses(dx_network_connection_context_t* context) 
     for (; ctx->cur_addr_index < ctx->size; ++ctx->cur_addr_index) {
         dx_ext_address_t* cur_addr = &(ctx->elements[ctx->cur_addr_index]);
 
+        //TODO: restore properties configured via API before next connection will be open
+        //TODO: deside how to determine copy of properties to backup
+        if (cur_addr->username != NULL && 
+            cur_addr->password != NULL &&
+            !dx_protocol_property_contains_impl(context, DX_AUTH_KEY)) {
+            dx_protocol_configure_basic_auth(context->connection, cur_addr->username, cur_addr->password);
+        }
+
 #ifdef DXFEED_CODEC_TLS_ENABLED
         if (cur_addr->tls.enabled) {
             if (dx_connect_via_tls(context, cur_addr))
@@ -1146,10 +1156,9 @@ static void dx_protocol_property_free_item(void* obj) {
         dx_free(item->value);
 }
 
-static void dx_protocol_property_clear(dx_network_connection_context_t* context) {
-    if (context == NULL)
-        return;
-    dx_property_map_t* props = &context->properties;
+/* -------------------------------------------------------------------------- */
+
+static void dx_protocol_property_free_collection(dx_property_map_t* props) {
     dx_property_item_t* item = props->elements;
     size_t i;
     for (i = 0; i < props->size; i++) {
@@ -1161,9 +1170,22 @@ static void dx_protocol_property_clear(dx_network_connection_context_t* context)
     props->capacity = 0;
 }
 
+/* -------------------------------------------------------------------------- */
+
+static void dx_protocol_property_clear(dx_network_connection_context_t* context) {
+    if (context == NULL)
+        return;
+    dx_protocol_property_free_collection(&context->properties);
+    dx_protocol_property_free_collection(&context->prop_backup);
+}
+
+/* -------------------------------------------------------------------------- */
+
 static inline int dx_property_item_comparator(dx_property_item_t item1, dx_property_item_t item2) {
     return dx_compare_strings((dxf_const_string_t)item1.key, (dxf_const_string_t)item2.key);
 }
+
+/* -------------------------------------------------------------------------- */
 
 //Note: not fast map-dictionary realization, but enough for properties
 static bool dx_protocol_property_set_impl(dx_network_connection_context_t* context, dxf_const_string_t key, dxf_const_string_t value) {
@@ -1206,6 +1228,44 @@ static bool dx_protocol_property_set_impl(dx_network_connection_context_t* conte
     return true;
 }
 
+/* -------------------------------------------------------------------------- */
+
+static bool dx_protocol_property_contains_impl(dx_network_connection_context_t* context, dxf_const_string_t key) {
+    dx_property_map_t* props = &context->properties;
+    dx_property_item_t item = { (dxf_string_t)key, NULL };
+    bool found;
+    size_t index;
+
+    if (context == NULL)
+        return dx_set_error_code(dx_ec_invalid_func_param_internal);
+    if (key == NULL)
+        return dx_set_error_code(dx_ec_invalid_func_param);
+
+    DX_ARRAY_BINARY_SEARCH(props->elements, 0, props->size, item, dx_property_item_comparator, found, index);
+    return found;
+}
+
+/* -------------------------------------------------------------------------- */
+//TODO: need tests
+static bool dx_protocol_property_copy(const dx_property_map_t* src, dx_property_map_t* dest) {
+    size_t i;
+    bool failed = false;
+    if (src == NULL || dest == NULL)
+        return dx_set_error_code(dx_ec_invalid_func_param);
+
+    DX_ARRAY_RESERVE(*dest, dx_property_item_t, src->size, failed);
+    if (failed)
+        return false;
+    for (i = 0; i < src->size; i++) {
+        dx_property_item_t item;
+        item.key = dx_create_string_src(src->elements[i].key);
+        item.value = dx_create_string_src(src->elements[i].value);
+        dest->elements[i] = item;
+    }
+}
+
+/* -------------------------------------------------------------------------- */
+
 bool dx_protocol_property_set(dxf_connection_t connection, dxf_const_string_t key, dxf_const_string_t value) {
     dx_network_connection_context_t* context = NULL;
     bool res = true;
@@ -1222,6 +1282,8 @@ bool dx_protocol_property_set(dxf_connection_t connection, dxf_const_string_t ke
     return dx_protocol_property_set_impl(context, key, value);
 }
 
+/* -------------------------------------------------------------------------- */
+
 const dx_property_map_t* dx_protocol_property_get_all(dxf_connection_t connection) {
     dx_network_connection_context_t* context = NULL;
     bool res = true;
@@ -1237,3 +1299,33 @@ const dx_property_map_t* dx_protocol_property_get_all(dxf_connection_t connectio
 
     return (const dx_property_map_t*)&context->properties;
 }
+
+/* -------------------------------------------------------------------------- */
+
+//TODO: implement test
+bool dx_protocol_property_contains(dxf_connection_t connection, dxf_const_string_t key) {
+    dx_network_connection_context_t* context = NULL;
+    bool res = true;
+
+    context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
+
+    if (context == NULL) {
+        if (res) {
+            dx_set_error_code(dx_cec_connection_context_not_initialized);
+        }
+        return false;
+    }
+
+    return dx_protocol_property_contains_impl(context, key);
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_protocol_configure_basic_auth(dxf_connection_t connection, 
+                                      const char* user, const char* password) {
+
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_protocol_configure_bearer_auth(dxf_connection_t connection, const char* token);

@@ -442,7 +442,7 @@ size_t dx_random_size(size_t max_value);
     do { \
         elem_type* _new_elem_buffer = (array_obj).elements; \
         error = false; \
-        if (reserve_size <= (array_obj.size)) { \
+        if (reserve_size <= (array_obj).size) { \
             break; \
         } \
         \
