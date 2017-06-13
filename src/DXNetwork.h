@@ -28,9 +28,9 @@
 #include "DXFeed.h"
 #include "TaskQueue.h"
 
-#define DX_AUTH_KEY L"authorization"
-#define DX_AUTH_BASIC_KEY L"basic"
-#define DX_AUTH_BEARER_KEY L"bearer"
+#define DX_AUTH_KEY "authorization"
+#define DX_AUTH_BASIC_KEY "basic"
+#define DX_AUTH_BEARER_KEY "bearer"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -126,11 +126,19 @@ bool dx_add_worker_thread_task (dxf_connection_t connection, dx_task_processor_t
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_protocol_property_set(dxf_connection_t connection, dxf_const_string_t key, dxf_const_string_t value);
+bool dx_protocol_property_set(dxf_connection_t connection, 
+                              dxf_const_string_t key, dxf_const_string_t value);
+bool dx_protocol_property_set_many(dxf_connection_t connection, 
+                                   const dx_property_map_t* other);
 const dx_property_map_t* dx_protocol_property_get_all(dxf_connection_t connection);
-bool dx_protocol_property_contains(dxf_connection_t connection, dxf_const_string_t key);
-bool dx_protocol_configure_basic_auth(dxf_connection_t connection,
+bool dx_protocol_property_contains(dxf_connection_t connection, 
+                                   dxf_const_string_t key);
+
+char* dx_protocol_get_basic_auth_data(const char* user, const char* password);
+bool dx_protocol_configure_basic_auth(dxf_connection_t connection, 
                                       const char* user, const char* password);
-bool dx_protocol_configure_bearer_auth(dxf_connection_t connection, const char* token);
+bool dx_protocol_configure_custom_auth(dxf_connection_t connection, 
+                                       const char* authscheme, 
+                                       const char* authdata);
 
 #endif /* DX_NETWORK_H_INCLUDED */

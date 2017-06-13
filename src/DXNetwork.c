@@ -138,6 +138,7 @@ typedef struct {
 #define TASK_QUEUE_FIELD_FLAG       (1 << 3)
 #define QUEUE_THREAD_FIELD_FLAG     (1 << 4)
 #define DUMPING_RAW_DATA_FIELD_FLAG (1 << 5)
+#define PROPERTIES_BACKUP_FLAG      (1 << 8)
 
 /* -------------------------------------------------------------------------- */
 
@@ -177,8 +178,6 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_network) {
 /* -------------------------------------------------------------------------- */
 
 static bool dx_close_socket (dx_network_connection_context_t* context);
-static void dx_protocol_property_clear(dx_network_connection_context_t* context);
-static bool dx_protocol_property_contains_impl(dx_network_connection_context_t* context, dxf_const_string_t key);
 
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_network) {
     bool res = true;
@@ -232,11 +231,19 @@ DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_network) {
 
 #define READ_CHUNK_SIZE 1024
 #define TRUST_STORE_DEFAULT_NAME "ca_cert.pem"
+#define DX_PROPERTY_AUTH L"authorization"
 
 /* -------------------------------------------------------------------------- */
 /*
  *	Helper functions
  */
+/* -------------------------------------------------------------------------- */
+
+static bool dx_property_map_contains(const dx_property_map_t* props, dxf_const_string_t key);
+static void dx_protocol_property_clear(dx_network_connection_context_t* context);
+static bool dx_protocol_property_make_backup(dx_network_connection_context_t* context);
+static bool dx_protocol_property_restore_backup(dx_network_connection_context_t* context);
+
 /* -------------------------------------------------------------------------- */
 
 static void dx_unload_tls_file(uint8_t* mem, size_t len) {
@@ -275,7 +282,7 @@ void dx_clear_addr_context_data (dx_address_resolution_context_t* context_data) 
     }
 
     if (context_data->elements != NULL) {
-        int i;
+        size_t i;
         for (i = 0; i < context_data->size; i++) {
             dx_ext_address_t* addr = &(context_data->elements[i]);
             if (addr->host != NULL) {
@@ -842,7 +849,6 @@ static bool dx_connect_via_tls(dx_network_connection_context_t* context, dx_ext_
         return false;
     }
 
-    //TODO: fill config with credentials here?
     /* load root CA */
     if (address->tls.trust_store_password == NULL) {
         if (tls_config_set_ca_file(context->tls_config, address->tls.trust_store) < 0) {
@@ -899,7 +905,7 @@ static bool dx_connect_via_tls(dx_network_connection_context_t* context, dx_ext_
 
 bool dx_connect_to_resolved_addresses(dx_network_connection_context_t* context) {
     dx_address_resolution_context_t* ctx = &(context->addr_context);
-
+    //TODO: review loading data from file
     //raw data file
     if (IS_FLAG_SET(context->set_fields_flags, DUMPING_RAW_DATA_FIELD_FLAG)) {
         if (context->raw_dump_file != NULL)
@@ -918,12 +924,22 @@ bool dx_connect_to_resolved_addresses(dx_network_connection_context_t* context) 
     for (; ctx->cur_addr_index < ctx->size; ++ctx->cur_addr_index) {
         dx_ext_address_t* cur_addr = &(ctx->elements[ctx->cur_addr_index]);
 
-        //TODO: restore properties configured via API before next connection will be open
-        //TODO: deside how to determine copy of properties to backup
+        /* Make backup of properties configured via API on first pass */
+        if (!IS_FLAG_SET(context->set_fields_flags, PROPERTIES_BACKUP_FLAG)) {
+            if (!dx_protocol_property_make_backup(context))
+                return false;
+            context->set_fields_flags |= PROPERTIES_BACKUP_FLAG;
+        } else {
+            /* Restore properties configured via API before next connection will be open */
+            if (!dx_protocol_property_restore_backup(context))
+                return false;
+        }
+
         if (cur_addr->username != NULL && 
             cur_addr->password != NULL &&
-            !dx_protocol_property_contains_impl(context, DX_AUTH_KEY)) {
-            dx_protocol_configure_basic_auth(context->connection, cur_addr->username, cur_addr->password);
+            !dx_property_map_contains(&context->properties, DX_PROPERTY_AUTH)) {
+            if (!dx_protocol_configure_basic_auth(context->connection, cur_addr->username, cur_addr->password))
+                return false;
         }
 
 #ifdef DXFEED_CODEC_TLS_ENABLED
@@ -1188,15 +1204,12 @@ static inline int dx_property_item_comparator(dx_property_item_t item1, dx_prope
 /* -------------------------------------------------------------------------- */
 
 //Note: not fast map-dictionary realization, but enough for properties
-static bool dx_protocol_property_set_impl(dx_network_connection_context_t* context, dxf_const_string_t key, dxf_const_string_t value) {
-    dx_property_map_t* props = &context->properties;
+static bool dx_property_map_set(dx_property_map_t* props, dxf_const_string_t key, dxf_const_string_t value) {
     dx_property_item_t item = { (dxf_string_t)key, (dxf_string_t)value };
     bool found;
     size_t index;
 
-    if (context == NULL)
-        return dx_set_error_code(dx_ec_invalid_func_param_internal);
-    if (key == NULL || value == NULL)
+    if (props == NULL || key == NULL || value == NULL)
         return dx_set_error_code(dx_ec_invalid_func_param);
 
     DX_ARRAY_BINARY_SEARCH(props->elements, 0, props->size, item, dx_property_item_comparator, found, index);
@@ -1229,14 +1242,30 @@ static bool dx_protocol_property_set_impl(dx_network_connection_context_t* conte
 }
 
 /* -------------------------------------------------------------------------- */
+//TODO: implement test
+bool dx_property_map_set_many(dx_property_map_t* props, const dx_property_map_t* other) {
+    size_t i;
 
-static bool dx_protocol_property_contains_impl(dx_network_connection_context_t* context, dxf_const_string_t key) {
-    dx_property_map_t* props = &context->properties;
+    if (props == NULL || other == NULL)
+        return dx_set_error_code(dx_ec_invalid_func_param);
+
+    for (i = 0; i < other->size; i++) {
+        dx_property_item_t* item = &other->elements[i];
+        if (!dx_property_map_set(props, item->key, item->value))
+            return false;
+    }
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+//TODO: implement test
+static bool dx_property_map_contains(const dx_property_map_t* props, dxf_const_string_t key) {
     dx_property_item_t item = { (dxf_string_t)key, NULL };
     bool found;
     size_t index;
 
-    if (context == NULL)
+    if (props == NULL)
         return dx_set_error_code(dx_ec_invalid_func_param_internal);
     if (key == NULL)
         return dx_set_error_code(dx_ec_invalid_func_param);
@@ -1246,12 +1275,15 @@ static bool dx_protocol_property_contains_impl(dx_network_connection_context_t* 
 }
 
 /* -------------------------------------------------------------------------- */
+
 //TODO: need tests
-static bool dx_protocol_property_copy(const dx_property_map_t* src, dx_property_map_t* dest) {
+static bool dx_property_map_clone(const dx_property_map_t* src, dx_property_map_t* dest) {
     size_t i;
     bool failed = false;
     if (src == NULL || dest == NULL)
         return dx_set_error_code(dx_ec_invalid_func_param);
+
+    dx_protocol_property_free_collection(dest);
 
     DX_ARRAY_RESERVE(*dest, dx_property_item_t, src->size, failed);
     if (failed)
@@ -1262,6 +1294,25 @@ static bool dx_protocol_property_copy(const dx_property_map_t* src, dx_property_
         item.value = dx_create_string_src(src->elements[i].value);
         dest->elements[i] = item;
     }
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+static bool dx_protocol_property_make_backup(dx_network_connection_context_t* context) {
+    if (context == NULL)
+        return dx_set_error_code(dx_ec_invalid_func_param_internal);
+
+    return dx_property_map_clone(&context->properties, &context->prop_backup);
+}
+
+/* -------------------------------------------------------------------------- */
+
+static bool dx_protocol_property_restore_backup(dx_network_connection_context_t* context) {
+    if (context == NULL)
+        return dx_set_error_code(dx_ec_invalid_func_param_internal);
+    dx_protocol_property_free_collection(&context->properties);
+    return dx_property_map_clone(&context->prop_backup, &context->properties);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1279,7 +1330,26 @@ bool dx_protocol_property_set(dxf_connection_t connection, dxf_const_string_t ke
         return false;
     }
 
-    return dx_protocol_property_set_impl(context, key, value);
+    return dx_property_map_set(&context->properties, key, value);
+}
+
+/* -------------------------------------------------------------------------- */
+
+//TODO: tests
+bool dx_protocol_property_set_many(dxf_connection_t connection, const dx_property_map_t* other) {
+    dx_network_connection_context_t* context = NULL;
+    bool res = true;
+
+    context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
+
+    if (context == NULL) {
+        if (res) {
+            dx_set_error_code(dx_cec_connection_context_not_initialized);
+        }
+        return false;
+    }
+
+    return dx_property_map_set_many(&context->properties, other);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1316,16 +1386,87 @@ bool dx_protocol_property_contains(dxf_connection_t connection, dxf_const_string
         return false;
     }
 
-    return dx_protocol_property_contains_impl(context, key);
+    return dx_property_map_contains(&context->properties, key);
 }
 
 /* -------------------------------------------------------------------------- */
+//TODO: implement test
+char* dx_protocol_get_basic_auth_data(const char* user, const char* password) {
+    size_t credentials_size;
+    size_t base64_size;
+    char* credentials_buf;
+    char* base64_buf;
 
+    if (user == NULL || password == NULL) {
+        dx_set_error_code(dx_ec_invalid_func_param);
+        return NULL;
+    }
+
+    /* The buffer stores user and password as <username>:<password>. The length
+    of the buffer is sum of user and password length and addtional ':' symbol. */
+    credentials_size = strlen(user) + strlen(password) + 1;
+    credentials_buf = dx_ansi_create_string(credentials_size);
+    if (sprintf(credentials_buf, "%s:%s", user, password) <= 0) {
+        dx_free(credentials_buf);
+        return NULL;
+    }
+
+    base64_size = dx_base64_length(credentials_size);
+    base64_buf = dx_ansi_create_string(base64_size);
+    if (!dx_base64_encode((const char*)credentials_buf, credentials_size, base64_buf, base64_size)) {
+        dx_free(base64_buf);
+        dx_free(credentials_buf);
+        return NULL;
+    }
+
+    dx_free(credentials_buf);
+
+    return base64_buf;
+}
+
+/* -------------------------------------------------------------------------- */
+//TODO: implement test
 bool dx_protocol_configure_basic_auth(dxf_connection_t connection, 
                                       const char* user, const char* password) {
+    bool res = true;
+    char* base64_buf = dx_protocol_get_basic_auth_data(user, password);
+    if (base64_buf == NULL)
+        return false;
 
+    res = dx_protocol_configure_custom_auth(connection, DX_AUTH_BASIC_KEY, base64_buf);
+
+    dx_free(base64_buf);
+    return res;
 }
 
 /* -------------------------------------------------------------------------- */
+//TODO: implement test
+bool dx_protocol_configure_custom_auth(dxf_connection_t connection, 
+                                       const char* authscheme, 
+                                       const char* authdata) {
+    size_t buf_size;
+    dxf_string_t buf;
+    dxf_string_t w_authscheme;
+    dxf_string_t w_authdata;
+    bool res = true;
 
-bool dx_protocol_configure_bearer_auth(dxf_connection_t connection, const char* token);
+    if (connection == NULL || authscheme == NULL || authdata == NULL)
+        return dx_set_error_code(dx_ec_invalid_func_param);
+
+    /* This buffer stores 'authorization' value which is [<SchemeName> <SchemeData>].
+    Total size of this buffer is sum of 'authscheme' and 'authdata' lengths and also
+    space between this values.
+    */
+    buf_size = strlen(authscheme) + strlen(authdata) + 1;
+    buf = dx_create_string(buf_size);
+    w_authscheme = dx_ansi_to_unicode(authscheme);
+    w_authdata = dx_ansi_to_unicode(authdata);
+    swprintf(buf, buf_size, L"%ls %ls", w_authscheme, w_authdata);
+
+    res = dx_protocol_property_set(connection, DX_PROPERTY_AUTH, buf);
+
+    dx_free(w_authdata);
+    dx_free(w_authscheme);
+    dx_free(buf);
+    return res;
+}

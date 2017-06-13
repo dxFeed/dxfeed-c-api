@@ -241,6 +241,52 @@ DXFEED_API ERRORCODE dxf_create_connection (const char* address,
     return DXF_SUCCESS;
 }
 
+//TODO: remove commented code
+
+//DXFEED_API ERRORCODE dxf_create_connection_auth_basic(const char* address,
+//                                                      const char* user,
+//                                                      const char* password,
+//                                                      dxf_conn_termination_notifier_t notifier,
+//                                                      dxf_socket_thread_creation_notifier_t stcn,
+//                                                      dxf_socket_thread_destruction_notifier_t stdn,
+//                                                      void* user_data,
+//                                                      OUT dxf_connection_t* connection) {
+//    ERRORCODE res;
+//    size_t credentials_size;
+//    size_t base64_size;
+//    char* credentials_buf;
+//    char* base64_buf;
+//
+//    if (user == NULL || password == NULL) {
+//        dx_set_error_code(dx_ec_invalid_func_param);
+//
+//        return DXF_FAILURE;
+//    }
+//
+//    /* The buffer stores user and password as <username>:<password>. The length
+//    of the buffer is sum of user and password length and addtional ':' symbol. */
+//    credentials_size = strlen(user) + strlen(password) + 1;
+//    credentials_buf = dx_ansi_create_string(credentials_size);
+//    if (sprintf(credentials_buf, "%s:%s", user, password) <= 0) {
+//        dx_free(credentials_buf);
+//        return DXF_FAILURE;
+//    }
+//
+//    base64_size = dx_base64_length(credentials_size);
+//    base64_buf = dx_ansi_create_string(base64_size);
+//    if (!dx_base64_encode((const char*)credentials_buf, credentials_size, base64_buf, base64_size)) {
+//        dx_free(base64_buf);
+//        dx_free(credentials_buf);
+//        return DXF_FAILURE;
+//    }
+//
+//    res = dxf_create_connection_auth_custom(address, "basic", base64_buf, notifier, stcn, stdn, user_data, connection);
+//
+//    dx_free(base64_buf);
+//    dx_free(credentials_buf);
+//    return res;
+//}
+
 DXFEED_API ERRORCODE dxf_create_connection_auth_basic(const char* address,
                                                       const char* user,
                                                       const char* password,
@@ -250,9 +296,6 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_basic(const char* address,
                                                       void* user_data,
                                                       OUT dxf_connection_t* connection) {
     ERRORCODE res;
-    size_t credentials_size;
-    size_t base64_size;
-    char* credentials_buf;
     char* base64_buf;
 
     if (user == NULL || password == NULL) {
@@ -261,27 +304,13 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_basic(const char* address,
         return DXF_FAILURE;
     }
 
-    /* The buffer stores user and password as <username>:<password>. The length
-    of the buffer is sum of user and password length and addtional ':' symbol. */
-    credentials_size = strlen(user) + strlen(password) + 1;
-    credentials_buf = dx_ansi_create_string(credentials_size);
-    if (sprintf(credentials_buf, "%s:%s", user, password) <= 0) {
-        dx_free(credentials_buf);
+    base64_buf = dx_protocol_get_basic_auth_data(user, password);
+    if (base64_buf == NULL)
         return DXF_FAILURE;
-    }
 
-    base64_size = dx_base64_length(credentials_size);
-    base64_buf = dx_ansi_create_string(base64_size);
-    if (!dx_base64_encode((const char*)credentials_buf, credentials_size, base64_buf, base64_size)) {
-        dx_free(base64_buf);
-        dx_free(credentials_buf);
-        return DXF_FAILURE;
-    }
-
-    res = dxf_create_connection_auth_custom(address, "basic", base64_buf, notifier, stcn, stdn, user_data, connection);
+    res = dxf_create_connection_auth_custom(address, DX_AUTH_BASIC_KEY, base64_buf, notifier, stcn, stdn, user_data, connection);
 
     dx_free(base64_buf);
-    dx_free(credentials_buf);
     return res;
 }
 
@@ -298,7 +327,7 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_bearer(const char* address,
         return DXF_FAILURE;
     }
 
-    return dxf_create_connection_auth_custom(address, "bearer", token, notifier, stcn, stdn, user_data, connection);
+    return dxf_create_connection_auth_custom(address, DX_AUTH_BEARER_KEY, token, notifier, stcn, stdn, user_data, connection);
 }
 
 DXFEED_API ERRORCODE dxf_create_connection_auth_custom(const char* address,
@@ -324,29 +353,35 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_custom(const char* address,
         return DXF_FAILURE;
     }
 
-    {
-        /* This buffer stores 'authorization' value which is [<SchemeName> <SchemeData>].
-           Total size of this buffer is sum of 'authscheme' and 'authdata' lengths and also 
-           space between this values.
-        */
-        size_t buf_size = strlen(authscheme) + strlen(authdata) + 1;
-        dxf_string_t buf = dx_create_string(buf_size);
-        dxf_string_t w_authscheme = dx_ansi_to_unicode(authscheme);
-        dxf_string_t w_authdata = dx_ansi_to_unicode(authdata);
-        bool res;
-        swprintf(buf, buf_size, L"%ls %ls", w_authscheme, w_authdata);
+    //TODO: remove commented
+    //{
+    //    /* This buffer stores 'authorization' value which is [<SchemeName> <SchemeData>].
+    //       Total size of this buffer is sum of 'authscheme' and 'authdata' lengths and also 
+    //       space between this values.
+    //    */
+    //    size_t buf_size = strlen(authscheme) + strlen(authdata) + 1;
+    //    dxf_string_t buf = dx_create_string(buf_size);
+    //    dxf_string_t w_authscheme = dx_ansi_to_unicode(authscheme);
+    //    dxf_string_t w_authdata = dx_ansi_to_unicode(authdata);
+    //    bool res;
+    //    swprintf(buf, buf_size, L"%ls %ls", w_authscheme, w_authdata);
 
-        res = dx_protocol_property_set(*connection, L"authorization", buf);
+    //    res = dx_protocol_property_set(*connection, L"authorization", buf);
 
-        dx_free(w_authdata);
-        dx_free(w_authscheme);
-        dx_free(buf);
+    //    dx_free(w_authdata);
+    //    dx_free(w_authscheme);
+    //    dx_free(buf);
 
-        if(!res) {
-            dx_deinit_connection(*connection);
-            *connection = NULL;
-            return DXF_FAILURE;
-        }
+    //    if(!res) {
+    //        dx_deinit_connection(*connection);
+    //        *connection = NULL;
+    //        return DXF_FAILURE;
+    //    }
+    //}
+    if (!dx_protocol_configure_custom_auth(*connection, authscheme, authdata)) {
+        dx_deinit_connection(*connection);
+        *connection = NULL;
+        return DXF_FAILURE;
     }
 
     {
