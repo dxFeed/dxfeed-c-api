@@ -409,6 +409,7 @@ int _tmain(int argc, _TCHAR* argv[]) {
 
         DXConnectionTerminationNotifier ctn;
         DXEventListener el;
+        DXIncrementalEventListener iel;
 
         cout << "\nDXFeed COM wrapper C++ sample started...\n";
 
@@ -534,31 +535,59 @@ int _tmain(int argc, _TCHAR* argv[]) {
 
         subscr->ClearSymbols();
 
-        IDXSubscription* snapshot = NULL;
-        cout << "Creating a snapshot based on the created connection: event type bitmask = " << DXF_ET_ORDER << "...\n";
-        processError(connection->CreateSnapshot(DXF_ET_ORDER, L"IBM", L"NTV", 0, FALSE, (IDispatch**)&snapshot), feed);
+        {
+            IDXSubscription* snapshot = NULL;
+            cout << "Creating a snapshot based on the created connection: event type bitmask = " << DXF_ET_ORDER << "...\n";
+            processError(connection->CreateSnapshot(DXF_ET_ORDER, L"IBM", L"NTV", 0, FALSE, (IDispatch**)&snapshot), feed);
 
-        /* For Candle snapshot subscription use CreateCandleSnapshot method, e.g.
-        processError(connection->CreateCandleSnapshot(candleSymbol, 0, FALSE, (IDispatch**)&snapshot), feed);
-        */
+            /* For Candle snapshot subscription use CreateCandleSnapshot method, e.g.
+            processError(connection->CreateCandleSnapshot(candleSymbol, 0, FALSE, (IDispatch**)&snapshot), feed);
+            */
 
-        ComReleaser snapshotReleaser(snapshot);
-        cout << "Attaching an event data listener to the snapshot object...\n";
-        attachSink(snapshot, (IDXEventListener*)&el, DIID_IDXEventListener);
-        getSymbols(feed, snapshot);
+            ComReleaser snapshotReleaser(snapshot);
+            cout << "Attaching an event data listener to the snapshot object...\n";
+            attachSink(snapshot, (IDXEventListener*)&el, DIID_IDXEventListener);
+            getSymbols(feed, snapshot);
 
-        pauseThread(20000);
+            pauseThread(20000);
 
-        cout << "Change symbol of snapshot...\n";
+            cout << "Change symbol of snapshot...\n";
 
-        setSymbols(feed, snapshot, symbolPacks[5]);
-        getSymbols(feed, snapshot);
+            setSymbols(feed, snapshot, symbolPacks[5]);
+            getSymbols(feed, snapshot);
 
-        pauseThread(20000);
+            pauseThread(20000);
 
-        snapshot->ClearSymbols();
+            snapshot->ClearSymbols();
+        }
 
-    } catch (const DXFeedError&) {
+        {
+            IDXSubscription* incsnapshot = NULL;
+            cout << "Creating a incremental snapshot based on the created connection: event type bitmask = " << DXF_ET_ORDER << "...\n";
+            processError(connection->CreateSnapshot(DXF_ET_ORDER, L"IBM", L"NTV", 0, TRUE, (IDispatch**)&incsnapshot), feed);
+
+            /* For Candle incremental snapshot subscription use CreateCandleSnapshot method, e.g.
+            processError(connection->CreateCandleSnapshot(candleSymbol, 0, TRUE, (IDispatch**)&incsnapshot), feed);
+            */
+
+            ComReleaser incSnapshotReleaser(incsnapshot);
+            cout << "Attaching an event data listener to the snapshot object...\n";
+            attachSink(incsnapshot, (IDXIncrementalEventListener*)&iel, DIID_IDXEventListener);
+            getSymbols(feed, incsnapshot);
+
+            pauseThread(20000);
+
+            cout << "Change symbol of snapshot...\n";
+
+            setSymbols(feed, incsnapshot, symbolPacks[5]);
+            getSymbols(feed, incsnapshot);
+
+            pauseThread(20000);
+
+            incsnapshot->ClearSymbols();
+        }
+
+    } catch (const DXFeedError &) {
         return -1;
     } catch (...) {
         cout << "UNEXPECTED FATAL ERROR!!!\n";

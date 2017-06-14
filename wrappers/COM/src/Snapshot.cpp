@@ -656,9 +656,15 @@ HRESULT STDMETHODCALLTYPE DXSnapshot::Advise(IUnknown *pUnkSink, DWORD *pdwCooki
         if (pUnkSink->QueryInterface(DIID_IDXIncrementalEventListener, reinterpret_cast<void**>(&listener)) != S_OK) {
             return CONNECT_E_CANNOTCONNECT;
         }
+        if (m_incListenerSnapMethodId == 0 || m_incListenerUpMethodId == 0) {
+            return DISP_E_UNKNOWNNAME;
+        }
     } else {
         if (pUnkSink->QueryInterface(DIID_IDXEventListener, reinterpret_cast<void**>(&listener)) != S_OK) {
             return CONNECT_E_CANNOTCONNECT;
+        }
+        if (m_listenerMethodId == 0) {
+            return DISP_E_UNKNOWNNAME;
         }
     }
 
@@ -672,10 +678,6 @@ HRESULT STDMETHODCALLTYPE DXSnapshot::Advise(IUnknown *pUnkSink, DWORD *pdwCooki
 
             return S_OK;
         }
-    }
-
-    if (m_listenerMethodId == 0) {
-        return DISP_E_UNKNOWNNAME;
     }
 
     *pdwCookie = m_listener_next_id++;
