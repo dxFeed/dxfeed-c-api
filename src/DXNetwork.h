@@ -26,11 +26,12 @@
 
 #include "PrimitiveTypes.h"
 #include "DXFeed.h"
+#include "DXProperties.h"
 #include "TaskQueue.h"
 
 #define DX_AUTH_KEY "authorization"
-#define DX_AUTH_BASIC_KEY "basic"
-#define DX_AUTH_BEARER_KEY "bearer"
+#define DX_AUTH_BASIC_KEY "Basic"
+#define DX_AUTH_BEARER_KEY "Bearer"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -39,17 +40,6 @@
 /* -------------------------------------------------------------------------- */
 
 typedef bool (*dx_socket_data_receiver_t) (dxf_connection_t connection, const void* buffer, int buffer_size);
-
-typedef struct {
-    dxf_string_t key;
-    dxf_string_t value;
-} dx_property_item_t;
-
-typedef struct {
-    dx_property_item_t* elements;
-    size_t size;
-    size_t capacity;
-} dx_property_map_t;
 
 typedef struct {
     dx_socket_data_receiver_t receiver; /* a callback to pass the read data to */

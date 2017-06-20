@@ -72,6 +72,8 @@ typedef struct {
     uint8_t* trust_store_mem;
     size_t trust_store_len;
 #endif // DXFEED_CODEC_TLS_ENABLED
+
+    bool is_connection_failed;
 } dx_ext_address_t;
 
 typedef struct {
@@ -239,7 +241,6 @@ DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_network) {
  */
 /* -------------------------------------------------------------------------- */
 
-static bool dx_property_map_contains(const dx_property_map_t* props, dxf_const_string_t key);
 static void dx_protocol_property_clear(dx_network_connection_context_t* context);
 static bool dx_protocol_property_make_backup(dx_network_connection_context_t* context);
 static bool dx_protocol_property_restore_backup(dx_network_connection_context_t* context);
@@ -416,12 +417,25 @@ static bool dx_close_socket (dx_network_connection_context_t* context) {
 /* -------------------------------------------------------------------------- */
 
 void dx_notify_conn_termination (dx_network_connection_context_t* context, OUT bool* idle_thread_flag) {
+    //TODO: temp
+    if (dx_get_error_code() == dx_pec_authentication_error) {
+        dx_send_protocol_description(context->connection, false);
+        dx_send_record_description(context->connection, false);
+        dx_pop_last_error();
+        *idle_thread_flag = true;
+        return;
+    }
+
     if (context->context_data.notifier != NULL) {
         context->context_data.notifier((void*)context->address, context->context_data.notifier_user_data);
     }
 
     if (idle_thread_flag != NULL) {
         *idle_thread_flag = true;
+    }
+
+    if (dx_get_error_code() == dx_pec_authentication_error) {
+        dx_get_current_address(context)->is_connection_failed = true;
     }
 
     dx_close_socket(context);
@@ -924,6 +938,9 @@ bool dx_connect_to_resolved_addresses(dx_network_connection_context_t* context) 
     for (; ctx->cur_addr_index < ctx->size; ++ctx->cur_addr_index) {
         dx_ext_address_t* cur_addr = &(ctx->elements[ctx->cur_addr_index]);
 
+        if (cur_addr->is_connection_failed)
+            continue;
+
         /* Make backup of properties configured via API on first pass */
         if (!IS_FLAG_SET(context->set_fields_flags, PROPERTIES_BACKUP_FLAG)) {
             if (!dx_protocol_property_make_backup(context))
@@ -1074,7 +1091,7 @@ bool dx_bind_to_address (dxf_connection_t connection, const char* address, const
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_send_data(dxf_connection_t connection, const void* buffer, int buffer_size) {
+bool dx_send_data (dxf_connection_t connection, const void* buffer, int buffer_size) {
     dx_network_connection_context_t* context = NULL;
     const char* char_buf = (const char*)buffer;
     bool res = true;
@@ -1135,7 +1152,7 @@ bool dx_send_data(dxf_connection_t connection, const void* buffer, int buffer_si
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_add_worker_thread_task(dxf_connection_t connection, dx_task_processor_t processor, void* data) {
+bool dx_add_worker_thread_task (dxf_connection_t connection, dx_task_processor_t processor, void* data) {
     dx_network_connection_context_t* context = NULL;
     bool res = true;
 
@@ -1160,32 +1177,6 @@ bool dx_add_worker_thread_task(dxf_connection_t connection, dx_task_processor_t 
 /*
  *	Protocol properties functions
  */
- /* -------------------------------------------------------------------------- */
-
-static void dx_property_map_free_item(void* obj) {
-    if (obj == NULL)
-        return;
-    dx_property_item_t* item = (dx_property_item_t*)obj;
-    if (item->key != NULL)
-        dx_free(item->key);
-    if (item->value != NULL)
-        dx_free(item->value);
-}
-
-/* -------------------------------------------------------------------------- */
-
-static void dx_property_map_free_collection(dx_property_map_t* props) {
-    dx_property_item_t* item = props->elements;
-    size_t i;
-    for (i = 0; i < props->size; i++) {
-        dx_property_map_free_item((void*)item++);
-    }
-    dx_free(props->elements);
-    props->elements = NULL;
-    props->size = 0;
-    props->capacity = 0;
-}
-
 /* -------------------------------------------------------------------------- */
 
 static void dx_protocol_property_clear(dx_network_connection_context_t* context) {
@@ -1193,118 +1184,6 @@ static void dx_protocol_property_clear(dx_network_connection_context_t* context)
         return;
     dx_property_map_free_collection(&context->properties);
     dx_property_map_free_collection(&context->prop_backup);
-}
-
-/* -------------------------------------------------------------------------- */
-
-static inline int dx_property_item_comparator(dx_property_item_t item1, dx_property_item_t item2) {
-    return dx_compare_strings((dxf_const_string_t)item1.key, (dxf_const_string_t)item2.key);
-}
-
-/* -------------------------------------------------------------------------- */
-
-static bool dx_property_map_clone(const dx_property_map_t* src, dx_property_map_t* dest) {
-    size_t i;
-    bool failed = false;
-    if (src == NULL || dest == NULL)
-        return dx_set_error_code(dx_ec_invalid_func_param);
-
-    dx_property_map_free_collection(dest);
-
-    DX_ARRAY_RESERVE(*dest, dx_property_item_t, src->size, failed);
-    if (failed)
-        return false;
-    for (i = 0; i < src->size; i++) {
-        dx_property_item_t item;
-        item.key = dx_create_string_src(src->elements[i].key);
-        item.value = dx_create_string_src(src->elements[i].value);
-        dest->elements[i] = item;
-    }
-    return true;
-}
-
-/* -------------------------------------------------------------------------- */
-
-//Note: not fast map-dictionary realization, but enough for properties
-static bool dx_property_map_set(dx_property_map_t* props, dxf_const_string_t key, dxf_const_string_t value) {
-    dx_property_item_t item = { (dxf_string_t)key, (dxf_string_t)value };
-    bool found;
-    size_t index;
-
-    if (props == NULL || key == NULL || value == NULL)
-        return dx_set_error_code(dx_ec_invalid_func_param);
-
-    DX_ARRAY_BINARY_SEARCH(props->elements, 0, props->size, item, dx_property_item_comparator, found, index);
-    if (found) {
-        dx_property_item_t* item_ptr = props->elements + index;
-        if (dx_compare_strings(item_ptr->value, value) == 0) {
-            // map already contains such key-value pair
-            return true;
-        }
-        dxf_string_t value_copy = dx_create_string_src(value);
-        if (value_copy == NULL)
-            return false;
-        dx_free(item_ptr->value);
-        item_ptr->value = value_copy;
-    } else {
-        dx_property_item_t new_item = { dx_create_string_src(key), dx_create_string_src(value) };
-        bool insertion_failed;
-        if (new_item.key == NULL || new_item.value == NULL) {
-            dx_property_map_free_item((void*)&new_item);
-            return false;
-        }
-        DX_ARRAY_INSERT(*props, dx_property_item_t, new_item, index, dx_capacity_manager_halfer, insertion_failed);
-        if (insertion_failed) {
-            dx_property_map_free_item((void*)&new_item);
-            return false;
-        }
-    }
-
-    return true;
-}
-
-/* -------------------------------------------------------------------------- */
-
-bool dx_property_map_set_many(dx_property_map_t* props, const dx_property_map_t* other) {
-    size_t i;
-    dx_property_map_t temp = { 0 };
-
-    if (props == NULL || other == NULL)
-        return dx_set_error_code(dx_ec_invalid_func_param);
-
-    if (!dx_property_map_clone(props, &temp))
-        return false;
-
-    for (i = 0; i < other->size; i++) {
-        dx_property_item_t* item = &other->elements[i];
-        if (!dx_property_map_set(&temp, item->key, item->value)) {
-            dx_property_map_free_collection(&temp);
-            return false;
-        }
-    }
-
-    dx_property_map_free_collection(props);
-    props->elements = temp.elements;
-    props->size = temp.size;
-    props->capacity = temp.capacity;
-
-    return true;
-}
-
-/* -------------------------------------------------------------------------- */
-
-static bool dx_property_map_contains(const dx_property_map_t* props, dxf_const_string_t key) {
-    dx_property_item_t item = { (dxf_string_t)key, NULL };
-    bool found;
-    size_t index;
-
-    if (props == NULL)
-        return dx_set_error_code(dx_ec_invalid_func_param_internal);
-    if (key == NULL)
-        return dx_set_error_code(dx_ec_invalid_func_param);
-
-    DX_ARRAY_BINARY_SEARCH(props->elements, 0, props->size, item, dx_property_item_comparator, found, index);
-    return found;
 }
 
 /* -------------------------------------------------------------------------- */

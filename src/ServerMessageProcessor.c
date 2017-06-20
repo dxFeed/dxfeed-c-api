@@ -38,6 +38,7 @@
 #include "TaskQueue.h"
 #include "DXNetwork.h"
 #include "Snapshot.h"
+#include "DXProperties.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -55,6 +56,8 @@
 #define DESCRIBE_PROTOCOL_TIMEOUT   3000
 
 #define MRU_EVENT_FLAGS 1
+
+#define DX_RECV_PROPERTY_AUTH L"authentication"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -129,6 +132,8 @@ typedef struct {
 	int describe_protocol_timestamp;
 	dx_mutex_t describe_protocol_guard;
     char* raw_dump_file_name;
+    /* Contains received properties from server */
+    dx_property_map_t recv_props;
 } dx_server_msg_proc_connection_context_t;
 
 /* -------------------------------------------------------------------------- */
@@ -212,6 +217,7 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_server_msg_processor) {
     CHECKED_FREE(context->raw_dump_file_name);
     
     dx_clear_record_digests(context);
+    dx_property_map_free_collection(&context->recv_props);
     dx_free(context);
     
     return true;
@@ -1259,6 +1265,8 @@ bool dx_read_describe_protocol_properties (dx_server_msg_proc_connection_context
 		
 		dx_logging_verbose_info(L"%s: %s", key, value);
 
+        dx_property_map_set(&(context->recv_props), key, value);
+
 		/* so far the properties are not supported */
 		
 		dx_free(key);
@@ -1362,6 +1370,7 @@ bool dx_process_describe_protocol (dx_server_msg_proc_connection_context_t* cont
     dxf_int_t magic;
     int buf_pos;
     int buf_limit;
+    dxf_const_string_t prop_value;
 
 	dx_logging_verbose_info(L"Processing describe protocol");
 	
@@ -1388,6 +1397,7 @@ bool dx_process_describe_protocol (dx_server_msg_proc_connection_context_t* cont
         return dx_set_error_code(dx_pec_describe_protocol_message_corrupted);
 	}
 
+    dx_property_map_free_collection(&context->recv_props);
 	dx_logging_verbose_info(L"Protocol properties: ");
 	if (!dx_read_describe_protocol_properties(context)) {
         dx_mutex_unlock(&(context->describe_protocol_guard));
@@ -1408,6 +1418,16 @@ bool dx_process_describe_protocol (dx_server_msg_proc_connection_context_t* cont
 
         return false;
 	}
+
+    /* Check received properties from server */
+    if (dx_property_map_try_get_value(&(context->recv_props), DX_RECV_PROPERTY_AUTH, OUT &prop_value)) {
+        /*if (dx_string_length(prop_value) > 0) {
+            dx_set_error_code(dx_pec_authentication_error);
+            dx_logging_error(prop_value);
+            dx_mutex_unlock(&(context->describe_protocol_guard));
+            return false;
+        }*/
+    }
 
     /* All additional data must be skipped according to message length */
     buf_pos = dx_get_in_buffer_position(context->bicc);

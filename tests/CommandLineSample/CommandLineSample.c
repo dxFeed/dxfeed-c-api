@@ -61,6 +61,29 @@ bool is_thread_terminate() {
 }
 #endif
 
+/* -------------------------------------------------------------------------- */
+
+void process_last_error() {
+    int error_code = dx_ec_success;
+    dxf_const_string_t error_descr = NULL;
+    int res;
+
+    res = dxf_get_last_error(&error_code, &error_descr);
+
+    if (res == DXF_SUCCESS) {
+        if (error_code == dx_ec_success) {
+            wprintf(L"WTF - no error information is stored");
+            return;
+        }
+
+        wprintf(L"Error occurred and successfully retrieved:\n"
+            L"error code = %d, description = \"%ls\"\n",
+            error_code, error_descr);
+        return;
+    }
+
+    wprintf(L"An error occurred but the error subsystem failed to initialize\n");
+}
 
 /* -------------------------------------------------------------------------- */
 
@@ -71,11 +94,13 @@ void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
     LeaveCriticalSection(&listener_thread_guard);
 
     wprintf(L"\nTerminating listener thread\n");
+    process_last_error();
 }
 #else
 void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
     is_listener_thread_terminated = true;
     wprintf(L"\nTerminating listener thread\n");
+    process_last_error();
 }
 #endif
 
@@ -265,29 +290,6 @@ void listener(int event_type, dxf_const_string_t symbol_name,
 }
 /* -------------------------------------------------------------------------- */
 
-void process_last_error () {
-    int error_code = dx_ec_success;
-    dxf_const_string_t error_descr = NULL;
-    int res;
-
-    res = dxf_get_last_error(&error_code, &error_descr);
-
-    if (res == DXF_SUCCESS) {
-        if (error_code == dx_ec_success) {
-            wprintf(L"WTF - no error information is stored");
-            return;
-        }
-
-        wprintf(L"Error occurred and successfully retrieved:\n"
-            L"error code = %d, description = \"%ls\"\n",
-            error_code, error_descr);
-        return;
-    }
-
-    wprintf(L"An error occurred but the error subsystem failed to initialize\n");
-}
-
-/* -------------------------------------------------------------------------- */
 dxf_string_t ansi_to_unicode (const char* ansi_str, size_t len) {
 #ifdef _WIN32
     dxf_string_t wide_str = NULL;
@@ -501,7 +503,9 @@ int main (int argc, char* argv[]) {
     InitializeCriticalSection(&listener_thread_guard);
 #endif
 
-    if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, &connection)) {
+    //if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, &connection)) {
+    //if (!dxf_create_connection_auth_basic(dxfeed_host, "demo1", "demo", on_reader_thread_terminate, NULL, NULL, NULL, &connection)) {
+    if (!dxf_create_connection_auth_basic(dxfeed_host, "xxx", "yyy", on_reader_thread_terminate, NULL, NULL, NULL, &connection)) {
         process_last_error();
         free_symbols(symbols, symbol_count);
         return -1;
@@ -537,7 +541,7 @@ int main (int argc, char* argv[]) {
 
     while (!is_thread_terminate() && loop_counter--) {
 #ifdef _WIN32
-        Sleep(100);
+        Sleep(1000);
 #else
 		sleep(1);
 #endif
@@ -551,7 +555,7 @@ int main (int argc, char* argv[]) {
         return -1;
     }
 
-    wprintf(L"Disconnect successful!\nConnection test completed successfully!\n");
+    wprintf(L"Disconnect successful!\n");
     wprintf(L"loops remain:%d\n", loop_counter);
 
 #ifdef _WIN32

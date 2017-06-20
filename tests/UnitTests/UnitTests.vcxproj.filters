@@ -152,9 +152,6 @@
     <ClCompile Include="ConnectionTest.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DataCollectionsTests.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="AlgorithmsTest.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -163,6 +160,12 @@
     </ClCompile>
     <ClCompile Include="AddressParserTest.c">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DXNetworkTests.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\DXProperties.c">
+      <Filter>Common\Sources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -247,9 +250,6 @@
     <ClInclude Include="..\..\src\DataStructures.h">
       <Filter>Parser\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="DataCollectionsTests.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="AlgorithmsTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -258,6 +258,12 @@
     </ClInclude>
     <ClInclude Include="AddressParserTest.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DXNetworkTests.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\DXProperties.h">
+      <Filter>Common\Headers</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

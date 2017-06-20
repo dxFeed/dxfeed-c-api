@@ -157,6 +157,7 @@ dxf_const_string_t dx_get_error_description (dx_error_code_t code) {
     case dx_pec_unexpected_message_sequence_internal: return s_internal_error_descr;
     case dx_pec_local_message_not_supported_by_server: return L"Local message is not supported by server";
     case dx_pec_inconsistent_message_support: return L"Inconsistent message support by server";
+    case dx_pec_authentication_error: return L"Authentication failed";
 
     /* connection error codes */
     

@@ -385,6 +385,7 @@
     <ClCompile Include="src\DXMemory.c" />
     <ClCompile Include="src\DXNetwork.c" />
     <ClCompile Include="src\DXPMessageData.c" />
+    <ClCompile Include="src\DXProperties.c" />
     <ClCompile Include="src\DXSockets.c" />
     <ClCompile Include="src\DXThreads.c" />
     <ClCompile Include="src\EventData.c" />
@@ -417,6 +418,7 @@
   <ItemGroup>
     <ClInclude Include="src\ConfigurationDeserializer.h" />
     <ClInclude Include="src\DXAddressParser.h" />
+    <ClInclude Include="src\DXProperties.h" />
     <ClInclude Include="src\PriceLevelBook.h" />
     <ClInclude Include="src\resource.h" />
     <ClInclude Include="src\Candle.h" />

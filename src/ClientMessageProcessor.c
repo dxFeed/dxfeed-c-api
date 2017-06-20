@@ -447,12 +447,15 @@ static bool dx_write_describe_protocol_properties (void* bocc, const dx_property
 
     if (properties == NULL)
         return false;
-
+    //TODO: prop temp
+    dx_logging_verbose_info(L"Properties:");
     CHECKED_CALL_2(dx_write_compact_int, bocc, (dxf_int_t)properties->size); /* count of properties */
     for (i = 0; i < properties->size; i++) {
         dx_property_item_t* item_ptr = properties->elements + i;
         CHECKED_CALL_2(dx_write_utf_string, bocc, item_ptr->key);
         CHECKED_CALL_2(dx_write_utf_string, bocc, item_ptr->value);
+        //TODO: prop temp
+        dx_logging_verbose_info(L"   %ls: %ls", item_ptr->key, item_ptr->value);
     }
   
     return true;
@@ -677,6 +680,7 @@ bool dx_send_protocol_description (dxf_connection_t connection, bool task_mode) 
     }
 
     // set default protocol properties values
+    //TODO: simplify?
     if (!dx_protocol_property_set(connection, L"version", DX_LIBRARY_VERSION) ||
         !dx_protocol_property_set(connection, L"opt", L"hs")) {
 

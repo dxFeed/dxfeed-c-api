@@ -332,6 +332,7 @@
     <ClCompile Include="..\..\src\Candle.c" />
     <ClCompile Include="..\..\src\ConfigurationDeserializer.c" />
     <ClCompile Include="..\..\src\DXAddressParser.c" />
+    <ClCompile Include="..\..\src\DXProperties.c" />
     <ClCompile Include="..\..\src\PriceLevelBook.c" />
     <ClCompile Include="AddressParserTest.c" />
     <ClCompile Include="AlgorithmsTest.c" />
@@ -340,7 +341,7 @@
     <ClCompile Include="..\..\src\Snapshot.c" />
     <ClCompile Include="..\..\src\ObjectArray.c" />
     <ClCompile Include="ConnectionTest.c" />
-    <ClCompile Include="DataCollectionsTests.c" />
+    <ClCompile Include="DXNetworkTests.c" />
     <ClCompile Include="EventDynamicSubscriptionTest.cpp" />
     <ClCompile Include="EventSubscriptionTest.c" />
     <ClCompile Include="OrderSourceConfigurationTest.c" />
@@ -385,6 +386,7 @@
     <ClInclude Include="..\..\src\DXErrorHandling.h" />
     <ClInclude Include="..\..\src\DXMemory.h" />
     <ClInclude Include="..\..\src\DXPMessageData.h" />
+    <ClInclude Include="..\..\src\DXProperties.h" />
     <ClInclude Include="..\..\src\DXThreads.h" />
     <ClInclude Include="..\..\include\EventData.h" />
     <ClInclude Include="..\..\src\EventManager.h" />
@@ -398,7 +400,7 @@
     <ClInclude Include="AlgorithmsTest.h" />
     <ClInclude Include="CandleTest.h" />
     <ClInclude Include="ConnectionTest.h" />
-    <ClInclude Include="DataCollectionsTests.h" />
+    <ClInclude Include="DXNetworkTests.h" />
     <ClInclude Include="EventDynamicSubscriptionTest.h" />
     <ClInclude Include="EventSubscriptionTest.h" />
     <ClInclude Include="..\..\src\Logger.h" />

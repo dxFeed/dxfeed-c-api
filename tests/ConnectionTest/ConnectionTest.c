@@ -7,7 +7,8 @@
 
 //const char dxfeed_host[] = "demo.dxfeed.com:7300";
 //TODO: temp
-const char dxfeed_host[] = "mddqa.in.devexperts.com:7400[username=demo1,password=demo]";
+//const char dxfeed_host[] = "mddqa.in.devexperts.com:7400[username=demo1,password=demo]";
+const char dxfeed_host[] = "127.0.0.1:7777[username=xxx,password=yyy]";
 
 /* -------------------------------------------------------------------------- */
 
@@ -32,6 +33,13 @@ void process_last_error () {
     }
 
     printf("An error occurred but the error subsystem failed to initialize\n");
+}
+
+/* -------------------------------------------------------------------------- */
+
+void conn_termination_notifier(dxf_connection_t connection, void* user_data) {
+    wprintf(L"The connection was been terminated!\n");
+    process_last_error();
 }
 
 /* -------------------------------------------------------------------------- */
@@ -68,7 +76,7 @@ int main (int argc, char* argv[]) {
 
     printf("Connecting to host via basic authorization %s...\n", dxfeed_host);
     //TODO: finish test
-    if (!dxf_create_connection_auth_basic(dxfeed_host, "demo1", "demo", NULL, NULL, NULL, NULL, &connection)) {
+    if (!dxf_create_connection_auth_basic(dxfeed_host, "demo1", "demo", conn_termination_notifier, NULL, NULL, NULL, &connection)) {
         process_last_error();
 
         return -1;
@@ -76,7 +84,7 @@ int main (int argc, char* argv[]) {
 
     printf("Connection successful!\n");
 
-    Sleep(121000);//2m01s
+    Sleep(5000);
 
     printf("Disconnecting from host...\n");
 
