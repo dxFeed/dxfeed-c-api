@@ -49,6 +49,13 @@ typedef struct {
     void* notifier_user_data; /* the user data passed to the notifier callbacks */
 } dx_connection_context_data_t;
 
+typedef enum {
+    dx_cs_not_connected = 0,
+    dx_cs_connected,
+    dx_cs_login_required,
+    dx_cs_authorized
+} dx_connection_status_t;
+
 /* -------------------------------------------------------------------------- */
 /*
  *	Advanced network functions
@@ -109,6 +116,15 @@ bool dx_send_data (dxf_connection_t connection, const void* buffer, int buffer_s
  */
 
 bool dx_add_worker_thread_task (dxf_connection_t connection, dx_task_processor_t processor, void* data);
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Connection status functions
+ */
+/* -------------------------------------------------------------------------- */
+
+void dx_connection_status_set(dxf_connection_t connection, dx_connection_status_t status);
+dx_connection_status_t dx_connection_status_get(dxf_connection_t connection);
 
 /* -------------------------------------------------------------------------- */
 /*

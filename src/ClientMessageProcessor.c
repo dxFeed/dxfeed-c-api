@@ -365,7 +365,7 @@ bool dx_get_event_server_support (dxf_connection_t connection, dx_order_source_a
     bool success = true;
         
     *res = dx_mss_pending;
-    
+
     CHECKED_CALL_2(dx_lock_describe_protocol_processing, connection, true);
 
     for (; eid < dx_eid_count; ++eid) {

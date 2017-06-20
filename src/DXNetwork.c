@@ -131,6 +131,9 @@ typedef struct {
     dx_property_map_t properties;
     dx_property_map_t prop_backup; //TODO: need another solution?
 
+    dx_connection_status_t status;
+    dx_mutex_t status_guard;
+
     int set_fields_flags;
 } dx_network_connection_context_t;
 
@@ -141,6 +144,7 @@ typedef struct {
 #define QUEUE_THREAD_FIELD_FLAG     (1 << 4)
 #define DUMPING_RAW_DATA_FIELD_FLAG (1 << 5)
 #define PROPERTIES_BACKUP_FLAG      (1 << 8)
+#define STATUS_GUARD_FLAG           (1 << 16)
 
 /* -------------------------------------------------------------------------- */
 
@@ -161,6 +165,7 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_network) {
     context->queue_thread_state = true;
 
     if (!(dx_create_task_queue(&(context->tq)) && (context->set_fields_flags |= TASK_QUEUE_FIELD_FLAG)) ||
+        !(dx_mutex_create(&(context->status_guard)) && (context->set_fields_flags |= STATUS_GUARD_FLAG)) ||
         !dx_set_subsystem_data(connection, dx_ccs_network, context)) {
         dx_clear_connection_data(context);
 
@@ -378,6 +383,10 @@ bool dx_clear_connection_data (dx_network_connection_context_t* context) {
         context->raw_dump_file = NULL;
     }
 
+    if (IS_FLAG_SET(set_fields_flags, STATUS_GUARD_FLAG)) {
+        success = dx_mutex_destroy(&(context->status_guard)) && success;
+    }
+
     CHECKED_FREE(context->address);
 
     dx_protocol_property_clear(context);
@@ -391,6 +400,10 @@ bool dx_clear_connection_data (dx_network_connection_context_t* context) {
 
 static bool dx_close_socket (dx_network_connection_context_t* context) {
     bool res = true;
+
+    //TODO:new
+    //TODO: simplify
+    dx_connection_status_set(context->connection, dx_cs_not_connected);
 
     if (!IS_FLAG_SET(context->set_fields_flags, SOCKET_FIELD_FLAG)) {
         return res;
@@ -417,14 +430,10 @@ static bool dx_close_socket (dx_network_connection_context_t* context) {
 /* -------------------------------------------------------------------------- */
 
 void dx_notify_conn_termination (dx_network_connection_context_t* context, OUT bool* idle_thread_flag) {
-    //TODO: temp
-    if (dx_get_error_code() == dx_pec_authentication_error) {
-        dx_send_protocol_description(context->connection, false);
-        dx_send_record_description(context->connection, false);
-        dx_pop_last_error();
-        *idle_thread_flag = true;
+    //TODO: new
+    //if connection required login don't call notifier
+    if (dx_connection_status_get(context->connection) == dx_cs_login_required)
         return;
-    }
 
     if (context->context_data.notifier != NULL) {
         context->context_data.notifier((void*)context->address, context->context_data.notifier_user_data);
@@ -847,6 +856,8 @@ static bool dx_connect_via_socket(dx_network_connection_context_t* context, dx_e
             continue;
         }
 
+        //TODO: simplify
+        dx_connection_status_set(context->connection, dx_cs_connected);
         return true;
     }
     return false;
@@ -911,6 +922,8 @@ static bool dx_connect_via_tls(dx_network_connection_context_t* context, dx_ext_
         return false;
     }
 
+    //TODO: simplify
+    dx_connection_status_set(context->connection, dx_cs_connected);
     return true;
 }
 #endif // DXFEED_CODEC_TLS_ENABLED
@@ -1000,6 +1013,15 @@ static bool dx_server_event_subscription_refresher (dxf_connection_t connection,
 /* ---------------------------------- */
 
 bool dx_reestablish_connection (dx_network_connection_context_t* context) {
+    //TODO: new, temp?
+    // if connection required login send credentials again
+    if (dx_connection_status_get(context->connection) == dx_cs_login_required) {
+        CHECKED_CALL_2(dx_send_protocol_description, context->connection, false);
+        CHECKED_CALL_2(dx_send_record_description, context->connection, false);
+        CHECKED_CALL_2(dx_process_connection_subscriptions, context->connection, dx_server_event_subscription_refresher);
+        return true;
+    }
+
     CHECKED_CALL(dx_clear_server_info, context->connection);
 
     if (!dx_connect_to_resolved_addresses(context)) {
@@ -1171,6 +1193,56 @@ bool dx_add_worker_thread_task (dxf_connection_t connection, dx_task_processor_t
     }
 
     return dx_add_task_to_queue(context->tq, processor, data);
+}
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	Connection status functions
+ */
+/* -------------------------------------------------------------------------- */
+
+void dx_connection_status_set(dxf_connection_t connection, dx_connection_status_t status) {
+    dx_network_connection_context_t* context = NULL;
+    bool res = true;
+
+    context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
+
+    if (context == NULL) {
+        if (res) {
+            dx_set_error_code(dx_cec_connection_context_not_initialized);
+        }
+
+        return;
+    }
+
+    dx_mutex_lock(&(context->status_guard));
+    dx_logging_verbose_info(L"Connection status changed %d->%d", context->status, status);
+    context->status = status;
+    dx_mutex_unlock(&(context->status_guard));
+}
+
+/* -------------------------------------------------------------------------- */
+
+dx_connection_status_t dx_connection_status_get(dxf_connection_t connection) {
+    dx_network_connection_context_t* context = NULL;
+    dx_connection_status_t status = dx_cs_not_connected;;
+    bool res = true;
+
+    context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
+
+    if (context == NULL) {
+        if (res) {
+            dx_set_error_code(dx_cec_connection_context_not_initialized);
+        }
+
+        return status;
+    }
+
+    CHECKED_CALL(dx_mutex_lock, &(context->status_guard));
+    status = context->status;
+    dx_mutex_unlock(&(context->status_guard));
+
+    return status;
 }
 
 /* -------------------------------------------------------------------------- */
