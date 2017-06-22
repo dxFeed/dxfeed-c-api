@@ -405,11 +405,11 @@ static bool dx_close_socket (dx_network_connection_context_t* context) {
     //TODO: simplify
     dx_connection_status_set(context->connection, dx_cs_not_connected);
 
-    if (!IS_FLAG_SET(context->set_fields_flags, SOCKET_FIELD_FLAG)) {
-        return res;
-    }
-
     CHECKED_CALL(dx_mutex_lock, &(context->socket_guard));
+
+    if (!IS_FLAG_SET(context->set_fields_flags, SOCKET_FIELD_FLAG)) {
+        return dx_mutex_unlock(&(context->socket_guard)) && res;
+    }
 
 #ifdef DXFEED_CODEC_TLS_ENABLED
     if (dx_get_current_address(context)->tls.enabled) {

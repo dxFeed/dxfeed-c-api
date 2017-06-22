@@ -504,9 +504,9 @@ int main (int argc, char* argv[]) {
 #endif
 
     //TODO: temporary commented lines
-    //if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, &connection)) {
+    if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, &connection)) {
     //if (!dxf_create_connection_auth_basic(dxfeed_host, "demo1", "demo", on_reader_thread_terminate, NULL, NULL, NULL, &connection)) {
-    if (!dxf_create_connection_auth_basic(dxfeed_host, "xxx", "yyy", on_reader_thread_terminate, NULL, NULL, NULL, &connection)) {
+    //if (!dxf_create_connection_auth_basic(dxfeed_host, "xxx", "yyy", on_reader_thread_terminate, NULL, NULL, NULL, &connection)) {
         process_last_error();
         free_symbols(symbols, symbol_count);
         return -1;
