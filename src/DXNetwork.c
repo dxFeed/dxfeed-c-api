@@ -875,31 +875,37 @@ static bool dx_connect_via_tls(dx_network_connection_context_t* context, dx_ext_
     }
 
     /* load root CA */
-    if (address->tls.trust_store_password == NULL) {
-        if (tls_config_set_ca_file(context->tls_config, address->tls.trust_store) < 0) {
-            tls_config_free(context->tls_config);
-            return false;
-        }
-    } else {
-        address->trust_store_mem = tls_load_file(address->tls.trust_store, &(address->trust_store_len), address->tls.trust_store_password);
-        if (address->trust_store_mem == NULL ||
-            tls_config_set_ca_mem(context->tls_config, address->trust_store_mem, address->trust_store_len) < 0) {
-            tls_config_free(context->tls_config);
-            return false;
+    if (address->tls.trust_store != NULL) {
+        if (address->tls.trust_store_password == NULL) {
+            if (tls_config_set_ca_file(context->tls_config, address->tls.trust_store) < 0) {
+                dx_logging_ansi_error(tls_config_error(context->tls_config));
+                tls_config_free(context->tls_config);
+                return false;
+            }
+        } else {
+            address->trust_store_mem = tls_load_file(address->tls.trust_store, &(address->trust_store_len), address->tls.trust_store_password);
+            if (address->trust_store_mem == NULL ||
+                tls_config_set_ca_mem(context->tls_config, address->trust_store_mem, address->trust_store_len) < 0) {
+                tls_config_free(context->tls_config);
+                return false;
+            }
         }
     }
     /* load public certificate */
-    if (address->tls.key_store_password == NULL) {
-        if (tls_config_set_cert_file(context->tls_config, address->tls.key_store) < 0) {
-            tls_config_free(context->tls_config);
-            return false;
-        }
-    } else {
-        address->key_store_mem = tls_load_file(address->tls.key_store, &(address->key_store_len), address->tls.key_store_password);
-        if (address->key_store_mem == NULL ||
-            tls_config_set_cert_mem(context->tls_config, address->key_store_mem, address->key_store_len) < 0) {
-            tls_config_free(context->tls_config);
-            return false;
+    if (address->tls.key_store != NULL) {
+        if (address->tls.key_store_password == NULL) {
+            if (tls_config_set_cert_file(context->tls_config, address->tls.key_store) < 0) {
+                dx_logging_ansi_error(tls_config_error(context->tls_config));
+                tls_config_free(context->tls_config);
+                return false;
+            }
+        } else {
+            address->key_store_mem = tls_load_file(address->tls.key_store, &(address->key_store_len), address->tls.key_store_password);
+            if (address->key_store_mem == NULL ||
+                tls_config_set_cert_mem(context->tls_config, address->key_store_mem, address->key_store_len) < 0) {
+                tls_config_free(context->tls_config);
+                return false;
+            }
         }
     }
 
@@ -987,11 +993,11 @@ bool dx_connect_to_resolved_addresses(dx_network_connection_context_t* context) 
     }
 
     if (ctx->cur_addr_index == ctx->size) {
-        /* we failed to establish a TLS connection */
+        /* we failed to establish connection */
 
         dx_mutex_unlock(&(context->socket_guard));
 
-        return false;
+        return dx_set_error_code(dx_nec_open_connection_error);
     }
 
     context->set_fields_flags |= SOCKET_FIELD_FLAG;
