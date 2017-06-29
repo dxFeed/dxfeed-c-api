@@ -260,6 +260,8 @@ static void dx_unload_tls_file(uint8_t* mem, size_t len) {
 /* -------------------------------------------------------------------------- */
 
 static void dx_logging_ansi_error(const char* ansi_error) {
+    if (ansi_error == NULL)
+        return;
     dxf_string_t w_error = dx_ansi_to_unicode(ansi_error);
     dx_logging_error(w_error);
     dx_free(w_error);
