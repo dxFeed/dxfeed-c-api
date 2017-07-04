@@ -253,8 +253,9 @@ static bool dx_protocol_property_restore_backup(dx_network_connection_context_t*
 /* -------------------------------------------------------------------------- */
 
 static void dx_unload_tls_file(uint8_t* mem, size_t len) {
-    dx_memset((void*)mem, 0, len);
-    dx_free((void*)mem);
+    //TODO: assert
+    //dx_memset((void*)mem, 0, len);
+    //dx_free((void*)mem);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -876,6 +877,13 @@ static bool dx_connect_via_tls(dx_network_connection_context_t* context, dx_ext_
         return false;
     }
 
+    /* Configure protocol and ciphers */
+    if (tls_config_set_protocols(context->tls_config, TLS_PROTOCOL_TLSv1_1 | TLS_PROTOCOL_TLSv1_2) < 0) {
+        dx_logging_ansi_error(tls_config_error(context->tls_config));
+        tls_config_free(context->tls_config);
+        return false;
+    }
+
     /* load root CA */
     if (address->tls.trust_store != NULL) {
         if (address->tls.trust_store_password == NULL) {
@@ -893,10 +901,10 @@ static bool dx_connect_via_tls(dx_network_connection_context_t* context, dx_ext_
             }
         }
     }
-    /* load public certificate */
+    /* load private certificate */
     if (address->tls.key_store != NULL) {
         if (address->tls.key_store_password == NULL) {
-            if (tls_config_set_cert_file(context->tls_config, address->tls.key_store) < 0) {
+            if (tls_config_set_key_file(context->tls_config, address->tls.key_store) < 0) {
                 dx_logging_ansi_error(tls_config_error(context->tls_config));
                 tls_config_free(context->tls_config);
                 return false;
@@ -904,7 +912,7 @@ static bool dx_connect_via_tls(dx_network_connection_context_t* context, dx_ext_
         } else {
             address->key_store_mem = tls_load_file(address->tls.key_store, &(address->key_store_len), address->tls.key_store_password);
             if (address->key_store_mem == NULL ||
-                tls_config_set_cert_mem(context->tls_config, address->key_store_mem, address->key_store_len) < 0) {
+                tls_config_set_key_mem(context->tls_config, address->key_store_mem, address->key_store_len) < 0) {
                 tls_config_free(context->tls_config);
                 return false;
             }
@@ -924,6 +932,15 @@ static bool dx_connect_via_tls(dx_network_connection_context_t* context, dx_ext_
         dx_logging_ansi_error(tls_error(context->tls_context));
 
         /* failed to configure or connect */
+        tls_config_free(context->tls_config);
+        tls_free(context->tls_context);
+
+        return false;
+    }
+
+    /* try perform handshake */
+    if (tls_handshake(context->tls_context) < 0) {
+        dx_logging_ansi_error(tls_error(context->tls_context));
         tls_config_free(context->tls_config);
         tls_free(context->tls_context);
 
