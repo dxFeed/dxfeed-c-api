@@ -44,7 +44,7 @@ bool protocol_get_basic_auth_data_test(void) {
  */
 bool protocol_configure_basic_auth_test(void) {
     dx_property_item_t expected_array[] = {
-        { L"authorization", L"basic eHh4Onl5eXk=" }
+        { L"authorization", L"Basic eHh4Onl5eXk=" }
     };
     const size_t expected_size = SIZE_OF_ARRAY(expected_array);
     dx_property_map_t expected = { expected_array, expected_size, expected_size };
@@ -69,13 +69,13 @@ bool protocol_configure_basic_auth_test(void) {
  */
 bool protocol_configure_custom_auth_test(void) {
     dx_property_item_t expected_array[] = {
-        { L"authorization", L"bearer 123" }
+        { L"authorization", L"Bearer 123" }
     };
     const size_t expected_size = SIZE_OF_ARRAY(expected_array);
     dx_property_map_t expected = { expected_array, expected_size, expected_size };
     dxf_connection_t connection = dx_init_connection();
 
-    DX_CHECK(dx_is_true(dx_protocol_configure_custom_auth(connection, "bearer", "123")));
+    DX_CHECK(dx_is_true(dx_protocol_configure_custom_auth(connection, "Bearer", "123")));
 
     DX_CHECK(dx_is_equal_property_map(&expected, dx_protocol_property_get_all(connection)));
 

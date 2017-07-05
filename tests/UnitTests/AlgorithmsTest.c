@@ -320,6 +320,7 @@ bool properties_map_set_many_invalid_test(void) {
  * Test
  *
  * Creates context with properties map.
+ * Checks containig on empty map.
  * Fills protocol properties set.
  * Tries to check map contains elements.
  * Destroys context.
@@ -329,6 +330,8 @@ bool properties_map_set_many_invalid_test(void) {
 bool properties_map_contains_test(void) {
     dx_property_map_t props = { 0 };
     size_t i;
+
+    DX_CHECK(dx_is_false(dx_property_map_contains(&props, L"a")));
 
     for (i = source_props_size; i > 0; i--)
         DX_CHECK(dx_is_true(dx_property_map_set(&props, source_props_array[i - 1].key, source_props_array[i - 1].value)));

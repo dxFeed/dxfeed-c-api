@@ -159,6 +159,7 @@ typedef enum {
     dx_pec_local_message_not_supported_by_server,
     dx_pec_inconsistent_message_support,
     dx_pec_authentication_error,
+    dx_pec_credentials_required,
     
     /* connection error codes */
     

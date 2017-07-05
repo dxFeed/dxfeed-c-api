@@ -154,7 +154,7 @@ bool dx_property_map_set_many(dx_property_map_t* props, const dx_property_map_t*
 }
 
 /* -------------------------------------------------------------------------- */
-//TODO: tests for operations on empty map
+
 bool dx_property_map_contains(const dx_property_map_t* props, dxf_const_string_t key) {
     dx_property_item_t item = { (dxf_string_t)key, NULL };
     bool found;

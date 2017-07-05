@@ -129,7 +129,7 @@ typedef struct {
 
     /* protocol description properties */
     dx_property_map_t properties;
-    dx_property_map_t prop_backup; //TODO: need another solution?
+    dx_property_map_t prop_backup;
 
     dx_connection_status_t status;
     dx_mutex_t status_guard;
@@ -252,10 +252,8 @@ static bool dx_protocol_property_restore_backup(dx_network_connection_context_t*
 
 /* -------------------------------------------------------------------------- */
 
-static void dx_unload_tls_file(uint8_t* mem, size_t len) {
-    //TODO: assert
-    //dx_memset((void*)mem, 0, len);
-    //dx_free((void*)mem);
+ void tls_unload_file(uint8_t* buf, size_t len) {
+    //Note: it is simple stub since current TLS API do not support unloading files
 }
 
 /* -------------------------------------------------------------------------- */
@@ -320,12 +318,12 @@ void dx_clear_addr_context_data (dx_address_resolution_context_t* context_data) 
 
 #ifdef DXFEED_CODEC_TLS_ENABLED
             if (addr->key_store_mem != NULL) {
-                dx_unload_tls_file(addr->key_store_mem, addr->key_store_len);
+                tls_unload_file(addr->key_store_mem, addr->key_store_len);
                 addr->key_store_mem = NULL;
                 addr->key_store_len = 0;
             }
             if (addr->trust_store_mem != NULL) {
-                dx_unload_tls_file(addr->trust_store_mem, addr->trust_store_len);
+                tls_unload_file(addr->trust_store_mem, addr->trust_store_len);
                 addr->trust_store_mem = NULL;
                 addr->trust_store_len = 0;
             }
@@ -404,8 +402,6 @@ bool dx_clear_connection_data (dx_network_connection_context_t* context) {
 static bool dx_close_socket (dx_network_connection_context_t* context) {
     bool res = true;
 
-    //TODO:new
-    //TODO: simplify
     dx_connection_status_set(context->connection, dx_cs_not_connected);
 
     CHECKED_CALL(dx_mutex_lock, &(context->socket_guard));
@@ -432,11 +428,20 @@ static bool dx_close_socket (dx_network_connection_context_t* context) {
 
 /* -------------------------------------------------------------------------- */
 
+static bool dx_have_credentials(dx_network_connection_context_t* context) {
+    return dx_property_map_contains(&context->properties, DX_PROPERTY_AUTH);
+}
+
+/* -------------------------------------------------------------------------- */
+
 void dx_notify_conn_termination (dx_network_connection_context_t* context, OUT bool* idle_thread_flag) {
-    //TODO: new
-    //if connection required login don't call notifier
-    if (dx_connection_status_get(context->connection) == dx_cs_login_required)
-        return;
+    //if connection required login and we have cresentials don't call notifier
+    if (dx_connection_status_get(context->connection) == dx_cs_login_required) {
+        if (dx_have_credentials(context))
+            return;
+        dx_get_current_address(context)->is_connection_failed = true;
+        dx_set_error_code(dx_pec_credentials_required);
+    }
 
     if (context->context_data.notifier != NULL) {
         context->context_data.notifier((void*)context->address, context->context_data.notifier_user_data);
@@ -653,7 +658,6 @@ void dx_socket_reader (dx_network_connection_context_t* context) {
 #ifdef DXFEED_CODEC_TLS_ENABLED
             if (dx_get_current_address(context)->tls.enabled) {
                 number_of_bytes_read = tls_read(context->tls_context, (void*)read_buf, READ_CHUNK_SIZE);
-                //TODO: temp?
                 if (number_of_bytes_read == -1)
                     dx_logging_ansi_error(tls_error(context->tls_context));
             } else {
@@ -859,7 +863,6 @@ static bool dx_connect_via_socket(dx_network_connection_context_t* context, dx_e
             continue;
         }
 
-        //TODO: simplify
         dx_connection_status_set(context->connection, dx_cs_connected);
         return true;
     }
@@ -947,7 +950,6 @@ static bool dx_connect_via_tls(dx_network_connection_context_t* context, dx_ext_
         return false;
     }
 
-    //TODO: simplify
     dx_connection_status_set(context->connection, dx_cs_connected);
     return true;
 }
@@ -957,7 +959,7 @@ static bool dx_connect_via_tls(dx_network_connection_context_t* context, dx_ext_
 
 bool dx_connect_to_resolved_addresses(dx_network_connection_context_t* context) {
     dx_address_resolution_context_t* ctx = &(context->addr_context);
-    //TODO: review loading data from file
+
     //raw data file
     if (IS_FLAG_SET(context->set_fields_flags, DUMPING_RAW_DATA_FIELD_FLAG)) {
         if (context->raw_dump_file != NULL)
@@ -1038,7 +1040,6 @@ static bool dx_server_event_subscription_refresher (dxf_connection_t connection,
 /* ---------------------------------- */
 
 bool dx_reestablish_connection (dx_network_connection_context_t* context) {
-    //TODO: new, temp?
     // if connection required login send credentials again
     if (dx_connection_status_get(context->connection) == dx_cs_login_required) {
         CHECKED_CALL_2(dx_send_protocol_description, context->connection, false);
@@ -1173,7 +1174,6 @@ bool dx_send_data (dxf_connection_t connection, const void* buffer, int buffer_s
 #ifdef DXFEED_CODEC_TLS_ENABLED
             if (dx_get_current_address(context)->tls.enabled) {
                 sent_count = tls_write(context->tls_context, (const void*)char_buf, buffer_size);
-                //TODO: temp?
                 if (sent_count == -1)
                     dx_logging_ansi_error(tls_error(context->tls_context));
             } else {
