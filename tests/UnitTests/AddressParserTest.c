@@ -58,6 +58,10 @@ static dx_address_t addresses[] = {
     { "http://demo.dxfeed.com", NULL, NULL, NULL, { true, NULL, NULL, "C:/data/CA.pem", NULL }, { false } },
     //11 - https://192.168.1.1:4242[username=xxx,password=yyyy]
     { "https://192.168.1.1", "4242", "xxx", "yyyy", { false, NULL, NULL, NULL, NULL }, { false } },
+    //12 - tls[trustStore=C:/data/CA.pem]+http://demo.dxfeed.com
+    { "http://demo.dxfeed.com", NULL, NULL, NULL, { true, NULL, NULL, "C:/data/CA.pem", NULL }, { false } },
+    //13 - tls[trustStore=C:/data/CA.pem]+https://192.168.1.1:4242[username=xxx,password=yyyy]
+    { "https://192.168.1.1", "4242", "xxx", "yyyy", { true, NULL, NULL, "C:/data/CA.pem", NULL }, { false } }
 };
 
 static dx_test_case_t all_cases[] = {
@@ -90,6 +94,7 @@ static dx_test_case_t all_cases[] = {
     { "(demo.dxfeed.com:7300)(192.168.1.1:4242)",                                           { &addresses[0], 2, 2 }, true },
     { "()(demo.dxfeed.com:7300)()()(192.168.1.1:4242)",                                     { &addresses[0], 2, 2 }, true },
     { "(tls[trustStore=C:/data/CA.pem]+http://demo.dxfeed.com)(https://192.168.1.1:4242[username=xxx,password=yyyy])", { &addresses[10], 2, 2 }, WITH_TLS_RESULT },
+    { "(tls[trustStore=C:/data/CA.pem]+http://demo.dxfeed.com)(tls[trustStore=C:/data/CA.pem]+https://192.168.1.1:4242[username=xxx,password=yyyy])",{ &addresses[12], 2, 2 }, WITH_TLS_RESULT },
 
     /* invalid cases */
     { "",                                                                                   DX_EMPTY_ARRAY, false },

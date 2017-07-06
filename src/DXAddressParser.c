@@ -198,7 +198,7 @@ static bool dx_get_next_entry(OUT const char** next, OUT const char** entry, OUT
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_get_next_codec(OUT const char** next, OUT const char** codec, OUT size_t* size) {
+static bool dx_get_next_codec(OUT const char** next, const char* next_end, OUT const char** codec, OUT size_t* size) {
     if (codec == NULL || size == NULL || next == NULL)
         return dx_set_error_code(dx_ec_invalid_func_param_internal);
 
@@ -206,7 +206,7 @@ static bool dx_get_next_codec(OUT const char** next, OUT const char** codec, OUT
     *size = 0;
     while (dx_has_next(*next)) {
         const char* begin = *next;
-        const char* end = strchr(begin, codec_splitter);
+        const char* end = dx_find_first(begin, next_end, codec_splitter);
         if (end == NULL) {
             //move pointer to null terminating symbol
             *next += strlen(*next);
@@ -591,6 +591,7 @@ static void dx_free_address(OUT dx_address_t* addr) {
 
 static bool dx_parse_address(const char* entry, size_t entry_size, OUT dx_address_t* addr) {
     const char* next = entry;
+    const char* next_end = entry + entry_size;
     size_t next_size;
     const char* address;
     size_t address_size;
@@ -603,7 +604,7 @@ static bool dx_parse_address(const char* entry, size_t entry_size, OUT dx_addres
     do {
         const char* codec;
         size_t codec_size;
-        if (!dx_get_next_codec(OUT &next, OUT &codec, OUT &codec_size)) {
+        if (!dx_get_next_codec(OUT &next, next_end, OUT &codec, OUT &codec_size)) {
             dx_free_address(addr);
             return false;
         }
