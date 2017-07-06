@@ -104,8 +104,8 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Midl>
-      <TypeLibraryName>$(SolutionDir)bin\32\tlb\$(ProjectName).tlb</TypeLibraryName>
-      <OutputDirectory>$(SolutionDir)bin\32\tlb</OutputDirectory>
+      <TypeLibraryName>$(SolutionDir)bin\64\tlb\$(ProjectName).tlb</TypeLibraryName>
+      <OutputDirectory>$(SolutionDir)bin\64\tlb</OutputDirectory>
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
@@ -131,8 +131,8 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Midl>
-      <TypeLibraryName>$(SolutionDir)bin\64\tlb\$(ProjectName).tlb</TypeLibraryName>
-      <OutputDirectory>$(SolutionDir)bin\64\tlb</OutputDirectory>
+      <TypeLibraryName>$(SolutionDir)bin\32\tlb\$(ProjectName).tlb</TypeLibraryName>
+      <OutputDirectory>$(SolutionDir)bin\32\tlb</OutputDirectory>
     </Midl>
     <ClCompile>
       <Optimization>Full</Optimization>

@@ -4,6 +4,15 @@
 
 #include <ObjBase.h>
 
+typedef enum {
+    DXEF_tx_pending = 0x01,
+    DXEF_remove_event = 0x02,
+    DXEF_snapshot_begin = 0x04,
+    DXEF_snapshot_end = 0x08,
+    DXEF_snapshot_snip = 0x10,
+    DXEF_remove_symbol = 0x20
+} DXFEventFlags;
+
 /* -------------------------------------------------------------------------- */
 /*
  *	IDXFeed interface
@@ -31,8 +40,8 @@ struct IDXConnection : public IDispatch {
     virtual HRESULT STDMETHODCALLTYPE CreateSubscription(INT eventTypes, IDispatch** subscription) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetLastEvent(INT eventType, BSTR symbol, IDispatch** eventData) = 0;
     virtual HRESULT STDMETHODCALLTYPE CreateSubscriptionTimed(INT eventTypes, LONGLONG time, IDispatch** subscription) = 0;
-    virtual HRESULT STDMETHODCALLTYPE CreateSnapshot(INT eventType, BSTR symbol, BSTR source, LONGLONG time, IDispatch** snapshot) = 0;
-    virtual HRESULT STDMETHODCALLTYPE CreateCandleSnapshot(IDXCandleSymbol* symbol, LONGLONG time, IDispatch** snapshot) = 0;
+    virtual HRESULT STDMETHODCALLTYPE CreateSnapshot(INT eventType, BSTR symbol, BSTR source, LONGLONG time, BOOL incremental, IDispatch** snapshot) = 0;
+    virtual HRESULT STDMETHODCALLTYPE CreateCandleSnapshot(IDXCandleSymbol* symbol, LONGLONG time, BOOL incremental, IDispatch** snapshot) = 0;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -174,6 +183,7 @@ struct IDXOrder : public IDispatch {
     virtual HRESULT STDMETHODCALLTYPE GetTimeSequence(LONGLONG* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetSequence(INT* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetScope(INT* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE IsRemoved(VARIANT_BOOL* value) = 0;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -201,6 +211,7 @@ struct IDXTimeAndSale : public IDispatch {
     virtual HRESULT STDMETHODCALLTYPE GetTradeFlag(VARIANT_BOOL* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetValidTick(VARIANT_BOOL* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetType(INT* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE IsRemoved(VARIANT_BOOL* value) = 0;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -226,6 +237,8 @@ struct IDXCandle : public IDispatch {
     virtual HRESULT STDMETHODCALLTYPE GetIndex(LONGLONG* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetOpenInterest(LONGLONG* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetImpVolacility(DOUBLE* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetEventFlags(INT* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE IsRemoved(VARIANT_BOOL* value) = 0;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -268,6 +281,7 @@ struct IDXSpreadOrder : public IDispatch {
     virtual HRESULT STDMETHODCALLTYPE GetSpreadSymbol(BSTR* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetTimeSequence(LONGLONG* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetScope(INT* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE IsRemoved(VARIANT_BOOL* value) = 0;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -289,6 +303,8 @@ struct IDXGreeks : public IDispatch {
     virtual HRESULT STDMETHODCALLTYPE GetRho(DOUBLE* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetVega(DOUBLE* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetIndex(LONGLONG* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetEventFlags(INT* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE IsRemoved(VARIANT_BOOL* value) = 0;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -341,6 +357,8 @@ struct IDXSeries : public IDispatch {
     virtual HRESULT STDMETHODCALLTYPE GetDividend(DOUBLE* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetInterest(DOUBLE* value) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetIndex(LONGLONG* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetEventFlags(INT* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE IsRemoved(VARIANT_BOOL* value) = 0;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -373,6 +391,19 @@ struct IDXConnectionTerminationNotifier : public IDispatch {
 
 struct IDXEventListener : public IDispatch {
     virtual HRESULT STDMETHODCALLTYPE OnNewData(IDispatch* subscription, INT eventType, BSTR symbol,
+                                                 IDispatch* dataCollection) = 0;
+};
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	IDXIncrementalEventListener sink interface
+ */
+/* -------------------------------------------------------------------------- */
+
+struct IDXIncrementalEventListener : public IDispatch {
+    virtual HRESULT STDMETHODCALLTYPE OnNewSnapshot(IDispatch* subscription, INT eventType, BSTR symbol,
+                                                 IDispatch* dataCollection) = 0;
+    virtual HRESULT STDMETHODCALLTYPE OnUpdate(IDispatch* subscription, INT eventType, BSTR symbol,
                                                  IDispatch* dataCollection) = 0;
 };
 

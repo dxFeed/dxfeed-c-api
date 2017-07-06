@@ -294,3 +294,218 @@ HRESULT STDMETHODCALLTYPE DXEventListener::OnNewData (IDispatch* subscription, I
     
     return S_OK;
 }
+
+/* -------------------------------------------------------------------------- */
+/*
+ *	DXIncrementalEventListener methods implementation
+ */
+/* -------------------------------------------------------------------------- */
+
+DXIncrementalEventListener::DXIncrementalEventListener ()
+: GenericSinkImpl(DIID_IDXIncrementalEventListener) {
+}
+
+HRESULT STDMETHODCALLTYPE DXIncrementalEventListener::OnNewSnapshot (IDispatch* subscription, INT eventType, BSTR symbol,
+                                                      IDispatch* dataCollection) {
+    Alerter a;
+    
+    if (subscription == NULL || dataCollection == NULL) {
+        return E_POINTER;
+    }
+    
+    _bstr_t symWrp(symbol, false);
+    cout << "\t\tNew snapshot received: symbol is " << std::string((const char*)symWrp).c_str();
+    symWrp.Detach();
+    
+    cout << ", event type is " << eventTypeToString(eventType);
+    
+    IDXEventDataCollection* dc = reinterpret_cast<IDXEventDataCollection*>(dataCollection);
+    
+    ULONGLONG dataCount;
+    HRESULT res = dc->GetEventCount(&dataCount);
+    
+    if (res != S_OK) {
+        return res;
+    }
+    
+    cout << ", event data count = " << dataCount << "\n";
+    
+    for (ULONGLONG i = 0; i < dataCount; ++i) {
+        IDispatch* eventData = NULL;
+        
+        if ((res = dc->GetEvent(i, &eventData)) != S_OK) {
+            return res;
+        }
+        
+        ComReleaser edr(eventData);
+        
+        if (eventType == DXF_ET_ORDER) {
+            IDXOrder* o = (IDXOrder*)eventData;
+        }
+
+        if (eventType == DXF_ET_TIME_AND_SALE) {
+            IDXTimeAndSale* ts = (IDXTimeAndSale*)eventData;
+        }
+        
+        if (eventType == DXF_ET_CANDLE) {
+            IDXCandle* c = (IDXCandle*)eventData;
+            DOUBLE open, high, low, close;
+
+            if ((res = c->GetOpen(&open)) != S_OK ||
+                (res = c->GetHigh(&high)) != S_OK ||
+                (res = c->GetLow(&low)) != S_OK ||
+                (res = c->GetClose(&close)) != S_OK) {
+                return res;
+            }
+
+            cout << "\t\tevent[" << i << "].open = " << open 
+                << "\tevent[" << i << "].high = " << high
+                << std::endl
+                << "\t\tevent[" << i << "].low = " << low
+                << "\tevent[" << i << "].close = " << close
+                << std::endl;
+        }
+
+        if (eventType == DXF_ET_SPREAD_ORDER) {
+            IDXSpreadOrder* so = (IDXSpreadOrder*)eventData;
+        }
+
+        if (eventType == DXF_ET_GREEKS) {
+            IDXGreeks* g = (IDXGreeks*)eventData;
+        }
+
+        if (eventType == DXF_ET_SERIES) {
+            IDXSeries* s = (IDXSeries*)eventData;
+        }
+
+    }
+    
+    a.disarm();
+    
+    return S_OK;
+}
+
+HRESULT STDMETHODCALLTYPE DXIncrementalEventListener::OnUpdate (IDispatch* subscription, INT eventType, BSTR symbol,
+                                                      IDispatch* dataCollection) {
+    Alerter a;
+    
+    if (subscription == NULL || dataCollection == NULL) {
+        return E_POINTER;
+    }
+    
+    _bstr_t symWrp(symbol, false);
+    cout << "\t\tUpdate for data received: symbol is " << std::string((const char*)symWrp).c_str();
+    symWrp.Detach();
+    
+    cout << ", event type is " << eventTypeToString(eventType);
+    
+    IDXEventDataCollection* dc = reinterpret_cast<IDXEventDataCollection*>(dataCollection);
+    
+    ULONGLONG dataCount;
+    HRESULT res = dc->GetEventCount(&dataCount);
+    
+    if (res != S_OK) {
+        return res;
+    }
+    
+    cout << ", event data count = " << dataCount << "\n";
+    
+    for (ULONGLONG i = 0; i < dataCount; ++i) {
+        IDispatch* eventData = NULL;
+        
+        if ((res = dc->GetEvent(i, &eventData)) != S_OK) {
+            return res;
+        }
+        
+        ComReleaser edr(eventData);
+        
+        if (eventType == DXF_ET_ORDER) {
+            IDXOrder* o = (IDXOrder*)eventData;
+            VARIANT_BOOL rm;
+            if ((res = o->IsRemoved(&rm)) != S_OK) {
+                return res;
+            }
+            if (rm == VARIANT_TRUE) {
+                /* Removed, only Index is valid  */
+            }
+            else {
+                /* Added or changed, all data is valid */
+            }
+        }
+
+        if (eventType == DXF_ET_TIME_AND_SALE) {
+            IDXTimeAndSale* ts = (IDXTimeAndSale*)eventData;
+            VARIANT_BOOL rm;
+            if ((res = ts->IsRemoved(&rm)) != S_OK) {
+                return res;
+            }
+            if (rm == VARIANT_TRUE) {
+                /* Removed, only Index is valid  */
+            }
+            else {
+                /* Added or changed, all data is valid */
+            }
+        }
+        
+        if (eventType == DXF_ET_CANDLE) {
+            IDXCandle* c = (IDXCandle*)eventData;
+            VARIANT_BOOL rm;
+            if ((res = c->IsRemoved(&rm)) != S_OK) {
+                return res;
+            }
+            if (rm == VARIANT_TRUE) {
+                /* Removed, only Index is valid  */
+            }
+            else {
+                /* Added or changed, all data is valid */
+            }
+        }
+
+        if (eventType == DXF_ET_SPREAD_ORDER) {
+            IDXSpreadOrder* so = (IDXSpreadOrder*)eventData;
+            VARIANT_BOOL rm;
+            if ((res = so->IsRemoved(&rm)) != S_OK) {
+                return res;
+            }
+            if (rm == VARIANT_TRUE) {
+                /* Removed, only Index is valid  */
+            }
+            else {
+                /* Added or changed, all data is valid */
+            }
+        }
+
+        if (eventType == DXF_ET_GREEKS) {
+            IDXGreeks* g = (IDXGreeks*)eventData;
+            VARIANT_BOOL rm;
+            if ((res = g->IsRemoved(&rm)) != S_OK) {
+                return res;
+            }
+            if (rm == VARIANT_TRUE) {
+                /* Removed, only Index is valid  */
+            }
+            else {
+                /* Added or changed, all data is valid */
+            }
+        }
+
+        if (eventType == DXF_ET_SERIES) {
+            IDXSeries* s = (IDXSeries*)eventData;
+            VARIANT_BOOL rm;
+            if ((res = s->IsRemoved(&rm)) != S_OK) {
+                return res;
+            }
+            if (rm == VARIANT_TRUE) {
+                /* Removed, only Index is valid  */
+            }
+            else {
+                /* Added or changed, all data is valid */
+            }
+        }
+
+    }
+    
+    a.disarm();
+    
+    return S_OK;
+}

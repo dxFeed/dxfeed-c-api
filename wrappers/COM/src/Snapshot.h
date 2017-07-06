@@ -18,7 +18,7 @@ struct IDXSubscription;
 
 struct DefDXSnapshotFactory {
     static IDXSubscription* CreateSnapshot(dxf_connection_t connection, int eventType, BSTR symbol, 
-        BSTR source, LONGLONG time, IUnknown* parent);
+        BSTR source, LONGLONG time, BOOL incremental, IUnknown* parent);
     static IDXSubscription* CreateSnapshot(dxf_connection_t connection, IDXCandleSymbol* symbol,
-        LONGLONG time, IUnknown* parent);
+        LONGLONG time, BOOL incremental, IUnknown* parent);
 };

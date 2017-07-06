@@ -17,7 +17,8 @@ typedef const GUID* GUIDPTR;
 
 static GUIDPTR const g_interfaceGuids[] = {
     &DIID_IDXConnectionTerminationNotifier,
-    &DIID_IDXEventListener
+    &DIID_IDXEventListener,
+    &DIID_IDXIncrementalEventListener
 };
 
 static const int g_interfaceCount = sizeof(g_interfaceGuids) / sizeof(g_interfaceGuids[0]);
