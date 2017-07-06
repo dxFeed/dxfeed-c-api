@@ -482,7 +482,7 @@ void dx_socket_reader (dx_network_connection_context_t* context) {
         }
 
         if (IS_FLAG_SET(context->set_fields_flags, DUMPING_RAW_DATA_FIELD_FLAG)) {
-            number_of_bytes_read = fread((void*)read_buf, sizeof(char), READ_CHUNK_SIZE, context->raw_dump_file);
+            number_of_bytes_read = (int)fread((void*)read_buf, sizeof(char), READ_CHUNK_SIZE, context->raw_dump_file);
 
             if (feof(context->raw_dump_file)) {
                 number_of_bytes_read = INVALID_DATA_SIZE;

@@ -62,11 +62,12 @@ private:
 private:
 
     DXSnapshot(dxf_connection_t connection, int eventType, BSTR symbol, BSTR source,
-        LONGLONG time, IUnknown* parent);
+        LONGLONG time, BOOL incremental, IUnknown* parent);
     DXSnapshot(dxf_connection_t connection, IDXCandleSymbol* symbol, LONGLONG time,
-        IUnknown* parent);
+        BOOL incremental, IUnknown* parent);
 
     static void OnNewData(const dxf_snapshot_data_ptr_t snapshotData, void* userData);
+    static void OnNewDataInc(const dxf_snapshot_data_ptr_t snapshotData, int new_snapshot, void* userData);
     void ClearListeners();
     void CreateListenerParams(IDispatch* subscription, int eventType, _bstr_t& symbol, IDispatch* dataCollection,
         variant_vector_t& storage, OUT DISPPARAMS& params);
@@ -93,26 +94,32 @@ private:
     int m_eventType;
     _bstr_t m_source;
     LONGLONG m_time;
+    BOOL m_incremental;
     dxf_snapshot_t m_snapshotHandle;
 
     CriticalSection m_listenerGuard;
     listener_map_t m_listeners;
     DISPID m_listenerMethodId;
+    DISPID m_incListenerSnapMethodId;
+    DISPID m_incListenerUpMethodId;
     DWORD m_listener_next_id;
 };
 
 /* -------------------------------------------------------------------------- */
 
 DXSnapshot::DXSnapshot(dxf_connection_t connection, int eventType, BSTR symbol, BSTR source,
-    LONGLONG time, IUnknown* parent)
+    LONGLONG time, BOOL incremental, IUnknown* parent)
     : DefIDispatchImpl(IID_IDXSubscription, parent)
     , DefIConnectionPointImpl(DIID_IDXEventListener)
     , m_connection(connection)
     , m_eventType(eventType)
     , m_source(source)
     , m_time(time)
+    , m_incremental(incremental)
     , m_snapshotHandle(NULL)
     , m_listenerMethodId(0)
+    , m_incListenerSnapMethodId(0)
+    , m_incListenerUpMethodId(0)
     , m_listener_next_id(1) {
     SetBehaviorCustomizer(this);
 
@@ -121,28 +128,47 @@ DXSnapshot::DXSnapshot(dxf_connection_t connection, int eventType, BSTR symbol, 
         throw "Failed to create a snapshot";
     }
 
-    if (DispUtils::GetMethodId(DIID_IDXEventListener, _bstr_t("OnNewData"), OUT m_listenerMethodId) != S_OK) {
-        m_listenerMethodId = 0;
+    if (incremental) {
+        if (DispUtils::GetMethodId(DIID_IDXIncrementalEventListener, _bstr_t("OnNewSnapshot"), OUT m_incListenerSnapMethodId) != S_OK) {
+            m_incListenerSnapMethodId = 0;
+        }
+        if (DispUtils::GetMethodId(DIID_IDXIncrementalEventListener, _bstr_t("OnUpdate"), OUT m_incListenerUpMethodId) != S_OK) {
+            m_incListenerUpMethodId = 0;
+        }
+    } else {
+        if (DispUtils::GetMethodId(DIID_IDXEventListener, _bstr_t("OnNewData"), OUT m_listenerMethodId) != S_OK) {
+            m_listenerMethodId = 0;
+        }
     }
 
-    if (dxf_attach_snapshot_listener(m_snapshotHandle, OnNewData, this) != DXF_SUCCESS) {
-        CloseSnapshot();
-        throw "Failed to attach an internal event listener";
+    if (incremental) {
+        if (dxf_attach_snapshot_inc_listener(m_snapshotHandle, OnNewDataInc, this) != DXF_SUCCESS) {
+            CloseSnapshot();
+            throw "Failed to attach an internal event listener";
+        }
+    } else {
+        if (dxf_attach_snapshot_listener(m_snapshotHandle, OnNewData, this) != DXF_SUCCESS) {
+            CloseSnapshot();
+            throw "Failed to attach an internal event listener";
+        }
     }
 }
 
 /* -------------------------------------------------------------------------- */
 
 DXSnapshot::DXSnapshot(dxf_connection_t connection, IDXCandleSymbol* symbol, LONGLONG time,
-    IUnknown* parent)
+    BOOL incremental, IUnknown* parent)
     : DefIDispatchImpl(IID_IDXSubscription, parent)
     , DefIConnectionPointImpl(DIID_IDXEventListener)
     , m_connection(connection)
     , m_source()
     , m_time(time)
+    , m_incremental(incremental)
     , m_eventType(DXF_ET_CANDLE)
     , m_snapshotHandle(NULL)
     , m_listenerMethodId(0)
+    , m_incListenerSnapMethodId(0)
+    , m_incListenerUpMethodId(0)
     , m_listener_next_id(1) {
     SetBehaviorCustomizer(this);
 
@@ -151,13 +177,29 @@ DXSnapshot::DXSnapshot(dxf_connection_t connection, IDXCandleSymbol* symbol, LON
         throw "Failed to create a snapshot";
     }
 
-    if (DispUtils::GetMethodId(DIID_IDXEventListener, _bstr_t("OnNewData"), OUT m_listenerMethodId) != S_OK) {
-        m_listenerMethodId = 0;
+    if (incremental) {
+        if (DispUtils::GetMethodId(DIID_IDXIncrementalEventListener, _bstr_t("OnNewSnapshot"), OUT m_incListenerSnapMethodId) != S_OK) {
+            m_incListenerSnapMethodId = 0;
+        }
+        if (DispUtils::GetMethodId(DIID_IDXIncrementalEventListener, _bstr_t("OnUpdate"), OUT m_incListenerUpMethodId) != S_OK) {
+            m_incListenerUpMethodId = 0;
+        }
+    } else {
+        if (DispUtils::GetMethodId(DIID_IDXEventListener, _bstr_t("OnNewData"), OUT m_listenerMethodId) != S_OK) {
+            m_listenerMethodId = 0;
+        }
     }
 
-    if (dxf_attach_snapshot_listener(m_snapshotHandle, OnNewData, this) != DXF_SUCCESS) {
-        CloseSnapshot();
-        throw "Failed to attach an internal event listener";
+    if (incremental) {
+        if (dxf_attach_snapshot_inc_listener(m_snapshotHandle, OnNewDataInc, this) != DXF_SUCCESS) {
+            CloseSnapshot();
+            throw "Failed to attach an internal event listener";
+        }
+    } else {
+        if (dxf_attach_snapshot_listener(m_snapshotHandle, OnNewData, this) != DXF_SUCCESS) {
+            CloseSnapshot();
+            throw "Failed to attach an internal event listener";
+        }
     }
 }
 
@@ -445,6 +487,50 @@ void DXSnapshot::OnNewData(const dxf_snapshot_data_ptr_t snapshotData, void* use
     }
 }
 
+void DXSnapshot::OnNewDataInc(const dxf_snapshot_data_ptr_t snapshotData, int new_snapshot, void* userData) {
+    if (userData == NULL) {
+        return;
+    }
+
+    DXSnapshot* thisPtr = reinterpret_cast<DXSnapshot*>(userData);
+
+    AutoCriticalSection acs(thisPtr->m_listenerGuard);
+
+    if (thisPtr->m_listeners.empty()) {
+        return;
+    }
+
+    IDXEventDataCollection* dataCollection = DefDXEventDataCollectionFactory::CreateInstance(
+        snapshotData->event_type,
+        snapshotData->records,
+        snapshotData->records_count,
+        static_cast<IDXSubscription*>(thisPtr));
+    if (dataCollection == NULL) {
+        return;
+    }
+
+    IUnknownWrapper dcw(dataCollection, false);
+
+    try {
+        listener_map_t::const_iterator it = thisPtr->m_listeners.begin();
+        listener_map_t::const_iterator itEnd = thisPtr->m_listeners.end();
+        variant_vector_t storage;
+        DISPPARAMS listenerParams;
+        _bstr_t symbolWrapper(snapshotData->symbol);
+
+        thisPtr->CreateListenerParams(static_cast<IDXSubscription*>(thisPtr), snapshotData->event_type, symbolWrapper,
+            dataCollection, storage, listenerParams);
+
+        for (; it != itEnd; ++it) {
+            if (new_snapshot)
+                (*it).second->Invoke(thisPtr->m_incListenerSnapMethodId, IID_NULL, 0, DISPATCH_METHOD, &listenerParams, NULL, NULL, NULL);
+            else
+                (*it).second->Invoke(thisPtr->m_incListenerUpMethodId, IID_NULL, 0, DISPATCH_METHOD, &listenerParams, NULL, NULL, NULL);
+        }
+    } catch (...) {
+    }
+}
+
 /* -------------------------------------------------------------------------- */
 
 void DXSnapshot::ClearListeners() {
@@ -566,8 +652,20 @@ HRESULT STDMETHODCALLTYPE DXSnapshot::Advise(IUnknown *pUnkSink, DWORD *pdwCooki
 
     IDispatch* listener = NULL;
 
-    if (pUnkSink->QueryInterface(DIID_IDXEventListener, reinterpret_cast<void**>(&listener)) != S_OK) {
-        return CONNECT_E_CANNOTCONNECT;
+    if (m_incremental) {
+        if (pUnkSink->QueryInterface(DIID_IDXIncrementalEventListener, reinterpret_cast<void**>(&listener)) != S_OK) {
+            return CONNECT_E_CANNOTCONNECT;
+        }
+        if (m_incListenerSnapMethodId == 0 || m_incListenerUpMethodId == 0) {
+            return DISP_E_UNKNOWNNAME;
+        }
+    } else {
+        if (pUnkSink->QueryInterface(DIID_IDXEventListener, reinterpret_cast<void**>(&listener)) != S_OK) {
+            return CONNECT_E_CANNOTCONNECT;
+        }
+        if (m_listenerMethodId == 0) {
+            return DISP_E_UNKNOWNNAME;
+        }
     }
 
     AutoCriticalSection acs(m_listenerGuard);
@@ -580,10 +678,6 @@ HRESULT STDMETHODCALLTYPE DXSnapshot::Advise(IUnknown *pUnkSink, DWORD *pdwCooki
 
             return S_OK;
         }
-    }
-
-    if (m_listenerMethodId == 0) {
-        return DISP_E_UNKNOWNNAME;
     }
 
     *pdwCookie = m_listener_next_id++;
@@ -623,11 +717,11 @@ void DXSnapshot::OnBeforeDelete() {
 /* -------------------------------------------------------------------------- */
 
 IDXSubscription* DefDXSnapshotFactory::CreateSnapshot(dxf_connection_t connection, int eventType,
-    BSTR symbol, BSTR source, LONGLONG time, IUnknown* parent) {
+    BSTR symbol, BSTR source, LONGLONG time, BOOL incremental, IUnknown* parent) {
     IDXSubscription* subscription = NULL;
 
     try {
-        subscription = new DXSnapshot(connection, eventType, symbol, source, time, parent);
+        subscription = new DXSnapshot(connection, eventType, symbol, source, time, incremental, parent);
 
         subscription->AddRef();
     } catch (...) {
@@ -637,11 +731,11 @@ IDXSubscription* DefDXSnapshotFactory::CreateSnapshot(dxf_connection_t connectio
 }
 
 IDXSubscription* DefDXSnapshotFactory::CreateSnapshot(dxf_connection_t connection,
-    IDXCandleSymbol* symbol, LONGLONG time, IUnknown* parent) {
+    IDXCandleSymbol* symbol, LONGLONG time, BOOL incremental, IUnknown* parent) {
     IDXSubscription* subscription = NULL;
 
     try {
-        subscription = new DXSnapshot(connection, symbol, time, parent);
+        subscription = new DXSnapshot(connection, symbol, time, incremental, parent);
 
         subscription->AddRef();
     } catch (...) {
