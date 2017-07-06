@@ -657,7 +657,7 @@ void dx_socket_reader (dx_network_connection_context_t* context) {
         } else {
 #ifdef DXFEED_CODEC_TLS_ENABLED
             if (dx_get_current_address(context)->tls.enabled) {
-                number_of_bytes_read = tls_read(context->tls_context, (void*)read_buf, READ_CHUNK_SIZE);
+                number_of_bytes_read = (int)tls_read(context->tls_context, (void*)read_buf, READ_CHUNK_SIZE);
                 if (number_of_bytes_read == -1)
                     dx_logging_ansi_error(tls_error(context->tls_context));
             } else {
@@ -1173,7 +1173,7 @@ bool dx_send_data (dxf_connection_t connection, const void* buffer, int buffer_s
         } else {
 #ifdef DXFEED_CODEC_TLS_ENABLED
             if (dx_get_current_address(context)->tls.enabled) {
-                sent_count = tls_write(context->tls_context, (const void*)char_buf, buffer_size);
+                sent_count = (int)tls_write(context->tls_context, (const void*)char_buf, buffer_size);
                 if (sent_count == -1)
                     dx_logging_ansi_error(tls_error(context->tls_context));
             } else {
