@@ -506,6 +506,28 @@ DXFEED_API ERRORCODE dxf_detach_snapshot_listener(dxf_snapshot_t snapshot,
                                                   dxf_snapshot_listener_t snapshot_listener);
 
 /*
+ *  Attaches a incremental listener callback to the snapshot.
+ *  This callback will be invoked when the new snapshot arrives or existing updates.
+ *  No error occurs if it's attempted to attach the same listener twice or more.
+ *
+ *  snapshot - a handle of the snapshot to which a listener is to be attached
+ *  snapshot_listener - a listener callback function pointer
+ */
+DXFEED_API ERRORCODE dxf_attach_snapshot_inc_listener(dxf_snapshot_t snapshot, 
+                                                  dxf_snapshot_inc_listener_t snapshot_listener,
+                                                  void* user_data);
+
+/*
+ *  Detaches a listener from the snapshot.
+ *  No error occurs if it's attempted to detach a listener which wasn't previously attached.
+ *
+ *  snapshot - a handle of the snapshot to which a listener is to be detached
+ *  snapshot_listener - a listener callback function pointer
+ */
+DXFEED_API ERRORCODE dxf_detach_snapshot_inc_listener(dxf_snapshot_t snapshot, 
+                                                  dxf_snapshot_inc_listener_t snapshot_listener);
+
+/*
  *  Retrieves the symbol currently added to the snapshot subscription.
  *  The memory for the resulting symbol is allocated internally, so no actions to free it are required.
  *

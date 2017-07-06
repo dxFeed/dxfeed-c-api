@@ -748,6 +748,7 @@ private:
     virtual HRESULT STDMETHODCALLTYPE GetTimeSequence(LONGLONG* value);
     virtual HRESULT STDMETHODCALLTYPE GetSequence(INT* value);
     virtual HRESULT STDMETHODCALLTYPE GetScope(INT* value);
+    virtual HRESULT STDMETHODCALLTYPE IsRemoved(VARIANT_BOOL* value);
 
 private:
 
@@ -927,6 +928,16 @@ HRESULT STDMETHODCALLTYPE DXOrder::GetScope(INT* value) {
 }
 
 /* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXOrder::IsRemoved(VARIANT_BOOL* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->size == 0 ? VARIANT_TRUE : VARIANT_FALSE;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
 /*
  *	DXTimeAndSale class
 
@@ -975,6 +986,7 @@ private:
     virtual HRESULT STDMETHODCALLTYPE GetTradeFlag(VARIANT_BOOL* value);
     virtual HRESULT STDMETHODCALLTYPE GetValidTick(VARIANT_BOOL* value);
     virtual HRESULT STDMETHODCALLTYPE GetType(INT* value);
+    virtual HRESULT STDMETHODCALLTYPE IsRemoved(VARIANT_BOOL* value);
 
 private:
 
@@ -1164,6 +1176,15 @@ HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetType(INT* value) {
     return S_OK;
 }
 
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXTimeAndSale::IsRemoved(VARIANT_BOOL* value) {
+    CHECK_PTR(value);
+
+    *value = (m_data->event_flags & DXEF_remove_event) != 0 ? VARIANT_TRUE : VARIANT_FALSE;
+
+    return S_OK;
+}
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -1212,6 +1233,8 @@ private:
     virtual HRESULT STDMETHODCALLTYPE GetIndex(LONGLONG* value);
     virtual HRESULT STDMETHODCALLTYPE GetOpenInterest(LONGLONG* value);
     virtual HRESULT STDMETHODCALLTYPE GetImpVolacility(DOUBLE* value);
+    virtual HRESULT STDMETHODCALLTYPE GetEventFlags(INT* value);
+    virtual HRESULT STDMETHODCALLTYPE IsRemoved(VARIANT_BOOL* value);
 
 private:
 
@@ -1369,6 +1392,26 @@ HRESULT STDMETHODCALLTYPE DXCandle::GetImpVolacility(DOUBLE* value) {
     CHECK_PTR(value);
 
     *value = m_data->imp_volatility;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXCandle::GetEventFlags(INT* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->event_flags;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXCandle::IsRemoved(VARIANT_BOOL* value) {
+    CHECK_PTR(value);
+
+    *value = (m_data->event_flags & DXEF_remove_event) != 0 ? VARIANT_TRUE : VARIANT_FALSE;
 
     return S_OK;
 }
@@ -1540,6 +1583,7 @@ private:
     virtual HRESULT STDMETHODCALLTYPE GetSpreadSymbol(BSTR* value);
     virtual HRESULT STDMETHODCALLTYPE GetTimeSequence(LONGLONG* value);
     virtual HRESULT STDMETHODCALLTYPE GetScope(INT* value);
+    virtual HRESULT STDMETHODCALLTYPE IsRemoved(VARIANT_BOOL* value);
 
 private:
 
@@ -1720,6 +1764,16 @@ HRESULT STDMETHODCALLTYPE DXSpreadOrder::GetScope(INT* value) {
 }
 
 /* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXSpreadOrder::IsRemoved(VARIANT_BOOL* value) {
+    CHECK_PTR(value);
+
+    *value = (m_data->event_flags & DXEF_remove_event) != 0 ? VARIANT_TRUE : VARIANT_FALSE;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
 /*
  *	DXGreeks class
 
@@ -1762,6 +1816,8 @@ private:
     virtual HRESULT STDMETHODCALLTYPE GetRho(DOUBLE* value);
     virtual HRESULT STDMETHODCALLTYPE GetVega(DOUBLE* value);
     virtual HRESULT STDMETHODCALLTYPE GetIndex(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetEventFlags(INT* value);
+    virtual HRESULT STDMETHODCALLTYPE IsRemoved(VARIANT_BOOL* value);
 
 private:
 
@@ -1879,6 +1935,26 @@ HRESULT STDMETHODCALLTYPE DXGreeks::GetIndex(LONGLONG* value) {
     CHECK_PTR(value);
 
     *value = m_data->index;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXGreeks::GetEventFlags(INT* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->event_flags;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXGreeks::IsRemoved(VARIANT_BOOL* value) {
+    CHECK_PTR(value);
+
+    *value = (m_data->event_flags & DXEF_remove_event) != 0 ? VARIANT_TRUE : VARIANT_FALSE;
 
     return S_OK;
 }
@@ -2153,6 +2229,8 @@ private:
     virtual HRESULT STDMETHODCALLTYPE GetDividend(DOUBLE* value);
     virtual HRESULT STDMETHODCALLTYPE GetInterest(DOUBLE* value);
     virtual HRESULT STDMETHODCALLTYPE GetIndex(LONGLONG* value);
+    virtual HRESULT STDMETHODCALLTYPE GetEventFlags(INT* value);
+    virtual HRESULT STDMETHODCALLTYPE IsRemoved(VARIANT_BOOL* value);
 
 private:
 
@@ -2250,6 +2328,26 @@ HRESULT STDMETHODCALLTYPE DXSeries::GetIndex(LONGLONG* value) {
     CHECK_PTR(value);
 
     *value = m_data->index;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXSeries::GetEventFlags(INT* value) {
+    CHECK_PTR(value);
+
+    *value = m_data->event_flags;
+
+    return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXSeries::IsRemoved(VARIANT_BOOL* value) {
+    CHECK_PTR(value);
+
+    *value = (m_data->event_flags & DXEF_remove_event) != 0 ? VARIANT_TRUE : VARIANT_FALSE;
 
     return S_OK;
 }
