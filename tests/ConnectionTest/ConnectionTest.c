@@ -5,10 +5,7 @@
 #include <stdio.h>
 #include <Windows.h>
 
-//const char dxfeed_host[] = "demo.dxfeed.com:7300";
-//TODO: temp
-//const char dxfeed_host[] = "mddqa.in.devexperts.com:7400[username=demo1,password=demo]";
-const char dxfeed_host[] = "127.0.0.1:7777[username=xxx,password=yyy]";
+const char dxfeed_host[] = "demo.dxfeed.com:7300";
 
 /* -------------------------------------------------------------------------- */
 
@@ -37,65 +34,32 @@ void process_last_error () {
 
 /* -------------------------------------------------------------------------- */
 
-void conn_termination_notifier(dxf_connection_t connection, void* user_data) {
-    wprintf(L"The connection was been terminated!\n");
-    process_last_error();
-}
-
-/* -------------------------------------------------------------------------- */
-
 int main (int argc, char* argv[]) {
-
     dxf_connection_t connection;
-
-    //TODO: new
-    dxf_initialize_logger("log.log", 1, 1, 1);
     
     printf("Connection test started.\n");
-    //printf("Connecting to host %s...\n", dxfeed_host);
-    //
-    //if (!dxf_create_connection(dxfeed_host, NULL, NULL, NULL, NULL, &connection)) {
-    //    process_last_error();
-
-    //    return -1;
-    //}
-    //
-    //printf("Connection successful!\n");
-    //
-    //Sleep(121000);//2m01s
-    //
-    //printf("Disconnecting from host...\n");
-    //
-    //if (!dxf_close_connection(connection)) {
-    //    process_last_error();
-    //    
-    //    return -1;
-    //}
-    //
-    //printf("Disconnect successful!\n");
-
-    printf("Connecting to host via basic authorization %s...\n", dxfeed_host);
-    //TODO: finish test
-    if (!dxf_create_connection_auth_basic(dxfeed_host, "demo1", "demo", conn_termination_notifier, NULL, NULL, NULL, &connection)) {
+    printf("Connecting to host %s...\n", dxfeed_host);
+    
+    if (!dxf_create_connection(dxfeed_host, NULL, NULL, NULL, NULL, &connection)) {
         process_last_error();
 
         return -1;
     }
-
+    
     printf("Connection successful!\n");
-
-    Sleep(5000);
-
+    
+    Sleep(121000);//2m01s
+    
     printf("Disconnecting from host...\n");
-
+    
     if (!dxf_close_connection(connection)) {
         process_last_error();
-
+        
         return -1;
     }
-
+    
     printf("Disconnect successful!\n"
-        "Connection test completed successfully!\n");
+           "Connection test completed successfully!\n");
            
     return 0;
 }
