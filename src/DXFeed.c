@@ -1002,6 +1002,42 @@ DXFEED_API ERRORCODE dxf_detach_snapshot_listener(dxf_snapshot_t snapshot, dxf_s
 
 /* -------------------------------------------------------------------------- */
 
+DXFEED_API ERRORCODE dxf_attach_snapshot_inc_listener(dxf_snapshot_t snapshot, dxf_snapshot_inc_listener_t snapshot_listener,
+    void* user_data) {
+    dx_perform_common_actions();
+
+    if (snapshot == dx_invalid_snapshot || snapshot_listener == NULL) {
+        dx_set_error_code(dx_ec_invalid_func_param);
+        return DXF_FAILURE;
+    }
+
+    if (!dx_add_snapshot_inc_listener(snapshot, snapshot_listener, user_data)) {
+        return DXF_FAILURE;
+    }
+
+    return DXF_SUCCESS;
+}
+
+/* -------------------------------------------------------------------------- */
+
+DXFEED_API ERRORCODE dxf_detach_snapshot_inc_listener(dxf_snapshot_t snapshot, dxf_snapshot_inc_listener_t snapshot_listener) {
+    dx_perform_common_actions();
+
+    if (snapshot == dx_invalid_subscription || snapshot_listener == NULL) {
+        dx_set_error_code(dx_ec_invalid_func_param);
+
+        return DXF_FAILURE;
+    }
+
+    if (!dx_remove_snapshot_inc_listener(snapshot, snapshot_listener)) {
+        return DXF_FAILURE;
+    }
+
+    return DXF_SUCCESS;
+}
+
+/* -------------------------------------------------------------------------- */
+
 DXFEED_API ERRORCODE dxf_get_snapshot_symbol(dxf_snapshot_t snapshot, OUT dxf_string_t* symbol) {
     dx_perform_common_actions();
 

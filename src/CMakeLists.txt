@@ -158,7 +158,8 @@ set (ADDITIONAL_LIBRARIES "")
 
 if (MSVC)
     set(CMAKE_C_FLAGS_DEBUG "/TC /RTC1 /MTd /Od")
-    set(CMAKE_C_FLAGS_RELEASE "/O2 /MT")
+    set(CMAKE_C_FLAGS_RELEASE "/O2 /MT /Zi")
+    set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF")
     add_definitions (-D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE -D_USRDLL -DDXFEED_EXPORTS /Gd /TC /Zc:wchar_t /Zc:forScope /Gm- /W3 /Ob0)
     
     set (ADDITIONAL_LIBRARIES
@@ -230,6 +231,21 @@ install(FILES "../DXFeed.def" "../DXFeedd.def" "../DXFeed_64.def" "../DXFeedd_64
     "../CMakeLists.txt" "../build.bat" "../make_package.bat"
     DESTINATION "."
 )
+if(MSVC)
+    set(DEBUG_PDB_PATH ${EXECUTABLE_OUTPUT_PATH}/Debug)
+    install(FILES ${DEBUG_PDB_PATH}/${PROJECT}d.pdb ${DEBUG_PDB_PATH}/${PROJECT}d_64.pdb
+        DESTINATION "bin/${TARGET_PLATFORM}"
+        CONFIGURATIONS Debug
+        OPTIONAL
+    )
+    set(RELEASE_PDB_PATH ${EXECUTABLE_OUTPUT_PATH}/Release)
+    install(FILES ${RELEASE_PDB_PATH}/${PROJECT}.pdb ${RELEASE_PDB_PATH}/${PROJECT}_64.pdb
+        DESTINATION "bin/${TARGET_PLATFORM}"
+        CONFIGURATIONS Release
+        OPTIONAL
+    )
+endif(MSVC)
+
 set(CPACK_PACKAGE_VENDOR "Devexperts")
 set(CPACK_PACKAGE_NAME "${PROJECT}")
 set(CPACK_PACKAGE_VERSION "${APP_VERSION}")

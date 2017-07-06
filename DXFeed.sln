@@ -44,6 +44,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PriceLevelBookSample", "tes
 		{98DF2375-3C29-4806-A832-7C666F8BF54C} = {98DF2375-3C29-4806-A832-7C666F8BF54C}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IncSnapshotConsoleSample", "tests\IncSnapshotConsoleSample\IncSnapshotConsoleSample.vcxproj", "{70E09AD5-89E5-47E2-953B-860A53F1C1DC}"
+	ProjectSection(ProjectDependencies) = postProject
+		{98DF2375-3C29-4806-A832-7C666F8BF54C} = {98DF2375-3C29-4806-A832-7C666F8BF54C}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -294,6 +299,22 @@ Global
 		{BF2A8A6D-418E-4CD0-B41F-77B252CB31A4}.ReleaseTls|Win32.Build.0 = ReleaseTls|Win32
 		{BF2A8A6D-418E-4CD0-B41F-77B252CB31A4}.ReleaseTls|x64.ActiveCfg = ReleaseTls|x64
 		{BF2A8A6D-418E-4CD0-B41F-77B252CB31A4}.ReleaseTls|x64.Build.0 = ReleaseTls|x64
+		{70E09AD5-89E5-47E2-953B-860A53F1C1DC}.Debug|Win32.ActiveCfg = Debug|Win32
+		{70E09AD5-89E5-47E2-953B-860A53F1C1DC}.Debug|Win32.Build.0 = Debug|Win32
+		{70E09AD5-89E5-47E2-953B-860A53F1C1DC}.Debug|x64.ActiveCfg = Debug|x64
+		{70E09AD5-89E5-47E2-953B-860A53F1C1DC}.Debug|x64.Build.0 = Debug|x64
+		{70E09AD5-89E5-47E2-953B-860A53F1C1DC}.DebugTls|Win32.ActiveCfg = DebugTls|Win32
+		{70E09AD5-89E5-47E2-953B-860A53F1C1DC}.DebugTls|Win32.Build.0 = DebugTls|Win32
+		{70E09AD5-89E5-47E2-953B-860A53F1C1DC}.DebugTls|x64.ActiveCfg = DebugTls|x64
+		{70E09AD5-89E5-47E2-953B-860A53F1C1DC}.DebugTls|x64.Build.0 = DebugTls|x64
+		{70E09AD5-89E5-47E2-953B-860A53F1C1DC}.Release|Win32.ActiveCfg = Release|Win32
+		{70E09AD5-89E5-47E2-953B-860A53F1C1DC}.Release|Win32.Build.0 = Release|Win32
+		{70E09AD5-89E5-47E2-953B-860A53F1C1DC}.Release|x64.ActiveCfg = Release|x64
+		{70E09AD5-89E5-47E2-953B-860A53F1C1DC}.Release|x64.Build.0 = Release|x64
+		{70E09AD5-89E5-47E2-953B-860A53F1C1DC}.ReleaseTls|Win32.ActiveCfg = ReleaseTls|Win32
+		{70E09AD5-89E5-47E2-953B-860A53F1C1DC}.ReleaseTls|Win32.Build.0 = ReleaseTls|Win32
+		{70E09AD5-89E5-47E2-953B-860A53F1C1DC}.ReleaseTls|x64.ActiveCfg = ReleaseTls|x64
+		{70E09AD5-89E5-47E2-953B-860A53F1C1DC}.ReleaseTls|x64.Build.0 = ReleaseTls|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
