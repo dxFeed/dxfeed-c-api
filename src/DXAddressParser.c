@@ -65,6 +65,7 @@ bool dx_codec_gzip_parser(const char* codec, size_t size, OUT dx_address_t* addr
 
 static const dx_codec_info_t codecs[] = {
     { "tls", DX_CODEC_TLS_STATUS, dx_codec_tls_parser },
+    { "ssl", DX_CODEC_TLS_STATUS, dx_codec_tls_parser },
     { "gzip", DX_CODEC_GZIP_STATUS, dx_codec_gzip_parser }
 };
 
