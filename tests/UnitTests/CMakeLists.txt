@@ -40,6 +40,7 @@ set(COMMON_HEADERS
     ${LIB_DXFEED_SRC_DIR}/DXErrorHandling.h
     ${LIB_DXFEED_SRC_DIR}/DXMemory.h
     ${LIB_DXFEED_SRC_DIR}/DXPMessageData.h
+    ${LIB_DXFEED_SRC_DIR}/DXProperties.h
     ${LIB_DXFEED_SRC_DIR}/DXThreads.h
     ${INCLUDE_DIR}/EventData.h
     ${LIB_DXFEED_SRC_DIR}/EventManager.h
@@ -60,6 +61,7 @@ set(COMMON_SOURCES
     ${LIB_DXFEED_SRC_DIR}/DXMemory.c
     ${LIB_DXFEED_SRC_DIR}/DXNetwork.c
     ${LIB_DXFEED_SRC_DIR}/DXPMessageData.c
+    ${LIB_DXFEED_SRC_DIR}/DXProperties.c
     ${LIB_DXFEED_SRC_DIR}/DXSockets.c
     ${LIB_DXFEED_SRC_DIR}/DXThreads.c
     ${LIB_DXFEED_SRC_DIR}/EventData.c
@@ -81,7 +83,7 @@ set(HEADER_FILES
     AlgorithmsTest.h
     CandleTest.h
     ConnectionTest.h
-    DataCollectionsTests.h
+    DXNetworkTests.h
     EventDynamicSubscriptionTest.h
     EventSubscriptionTest.h
     OrderSourceConfigurationTest.h
@@ -117,7 +119,7 @@ set(SOURCE_FILES
     AlgorithmsTest.c
     CandleTest.c
     ConnectionTest.c
-    DataCollectionsTests.c
+    DXNetworkTests.c
     EventDynamicSubscriptionTest.cpp
     EventSubscriptionTest.c
     OrderSourceConfigurationTest.c

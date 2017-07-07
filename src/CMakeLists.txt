@@ -66,6 +66,7 @@ set (HEADER_FILES
     DXMemory.h
     DXNetwork.h
     DXPMessageData.h
+    DXProperties.h
     DXSockets.h
     DXThreads.h
     EventManager.h
@@ -122,6 +123,7 @@ set (SOURCE_FILES
     DXMemory.c
     DXNetwork.c
     DXPMessageData.c
+    DXProperties.c
     DXSockets.c
     DXThreads.c
     EventData.c
@@ -222,7 +224,7 @@ set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/DXFeedAllCPackConfig.cmake")
 install(TARGETS ${PROJECT}
     DESTINATION "bin/${TARGET_PLATFORM}"
 )
-install(DIRECTORY "${INCLUDE_DIR}" "../scripts" "../src"
+install(DIRECTORY "${INCLUDE_DIR}" "../scripts" "../src" "../lib"
     DESTINATION "."
     PATTERN "build" EXCLUDE
 )
