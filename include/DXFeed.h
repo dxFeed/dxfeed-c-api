@@ -73,7 +73,10 @@ typedef void (*dxf_socket_thread_destruction_notifier_t) (dxf_connection_t conne
 /*
  *	Creates connection with the specified parameters.
  
- *  address - "[host[:port],]host:port"
+ *  address - the single address: "host:port" or just "host"
+ *            address with credentials: "host:port[username=xxx,password=yyy]"
+ *            multiple addresses: "(host1:port1)(host2)(host3:port3[username=xxx,password=yyy])"
+ *            the data from file: "/path/to/file" on *nix and "drive:\path\to\file" on Windows
  *  notifier - the callback to inform the client side that the connection has stumbled upon and error and will go reconnecting
  *  stcn - the callback for informing the client side about the socket thread creation;
            may be set to NULL if no specific action is required to perform on the client side on a new thread creation
@@ -93,7 +96,10 @@ DXFEED_API ERRORCODE dxf_create_connection (const char* address,
 /*
  *	Creates connection with the specified parameters and basic authorization.
  
- *  address - "[host[:port],]host:port"
+ *  address - the single address: "host:port" or just "host"
+ *            address with credentials: "host:port[username=xxx,password=yyy]"
+ *            multiple addresses: "(host1:port1)(host2)(host3:port3[username=xxx,password=yyy])"
+ *            the data from file: "/path/to/file" on *nix and "drive:\path\to\file" on Windows
  *  user - the user name;
  *  password - the user password;
  *  notifier - the callback to inform the client side that the connection has stumbled upon and error and will go reconnecting
@@ -104,6 +110,8 @@ DXFEED_API ERRORCODE dxf_create_connection (const char* address,
  *  user_data - the user defined value passed to the termination notifier callback along with the connection handle; may be set
                 to whatever value;
  *  OUT connection - the handle of the created connection.
+ *
+ * Note: the user and password data from argument have a higher priority than address credentials.
  */
 DXFEED_API ERRORCODE dxf_create_connection_auth_basic(const char* address,
                                                       const char* user,
@@ -117,7 +125,10 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_basic(const char* address,
 /*
  *	Creates connection with the specified parameters and token authorization.
  
- *  address - "[host[:port],]host:port"
+ *  address - the single address: "host:port" or just "host"
+ *            address with credentials: "host:port[username=xxx,password=yyy]"
+ *            multiple addresses: "(host1:port1)(host2)(host3:port3[username=xxx,password=yyy])"
+ *            the data from file: "/path/to/file" on *nix and "drive:\path\to\file" on Windows
  *  token - the authorization token;
  *  notifier - the callback to inform the client side that the connection has stumbled upon and error and will go reconnecting
  *  stcn - the callback for informing the client side about the socket thread creation;
@@ -127,6 +138,8 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_basic(const char* address,
  *  user_data - the user defined value passed to the termination notifier callback along with the connection handle; may be set
                 to whatever value;
  *  OUT connection - the handle of the created connection.
+ *
+ * Note: the token data from argument have a higher priority than address credentials.
  */
 DXFEED_API ERRORCODE dxf_create_connection_auth_bearer(const char* address,
                                                        const char* token,
@@ -139,7 +152,10 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_bearer(const char* address,
 /*
  *	Creates connection with the specified parameters and custom described authorization.
  
- *  address - "[host[:port],]host:port"
+ *  address - the single address: "host:port" or just "host"
+ *            address with credentials: "host:port[username=xxx,password=yyy]"
+ *            multiple addresses: "(host1:port1)(host2)(host3:port3[username=xxx,password=yyy])"
+ *            the data from file: "/path/to/file" on *nix and "drive:\path\to\file" on Windows
  *  authscheme - the authorization scheme;
  *  authdata - the authorization data;
  *  notifier - the callback to inform the client side that the connection has stumbled upon and error and will go reconnecting
@@ -150,6 +166,8 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_bearer(const char* address,
  *  user_data - the user defined value passed to the termination notifier callback along with the connection handle; may be set
                 to whatever value;
  *  OUT connection - the handle of the created connection.
+ *
+ * Note: the authscheme and authdata from argument have a higher priority than address credentials.
  */
 DXFEED_API ERRORCODE dxf_create_connection_auth_custom(const char* address,
                                                        const char* authscheme,
