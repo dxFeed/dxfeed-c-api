@@ -834,6 +834,9 @@ static bool dx_read_symbol (dx_server_msg_proc_connection_context_t* context) {
         
     if ((r & dx_get_codec_valid_cipher()) != 0) {
         context->last_cipher = r;
+        if (context->last_symbol != NULL) {
+            CHECKED_FREE(context->last_symbol);
+        }
         context->last_symbol = NULL;
 	} else if (r > 0) {
         context->last_cipher = 0;      
@@ -1052,6 +1055,7 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
     dx_logging_verbose_info(L"Process data");
     context->last_cipher = 0;
     CHECKED_FREE(context->last_symbol);
+    context->last_symbol = NULL;
     context->last_flags = 0;
     context->mru_event_flags = dxf_ef_tx_pending;
 

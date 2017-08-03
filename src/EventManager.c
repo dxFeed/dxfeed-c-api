@@ -64,11 +64,14 @@
                                                 } \
         dx_memcpy(dest, source, sizeof(struct_name)); \
         if (src_obj->string_param != NULL) { \
-            temp_buf = dx_calloc(1, sizeof(dx_string_array_t)); \
+            temp_buf = (*string_buffer == NULL) ? dx_calloc(1, sizeof(dx_string_array_t)) : *string_buffer; \
             temp_str = dx_create_string_src(src_obj->string_param); \
             if (!dx_string_array_add(temp_buf, temp_str)) { \
                 dx_free(dest); \
-                dx_free(temp_buf); \
+                if (*string_buffer == NULL) { \
+                    dx_free(temp_buf); \
+                } \
+                dx_free(temp_str); \
                 return false; \
             } \
             dest->string_param = temp_str; \
@@ -94,11 +97,14 @@
                                                 } \
         dx_memcpy(dest, source, sizeof(struct_name)); \
         if (src_obj->string_param_1 != NULL) { \
-            temp_buf = dx_calloc(1, sizeof(dx_string_array_t)); \
+            temp_buf = (*string_buffer == NULL) ? dx_calloc(1, sizeof(dx_string_array_t)) : *string_buffer; \
             temp_str = dx_create_string_src(src_obj->string_param_1); \
             if (!dx_string_array_add(temp_buf, temp_str)) { \
                 dx_free(dest); \
-                dx_free(temp_buf); \
+                if (*string_buffer == NULL) { \
+                    dx_free(temp_buf); \
+                } \
+                dx_free(temp_str); \
                 return false; \
             } \
             dest->string_param_1 = temp_str; \
@@ -111,6 +117,10 @@
             if (!dx_string_array_add(temp_buf, temp_str)) { \
                 dx_free(dest); \
                 dx_string_array_free(temp_buf); \
+                if (*string_buffer == NULL) { \
+                    dx_free(temp_buf); \
+                } \
+                dx_free(temp_str); \
                 return false; \
             } \
             dest->string_param_2 = temp_str; \
