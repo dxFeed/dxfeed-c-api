@@ -54,7 +54,6 @@
         struct_name* dest = NULL; \
         struct_name* src_obj = (struct_name*)source; \
         dxf_string_t temp_str = NULL; \
-        dx_string_array_ptr_t temp_buf = NULL; \
         if (source == NULL || new_obj == NULL || string_buffer == NULL) { \
             return dx_set_error_code(dx_ec_invalid_func_param_internal); \
                                                 } \
@@ -64,7 +63,7 @@
                                                 } \
         dx_memcpy(dest, source, sizeof(struct_name)); \
         if (src_obj->string_param != NULL) { \
-            temp_buf = (*string_buffer == NULL) ? dx_calloc(1, sizeof(dx_string_array_t)) : *string_buffer; \
+            dx_string_array_ptr_t temp_buf = (*string_buffer == NULL) ? dx_calloc(1, sizeof(dx_string_array_t)) : *string_buffer; \
             temp_str = dx_create_string_src(src_obj->string_param); \
             if (!dx_string_array_add(temp_buf, temp_str)) { \
                 dx_free(dest); \
@@ -75,8 +74,8 @@
                 return false; \
             } \
             dest->string_param = temp_str; \
+            *string_buffer = temp_buf; \
         } \
-        *string_buffer = temp_buf; \
         *new_obj = (dxf_event_data_t)dest; \
         return true; \
     }
@@ -87,7 +86,6 @@
         struct_name* dest = NULL; \
         struct_name* src_obj = (struct_name*)source; \
         dxf_string_t temp_str = NULL; \
-        dx_string_array_ptr_t temp_buf = NULL; \
         if (source == NULL || new_obj == NULL || string_buffer == NULL) { \
             return dx_set_error_code(dx_ec_invalid_func_param_internal); \
                                                 } \
@@ -97,7 +95,7 @@
                                                 } \
         dx_memcpy(dest, source, sizeof(struct_name)); \
         if (src_obj->string_param_1 != NULL) { \
-            temp_buf = (*string_buffer == NULL) ? dx_calloc(1, sizeof(dx_string_array_t)) : *string_buffer; \
+            dx_string_array_ptr_t temp_buf = (*string_buffer == NULL) ? dx_calloc(1, sizeof(dx_string_array_t)) : *string_buffer; \
             temp_str = dx_create_string_src(src_obj->string_param_1); \
             if (!dx_string_array_add(temp_buf, temp_str)) { \
                 dx_free(dest); \
@@ -108,11 +106,10 @@
                 return false; \
             } \
             dest->string_param_1 = temp_str; \
+            *string_buffer = temp_buf; \
         } \
         if (src_obj->string_param_2 != NULL) { \
-            if (temp_buf == NULL) { \
-                temp_buf = dx_calloc(1, sizeof(dx_string_array_t)); \
-            } \
+            dx_string_array_ptr_t temp_buf = (*string_buffer == NULL) ? dx_calloc(1, sizeof(dx_string_array_t)) : *string_buffer; \
             temp_str = dx_create_string_src(src_obj->string_param_2); \
             if (!dx_string_array_add(temp_buf, temp_str)) { \
                 dx_free(dest); \
@@ -124,8 +121,8 @@
                 return false; \
             } \
             dest->string_param_2 = temp_str; \
+            *string_buffer = temp_buf; \
         } \
-        *string_buffer = temp_buf; \
         *new_obj = (dxf_event_data_t)dest; \
         return true; \
     }

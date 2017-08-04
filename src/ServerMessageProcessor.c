@@ -834,9 +834,7 @@ static bool dx_read_symbol (dx_server_msg_proc_connection_context_t* context) {
         
     if ((r & dx_get_codec_valid_cipher()) != 0) {
         context->last_cipher = r;
-        if (context->last_symbol != NULL) {
-            CHECKED_FREE(context->last_symbol);
-        }
+        CHECKED_FREE(context->last_symbol);
         context->last_symbol = NULL;
 	} else if (r > 0) {
         context->last_cipher = 0;      
