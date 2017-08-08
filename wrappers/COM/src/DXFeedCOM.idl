@@ -509,6 +509,12 @@ library DXFeedCOM {
         HRESULT InitLogger ([in] BSTR, [in] VARIANT_BOOL, [in] VARIANT_BOOL, [in] VARIANT_BOOL);
         [id(5), helpstring("Creates a default Candle symbol attributes object.")]
         HRESULT CreateCandleSymbol([out, retval] IDispatch**);
+        [id(6), helpstring("Creates a new connection with basic authorization"), source]
+        HRESULT CreateBasicConnection([in] BSTR, [in] BSTR, [in] BSTR, [out, retval] IDispatch**);
+        [id(7), helpstring("Creates a new connection with bearer authorization"), source]
+        HRESULT CreateBearerConnection([in] BSTR, [in] BSTR, [out, retval] IDispatch**);
+        [id(8), helpstring("Creates a new connection with custom authorization"), source]
+        HRESULT CreateCustomConnection([in] BSTR, [in] BSTR, [in] BSTR, [out, retval] IDispatch**);
     };
 
     [uuid(88E3240E-D6DE-416b-893B-C9A439EEA275), helpstring("The main library class"), appobject]

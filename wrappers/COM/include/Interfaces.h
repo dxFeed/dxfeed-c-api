@@ -26,6 +26,9 @@ struct IDXFeed : public IDispatch {
     virtual HRESULT STDMETHODCALLTYPE InitLogger(BSTR file, VARIANT_BOOL overwrite,
                                                   VARIANT_BOOL showTimezone, VARIANT_BOOL verbose) = 0;
     virtual HRESULT STDMETHODCALLTYPE CreateCandleSymbol(IDispatch** candleSymbol) = 0;
+    virtual HRESULT STDMETHODCALLTYPE CreateBasicConnection(BSTR address, BSTR user, BSTR password, IDispatch** connection) = 0;
+    virtual HRESULT STDMETHODCALLTYPE CreateBearerConnection(BSTR address, BSTR token, IDispatch** connection) = 0;
+    virtual HRESULT STDMETHODCALLTYPE CreateCustomConnection(BSTR address, BSTR authscheme, BSTR authdata, IDispatch** connection) = 0;
 };
 
 /* -------------------------------------------------------------------------- */

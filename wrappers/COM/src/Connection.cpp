@@ -57,7 +57,15 @@ class DXConnection : private IDXConnection, private DefIDispatchImpl,
 
 private:
 
-    DXConnection (const char* address);
+    enum class AuthType {
+        none = 0,
+        basic = 1,
+        bearer = 2,
+        custom = 3
+    };
+
+    DXConnection(const char* address);
+    DXConnection(const char* address, AuthType type, const char* param1, const char* param2);
     
     static void OnConnectionTerminated (dxf_connection_t connection, void* user_data);
     static int OnSocketThreadCreated (dxf_connection_t connection, void* user_data);
@@ -94,14 +102,34 @@ private:
  */
 /* -------------------------------------------------------------------------- */
 
-DXConnection::DXConnection (const char* address)
+DXConnection::DXConnection(const char* address) : DXConnection(address, AuthType::none, NULL, NULL) {}
+
+DXConnection::DXConnection (const char* address, AuthType type, const char* param1, const char* param2)
 : DefIDispatchImpl(IID_IDXConnection)
 , DefIConnectionPointImpl(DIID_IDXConnectionTerminationNotifier)
 , m_connHandle(NULL)
 , m_termNotifier(NULL)
 , m_notifierMethodId(0) {
-    if (dxf_create_connection(address, OnConnectionTerminated, OnSocketThreadCreated,
-                              OnSocketThreadDestroyed, reinterpret_cast<void*>(this), &m_connHandle) == DXF_FAILURE) {
+    ERRORCODE result;
+    switch (type) {
+        case AuthType::none:
+            result = dxf_create_connection(address, OnConnectionTerminated, OnSocketThreadCreated,
+                OnSocketThreadDestroyed, reinterpret_cast<void*>(this), &m_connHandle);
+            break;
+        case AuthType::basic:
+            result = dxf_create_connection_auth_basic(address, param1, param2, OnConnectionTerminated, 
+                OnSocketThreadCreated, OnSocketThreadDestroyed, reinterpret_cast<void*>(this), &m_connHandle);
+            break;
+        case AuthType::bearer:
+            result = dxf_create_connection_auth_bearer(address, param1, OnConnectionTerminated, 
+                OnSocketThreadCreated, OnSocketThreadDestroyed, reinterpret_cast<void*>(this), &m_connHandle);
+            break;
+        case AuthType::custom:
+            result = dxf_create_connection_auth_custom(address, param1, param2, OnConnectionTerminated, 
+                OnSocketThreadCreated, OnSocketThreadDestroyed, reinterpret_cast<void*>(this), &m_connHandle);
+            break;
+    }
+    if (result == DXF_FAILURE) {
         throw "Failed to establish connection";
     }
     
@@ -373,5 +401,50 @@ IDXConnection* DefDXConnectionFactory::CreateInstance (const char* address) {
     } catch (...) {        
     }
     
+    return connection;
+}
+
+/* -------------------------------------------------------------------------- */
+
+IDXConnection* DefDXConnectionFactory::CreateAuthBasicInstance(const char* address, const char* user, const char* password) {
+    IDXConnection* connection = NULL;
+
+    try {
+        connection = new DXConnection(address, DXConnection::AuthType::basic, user, password);
+
+        connection->AddRef();
+    } catch (...) {
+    }
+
+    return connection;
+}
+
+/* -------------------------------------------------------------------------- */
+
+IDXConnection* DefDXConnectionFactory::CreateAuthBearerInstance(const char* address, const char* token) {
+    IDXConnection* connection = NULL;
+
+    try {
+        connection = new DXConnection(address, DXConnection::AuthType::bearer, token, NULL);
+
+        connection->AddRef();
+    } catch (...) {
+    }
+
+    return connection;
+}
+
+/* -------------------------------------------------------------------------- */
+
+IDXConnection* DefDXConnectionFactory::CreateAuthCustomInstance(const char* address, const char* authsheme, const char* authdata) {
+    IDXConnection* connection = NULL;
+
+    try {
+        connection = new DXConnection(address, DXConnection::AuthType::custom, authsheme, authdata);
+
+        connection->AddRef();
+    } catch (...) {
+    }
+
     return connection;
 }

@@ -50,7 +50,9 @@ struct DXFeed : public IDXFeed, private DefIDispatchImpl {
     virtual HRESULT STDMETHODCALLTYPE InitLogger (BSTR file, VARIANT_BOOL overwrite,
                                                   VARIANT_BOOL showTimezone, VARIANT_BOOL verbose);
     virtual HRESULT STDMETHODCALLTYPE CreateCandleSymbol(IDispatch** candleSymbol);
-                                              
+    virtual HRESULT STDMETHODCALLTYPE CreateBasicConnection(BSTR address, BSTR user, BSTR password, IDispatch** connection);
+    virtual HRESULT STDMETHODCALLTYPE CreateBearerConnection(BSTR address, BSTR token, IDispatch** connection);
+    virtual HRESULT STDMETHODCALLTYPE CreateCustomConnection(BSTR address, BSTR authscheme, BSTR authdata, IDispatch** connection);
 private:
 
     DXFeed ();
@@ -173,6 +175,100 @@ HRESULT STDMETHODCALLTYPE DXFeed::CreateCandleSymbol(IDispatch** candleSymbol) {
     }
     catch (...) {
     }
+
+    return hr;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXFeed::CreateBasicConnection(BSTR address, BSTR user, BSTR password, IDispatch** connection) {
+    if (connection == NULL) {
+        return E_POINTER;
+    }
+
+    *connection = NULL;
+
+    HRESULT hr = E_FAIL;
+    _bstr_t addrWrapper, userWrapper, passWrapper;
+
+    try {
+        addrWrapper = _bstr_t(address, false);
+        userWrapper = _bstr_t(user, false);
+        passWrapper = _bstr_t(password, false);
+
+        if ((*connection = DefDXConnectionFactory::CreateAuthBasicInstance((const char*)addrWrapper, (const char*)userWrapper, (const char*)passWrapper)) != NULL) {
+            hr = NOERROR;
+        }
+    } catch (const _com_error& e) {
+        hr = e.Error();
+    } catch (...) {
+    }
+
+    addrWrapper.Detach();
+    userWrapper.Detach();
+    passWrapper.Detach();
+
+    return hr;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXFeed::CreateBearerConnection(BSTR address, BSTR token, IDispatch** connection) {
+    if (connection == NULL) {
+        return E_POINTER;
+    }
+
+    *connection = NULL;
+
+    HRESULT hr = E_FAIL;
+    _bstr_t addrWrapper, tokenWrapper;
+
+    try {
+        addrWrapper = _bstr_t(address, false);
+        tokenWrapper = _bstr_t(token, false);
+
+        if ((*connection = DefDXConnectionFactory::CreateAuthBearerInstance((const char*)addrWrapper, (const char*)tokenWrapper)) != NULL) {
+            hr = NOERROR;
+        }
+    } catch (const _com_error& e) {
+        hr = e.Error();
+    } catch (...) {
+    }
+
+    addrWrapper.Detach();
+    tokenWrapper.Detach();
+
+    return hr;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXFeed::CreateCustomConnection(BSTR address, BSTR authscheme, BSTR authdata, IDispatch** connection) {
+    if (connection == NULL) {
+        return E_POINTER;
+    }
+
+    *connection = NULL;
+
+    HRESULT hr = E_FAIL;
+    _bstr_t addrWrapper, schemeWrapper, dataWrapper;
+
+    try {
+        addrWrapper = _bstr_t(address, false);
+        schemeWrapper = _bstr_t(authscheme, false);
+        dataWrapper = _bstr_t(authdata, false);
+
+        if ((*connection = DefDXConnectionFactory::CreateAuthCustomInstance((const char*)addrWrapper, (const char*)schemeWrapper, (const char*)dataWrapper)) != NULL) {
+            hr = NOERROR;
+        }
+    } catch (const _com_error& e) {
+        hr = e.Error();
+    } catch (...) {
+    }
+
+    addrWrapper.Detach();
+    schemeWrapper.Detach();
+    dataWrapper.Detach();
 
     return hr;
 }
