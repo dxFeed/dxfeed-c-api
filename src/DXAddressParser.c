@@ -28,8 +28,8 @@
 #include "Logger.h"
 
 #ifdef _WIN32
-#define strncasecmp _strnicmp
-#define strcasecmp _stricmp
+#define strncasecmp strnicmp
+#define strcasecmp stricmp
 #endif /* _WIN32 */
 
 /* To add TLS codec support for library add 'DXFEED_CODEC_TLS_ENABLED' string 
@@ -545,7 +545,7 @@ static bool dx_parse_host_port(const char* host, size_t size, OUT dx_address_t* 
     for (i = 0; i < scheme_count; i++) {
         const char* scheme = schemes[i];
         size_t scheme_len = strlen(scheme);
-        if (strnicmp(host_start, scheme, scheme_len) == 0) {
+        if (strncasecmp(host_start, scheme, scheme_len) == 0) {
             host_start += scheme_len;
             break;
         }
