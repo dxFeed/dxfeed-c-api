@@ -27,6 +27,11 @@
 #include "DXErrorHandling.h"
 #include "Logger.h"
 
+#ifdef _WIN32
+#define strncasecmp _strnicmp
+#define strcasecmp _stricmp
+#endif /* _WIN32 */
+
 /* To add TLS codec support for library add 'DXFEED_CODEC_TLS_ENABLED' string 
  * to C/C++ compiller definition.
  */
@@ -59,9 +64,9 @@ typedef struct {
 } dx_address_property_t;
 
 //function forward declaration
-bool dx_codec_tls_parser(const char* codec, size_t size, OUT dx_address_t* addr);
+static bool dx_codec_tls_parser(const char* codec, size_t size, OUT dx_address_t* addr);
 //function forward declaration
-bool dx_codec_gzip_parser(const char* codec, size_t size, OUT dx_address_t* addr);
+static bool dx_codec_gzip_parser(const char* codec, size_t size, OUT dx_address_t* addr);
 
 static const dx_codec_info_t codecs[] = {
     { "tls", DX_CODEC_TLS_STATUS, dx_codec_tls_parser },
@@ -442,13 +447,13 @@ void dx_codec_tls_free(dx_codec_tls_t* tls) {
 /* -------------------------------------------------------------------------- */
 
 static bool dx_codec_tls_parser(const char* codec, size_t size, OUT dx_address_t* addr) {
-    char* next;
+    const char* next;
     size_t next_size;
     dx_codec_tls_t tls = { true, NULL, NULL, NULL, NULL };
     if (!dx_get_codec_properties(codec, size, &next, &next_size))
         return false;
     do {
-        char* str;
+        const char* str;
         size_t str_size;
         dx_address_property_t prop = { 0 };
         if (!dx_get_next_property(&next, &next_size, &str, &str_size)) {
@@ -457,7 +462,7 @@ static bool dx_codec_tls_parser(const char* codec, size_t size, OUT dx_address_t
         }
         if (str == NULL)
             continue;
-        if (!dx_parse_property((const char*)str, str_size, &prop)) {
+        if (!dx_parse_property(str, str_size, &prop)) {
             dx_codec_tls_free(&tls);
             return false;
         }
@@ -504,7 +509,7 @@ static bool dx_codec_gzip_parser(const char* codec, size_t size, OUT dx_address_
 /* -------------------------------------------------------------------------- */
 
 static bool dx_codec_parse(const char* codec, size_t codec_size, OUT dx_address_t* addr) {
-    char* codec_name;
+    const char* codec_name;
     size_t codec_name_size;
     size_t count = sizeof(codecs) / sizeof(codecs[0]);
     size_t i;
@@ -512,7 +517,7 @@ static bool dx_codec_parse(const char* codec, size_t codec_size, OUT dx_address_
         return false;
     for (i = 0; i < count; ++i) {
         dx_codec_info_t info = codecs[i];
-        if (strlen(info.name) != codec_name_size || strnicmp(info.name, codec_name, codec_name_size) != 0)
+        if (strlen(info.name) != codec_name_size || strncasecmp(info.name, codec_name, codec_name_size) != 0)
             continue;
         if (!info.supported)
             return dx_set_error_code(dx_nec_unknown_codec);
@@ -630,7 +635,7 @@ static bool dx_parse_address(const char* entry, size_t entry_size, OUT dx_addres
         return false;
     }
     do {
-        char* str;
+        const char* str;
         size_t str_size;
         dx_address_property_t prop = { 0 };
         if (!dx_get_next_property(OUT &next, OUT &next_size, OUT &str, OUT &str_size)) {
@@ -639,7 +644,7 @@ static bool dx_parse_address(const char* entry, size_t entry_size, OUT dx_addres
         }
         if (str == NULL)
             continue;
-        if (!dx_parse_property((const char*)str, str_size, &prop)) {
+        if (!dx_parse_property(str, str_size, &prop)) {
             dx_free_address(addr);
             return false;
         }
@@ -685,7 +690,7 @@ bool dx_get_addresses_from_collection(const char* collection, OUT dx_address_arr
     const char* last_port = NULL;
     size_t i = 0;
 
-    char* next = (char*)collection;
+    const char* next = collection;
 
     if (collection == NULL || addresses == NULL) {
         dx_set_last_error(dx_ec_invalid_func_param_internal);
@@ -705,7 +710,7 @@ bool dx_get_addresses_from_collection(const char* collection, OUT dx_address_arr
         dx_address_t addr = { 0 };
         bool failed;
 
-        char* entry;
+        const char* entry;
         size_t entry_size;
 
         if (!dx_get_next_entry(&next, &entry, &entry_size) ||

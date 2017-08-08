@@ -1107,7 +1107,7 @@ bool dx_get_event_subscription_time(dxf_subscription_t subscr_id, OUT dxf_long_t
 
 /* -------------------------------------------------------------------------- */
 
-static dx_call_subscr_listeners(dx_subscription_data_ptr_t subscr_data, int event_bitmask, dxf_const_string_t symbol_name, const dxf_event_data_t data, int data_count, const dxf_event_params_t* event_params) {
+static void dx_call_subscr_listeners(dx_subscription_data_ptr_t subscr_data, int event_bitmask, dxf_const_string_t symbol_name, const dxf_event_data_t data, int data_count, const dxf_event_params_t* event_params) {
     size_t cur_listener_index = 0;
     for (; cur_listener_index < subscr_data->listeners.size; ++cur_listener_index) {
         dx_listener_context_t* listener_context = subscr_data->listeners.elements + cur_listener_index;
