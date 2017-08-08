@@ -581,10 +581,10 @@ bool dx_is_snapshot_event(const dx_snapshot_data_ptr_t snapshot_data, int event_
 }
 
 
-bool dx_is_zero_event(dx_event_id_t event_id, const dxf_event_data_t event_row, int idx) {
+bool dx_is_zero_event(dx_event_id_t event_id, const dxf_event_data_t* data, int idx) {
     if (event_id != dx_eid_order)
         return false;
-    return ((dxf_order_t*)event_row)[idx].size == 0;
+    return ((dxf_order_t*)(data + idx))->size == 0;
 }
 
 void event_listener(int event_type, dxf_const_string_t symbol_name,
