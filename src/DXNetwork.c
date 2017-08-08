@@ -444,7 +444,7 @@ void dx_notify_conn_termination (dx_network_connection_context_t* context, OUT b
     }
 
     if (context->context_data.notifier != NULL) {
-        context->context_data.notifier((void*)context->address, context->context_data.notifier_user_data);
+        context->context_data.notifier((void*)context->connection, context->context_data.notifier_user_data);
     }
 
     if (idle_thread_flag != NULL) {
