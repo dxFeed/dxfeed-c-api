@@ -590,7 +590,7 @@ bool dx_is_zero_event(dx_event_id_t event_id, const dxf_event_data_t event_row, 
 void event_listener(int event_type, dxf_const_string_t symbol_name,
                     const dxf_event_data_t* data, int data_count,
                     const dxf_event_params_t* event_params, void* user_data) {
-    size_t i = 0;
+    int i = 0;
     dxf_event_flags_t flags = event_params->flags;
     dx_snapshot_data_ptr_t snapshot_data = (dx_snapshot_data_ptr_t)user_data;
     bool sb, se, rm, tx;
@@ -599,7 +599,7 @@ void event_listener(int event_type, dxf_const_string_t symbol_name,
     se = IS_FLAG_SET(event_params->flags, dxf_ef_snapshot_end) || IS_FLAG_SET(event_params->flags, dxf_ef_snapshot_snip);
     tx = IS_FLAG_SET(event_params->flags, dxf_ef_tx_pending);
 
-    for (i = 0; i < (size_t)data_count; i++) {
+    for (i = 0; i < data_count; i++) {
         /* It should be no-op, really */
         if (!dx_is_snapshot_event(snapshot_data, event_type, event_params, (const dxf_event_data_t)(data + i))) {
             continue;
