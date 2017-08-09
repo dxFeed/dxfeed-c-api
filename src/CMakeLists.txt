@@ -213,6 +213,13 @@ elseif (CMAKE_COMPILER_IS_GNUCC)
         ${ADDITIONAL_LIBRARIES}
         pthread
     )
+    if (NOT DISABLE_TLS)
+        link_directories(${LIB_TLS}/nix/${TARGET_PLATFORM})
+        set (ADDITIONAL_LIBRARIES
+            ${ADDITIONAL_LIBRARIES}
+            tls
+        )
+    endif (NOT DISABLE_TLS)
     
 else ()
     message ("Unknown compiler")
