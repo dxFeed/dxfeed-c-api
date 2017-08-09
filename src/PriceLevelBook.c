@@ -18,6 +18,7 @@
 */
 
 #include <math.h>
+#include <string.h>
 
 #include "ConnectionContextData.h"
 #include "DXAlgorithms.h"
@@ -200,7 +201,7 @@ static bool dx_plb_clear_connection_context(dx_plb_connection_context_t* context
             if (context->sources[i] != NULL)
                 res &= dx_plb_source_clear(context->sources[i], true);
         }
-        free(context->sources);
+        dx_free(context->sources);
     }
     res &= dx_mutex_destroy(&(context->guard));
     dx_free(context);
@@ -741,11 +742,11 @@ static void dx_plb_book_clear(dx_price_level_book_t *book) {
         It could not be done in loop above to avoid situation when next source call book and book
         uses deleted source.
         */
-        dx_mutex_lock(&CTX(book->context));
+        dx_mutex_lock(&CTX(book->context)->guard);
         for (i = 0; i < book->sources_count && book->sources[i] != NULL; i++) {
             dx_plb_source_cleanup(CTX(book->context), book->sources[i]);
         }
-        dx_mutex_unlock(&CTX(book->context));
+        dx_mutex_unlock(&CTX(book->context)->guard);
     }
     /* Now nothing could call book methods, kill it */
     dx_plb_book_free(book);
@@ -776,7 +777,7 @@ static bool dx_plb_book_update_one_side(dx_plb_price_level_side_t *dst, dx_plb_p
                 cmp = dst->cmp(best, srcs[i]->levels[sidx[i]]);
                 if (cmp == 0) {
                     best.size += srcs[i]->levels[sidx[i]].size;
-                    best.time = max(best.time, srcs[i]->levels[sidx[i]].time);
+                    best.time = MAX(best.time, srcs[i]->levels[sidx[i]].time);
                 } else if (cmp > 0) {
                     /* Best is "greater" than current, replace (it may be smaller, if comarator is reversed) */
                     best = srcs[i]->levels[sidx[i]];
