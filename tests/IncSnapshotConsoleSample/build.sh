@@ -15,6 +15,7 @@ CONF_DEBUG=Debug
 CONF_RELEASE=Release
 CONFIGURATION=$CONF_RELEASE
 BUILD_PATH=build
+PLATFORM=x86
 
 if [ $# -eq 0 ]; then
     :
@@ -32,12 +33,16 @@ else
     exit
 fi
 
-echo "Start building $CONFIGURATION..."
+if [ $(uname -m) = "x86_64" ]; then
+  PLATFORM=x64
+fi
+
+echo "Start building $PLATFORM $CONFIGURATION..."
 
 mkdir -p $BUILD_PATH
 cd $BUILD_PATH
 
-cmake -DCMAKE_BUILD_TYPE=$CONFIGURATION -G "Unix Makefiles" ..
+cmake -DCMAKE_BUILD_TYPE=$CONFIGURATION -DTARGET_PLATFORM=$PLATFORM -G "Unix Makefiles" ..
 if [ $? -ne 0 ]; then
     handle_error_code $?
 fi
