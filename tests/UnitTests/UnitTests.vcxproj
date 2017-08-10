@@ -235,7 +235,7 @@
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>DXFeedd_64.lib;ws2_32.lib;libtls-15.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>DXFeedd_64.lib;ws2_32.lib;libtls-15_64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName)d_64.exe</OutputFile>
       <AdditionalLibraryDirectories>$(SolutionDir)bin\64;$(SolutionDir)\lib;$(SolutionDir)lib\libressl\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -322,7 +322,7 @@
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>DXFeed_64.lib;ws2_32.lib;libtls-15.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>DXFeed_64.lib;ws2_32.lib;libtls-15_64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName)_64.exe</OutputFile>
       <AdditionalLibraryDirectories>$(SolutionDir)bin\64;$(SolutionDir)\lib;$(SolutionDir)lib\libressl\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Console</SubSystem>

@@ -158,7 +158,7 @@ if(MSVC)
         link_directories(${LIB_TLS}/${TARGET_PLATFORM})
         set (ADDITIONAL_LIBRARIES
             ${ADDITIONAL_LIBRARIES}
-            libtls-15.lib
+            libtls-15${PLATFORM_POSTFIX}.lib
         )
     endif (NOT DISABLE_TLS)
     
@@ -218,9 +218,9 @@ if (NOT DISABLE_TLS)
     ADD_CUSTOM_COMMAND(
         TARGET ${PROJECT}
         POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/${TARGET_PLATFORM}/libtls-15.dll ${CMAKE_BINARY_DIR}/$(Configuration)
-        COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/${TARGET_PLATFORM}/libssl-43.dll ${CMAKE_BINARY_DIR}/$(Configuration)
-        COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/${TARGET_PLATFORM}/libcrypto-41.dll ${CMAKE_BINARY_DIR}/$(Configuration)
+        COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/${TARGET_PLATFORM}/libtls-15${PLATFORM_POSTFIX}.dll ${CMAKE_BINARY_DIR}/$(Configuration)
+        COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/${TARGET_PLATFORM}/libssl-43${PLATFORM_POSTFIX}.dll ${CMAKE_BINARY_DIR}/$(Configuration)
+        COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/${TARGET_PLATFORM}/libcrypto-41${PLATFORM_POSTFIX}.dll ${CMAKE_BINARY_DIR}/$(Configuration)
     )
 endif (NOT DISABLE_TLS)
 
