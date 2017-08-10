@@ -242,15 +242,17 @@ add_library (${PROJECT} SHARED ${ALL_HEADERS} ${ALL_SOURCES})
 target_link_libraries (${PROJECT} PRIVATE ${ADDITIONAL_LIBRARIES})
 
 
-if (NOT DISABLE_TLS)
-    ADD_CUSTOM_COMMAND(
-        TARGET ${PROJECT}
-        POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/${TARGET_PLATFORM}/libtls-15${PLATFORM_POSTFIX}.dll ${CMAKE_BINARY_DIR}/$(Configuration)
-        COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/${TARGET_PLATFORM}/libssl-43${PLATFORM_POSTFIX}.dll ${CMAKE_BINARY_DIR}/$(Configuration)
-        COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/${TARGET_PLATFORM}/libcrypto-41${PLATFORM_POSTFIX}.dll ${CMAKE_BINARY_DIR}/$(Configuration)
-    )
-endif (NOT DISABLE_TLS)
+if (MSVC)
+    if (NOT DISABLE_TLS)
+        ADD_CUSTOM_COMMAND(
+            TARGET ${PROJECT}
+            POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/${TARGET_PLATFORM}/libtls-15${PLATFORM_POSTFIX}.dll ${CMAKE_BINARY_DIR}/$(Configuration)
+            COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/${TARGET_PLATFORM}/libssl-43${PLATFORM_POSTFIX}.dll ${CMAKE_BINARY_DIR}/$(Configuration)
+            COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/${TARGET_PLATFORM}/libcrypto-41${PLATFORM_POSTFIX}.dll ${CMAKE_BINARY_DIR}/$(Configuration)
+        )
+    endif (NOT DISABLE_TLS)
+endif (MSVC)
 
 
 set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/DXFeedAllCPackConfig.cmake")
