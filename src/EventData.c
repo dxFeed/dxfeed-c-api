@@ -156,7 +156,26 @@ bool dx_get_single_order_subscription_params(dxf_connection_t connection, dx_ord
     return true;
 }
 
-bool dx_get_order_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source, 
+bool dx_get_quote_subscription_params(dxf_connection_t connection, dxf_uint_t subscr_flags,
+                                      OUT dx_event_subscription_param_list_t* param_list) {
+    dxf_char_t ch = 'A';
+    dxf_char_t quote_name_buf[QUOTE_TMPL_LEN + 2] = { 0 };
+
+    if (!IS_FLAG_SET(subscr_flags, DX_SUBSCR_QUOTES_REGIONAL)) {
+        return dx_add_subscription_param_to_list(connection, &param_list, L"Quote", dx_st_ticker);
+    }
+
+    /* fill quotes Quote&A..Quote&Z */
+    dx_copy_string(quote_name_buf, g_quote_tmpl);
+    for (; ch <= 'Z'; ch++) {
+        quote_name_buf[QUOTE_TMPL_LEN] = ch;
+        CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, quote_name_buf, dx_st_ticker);
+    }
+
+    return true;
+}
+
+bool dx_get_order_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
                                       dxf_uint_t subscr_flags,
                                       OUT dx_event_subscription_param_list_t* param_list) {
     dxf_char_t ch = 'A';
@@ -249,7 +268,7 @@ size_t dx_get_event_subscription_params(dxf_connection_t connection, dx_order_so
         result = dx_get_trade_subscription_params(connection, &param_list);
         break;
     case dx_eid_quote:
-        result = dx_add_subscription_param_to_list(connection, &param_list, L"Quote", dx_st_ticker);
+        result = dx_get_quote_subscription_params(connection, subscr_flags, &param_list);
         break;
     case dx_eid_summary:
         result = dx_get_summary_subscription_params(connection, &param_list);

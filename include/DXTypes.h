@@ -26,6 +26,7 @@ typedef void* dxf_connection_t;
 typedef void* dxf_candle_attributes_t;
 typedef void* dxf_snapshot_t;
 typedef void* dxf_price_level_book_t;
+typedef void* dxf_regional_book_t;
 
 #ifdef _WIN32
 

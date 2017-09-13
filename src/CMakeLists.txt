@@ -72,6 +72,7 @@ set (HEADER_FILES
     Logger.h
     ObjectArray.h
     PriceLevelBook.h
+    RegionalBook.h
     PrimitiveTypes.h
     resource.h
     RecordTranscoder.h
@@ -128,6 +129,7 @@ set (SOURCE_FILES
     Logger.c
     ObjectArray.c
     PriceLevelBook.c
+    RegionalBook.c
     RecordTranscoder.c
     ServerMessageProcessor.c
     Snapshot.c
