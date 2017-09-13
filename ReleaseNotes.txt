@@ -1,3 +1,4 @@
 Version 4.9
 
 + RegionalBook is implemented.
+* Mutex misuse bug in PriceLevelBook is fixed.
