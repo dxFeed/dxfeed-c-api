@@ -1,4 +1,4 @@
-Version 4.9
-
-+ RegionalBook is implemented.
-* Mutex misuse bug in PriceLevelBook is fixed.
+Version 4.9.0
++ Implement RegionalBook.
+* Fix mutex misuse bug in PriceLevelBook.
+* Fix memory leak in COM/C++ code.
