@@ -228,7 +228,7 @@ install(DIRECTORY "${INCLUDE_DIR}" "../scripts" "../src"
 )
 install(FILES "../DXFeed.def" "../DXFeedd.def" "../DXFeed_64.def" "../DXFeedd_64.def" 
     "../DXFeed.sln" "../DXFeed.vcxproj" "../DXFeed.vcxproj.filters" "../Makefile" 
-    "../CMakeLists.txt" "../build.bat" "../make_package.bat"
+    "../CMakeLists.txt" "../build.bat" "../make_package.bat" "../ReleaseNotes.txt"
     DESTINATION "."
 )
 if(MSVC)
