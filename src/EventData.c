@@ -162,7 +162,7 @@ bool dx_get_quote_subscription_params(dxf_connection_t connection, dxf_uint_t su
     dxf_char_t quote_name_buf[QUOTE_TMPL_LEN + 2] = { 0 };
 
     if (!IS_FLAG_SET(subscr_flags, DX_SUBSCR_QUOTES_REGIONAL)) {
-        return dx_add_subscription_param_to_list(connection, &param_list, L"Quote", dx_st_ticker);
+        return dx_add_subscription_param_to_list(connection, param_list, L"Quote", dx_st_ticker);
     }
 
     /* fill quotes Quote&A..Quote&Z */
