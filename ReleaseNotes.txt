@@ -1,3 +1,4 @@
+Version 4.9.2
 * Fix ORDER (all-mixed-up) subscription.
 
 Version 4.9.1
