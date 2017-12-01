@@ -82,13 +82,11 @@ extern void dx_init_threads();
 
 __attribute__((constructor)) void init(void)
 {
-	dx_log_debug_message(L"DXFeed: Process attach");
 	dx_init_cb_queue(&g_process_destructors);
 }
 
 __attribute__((destructor))  void fini(void)
 {
-	dx_log_debug_message(L"DXFeed: Process detach");
 	dx_run_cb_queue(&g_process_destructors);
 	dx_fini_cb_queue(&g_process_destructors);
 }

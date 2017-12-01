@@ -331,6 +331,12 @@ bool dx_write_event_records (void* bocc, void* dscc) {
 	dx_record_id_t record_id = dx_get_next_unsubscribed_record_id(dscc, false);
 	dx_record_id_t count = dx_get_records_list_count(dscc);
 
+#ifdef _DEBUG
+	dx_logging_dbg_lock();
+	dx_logging_dbg(L"SENDRECORDS Send records [%u, %u)", record_id, count);
+	dx_logging_dbg_stack();
+	dx_logging_dbg_unlock();
+#endif
 	while (record_id < count) {
 		CHECKED_CALL_3(dx_write_event_record, bocc, dx_get_record_by_id(dscc, record_id), record_id);
 		record_id = dx_get_next_unsubscribed_record_id(dscc, true);
@@ -599,8 +605,6 @@ bool dx_send_record_description (dxf_connection_t connection, bool task_mode) {
 	dxf_byte_t* initial_buffer = NULL;
 	int message_size = 0;
 
-	dx_logging_verbose_info(L"Update record description");
-
 	CHECKED_CALL_2(dx_validate_connection_handle, connection, true);
 
 	if (!task_mode) {
@@ -660,8 +664,6 @@ bool dx_send_protocol_description (dxf_connection_t connection, bool task_mode) 
 	void* bocc = NULL;
 	dxf_byte_t* initial_buffer = NULL;
 	int message_size = 0;
-
-	dx_logging_verbose_info(L"Update protocol description");
 
 	CHECKED_CALL_2(dx_validate_connection_handle, connection, true);
 
@@ -737,7 +739,6 @@ bool dx_send_heartbeat (dxf_connection_t connection, bool task_mode) {
 	dxf_byte_t* initial_buffer = NULL;
 	int message_size = 0;
 
-
 	CHECKED_CALL_2(dx_validate_connection_handle, connection, true);
 
 	if (!task_mode) {
@@ -749,8 +750,7 @@ bool dx_send_heartbeat (dxf_connection_t connection, bool task_mode) {
 
 		return true;
 	}
-	dx_logging_verbose_info(L"Send heartbeat");
-
+	
 	bocc = dx_get_buffered_output_connection_context(connection);
 
 	if (bocc == NULL) {

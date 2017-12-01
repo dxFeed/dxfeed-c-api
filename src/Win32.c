@@ -97,22 +97,18 @@ BOOL APIENTRY DllMain (HANDLE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 {
 	switch (ul_reason_for_call) {
 	case DLL_PROCESS_ATTACH:
-		dx_log_debug_message(L"DXFeed: Process attach");
 		dx_init_cb_queue(&g_thread_constructors);
 		dx_init_cb_queue(&g_thread_destructors);
 		dx_init_cb_queue(&g_process_destructors);
 		dx_init_threads();
 		break;
 	case DLL_THREAD_ATTACH:
-		dx_log_debug_message(L"DXFeed: Thread attach");
 		dx_run_cb_queue(&g_thread_constructors);
 		break;
 	case DLL_THREAD_DETACH:
-		dx_log_debug_message(L"DXFeed: Thread detach");
 		dx_run_cb_queue(&g_thread_destructors);
 		break;
 	case DLL_PROCESS_DETACH:
-		dx_log_debug_message(L"DXFeed: Process detach");
 		dx_run_cb_queue(&g_process_destructors);
 		dx_fini_cb_queue(&g_thread_constructors);
 		dx_fini_cb_queue(&g_thread_destructors);

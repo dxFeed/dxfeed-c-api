@@ -585,14 +585,14 @@ void snapshot_listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_d
 
 	if (snapshot_data->event_type != info->event_type) {
 		swprintf(str, sizeof(str), L"Error: event: %s Symbol: %s, expected event: %s\n",
-				dx_event_type_to_string(snapshot_data->event_type), snapshot_data->symbol,
-				dx_event_type_to_string(info->event_type));
+					dx_event_type_to_string(snapshot_data->event_type), snapshot_data->symbol,
+					dx_event_type_to_string(info->event_type));
 		print_at(coord, str);
 		return;
 	}
 
 	swprintf(str, sizeof(str), L"Snapshot %s#%S:                           ",
-			dx_event_type_to_string(info->event_type), info->source);
+				dx_event_type_to_string(info->event_type), info->source);
 	print_at(coord, str);
 	ind = get_symbol_index(snapshot_data->symbol);
 	if (ind == -1) {
@@ -604,7 +604,7 @@ void snapshot_listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_d
 	coord.X += 5;
 	coord.Y += ind + 1;
 	swprintf(str, sizeof(str), L"Symbol: \"%s\" Data count: %zu, Total data count: %zu            ",
-			snapshot_data->symbol, snapshot_data->records_count, info->total_data_count[ind]);
+				snapshot_data->symbol, snapshot_data->records_count, info->total_data_count[ind]);
 	print_at(coord, str);
 }
 

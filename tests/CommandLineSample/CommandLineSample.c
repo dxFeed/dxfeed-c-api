@@ -554,7 +554,6 @@ int main (int argc, char* argv[]) {
 	}
 
 	wprintf(L"Disconnect successful!\n");
-	wprintf(L"loops remain:%d\n", loop_counter);
 
 #ifdef _WIN32
 	DeleteCriticalSection(&listener_thread_guard);

@@ -1137,6 +1137,13 @@ bool dx_add_record_to_list(dxf_connection_t connection, dx_record_item_t record,
 	dx_memcpy(new_record.suffix, record.suffix, sizeof(record.suffix));
 	new_record.exchange_code = record.exchange_code;
 
+#ifdef _DEBUG
+	dx_logging_dbg_lock();
+	dx_logging_dbg(L"ADDRECORD New record %s", record.name);
+	dx_logging_dbg_stack();
+	dx_logging_dbg_unlock();
+#endif
+
 	DX_ARRAY_INSERT(dscc->records_list, dx_record_item_t, new_record, index, dx_capacity_manager_halfer, failed);
 
 	if (failed) {

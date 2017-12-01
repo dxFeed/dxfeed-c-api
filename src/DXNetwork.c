@@ -421,6 +421,7 @@ static bool dx_close_socket (dx_network_connection_context_t* context) {
 #else
 	res = dx_close(context->s);
 #endif // DXFEED_CODEC_TLS_ENABLED
+
 	context->set_fields_flags &= ~SOCKET_FIELD_FLAG;
 
 	return dx_mutex_unlock(&(context->socket_guard)) && res;
@@ -964,7 +965,6 @@ bool dx_connect_to_resolved_addresses(dx_network_connection_context_t* context) 
 	if (IS_FLAG_SET(context->set_fields_flags, DUMPING_RAW_DATA_FIELD_FLAG)) {
 		if (context->raw_dump_file != NULL)
 			return true;
-		dx_logging_info(L"Initialize reading from raw file...");
 		context->raw_dump_file = fopen(context->address, "rb");
 		if (context->raw_dump_file == NULL) {
 			dx_logging_error(L"Cannot open raw file!");

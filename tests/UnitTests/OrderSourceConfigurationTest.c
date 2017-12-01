@@ -201,10 +201,10 @@ bool mixed_order_source_test() {
 		!dx_is_equal_int(0, ost_get_dea_counter())) {
 
 		printf("at %s, line: %d\n"
-			"    Expected: ntv=%5s, dex=%5s, dea=%5s; \n"
-			"    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n",
-			__FUNCTION__, __LINE__, ">0", "0", "0",
-			ost_get_ntv_counter(), ost_get_dex_counter(), ost_get_dea_counter());
+				"    Expected: ntv=%5s, dex=%5s, dea=%5s; \n"
+				"    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n",
+				__FUNCTION__, __LINE__, ">0", "0", "0",
+				ost_get_ntv_counter(), ost_get_dex_counter(), ost_get_dea_counter());
 		close_data(connection, subscription, listener);
 		return false;
 	}
@@ -230,10 +230,10 @@ bool mixed_order_source_test() {
 		!dx_is_equal_int(0, ost_get_dea_counter())) {
 
 		printf("at %s, line: %d\n"
-			"    Expected: ntv=%5s, dex=%5s, dea=%5s; \n"
-			"    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n",
-			__FUNCTION__, __LINE__, ">0", ">0", "0",
-			ost_get_ntv_counter(), ost_get_dex_counter(), ost_get_dea_counter());
+				"    Expected: ntv=%5s, dex=%5s, dea=%5s; \n"
+				"    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n",
+				__FUNCTION__, __LINE__, ">0", ">0", "0",
+				ost_get_ntv_counter(), ost_get_dex_counter(), ost_get_dea_counter());
 		close_data(connection, subscription, listener);
 		return false;
 	}
@@ -306,10 +306,10 @@ bool set_order_source_test() {
 		!dx_is_equal_int(0, ost_get_dea_counter())) {
 
 		printf("at %s, line: %d\n"
-			"    Expected: ntv=%5s, dex=%5s, dea=%5s; \n"
-			"    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n",
-			__FUNCTION__, __LINE__, ">0", "0", "0",
-			ost_get_ntv_counter(), ost_get_dex_counter(), ost_get_dea_counter());
+				"    Expected: ntv=%5s, dex=%5s, dea=%5s; \n"
+				"    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n",
+				__FUNCTION__, __LINE__, ">0", "0", "0",
+				ost_get_ntv_counter(), ost_get_dex_counter(), ost_get_dea_counter());
 		close_data(connection, subscription, listener);
 		return false;
 	}
@@ -336,10 +336,10 @@ bool set_order_source_test() {
 		!dx_is_equal_int(0, ost_get_dea_counter())) {
 
 		printf("at %s, line: %d\n"
-			"    Expected: ntv=%5s, dex=%5s, dea=%5s; \n"
-			"    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n",
-			__FUNCTION__, __LINE__, "0", ">0", "0",
-			ost_get_ntv_counter(), ost_get_dex_counter(), ost_get_dea_counter());
+				"    Expected: ntv=%5s, dex=%5s, dea=%5s; \n"
+				"    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n",
+				__FUNCTION__, __LINE__, "0", ">0", "0",
+				ost_get_ntv_counter(), ost_get_dex_counter(), ost_get_dea_counter());
 		close_data(connection, subscription, listener);
 		return false;
 	}
@@ -390,10 +390,10 @@ bool add_order_source_test() {
 		!dx_is_equal_int(0, ost_get_dea_counter())) {
 
 		printf("at %s, line: %d\n"
-			"    Expected: ntv=%5s, dex=%5s, dea=%5s; \n"
-			"    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n",
-			__FUNCTION__, __LINE__, ">0", "0", "0",
-			ost_get_ntv_counter(), ost_get_dex_counter(), ost_get_dea_counter());
+				"    Expected: ntv=%5s, dex=%5s, dea=%5s; \n"
+				"    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n",
+				__FUNCTION__, __LINE__, ">0", "0", "0",
+				ost_get_ntv_counter(), ost_get_dex_counter(), ost_get_dea_counter());
 		close_data(connection, subscription, listener);
 		return false;
 	}
@@ -419,10 +419,10 @@ bool add_order_source_test() {
 		!dx_is_equal_int(0, ost_get_dea_counter())) {
 
 		printf("at %s, line: %d\n"
-			"    Expected: ntv=%5s, dex=%5s, dea=%5s; \n"
-			"    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n",
-			__FUNCTION__, __LINE__, ">0", ">0", "0",
-			ost_get_ntv_counter(), ost_get_dex_counter(), ost_get_dea_counter());
+				"    Expected: ntv=%5s, dex=%5s, dea=%5s; \n"
+				"    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n",
+				__FUNCTION__, __LINE__, ">0", ">0", "0",
+				ost_get_ntv_counter(), ost_get_dex_counter(), ost_get_dea_counter());
 		close_data(connection, subscription, listener);
 		return false;
 	}
@@ -446,10 +446,10 @@ bool add_order_source_test() {
 	drop_event_counter(g_dea_counter);
 	if (!ost_wait_multiple_events(g_all_counters, SIZE_OF_ARRAY(g_all_counters))) {
 		printf("at %s, line: %d\n"
-			"    Expected: ntv=%5s, dex=%5s, dea=%5s; \n"
-			"    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n",
-			__FUNCTION__, __LINE__, ">0", ">0", ">0",
-			ost_get_ntv_counter(), ost_get_dex_counter(), ost_get_dea_counter());
+				"    Expected: ntv=%5s, dex=%5s, dea=%5s; \n"
+				"    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n",
+				__FUNCTION__, __LINE__, ">0", ">0", ">0",
+				ost_get_ntv_counter(), ost_get_dex_counter(), ost_get_dea_counter());
 		close_data(connection, subscription, listener);
 		return false;
 	}

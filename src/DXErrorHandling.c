@@ -51,12 +51,10 @@ static void dx_key_data_destructor (void* data) {
 }
 
 static void dx_key_remover(void *data) {
-	dx_log_debug_message(L"Remove error key");
 	if (g_initialization_attempted) {
 		dx_thread_data_key_destroy(g_last_error_data_key);
 		g_initialization_attempted = false;
 	}
-	dx_log_debug_message(L"Remove error key -- done");
 }
 
 /* -------------------------------------------------------------------------- */
@@ -189,7 +187,6 @@ bool dx_init_error_subsystem (void) {
 		return true;
 	}
 
-	dx_log_debug_message(L"dx_init_error_subsystem()");
 	error_data = (dx_error_code_t*)dx_calloc_no_ehm(1, sizeof(dx_error_code_t));
 
 	if (error_data == NULL) {

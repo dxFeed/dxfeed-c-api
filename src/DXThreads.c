@@ -205,9 +205,6 @@ bool dx_compare_threads (dx_thread_t t1, dx_thread_t t2) {
 
 bool dx_mutex_create (dx_mutex_t* mutex) {
 	int res = pthread_mutex_init(mutex, NULL);
-
-//  dx_logging_verbose_info(L"Create mutex %#010x", mutex);
-
 	switch (res) {
 	case EAGAIN:
 		return dx_set_error_code(dx_tec_not_enough_sys_resources);
@@ -230,9 +227,6 @@ bool dx_mutex_create (dx_mutex_t* mutex) {
 
 bool dx_mutex_destroy (dx_mutex_t* mutex) {
 	int res = pthread_mutex_destroy(mutex);
-
-// dx_logging_verbose_info(L"Destroy mutex %#010x", mutex);
-
 	switch (res) {
 	case EBUSY:
 		return dx_set_error_code(dx_tec_resource_busy);
@@ -249,9 +243,6 @@ bool dx_mutex_destroy (dx_mutex_t* mutex) {
 
 bool dx_mutex_lock (dx_mutex_t* mutex) {
 	int res = pthread_mutex_lock(mutex);
-
-//   dx_logging_verbose_info(L"Lock mutex %#010x", mutex);
-
 	switch (res) {
 	case EINVAL:
 		return dx_set_error_code(dx_tec_invalid_resource_id);
@@ -270,9 +261,6 @@ bool dx_mutex_lock (dx_mutex_t* mutex) {
 
 bool dx_mutex_unlock (dx_mutex_t* mutex) {
 	int res = pthread_mutex_unlock(mutex);
-
-//  dx_logging_verbose_info(L"Unlock mutex %#010x", mutex);
-
 	switch (res) {
 	case EINVAL:
 		return dx_set_error_code(dx_tec_invalid_resource_id);

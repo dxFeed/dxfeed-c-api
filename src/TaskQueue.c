@@ -22,6 +22,7 @@
 #include "DXMemory.h"
 #include "DXAlgorithms.h"
 #include "DXErrorHandling.h"
+#include "Logger.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -101,7 +102,7 @@ bool dx_create_task_queue (OUT dx_task_queue_t* tq) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_destroy_task_queue (dx_task_queue_t tq) {
+bool dx_cleanup_task_queue (dx_task_queue_t tq) {
 	dx_task_queue_data_t* tqd = tq;
 	size_t i = 0;
 	bool res = true;
@@ -112,11 +113,24 @@ bool dx_destroy_task_queue (dx_task_queue_t tq) {
 
 	for (; i < tqd->size; ++i) {
 		int task_res = tqd->elements[i].processor(tqd->elements[i].data, dx_tc_free_resources);
-
 		res = IS_FLAG_SET(task_res, dx_tes_success) && res;
 	}
+	tqd->size = 0;
 
-	res = dx_clear_task_queue_data(tqd) && res;
+	return res;
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_destroy_task_queue (dx_task_queue_t tq) {
+	bool res = true;
+
+	if (tq == NULL) {
+		return dx_set_error_code(dx_ec_invalid_func_param_internal);
+	}
+
+	res = dx_cleanup_task_queue(tq) && res;
+	res = dx_clear_task_queue_data(tq) && res;
 
 	return res;
 }
@@ -136,6 +150,13 @@ bool dx_add_task_to_queue (dx_task_queue_t tq, dx_task_processor_t processor, vo
 
 	task.processor = processor;
 	task.data = data;
+
+#ifdef _DEBUG
+	dx_logging_dbg_lock();
+	dx_logging_dbg(L"NEWTASK Submit [0x%016p] %S(0x%016p) at %u", processor, dx_logging_dbg_sym(processor), data, tqd->size);
+	dx_logging_dbg_stack();
+	dx_logging_dbg_unlock();
+#endif
 
 	DX_ARRAY_INSERT(*tqd, dx_task_data_t, task, tqd->size, dx_capacity_manager_halfer, failed);
 
@@ -157,6 +178,12 @@ bool dx_execute_task_queue (dx_task_queue_t tq) {
 
 	while (i < tqd->size) {
 		dx_task_data_t* task = &(tqd->elements[i]);
+#ifdef _DEBUG
+		dx_logging_dbg_lock();
+		dx_logging_dbg(L"RUNTASK Execute [0x%016p] %S(0x%016p) at %u", task->processor, dx_logging_dbg_sym(task->processor), task->data, i);
+		dx_logging_dbg_stack();
+		dx_logging_dbg_unlock();
+#endif
 		int task_res = task->processor(task->data, 0);
 
 		res = IS_FLAG_SET(task_res, dx_tes_success) && res;
@@ -175,7 +202,6 @@ bool dx_execute_task_queue (dx_task_queue_t tq) {
 
 		if (IS_FLAG_SET(task_res, dx_tes_pop_me)) {
 			/* the current element is deleted, now the next element has its index, no need to increase it */
-
 			continue;
 		}
 

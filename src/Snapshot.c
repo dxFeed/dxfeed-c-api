@@ -464,7 +464,6 @@ bool dx_snapshot_remove_event_records(dx_snapshot_data_ptr_t snapshot_data, dx_s
 			dx_snapshot_records_comparator, found, index);
 
 		if (found) {
-			dx_logging_verbose_info(L"Remove record at %d position (time=%llu)", index, time_ints->elements[i]);
 			if (!dx_snapshot_remove_event_record(snapshot_data, recs, index)) {
 				return false;
 			}
@@ -527,12 +526,10 @@ bool dx_snapshot_update_event_records(dx_snapshot_data_ptr_t snapshot_data, dx_s
 
 		/* add or update record */
 		if (found) {
-			dx_logging_verbose_info(L"Update record at %d position (time=%llu)", index, event_params->time_int_field);
 			if (!dx_snapshot_replace_record(snapshot_data, recs, index, (const dxf_event_data_t)(data + i))) {
 				return false;
 			}
 		} else {
-			dx_logging_verbose_info(L"Add new record at %d position (time=%llu)", index, event_params->time_int_field);
 			if (!dx_snapshot_add_event_record(snapshot_data, recs, event_params, (const dxf_event_data_t)(data + i), index)) {
 				return false;
 			}
@@ -590,7 +587,7 @@ bool dx_is_zero_event(dx_event_id_t event_id, const dxf_event_data_t event_row, 
 void event_listener(int event_type, dxf_const_string_t symbol_name,
 					const dxf_event_data_t* data, int data_count,
 					const dxf_event_params_t* event_params, void* user_data) {
-	int i = 0;
+	size_t i = 0;
 	dxf_event_flags_t flags = event_params->flags;
 	dx_snapshot_data_ptr_t snapshot_data = (dx_snapshot_data_ptr_t)user_data;
 	bool sb, se, rm, tx;
@@ -599,7 +596,7 @@ void event_listener(int event_type, dxf_const_string_t symbol_name,
 	se = IS_FLAG_SET(event_params->flags, dxf_ef_snapshot_end) || IS_FLAG_SET(event_params->flags, dxf_ef_snapshot_snip);
 	tx = IS_FLAG_SET(event_params->flags, dxf_ef_tx_pending);
 
-	for (i = 0; i < data_count; i++) {
+	for (i = 0; i < (size_t)data_count; i++) {
 		/* It should be no-op, really */
 		if (!dx_is_snapshot_event(snapshot_data, event_type, event_params, (const dxf_event_data_t)(data + i))) {
 			continue;
@@ -875,9 +872,6 @@ bool dx_add_snapshot_listener(dxf_snapshot_t snapshot, dxf_snapshot_listener_t l
 		return dx_mutex_unlock(&snapshot_data->guard);
 	}
 
-	dx_logging_verbose_info(L"Add snapshot listener: %zu", listener_index);
-
-
 	{
 		dx_snapshot_listener_context_t listener_context = {
 			.incremental = false,
@@ -913,10 +907,10 @@ bool dx_remove_snapshot_listener(dxf_snapshot_t snapshot, dxf_snapshot_listener_
 		return dx_mutex_unlock(&snapshot_data->guard);
 	}
 
-	dx_logging_verbose_info(L"Remove snapshot listener: %zu", listener_index);
-
-	/* a guard mutex is required to protect the internal containers
-	from the secondary data retriever threads */
+	/*
+	a guard mutex is required to protect the internal containers
+	from the secondary data retriever threads
+	*/
 
 	DX_ARRAY_DELETE(snapshot_data->listeners, dx_snapshot_listener_context_t, listener_index,
 		dx_capacity_manager_halfer, failed);
@@ -944,8 +938,6 @@ bool dx_add_snapshot_inc_listener(dxf_snapshot_t snapshot, dxf_snapshot_inc_list
 	if (found) {
 		return dx_mutex_unlock(&snapshot_data->guard);
 	}
-
-	dx_logging_verbose_info(L"Add snapshot listener: %zu", listener_index);
 
 	{
 		dx_snapshot_listener_context_t listener_context = {
@@ -982,8 +974,6 @@ bool dx_remove_snapshot_inc_listener(dxf_snapshot_t snapshot, dxf_snapshot_inc_l
 	if (!found) {
 		return dx_mutex_unlock(&snapshot_data->guard);
 	}
-
-	dx_logging_verbose_info(L"Remove snapshot listener: %zu", listener_index);
 
 	DX_ARRAY_DELETE(snapshot_data->listeners, dx_snapshot_listener_context_t, listener_index,
 		dx_capacity_manager_halfer, failed);

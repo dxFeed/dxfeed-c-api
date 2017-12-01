@@ -272,16 +272,15 @@ int main (int argc, char* argv[]) {
 	printf("Connection successful!\n");
 	time (&start);
 	if (!dxf_create_subscription(connection, DXF_ET_TRADE | DXF_ET_QUOTE | DXF_ET_ORDER | DXF_ET_SUMMARY | DXF_ET_PROFILE, &subscription)) {
-	process_last_error();
-
+		process_last_error();
 		return -1;
-	};
+	}
+
 	if (symbols_pos > 0){
 		for (i = 0; i < symbols_pos; ++i){
 			printf("Subscribing to: %s\n",symbols[i]);
 			if (!dxf_add_symbol(subscription, ansi_to_unicode(symbols[i]))) {
 				process_last_error();
-
 				return -1;
 			};
 		};
@@ -310,7 +309,7 @@ int main (int argc, char* argv[]) {
 	diff_time = (int)difftime(end, start);
 
 	printf("Disconnect successful!\n"
-		"Connection test completed successfully!\n");
+			"Connection test completed successfully!\n");
 
 	printf("received %i quotes in %i sec. %i qoutes in 1 sec\n", quotes_counter, diff_time, (int )(quotes_counter / diff_time));
 

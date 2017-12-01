@@ -227,7 +227,7 @@ int main (int argc, char* argv[]) {
 	}
 
 	printf("Disconnect successful!\n"
-		"Connection test completed successfully!\n");
+			"Connection test completed successfully!\n");
 
 	return 0;
 }

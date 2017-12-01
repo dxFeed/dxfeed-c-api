@@ -227,7 +227,6 @@ DXFEED_API ERRORCODE dxf_create_connection_impl(const char* address,
 		dxf_string_t w_host = dx_ansi_to_unicode(address);
 
 		if (w_host != NULL) {
-			dx_logging_verbose_info(L"Binding to address: %s", w_host);
 			dx_free(w_host);
 		}
 	}
@@ -332,8 +331,6 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_custom(const char* address,
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_close_connection (dxf_connection_t connection) {
-	dx_logging_verbose_info(L"Disconnect");
-
 	if (!dx_validate_connection_handle(connection, false)) {
 		return DXF_FAILURE;
 	}
@@ -351,8 +348,6 @@ DXFEED_API ERRORCODE dxf_close_connection (dxf_connection_t connection) {
 ERRORCODE dxf_create_subscription_impl (dxf_connection_t connection, int event_types,
 										dxf_uint_t subscr_flags, dxf_long_t time,
 										OUT dxf_subscription_t* subscription) {
-
-	dx_logging_verbose_info(L"Create subscription, event types: %x", event_types);
 
 	dx_perform_common_actions();
 
@@ -426,8 +421,6 @@ DXFEED_API ERRORCODE dxf_close_subscription (dxf_subscription_t subscription) {
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_add_symbol (dxf_subscription_t subscription, dxf_const_string_t symbol) {
-	dx_logging_verbose_info(L"Adding symbol %s", symbol);
-
 	return dxf_add_symbols(subscription, &symbol, 1);
 }
 
@@ -464,8 +457,6 @@ DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dxf_const
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_remove_symbol (dxf_subscription_t subscription, dxf_const_string_t symbol) {
-	dx_logging_verbose_info(L"Removing symbol %s", symbol);
-
 	return dxf_remove_symbols(subscription, &symbol, 1);
 }
 
@@ -858,8 +849,6 @@ ERRORCODE dxf_create_snapshot_impl(dxf_connection_t connection, dx_event_id_t ev
 		return DXF_FAILURE;
 	}
 
-	dx_logging_verbose_info(L"Create snapshot, event_id: %d, symbol: %s", event_id, symbol);
-
 	dx_perform_common_actions();
 
 	if (snapshot == NULL) {
@@ -947,8 +936,6 @@ DXFEED_API ERRORCODE dxf_close_snapshot(dxf_snapshot_t snapshot) {
 	dxf_subscription_t subscription = NULL;
 
 	dx_perform_common_actions();
-
-	dx_logging_verbose_info(L"Close snapshot");
 
 	if (snapshot == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
@@ -1064,8 +1051,6 @@ DXFEED_API ERRORCODE dxf_create_price_level_book(dxf_connection_t connection,
 	size_t srccount = 0;
 	bool found;
 
-	dx_logging_verbose_info(L"Create price level book, symbol: %s", symbol);
-
 	dx_perform_common_actions();
 	if (!dx_init_codec()) {
 		return DXF_FAILURE;
@@ -1128,8 +1113,6 @@ DXFEED_API ERRORCODE dxf_close_price_level_book(dxf_price_level_book_t book) {
 
 	dx_perform_common_actions();
 
-	dx_logging_verbose_info(L"Close Price Level Book");
-
 	if (book == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
 		return DXF_FAILURE;
@@ -1184,8 +1167,6 @@ DXFEED_API ERRORCODE dxf_detach_price_level_book_listener(dxf_price_level_book_t
 DXFEED_API ERRORCODE dxf_create_regional_book(dxf_connection_t connection,
 											dxf_const_string_t symbol,
 											OUT dxf_regional_book_t* book) {
-	dx_logging_verbose_info(L"Create regional book, symbol: %s", symbol);
-
 	dx_perform_common_actions();
 	if (!dx_init_codec()) {
 		return DXF_FAILURE;
@@ -1215,8 +1196,6 @@ DXFEED_API ERRORCODE dxf_close_regional_book(dxf_regional_book_t book) {
 	dxf_subscription_t subscription = NULL;
 
 	dx_perform_common_actions();
-
-	dx_logging_verbose_info(L"Close Regional Book");
 
 	if (book == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
