@@ -40,6 +40,7 @@ SRCS=	BufferedInput.c \
 	Linux.c \
 	Logger.c \
 	PriceLevelBook.c \
+	RegionalBook.c \
 	RecordBuffers.c \
 	RecordFieldSetters.c \
 	RecordTranscoder.c \

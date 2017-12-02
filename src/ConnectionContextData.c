@@ -41,7 +41,8 @@ static const dx_conn_ctx_subsys_manipulator_t g_initializer_queue[dx_ccs_count] 
     DX_CONNECTION_SUBSYS_INIT_NAME(dx_ccs_event_subscription),
     DX_CONNECTION_SUBSYS_INIT_NAME(dx_ccs_record_transcoder),
     DX_CONNECTION_SUBSYS_INIT_NAME(dx_ccs_snapshot_subscription),
-    DX_CONNECTION_SUBSYS_INIT_NAME(dx_ccs_price_level_book)
+    DX_CONNECTION_SUBSYS_INIT_NAME(dx_ccs_price_level_book),
+    DX_CONNECTION_SUBSYS_INIT_NAME(dx_ccs_regional_book)
 };
 
 static const dx_conn_ctx_subsys_manipulator_t g_deinitializer_queue[dx_ccs_count] = {
@@ -54,7 +55,8 @@ static const dx_conn_ctx_subsys_manipulator_t g_deinitializer_queue[dx_ccs_count
     DX_CONNECTION_SUBSYS_DEINIT_NAME(dx_ccs_record_buffers),
     DX_CONNECTION_SUBSYS_DEINIT_NAME(dx_ccs_record_transcoder),
     DX_CONNECTION_SUBSYS_DEINIT_NAME(dx_ccs_snapshot_subscription),
-    DX_CONNECTION_SUBSYS_DEINIT_NAME(dx_ccs_price_level_book)
+    DX_CONNECTION_SUBSYS_DEINIT_NAME(dx_ccs_price_level_book),
+    DX_CONNECTION_SUBSYS_DEINIT_NAME(dx_ccs_regional_book)
 };
 
 static const dx_conn_ctx_subsys_manipulator_t g_check_queue[dx_ccs_count] = {
@@ -67,7 +69,8 @@ static const dx_conn_ctx_subsys_manipulator_t g_check_queue[dx_ccs_count] = {
     DX_CONNECTION_SUBSYS_CHECK_NAME(dx_ccs_record_buffers),
     DX_CONNECTION_SUBSYS_CHECK_NAME(dx_ccs_record_transcoder),
     DX_CONNECTION_SUBSYS_CHECK_NAME(dx_ccs_snapshot_subscription),
-    DX_CONNECTION_SUBSYS_CHECK_NAME(dx_ccs_price_level_book)
+    DX_CONNECTION_SUBSYS_CHECK_NAME(dx_ccs_price_level_book),
+    DX_CONNECTION_SUBSYS_CHECK_NAME(dx_ccs_regional_book)
 };
 /* -------------------------------------------------------------------------- */
 /*

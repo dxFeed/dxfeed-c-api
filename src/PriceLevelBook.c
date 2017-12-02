@@ -741,11 +741,11 @@ static void dx_plb_book_clear(dx_price_level_book_t *book) {
         It could not be done in loop above to avoid situation when next source call book and book
         uses deleted source.
         */
-        dx_mutex_lock(&CTX(book->context));
+        dx_mutex_lock(&CTX(book->guard));
         for (i = 0; i < book->sources_count && book->sources[i] != NULL; i++) {
             dx_plb_source_cleanup(CTX(book->context), book->sources[i]);
         }
-        dx_mutex_unlock(&CTX(book->context));
+        dx_mutex_unlock(&CTX(book->guard));
     }
     /* Now nothing could call book methods, kill it */
     dx_plb_book_free(book);

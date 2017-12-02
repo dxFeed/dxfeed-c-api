@@ -44,6 +44,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PriceLevelBookSample", "tes
 		{98DF2375-3C29-4806-A832-7C666F8BF54C} = {98DF2375-3C29-4806-A832-7C666F8BF54C}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RegionalBookSample", "tests\RegionalBookSample\RegionalBookSample.vcxproj", "{8A14A0E2-B0BB-4300-B1C1-3D52327A42AF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{98DF2375-3C29-4806-A832-7C666F8BF54C} = {98DF2375-3C29-4806-A832-7C666F8BF54C}
+	EndProjectSection
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IncSnapshotConsoleSample", "tests\IncSnapshotConsoleSample\IncSnapshotConsoleSample.vcxproj", "{70E09AD5-89E5-47E2-953B-860A53F1C1DC}"
 	ProjectSection(ProjectDependencies) = postProject
 		{98DF2375-3C29-4806-A832-7C666F8BF54C} = {98DF2375-3C29-4806-A832-7C666F8BF54C}
@@ -174,6 +179,14 @@ Global
 		{BF2A8A6D-418E-4CD0-B41F-77B252CB31A4}.Release|Win32.Build.0 = Release|Win32
 		{BF2A8A6D-418E-4CD0-B41F-77B252CB31A4}.Release|x64.ActiveCfg = Release|x64
 		{BF2A8A6D-418E-4CD0-B41F-77B252CB31A4}.Release|x64.Build.0 = Release|x64
+		{8A14A0E2-B0BB-4300-B1C1-3D52327A42AF}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8A14A0E2-B0BB-4300-B1C1-3D52327A42AF}.Debug|Win32.Build.0 = Debug|Win32
+		{8A14A0E2-B0BB-4300-B1C1-3D52327A42AF}.Debug|x64.ActiveCfg = Debug|x64
+		{8A14A0E2-B0BB-4300-B1C1-3D52327A42AF}.Debug|x64.Build.0 = Debug|x64
+		{8A14A0E2-B0BB-4300-B1C1-3D52327A42AF}.Release|Win32.ActiveCfg = Release|Win32
+		{8A14A0E2-B0BB-4300-B1C1-3D52327A42AF}.Release|Win32.Build.0 = Release|Win32
+		{8A14A0E2-B0BB-4300-B1C1-3D52327A42AF}.Release|x64.ActiveCfg = Release|x64
+		{8A14A0E2-B0BB-4300-B1C1-3D52327A42AF}.Release|x64.Build.0 = Release|x64
 		{70E09AD5-89E5-47E2-953B-860A53F1C1DC}.Debug|Win32.ActiveCfg = Debug|Win32
 		{70E09AD5-89E5-47E2-953B-860A53F1C1DC}.Debug|Win32.Build.0 = Debug|Win32
 		{70E09AD5-89E5-47E2-953B-860A53F1C1DC}.Debug|x64.ActiveCfg = Debug|x64

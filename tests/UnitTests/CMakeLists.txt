@@ -45,6 +45,7 @@ set(COMMON_HEADERS
     ${LIB_DXFEED_SRC_DIR}/EventManager.h
     ${LIB_DXFEED_SRC_DIR}/ObjectArray.h
     ${LIB_DXFEED_SRC_DIR}/PriceLevelBook.h
+    ${LIB_DXFEED_SRC_DIR}/RegionalBook.h
     ${LIB_DXFEED_SRC_DIR}/PrimitiveTypes.h
     ${LIB_DXFEED_SRC_DIR}/Snapshot.h
     ${LIB_DXFEED_SRC_DIR}/TaskQueue.h
@@ -66,6 +67,7 @@ set(COMMON_SOURCES
     ${LIB_DXFEED_SRC_DIR}/EventManager.c
     ${LIB_DXFEED_SRC_DIR}/ObjectArray.c
     ${LIB_DXFEED_SRC_DIR}/PriceLevelBook.c
+    ${LIB_DXFEED_SRC_DIR}/RegionalBook.c
     ${LIB_DXFEED_SRC_DIR}/Snapshot.c
     ${LIB_DXFEED_SRC_DIR}/TaskQueue.c
     ${LIB_DXFEED_SRC_DIR}/Win32.c

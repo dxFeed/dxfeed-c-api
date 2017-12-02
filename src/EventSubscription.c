@@ -47,6 +47,8 @@ const dxf_const_string_t dx_all_order_sources[] = {
 };
 const size_t dx_all_order_sources_count = sizeof(dx_all_order_sources) / sizeof(dx_all_order_sources[0]) - 1;
 
+const size_t dx_all_regional_count = 26;
+
 struct dx_subscription_data_struct_t;
 typedef struct dx_subscription_data_struct_t dx_subscription_data_t;
 typedef dx_subscription_data_t* dx_subscription_data_ptr_t;
@@ -729,6 +731,7 @@ dxf_subscription_t dx_create_event_subscription(dxf_connection_t connection, int
 		for (; dx_all_order_sources[i]; i++) {
 			res &= dx_add_order_source(subscr_data, dx_all_order_sources[i]);
 		}
+        res &= dx_add_order_source(subscr_data, L"");
     }
     if (!res) {
         dx_free_event_subscription_data(subscr_data);
