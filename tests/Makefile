@@ -16,7 +16,8 @@ SUBDIRS = CandleSample \
 	  CommandLineSample \
 	  SnapshotConsoleSample \
 	  IncSnapshotConsoleSample \
-	  PriceLevelBookSample
+	  PriceLevelBookSample \
+	  RegionalBookSample
 
 .PHONY: all $(SUBDIRS)
 

@@ -322,7 +322,7 @@ bool dx_snapshot_set_record(dx_snapshot_data_ptr_t snapshot_data, dx_snapshot_re
             sizeof(dxf_greeks_t));
         break;
     case dx_eid_series:
-        dx_memcpy(&(((dxf_series_t*)recs->records.elements)[position]), (dxf_candle_t*)obj,
+        dx_memcpy(&(((dxf_series_t*)recs->records.elements)[position]), (dxf_series_t*)obj,
             sizeof(dxf_series_t));
         break;
     default:
@@ -354,6 +354,7 @@ bool dx_snapshot_add_event_record(dx_snapshot_data_ptr_t snapshot_data,
     free_event(obj);
     if (!res) {
         dx_string_array_free(string_buffer);
+        dx_free((void*)string_buffer);
         return false;
     }
 
@@ -362,6 +363,7 @@ bool dx_snapshot_add_event_record(dx_snapshot_data_ptr_t snapshot_data,
         event_params->time_int_field, position, dx_capacity_manager_halfer, failed);
     if (failed) {
         dx_string_array_free(string_buffer);
+        dx_free((void*)string_buffer);
         dx_snapshot_delete_record(snapshot_data, recs, position);
         return dx_set_error_code(dx_mec_insufficient_memory);
     }
@@ -371,6 +373,7 @@ bool dx_snapshot_add_event_record(dx_snapshot_data_ptr_t snapshot_data,
         position, dx_capacity_manager_halfer, failed);
     if (failed) {
         dx_string_array_free(string_buffer);
+        dx_free((void*)string_buffer);
         dx_snapshot_delete_record(snapshot_data, recs, position);
         DX_ARRAY_DELETE(recs->record_time_ints, dxf_time_int_field_t, position,
             dx_capacity_manager_halfer, failed);
@@ -408,6 +411,7 @@ bool dx_snapshot_clear_records_array(dx_snapshot_data_ptr_t snapshot_data, dx_sn
     string_buffers = &(recs->record_buffers);
     for (i = 0; i < string_buffers->size; ++i) {
         dx_string_array_free(string_buffers->elements[i]);
+        dx_free((void*)string_buffers->elements[i]);
     }
     dx_free(string_buffers->elements);
     string_buffers->elements = NULL;
@@ -425,6 +429,7 @@ bool dx_snapshot_remove_event_record(dx_snapshot_data_ptr_t snapshot_data, dx_sn
     }
 
     dx_string_array_free(recs->record_buffers.elements[position]);
+    dx_free((void*)recs->record_buffers.elements[position]);
 
     if (!dx_snapshot_delete_record(snapshot_data, recs, position))
         return false;
@@ -576,7 +581,7 @@ bool dx_is_snapshot_event(const dx_snapshot_data_ptr_t snapshot_data, int event_
 }
 
 
-bool dx_is_zero_event(dx_event_id_t event_id, const dxf_event_data_t event_row, int idx) {
+bool dx_is_zero_event(dx_event_id_t event_id, const dxf_event_data_t event_row, size_t idx) {
     if (event_id != dx_eid_order)
         return false;
     return ((dxf_order_t*)event_row)[idx].size == 0;
@@ -594,7 +599,7 @@ void event_listener(int event_type, dxf_const_string_t symbol_name,
     se = IS_FLAG_SET(event_params->flags, dxf_ef_snapshot_end) || IS_FLAG_SET(event_params->flags, dxf_ef_snapshot_snip);
     tx = IS_FLAG_SET(event_params->flags, dxf_ef_tx_pending);
 
-    for (i = 0; i < data_count; i++) {
+    for (i = 0; i < (size_t)data_count; i++) {
         /* It should be no-op, really */
         if (!dx_is_snapshot_event(snapshot_data, event_type, event_params, (const dxf_event_data_t)(data + i))) {
             continue;

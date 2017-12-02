@@ -38,11 +38,14 @@
 #define DX_SUBSCR_FLAG_SR_MARKET_MAKER_ORDER    0x2
 /* used for time series subscription */
 #define DX_SUBSCR_FLAG_TIME_SERIES              0x4
+/* used for regional quotes */
+#define DX_SUBSCR_QUOTES_REGIONAL               0x8
 
 extern const dxf_subscription_t dx_invalid_subscription;
 
 extern const dxf_const_string_t dx_all_order_sources[];
 extern const size_t dx_all_order_sources_count;
+extern const size_t dx_all_regional_count;
 
 /* -------------------------------------------------------------------------- */
 /*

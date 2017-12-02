@@ -206,6 +206,7 @@
     <ClCompile Include="src\EventSubscription.c" />
     <ClCompile Include="src\Logger.c" />
     <ClCompile Include="src\PriceLevelBook.c" />
+    <ClCompile Include="src\RegionalBook.c" />
     <ClCompile Include="src\RecordTranscoder.c" />
     <ClCompile Include="src\ServerMessageProcessor.c" />
     <ClCompile Include="src\Snapshot.c" />
@@ -231,6 +232,7 @@
   <ItemGroup>
     <ClInclude Include="src\ConfigurationDeserializer.h" />
     <ClInclude Include="src\PriceLevelBook.h" />
+    <ClInclude Include="src\RegionalBook.h" />
     <ClInclude Include="src\resource.h" />
     <ClInclude Include="src\Candle.h" />
     <ClInclude Include="src\ClientMessageProcessor.h" />

@@ -36,6 +36,7 @@
 #include "DXThreads.h"
 #include "Snapshot.h"
 #include "PriceLevelBook.h"
+#include "RegionalBook.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -1228,6 +1229,96 @@ DXFEED_API ERRORCODE dxf_detach_price_level_book_listener(dxf_price_level_book_t
 
 	return DXF_SUCCESS;
 }
+
+/* -------------------------------------------------------------------------- */
+
+DXFEED_API ERRORCODE dxf_create_regional_book(dxf_connection_t connection, 
+                                              dxf_const_string_t symbol,
+                                              OUT dxf_regional_book_t* book) {
+    dx_logging_verbose_info(L"Create regional book, symbol: %s", symbol);
+
+    dx_perform_common_actions();
+    if (!dx_init_codec()) {
+        return DXF_FAILURE;
+    }
+
+    if (book == NULL) {
+        dx_set_error_code(dx_ec_invalid_func_param);
+        return DXF_FAILURE;
+    }
+
+    if (symbol == NULL || dx_string_length(symbol) == 0) {
+        dx_set_error_code(dx_ssec_invalid_symbol);
+        return DXF_FAILURE;
+    }
+
+    *book = dx_create_regional_book(connection, symbol);
+    if (*book == NULL) {
+        return DXF_FAILURE;
+    }
+
+    return DXF_SUCCESS;
+}
+
+/* -------------------------------------------------------------------------- */
+
+DXFEED_API ERRORCODE dxf_close_regional_book(dxf_regional_book_t book) {
+    dxf_subscription_t subscription = NULL;
+
+    dx_perform_common_actions();
+
+    dx_logging_verbose_info(L"Close Regional Book");
+
+    if (book == NULL) {
+        dx_set_error_code(dx_ec_invalid_func_param);
+        return DXF_FAILURE;
+    }
+    if (!dx_close_regional_book(book)) {
+        return DXF_FAILURE;
+    }
+
+    return DXF_SUCCESS;
+}
+
+/* -------------------------------------------------------------------------- */
+
+DXFEED_API ERRORCODE dxf_attach_regional_book_listener(dxf_regional_book_t book, 
+                                                       dxf_price_level_book_listener_t book_listener,
+                                                       void* user_data) {
+    dx_perform_common_actions();
+
+    if (book == NULL) {
+        dx_set_error_code(dx_ec_invalid_func_param);
+        return DXF_FAILURE;
+    }
+
+    if (!dx_add_regional_book_listener(book, book_listener, user_data)) {
+        return DXF_FAILURE;
+    }
+
+    return DXF_SUCCESS;
+}
+
+/* -------------------------------------------------------------------------- */
+
+DXFEED_API ERRORCODE dxf_detach_regional_book_listener(dxf_regional_book_t book, 
+                                                       dxf_price_level_book_listener_t book_listener) {
+    dx_perform_common_actions();
+
+    if (book == NULL) {
+        dx_set_error_code(dx_ec_invalid_func_param);
+
+        return DXF_FAILURE;
+    }
+
+    if (!dx_remove_regional_book_listener(book, book_listener)) {
+        return DXF_FAILURE;
+    }
+
+    return DXF_SUCCESS;
+}
+
+/* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_write_raw_data(dxf_connection_t connection, const char * raw_file_name)
 {

@@ -131,6 +131,9 @@
     <ClCompile Include="src\PriceLevelBook.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\RegionalBook.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="DXFeed.def">
@@ -262,6 +265,9 @@
       <Filter>Parser\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\PriceLevelBook.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RegionalBook.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
