@@ -16,12 +16,12 @@
  * Contributor(s):
  *
  */
- 
+
 /*
  *	Contains the functionality for managing the memory required to store
  *  the record data
  */
- 
+
 #ifndef RECORD_BUFFERS_H_INCLUDED
 #define RECORD_BUFFERS_H_INCLUDED
 
@@ -52,8 +52,8 @@ typedef void* (*dx_get_record_buffer_ptr_t)(void* context);
 /* -------------------------------------------------------------------------- */
 
 typedef struct {
-    dx_get_record_ptr_t record_getter;
-    dx_get_record_buffer_ptr_t record_buffer_getter;
+	dx_get_record_ptr_t record_getter;
+	dx_get_record_buffer_ptr_t record_buffer_getter;
 } dx_buffer_manager_collection_t;
 
 extern const dx_buffer_manager_collection_t g_buffer_managers[dx_rid_count];

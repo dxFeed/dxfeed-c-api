@@ -27,21 +27,21 @@
 #define DX_SOCKETS_H_INCLUDED
 
 #ifdef _WIN32
-    #include <WinSock2.h>
-    #include <WS2tcpip.h>
-    
-    typedef SOCKET dx_socket_t;
-#else
-    #include <unistd.h>
-    #include <sys/types.h>
-    #include <sys/socket.h>
-    #include <netinet/in.h>
-    #include <netdb.h>
-    #include <errno.h>
+	#include <WinSock2.h>
+	#include <WS2tcpip.h>
 
-    #define INVALID_SOCKET -1
-    #define SOCKET_ERROR -1
-    typedef int dx_socket_t;
+	typedef SOCKET dx_socket_t;
+#else
+	#include <unistd.h>
+	#include <sys/types.h>
+	#include <sys/socket.h>
+	#include <netinet/in.h>
+	#include <netdb.h>
+	#include <errno.h>
+
+	#define INVALID_SOCKET -1
+	#define SOCKET_ERROR -1
+	typedef int dx_socket_t;
 #endif /* _WIN32 */
 
 #include "PrimitiveTypes.h"
@@ -69,7 +69,7 @@ int dx_send (dx_socket_t s, const void* buffer, int buflen);
 int dx_recv (dx_socket_t s, void* buffer, int buflen);
 bool dx_close (dx_socket_t s);
 bool dx_getaddrinfo (const char* nodename, const char* servname,
-                     const struct addrinfo* hints, struct addrinfo** res);
+					const struct addrinfo* hints, struct addrinfo** res);
 void dx_freeaddrinfo (struct addrinfo* res);
 
 #endif /* DX_SOCKETS_H_INCLUDED */

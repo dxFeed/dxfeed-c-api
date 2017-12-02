@@ -14,16 +14,16 @@
 /* -------------------------------------------------------------------------- */
 
 typedef struct {
-    dxf_const_string_t symbol;
-    dxf_char_t exchange_code;
-    dxf_double_t period_value;
-    dxf_candle_type_period_attribute_t period_type;
-    dxf_candle_price_attribute_t price;
-    dxf_candle_session_attribute_t session;
-    dxf_candle_alignment_attribute_t alignment;
+	dxf_const_string_t symbol;
+	dxf_char_t exchange_code;
+	dxf_double_t period_value;
+	dxf_candle_type_period_attribute_t period_type;
+	dxf_candle_price_attribute_t price;
+	dxf_candle_session_attribute_t session;
+	dxf_candle_alignment_attribute_t alignment;
 
-    dxf_const_string_t expected;
-    int line;
+	dxf_const_string_t expected;
+	int line;
 } candle_attribute_test_case_t;
 
 /* -------------------------------------------------------------------------- */
@@ -40,17 +40,17 @@ void reset_thread_terminate(dxf_listener_thread_data_t data);
 
 void process_last_error();
 bool create_event_subscription(dxf_connection_t connection, int event_type,
-                               dxf_const_string_t symbol,
-                               dxf_event_listener_t event_listener,
-                               OUT dxf_subscription_t* res_subscription);
+							dxf_const_string_t symbol,
+							dxf_event_listener_t event_listener,
+							OUT dxf_subscription_t* res_subscription);
 
 /* -------------------------------------------------------------------------- */
 /* Event counter data */
 typedef struct {
-    const char *counter_name;
-    dxf_uint_t event_counter;
-    //TODO: hide implementation into c-file; remove Windows.h header from this
-    CRITICAL_SECTION event_counter_guard;
+	const char *counter_name;
+	dxf_uint_t event_counter;
+	//TODO: hide implementation into c-file; remove Windows.h header from this
+	CRITICAL_SECTION event_counter_guard;
 } event_counter_data_t, *event_counter_data_ptr_t;
 
 /* Event counter functions */
@@ -68,36 +68,36 @@ const char *get_event_counter_name(event_counter_data_ptr_t counter_data);
 #define PRINT_TEST_FAILED_MESSAGE(message) printf("%s failed! File: %s, line: %d\nMessage:%s\n", __FUNCTION__, __FILE__, __LINE__, message);
 
 #define DX_CHECK(predicate) \
-    do { \
-        if (!(predicate)) { \
-            PRINT_TEST_FAILED \
-            { \
-                int error_code; \
-                dxf_const_string_t error_descr = L""; \
-                if (dx_get_last_error(&error_code) == dx_efr_success && error_code != dx_ec_success) { \
-                    wprintf(L"Last error: #%d %ls\n", error_code, dx_get_error_description(error_code)); \
-                    dx_pop_last_error(); \
-                } \
-            } \
-            return false; \
-        } \
-    } while (false)
+	do { \
+		if (!(predicate)) { \
+			PRINT_TEST_FAILED \
+			{ \
+				int error_code; \
+				dxf_const_string_t error_descr = L""; \
+				if (dx_get_last_error(&error_code) == dx_efr_success && error_code != dx_ec_success) { \
+					wprintf(L"Last error: #%d %ls\n", error_code, dx_get_error_description(error_code)); \
+					dx_pop_last_error(); \
+				} \
+			} \
+			return false; \
+		} \
+	} while (false)
 
 #define DX_CHECK_MESSAGE(predicate, message) \
-    do { \
-        if (!(predicate)) { \
-            PRINT_TEST_FAILED_MESSAGE(message) \
-            { \
-                int error_code; \
-                dxf_const_string_t error_descr = L""; \
-                if (dx_get_last_error(&error_code) == dx_efr_success && error_code != dx_ec_success) { \
-                    wprintf(L"Last error: #%d %ls\n", error_code, dx_get_error_description(error_code)); \
-                    dx_pop_last_error(); \
-                } \
-            } \
-            return false; \
-        } \
-    } while (false)
+	do { \
+		if (!(predicate)) { \
+			PRINT_TEST_FAILED_MESSAGE(message) \
+			{ \
+				int error_code; \
+				dxf_const_string_t error_descr = L""; \
+				if (dx_get_last_error(&error_code) == dx_efr_success && error_code != dx_ec_success) { \
+					wprintf(L"Last error: #%d %ls\n", error_code, dx_get_error_description(error_code)); \
+					dx_pop_last_error(); \
+				} \
+			} \
+			return false; \
+		} \
+	} while (false)
 
 #define DX_IS_EQUAL_FUNCTION_DECLARATION(type) bool dx_is_equal_##type##(type expected, type actual)
 #define DX_IS_GREATER_OR_EQUAL_FUNCTION_DECLARATION(type) bool dx_ge_##type##(type actual, type param)

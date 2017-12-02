@@ -13,5 +13,5 @@
 /* -------------------------------------------------------------------------- */
 
 struct EventDataFactory {
-    static IDispatch* CreateInstance (int eventType, dxf_event_data_t eventData, IUnknown* parent);
+	static IDispatch* CreateInstance (int eventType, dxf_event_data_t eventData, IUnknown* parent);
 };

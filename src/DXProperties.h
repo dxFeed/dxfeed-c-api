@@ -35,15 +35,15 @@
 /* -------------------------------------------------------------------------- */
 
 typedef struct {
-    dxf_string_t key;
-    dxf_string_t value;
+	dxf_string_t key;
+	dxf_string_t value;
 } dx_property_item_t;
 
 //Note: not fast map-dictionary realization, but enough for properties
 typedef struct {
-    dx_property_item_t* elements;
-    size_t size;
-    size_t capacity;
+	dx_property_item_t* elements;
+	size_t size;
+	size_t capacity;
 } dx_property_map_t;
 
 void dx_property_map_free_collection(dx_property_map_t* props);

@@ -40,11 +40,11 @@
 /* -------------------------------------------------------------------------- */
 
 void* dx_error_processor (void* src) {
-    if (src == NULL) {
-        dx_set_error_code(dx_mec_insufficient_memory);
-    }
+	if (src == NULL) {
+		dx_set_error_code(dx_mec_insufficient_memory);
+	}
 
-    return src;
+	return src;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -55,39 +55,39 @@ void* dx_error_processor (void* src) {
 
 void* dx_malloc (size_t size) {
 	void* r = malloc(size);
-    return dx_error_processor(r);
+	return dx_error_processor(r);
 }
 
 /* -------------------------------------------------------------------------- */
 
 void* dx_calloc (size_t num, size_t size) {
 	void* r = calloc(num, size);
-    return dx_error_processor(r);
+	return dx_error_processor(r);
 }
 
 /* -------------------------------------------------------------------------- */
 
 void* dx_memcpy (void * destination, const void * source, size_t size) {
-    
-    return dx_error_processor(memcpy(destination, source, size));
+
+	return dx_error_processor(memcpy(destination, source, size));
 }
 
 /* -------------------------------------------------------------------------- */
 
 void* dx_memmove (void * destination, const void * source, size_t size) {
-    return dx_error_processor(memmove(destination, source, size));
+	return dx_error_processor(memmove(destination, source, size));
 }
 
 /* -------------------------------------------------------------------------- */
 
 void* dx_memset (void * destination, int c, size_t size) {
-    return dx_error_processor(memset(destination, c, size));
+	return dx_error_processor(memset(destination, c, size));
 }
 
 /* -------------------------------------------------------------------------- */
 
 void dx_free (void* buf) {
-    free(buf);
+	free(buf);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -98,11 +98,11 @@ void dx_free (void* buf) {
 
 void* dx_calloc_no_ehm (size_t num, size_t size) {
 	void *r = calloc(num, size);
-    return r;
+	return r;
 }
 
 /* -------------------------------------------------------------------------- */
 
 void dx_free_no_ehm (void* buf) {
-    free(buf);
+	free(buf);
 }

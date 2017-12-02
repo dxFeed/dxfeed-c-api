@@ -4,12 +4,12 @@ struct IDXCandleSymbol;
 
 /* -------------------------------------------------------------------------- */
 /*
-*	DefDXCandleSymbolFactory class
+ *	DefDXCandleSymbolFactory class
 
-*  creates the instances implementing the IDXCandleSymbol interface
-*/
+ *  creates the instances implementing the IDXCandleSymbol interface
+ */
 /* -------------------------------------------------------------------------- */
 
 struct DefDXCandleSymbolFactory {
-    static IDXCandleSymbol* CreateInstance();
+	static IDXCandleSymbol* CreateInstance();
 };

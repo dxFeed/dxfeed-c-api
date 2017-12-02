@@ -42,7 +42,7 @@ void* dx_memset (void* destination, int c, size_t size);
 /* -------------------------------------------------------------------------- */
 /*
  *	Memory function wrappers without error handling mechanism
- 
+
  *  May be useful when the internal error handling mechanism cannot be relied
  *  upon, e.g. within its initialization.
  */

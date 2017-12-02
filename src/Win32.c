@@ -119,7 +119,7 @@ BOOL APIENTRY DllMain (HANDLE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 		dx_fini_cb_queue(&g_process_destructors);
 		break;
 	}
-    return TRUE;
+	return TRUE;
 }
 
 #endif

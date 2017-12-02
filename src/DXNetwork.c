@@ -54,38 +54,38 @@
 typedef struct addrinfo* dx_addrinfo_ptr;
 
 typedef struct {
-    char* host;
-    char* port;
-    char* username;
-    char* password;
-    dx_codec_tls_t tls;
-    dx_codec_gzip_t gzip;
+	char* host;
+	char* port;
+	char* username;
+	char* password;
+	dx_codec_tls_t tls;
+	dx_codec_gzip_t gzip;
 
-    dx_addrinfo_ptr* elements;
-    size_t size;
-    size_t capacity;
-    size_t cur_info_index;
+	dx_addrinfo_ptr* elements;
+	size_t size;
+	size_t capacity;
+	size_t cur_info_index;
 
 #ifdef DXFEED_CODEC_TLS_ENABLED
-    uint8_t* key_store_mem;
-    size_t key_store_len;
-    uint8_t* trust_store_mem;
-    size_t trust_store_len;
+	uint8_t* key_store_mem;
+	size_t key_store_len;
+	uint8_t* trust_store_mem;
+	size_t trust_store_len;
 #endif // DXFEED_CODEC_TLS_ENABLED
 
-    bool is_connection_failed;
+	bool is_connection_failed;
 } dx_ext_address_t;
 
 typedef struct {
-    dx_ext_address_t* elements;
-    size_t size;
-    size_t capacity;
+	dx_ext_address_t* elements;
+	size_t size;
+	size_t capacity;
 
-    dx_addrinfo_ptr* elements_to_free;
-    int elements_to_free_count;
+	dx_addrinfo_ptr* elements_to_free;
+	int elements_to_free_count;
 
-    int last_resolution_timestamp;
-    size_t cur_addr_index;
+	int last_resolution_timestamp;
+	size_t cur_addr_index;
 } dx_address_resolution_context_t;
 
 #ifdef DXFEED_CODEC_TLS_ENABLED
@@ -100,41 +100,41 @@ typedef struct tls_config* dx_tls_config;
 /* -------------------------------------------------------------------------- */
 
 typedef struct {
-    dxf_connection_t connection;
+	dxf_connection_t connection;
 
-    dx_connection_context_data_t context_data;
-    dx_address_resolution_context_t addr_context;
+	dx_connection_context_data_t context_data;
+	dx_address_resolution_context_t addr_context;
 
-    const char* address;
-    dx_socket_t s;
-    time_t next_heartbeat;
-    dx_thread_t reader_thread;
-    dx_thread_t queue_thread;
-    dx_mutex_t socket_guard;
+	const char* address;
+	dx_socket_t s;
+	time_t next_heartbeat;
+	dx_thread_t reader_thread;
+	dx_thread_t queue_thread;
+	dx_mutex_t socket_guard;
 
 #ifdef DXFEED_CODEC_TLS_ENABLED
-    dx_tls tls_context;
-    dx_tls_config tls_config;
+	dx_tls tls_context;
+	dx_tls_config tls_config;
 #endif // DXFEED_CODEC_TLS_ENABLED
 
-    bool reader_thread_termination_trigger;
-    bool queue_thread_termination_trigger;
-    bool reader_thread_state;
-    bool queue_thread_state;
-    dx_error_code_t queue_thread_error;
+	bool reader_thread_termination_trigger;
+	bool queue_thread_termination_trigger;
+	bool reader_thread_state;
+	bool queue_thread_state;
+	dx_error_code_t queue_thread_error;
 
-    dx_task_queue_t tq;
+	dx_task_queue_t tq;
 
-    FILE* raw_dump_file;
+	FILE* raw_dump_file;
 
-    /* protocol description properties */
-    dx_property_map_t properties;
-    dx_property_map_t prop_backup;
+	/* protocol description properties */
+	dx_property_map_t properties;
+	dx_property_map_t prop_backup;
 
-    dx_connection_status_t status;
-    dx_mutex_t status_guard;
+	dx_connection_status_t status;
+	dx_mutex_t status_guard;
 
-    int set_fields_flags;
+	int set_fields_flags;
 } dx_network_connection_context_t;
 
 #define SOCKET_FIELD_FLAG           (1 << 0)
@@ -151,35 +151,35 @@ typedef struct {
 bool dx_clear_connection_data (dx_network_connection_context_t* context);
 
 DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_network) {
-    dx_network_connection_context_t* context = NULL;
+	dx_network_connection_context_t* context = NULL;
 
-    CHECKED_CALL_0(dx_on_connection_created);
+	CHECKED_CALL_0(dx_on_connection_created);
 
-    context = dx_calloc(1, sizeof(dx_network_connection_context_t));
+	context = dx_calloc(1, sizeof(dx_network_connection_context_t));
 
-    if (context == NULL) {
-        return false;
-    }
+	if (context == NULL) {
+		return false;
+	}
 
-    context->connection = connection;
-    context->queue_thread_state = true;
+	context->connection = connection;
+	context->queue_thread_state = true;
 
-    if (!(dx_create_task_queue(&(context->tq)) && (context->set_fields_flags |= TASK_QUEUE_FIELD_FLAG)) ||
-        !(dx_mutex_create(&(context->status_guard)) && (context->set_fields_flags |= STATUS_GUARD_FLAG)) ||
-        !dx_set_subsystem_data(connection, dx_ccs_network, context)) {
-        dx_clear_connection_data(context);
+	if (!(dx_create_task_queue(&(context->tq)) && (context->set_fields_flags |= TASK_QUEUE_FIELD_FLAG)) ||
+		!(dx_mutex_create(&(context->status_guard)) && (context->set_fields_flags |= STATUS_GUARD_FLAG)) ||
+		!dx_set_subsystem_data(connection, dx_ccs_network, context)) {
+		dx_clear_connection_data(context);
 
-        return false;
-    }
+		return false;
+	}
 
 #ifdef DXFEED_CODEC_TLS_ENABLED
-    if (tls_init() < 0) {
-        dx_clear_connection_data(context);
-        return false;
-    }
+	if (tls_init() < 0) {
+		dx_clear_connection_data(context);
+		return false;
+	}
 #endif // DXFEED_CODEC_TLS_ENABLED
 
-    return true;
+	return true;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -187,46 +187,46 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_network) {
 static bool dx_close_socket (dx_network_connection_context_t* context);
 
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_network) {
-    bool res = true;
-    dx_network_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
+	bool res = true;
+	dx_network_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
 
-    if (context == NULL) {
-        return dx_on_connection_destroyed() && res;
-    }
+	if (context == NULL) {
+		return dx_on_connection_destroyed() && res;
+	}
 
-    if (IS_FLAG_SET(context->set_fields_flags, QUEUE_THREAD_FIELD_FLAG)) {
-        context->queue_thread_termination_trigger = true;
+	if (IS_FLAG_SET(context->set_fields_flags, QUEUE_THREAD_FIELD_FLAG)) {
+		context->queue_thread_termination_trigger = true;
 
-        res = dx_wait_for_thread(context->queue_thread, NULL) && res;
-        dx_log_debug_message(L"Queue thread exited");
-    }
+		res = dx_wait_for_thread(context->queue_thread, NULL) && res;
+		dx_log_debug_message(L"Queue thread exited");
+	}
 
-    if (IS_FLAG_SET(context->set_fields_flags, READER_THREAD_FIELD_FLAG)) {
-        context->reader_thread_termination_trigger = true;
+	if (IS_FLAG_SET(context->set_fields_flags, READER_THREAD_FIELD_FLAG)) {
+		context->reader_thread_termination_trigger = true;
 
-        res = dx_close_socket(context) && res;
-        res = dx_wait_for_thread(context->reader_thread, NULL) && res;
-        dx_log_debug_message(L"Reader thread exited");
-    }
+		res = dx_close_socket(context) && res;
+		res = dx_wait_for_thread(context->reader_thread, NULL) && res;
+		dx_log_debug_message(L"Reader thread exited");
+	}
 
-    res = dx_clear_connection_data(context) && res;
-    res = dx_on_connection_destroyed() && res;
+	res = dx_clear_connection_data(context) && res;
+	res = dx_on_connection_destroyed() && res;
 
-    return res;
+	return res;
 }
 
 /* -------------------------------------------------------------------------- */
 
 DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_network) {
-    bool res = true;
-    dx_network_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
-    dx_thread_t cur_thread = dx_get_thread_id();
+	bool res = true;
+	dx_network_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
+	dx_thread_t cur_thread = dx_get_thread_id();
 
-    if (context == NULL) {
-        return true;
-    }
+	if (context == NULL) {
+		return true;
+	}
 
-    return !dx_compare_threads(cur_thread, context->queue_thread) && !dx_compare_threads(cur_thread, context->reader_thread);
+	return !dx_compare_threads(cur_thread, context->queue_thread) && !dx_compare_threads(cur_thread, context->reader_thread);
 }
 
 
@@ -252,210 +252,210 @@ static bool dx_protocol_property_restore_backup(dx_network_connection_context_t*
 
 /* -------------------------------------------------------------------------- */
 
- void tls_unload_file(uint8_t* buf, size_t len) {
-    //Note: it is simple stub since current TLS API do not support unloading files
+void tls_unload_file(uint8_t* buf, size_t len) {
+	//Note: it is simple stub since current TLS API do not support unloading files
 }
 
 /* -------------------------------------------------------------------------- */
 
 static void dx_logging_ansi_error(const char* ansi_error) {
-    if (ansi_error == NULL)
-        return;
-    dxf_string_t w_error = dx_ansi_to_unicode(ansi_error);
-    dx_logging_error(w_error);
-    dx_free(w_error);
+	if (ansi_error == NULL)
+		return;
+	dxf_string_t w_error = dx_ansi_to_unicode(ansi_error);
+	dx_logging_error(w_error);
+	dx_free(w_error);
 }
 
 /* -------------------------------------------------------------------------- */
 
 static dx_ext_address_t* dx_get_current_address(dx_network_connection_context_t* context) {
-    return &(context->addr_context.elements[context->addr_context.cur_addr_index]);
+	return &(context->addr_context.elements[context->addr_context.cur_addr_index]);
 }
 
 /* -------------------------------------------------------------------------- */
 
 void dx_clear_addr_context_data (dx_address_resolution_context_t* context_data) {
-    if (context_data->elements_to_free != NULL) {
-        int i = 0;
+	if (context_data->elements_to_free != NULL) {
+		int i = 0;
 
-        for (; i < context_data->elements_to_free_count; ++i) {
-            dx_freeaddrinfo(context_data->elements_to_free[i]);
-        }
+		for (; i < context_data->elements_to_free_count; ++i) {
+			dx_freeaddrinfo(context_data->elements_to_free[i]);
+		}
 
-        dx_free(context_data->elements_to_free);
+		dx_free(context_data->elements_to_free);
 
-        context_data->elements_to_free = NULL;
-        context_data->elements_to_free_count = 0;
-    }
+		context_data->elements_to_free = NULL;
+		context_data->elements_to_free_count = 0;
+	}
 
-    if (context_data->elements != NULL) {
-        size_t i;
-        for (i = 0; i < context_data->size; i++) {
-            dx_ext_address_t* addr = &(context_data->elements[i]);
-            if (addr->host != NULL) {
-                dx_free(addr->host);
-                addr->host = NULL;
-            }
-            if (addr->port != NULL) {
-                dx_free(addr->port);
-                addr->port = NULL;
-            }
-            if (addr->username != NULL) {
-                dx_free(addr->username);
-                addr->username = NULL;
-            }
-            if (addr->password != NULL) {
-                dx_free(addr->password);
-                addr->password = NULL;
-            }
+	if (context_data->elements != NULL) {
+		size_t i;
+		for (i = 0; i < context_data->size; i++) {
+			dx_ext_address_t* addr = &(context_data->elements[i]);
+			if (addr->host != NULL) {
+				dx_free(addr->host);
+				addr->host = NULL;
+			}
+			if (addr->port != NULL) {
+				dx_free(addr->port);
+				addr->port = NULL;
+			}
+			if (addr->username != NULL) {
+				dx_free(addr->username);
+				addr->username = NULL;
+			}
+			if (addr->password != NULL) {
+				dx_free(addr->password);
+				addr->password = NULL;
+			}
 
-            dx_codec_tls_free(&addr->tls);
+			dx_codec_tls_free(&addr->tls);
 
-            dx_free(addr->elements);
-            addr->elements = NULL;
-            addr->size = 0;
-            addr->capacity = 0;
+			dx_free(addr->elements);
+			addr->elements = NULL;
+			addr->size = 0;
+			addr->capacity = 0;
 
 #ifdef DXFEED_CODEC_TLS_ENABLED
-            if (addr->key_store_mem != NULL) {
-                tls_unload_file(addr->key_store_mem, addr->key_store_len);
-                addr->key_store_mem = NULL;
-                addr->key_store_len = 0;
-            }
-            if (addr->trust_store_mem != NULL) {
-                tls_unload_file(addr->trust_store_mem, addr->trust_store_len);
-                addr->trust_store_mem = NULL;
-                addr->trust_store_len = 0;
-            }
+			if (addr->key_store_mem != NULL) {
+				tls_unload_file(addr->key_store_mem, addr->key_store_len);
+				addr->key_store_mem = NULL;
+				addr->key_store_len = 0;
+			}
+			if (addr->trust_store_mem != NULL) {
+				tls_unload_file(addr->trust_store_mem, addr->trust_store_len);
+				addr->trust_store_mem = NULL;
+				addr->trust_store_len = 0;
+			}
 #endif // DXFEED_CODEC_TLS_ENABLED
-        }
+		}
 
-        dx_free(context_data->elements);
-        context_data->elements = NULL;
-        context_data->size = 0;
-        context_data->capacity = 0;
-        context_data->cur_addr_index = 0;
-    }
+		dx_free(context_data->elements);
+		context_data->elements = NULL;
+		context_data->size = 0;
+		context_data->capacity = 0;
+		context_data->cur_addr_index = 0;
+	}
 }
 
 /* -------------------------------------------------------------------------- */
 
 bool dx_clear_connection_data (dx_network_connection_context_t* context) {
-    int set_fields_flags = 0;
-    bool success = true;
+	int set_fields_flags = 0;
+	bool success = true;
 
-    if (context == NULL) {
-        return true;
-    }
+	if (context == NULL) {
+		return true;
+	}
 
-    set_fields_flags = context->set_fields_flags;
+	set_fields_flags = context->set_fields_flags;
 
-    if (IS_FLAG_SET(set_fields_flags, SOCKET_FIELD_FLAG)) {
+	if (IS_FLAG_SET(set_fields_flags, SOCKET_FIELD_FLAG)) {
 #ifdef DXFEED_CODEC_TLS_ENABLED
-        if (dx_get_current_address(context)->tls.enabled) {
-            tls_close(context->tls_context);
-            tls_free(context->tls_context);
-            tls_config_free(context->tls_config);
-        } else {
-            success = dx_close(context->s) && success;
-        }
+		if (dx_get_current_address(context)->tls.enabled) {
+			tls_close(context->tls_context);
+			tls_free(context->tls_context);
+			tls_config_free(context->tls_config);
+		} else {
+			success = dx_close(context->s) && success;
+		}
 #else
-        success = dx_close(context->s) && success;
+		success = dx_close(context->s) && success;
 #endif // DXFEED_CODEC_TLS_ENABLED
-    }
+	}
 
-    dx_clear_addr_context_data(&(context->addr_context));
+	dx_clear_addr_context_data(&(context->addr_context));
 
-    if (IS_FLAG_SET(set_fields_flags, MUTEX_FIELD_FLAG)) {
-        success = dx_mutex_destroy(&(context->socket_guard)) && success;
-    }
+	if (IS_FLAG_SET(set_fields_flags, MUTEX_FIELD_FLAG)) {
+		success = dx_mutex_destroy(&(context->socket_guard)) && success;
+	}
 
-    if (IS_FLAG_SET(set_fields_flags, READER_THREAD_FIELD_FLAG)) {
-        success = dx_close_thread_handle(context->reader_thread) && success;
-    }
+	if (IS_FLAG_SET(set_fields_flags, READER_THREAD_FIELD_FLAG)) {
+		success = dx_close_thread_handle(context->reader_thread) && success;
+	}
 
-    if (IS_FLAG_SET(set_fields_flags, TASK_QUEUE_FIELD_FLAG)) {
-        success = dx_destroy_task_queue(context->tq) && success;
-    }
+	if (IS_FLAG_SET(set_fields_flags, TASK_QUEUE_FIELD_FLAG)) {
+		success = dx_destroy_task_queue(context->tq) && success;
+	}
 
-    if (IS_FLAG_SET(set_fields_flags, DUMPING_RAW_DATA_FIELD_FLAG)) {
-        if (context->raw_dump_file != NULL)
-            success = (fclose(context->raw_dump_file) == 0) && success;
-        context->raw_dump_file = NULL;
-    }
+	if (IS_FLAG_SET(set_fields_flags, DUMPING_RAW_DATA_FIELD_FLAG)) {
+		if (context->raw_dump_file != NULL)
+			success = (fclose(context->raw_dump_file) == 0) && success;
+		context->raw_dump_file = NULL;
+	}
 
-    if (IS_FLAG_SET(set_fields_flags, STATUS_GUARD_FLAG)) {
-        success = dx_mutex_destroy(&(context->status_guard)) && success;
-    }
+	if (IS_FLAG_SET(set_fields_flags, STATUS_GUARD_FLAG)) {
+		success = dx_mutex_destroy(&(context->status_guard)) && success;
+	}
 
-    CHECKED_FREE(context->address);
+	CHECKED_FREE(context->address);
 
-    dx_protocol_property_clear(context);
+	dx_protocol_property_clear(context);
 
-    dx_free(context);
+	dx_free(context);
 
-    return success;
+	return success;
 }
 
 /* -------------------------------------------------------------------------- */
 
 static bool dx_close_socket (dx_network_connection_context_t* context) {
-    bool res = true;
+	bool res = true;
 
-    dx_connection_status_set(context->connection, dx_cs_not_connected);
+	dx_connection_status_set(context->connection, dx_cs_not_connected);
 
-    CHECKED_CALL(dx_mutex_lock, &(context->socket_guard));
+	CHECKED_CALL(dx_mutex_lock, &(context->socket_guard));
 
-    if (!IS_FLAG_SET(context->set_fields_flags, SOCKET_FIELD_FLAG)) {
-        return dx_mutex_unlock(&(context->socket_guard)) && res;
-    }
+	if (!IS_FLAG_SET(context->set_fields_flags, SOCKET_FIELD_FLAG)) {
+		return dx_mutex_unlock(&(context->socket_guard)) && res;
+	}
 
 #ifdef DXFEED_CODEC_TLS_ENABLED
-    if (dx_get_current_address(context)->tls.enabled) {
-        tls_close(context->tls_context);
-        tls_free(context->tls_context);
-        tls_config_free(context->tls_config);
-    } else {
-        res = dx_close(context->s);
-    }
+	if (dx_get_current_address(context)->tls.enabled) {
+		tls_close(context->tls_context);
+		tls_free(context->tls_context);
+		tls_config_free(context->tls_config);
+	} else {
+		res = dx_close(context->s);
+	}
 #else
-    res = dx_close(context->s);
+	res = dx_close(context->s);
 #endif // DXFEED_CODEC_TLS_ENABLED
-    context->set_fields_flags &= ~SOCKET_FIELD_FLAG;
+	context->set_fields_flags &= ~SOCKET_FIELD_FLAG;
 
-    return dx_mutex_unlock(&(context->socket_guard)) && res;
+	return dx_mutex_unlock(&(context->socket_guard)) && res;
 }
 
 /* -------------------------------------------------------------------------- */
 
 static bool dx_have_credentials(dx_network_connection_context_t* context) {
-    return dx_property_map_contains(&context->properties, DX_PROPERTY_AUTH);
+	return dx_property_map_contains(&context->properties, DX_PROPERTY_AUTH);
 }
 
 /* -------------------------------------------------------------------------- */
 
 void dx_notify_conn_termination (dx_network_connection_context_t* context, OUT bool* idle_thread_flag) {
-    //if connection required login and we have cresentials don't call notifier
-    if (dx_connection_status_get(context->connection) == dx_cs_login_required) {
-        if (dx_have_credentials(context))
-            return;
-        dx_get_current_address(context)->is_connection_failed = true;
-        dx_set_error_code(dx_pec_credentials_required);
-    }
+	//if connection required login and we have cresentials don't call notifier
+	if (dx_connection_status_get(context->connection) == dx_cs_login_required) {
+		if (dx_have_credentials(context))
+			return;
+		dx_get_current_address(context)->is_connection_failed = true;
+		dx_set_error_code(dx_pec_credentials_required);
+	}
 
-    if (context->context_data.notifier != NULL) {
-        context->context_data.notifier((void*)context->connection, context->context_data.notifier_user_data);
-    }
+	if (context->context_data.notifier != NULL) {
+		context->context_data.notifier((void*)context->connection, context->context_data.notifier_user_data);
+	}
 
-    if (idle_thread_flag != NULL) {
-        *idle_thread_flag = true;
-    }
+	if (idle_thread_flag != NULL) {
+		*idle_thread_flag = true;
+	}
 
-    if (dx_get_error_code() == dx_pec_authentication_error) {
-        dx_get_current_address(context)->is_connection_failed = true;
-    }
+	if (dx_get_error_code() == dx_pec_authentication_error) {
+		dx_get_current_address(context)->is_connection_failed = true;
+	}
 
-    dx_close_socket(context);
+	dx_close_socket(context);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -465,81 +465,81 @@ void* dx_queue_executor (void* arg) {
 #else
 unsigned dx_queue_executor(void* arg) {
 #endif
-    static int s_idle_timeout = 100;
-    static int s_small_timeout = 25;
-    static int s_heartbeat_timeout = 60; // in seconds
+	static int s_idle_timeout = 100;
+	static int s_small_timeout = 25;
+	static int s_heartbeat_timeout = 60; // in seconds
 
-    time_t current_time;
+	time_t current_time;
 
-    dx_network_connection_context_t* context = NULL;
+	dx_network_connection_context_t* context = NULL;
 
-    if (arg == NULL) {
-        /* invalid input parameter
-           but we cannot report it anywhere so simply exit */
-        dx_set_error_code(dx_ec_invalid_func_param_internal);
+	if (arg == NULL) {
+		/* invalid input parameter
+		but we cannot report it anywhere so simply exit */
+		dx_set_error_code(dx_ec_invalid_func_param_internal);
 
-        return DX_THREAD_RETVAL_NULL;
-    }
+		return DX_THREAD_RETVAL_NULL;
+	}
 
-    context = (dx_network_connection_context_t*)arg;
+	context = (dx_network_connection_context_t*)arg;
 
-    if (!dx_init_error_subsystem()) {
-        context->queue_thread_error = dx_ec_error_subsystem_failure;
-        context->queue_thread_state = false;
+	if (!dx_init_error_subsystem()) {
+		context->queue_thread_error = dx_ec_error_subsystem_failure;
+		context->queue_thread_state = false;
 
-        return DX_THREAD_RETVAL_NULL;
-    }
+		return DX_THREAD_RETVAL_NULL;
+	}
 
-    time(&context->next_heartbeat);
+	time(&context->next_heartbeat);
 
-    for (;;) {
-        bool queue_empty = true;
+	for (;;) {
+		bool queue_empty = true;
 
-        time(&current_time);
-        if (difftime(current_time, context->next_heartbeat) >= 0) {
-            if (!dx_send_heartbeat(context->connection, true)) {
-                dx_sleep(s_idle_timeout);
-                continue;
-            }
-            time(&context->next_heartbeat);
-            context->next_heartbeat += s_heartbeat_timeout;
-        }
+		time(&current_time);
+		if (difftime(current_time, context->next_heartbeat) >= 0) {
+			if (!dx_send_heartbeat(context->connection, true)) {
+				dx_sleep(s_idle_timeout);
+				continue;
+			}
+			time(&context->next_heartbeat);
+			context->next_heartbeat += s_heartbeat_timeout;
+		}
 
 
-        if (context->queue_thread_termination_trigger) {
-            break;
-        }
+		if (context->queue_thread_termination_trigger) {
+			break;
+		}
 
-        if (!context->reader_thread_state || !context->queue_thread_state) {
-            dx_sleep(s_idle_timeout);
+		if (!context->reader_thread_state || !context->queue_thread_state) {
+			dx_sleep(s_idle_timeout);
 
-            continue;
-        }
+			continue;
+		}
 
-        if (!dx_is_queue_empty(context->tq, &queue_empty)) {
-            context->queue_thread_error = dx_get_error_code();
-            context->queue_thread_state = false;
+		if (!dx_is_queue_empty(context->tq, &queue_empty)) {
+			context->queue_thread_error = dx_get_error_code();
+			context->queue_thread_state = false;
 
-            continue;
-        }
+			continue;
+		}
 
-        if (queue_empty) {
-            dx_sleep(s_idle_timeout);
+		if (queue_empty) {
+			dx_sleep(s_idle_timeout);
 
-            continue;
-        }
+			continue;
+		}
 
-        if (!dx_execute_task_queue(context->tq)) {
-            context->queue_thread_error = dx_get_error_code();
-            context->queue_thread_state = false;
+		if (!dx_execute_task_queue(context->tq)) {
+			context->queue_thread_error = dx_get_error_code();
+			context->queue_thread_state = false;
 
-            continue;
-        }
+			continue;
+		}
 
-        dx_sleep(s_small_timeout);
-    }
+		dx_sleep(s_small_timeout);
+	}
 
-    return DX_THREAD_RETVAL_NULL;
+	return DX_THREAD_RETVAL_NULL;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -551,35 +551,35 @@ void* dx_socket_reader_wrapper(void* arg) {
 #else
 unsigned dx_socket_reader_wrapper(void* arg) {
 #endif
-    dx_network_connection_context_t* context = NULL;
-    dx_connection_context_data_t* context_data = NULL;
+	dx_network_connection_context_t* context = NULL;
+	dx_connection_context_data_t* context_data = NULL;
 
-    if (arg == NULL) {
-        /* invalid input parameter
-           but we cannot report it anywhere so simply exit */
-        dx_set_error_code(dx_ec_invalid_func_param_internal);
+	if (arg == NULL) {
+		/* invalid input parameter
+		but we cannot report it anywhere so simply exit */
+		dx_set_error_code(dx_ec_invalid_func_param_internal);
 
-        return DX_THREAD_RETVAL_NULL;
-    }
+		return DX_THREAD_RETVAL_NULL;
+	}
 
-    context = (dx_network_connection_context_t*)arg;
-    context_data = &(context->context_data);
+	context = (dx_network_connection_context_t*)arg;
+	context_data = &(context->context_data);
 
-    if (context_data->stcn != NULL) {
-        if (context_data->stcn(context->connection, context_data->notifier_user_data) == 0) {
-            /* zero return value means fatal client side error */
+	if (context_data->stcn != NULL) {
+		if (context_data->stcn(context->connection, context_data->notifier_user_data) == 0) {
+			/* zero return value means fatal client side error */
 
-            return DX_THREAD_RETVAL_NULL;
-        }
-    }
+			return DX_THREAD_RETVAL_NULL;
+		}
+	}
 
-    dx_socket_reader(context);
+	dx_socket_reader(context);
 
-    if (context_data->stdn != NULL) {
-        context_data->stdn(context->connection, context_data->notifier_user_data);
-    }
+	if (context_data->stdn != NULL) {
+		context_data->stdn(context->connection, context_data->notifier_user_data);
+	}
 
-    return DX_THREAD_RETVAL_NULL;
+	return DX_THREAD_RETVAL_NULL;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -587,490 +587,490 @@ unsigned dx_socket_reader_wrapper(void* arg) {
 bool dx_reestablish_connection (dx_network_connection_context_t* context);
 
 void dx_socket_reader (dx_network_connection_context_t* context) {
-    dx_connection_context_data_t* context_data = NULL;
-    bool is_thread_idle = false;
+	dx_connection_context_data_t* context_data = NULL;
+	bool is_thread_idle = false;
 
-    char read_buf[READ_CHUNK_SIZE];
-    int number_of_bytes_read = 0;
+	char read_buf[READ_CHUNK_SIZE];
+	int number_of_bytes_read = 0;
 
-    context_data = &(context->context_data);
+	context_data = &(context->context_data);
 
-    if (!dx_init_error_subsystem()) {
-        /* the error subsystem is broken, aborting the thread */
+	if (!dx_init_error_subsystem()) {
+		/* the error subsystem is broken, aborting the thread */
 
-        context_data->notifier(context->connection, context_data->notifier_user_data);
+		context_data->notifier(context->connection, context_data->notifier_user_data);
 
-        return;
-    }
+		return;
+	}
 
-    /*
-     *	That's an important initialization. Initially, this flag is false, to indicate that
-     *  the socket reader thread isn't initialized. And only when it's ready to work, this flag
-     *  is set to true.
-     *  This also prevents the queue thread from executing the task queue before the socket reader is ready.
-     */
-    context->reader_thread_state = true;
+	/*
+	*	That's an important initialization. Initially, this flag is false, to indicate that
+	*  the socket reader thread isn't initialized. And only when it's ready to work, this flag
+	*  is set to true.
+	*  This also prevents the queue thread from executing the task queue before the socket reader is ready.
+	*/
+	context->reader_thread_state = true;
 
-    for (;;) {
-        if (context->reader_thread_termination_trigger) {
-            /* the thread is told to terminate */
+	for (;;) {
+		if (context->reader_thread_termination_trigger) {
+			/* the thread is told to terminate */
 
-            break;
-        }
+			break;
+		}
 
-        if (context->reader_thread_state && !context->queue_thread_state) {
-            context->reader_thread_state = false;
-            context->queue_thread_state = true;
+		if (context->reader_thread_state && !context->queue_thread_state) {
+			context->reader_thread_state = false;
+			context->queue_thread_state = true;
 
-            dx_set_error_code(context->queue_thread_error);
-        }
+			dx_set_error_code(context->queue_thread_error);
+		}
 
-        if (!context->reader_thread_state && !is_thread_idle) {
-            dx_notify_conn_termination(context, &is_thread_idle);
-        }
+		if (!context->reader_thread_state && !is_thread_idle) {
+			dx_notify_conn_termination(context, &is_thread_idle);
+		}
 
-        if (is_thread_idle) {
-            if (dx_reestablish_connection(context)) {
-                context->reader_thread_state = true;
-                is_thread_idle = false;
-            } else {
-                /* no waiting is required here, because there is a timeout within 'dx_reestablish_connection' */
+		if (is_thread_idle) {
+			if (dx_reestablish_connection(context)) {
+				context->reader_thread_state = true;
+				is_thread_idle = false;
+			} else {
+				/* no waiting is required here, because there is a timeout within 'dx_reestablish_connection' */
 
-                continue;
-            }
-        }
+				continue;
+			}
+		}
 
-        if (IS_FLAG_SET(context->set_fields_flags, DUMPING_RAW_DATA_FIELD_FLAG)) {
-            number_of_bytes_read = (int)fread((void*)read_buf, sizeof(char), READ_CHUNK_SIZE, context->raw_dump_file);
+		if (IS_FLAG_SET(context->set_fields_flags, DUMPING_RAW_DATA_FIELD_FLAG)) {
+			number_of_bytes_read = (int)fread((void*)read_buf, sizeof(char), READ_CHUNK_SIZE, context->raw_dump_file);
 
-            if (feof(context->raw_dump_file)) {
-                number_of_bytes_read = INVALID_DATA_SIZE;
-                context->set_fields_flags |= READER_THREAD_FIELD_FLAG;
-                dx_notify_conn_termination(context, &is_thread_idle);
-                context->reader_thread_termination_trigger = true;
-            }
+			if (feof(context->raw_dump_file)) {
+				number_of_bytes_read = INVALID_DATA_SIZE;
+				context->set_fields_flags |= READER_THREAD_FIELD_FLAG;
+				dx_notify_conn_termination(context, &is_thread_idle);
+				context->reader_thread_termination_trigger = true;
+			}
 
-            if (ferror(context->raw_dump_file)) {
-                dx_logging_error(L"Raw data file read error.");
-                number_of_bytes_read = INVALID_DATA_SIZE;
-            }
-        } else {
+			if (ferror(context->raw_dump_file)) {
+				dx_logging_error(L"Raw data file read error.");
+				number_of_bytes_read = INVALID_DATA_SIZE;
+			}
+		} else {
 #ifdef DXFEED_CODEC_TLS_ENABLED
-            if (dx_get_current_address(context)->tls.enabled) {
-                number_of_bytes_read = (int)tls_read(context->tls_context, (void*)read_buf, READ_CHUNK_SIZE);
-                if (number_of_bytes_read == -1)
-                    dx_logging_ansi_error(tls_error(context->tls_context));
-            } else {
-                number_of_bytes_read = dx_recv(context->s, (void*)read_buf, READ_CHUNK_SIZE);
-            }
+			if (dx_get_current_address(context)->tls.enabled) {
+				number_of_bytes_read = (int)tls_read(context->tls_context, (void*)read_buf, READ_CHUNK_SIZE);
+				if (number_of_bytes_read == -1)
+					dx_logging_ansi_error(tls_error(context->tls_context));
+			} else {
+				number_of_bytes_read = dx_recv(context->s, (void*)read_buf, READ_CHUNK_SIZE);
+			}
 #else
-            number_of_bytes_read = dx_recv(context->s, (void*)read_buf, READ_CHUNK_SIZE);
+			number_of_bytes_read = dx_recv(context->s, (void*)read_buf, READ_CHUNK_SIZE);
 #endif // DXFEED_CODEC_TLS_ENABLED
-        }
+		}
 
-        if (number_of_bytes_read == INVALID_DATA_SIZE) {
-            context->reader_thread_state = false;
+		if (number_of_bytes_read == INVALID_DATA_SIZE) {
+			context->reader_thread_state = false;
 
-            continue;
-        }
+			continue;
+		}
 
-        /* reporting the read data */
-        context->reader_thread_state = context_data->receiver(context->connection, (const void*)read_buf, number_of_bytes_read);
-    }
+		/* reporting the read data */
+		context->reader_thread_state = context_data->receiver(context->connection, (const void*)read_buf, number_of_bytes_read);
+	}
 }
 
 /* -------------------------------------------------------------------------- */
 
 void dx_sleep_before_resolve (dx_network_connection_context_t* context) {
-    static int RECONNECT_TIMEOUT = 10000;
+	static int RECONNECT_TIMEOUT = 10000;
 
-    int* last_res_timestamp = &(context->addr_context.last_resolution_timestamp);
-    int timestamp_diff = dx_millisecond_timestamp_diff(dx_millisecond_timestamp(), *last_res_timestamp);
+	int* last_res_timestamp = &(context->addr_context.last_resolution_timestamp);
+	int timestamp_diff = dx_millisecond_timestamp_diff(dx_millisecond_timestamp(), *last_res_timestamp);
 
-    if (*last_res_timestamp != 0 && timestamp_diff < RECONNECT_TIMEOUT) {
-        dx_sleep((int)((1.0 + dx_random_double(1)) * (RECONNECT_TIMEOUT - timestamp_diff)));
-    }
+	if (*last_res_timestamp != 0 && timestamp_diff < RECONNECT_TIMEOUT) {
+		dx_sleep((int)((1.0 + dx_random_double(1)) * (RECONNECT_TIMEOUT - timestamp_diff)));
+	}
 
-    *last_res_timestamp = dx_millisecond_timestamp();
+	*last_res_timestamp = dx_millisecond_timestamp();
 }
 
 /* -------------------------------------------------------------------------- */
 
 void dx_shuffle_addrs (dx_address_resolution_context_t* addrs) {
-    DX_ARRAY_SHUFFLE(addrs->elements, dx_ext_address_t, addrs->size);
+	DX_ARRAY_SHUFFLE(addrs->elements, dx_ext_address_t, addrs->size);
 }
 
 /* -------------------------------------------------------------------------- */
 
 static bool dx_create_ext_address(const dx_address_t* source, OUT dx_ext_address_t* dest) {
-    if (source == NULL || dest == NULL)
-        return dx_set_error_code(dx_ec_invalid_func_param_internal);
-    dx_memset((void*)dest, 0, sizeof(dx_ext_address_t));
+	if (source == NULL || dest == NULL)
+		return dx_set_error_code(dx_ec_invalid_func_param_internal);
+	dx_memset((void*)dest, 0, sizeof(dx_ext_address_t));
 
-    if (source->host != NULL) {
-        dest->host = dx_ansi_create_string_src(source->host);
-        if (dest->host == NULL)
-            return false;
-    }
+	if (source->host != NULL) {
+		dest->host = dx_ansi_create_string_src(source->host);
+		if (dest->host == NULL)
+			return false;
+	}
 
-    if (source->port != NULL) {
-        dest->port = dx_ansi_create_string_src(source->port);
-        if (dest->port == NULL)
-            return false;
-    }
+	if (source->port != NULL) {
+		dest->port = dx_ansi_create_string_src(source->port);
+		if (dest->port == NULL)
+			return false;
+	}
 
-    if (source->username != NULL) {
-        dest->username = dx_ansi_create_string_src(source->username);
-        if (dest->username == NULL)
-            return false;
-    }
+	if (source->username != NULL) {
+		dest->username = dx_ansi_create_string_src(source->username);
+		if (dest->username == NULL)
+			return false;
+	}
 
-    if (source->password != NULL) {
-        dest->password = dx_ansi_create_string_src(source->password);
-        if (dest->password == NULL)
-            return false;
-    }
+	if (source->password != NULL) {
+		dest->password = dx_ansi_create_string_src(source->password);
+		if (dest->password == NULL)
+			return false;
+	}
 
-    if (!dx_codec_tls_copy(&(source->tls), OUT &(dest->tls)) ||
-        !dx_codec_gzip_copy(&(source->gzip), OUT &(dest->gzip)))
-        return false;
+	if (!dx_codec_tls_copy(&(source->tls), OUT &(dest->tls)) ||
+		!dx_codec_gzip_copy(&(source->gzip), OUT &(dest->gzip)))
+		return false;
 
 #ifdef DXFEED_CODEC_TLS_ENABLED
-    if (dest->tls.enabled && dest->tls.trust_store == NULL)
-        dest->tls.trust_store = dx_ansi_create_string_src(TRUST_STORE_DEFAULT_NAME);
+	if (dest->tls.enabled && dest->tls.trust_store == NULL)
+		dest->tls.trust_store = dx_ansi_create_string_src(TRUST_STORE_DEFAULT_NAME);
 #endif // !DXFEED_CODEC_TLS_ENABLED
 
-    return true;
+	return true;
 }
 
 /* -------------------------------------------------------------------------- */
 
 bool dx_resolve_address(dx_network_connection_context_t* context) {
-    struct addrinfo hints;
-    size_t i = 0;
-    FILE* raw_dump_file = NULL;
-    dx_address_array_t addresses;
-    int resolved_count = 0;
+	struct addrinfo hints;
+	size_t i = 0;
+	FILE* raw_dump_file = NULL;
+	dx_address_array_t addresses;
+	int resolved_count = 0;
 
-    if (context == NULL) {
-        dx_set_last_error(dx_ec_invalid_func_param_internal);
+	if (context == NULL) {
+		dx_set_last_error(dx_ec_invalid_func_param_internal);
 
-        return false;
-    }
+		return false;
+	}
 
-    //check raw data file is used
-    if (IS_FLAG_SET(context->set_fields_flags, DUMPING_RAW_DATA_FIELD_FLAG))
-        return true;
-    //check address is local file
-    raw_dump_file = fopen(context->address, "rb");
-    if (raw_dump_file != NULL) {
-        fclose(raw_dump_file);
-        context->set_fields_flags |= DUMPING_RAW_DATA_FIELD_FLAG;
-        return true;
-    }
+	//check raw data file is used
+	if (IS_FLAG_SET(context->set_fields_flags, DUMPING_RAW_DATA_FIELD_FLAG))
+		return true;
+	//check address is local file
+	raw_dump_file = fopen(context->address, "rb");
+	if (raw_dump_file != NULL) {
+		fclose(raw_dump_file);
+		context->set_fields_flags |= DUMPING_RAW_DATA_FIELD_FLAG;
+		return true;
+	}
 
-    dx_sleep_before_resolve(context);
+	dx_sleep_before_resolve(context);
 
-    CHECKED_CALL_2(dx_get_addresses_from_collection, context->address, &addresses);
-    if (addresses.size == 0)
-        return false;
+	CHECKED_CALL_2(dx_get_addresses_from_collection, context->address, &addresses);
+	if (addresses.size == 0)
+		return false;
 
-    dx_memset(&hints, 0, sizeof(hints));
+	dx_memset(&hints, 0, sizeof(hints));
 
-    hints.ai_family = AF_INET;
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_protocol = IPPROTO_TCP;
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_protocol = IPPROTO_TCP;
 
-    context->addr_context.elements_to_free = dx_calloc(addresses.size, sizeof(dx_addrinfo_ptr));
+	context->addr_context.elements_to_free = dx_calloc(addresses.size, sizeof(dx_addrinfo_ptr));
 
-    if (context->addr_context.elements_to_free == NULL) {
-        dx_clear_address_array(&addresses);
-        return false;
-    }
+	if (context->addr_context.elements_to_free == NULL) {
+		dx_clear_address_array(&addresses);
+		return false;
+	}
 
-    for (i = 0; i < addresses.size; ++i) {
-        dx_addrinfo_ptr addr = NULL;
-        dx_addrinfo_ptr cur_addr = NULL;
-        dx_ext_address_t address;
-        bool failed = false;
+	for (i = 0; i < addresses.size; ++i) {
+		dx_addrinfo_ptr addr = NULL;
+		dx_addrinfo_ptr cur_addr = NULL;
+		dx_ext_address_t address;
+		bool failed = false;
 
-        if (!dx_create_ext_address(&(addresses.elements[i]), OUT &address)) {
-            dx_clear_addr_context_data(&(context->addr_context));
-            dx_clear_address_array(&addresses);
-            return false;
-        }
+		if (!dx_create_ext_address(&(addresses.elements[i]), OUT &address)) {
+			dx_clear_addr_context_data(&(context->addr_context));
+			dx_clear_address_array(&addresses);
+			return false;
+		}
 
-        DX_ARRAY_INSERT(context->addr_context, dx_ext_address_t, address, context->addr_context.size, dx_capacity_manager_halfer, failed);
-        if (failed) {
-            dx_clear_addr_context_data(&(context->addr_context));
-            dx_clear_address_array(&addresses);
-            return false;
-        }
+		DX_ARRAY_INSERT(context->addr_context, dx_ext_address_t, address, context->addr_context.size, dx_capacity_manager_halfer, failed);
+		if (failed) {
+			dx_clear_addr_context_data(&(context->addr_context));
+			dx_clear_address_array(&addresses);
+			return false;
+		}
 
-        if (!dx_getaddrinfo(addresses.elements[i].host, addresses.elements[i].port, &hints, &addr)) {
-            continue;
-        }
+		if (!dx_getaddrinfo(addresses.elements[i].host, addresses.elements[i].port, &hints, &addr)) {
+			continue;
+		}
 
-        cur_addr = context->addr_context.elements_to_free[context->addr_context.elements_to_free_count++] = addr;
+		cur_addr = context->addr_context.elements_to_free[context->addr_context.elements_to_free_count++] = addr;
 
-        for (; cur_addr != NULL; cur_addr = cur_addr->ai_next) {
-            bool failed = false;
-            dx_ext_address_t* last = &(context->addr_context.elements[context->addr_context.size - 1]);
+		for (; cur_addr != NULL; cur_addr = cur_addr->ai_next) {
+			bool failed = false;
+			dx_ext_address_t* last = &(context->addr_context.elements[context->addr_context.size - 1]);
 
-            DX_ARRAY_INSERT(*last, dx_addrinfo_ptr, cur_addr, last->size, dx_capacity_manager_halfer, failed);
+			DX_ARRAY_INSERT(*last, dx_addrinfo_ptr, cur_addr, last->size, dx_capacity_manager_halfer, failed);
 
-            if (failed) {
-                dx_clear_addr_context_data(&(context->addr_context));
-                dx_clear_address_array(&addresses);
-                return false;
-            }
-            resolved_count++;
-        }
-    }
+			if (failed) {
+				dx_clear_addr_context_data(&(context->addr_context));
+				dx_clear_address_array(&addresses);
+				return false;
+			}
+			resolved_count++;
+		}
+	}
 
-    dx_clear_address_array(&addresses);
+	dx_clear_address_array(&addresses);
 
-    //all addresses in collection cannot be resolved
-    if (resolved_count == 0) {
+	//all addresses in collection cannot be resolved
+	if (resolved_count == 0) {
 
-        return false;
-    }
+		return false;
+	}
 
-    dx_shuffle_addrs(&(context->addr_context));
+	dx_shuffle_addrs(&(context->addr_context));
 
-    return true;
+	return true;
 }
 
 /* -------------------------------------------------------------------------- */
 
 static bool dx_connect_via_socket(dx_network_connection_context_t* context, dx_ext_address_t* address) {
-    for (; address->cur_info_index < address->size; ++address->cur_info_index) {
-        dx_addrinfo_ptr cur_addr = address->elements[address->cur_info_index];
+	for (; address->cur_info_index < address->size; ++address->cur_info_index) {
+		dx_addrinfo_ptr cur_addr = address->elements[address->cur_info_index];
 
-        context->s = dx_socket(cur_addr->ai_family, cur_addr->ai_socktype, cur_addr->ai_protocol);
+		context->s = dx_socket(cur_addr->ai_family, cur_addr->ai_socktype, cur_addr->ai_protocol);
 
-        if (context->s == INVALID_SOCKET) {
-            /* failed to create a new socket */
+		if (context->s == INVALID_SOCKET) {
+			/* failed to create a new socket */
 
-            continue;
-        }
+			continue;
+		}
 
-        if (!dx_connect(context->s, cur_addr->ai_addr, (socklen_t)cur_addr->ai_addrlen)) {
-            /* failed to connect */
+		if (!dx_connect(context->s, cur_addr->ai_addr, (socklen_t)cur_addr->ai_addrlen)) {
+			/* failed to connect */
 
-            dx_close(context->s);
+			dx_close(context->s);
 
-            continue;
-        }
+			continue;
+		}
 
-        dx_connection_status_set(context->connection, dx_cs_connected);
-        return true;
-    }
-    return false;
+		dx_connection_status_set(context->connection, dx_cs_connected);
+		return true;
+	}
+	return false;
 }
 
 /* -------------------------------------------------------------------------- */
 
 #ifdef DXFEED_CODEC_TLS_ENABLED
 static bool dx_connect_via_tls(dx_network_connection_context_t* context, dx_ext_address_t* address) {
-    context->tls_config = tls_config_new();
-    if (context->tls_config == NULL) {
-        /* failed to create TLS config */
+	context->tls_config = tls_config_new();
+	if (context->tls_config == NULL) {
+		/* failed to create TLS config */
 
-        return false;
-    }
+		return false;
+	}
 
-    /* Configure protocol and ciphers */
-    if (tls_config_set_protocols(context->tls_config, TLS_PROTOCOL_TLSv1_1 | TLS_PROTOCOL_TLSv1_2) < 0) {
-        dx_logging_ansi_error(tls_config_error(context->tls_config));
-        tls_config_free(context->tls_config);
-        return false;
-    }
+	/* Configure protocol and ciphers */
+	if (tls_config_set_protocols(context->tls_config, TLS_PROTOCOL_TLSv1_1 | TLS_PROTOCOL_TLSv1_2) < 0) {
+		dx_logging_ansi_error(tls_config_error(context->tls_config));
+		tls_config_free(context->tls_config);
+		return false;
+	}
 
-    /* load root CA */
-    if (address->tls.trust_store != NULL) {
-        if (address->tls.trust_store_password == NULL) {
-            if (tls_config_set_ca_file(context->tls_config, address->tls.trust_store) < 0) {
-                dx_logging_ansi_error(tls_config_error(context->tls_config));
-                tls_config_free(context->tls_config);
-                return false;
-            }
-        } else {
-            address->trust_store_mem = tls_load_file(address->tls.trust_store, &(address->trust_store_len), address->tls.trust_store_password);
-            if (address->trust_store_mem == NULL ||
-                tls_config_set_ca_mem(context->tls_config, address->trust_store_mem, address->trust_store_len) < 0) {
-                tls_config_free(context->tls_config);
-                return false;
-            }
-        }
-    }
-    /* load private certificate */
-    if (address->tls.key_store != NULL) {
-        if (address->tls.key_store_password == NULL) {
-            if (tls_config_set_key_file(context->tls_config, address->tls.key_store) < 0) {
-                dx_logging_ansi_error(tls_config_error(context->tls_config));
-                tls_config_free(context->tls_config);
-                return false;
-            }
-        } else {
-            address->key_store_mem = tls_load_file(address->tls.key_store, &(address->key_store_len), address->tls.key_store_password);
-            if (address->key_store_mem == NULL ||
-                tls_config_set_key_mem(context->tls_config, address->key_store_mem, address->key_store_len) < 0) {
-                tls_config_free(context->tls_config);
-                return false;
-            }
-        }
-    }
+	/* load root CA */
+	if (address->tls.trust_store != NULL) {
+		if (address->tls.trust_store_password == NULL) {
+			if (tls_config_set_ca_file(context->tls_config, address->tls.trust_store) < 0) {
+				dx_logging_ansi_error(tls_config_error(context->tls_config));
+				tls_config_free(context->tls_config);
+				return false;
+			}
+		} else {
+			address->trust_store_mem = tls_load_file(address->tls.trust_store, &(address->trust_store_len), address->tls.trust_store_password);
+			if (address->trust_store_mem == NULL ||
+				tls_config_set_ca_mem(context->tls_config, address->trust_store_mem, address->trust_store_len) < 0) {
+				tls_config_free(context->tls_config);
+				return false;
+			}
+		}
+	}
+	/* load private certificate */
+	if (address->tls.key_store != NULL) {
+		if (address->tls.key_store_password == NULL) {
+			if (tls_config_set_key_file(context->tls_config, address->tls.key_store) < 0) {
+				dx_logging_ansi_error(tls_config_error(context->tls_config));
+				tls_config_free(context->tls_config);
+				return false;
+			}
+		} else {
+			address->key_store_mem = tls_load_file(address->tls.key_store, &(address->key_store_len), address->tls.key_store_password);
+			if (address->key_store_mem == NULL ||
+				tls_config_set_key_mem(context->tls_config, address->key_store_mem, address->key_store_len) < 0) {
+				tls_config_free(context->tls_config);
+				return false;
+			}
+		}
+	}
 
-    context->tls_context = tls_client();
-    if (context->tls_context == NULL) {
-        /* failed to create TLS context */
-        tls_config_free(context->tls_config);
+	context->tls_context = tls_client();
+	if (context->tls_context == NULL) {
+		/* failed to create TLS context */
+		tls_config_free(context->tls_config);
 
-        return false;
-    }
-    if (tls_configure(context->tls_context, context->tls_config) < 0 ||
-        tls_connect(context->tls_context, address->host, address->port) < 0) {
+		return false;
+	}
+	if (tls_configure(context->tls_context, context->tls_config) < 0 ||
+		tls_connect(context->tls_context, address->host, address->port) < 0) {
 
-        dx_logging_ansi_error(tls_error(context->tls_context));
+		dx_logging_ansi_error(tls_error(context->tls_context));
 
-        /* failed to configure or connect */
-        tls_config_free(context->tls_config);
-        tls_free(context->tls_context);
+		/* failed to configure or connect */
+		tls_config_free(context->tls_config);
+		tls_free(context->tls_context);
 
-        return false;
-    }
+		return false;
+	}
 
-    /* try perform handshake */
-    if (tls_handshake(context->tls_context) < 0) {
-        dx_logging_ansi_error(tls_error(context->tls_context));
-        tls_config_free(context->tls_config);
-        tls_free(context->tls_context);
+	/* try perform handshake */
+	if (tls_handshake(context->tls_context) < 0) {
+		dx_logging_ansi_error(tls_error(context->tls_context));
+		tls_config_free(context->tls_config);
+		tls_free(context->tls_context);
 
-        return false;
-    }
+		return false;
+	}
 
-    dx_connection_status_set(context->connection, dx_cs_connected);
-    return true;
+	dx_connection_status_set(context->connection, dx_cs_connected);
+	return true;
 }
 #endif // DXFEED_CODEC_TLS_ENABLED
 
 /* -------------------------------------------------------------------------- */
 
 bool dx_connect_to_resolved_addresses(dx_network_connection_context_t* context) {
-    dx_address_resolution_context_t* ctx = &(context->addr_context);
+	dx_address_resolution_context_t* ctx = &(context->addr_context);
 
-    //raw data file
-    if (IS_FLAG_SET(context->set_fields_flags, DUMPING_RAW_DATA_FIELD_FLAG)) {
-        if (context->raw_dump_file != NULL)
-            return true;
-        dx_logging_info(L"Initialize reading from raw file...");
-        context->raw_dump_file = fopen(context->address, "rb");
-        if (context->raw_dump_file == NULL) {
-            dx_logging_error(L"Cannot open raw file!");
-            return false;
-        }
-        return true;
-    }
+	//raw data file
+	if (IS_FLAG_SET(context->set_fields_flags, DUMPING_RAW_DATA_FIELD_FLAG)) {
+		if (context->raw_dump_file != NULL)
+			return true;
+		dx_logging_info(L"Initialize reading from raw file...");
+		context->raw_dump_file = fopen(context->address, "rb");
+		if (context->raw_dump_file == NULL) {
+			dx_logging_error(L"Cannot open raw file!");
+			return false;
+		}
+		return true;
+	}
 
-    CHECKED_CALL(dx_mutex_lock, &(context->socket_guard));
+	CHECKED_CALL(dx_mutex_lock, &(context->socket_guard));
 
-    for (; ctx->cur_addr_index < ctx->size; ++ctx->cur_addr_index) {
-        dx_ext_address_t* cur_addr = &(ctx->elements[ctx->cur_addr_index]);
+	for (; ctx->cur_addr_index < ctx->size; ++ctx->cur_addr_index) {
+		dx_ext_address_t* cur_addr = &(ctx->elements[ctx->cur_addr_index]);
 
-        if (cur_addr->is_connection_failed)
-            continue;
+		if (cur_addr->is_connection_failed)
+			continue;
 
-        /* Make backup of properties configured via API on first pass */
-        if (!IS_FLAG_SET(context->set_fields_flags, PROPERTIES_BACKUP_FLAG)) {
-            if (!dx_protocol_property_make_backup(context))
-                return false;
-            context->set_fields_flags |= PROPERTIES_BACKUP_FLAG;
-        } else {
-            /* Restore properties configured via API before next connection will be open */
-            if (!dx_protocol_property_restore_backup(context))
-                return false;
-        }
+		/* Make backup of properties configured via API on first pass */
+		if (!IS_FLAG_SET(context->set_fields_flags, PROPERTIES_BACKUP_FLAG)) {
+			if (!dx_protocol_property_make_backup(context))
+				return false;
+			context->set_fields_flags |= PROPERTIES_BACKUP_FLAG;
+		} else {
+			/* Restore properties configured via API before next connection will be open */
+			if (!dx_protocol_property_restore_backup(context))
+				return false;
+		}
 
-        if (cur_addr->username != NULL &&
-            cur_addr->password != NULL &&
-            !dx_property_map_contains(&context->properties, DX_PROPERTY_AUTH)) {
-            if (!dx_protocol_configure_basic_auth(context->connection, cur_addr->username, cur_addr->password))
-                return false;
-        }
+		if (cur_addr->username != NULL &&
+			cur_addr->password != NULL &&
+			!dx_property_map_contains(&context->properties, DX_PROPERTY_AUTH)) {
+			if (!dx_protocol_configure_basic_auth(context->connection, cur_addr->username, cur_addr->password))
+				return false;
+		}
 
 #ifdef DXFEED_CODEC_TLS_ENABLED
-        if (cur_addr->tls.enabled) {
-            if (dx_connect_via_tls(context, cur_addr))
-                break;
-        } else {
-            if (dx_connect_via_socket(context, cur_addr))
-                break;
-        }
+		if (cur_addr->tls.enabled) {
+			if (dx_connect_via_tls(context, cur_addr))
+				break;
+		} else {
+			if (dx_connect_via_socket(context, cur_addr))
+				break;
+		}
 #else
-        if (dx_connect_via_socket(context, cur_addr))
-            break;
+		if (dx_connect_via_socket(context, cur_addr))
+			break;
 #endif // DXFEED_CODEC_TLS_ENABLED
-    }
+	}
 
-    if (ctx->cur_addr_index == ctx->size) {
-        /* we failed to establish connection */
+	if (ctx->cur_addr_index == ctx->size) {
+		/* we failed to establish connection */
 
-        dx_mutex_unlock(&(context->socket_guard));
+		dx_mutex_unlock(&(context->socket_guard));
 
-        return dx_set_error_code(dx_nec_open_connection_error);
-    }
+		return dx_set_error_code(dx_nec_open_connection_error);
+	}
 
-    context->set_fields_flags |= SOCKET_FIELD_FLAG;
+	context->set_fields_flags |= SOCKET_FIELD_FLAG;
 
-    return dx_mutex_unlock(&(context->socket_guard));
+	return dx_mutex_unlock(&(context->socket_guard));
 }
 
 /* -------------------------------------------------------------------------- */
 
 static bool dx_server_event_subscription_refresher (dxf_connection_t connection,
-                                                    dx_order_source_array_ptr_t order_source,
-                                                    dxf_const_string_t* symbols, size_t symbol_count,
-                                                    int event_types, dxf_uint_t subscr_flags,
-                                                    dxf_long_t time) {
-    return dx_subscribe_symbols_to_events(connection, order_source, symbols, symbol_count,
-        event_types, false, false, subscr_flags, time);
+													dx_order_source_array_ptr_t order_source,
+													dxf_const_string_t* symbols, size_t symbol_count,
+													int event_types, dxf_uint_t subscr_flags,
+													dxf_long_t time) {
+	return dx_subscribe_symbols_to_events(connection, order_source, symbols, symbol_count,
+		event_types, false, false, subscr_flags, time);
 }
 
 /* ---------------------------------- */
 
 bool dx_reestablish_connection (dx_network_connection_context_t* context) {
-    // if connection required login send credentials again
-    if (dx_connection_status_get(context->connection) == dx_cs_login_required) {
-        CHECKED_CALL_2(dx_send_protocol_description, context->connection, false);
-        CHECKED_CALL_2(dx_send_record_description, context->connection, false);
-        CHECKED_CALL_2(dx_process_connection_subscriptions, context->connection, dx_server_event_subscription_refresher);
-        return true;
-    }
+	// if connection required login send credentials again
+	if (dx_connection_status_get(context->connection) == dx_cs_login_required) {
+		CHECKED_CALL_2(dx_send_protocol_description, context->connection, false);
+		CHECKED_CALL_2(dx_send_record_description, context->connection, false);
+		CHECKED_CALL_2(dx_process_connection_subscriptions, context->connection, dx_server_event_subscription_refresher);
+		return true;
+	}
 
-    CHECKED_CALL(dx_clear_server_info, context->connection);
+	CHECKED_CALL(dx_clear_server_info, context->connection);
 
-    if (!dx_connect_to_resolved_addresses(context)) {
-        /*
-         *	An important moment here.
-         *  Before we resolve address anew, we must attempt to connect to the previously
-         *  resolved addresses, because there might still be some valid addresses resolved from
-         *  the previous attempt. And only if the new connection attempt fails, which also means
-         *  there are no valid addresses left, a new resolution is started, and then we repeat
-         *  the connection attempt with the newly resolved addresses.
-         */
+	if (!dx_connect_to_resolved_addresses(context)) {
+		/*
+		*	An important moment here.
+		*  Before we resolve address anew, we must attempt to connect to the previously
+		*  resolved addresses, because there might still be some valid addresses resolved from
+		*  the previous attempt. And only if the new connection attempt fails, which also means
+		*  there are no valid addresses left, a new resolution is started, and then we repeat
+		*  the connection attempt with the newly resolved addresses.
+		*/
 
-        dx_clear_addr_context_data(&(context->addr_context));
+		dx_clear_addr_context_data(&(context->addr_context));
 
-        CHECKED_CALL(dx_resolve_address, context);
-        CHECKED_CALL(dx_connect_to_resolved_addresses, context);
-    }
+		CHECKED_CALL(dx_resolve_address, context);
+		CHECKED_CALL(dx_connect_to_resolved_addresses, context);
+	}
 
-    CHECKED_CALL_2(dx_send_protocol_description, context->connection, false);
-    CHECKED_CALL_2(dx_send_record_description, context->connection, false);
-    CHECKED_CALL_2(dx_process_connection_subscriptions, context->connection, dx_server_event_subscription_refresher);
+	CHECKED_CALL_2(dx_send_protocol_description, context->connection, false);
+	CHECKED_CALL_2(dx_send_record_description, context->connection, false);
+	CHECKED_CALL_2(dx_process_connection_subscriptions, context->connection, dx_server_event_subscription_refresher);
 
-    return true;
+	return true;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1080,144 +1080,144 @@ bool dx_reestablish_connection (dx_network_connection_context_t* context) {
 /* -------------------------------------------------------------------------- */
 
 bool dx_bind_to_address (dxf_connection_t connection, const char* address, const dx_connection_context_data_t* ccd) {
-    dx_network_connection_context_t* context = NULL;
-    bool res = true;
+	dx_network_connection_context_t* context = NULL;
+	bool res = true;
 
-    if (address == NULL || ccd == NULL || ccd->receiver == NULL) {
-        return dx_set_error_code(dx_ec_invalid_func_param_internal);
-    }
+	if (address == NULL || ccd == NULL || ccd->receiver == NULL) {
+		return dx_set_error_code(dx_ec_invalid_func_param_internal);
+	}
 
-    context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
+	context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
 
-    if (context == NULL) {
-        if (res) {
-            dx_set_error_code(dx_cec_connection_context_not_initialized);
-        }
+	if (context == NULL) {
+		if (res) {
+			dx_set_error_code(dx_cec_connection_context_not_initialized);
+		}
 
-        return false;
-    }
+		return false;
+	}
 
-    context->context_data = *ccd;
+	context->context_data = *ccd;
 
-    CHECKED_CALL(dx_mutex_create, &(context->socket_guard));
+	CHECKED_CALL(dx_mutex_create, &(context->socket_guard));
 
-    context->set_fields_flags |= MUTEX_FIELD_FLAG;
+	context->set_fields_flags |= MUTEX_FIELD_FLAG;
 
-    if ((context->address = dx_ansi_create_string_src(address)) == NULL ||
-        !dx_resolve_address(context) ||
-        !dx_connect_to_resolved_addresses(context)) {
+	if ((context->address = dx_ansi_create_string_src(address)) == NULL ||
+		!dx_resolve_address(context) ||
+		!dx_connect_to_resolved_addresses(context)) {
 
-        return false;
-    }
+		return false;
+	}
 
-    /* the tricky place here.
-       the error subsystem internally uses the thread-specific storage to ensure the error
-       operation functions are thread-safe and each thread supports its own last error.
-       to do that, the key to that thread-specific data (which itself is the same for
-       all threads) must be initialized.
-       it happens implicitly on the first call to any error reporting function, but to
-       ensure there'll be no potential thread race to create it, it's made sure such
-       key is created before any secondary thread is created. */
-    CHECKED_CALL_0(dx_init_error_subsystem);
+	/* the tricky place here.
+	the error subsystem internally uses the thread-specific storage to ensure the error
+	operation functions are thread-safe and each thread supports its own last error.
+	to do that, the key to that thread-specific data (which itself is the same for
+	all threads) must be initialized.
+	it happens implicitly on the first call to any error reporting function, but to
+	ensure there'll be no potential thread race to create it, it's made sure such
+	key is created before any secondary thread is created. */
+	CHECKED_CALL_0(dx_init_error_subsystem);
 
-    if (!dx_thread_create(&(context->queue_thread), NULL, dx_queue_executor, context)) {
-        return false;
-    }
+	if (!dx_thread_create(&(context->queue_thread), NULL, dx_queue_executor, context)) {
+		return false;
+	}
 
-    context->set_fields_flags |= QUEUE_THREAD_FIELD_FLAG;
+	context->set_fields_flags |= QUEUE_THREAD_FIELD_FLAG;
 
-    if (!dx_thread_create(&(context->reader_thread), NULL, dx_socket_reader_wrapper, context)) {
-        /* failed to create a thread */
+	if (!dx_thread_create(&(context->reader_thread), NULL, dx_socket_reader_wrapper, context)) {
+		/* failed to create a thread */
 
-        return false;
-    }
+		return false;
+	}
 
-    context->set_fields_flags |= READER_THREAD_FIELD_FLAG;
+	context->set_fields_flags |= READER_THREAD_FIELD_FLAG;
 
-    return true;
+	return true;
 }
 
 /* -------------------------------------------------------------------------- */
 
 bool dx_send_data (dxf_connection_t connection, const void* buffer, int buffer_size) {
-    dx_network_connection_context_t* context = NULL;
-    const char* char_buf = (const char*)buffer;
-    bool res = true;
+	dx_network_connection_context_t* context = NULL;
+	const char* char_buf = (const char*)buffer;
+	bool res = true;
 
-    if (buffer == NULL || buffer_size == 0) {
-        return dx_set_error_code(dx_ec_invalid_func_param_internal);
-    }
+	if (buffer == NULL || buffer_size == 0) {
+		return dx_set_error_code(dx_ec_invalid_func_param_internal);
+	}
 
-    context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
+	context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
 
-    if (context == NULL) {
-        if (res) {
-            dx_set_error_code(dx_cec_connection_context_not_initialized);
-        }
+	if (context == NULL) {
+		if (res) {
+			dx_set_error_code(dx_cec_connection_context_not_initialized);
+		}
 
-        return false;
-    }
+		return false;
+	}
 
-    CHECKED_CALL(dx_mutex_lock, &(context->socket_guard));
+	CHECKED_CALL(dx_mutex_lock, &(context->socket_guard));
 
-    if (!IS_FLAG_SET(context->set_fields_flags, SOCKET_FIELD_FLAG | DUMPING_RAW_DATA_FIELD_FLAG)) {
-        dx_mutex_unlock(&(context->socket_guard));
+	if (!IS_FLAG_SET(context->set_fields_flags, SOCKET_FIELD_FLAG | DUMPING_RAW_DATA_FIELD_FLAG)) {
+		dx_mutex_unlock(&(context->socket_guard));
 
-        return dx_set_error_code(dx_nec_connection_closed);
-    }
+		return dx_set_error_code(dx_nec_connection_closed);
+	}
 
-    do {
-        int sent_count = INVALID_DATA_SIZE;
-        if (IS_FLAG_SET(context->set_fields_flags, DUMPING_RAW_DATA_FIELD_FLAG)) {
-            sent_count = buffer_size;
-        } else {
+	do {
+		int sent_count = INVALID_DATA_SIZE;
+		if (IS_FLAG_SET(context->set_fields_flags, DUMPING_RAW_DATA_FIELD_FLAG)) {
+			sent_count = buffer_size;
+		} else {
 #ifdef DXFEED_CODEC_TLS_ENABLED
-            if (dx_get_current_address(context)->tls.enabled) {
-                sent_count = (int)tls_write(context->tls_context, (const void*)char_buf, buffer_size);
-                if (sent_count == -1)
-                    dx_logging_ansi_error(tls_error(context->tls_context));
-            } else {
-                sent_count = dx_send(context->s, (const void*)char_buf, buffer_size);
-            }
+			if (dx_get_current_address(context)->tls.enabled) {
+				sent_count = (int)tls_write(context->tls_context, (const void*)char_buf, buffer_size);
+				if (sent_count == -1)
+					dx_logging_ansi_error(tls_error(context->tls_context));
+			} else {
+				sent_count = dx_send(context->s, (const void*)char_buf, buffer_size);
+			}
 #else
-            sent_count = dx_send(context->s, (const void*)char_buf, buffer_size);
+			sent_count = dx_send(context->s, (const void*)char_buf, buffer_size);
 #endif // DXFEED_CODEC_TLS_ENABLED
-        }
+		}
 
-        if (sent_count == INVALID_DATA_SIZE) {
-            dx_mutex_unlock(&(context->socket_guard));
+		if (sent_count == INVALID_DATA_SIZE) {
+			dx_mutex_unlock(&(context->socket_guard));
 
-            return false;
-        }
+			return false;
+		}
 
-        char_buf += sent_count;
-        buffer_size -= sent_count;
-    } while (buffer_size > 0);
+		char_buf += sent_count;
+		buffer_size -= sent_count;
+	} while (buffer_size > 0);
 
-    return dx_mutex_unlock(&(context->socket_guard));
+	return dx_mutex_unlock(&(context->socket_guard));
 }
 
 /* -------------------------------------------------------------------------- */
 
 bool dx_add_worker_thread_task (dxf_connection_t connection, dx_task_processor_t processor, void* data) {
-    dx_network_connection_context_t* context = NULL;
-    bool res = true;
+	dx_network_connection_context_t* context = NULL;
+	bool res = true;
 
-    if (processor == NULL) {
-        return dx_set_error_code(dx_ec_invalid_func_param_internal);
-    }
+	if (processor == NULL) {
+		return dx_set_error_code(dx_ec_invalid_func_param_internal);
+	}
 
-    context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
+	context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
 
-    if (context == NULL) {
-        if (res) {
-            dx_set_error_code(dx_cec_connection_context_not_initialized);
-        }
+	if (context == NULL) {
+		if (res) {
+			dx_set_error_code(dx_cec_connection_context_not_initialized);
+		}
 
-        return false;
-    }
+		return false;
+	}
 
-    return dx_add_task_to_queue(context->tq, processor, data);
+	return dx_add_task_to_queue(context->tq, processor, data);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1227,47 +1227,47 @@ bool dx_add_worker_thread_task (dxf_connection_t connection, dx_task_processor_t
 /* -------------------------------------------------------------------------- */
 
 void dx_connection_status_set(dxf_connection_t connection, dx_connection_status_t status) {
-    dx_network_connection_context_t* context = NULL;
-    bool res = true;
+	dx_network_connection_context_t* context = NULL;
+	bool res = true;
 
-    context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
+	context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
 
-    if (context == NULL) {
-        if (res) {
-            dx_set_error_code(dx_cec_connection_context_not_initialized);
-        }
+	if (context == NULL) {
+		if (res) {
+			dx_set_error_code(dx_cec_connection_context_not_initialized);
+		}
 
-        return;
-    }
+		return;
+	}
 
-    dx_mutex_lock(&(context->status_guard));
-    dx_logging_verbose_info(L"Connection status changed %d->%d", context->status, status);
-    context->status = status;
-    dx_mutex_unlock(&(context->status_guard));
+	dx_mutex_lock(&(context->status_guard));
+	dx_logging_verbose_info(L"Connection status changed %d->%d", context->status, status);
+	context->status = status;
+	dx_mutex_unlock(&(context->status_guard));
 }
 
 /* -------------------------------------------------------------------------- */
 
 dx_connection_status_t dx_connection_status_get(dxf_connection_t connection) {
-    dx_network_connection_context_t* context = NULL;
-    dx_connection_status_t status = dx_cs_not_connected;;
-    bool res = true;
+	dx_network_connection_context_t* context = NULL;
+	dx_connection_status_t status = dx_cs_not_connected;;
+	bool res = true;
 
-    context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
+	context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
 
-    if (context == NULL) {
-        if (res) {
-            dx_set_error_code(dx_cec_connection_context_not_initialized);
-        }
+	if (context == NULL) {
+		if (res) {
+			dx_set_error_code(dx_cec_connection_context_not_initialized);
+		}
 
-        return status;
-    }
+		return status;
+	}
 
-    CHECKED_CALL(dx_mutex_lock, &(context->status_guard));
-    status = context->status;
-    dx_mutex_unlock(&(context->status_guard));
+	CHECKED_CALL(dx_mutex_lock, &(context->status_guard));
+	status = context->status;
+	dx_mutex_unlock(&(context->status_guard));
 
-    return status;
+	return status;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1277,180 +1277,180 @@ dx_connection_status_t dx_connection_status_get(dxf_connection_t connection) {
 /* -------------------------------------------------------------------------- */
 
 static void dx_protocol_property_clear(dx_network_connection_context_t* context) {
-    if (context == NULL)
-        return;
-    dx_property_map_free_collection(&context->properties);
-    dx_property_map_free_collection(&context->prop_backup);
+	if (context == NULL)
+		return;
+	dx_property_map_free_collection(&context->properties);
+	dx_property_map_free_collection(&context->prop_backup);
 }
 
 /* -------------------------------------------------------------------------- */
 
 static bool dx_protocol_property_make_backup(dx_network_connection_context_t* context) {
-    if (context == NULL)
-        return dx_set_error_code(dx_ec_invalid_func_param_internal);
+	if (context == NULL)
+		return dx_set_error_code(dx_ec_invalid_func_param_internal);
 
-    return dx_property_map_clone(&context->properties, &context->prop_backup);
+	return dx_property_map_clone(&context->properties, &context->prop_backup);
 }
 
 /* -------------------------------------------------------------------------- */
 
 static bool dx_protocol_property_restore_backup(dx_network_connection_context_t* context) {
-    if (context == NULL)
-        return dx_set_error_code(dx_ec_invalid_func_param_internal);
-    dx_property_map_free_collection(&context->properties);
-    return dx_property_map_clone(&context->prop_backup, &context->properties);
+	if (context == NULL)
+		return dx_set_error_code(dx_ec_invalid_func_param_internal);
+	dx_property_map_free_collection(&context->properties);
+	return dx_property_map_clone(&context->prop_backup, &context->properties);
 }
 
 /* -------------------------------------------------------------------------- */
 
 bool dx_protocol_property_set(dxf_connection_t connection, dxf_const_string_t key, dxf_const_string_t value) {
-    dx_network_connection_context_t* context = NULL;
-    bool res = true;
+	dx_network_connection_context_t* context = NULL;
+	bool res = true;
 
-    context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
+	context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
 
-    if (context == NULL) {
-        if (res) {
-            dx_set_error_code(dx_cec_connection_context_not_initialized);
-        }
-        return false;
-    }
+	if (context == NULL) {
+		if (res) {
+			dx_set_error_code(dx_cec_connection_context_not_initialized);
+		}
+		return false;
+	}
 
-    return dx_property_map_set(&context->properties, key, value);
+	return dx_property_map_set(&context->properties, key, value);
 }
 
 /* -------------------------------------------------------------------------- */
 
 bool dx_protocol_property_set_many(dxf_connection_t connection, const dx_property_map_t* other) {
-    dx_network_connection_context_t* context = NULL;
-    bool res = true;
+	dx_network_connection_context_t* context = NULL;
+	bool res = true;
 
-    context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
+	context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
 
-    if (context == NULL) {
-        if (res) {
-            dx_set_error_code(dx_cec_connection_context_not_initialized);
-        }
-        return false;
-    }
+	if (context == NULL) {
+		if (res) {
+			dx_set_error_code(dx_cec_connection_context_not_initialized);
+		}
+		return false;
+	}
 
-    return dx_property_map_set_many(&context->properties, other);
+	return dx_property_map_set_many(&context->properties, other);
 }
 
 /* -------------------------------------------------------------------------- */
 
 const dx_property_map_t* dx_protocol_property_get_all(dxf_connection_t connection) {
-    dx_network_connection_context_t* context = NULL;
-    bool res = true;
+	dx_network_connection_context_t* context = NULL;
+	bool res = true;
 
-    context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
+	context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
 
-    if (context == NULL) {
-        if (res) {
-            dx_set_error_code(dx_cec_connection_context_not_initialized);
-        }
-        return NULL;
-    }
+	if (context == NULL) {
+		if (res) {
+			dx_set_error_code(dx_cec_connection_context_not_initialized);
+		}
+		return NULL;
+	}
 
-    return (const dx_property_map_t*)&context->properties;
+	return (const dx_property_map_t*)&context->properties;
 }
 
 /* -------------------------------------------------------------------------- */
 
 bool dx_protocol_property_contains(dxf_connection_t connection, dxf_const_string_t key) {
-    dx_network_connection_context_t* context = NULL;
-    bool res = true;
+	dx_network_connection_context_t* context = NULL;
+	bool res = true;
 
-    context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
+	context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
 
-    if (context == NULL) {
-        if (res) {
-            dx_set_error_code(dx_cec_connection_context_not_initialized);
-        }
-        return false;
-    }
+	if (context == NULL) {
+		if (res) {
+			dx_set_error_code(dx_cec_connection_context_not_initialized);
+		}
+		return false;
+	}
 
-    return dx_property_map_contains(&context->properties, key);
+	return dx_property_map_contains(&context->properties, key);
 }
 
 /* -------------------------------------------------------------------------- */
 
 char* dx_protocol_get_basic_auth_data(const char* user, const char* password) {
-    size_t credentials_size;
-    size_t base64_size;
-    char* credentials_buf;
-    char* base64_buf;
+	size_t credentials_size;
+	size_t base64_size;
+	char* credentials_buf;
+	char* base64_buf;
 
-    if (user == NULL || password == NULL) {
-        dx_set_error_code(dx_ec_invalid_func_param);
-        return NULL;
-    }
+	if (user == NULL || password == NULL) {
+		dx_set_error_code(dx_ec_invalid_func_param);
+		return NULL;
+	}
 
-    /* The buffer stores user and password as <username>:<password>. The length
-    of the buffer is sum of user and password length and addtional ':' symbol. */
-    credentials_size = strlen(user) + strlen(password) + 1;
-    credentials_buf = dx_ansi_create_string(credentials_size);
-    if (sprintf(credentials_buf, "%s:%s", user, password) <= 0) {
-        dx_free(credentials_buf);
-        return NULL;
-    }
+	/* The buffer stores user and password as <username>:<password>. The length
+	of the buffer is sum of user and password length and addtional ':' symbol. */
+	credentials_size = strlen(user) + strlen(password) + 1;
+	credentials_buf = dx_ansi_create_string(credentials_size);
+	if (sprintf(credentials_buf, "%s:%s", user, password) <= 0) {
+		dx_free(credentials_buf);
+		return NULL;
+	}
 
-    base64_size = dx_base64_length(credentials_size);
-    base64_buf = dx_ansi_create_string(base64_size);
-    if (!dx_base64_encode((const char*)credentials_buf, credentials_size, base64_buf, base64_size)) {
-        dx_free(base64_buf);
-        dx_free(credentials_buf);
-        return NULL;
-    }
+	base64_size = dx_base64_length(credentials_size);
+	base64_buf = dx_ansi_create_string(base64_size);
+	if (!dx_base64_encode((const char*)credentials_buf, credentials_size, base64_buf, base64_size)) {
+		dx_free(base64_buf);
+		dx_free(credentials_buf);
+		return NULL;
+	}
 
-    dx_free(credentials_buf);
+	dx_free(credentials_buf);
 
-    return base64_buf;
+	return base64_buf;
 }
 
 /* -------------------------------------------------------------------------- */
 
 bool dx_protocol_configure_basic_auth(dxf_connection_t connection,
-                                      const char* user, const char* password) {
-    bool res = true;
-    char* base64_buf = dx_protocol_get_basic_auth_data(user, password);
-    if (base64_buf == NULL)
-        return false;
+									const char* user, const char* password) {
+	bool res = true;
+	char* base64_buf = dx_protocol_get_basic_auth_data(user, password);
+	if (base64_buf == NULL)
+		return false;
 
-    res = dx_protocol_configure_custom_auth(connection, DX_AUTH_BASIC_KEY, base64_buf);
+	res = dx_protocol_configure_custom_auth(connection, DX_AUTH_BASIC_KEY, base64_buf);
 
-    dx_free(base64_buf);
-    return res;
+	dx_free(base64_buf);
+	return res;
 }
 
 /* -------------------------------------------------------------------------- */
 
 bool dx_protocol_configure_custom_auth(dxf_connection_t connection,
-                                       const char* authscheme,
-                                       const char* authdata) {
-    size_t buf_size;
-    dxf_string_t buf;
-    dxf_string_t w_authscheme;
-    dxf_string_t w_authdata;
-    bool res = true;
+									const char* authscheme,
+									const char* authdata) {
+	size_t buf_size;
+	dxf_string_t buf;
+	dxf_string_t w_authscheme;
+	dxf_string_t w_authdata;
+	bool res = true;
 
-    if (connection == NULL || authscheme == NULL || authdata == NULL)
-        return dx_set_error_code(dx_ec_invalid_func_param);
+	if (connection == NULL || authscheme == NULL || authdata == NULL)
+		return dx_set_error_code(dx_ec_invalid_func_param);
 
-    /* This buffer stores 'authorization' value which is [<SchemeName> <SchemeData>].
-    Total size of this buffer is sum of 'authscheme' and 'authdata' lengths, space 
-    between this values and also trailing zero.
-    */
-    buf_size = strlen(authscheme) + strlen(authdata) + 2;
-    buf = dx_create_string(buf_size);
-    w_authscheme = dx_ansi_to_unicode(authscheme);
-    w_authdata = dx_ansi_to_unicode(authdata);
-    swprintf(buf, buf_size, L"%ls %ls", w_authscheme, w_authdata);
+	/* This buffer stores 'authorization' value which is [<SchemeName> <SchemeData>].
+	Total size of this buffer is sum of 'authscheme' and 'authdata' lengths, space
+	between this values and also trailing zero.
+	*/
+	buf_size = strlen(authscheme) + strlen(authdata) + 2;
+	buf = dx_create_string(buf_size);
+	w_authscheme = dx_ansi_to_unicode(authscheme);
+	w_authdata = dx_ansi_to_unicode(authdata);
+	swprintf(buf, buf_size, L"%ls %ls", w_authscheme, w_authdata);
 
-    res = dx_protocol_property_set(connection, DX_PROPERTY_AUTH, buf);
+	res = dx_protocol_property_set(connection, DX_PROPERTY_AUTH, buf);
 
-    dx_free(w_authdata);
-    dx_free(w_authscheme);
-    dx_free(buf);
-    return res;
+	dx_free(w_authdata);
+	dx_free(w_authscheme);
+	dx_free(buf);
+	return res;
 }

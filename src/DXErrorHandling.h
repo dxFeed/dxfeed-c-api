@@ -35,9 +35,9 @@
 /* -------------------------------------------------------------------------- */
 
 typedef enum {
-    dx_efr_success,
-    dx_efr_invalid_error_code,
-    dx_efr_error_subsys_init_failure    
+	dx_efr_success,
+	dx_efr_invalid_error_code,
+	dx_efr_error_subsys_init_failure
 } dx_error_function_result_t;
 
 /* -------------------------------------------------------------------------- */
@@ -48,14 +48,14 @@ typedef enum {
 /*
  *  Reports an error.
 
-    Input:
-        error_code - an error code.
-        
-    Return value:
-        dx_efr_success - an error is valid and has been reported.
-        dx_efr_invalid_error_code - invalid error code.
-        dx_efr_error_subsys_init_failure - the error subsystem wasn't
-                                           successfully initialized.
+	Input:
+		error_code - an error code.
+
+	Return value:
+		dx_efr_success - an error is valid and has been reported.
+		dx_efr_invalid_error_code - invalid error code.
+		dx_efr_error_subsys_init_failure - the error subsystem wasn't
+										successfully initialized.
  */
 
 dx_error_function_result_t dx_set_last_error (dx_error_code_t error_code);
@@ -64,15 +64,15 @@ dx_error_function_result_t dx_set_last_error (dx_error_code_t error_code);
 /*
  *  Retrieves an information about a previously reported error.
 
-    Input:
-        error_code - a pointer to a variable for storing the error code;
-                     MUST NOT be NULL.
-                      
-    Return value:
-        dx_efr_success - an error information was retrieved.
-        dx_efr_invalid_error_code - error_code is NULL.
-        dx_efr_error_subsys_init_failure - the error subsystem wasn't
-                                           successfully initialized.
+	Input:
+		error_code - a pointer to a variable for storing the error code;
+					MUST NOT be NULL.
+
+	Return value:
+		dx_efr_success - an error information was retrieved.
+		dx_efr_invalid_error_code - error_code is NULL.
+		dx_efr_error_subsys_init_failure - the error subsystem wasn't
+										successfully initialized.
  */
 
 dx_error_function_result_t dx_get_last_error (int* error_code);
@@ -80,16 +80,16 @@ dx_error_function_result_t dx_get_last_error (int* error_code);
 /* -------------------------------------------------------------------------- */
 /*
  *  Erases the information about the last reported error, thus making the
-    subsequent successful 'dx_get_last_error' calls return 'dx_ec_success'
-    error code.
+	subsequent successful 'dx_get_last_error' calls return 'dx_ec_success'
+	error code.
 
-    Input:
-        none.
-        
-    Return value:
-        true - the last error info is successfully erased.
-        false - function call failed due to the error subsystem
-                initialization failure.
+	Input:
+		none.
+
+	Return value:
+		true - the last error info is successfully erased.
+		false - function call failed due to the error subsystem
+				initialization failure.
  */
 
 bool dx_pop_last_error ();
@@ -97,16 +97,16 @@ bool dx_pop_last_error ();
 /* -------------------------------------------------------------------------- */
 /*
  *	Explicitly initializes the error subsystem.
-    Should not be called unless you know what you're doing.
-    
-    Input:
-        none.
-        
-    Return value:
-        true - the error subsystem successfully initialized
-        false - the error subsystem initialization failed.
+	Should not be called unless you know what you're doing.
+
+	Input:
+		none.
+
+	Return value:
+		true - the error subsystem successfully initialized
+		false - the error subsystem initialization failed.
  */
- 
+
 bool dx_init_error_subsystem (void);
 
 /* -------------------------------------------------------------------------- */

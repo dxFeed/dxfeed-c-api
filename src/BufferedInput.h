@@ -63,7 +63,7 @@ bool dx_read_double (void* context, OUT dxf_double_t* value);
 bool dx_read_line (void* context, OUT dxf_string_t* value);
 /*
 bool dx_read_utf (void* context, OUT dxf_string_t* value);
-*/
+ */
 
 /* -------------------------------------------------------------------------- */
 /*

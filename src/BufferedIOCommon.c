@@ -72,10 +72,10 @@ static dxf_int_t MAX_CODE_POINT = 0x10ffff;
 /* -------------------------------------------------------------------------- */
 
 void dx_code_point_to_surrogates (dxf_int_t code_point, dxf_string_t dest_buffer, int dest_buffer_pos) {
-    dxf_int_t offset = code_point - MIN_SUPPLEMENTARY_CODE_POINT;
+	dxf_int_t offset = code_point - MIN_SUPPLEMENTARY_CODE_POINT;
 
-    dest_buffer[dest_buffer_pos+1] = (dxf_char_t)((offset & 0x3ff) + MIN_LOW_SURROGATE);
-    dest_buffer[dest_buffer_pos] = (dxf_char_t)((offset >> 10) + MIN_HIGH_SURROGATE);
+	dest_buffer[dest_buffer_pos+1] = (dxf_char_t)((offset & 0x3ff) + MIN_LOW_SURROGATE);
+	dest_buffer[dest_buffer_pos] = (dxf_char_t)((offset >> 10) + MIN_HIGH_SURROGATE);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -85,47 +85,47 @@ void dx_code_point_to_surrogates (dxf_int_t code_point, dxf_string_t dest_buffer
 /* -------------------------------------------------------------------------- */
 
 int dx_is_high_surrogate (dxf_char_t value) {
-    return value >= MIN_HIGH_SURROGATE && value <= MAX_HIGH_SURROGATE;
+	return value >= MIN_HIGH_SURROGATE && value <= MAX_HIGH_SURROGATE;
 }
 
 /* -------------------------------------------------------------------------- */
 
 int dx_is_low_surrogate (dxf_char_t value) {
-    return value >= MIN_LOW_SURROGATE && value <= MAX_LOW_SURROGATE;
+	return value >= MIN_LOW_SURROGATE && value <= MAX_LOW_SURROGATE;
 }
 
 /* -------------------------------------------------------------------------- */
 
 dxf_int_t dx_surrogates_to_code_point (dxf_char_t high, dxf_char_t low) {
-    return ((high - MIN_HIGH_SURROGATE) << 10) + (low - MIN_LOW_SURROGATE) + MIN_SUPPLEMENTARY_CODE_POINT;
+	return ((high - MIN_HIGH_SURROGATE) << 10) + (low - MIN_LOW_SURROGATE) + MIN_SUPPLEMENTARY_CODE_POINT;
 }
 
 /* -------------------------------------------------------------------------- */
 
 bool dx_code_point_to_utf16_chars (dxf_int_t code_point, dxf_string_t dest_buffer, int dest_buffer_pos, int dest_buffer_length, OUT int* result) {
-    if (code_point < 0 || code_point > MAX_CODE_POINT || dest_buffer == NULL || result == NULL) {
-        return dx_set_error_code(dx_ec_invalid_func_param_internal);
-    }
+	if (code_point < 0 || code_point > MAX_CODE_POINT || dest_buffer == NULL || result == NULL) {
+		return dx_set_error_code(dx_ec_invalid_func_param_internal);
+	}
 
-    if (code_point < MIN_SUPPLEMENTARY_CODE_POINT) {
-        if (dest_buffer_length - dest_buffer_pos < 1) {
-            return dx_set_error_code(dx_bioec_index_out_of_bounds);
-        }
-        
-        dest_buffer[dest_buffer_pos] = (dxf_char_t)code_point;        
-        *result = 1;
-        
-        return true;
-    }
+	if (code_point < MIN_SUPPLEMENTARY_CODE_POINT) {
+		if (dest_buffer_length - dest_buffer_pos < 1) {
+			return dx_set_error_code(dx_bioec_index_out_of_bounds);
+		}
 
-    if (dest_buffer_length - dest_buffer_pos < 2) {
-        return dx_set_error_code(dx_bioec_index_out_of_bounds);
-    }
+		dest_buffer[dest_buffer_pos] = (dxf_char_t)code_point;
+		*result = 1;
 
-    dx_code_point_to_surrogates(code_point, dest_buffer, dest_buffer_pos);
-    *result = 2;
-    
-    return true;
+		return true;
+	}
+
+	if (dest_buffer_length - dest_buffer_pos < 2) {
+		return dx_set_error_code(dx_bioec_index_out_of_bounds);
+	}
+
+	dx_code_point_to_surrogates(code_point, dest_buffer, dest_buffer_pos);
+	*result = 2;
+
+	return true;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -135,45 +135,45 @@ bool dx_code_point_to_utf16_chars (dxf_int_t code_point, dxf_string_t dest_buffe
 /* -------------------------------------------------------------------------- */
 
 int dx_get_compact_size (dxf_long_t value) {
-    if (value >= 0) {
-        if (value < 0x40) {
-            return 1;
-        } else if (value < 0x2000) {
-            return 2;
-        } else if (value < 0x100000) {
-            return 3;
-        } else if (value < 0x08000000) {
-            return 4;
-        } else if (value < 0x0400000000L) {
-            return 5;
-        } else if (value < 0x020000000000L) {
-            return 6;
-        } else if (value < 0x01000000000000L) {
-            return 7;
-        } else if (value < 0x80000000000000L) {
-            return 8;
-        } else {
-            return 9;
-        }
-    } else {
-        if (value >= -0x40) {
-            return 1;
-        } else if (value >= -0x2000) {
-            return 2;
-        } else if (value >= -0x100000) {
-            return 3;
-        } else if (value >= -0x08000000) {
-            return 4;
-        } else if (value >= -0x0400000000L) {
-            return 5;
-        } else if (value >= -0x020000000000L) {
-            return 6;
-        } else if (value >= -0x01000000000000L) {
-            return 7;
-        } else if (value >= -0x80000000000000L) {
-            return 8;
-        } else {
-            return 9;
-        }
-    }
+	if (value >= 0) {
+		if (value < 0x40) {
+			return 1;
+		} else if (value < 0x2000) {
+			return 2;
+		} else if (value < 0x100000) {
+			return 3;
+		} else if (value < 0x08000000) {
+			return 4;
+		} else if (value < 0x0400000000L) {
+			return 5;
+		} else if (value < 0x020000000000L) {
+			return 6;
+		} else if (value < 0x01000000000000L) {
+			return 7;
+		} else if (value < 0x80000000000000L) {
+			return 8;
+		} else {
+			return 9;
+		}
+	} else {
+		if (value >= -0x40) {
+			return 1;
+		} else if (value >= -0x2000) {
+			return 2;
+		} else if (value >= -0x100000) {
+			return 3;
+		} else if (value >= -0x08000000) {
+			return 4;
+		} else if (value >= -0x0400000000L) {
+			return 5;
+		} else if (value >= -0x020000000000L) {
+			return 6;
+		} else if (value >= -0x01000000000000L) {
+			return 7;
+		} else if (value >= -0x80000000000000L) {
+			return 8;
+		} else {
+			return 9;
+		}
+	}
 }

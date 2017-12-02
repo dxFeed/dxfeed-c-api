@@ -82,7 +82,7 @@ bool dx_is_thread_master (void);
 /* -------------------------------------------------------------------------- */
 
 bool dx_thread_create (dx_thread_t* thread_id, const pthread_attr_t* attr,
-                       dx_start_routine_t start_routine, void *arg);
+					dx_start_routine_t start_routine, void *arg);
 bool dx_wait_for_thread (dx_thread_t thread_id, void **value_ptr);
 bool dx_close_thread_handle (dx_thread_t thread_id);
 bool dx_thread_data_key_create (dx_key_t* key, void (*destructor)(void*));

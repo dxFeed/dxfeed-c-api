@@ -33,7 +33,7 @@
  * Determines if the given dx_char_t value is a
  * high-surrogate code unit (also known as leading-surrogate
  * code unit). Such values do not represent characters by
- * themselves, but are used in the representation of 
+ * themselves, but are used in the representation of
  * supplementary characters in the UTF-16 encoding.
  *
  * This method returns nonzero if and only if
@@ -66,7 +66,7 @@ int dx_is_low_surrogate (dxf_char_t value);
 /*
  * Converts the specified surrogate pair to its supplementary code
  * point value. This method does not validate the specified
- * surrogate pair. The caller must validate it using 
+ * surrogate pair. The caller must validate it using
  * isSurrogatePair(char, char) if necessary.
  *
  * @param  high the high-surrogate code unit

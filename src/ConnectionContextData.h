@@ -16,11 +16,11 @@
  * Contributor(s):
  *
  */
- 
+
 /*
  *	Provides functionality to manage the connection-specific data.
  */
- 
+
 #ifndef CONNECTION_CONTEXT_DATA_H_INCLUDED
 #define CONNECTION_CONTEXT_DATA_H_INCLUDED
 
@@ -34,20 +34,20 @@
 /* -------------------------------------------------------------------------- */
 
 typedef enum {
-    dx_ccs_begin,
-    dx_ccs_network = dx_ccs_begin,
-    dx_ccs_event_subscription,
-    dx_ccs_record_transcoder,
-    dx_ccs_data_structures,
-    dx_ccs_record_buffers,
-    dx_ccs_server_msg_processor,
-    dx_ccs_buffered_input,
-    dx_ccs_buffered_output,
-    dx_ccs_snapshot_subscription,
-    dx_ccs_price_level_book,
-    dx_ccs_regional_book,
-    
-    dx_ccs_count
+	dx_ccs_begin,
+	dx_ccs_network = dx_ccs_begin,
+	dx_ccs_event_subscription,
+	dx_ccs_record_transcoder,
+	dx_ccs_data_structures,
+	dx_ccs_record_buffers,
+	dx_ccs_server_msg_processor,
+	dx_ccs_buffered_input,
+	dx_ccs_buffered_output,
+	dx_ccs_snapshot_subscription,
+	dx_ccs_price_level_book,
+	dx_ccs_regional_book,
+
+	dx_ccs_count
 } dx_connection_context_subsystem_t;
 
 typedef bool (*dx_conn_ctx_subsys_manipulator_t) (dxf_connection_t connection);
@@ -59,22 +59,22 @@ typedef bool (*dx_conn_ctx_subsys_manipulator_t) (dxf_connection_t connection);
 /* -------------------------------------------------------------------------- */
 
 #define DX_CONNECTION_SUBSYS_INIT_NAME(subsys_id) \
-    subsys_id##_init
-    
+	subsys_id##_init
+
 #define DX_CONNECTION_SUBSYS_INIT_PROTO(subsys_id) \
-    bool DX_CONNECTION_SUBSYS_INIT_NAME(subsys_id) (dxf_connection_t connection)
-    
+	bool DX_CONNECTION_SUBSYS_INIT_NAME(subsys_id) (dxf_connection_t connection)
+
 #define DX_CONNECTION_SUBSYS_DEINIT_NAME(subsys_id) \
-    subsys_id##_deinit
+	subsys_id##_deinit
 
 #define DX_CONNECTION_SUBSYS_DEINIT_PROTO(subsys_id) \
-    bool DX_CONNECTION_SUBSYS_DEINIT_NAME(subsys_id) (dxf_connection_t connection)
-    
+	bool DX_CONNECTION_SUBSYS_DEINIT_NAME(subsys_id) (dxf_connection_t connection)
+
 #define DX_CONNECTION_SUBSYS_CHECK_NAME(subsys_id) \
-    subsys_id##_check
+	subsys_id##_check
 
 #define DX_CONNECTION_SUBSYS_CHECK_PROTO(subsys_id) \
-    bool DX_CONNECTION_SUBSYS_CHECK_NAME(subsys_id) (dxf_connection_t connection)
+	bool DX_CONNECTION_SUBSYS_CHECK_NAME(subsys_id) (dxf_connection_t connection)
 
 /* -------------------------------------------------------------------------- */
 /*

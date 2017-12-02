@@ -16,12 +16,12 @@
  * Contributor(s):
  *
  */
- 
+
 /*
  *	Contains the setter prototypes for the fields of record structures we pass
  *  to the client side
  */
- 
+
 #ifndef RECORD_FIELD_SETTERS_H_INCLUDED
 #define RECORD_FIELD_SETTERS_H_INCLUDED
 
@@ -40,11 +40,11 @@ typedef void (*dx_record_field_setter_t)(void* object, const void* field);
 /* -------------------------------------------------------------------------- */
 
 #define DX_RECORD_FIELD_SETTER_NAME(struct_name, field_name) \
-    struct_name##_##field_name##_##setter
-    
+	struct_name##_##field_name##_##setter
+
 #define DX_RECORD_FIELD_SETTER_PROTOTYPE(struct_name, field_name) \
-    void DX_RECORD_FIELD_SETTER_NAME(struct_name, field_name) (void* object, const void* field)
-    
+	void DX_RECORD_FIELD_SETTER_NAME(struct_name, field_name) (void* object, const void* field)
+
 /* -------------------------------------------------------------------------- */
 /*
  *	Trade field setters
@@ -76,8 +76,8 @@ DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_quote_t, ask_size);
 
 /* -------------------------------------------------------------------------- */
 /*
-*	Summary field setters
-*/
+ *	Summary field setters
+ */
 /* -------------------------------------------------------------------------- */
 
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_summary_t, day_id);
@@ -163,8 +163,8 @@ DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_time_and_sale_t, flags);
 
 /* -------------------------------------------------------------------------- */
 /*
-*	Candle field setters
-*/
+ *	Candle field setters
+ */
 /* -------------------------------------------------------------------------- */
 
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_candle_t, time);
@@ -183,8 +183,8 @@ DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_candle_t, imp_volatility);
 
 /* -------------------------------------------------------------------------- */
 /*
-*	TradeETH field setters
-*/
+ *	TradeETH field setters
+ */
 /* -------------------------------------------------------------------------- */
 
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_trade_eth_t, time);
@@ -196,8 +196,8 @@ DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_trade_eth_t, eth_volume);
 
 /* -------------------------------------------------------------------------- */
 /*
-*	SpreadOrder field setters
-*/
+ *	SpreadOrder field setters
+ */
 /* -------------------------------------------------------------------------- */
 
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_spread_order_t, index);
@@ -211,8 +211,8 @@ DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_spread_order_t, spread_symbol);
 
 /* -------------------------------------------------------------------------- */
 /*
-*	Greeks field setters
-*/
+ *	Greeks field setters
+ */
 /* -------------------------------------------------------------------------- */
 
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_greeks_t, time);
@@ -227,8 +227,8 @@ DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_greeks_t, vega);
 
 /* -------------------------------------------------------------------------- */
 /*
-*	TheoPrice field setters
-*/
+ *	TheoPrice field setters
+ */
 /* -------------------------------------------------------------------------- */
 
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_theo_price_t, theo_time);
@@ -241,8 +241,8 @@ DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_theo_price_t, theo_interest);
 
 /* -------------------------------------------------------------------------- */
 /*
-*	Underlying field setters
-*/
+ *	Underlying field setters
+ */
 /* -------------------------------------------------------------------------- */
 
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_underlying_t, volatility);
@@ -252,8 +252,8 @@ DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_underlying_t, put_call_ratio);
 
 /* -------------------------------------------------------------------------- */
 /*
-*	Series field setters
-*/
+ *	Series field setters
+ */
 /* -------------------------------------------------------------------------- */
 
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_series_t, expiration);
@@ -266,8 +266,8 @@ DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_series_t, interest);
 
 /* -------------------------------------------------------------------------- */
 /*
-*	Configuration field setters
-*/
+ *	Configuration field setters
+ */
 /* -------------------------------------------------------------------------- */
 
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_configuration_t, object);
@@ -291,11 +291,11 @@ typedef const void* (*dx_record_field_def_val_getter_t) (void);
 /* -------------------------------------------------------------------------- */
 
 #define DX_RECORD_FIELD_DEF_VAL_NAME(struct_name, field_name) \
-    struct_name##_##field_name##_##default_value
+	struct_name##_##field_name##_##default_value
 
 #define DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(struct_name, field_name) \
-    const void* DX_RECORD_FIELD_DEF_VAL_NAME(struct_name, field_name) (void)
-    
+	const void* DX_RECORD_FIELD_DEF_VAL_NAME(struct_name, field_name) (void)
+
 /* -------------------------------------------------------------------------- */
 /*
  *	Trade field default value getters
@@ -327,8 +327,8 @@ DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_quote_t, ask_size);
 
 /* -------------------------------------------------------------------------- */
 /*
-*	Summary field default value getters
-*/
+ *	Summary field default value getters
+ */
 /* -------------------------------------------------------------------------- */
 
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_summary_t, day_id);
@@ -414,8 +414,8 @@ DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_time_and_sale_t, flags);
 
 /* -------------------------------------------------------------------------- */
 /*
-*	Candle field default value getters
-*/
+ *	Candle field default value getters
+ */
 /* -------------------------------------------------------------------------- */
 
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_candle_t, time);
@@ -434,8 +434,8 @@ DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_candle_t, imp_volatility);
 
 /* -------------------------------------------------------------------------- */
 /*
-*	TradeETH field default value getters
-*/
+ *	TradeETH field default value getters
+ */
 /* -------------------------------------------------------------------------- */
 
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_trade_eth_t, time);
@@ -447,8 +447,8 @@ DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_trade_eth_t, eth_volume);
 
 /* -------------------------------------------------------------------------- */
 /*
-*	SpreadOrder field default value getters
-*/
+ *	SpreadOrder field default value getters
+ */
 /* -------------------------------------------------------------------------- */
 
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_spread_order_t, index);
@@ -462,8 +462,8 @@ DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_spread_order_t, spread_symbol);
 
 /* -------------------------------------------------------------------------- */
 /*
-*	Greeks field default value getters
-*/
+ *	Greeks field default value getters
+ */
 /* -------------------------------------------------------------------------- */
 
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_greeks_t, time);
@@ -478,8 +478,8 @@ DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_greeks_t, vega);
 
 /* -------------------------------------------------------------------------- */
 /*
-*	TheoPrice field default value getters
-*/
+ *	TheoPrice field default value getters
+ */
 /* -------------------------------------------------------------------------- */
 
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_theo_price_t, theo_time);
@@ -492,8 +492,8 @@ DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_theo_price_t, theo_interest);
 
 /* -------------------------------------------------------------------------- */
 /*
-*	Underlying field default value getters
-*/
+ *	Underlying field default value getters
+ */
 /* -------------------------------------------------------------------------- */
 
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_underlying_t, volatility);
@@ -503,8 +503,8 @@ DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_underlying_t, put_call_ratio);
 
 /* -------------------------------------------------------------------------- */
 /*
-*	Series field default value getters
-*/
+ *	Series field default value getters
+ */
 /* -------------------------------------------------------------------------- */
 
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_series_t, expiration);
@@ -517,36 +517,36 @@ DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_series_t, interest);
 
 /* -------------------------------------------------------------------------- */
 /*
-*	Configuration field default value getters
-*/
+ *	Configuration field default value getters
+ */
 /* -------------------------------------------------------------------------- */
 
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_configuration_t, object);
 
 /* -------------------------------------------------------------------------- */
 /*
-*	Generic setter prototype
-*/
+ *	Generic setter prototype
+ */
 /* -------------------------------------------------------------------------- */
 
 typedef void(*dx_record_field_getter_t)(void* object, OUT void* field);
 
 /* -------------------------------------------------------------------------- */
 /*
-*	Setter macros
-*/
+ *	Setter macros
+ */
 /* -------------------------------------------------------------------------- */
 
 #define DX_RECORD_FIELD_GETTER_NAME(struct_name, field_name) \
-    struct_name##_##field_name##_##getter
+	struct_name##_##field_name##_##getter
 
 #define DX_RECORD_FIELD_GETTER_PROTOTYPE(struct_name, field_name) \
-    void DX_RECORD_FIELD_GETTER_NAME(struct_name, field_name) (void* object, OUT void* field)
+	void DX_RECORD_FIELD_GETTER_NAME(struct_name, field_name) (void* object, OUT void* field)
 
 /* -------------------------------------------------------------------------- */
 /*
-*	Trade field getters
-*/
+ *	Trade field getters
+ */
 /* -------------------------------------------------------------------------- */
 
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_trade_t, time);
@@ -559,8 +559,8 @@ DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_trade_t, day_volume);
 
 /* -------------------------------------------------------------------------- */
 /*
-*	Quote field getters
-*/
+ *	Quote field getters
+ */
 /* -------------------------------------------------------------------------- */
 
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_quote_t, bid_time);
@@ -574,8 +574,8 @@ DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_quote_t, ask_size);
 
 /* -------------------------------------------------------------------------- */
 /*
-*	Summary field getters
-*/
+ *	Summary field getters
+ */
 /* -------------------------------------------------------------------------- */
 
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_summary_t, day_id);
@@ -591,8 +591,8 @@ DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_summary_t, exchange_code);
 
 /* -------------------------------------------------------------------------- */
 /*
-*	Profile field getters
-*/
+ *	Profile field getters
+ */
 /* -------------------------------------------------------------------------- */
 
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_profile_t, beta);
@@ -613,8 +613,8 @@ DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_profile_t, low_limit_price);
 
 /* -------------------------------------------------------------------------- */
 /*
-*	Market maker field getters
-*/
+ *	Market maker field getters
+ */
 /* -------------------------------------------------------------------------- */
 
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_market_maker_t, mm_exchange);
@@ -630,8 +630,8 @@ DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_market_maker_t, mmask_count);
 
 /* -------------------------------------------------------------------------- */
 /*
-*	Order field getters
-*/
+ *	Order field getters
+ */
 /* -------------------------------------------------------------------------- */
 
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_order_t, index);
@@ -645,8 +645,8 @@ DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_order_t, count);
 
 /* -------------------------------------------------------------------------- */
 /*
-*	Time and Sale field getters
-*/
+ *	Time and Sale field getters
+ */
 /* -------------------------------------------------------------------------- */
 
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_time_and_sale_t, time);
@@ -661,8 +661,8 @@ DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_time_and_sale_t, flags);
 
 /* -------------------------------------------------------------------------- */
 /*
-*	Candle field getters
-*/
+ *	Candle field getters
+ */
 /* -------------------------------------------------------------------------- */
 
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_candle_t, time);
@@ -681,8 +681,8 @@ DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_candle_t, imp_volatility);
 
 /* -------------------------------------------------------------------------- */
 /*
-*	TradeETH field getters
-*/
+ *	TradeETH field getters
+ */
 /* -------------------------------------------------------------------------- */
 
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_trade_eth_t, time);
@@ -694,8 +694,8 @@ DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_trade_eth_t, eth_volume);
 
 /* -------------------------------------------------------------------------- */
 /*
-*	SpreadOrder field getters
-*/
+ *	SpreadOrder field getters
+ */
 /* -------------------------------------------------------------------------- */
 
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_spread_order_t, index);
@@ -709,8 +709,8 @@ DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_spread_order_t, spread_symbol);
 
 /* -------------------------------------------------------------------------- */
 /*
-*	Greeks field getters
-*/
+ *	Greeks field getters
+ */
 /* -------------------------------------------------------------------------- */
 
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_greeks_t, time);
@@ -725,8 +725,8 @@ DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_greeks_t, vega);
 
 /* -------------------------------------------------------------------------- */
 /*
-*	TheoPrice field getters
-*/
+ *	TheoPrice field getters
+ */
 /* -------------------------------------------------------------------------- */
 
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_theo_price_t, theo_time);
@@ -739,8 +739,8 @@ DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_theo_price_t, theo_interest);
 
 /* -------------------------------------------------------------------------- */
 /*
-*	Underlying field getters
-*/
+ *	Underlying field getters
+ */
 /* -------------------------------------------------------------------------- */
 
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_underlying_t, volatility);
@@ -750,8 +750,8 @@ DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_underlying_t, put_call_ratio);
 
 /* -------------------------------------------------------------------------- */
 /*
-*	Series field getters
-*/
+ *	Series field getters
+ */
 /* -------------------------------------------------------------------------- */
 
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_series_t, expiration);
@@ -764,8 +764,8 @@ DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_series_t, interest);
 
 /* -------------------------------------------------------------------------- */
 /*
-*	Configuration field getters
-*/
+ *	Configuration field getters
+ */
 /* -------------------------------------------------------------------------- */
 
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_configuration_t, object);

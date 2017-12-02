@@ -16,11 +16,11 @@
  * Contributor(s):
  *
  */
- 
+
 /*
  *	Contains various algorithms which may be used across the project
  */
- 
+
 #ifndef DX_ALGORITHMS_H_INCLUDED
 #define DX_ALGORITHMS_H_INCLUDED
 
@@ -42,71 +42,71 @@
 /* -------------------------------------------------------------------------- */
 
 #define DX_SWAP(type, e1, e2) \
-    do { \
-        type _tmp = e1; \
-        \
-        e1 = e2; \
-        e2 = _tmp; \
-    } while (false)
+	do { \
+		type _tmp = e1; \
+		\
+		e1 = e2; \
+		e2 = _tmp; \
+	} while (false)
 
 #define DX_CHECKED_SET_VAL_TO_PTR(ptr, val) \
-    do { \
-        if (ptr != NULL) { \
-            *ptr = val; \
-        } \
-    } while (false)
-    
+	do { \
+		if (ptr != NULL) { \
+			*ptr = val; \
+		} \
+	} while (false)
+
 #define MAX(a,b) (((a)>(b))?(a):(b))
 #define MIN(a,b) (((a)<(b))?(a):(b))
 
 #define CHECKED_CALL(func, param) \
-    do { \
-        if (!func(param)) { \
-            return false; \
-        } \
-    } while (false)
+	do { \
+		if (!func(param)) { \
+			return false; \
+		} \
+	} while (false)
 
 #define CHECKED_CALL_0(func) \
-    do { \
-        if (!func()) { \
-            return false; \
-        } \
-    } while (false)
+	do { \
+		if (!func()) { \
+			return false; \
+		} \
+	} while (false)
 
 #define CHECKED_CALL_1(func, param1) \
-    do { \
-        if (!func(param1)) { \
-            return false; \
-        } \
-    } while (false)
+	do { \
+		if (!func(param1)) { \
+			return false; \
+		} \
+	} while (false)
 
 #define CHECKED_CALL_2(func, param1, param2) \
-    do { \
-        if (!func(param1, param2)) { \
-            return false; \
-        } \
-    } while (false)
+	do { \
+		if (!func(param1, param2)) { \
+			return false; \
+		} \
+	} while (false)
 
 #define CHECKED_CALL_3(func, param1, param2, param3) \
-    do { \
-        if (!func(param1, param2, param3)) { \
-            return false; \
-        } \
-    } while (false)
+	do { \
+		if (!func(param1, param2, param3)) { \
+			return false; \
+		} \
+	} while (false)
 
 #define CHECKED_CALL_4(func, param1, param2, param3, param4) \
-    do { \
-        if (!func(param1, param2, param3, param4)) { \
-            return false; \
-        } \
-    } while (false)
+	do { \
+		if (!func(param1, param2, param3, param4)) { \
+			return false; \
+		} \
+	} while (false)
 
 #define CHECKED_CALL_5(func, param1, param2, param3, param4, param5) \
-    do { \
-        if (!func(param1, param2, param3, param4, param5)) { \
-            return false; \
-        } \
-    } while (false)
+	do { \
+		if (!func(param1, param2, param3, param4, param5)) { \
+			return false; \
+		} \
+	} while (false)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -115,28 +115,28 @@
 /* -------------------------------------------------------------------------- */
 
 #define CHECKED_FREE(ptr) \
-    do { \
-        if (ptr != NULL) { \
-            dx_free((void*)(ptr)); \
-        } \
-    } while (false)
+	do { \
+		if (ptr != NULL) { \
+			dx_free((void*)(ptr)); \
+		} \
+	} while (false)
 
 #define FREE_ARRAY(array_ptr, size) \
-    do { \
-        size_t _array_ind = 0; \
-        \
-        if (array_ptr == NULL) { \
-            break; \
-        } \
-        \
-        for (; _array_ind < size; ++_array_ind) { \
-            if (array_ptr[_array_ind] != NULL) { \
-                dx_free((void*)array_ptr[_array_ind]); \
-            } \
-        } \
-        \
-        dx_free((void*)array_ptr); \
-    } while (false)
+	do { \
+		size_t _array_ind = 0; \
+		\
+		if (array_ptr == NULL) { \
+			break; \
+		} \
+		\
+		for (; _array_ind < size; ++_array_ind) { \
+			if (array_ptr[_array_ind] != NULL) { \
+				dx_free((void*)array_ptr[_array_ind]); \
+			} \
+		} \
+		\
+		dx_free((void*)array_ptr); \
+	} while (false)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -145,22 +145,22 @@
 /* -------------------------------------------------------------------------- */
 
 #define INDEX_BITMASK(index) \
-    (1 << (index))
+	(1 << (index))
 
 #define IS_FLAG_SET(flags, flag) \
-    ((flags & flag) != 0)
+	((flags & flag) != 0)
 
 #define UNSIGNED_TYPE_dxf_int_t \
-    dxf_uint_t
+	dxf_uint_t
 
 #define UNSIGNED_TYPE_dxf_long_t \
-    dxf_ulong_t
+	dxf_ulong_t
 
 #define UNSIGNED_TYPE(type) \
-    UNSIGNED_TYPE_##type
+	UNSIGNED_TYPE_##type
 
 #define UNSIGNED_RIGHT_SHIFT(value, offset, type) \
-    ((type)((UNSIGNED_TYPE(type))value >> offset))
+	((type)((UNSIGNED_TYPE(type))value >> offset))
 
 bool dx_is_only_single_bit_set (int value);
 
@@ -182,18 +182,18 @@ size_t dx_random_size(size_t max_value);
 
 /*
  *  Sets the empty array value.
- *  Returns the array descriptor structure. this structure must contain at 
-    least three fields:
-        elements - a pointer to the array buffer (of type 'elem_type*')
-        size - an integer value containing the number of elements in the buffer
-        capacity - the current buffer capacity, may be greater than size
+ *  Returns the array descriptor structure. this structure must contain at
+	least three fields:
+		elements - a pointer to the array buffer (of type 'elem_type*')
+		size - an integer value containing the number of elements in the buffer
+		capacity - the current buffer capacity, may be greater than size
  */
 #define DX_EMPTY_ARRAY { NULL, 0, 0 }
 
 /* -------------------------------------------------------------------------- */
 /*
  *	Array operations and functions
- 
+
  *  A set of operations implementing various array algorithms: search,
  *  insertion, deletion etc
  */
@@ -207,41 +207,41 @@ size_t dx_random_size(size_t max_value);
  *  end_index - the index of the last element which can contain the key increased by 1
  *  elem - the key we're looking for
  *  comparator - a binary ordering predicate:
-        comparator(a, b) > 0 => a > b
-        comparator(a, b) = 0 => a = b
-        comparator(a, b) < 0 => a < b
+		comparator(a, b) > 0 => a > b
+		comparator(a, b) = 0 => a = b
+		comparator(a, b) < 0 => a < b
  *  found - a boolean return value, if it's non-zero then the key was found in the array
  *  res_index - an integer return value, contains the index of an element containing the key,
-                or the index of an element where the key might be inserted without breaking
-                the ordering, if the element wasn't found
+				or the index of an element where the key might be inserted without breaking
+				the ordering, if the element wasn't found
  */
 #define DX_ARRAY_BINARY_SEARCH(a, start_index, end_index, elem, comparator, found, res_index) \
-    do { \
-        size_t _begin = start_index; \
-        size_t _end = end_index; \
-        size_t _mid; \
-        int _comp_res; \
-        \
-        found = false; \
-        \
-        while (_begin < _end && !found) { \
-            _mid = (_begin + _end) / 2; \
-            _comp_res = comparator((a)[_mid], (elem)); \
-            \
-            if (_comp_res == 0) { \
-                res_index = _mid; \
-                found = true; \
-            } else if (_comp_res < 0) { \
-                _begin = _mid + 1; \
-            } else { \
-                _end = _mid; \
-            } \
-        } \
-        \
-        if (!found) { \
-            res_index = _end; \
-        } \
-    } while (false)
+	do { \
+		size_t _begin = start_index; \
+		size_t _end = end_index; \
+		size_t _mid; \
+		int _comp_res; \
+		\
+		found = false; \
+		\
+		while (_begin < _end && !found) { \
+			_mid = (_begin + _end) / 2; \
+			_comp_res = comparator((a)[_mid], (elem)); \
+			\
+			if (_comp_res == 0) { \
+				res_index = _mid; \
+				found = true; \
+			} else if (_comp_res < 0) { \
+				_begin = _mid + 1; \
+			} else { \
+				_end = _mid; \
+			} \
+		} \
+		\
+		if (!found) { \
+			res_index = _end; \
+		} \
+	} while (false)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -252,157 +252,157 @@ size_t dx_random_size(size_t max_value);
  *  end_index - the index of the last element which can contain the key increased by 1
  *  elem - the key we're looking for
  *  comparator - a binary ordering predicate:
-        comparator(a, b) > 0 => a > b
-        comparator(a, b) = 0 => a = b
-        comparator(a, b) < 0 => a < b
+		comparator(a, b) > 0 => a > b
+		comparator(a, b) = 0 => a = b
+		comparator(a, b) < 0 => a < b
  *  is_binary - a boolean value: if it's non-zero then the the array is sorted by the order
-                set by comparator
+				set by comparator
  *  found - a boolean return value, if it's non-zero then the key was found in the array
  *  res_index - an integer return value, contains the index of an element containing the key,
-                or the index of an element where the key might be inserted without breaking
-                the ordering, if the element wasn't found
+				or the index of an element where the key might be inserted without breaking
+				the ordering, if the element wasn't found
  */
 #define DX_ARRAY_SEARCH(a, start_index, end_index, elem, comparator, is_binary, found, res_index) \
-    do { \
-        found = false; \
-        \
-        if (is_binary) { \
-            DX_ARRAY_BINARY_SEARCH(a, start_index, end_index, elem, comparator, found, res_index); \
-        } else { \
-            size_t _index = start_index; \
-            \
-            for (; _index < end_index; ++_index) { \
-                if (comparator((a)[_index], (elem)) == 0) { \
-                    found = true; \
-                    \
-                    break; \
-                } \
-            } \
-            \
-            res_index = _index; \
-        } \
-    } while (false)
+	do { \
+		found = false; \
+		\
+		if (is_binary) { \
+			DX_ARRAY_BINARY_SEARCH(a, start_index, end_index, elem, comparator, found, res_index); \
+		} else { \
+			size_t _index = start_index; \
+			\
+			for (; _index < end_index; ++_index) { \
+				if (comparator((a)[_index], (elem)) == 0) { \
+					found = true; \
+					\
+					break; \
+				} \
+			} \
+			\
+			res_index = _index; \
+		} \
+	} while (false)
 
 /* -------------------------------------------------------------------------- */
 /*
  *	Insertion
 
  *  array_obj - an array descriptor structure. this structure must contain
-                at least three fields:
-        elements - a pointer to the array buffer (of type 'elem_type*')
-        size - an integer value containing the number of elements in the buffer
-        capacity - the current buffer capacity, may be greater than size
+				at least three fields:
+		elements - a pointer to the array buffer (of type 'elem_type*')
+		size - an integer value containing the number of elements in the buffer
+		capacity - the current buffer capacity, may be greater than size
  *  elem_type - type of elements in the buffer
  *  new_elem - an element to insert
  *  position - an index of a position where the new element is to be inserted,
-               is determined by a previous call of DX_ARRAY_SEARCH
+			is determined by a previous call of DX_ARRAY_SEARCH
  *  capacity_mgr - a function with two parameters:
-        new_size - an size_t parameter passed by value, contains the desired
-                   new size of the array
-        capacity - an size_t parameter passed by pointer, contains the current
-                   array capacity
-        
-        Return value:
-            true - reallocation is required, in this case the new capacity
-                   value is stored in the capacity parameter
-            false - no reallocation is required
+		new_size - an size_t parameter passed by value, contains the desired
+				new size of the array
+		capacity - an size_t parameter passed by pointer, contains the current
+				array capacity
+
+		Return value:
+			true - reallocation is required, in this case the new capacity
+				value is stored in the capacity parameter
+			false - no reallocation is required
  *  error - a boolean return value, is true if some error occurred during insertion,
-            is false otherwise
+			is false otherwise
  */
 #define DX_ARRAY_INSERT(array_obj, elem_type, new_elem, position, capacity_mgr, error) \
-    do { \
-        void* _buffer_to_free = NULL; \
-        elem_type* _new_elem_buffer = (array_obj).elements; \
-        \
-        error = false; \
-        \
-        if (capacity_mgr((array_obj).size + 1, &((array_obj).capacity))) { \
-            _new_elem_buffer = (elem_type*)dx_calloc((array_obj).capacity, sizeof(elem_type)); \
-            \
-            if (_new_elem_buffer == NULL) { \
-                error = true; \
-                \
-                break; \
-            } \
-            \
-            dx_memcpy((void*)_new_elem_buffer, (const void*)(array_obj).elements, position * sizeof(elem_type)); \
-            \
-            _buffer_to_free = (void*)(array_obj).elements; \
-        } \
-        \
-        if (_buffer_to_free == NULL) { \
-            dx_memmove((void*)(_new_elem_buffer + position + 1), (const void*)((elem_type*)(array_obj).elements + position), \
-                       ((array_obj).size - position) * sizeof(elem_type)); \
-        } else { \
-            dx_memcpy((void*)(_new_elem_buffer + position + 1), (const void*)((elem_type*)(array_obj).elements + position), \
-                      ((array_obj).size - position) * sizeof(elem_type)); \
-            dx_free(_buffer_to_free); \
-        } \
+	do { \
+		void* _buffer_to_free = NULL; \
+		elem_type* _new_elem_buffer = (array_obj).elements; \
+		\
+		error = false; \
+		\
+		if (capacity_mgr((array_obj).size + 1, &((array_obj).capacity))) { \
+			_new_elem_buffer = (elem_type*)dx_calloc((array_obj).capacity, sizeof(elem_type)); \
+			\
+			if (_new_elem_buffer == NULL) { \
+				error = true; \
+				\
+				break; \
+			} \
+			\
+			dx_memcpy((void*)_new_elem_buffer, (const void*)(array_obj).elements, position * sizeof(elem_type)); \
+			\
+			_buffer_to_free = (void*)(array_obj).elements; \
+		} \
+		\
+		if (_buffer_to_free == NULL) { \
+			dx_memmove((void*)(_new_elem_buffer + position + 1), (const void*)((elem_type*)(array_obj).elements + position), \
+					((array_obj).size - position) * sizeof(elem_type)); \
+		} else { \
+			dx_memcpy((void*)(_new_elem_buffer + position + 1), (const void*)((elem_type*)(array_obj).elements + position), \
+					((array_obj).size - position) * sizeof(elem_type)); \
+			dx_free(_buffer_to_free); \
+		} \
 		_new_elem_buffer[position] = new_elem; \
-        \
-        (array_obj).elements = _new_elem_buffer; \
-        ++((array_obj).size); \
-    } while (false)
+		\
+		(array_obj).elements = _new_elem_buffer; \
+		++((array_obj).size); \
+	} while (false)
 
 /* -------------------------------------------------------------------------- */
 /*
  *	Deletion
 
  *  array_obj - an array descriptor structure. this structure must contain
-                at least three fields:
-        elements - a pointer to the array buffer (of type 'elem_type*')
-        size - an integer value containing the number of elements in the buffer
-        capacity - the current buffer capacity, may be greater than size
+				at least three fields:
+		elements - a pointer to the array buffer (of type 'elem_type*')
+		size - an integer value containing the number of elements in the buffer
+		capacity - the current buffer capacity, may be greater than size
  *  elem_type - type of elements in the buffer
  *  position - an index of a position where the new element is to be inserted,
-               is determined by a previous call of DX_ARRAY_SEARCH
+			is determined by a previous call of DX_ARRAY_SEARCH
  *  capacity_mgr - a function with two parameters:
-        new_size - an size_t parameter passed by value, contains the desired
-                   new size of the array
-        capacity - an size_t parameter passed by pointer, contains the current
-                   array capacity
+		new_size - an size_t parameter passed by value, contains the desired
+				new size of the array
+		capacity - an size_t parameter passed by pointer, contains the current
+				array capacity
 
-        Return value:
-            true - reallocation is required, in this case the new capacity
-                   value is stored in the capacity parameter
-            false - no reallocation is required
+		Return value:
+			true - reallocation is required, in this case the new capacity
+				value is stored in the capacity parameter
+			false - no reallocation is required
  *  error - a boolean return value, is true if some error occurred during insertion,
-            is false otherwise
-*/
+			is false otherwise
+ */
 #define DX_ARRAY_DELETE(array_obj, elem_type, position, capacity_mgr, error) \
-    do { \
-        void* _buffer_to_free = NULL; \
-        elem_type* _new_elem_buffer = (array_obj).elements; \
-        \
-        error = false; \
-        \
-        if (capacity_mgr((array_obj).size - 1, &((array_obj).capacity))) { \
-            _new_elem_buffer = (elem_type*)dx_calloc((array_obj).capacity, sizeof(elem_type)); \
-            \
-            if (_new_elem_buffer == NULL) { \
-                error = true; \
-                \
-                break; \
-            } \
-            \
-            dx_memcpy((void*)_new_elem_buffer, (const void*)(array_obj).elements, position * sizeof(elem_type)); \
-            \
-            _buffer_to_free = (void*)(array_obj).elements; \
-        } \
-        \
-        if (_buffer_to_free == NULL) { \
-            dx_memmove((void*)(_new_elem_buffer + position), (const void*)((elem_type*)(array_obj).elements + position + 1), \
-                       ((array_obj).size - position - 1) * sizeof(elem_type)); \
-        } else { \
-            dx_memcpy((void*)(_new_elem_buffer + position), (const void*)((elem_type*)(array_obj).elements + position + 1), \
-                      ((array_obj).size - position - 1) * sizeof(elem_type)); \
-            dx_free(_buffer_to_free); \
-        } \
-        \
-        (array_obj).elements = _new_elem_buffer; \
-        --((array_obj).size); \
-    } while (false)
-    
+	do { \
+		void* _buffer_to_free = NULL; \
+		elem_type* _new_elem_buffer = (array_obj).elements; \
+		\
+		error = false; \
+		\
+		if (capacity_mgr((array_obj).size - 1, &((array_obj).capacity))) { \
+			_new_elem_buffer = (elem_type*)dx_calloc((array_obj).capacity, sizeof(elem_type)); \
+			\
+			if (_new_elem_buffer == NULL) { \
+				error = true; \
+				\
+				break; \
+			} \
+			\
+			dx_memcpy((void*)_new_elem_buffer, (const void*)(array_obj).elements, position * sizeof(elem_type)); \
+			\
+			_buffer_to_free = (void*)(array_obj).elements; \
+		} \
+		\
+		if (_buffer_to_free == NULL) { \
+			dx_memmove((void*)(_new_elem_buffer + position), (const void*)((elem_type*)(array_obj).elements + position + 1), \
+					((array_obj).size - position - 1) * sizeof(elem_type)); \
+		} else { \
+			dx_memcpy((void*)(_new_elem_buffer + position), (const void*)((elem_type*)(array_obj).elements + position + 1), \
+					((array_obj).size - position - 1) * sizeof(elem_type)); \
+			dx_free(_buffer_to_free); \
+		} \
+		\
+		(array_obj).elements = _new_elem_buffer; \
+		--((array_obj).size); \
+	} while (false)
+
 /* -------------------------------------------------------------------------- */
 /*
  *	Shuffle
@@ -413,56 +413,56 @@ size_t dx_random_size(size_t max_value);
  *  size - the number of elements in the array
  */
 #define DX_ARRAY_SHUFFLE(a, elem_type, size) \
-    do { \
-        size_t _idx = (size) - 1; \
-        size_t _rand_idx; \
-        \
-        for (; _idx > 0; --_idx) { \
-            _rand_idx = dx_random_size(_idx); \
-            \
-            DX_SWAP(elem_type, (a)[_idx], (a)[_rand_idx]); \
-        } \
-    } while (false)
+	do { \
+		size_t _idx = (size) - 1; \
+		size_t _rand_idx; \
+		\
+		for (; _idx > 0; --_idx) { \
+			_rand_idx = dx_random_size(_idx); \
+			\
+			DX_SWAP(elem_type, (a)[_idx], (a)[_rand_idx]); \
+		} \
+	} while (false)
 
 /* -------------------------------------------------------------------------- */
 /*
  *	Reservation
 
  *  array_obj - an array descriptor structure. this structure must contain
-                at least three fields:
-        elements - a pointer to the array buffer (of type 'elem_type*')
-        size - an integer value containing the number of elements in the buffer
-        capacity - the current buffer capacity, may be greater than size
+				at least three fields:
+		elements - a pointer to the array buffer (of type 'elem_type*')
+		size - an integer value containing the number of elements in the buffer
+		capacity - the current buffer capacity, may be greater than size
  *  elem_type - type of elements in the buffer
  *  reserve_size - a new size to reservation
- *  error - a boolean return value, is true if some error occurred during 
-            reservation, is false otherwise
+ *  error - a boolean return value, is true if some error occurred during
+			reservation, is false otherwise
  */
 #define DX_ARRAY_RESERVE(array_obj, elem_type, reserve_size, error) \
-    do { \
-        elem_type* _new_elem_buffer = (array_obj).elements; \
-        error = false; \
-        if (reserve_size <= (array_obj).size) { \
-            break; \
-        } \
-        \
-        if (reserve_size > (array_obj).capacity) { \
-            _new_elem_buffer = (elem_type*)dx_calloc(reserve_size, sizeof(elem_type)); \
-            \
-            if (_new_elem_buffer == NULL) { \
-                error = true; \
-                \
-                break; \
-            } \
-            \
-            dx_memcpy((void*)_new_elem_buffer, (const void*)(array_obj).elements, (array_obj).size * sizeof(elem_type)); \
-            (array_obj).capacity = reserve_size; \
-            dx_free((void*)(array_obj).elements); \
-        } \
-        \
-        (array_obj).elements = _new_elem_buffer; \
-        (array_obj).size = reserve_size; \
-    } while (false)
+	do { \
+		elem_type* _new_elem_buffer = (array_obj).elements; \
+		error = false; \
+		if (reserve_size <= (array_obj).size) { \
+			break; \
+		} \
+		\
+		if (reserve_size > (array_obj).capacity) { \
+			_new_elem_buffer = (elem_type*)dx_calloc(reserve_size, sizeof(elem_type)); \
+			\
+			if (_new_elem_buffer == NULL) { \
+				error = true; \
+				\
+				break; \
+			} \
+			\
+			dx_memcpy((void*)_new_elem_buffer, (const void*)(array_obj).elements, (array_obj).size * sizeof(elem_type)); \
+			(array_obj).capacity = reserve_size; \
+			dx_free((void*)(array_obj).elements); \
+		} \
+		\
+		(array_obj).elements = _new_elem_buffer; \
+		(array_obj).size = reserve_size; \
+	} while (false)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -536,7 +536,7 @@ dxf_int_t dx_get_millis_from_time(dxf_long_t millis);
 /*
  *	Base64 encoding operations implementation
  */
- /* -------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------- */
 
 bool dx_base64_encode(const char* in, size_t in_len, char* out, size_t out_len);
 bool dx_base64_decode(const char* in, size_t in_len, char* out, size_t *out_len);

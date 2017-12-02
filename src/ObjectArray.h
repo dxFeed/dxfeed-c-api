@@ -36,7 +36,7 @@ dx_##alias##_array_ptr_t
 
 /*
  * Macro declares data struct.
- * The macro DX_OBJECT_ARRAY_STRUCT(dxf_const_string_t, string) will produce 
+ * The macro DX_OBJECT_ARRAY_STRUCT(dxf_const_string_t, string) will produce
  * next structure:
  *      typedef struct {
  *          dxf_const_string_t* elements;
@@ -46,14 +46,14 @@ dx_##alias##_array_ptr_t
  */
 #define DX_OBJECT_ARRAY_STRUCT(type, alias) \
 typedef struct { \
-    type* elements; \
-    size_t size; \
-    size_t capacity; \
-} DX_OBJECT_ARRAY_NAME(alias), *DX_OBJECT_ARRAY_NAME_PTR(alias); 
+	type* elements; \
+	size_t size; \
+	size_t capacity; \
+} DX_OBJECT_ARRAY_NAME(alias), *DX_OBJECT_ARRAY_NAME_PTR(alias);
 
 /*
  * Macro declares function prototype that adds new element in object array.
- * The macro DX_OBJECT_ARRAY_STRUCT(dxf_const_string_t, string) will produce 
+ * The macro DX_OBJECT_ARRAY_STRUCT(dxf_const_string_t, string) will produce
  * next function prototype:
  *      bool dx_string_array_add(dx_string_array_t* string_array, dxf_const_string_t str);
  */

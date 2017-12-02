@@ -34,7 +34,7 @@ typedef int bool;
 #endif // OUT
 
 #ifndef NULL
-    #define NULL ((void*)0)
+	#define NULL ((void*)0)
 #endif // NULL
 
 #endif /* PRIMITIVE_TYPES_H_INCLUDED */

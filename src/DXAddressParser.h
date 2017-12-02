@@ -24,30 +24,30 @@
 #include "PrimitiveTypes.h"
 
 typedef struct {
-    bool enabled;
-    char* key_store;
-    char* key_store_password;
-    char* trust_store;
-    char* trust_store_password;
+	bool enabled;
+	char* key_store;
+	char* key_store_password;
+	char* trust_store;
+	char* trust_store_password;
 } dx_codec_tls_t;
 
 typedef struct {
-    bool enabled;
+	bool enabled;
 } dx_codec_gzip_t;
 
 typedef struct {
-    char* host;
-    const char* port;
-    char* username;
-    char* password;
-    dx_codec_tls_t tls;
-    dx_codec_gzip_t gzip;
+	char* host;
+	const char* port;
+	char* username;
+	char* password;
+	dx_codec_tls_t tls;
+	dx_codec_gzip_t gzip;
 } dx_address_t;
 
 typedef struct {
-    dx_address_t* elements;
-    size_t size;
-    size_t capacity;
+	dx_address_t* elements;
+	size_t size;
+	size_t capacity;
 } dx_address_array_t;
 
 void dx_clear_address_array(dx_address_array_t* addresses);

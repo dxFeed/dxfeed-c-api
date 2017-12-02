@@ -90,50 +90,50 @@ void dx_vlog_debug_message(const dxf_char_t *format, va_list ap) {
 #define dx_vlog_debug_message(f, ap)
 #endif
 
-const dxf_char_t* dx_get_current_time (void) {    
-    SYSTEMTIME current_time;
-    dxf_char_t* time_buffer = dx_get_current_time_buffer();
-    
-    if (time_buffer == NULL) {
-        return NULL;
-    }
+const dxf_char_t* dx_get_current_time (void) {
+	SYSTEMTIME current_time;
+	dxf_char_t* time_buffer = dx_get_current_time_buffer();
 
-    GetLocalTime(&current_time);
-    _snwprintf(time_buffer, CURRENT_TIME_STR_LENGTH, L"%.2u.%.2u.%.4u %.2u:%.2u:%.2u.%.4u",
-                                                     current_time.wDay, current_time.wMonth, current_time.wYear,
-                                                     current_time.wHour, current_time.wMinute, current_time.wSecond,
-                                                     current_time.wMilliseconds);
-    if (g_show_timezone) {
-        TIME_ZONE_INFORMATION time_zone;
-        GetTimeZoneInformation(&time_zone);
-        _snwprintf(time_buffer + CURRENT_TIME_STR_TIME_OFFSET, 7, L" GMT%+.2d", time_zone.Bias / TIME_ZONE_BIAS_TO_HOURS);
-    }
+	if (time_buffer == NULL) {
+		return NULL;
+	}
 
-    return time_buffer;
+	GetLocalTime(&current_time);
+	_snwprintf(time_buffer, CURRENT_TIME_STR_LENGTH, L"%.2u.%.2u.%.4u %.2u:%.2u:%.2u.%.4u",
+													current_time.wDay, current_time.wMonth, current_time.wYear,
+													current_time.wHour, current_time.wMinute, current_time.wSecond,
+													current_time.wMilliseconds);
+	if (g_show_timezone) {
+		TIME_ZONE_INFORMATION time_zone;
+		GetTimeZoneInformation(&time_zone);
+		_snwprintf(time_buffer + CURRENT_TIME_STR_TIME_OFFSET, 7, L" GMT%+.2d", time_zone.Bias / TIME_ZONE_BIAS_TO_HOURS);
+	}
+
+	return time_buffer;
 }
 
 #else // _WIN32
 
 dxf_const_string_t dx_get_current_time () {
-    dxf_char_t* time_buffer = dx_get_current_time_buffer();
-    time_t clock;
-    struct tm ltm;
-    
-    if (time_buffer == NULL) {
-        return NULL;
-    }
+	dxf_char_t* time_buffer = dx_get_current_time_buffer();
+	time_t clock;
+	struct tm ltm;
 
-    time(&clock);
-    localtime_r(&clock, &ltm);
-    swprintf(time_buffer, CURRENT_TIME_STR_LENGTH, L"%.2u.%.2u.%.4u %.2u:%.2u:%.2u.%.4u",
-                                                     ltm.tm_mday, ltm.tm_mon + 1, ltm.tm_year + 1900,
-                                                     ltm.tm_hour, ltm.tm_min, ltm.tm_sec,
-                                                     0);
-    if (g_show_timezone) {
-        swprintf(time_buffer + CURRENT_TIME_STR_TIME_OFFSET, 7, L" GMT%+.2d", ltm.tm_gmtoff / 3600);
-    }
+	if (time_buffer == NULL) {
+		return NULL;
+	}
 
-    return time_buffer;
+	time(&clock);
+	localtime_r(&clock, &ltm);
+	swprintf(time_buffer, CURRENT_TIME_STR_LENGTH, L"%.2u.%.2u.%.4u %.2u:%.2u:%.2u.%.4u",
+													ltm.tm_mday, ltm.tm_mon + 1, ltm.tm_year + 1900,
+													ltm.tm_hour, ltm.tm_min, ltm.tm_sec,
+													0);
+	if (g_show_timezone) {
+		swprintf(time_buffer + CURRENT_TIME_STR_TIME_OFFSET, 7, L" GMT%+.2d", ltm.tm_gmtoff / 3600);
+	}
+
+	return time_buffer;
 }
 
 #ifdef __linux
@@ -171,8 +171,8 @@ void dx_vlog_debug_message(const dxf_char_t *format, va_list ap) {
 /* -------------------------------------------------------------------------- */
 
 static void dx_current_time_buffer_destructor (void* data) {
-    if (data != current_time_str && data != NULL) {
-        dx_free(data);
+	if (data != current_time_str && data != NULL) {
+		dx_free(data);
 	}
 }
 
@@ -188,72 +188,72 @@ static void dx_key_remover(void *data) {
 /* -------------------------------------------------------------------------- */
 
 dxf_string_t dx_get_current_time_buffer (void) {
-    /*
-     *	This function uses the low-level functions without embedded error handling/logging,
-     *  because otherwise an infinite recursion and a stack overflow may occur
-     */
-    
-    dxf_string_t buffer = NULL;
-    
-    if (!g_key_created) {
-        return NULL;
-    }
-    
-    buffer = (dxf_string_t)dx_get_thread_data(g_current_time_str_key);
-    
-    if (buffer == NULL) {
-        /* buffer for this thread wasn't yet created. */
-        
+	/*
+	*	This function uses the low-level functions without embedded error handling/logging,
+	*  because otherwise an infinite recursion and a stack overflow may occur
+	*/
+
+	dxf_string_t buffer = NULL;
+
+	if (!g_key_created) {
+		return NULL;
+	}
+
+	buffer = (dxf_string_t)dx_get_thread_data(g_current_time_str_key);
+
+	if (buffer == NULL) {
+		/* buffer for this thread wasn't yet created. */
+
 		dx_log_debug_message(L"dx_get_current_time_buffer()");
-        buffer = (dxf_string_t)dx_calloc_no_ehm(CURRENT_TIME_STR_LENGTH + 1, sizeof(dxf_char_t));
-        
-        if (buffer == NULL) {
-            return NULL;
-        }
-        
-        if (!dx_set_thread_data_no_ehm(g_current_time_str_key, buffer)) {
-            dx_free_no_ehm(buffer);
-            
-            return NULL;
-        }
-    }
-    
-    return buffer;
+		buffer = (dxf_string_t)dx_calloc_no_ehm(CURRENT_TIME_STR_LENGTH + 1, sizeof(dxf_char_t));
+
+		if (buffer == NULL) {
+			return NULL;
+		}
+
+		if (!dx_set_thread_data_no_ehm(g_current_time_str_key, buffer)) {
+			dx_free_no_ehm(buffer);
+
+			return NULL;
+		}
+	}
+
+	return buffer;
 }
 
 /* -------------------------------------------------------------------------- */
 
 bool dx_init_current_time_key (void) {
-    if (g_key_creation_attempted) {
-        return g_key_created;
-    }
-    
-    g_key_creation_attempted = true;
-    
-    if (!dx_thread_data_key_create(&g_current_time_str_key, dx_current_time_buffer_destructor)) {
-        return false;
-    }
-    
-    if (!dx_set_thread_data(g_current_time_str_key, current_time_str)) {
-        dx_thread_data_key_destroy(g_current_time_str_key);
-        
-        return false;
-    }
-	dx_register_process_destructor(&dx_key_remover, NULL);
-   
-    g_key_created = true;
+	if (g_key_creation_attempted) {
+		return g_key_created;
+	}
 
-    return true;
+	g_key_creation_attempted = true;
+
+	if (!dx_thread_data_key_create(&g_current_time_str_key, dx_current_time_buffer_destructor)) {
+		return false;
+	}
+
+	if (!dx_set_thread_data(g_current_time_str_key, current_time_str)) {
+		dx_thread_data_key_destroy(g_current_time_str_key);
+
+		return false;
+	}
+	dx_register_process_destructor(&dx_key_remover, NULL);
+
+	g_key_created = true;
+
+	return true;
 }
 
 /* -------------------------------------------------------------------------- */
 
 static void dx_flush_log (void) {
-    if (g_log_file == NULL) {
-        return;
-    }
-    
-    fflush(g_log_file);
+	if (g_log_file == NULL) {
+		return;
+	}
+
+	fflush(g_log_file);
 }
 
 static void dx_close_logging(void *arg) {
@@ -272,127 +272,127 @@ static void dx_close_logging(void *arg) {
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_initialize_logger (const char* file_name, int rewrite_file, int show_timezone_info, int verbose) {
-    if (!dx_init_error_subsystem()) {
-        wprintf(L"\nCan not init error subsystem\n");
-        return DXF_FAILURE;
-    }
+	if (!dx_init_error_subsystem()) {
+		wprintf(L"\nCan not init error subsystem\n");
+		return DXF_FAILURE;
+	}
 
-    g_log_file = fopen(file_name, rewrite_file ? "w" : "a");
-    
-    if (g_log_file == NULL) {
-        printf("\nCan not open log-file %s", file_name);
-        return DXF_FAILURE;
-    }
+	g_log_file = fopen(file_name, rewrite_file ? "w" : "a");
 
-    dx_register_process_destructor(&dx_close_logging, NULL);
+	if (g_log_file == NULL) {
+		printf("\nCan not open log-file %s", file_name);
+		return DXF_FAILURE;
+	}
 
-    g_show_timezone = show_timezone_info ? true : false;
-    g_verbose_logger_mode = verbose ? true : false;
-    
-    if (!dx_init_current_time_key()) {
-        return DXF_FAILURE;
-    }
+	dx_register_process_destructor(&dx_close_logging, NULL);
 
-    dx_logging_info(L"Logging started: file %s, verbose mode is %s",
-                    rewrite_file ? L"rewritten" : L"not rewritten", verbose ? L"on" : L"off");
-    dx_flush_log();
-    
-    return DXF_SUCCESS;
+	g_show_timezone = show_timezone_info ? true : false;
+	g_verbose_logger_mode = verbose ? true : false;
+
+	if (!dx_init_current_time_key()) {
+		return DXF_FAILURE;
+	}
+
+	dx_logging_info(L"Logging started: file %s, verbose mode is %s",
+					rewrite_file ? L"rewritten" : L"not rewritten", verbose ? L"on" : L"off");
+	dx_flush_log();
+
+	return DXF_SUCCESS;
 }
 
 /* -------------------------------------------------------------------------- */
 
 void dx_logging_error (dxf_const_string_t message ) {
-    if (g_log_file == NULL || message == NULL) {
-        return;
-    }
+	if (g_log_file == NULL || message == NULL) {
+		return;
+	}
 
-    dx_log_debug_message(L"%s", message);
-    fwprintf(g_log_file, L"\n%s [%08lx] %s%s", dx_get_current_time(),
+	dx_log_debug_message(L"%s", message);
+	fwprintf(g_log_file, L"\n%s [%08lx] %s%s", dx_get_current_time(),
 #ifdef _WIN32
-     (unsigned long)GetCurrentThreadId(),
+	(unsigned long)GetCurrentThreadId(),
 #else
-     (unsigned long)pthread_getthreadid_np(),
+	(unsigned long)pthread_getthreadid_np(),
 #endif
-     g_error_prefix, message);
-    dx_flush_log();
+	g_error_prefix, message);
+	dx_flush_log();
 }
 
 /* -------------------------------------------------------------------------- */
 
 void dx_logging_last_error (void) {
-    dx_logging_error(dx_get_error_description(dx_get_error_code()));
-    dx_flush_log();
+	dx_logging_error(dx_get_error_description(dx_get_error_code()));
+	dx_flush_log();
 }
 
 /* -------------------------------------------------------------------------- */
 
 void dx_logging_last_error_verbose (void) {
-    if (!g_verbose_logger_mode) {
-        return;
-    }
-    
-    dx_logging_error(dx_get_error_description(dx_get_error_code()));
-    dx_flush_log();
+	if (!g_verbose_logger_mode) {
+		return;
+	}
+
+	dx_logging_error(dx_get_error_description(dx_get_error_code()));
+	dx_flush_log();
 }
 
 /* -------------------------------------------------------------------------- */
 
 void dx_logging_verbose_info( const dxf_char_t* format, ... ) {
-    if (!g_verbose_logger_mode) {
-        return;
-    }
+	if (!g_verbose_logger_mode) {
+		return;
+	}
 
-    if (g_log_file == NULL || format == NULL) {
-        return;
-    }
+	if (g_log_file == NULL || format == NULL) {
+		return;
+	}
 
-    fwprintf(g_log_file, L"\n%s [%08lx] %s ", dx_get_current_time(),
+	fwprintf(g_log_file, L"\n%s [%08lx] %s ", dx_get_current_time(),
 #ifdef _WIN32
-     (unsigned long)GetCurrentThreadId(),
+	(unsigned long)GetCurrentThreadId(),
 #else
-     (unsigned long)pthread_getthreadid_np(),
+	(unsigned long)pthread_getthreadid_np(),
 #endif
-      g_info_prefix);
-    {
-        va_list ap;
-        va_start(ap, format);
-        dx_vlog_debug_message(format, ap);
-        vfwprintf(g_log_file, format, ap);
-        va_end(ap);
-    }
-    dx_flush_log();
+	g_info_prefix);
+	{
+		va_list ap;
+		va_start(ap, format);
+		dx_vlog_debug_message(format, ap);
+		vfwprintf(g_log_file, format, ap);
+		va_end(ap);
+	}
+	dx_flush_log();
 }
 /* -------------------------------------------------------------------------- */
 
 void dx_logging_info( const dxf_char_t* format, ... ) {
-    if (g_log_file == NULL || format == NULL) {
-        return;
-    }
+	if (g_log_file == NULL || format == NULL) {
+		return;
+	}
 
-    fwprintf(g_log_file, L"\n%s [%08lx] %s ", dx_get_current_time(),
+	fwprintf(g_log_file, L"\n%s [%08lx] %s ", dx_get_current_time(),
 #ifdef _WIN32
-     (unsigned long)GetCurrentThreadId(),
+	(unsigned long)GetCurrentThreadId(),
 #else
-     (unsigned long)pthread_getthreadid_np(),
+	(unsigned long)pthread_getthreadid_np(),
 #endif
-      g_info_prefix);
-    {
-        va_list ap;
-        va_start(ap, format);
-        dx_vlog_debug_message(format, ap);
-        vfwprintf(g_log_file, format, ap);
-        va_end(ap);
-    }
-    dx_flush_log();
+	g_info_prefix);
+	{
+		va_list ap;
+		va_start(ap, format);
+		dx_vlog_debug_message(format, ap);
+		vfwprintf(g_log_file, format, ap);
+		va_end(ap);
+	}
+	dx_flush_log();
 }
 
 /* -------------------------------------------------------------------------- */
 
 void dx_logging_verbose_gap (void) {
-    if (!g_verbose_logger_mode) {
-        return;
-    }
-    fwprintf(g_log_file, L"\n");
+	if (!g_verbose_logger_mode) {
+		return;
+	}
+	fwprintf(g_log_file, L"\n");
 	dx_flush_log();
 }

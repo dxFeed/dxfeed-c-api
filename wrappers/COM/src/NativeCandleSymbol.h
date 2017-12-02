@@ -5,11 +5,11 @@
 class NativeCandleSymbol {
 
 public:
-    NativeCandleSymbol(IDXCandleSymbol*);
-    virtual ~NativeCandleSymbol();
-    dxf_candle_attributes_t& operator*();
+	NativeCandleSymbol(IDXCandleSymbol*);
+	virtual ~NativeCandleSymbol();
+	dxf_candle_attributes_t& operator*();
 
 private:
-    NativeCandleSymbol();
-    dxf_candle_attributes_t mCandleAttributes;
+	NativeCandleSymbol();
+	dxf_candle_attributes_t mCandleAttributes;
 };

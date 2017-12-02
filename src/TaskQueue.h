@@ -16,7 +16,7 @@
  * Contributor(s):
  *
  */
- 
+
 #ifndef TASK_QUEUE_H_INCLUDED
 #define TASK_QUEUE_H_INCLUDED
 
@@ -29,14 +29,14 @@
 /* -------------------------------------------------------------------------- */
 
 typedef enum {
-    dx_tes_success = (1 << 0), /* if this flag is not set then some error occurred */
-    dx_tes_dont_advance = (1 << 1), /* if this flag is set then the next tasks in queue are not processed */
-    dx_tes_pop_me = (1 << 2) /* if this flag is set then the task must be popped from the queue */
+	dx_tes_success = (1 << 0), /* if this flag is not set then some error occurred */
+	dx_tes_dont_advance = (1 << 1), /* if this flag is set then the next tasks in queue are not processed */
+	dx_tes_pop_me = (1 << 2) /* if this flag is set then the task must be popped from the queue */
 } dx_task_execution_status_t;
 
 typedef enum {
-    dx_tc_free_resources = (1 << 0) /* if this flag is set then the task must free its resources and return
-                                       without doing its job */
+	dx_tc_free_resources = (1 << 0) /* if this flag is set then the task must free its resources and return
+									without doing its job */
 } dx_task_command_t;
 
 typedef int (*dx_task_processor_t) (void* data, int command);

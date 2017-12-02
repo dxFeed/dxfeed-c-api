@@ -20,14 +20,14 @@ dxf_const_string_t dx_event_type_to_string (int event_type) {
 	case DXF_ET_PROFILE: return L"Profile";
 	case DXF_ET_ORDER: return L"Order";
 	case DXF_ET_TIME_AND_SALE: return L"Time&Sale";
-    case DXF_ET_CANDLE: return L"Candle";
-    case DXF_ET_TRADE_ETH: return L"TradeETH";
-    case DXF_ET_SPREAD_ORDER: return L"SpreadOrder";
-    case DXF_ET_GREEKS: return L"Greeks";
-    case DXF_ET_THEO_PRICE: return L"THEO_PRICE";
-    case DXF_ET_UNDERLYING: return L"Underlying";
-    case DXF_ET_SERIES: return L"Series";
-    case DXF_ET_CONFIGURATION: return L"Configuration";
+	case DXF_ET_CANDLE: return L"Candle";
+	case DXF_ET_TRADE_ETH: return L"TradeETH";
+	case DXF_ET_SPREAD_ORDER: return L"SpreadOrder";
+	case DXF_ET_GREEKS: return L"Greeks";
+	case DXF_ET_THEO_PRICE: return L"THEO_PRICE";
+	case DXF_ET_UNDERLYING: return L"Underlying";
+	case DXF_ET_SERIES: return L"Series";
+	case DXF_ET_CONFIGURATION: return L"Configuration";
 	default: return L"";
 	}
 }
@@ -37,41 +37,41 @@ static bool is_listener_thread_terminated = false;
 CRITICAL_SECTION listener_thread_guard;
 
 bool is_thread_terminate() {
-    bool res;
-    EnterCriticalSection(&listener_thread_guard);
-    res = is_listener_thread_terminated;
-    LeaveCriticalSection(&listener_thread_guard);
+	bool res;
+	EnterCriticalSection(&listener_thread_guard);
+	res = is_listener_thread_terminated;
+	LeaveCriticalSection(&listener_thread_guard);
 
-    return res;
+	return res;
 }
 
 /* -------------------------------------------------------------------------- */
 
 void on_reader_thread_terminate(const char* host, void* user_data) {
-    EnterCriticalSection(&listener_thread_guard);
-    is_listener_thread_terminated = true;
-    LeaveCriticalSection(&listener_thread_guard);
+	EnterCriticalSection(&listener_thread_guard);
+	is_listener_thread_terminated = true;
+	LeaveCriticalSection(&listener_thread_guard);
 
-    printf("\nTerminating listener thread, host: %s\n", host);
+	printf("\nTerminating listener thread, host: %s\n", host);
 }
 
 /* -------------------------------------------------------------------------- */
 int quotes_counter = 0;
 bool doPrint = false;
 
-void print_current_time (void) {    
-    SYSTEMTIME current_time;
-    
-    GetLocalTime(&current_time);
+void print_current_time (void) {
+	SYSTEMTIME current_time;
+
+	GetLocalTime(&current_time);
 	wprintf(L"%.4u-%.2u-%.2u %.2u:%.2u:%.2u.%.3u:",
-			current_time.wYear, current_time.wMonth, current_time.wDay, 
+			current_time.wYear, current_time.wMonth, current_time.wDay,
 			current_time.wHour, current_time.wMinute, current_time.wSecond,
 			current_time.wMilliseconds);
 
 }
 void print_timestamp(dxf_long_t timestamp){
 		char timefmt[80];
-		
+
 		struct tm * timeinfo;
 		time_t tmpint = (int)(timestamp /1000);
 		timeinfo = localtime ( &tmpint );
@@ -80,8 +80,8 @@ void print_timestamp(dxf_long_t timestamp){
 }
 
 void listener(int event_type, dxf_const_string_t symbol_name,
-              const dxf_event_data_t* data, int data_count, void* user_data) {
-    dxf_int_t i = 0;
+			const dxf_event_data_t* data, int data_count, void* user_data) {
+	dxf_int_t i = 0;
 
 	++quotes_counter;
 
@@ -89,124 +89,124 @@ void listener(int event_type, dxf_const_string_t symbol_name,
 		return;
 
 	wprintf(L"%s{symbol=%s, ",dx_event_type_to_string(event_type), symbol_name);
-	
-    if (event_type == DXF_ET_QUOTE) {
-	    dxf_quote_t* quotes = (dxf_quote_t*)data;
 
-	    for (; i < data_count; ++i) {
+	if (event_type == DXF_ET_QUOTE) {
+		dxf_quote_t* quotes = (dxf_quote_t*)data;
+
+		for (; i < data_count; ++i) {
 			wprintf(L"bidTime=");
 			print_timestamp(quotes[i].bid_time);
 			wprintf(L" bidExchangeCode=%c, bidPrice=%f, bidSize=%I64i, ",
-					quotes[i].bid_exchange_code, 
+					quotes[i].bid_exchange_code,
 					quotes[i].bid_price,
 					quotes[i].bid_size);
 			wprintf(L"askTime=");
 			print_timestamp(quotes[i].ask_time);
 			wprintf(L" askExchangeCode=%c, askPrice=%f, askSize=%I64i}\n",
-					quotes[i].ask_exchange_code, 
+					quotes[i].ask_exchange_code,
 					quotes[i].ask_price,
 					quotes[i].ask_size);
 		}
-    }
-    
-    if (event_type == DXF_ET_ORDER){
-	    dxf_order_t* orders = (dxf_order_t*)data;
+	}
 
-	    for (; i < data_count; ++i) {
-		    wprintf(L"index=0x%I64X, side=%i, level=%i, time=",
-		            orders[i].index, orders[i].side, orders[i].level);
+	if (event_type == DXF_ET_ORDER){
+		dxf_order_t* orders = (dxf_order_t*)data;
+
+		for (; i < data_count; ++i) {
+			wprintf(L"index=0x%I64X, side=%i, level=%i, time=",
+					orders[i].index, orders[i].side, orders[i].level);
 					print_timestamp(orders[i].time);
 			wprintf(L", exchange code=%c, market maker=%s, price=%f, size=%I64i}\n",
-		            orders[i].exchange_code, orders[i].market_maker, orders[i].price, orders[i].size);
+					orders[i].exchange_code, orders[i].market_maker, orders[i].price, orders[i].size);
 		}
-    }
-    
-    if (event_type == DXF_ET_TRADE) {
-	    dxf_trade_t* trades = (dx_trade_t*)data;
+	}
+
+	if (event_type == DXF_ET_TRADE) {
+		dxf_trade_t* trades = (dx_trade_t*)data;
 
 		for (; i < data_count; ++i) {
 			print_timestamp(trades[i].time);
 			wprintf(L", exchangeCode=%c, price=%f, size=%I64i, tick=%I64i, change=%f, day volume=%.0f}\n",
-		            trades[i].exchange_code, trades[i].price, trades[i].size, trades[i].tick, trades[i].change, trades[i].day_volume);
+					trades[i].exchange_code, trades[i].price, trades[i].size, trades[i].tick, trades[i].change, trades[i].day_volume);
 		}
-    }
-    
-    if (event_type == DXF_ET_SUMMARY) {
-	    dxf_summary_t* s = (dxf_summary_t*)data;
+	}
 
-	    for (; i < data_count; ++i) {
+	if (event_type == DXF_ET_SUMMARY) {
+		dxf_summary_t* s = (dxf_summary_t*)data;
+
+		for (; i < data_count; ++i) {
 			wprintf(L"day high price=%f, day low price=%f, day open price=%f, prev day close price=%f, open interest=%I64i}\n",
-		            s[i].day_high_price, s[i].day_low_price, s[i].day_open_price, s[i].prev_day_close_price, s[i].open_interest);
+					s[i].day_high_price, s[i].day_low_price, s[i].day_open_price, s[i].prev_day_close_price, s[i].open_interest);
 		}
-    }
-    
-    if (event_type == DXF_ET_PROFILE) {
-        dxf_profile_t* p = (dxf_profile_t*)data;
+	}
 
-        for (; i < data_count ; ++i) {
-            wprintf(L"Beta=%f, eps=%f, div freq=%I64i, exd div amount=%f, exd div date=%i, 52 high price=%f, "
-                L"52 low price=%f, shares=%f, Description=%ls, flags=%I64i, status_reason=%ls, halt start time=",
-                p[i].beta, p[i].eps, p[i].div_freq, p[i].exd_div_amount, p[i].exd_div_date, p[i]._52_high_price,
-                p[i]._52_low_price, p[i].shares, p[i].description, p[i].flags, p[i].status_reason);
-            print_timestamp(p[i].halt_start_time);
-            wprintf(L", halt end time=");
-            print_timestamp(p[i].halt_end_time);
-            wprintf(L", high limit price=%f, low limit price=%f}\n", p[i].high_limit_price, p[i].low_limit_price);
-        }
-    }
-    
-    if (event_type == DXF_ET_TIME_AND_SALE) {
-        dxf_time_and_sale_t* tns = (dxf_time_and_sale_t*)data;
+	if (event_type == DXF_ET_PROFILE) {
+		dxf_profile_t* p = (dxf_profile_t*)data;
 
-        for (; i < data_count ; ++i) {
-            wprintf(L"event id=%I64i, time=%I64i, exchange code=%c, price=%f, size=%I64i, bid price=%f, ask price=%f, "
+		for (; i < data_count ; ++i) {
+			wprintf(L"Beta=%f, eps=%f, div freq=%I64i, exd div amount=%f, exd div date=%i, 52 high price=%f, "
+				L"52 low price=%f, shares=%f, Description=%ls, flags=%I64i, status_reason=%ls, halt start time=",
+				p[i].beta, p[i].eps, p[i].div_freq, p[i].exd_div_amount, p[i].exd_div_date, p[i]._52_high_price,
+				p[i]._52_low_price, p[i].shares, p[i].description, p[i].flags, p[i].status_reason);
+			print_timestamp(p[i].halt_start_time);
+			wprintf(L", halt end time=");
+			print_timestamp(p[i].halt_end_time);
+			wprintf(L", high limit price=%f, low limit price=%f}\n", p[i].high_limit_price, p[i].low_limit_price);
+		}
+	}
+
+	if (event_type == DXF_ET_TIME_AND_SALE) {
+		dxf_time_and_sale_t* tns = (dxf_time_and_sale_t*)data;
+
+		for (; i < data_count ; ++i) {
+			wprintf(L"event id=%I64i, time=%I64i, exchange code=%c, price=%f, size=%I64i, bid price=%f, ask price=%f, "
 				L"exchange sale conditions=%s, is trade=%s, type=%i}\n",
-                    tns[i].event_id, tns[i].time, tns[i].exchange_code, tns[i].price, tns[i].size,
-                    tns[i].bid_price, tns[i].ask_price, tns[i].exchange_sale_conditions,
-                    tns[i].is_trade ? L"True" : L"False", tns[i].type);
-        }
-    }
+					tns[i].event_id, tns[i].time, tns[i].exchange_code, tns[i].price, tns[i].size,
+					tns[i].bid_price, tns[i].ask_price, tns[i].exchange_sale_conditions,
+					tns[i].is_trade ? L"True" : L"False", tns[i].type);
+		}
+	}
 }
 /* -------------------------------------------------------------------------- */
 
 void process_last_error () {
-    int error_code = dx_ec_success;
-    dxf_const_string_t error_descr = NULL;
-    int res;
+	int error_code = dx_ec_success;
+	dxf_const_string_t error_descr = NULL;
+	int res;
 
-    res = dxf_get_last_error(&error_code, &error_descr);
+	res = dxf_get_last_error(&error_code, &error_descr);
 
-    if (res == DXF_SUCCESS) {
-        if (error_code == dx_ec_success) {
-            printf("WTF - no error information is stored");
+	if (res == DXF_SUCCESS) {
+		if (error_code == dx_ec_success) {
+			printf("WTF - no error information is stored");
 
-            return;
-        }
+			return;
+		}
 
-        wprintf(L"Error occurred and successfully retrieved:\n"
-            L"error code = %d, description = \"%s\"\n",
-            error_code, error_descr);
-        return;
-    }
+		wprintf(L"Error occurred and successfully retrieved:\n"
+			L"error code = %d, description = \"%s\"\n",
+			error_code, error_descr);
+		return;
+	}
 
-    printf("An error occurred but the error subsystem failed to initialize\n");
+	printf("An error occurred but the error subsystem failed to initialize\n");
 }
 dxf_string_t ansi_to_unicode (const char* ansi_str) {
 #ifdef _WIN32
-    size_t len = strlen(ansi_str);
-    dxf_string_t wide_str = NULL;
+	size_t len = strlen(ansi_str);
+	dxf_string_t wide_str = NULL;
 
-    // get required size
-    int wide_size = MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, ansi_str, (int)len, wide_str, 0);
+	// get required size
+	int wide_size = MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, ansi_str, (int)len, wide_str, 0);
 
-    if (wide_size > 0) {
-        wide_str = calloc(wide_size + 1, sizeof(dxf_char_t));
-        MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, ansi_str, (int)len, wide_str, wide_size);
-    }
+	if (wide_size > 0) {
+		wide_str = calloc(wide_size + 1, sizeof(dxf_char_t));
+		MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, ansi_str, (int)len, wide_str, wide_size);
+	}
 
-    return wide_str;
+	return wide_str;
 #else /* _WIN32 */
-    return NULL; /* todo */
+	return NULL; /* todo */
 #endif /* _WIN32 */
 }
 
@@ -214,9 +214,9 @@ dxf_string_t ansi_to_unicode (const char* ansi_str) {
 
 
 int main (int argc, char* argv[]) {
-    dxf_connection_t connection;
-    dxf_subscription_t subscription;
-    int loop_counter = 1000; // *100 = msec of running
+	dxf_connection_t connection;
+	dxf_subscription_t subscription;
+	int loop_counter = 1000; // *100 = msec of running
 	int i = 0;
 	int arg = 1;
 	int line_size = 200;
@@ -244,13 +244,13 @@ int main (int argc, char* argv[]) {
 				printf("Couldn't open input file.");
 				return -1;
 			}
-			while(fgets(line, line_size, file) != NULL){		
+			while(fgets(line, line_size, file) != NULL){
 				if (line[0] == '#')
 					continue;
 				pch = strtok (line,",");
-			    pch = strtok (NULL, ",");// we need a second token
+				pch = strtok (NULL, ",");// we need a second token
 				if (symbols_pos < symbols_max){
-					symbols[symbols_pos] = strdup(pch); 
+					symbols[symbols_pos] = strdup(pch);
 					++symbols_pos;
 				}
 			}
@@ -258,62 +258,62 @@ int main (int argc, char* argv[]) {
 		}
 	}
 
-    dxf_initialize_logger( "log.log", true, true, true );
-    InitializeCriticalSection(&listener_thread_guard);
-	
-	printf("Sample test started.\n");    
-    printf("Connecting to host %s...\n", dxfeed_host);
-    
-    if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, &connection)) {
-        process_last_error();
-        return -1;
-    }
+	dxf_initialize_logger( "log.log", true, true, true );
+	InitializeCriticalSection(&listener_thread_guard);
 
-    printf("Connection successful!\n");
- 	time (&start);
+	printf("Sample test started.\n");
+	printf("Connecting to host %s...\n", dxfeed_host);
+
+	if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, &connection)) {
+		process_last_error();
+		return -1;
+	}
+
+	printf("Connection successful!\n");
+	time (&start);
 	if (!dxf_create_subscription(connection, DXF_ET_TRADE | DXF_ET_QUOTE | DXF_ET_ORDER | DXF_ET_SUMMARY | DXF_ET_PROFILE, &subscription)) {
-	   process_last_error();
-        
-        return -1;
-    };
+	process_last_error();
+
+		return -1;
+	};
 	if (symbols_pos > 0){
 		for (i = 0; i < symbols_pos; ++i){
 			printf("Subscribing to: %s\n",symbols[i]);
 			if (!dxf_add_symbol(subscription, ansi_to_unicode(symbols[i]))) {
-				 process_last_error();
-        
-				 return -1;
-			 }; 
+				process_last_error();
+
+				return -1;
+			};
 		};
 	};
 
 	if (!dxf_attach_event_listener(subscription, listener, NULL)) {
-        process_last_error();
-        
-        return -1;
-    };
-    printf("Subscription successful!\n");
+		process_last_error();
 
-    while (!is_thread_terminate() && loop_counter--) {
-        Sleep(100);
-    }
-    DeleteCriticalSection(&listener_thread_guard);
+		return -1;
+	};
+	printf("Subscription successful!\n");
 
-    printf("Disconnecting from host...\n");
-    
-    if (!dxf_close_connection(connection)) {
-        process_last_error();
-        
-        return -1;
-    }
-    time(&end);
+	while (!is_thread_terminate() && loop_counter--) {
+		Sleep(100);
+	}
+	DeleteCriticalSection(&listener_thread_guard);
+
+	printf("Disconnecting from host...\n");
+
+	if (!dxf_close_connection(connection)) {
+		process_last_error();
+
+		return -1;
+	}
+	time(&end);
 	diff_time = (int)difftime(end, start);
 
 	printf("Disconnect successful!\n"
-           "Connection test completed successfully!\n");
-           
+		"Connection test completed successfully!\n");
+
 	printf("received %i quotes in %i sec. %i qoutes in 1 sec\n", quotes_counter, diff_time, (int )(quotes_counter / diff_time));
 
-    return 0;
+	return 0;
 }
 
