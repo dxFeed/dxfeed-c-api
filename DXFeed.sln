@@ -1,5 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
+# Visual Studio Express 14 for Windows Desktop
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DXFeed", "DXFeed.vcxproj", "{98DF2375-3C29-4806-A832-7C666F8BF54C}"
@@ -40,6 +40,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SnapshotConsoleSample", "te
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PriceLevelBookSample", "tests\PriceLevelBookSample\PriceLevelBookSample.vcxproj", "{BF2A8A6D-418E-4CD0-B41F-77B252CB31A4}"
+	ProjectSection(ProjectDependencies) = postProject
+		{98DF2375-3C29-4806-A832-7C666F8BF54C} = {98DF2375-3C29-4806-A832-7C666F8BF54C}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RegionalBookSample", "tests\RegionalBookSample\RegionalBookSample.vcxproj", "{8A14A0E2-B0BB-4300-B1C1-3D52327A42AF}"
 	ProjectSection(ProjectDependencies) = postProject
 		{98DF2375-3C29-4806-A832-7C666F8BF54C} = {98DF2375-3C29-4806-A832-7C666F8BF54C}
 	EndProjectSection
@@ -301,6 +306,18 @@ Global
 		{BF2A8A6D-418E-4CD0-B41F-77B252CB31A4}.ReleaseNoTLS|Win32.Build.0 = ReleaseNoTLS|Win32
 		{BF2A8A6D-418E-4CD0-B41F-77B252CB31A4}.ReleaseNoTLS|x64.ActiveCfg = ReleaseNoTLS|x64
 		{BF2A8A6D-418E-4CD0-B41F-77B252CB31A4}.ReleaseNoTLS|x64.Build.0 = ReleaseNoTLS|x64
+		{8A14A0E2-B0BB-4300-B1C1-3D52327A42AF}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8A14A0E2-B0BB-4300-B1C1-3D52327A42AF}.Debug|Win32.Build.0 = Debug|Win32
+		{8A14A0E2-B0BB-4300-B1C1-3D52327A42AF}.Debug|x64.ActiveCfg = Debug|x64
+		{8A14A0E2-B0BB-4300-B1C1-3D52327A42AF}.Debug|x64.Build.0 = Debug|x64
+		{8A14A0E2-B0BB-4300-B1C1-3D52327A42AF}.DebugNoTLS|Win32.ActiveCfg = Debug|Win32
+		{8A14A0E2-B0BB-4300-B1C1-3D52327A42AF}.DebugNoTLS|x64.ActiveCfg = Debug|x64
+		{8A14A0E2-B0BB-4300-B1C1-3D52327A42AF}.Release|Win32.ActiveCfg = Release|Win32
+		{8A14A0E2-B0BB-4300-B1C1-3D52327A42AF}.Release|Win32.Build.0 = Release|Win32
+		{8A14A0E2-B0BB-4300-B1C1-3D52327A42AF}.Release|x64.ActiveCfg = Release|x64
+		{8A14A0E2-B0BB-4300-B1C1-3D52327A42AF}.Release|x64.Build.0 = Release|x64
+		{8A14A0E2-B0BB-4300-B1C1-3D52327A42AF}.ReleaseNoTLS|Win32.ActiveCfg = Release|Win32
+		{8A14A0E2-B0BB-4300-B1C1-3D52327A42AF}.ReleaseNoTLS|x64.ActiveCfg = Release|x64
 		{70E09AD5-89E5-47E2-953B-860A53F1C1DC}.Debug|Win32.ActiveCfg = Debug|Win32
 		{70E09AD5-89E5-47E2-953B-860A53F1C1DC}.Debug|Win32.Build.0 = Debug|Win32
 		{70E09AD5-89E5-47E2-953B-860A53F1C1DC}.Debug|x64.ActiveCfg = Debug|x64

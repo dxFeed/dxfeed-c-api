@@ -336,6 +336,7 @@
     <ClCompile Include="..\..\src\PriceLevelBook.c" />
     <ClCompile Include="AddressParserTest.c" />
     <ClCompile Include="AlgorithmsTest.c" />
+    <ClCompile Include="..\..\src\RegionalBook.c" />
     <ClCompile Include="CandleTest.c" />
     <ClCompile Include="..\..\src\EventManager.c" />
     <ClCompile Include="..\..\src\Snapshot.c" />
@@ -391,6 +392,7 @@
     <ClInclude Include="..\..\include\EventData.h" />
     <ClInclude Include="..\..\src\EventManager.h" />
     <ClInclude Include="..\..\src\PriceLevelBook.h" />
+    <ClInclude Include="..\..\src\RegionalBook.h" />
     <ClInclude Include="..\..\src\PrimitiveTypes.h" />
     <ClInclude Include="..\..\src\Snapshot.h" />
     <ClInclude Include="..\..\src\ObjectArray.h" />

@@ -137,6 +137,9 @@
     <ClCompile Include="src\DXProperties.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\RegionalBook.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="DXFeed.def">
@@ -274,6 +277,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\DXProperties.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RegionalBook.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

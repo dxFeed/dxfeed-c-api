@@ -1169,7 +1169,7 @@ bool dx_fill_record_digest(dx_server_msg_proc_connection_context_t* context, dx_
 
         CHECKED_CALL_4(dx_create_field_digest, context, rid, record_info, &field_digest);
 
-        if (field_digest != NULL) {
+        if (field_digest != NULL && record_digest->elements != NULL) {
             record_digest->elements[(record_digest->size)++] = field_digest;
         }
     }
@@ -1198,7 +1198,7 @@ bool dx_process_describe_records (dx_server_msg_proc_connection_context_t* conte
         const dx_record_item_t* record_info = NULL;
         dx_record_digest_t* record_digest = NULL;
         dx_record_id_t local_record_id = DX_RECORD_ID_INVALID;
-        dx_record_digest_t dummy;
+        dx_record_digest_t dummy = { NULL, 0, 0 };
         
         CHECKED_CALL_2(dx_read_compact_int, context->bicc, &server_record_id);
         CHECKED_CALL_2(dx_read_utf_string, context->bicc, &record_name);
@@ -1226,7 +1226,7 @@ bool dx_process_describe_records (dx_server_msg_proc_connection_context_t* conte
                 return false;
 
             record_digest = dx_get_record_digest(context, local_record_id);
-            if (record_digest == NULL)
+            if (record_digest == NULL || record_digest->size < 0)
                 return dx_set_error_code(dx_ec_invalid_func_param_internal);
 
             if (record_digest->elements != NULL) {

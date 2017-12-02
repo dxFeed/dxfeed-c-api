@@ -576,12 +576,12 @@ DXFEED_API ERRORCODE dxf_create_price_level_book(dxf_connection_t connection,
 DXFEED_API ERRORCODE dxf_close_price_level_book(dxf_price_level_book_t book);
 
 /*
- *  Attaches a listener callback to the snapshot.
- *  This callback will be invoked when the new snapshot arrives or existing updates.
+ *  Attaches a listener callback to the price level book.
+ *  This callback will be invoked when price levels change.
  *  No error occurs if it's attempted to attach the same listener twice or more.
  *
- *  snapshot - a handle of the snapshot to which a listener is to be attached
- *  snapshot_listener - a listener callback function pointer
+ *  book - a handle of the book to which a listener is to be detached
+ *  book_listener - a listener callback function pointer
  */
 DXFEED_API ERRORCODE dxf_attach_price_level_book_listener(dxf_price_level_book_t book, 
                                                           dxf_price_level_book_listener_t book_listener,
@@ -591,11 +591,52 @@ DXFEED_API ERRORCODE dxf_attach_price_level_book_listener(dxf_price_level_book_t
  *  Detaches a listener from the snapshot.
  *  No error occurs if it's attempted to detach a listener which wasn't previously attached.
  *
- *  snapshot - a handle of the snapshot to which a listener is to be detached
- *  snapshot_listener - a listener callback function pointer
+ *  book - a handle of the book to which a listener is to be detached
+ *  book_listener - a listener callback function pointer
  */
 DXFEED_API ERRORCODE dxf_detach_price_level_book_listener(dxf_price_level_book_t book, 
                                                           dxf_price_level_book_listener_t book_listener);
+
+/*
+ *  Creates Regional book with the specified parameters.
+ *  Regional book is like Price Level Book but uses regional data instead of full depth order book.
+ *
+ *  connection - a handle of a previously created connection which the subscription will be using
+ *  symbol - the symbol to use
+ *  OUT book - a handle of the created regional book
+ */
+DXFEED_API ERRORCODE dxf_create_regional_book(dxf_connection_t connection, 
+                                              dxf_const_string_t symbol,
+                                              OUT dxf_regional_book_t* book);
+
+/*
+ *  Closes a regional book.
+ *  All the data associated with it will be freed.
+ *
+ *  book - a handle of the price level book to close
+ */
+DXFEED_API ERRORCODE dxf_close_regional_book(dxf_regional_book_t book);
+
+/*
+ *  Attaches a listener callback to regional book.
+ *  This callback will be invoked when price levels created from regional data change.
+ *
+ *  book - a handle of the book to which a listener is to be detached
+ *  book_listener - a listener callback function pointer
+ */
+DXFEED_API ERRORCODE dxf_attach_regional_book_listener(dxf_regional_book_t book, 
+                                                       dxf_price_level_book_listener_t book_listener,
+                                                       void* user_data);
+
+/*
+ *  Detaches a listener from the regional book.
+ *  No error occurs if it's attempted to detach a listener which wasn't previously attached.
+ *
+ *  book - a handle of the book to which a listener is to be detached
+ *  book_listener - a listener callback function pointer
+ */
+DXFEED_API ERRORCODE dxf_detach_regional_book_listener(dxf_regional_book_t book, 
+                                                       dxf_price_level_book_listener_t book_listener);
 
 /*
  *  Add dumping of incoming traffic into specific file

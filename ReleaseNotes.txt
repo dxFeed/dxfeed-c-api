@@ -1,0 +1,15 @@
+Version 5.0.0
++ Implement Entitlement API for C.
++ Implement support for different connection schemes.
++ Implement support for SSL/TLS.
+
+Version 4.9.2
+* Fix ORDER (all-mixed-up) subscription.
+
+Version 4.9.1
+* Fix Quote subscription bug introduced in 4.9.0.
+
+Version 4.9.0
++ Implement RegionalBook.
+* Fix mutex misuse bug in PriceLevelBook.
+* Fix memory leak in COM/C++ code.

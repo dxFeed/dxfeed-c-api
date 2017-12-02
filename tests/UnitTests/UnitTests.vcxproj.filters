@@ -149,6 +149,9 @@
     <ClCompile Include="..\..\src\PriceLevelBook.c">
       <Filter>Common\Sources</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\RegionalBook.c">
+      <Filter>Common\Sources</Filter>
+    </ClCompile>
     <ClCompile Include="ConnectionTest.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -236,6 +239,9 @@
       <Filter>Parser\Headers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\PriceLevelBook.h">
+      <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\RegionalBook.h">
       <Filter>Common\Headers</Filter>
     </ClInclude>
     <ClInclude Include="ConnectionTest.h">

@@ -77,6 +77,7 @@ set (HEADER_FILES
     Logger.h
     ObjectArray.h
     PriceLevelBook.h
+    RegionalBook.h
     PrimitiveTypes.h
     resource.h
     RecordTranscoder.h
@@ -135,6 +136,7 @@ set (SOURCE_FILES
     Logger.c
     ObjectArray.c
     PriceLevelBook.c
+    RegionalBook.c
     RecordTranscoder.c
     ServerMessageProcessor.c
     Snapshot.c
@@ -265,7 +267,7 @@ install(DIRECTORY "${INCLUDE_DIR}" "../scripts" "../src" "../lib"
 )
 install(FILES "../DXFeed.def" "../DXFeedd.def" "../DXFeed_64.def" "../DXFeedd_64.def" 
     "../DXFeed.sln" "../DXFeed.vcxproj" "../DXFeed.vcxproj.filters" "../Makefile" 
-    "../CMakeLists.txt" "../build.bat" "../make_package.bat"
+    "../CMakeLists.txt" "../build.bat" "../make_package.bat" "../ReleaseNotes.txt"
     DESTINATION "."
 )
 if (NOT DISABLE_TLS)
