@@ -490,7 +490,8 @@ static dx_plb_source_t *dx_plb_source_create(dxf_connection_t connection, dxf_co
 	}
 
 	/* And make all these motions */
-	if (!dx_send_record_description(connection, false) ||
+	if (!dx_load_events_for_subscription(connection, dx_get_order_source(source->subscription), DXF_ET_ORDER, subscr_flags) ||
+		!dx_send_record_description(connection, false) ||
 		!dx_subscribe_symbols_to_events(connection, dx_get_order_source(source->subscription),
 			&symbol, 1, DXF_ET_ORDER, false, false, subscr_flags, 0)) {
 		dx_plb_source_free(source);

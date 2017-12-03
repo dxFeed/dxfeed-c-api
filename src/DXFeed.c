@@ -445,6 +445,7 @@ DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dxf_const
 		!dx_get_event_subscription_flags(subscription, &subscr_flags) ||
 		!dx_get_event_subscription_time(subscription, &time) ||
 		!dx_add_symbols(subscription, symbols, symbol_count) ||
+		!dx_load_events_for_subscription(connection, dx_get_order_source(subscription), events, subscr_flags) ||
 		!dx_send_record_description(connection, false) ||
 		!dx_subscribe(connection, dx_get_order_source(subscription), symbols, symbol_count, events, subscr_flags, time)) {
 
@@ -749,7 +750,8 @@ DXFEED_API ERRORCODE dxf_set_order_source(dxf_subscription_t subscription, const
 	dx_free(str);
 
 	//subscribe to new order sources
-	if (!dx_send_record_description(connection, false) ||
+	if (!dx_load_events_for_subscription(connection, dx_get_order_source(subscription), events, subscr_flags) ||
+		!dx_send_record_description(connection, false) ||
 		!dx_subscribe(connection, dx_get_order_source(subscription), symbols, symbol_count, events, subscr_flags, time)) {
 
 		return DXF_FAILURE;
@@ -797,6 +799,7 @@ DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const
 		!dx_get_event_subscription_event_types(subscription, &events) ||
 		!dx_get_event_subscription_flags(subscription, &subscr_flags) ||
 		!dx_get_event_subscription_time(subscription, &time) ||
+		!dx_load_events_for_subscription(connection, &new_source_array, events, subscr_flags) ||
 		!dx_send_record_description(connection, false) ||
 		!dx_subscribe(connection, &new_source_array, symbols, symbol_count, events, subscr_flags, time) ||
 		!dx_add_order_source(subscription, elem.suffix)) {

@@ -373,7 +373,8 @@ dxf_regional_book_t dx_create_regional_book(dxf_connection_t connection,
 	}
 
 	/* And make all these motions */
-	if (!dx_send_record_description(connection, false) ||
+	if (!dx_load_events_for_subscription(connection, dx_get_order_source(book->subscription), DXF_ET_QUOTE, DX_SUBSCR_QUOTES_REGIONAL) ||
+		!dx_send_record_description(connection, false) ||
 		!dx_subscribe_symbols_to_events(connection, dx_get_order_source(book->subscription),
 			&symbol, 1, DXF_ET_QUOTE, false, false, DX_SUBSCR_QUOTES_REGIONAL, 0)) {
 		dx_rb_book_free(book);
