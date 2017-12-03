@@ -1040,6 +1040,9 @@ static bool dx_server_event_subscription_refresher (dxf_connection_t connection,
 /* ---------------------------------- */
 
 bool dx_reestablish_connection (dx_network_connection_context_t* context) {
+	// Cleanup task queue
+	dx_cleanup_task_queue(context->tq);
+
 	// if connection required login send credentials again
 	if (dx_connection_status_get(context->connection) == dx_cs_login_required) {
 		CHECKED_CALL_2(dx_send_protocol_description, context->connection, false);
@@ -1052,13 +1055,13 @@ bool dx_reestablish_connection (dx_network_connection_context_t* context) {
 
 	if (!dx_connect_to_resolved_addresses(context)) {
 		/*
-		*	An important moment here.
-		*  Before we resolve address anew, we must attempt to connect to the previously
-		*  resolved addresses, because there might still be some valid addresses resolved from
-		*  the previous attempt. And only if the new connection attempt fails, which also means
-		*  there are no valid addresses left, a new resolution is started, and then we repeat
-		*  the connection attempt with the newly resolved addresses.
-		*/
+		 *	An important moment here.
+		 *  Before we resolve address anew, we must attempt to connect to the previously
+		 *  resolved addresses, because there might still be some valid addresses resolved from
+		 *  the previous attempt. And only if the new connection attempt fails, which also means
+		 *  there are no valid addresses left, a new resolution is started, and then we repeat
+		 *  the connection attempt with the newly resolved addresses.
+		 */
 
 		dx_clear_addr_context_data(&(context->addr_context));
 
