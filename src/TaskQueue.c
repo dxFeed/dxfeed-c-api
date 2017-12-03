@@ -151,7 +151,7 @@ bool dx_add_task_to_queue (dx_task_queue_t tq, dx_task_processor_t processor, vo
 	task.processor = processor;
 	task.data = data;
 
-#ifdef _DEBUG
+#ifdef _DEBUG_TQ
 	dx_logging_dbg_lock();
 	dx_logging_dbg(L"NEWTASK Submit [0x%016p] %S(0x%016p) at %u", processor, dx_logging_dbg_sym(processor), data, tqd->size);
 	dx_logging_dbg_stack();
@@ -178,7 +178,7 @@ bool dx_execute_task_queue (dx_task_queue_t tq) {
 
 	while (i < tqd->size) {
 		dx_task_data_t* task = &(tqd->elements[i]);
-#ifdef _DEBUG
+#ifdef _DEBUG_TQ
 		dx_logging_dbg_lock();
 		dx_logging_dbg(L"RUNTASK Execute [0x%016p] %S(0x%016p) at %u", task->processor, dx_logging_dbg_sym(task->processor), task->data, i);
 		dx_logging_dbg_stack();

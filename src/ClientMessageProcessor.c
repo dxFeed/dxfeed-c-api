@@ -331,12 +331,6 @@ bool dx_write_event_records (void* bocc, void* dscc) {
 	dx_record_id_t record_id = dx_get_next_unsubscribed_record_id(dscc, false);
 	dx_record_id_t count = dx_get_records_list_count(dscc);
 
-#ifdef _DEBUG
-	dx_logging_dbg_lock();
-	dx_logging_dbg(L"SENDRECORDS Send records [%u, %u)", record_id, count);
-	dx_logging_dbg_stack();
-	dx_logging_dbg_unlock();
-#endif
 	while (record_id < count) {
 		CHECKED_CALL_3(dx_write_event_record, bocc, dx_get_record_by_id(dscc, record_id), record_id);
 		record_id = dx_get_next_unsubscribed_record_id(dscc, true);

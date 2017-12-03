@@ -55,7 +55,7 @@ void* dx_error_processor (void* src) {
 
 void* dx_malloc (size_t size) {
 	void* r = malloc(size);
-#ifdef _DEBUG
+#ifdef _DEBUG_MEM
 	dx_logging_dbg_lock();
 	dx_logging_dbg(L"ALLOC %Iu at 0x%016p", size, r);
 	dx_logging_dbg_stack();
@@ -68,7 +68,7 @@ void* dx_malloc (size_t size) {
 
 void* dx_calloc (size_t num, size_t size) {
 	void* r = calloc(num, size);
-#ifdef _DEBUG
+#ifdef _DEBUG_MEM
 	dx_logging_dbg_lock();
 	dx_logging_dbg(L"CALLOC %Iu * %Iu = %Iu at 0x%016p", size, num, size * num, r);
 	dx_logging_dbg_stack();
@@ -99,7 +99,7 @@ void* dx_memset (void * destination, int c, size_t size) {
 /* -------------------------------------------------------------------------- */
 
 void dx_free (void* buf) {
-#ifdef _DEBUG
+#ifdef _DEBUG_MEM
 	dx_logging_dbg_lock();
 	dx_logging_dbg(L"FREE at 0x%016p", buf);
 	dx_logging_dbg_stack();
@@ -116,7 +116,7 @@ void dx_free (void* buf) {
 
 void* dx_calloc_no_ehm (size_t num, size_t size) {
 	void *r = calloc(num, size);
-#ifdef _DEBUG
+#ifdef _DEBUG_MEM
 	dx_logging_dbg_lock();
 	dx_logging_dbg(L"CALLOC %Iu * %Iu = %Iu at 0x%016p", size, num, size * num, r);
 	dx_logging_dbg_stack();
@@ -128,7 +128,7 @@ void* dx_calloc_no_ehm (size_t num, size_t size) {
 /* -------------------------------------------------------------------------- */
 
 void dx_free_no_ehm (void* buf) {
-#ifdef _DEBUG
+#ifdef _DEBUG_MEM
 	dx_logging_dbg_lock();
 	dx_logging_dbg(L"FREE at 0x%016p", buf);
 	dx_logging_dbg_stack();
