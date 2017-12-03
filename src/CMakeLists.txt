@@ -173,7 +173,13 @@ if (MSVC)
         ${ADDITIONAL_LIBRARIES}
         ws2_32.lib
     )
-    if (NOT DISABLE_TLS)
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set (ADDITIONAL_LIBRARIES
+           ${ADDITIONAL_LIBRARIES}
+           dbghelp.lib
+        )
+    endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
+	if (NOT DISABLE_TLS)
         link_directories(${LIB_TLS}/${TARGET_PLATFORM})
         set (ADDITIONAL_LIBRARIES
             ${ADDITIONAL_LIBRARIES}
