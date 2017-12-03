@@ -3,6 +3,7 @@ Version 5.0.0
 + Implement support for different connection schemes.
 + Implement support for SSL/TLS.
 * Fix memory leak on reconnects.
+* Fix memory leak in C++ snapshot wrapper.
 
 Version 4.9.2
 * Fix ORDER (all-mixed-up) subscription.
