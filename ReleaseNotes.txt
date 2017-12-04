@@ -1,3 +1,6 @@
+vERSION 5.1.0
++ Add license of LibreSSL
+
 Version 5.0.0
 + Implement Entitlement API for C.
 + Implement support for different connection schemes.
