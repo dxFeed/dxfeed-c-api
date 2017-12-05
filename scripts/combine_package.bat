@@ -2,7 +2,7 @@
 rem Script CPack archives with specified platform and configuration. After
 rem packing all files extracted to single release directory.
 rem Usage:
-rem     combine_package <project-name> <configuration> <platform> <version>
+rem     combine_package <project-name> <configuration> <platform> <version> [no-tls]
 rem where:
 rem     project-name    - The name of target project package
 rem     configuration   - Debug or Release
@@ -38,6 +38,8 @@ set PROJECT_NAME=%1
 set CONFIG=%2
 set PLATFORM=%3
 set VERSION=%4
+set NO_TLS=%5
+set PACKAGE_SUFFIX=
 
 if [%PROJECT_NAME%] EQU [] (
     echo ERROR: Project package name is not specified!
@@ -61,10 +63,14 @@ rem     echo ERROR: Version is not specified!
 rem     goto exit_error
 rem )
 
+if [%NO_TLS%] EQU [no-tls] (
+    set PACKAGE_SUFFIX=-no-tls
+)
+
 cpack -G ZIP -C %CONFIG% --config %PLATFORM%\DXFeedAllCPackConfig.cmake
 if %ERRORLEVEL% GEQ 1 goto exit_error
-set PACKAGE_NAME=%PROJECT_NAME%-%VERSION%-%PLATFORM%
-set ARCHIVE_NAME=%PROJECT_NAME%-%VERSION%-%PLATFORM%%CONFIG%
+set PACKAGE_NAME=%PROJECT_NAME%-%VERSION%-%PLATFORM%%PACKAGE_SUFFIX%
+set ARCHIVE_NAME=%PROJECT_NAME%-%VERSION%-%PLATFORM%%CONFIG%%PACKAGE_SUFFIX%
 move /Y %PACKAGE_NAME%.zip %PACKAGE_WORK_DIR%\%ARCHIVE_NAME%.zip
 7z x -y -o%PACKAGE_WORK_DIR% %PACKAGE_WORK_DIR%\%ARCHIVE_NAME%.zip
 if %ERRORLEVEL% GEQ 1 goto exit_error

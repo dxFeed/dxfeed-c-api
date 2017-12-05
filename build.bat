@@ -2,7 +2,7 @@
 rem This script runs building project using CMakeLists.txt from current folder.
 rem The result of building places into BUILD_DIR directory.
 rem Usage: 
-rem     build.bat [<configuration>] [<platform>] [rebuild|clean]
+rem     build.bat [<configuration>] [<platform>] [rebuild|clean] [no-tls]
 rem Where
 rem     <configuration> - Debug or Release
 rem     <platform>      - x86 or x64
@@ -23,6 +23,7 @@ set CONFIG=
 set PLATFORM=
 set CMAKE_PLATFORM=
 set MSBUILD_PLATFORM=Win32
+set DISABLE_TLS=OFF
 
 for %%A in (%*) do (
     if [%%A] EQU [Debug] (
@@ -46,6 +47,8 @@ for %%A in (%*) do (
             RMDIR /S /Q %BUILD_DIR%
             if %ERRORLEVEL% GEQ 1 goto exit_error
         )
+    ) else if [%%A] EQU [no-tls] (
+       set DISABLE_TLS=ON
     ) else (
         goto usage
     )
@@ -60,7 +63,7 @@ if not exist %BUILD_DIR% (mkdir %BUILD_DIR%)
 cd %BUILD_DIR%
 
 echo Start building %CONFIG% %PLATFORM%...
-cmake -DCMAKE_BUILD_TYPE=%CONFIG% -G "Visual Studio 14 2015%CMAKE_PLATFORM%" -DTARGET_PLATFORM=%PLATFORM% -DAPP_VERSION=%APP_VERSION% ..\..
+cmake -DCMAKE_BUILD_TYPE=%CONFIG% -G "Visual Studio 14 2015%CMAKE_PLATFORM%" -DDISABLE_TLS=%DISABLE_TLS% -DTARGET_PLATFORM=%PLATFORM% -DAPP_VERSION=%APP_VERSION% ..\..
 if %ERRORLEVEL% GEQ 1 goto build_error
 
 msbuild /p:Configuration=%CONFIG% /p:Platform=%MSBUILD_PLATFORM% /m /t:build /ignore:.vcproj,.vcxproj

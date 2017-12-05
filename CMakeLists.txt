@@ -5,6 +5,8 @@ cmake_policy(SET CMP0013 NEW)
 
 set(PROJECT DXFeedAll)
 
+option(DISABLE_TLS "Use ON value to disable TLS support" OFF)
+
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 
@@ -12,6 +14,12 @@ set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE TYPE INTERNAL FORCE)
 
 project(${PROJECT})
 link_directories(${CMAKE_BINARY_DIR})
+
+if (NOT DISABLE_TLS)
+    set(PACKAGE_SUFFIX "")
+else (NOT DISABLE_TLS)
+    set(PACKAGE_SUFFIX "-no-tls")
+endif (NOT DISABLE_TLS)
 
 #Note: add projects to build and package below
 add_subdirectory(src)
@@ -30,5 +38,5 @@ set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/DXFeedAllCPackConfig.cmake")
 set(CPACK_PACKAGE_VENDOR "Devexperts")
 set(CPACK_PACKAGE_NAME "${PROJECT}")
 set(CPACK_PACKAGE_VERSION "${APP_VERSION}")
-set(CPACK_PACKAGE_FILE_NAME "${PROJECT}-${APP_VERSION}-${TARGET_PLATFORM}")
+set(CPACK_PACKAGE_FILE_NAME "${PROJECT}-${APP_VERSION}-${TARGET_PLATFORM}${PACKAGE_SUFFIX}")
 include(CPack)

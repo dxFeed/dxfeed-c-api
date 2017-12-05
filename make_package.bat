@@ -4,7 +4,7 @@ rem Script build all targets from CMakeLists.txt by sequentionally calling
 rem build.bat for next configurations: Debug x86, Release x86, Debug x64, 
 rem Release x64. If one of configurations fail the process stopped.
 rem Usage: 
-rem     make_package <major>.<minor>[.<patch>] [rebuild|clean] [no-test]
+rem     make_package <major>.<minor>[.<patch>] [rebuild|clean] [no-test] [no-tls]
 rem Where
 rem     <major>.<minor>[.<patch>] - Version of package, i.e. 1.2.6
 rem     clean                     - removes build directory
@@ -59,6 +59,8 @@ set BUILD_DIR=%~dp0\build
 set PROJECT_NAME=DXFeedAll
 set PACKAGE_WORK_DIR=_CPack_Packages
 set TARGET_PACKAGE=dxfeed-c-api-%VERSION%
+set NO_TLS=
+set PACKAGE_SUFFIX=
 
 for %%A in (%*) do (
     if [%%A] EQU [clean] (
@@ -68,6 +70,9 @@ for %%A in (%*) do (
         call build.bat clean
     ) else if [%%A] EQU [no-test] (
         set DO_TEST=0
+    ) else if [%%A] EQU [no-tls] (
+        set NO_TLS=no-tls
+        set PACKAGE_SUFFIX=-no-tls
     )
 )
 
@@ -84,16 +89,16 @@ set APP_VERSION=%VERSION%
 
 rem === BUILD ALL TARGETS ===
 
-call build.bat Debug x86
+call build.bat Debug x86 %NO_TLS%
 if %ERRORLEVEL% GEQ 1 goto exit_error
 
-call build.bat Release x86
+call build.bat Release x86 %NO_TLS%
 if %ERRORLEVEL% GEQ 1 goto exit_error
 
-call build.bat Debug x64
+call build.bat Debug x64 %NO_TLS%
 if %ERRORLEVEL% GEQ 1 goto exit_error
 
-call build.bat Release x64
+call build.bat Release x64 %NO_TLS%
 if %ERRORLEVEL% GEQ 1 goto exit_error
 
 rem === TEST BUILDS ===
@@ -112,34 +117,35 @@ rem === MAKE PACKAGE ===
 echo Start make release package %VERSION%
 set HOME_DIR=%cd%
 cd %BUILD_DIR%
-call %~dp0\scripts\combine_package %PROJECT_NAME% Debug x86 %VERSION%
+call %~dp0\scripts\combine_package %PROJECT_NAME% Debug x86 %VERSION% %NO_TLS%
 if %ERRORLEVEL% GEQ 1 goto cpack_error
-call %~dp0\scripts\combine_package %PROJECT_NAME% Release x86 %VERSION%
+call %~dp0\scripts\combine_package %PROJECT_NAME% Release x86 %VERSION% %NO_TLS%
 if %ERRORLEVEL% GEQ 1 goto cpack_error
-call %~dp0\scripts\combine_package %PROJECT_NAME% Debug x64 %VERSION%
+call %~dp0\scripts\combine_package %PROJECT_NAME% Debug x64 %VERSION% %NO_TLS%
 if %ERRORLEVEL% GEQ 1 goto cpack_error
-call %~dp0\scripts\combine_package %PROJECT_NAME% Release x64 %VERSION%
+call %~dp0\scripts\combine_package %PROJECT_NAME% Release x64 %VERSION% %NO_TLS%
 if %ERRORLEVEL% GEQ 1 goto cpack_error
 
 if NOT EXIST %PACKAGE_WORK_DIR% mkdir %PACKAGE_WORK_DIR%
 cd %PACKAGE_WORK_DIR%
-if EXIST %TARGET_PACKAGE% rmdir %TARGET_PACKAGE% /S /Q
-mkdir %TARGET_PACKAGE%
-xcopy /Y /S %PROJECT_NAME%-%VERSION%-x86 %TARGET_PACKAGE%
-xcopy /Y /S %PROJECT_NAME%-%VERSION%-x64 %TARGET_PACKAGE%
-7z a %TARGET_PACKAGE%.zip %TARGET_PACKAGE%
-move /Y %TARGET_PACKAGE%.zip %BUILD_DIR%\%TARGET_PACKAGE%.zip
+if EXIST %TARGET_PACKAGE%%PACKAGE_SUFFIX% rmdir %TARGET_PACKAGE%%PACKAGE_SUFFIX% /S /Q
+mkdir %TARGET_PACKAGE%%PACKAGE_SUFFIX%
+xcopy /Y /S %PROJECT_NAME%-%VERSION%-x86%PACKAGE_SUFFIX% %TARGET_PACKAGE%%PACKAGE_SUFFIX%
+xcopy /Y /S %PROJECT_NAME%-%VERSION%-x64%PACKAGE_SUFFIX% %TARGET_PACKAGE%%PACKAGE_SUFFIX%
+7z a %TARGET_PACKAGE%%PACKAGE_SUFFIX%.zip %TARGET_PACKAGE%%PACKAGE_SUFFIX%
+move /Y %TARGET_PACKAGE%%PACKAGE_SUFFIX%.zip %BUILD_DIR%\%TARGET_PACKAGE%%PACKAGE_SUFFIX%.zip
 cd %HOME_DIR%
 
 rem === FINISH ===
 goto exit_success
 
 :usage
-echo Usage: %0 ^<major^>.^<minor^>[.^<patch^>] [rebuild^|clean] [no-test]
+echo Usage: %0 ^<major^>.^<minor^>[.^<patch^>] [rebuild^|clean] [no-test] [no-tls]
 echo    ^<major^>.^<minor^>[.^<patch^>] - Version of package, i.e. 1.2.6
 echo    clean                     - removes build directory
 echo    rebuild                   - performs clean and build
 echo    no-test                   - build tests will not be started
+echo    no-tls                    - build without TLS support
 goto exit_error
 
 :exit_success

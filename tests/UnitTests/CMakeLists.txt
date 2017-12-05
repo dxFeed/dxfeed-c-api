@@ -2,8 +2,6 @@ cmake_minimum_required (VERSION 2.8.1)
 
 cmake_policy(SET CMP0015 NEW)
 
-option(DISABLE_TLS "Use ON value to disable TLS support" OFF)
- 
 set(PROJECT UnitTests) 
 set(INCLUDE_DIR ../../include)
 set(TARGET_PLATFORM "x86" CACHE STRING "Target platform specification")

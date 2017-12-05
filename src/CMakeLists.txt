@@ -2,8 +2,6 @@ cmake_minimum_required (VERSION 2.8.1)
 
 cmake_policy(SET CMP0015 NEW)
 
-option(DISABLE_TLS "Use ON value to disable TLS support" OFF)
- 
 set(PROJECT DXFeed) 
 set(INCLUDE_DIR ../include)
 set(PTHREADS_INCLUDE_DIR ../include/pthreads)
@@ -267,7 +265,7 @@ set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/DXFeedAllCPackConfig.cmake")
 install(TARGETS ${PROJECT}
     DESTINATION "bin/${TARGET_PLATFORM}"
 )
-install(DIRECTORY "${INCLUDE_DIR}" "../scripts" "../src" "../lib"
+install(DIRECTORY "${INCLUDE_DIR}" "../scripts" "../src"
     DESTINATION "."
     PATTERN "build" EXCLUDE
 )
@@ -276,6 +274,7 @@ install(FILES "../DXFeed.def" "../DXFeedd.def" "../DXFeed_64.def" "../DXFeedd_64
     "../CMakeLists.txt" "../build.bat" "../make_package.bat" "../ReleaseNotes.txt"
     DESTINATION "."
 )
+
 if (NOT DISABLE_TLS)
     install(FILES 
         "${LIB_TLS}/${TARGET_PLATFORM}/libtls-15${PLATFORM_POSTFIX}.dll" 
@@ -283,7 +282,18 @@ if (NOT DISABLE_TLS)
         "${LIB_TLS}/${TARGET_PLATFORM}/libcrypto-41${PLATFORM_POSTFIX}.dll"
         DESTINATION "bin/${TARGET_PLATFORM}"
     )
+    install(FILES "../COPYING.libressl"
+        DESTINATION "."
+    )
+    install(DIRECTORY "../lib/libressl"
+        DESTINATION "lib"
+        PATTERN "build" EXCLUDE
+    )
+    set(PACKAGE_SUFFIX "")
+else (NOT DISABLE_TLS)
+    set(PACKAGE_SUFFIX "-no-tls")
 endif (NOT DISABLE_TLS)
+
 if(MSVC)
     set(DEBUG_PDB_PATH ${EXECUTABLE_OUTPUT_PATH}/Debug)
     install(FILES ${DEBUG_PDB_PATH}/${PROJECT}d.pdb ${DEBUG_PDB_PATH}/${PROJECT}d_64.pdb
@@ -302,5 +312,5 @@ endif(MSVC)
 set(CPACK_PACKAGE_VENDOR "Devexperts")
 set(CPACK_PACKAGE_NAME "${PROJECT}")
 set(CPACK_PACKAGE_VERSION "${APP_VERSION}")
-set(CPACK_PACKAGE_FILE_NAME "${PROJECT}-${APP_VERSION}-${TARGET_PLATFORM}")
+set(CPACK_PACKAGE_FILE_NAME "${PROJECT}-${APP_VERSION}-${TARGET_PLATFORM}${PACKAGE_SUFFIX}")
 include(CPack)
