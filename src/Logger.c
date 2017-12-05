@@ -37,6 +37,7 @@
 #include "DXAlgorithms.h"
 #include "DXThreads.h"
 #include "DXErrorCodes.h"
+#include "Version.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -297,6 +298,7 @@ DXFEED_API ERRORCODE dxf_initialize_logger (const char* file_name, int rewrite_f
 
 	dx_logging_info(L"Logging started: file %s, verbose mode is %s",
 					rewrite_file ? L"rewritten" : L"not rewritten", verbose ? L"on" : L"off");
+	dx_logging_info(L"Version: %s, options: %s", DX_VER_PRODUCT_VERSION_LSTR, DX_LIBRARY_OPTIONS);
 	dx_flush_log();
 
 #ifdef _DEBUG
@@ -466,7 +468,7 @@ void dx_logging_info( const dxf_char_t* format, ... ) {
 		return;
 	}
 
-	fwprintf(g_log_file, L"\n%s [%08lx] %s ", dx_get_current_time(),
+	fwprintf(g_log_file, L"\n%s [%08lx] %s", dx_get_current_time(),
 #ifdef _WIN32
 	(unsigned long)GetCurrentThreadId(),
 #else

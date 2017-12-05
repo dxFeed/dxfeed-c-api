@@ -139,6 +139,7 @@ set (SOURCE_FILES
     ServerMessageProcessor.c
     Snapshot.c
     TaskQueue.c
+    Version.c
     Win32.c
     ${DEF_FILE}) 
     
