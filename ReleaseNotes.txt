@@ -1,6 +1,7 @@
+Version 5.1.1
 * Fix possible race condition on working queue cleanup.
 
-vERSION 5.1.0
+Version 5.1.0
 + Add license of LibreSSL
 
 Version 5.0.0
