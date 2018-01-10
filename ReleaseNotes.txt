@@ -1,3 +1,5 @@
+* Fix possible race condition on working queue cleanup.
+
 vERSION 5.1.0
 + Add license of LibreSSL
 
