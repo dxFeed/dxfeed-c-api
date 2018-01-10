@@ -111,13 +111,14 @@ bool dx_cleanup_task_queue (dx_task_queue_t tq) {
 		return dx_set_error_code(dx_ec_invalid_func_param_internal);
 	}
 
+	CHECKED_CALL(dx_mutex_lock, &(tqd->guard));
 	for (; i < tqd->size; ++i) {
 		int task_res = tqd->elements[i].processor(tqd->elements[i].data, dx_tc_free_resources);
 		res = IS_FLAG_SET(task_res, dx_tes_success) && res;
 	}
 	tqd->size = 0;
 
-	return res;
+	return dx_mutex_unlock(&(tqd->guard)) && res;
 }
 
 /* -------------------------------------------------------------------------- */
