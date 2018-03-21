@@ -334,6 +334,7 @@
     <ClCompile Include="..\..\src\DXAddressParser.c" />
     <ClCompile Include="..\..\src\DXProperties.c" />
     <ClCompile Include="..\..\src\PriceLevelBook.c" />
+    <ClCompile Include="..\..\src\Version.c" />
     <ClCompile Include="AddressParserTest.c" />
     <ClCompile Include="AlgorithmsTest.c" />
     <ClCompile Include="..\..\src\RegionalBook.c" />

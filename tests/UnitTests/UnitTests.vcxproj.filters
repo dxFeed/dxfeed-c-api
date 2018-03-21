@@ -170,6 +170,9 @@
     <ClCompile Include="..\..\src\DXProperties.c">
       <Filter>Common\Sources</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Version.c">
+      <Filter>Common\Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\DXAlgorithms.h">

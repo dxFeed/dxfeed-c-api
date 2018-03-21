@@ -103,9 +103,15 @@ typedef struct {
 } dx_configuration_buffer_t;
 
 typedef struct {
+	dxf_time_and_sale_t* buffer;
+	int count;
+} dx_time_and_sale_buffer_t;
+
+typedef struct {
 	dx_order_buffer_t order_buffer;
 	dx_spread_order_buffer_t spread_order_buffer;
 	dx_configuration_buffer_t configuration_buffer;
+	dx_time_and_sale_buffer_t time_and_sale_buffer;
 
 	dxf_connection_t connection;
 	void* rbcc;
@@ -170,6 +176,9 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_record_transcoder) {
 	if (context->configuration_buffer.buffer != NULL) {
 		dx_free(context->configuration_buffer.buffer);
 	}
+	if (context->time_and_sale_buffer.buffer != NULL) {
+		dx_free(context->time_and_sale_buffer.buffer);
+	}
 
 	dx_free(context);
 
@@ -224,6 +233,10 @@ dxf_event_data_t dx_get_event_data_buffer(dx_record_transcoder_connection_contex
 	} else if (event_id == dx_eid_configuration) {
 		return dx_initialize_event_data_buffer(count, sizeof(dxf_configuration_t),
 			(void**)&(context->configuration_buffer.buffer), &(context->configuration_buffer.count));
+
+	} else if (event_id == dx_eid_time_and_sale) {
+		return dx_initialize_event_data_buffer(count, sizeof(dxf_time_and_sale_t),
+			(void**)&(context->time_and_sale_buffer.buffer), &(context->time_and_sale_buffer.count));
 
 	} else {
 		/* these other types don't require separate buffers yet */
@@ -637,51 +650,63 @@ bool RECORD_TRANSCODER_NAME(dx_time_and_sale_t) (dx_record_transcoder_connection
 												const dx_record_params_t* record_params,
 												const dxf_event_params_t* event_params,
 												void* record_buffer, int record_count) {
-	dxf_time_and_sale_t* event_buffer = (dxf_time_and_sale_t*)record_buffer;
 	int i = 0;
+	dxf_time_and_sale_t* event_buffer = (dxf_time_and_sale_t*)dx_get_event_data_buffer(context, dx_eid_time_and_sale, record_count);
+
+	if (event_buffer == NULL) {
+		return false;
+	}
 
 	for (; i < record_count; ++i) {
-		/* 'event_id' and 'type' fields were deliberately used to store the different values,
-		so that the structure might be reused without any new buffer allocations */
-
+		dx_time_and_sale_t* cur_record = (dx_time_and_sale_t*)record_buffer + i;
 		dxf_time_and_sale_t* cur_event = event_buffer + i;
-		const dxf_int_t sequence = (dxf_int_t)(cur_event->event_id & 0xFFFFFFFFL);
-		const dxf_int_t exchange_sale_conditions = (dxf_int_t)(cur_event->event_id >> 32);
-		const dxf_int_t time = (dxf_int_t)cur_event->time;
-		const dxf_int_t flags = cur_event->flags;
 
-		cur_event->event_id = ((dxf_long_t)time << 32) | ((dxf_long_t)sequence & 0xFFFFFFFFL);
-		cur_event->time = ((dxf_long_t)time * 1000L) + (((dxf_long_t)sequence >> 22) & 0x000003FFL);
+		dxf_int_t flags = cur_record->flags;
 
 		cur_event->event_flags = event_params->flags;
-		cur_event->sequence = sequence;
-		cur_event->exchange_sale_conditions = dx_decode_from_integer((((dxf_long_t)flags & 0xFF00L) << 24 ) | exchange_sale_conditions);
-		cur_event->index = cur_event->event_id;
-		cur_event->side = ((flags >> DX_TIME_AND_SALE_SIDE_SHIFT) & DX_TIME_AND_SALE_SIDE_MASK) == DX_ORDER_SIDE_SELL ? DXF_ORDER_SIDE_SELL : DXF_ORDER_SIDE_BUY;
+		cur_event->time = cur_record->time * 1000L;
+		cur_event->sequence = cur_record->sequence;
+		cur_event->exchange_code = cur_record->exchange_code;
+		cur_event->price = cur_record->price;
+		cur_event->size = cur_record->size;
+		cur_event->bid_price = cur_record->bid_price;
+		cur_event->ask_price = cur_record->ask_price;
+		cur_event->exchange_sale_conditions = dx_decode_from_integer(cur_record->exchange_sale_conditions);
+		cur_event->flags = cur_record->flags;
+		cur_event->buyer = dx_decode_from_integer(cur_record->buyer);
+		cur_event->seller = dx_decode_from_integer(cur_record->seller);
+
+		cur_event->index = ((dxf_long_t)cur_record->time) << 32 | (cur_record->sequence & 0xFFFFFFFF);
+		cur_event->side = ((flags >> DX_TIME_AND_SALE_SIDE_SHIFT) & DX_TIME_AND_SALE_SIDE_MASK) == DX_ORDER_SIDE_SELL ? DXF_ORDER_SIDE_SELL : DXF_ORDER_SIDE_BUY;;
+		cur_event->is_eth_trade = ((flags & DX_TIME_AND_SALE_ETH) != 0);
 		cur_event->is_spread_leg = ((flags & DX_TIME_AND_SALE_SPREAD_LEG) != 0);
-		cur_event->is_trade = ((flags & DX_TIME_AND_SALE_ETH) != 0);
 		cur_event->is_valid_tick = ((flags & DX_TIME_AND_SALE_VALID_TICK) != 0);
+
+		switch (flags & DX_TIME_AND_SALE_TYPE_MASK) {
+		case 0: cur_event->type = DXF_TIME_AND_SALE_TYPE_NEW; break;
+		case 1: cur_event->type = DXF_TIME_AND_SALE_TYPE_CORRECTION; break;
+		case 2: cur_event->type = DXF_TIME_AND_SALE_TYPE_CANCEL; break;
+		default: return false;
+		}
+		cur_event->is_cancel = (cur_event->type == DXF_TIME_AND_SALE_TYPE_CANCEL);
+		cur_event->is_correction = (cur_event->type == DXF_TIME_AND_SALE_TYPE_CORRECTION);
+		cur_event->is_new = (cur_event->type == DXF_TIME_AND_SALE_TYPE_NEW);
 
 		/* when we get REMOVE_EVENT flag almost all fields of record is null;
 		in this case no fileds are checked for null*/
 		if (!IS_FLAG_SET(event_params->flags, dxf_ef_remove_event)) {
-			if (cur_event->exchange_sale_conditions != NULL &&
-				!dx_store_string_buffer(context->rbcc, cur_event->exchange_sale_conditions)) {
-
+			if (cur_event->exchange_sale_conditions != NULL && !dx_store_string_buffer(context->rbcc, cur_event->exchange_sale_conditions)) {
+				return false;
+			}
+			if (cur_event->buyer != NULL && !dx_store_string_buffer(context->rbcc, cur_event->buyer)) {
+				return false;
+			}
+			if (cur_event->seller != NULL && !dx_store_string_buffer(context->rbcc, cur_event->seller)) {
 				return false;
 			}
 
-			switch (flags & DX_TIME_AND_SALE_TYPE_MASK) {
-			case 0: cur_event->type = DXF_TIME_AND_SALE_TYPE_NEW; break;
-			case 1: cur_event->type = DXF_TIME_AND_SALE_TYPE_CORRECTION; break;
-			case 2: cur_event->type = DXF_TIME_AND_SALE_TYPE_CANCEL; break;
-			default: return false;
-			}
 		}
 
-		cur_event->is_cancel = (cur_event->type == DXF_TIME_AND_SALE_TYPE_CANCEL);
-		cur_event->is_correction = (cur_event->type == DXF_TIME_AND_SALE_TYPE_CORRECTION);
-		cur_event->is_new = (cur_event->type == DXF_TIME_AND_SALE_TYPE_NEW);
 	}
 
 	return dx_process_event_data(context->connection, dx_eid_time_and_sale, record_params->symbol_name,

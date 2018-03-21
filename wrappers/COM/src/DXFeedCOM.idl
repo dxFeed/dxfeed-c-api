@@ -212,7 +212,7 @@ library DXFeedCOM {
         [id(13), propget, helpstring("Spread leg flag value getter")]
         HRESULT spreadLeg([out, retval] VARIANT_BOOL*);
         [id(14), propget, helpstring("Extended trading hours flag value getter")]
-        HRESULT tradeFlag([out, retval] VARIANT_BOOL*);
+        HRESULT ETHTradeFlag([out, retval] VARIANT_BOOL*);
         [id(15), propget, helpstring("Valid tick flag value getter")]
         HRESULT validTick([out, retval] VARIANT_BOOL*);
         [id(16), propget, helpstring("Type value getter")]

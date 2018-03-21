@@ -1,3 +1,4 @@
+* Add Time and Sale Buyer and Seller.
 * Fix possible race condition on working queue cleanup.
 
 vERSION 5.1.0

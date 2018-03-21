@@ -158,8 +158,10 @@ DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_time_and_sale_t, price);
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_time_and_sale_t, size);
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_time_and_sale_t, bid_price);
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_time_and_sale_t, ask_price);
-DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_time_and_sale_t, exch_sale_conds);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_time_and_sale_t, exchange_sale_conditions);
 DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_time_and_sale_t, flags);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_time_and_sale_t, buyer);
+DX_RECORD_FIELD_SETTER_PROTOTYPE(dx_time_and_sale_t, seller);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -409,8 +411,10 @@ DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_time_and_sale_t, price);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_time_and_sale_t, size);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_time_and_sale_t, bid_price);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_time_and_sale_t, ask_price);
-DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_time_and_sale_t, exch_sale_conds);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_time_and_sale_t, exchange_sale_conditions);
 DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_time_and_sale_t, flags);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_time_and_sale_t, buyer);
+DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(dx_time_and_sale_t, seller);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -656,8 +660,10 @@ DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_time_and_sale_t, price);
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_time_and_sale_t, size);
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_time_and_sale_t, bid_price);
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_time_and_sale_t, ask_price);
-DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_time_and_sale_t, exch_sale_conds);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_time_and_sale_t, exchange_sale_conditions);
 DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_time_and_sale_t, flags);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_time_and_sale_t, buyer);
+DX_RECORD_FIELD_GETTER_PROTOTYPE(dx_time_and_sale_t, seller);
 
 /* -------------------------------------------------------------------------- */
 /*
