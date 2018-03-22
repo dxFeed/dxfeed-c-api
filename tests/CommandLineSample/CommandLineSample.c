@@ -197,13 +197,15 @@ void listener(int event_type, dxf_const_string_t symbol_name,
 		dxf_time_and_sale_t* tns = (dxf_time_and_sale_t*)data;
 
 		for (; i < data_count; ++i) {
-			wprintf(L"event id=%I64i, time=", tns[i].event_id);
+			wprintf(L"event id=%I64i, time=", tns[i].index);
 			print_timestamp(tns[i].time);
 			wprintf(L", exchange code=%c, price=%f, size=%I64i, bid price=%f, ask price=%f, "
-				L"exchange sale conditions=\'%ls\', is trade=%ls, type=%i}\n",
+				L"exchange sale conditions=\'%ls\', is ETH trade=%ls, type=%i, buyer=\'%ls\', seller=\'%ls\'}\n",
 				tns[i].exchange_code, tns[i].price, tns[i].size,
 				tns[i].bid_price, tns[i].ask_price, tns[i].exchange_sale_conditions,
-				tns[i].is_trade ? L"True" : L"False", tns[i].type);
+				tns[i].is_eth_trade ? L"True" : L"False", tns[i].type,
+				tns[i].buyer ? tns[i].buyer : L"<UNKNOWN>", 
+				tns[i].seller ? tns[i].seller : L"<UNKNOWN>");
 		}
 	}
 

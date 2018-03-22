@@ -142,10 +142,10 @@ void listener(int event_type, dxf_const_string_t symbol_name,
 
 		for (; i < data_count ; ++i) {
 			wprintf(L"event id=%I64i, time=%I64i, exchange code=%c, price=%f, size=%I64i, bid price=%f, ask price=%f, "
-				L"exchange sale conditions=\'%s\', is trade=%s, type=%i}\n",
-					tns[i].event_id, tns[i].time, tns[i].exchange_code, tns[i].price, tns[i].size,
+				L"exchange sale conditions=\'%s\', is ETH trade=%s, type=%i}\n",
+					tns[i].index, tns[i].time, tns[i].exchange_code, tns[i].price, tns[i].size,
 					tns[i].bid_price, tns[i].ask_price, tns[i].exchange_sale_conditions,
-					tns[i].is_trade ? L"True" : L"False", tns[i].type);
+					tns[i].is_eth_trade ? L"True" : L"False", tns[i].type);
 		}
 	}
 }

@@ -222,10 +222,10 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
 			}
 
 			wprintf(L"event id=%I64i, time=%I64i, exchange code=%c, price=%f, size=%I64i, bid price=%f, ask price=%f, "
-				L"exchange sale conditions=\'%ls\', is trade=%ls, type=%i}\n",
-				tns.event_id, tns.time, tns.exchange_code, tns.price, tns.size,
+				L"exchange sale conditions=\'%ls\', is ETH trade=%ls, type=%i}\n",
+				tns.index, tns.time, tns.exchange_code, tns.price, tns.size,
 				tns.bid_price, tns.ask_price, tns.exchange_sale_conditions,
-				tns.is_trade ? L"True" : L"False", tns.type);
+				tns.is_eth_trade ? L"True" : L"False", tns.type);
 		}
 	} else if (snapshot_data->event_type == DXF_ET_GREEKS) {
 		dxf_greeks_t* greeks_records = (dxf_greeks_t*)snapshot_data->records;
