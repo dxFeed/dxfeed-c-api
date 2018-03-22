@@ -147,7 +147,6 @@ typedef struct {
 } dx_order_t;
 
 typedef struct {
-    dxf_long_t event_id;
     dxf_long_t time;
     dxf_int_t sequence;
     dxf_char_t exchange_code;
@@ -155,19 +154,10 @@ typedef struct {
     dxf_long_t size;
     dxf_double_t bid_price;
     dxf_double_t ask_price;
-    dxf_const_string_t exchange_sale_conditions;
+    dxf_int_t exchange_sale_conditions;
     dxf_int_t flags;
-
-    dxf_event_flags_t event_flags;
-    dxf_long_t index;
-    dxf_int_t side;
-    dxf_bool_t is_cancel;
-    dxf_bool_t is_correction;
-    dxf_bool_t is_trade;
-    dxf_bool_t is_new;
-    dxf_bool_t is_spread_leg;
-    dxf_bool_t is_valid_tick;
-    dxf_int_t type;
+    dxf_const_string_t buyer;
+    dxf_const_string_t seller;
 } dx_time_and_sale_t;
 
 typedef struct {

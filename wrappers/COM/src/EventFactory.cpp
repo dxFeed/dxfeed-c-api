@@ -983,7 +983,7 @@ private:
 	virtual HRESULT STDMETHODCALLTYPE GetIndex(LONGLONG* value);
 	virtual HRESULT STDMETHODCALLTYPE GetAgressorSide(INT* value);
 	virtual HRESULT STDMETHODCALLTYPE GetSpreadLeg(VARIANT_BOOL* value);
-	virtual HRESULT STDMETHODCALLTYPE GetTradeFlag(VARIANT_BOOL* value);
+	virtual HRESULT STDMETHODCALLTYPE GetETHTradeFlag(VARIANT_BOOL* value);
 	virtual HRESULT STDMETHODCALLTYPE GetValidTick(VARIANT_BOOL* value);
 	virtual HRESULT STDMETHODCALLTYPE GetType(INT* value);
 	virtual HRESULT STDMETHODCALLTYPE IsRemoved(VARIANT_BOOL* value);
@@ -1013,7 +1013,7 @@ DXTimeAndSale::DXTimeAndSale(dxf_event_data_t data, IUnknown* parent)
 HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetEventId(LONGLONG* value) {
 	CHECK_PTR(value);
 
-	*value = m_data->event_id;
+	*value = m_data->index;
 
 	return S_OK;
 }
@@ -1148,10 +1148,10 @@ HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetSpreadLeg(VARIANT_BOOL* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetTradeFlag(VARIANT_BOOL* value) {
+HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetETHTradeFlag(VARIANT_BOOL* value) {
 	CHECK_PTR(value);
 
-	*value = m_data->is_trade ? VARIANT_TRUE : VARIANT_FALSE;
+	*value = m_data->is_eth_trade ? VARIANT_TRUE : VARIANT_FALSE;
 
 	return S_OK;
 }

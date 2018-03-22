@@ -111,13 +111,37 @@ typedef dx_trade_t dxf_trade_t;
 typedef dx_quote_t dxf_quote_t;
 typedef dx_summary_t dxf_summary_t;
 typedef dx_profile_t dxf_profile_t;
-typedef dx_time_and_sale_t dxf_time_and_sale_t;
 typedef dx_candle_t dxf_candle_t;
 typedef dx_trade_eth_t dxf_trade_eth_t;
 typedef dx_greeks_t dxf_greeks_t;
 typedef dx_theo_price_t dxf_theo_price_t;
 typedef dx_underlying_t dxf_underlying_t;
 typedef dx_series_t dxf_series_t;
+
+typedef struct {
+    dxf_event_flags_t event_flags;
+    dxf_long_t time;
+    dxf_int_t sequence;
+    dxf_char_t exchange_code;
+    dxf_double_t price;
+    dxf_long_t size;
+    dxf_double_t bid_price;
+    dxf_double_t ask_price;
+    dxf_const_string_t exchange_sale_conditions;
+    dxf_int_t flags;
+    dxf_const_string_t buyer;
+    dxf_const_string_t seller;
+
+    dxf_long_t index;
+    dxf_int_t side;
+    dxf_bool_t is_cancel;
+    dxf_bool_t is_correction;
+    dxf_bool_t is_eth_trade;
+    dxf_bool_t is_new;
+    dxf_bool_t is_spread_leg;
+    dxf_bool_t is_valid_tick;
+    dxf_int_t type;
+} dxf_time_and_sale_t;
 
 typedef struct {
     dxf_int_t count;

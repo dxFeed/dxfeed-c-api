@@ -240,10 +240,10 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, bool new_snapshot, vo
 				wprintf(L"    {time=");
 				print_timestamp(tns.time);
 				wprintf(L", sequence=%d, event id=%I64i, exchange code=%c, price=%f, size=%I64i, bid price=%f, ask price=%f, "
-					L"exchange sale conditions=\'%ls\', is trade=%ls, type=%i}\n",
-					tns.sequence, tns.event_id, tns.exchange_code, tns.price, tns.size,
+					L"exchange sale conditions=\'%ls\', is ETH trade=%ls, type=%i}\n",
+					tns.sequence, tns.index, tns.exchange_code, tns.price, tns.size,
 					tns.bid_price, tns.ask_price, tns.exchange_sale_conditions,
-					tns.is_trade ? L"True" : L"False", tns.type);
+					tns.is_eth_trade ? L"True" : L"False", tns.type);
 			} else {
 				wprintf(L"    {time=");
 				print_timestamp(tns.time);

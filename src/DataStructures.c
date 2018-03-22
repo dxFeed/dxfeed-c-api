@@ -339,12 +339,20 @@ static const dx_field_info_t dx_fields_time_and_sale[] = {
 	DX_RECORD_FIELD_DEF_VAL_NAME(dx_time_and_sale_t, ask_price), DX_RECORD_FIELD_GETTER_NAME(dx_time_and_sale_t, ask_price),
 	dx_ft_common_field },
 
-	{ dx_fid_compact_int, L"ExchangeSaleConditions", DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, exch_sale_conds),
-	DX_RECORD_FIELD_DEF_VAL_NAME(dx_time_and_sale_t, exch_sale_conds), DX_RECORD_FIELD_GETTER_NAME(dx_time_and_sale_t, exch_sale_conds),
+	{ dx_fid_compact_int, L"ExchangeSaleConditions", DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, exchange_sale_conditions),
+	DX_RECORD_FIELD_DEF_VAL_NAME(dx_time_and_sale_t, exchange_sale_conditions), DX_RECORD_FIELD_GETTER_NAME(dx_time_and_sale_t, exchange_sale_conditions),
 	dx_ft_common_field },
 
 	{ dx_fid_compact_int, L"Flags", DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, flags),
 	DX_RECORD_FIELD_DEF_VAL_NAME(dx_time_and_sale_t, flags), DX_RECORD_FIELD_GETTER_NAME(dx_time_and_sale_t, flags),
+	dx_ft_common_field },
+
+	{ dx_fid_utf_char_array, L"Buyer", DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, buyer),
+	DX_RECORD_FIELD_DEF_VAL_NAME(dx_time_and_sale_t, buyer), DX_RECORD_FIELD_GETTER_NAME(dx_time_and_sale_t, buyer),
+	dx_ft_common_field },
+
+	{ dx_fid_utf_char_array, L"Seller", DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, seller),
+	DX_RECORD_FIELD_DEF_VAL_NAME(dx_time_and_sale_t, seller), DX_RECORD_FIELD_GETTER_NAME(dx_time_and_sale_t,seller),
 	dx_ft_common_field }
 };
 

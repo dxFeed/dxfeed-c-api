@@ -804,6 +804,8 @@ int main (int argc, char* argv[]) {
 		loop_counter = atoi(argv[2]) * 1000 / MAIN_LOOP_SLEEP_MILLIS;
 	}
 
+	InitializeCriticalSection(&listener_thread_guard);
+
 	dxf_initialize_logger( "log.log", true, true, true );
 
 	if (!initialize_console()) {
@@ -828,11 +830,9 @@ int main (int argc, char* argv[]) {
 			return -1;
 	}
 	// main loop
-	InitializeCriticalSection(&listener_thread_guard);
 	while (!is_thread_terminate() && loop_counter--) {
 		Sleep(MAIN_LOOP_SLEEP_MILLIS);
 	}
-	DeleteCriticalSection(&listener_thread_guard);
 
 	printf("Disconnecting from host...\n");
 
@@ -844,6 +844,8 @@ int main (int argc, char* argv[]) {
 
 	printf("Disconnect successful!\n"
 		"Connection test completed successfully!\n");
+
+	DeleteCriticalSection(&listener_thread_guard);
 
 	return 0;
 }
