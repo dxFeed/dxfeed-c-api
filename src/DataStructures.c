@@ -347,11 +347,11 @@ static const dx_field_info_t dx_fields_time_and_sale[] = {
 	DX_RECORD_FIELD_DEF_VAL_NAME(dx_time_and_sale_t, flags), DX_RECORD_FIELD_GETTER_NAME(dx_time_and_sale_t, flags),
 	dx_ft_common_field },
 
-	{ dx_fid_compact_int, L"Buyer", DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, buyer),
+	{ dx_fid_utf_char_array, L"Buyer", DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, buyer),
 	DX_RECORD_FIELD_DEF_VAL_NAME(dx_time_and_sale_t, buyer), DX_RECORD_FIELD_GETTER_NAME(dx_time_and_sale_t, buyer),
 	dx_ft_common_field },
 
-	{ dx_fid_compact_int, L"Buyer", DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, seller),
+	{ dx_fid_utf_char_array, L"Seller", DX_RECORD_FIELD_SETTER_NAME(dx_time_and_sale_t, seller),
 	DX_RECORD_FIELD_DEF_VAL_NAME(dx_time_and_sale_t, seller), DX_RECORD_FIELD_GETTER_NAME(dx_time_and_sale_t,seller),
 	dx_ft_common_field }
 };

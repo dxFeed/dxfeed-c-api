@@ -153,8 +153,8 @@ FIELD_SETTER_BODY(dx_time_and_sale_t, bid_price, dxf_double_t)
 FIELD_SETTER_BODY(dx_time_and_sale_t, ask_price, dxf_double_t)
 FIELD_SETTER_BODY(dx_time_and_sale_t, exchange_sale_conditions, dxf_int_t)
 FIELD_SETTER_BODY(dx_time_and_sale_t, flags, dxf_int_t)
-FIELD_SETTER_BODY(dx_time_and_sale_t, buyer, dxf_int_t)
-FIELD_SETTER_BODY(dx_time_and_sale_t, seller, dxf_int_t)
+FIELD_SETTER_BODY(dx_time_and_sale_t, buyer, dxf_const_string_t)
+FIELD_SETTER_BODY(dx_time_and_sale_t, seller, dxf_const_string_t)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -505,8 +505,8 @@ FIELD_DEF_VAL_BODY(dx_time_and_sale_t, bid_price, dxf_double_t)
 FIELD_DEF_VAL_BODY(dx_time_and_sale_t, ask_price, dxf_double_t)
 FIELD_DEF_VAL_BODY(dx_time_and_sale_t, exchange_sale_conditions, dxf_int_t)
 FIELD_DEF_VAL_BODY(dx_time_and_sale_t, flags, dxf_int_t)
-FIELD_DEF_VAL_BODY(dx_time_and_sale_t, buyer, dxf_int_t)
-FIELD_DEF_VAL_BODY(dx_time_and_sale_t, seller, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_time_and_sale_t, buyer, dxf_const_string_t)
+FIELD_DEF_VAL_BODY(dx_time_and_sale_t, seller, dxf_const_string_t)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -744,8 +744,8 @@ FIELD_GETTER_BODY(dx_time_and_sale_t, bid_price, dxf_double_t)
 FIELD_GETTER_BODY(dx_time_and_sale_t, ask_price, dxf_double_t)
 FIELD_GETTER_BODY(dx_time_and_sale_t, exchange_sale_conditions, dxf_int_t)
 FIELD_GETTER_BODY(dx_time_and_sale_t, flags, dxf_int_t)
-FIELD_GETTER_BODY(dx_time_and_sale_t, buyer, dxf_int_t)
-FIELD_GETTER_BODY(dx_time_and_sale_t, seller, dxf_int_t)
+FIELD_GETTER_BODY(dx_time_and_sale_t, buyer, dxf_const_string_t)
+FIELD_GETTER_BODY(dx_time_and_sale_t, seller, dxf_const_string_t)
 
 /* -------------------------------------------------------------------------- */
 /*

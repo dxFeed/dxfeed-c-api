@@ -156,8 +156,8 @@ typedef struct {
     dxf_double_t ask_price;
     dxf_int_t exchange_sale_conditions;
     dxf_int_t flags;
-    dxf_int_t buyer;
-    dxf_int_t seller;
+    dxf_const_string_t buyer;
+    dxf_const_string_t seller;
 } dx_time_and_sale_t;
 
 typedef struct {

@@ -673,8 +673,8 @@ bool RECORD_TRANSCODER_NAME(dx_time_and_sale_t) (dx_record_transcoder_connection
 		cur_event->ask_price = cur_record->ask_price;
 		cur_event->exchange_sale_conditions = dx_decode_from_integer(cur_record->exchange_sale_conditions);
 		cur_event->flags = cur_record->flags;
-		cur_event->buyer = dx_decode_from_integer(cur_record->buyer);
-		cur_event->seller = dx_decode_from_integer(cur_record->seller);
+		cur_event->buyer = cur_record->buyer;
+		cur_event->seller = cur_record->seller;
 
 		cur_event->index = ((dxf_long_t)cur_record->time) << 32 | (cur_record->sequence & 0xFFFFFFFF);
 		cur_event->side = ((flags >> DX_TIME_AND_SALE_SIDE_SHIFT) & DX_TIME_AND_SALE_SIDE_MASK) == DX_ORDER_SIDE_SELL ? DXF_ORDER_SIDE_SELL : DXF_ORDER_SIDE_BUY;;
@@ -698,13 +698,6 @@ bool RECORD_TRANSCODER_NAME(dx_time_and_sale_t) (dx_record_transcoder_connection
 			if (cur_event->exchange_sale_conditions != NULL && !dx_store_string_buffer(context->rbcc, cur_event->exchange_sale_conditions)) {
 				return false;
 			}
-			if (cur_event->buyer != NULL && !dx_store_string_buffer(context->rbcc, cur_event->buyer)) {
-				return false;
-			}
-			if (cur_event->seller != NULL && !dx_store_string_buffer(context->rbcc, cur_event->seller)) {
-				return false;
-			}
-
 		}
 
 	}
