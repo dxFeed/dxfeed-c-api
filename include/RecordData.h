@@ -69,12 +69,16 @@ static const dx_record_id_t DX_RECORD_ID_INVALID = -1;
 
 typedef struct {
     dxf_long_t time;
+    dxf_int_t sequence;
+    dxf_int_t time_nanos
     dxf_char_t exchange_code;
     dxf_double_t price;
-    dxf_long_t size;
-    dxf_long_t tick;
+    dxf_int_t size;
+    dxf_int_t tick;
     dxf_double_t change;
-    dxf_double_t day_volume;	
+    dxf_int_t flags;
+    dxf_double_t day_volume;
+    dxf_double_t day_turnover;
 } dx_trade_t;
 
 typedef struct {
