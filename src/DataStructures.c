@@ -139,14 +139,15 @@ static const dx_field_info_t dx_fields_market_maker[] = {
 /* -------------------------------------------------------------------------- */
 
 static const dx_field_info_t dx_fields_order[] = {
-	{ dx_fid_compact_int,                       L"Index",    DX_RECORD_FIELD_STDOPS(dx_order_t, index),    dx_ft_second_time_int_field },
-    { dx_fid_compact_int,                       L"Time",     DX_RECORD_FIELD_STDOPS(dx_order_t, time),     dx_ft_common_field },
-    { dx_fid_compact_int,                       L"Sequence", DX_RECORD_FIELD_STDOPS(dx_order_t, sequence), dx_ft_common_field },
-    { dx_fid_compact_int | dx_fid_flag_decimal, L"Price",    DX_RECORD_FIELD_STDOPS(dx_order_t, price),    dx_ft_common_field },
-    { dx_fid_compact_int,                       L"Size",     DX_RECORD_FIELD_STDOPS(dx_order_t, size),     dx_ft_common_field },
-    { dx_fid_compact_int,                       L"Flags",    DX_RECORD_FIELD_STDOPS(dx_order_t, flags),    dx_ft_common_field },
-    { dx_fid_compact_int,                       L"MMID",     DX_RECORD_FIELD_STDOPS(dx_order_t, mmid),     dx_ft_common_field },
-    { dx_fid_compact_int,                       L"Count",    DX_RECORD_FIELD_STDOPS(dx_order_t, count),	   dx_ft_common_field }
+	{ dx_fid_compact_int,                       L"Index",        DX_RECORD_FIELD_STDOPS(dx_order_t, index),      dx_ft_second_time_int_field },
+    { dx_fid_compact_int,                       L"Time",         DX_RECORD_FIELD_STDOPS(dx_order_t, time),       dx_ft_common_field },
+	{ dx_fid_compact_int,                       L"TimeNanoPart", DX_RECORD_FIELD_STDOPS(dx_order_t, time_nanos), dx_ft_common_field },
+    { dx_fid_compact_int,                       L"Sequence",     DX_RECORD_FIELD_STDOPS(dx_order_t, sequence),   dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Price",        DX_RECORD_FIELD_STDOPS(dx_order_t, price),      dx_ft_common_field },
+    { dx_fid_compact_int,                       L"Size",         DX_RECORD_FIELD_STDOPS(dx_order_t, size),       dx_ft_common_field },
+    { dx_fid_compact_int,                       L"Flags",        DX_RECORD_FIELD_STDOPS(dx_order_t, flags),      dx_ft_common_field },
+    { dx_fid_compact_int,                       L"MMID",         DX_RECORD_FIELD_STDOPS(dx_order_t, mmid),       dx_ft_common_field },
+    { dx_fid_compact_int,                       L"Count",        DX_RECORD_FIELD_STDOPS(dx_order_t, count),	     dx_ft_common_field }
 };
 
 /* -------------------------------------------------------------------------- */

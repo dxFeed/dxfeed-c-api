@@ -195,6 +195,7 @@ DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_market_maker_t, mmask_count);
 
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_order_t, index);
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_order_t, time);
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_order_t, time_nanos);
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_order_t, sequence);
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_order_t, price);
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_order_t, size);

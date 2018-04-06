@@ -275,7 +275,8 @@ FIELD_STDOPS_BODIES(dx_market_maker_t, mmask_count, dxf_int_t, dxf_int_t)
  /* -------------------------------------------------------------------------- */
 
 FIELD_STDOPS_BODIES(dx_order_t, index, dxf_int_t, dxf_int_t)
-FIELD_STDOPS_BODIES(dx_order_t, time, dxf_int_t, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_order_t, time, dxf_int_t, dxf_long_t)
+FIELD_STDOPS_BODIES(dx_order_t, time_nanos, dxf_int_t, dxf_int_t)
 FIELD_STDOPS_BODIES(dx_order_t, sequence, dxf_int_t, dxf_int_t)
 FIELD_STDOPS_BODIES(dx_order_t, price, dxf_double_t, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_order_t, size, dxf_int_t, dxf_int_t)

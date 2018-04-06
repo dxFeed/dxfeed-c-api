@@ -142,14 +142,27 @@ typedef struct {
 
 typedef struct {
     dxf_int_t index;
-    dxf_int_t time;
+    dxf_long_t time;
+    dxf_int_t time_nanos;
     dxf_int_t sequence;
     dxf_double_t price;
     dxf_int_t size;
+    dxf_int_t count;
     dxf_int_t flags;
     dxf_int_t mmid;
-    dxf_int_t count;
 } dx_order_t;
+
+typedef struct {
+    dxf_int_t index;
+    dxf_int_t time;
+    dxf_int_t time_nanos;
+    dxf_int_t sequence;
+    dxf_double_t price;
+    dxf_int_t size;
+    dxf_int_t count;
+    dxf_int_t flags;
+    dxf_const_string_t spread_symbol;
+} dx_spread_order_t;
 
 typedef struct {
     dxf_long_t time;
@@ -193,17 +206,6 @@ typedef struct {
     dxf_long_t size;
     dxf_double_t eth_volume;
 } dx_trade_eth_t;
-
-typedef struct {
-    dxf_int_t index;
-    dxf_int_t time;
-    dxf_int_t sequence;
-    dxf_double_t price;
-    dxf_int_t size;
-    dxf_int_t count;
-    dxf_int_t flags;
-    dxf_const_string_t spread_symbol;
-} dx_spread_order_t;
 
 typedef struct {
     dxf_long_t time;

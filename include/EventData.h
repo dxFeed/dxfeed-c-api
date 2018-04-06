@@ -174,8 +174,8 @@ static const dxf_uint_t DXF_PROFILE_FLAGS_TS_MASK   = 0x3;
 static const dxf_byte_t DXF_PROFILE_FLAGS_SSR_SHIFT = 2;
 static const dxf_uint_t DXF_PROFILE_FLAGS_SSR_MASK  = 0x3;
 
-#define DX_PROFILE_GET_TRADING_STATUS(profile) ((dxf_trading_status_t)(((profil)->flags >> DXF_PROFILE_FLAGS_TS_SHIFT) & DXF_PROFILE_FLAGS_TS_MASK))
-#define DX_PROFILE_GET_SSR(profile)            ((dxf_short_sale_restriction_t(((profil)->flags >> DXF_PROFILE_FLAGS_SSR_SHIFT) & DXF_PROFILE_FLAGS_SSR_MASK))
+#define DX_PROFILE_GET_TRADING_STATUS(profile) ((dxf_trading_status_t)(((profile)->flags >> DXF_PROFILE_FLAGS_TS_SHIFT) & DXF_PROFILE_FLAGS_TS_MASK))
+#define DX_PROFILE_GET_SSR(profile)            ((dxf_short_sale_restriction_t(((profile)->flags >> DXF_PROFILE_FLAGS_SSR_SHIFT) & DXF_PROFILE_FLAGS_SSR_MASK))
 
 /* Candle ------------------------------------------------------------------- */
 typedef dx_candle_t dxf_candle_t;
@@ -210,39 +210,40 @@ typedef struct {
     dxf_int_t type;
 } dxf_time_and_sale_t;
 
-typedef struct {
-    dxf_int_t count;
-    dxf_event_flags_t event_flags;
-    dxf_char_t exchange_code;
-    dxf_long_t index;
-    dxf_int_t level;
-    dxf_int_t side;
-    dxf_double_t price;
-    dxf_int_t scope;
-    dxf_int_t sequence;
-    dxf_long_t size;
-    dxf_char_t source[DXF_RECORD_SUFFIX_SIZE];
-    dxf_long_t time;
-    dxf_long_t time_sequence;
-    dxf_const_string_t market_maker;
-} dxf_order_t;
+/* Order & Spread Order ----------------------------------------------------- */
+
+/* Event and record are not the same, this is event */
+typedef enum {
+    dxf_osc_composite = 0,
+    dxf_osc_regional = 1,
+    dxf_osc_aggregate = 2,
+    dxf_osc_order = 3
+} dxf_order_scope_t;
+
+typedef enum {
+    dxf_osd_undefined = 0,
+    dxf_osd_buy = 1,
+    dxf_osd_sell = 2
+} dxf_order_side_t;
 
 typedef struct {
-    dxf_int_t count;
     dxf_event_flags_t event_flags;
-    dxf_char_t exchange_code;
     dxf_long_t index;
-    dxf_int_t level;
-    dxf_int_t side;
-    dxf_double_t price;
-    dxf_int_t scope;
-    dxf_int_t sequence;
-    dxf_long_t size;
-    dxf_char_t source[DXF_RECORD_SUFFIX_SIZE];
     dxf_long_t time;
-    dxf_long_t time_sequence;
-    dxf_const_string_t spread_symbol;
-} dxf_spread_order_t;
+    dxf_int_t time_nanos;
+    dxf_int_t sequence;
+    dxf_double_t price;
+    dxf_long_t size;
+    dxf_long_t count;
+    dxf_order_scope_t scope;
+    dxf_order_side_t side;
+    dxf_char_t exchange_code;
+    dxf_char_t source[DXF_RECORD_SUFFIX_SIZE];
+    union {
+        dxf_const_string_t market_maker;
+        dxf_const_string_t spread_symbol;
+	};
+} dxf_order_t;
 
 typedef struct {
     dxf_string_t object;
