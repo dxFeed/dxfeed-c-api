@@ -73,16 +73,6 @@ static const dxf_int_t DX_TIME_AND_SALE_TYPE_MASK = 3;
 
 /* -------------------------------------------------------------------------- */
 /*
- *	Summary calculation constants
- */
-/* -------------------------------------------------------------------------- */
-
-static const dxf_byte_t DX_SUMMARY_PRICE_TYPE_MASK = 3;
-static const dxf_byte_t DX_SUMMARY_DAY_CLOSE_PRICE_TYPE_SHIFT = 2;
-static const dxf_byte_t DX_SUMMARY_PREV_DAY_CLOSE_PRICE_TYPE_SHIFT = 0;
-
-/* -------------------------------------------------------------------------- */
-/*
  *	Record transcoder connection context
  */
 /* -------------------------------------------------------------------------- */

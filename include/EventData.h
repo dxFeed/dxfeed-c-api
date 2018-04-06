@@ -121,9 +121,9 @@ typedef enum {
     dxf_dir_up = 5
 } dxf_direction_t;
 
-static const dxf_int_t  DXF_TRADE_FLAGS_ETH       = 1;
+static const dxf_uint_t DXF_TRADE_FLAGS_ETH       = 1;
 static const dxf_byte_t DXF_TRADE_FLAGS_DIR_SHIFT = 1;
-static const dxf_byte_t DXF_TRADE_FLAGS_DIR_MASK  = 0x7;
+static const dxf_uint_t DXF_TRADE_FLAGS_DIR_MASK  = 0x7;
 
 #define DXF_TRADE_IS_ETH(trade)   (((trade)->flags & DXF_TRADE_FLAGS_ETH) == DXF_TRADE_FLAGS_ETH)
 #define DXF_TRADE_GET_DIR(trade)  ((dxf_direction_t)(((trade)->flags >> DXF_TRADE_FLAGS_DIR_SHIFT) & DXF_TRADE_FLAGS_DIR_MASK))
@@ -136,7 +136,6 @@ typedef dx_quote_t dxf_quote_t;
 /* Summary ------------------------------------------------------------------ */
 
 /* Event and record are the same */
-
 typedef dx_summary_t dxf_summary_t;
 
 typedef enum {
@@ -148,13 +147,37 @@ typedef enum {
 
 static const dxf_byte_t DXF_SUMMARY_FLAGS_DCPT_SHIFT  = 2;
 static const dxf_byte_t DXF_SUMMARY_FLAGS_PDCPT_SHIFT = 0;
-static const dxf_byte_t DXF_SUMMARY_FLAGS_CPT_MASK    = 0x3;
+static const dxf_uint_t DXF_SUMMARY_FLAGS_CPT_MASK    = 0x3;
 
 #define DX_SUMMARY_GET_DAY_CLOSE_PRICE_TYPE(summary)      ((dxf_price_type_t)(((summary)->flags >> DXF_SUMMARY_FLAGS_DCPT_SHIFT)  & DXF_SUMMARY_FLAGS_CPT_MASK))
 #define DX_SUMMARY_GET_PREV_DAY_CLOSE_PRICE_TYPE(summary) ((dxf_price_type_t)(((summary)->flags >> DXF_SUMMARY_FLAGS_PDCPT_SHIFT) & DXF_SUMMARY_FLAGS_CPT_MASK))
 
 /* Profile ------------------------------------------------------------------ */
+
+/* Event and record are the same */
 typedef dx_profile_t dxf_profile_t;
+
+typedef enum {
+  dxf_ts_undefined = 0,
+  dxf_ts_halted = 1,
+  dxf_ts_active = 2
+} dxf_trading_status_t;
+
+typedef enum {
+  dxf_ssr_undefined = 0,
+  dxf_ssr_active = 1,
+  dxf_ssr_inactive = 2
+} dxf_short_sale_restriction_t;
+
+static const dxf_byte_t DXF_PROFILE_FLAGS_TS_SHIFT  = 0;
+static const dxf_uint_t DXF_PROFILE_FLAGS_TS_MASK   = 0x3;
+static const dxf_byte_t DXF_PROFILE_FLAGS_SSR_SHIFT = 2;
+static const dxf_uint_t DXF_PROFILE_FLAGS_SSR_MASK  = 0x3;
+
+#define DX_PROFILE_GET_TRADING_STATUS(profile) ((dxf_trading_status_t)(((profil)->flags >> DXF_PROFILE_FLAGS_TS_SHIFT) & DXF_PROFILE_FLAGS_TS_MASK))
+#define DX_PROFILE_GET_SSR(profile)            ((dxf_short_sale_restriction_t(((profil)->flags >> DXF_PROFILE_FLAGS_SSR_SHIFT) & DXF_PROFILE_FLAGS_SSR_MASK))
+
+/* Candle ------------------------------------------------------------------- */
 typedef dx_candle_t dxf_candle_t;
 typedef dx_trade_eth_t dxf_trade_eth_t;
 typedef dx_greeks_t dxf_greeks_t;

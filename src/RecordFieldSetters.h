@@ -161,13 +161,14 @@ DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, exd_div_date);
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, _52_high_price);
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, _52_low_price);
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, shares);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, description);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, flags);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, status_reason);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, halt_start_time);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, halt_end_time);
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, free_float);
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, high_limit_price);
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, low_limit_price);
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, halt_start_time);
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, halt_end_time);
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, flags);
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, description);
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, status_reason);
 
 /* -------------------------------------------------------------------------- */
 /*
