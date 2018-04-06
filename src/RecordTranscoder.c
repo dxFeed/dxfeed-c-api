@@ -384,6 +384,10 @@ bool dx_transcode_quote (dx_record_transcoder_connection_context_t* context,
 		cur_event->ask_time *= 1000L;
 		if (exchange_code != 0)
 			cur_event->ask_exchange_code = exchange_code;
+
+		cur_event->time = (cur_event->bid_time > cur_event->ask_time ? cur_event->bid_time : cur_event->ask_time) + ((cur_event->sequence >> 22) & 0x3FF);
+		cur_event->sequence &= 0x3FFFFFU;
+
 		dx_set_record_exchange_code(context->dscc, record_params->record_id, cur_event->bid_exchange_code);
 	}
 

@@ -200,6 +200,8 @@ FIELD_STDOPS_BODIES(dx_trade_t, day_turnover, dxf_double_t, dxf_double_t)
  */
 /* -------------------------------------------------------------------------- */
 
+FIELD_STDOPS_BODIES(dx_quote_t, sequence, dxf_int_t, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_quote_t, time_nanos, dxf_int_t, dxf_int_t)
 FIELD_STDOPS_BODIES(dx_quote_t, bid_time, dxf_int_t, dxf_long_t)
 FIELD_STDOPS_BODIES(dx_quote_t, bid_exchange_code, dxf_char_t, dxf_char_t)
 FIELD_STDOPS_BODIES(dx_quote_t, bid_price, dxf_double_t, dxf_double_t)

@@ -119,6 +119,8 @@ DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_t, day_turnover);
  */
 /* -------------------------------------------------------------------------- */
 
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_quote_t, sequence);
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_quote_t, time_nanos);
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_quote_t, bid_time);
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_quote_t, bid_exchange_code);
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_quote_t, bid_price);

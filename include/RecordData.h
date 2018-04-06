@@ -82,6 +82,9 @@ typedef struct {
 } dx_trade_t;
 
 typedef struct {
+    dxf_long_t time;
+    dxf_int_t sequence;
+    dxf_int_t time_nanos;
     dxf_long_t bid_time;
     dxf_char_t bid_exchange_code;
     dxf_double_t bid_price;

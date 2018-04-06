@@ -58,6 +58,8 @@ static const dx_field_info_t dx_fields_trade[] = {
 /* -------------------------------------------------------------------------- */
 
 static const dx_field_info_t dx_fields_quote[] = {
+	{ dx_fid_compact_int,                       L"Sequence",     DX_RECORD_FIELD_STDOPS(dx_quote_t, sequence),          dx_ft_common_field },
+	{ dx_fid_compact_int,                       L"TimeNanoPart", DX_RECORD_FIELD_STDOPS(dx_quote_t, time_nanos),        dx_ft_common_field },
 	{ dx_fid_compact_int,                       L"Bid.Time",     DX_RECORD_FIELD_STDOPS(dx_quote_t, bid_time),          dx_ft_common_field },
 	{ dx_fid_utf_char,                          L"Bid.Exchange", DX_RECORD_FIELD_STDOPS(dx_quote_t, bid_exchange_code),	dx_ft_common_field },
 	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Bid.Price",    DX_RECORD_FIELD_STDOPS(dx_quote_t, bid_price),         dx_ft_common_field },

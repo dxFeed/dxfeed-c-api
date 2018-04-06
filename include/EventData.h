@@ -130,7 +130,10 @@ static const dxf_byte_t DXF_TRADE_FLAGS_DIR_MASK  = 0x7;
 
 /* Quote -------------------------------------------------------------------- */
 
+/* Event and record are the same */
 typedef dx_quote_t dxf_quote_t;
+
+/* Summary ------------------------------------------------------------------ */
 typedef dx_summary_t dxf_summary_t;
 typedef dx_profile_t dxf_profile_t;
 typedef dx_candle_t dxf_candle_t;
