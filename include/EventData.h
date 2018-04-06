@@ -101,13 +101,35 @@ typedef dx_order_source_array_t* dx_order_source_array_ptr_t;
 
 /* -------------------------------------------------------------------------- */
 /*
- *	Event data structures
+ *	Event data structures and support
  */
 /* -------------------------------------------------------------------------- */
 
 typedef void* dxf_event_data_t;
 
+/* Trade -------------------------------------------------------------------- */
+
+/* Event and record are the same */
 typedef dx_trade_t dxf_trade_t;
+
+typedef enum {
+    dxf_dir_undefined = 0,
+    dxf_dir_down = 1,
+    dxf_dir_zero_down = 2,
+    dxf_dir_zero = 3,
+    dxf_dir_zero_up = 4,
+    dxf_dir_up = 5
+} dxf_direction_t;
+
+static const dxf_int_t  DXF_TRADE_FLAGS_ETH       = 1;
+static const dxf_byte_t DXF_TRADE_FLAGS_DIR_SHIFT = 1;
+static const dxf_byte_t DXF_TRADE_FLAGS_DIR_MASK  = 0x7;
+
+#define DXF_TRADE_IS_ETH(trade)   (((trade)->flags & DXF_TRADE_FLAGS_ETH) == DXF_TRADE_FLAGS_ETH)
+#define DXF_TRADE_GET_DIR(trade)  ((dxf_direction_t)(((trade)->flags >> DXF_TRADE_FLAGS_DIR_SHIFT) & DXF_TRADE_FLAGS_DIR_MASK))
+
+/* Quote -------------------------------------------------------------------- */
+
 typedef dx_quote_t dxf_quote_t;
 typedef dx_summary_t dxf_summary_t;
 typedef dx_profile_t dxf_profile_t;

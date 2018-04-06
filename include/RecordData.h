@@ -70,7 +70,7 @@ static const dx_record_id_t DX_RECORD_ID_INVALID = -1;
 typedef struct {
     dxf_long_t time;
     dxf_int_t sequence;
-    dxf_int_t time_nanos
+    dxf_int_t time_nanos;
     dxf_char_t exchange_code;
     dxf_double_t price;
     dxf_int_t size;

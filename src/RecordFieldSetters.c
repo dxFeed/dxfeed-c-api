@@ -44,7 +44,7 @@
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_SETTER_BODY(dx_trade_t, time, dxf_int_t)
+FIELD_SETTER_BODY(dx_trade_t, time, dxf_long_t)
 FIELD_SETTER_BODY(dx_trade_t, sequence, dxf_int_t)
 FIELD_SETTER_BODY(dx_trade_t, time_nanos, dxf_int_t)
 FIELD_SETTER_BODY(dx_trade_t, exchange_code, dxf_char_t)
@@ -402,7 +402,7 @@ RECORD_EXCHANGE_CODE_GETTER_BODY(dx_rid_trade_eth)
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_DEF_VAL_BODY(dx_trade_t, time, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_trade_t, time, dxf_long_t)
 FIELD_DEF_VAL_BODY(dx_trade_t, sequence, dxf_int_t)
 FIELD_DEF_VAL_BODY(dx_trade_t, time_nanos, dxf_int_t)
 FIELD_DEF_VAL_BODY(dx_trade_t, exchange_code, dxf_char_t)
@@ -643,7 +643,7 @@ FIELD_DEF_VAL_BODY(dx_configuration_t, object, dxf_byte_array_t);
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_GETTER_BODY(dx_trade_t, time, dxf_int_t)
+FIELD_GETTER_BODY(dx_trade_t, time, dxf_long_t)
 FIELD_GETTER_BODY(dx_trade_t, sequence, dxf_int_t)
 FIELD_GETTER_BODY(dx_trade_t, time_nanos, dxf_int_t)
 FIELD_GETTER_BODY(dx_trade_t, exchange_code, dxf_char_t)

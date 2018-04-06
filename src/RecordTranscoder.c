@@ -282,7 +282,8 @@ bool RECORD_TRANSCODER_NAME(dx_trade_t) (dx_record_transcoder_connection_context
 		dxf_trade_t* cur_event = event_buffer + i;
 		dxf_char_t exchange_code = (suffix == NULL ? 0 : suffix[0]);
 		
-		cur_event->time = cur_event->time * 1000L + (((dxf_uint_t)cur_event->sequence) >> 22);
+		cur_event->time = cur_event->time * 1000L + ((cur_event->sequence >> 22) & 0x3FF);
+		cur_event->sequence &= 0x3FFFFFU;
 		if (!cur_event->exchange_code) {
 			cur_event->exchange_code = exchange_code;
 			dx_set_record_exchange_code(context->dscc, record_params->record_id, exchange_code);

@@ -39,6 +39,14 @@ static const dx_field_info_t dx_fields_trade[] = {
 	DX_RECORD_FIELD_DEF_VAL_NAME(dx_trade_t, time), DX_RECORD_FIELD_GETTER_NAME(dx_trade_t, time),
 	dx_ft_common_field },
 
+	{ dx_fid_compact_int, L"Last.Sequence", DX_RECORD_FIELD_SETTER_NAME(dx_trade_t, sequence),
+	DX_RECORD_FIELD_DEF_VAL_NAME(dx_trade_t, sequence), DX_RECORD_FIELD_GETTER_NAME(dx_trade_t, sequence),
+	dx_ft_common_field },
+
+	{ dx_fid_compact_int, L"Last.TimeNanoPart", DX_RECORD_FIELD_SETTER_NAME(dx_trade_t, time_nanos),
+	DX_RECORD_FIELD_DEF_VAL_NAME(dx_trade_t, time_nanos), DX_RECORD_FIELD_GETTER_NAME(dx_trade_t, time_nanos),
+	dx_ft_common_field },
+
 	{ dx_fid_utf_char, L"Last.Exchange", DX_RECORD_FIELD_SETTER_NAME(dx_trade_t, exchange_code),
 	DX_RECORD_FIELD_DEF_VAL_NAME(dx_trade_t, exchange_code), DX_RECORD_FIELD_GETTER_NAME(dx_trade_t, exchange_code),
 	dx_ft_common_field },
@@ -59,8 +67,16 @@ static const dx_field_info_t dx_fields_trade[] = {
 	DX_RECORD_FIELD_DEF_VAL_NAME(dx_trade_t, change), DX_RECORD_FIELD_GETTER_NAME(dx_trade_t, change),
 	dx_ft_common_field },
 
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Last.Flags", DX_RECORD_FIELD_SETTER_NAME(dx_trade_t, flags),
+	DX_RECORD_FIELD_DEF_VAL_NAME(dx_trade_t, flags), DX_RECORD_FIELD_GETTER_NAME(dx_trade_t, flags),
+	dx_ft_common_field },
+
 	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Volume", DX_RECORD_FIELD_SETTER_NAME(dx_trade_t, day_volume),
 	DX_RECORD_FIELD_DEF_VAL_NAME(dx_trade_t, day_volume), DX_RECORD_FIELD_GETTER_NAME(dx_trade_t, day_volume),
+	dx_ft_common_field },
+
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"DayTurnover", DX_RECORD_FIELD_SETTER_NAME(dx_trade_t, day_turnover),
+	DX_RECORD_FIELD_DEF_VAL_NAME(dx_trade_t, day_turnover), DX_RECORD_FIELD_GETTER_NAME(dx_trade_t, day_turnover),
 	dx_ft_common_field }
 };
 
