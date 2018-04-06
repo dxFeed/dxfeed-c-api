@@ -257,37 +257,37 @@ FIELD_STDOPS_BODIES(dx_profile_t, status_reason, dxf_const_string_t, dxf_const_s
  */
  /* -------------------------------------------------------------------------- */
 
-	FIELD_STDOPS_BODIES(dx_market_maker_t, mm_exchange, dxf_char_t, dxf_char_t)
-	FIELD_STDOPS_BODIES(dx_market_maker_t, mm_id, dxf_int_t, dxf_int_t)
-	FIELD_STDOPS_BODIES(dx_market_maker_t, mmbid_time, dxf_int_t, dxf_int_t)
-	FIELD_STDOPS_BODIES(dx_market_maker_t, mmbid_price, dxf_double_t, dxf_double_t)
-	FIELD_STDOPS_BODIES(dx_market_maker_t, mmbid_size, dxf_int_t, dxf_int_t)
-	FIELD_STDOPS_BODIES(dx_market_maker_t, mmask_time, dxf_int_t, dxf_int_t)
-	FIELD_STDOPS_BODIES(dx_market_maker_t, mmask_price, dxf_double_t, dxf_double_t)
-	FIELD_STDOPS_BODIES(dx_market_maker_t, mmask_size, dxf_int_t, dxf_int_t)
-	FIELD_STDOPS_BODIES(dx_market_maker_t, mmbid_count, dxf_int_t, dxf_int_t)
-	FIELD_STDOPS_BODIES(dx_market_maker_t, mmask_count, dxf_int_t, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_market_maker_t, mm_exchange, dxf_char_t, dxf_char_t)
+FIELD_STDOPS_BODIES(dx_market_maker_t, mm_id, dxf_int_t, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_market_maker_t, mmbid_time, dxf_int_t, dxf_long_t)
+FIELD_STDOPS_BODIES(dx_market_maker_t, mmbid_price, dxf_double_t, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_market_maker_t, mmbid_size, dxf_int_t, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_market_maker_t, mmbid_count, dxf_int_t, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_market_maker_t, mmask_time, dxf_int_t, dxf_long_t)
+FIELD_STDOPS_BODIES(dx_market_maker_t, mmask_price, dxf_double_t, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_market_maker_t, mmask_size, dxf_int_t, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_market_maker_t, mmask_count, dxf_int_t, dxf_int_t)
 
-	/* -------------------------------------------------------------------------- */
-	/*
-	 *	Order field setters/getters implementation
-	 */
-	 /* -------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------- */
+/*
+ *	Order field setters/getters implementation
+ */
+ /* -------------------------------------------------------------------------- */
 
-	FIELD_STDOPS_BODIES(dx_order_t, index, dxf_int_t, dxf_int_t)
-	FIELD_STDOPS_BODIES(dx_order_t, time, dxf_int_t, dxf_int_t)
-	FIELD_STDOPS_BODIES(dx_order_t, sequence, dxf_int_t, dxf_int_t)
-	FIELD_STDOPS_BODIES(dx_order_t, price, dxf_double_t, dxf_double_t)
-	FIELD_STDOPS_BODIES(dx_order_t, size, dxf_int_t, dxf_int_t)
-	FIELD_STDOPS_BODIES(dx_order_t, flags, dxf_int_t, dxf_int_t)
-	FIELD_STDOPS_BODIES(dx_order_t, mmid, dxf_int_t, dxf_int_t)
-	FIELD_STDOPS_BODIES(dx_order_t, count, dxf_int_t, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_order_t, index, dxf_int_t, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_order_t, time, dxf_int_t, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_order_t, sequence, dxf_int_t, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_order_t, price, dxf_double_t, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_order_t, size, dxf_int_t, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_order_t, flags, dxf_int_t, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_order_t, mmid, dxf_int_t, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_order_t, count, dxf_int_t, dxf_int_t)
 
-	/* -------------------------------------------------------------------------- */
-	/*
-	 *	Time and Sale field setters/getters implementation
-	 */
-	 /* -------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------- */
+/*
+ *	Time and Sale field setters/getters implementation
+ */
+ /* -------------------------------------------------------------------------- */
 
 FIELD_STDOPS_BODIES(dx_time_and_sale_t, time, dxf_int_t, dxf_long_t)
 FIELD_STDOPS_BODIES(dx_time_and_sale_t, sequence, dxf_int_t, dxf_int_t)

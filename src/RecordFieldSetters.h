@@ -181,10 +181,10 @@ DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_market_maker_t, mm_id);
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_market_maker_t, mmbid_time);
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_market_maker_t, mmbid_price);
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_market_maker_t, mmbid_size);
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_market_maker_t, mmbid_count);
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_market_maker_t, mmask_time);
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_market_maker_t, mmask_price);
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_market_maker_t, mmask_size);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_market_maker_t, mmbid_count);
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_market_maker_t, mmask_count);
 
 /* -------------------------------------------------------------------------- */
