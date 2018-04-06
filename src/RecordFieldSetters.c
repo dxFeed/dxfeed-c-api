@@ -182,7 +182,7 @@ GENERIC_VALUE_GETTER_NAME_PROTO(dxf_byte_array_t) {
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_STDOPS_BODIES(dx_trade_t, time, dxf_long_t, dxf_long_t)
+FIELD_STDOPS_BODIES(dx_trade_t, time, dxf_int_t, dxf_long_t)
 FIELD_STDOPS_BODIES(dx_trade_t, sequence, dxf_int_t, dxf_int_t)
 FIELD_STDOPS_BODIES(dx_trade_t, time_nanos, dxf_int_t, dxf_int_t)
 FIELD_STDOPS_BODIES(dx_trade_t, exchange_code, dxf_char_t, dxf_char_t)
@@ -354,7 +354,7 @@ FIELD_STDOPS_BODIES(dx_spread_order_t, spread_symbol, dxf_const_string_t, dxf_co
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_STDOPS_BODIES(dx_greeks_t, time, dxf_int_t, dxf_int_t);
+FIELD_STDOPS_BODIES(dx_greeks_t, time, dxf_int_t, dxf_long_t);
 FIELD_STDOPS_BODIES(dx_greeks_t, sequence, dxf_int_t, dxf_int_t);
 FIELD_STDOPS_BODIES(dx_greeks_t, greeks_price, dxf_double_t, dxf_double_t);
 FIELD_STDOPS_BODIES(dx_greeks_t, volatility, dxf_double_t, dxf_double_t);
@@ -370,7 +370,7 @@ FIELD_STDOPS_BODIES(dx_greeks_t, vega, dxf_double_t, dxf_double_t);
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_STDOPS_BODIES(dx_theo_price_t, theo_time, dxf_int_t, dxf_int_t);
+FIELD_STDOPS_BODIES(dx_theo_price_t, theo_time, dxf_int_t, dxf_long_t);
 FIELD_STDOPS_BODIES(dx_theo_price_t, theo_price, dxf_double_t, dxf_double_t);
 FIELD_STDOPS_BODIES(dx_theo_price_t, theo_underlying_price, dxf_double_t, dxf_double_t);
 FIELD_STDOPS_BODIES(dx_theo_price_t, theo_delta, dxf_double_t, dxf_double_t);
