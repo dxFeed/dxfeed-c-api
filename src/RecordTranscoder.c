@@ -439,8 +439,6 @@ bool RECORD_TRANSCODER_NAME(dx_summary_t) (dx_record_transcoder_connection_conte
 	for (; i < record_count; ++i) {
 		dxf_summary_t* cur_event = event_buffer + i;
 		cur_event->exchange_code = exchange_code;
-		cur_event->day_close_price_type = (cur_event->flags >> DX_SUMMARY_DAY_CLOSE_PRICE_TYPE_SHIFT) & DX_SUMMARY_PRICE_TYPE_MASK;
-		cur_event->prev_day_close_price_type = (cur_event->flags >> DX_SUMMARY_PREV_DAY_CLOSE_PRICE_TYPE_SHIFT) & DX_SUMMARY_PRICE_TYPE_MASK;
 	}
 
 	return dx_process_event_data(context->connection, dx_eid_summary, record_params->symbol_name,

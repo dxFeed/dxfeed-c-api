@@ -134,7 +134,26 @@ static const dxf_byte_t DXF_TRADE_FLAGS_DIR_MASK  = 0x7;
 typedef dx_quote_t dxf_quote_t;
 
 /* Summary ------------------------------------------------------------------ */
+
+/* Event and record are the same */
+
 typedef dx_summary_t dxf_summary_t;
+
+typedef enum {
+    dxf_pt_regular = 0,
+    dxf_pt_indicative = 1,
+    dxf_pt_preliminary = 2,
+    dxf_pt_final = 3
+} dxf_price_type_t;
+
+static const dxf_byte_t DXF_SUMMARY_FLAGS_DCPT_SHIFT  = 2;
+static const dxf_byte_t DXF_SUMMARY_FLAGS_PDCPT_SHIFT = 0;
+static const dxf_byte_t DXF_SUMMARY_FLAGS_CPT_MASK    = 0x3;
+
+#define DX_SUMMARY_GET_DAY_CLOSE_PRICE_TYPE(summary)      ((dxf_price_type_t)(((summary)->flags >> DXF_SUMMARY_FLAGS_DCPT_SHIFT)  & DXF_SUMMARY_FLAGS_CPT_MASK))
+#define DX_SUMMARY_GET_PREV_DAY_CLOSE_PRICE_TYPE(summary) ((dxf_price_type_t)(((summary)->flags >> DXF_SUMMARY_FLAGS_PDCPT_SHIFT) & DXF_SUMMARY_FLAGS_CPT_MASK))
+
+/* Profile ------------------------------------------------------------------ */
 typedef dx_profile_t dxf_profile_t;
 typedef dx_candle_t dxf_candle_t;
 typedef dx_trade_eth_t dxf_trade_eth_t;

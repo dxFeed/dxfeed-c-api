@@ -106,9 +106,6 @@ typedef struct {
     dxf_long_t open_interest;
     dxf_long_t flags;
     dxf_char_t exchange_code;
-    /* Note: calculated fields */
-    dxf_byte_t day_close_price_type;
-    dxf_byte_t prev_day_close_price_type;
 } dx_summary_t;
 
 typedef struct {
