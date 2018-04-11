@@ -207,13 +207,13 @@ typedef struct {
 } dx_greeks_t;
 
 typedef struct {
-    dxf_long_t theo_time;
-    dxf_double_t theo_price;
-    dxf_double_t theo_underlying_price;
-    dxf_double_t theo_delta;
-    dxf_double_t theo_gamma;
-    dxf_double_t theo_dividend;
-    dxf_double_t theo_interest;
+    dxf_long_t time;
+    dxf_double_t price;
+    dxf_double_t underlying_price;
+    dxf_double_t delta;
+    dxf_double_t gamma;
+    dxf_double_t dividend;
+    dxf_double_t interest;
 } dx_theo_price_t;
 
 typedef struct {

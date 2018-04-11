@@ -277,13 +277,13 @@ DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_greeks_t, vega);
  */
 /* -------------------------------------------------------------------------- */
 
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_theo_price_t, theo_time);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_theo_price_t, theo_price);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_theo_price_t, theo_underlying_price);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_theo_price_t, theo_delta);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_theo_price_t, theo_gamma);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_theo_price_t, theo_dividend);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_theo_price_t, theo_interest);
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_theo_price_t, time);
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_theo_price_t, price);
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_theo_price_t, underlying_price);
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_theo_price_t, delta);
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_theo_price_t, gamma);
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_theo_price_t, dividend);
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_theo_price_t, interest);
 
 /* -------------------------------------------------------------------------- */
 /*

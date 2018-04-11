@@ -252,13 +252,13 @@ static const dx_field_info_t dx_fields_greeks[] = {
 /* -------------------------------------------------------------------------- */
 
 static const dx_field_info_t dx_fields_theo_price[] = {
-	{ dx_fid_compact_int | dx_fid_flag_time,    L"Theo.Time",            DX_RECORD_FIELD_STDOPS(dx_theo_price_t, theo_time),             dx_ft_common_field },
-    { dx_fid_compact_int | dx_fid_flag_decimal, L"Theo.Price",           DX_RECORD_FIELD_STDOPS(dx_theo_price_t, theo_price),            dx_ft_common_field },
-    { dx_fid_compact_int | dx_fid_flag_decimal, L"Theo.UnderlyingPrice", DX_RECORD_FIELD_STDOPS(dx_theo_price_t, theo_underlying_price), dx_ft_common_field },
-    { dx_fid_compact_int | dx_fid_flag_decimal, L"Theo.Delta",           DX_RECORD_FIELD_STDOPS(dx_theo_price_t, theo_delta),            dx_ft_common_field },
-    { dx_fid_compact_int | dx_fid_flag_decimal, L"Theo.Gamma",           DX_RECORD_FIELD_STDOPS(dx_theo_price_t, theo_gamma),            dx_ft_common_field },
-    { dx_fid_compact_int | dx_fid_flag_decimal, L"Theo.Dividend",        DX_RECORD_FIELD_STDOPS(dx_theo_price_t, theo_dividend),         dx_ft_common_field },
-    { dx_fid_compact_int | dx_fid_flag_decimal, L"Theo.Interest",        DX_RECORD_FIELD_STDOPS(dx_theo_price_t, theo_interest),         dx_ft_common_field }
+	{ dx_fid_compact_int | dx_fid_flag_time,    L"Theo.Time",            DX_RECORD_FIELD_STDOPS(dx_theo_price_t, time),             dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Theo.Price",           DX_RECORD_FIELD_STDOPS(dx_theo_price_t, price),            dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Theo.UnderlyingPrice", DX_RECORD_FIELD_STDOPS(dx_theo_price_t, underlying_price), dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Theo.Delta",           DX_RECORD_FIELD_STDOPS(dx_theo_price_t, delta),            dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Theo.Gamma",           DX_RECORD_FIELD_STDOPS(dx_theo_price_t, gamma),            dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Theo.Dividend",        DX_RECORD_FIELD_STDOPS(dx_theo_price_t, dividend),         dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_decimal, L"Theo.Interest",        DX_RECORD_FIELD_STDOPS(dx_theo_price_t, interest),         dx_ft_common_field }
 };
 
 /* -------------------------------------------------------------------------- */

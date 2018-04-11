@@ -358,13 +358,13 @@ FIELD_STDOPS_BODIES(dx_greeks_t, vega, dxf_double_t, dxf_double_t);
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_STDOPS_BODIES(dx_theo_price_t, theo_time, dxf_int_t, dxf_long_t);
-FIELD_STDOPS_BODIES(dx_theo_price_t, theo_price, dxf_double_t, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_theo_price_t, theo_underlying_price, dxf_double_t, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_theo_price_t, theo_delta, dxf_double_t, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_theo_price_t, theo_gamma, dxf_double_t, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_theo_price_t, theo_dividend, dxf_double_t, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_theo_price_t, theo_interest, dxf_double_t, dxf_double_t);
+FIELD_STDOPS_BODIES(dx_theo_price_t, time, dxf_int_t, dxf_long_t);
+FIELD_STDOPS_BODIES(dx_theo_price_t, price, dxf_double_t, dxf_double_t);
+FIELD_STDOPS_BODIES(dx_theo_price_t, underlying_price, dxf_double_t, dxf_double_t);
+FIELD_STDOPS_BODIES(dx_theo_price_t, delta, dxf_double_t, dxf_double_t);
+FIELD_STDOPS_BODIES(dx_theo_price_t, gamma, dxf_double_t, dxf_double_t);
+FIELD_STDOPS_BODIES(dx_theo_price_t, dividend, dxf_double_t, dxf_double_t);
+FIELD_STDOPS_BODIES(dx_theo_price_t, interest, dxf_double_t, dxf_double_t);
 
 /* -------------------------------------------------------------------------- */
 /*
