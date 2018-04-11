@@ -986,7 +986,7 @@ bool RECORD_TRANSCODER_NAME(dx_theo_price_t) (dx_record_transcoder_connection_co
 bool RECORD_TRANSCODER_NAME(dx_underlying_t) (dx_record_transcoder_connection_context_t* context,
 										const dx_record_params_t* record_params,
 										const dxf_event_params_t* event_params,
-										void* record_buffer, int record_count) {
+										dx_underlying_t* record_buffer, int record_count) {
 	dxf_underlying_t* event_buffer = (dxf_underlying_t*)record_buffer;
 
 	return dx_process_event_data(context->connection, dx_eid_underlying, record_params->symbol_name,

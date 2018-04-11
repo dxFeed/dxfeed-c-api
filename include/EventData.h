@@ -312,6 +312,8 @@ typedef struct {
 /* Event and record are the same */
 typedef dx_theo_price_t dxf_theo_price_t;
 
+/* Underlying --------------------------------------------------------------- */
+/* Event and record are the same */
 typedef dx_underlying_t dxf_underlying_t;
 typedef dx_series_t dxf_series_t;
 
