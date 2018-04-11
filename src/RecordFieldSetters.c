@@ -397,6 +397,7 @@ FIELD_STDOPS_BODIES(dx_series_t, interest, dxf_double_t, dxf_double_t);
  */
 /* -------------------------------------------------------------------------- */
 
+FIELD_STDOPS_BODIES(dx_configuration_t, version, dxf_int_t, dxf_int_t);
 FIELD_STDOPS_BODIES(dx_configuration_t, object, dxf_byte_array_t, dxf_byte_array_t);
 
 /* -------------------------------------------------------------------------- */

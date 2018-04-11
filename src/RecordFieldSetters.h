@@ -316,6 +316,7 @@ DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_series_t, interest);
  */
 /* -------------------------------------------------------------------------- */
 
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_configuration_t, version);
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_configuration_t, object);
 
 #endif /* RECORD_FIELD_SETTERS_H_INCLUDED */

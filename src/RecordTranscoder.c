@@ -1034,17 +1034,18 @@ bool RECORD_TRANSCODER_NAME(dx_series_t) (dx_record_transcoder_connection_contex
 bool RECORD_TRANSCODER_NAME(dx_configuration_t) (dx_record_transcoder_connection_context_t* context,
 												const dx_record_params_t* record_params,
 												const dxf_event_params_t* event_params,
-												void* record_buffer, int record_count) {
-	int i = 0;
+												dx_configuration_t* record_buffer, int record_count) {
 	dxf_configuration_t* event_buffer = (dxf_configuration_t*)dx_get_event_data_buffer(context, dx_eid_configuration, record_count);
 
 	if (event_buffer == NULL) {
 		return false;
 	}
 
-	for (; i < record_count; ++i) {
-		dx_configuration_t* cur_record = (dx_configuration_t*)record_buffer + i;
+	for (int i = 0; i < record_count; ++i) {
+		dx_configuration_t* cur_record = record_buffer + i;
 		dxf_configuration_t* cur_event = event_buffer + i;
+
+		cur_event->version = cur_record->version;
 
 		if (!dx_configuration_deserialize_string(&(cur_record->object), &(cur_event->object)) ||
 			!dx_store_string_buffer(context->rbcc, cur_event->object)) {
