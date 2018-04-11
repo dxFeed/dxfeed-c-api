@@ -38,7 +38,7 @@
 /* -------------------------------------------------------------------------- */
 
 typedef enum {
-    dx_eid_begin,
+    dx_eid_begin = 0,
     dx_eid_trade = dx_eid_begin,
     dx_eid_quote,
     dx_eid_summary,
@@ -109,9 +109,6 @@ typedef void* dxf_event_data_t;
 
 /* Trade -------------------------------------------------------------------- */
 
-/* Event and record are the same */
-typedef dx_trade_t dxf_trade_t;
-
 typedef enum {
     dxf_dir_undefined = 0,
     dxf_dir_down = 1,
@@ -121,12 +118,21 @@ typedef enum {
     dxf_dir_up = 5
 } dxf_direction_t;
 
-static const dxf_uint_t DXF_TRADE_FLAGS_ETH       = 1;
-static const dxf_byte_t DXF_TRADE_FLAGS_DIR_SHIFT = 1;
-static const dxf_uint_t DXF_TRADE_FLAGS_DIR_MASK  = 0x7;
-
-#define DXF_TRADE_IS_ETH(trade)   (((trade)->flags & DXF_TRADE_FLAGS_ETH) == DXF_TRADE_FLAGS_ETH)
-#define DXF_TRADE_GET_DIR(trade)  ((dxf_direction_t)(((trade)->flags >> DXF_TRADE_FLAGS_DIR_SHIFT) & DXF_TRADE_FLAGS_DIR_MASK))
+typedef struct {
+    dxf_long_t time;
+    dxf_int_t sequence;
+    dxf_int_t time_nanos;
+    dxf_char_t exchange_code;
+    dxf_double_t price;
+    dxf_int_t size;
+    dxf_int_t tick;
+    dxf_double_t change;
+    dxf_int_t raw_flags;
+    dxf_double_t day_volume;
+    dxf_double_t day_turnover;
+    dxf_direction_t direction;
+    dxf_bool_t is_eth;
+} dxf_trade_t;
 
 /* Quote -------------------------------------------------------------------- */
 

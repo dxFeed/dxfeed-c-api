@@ -32,6 +32,15 @@
 
 /* -------------------------------------------------------------------------- */
 /*
+ *	Trade flags constants
+ */
+/* -------------------------------------------------------------------------- */
+static const dxf_uint_t DX_TRADE_FLAGS_ETH       = 1;
+static const dxf_byte_t DX_TRADE_FLAGS_DIR_SHIFT = 1;
+static const dxf_uint_t DX_TRADE_FLAGS_DIR_MASK  = 0x7;
+
+/* -------------------------------------------------------------------------- */
+/*
  *	Order index calculation constants
  */
 /* -------------------------------------------------------------------------- */
@@ -75,31 +84,29 @@ static const dxf_int_t DX_TIME_AND_SALE_TYPE_MASK = 3;
  */
 /* -------------------------------------------------------------------------- */
 
-typedef struct {
-	dxf_order_t* buffer;
-	int count;
-} dx_order_buffer_t;
+/* Must be synchronized with dx_event_id_t */
+const size_t dx_event_sizes[] = {
+    sizeof(dxf_trade_t),
+	sizeof(dxf_quote_t),
+	sizeof(dxf_summary_t),
+	sizeof(dxf_profile_t),
+	sizeof(dxf_order_t),
+	sizeof(dxf_time_and_sale_t),
+	sizeof(dxf_candle_t),
+	sizeof(dxf_trade_eth_t),
+	sizeof(dxf_order_t),
+	sizeof(dxf_greeks_t),
+	sizeof(dxf_theo_price_t),
+	sizeof(dxf_underlying_t),
+	sizeof(dxf_series_t),
+	sizeof(dxf_configuration_t)
+};
 
 typedef struct {
-	dxf_order_t* buffer;
-	int count;
-} dx_spread_order_buffer_t;
-
-typedef struct {
-	dxf_configuration_t* buffer;
-	int count;
-} dx_configuration_buffer_t;
-
-typedef struct {
-	dxf_time_and_sale_t* buffer;
-	int count;
-} dx_time_and_sale_buffer_t;
-
-typedef struct {
-	dx_order_buffer_t order_buffer;
-	dx_spread_order_buffer_t spread_order_buffer;
-	dx_configuration_buffer_t configuration_buffer;
-	dx_time_and_sale_buffer_t time_and_sale_buffer;
+	struct {
+		dxf_event_data_t buffer;
+		int count;
+	} event_buffers[dx_eid_count];
 
 	dxf_connection_t connection;
 	void* rbcc;
@@ -155,17 +162,9 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_record_transcoder) {
 		return res;
 	}
 
-	if (context->order_buffer.buffer != NULL) {
-		dx_free(context->order_buffer.buffer);
-	}
-	if (context->spread_order_buffer.buffer != NULL) {
-		dx_free(context->spread_order_buffer.buffer);
-	}
-	if (context->configuration_buffer.buffer != NULL) {
-		dx_free(context->configuration_buffer.buffer);
-	}
-	if (context->time_and_sale_buffer.buffer != NULL) {
-		dx_free(context->time_and_sale_buffer.buffer);
+	for (int i = dx_eid_begin; i < dx_eid_count; i++) {
+		if (context->event_buffers[i].buffer)
+			dx_free(context->event_buffers[i].buffer);
 	}
 
 	dx_free(context);
@@ -188,7 +187,7 @@ DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_record_transcoder) {
  */
 /* -------------------------------------------------------------------------- */
 
-void* dx_initialize_event_data_buffer(int count, int struct_size,
+void* dx_initialize_event_data_buffer(int count, size_t struct_size,
 									OUT void** buffer_data, OUT int* buffer_count) {
 	if (*buffer_count >= count) {
 		return *buffer_data;
@@ -210,29 +209,13 @@ void* dx_initialize_event_data_buffer(int count, int struct_size,
 
 dxf_event_data_t dx_get_event_data_buffer(dx_record_transcoder_connection_context_t* context,
 										dx_event_id_t event_id, int count) {
-	if (event_id == dx_eid_order) {
-		return dx_initialize_event_data_buffer(count, sizeof(dxf_order_t),
-			(void**)&(context->order_buffer.buffer), &(context->order_buffer.count));
 
-	} else if (event_id == dx_eid_spread_order) {
-		return dx_initialize_event_data_buffer(count, sizeof(dxf_order_t),
-			(void**)&(context->spread_order_buffer.buffer), &(context->spread_order_buffer.count));
-
-	} else if (event_id == dx_eid_configuration) {
-		return dx_initialize_event_data_buffer(count, sizeof(dxf_configuration_t),
-			(void**)&(context->configuration_buffer.buffer), &(context->configuration_buffer.count));
-
-	} else if (event_id == dx_eid_time_and_sale) {
-		return dx_initialize_event_data_buffer(count, sizeof(dxf_time_and_sale_t),
-			(void**)&(context->time_and_sale_buffer.buffer), &(context->time_and_sale_buffer.count));
-
-	} else {
-		/* these other types don't require separate buffers yet */
-
+	if (event_id < dx_eid_begin || event_id >= dx_eid_count) {
 		dx_set_error_code(dx_ec_internal_assert_violation);
-
 		return NULL;
 	}
+	return dx_initialize_event_data_buffer(count, dx_event_sizes[event_id],
+			(void**)&(context->event_buffers[event_id].buffer), &(context->event_buffers[event_id].count));
 }
 
 /* -------------------------------------------------------------------------- */
@@ -261,21 +244,34 @@ typedef bool (*dx_record_transcoder_t) (dx_record_transcoder_connection_context_
 bool RECORD_TRANSCODER_NAME(dx_trade_t) (dx_record_transcoder_connection_context_t* context,
 										const dx_record_params_t* record_params,
 										const dxf_event_params_t* event_params,
-										void* record_buffer, int record_count) {
-	dxf_trade_t* event_buffer = (dxf_trade_t*)record_buffer;
-	int i = 0;
-	dxf_const_string_t suffix = record_params->suffix;
+										dx_trade_t* record_buffer, int record_count) {
+	dxf_trade_t* event_buffer = NULL;
+	dxf_char_t exchange_code = (record_params->suffix == NULL ? 0 : record_params->suffix[0]);
 
-	for (; i < record_count; ++i) {
+	if ((event_buffer = (dxf_trade_t*)dx_get_event_data_buffer(context, dx_eid_trade, record_count)) == NULL) {
+		return false;
+	}
+
+	for (int i = 0; i < record_count; ++i) {
+		dx_trade_t* cur_record = record_buffer + i;
 		dxf_trade_t* cur_event = event_buffer + i;
-		dxf_char_t exchange_code = (suffix == NULL ? 0 : suffix[0]);
 		
-		cur_event->time = cur_event->time * 1000L + ((cur_event->sequence >> 22) & 0x3FF);
-		cur_event->sequence &= 0x3FFFFFU;
-		if (!cur_event->exchange_code) {
-			cur_event->exchange_code = exchange_code;
+		cur_event->time = cur_record->time * 1000L + ((cur_record->sequence >> 22) & 0x3FF);
+		cur_event->sequence = cur_record->sequence & 0x3FFFFFU;
+		cur_event->time_nanos = cur_record->time_nanos;
+		cur_event->exchange_code = cur_record->exchange_code ? cur_record->exchange_code : exchange_code;
+		cur_event->price = cur_record->price;
+		cur_event->size = cur_record->size;
+		cur_event->tick = cur_record->tick;
+		cur_event->change = cur_record->change;
+		cur_event->raw_flags = cur_record->flags;
+		cur_event->day_volume = cur_record->day_volume;
+		cur_event->day_turnover = cur_record->day_turnover;
+		cur_event->direction = (dxf_direction_t)((cur_record->flags >> DX_TRADE_FLAGS_DIR_SHIFT) & DX_TRADE_FLAGS_DIR_MASK);
+		cur_event->is_eth = (cur_record->flags & DX_TRADE_FLAGS_ETH) == DX_TRADE_FLAGS_ETH;
+
+		if (!cur_record->exchange_code)
 			dx_set_record_exchange_code(context->dscc, record_params->record_id, exchange_code);
-		}
 	}
 
 	return dx_process_event_data(context->connection, dx_eid_trade, record_params->symbol_name,

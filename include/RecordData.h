@@ -33,7 +33,7 @@
 /* -------------------------------------------------------------------------- */
 
 typedef enum {
-    dx_rid_begin,
+    dx_rid_begin = 0,
     dx_rid_trade = dx_rid_begin,
     dx_rid_quote,
     dx_rid_summary,
