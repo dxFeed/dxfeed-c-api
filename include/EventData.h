@@ -315,7 +315,18 @@ typedef dx_theo_price_t dxf_theo_price_t;
 /* Underlying --------------------------------------------------------------- */
 /* Event and record are the same */
 typedef dx_underlying_t dxf_underlying_t;
-typedef dx_series_t dxf_series_t;
+
+/* Series ------------------------------------------------------------------- */
+typedef struct {
+    dxf_event_flags_t event_flags;
+    dxf_long_t index;
+    dxf_dayid_t expiration;
+    dxf_double_t volatility;
+    dxf_double_t put_call_ratio;
+    dxf_double_t forward_price;
+    dxf_double_t dividend;
+    dxf_double_t interest;
+} dxf_series_t;
 
 typedef struct {
     dxf_string_t object;

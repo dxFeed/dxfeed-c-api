@@ -231,9 +231,6 @@ typedef struct {
     dxf_double_t forward_price;
     dxf_double_t dividend;
     dxf_double_t interest;
-    /* Note: calculated fields */
-    dxf_long_t index;
-    dxf_event_flags_t event_flags;
 } dx_series_t;
 
 typedef struct {
