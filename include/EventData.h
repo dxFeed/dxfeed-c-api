@@ -141,9 +141,6 @@ typedef dx_quote_t dxf_quote_t;
 
 /* Summary ------------------------------------------------------------------ */
 
-/* Event and record are the same */
-typedef dx_summary_t dxf_summary_t;
-
 typedef enum {
     dxf_pt_regular = 0,
     dxf_pt_indicative = 1,
@@ -151,12 +148,20 @@ typedef enum {
     dxf_pt_final = 3
 } dxf_price_type_t;
 
-static const dxf_byte_t DXF_SUMMARY_FLAGS_DCPT_SHIFT  = 2;
-static const dxf_byte_t DXF_SUMMARY_FLAGS_PDCPT_SHIFT = 0;
-static const dxf_uint_t DXF_SUMMARY_FLAGS_CPT_MASK    = 0x3;
-
-#define DX_SUMMARY_GET_DAY_CLOSE_PRICE_TYPE(summary)      ((dxf_price_type_t)(((summary)->flags >> DXF_SUMMARY_FLAGS_DCPT_SHIFT)  & DXF_SUMMARY_FLAGS_CPT_MASK))
-#define DX_SUMMARY_GET_PREV_DAY_CLOSE_PRICE_TYPE(summary) ((dxf_price_type_t)(((summary)->flags >> DXF_SUMMARY_FLAGS_PDCPT_SHIFT) & DXF_SUMMARY_FLAGS_CPT_MASK))
+typedef struct {
+    dxf_dayid_t day_id;
+    dxf_double_t day_open_price;
+    dxf_double_t day_high_price;
+    dxf_double_t day_low_price;
+    dxf_double_t day_close_price;
+    dxf_dayid_t prev_day_id;
+    dxf_double_t prev_day_close_price;
+    dxf_long_t open_interest;
+    dxf_long_t raw_flags;
+    dxf_char_t exchange_code;
+    dxf_price_type_t day_close_price_type;
+    dxf_price_type_t prev_day_close_price_type;
+} dxf_summary_t;
 
 /* Profile ------------------------------------------------------------------ */
 

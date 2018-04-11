@@ -241,7 +241,7 @@ bool dx_snapshot_insert_record(dx_snapshot_data_ptr_t snapshot_data, dx_snapshot
 			dx_capacity_manager_halfer, failed);
 		break;
 	case dx_eid_spread_order:
-		DX_ARRAY_INSERT(recs->records, dxf_spread_order_t, *((dxf_spread_order_t*)obj), position,
+		DX_ARRAY_INSERT(recs->records, dxf_order_t, *((dxf_order_t*)obj), position,
 			dx_capacity_manager_halfer, failed);
 		break;
 	case dx_eid_time_and_sale:
@@ -276,7 +276,7 @@ bool dx_snapshot_delete_record(dx_snapshot_data_ptr_t snapshot_data, dx_snapshot
 			dx_capacity_manager_halfer, failed);
 		break;
 	case dx_eid_spread_order:
-		DX_ARRAY_DELETE(recs->records, dxf_spread_order_t, position,
+		DX_ARRAY_DELETE(recs->records, dxf_order_t, position,
 			dx_capacity_manager_halfer, failed);
 		break;
 	case dx_eid_time_and_sale:
@@ -310,8 +310,8 @@ bool dx_snapshot_set_record(dx_snapshot_data_ptr_t snapshot_data, dx_snapshot_re
 			sizeof(dxf_candle_t));
 		break;
 	case dx_eid_spread_order:
-		dx_memcpy(&(((dxf_spread_order_t*)recs->records.elements)[position]), (dxf_spread_order_t*)obj,
-			sizeof(dxf_spread_order_t));
+		dx_memcpy(&(((dxf_order_t*)recs->records.elements)[position]), (dxf_order_t*)obj,
+			sizeof(dxf_order_t));
 		break;
 	case dx_eid_time_and_sale:
 		dx_memcpy(&(((dxf_time_and_sale_t*)recs->records.elements)[position]), (dxf_time_and_sale_t*)obj,

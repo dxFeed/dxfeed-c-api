@@ -145,7 +145,6 @@ DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_summary_t, prev_day_id);
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_summary_t, prev_day_close_price);
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_summary_t, open_interest);
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_summary_t, flags);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_summary_t, exchange_code);
 
 /* -------------------------------------------------------------------------- */
 /*

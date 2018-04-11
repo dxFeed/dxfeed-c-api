@@ -41,6 +41,15 @@ static const dxf_uint_t DX_TRADE_FLAGS_DIR_MASK  = 0x7;
 
 /* -------------------------------------------------------------------------- */
 /*
+ *	Summary flags constants
+ */
+/* -------------------------------------------------------------------------- */
+static const dxf_byte_t DX_SUMMARY_FLAGS_DCPT_SHIFT  = 2;
+static const dxf_byte_t DX_SUMMARY_FLAGS_PDCPT_SHIFT = 0;
+static const dxf_uint_t DX_SUMMARY_FLAGS_CPT_MASK    = 0x3;
+
+/* -------------------------------------------------------------------------- */
+/*
  *	Order index calculation constants
  */
 /* -------------------------------------------------------------------------- */
@@ -433,16 +442,31 @@ bool RECORD_TRANSCODER_NAME(dx_quote_t) (dx_record_transcoder_connection_context
 bool RECORD_TRANSCODER_NAME(dx_summary_t) (dx_record_transcoder_connection_context_t* context,
 										const dx_record_params_t* record_params,
 										const dxf_event_params_t* event_params,
-										void* record_buffer, int record_count) {
+										dx_summary_t* record_buffer, int record_count) {
 
-	dxf_summary_t* event_buffer = (dxf_summary_t*)record_buffer;
-	dxf_const_string_t suffix = record_params->suffix;
-	dxf_char_t exchange_code = (suffix == NULL ? 0 : suffix[0]);
-	int i = 0;
+	dxf_summary_t* event_buffer = NULL;
+	dxf_char_t exchange_code = (record_params->suffix == NULL ? 0 : record_params->suffix[0]);
 
-	for (; i < record_count; ++i) {
+	if ((event_buffer = (dxf_summary_t*)dx_get_event_data_buffer(context, dx_eid_summary, record_count)) == NULL) {
+		return false;
+	}
+
+	for (int i = 0; i < record_count; ++i) {
+		dx_summary_t* cur_record = record_buffer + i;
 		dxf_summary_t* cur_event = event_buffer + i;
+
+		cur_event->day_id = cur_record->day_id;	
+		cur_event->day_open_price = cur_record->day_open_price;
+		cur_event->day_high_price = cur_record->day_high_price;
+		cur_event->day_low_price = cur_record->day_low_price;
+		cur_event->day_close_price = cur_record->day_close_price;
+		cur_event->prev_day_id = cur_record->prev_day_id;
+		cur_event->prev_day_close_price = cur_record->prev_day_close_price;
+		cur_event->open_interest = cur_record->open_interest;
+		cur_event->raw_flags = cur_record->flags;
 		cur_event->exchange_code = exchange_code;
+		cur_event->day_close_price_type = (dxf_price_type_t)(((cur_record)->flags >> DX_SUMMARY_FLAGS_DCPT_SHIFT)  & DX_SUMMARY_FLAGS_CPT_MASK);
+		cur_event->prev_day_close_price_type = (dxf_price_type_t)(((cur_record)->flags >> DX_SUMMARY_FLAGS_PDCPT_SHIFT) & DX_SUMMARY_FLAGS_CPT_MASK);
 	}
 
 	return dx_process_event_data(context->connection, dx_eid_summary, record_params->symbol_name,

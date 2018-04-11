@@ -96,7 +96,7 @@ typedef struct {
 } dx_quote_t;
 
 typedef struct {
-    dxf_dayid_t day_id;
+    dxf_dayid_t day_id;	
     dxf_double_t day_open_price;
     dxf_double_t day_high_price;
     dxf_double_t day_low_price;
@@ -105,7 +105,6 @@ typedef struct {
     dxf_double_t prev_day_close_price;
     dxf_long_t open_interest;
     dxf_long_t flags;
-    dxf_char_t exchange_code;
 } dx_summary_t;
 
 typedef struct {

@@ -226,7 +226,6 @@ FIELD_STDOPS_BODIES(dx_summary_t, prev_day_id, dxf_dayid_t, dxf_dayid_t);
 FIELD_STDOPS_BODIES(dx_summary_t, prev_day_close_price, dxf_double_t, dxf_double_t);
 FIELD_STDOPS_BODIES(dx_summary_t, open_interest, dxf_int_t, dxf_long_t);
 FIELD_STDOPS_BODIES(dx_summary_t, flags, dxf_int_t, dxf_long_t);
-FIELD_STDOPS_BODIES(dx_summary_t, exchange_code, dxf_char_t, dxf_char_t);
 
 /* -------------------------------------------------------------------------- */
 /*
