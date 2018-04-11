@@ -273,7 +273,24 @@ typedef struct {
 } dxf_time_and_sale_t;
 
 /* Candle ------------------------------------------------------------------- */
-typedef dx_candle_t dxf_candle_t;
+typedef struct {
+    dxf_event_flags_t event_flags;
+    dxf_long_t index;
+    dxf_long_t time;
+    dxf_int_t sequence;
+    dxf_double_t count;
+    dxf_double_t open;
+    dxf_double_t high;
+    dxf_double_t low;
+    dxf_double_t close;
+    dxf_double_t volume;
+    dxf_double_t vwap;
+    dxf_double_t bid_volume;
+    dxf_double_t ask_volume;
+    dxf_long_t open_interest;
+    dxf_double_t imp_volatility;
+} dxf_candle_t;
+
 typedef dx_trade_eth_t dxf_trade_eth_t;
 typedef dx_greeks_t dxf_greeks_t;
 typedef dx_theo_price_t dxf_theo_price_t;

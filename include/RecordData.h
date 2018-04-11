@@ -188,12 +188,8 @@ typedef struct {
     dxf_double_t vwap;
     dxf_double_t bid_volume;
     dxf_double_t ask_volume;
-    dxf_long_t index;
-    /* Note: next two fields open_interest and imp_volatility introduced for 
-       daily candle */
     dxf_long_t open_interest;
     dxf_double_t imp_volatility;
-    dxf_event_flags_t event_flags;
 } dx_candle_t;
 
 typedef struct {

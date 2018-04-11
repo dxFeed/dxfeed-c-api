@@ -149,6 +149,13 @@ static const dxf_byte_t DX_TNS_INDEX_TIME_SHIFT = 32;
 
 /* -------------------------------------------------------------------------- */
 /*
+ *	Candle calculation constants
+ */
+/* -------------------------------------------------------------------------- */
+static const dxf_byte_t DX_CANDLE_INDEX_TIME_SHIFT = 32;
+
+/* -------------------------------------------------------------------------- */
+/*
  *	Record transcoder connection context
  */
 /* -------------------------------------------------------------------------- */
@@ -803,17 +810,32 @@ bool RECORD_TRANSCODER_NAME(dx_time_and_sale_t) (dx_record_transcoder_connection
 bool RECORD_TRANSCODER_NAME(dx_candle_t) (dx_record_transcoder_connection_context_t* context,
 										const dx_record_params_t* record_params,
 										const dxf_event_params_t* event_params,
-										void* record_buffer, int record_count) {
-	dxf_candle_t* event_buffer = (dxf_candle_t*)record_buffer;
-	int i = 0;
+										dx_candle_t* record_buffer, int record_count) {
+	dxf_candle_t* event_buffer = (dxf_candle_t*)dx_get_event_data_buffer(context, dx_eid_candle, record_count);
 
-	for (; i < record_count; ++i) {
+	if (event_buffer == NULL) {
+		return false;
+	}
+
+	for (int i = 0; i < record_count; ++i) {
+		dx_candle_t* cur_record = record_buffer + i;
 		dxf_candle_t* cur_event = event_buffer + i;
-		cur_event->time *= DX_TIME_SECOND;
-		cur_event->index = ((dxf_long_t)dx_get_seconds_from_time(cur_event->time) << 32)
-			| ((dxf_long_t)dx_get_millis_from_time(cur_event->time) << 22)
-			| cur_event->sequence;
+
 		cur_event->event_flags = event_params->flags;
+		cur_event->index = (((dxf_long_t)cur_record->time) << DX_CANDLE_INDEX_TIME_SHIFT) | (cur_record->sequence);
+		cur_event->time = DX_TIME_SEQ_TO_MS(cur_record);
+		cur_event->sequence = DX_SEQUENCE(cur_record);
+		cur_event->count = cur_record->count;
+		cur_event->open = cur_record->open;
+		cur_event->high = cur_record->high;
+		cur_event->low = cur_record->low;
+		cur_event->close = cur_record->close;
+		cur_event->volume = cur_record->volume;
+		cur_event->vwap = cur_record->vwap;
+		cur_event->bid_volume = cur_record->bid_volume;
+		cur_event->ask_volume = cur_record->ask_volume;
+		cur_event->open_interest = cur_record->open_interest;
+		cur_event->imp_volatility = cur_record->imp_volatility;
 	}
 
 	return dx_process_event_data(context->connection, dx_eid_candle, record_params->symbol_name,
