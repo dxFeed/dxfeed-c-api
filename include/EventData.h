@@ -145,11 +145,11 @@ typedef struct {
     dxf_long_t bid_time;
     dxf_char_t bid_exchange_code;
     dxf_double_t bid_price;
-    dxf_long_t bid_size;
+    dxf_int_t bid_size;
     dxf_long_t ask_time;
     dxf_char_t ask_exchange_code;
     dxf_double_t ask_price;
-    dxf_long_t ask_size;
+    dxf_int_t ask_size;
 } dxf_quote_t;
 
 /* Summary ------------------------------------------------------------------ */
@@ -169,8 +169,8 @@ typedef struct {
     dxf_double_t day_close_price;
     dxf_dayid_t prev_day_id;
     dxf_double_t prev_day_close_price;
-    dxf_long_t open_interest;
-    dxf_long_t raw_flags;
+    dxf_int_t open_interest;
+    dxf_int_t raw_flags;
     dxf_char_t exchange_code;
     dxf_price_type_t day_close_price_type;
     dxf_price_type_t prev_day_close_price_type;
@@ -233,8 +233,8 @@ typedef struct {
     dxf_int_t time_nanos;
     dxf_int_t sequence;
     dxf_double_t price;
-    dxf_long_t size;
-    dxf_long_t count;
+    dxf_int_t size;
+    dxf_int_t count;
     dxf_order_scope_t scope;
     dxf_order_side_t side;
     dxf_char_t exchange_code;
@@ -259,7 +259,7 @@ typedef struct {
     dxf_long_t time;
     dxf_char_t exchange_code;
     dxf_double_t price;
-    dxf_long_t size;
+    dxf_int_t size;
     dxf_double_t bid_price;
     dxf_double_t ask_price;
     dxf_const_string_t exchange_sale_conditions;
@@ -289,7 +289,7 @@ typedef struct {
     dxf_double_t vwap;
     dxf_double_t bid_volume;
     dxf_double_t ask_volume;
-    dxf_long_t open_interest;
+    dxf_int_t open_interest;
     dxf_double_t imp_volatility;
 } dxf_candle_t;
 

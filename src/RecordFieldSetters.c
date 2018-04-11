@@ -170,10 +170,10 @@ GENERIC_VALUE_GETTER_NAME_PROTO(dxf_byte_array_t) {
  *	Standard operations macros
  */
 /* -------------------------------------------------------------------------- */
-#define FIELD_STDOPS_BODIES(struct_name, field_name, field_type, getter_type) \
-    FIELD_SETTER_BODY(struct_name, field_name, field_type)                    \
-    FIELD_DEF_VAL_BODY(struct_name, field_name, field_type)                   \
-    FIELD_GETTER_BODY(struct_name, field_name, getter_type)
+#define FIELD_STDOPS_BODIES(struct_name, field_name, field_type) \
+    FIELD_SETTER_BODY(struct_name, field_name, field_type)       \
+    FIELD_DEF_VAL_BODY(struct_name, field_name, field_type)      \
+    FIELD_GETTER_BODY(struct_name, field_name, field_type)
 
 
 /* -------------------------------------------------------------------------- */
@@ -182,17 +182,17 @@ GENERIC_VALUE_GETTER_NAME_PROTO(dxf_byte_array_t) {
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_STDOPS_BODIES(dx_trade_t, time, dxf_int_t, dxf_long_t)
-FIELD_STDOPS_BODIES(dx_trade_t, sequence, dxf_int_t, dxf_int_t)
-FIELD_STDOPS_BODIES(dx_trade_t, time_nanos, dxf_int_t, dxf_int_t)
-FIELD_STDOPS_BODIES(dx_trade_t, exchange_code, dxf_char_t, dxf_char_t)
-FIELD_STDOPS_BODIES(dx_trade_t, price, dxf_double_t, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_trade_t, size, dxf_int_t, dxf_int_t)
-FIELD_STDOPS_BODIES(dx_trade_t, tick, dxf_int_t, dxf_int_t)
-FIELD_STDOPS_BODIES(dx_trade_t, change, dxf_double_t, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_trade_t, flags, dxf_int_t, dxf_int_t)
-FIELD_STDOPS_BODIES(dx_trade_t, day_volume, dxf_double_t, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_trade_t, day_turnover, dxf_double_t, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_trade_t, time, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_trade_t, sequence, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_trade_t, time_nanos, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_trade_t, exchange_code, dxf_char_t)
+FIELD_STDOPS_BODIES(dx_trade_t, price, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_trade_t, size, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_trade_t, tick, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_trade_t, change, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_trade_t, flags, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_trade_t, day_volume, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_trade_t, day_turnover, dxf_double_t)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -200,16 +200,16 @@ FIELD_STDOPS_BODIES(dx_trade_t, day_turnover, dxf_double_t, dxf_double_t)
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_STDOPS_BODIES(dx_quote_t, sequence, dxf_int_t, dxf_int_t)
-FIELD_STDOPS_BODIES(dx_quote_t, time_nanos, dxf_int_t, dxf_int_t)
-FIELD_STDOPS_BODIES(dx_quote_t, bid_time, dxf_int_t, dxf_long_t)
-FIELD_STDOPS_BODIES(dx_quote_t, bid_exchange_code, dxf_char_t, dxf_char_t)
-FIELD_STDOPS_BODIES(dx_quote_t, bid_price, dxf_double_t, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_quote_t, bid_size, dxf_int_t, dxf_long_t)
-FIELD_STDOPS_BODIES(dx_quote_t, ask_time, dxf_int_t, dxf_long_t)
-FIELD_STDOPS_BODIES(dx_quote_t, ask_exchange_code, dxf_char_t, dxf_char_t)
-FIELD_STDOPS_BODIES(dx_quote_t, ask_price, dxf_double_t, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_quote_t, ask_size, dxf_int_t, dxf_long_t)
+FIELD_STDOPS_BODIES(dx_quote_t, sequence, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_quote_t, time_nanos, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_quote_t, bid_time, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_quote_t, bid_exchange_code, dxf_char_t)
+FIELD_STDOPS_BODIES(dx_quote_t, bid_price, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_quote_t, bid_size, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_quote_t, ask_time, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_quote_t, ask_exchange_code, dxf_char_t)
+FIELD_STDOPS_BODIES(dx_quote_t, ask_price, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_quote_t, ask_size, dxf_int_t)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -217,15 +217,15 @@ FIELD_STDOPS_BODIES(dx_quote_t, ask_size, dxf_int_t, dxf_long_t)
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_STDOPS_BODIES(dx_summary_t, day_id, dxf_dayid_t, dxf_dayid_t)
-FIELD_STDOPS_BODIES(dx_summary_t, day_open_price, dxf_double_t, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_summary_t, day_high_price, dxf_double_t, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_summary_t, day_low_price, dxf_double_t, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_summary_t, day_close_price, dxf_double_t, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_summary_t, prev_day_id, dxf_dayid_t, dxf_dayid_t);
-FIELD_STDOPS_BODIES(dx_summary_t, prev_day_close_price, dxf_double_t, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_summary_t, open_interest, dxf_int_t, dxf_long_t);
-FIELD_STDOPS_BODIES(dx_summary_t, flags, dxf_int_t, dxf_long_t);
+FIELD_STDOPS_BODIES(dx_summary_t, day_id, dxf_dayid_t)
+FIELD_STDOPS_BODIES(dx_summary_t, day_open_price, dxf_double_t);
+FIELD_STDOPS_BODIES(dx_summary_t, day_high_price, dxf_double_t);
+FIELD_STDOPS_BODIES(dx_summary_t, day_low_price, dxf_double_t);
+FIELD_STDOPS_BODIES(dx_summary_t, day_close_price, dxf_double_t);
+FIELD_STDOPS_BODIES(dx_summary_t, prev_day_id, dxf_dayid_t);
+FIELD_STDOPS_BODIES(dx_summary_t, prev_day_close_price, dxf_double_t);
+FIELD_STDOPS_BODIES(dx_summary_t, open_interest, dxf_int_t);
+FIELD_STDOPS_BODIES(dx_summary_t, flags, dxf_int_t);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -233,22 +233,22 @@ FIELD_STDOPS_BODIES(dx_summary_t, flags, dxf_int_t, dxf_long_t);
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_STDOPS_BODIES(dx_profile_t, beta, dxf_double_t, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_profile_t, eps, dxf_double_t, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_profile_t, div_freq, dxf_int_t, dxf_int_t)
-FIELD_STDOPS_BODIES(dx_profile_t, exd_div_amount, dxf_double_t, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_profile_t, exd_div_date, dxf_dayid_t, dxf_dayid_t)
-FIELD_STDOPS_BODIES(dx_profile_t, _52_high_price, dxf_double_t, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_profile_t, _52_low_price, dxf_double_t, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_profile_t, shares, dxf_double_t, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_profile_t, free_float, dxf_double_t, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_profile_t, high_limit_price, dxf_double_t, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_profile_t, low_limit_price, dxf_double_t, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_profile_t, halt_start_time, dxf_int_t, dxf_long_t)
-FIELD_STDOPS_BODIES(dx_profile_t, halt_end_time, dxf_int_t, dxf_long_t)
-FIELD_STDOPS_BODIES(dx_profile_t, flags, dxf_int_t, dxf_int_t)
-FIELD_STDOPS_BODIES(dx_profile_t, description, dxf_const_string_t, dxf_const_string_t)
-FIELD_STDOPS_BODIES(dx_profile_t, status_reason, dxf_const_string_t, dxf_const_string_t)
+FIELD_STDOPS_BODIES(dx_profile_t, beta, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_profile_t, eps, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_profile_t, div_freq, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_profile_t, exd_div_amount, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_profile_t, exd_div_date, dxf_dayid_t)
+FIELD_STDOPS_BODIES(dx_profile_t, _52_high_price, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_profile_t, _52_low_price, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_profile_t, shares, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_profile_t, free_float, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_profile_t, high_limit_price, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_profile_t, low_limit_price, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_profile_t, halt_start_time, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_profile_t, halt_end_time, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_profile_t, flags, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_profile_t, description, dxf_const_string_t)
+FIELD_STDOPS_BODIES(dx_profile_t, status_reason, dxf_const_string_t)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -256,16 +256,16 @@ FIELD_STDOPS_BODIES(dx_profile_t, status_reason, dxf_const_string_t, dxf_const_s
  */
  /* -------------------------------------------------------------------------- */
 
-FIELD_STDOPS_BODIES(dx_market_maker_t, mm_exchange, dxf_char_t, dxf_char_t)
-FIELD_STDOPS_BODIES(dx_market_maker_t, mm_id, dxf_int_t, dxf_int_t)
-FIELD_STDOPS_BODIES(dx_market_maker_t, mmbid_time, dxf_int_t, dxf_long_t)
-FIELD_STDOPS_BODIES(dx_market_maker_t, mmbid_price, dxf_double_t, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_market_maker_t, mmbid_size, dxf_int_t, dxf_int_t)
-FIELD_STDOPS_BODIES(dx_market_maker_t, mmbid_count, dxf_int_t, dxf_int_t)
-FIELD_STDOPS_BODIES(dx_market_maker_t, mmask_time, dxf_int_t, dxf_long_t)
-FIELD_STDOPS_BODIES(dx_market_maker_t, mmask_price, dxf_double_t, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_market_maker_t, mmask_size, dxf_int_t, dxf_int_t)
-FIELD_STDOPS_BODIES(dx_market_maker_t, mmask_count, dxf_int_t, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_market_maker_t, mm_exchange, dxf_char_t)
+FIELD_STDOPS_BODIES(dx_market_maker_t, mm_id, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_market_maker_t, mmbid_time, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_market_maker_t, mmbid_price, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_market_maker_t, mmbid_size, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_market_maker_t, mmbid_count, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_market_maker_t, mmask_time, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_market_maker_t, mmask_price, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_market_maker_t, mmask_size, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_market_maker_t, mmask_count, dxf_int_t)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -273,15 +273,15 @@ FIELD_STDOPS_BODIES(dx_market_maker_t, mmask_count, dxf_int_t, dxf_int_t)
  */
  /* -------------------------------------------------------------------------- */
 
-FIELD_STDOPS_BODIES(dx_order_t, index, dxf_int_t, dxf_int_t)
-FIELD_STDOPS_BODIES(dx_order_t, time, dxf_int_t, dxf_long_t)
-FIELD_STDOPS_BODIES(dx_order_t, time_nanos, dxf_int_t, dxf_int_t)
-FIELD_STDOPS_BODIES(dx_order_t, sequence, dxf_int_t, dxf_int_t)
-FIELD_STDOPS_BODIES(dx_order_t, price, dxf_double_t, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_order_t, size, dxf_int_t, dxf_int_t)
-FIELD_STDOPS_BODIES(dx_order_t, flags, dxf_int_t, dxf_int_t)
-FIELD_STDOPS_BODIES(dx_order_t, mmid, dxf_int_t, dxf_int_t)
-FIELD_STDOPS_BODIES(dx_order_t, count, dxf_int_t, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_order_t, index, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_order_t, time, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_order_t, time_nanos, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_order_t, sequence, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_order_t, price, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_order_t, size, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_order_t, flags, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_order_t, mmid, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_order_t, count, dxf_int_t)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -289,17 +289,17 @@ FIELD_STDOPS_BODIES(dx_order_t, count, dxf_int_t, dxf_int_t)
  */
  /* -------------------------------------------------------------------------- */
 
-FIELD_STDOPS_BODIES(dx_time_and_sale_t, time, dxf_int_t, dxf_long_t)
-FIELD_STDOPS_BODIES(dx_time_and_sale_t, sequence, dxf_int_t, dxf_int_t)
-FIELD_STDOPS_BODIES(dx_time_and_sale_t, exchange_code, dxf_char_t, dxf_char_t)
-FIELD_STDOPS_BODIES(dx_time_and_sale_t, price, dxf_double_t, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_time_and_sale_t, size, dxf_int_t, dxf_long_t)
-FIELD_STDOPS_BODIES(dx_time_and_sale_t, bid_price, dxf_double_t, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_time_and_sale_t, ask_price, dxf_double_t, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_time_and_sale_t, exchange_sale_conditions, dxf_int_t, dxf_int_t)
-FIELD_STDOPS_BODIES(dx_time_and_sale_t, flags, dxf_int_t, dxf_int_t)
-FIELD_STDOPS_BODIES(dx_time_and_sale_t, buyer, dxf_const_string_t, dxf_const_string_t)
-FIELD_STDOPS_BODIES(dx_time_and_sale_t, seller, dxf_const_string_t, dxf_const_string_t)
+FIELD_STDOPS_BODIES(dx_time_and_sale_t, time, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_time_and_sale_t, sequence, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_time_and_sale_t, exchange_code, dxf_char_t)
+FIELD_STDOPS_BODIES(dx_time_and_sale_t, price, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_time_and_sale_t, size, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_time_and_sale_t, bid_price, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_time_and_sale_t, ask_price, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_time_and_sale_t, exchange_sale_conditions, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_time_and_sale_t, flags, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_time_and_sale_t, buyer, dxf_const_string_t)
+FIELD_STDOPS_BODIES(dx_time_and_sale_t, seller, dxf_const_string_t)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -307,19 +307,19 @@ FIELD_STDOPS_BODIES(dx_time_and_sale_t, seller, dxf_const_string_t, dxf_const_st
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_STDOPS_BODIES(dx_candle_t, time, dxf_int_t, dxf_long_t)
-FIELD_STDOPS_BODIES(dx_candle_t, sequence, dxf_int_t, dxf_int_t)
-FIELD_STDOPS_BODIES(dx_candle_t, count, dxf_double_t, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_candle_t, open, dxf_double_t, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_candle_t, high, dxf_double_t, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_candle_t, low, dxf_double_t, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_candle_t, close, dxf_double_t, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_candle_t, volume, dxf_double_t, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_candle_t, vwap, dxf_double_t, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_candle_t, bid_volume, dxf_double_t, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_candle_t, ask_volume, dxf_double_t, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_candle_t, open_interest, dxf_int_t, dxf_long_t)
-FIELD_STDOPS_BODIES(dx_candle_t, imp_volatility, dxf_double_t, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_candle_t, time, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_candle_t, sequence, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_candle_t, count, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_candle_t, open, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_candle_t, high, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_candle_t, low, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_candle_t, close, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_candle_t, volume, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_candle_t, vwap, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_candle_t, bid_volume, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_candle_t, ask_volume, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_candle_t, open_interest, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_candle_t, imp_volatility, dxf_double_t)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -327,14 +327,14 @@ FIELD_STDOPS_BODIES(dx_candle_t, imp_volatility, dxf_double_t, dxf_double_t)
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_STDOPS_BODIES(dx_spread_order_t, index, dxf_int_t, dxf_int_t)
-FIELD_STDOPS_BODIES(dx_spread_order_t, time, dxf_int_t, dxf_int_t)
-FIELD_STDOPS_BODIES(dx_spread_order_t, sequence, dxf_int_t, dxf_int_t)
-FIELD_STDOPS_BODIES(dx_spread_order_t, price, dxf_double_t, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_spread_order_t, size, dxf_int_t, dxf_int_t)
-FIELD_STDOPS_BODIES(dx_spread_order_t, count, dxf_int_t, dxf_int_t)
-FIELD_STDOPS_BODIES(dx_spread_order_t, flags, dxf_int_t, dxf_int_t)
-FIELD_STDOPS_BODIES(dx_spread_order_t, spread_symbol, dxf_const_string_t, dxf_const_string_t)
+FIELD_STDOPS_BODIES(dx_spread_order_t, index, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_spread_order_t, time, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_spread_order_t, sequence, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_spread_order_t, price, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_spread_order_t, size, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_spread_order_t, count, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_spread_order_t, flags, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_spread_order_t, spread_symbol, dxf_const_string_t)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -342,15 +342,15 @@ FIELD_STDOPS_BODIES(dx_spread_order_t, spread_symbol, dxf_const_string_t, dxf_co
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_STDOPS_BODIES(dx_greeks_t, time, dxf_int_t, dxf_long_t);
-FIELD_STDOPS_BODIES(dx_greeks_t, sequence, dxf_int_t, dxf_int_t);
-FIELD_STDOPS_BODIES(dx_greeks_t, price, dxf_double_t, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_greeks_t, volatility, dxf_double_t, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_greeks_t, delta, dxf_double_t, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_greeks_t, gamma, dxf_double_t, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_greeks_t, theta, dxf_double_t, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_greeks_t, rho, dxf_double_t, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_greeks_t, vega, dxf_double_t, dxf_double_t);
+FIELD_STDOPS_BODIES(dx_greeks_t, time, dxf_int_t);
+FIELD_STDOPS_BODIES(dx_greeks_t, sequence, dxf_int_t);
+FIELD_STDOPS_BODIES(dx_greeks_t, price, dxf_double_t);
+FIELD_STDOPS_BODIES(dx_greeks_t, volatility, dxf_double_t);
+FIELD_STDOPS_BODIES(dx_greeks_t, delta, dxf_double_t);
+FIELD_STDOPS_BODIES(dx_greeks_t, gamma, dxf_double_t);
+FIELD_STDOPS_BODIES(dx_greeks_t, theta, dxf_double_t);
+FIELD_STDOPS_BODIES(dx_greeks_t, rho, dxf_double_t);
+FIELD_STDOPS_BODIES(dx_greeks_t, vega, dxf_double_t);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -358,13 +358,15 @@ FIELD_STDOPS_BODIES(dx_greeks_t, vega, dxf_double_t, dxf_double_t);
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_STDOPS_BODIES(dx_theo_price_t, time, dxf_int_t, dxf_long_t);
-FIELD_STDOPS_BODIES(dx_theo_price_t, price, dxf_double_t, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_theo_price_t, underlying_price, dxf_double_t, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_theo_price_t, delta, dxf_double_t, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_theo_price_t, gamma, dxf_double_t, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_theo_price_t, dividend, dxf_double_t, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_theo_price_t, interest, dxf_double_t, dxf_double_t);
+FIELD_SETTER_BODY  (dx_theo_price_t, time, dxf_int_t);
+FIELD_DEF_VAL_BODY (dx_theo_price_t, time, dxf_int_t);
+FIELD_GETTER_BODY  (dx_theo_price_t, time, dxf_long_t);
+FIELD_STDOPS_BODIES(dx_theo_price_t, price, dxf_double_t);
+FIELD_STDOPS_BODIES(dx_theo_price_t, underlying_price, dxf_double_t);
+FIELD_STDOPS_BODIES(dx_theo_price_t, delta, dxf_double_t);
+FIELD_STDOPS_BODIES(dx_theo_price_t, gamma, dxf_double_t);
+FIELD_STDOPS_BODIES(dx_theo_price_t, dividend, dxf_double_t);
+FIELD_STDOPS_BODIES(dx_theo_price_t, interest, dxf_double_t);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -372,10 +374,10 @@ FIELD_STDOPS_BODIES(dx_theo_price_t, interest, dxf_double_t, dxf_double_t);
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_STDOPS_BODIES(dx_underlying_t, volatility, dxf_double_t, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_underlying_t, front_volatility, dxf_double_t, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_underlying_t, back_volatility, dxf_double_t, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_underlying_t, put_call_ratio, dxf_double_t, dxf_double_t);
+FIELD_STDOPS_BODIES(dx_underlying_t, volatility, dxf_double_t);
+FIELD_STDOPS_BODIES(dx_underlying_t, front_volatility, dxf_double_t);
+FIELD_STDOPS_BODIES(dx_underlying_t, back_volatility, dxf_double_t);
+FIELD_STDOPS_BODIES(dx_underlying_t, put_call_ratio, dxf_double_t);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -383,13 +385,13 @@ FIELD_STDOPS_BODIES(dx_underlying_t, put_call_ratio, dxf_double_t, dxf_double_t)
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_STDOPS_BODIES(dx_series_t, expiration, dxf_dayid_t, dxf_dayid_t);
-FIELD_STDOPS_BODIES(dx_series_t, sequence, dxf_int_t, dxf_int_t);
-FIELD_STDOPS_BODIES(dx_series_t, volatility, dxf_double_t, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_series_t, put_call_ratio, dxf_double_t, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_series_t, forward_price, dxf_double_t, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_series_t, dividend, dxf_double_t, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_series_t, interest, dxf_double_t, dxf_double_t);
+FIELD_STDOPS_BODIES(dx_series_t, expiration, dxf_dayid_t);
+FIELD_STDOPS_BODIES(dx_series_t, sequence, dxf_int_t);
+FIELD_STDOPS_BODIES(dx_series_t, volatility, dxf_double_t);
+FIELD_STDOPS_BODIES(dx_series_t, put_call_ratio, dxf_double_t);
+FIELD_STDOPS_BODIES(dx_series_t, forward_price, dxf_double_t);
+FIELD_STDOPS_BODIES(dx_series_t, dividend, dxf_double_t);
+FIELD_STDOPS_BODIES(dx_series_t, interest, dxf_double_t);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -397,8 +399,8 @@ FIELD_STDOPS_BODIES(dx_series_t, interest, dxf_double_t, dxf_double_t);
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_STDOPS_BODIES(dx_configuration_t, version, dxf_int_t, dxf_int_t);
-FIELD_STDOPS_BODIES(dx_configuration_t, object, dxf_byte_array_t, dxf_byte_array_t);
+FIELD_STDOPS_BODIES(dx_configuration_t, version, dxf_int_t);
+FIELD_STDOPS_BODIES(dx_configuration_t, object, dxf_byte_array_t);
 
 /* -------------------------------------------------------------------------- */
 

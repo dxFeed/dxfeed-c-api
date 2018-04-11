@@ -68,7 +68,7 @@ static const dx_record_id_t DX_RECORD_ID_INVALID = -1;
 /* -------------------------------------------------------------------------- */
 
 typedef struct {
-    dxf_long_t time;
+    dxf_int_t time;
     dxf_int_t sequence;
     dxf_int_t time_nanos;
     dxf_char_t exchange_code;
@@ -86,14 +86,14 @@ typedef dx_trade_t dx_trade_eth_t;
 typedef struct {
     dxf_int_t sequence;
     dxf_int_t time_nanos;
-    dxf_long_t bid_time;
+    dxf_int_t bid_time;
     dxf_char_t bid_exchange_code;
     dxf_double_t bid_price;
-    dxf_long_t bid_size;
-    dxf_long_t ask_time;
+    dxf_int_t bid_size;
+    dxf_int_t ask_time;
     dxf_char_t ask_exchange_code;
     dxf_double_t ask_price;
-    dxf_long_t ask_size;
+    dxf_int_t ask_size;
 } dx_quote_t;
 
 typedef struct {
@@ -104,8 +104,8 @@ typedef struct {
     dxf_double_t day_close_price;
     dxf_dayid_t prev_day_id;
     dxf_double_t prev_day_close_price;
-    dxf_long_t open_interest;
-    dxf_long_t flags;
+    dxf_int_t open_interest;
+    dxf_int_t flags;
 } dx_summary_t;
 
 typedef struct {
@@ -120,8 +120,8 @@ typedef struct {
     dxf_double_t free_float;
     dxf_double_t high_limit_price;
     dxf_double_t low_limit_price;
-    dxf_long_t halt_start_time;
-    dxf_long_t halt_end_time;
+    dxf_int_t halt_start_time;
+    dxf_int_t halt_end_time;
     dxf_int_t flags;
     dxf_const_string_t description;
     dxf_const_string_t status_reason;
@@ -130,11 +130,11 @@ typedef struct {
 typedef struct {
     dxf_char_t mm_exchange;
     dxf_int_t mm_id;
-    dxf_long_t mmbid_time;
+    dxf_int_t mmbid_time;
     dxf_double_t mmbid_price;
     dxf_int_t mmbid_size;
     dxf_int_t mmbid_count;
-    dxf_long_t mmask_time;
+    dxf_int_t mmask_time;
     dxf_double_t mmask_price;
     dxf_int_t mmask_size;
     dxf_int_t mmask_count;
@@ -142,7 +142,7 @@ typedef struct {
 
 typedef struct {
     dxf_int_t index;
-    dxf_long_t time;
+    dxf_int_t time;
     dxf_int_t time_nanos;
     dxf_int_t sequence;
     dxf_double_t price;
@@ -165,11 +165,11 @@ typedef struct {
 } dx_spread_order_t;
 
 typedef struct {
-    dxf_long_t time;
+    dxf_int_t time;
     dxf_int_t sequence;
     dxf_char_t exchange_code;
     dxf_double_t price;
-    dxf_long_t size;
+    dxf_int_t size;
     dxf_double_t bid_price;
     dxf_double_t ask_price;
     dxf_int_t exchange_sale_conditions;
@@ -179,7 +179,7 @@ typedef struct {
 } dx_time_and_sale_t;
 
 typedef struct {
-    dxf_long_t time;
+    dxf_int_t time;
     dxf_int_t sequence;
     dxf_double_t count;
     dxf_double_t open;
@@ -190,12 +190,12 @@ typedef struct {
     dxf_double_t vwap;
     dxf_double_t bid_volume;
     dxf_double_t ask_volume;
-    dxf_long_t open_interest;
+    dxf_int_t open_interest;
     dxf_double_t imp_volatility;
 } dx_candle_t;
 
 typedef struct {
-    dxf_long_t time;
+    dxf_int_t time;
     dxf_int_t sequence;
     dxf_double_t price;
     dxf_double_t volatility;
@@ -207,6 +207,7 @@ typedef struct {
 } dx_greeks_t;
 
 typedef struct {
+    // To have same record for record and event
     dxf_long_t time;
     dxf_double_t price;
     dxf_double_t underlying_price;
