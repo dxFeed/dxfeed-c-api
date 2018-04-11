@@ -263,7 +263,7 @@ DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_spread_order_t, spread_symbol);
 
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_greeks_t, time);
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_greeks_t, sequence);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_greeks_t, greeks_price);
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_greeks_t, price);
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_greeks_t, volatility);
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_greeks_t, delta);
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_greeks_t, gamma);

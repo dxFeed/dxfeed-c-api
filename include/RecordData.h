@@ -197,16 +197,13 @@ typedef struct {
 typedef struct {
     dxf_long_t time;
     dxf_int_t sequence;
-    dxf_double_t greeks_price;
+    dxf_double_t price;
     dxf_double_t volatility;
     dxf_double_t delta;
     dxf_double_t gamma;
     dxf_double_t theta;
     dxf_double_t rho;
     dxf_double_t vega;
-    /* Note: calculated fields */
-    dxf_long_t index;
-    dxf_event_flags_t event_flags;
 } dx_greeks_t;
 
 typedef struct {

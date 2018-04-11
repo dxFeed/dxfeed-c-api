@@ -344,7 +344,7 @@ FIELD_STDOPS_BODIES(dx_spread_order_t, spread_symbol, dxf_const_string_t, dxf_co
 
 FIELD_STDOPS_BODIES(dx_greeks_t, time, dxf_int_t, dxf_long_t);
 FIELD_STDOPS_BODIES(dx_greeks_t, sequence, dxf_int_t, dxf_int_t);
-FIELD_STDOPS_BODIES(dx_greeks_t, greeks_price, dxf_double_t, dxf_double_t);
+FIELD_STDOPS_BODIES(dx_greeks_t, price, dxf_double_t, dxf_double_t);
 FIELD_STDOPS_BODIES(dx_greeks_t, volatility, dxf_double_t, dxf_double_t);
 FIELD_STDOPS_BODIES(dx_greeks_t, delta, dxf_double_t, dxf_double_t);
 FIELD_STDOPS_BODIES(dx_greeks_t, gamma, dxf_double_t, dxf_double_t);

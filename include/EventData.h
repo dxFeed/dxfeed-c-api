@@ -293,7 +293,21 @@ typedef struct {
     dxf_double_t imp_volatility;
 } dxf_candle_t;
 
-typedef dx_greeks_t dxf_greeks_t;
+/* Greeks ------------------------------------------------------------------- */
+typedef struct {
+    dxf_event_flags_t event_flags;
+    dxf_long_t index;
+    dxf_long_t time;
+    dxf_int_t sequence;
+    dxf_double_t price;
+    dxf_double_t volatility;
+    dxf_double_t delta;
+    dxf_double_t gamma;
+    dxf_double_t theta;
+    dxf_double_t rho;
+    dxf_double_t vega;
+} dxf_greeks_t;
+
 typedef dx_theo_price_t dxf_theo_price_t;
 typedef dx_underlying_t dxf_underlying_t;
 typedef dx_series_t dxf_series_t;

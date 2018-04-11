@@ -156,6 +156,13 @@ static const dxf_byte_t DX_CANDLE_INDEX_TIME_SHIFT = 32;
 
 /* -------------------------------------------------------------------------- */
 /*
+ *	Candle calculation constants
+ */
+/* -------------------------------------------------------------------------- */
+static const dxf_byte_t DX_GREEKS_INDEX_TIME_SHIFT = 32;
+
+/* -------------------------------------------------------------------------- */
+/*
  *	Record transcoder connection context
  */
 /* -------------------------------------------------------------------------- */
@@ -928,17 +935,29 @@ bool RECORD_TRANSCODER_NAME(dx_spread_order_t) (dx_record_transcoder_connection_
 bool RECORD_TRANSCODER_NAME(dx_greeks_t) (dx_record_transcoder_connection_context_t* context,
 										const dx_record_params_t* record_params,
 										const dxf_event_params_t* event_params,
-										void* record_buffer, int record_count) {
-	dxf_greeks_t* event_buffer = (dxf_greeks_t*)record_buffer;
+										dx_greeks_t* record_buffer, int record_count) {
+	dxf_greeks_t* event_buffer = (dxf_greeks_t*)dx_get_event_data_buffer(context, dx_eid_greeks, record_count);
 	int i = 0;
 
+	if (event_buffer == NULL) {
+		return false;
+	}
+
 	for (; i < record_count; ++i) {
+		dx_greeks_t* cur_record = record_buffer + i;
 		dxf_greeks_t* cur_event = event_buffer + i;
-		cur_event->time *= DX_TIME_SECOND;
-		cur_event->index = ((dxf_long_t)dx_get_seconds_from_time(cur_event->time) << 32)
-			| ((dxf_long_t)dx_get_millis_from_time(cur_event->time) << 22)
-			| cur_event->sequence;
+
 		cur_event->event_flags = event_params->flags;
+		cur_event->index = (((dxf_long_t)cur_record->time) << DX_GREEKS_INDEX_TIME_SHIFT) | (cur_record->sequence);
+		cur_event->time = DX_TIME_SEQ_TO_MS(cur_record);
+		cur_event->sequence = DX_SEQUENCE(cur_record);
+		cur_event->price = cur_record->price;
+		cur_event->volatility = cur_record->volatility;
+		cur_event->delta = cur_record->delta;
+		cur_event->gamma = cur_record->gamma;
+		cur_event->theta = cur_record->theta;
+		cur_event->rho = cur_record->rho;
+		cur_event->vega = cur_record->vega;
 	}
 
 	return dx_process_event_data(context->connection, dx_eid_greeks, record_params->symbol_name,
