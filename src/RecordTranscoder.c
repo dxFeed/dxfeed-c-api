@@ -944,13 +944,12 @@ bool RECORD_TRANSCODER_NAME(dx_greeks_t) (dx_record_transcoder_connection_contex
 										const dxf_event_params_t* event_params,
 										dx_greeks_t* record_buffer, int record_count) {
 	dxf_greeks_t* event_buffer = (dxf_greeks_t*)dx_get_event_data_buffer(context, dx_eid_greeks, record_count);
-	int i = 0;
 
 	if (event_buffer == NULL) {
 		return false;
 	}
 
-	for (; i < record_count; ++i) {
+	for (int i = 0; i < record_count; ++i) {
 		dx_greeks_t* cur_record = record_buffer + i;
 		dxf_greeks_t* cur_event = event_buffer + i;
 
