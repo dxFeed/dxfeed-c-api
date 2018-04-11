@@ -309,15 +309,8 @@ typedef struct {
 } dxf_greeks_t;
 
 /* TheoPrice ---------------------------------------------------------------- */
-typedef struct {
-    dxf_long_t time;
-    dxf_double_t price;
-    dxf_double_t underlying_price;
-    dxf_double_t delta;
-    dxf_double_t gamma;
-    dxf_double_t dividend;
-    dxf_double_t interest;
-} dxf_theo_price_t;
+/* Event and record are the same */
+typedef dx_theo_price_t dxf_theo_price_t;
 
 typedef dx_underlying_t dxf_underlying_t;
 typedef dx_series_t dxf_series_t;

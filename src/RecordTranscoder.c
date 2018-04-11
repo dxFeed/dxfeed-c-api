@@ -970,23 +970,11 @@ bool RECORD_TRANSCODER_NAME(dx_theo_price_t) (dx_record_transcoder_connection_co
 										const dx_record_params_t* record_params,
 										const dxf_event_params_t* event_params,
 										dx_theo_price_t* record_buffer, int record_count) {
-	dxf_theo_price_t* event_buffer = (dxf_theo_price_t*)dx_get_event_data_buffer(context, dx_eid_theo_price, record_count);
-
-	if (event_buffer == NULL) {
-		return false;
-	}
+	dxf_theo_price_t* event_buffer = (dxf_theo_price_t*)record_buffer;
 
 	for (int i = 0; i < record_count; ++i) {
-		dx_theo_price_t* cur_record = record_buffer + i;
 		dxf_theo_price_t* cur_event = event_buffer + i;
-
-		cur_event->time = DX_TIME_FIELD_TO_MS(cur_record->time);
-		cur_event->price = cur_record->price;
-		cur_event->underlying_price = cur_record->underlying_price;
-		cur_event->delta = cur_record->delta;
-		cur_event->gamma = cur_record->gamma;
-		cur_event->dividend = cur_record->dividend;
-		cur_event->interest = cur_record->interest;
+		cur_event->time = DX_TIME_FIELD_TO_MS(cur_event->time);
 	}
 
 	return dx_process_event_data(context->connection, dx_eid_theo_price, record_params->symbol_name,
