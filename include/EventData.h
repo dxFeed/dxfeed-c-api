@@ -198,6 +198,40 @@ typedef struct {
     dxf_short_sale_restriction_t ssr;
 } dxf_profile_t;
 
+/* Order & Spread Order ----------------------------------------------------- */
+
+typedef enum {
+    dxf_osc_composite = 0,
+    dxf_osc_regional = 1,
+    dxf_osc_aggregate = 2,
+    dxf_osc_order = 3
+} dxf_order_scope_t;
+
+typedef enum {
+    dxf_osd_undefined = 0,
+    dxf_osd_buy = 1,
+    dxf_osd_sell = 2
+} dxf_order_side_t;
+
+typedef struct {
+    dxf_event_flags_t event_flags;
+    dxf_long_t index;
+    dxf_long_t time;
+    dxf_int_t time_nanos;
+    dxf_int_t sequence;
+    dxf_double_t price;
+    dxf_long_t size;
+    dxf_long_t count;
+    dxf_order_scope_t scope;
+    dxf_order_side_t side;
+    dxf_char_t exchange_code;
+    dxf_char_t source[DXF_RECORD_SUFFIX_SIZE];
+    union {
+        dxf_const_string_t market_maker;
+        dxf_const_string_t spread_symbol;
+	};
+} dxf_order_t;
+
 /* Candle ------------------------------------------------------------------- */
 typedef dx_candle_t dxf_candle_t;
 typedef dx_trade_eth_t dxf_trade_eth_t;
@@ -230,41 +264,6 @@ typedef struct {
     dxf_bool_t is_valid_tick;
     dxf_int_t type;
 } dxf_time_and_sale_t;
-
-/* Order & Spread Order ----------------------------------------------------- */
-
-/* Event and record are not the same, this is event */
-typedef enum {
-    dxf_osc_composite = 0,
-    dxf_osc_regional = 1,
-    dxf_osc_aggregate = 2,
-    dxf_osc_order = 3
-} dxf_order_scope_t;
-
-typedef enum {
-    dxf_osd_undefined = 0,
-    dxf_osd_buy = 1,
-    dxf_osd_sell = 2
-} dxf_order_side_t;
-
-typedef struct {
-    dxf_event_flags_t event_flags;
-    dxf_long_t index;
-    dxf_long_t time;
-    dxf_int_t time_nanos;
-    dxf_int_t sequence;
-    dxf_double_t price;
-    dxf_long_t size;
-    dxf_long_t count;
-    dxf_order_scope_t scope;
-    dxf_order_side_t side;
-    dxf_char_t exchange_code;
-    dxf_char_t source[DXF_RECORD_SUFFIX_SIZE];
-    union {
-        dxf_const_string_t market_maker;
-        dxf_const_string_t spread_symbol;
-	};
-} dxf_order_t;
 
 typedef struct {
     dxf_string_t object;
