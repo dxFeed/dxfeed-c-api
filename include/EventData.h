@@ -298,7 +298,6 @@ typedef struct {
     dxf_event_flags_t event_flags;
     dxf_long_t index;
     dxf_long_t time;
-    dxf_int_t sequence;
     dxf_double_t price;
     dxf_double_t volatility;
     dxf_double_t delta;

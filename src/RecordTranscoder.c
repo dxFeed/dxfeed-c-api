@@ -957,7 +957,6 @@ bool RECORD_TRANSCODER_NAME(dx_greeks_t) (dx_record_transcoder_connection_contex
 		cur_event->event_flags = event_params->flags;
 		cur_event->index = (((dxf_long_t)cur_record->time) << DX_GREEKS_INDEX_TIME_SHIFT) | (cur_record->sequence);
 		cur_event->time = DX_TIME_SEQ_TO_MS(cur_record);
-		cur_event->sequence = DX_SEQUENCE(cur_record);
 		cur_event->price = cur_record->price;
 		cur_event->volatility = cur_record->volatility;
 		cur_event->delta = cur_record->delta;
