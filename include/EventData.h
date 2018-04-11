@@ -338,19 +338,6 @@ typedef struct {
  */
 /* -------------------------------------------------------------------------- */
 
-static const dxf_byte_t DXF_SUMMARY_PRICE_TYPE_REGULAR = 0;
-static const dxf_byte_t DXF_SUMMARY_PRICE_TYPE_INDICATIVE = 1;
-static const dxf_byte_t DXF_SUMMARY_PRICE_TYPE_PRELIMINARY = 2;
-static const dxf_byte_t DXF_SUMMARY_PRICE_TYPE_FINAL = 3;
-
-static const dxf_int_t DXF_ORDER_SIDE_BUY = 0;
-static const dxf_int_t DXF_ORDER_SIDE_SELL = 1;
-
-static const dxf_int_t DXF_ORDER_LEVEL_COMPOSITE = 0;
-static const dxf_int_t DXF_ORDER_LEVEL_REGIONAL = 1;
-static const dxf_int_t DXF_ORDER_LEVEL_AGGREGATE = 2;
-static const dxf_int_t DXF_ORDER_LEVEL_ORDER = 3;
-
 static dxf_const_string_t DXF_ORDER_COMPOSITE_BID_STR = L"COMPOSITE_BID";
 static dxf_const_string_t DXF_ORDER_COMPOSITE_ASK_STR = L"COMPOSITE_ASK";
 
@@ -541,8 +528,8 @@ typedef void(*dxf_snapshot_listener_t) (const dxf_snapshot_data_ptr_t snapshot_d
 */
 /* -------------------------------------------------------------------------- */
 #define DXF_IS_CANDLE_REMOVAL(c) (((c)->event_flags & dxf_ef_remove_event) != 0)
-#define DXF_IS_ORDER_REMOVAL(o) ((o)->size == 0)
-#define DXF_IS_SPREAD_ORDER_REMOVAL(o) ((o)->size == 0)
+#define DXF_IS_ORDER_REMOVAL(o) ((((c)->event_flags & dxf_ef_remove_event) != 0) || ((o)->size == 0))
+#define DXF_IS_SPREAD_ORDER_REMOVAL(o) ((((c)->event_flags & dxf_ef_remove_event) != 0) || ((o)->size == 0))
 #define DXF_IS_TIME_AND_SALE_REMOVAL(t) (((t)->event_flags & dxf_ef_remove_event) != 0)
 #define DXF_IS_GREEKS_REMOVAL(g) (((g)->event_flags & dxf_ef_remove_event) != 0)
 #define DXF_IS_SERIES_REMOVAL(s) (((s)->event_flags & dxf_ef_remove_event) != 0)

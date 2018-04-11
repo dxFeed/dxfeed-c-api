@@ -898,14 +898,14 @@ static void plb_event_listener(int event_type, dxf_const_string_t symbol_name,
 		/* And call all consumers  if it is end of transaction */
 		if ((source->asks.updated || source->bids.updated) && source->snapshot_status == dx_status_full) {
 			if (source->bids.rebuild) {
-				dx_plb_source_rebuild_levels(&source->snapshot, &source->bids, DXF_ORDER_SIDE_BUY);
+				dx_plb_source_rebuild_levels(&source->snapshot, &source->bids, dxf_osd_buy);
 			}
 			if (source->bids.updated) {
 				source->final_bids = source->bids;
 			}
 
 			if (source->asks.rebuild) {
-				dx_plb_source_rebuild_levels(&source->snapshot, &source->asks, DXF_ORDER_SIDE_SELL);
+				dx_plb_source_rebuild_levels(&source->snapshot, &source->asks, dxf_osd_sell);
 			}
 			if (source->asks.updated) {
 				source->final_asks = source->asks;
