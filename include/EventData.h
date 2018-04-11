@@ -243,6 +243,35 @@ typedef struct {
 	};
 } dxf_order_t;
 
+/* Time And Sale ------------------------------------------------------------ */
+
+typedef enum {
+    dxf_tnst_new = 0,
+    dxf_tnst_correction = 1,
+    dxf_tnst_cancel = 2
+} dxf_tns_type_t;
+
+typedef struct {
+    dxf_event_flags_t event_flags;
+    dxf_long_t index;
+    dxf_long_t time;
+    dxf_char_t exchange_code;
+    dxf_double_t price;
+    dxf_long_t size;
+    dxf_double_t bid_price;
+    dxf_double_t ask_price;
+    dxf_const_string_t exchange_sale_conditions;
+    dxf_int_t raw_flags;
+    dxf_const_string_t buyer;
+    dxf_const_string_t seller;
+    dxf_order_side_t side;
+    dxf_tns_type_t type;
+    dxf_bool_t is_valid_tick;
+    dxf_bool_t is_eth_trade;
+    dxf_char_t trade_through_exempt;
+    dxf_bool_t is_spread_leg;
+} dxf_time_and_sale_t;
+
 /* Candle ------------------------------------------------------------------- */
 typedef dx_candle_t dxf_candle_t;
 typedef dx_trade_eth_t dxf_trade_eth_t;
@@ -250,31 +279,6 @@ typedef dx_greeks_t dxf_greeks_t;
 typedef dx_theo_price_t dxf_theo_price_t;
 typedef dx_underlying_t dxf_underlying_t;
 typedef dx_series_t dxf_series_t;
-
-typedef struct {
-    dxf_event_flags_t event_flags;
-    dxf_long_t time;
-    dxf_int_t sequence;
-    dxf_char_t exchange_code;
-    dxf_double_t price;
-    dxf_long_t size;
-    dxf_double_t bid_price;
-    dxf_double_t ask_price;
-    dxf_const_string_t exchange_sale_conditions;
-    dxf_int_t flags;
-    dxf_const_string_t buyer;
-    dxf_const_string_t seller;
-
-    dxf_long_t index;
-    dxf_int_t side;
-    dxf_bool_t is_cancel;
-    dxf_bool_t is_correction;
-    dxf_bool_t is_eth_trade;
-    dxf_bool_t is_new;
-    dxf_bool_t is_spread_leg;
-    dxf_bool_t is_valid_tick;
-    dxf_int_t type;
-} dxf_time_and_sale_t;
 
 typedef struct {
     dxf_string_t object;
@@ -298,10 +302,6 @@ static const dxf_int_t DXF_ORDER_LEVEL_COMPOSITE = 0;
 static const dxf_int_t DXF_ORDER_LEVEL_REGIONAL = 1;
 static const dxf_int_t DXF_ORDER_LEVEL_AGGREGATE = 2;
 static const dxf_int_t DXF_ORDER_LEVEL_ORDER = 3;
-
-static const dxf_int_t DXF_TIME_AND_SALE_TYPE_NEW = 0;
-static const dxf_int_t DXF_TIME_AND_SALE_TYPE_CORRECTION = 1;
-static const dxf_int_t DXF_TIME_AND_SALE_TYPE_CANCEL = 2;
 
 static dxf_const_string_t DXF_ORDER_COMPOSITE_BID_STR = L"COMPOSITE_BID";
 static dxf_const_string_t DXF_ORDER_COMPOSITE_ASK_STR = L"COMPOSITE_ASK";

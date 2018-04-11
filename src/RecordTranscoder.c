@@ -128,13 +128,24 @@ static const dxf_uint_t DX_ORDER_FLAGS_EXCHANGE_MASK  = 0x7f;
  *	TimeAndSale calculation constants
  */
 /* -------------------------------------------------------------------------- */
-static const dxf_int_t DX_TIME_AND_SALE_EVENT_FLAGS_SHIFT = 24;
-static const dxf_int_t DX_TIME_AND_SALE_SIDE_MASK = 3;
-static const dxf_int_t DX_TIME_AND_SALE_SIDE_SHIFT = 5;
-static const dxf_int_t DX_TIME_AND_SALE_SPREAD_LEG = 1 << 4;
-static const dxf_int_t DX_TIME_AND_SALE_ETH = 1 << 3;
-static const dxf_int_t DX_TIME_AND_SALE_VALID_TICK = 1 << 2;
-static const dxf_int_t DX_TIME_AND_SALE_TYPE_MASK = 3;
+static const dxf_byte_t DX_TNS_FLAGS_TYPE_SHIFT = 0;
+static const dxf_uint_t DX_TNS_FLAGS_TYPE_MASK  = 0x3;
+static const dxf_uint_t DX_TNS_FLAGS_VALID_TICK = 0x4;
+static const dxf_uint_t DX_TNS_FLAGS_ETH        = 0x08;
+static const dxf_uint_t DX_TNS_FLAGS_SPREAD     = 0x10;
+static const dxf_byte_t DX_TNS_FLAGS_SIDE_SHIFT = 5;
+static const dxf_uint_t DX_TNS_FLAGS_SIDE_MASK  = 0x3;
+static const dxf_byte_t DX_TNS_FLAGS_TTE_SHIFT  = 8;
+static const dxf_uint_t DX_TNS_FLAGS_TTE_MASK   = 0xff;
+
+static const dxf_byte_t DX_TNS_INDEX_TIME_SHIFT = 32;
+
+#define DX_TNS_GET_TYPE(rec)       ((dxf_tns_type_t)(((rec)->flags >> DX_TNS_FLAGS_TYPE_SHIFT) & DX_TNS_FLAGS_TYPE_MASK))
+#define DX_TNS_GET_VALID_TICK(rec) (((rec)->flags & DX_TNS_FLAGS_VALID_TICK) == DX_TNS_FLAGS_VALID_TICK)
+#define DX_TNS_GET_ETH(rec)        (((rec)->flags & DX_TNS_FLAGS_ETH) == DX_TNS_FLAGS_ETH)
+#define DX_TNS_GET_SPREAD_LEG(rec) (((rec)->flags & DX_TNS_FLAGS_SPREAD) == DX_TNS_FLAGS_SPREAD)
+#define DX_TNS_GET_SIDE(rec)       ((dxf_order_side_t)(((rec)->flags >> DX_TNS_FLAGS_SIDE_SHIFT) & DX_TNS_FLAGS_SIDE_MASK))
+#define DX_TNS_GET_TTE(rec)        ((dxf_char_t)(((rec)->flags >> DX_TNS_FLAGS_TTE_SHIFT) & DX_TNS_FLAGS_TTE_MASK))
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -745,45 +756,42 @@ bool RECORD_TRANSCODER_NAME(dx_time_and_sale_t) (dx_record_transcoder_connection
 		dx_time_and_sale_t* cur_record = record_buffer + i;
 		dxf_time_and_sale_t* cur_event = event_buffer + i;
 
-		dxf_int_t flags = cur_record->flags;
-
 		cur_event->event_flags = event_params->flags;
+		cur_event->index = (((dxf_long_t)cur_record->time) << DX_TNS_INDEX_TIME_SHIFT) | (cur_record->sequence);
 		cur_event->time = DX_TIME_SEQ_TO_MS(cur_record);
-		cur_event->sequence = DX_SEQUENCE(cur_record);
 		cur_event->exchange_code = cur_record->exchange_code;
 		cur_event->price = cur_record->price;
 		cur_event->size = cur_record->size;
 		cur_event->bid_price = cur_record->bid_price;
 		cur_event->ask_price = cur_record->ask_price;
+
 		cur_event->exchange_sale_conditions = dx_decode_from_integer(cur_record->exchange_sale_conditions);
-		cur_event->flags = cur_record->flags;
-		cur_event->buyer = cur_record->buyer;
-		cur_event->seller = cur_record->seller;
-
-		cur_event->index = ((dxf_long_t)cur_record->time) << 32 | (cur_record->sequence & 0xFFFFFFFF);
-		cur_event->side = 0; /* ((flags >> DX_TIME_AND_SALE_SIDE_SHIFT) & DX_TIME_AND_SALE_SIDE_MASK) == DX_ORDER_SIDE_SELL ? DXF_ORDER_SIDE_SELL : DXF_ORDER_SIDE_BUY;*/;
-		cur_event->is_eth_trade = ((flags & DX_TIME_AND_SALE_ETH) != 0);
-		cur_event->is_spread_leg = ((flags & DX_TIME_AND_SALE_SPREAD_LEG) != 0);
-		cur_event->is_valid_tick = ((flags & DX_TIME_AND_SALE_VALID_TICK) != 0);
-
-		switch (flags & DX_TIME_AND_SALE_TYPE_MASK) {
-		case 0: cur_event->type = DXF_TIME_AND_SALE_TYPE_NEW; break;
-		case 1: cur_event->type = DXF_TIME_AND_SALE_TYPE_CORRECTION; break;
-		case 2: cur_event->type = DXF_TIME_AND_SALE_TYPE_CANCEL; break;
-		default: return false;
+		if (cur_event->exchange_sale_conditions && !dx_store_string_buffer(context->rbcc, cur_event->exchange_sale_conditions)) {
+			return false;
 		}
-		cur_event->is_cancel = (cur_event->type == DXF_TIME_AND_SALE_TYPE_CANCEL);
-		cur_event->is_correction = (cur_event->type == DXF_TIME_AND_SALE_TYPE_CORRECTION);
-		cur_event->is_new = (cur_event->type == DXF_TIME_AND_SALE_TYPE_NEW);
 
-		/* when we get REMOVE_EVENT flag almost all fields of record is null;
-		in this case no fileds are checked for null*/
-		if (!IS_FLAG_SET(event_params->flags, dxf_ef_remove_event)) {
-			if (cur_event->exchange_sale_conditions != NULL && !dx_store_string_buffer(context->rbcc, cur_event->exchange_sale_conditions)) {
+		cur_event->raw_flags = cur_record->flags;
+
+		if (cur_record->buyer != NULL) {
+			cur_event->buyer = dx_create_string_src(cur_record->buyer);
+			if (cur_event->buyer && !dx_store_string_buffer(context->rbcc, cur_event->buyer)) {
 				return false;
 			}
 		}
 
+		if (cur_record->seller != NULL) {
+			cur_event->seller = dx_create_string_src(cur_record->seller);
+			if (cur_event->seller && !dx_store_string_buffer(context->rbcc, cur_event->seller)) {
+				return false;
+			}
+		}
+
+		cur_event->side = DX_TNS_GET_SIDE(cur_record);
+		cur_event->type = DX_TNS_GET_TYPE(cur_record);
+		cur_event->is_valid_tick = DX_TNS_GET_VALID_TICK(cur_record);
+		cur_event->is_eth_trade = DX_TNS_GET_ETH(cur_record);
+		cur_event->trade_through_exempt = DX_TNS_GET_TTE(cur_record);
+		cur_event->is_spread_leg = DX_TNS_GET_SPREAD_LEG(cur_record);
 	}
 
 	return dx_process_event_data(context->connection, dx_eid_time_and_sale, record_params->symbol_name,
