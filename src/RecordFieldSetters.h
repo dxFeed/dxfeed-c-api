@@ -242,19 +242,6 @@ DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_candle_t, imp_volatility);
 
 /* -------------------------------------------------------------------------- */
 /*
- *	TradeETH field operations
- */
-/* -------------------------------------------------------------------------- */
-
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_eth_t, time);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_eth_t, flags);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_eth_t, exchange_code);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_eth_t, price);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_eth_t, size);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_eth_t, eth_volume);
-
-/* -------------------------------------------------------------------------- */
-/*
  *	SpreadOrder field operations
  */
 /* -------------------------------------------------------------------------- */

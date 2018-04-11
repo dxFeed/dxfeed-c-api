@@ -169,8 +169,8 @@ const size_t dx_event_sizes[] = {
 	sizeof(dxf_order_t),
 	sizeof(dxf_time_and_sale_t),
 	sizeof(dxf_candle_t),
-	sizeof(dxf_trade_eth_t),
-	sizeof(dxf_order_t),
+	sizeof(dxf_trade_t), // As trade ETH
+	sizeof(dxf_order_t), // As spread order
 	sizeof(dxf_greeks_t),
 	sizeof(dxf_theo_price_t),
 	sizeof(dxf_underlying_t),
@@ -847,17 +847,32 @@ bool RECORD_TRANSCODER_NAME(dx_candle_t) (dx_record_transcoder_connection_contex
 bool RECORD_TRANSCODER_NAME(dx_trade_eth_t) (dx_record_transcoder_connection_context_t* context,
 											const dx_record_params_t* record_params,
 											const dxf_event_params_t* event_params,
-											void* record_buffer, int record_count) {
-	dxf_trade_eth_t* event_buffer = (dxf_trade_eth_t*)record_buffer;
-	dxf_const_string_t suffix = record_params->suffix;
-	int i = 0;
+											dx_trade_t* record_buffer, int record_count) {
+	dxf_trade_t* event_buffer = (dxf_trade_t*)dx_get_event_data_buffer(context, dx_eid_trade_eth, record_count);
+	dxf_char_t exchange_code = DX_EXCHANGE_FROM_RECORD(record_params);
 
-	for (; i < record_count; ++i) {
-		dxf_trade_eth_t* cur_event = event_buffer + i;
-		dxf_char_t exchange_code = (suffix == NULL ? 0 : suffix[0]);
-		cur_event->time *= 1000L;
-		cur_event->exchange_code = exchange_code;
+	if (event_buffer == NULL) {
+		return false;
+	}
+
+	if (!exchange_code)
 		dx_set_record_exchange_code(context->dscc, record_params->record_id, exchange_code);
+
+	for (int i = 0; i < record_count; ++i) {
+		dx_trade_t* cur_record = record_buffer + i;
+		dxf_trade_t* cur_event = event_buffer + i;
+
+		cur_event->time = DX_TIME_SEQ_TO_MS(cur_record);
+		cur_event->sequence = DX_SEQUENCE(cur_record);
+		cur_event->time_nanos = cur_record->time_nanos;
+		cur_event->exchange_code = cur_record->exchange_code ? cur_record->exchange_code : exchange_code;
+		cur_event->price = cur_record->price;
+		cur_event->size = cur_record->size;
+		cur_event->raw_flags = cur_record->flags;
+		cur_event->day_volume = cur_record->day_volume;
+		cur_event->day_turnover = cur_record->day_turnover;
+		cur_event->direction = DX_TRADE_GET_DIR(cur_record);
+		cur_event->is_eth = DX_TRADE_GET_ETH(cur_record);
 	}
 
 	return dx_process_event_data(context->connection, dx_eid_trade_eth, record_params->symbol_name,

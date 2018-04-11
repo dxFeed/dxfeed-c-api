@@ -323,19 +323,6 @@ FIELD_STDOPS_BODIES(dx_candle_t, imp_volatility, dxf_double_t, dxf_double_t)
 
 /* -------------------------------------------------------------------------- */
 /*
- *	TradeETH field setters/getters implementation
- */
-/* -------------------------------------------------------------------------- */
-
-FIELD_STDOPS_BODIES(dx_trade_eth_t, time, dxf_int_t, dxf_long_t)
-FIELD_STDOPS_BODIES(dx_trade_eth_t, flags, dxf_int_t, dxf_int_t)
-FIELD_STDOPS_BODIES(dx_trade_eth_t, exchange_code, dxf_char_t, dxf_char_t)
-FIELD_STDOPS_BODIES(dx_trade_eth_t, price, dxf_double_t, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_trade_eth_t, size, dxf_int_t, dxf_long_t)
-FIELD_STDOPS_BODIES(dx_trade_eth_t, eth_volume, dxf_double_t, dxf_double_t)
-
-/* -------------------------------------------------------------------------- */
-/*
  *	SpreadOrder field setters/getters implementation
  */
 /* -------------------------------------------------------------------------- */

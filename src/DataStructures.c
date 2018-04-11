@@ -199,12 +199,15 @@ static const dx_field_info_t dx_fields_candle[] = {
 /* -------------------------------------------------------------------------- */
 
 static const dx_field_info_t dx_fields_trade_eth[] = {
-	{ dx_fid_compact_int | dx_fid_flag_time,    L"ETHLast.Time",     DX_RECORD_FIELD_STDOPS(dx_trade_eth_t, time),          dx_ft_common_field },
-    { dx_fid_compact_int,                       L"ETHLast.Flags",    DX_RECORD_FIELD_STDOPS(dx_trade_eth_t, size),          dx_ft_common_field },
-    { dx_fid_utf_char,                          L"ETHLast.Exchange", DX_RECORD_FIELD_STDOPS(dx_trade_eth_t, exchange_code), dx_ft_common_field },
-    { dx_fid_compact_int | dx_fid_flag_decimal, L"ETHLast.Price",    DX_RECORD_FIELD_STDOPS(dx_trade_eth_t, price),         dx_ft_common_field },
-    { dx_fid_compact_int,                       L"ETHLast.Size",     DX_RECORD_FIELD_STDOPS(dx_trade_eth_t, size),          dx_ft_common_field },
-    { dx_fid_compact_int | dx_fid_flag_decimal, L"ETHVolume",        DX_RECORD_FIELD_STDOPS(dx_trade_eth_t, eth_volume),    dx_ft_common_field }
+	{ dx_fid_compact_int,                       L"ETHLast.Time",      DX_RECORD_FIELD_STDOPS(dx_trade_t, time),          dx_ft_common_field },
+	{ dx_fid_compact_int,                       L"ETHLast.Sequence",  DX_RECORD_FIELD_STDOPS(dx_trade_t, sequence),      dx_ft_common_field },
+	{ dx_fid_compact_int,                       L"Last.TimeNanoPart", DX_RECORD_FIELD_STDOPS(dx_trade_t, time_nanos),    dx_ft_common_field },
+	{ dx_fid_utf_char,                          L"ETHLast.Exchange",  DX_RECORD_FIELD_STDOPS(dx_trade_t, exchange_code), dx_ft_common_field },
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"ETHLast.Price",     DX_RECORD_FIELD_STDOPS(dx_trade_t, price),         dx_ft_common_field },
+	{ dx_fid_compact_int,                       L"ETHLast.Size",      DX_RECORD_FIELD_STDOPS(dx_trade_t, size),          dx_ft_common_field },
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"ETHLast.Flags",     DX_RECORD_FIELD_STDOPS(dx_trade_t, flags),         dx_ft_common_field },
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"ETHVolume",         DX_RECORD_FIELD_STDOPS(dx_trade_t, day_volume),    dx_ft_common_field },
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"ETHDayTurnover",    DX_RECORD_FIELD_STDOPS(dx_trade_t, day_turnover),  dx_ft_common_field }
 };
 
 /* -------------------------------------------------------------------------- */

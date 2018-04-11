@@ -107,7 +107,7 @@ typedef dx_order_source_array_t* dx_order_source_array_ptr_t;
 
 typedef void* dxf_event_data_t;
 
-/* Trade -------------------------------------------------------------------- */
+/* Trade & Trade ETH -------------------------------------------------------- */
 
 typedef enum {
     dxf_dir_undefined = 0,
@@ -125,7 +125,9 @@ typedef struct {
     dxf_char_t exchange_code;
     dxf_double_t price;
     dxf_int_t size;
+    /* This field is absent in TradeETH */
     dxf_int_t tick;
+    /* This field is absent in TradeETH */
     dxf_double_t change;
     dxf_int_t raw_flags;
     dxf_double_t day_volume;
@@ -291,7 +293,6 @@ typedef struct {
     dxf_double_t imp_volatility;
 } dxf_candle_t;
 
-typedef dx_trade_eth_t dxf_trade_eth_t;
 typedef dx_greeks_t dxf_greeks_t;
 typedef dx_theo_price_t dxf_theo_price_t;
 typedef dx_underlying_t dxf_underlying_t;
