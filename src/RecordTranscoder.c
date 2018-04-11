@@ -50,6 +50,16 @@ static const dxf_uint_t DX_SUMMARY_FLAGS_CPT_MASK    = 0x3;
 
 /* -------------------------------------------------------------------------- */
 /*
+ *	Profile flags constants
+ */
+/* -------------------------------------------------------------------------- */
+static const dxf_byte_t DX_PROFILE_FLAGS_TS_SHIFT  = 0;
+static const dxf_uint_t DX_PROFILE_FLAGS_TS_MASK   = 0x3;
+static const dxf_byte_t DX_PROFILE_FLAGS_SSR_SHIFT = 2;
+static const dxf_uint_t DX_PROFILE_FLAGS_SSR_MASK  = 0x3;
+
+/* -------------------------------------------------------------------------- */
+/*
  *	Order index calculation constants
  */
 /* -------------------------------------------------------------------------- */
@@ -478,15 +488,46 @@ bool RECORD_TRANSCODER_NAME(dx_summary_t) (dx_record_transcoder_connection_conte
 bool RECORD_TRANSCODER_NAME(dx_profile_t) (dx_record_transcoder_connection_context_t* context,
 										const dx_record_params_t* record_params,
 										const dxf_event_params_t* event_params,
-										void* record_buffer, int record_count) {
-	dxf_profile_t* event_buffer = (dxf_profile_t*)record_buffer;
-	int i = 0;
+										dx_profile_t* record_buffer, int record_count) {
+	dxf_profile_t* event_buffer = NULL;
 
-	for (; i < record_count; ++i) {
+	if ((event_buffer = (dxf_profile_t*)dx_get_event_data_buffer(context, dx_eid_profile, record_count)) == NULL) {
+		return false;
+	}
+
+	for (int i = 0; i < record_count; ++i) {
+		dx_profile_t* cur_record = record_buffer + i;
 		dxf_profile_t* cur_event = event_buffer + i;
 
-		cur_event->halt_start_time *= 1000L;
-		cur_event->halt_end_time *= 1000L;
+		cur_event->beta = cur_record->beta;
+		cur_event->eps = cur_record->eps;
+		cur_event->div_freq = cur_record->div_freq;
+		cur_event->exd_div_amount = cur_record->exd_div_amount;
+		cur_event->exd_div_date = cur_record->exd_div_date;
+		cur_event->_52_high_price = cur_record->_52_high_price;
+		cur_event->_52_low_price = cur_record->_52_low_price;
+		cur_event->shares = cur_record->shares;
+		cur_event->free_float = cur_record->free_float;
+		cur_event->high_limit_price = cur_record->high_limit_price;
+		cur_event->low_limit_price = cur_record->low_limit_price;
+		cur_event->halt_start_time = cur_record->halt_start_time * 1000L;
+		cur_event->halt_end_time = cur_record->halt_end_time * 1000L;
+		cur_event->raw_flags = cur_record->flags;
+
+		if (cur_record->description != NULL) {
+			cur_event->description = dx_create_string_src(cur_record->description);
+			if (cur_event->description && !dx_store_string_buffer(context->rbcc, cur_event->description))
+				return false;
+		}
+
+		if (cur_record->status_reason != NULL) {
+			cur_event->status_reason = dx_create_string_src(cur_record->status_reason);
+			if (cur_event->status_reason && !dx_store_string_buffer(context->rbcc, cur_event->status_reason))
+				return false;
+		}
+
+		cur_event->trading_status = (dxf_trading_status_t)((cur_record->flags >> DX_PROFILE_FLAGS_TS_SHIFT) & DX_PROFILE_FLAGS_TS_MASK);
+		cur_event->ssr = (dxf_short_sale_restriction_t)((cur_record->flags >> DX_PROFILE_FLAGS_SSR_SHIFT) & DX_PROFILE_FLAGS_SSR_MASK);
 	}
 
 	return dx_process_event_data(context->connection, dx_eid_profile, record_params->symbol_name,

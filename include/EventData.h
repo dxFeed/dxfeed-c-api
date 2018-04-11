@@ -165,9 +165,6 @@ typedef struct {
 
 /* Profile ------------------------------------------------------------------ */
 
-/* Event and record are the same */
-typedef dx_profile_t dxf_profile_t;
-
 typedef enum {
   dxf_ts_undefined = 0,
   dxf_ts_halted = 1,
@@ -180,13 +177,26 @@ typedef enum {
   dxf_ssr_inactive = 2
 } dxf_short_sale_restriction_t;
 
-static const dxf_byte_t DXF_PROFILE_FLAGS_TS_SHIFT  = 0;
-static const dxf_uint_t DXF_PROFILE_FLAGS_TS_MASK   = 0x3;
-static const dxf_byte_t DXF_PROFILE_FLAGS_SSR_SHIFT = 2;
-static const dxf_uint_t DXF_PROFILE_FLAGS_SSR_MASK  = 0x3;
-
-#define DX_PROFILE_GET_TRADING_STATUS(profile) ((dxf_trading_status_t)(((profile)->flags >> DXF_PROFILE_FLAGS_TS_SHIFT) & DXF_PROFILE_FLAGS_TS_MASK))
-#define DX_PROFILE_GET_SSR(profile)            ((dxf_short_sale_restriction_t(((profile)->flags >> DXF_PROFILE_FLAGS_SSR_SHIFT) & DXF_PROFILE_FLAGS_SSR_MASK))
+typedef struct {
+    dxf_double_t beta;
+    dxf_double_t eps;
+    dxf_int_t div_freq;
+    dxf_double_t exd_div_amount;
+    dxf_dayid_t exd_div_date;
+    dxf_double_t _52_high_price;
+    dxf_double_t _52_low_price;
+    dxf_double_t shares;
+    dxf_double_t free_float;
+    dxf_double_t high_limit_price;
+    dxf_double_t low_limit_price;
+    dxf_long_t halt_start_time;
+    dxf_long_t halt_end_time;
+    dxf_int_t raw_flags;
+    dxf_const_string_t description;
+    dxf_const_string_t status_reason;
+    dxf_trading_status_t trading_status;
+    dxf_short_sale_restriction_t ssr;
+} dxf_profile_t;
 
 /* Candle ------------------------------------------------------------------- */
 typedef dx_candle_t dxf_candle_t;
