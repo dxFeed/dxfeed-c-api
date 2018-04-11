@@ -400,25 +400,32 @@ bool dx_transcode_quote (dx_record_transcoder_connection_context_t* context,
 						const dx_record_params_t* record_params,
 						const dxf_event_params_t* event_params,
 						dx_quote_t* record_buffer, int record_count) {
-	dxf_quote_t* event_buffer = (dxf_quote_t*)record_buffer;
-	int i = 0;
-	dxf_const_string_t suffix = record_params->suffix;
-	dxf_char_t exchange_code = (suffix == NULL ? 0 : suffix[0]);
+	dxf_quote_t* event_buffer = (dxf_quote_t*)dx_get_event_data_buffer(context, dx_eid_quote, record_count);;
+	dxf_char_t exchange_code = (record_params->suffix == NULL ? 0 : record_params->suffix[0]);
 
-	for (; i < record_count; ++i) {
+	if (event_buffer == NULL) {
+		return false;
+	}
+
+	if (exchange_code != 0) {
+		dx_set_record_exchange_code(context->dscc, record_params->record_id, exchange_code);
+	}
+
+	for (int i = 0; i < record_count; ++i) {
+		dx_quote_t* cur_record = record_buffer + i;
 		dxf_quote_t* cur_event = event_buffer + i;
 
-		cur_event->bid_time *= 1000L;
-		if (exchange_code != 0)
-			cur_event->bid_exchange_code = exchange_code;
-		cur_event->ask_time *= 1000L;
-		if (exchange_code != 0)
-			cur_event->ask_exchange_code = exchange_code;
-
 		cur_event->time = (cur_event->bid_time > cur_event->ask_time ? cur_event->bid_time : cur_event->ask_time) + ((cur_event->sequence >> 22) & 0x3FF);
-		cur_event->sequence &= 0x3FFFFFU;
-
-		dx_set_record_exchange_code(context->dscc, record_params->record_id, cur_event->bid_exchange_code);
+		cur_event->sequence = cur_record->sequence & 0x3FFFFFU;
+		cur_event->time_nanos = cur_record->time_nanos;
+		cur_event->bid_time = cur_record->bid_time * 1000L;
+		cur_event->bid_exchange_code = exchange_code ? exchange_code : cur_record->bid_exchange_code;
+		cur_event->bid_price = cur_record->bid_price;
+		cur_event->bid_size = cur_record->bid_size;
+		cur_event->ask_time = cur_record->ask_time * 1000L;
+		cur_event->ask_exchange_code = exchange_code ? exchange_code : cur_record->ask_exchange_code;
+		cur_event->ask_price = cur_record->ask_price;
+		cur_event->ask_size = cur_record->ask_size;
 	}
 
 	return dx_process_event_data(context->connection, dx_eid_quote, record_params->symbol_name,

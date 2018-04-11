@@ -136,8 +136,19 @@ typedef struct {
 
 /* Quote -------------------------------------------------------------------- */
 
-/* Event and record are the same */
-typedef dx_quote_t dxf_quote_t;
+typedef struct {
+    dxf_long_t time;
+    dxf_int_t sequence;
+    dxf_int_t time_nanos;
+    dxf_long_t bid_time;
+    dxf_char_t bid_exchange_code;
+    dxf_double_t bid_price;
+    dxf_long_t bid_size;
+    dxf_long_t ask_time;
+    dxf_char_t ask_exchange_code;
+    dxf_double_t ask_price;
+    dxf_long_t ask_size;
+} dxf_quote_t;
 
 /* Summary ------------------------------------------------------------------ */
 
