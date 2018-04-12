@@ -261,11 +261,11 @@ HRESULT STDMETHODCALLTYPE DXEventListener::OnNewData (IDispatch* subscription, I
 	}
 
 	if (eventType == DXF_ET_TRADE_ETH) {
-	IDXTradeETH* t = (IDXTradeETH*)eventData;
+	IDXTrade* t = (IDXTrade*)eventData;
 	}
 
 	if (eventType == DXF_ET_SPREAD_ORDER) {
-	IDXSpreadOrder* so = (IDXSpreadOrder*)eventData;
+	IDXOrder* so = (IDXOrder*)eventData;
 	}
 
 	if (eventType == DXF_ET_GREEKS) {
@@ -367,7 +367,7 @@ HRESULT STDMETHODCALLTYPE DXIncrementalEventListener::OnNewSnapshot (IDispatch* 
 	}
 
 	if (eventType == DXF_ET_SPREAD_ORDER) {
-	IDXSpreadOrder* so = (IDXSpreadOrder*)eventData;
+	IDXOrder* so = (IDXOrder*)eventData;
 	}
 
 	if (eventType == DXF_ET_GREEKS) {
@@ -462,7 +462,7 @@ HRESULT STDMETHODCALLTYPE DXIncrementalEventListener::OnUpdate (IDispatch* subsc
 	}
 
 	if (eventType == DXF_ET_SPREAD_ORDER) {
-	IDXSpreadOrder* so = (IDXSpreadOrder*)eventData;
+	IDXOrder* so = (IDXOrder*)eventData;
 	VARIANT_BOOL rm;
 	if ((res = so->IsRemoved(&rm)) != S_OK) {
 	return res;

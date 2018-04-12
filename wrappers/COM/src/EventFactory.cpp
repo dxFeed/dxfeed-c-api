@@ -60,6 +60,12 @@ private:
 	virtual HRESULT STDMETHODCALLTYPE GetTick(LONGLONG* value);
 	virtual HRESULT STDMETHODCALLTYPE GetChange(DOUBLE* value);
 	virtual HRESULT STDMETHODCALLTYPE GetDayVolume(LONGLONG* value);
+	virtual HRESULT STDMETHODCALLTYPE GetSequence(INT* value);
+	virtual HRESULT STDMETHODCALLTYPE GetTimeNanos(INT* value);
+	virtual HRESULT STDMETHODCALLTYPE GetRawFlags(INT* value);
+	virtual HRESULT STDMETHODCALLTYPE GetDayTurnover(DOUBLE* value);
+	virtual HRESULT STDMETHODCALLTYPE GetDirection(DXFDirection* value);
+	virtual HRESULT STDMETHODCALLTYPE IsETH(VARIANT_BOOL *value);
 
 private:
 
@@ -152,6 +158,66 @@ HRESULT STDMETHODCALLTYPE DXTrade::GetDayVolume(LONGLONG* value) {
 }
 
 /* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXTrade::GetSequence(INT* value) {
+	CHECK_PTR(value);
+
+	*value = m_data->sequence;
+
+	return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXTrade::GetTimeNanos(INT* value) {
+	CHECK_PTR(value);
+
+	*value = m_data->time_nanos;
+
+	return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXTrade::GetRawFlags(INT* value) {
+	CHECK_PTR(value);
+
+	*value = m_data->raw_flags;
+
+	return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXTrade::GetDayTurnover(DOUBLE* value) {
+	CHECK_PTR(value);
+
+	*value = m_data->day_turnover;
+
+	return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXTrade::GetDirection(DXFDirection* value) {
+	CHECK_PTR(value);
+
+	*value = (DXFDirection)m_data->direction;
+
+	return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXTrade::IsETH(VARIANT_BOOL *value) {
+	CHECK_PTR(value);
+
+	*value = m_data->is_eth ? VARIANT_TRUE : VARIANT_FALSE;
+
+	return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
 /*
  *	DXQuote class
 
@@ -192,6 +258,9 @@ private:
 	virtual HRESULT STDMETHODCALLTYPE GetAskExchangeCode(SHORT* value);
 	virtual HRESULT STDMETHODCALLTYPE GetAskPrice(DOUBLE* value);
 	virtual HRESULT STDMETHODCALLTYPE GetAskSize(LONGLONG* value);
+	virtual HRESULT STDMETHODCALLTYPE GetTime(LONGLONG* value);
+	virtual HRESULT STDMETHODCALLTYPE GetSequence(INT* value);
+	virtual HRESULT STDMETHODCALLTYPE GetTimeNanos(INT* value);
 
 private:
 
@@ -259,6 +328,36 @@ HRESULT STDMETHODCALLTYPE DXQuote::GetAskTime(LONGLONG* value) {
 	CHECK_PTR(value);
 
 	*value = m_data->ask_time;
+
+	return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXQuote::GetTime(LONGLONG* value) {
+	CHECK_PTR(value);
+
+	*value = m_data->time;
+
+	return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXQuote::GetSequence(INT* value) {
+	CHECK_PTR(value);
+
+	*value = m_data->sequence;
+
+	return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXQuote::GetTimeNanos(INT* value) {
+	CHECK_PTR(value);
+
+	*value = m_data->time_nanos;
 
 	return S_OK;
 }
@@ -334,10 +433,10 @@ private:
 	virtual HRESULT STDMETHODCALLTYPE GetPrevDayId(LONGLONG* value);
 	virtual HRESULT STDMETHODCALLTYPE GetPrevDayClosePrice(DOUBLE* value);
 	virtual HRESULT STDMETHODCALLTYPE GetOpenInterest(LONGLONG* value);
-	virtual HRESULT STDMETHODCALLTYPE GetFlags(LONGLONG* value);
+	virtual HRESULT STDMETHODCALLTYPE GetRawFlags(LONGLONG* value);
 	virtual HRESULT STDMETHODCALLTYPE GetExchange(SHORT* value);
-	virtual HRESULT STDMETHODCALLTYPE GetDayClosePriceType(CHAR* value);
-	virtual HRESULT STDMETHODCALLTYPE GetPrevDayClosePriceType(CHAR* value);
+	virtual HRESULT STDMETHODCALLTYPE GetDayClosePriceType(DXFPriceType* value);
+	virtual HRESULT STDMETHODCALLTYPE GetPrevDayClosePriceType(DXFPriceType* value);
 
 private:
 
@@ -441,10 +540,10 @@ HRESULT STDMETHODCALLTYPE DXSummary::GetOpenInterest(LONGLONG* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXSummary::GetFlags(LONGLONG* value) {
+HRESULT STDMETHODCALLTYPE DXSummary::GetRawFlags(LONGLONG* value) {
 	CHECK_PTR(value);
 
-	*value = m_data->flags;
+	*value = m_data->raw_flags;
 
 	return S_OK;
 }
@@ -461,20 +560,20 @@ HRESULT STDMETHODCALLTYPE DXSummary::GetExchange(SHORT* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXSummary::GetDayClosePriceType(CHAR* value) {
+HRESULT STDMETHODCALLTYPE DXSummary::GetDayClosePriceType(DXFPriceType* value) {
 	CHECK_PTR(value);
 
-	*value = m_data->day_close_price_type;
+	*value = (DXFPriceType)m_data->day_close_price_type;
 
 	return S_OK;
 }
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXSummary::GetPrevDayClosePriceType(CHAR* value) {
+HRESULT STDMETHODCALLTYPE DXSummary::GetPrevDayClosePriceType(DXFPriceType* value) {
 	CHECK_PTR(value);
 
-	*value = m_data->prev_day_close_price_type;
+	*value = (DXFPriceType)m_data->prev_day_close_price_type;
 
 	return S_OK;
 }
@@ -521,12 +620,15 @@ private:
 	virtual HRESULT STDMETHODCALLTYPE Get52LowPrice(DOUBLE* value);
 	virtual HRESULT STDMETHODCALLTYPE GetShares(DOUBLE* value);
 	virtual HRESULT STDMETHODCALLTYPE GetDescription(BSTR* value);
-	virtual HRESULT STDMETHODCALLTYPE GetFlags(LONGLONG* value);
+	virtual HRESULT STDMETHODCALLTYPE GetRawFlags(LONGLONG* value);
 	virtual HRESULT STDMETHODCALLTYPE GetStatusReason(BSTR* value);
 	virtual HRESULT STDMETHODCALLTYPE GetHaltStartTime(LONGLONG* value);
 	virtual HRESULT STDMETHODCALLTYPE GetHaltEndTime(LONGLONG* value);
 	virtual HRESULT STDMETHODCALLTYPE GetHighLimitPrice(DOUBLE* value);
 	virtual HRESULT STDMETHODCALLTYPE GetLowLimitPrice(DOUBLE* value);
+	virtual HRESULT STDMETHODCALLTYPE GetFreeFloat(DOUBLE* value);
+	virtual HRESULT STDMETHODCALLTYPE GetTradingStatus(DXFTradingStatus* value);
+	virtual HRESULT STDMETHODCALLTYPE GetShortSaleRestiction(DXFShortSaleRestriction* value);
 
 private:
 
@@ -638,11 +740,11 @@ HRESULT STDMETHODCALLTYPE DXProfile::GetDescription(BSTR* value) {
 	return hr;
 }
 
-HRESULT DXProfile::GetFlags(LONGLONG * value)
+HRESULT DXProfile::GetRawFlags(LONGLONG * value)
 {
 	CHECK_PTR(value);
 
-	*value = m_data->flags;
+	*value = m_data->raw_flags;
 
 	return S_OK;
 }
@@ -701,6 +803,34 @@ HRESULT DXProfile::GetLowLimitPrice(DOUBLE * value)
 	return S_OK;
 }
 
+HRESULT DXProfile::GetFreeFloat(DOUBLE* value)
+{
+	CHECK_PTR(value);
+
+	*value = m_data->free_float;
+
+	return S_OK;
+}
+
+HRESULT DXProfile::GetTradingStatus(DXFTradingStatus* value)
+{
+	CHECK_PTR(value);
+
+	*value = (DXFTradingStatus)m_data->trading_status;
+
+	return S_OK;
+}
+
+HRESULT DXProfile::GetShortSaleRestiction(DXFShortSaleRestriction* value)
+{
+	CHECK_PTR(value);
+
+	*value = (DXFShortSaleRestriction)m_data->ssr;
+
+	return S_OK;
+}
+
+
 /* -------------------------------------------------------------------------- */
 /*
  *	DXOrder class
@@ -735,8 +865,8 @@ private:
 	}
 
 	virtual HRESULT STDMETHODCALLTYPE GetIndex(LONGLONG* value);
-	virtual HRESULT STDMETHODCALLTYPE GetSide(INT* value);
-	virtual HRESULT STDMETHODCALLTYPE GetLevel(INT* value);
+	virtual HRESULT STDMETHODCALLTYPE GetSide(DXFSide* value);
+	virtual HRESULT STDMETHODCALLTYPE GetScope(DXFOrderScope* value);
 	virtual HRESULT STDMETHODCALLTYPE GetTime(LONGLONG* value);
 	virtual HRESULT STDMETHODCALLTYPE GetExchangeCode(SHORT* value);
 	virtual HRESULT STDMETHODCALLTYPE GetMarketMaker(BSTR* value);
@@ -745,10 +875,10 @@ private:
 	virtual HRESULT STDMETHODCALLTYPE GetOrderSource(BSTR* value);
 	virtual HRESULT STDMETHODCALLTYPE GetCount(INT* value);
 	virtual HRESULT STDMETHODCALLTYPE GetEventFlags(INT* value);
-	virtual HRESULT STDMETHODCALLTYPE GetTimeSequence(LONGLONG* value);
 	virtual HRESULT STDMETHODCALLTYPE GetSequence(INT* value);
-	virtual HRESULT STDMETHODCALLTYPE GetScope(INT* value);
 	virtual HRESULT STDMETHODCALLTYPE IsRemoved(VARIANT_BOOL* value);
+	virtual HRESULT STDMETHODCALLTYPE GetTimeNanos(INT* value);
+	virtual HRESULT STDMETHODCALLTYPE GetSpreadSymbol(BSTR* value);
 
 private:
 
@@ -782,20 +912,20 @@ HRESULT STDMETHODCALLTYPE DXOrder::GetIndex(LONGLONG* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXOrder::GetSide(INT* value) {
+HRESULT STDMETHODCALLTYPE DXOrder::GetSide(DXFSide* value) {
 	CHECK_PTR(value);
 
-	*value = m_data->side;
+	*value = (DXFSide)m_data->side;
 
 	return S_OK;
 }
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXOrder::GetLevel(INT* value) {
+HRESULT STDMETHODCALLTYPE DXOrder::GetScope(DXFOrderScope* value) {
 	CHECK_PTR(value);
 
-	*value = m_data->level;
+	*value = (DXFOrderScope)m_data->scope;
 
 	return S_OK;
 }
@@ -899,16 +1029,6 @@ HRESULT STDMETHODCALLTYPE DXOrder::GetEventFlags(INT* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXOrder::GetTimeSequence(LONGLONG* value) {
-	CHECK_PTR(value);
-
-	*value = m_data->time_sequence;
-
-	return S_OK;
-}
-
-/* -------------------------------------------------------------------------- */
-
 HRESULT STDMETHODCALLTYPE DXOrder::GetSequence(INT* value) {
 	CHECK_PTR(value);
 
@@ -919,22 +1039,41 @@ HRESULT STDMETHODCALLTYPE DXOrder::GetSequence(INT* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXOrder::GetScope(INT* value) {
+HRESULT STDMETHODCALLTYPE DXOrder::IsRemoved(VARIANT_BOOL* value) {
 	CHECK_PTR(value);
 
-	*value = m_data->scope;
+	*value = (m_data->event_flags & DXEF_remove_event) != 0 || (m_data->size == 0) ? VARIANT_TRUE : VARIANT_FALSE;
 
 	return S_OK;
 }
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXOrder::IsRemoved(VARIANT_BOOL* value) {
+HRESULT STDMETHODCALLTYPE DXOrder::GetTimeNanos(INT* value) {
 	CHECK_PTR(value);
 
-	*value = m_data->size == 0 ? VARIANT_TRUE : VARIANT_FALSE;
+	*value = m_data->time_nanos;
 
 	return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXOrder::GetSpreadSymbol(BSTR* value) {
+	CHECK_PTR(value);
+
+	HRESULT hr = S_OK;
+
+	try {
+		_bstr_t wrapper(m_data->spread_symbol);
+
+		*value = wrapper.Detach();
+	}
+	catch (const _com_error& e) {
+		hr = e.Error();
+	}
+
+	return hr;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -970,9 +1109,8 @@ private:
 	return InvokeImpl(this, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
 	}
 
-	virtual HRESULT STDMETHODCALLTYPE GetEventId(LONGLONG* value);
+	virtual HRESULT STDMETHODCALLTYPE GetIndex(LONGLONG* value);
 	virtual HRESULT STDMETHODCALLTYPE GetTime(LONGLONG* value);
-	virtual HRESULT STDMETHODCALLTYPE GetSequence(INT* value);
 	virtual HRESULT STDMETHODCALLTYPE GetExchangeCode(SHORT* value);
 	virtual HRESULT STDMETHODCALLTYPE GetPrice(DOUBLE* value);
 	virtual HRESULT STDMETHODCALLTYPE GetSize(LONGLONG* value);
@@ -980,13 +1118,16 @@ private:
 	virtual HRESULT STDMETHODCALLTYPE GetAskPrice(DOUBLE* value);
 	virtual HRESULT STDMETHODCALLTYPE GetExchangeSaleCondition(BSTR* value);
 	virtual HRESULT STDMETHODCALLTYPE GetEventFlags(INT* value);
-	virtual HRESULT STDMETHODCALLTYPE GetIndex(LONGLONG* value);
 	virtual HRESULT STDMETHODCALLTYPE GetAgressorSide(INT* value);
 	virtual HRESULT STDMETHODCALLTYPE GetSpreadLeg(VARIANT_BOOL* value);
 	virtual HRESULT STDMETHODCALLTYPE GetETHTradeFlag(VARIANT_BOOL* value);
 	virtual HRESULT STDMETHODCALLTYPE GetValidTick(VARIANT_BOOL* value);
-	virtual HRESULT STDMETHODCALLTYPE GetType(INT* value);
+	virtual HRESULT STDMETHODCALLTYPE GetType(DXFTNSType* value);
 	virtual HRESULT STDMETHODCALLTYPE IsRemoved(VARIANT_BOOL* value);
+	virtual HRESULT STDMETHODCALLTYPE IsTradeThroughExempt(VARIANT_BOOL* value);
+	virtual HRESULT STDMETHODCALLTYPE GetBuyer(BSTR* value);
+	virtual HRESULT STDMETHODCALLTYPE GetSeller(BSTR* value);
+	virtual HRESULT STDMETHODCALLTYPE GetRawFlags(INT* value);
 
 private:
 
@@ -1010,7 +1151,7 @@ DXTimeAndSale::DXTimeAndSale(dxf_event_data_t data, IUnknown* parent)
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetEventId(LONGLONG* value) {
+HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetIndex(LONGLONG* value) {
 	CHECK_PTR(value);
 
 	*value = m_data->index;
@@ -1024,16 +1165,6 @@ HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetTime(LONGLONG* value) {
 	CHECK_PTR(value);
 
 	*value = m_data->time;
-
-	return S_OK;
-}
-
-/* -------------------------------------------------------------------------- */
-
-HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetSequence(INT* value) {
-	CHECK_PTR(value);
-
-	*value = m_data->sequence;
 
 	return S_OK;
 }
@@ -1118,16 +1249,6 @@ HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetEventFlags(INT* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetIndex(LONGLONG* value) {
-	CHECK_PTR(value);
-
-	*value = m_data->index;
-
-	return S_OK;
-}
-
-/* -------------------------------------------------------------------------- */
-
 HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetAgressorSide(INT* value) {
 	CHECK_PTR(value);
 
@@ -1168,10 +1289,10 @@ HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetValidTick(VARIANT_BOOL* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetType(INT* value) {
+HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetType(DXFTNSType* value) {
 	CHECK_PTR(value);
 
-	*value = m_data->type;
+	*value = (DXFTNSType)m_data->type;
 
 	return S_OK;
 }
@@ -1182,6 +1303,64 @@ HRESULT STDMETHODCALLTYPE DXTimeAndSale::IsRemoved(VARIANT_BOOL* value) {
 	CHECK_PTR(value);
 
 	*value = (m_data->event_flags & DXEF_remove_event) != 0 ? VARIANT_TRUE : VARIANT_FALSE;
+
+	return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXTimeAndSale::IsTradeThroughExempt(VARIANT_BOOL* value) {
+	CHECK_PTR(value);
+
+	*value = m_data->trade_through_exempt ? VARIANT_TRUE : VARIANT_FALSE;
+
+	return S_OK;
+}
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetBuyer(BSTR* value) {
+	CHECK_PTR(value);
+
+	HRESULT hr = S_OK;
+
+	try {
+		_bstr_t wrapper(m_data->buyer);
+
+		*value = wrapper.Detach();
+	}
+	catch (const _com_error& e) {
+		hr = e.Error();
+	}
+
+	return hr;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetSeller(BSTR* value) {
+	CHECK_PTR(value);
+
+	HRESULT hr = S_OK;
+
+	try {
+		_bstr_t wrapper(m_data->seller);
+
+		*value = wrapper.Detach();
+	}
+	catch (const _com_error& e) {
+		hr = e.Error();
+	}
+
+	return hr;
+}
+
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetRawFlags(INT* value) {
+	CHECK_PTR(value);
+
+	*value = m_data->raw_flags;
 
 	return S_OK;
 }
@@ -1418,363 +1597,6 @@ HRESULT STDMETHODCALLTYPE DXCandle::IsRemoved(VARIANT_BOOL* value) {
 
 /* -------------------------------------------------------------------------- */
 /*
- *	DXTradeETH class
-
- *  default implementation of the IDXTradeETH interface
- */
-/* -------------------------------------------------------------------------- */
-
-class DXTradeETH : private IDXTradeETH, private DefIDispatchImpl {
-	friend struct EventDataFactory;
-
-private:
-
-	virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObject) {
-	return QueryInterfaceImpl(this, riid, ppvObject);
-	}
-	virtual ULONG STDMETHODCALLTYPE AddRef() { return AddRefImpl(); }
-	virtual ULONG STDMETHODCALLTYPE Release() { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
-
-	virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount(UINT *pctinfo) { return GetTypeInfoCountImpl(pctinfo); }
-	virtual HRESULT STDMETHODCALLTYPE GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
-	return GetTypeInfoImpl(iTInfo, lcid, ppTInfo);
-	}
-	virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames(REFIID riid, LPOLESTR *rgszNames,
-	UINT cNames, LCID lcid, DISPID *rgDispId) {
-	return GetIDsOfNamesImpl(riid, rgszNames, cNames, lcid, rgDispId);
-	}
-	virtual HRESULT STDMETHODCALLTYPE Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
-	DISPPARAMS *pDispParams, VARIANT *pVarResult,
-	EXCEPINFO *pExcepInfo, UINT *puArgErr) {
-	return InvokeImpl(this, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
-	}
-
-	virtual HRESULT STDMETHODCALLTYPE GetTime(LONGLONG* value);
-	virtual HRESULT STDMETHODCALLTYPE GetFlags(INT* value);
-	virtual HRESULT STDMETHODCALLTYPE GetExchangeCode(SHORT* value);
-	virtual HRESULT STDMETHODCALLTYPE GetPrice(DOUBLE* value);
-	virtual HRESULT STDMETHODCALLTYPE GetSize(LONGLONG* value);
-	virtual HRESULT STDMETHODCALLTYPE GetDayVolume(LONGLONG* value);
-
-private:
-
-	DXTradeETH(dxf_event_data_t data, IUnknown* parent);
-
-private:
-
-	dxf_trade_eth_t* m_data;
-};
-
-/* -------------------------------------------------------------------------- */
-/*
- *	DXTradeETH methods implementation
- */
-/* -------------------------------------------------------------------------- */
-
-DXTradeETH::DXTradeETH(dxf_event_data_t data, IUnknown* parent)
-	: DefIDispatchImpl(IID_IDXTradeETH, parent)
-	, m_data(reinterpret_cast<dxf_trade_eth_t*>(data)) {
-}
-
-/* -------------------------------------------------------------------------- */
-
-HRESULT STDMETHODCALLTYPE DXTradeETH::GetTime(LONGLONG* value) {
-	CHECK_PTR(value);
-
-	*value = m_data->time;
-
-	return S_OK;
-}
-
-/* -------------------------------------------------------------------------- */
-
-HRESULT STDMETHODCALLTYPE DXTradeETH::GetFlags(INT* value) {
-	CHECK_PTR(value);
-
-	*value = m_data->flags;
-
-	return S_OK;
-}
-
-/* -------------------------------------------------------------------------- */
-
-HRESULT STDMETHODCALLTYPE DXTradeETH::GetExchangeCode(SHORT* value) {
-	CHECK_PTR(value);
-
-	*value = m_data->exchange_code;
-
-	return S_OK;
-}
-
-/* -------------------------------------------------------------------------- */
-
-HRESULT STDMETHODCALLTYPE DXTradeETH::GetPrice(DOUBLE* value) {
-	CHECK_PTR(value);
-
-	*value = m_data->price;
-
-	return S_OK;
-}
-
-/* -------------------------------------------------------------------------- */
-
-HRESULT STDMETHODCALLTYPE DXTradeETH::GetSize(LONGLONG* value) {
-	CHECK_PTR(value);
-
-	*value = m_data->size;
-
-	return S_OK;
-}
-
-/* -------------------------------------------------------------------------- */
-
-HRESULT STDMETHODCALLTYPE DXTradeETH::GetDayVolume(LONGLONG* value) {
-	CHECK_PTR(value);
-
-	*value = (LONGLONG)std::round(m_data->eth_volume);
-
-	return S_OK;
-}
-
-/* -------------------------------------------------------------------------- */
-/*
- *	DXSpreadOrder class
-
- *  default implementation of the IDXSpreadOrder interface
- */
-/* -------------------------------------------------------------------------- */
-
-class DXSpreadOrder : private IDXSpreadOrder, private DefIDispatchImpl {
-	friend struct EventDataFactory;
-
-private:
-
-	virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObject) {
-	return QueryInterfaceImpl(this, riid, ppvObject);
-	}
-	virtual ULONG STDMETHODCALLTYPE AddRef() { return AddRefImpl(); }
-	virtual ULONG STDMETHODCALLTYPE Release() { ULONG res = ReleaseImpl(); if (res == 0) delete this; return res; }
-
-	virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount(UINT *pctinfo) { return GetTypeInfoCountImpl(pctinfo); }
-	virtual HRESULT STDMETHODCALLTYPE GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
-	return GetTypeInfoImpl(iTInfo, lcid, ppTInfo);
-	}
-	virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames(REFIID riid, LPOLESTR *rgszNames,
-	UINT cNames, LCID lcid, DISPID *rgDispId) {
-	return GetIDsOfNamesImpl(riid, rgszNames, cNames, lcid, rgDispId);
-	}
-	virtual HRESULT STDMETHODCALLTYPE Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
-	DISPPARAMS *pDispParams, VARIANT *pVarResult,
-	EXCEPINFO *pExcepInfo, UINT *puArgErr) {
-	return InvokeImpl(this, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
-	}
-
-	virtual HRESULT STDMETHODCALLTYPE GetIndex(LONGLONG* value);
-	virtual HRESULT STDMETHODCALLTYPE GetSide(INT* value);
-	virtual HRESULT STDMETHODCALLTYPE GetLevel(INT* value);
-	virtual HRESULT STDMETHODCALLTYPE GetTime(LONGLONG* value);
-	virtual HRESULT STDMETHODCALLTYPE GetSequence(INT* value);
-	virtual HRESULT STDMETHODCALLTYPE GetExchangeCode(SHORT* value);
-	virtual HRESULT STDMETHODCALLTYPE GetPrice(DOUBLE* value);
-	virtual HRESULT STDMETHODCALLTYPE GetOrderSource(BSTR* value);
-	virtual HRESULT STDMETHODCALLTYPE GetSize(LONGLONG* value);
-	virtual HRESULT STDMETHODCALLTYPE GetCount(INT* value);
-	virtual HRESULT STDMETHODCALLTYPE GetEventFlags(INT* value);
-	virtual HRESULT STDMETHODCALLTYPE GetSpreadSymbol(BSTR* value);
-	virtual HRESULT STDMETHODCALLTYPE GetTimeSequence(LONGLONG* value);
-	virtual HRESULT STDMETHODCALLTYPE GetScope(INT* value);
-	virtual HRESULT STDMETHODCALLTYPE IsRemoved(VARIANT_BOOL* value);
-
-private:
-
-	DXSpreadOrder(dxf_event_data_t data, IUnknown* parent);
-
-private:
-
-	dxf_spread_order_t* m_data;
-};
-
-/* -------------------------------------------------------------------------- */
-/*
- *	DXSpreadOrder methods implementation
- */
-/* -------------------------------------------------------------------------- */
-
-DXSpreadOrder::DXSpreadOrder(dxf_event_data_t data, IUnknown* parent)
-	: DefIDispatchImpl(IID_IDXSpreadOrder, parent)
-	, m_data(reinterpret_cast<dxf_spread_order_t*>(data)) {
-}
-
-/* -------------------------------------------------------------------------- */
-
-HRESULT STDMETHODCALLTYPE DXSpreadOrder::GetIndex(LONGLONG* value) {
-	CHECK_PTR(value);
-
-	*value = m_data->index;
-
-	return S_OK;
-}
-
-/* -------------------------------------------------------------------------- */
-
-HRESULT STDMETHODCALLTYPE DXSpreadOrder::GetSide(INT* value) {
-	CHECK_PTR(value);
-
-	*value = m_data->side;
-
-	return S_OK;
-}
-
-/* -------------------------------------------------------------------------- */
-
-HRESULT STDMETHODCALLTYPE DXSpreadOrder::GetLevel(INT* value) {
-	CHECK_PTR(value);
-
-	*value = m_data->level;
-
-	return S_OK;
-}
-
-/* -------------------------------------------------------------------------- */
-
-HRESULT STDMETHODCALLTYPE DXSpreadOrder::GetTime(LONGLONG* value) {
-	CHECK_PTR(value);
-
-	*value = m_data->time;
-
-	return S_OK;
-}
-
-/* -------------------------------------------------------------------------- */
-
-HRESULT STDMETHODCALLTYPE DXSpreadOrder::GetSequence(INT* value) {
-	CHECK_PTR(value);
-
-	*value = m_data->sequence;
-
-	return S_OK;
-}
-
-/* -------------------------------------------------------------------------- */
-
-HRESULT STDMETHODCALLTYPE DXSpreadOrder::GetExchangeCode(SHORT* value) {
-	CHECK_PTR(value);
-
-	*value = m_data->exchange_code;
-
-	return S_OK;
-}
-
-/* -------------------------------------------------------------------------- */
-
-HRESULT STDMETHODCALLTYPE DXSpreadOrder::GetPrice(DOUBLE* value) {
-	CHECK_PTR(value);
-
-	*value = m_data->price;
-
-	return S_OK;
-}
-
-/* -------------------------------------------------------------------------- */
-
-HRESULT STDMETHODCALLTYPE DXSpreadOrder::GetOrderSource(BSTR* value) {
-	CHECK_PTR(value);
-
-	HRESULT hr = S_OK;
-
-	try {
-	_bstr_t wrapper(m_data->source);
-
-	*value = wrapper.Detach();
-	}
-	catch (const _com_error& e) {
-	hr = e.Error();
-	}
-
-	return hr;
-}
-
-/* -------------------------------------------------------------------------- */
-
-HRESULT STDMETHODCALLTYPE DXSpreadOrder::GetSize(LONGLONG* value) {
-	CHECK_PTR(value);
-
-	*value = m_data->size;
-
-	return S_OK;
-}
-
-/* -------------------------------------------------------------------------- */
-
-HRESULT STDMETHODCALLTYPE DXSpreadOrder::GetCount(INT* value) {
-	CHECK_PTR(value);
-
-	*value = m_data->count;
-
-	return S_OK;
-}
-
-/* -------------------------------------------------------------------------- */
-
-HRESULT STDMETHODCALLTYPE DXSpreadOrder::GetEventFlags(INT* value) {
-	CHECK_PTR(value);
-
-	*value = m_data->event_flags;
-
-	return S_OK;
-}
-
-/* -------------------------------------------------------------------------- */
-
-HRESULT STDMETHODCALLTYPE DXSpreadOrder::GetSpreadSymbol(BSTR* value) {
-	CHECK_PTR(value);
-
-	HRESULT hr = S_OK;
-
-	try {
-	_bstr_t wrapper(m_data->spread_symbol);
-
-	*value = wrapper.Detach();
-	}
-	catch (const _com_error& e) {
-	hr = e.Error();
-	}
-
-	return hr;
-}
-
-/* -------------------------------------------------------------------------- */
-
-HRESULT STDMETHODCALLTYPE DXSpreadOrder::GetTimeSequence(LONGLONG* value) {
-	CHECK_PTR(value);
-
-	*value = m_data->time_sequence;
-
-	return S_OK;
-}
-
-/* -------------------------------------------------------------------------- */
-
-HRESULT STDMETHODCALLTYPE DXSpreadOrder::GetScope(INT* value) {
-	CHECK_PTR(value);
-
-	*value = m_data->scope;
-
-	return S_OK;
-}
-
-/* -------------------------------------------------------------------------- */
-
-HRESULT STDMETHODCALLTYPE DXSpreadOrder::IsRemoved(VARIANT_BOOL* value) {
-	CHECK_PTR(value);
-
-	*value = (m_data->event_flags & DXEF_remove_event) != 0 ? VARIANT_TRUE : VARIANT_FALSE;
-
-	return S_OK;
-}
-
-/* -------------------------------------------------------------------------- */
-/*
  *	DXGreeks class
 
  *  default implementation of the IDXGreeks interface
@@ -1807,7 +1629,6 @@ private:
 	}
 
 	virtual HRESULT STDMETHODCALLTYPE GetTime(LONGLONG* value);
-	virtual HRESULT STDMETHODCALLTYPE GetSequence(INT* value);
 	virtual HRESULT STDMETHODCALLTYPE GetGreeksPrice(DOUBLE* value);
 	virtual HRESULT STDMETHODCALLTYPE GetVolatility(DOUBLE* value);
 	virtual HRESULT STDMETHODCALLTYPE GetDelta(DOUBLE* value);
@@ -1851,20 +1672,10 @@ HRESULT STDMETHODCALLTYPE DXGreeks::GetTime(LONGLONG* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXGreeks::GetSequence(INT* value) {
-	CHECK_PTR(value);
-
-	*value = m_data->sequence;
-
-	return S_OK;
-}
-
-/* -------------------------------------------------------------------------- */
-
 HRESULT STDMETHODCALLTYPE DXGreeks::GetGreeksPrice(DOUBLE* value) {
 	CHECK_PTR(value);
 
-	*value = m_data->greeks_price;
+	*value = m_data->price;
 
 	return S_OK;
 }
@@ -2025,7 +1836,7 @@ DXTheoPrice::DXTheoPrice(dxf_event_data_t data, IUnknown* parent)
 HRESULT STDMETHODCALLTYPE DXTheoPrice::GetTheoTime(LONGLONG* value) {
 	CHECK_PTR(value);
 
-	*value = m_data->theo_time;
+	*value = m_data->time;
 
 	return S_OK;
 }
@@ -2035,7 +1846,7 @@ HRESULT STDMETHODCALLTYPE DXTheoPrice::GetTheoTime(LONGLONG* value) {
 HRESULT STDMETHODCALLTYPE DXTheoPrice::GetTheoPrice(DOUBLE* value) {
 	CHECK_PTR(value);
 
-	*value = m_data->theo_price;
+	*value = m_data->price;
 
 	return S_OK;
 }
@@ -2045,7 +1856,7 @@ HRESULT STDMETHODCALLTYPE DXTheoPrice::GetTheoPrice(DOUBLE* value) {
 HRESULT STDMETHODCALLTYPE DXTheoPrice::GetTheoUnderlyingPrice(DOUBLE* value) {
 	CHECK_PTR(value);
 
-	*value = m_data->theo_underlying_price;
+	*value = m_data->underlying_price;
 
 	return S_OK;
 }
@@ -2055,7 +1866,7 @@ HRESULT STDMETHODCALLTYPE DXTheoPrice::GetTheoUnderlyingPrice(DOUBLE* value) {
 HRESULT STDMETHODCALLTYPE DXTheoPrice::GetTheoDelta(DOUBLE* value) {
 	CHECK_PTR(value);
 
-	*value = m_data->theo_delta;
+	*value = m_data->delta;
 
 	return S_OK;
 }
@@ -2065,7 +1876,7 @@ HRESULT STDMETHODCALLTYPE DXTheoPrice::GetTheoDelta(DOUBLE* value) {
 HRESULT STDMETHODCALLTYPE DXTheoPrice::GetTheoGamma(DOUBLE* value) {
 	CHECK_PTR(value);
 
-	*value = m_data->theo_gamma;
+	*value = m_data->gamma;
 
 	return S_OK;
 }
@@ -2075,7 +1886,7 @@ HRESULT STDMETHODCALLTYPE DXTheoPrice::GetTheoGamma(DOUBLE* value) {
 HRESULT STDMETHODCALLTYPE DXTheoPrice::GetTheoDividend(DOUBLE* value) {
 	CHECK_PTR(value);
 
-	*value = m_data->theo_dividend;
+	*value = m_data->dividend;
 
 	return S_OK;
 }
@@ -2085,7 +1896,7 @@ HRESULT STDMETHODCALLTYPE DXTheoPrice::GetTheoDividend(DOUBLE* value) {
 HRESULT STDMETHODCALLTYPE DXTheoPrice::GetTheoInterest(DOUBLE* value) {
 	CHECK_PTR(value);
 
-	*value = m_data->theo_interest;
+	*value = m_data->interest;
 
 	return S_OK;
 }
@@ -2222,7 +2033,6 @@ private:
 	}
 
 	virtual HRESULT STDMETHODCALLTYPE GetExpiration(LONGLONG* value);
-	virtual HRESULT STDMETHODCALLTYPE GetSequence(INT* value);
 	virtual HRESULT STDMETHODCALLTYPE GetVolatility(DOUBLE* value);
 	virtual HRESULT STDMETHODCALLTYPE GetPutCallRatio(DOUBLE* value);
 	virtual HRESULT STDMETHODCALLTYPE GetForwardPrice(DOUBLE* value);
@@ -2264,15 +2074,6 @@ HRESULT STDMETHODCALLTYPE DXSeries::GetExpiration(LONGLONG* value) {
 
 /* -------------------------------------------------------------------------- */
 
-HRESULT STDMETHODCALLTYPE DXSeries::GetSequence(INT* value) {
-	CHECK_PTR(value);
-
-	*value = m_data->sequence;
-
-	return S_OK;
-}
-
-/* -------------------------------------------------------------------------- */
 
 HRESULT STDMETHODCALLTYPE DXSeries::GetVolatility(DOUBLE* value) {
 	CHECK_PTR(value);
@@ -2386,6 +2187,7 @@ private:
 	}
 
 	virtual HRESULT STDMETHODCALLTYPE GetStringObject(BSTR* value);
+	virtual HRESULT STDMETHODCALLTYPE GetVersion(INT* value);
 
 private:
 
@@ -2426,6 +2228,14 @@ HRESULT STDMETHODCALLTYPE DXConfiguration::GetStringObject(BSTR* value) {
 	return hr;
 }
 
+HRESULT STDMETHODCALLTYPE DXConfiguration::GetVersion(INT* value) {
+	CHECK_PTR(value);
+
+	*value = m_data->version;
+
+	return S_OK;
+}
+
 /* -------------------------------------------------------------------------- */
 /*
  *	EventDataFactory methods implementation
@@ -2458,10 +2268,10 @@ IDispatch* EventDataFactory::CreateInstance(int eventType, dxf_event_data_t even
 	instance = static_cast<IDXCandle*>(new DXCandle(eventData, parent));
 	break;
 	case DXF_ET_TRADE_ETH:
-	instance = static_cast<IDXTradeETH*>(new DXTradeETH(eventData, parent));
+	instance = static_cast<IDXTrade*>(new DXTrade(eventData, parent));
 	break;
 	case DXF_ET_SPREAD_ORDER:
-	instance = static_cast<IDXSpreadOrder*>(new DXSpreadOrder(eventData, parent));
+	instance = static_cast<IDXOrder*>(new DXOrder(eventData, parent));
 	break;
 	case DXF_ET_GREEKS:
 	instance = static_cast<IDXGreeks*>(new DXGreeks(eventData, parent));
