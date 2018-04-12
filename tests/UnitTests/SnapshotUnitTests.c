@@ -24,32 +24,27 @@
 #define SOURCE_DEFAULT L"NTV"
 #define TIME_DEFAULT 0
 #define LEVEL_ORDER 3
-#define SIDE_BUY 0
-#define SIDE_SELL 1
-#define SCOPE_ORDER 3
+#define dxf_osd_buy 0
+#define dxf_osd_sell 1
+#define dxf_osc_order 3
 
 /* -------------------------------------------------------------------------- */
-
-typedef struct {
-	dxf_event_flags_t flags;
-	dxf_order_t data;
-} dx_event_data_t;
 
 typedef struct {
 	int listener_call_counter;
 	bool result;
 } dx_snap_test_state_t;
 
-bool play_events(dxf_connection_t connection, dxf_snapshot_t snapshot, dx_event_data_t* events, size_t size) {
+bool play_events(dxf_connection_t connection, dxf_snapshot_t snapshot, dxf_order_t* events, size_t size) {
 	size_t i;
 	dxf_string_t symbol = dx_get_snapshot_symbol(snapshot);
 	dxf_int_t symbol_code = dx_encode_symbol_name(symbol);
 	for (i = 0; i < size; i++) {
-		dxf_order_t order = events[i].data;
+		dxf_order_t order = events[i];
 		dxf_event_data_t event_data = (dxf_event_data_t)&order;
 		dxf_ulong_t snapshot_key = dx_new_snapshot_key(dx_rid_order, symbol, order.source);
 		// Note: use index as time_int_field for test only
-		dxf_event_params_t event_params = { events[i].flags, order.index, snapshot_key };
+		dxf_event_params_t event_params = { order.event_flags, order.index, snapshot_key };
 		if (!dx_process_event_data(connection, dx_eid_order, symbol, symbol_code, event_data, 1, &event_params)) {
 			return false;
 		}
@@ -57,7 +52,7 @@ bool play_events(dxf_connection_t connection, dxf_snapshot_t snapshot, dx_event_
 	return true;
 }
 
-bool snapshot_test_runner(dx_event_data_t* events, size_t size, dxf_snapshot_listener_t listener, int expected_listener_call_count) {
+bool snapshot_test_runner(dxf_order_t* events, size_t size, dxf_snapshot_listener_t listener, int expected_listener_call_count) {
 	dxf_connection_t connection;
 	dxf_subscription_t subscription;
 	dxf_snapshot_t snapshot;
@@ -114,22 +109,22 @@ bool dx_compare_snapshots(const dxf_snapshot_data_ptr_t snapshot_data, dxf_order
 
 /* -------------------------------------------------------------------------- */
 
-static dx_event_data_t simple_test_data[] = {
-	{ dxf_ef_snapshot_begin,    { 0, 0, 0, 0x4e54560000000006, LEVEL_ORDER, SIDE_BUY, 0, SCOPE_ORDER, 0, 0, L"NTV", 0, 0, 0 } },
-	{ 0,                        { 0, 0, L'Q', 0x4e54560000000005, LEVEL_ORDER, SIDE_BUY, 100.50, SCOPE_ORDER, 0, 100, L"NTV", 1488551035000, 0, L"NSDQ" } },
-	{ 0,                        { 0, 0, L'Q', 0x4e54560000000004, LEVEL_ORDER, SIDE_SELL, 101.00, SCOPE_ORDER, 0, 101, L"NTV", 1488551035010, 0, L"NSDQ" } },
-	{ 0,                        { 0, 0, 0, 0x4e54560000000003, LEVEL_ORDER, SIDE_BUY, 0, SCOPE_ORDER, 0, 0, L"NTV", 0, 0, 0 } },
-	{ 0,                        { 0, 0, L'Q', 0x4e54560000000002, LEVEL_ORDER, SIDE_BUY, 100.40, SCOPE_ORDER, 0, 102, L"NTV", 1488551035020, 0, L"NSDQ" } },
-	{ 0,                        { 0, 0, L'Q', 0x4e54560000000001, LEVEL_ORDER, SIDE_BUY, 100.30, SCOPE_ORDER, 0, 103, L"NTV", 1488551035030, 0, L"NSDQ" } },
-	{ dxf_ef_snapshot_end,      { 0, 0, L'Q', 0x4e54560000000000, LEVEL_ORDER, SIDE_BUY, 100.20, SCOPE_ORDER, 0, 104, L"NTV", 1488551035040, 0, L"NSDQ" } }
+static dxf_order_t simple_test_data[] = {
+	{ dxf_ef_snapshot_begin, 0x4e54560000000006, 0,             0, 0, 0,      0,   0, dxf_osc_order, dxf_osd_buy,  0,    L"NTV", 0       },
+	{ 0,                     0x4e54560000000005, 1488551035000, 0, 0, 100.50, 100, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ 0,                     0x4e54560000000004, 1488551035010, 0, 0, 101.00, 101, 0, dxf_osc_order, dxf_osd_sell, L'Q', L"NTV", L"NSDQ" },
+	{ 0,                     0x4e54560000000003, 0,             0, 0, 0,      0,   0, dxf_osc_order, dxf_osd_buy,  0,    L"NTV", 0       },
+	{ 0,                     0x4e54560000000002, 1488551035020, 0, 0, 100.40, 102, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ 0,                     0x4e54560000000001, 1488551035030, 0, 0, 100.30, 103, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ dxf_ef_snapshot_end,   0x4e54560000000000, 1488551035040, 0, 0, 100.20, 104, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" }
 };
 
 static dxf_order_t simple_test_snap_data[] = {
-	{ 0, 0, L'Q', 0x4e54560000000005, LEVEL_ORDER, SIDE_BUY, 100.50, SCOPE_ORDER, 0, 100, L"NTV", 1488551035000, 0, L"NSDQ" },
-	{ 0, 0, L'Q', 0x4e54560000000004, LEVEL_ORDER, SIDE_SELL, 101.00, SCOPE_ORDER, 0, 101, L"NTV", 1488551035010, 0, L"NSDQ" },
-	{ 0, 0, L'Q', 0x4e54560000000002, LEVEL_ORDER, SIDE_BUY, 100.40, SCOPE_ORDER, 0, 102, L"NTV", 1488551035020, 0, L"NSDQ" },
-	{ 0, 0, L'Q', 0x4e54560000000001, LEVEL_ORDER, SIDE_BUY, 100.30, SCOPE_ORDER, 0, 103, L"NTV", 1488551035030, 0, L"NSDQ" },
-	{ 0, 0, L'Q', 0x4e54560000000000, LEVEL_ORDER, SIDE_BUY, 100.20, SCOPE_ORDER, 0, 104, L"NTV", 1488551035040, 0, L"NSDQ" }
+	{ 0, 0x4e54560000000005, 1488551035000, 0, 0, 100.50, 100, 0, dxf_osc_order, dxf_osd_buy,  L'Q',  L"NTV", L"NSDQ" },
+	{ 0, 0x4e54560000000004, 1488551035010, 0, 0, 101.00, 101, 0, dxf_osc_order, dxf_osd_sell, L'Q',  L"NTV", L"NSDQ" },
+	{ 0, 0x4e54560000000002, 1488551035020, 0, 0, 100.40, 102, 0, dxf_osc_order, dxf_osd_buy,  L'Q',  L"NTV", L"NSDQ" },
+	{ 0, 0x4e54560000000001, 1488551035030, 0, 0, 100.30, 103, 0, dxf_osc_order, dxf_osd_buy,  L'Q',  L"NTV", L"NSDQ" },
+	{ 0, 0x4e54560000000000, 1488551035040, 0, 0, 100.20, 104, 0, dxf_osc_order, dxf_osd_buy,  L'Q',  L"NTV", L"NSDQ" }
 };
 
 static int simple_test_snap_size = SIZE_OF_ARRAY(simple_test_snap_data);
@@ -150,11 +145,8 @@ bool snapshot_simple_test(void) {
 
 /* -------------------------------------------------------------------------- */
 
-static dx_event_data_t empty_test_data[] = {
-	{
-		dxf_ef_remove_event | dxf_ef_snapshot_begin | dxf_ef_snapshot_end,
-		{ 0, 0, L'Q', 0x4e54560000000000, LEVEL_ORDER, SIDE_BUY, 100.20, SCOPE_ORDER, 0, 104, L"NTV", 1488551035040, 0, L"NSDQ" }
-	}
+static dxf_order_t empty_test_data[] = {
+	{ dxf_ef_remove_event | dxf_ef_snapshot_begin | dxf_ef_snapshot_end, 0x4e54560000000000, 1488551035040, 0, 0, 100.20, 104, 0, dxf_osc_order, dxf_osd_buy, L'Q', L"NTV", L"NSDQ" }
 };
 
 void empty_test_listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
@@ -173,57 +165,57 @@ bool snapshot_empty_test(void) {
 
 /* -------------------------------------------------------------------------- */
 
-static dx_event_data_t update_test_data[] = {
+static dxf_order_t update_test_data[] = {
 	// initial data
-	{ dxf_ef_snapshot_begin,    { 0, 0, L'Q', 0x4e54560000000004, LEVEL_ORDER, SIDE_BUY, 100.50, SCOPE_ORDER, 0, 100, L"NTV", 1488551035000, 0, L"NSDQ" } },
-	{ 0,                        { 0, 0, L'Q', 0x4e54560000000003, LEVEL_ORDER, SIDE_SELL, 101.00, SCOPE_ORDER, 0, 101, L"NTV", 1488551035010, 0, L"NSDQ" } },
-	{ 0,                        { 0, 0, L'Q', 0x4e54560000000002, LEVEL_ORDER, SIDE_BUY, 100.40, SCOPE_ORDER, 0, 102, L"NTV", 1488551035020, 0, L"NSDQ" } },
-	{ 0,                        { 0, 0, L'Q', 0x4e54560000000001, LEVEL_ORDER, SIDE_BUY, 100.30, SCOPE_ORDER, 0, 103, L"NTV", 1488551035030, 0, L"NSDQ" } },
-	{ dxf_ef_snapshot_end,      { 0, 0, L'Q', 0x4e54560000000000, LEVEL_ORDER, SIDE_BUY, 100.20, SCOPE_ORDER, 0, 104, L"NTV", 1488551035040, 0, L"NSDQ" } },
+	{ dxf_ef_snapshot_begin,                   0x4e54560000000004, 1488551035000, 0, 0, 100.50, 100,    0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ 0,                                       0x4e54560000000003, 1488551035010, 0, 0, 101.00, 101,    0, dxf_osc_order, dxf_osd_sell, L'Q', L"NTV", L"NSDQ" },
+	{ 0,                                       0x4e54560000000002, 1488551035020, 0, 0, 100.40, 102,    0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ 0,                                       0x4e54560000000001, 1488551035030, 0, 0, 100.30, 103,    0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ dxf_ef_snapshot_end,                     0x4e54560000000000, 1488551035040, 0, 0, 100.20, 104,    0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
 	// Update#1: one row update
-	{ 0,                        { 0, 0, L'Q', 0x4e54560000000002, LEVEL_ORDER, SIDE_BUY, 100.40, SCOPE_ORDER, 0, 1000, L"NTV", 1488551035020, 0, L"NSDQ" } },
+	{ 0,                                       0x4e54560000000002, 1488551035020, 0, 0, 100.40, 1000,   0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
 	// Update#2: one row remove via flags
-	{ dxf_ef_remove_event,      { 0, 0, L'Q', 0x4e54560000000002, LEVEL_ORDER, SIDE_BUY, 100.40, SCOPE_ORDER, 0, 1001, L"NTV", 1488551035020, 0, L"NSDQ" } },
+	{ dxf_ef_remove_event,                     0x4e54560000000002, 1488551035020, 0, 0, 100.40, 1001,   0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
 	// Update#3: one row remove via zero event
-	{ 0,                        { 0, 0, 0, 0x4e54560000000001, LEVEL_ORDER, SIDE_BUY, 0, SCOPE_ORDER, 0, 0, L"NTV", 0, 0, 0 } },
+	{ 0,                                       0x4e54560000000001, 0,             0, 0, 0.0,    0,      0, dxf_osc_order, dxf_osd_buy,  0,    L"NTV" },
 	// Update#4: complex update (inserting x 2, updating, removing, inserting)
-	{ dxf_ef_tx_pending,        { 0, 0, L'Q', 0x4e54560000000002, LEVEL_ORDER, SIDE_BUY, 100.41, SCOPE_ORDER, 0, 1001, L"NTV", 1488551035020, 0, L"NSDQ" } },
-	{ dxf_ef_tx_pending,        { 0, 0, L'Q', 0x4e54560000000005, LEVEL_ORDER, SIDE_BUY, 100.42, SCOPE_ORDER, 0, 1002, L"NTV", 1488551035020, 0, L"NSDQ" } },
-	{ dxf_ef_tx_pending,        { 0, 0, L'Q', 0x4e54560000000000, LEVEL_ORDER, SIDE_BUY, 100.20, SCOPE_ORDER, 0, 100500, L"NTV", 1488551035040, 0, L"NSDQ" } },
-	{ dxf_ef_tx_pending | dxf_ef_remove_event,{ 0, 0, L'Q', 0x4e54560000000004, LEVEL_ORDER, SIDE_BUY, 100.50, SCOPE_ORDER, 0, 100, L"NTV", 1488551035000, 0, L"NSDQ" } },
-	{ 0,                        { 0, 0, L'Q', 0x4e54560000000010, LEVEL_ORDER, SIDE_BUY, 100.60, SCOPE_ORDER, 0, 100, L"NTV", 1488551035000, 0, L"NSDQ" } },
+	{ dxf_ef_tx_pending,                       0x4e54560000000002, 1488551035020, 0, 0, 100.41, 1001,   0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ dxf_ef_tx_pending,                       0x4e54560000000005, 1488551035020, 0, 0, 100.42, 1002,   0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ dxf_ef_tx_pending,                       0x4e54560000000000, 1488551035040, 0, 0, 100.20, 100500, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ dxf_ef_tx_pending | dxf_ef_remove_event, 0x4e54560000000004, 1488551035000, 0, 0, 100.50, 100,    0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ 0,                                       0x4e54560000000010, 1488551035000, 0, 0, 100.60, 100,    0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" }
 };
 
-static dxf_order_t update_test_snap_1_data[] = {
-	{ 0, 0, L'Q', 0x4e54560000000004, LEVEL_ORDER, SIDE_BUY, 100.50, SCOPE_ORDER, 0, 100, L"NTV", 1488551035000, 0, L"NSDQ" },
-	{ 0, 0, L'Q', 0x4e54560000000003, LEVEL_ORDER, SIDE_SELL, 101.00, SCOPE_ORDER, 0, 101, L"NTV", 1488551035010, 0, L"NSDQ" },
-	{ 0, 0, L'Q', 0x4e54560000000002, LEVEL_ORDER, SIDE_BUY, 100.40, SCOPE_ORDER, 0, 1000, L"NTV", 1488551035020, 0, L"NSDQ" },
-	{ 0, 0, L'Q', 0x4e54560000000001, LEVEL_ORDER, SIDE_BUY, 100.30, SCOPE_ORDER, 0, 103, L"NTV", 1488551035030, 0, L"NSDQ" },
-	{ 0, 0, L'Q', 0x4e54560000000000, LEVEL_ORDER, SIDE_BUY, 100.20, SCOPE_ORDER, 0, 104, L"NTV", 1488551035040, 0, L"NSDQ" }
+static dxf_order_t update_test_snap_1_data[] = {                
+	{ 0, 0x4e54560000000004, 1488551035000, 0, 0, 100.50, 100,  0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ 0, 0x4e54560000000003, 1488551035010, 0, 0, 101.00, 101,  0, dxf_osc_order, dxf_osd_sell, L'Q', L"NTV", L"NSDQ" },
+	{ 0, 0x4e54560000000002, 1488551035020, 0, 0, 100.40, 1000, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ 0, 0x4e54560000000001, 1488551035030, 0, 0, 100.30, 103,  0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ 0, 0x4e54560000000000, 1488551035040, 0, 0, 100.20, 104,  0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" }
 };
 static int update_test_snap_1_size = SIZE_OF_ARRAY(update_test_snap_1_data);
 
 static dxf_order_t update_test_snap_2_data[] = {
-	{ 0, 0, L'Q', 0x4e54560000000004, LEVEL_ORDER, SIDE_BUY, 100.50, SCOPE_ORDER, 0, 100, L"NTV", 1488551035000, 0, L"NSDQ" },
-	{ 0, 0, L'Q', 0x4e54560000000003, LEVEL_ORDER, SIDE_SELL, 101.00, SCOPE_ORDER, 0, 101, L"NTV", 1488551035010, 0, L"NSDQ" },
-	{ 0, 0, L'Q', 0x4e54560000000001, LEVEL_ORDER, SIDE_BUY, 100.30, SCOPE_ORDER, 0, 103, L"NTV", 1488551035030, 0, L"NSDQ" },
-	{ 0, 0, L'Q', 0x4e54560000000000, LEVEL_ORDER, SIDE_BUY, 100.20, SCOPE_ORDER, 0, 104, L"NTV", 1488551035040, 0, L"NSDQ" }
+	{ 0, 0x4e54560000000004, 1488551035000, 0, 0, 100.50, 100, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ 0, 0x4e54560000000003, 1488551035010, 0, 0, 101.00, 101, 0, dxf_osc_order, dxf_osd_sell, L'Q', L"NTV", L"NSDQ" },
+	{ 0, 0x4e54560000000001, 1488551035030, 0, 0, 100.30, 103, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ 0, 0x4e54560000000000, 1488551035040, 0, 0, 100.20, 104, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" }
 };
 static int update_test_snap_2_size = SIZE_OF_ARRAY(update_test_snap_2_data);
 
 static dxf_order_t update_test_snap_3_data[] = {
-	{ 0, 0, L'Q', 0x4e54560000000004, LEVEL_ORDER, SIDE_BUY, 100.50, SCOPE_ORDER, 0, 100, L"NTV", 1488551035000, 0, L"NSDQ" },
-	{ 0, 0, L'Q', 0x4e54560000000003, LEVEL_ORDER, SIDE_SELL, 101.00, SCOPE_ORDER, 0, 101, L"NTV", 1488551035010, 0, L"NSDQ" },
-	{ 0, 0, L'Q', 0x4e54560000000000, LEVEL_ORDER, SIDE_BUY, 100.20, SCOPE_ORDER, 0, 104, L"NTV", 1488551035040, 0, L"NSDQ" }
+	{ 0, 0x4e54560000000004, 1488551035000, 0, 0, 100.50, 100, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ 0, 0x4e54560000000003, 1488551035010, 0, 0, 101.00, 101, 0, dxf_osc_order, dxf_osd_sell, L'Q', L"NTV", L"NSDQ" },
+	{ 0, 0x4e54560000000000, 1488551035040, 0, 0, 100.20, 104, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" }
 };
 static int update_test_snap_3_size = SIZE_OF_ARRAY(update_test_snap_3_data);
 
 static dxf_order_t update_test_snap_4_data[] = {
-	{ 0, 0, L'Q', 0x4e54560000000010, LEVEL_ORDER, SIDE_BUY, 100.60, SCOPE_ORDER, 0, 100, L"NTV", 1488551035000, 0, L"NSDQ" },
-	{ 0, 0, L'Q', 0x4e54560000000005, LEVEL_ORDER, SIDE_BUY, 100.42, SCOPE_ORDER, 0, 1002, L"NTV", 1488551035020, 0, L"NSDQ" },
-	{ 0, 0, L'Q', 0x4e54560000000003, LEVEL_ORDER, SIDE_SELL, 101.00, SCOPE_ORDER, 0, 101, L"NTV", 1488551035010, 0, L"NSDQ" },
-	{ 0, 0, L'Q', 0x4e54560000000002, LEVEL_ORDER, SIDE_BUY, 100.41, SCOPE_ORDER, 0, 1001, L"NTV", 1488551035020, 0, L"NSDQ" },
-	{ 0, 0, L'Q', 0x4e54560000000000, LEVEL_ORDER, SIDE_BUY, 100.20, SCOPE_ORDER, 0, 100500, L"NTV", 1488551035040, 0, L"NSDQ" }
+	{ 0, 0x4e54560000000010, 1488551035000, 0, 0, 100.60, 100,    0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ 0, 0x4e54560000000005, 1488551035020, 0, 0, 100.42, 1002,   0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ 0, 0x4e54560000000003, 1488551035010, 0, 0, 101.00, 101,    0, dxf_osc_order, dxf_osd_sell, L'Q', L"NTV", L"NSDQ" },
+	{ 0, 0x4e54560000000002, 1488551035020, 0, 0, 100.41, 1001,   0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ 0, 0x4e54560000000000, 1488551035040, 0, 0, 100.20, 100500, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" }
 };
 static int update_test_snap_4_size = SIZE_OF_ARRAY(update_test_snap_4_data);
 
@@ -262,32 +254,32 @@ bool snapshot_update_test(void) {
 
 /* -------------------------------------------------------------------------- */
 
-static dx_event_data_t bid_ask_test_data[] = {
+static dxf_order_t bid_ask_test_data[] = {
 	// initial data
-	{ dxf_ef_snapshot_begin,    { 0, 0, L'Q', 0x4e54560000000005, LEVEL_ORDER, SIDE_BUY, 100.50, SCOPE_ORDER, 0, 100, L"NTV", 1488551035000, 0, L"NSDQ" } },
-	{ 0,                        { 0, 0, L'Q', 0x4e54560000000004, LEVEL_ORDER, SIDE_SELL, 101.00, SCOPE_ORDER, 0, 101, L"NTV", 1488551035010, 0, L"NSDQ" } },
-	{ 0,                        { 0, 0, L'Q', 0x4e54560000000002, LEVEL_ORDER, SIDE_BUY, 100.40, SCOPE_ORDER, 0, 102, L"NTV", 1488551035020, 0, L"NSDQ" } },
-	{ 0,                        { 0, 0, L'Q', 0x4e54560000000001, LEVEL_ORDER, SIDE_BUY, 100.30, SCOPE_ORDER, 0, 103, L"NTV", 1488551035030, 0, L"NSDQ" } },
-	{ dxf_ef_snapshot_end,      { 0, 0, L'Q', 0x4e54560000000000, LEVEL_ORDER, SIDE_BUY, 100.20, SCOPE_ORDER, 0, 104, L"NTV", 1488551035040, 0, L"NSDQ" } },
+	{ dxf_ef_snapshot_begin, 0x4e54560000000005, 1488551035000, 0, 0, 100.50, 100, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ 0,                     0x4e54560000000004, 1488551035010, 0, 0, 101.00, 101, 0, dxf_osc_order, dxf_osd_sell, L'Q', L"NTV", L"NSDQ" },
+	{ 0,                     0x4e54560000000002, 1488551035020, 0, 0, 100.40, 102, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ 0,                     0x4e54560000000001, 1488551035030, 0, 0, 100.30, 103, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ dxf_ef_snapshot_end,   0x4e54560000000000, 1488551035040, 0, 0, 100.20, 104, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
 	// Update#1: replace max bid with new min ask
-	{ 0,                        { 0, 0, L'Q', 0x4e54560000000005, LEVEL_ORDER, SIDE_SELL, 100.45, SCOPE_ORDER, 0, 100, L"NTV", 1488551035000, 0, L"NSDQ" } }
+	{ 0,                     0x4e54560000000005, 1488551035000, 0, 0, 100.45, 100, 0, dxf_osc_order, dxf_osd_sell, L'Q', L"NTV", L"NSDQ" }
 };
 
 static dxf_order_t bid_ask_test_snap_0_data[] = {
-	{ 0, 0, L'Q', 0x4e54560000000005, LEVEL_ORDER, SIDE_BUY, 100.50, SCOPE_ORDER, 0, 100, L"NTV", 1488551035000, 0, L"NSDQ" },
-	{ 0, 0, L'Q', 0x4e54560000000004, LEVEL_ORDER, SIDE_SELL, 101.00, SCOPE_ORDER, 0, 101, L"NTV", 1488551035010, 0, L"NSDQ" },
-	{ 0, 0, L'Q', 0x4e54560000000002, LEVEL_ORDER, SIDE_BUY, 100.40, SCOPE_ORDER, 0, 102, L"NTV", 1488551035020, 0, L"NSDQ" },
-	{ 0, 0, L'Q', 0x4e54560000000001, LEVEL_ORDER, SIDE_BUY, 100.30, SCOPE_ORDER, 0, 103, L"NTV", 1488551035030, 0, L"NSDQ" },
-	{ 0, 0, L'Q', 0x4e54560000000000, LEVEL_ORDER, SIDE_BUY, 100.20, SCOPE_ORDER, 0, 104, L"NTV", 1488551035040, 0, L"NSDQ" }
+	{ 0, 0x4e54560000000005, 1488551035000, 0, 0, 100.50, 100, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ 0, 0x4e54560000000004, 1488551035010, 0, 0, 101.00, 101, 0, dxf_osc_order, dxf_osd_sell, L'Q', L"NTV", L"NSDQ" },
+	{ 0, 0x4e54560000000002, 1488551035020, 0, 0, 100.40, 102, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ 0, 0x4e54560000000001, 1488551035030, 0, 0, 100.30, 103, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ 0, 0x4e54560000000000, 1488551035040, 0, 0, 100.20, 104, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" }
 };
 static int bid_ask_test_snap_0_size = SIZE_OF_ARRAY(bid_ask_test_snap_0_data);
 
 static dxf_order_t bid_ask_test_snap_1_data[] = {
-	{ 0, 0, L'Q', 0x4e54560000000005, LEVEL_ORDER, SIDE_SELL, 100.45, SCOPE_ORDER, 0, 100, L"NTV", 1488551035000, 0, L"NSDQ" },
-	{ 0, 0, L'Q', 0x4e54560000000004, LEVEL_ORDER, SIDE_SELL, 101.00, SCOPE_ORDER, 0, 101, L"NTV", 1488551035010, 0, L"NSDQ" },
-	{ 0, 0, L'Q', 0x4e54560000000002, LEVEL_ORDER, SIDE_BUY, 100.40, SCOPE_ORDER, 0, 102, L"NTV", 1488551035020, 0, L"NSDQ" },
-	{ 0, 0, L'Q', 0x4e54560000000001, LEVEL_ORDER, SIDE_BUY, 100.30, SCOPE_ORDER, 0, 103, L"NTV", 1488551035030, 0, L"NSDQ" },
-	{ 0, 0, L'Q', 0x4e54560000000000, LEVEL_ORDER, SIDE_BUY, 100.20, SCOPE_ORDER, 0, 104, L"NTV", 1488551035040, 0, L"NSDQ" }
+	{ 0, 0x4e54560000000005, 1488551035000, 0, 0, 100.45, 100, 0, dxf_osc_order, dxf_osd_sell, L'Q', L"NTV", L"NSDQ" },
+	{ 0, 0x4e54560000000004, 1488551035010, 0, 0, 101.00, 101, 0, dxf_osc_order, dxf_osd_sell, L'Q', L"NTV", L"NSDQ" },
+	{ 0, 0x4e54560000000002, 1488551035020, 0, 0, 100.40, 102, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ 0, 0x4e54560000000001, 1488551035030, 0, 0, 100.30, 103, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ 0, 0x4e54560000000000, 1488551035040, 0, 0, 100.20, 104, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" }
 };
 static int bid_ask_test_snap_1_size = SIZE_OF_ARRAY(bid_ask_test_snap_1_data);
 
@@ -303,10 +295,10 @@ void bid_ask_test_listener(const dxf_snapshot_data_ptr_t snapshot_data, void* us
 	for (i = 0; i < snapshot_data->records_count; i++) {
 		dxf_order_t order = order_records[i];
 
-		if (order.side == DXF_ORDER_SIDE_BUY) {
+		if (order.side == dxf_osd_buy) {
 			if (order.price > max_bid)
 				max_bid = order.price;
-		} else if (order.side == DXF_ORDER_SIDE_SELL) {
+		} else if (order.side == dxf_osd_sell) {
 			if (order.price < min_ask || min_ask == -1)
 				min_ask = order.price;
 		}
@@ -341,22 +333,22 @@ bool snapshot_bid_ask_test(void) {
 
 /* -------------------------------------------------------------------------- */
 
-static dx_event_data_t duplicate_index_test_data[] = {
-	{ dxf_ef_snapshot_begin,    { 0, 0, L'Q', 0x4e54560000000005, LEVEL_ORDER, SIDE_BUY, 100.50, SCOPE_ORDER, 0, 100, L"NTV", 1488551035000, 0, L"NSDQ" } },
-	{ 0,                        { 0, 0, L'Q', 0x4e54560000000004, LEVEL_ORDER, SIDE_SELL, 101.00, SCOPE_ORDER, 0, 101, L"NTV", 1488551035010, 0, L"NSDQ" } },
-	{ 0,                        { 0, 0, L'Q', 0x4e54560000000002, LEVEL_ORDER, SIDE_BUY, 100.40, SCOPE_ORDER, 0, 102, L"NTV", 1488551035020, 0, L"NSDQ" } },
-	{ 0,                        { 0, 0, L'Q', 0x4e54560000000001, LEVEL_ORDER, SIDE_BUY, 100.30, SCOPE_ORDER, 0, 103, L"NTV", 1488551035030, 0, L"NSDQ" } },
-	{ 0,                        { 0, 0, L'Q', 0x4e54560000000000, LEVEL_ORDER, SIDE_BUY, 100.20, SCOPE_ORDER, 0, 104, L"NTV", 1488551035040, 0, L"NSDQ" } },
-	{ 0,                        { 0, 0, L'Q', 0x4e54560000000004, LEVEL_ORDER, SIDE_SELL, 101.50, SCOPE_ORDER, 0, 101, L"NTV", 1488551035010, 0, L"NSDQ" } },
-	{ dxf_ef_snapshot_end,      { 0, 0, L'Q', 0x4e54560000000002, LEVEL_ORDER, SIDE_BUY, 100.60, SCOPE_ORDER, 0, 102, L"NTV", 1488551035020, 0, L"NSDQ" } },
+static dxf_order_t duplicate_index_test_data[] = {
+	{ dxf_ef_snapshot_begin, 0x4e54560000000005, 1488551035000, 0, 0, 100.50, 100, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ 0,                     0x4e54560000000004, 1488551035010, 0, 0, 101.00, 101, 0, dxf_osc_order, dxf_osd_sell, L'Q', L"NTV", L"NSDQ" },
+	{ 0,                     0x4e54560000000002, 1488551035020, 0, 0, 100.40, 102, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ 0,                     0x4e54560000000001, 1488551035030, 0, 0, 100.30, 103, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ 0,                     0x4e54560000000000, 1488551035040, 0, 0, 100.20, 104, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ 0,                     0x4e54560000000004, 1488551035010, 0, 0, 101.50, 101, 0, dxf_osc_order, dxf_osd_sell, L'Q', L"NTV", L"NSDQ" },
+	{ dxf_ef_snapshot_end,   0x4e54560000000002, 1488551035020, 0, 0, 100.60, 102, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" }
 };
 
 static dxf_order_t duplicate_index_test_snap_data[] = {
-	{ 0, 0, L'Q', 0x4e54560000000005, LEVEL_ORDER, SIDE_BUY, 100.50, SCOPE_ORDER, 0, 100, L"NTV", 1488551035000, 0, L"NSDQ" },
-	{ 0, 0, L'Q', 0x4e54560000000004, LEVEL_ORDER, SIDE_SELL, 101.50, SCOPE_ORDER, 0, 101, L"NTV", 1488551035010, 0, L"NSDQ" },
-	{ 0, 0, L'Q', 0x4e54560000000002, LEVEL_ORDER, SIDE_BUY, 100.60, SCOPE_ORDER, 0, 102, L"NTV", 1488551035020, 0, L"NSDQ" },
-	{ 0, 0, L'Q', 0x4e54560000000001, LEVEL_ORDER, SIDE_BUY, 100.30, SCOPE_ORDER, 0, 103, L"NTV", 1488551035030, 0, L"NSDQ" },
-	{ 0, 0, L'Q', 0x4e54560000000000, LEVEL_ORDER, SIDE_BUY, 100.20, SCOPE_ORDER, 0, 104, L"NTV", 1488551035040, 0, L"NSDQ" }
+	{ 0, 0x4e54560000000005, 1488551035000, 0, 0, 100.50, 100, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ 0, 0x4e54560000000004, 1488551035010, 0, 0, 101.50, 101, 0, dxf_osc_order, dxf_osd_sell, L'Q', L"NTV", L"NSDQ" },
+	{ 0, 0x4e54560000000002, 1488551035020, 0, 0, 100.60, 102, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ 0, 0x4e54560000000001, 1488551035030, 0, 0, 100.30, 103, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ 0, 0x4e54560000000000, 1488551035040, 0, 0, 100.20, 104, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" }
 };
 
 static int duplicate_index_test_snap_size = SIZE_OF_ARRAY(duplicate_index_test_snap_data);
@@ -377,24 +369,21 @@ bool snapshot_duplicate_index_test(void) {
 
 /* -------------------------------------------------------------------------- */
 
-static dx_event_data_t buildin_update_test_data[] = {
-	{ dxf_ef_snapshot_begin,    { 0, 0, L'Q', 0x4e54560000000005, LEVEL_ORDER, SIDE_BUY, 100.50, SCOPE_ORDER, 0, 100, L"NTV", 1488551035000, 0, L"NSDQ" } },
-	{ 0,                        { 0, 0, L'Q', 0x4e54560000000004, LEVEL_ORDER, SIDE_SELL, 101.00, SCOPE_ORDER, 0, 101, L"NTV", 1488551035010, 0, L"NSDQ" } },
-	{ 0,                        { 0, 0, L'Q', 0x4e54560000000002, LEVEL_ORDER, SIDE_BUY, 100.40, SCOPE_ORDER, 0, 102, L"NTV", 1488551035020, 0, L"NSDQ" } },
-	{ 0,                        { 0, 0, L'Q', 0x4e54560000000001, LEVEL_ORDER, SIDE_BUY, 100.30, SCOPE_ORDER, 0, 103, L"NTV", 1488551035030, 0, L"NSDQ" } },
-	{
-		dxf_ef_snapshot_end | dxf_ef_tx_pending | dxf_ef_remove_event,
-		{ 0, 0, L'Q', 0x4e54560000000000, LEVEL_ORDER, SIDE_BUY, 100.20, SCOPE_ORDER, 0, 104, L"NTV", 1488551035040, 0, L"NSDQ" }
-	},
-	{ dxf_ef_tx_pending,        { 0, 0, L'Q', 0x4e54560000000004, LEVEL_ORDER, SIDE_SELL, 101.50, SCOPE_ORDER, 0, 101, L"NTV", 1488551035010, 0, L"NSDQ" } },
-	{ 0,                        { 0, 0, L'Q', 0x4e54560000000002, LEVEL_ORDER, SIDE_BUY, 100.60, SCOPE_ORDER, 0, 102, L"NTV", 1488551035020, 0, L"NSDQ" } },
+static dxf_order_t buildin_update_test_data[] = {
+	{ dxf_ef_snapshot_begin,                                         0x4e54560000000005, 1488551035000, 0, 0, 100.50, 100, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ 0,                                                             0x4e54560000000004, 1488551035010, 0, 0, 101.00, 101, 0, dxf_osc_order, dxf_osd_sell, L'Q', L"NTV", L"NSDQ" },
+	{ 0,                                                             0x4e54560000000002, 1488551035020, 0, 0, 100.40, 102, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ 0,                                                             0x4e54560000000001, 1488551035030, 0, 0, 100.30, 103, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ dxf_ef_snapshot_end | dxf_ef_tx_pending | dxf_ef_remove_event, 0x4e54560000000000, 1488551035040, 0, 0, 100.20, 104, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ dxf_ef_tx_pending,                                             0x4e54560000000004, 1488551035010, 0, 0, 101.50, 101, 0, dxf_osc_order, dxf_osd_sell, L'Q', L"NTV", L"NSDQ" },
+	{ 0,                                                             0x4e54560000000002, 1488551035020, 0, 0, 100.60, 102, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" }
 };
 
 static dxf_order_t buildin_update_test_snap_data[] = {
-	{ 0, 0, L'Q', 0x4e54560000000005, LEVEL_ORDER, SIDE_BUY, 100.50, SCOPE_ORDER, 0, 100, L"NTV", 1488551035000, 0, L"NSDQ" },
-	{ 0, 0, L'Q', 0x4e54560000000004, LEVEL_ORDER, SIDE_SELL, 101.50, SCOPE_ORDER, 0, 101, L"NTV", 1488551035010, 0, L"NSDQ" },
-	{ 0, 0, L'Q', 0x4e54560000000002, LEVEL_ORDER, SIDE_BUY, 100.60, SCOPE_ORDER, 0, 102, L"NTV", 1488551035020, 0, L"NSDQ" },
-	{ 0, 0, L'Q', 0x4e54560000000001, LEVEL_ORDER, SIDE_BUY, 100.30, SCOPE_ORDER, 0, 103, L"NTV", 1488551035030, 0, L"NSDQ" }
+	{ 0, 0x4e54560000000005, 1488551035000, 0, 0, 100.50, 100, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ 0, 0x4e54560000000004, 1488551035010, 0, 0, 101.50, 101, 0, dxf_osc_order, dxf_osd_sell, L'Q', L"NTV", L"NSDQ" },
+	{ 0, 0x4e54560000000002, 1488551035020, 0, 0, 100.60, 102, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ 0, 0x4e54560000000001, 1488551035030, 0, 0, 100.30, 103, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" }
 };
 
 static int buildin_update_test_snap_size = SIZE_OF_ARRAY(buildin_update_test_snap_data);
