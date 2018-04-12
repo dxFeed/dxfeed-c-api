@@ -64,17 +64,17 @@ void first_listener(int event_type, dxf_const_string_t symbol_name,
 		dxf_order_t* orders = (dxf_order_t*)data;
 
 		for (; i < data_count; ++i) {
-			wprintf(L"index=%i, side=%i, level=%i, time=%i, exchange code=%C, market maker=%s, price=%f, size=%i\n",
-				(int)orders[i].index, (int)orders[i].side, (int)orders[i].level, (int)orders[i].time,
+			wprintf(L"index=%i, side=%i, scope=%i, time=%i, exchange code=%C, market maker=%s, price=%f, size=%i\n",
+				(int)orders[i].index, (int)orders[i].side, (int)orders[i].scope, (int)orders[i].time,
 				orders[i].exchange_code, orders[i].market_maker, orders[i].price, (int)orders[i].size);
 		}
 	}
 
 	if (event_type == DXF_ET_TRADE) {
-		dxf_trade_t* trades = (dx_trade_t*)data;
+		dxf_trade_t* trades = (dxf_trade_t*)data;
 
 		for (; i < data_count; ++i) {
-			wprintf(L"time=%i, exchange code=%C, price=%f, size=%i, tick=%lld, change=%f, day volume=%f\n",
+			wprintf(L"time=%i, exchange code=%C, price=%f, size=%i, tick=%d, change=%f, day volume=%f\n",
 				(int)trades[i].time, trades[i].exchange_code, trades[i].price, (int)trades[i].size, trades[i].tick,
 				trades[i].change, trades[i].day_volume);
 		}
@@ -93,10 +93,10 @@ void first_listener(int event_type, dxf_const_string_t symbol_name,
 		dxf_profile_t* p = (dxf_profile_t*)data;
 
 		for (; i < data_count ; ++i) {
-			wprintf(L"Beta=%f, eps=%f, div freq=%I64i, exd div amount=%f, exd div date=%i, 52 high price=%f, "
-				L"52 low price=%f, shares=%f, Description=%ls, flags=%I64i, status_reason=%ls, halt start time=",
+			wprintf(L"Beta=%f, eps=%f, div freq=%i, exd div amount=%f, exd div date=%i, 52 high price=%f, "
+				L"52 low price=%f, shares=%f, Description=%ls, flags=%i, status_reason=%ls, halt start time=",
 				p[i].beta, p[i].eps, p[i].div_freq, p[i].exd_div_amount, p[i].exd_div_date, p[i]._52_high_price,
-				p[i]._52_low_price, p[i].shares, p[i].description, p[i].flags, p[i].status_reason);
+				p[i]._52_low_price, p[i].shares, p[i].description, p[i].raw_flags, p[i].status_reason);
 			print_timestamp(p[i].halt_start_time);
 			wprintf(L", halt end time=");
 			print_timestamp(p[i].halt_end_time);

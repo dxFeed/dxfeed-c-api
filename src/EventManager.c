@@ -196,8 +196,6 @@ EVENT_COPY_WITH_2_STRINGS_FUNCTION_BODY(dxf_profile_t, description, status_reaso
 EVENT_COPY_WITH_STRING_FUNCTION_BODY(dxf_order_t, market_maker)
 EVENT_COPY_WITH_3_STRINGS_FUNCTION_BODY(dxf_time_and_sale_t, exchange_sale_conditions, buyer, seller)
 EVENT_COPY_FUNCTION_BODY(dxf_candle_t)
-EVENT_COPY_FUNCTION_BODY(dxf_trade_eth_t)
-EVENT_COPY_WITH_STRING_FUNCTION_BODY(dxf_spread_order_t, spread_symbol)
 EVENT_COPY_FUNCTION_BODY(dxf_greeks_t)
 EVENT_COPY_FUNCTION_BODY(dxf_theo_price_t)
 EVENT_COPY_FUNCTION_BODY(dxf_underlying_t)
@@ -212,8 +210,8 @@ static const dx_event_copy_function_t g_event_copy_functions[dx_eid_count] = {
 	EVENT_COPY_FUNCTION_NAME(dxf_order_t),
 	EVENT_COPY_FUNCTION_NAME(dxf_time_and_sale_t),
 	EVENT_COPY_FUNCTION_NAME(dxf_candle_t),
-	EVENT_COPY_FUNCTION_NAME(dxf_trade_eth_t),
-	EVENT_COPY_FUNCTION_NAME(dxf_spread_order_t),
+	EVENT_COPY_FUNCTION_NAME(dxf_trade_t), // As trade ETH
+	EVENT_COPY_FUNCTION_NAME(dxf_order_t), // As spread order
 	EVENT_COPY_FUNCTION_NAME(dxf_greeks_t),
 	EVENT_COPY_FUNCTION_NAME(dxf_theo_price_t),
 	EVENT_COPY_FUNCTION_NAME(dxf_underlying_t),
@@ -245,7 +243,6 @@ EVENT_FREE_FUNCTION_BODY(dxf_order_t)
 EVENT_FREE_FUNCTION_BODY(dxf_time_and_sale_t)
 EVENT_FREE_FUNCTION_BODY(dxf_candle_t)
 EVENT_FREE_FUNCTION_BODY(dxf_trade_eth_t)
-EVENT_FREE_FUNCTION_BODY(dxf_spread_order_t)
 EVENT_FREE_FUNCTION_BODY(dxf_greeks_t)
 EVENT_FREE_FUNCTION_BODY(dxf_theo_price_t)
 EVENT_FREE_FUNCTION_BODY(dxf_underlying_t)
@@ -261,7 +258,7 @@ static const dx_event_free_function_t g_event_free_functions[dx_eid_count] = {
 	EVENT_FREE_FUNCTION_NAME(dxf_time_and_sale_t),
 	EVENT_FREE_FUNCTION_NAME(dxf_candle_t),
 	EVENT_FREE_FUNCTION_NAME(dxf_trade_eth_t),
-	EVENT_FREE_FUNCTION_NAME(dxf_spread_order_t),
+	EVENT_FREE_FUNCTION_NAME(dxf_order_t), // As spread order
 	EVENT_FREE_FUNCTION_NAME(dxf_greeks_t),
 	EVENT_FREE_FUNCTION_NAME(dxf_theo_price_t),
 	EVENT_FREE_FUNCTION_NAME(dxf_underlying_t),

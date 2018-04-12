@@ -1,4 +1,12 @@
-* Add Time and Sale Buyer and Seller.
+* Records and Events were overhauled:
+  - All Records and Events were synced with Java API.
+  - All indexed events has `event_flags' now.
+  - All index calculations must be compatible with Java.
+  - All public bit flags are replaced with enums.
+  - All inner (record-only) fields were removed from events.
+  - Trade and TradeETH events were merged.
+  - Order and SpreadOrder events were merged.
+  ! These changes are not backward-compatible.
 
 Version 5.1.1
 * Fix possible race condition on working queue cleanup.

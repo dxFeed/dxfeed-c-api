@@ -164,10 +164,10 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
 				break;
 			}
 
-			wprintf(L"   {index=0x%llX, side=%i, level=%i, time=",
-				order.index, order.side, order.level);
+			wprintf(L"   {index=0x%llX, side=%i, scope=%i, time=",
+				order.index, order.side, order.scope);
 			print_timestamp(order.time);
-			wprintf(L", exchange code=%c, market maker=%ls, price=%f, size=%lld",
+			wprintf(L", exchange code=%c, market maker=%ls, price=%f, size=%d",
 				order.exchange_code, order.market_maker, order.price, order.size);
 			if (wcslen(order.source) > 0)
 				wprintf(L", source=%ls", order.source);
@@ -192,19 +192,19 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
 				candle.bid_volume, candle.ask_volume);
 		}
 	} else if (snapshot_data->event_type == DXF_ET_SPREAD_ORDER) {
-		dxf_spread_order_t* order_records = (dxf_spread_order_t*)snapshot_data->records;
+		dxf_order_t* order_records = (dxf_order_t*)snapshot_data->records;
 		for (i = 0; i < records_count; ++i) {
-			dxf_spread_order_t order = order_records[i];
+			dxf_order_t order = order_records[i];
 
 			if (i >= RECORDS_PRINT_LIMIT) {
 				wprintf(L"   { ... %zu records left ...}\n", records_count - i);
 				break;
 			}
 
-			wprintf(L"   {index=0x%llX, side=%i, level=%i, time=",
-				order.index, order.side, order.level);
+			wprintf(L"   {index=0x%llX, side=%i, scope=%i, time=",
+				order.index, order.side, order.scope);
 			print_timestamp(order.time);
-			wprintf(L", sequence=%i, exchange code=%c, price=%f, size=%lld, source=%ls, "
+			wprintf(L", sequence=%i, exchange code=%c, price=%f, size=%d, source=%ls, "
 				L"count=%i, flags=%i, spread symbol=%ls}\n",
 				order.sequence, order.exchange_code, order.price, order.size,
 				wcslen(order.source) > 0 ? order.source : L"",
@@ -221,7 +221,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
 				break;
 			}
 
-			wprintf(L"event id=%I64i, time=%I64i, exchange code=%c, price=%f, size=%I64i, bid price=%f, ask price=%f, "
+			wprintf(L"event id=%I64i, time=%I64i, exchange code=%c, price=%f, size=%i, bid price=%f, ask price=%f, "
 				L"exchange sale conditions=\'%ls\', is ETH trade=%ls, type=%i}\n",
 				tns.index, tns.time, tns.exchange_code, tns.price, tns.size,
 				tns.bid_price, tns.ask_price, tns.exchange_sale_conditions,
@@ -239,10 +239,10 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
 
 			wprintf(L"time=");
 			print_timestamp(grks.time);
-			wprintf(L", sequence=%d, greeks price=%f, volatility=%f, "
-				L"delta=%f, gamma=%f, theta=%f, rho=%f, vega=%f, index=0x%I64X}\n",
-				grks.sequence, grks.greeks_price, grks.volatility, grks.delta,
-				grks.gamma, grks.theta, grks.rho, grks.vega, grks.index);
+			wprintf(L", index=0x%I64X, greeks price=%f, volatility=%f, "
+				L"delta=%f, gamma=%f, theta=%f, rho=%f, vega=%f}\n",
+				grks.index, grks.price, grks.volatility, grks.delta,
+				grks.gamma, grks.theta, grks.rho, grks.vega);
 		}
 	} else if (snapshot_data->event_type == DXF_ET_SERIES) {
 		dxf_series_t* series_records = (dxf_series_t*)snapshot_data->records;
@@ -253,10 +253,10 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
 				wprintf(L"   { ... %zu records left ...}\n", records_count - i);
 				break;
 			}
-			wprintf(L"expiration=%d, sequence=%d, volatility=%f, put call ratio=%f, "
-				L"forward_price=%f, dividend=%f, interest=%f, index=0x%I64X}\n",
-				srs.expiration, srs.sequence, srs.volatility, srs.put_call_ratio,
-				srs.forward_price, srs.dividend, srs.interest, srs.index);
+			wprintf(L"expiration=%d, index=0x%I64X, volatility=%f, put call ratio=%f, "
+				L"forward_price=%f, dividend=%f, interest=%f}\n",
+				srs.expiration, srs.index, srs.volatility, srs.put_call_ratio,
+				srs.forward_price, srs.dividend, srs.interest);
 		}
 	}
 }

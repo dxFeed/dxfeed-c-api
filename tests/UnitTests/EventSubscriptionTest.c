@@ -32,9 +32,9 @@ bool event_subscription_test (void) {
 	dxf_const_string_t small_symbol_set[] = { L"SYMB" };
 	dxf_int_t symbol_code;
 	dxf_event_params_t empty_event_params = { 0, 0, 0 };
-	dxf_quote_t quote_data = { 0, 'A', 1.0, 1, 0, 'A', 2.0, 1 };
+	dxf_quote_t quote_data = { 0, 0, 0, 0, 'A', 1.0, 1, 0, 'A', 2.0, 1 };
 	const dxf_event_data_t quote_event_data = &quote_data;
-	dxf_trade_t trade_data = { 0, 'A', 1.0, 1, 1, 1.0, 1.0 };
+	dxf_trade_t trade_data = { 0, 0, 0, 'A', 1.0, 1, 1, 1.0, 0, 1.0, 1.0, dxf_dir_up, false };
 	const dxf_event_data_t trade_event_data = &trade_data;
 
 	if (dx_init_symbol_codec() != true) {

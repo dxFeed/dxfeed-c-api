@@ -38,7 +38,7 @@
 /* -------------------------------------------------------------------------- */
 
 typedef enum {
-    dx_eid_begin,
+    dx_eid_begin = 0,
     dx_eid_trade = dx_eid_begin,
     dx_eid_quote,
     dx_eid_summary,
@@ -101,83 +101,234 @@ typedef dx_order_source_array_t* dx_order_source_array_ptr_t;
 
 /* -------------------------------------------------------------------------- */
 /*
- *	Event data structures
+ *	Event data structures and support
  */
 /* -------------------------------------------------------------------------- */
 
 typedef void* dxf_event_data_t;
 
-typedef dx_trade_t dxf_trade_t;
-typedef dx_quote_t dxf_quote_t;
-typedef dx_summary_t dxf_summary_t;
-typedef dx_profile_t dxf_profile_t;
-typedef dx_candle_t dxf_candle_t;
-typedef dx_trade_eth_t dxf_trade_eth_t;
-typedef dx_greeks_t dxf_greeks_t;
-typedef dx_theo_price_t dxf_theo_price_t;
-typedef dx_underlying_t dxf_underlying_t;
-typedef dx_series_t dxf_series_t;
+/* Trade & Trade ETH -------------------------------------------------------- */
+
+typedef enum {
+    dxf_dir_undefined = 0,
+    dxf_dir_down = 1,
+    dxf_dir_zero_down = 2,
+    dxf_dir_zero = 3,
+    dxf_dir_zero_up = 4,
+    dxf_dir_up = 5
+} dxf_direction_t;
+
+typedef struct {
+    dxf_long_t time;
+    dxf_int_t sequence;
+    dxf_int_t time_nanos;
+    dxf_char_t exchange_code;
+    dxf_double_t price;
+    dxf_int_t size;
+    /* This field is absent in TradeETH */
+    dxf_int_t tick;
+    /* This field is absent in TradeETH */
+    dxf_double_t change;
+    dxf_int_t raw_flags;
+    dxf_double_t day_volume;
+    dxf_double_t day_turnover;
+    dxf_direction_t direction;
+    dxf_bool_t is_eth;
+} dxf_trade_t;
+
+/* Quote -------------------------------------------------------------------- */
+
+typedef struct {
+    dxf_long_t time;
+    dxf_int_t sequence;
+    dxf_int_t time_nanos;
+    dxf_long_t bid_time;
+    dxf_char_t bid_exchange_code;
+    dxf_double_t bid_price;
+    dxf_int_t bid_size;
+    dxf_long_t ask_time;
+    dxf_char_t ask_exchange_code;
+    dxf_double_t ask_price;
+    dxf_int_t ask_size;
+} dxf_quote_t;
+
+/* Summary ------------------------------------------------------------------ */
+
+typedef enum {
+    dxf_pt_regular = 0,
+    dxf_pt_indicative = 1,
+    dxf_pt_preliminary = 2,
+    dxf_pt_final = 3
+} dxf_price_type_t;
+
+typedef struct {
+    dxf_dayid_t day_id;
+    dxf_double_t day_open_price;
+    dxf_double_t day_high_price;
+    dxf_double_t day_low_price;
+    dxf_double_t day_close_price;
+    dxf_dayid_t prev_day_id;
+    dxf_double_t prev_day_close_price;
+    dxf_int_t open_interest;
+    dxf_int_t raw_flags;
+    dxf_char_t exchange_code;
+    dxf_price_type_t day_close_price_type;
+    dxf_price_type_t prev_day_close_price_type;
+} dxf_summary_t;
+
+/* Profile ------------------------------------------------------------------ */
+
+typedef enum {
+  dxf_ts_undefined = 0,
+  dxf_ts_halted = 1,
+  dxf_ts_active = 2
+} dxf_trading_status_t;
+
+typedef enum {
+  dxf_ssr_undefined = 0,
+  dxf_ssr_active = 1,
+  dxf_ssr_inactive = 2
+} dxf_short_sale_restriction_t;
+
+typedef struct {
+    dxf_double_t beta;
+    dxf_double_t eps;
+    dxf_int_t div_freq;
+    dxf_double_t exd_div_amount;
+    dxf_dayid_t exd_div_date;
+    dxf_double_t _52_high_price;
+    dxf_double_t _52_low_price;
+    dxf_double_t shares;
+    dxf_double_t free_float;
+    dxf_double_t high_limit_price;
+    dxf_double_t low_limit_price;
+    dxf_long_t halt_start_time;
+    dxf_long_t halt_end_time;
+    dxf_int_t raw_flags;
+    dxf_const_string_t description;
+    dxf_const_string_t status_reason;
+    dxf_trading_status_t trading_status;
+    dxf_short_sale_restriction_t ssr;
+} dxf_profile_t;
+
+/* Order & Spread Order ----------------------------------------------------- */
+
+typedef enum {
+    dxf_osc_composite = 0,
+    dxf_osc_regional = 1,
+    dxf_osc_aggregate = 2,
+    dxf_osc_order = 3
+} dxf_order_scope_t;
+
+typedef enum {
+    dxf_osd_undefined = 0,
+    dxf_osd_buy = 1,
+    dxf_osd_sell = 2
+} dxf_order_side_t;
 
 typedef struct {
     dxf_event_flags_t event_flags;
+    dxf_long_t index;
     dxf_long_t time;
+    dxf_int_t time_nanos;
     dxf_int_t sequence;
+    dxf_double_t price;
+    dxf_int_t size;
+    dxf_int_t count;
+    dxf_order_scope_t scope;
+    dxf_order_side_t side;
+    dxf_char_t exchange_code;
+    dxf_char_t source[DXF_RECORD_SUFFIX_SIZE];
+    union {
+        dxf_const_string_t market_maker;
+        dxf_const_string_t spread_symbol;
+	};
+} dxf_order_t;
+
+/* Time And Sale ------------------------------------------------------------ */
+
+typedef enum {
+    dxf_tnst_new = 0,
+    dxf_tnst_correction = 1,
+    dxf_tnst_cancel = 2
+} dxf_tns_type_t;
+
+typedef struct {
+    dxf_event_flags_t event_flags;
+    dxf_long_t index;
+    dxf_long_t time;
     dxf_char_t exchange_code;
     dxf_double_t price;
-    dxf_long_t size;
+    dxf_int_t size;
     dxf_double_t bid_price;
     dxf_double_t ask_price;
     dxf_const_string_t exchange_sale_conditions;
-    dxf_int_t flags;
+    dxf_int_t raw_flags;
     dxf_const_string_t buyer;
     dxf_const_string_t seller;
-
-    dxf_long_t index;
-    dxf_int_t side;
-    dxf_bool_t is_cancel;
-    dxf_bool_t is_correction;
-    dxf_bool_t is_eth_trade;
-    dxf_bool_t is_new;
-    dxf_bool_t is_spread_leg;
+    dxf_order_side_t side;
+    dxf_tns_type_t type;
     dxf_bool_t is_valid_tick;
-    dxf_int_t type;
+    dxf_bool_t is_eth_trade;
+    dxf_char_t trade_through_exempt;
+    dxf_bool_t is_spread_leg;
 } dxf_time_and_sale_t;
 
+/* Candle ------------------------------------------------------------------- */
 typedef struct {
-    dxf_int_t count;
     dxf_event_flags_t event_flags;
-    dxf_char_t exchange_code;
     dxf_long_t index;
-    dxf_int_t level;
-    dxf_int_t side;
-    dxf_double_t price;
-    dxf_int_t scope;
-    dxf_int_t sequence;
-    dxf_long_t size;
-    dxf_char_t source[DXF_RECORD_SUFFIX_SIZE];
     dxf_long_t time;
-    dxf_long_t time_sequence;
-    dxf_const_string_t market_maker;
-} dxf_order_t;
+    dxf_int_t sequence;
+    dxf_double_t count;
+    dxf_double_t open;
+    dxf_double_t high;
+    dxf_double_t low;
+    dxf_double_t close;
+    dxf_double_t volume;
+    dxf_double_t vwap;
+    dxf_double_t bid_volume;
+    dxf_double_t ask_volume;
+    dxf_int_t open_interest;
+    dxf_double_t imp_volatility;
+} dxf_candle_t;
+
+/* Greeks ------------------------------------------------------------------- */
+typedef struct {
+    dxf_event_flags_t event_flags;
+    dxf_long_t index;
+    dxf_long_t time;
+    dxf_double_t price;
+    dxf_double_t volatility;
+    dxf_double_t delta;
+    dxf_double_t gamma;
+    dxf_double_t theta;
+    dxf_double_t rho;
+    dxf_double_t vega;
+} dxf_greeks_t;
+
+/* TheoPrice ---------------------------------------------------------------- */
+/* Event and record are the same */
+typedef dx_theo_price_t dxf_theo_price_t;
+
+/* Underlying --------------------------------------------------------------- */
+/* Event and record are the same */
+typedef dx_underlying_t dxf_underlying_t;
+
+/* Series ------------------------------------------------------------------- */
+typedef struct {
+    dxf_event_flags_t event_flags;
+    dxf_long_t index;
+    dxf_dayid_t expiration;
+    dxf_double_t volatility;
+    dxf_double_t put_call_ratio;
+    dxf_double_t forward_price;
+    dxf_double_t dividend;
+    dxf_double_t interest;
+} dxf_series_t;
 
 typedef struct {
-    dxf_int_t count;
-    dxf_event_flags_t event_flags;
-    dxf_char_t exchange_code;
-    dxf_long_t index;
-    dxf_int_t level;
-    dxf_int_t side;
-    dxf_double_t price;
-    dxf_int_t scope;
-    dxf_int_t sequence;
-    dxf_long_t size;
-    dxf_char_t source[DXF_RECORD_SUFFIX_SIZE];
-    dxf_long_t time;
-    dxf_long_t time_sequence;
-    dxf_const_string_t spread_symbol;
-} dxf_spread_order_t;
-
-typedef struct {
+    dxf_int_t version;
     dxf_string_t object;
 } dxf_configuration_t;
 
@@ -186,23 +337,6 @@ typedef struct {
  *	Event data constants
  */
 /* -------------------------------------------------------------------------- */
-
-static const dxf_byte_t DXF_SUMMARY_PRICE_TYPE_REGULAR = 0;
-static const dxf_byte_t DXF_SUMMARY_PRICE_TYPE_INDICATIVE = 1;
-static const dxf_byte_t DXF_SUMMARY_PRICE_TYPE_PRELIMINARY = 2;
-static const dxf_byte_t DXF_SUMMARY_PRICE_TYPE_FINAL = 3;
-
-static const dxf_int_t DXF_ORDER_SIDE_BUY = 0;
-static const dxf_int_t DXF_ORDER_SIDE_SELL = 1;
-
-static const dxf_int_t DXF_ORDER_LEVEL_COMPOSITE = 0;
-static const dxf_int_t DXF_ORDER_LEVEL_REGIONAL = 1;
-static const dxf_int_t DXF_ORDER_LEVEL_AGGREGATE = 2;
-static const dxf_int_t DXF_ORDER_LEVEL_ORDER = 3;
-
-static const dxf_int_t DXF_TIME_AND_SALE_TYPE_NEW = 0;
-static const dxf_int_t DXF_TIME_AND_SALE_TYPE_CORRECTION = 1;
-static const dxf_int_t DXF_TIME_AND_SALE_TYPE_CANCEL = 2;
 
 static dxf_const_string_t DXF_ORDER_COMPOSITE_BID_STR = L"COMPOSITE_BID";
 static dxf_const_string_t DXF_ORDER_COMPOSITE_ASK_STR = L"COMPOSITE_ASK";
@@ -394,8 +528,8 @@ typedef void(*dxf_snapshot_listener_t) (const dxf_snapshot_data_ptr_t snapshot_d
 */
 /* -------------------------------------------------------------------------- */
 #define DXF_IS_CANDLE_REMOVAL(c) (((c)->event_flags & dxf_ef_remove_event) != 0)
-#define DXF_IS_ORDER_REMOVAL(o) ((o)->size == 0)
-#define DXF_IS_SPREAD_ORDER_REMOVAL(o) ((o)->size == 0)
+#define DXF_IS_ORDER_REMOVAL(o) ((((o)->event_flags & dxf_ef_remove_event) != 0) || ((o)->size == 0))
+#define DXF_IS_SPREAD_ORDER_REMOVAL(o) ((((o)->event_flags & dxf_ef_remove_event) != 0) || ((o)->size == 0))
 #define DXF_IS_TIME_AND_SALE_REMOVAL(t) (((t)->event_flags & dxf_ef_remove_event) != 0)
 #define DXF_IS_GREEKS_REMOVAL(g) (((g)->event_flags & dxf_ef_remove_event) != 0)
 #define DXF_IS_SERIES_REMOVAL(s) (((s)->event_flags & dxf_ef_remove_event) != 0)

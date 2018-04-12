@@ -626,7 +626,7 @@ static void dx_plb_source_add_order_to_levels(dx_plb_price_level_side_t *ob, con
 
 /* -------------------------------------------------------------------------- */
 
-static void dx_plb_source_rebuild_levels(dx_plb_records_array_t *snapshot, dx_plb_price_level_side_t *ob, int side) {
+static void dx_plb_source_rebuild_levels(dx_plb_records_array_t *snapshot, dx_plb_price_level_side_t *ob, dxf_order_side_t side) {
 	size_t i = 0;
 	dx_memset(ob->levels, 0, sizeof(ob->levels));
 	ob->count = 0;
@@ -672,7 +672,7 @@ static void dx_plb_source_process_order(dx_plb_source_t *source, const dxf_order
 		oo = source->snapshot.elements[orderIdx];
 		/* It is removal or update? */
 		if (rm || order->size == 0) {
-			dx_plb_source_remove_order_from_levels(oo->side == DXF_ORDER_SIDE_BUY ? &source->bids : &source->asks, oo);
+			dx_plb_source_remove_order_from_levels(oo->side == dxf_osd_buy ? &source->bids : &source->asks, oo);
 			if (rm) {
 				DX_ARRAY_DELETE(source->snapshot, dxf_order_t*, orderIdx, dx_capacity_manager_halfer, error);
 				dx_free(oo);
@@ -685,9 +685,9 @@ static void dx_plb_source_process_order(dx_plb_source_t *source, const dxf_order
 		else {
 			/* Update order */
 			/* Add first, to minimize chances to hit zero size */
-			dx_plb_source_add_order_to_levels(order->side == DXF_ORDER_SIDE_BUY ? &source->bids : &source->asks, order);
+			dx_plb_source_add_order_to_levels(order->side == dxf_osd_buy ? &source->bids : &source->asks, order);
 			/* Remove old order, which is replaced by this one */
-			dx_plb_source_remove_order_from_levels(oo->side == DXF_ORDER_SIDE_BUY ? &source->bids : &source->asks, oo);
+			dx_plb_source_remove_order_from_levels(oo->side == dxf_osd_buy ? &source->bids : &source->asks, oo);
 			/* And replace order */
 			*oo = *order;
 		}
@@ -701,7 +701,7 @@ static void dx_plb_source_process_order(dx_plb_source_t *source, const dxf_order
 		}
 		dx_memcpy(oo, order, sizeof(*oo));
 		DX_ARRAY_INSERT(source->snapshot, dxf_order_t *, oo, orderIdx, dx_capacity_manager_halfer, error);
-		dx_plb_source_add_order_to_levels(oo->side == DXF_ORDER_SIDE_BUY ? &source->bids : &source->asks, oo);
+		dx_plb_source_add_order_to_levels(oo->side == dxf_osd_buy ? &source->bids : &source->asks, oo);
 	}
 }
 
@@ -898,14 +898,14 @@ static void plb_event_listener(int event_type, dxf_const_string_t symbol_name,
 		/* And call all consumers  if it is end of transaction */
 		if ((source->asks.updated || source->bids.updated) && source->snapshot_status == dx_status_full) {
 			if (source->bids.rebuild) {
-				dx_plb_source_rebuild_levels(&source->snapshot, &source->bids, DXF_ORDER_SIDE_BUY);
+				dx_plb_source_rebuild_levels(&source->snapshot, &source->bids, dxf_osd_buy);
 			}
 			if (source->bids.updated) {
 				source->final_bids = source->bids;
 			}
 
 			if (source->asks.rebuild) {
-				dx_plb_source_rebuild_levels(&source->snapshot, &source->asks, DXF_ORDER_SIDE_SELL);
+				dx_plb_source_rebuild_levels(&source->snapshot, &source->asks, dxf_osd_sell);
 			}
 			if (source->asks.updated) {
 				source->final_asks = source->asks;

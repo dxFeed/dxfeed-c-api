@@ -38,8 +38,8 @@ static const int g_event_data_sizes[dx_eid_count] = {
 	sizeof(dxf_order_t),
 	sizeof(dxf_time_and_sale_t),
 	sizeof(dxf_candle_t),
-	sizeof(dxf_trade_eth_t),
-	sizeof(dxf_spread_order_t),
+	sizeof(dxf_trade_t), // As trade ETH
+	sizeof(dxf_order_t), // As spread order
 	sizeof(dxf_greeks_t),
 	sizeof(dxf_theo_price_t),
 	sizeof(dxf_underlying_t),
@@ -344,8 +344,6 @@ EVENT_DATA_NAVIGATOR_BODY(dxf_profile_t)
 EVENT_DATA_NAVIGATOR_BODY(dxf_order_t)
 EVENT_DATA_NAVIGATOR_BODY(dxf_time_and_sale_t)
 EVENT_DATA_NAVIGATOR_BODY(dxf_candle_t)
-EVENT_DATA_NAVIGATOR_BODY(dxf_trade_eth_t)
-EVENT_DATA_NAVIGATOR_BODY(dxf_spread_order_t)
 EVENT_DATA_NAVIGATOR_BODY(dxf_greeks_t)
 EVENT_DATA_NAVIGATOR_BODY(dxf_theo_price_t)
 EVENT_DATA_NAVIGATOR_BODY(dxf_underlying_t)
@@ -360,8 +358,8 @@ static const dx_event_data_navigator g_event_data_navigators[dx_eid_count] = {
 	EVENT_DATA_NAVIGATOR_NAME(dxf_order_t),
 	EVENT_DATA_NAVIGATOR_NAME(dxf_time_and_sale_t),
 	EVENT_DATA_NAVIGATOR_NAME(dxf_candle_t),
-	EVENT_DATA_NAVIGATOR_NAME(dxf_trade_eth_t),
-	EVENT_DATA_NAVIGATOR_NAME(dxf_spread_order_t),
+	EVENT_DATA_NAVIGATOR_NAME(dxf_trade_t), // As trade ETH
+	EVENT_DATA_NAVIGATOR_NAME(dxf_order_t), // As spread order
 	EVENT_DATA_NAVIGATOR_NAME(dxf_greeks_t),
 	EVENT_DATA_NAVIGATOR_NAME(dxf_theo_price_t),
 	EVENT_DATA_NAVIGATOR_NAME(dxf_underlying_t),

@@ -13,6 +13,53 @@ typedef enum {
 	DXEF_remove_symbol = 0x20
 } DXFEventFlags;
 
+typedef enum {
+	DXDir_Undefined = 0,
+	DXDir_Down = 1,
+	DXDir_ZeroDown = 2,
+	DXDir_Zero = 3,
+	DXDir_ZeroUp = 4,
+	DXDir_Up = 5
+} DXFDirection;
+
+typedef enum {
+	DXPT_Regular = 0,
+	DXPT_Indicative = 1,
+	DXPT_Preliminary = 2,
+	DXPT_Final = 3
+} DXFPriceType;
+
+typedef enum {
+	DXTS_Undefined = 0,
+	DXTS_Halted = 1,
+	DXTS_Active = 2
+} DXFTradingStatus;
+
+typedef enum {
+	DXSSR_Undefined = 0,
+	DXSSR_Active = 1,
+	DXSSR_Inactive = 2
+} DXFShortSaleRestriction;
+
+typedef enum {
+	DXOS_Composite = 0,
+	DXOS_Regional = 1,
+	DXOS_Aggreagte = 2,
+	DXOS_Order = 3
+} DXFOrderScope;
+
+typedef enum {
+	DXSD_Undefined = 0,
+	DXSD_Buy = 1,
+	DXSD_Sell = 2
+} DXFSide;
+
+typedef enum {
+	DXTNS_New = 0,
+	DXTNS_Correction = 1,
+	DXTNS_Cancel = 2
+} DXFTNSType;
+
 /* -------------------------------------------------------------------------- */
 /*
  *	IDXFeed interface
@@ -93,6 +140,12 @@ struct IDXTrade : public IDispatch {
 	virtual HRESULT STDMETHODCALLTYPE GetTick(LONGLONG* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetChange(DOUBLE* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetDayVolume(LONGLONG* value) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetSequence(INT* value) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetTimeNanos(INT* value) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetRawFlags(INT* value) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetDayTurnover(DOUBLE* value) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetDirection(DXFDirection* value) = 0;
+	virtual HRESULT STDMETHODCALLTYPE IsETH(VARIANT_BOOL *value) = 0;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -112,6 +165,9 @@ struct IDXQuote : public IDispatch {
 	virtual HRESULT STDMETHODCALLTYPE GetAskExchangeCode(SHORT* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetAskPrice(DOUBLE* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetAskSize(LONGLONG* value) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetTime(LONGLONG* value) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetSequence(INT* value) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetTimeNanos(INT* value) = 0;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -131,10 +187,10 @@ struct IDXSummary : public IDispatch {
 	virtual HRESULT STDMETHODCALLTYPE GetPrevDayId(LONGLONG* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetPrevDayClosePrice(DOUBLE* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetOpenInterest(LONGLONG* value) = 0;
-	virtual HRESULT STDMETHODCALLTYPE GetFlags(LONGLONG* value) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetRawFlags(LONGLONG* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetExchange(SHORT* value) = 0;
-	virtual HRESULT STDMETHODCALLTYPE GetDayClosePriceType(CHAR* value) = 0;
-	virtual HRESULT STDMETHODCALLTYPE GetPrevDayClosePriceType(CHAR* value) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetDayClosePriceType(DXFPriceType* value) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetPrevDayClosePriceType(DXFPriceType* value) = 0;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -155,12 +211,15 @@ struct IDXProfile : public IDispatch {
 	virtual HRESULT STDMETHODCALLTYPE Get52LowPrice(DOUBLE* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetShares(DOUBLE* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetDescription(BSTR* value) = 0;
-	virtual HRESULT STDMETHODCALLTYPE GetFlags(LONGLONG* value) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetRawFlags(LONGLONG* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetStatusReason(BSTR* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetHaltStartTime(LONGLONG* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetHaltEndTime(LONGLONG* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetHighLimitPrice(DOUBLE* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetLowLimitPrice(DOUBLE* value) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetFreeFloat(DOUBLE* value) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetTradingStatus (DXFTradingStatus* value) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetShortSaleRestiction (DXFShortSaleRestriction* value) = 0;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -173,8 +232,8 @@ struct IDXProfile : public IDispatch {
 
 struct IDXOrder : public IDispatch {
 	virtual HRESULT STDMETHODCALLTYPE GetIndex(LONGLONG* value) = 0;
-	virtual HRESULT STDMETHODCALLTYPE GetSide(INT* value) = 0;
-	virtual HRESULT STDMETHODCALLTYPE GetLevel(INT* value) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetSide(DXFSide* value) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetScope(DXFOrderScope* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetTime(LONGLONG* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetExchangeCode(SHORT* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetMarketMaker(BSTR* value) = 0;
@@ -183,10 +242,10 @@ struct IDXOrder : public IDispatch {
 	virtual HRESULT STDMETHODCALLTYPE GetOrderSource(BSTR* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetCount(INT* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetEventFlags(INT* value) = 0;
-	virtual HRESULT STDMETHODCALLTYPE GetTimeSequence(LONGLONG* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetSequence(INT* value) = 0;
-	virtual HRESULT STDMETHODCALLTYPE GetScope(INT* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE IsRemoved(VARIANT_BOOL* value) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetTimeNanos(INT* value) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetSpreadSymbol(BSTR* value) = 0;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -198,9 +257,8 @@ struct IDXOrder : public IDispatch {
 /* -------------------------------------------------------------------------- */
 
 struct IDXTimeAndSale : public IDispatch {
-	virtual HRESULT STDMETHODCALLTYPE GetEventId(LONGLONG* value) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetIndex(LONGLONG* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetTime(LONGLONG* value) = 0;
-	virtual HRESULT STDMETHODCALLTYPE GetSequence(INT* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetExchangeCode(SHORT* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetPrice(DOUBLE* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetSize(LONGLONG* value) = 0;
@@ -208,13 +266,16 @@ struct IDXTimeAndSale : public IDispatch {
 	virtual HRESULT STDMETHODCALLTYPE GetAskPrice(DOUBLE* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetExchangeSaleCondition (BSTR* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetEventFlags(INT* value) = 0;
-	virtual HRESULT STDMETHODCALLTYPE GetIndex(LONGLONG* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetAgressorSide(INT* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetSpreadLeg(VARIANT_BOOL* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetETHTradeFlag(VARIANT_BOOL* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetValidTick(VARIANT_BOOL* value) = 0;
-	virtual HRESULT STDMETHODCALLTYPE GetType(INT* value) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetType(DXFTNSType* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE IsRemoved(VARIANT_BOOL* value) = 0;
+	virtual HRESULT STDMETHODCALLTYPE IsTradeThroughExempt(VARIANT_BOOL* value) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetBuyer(BSTR* value) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetSeller(BSTR* value) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetRawFlags(INT* value) = 0;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -246,49 +307,6 @@ struct IDXCandle : public IDispatch {
 
 /* -------------------------------------------------------------------------- */
 /*
- *	IDXTradeETH interface
-
- *  defines the TradeETH data accessor
- */
-/* -------------------------------------------------------------------------- */
-
-struct IDXTradeETH : public IDispatch {
-	virtual HRESULT STDMETHODCALLTYPE GetTime(LONGLONG* value) = 0;
-	virtual HRESULT STDMETHODCALLTYPE GetFlags(INT* value) = 0;
-	virtual HRESULT STDMETHODCALLTYPE GetExchangeCode(SHORT* value) = 0;
-	virtual HRESULT STDMETHODCALLTYPE GetPrice(DOUBLE* value) = 0;
-	virtual HRESULT STDMETHODCALLTYPE GetSize(LONGLONG* value) = 0;
-	virtual HRESULT STDMETHODCALLTYPE GetDayVolume(LONGLONG* value) = 0;
-};
-
-/* -------------------------------------------------------------------------- */
-/*
- *	IDXSpreadOrder interface
-
- *  defines the spread order data accessor
- */
-/* -------------------------------------------------------------------------- */
-
-struct IDXSpreadOrder : public IDispatch {
-	virtual HRESULT STDMETHODCALLTYPE GetIndex(LONGLONG* value) = 0;
-	virtual HRESULT STDMETHODCALLTYPE GetSide(INT* value) = 0;
-	virtual HRESULT STDMETHODCALLTYPE GetLevel(INT* value) = 0;
-	virtual HRESULT STDMETHODCALLTYPE GetTime(LONGLONG* value) = 0;
-	virtual HRESULT STDMETHODCALLTYPE GetSequence(INT* value) = 0;
-	virtual HRESULT STDMETHODCALLTYPE GetExchangeCode(SHORT* value) = 0;
-	virtual HRESULT STDMETHODCALLTYPE GetPrice(DOUBLE* value) = 0;
-	virtual HRESULT STDMETHODCALLTYPE GetOrderSource(BSTR* value) = 0;
-	virtual HRESULT STDMETHODCALLTYPE GetSize(LONGLONG* value) = 0;
-	virtual HRESULT STDMETHODCALLTYPE GetCount(INT* value) = 0;
-	virtual HRESULT STDMETHODCALLTYPE GetEventFlags(INT* value) = 0;
-	virtual HRESULT STDMETHODCALLTYPE GetSpreadSymbol(BSTR* value) = 0;
-	virtual HRESULT STDMETHODCALLTYPE GetTimeSequence(LONGLONG* value) = 0;
-	virtual HRESULT STDMETHODCALLTYPE GetScope(INT* value) = 0;
-	virtual HRESULT STDMETHODCALLTYPE IsRemoved(VARIANT_BOOL* value) = 0;
-};
-
-/* -------------------------------------------------------------------------- */
-/*
  *	IDXGreeks interface
 
  *  defines the greeks data accessor
@@ -297,7 +315,6 @@ struct IDXSpreadOrder : public IDispatch {
 
 struct IDXGreeks : public IDispatch {
 	virtual HRESULT STDMETHODCALLTYPE GetTime(LONGLONG* value) = 0;
-	virtual HRESULT STDMETHODCALLTYPE GetSequence(INT* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetGreeksPrice(DOUBLE* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetVolatility(DOUBLE* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetDelta(DOUBLE* value) = 0;
@@ -353,7 +370,6 @@ struct IDXUnderlying : public IDispatch {
 
 struct IDXSeries : public IDispatch {
 	virtual HRESULT STDMETHODCALLTYPE GetExpiration(LONGLONG* value) = 0;
-	virtual HRESULT STDMETHODCALLTYPE GetSequence(INT* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetVolatility(DOUBLE* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetPutCallRatio(DOUBLE* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetForwardPrice(DOUBLE* value) = 0;
@@ -374,6 +390,7 @@ struct IDXSeries : public IDispatch {
 
 struct IDXConfiguration : public IDispatch {
 	virtual HRESULT STDMETHODCALLTYPE GetStringObject(BSTR* value) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetVersion(INT* value) = 0;
 };
 
 /* -------------------------------------------------------------------------- */
