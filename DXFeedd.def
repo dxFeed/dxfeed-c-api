@@ -1,6 +1,6 @@
 ; The following line has the only difference between release and debug versions of DXFeed lib
 LIBRARY DXFeedd
-VERSION 5.1
+VERSION 5.2
 EXPORTS
     dxf_create_connection 
     dxf_close_connection 

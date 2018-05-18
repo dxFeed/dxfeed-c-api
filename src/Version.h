@@ -27,8 +27,8 @@
 #define DX_TO_STRING(x) DX_STRINGIFY(x)
 
 #define DX_VERSION_MAJOR 5
-#define DX_VERSION_MINOR 1
-#define DX_VERSION_PATCH 1
+#define DX_VERSION_MINOR 2
+#define DX_VERSION_PATCH 0
 
 #define DX_VER_FILE_VERSION         DX_VERSION_MAJOR, DX_VERSION_MINOR, DX_VERSION_PATCH
 #define DX_VER_FILE_VERSION_STR     DX_TO_STRING(DX_VERSION_MAJOR) \
@@ -45,10 +45,10 @@
 #define DX_VER_INTERNAL_FILENAME DX_VER_ORIGINAL_FILENAME 
 #define DX_VER_COMPANY_NAME      "Devexperts LLC"
 #define DX_VER_FILE_DESCRIPTION  "Dynamic-link library that provides a common application programming interface (API) to real-time, delayed and historical market data feeds."
-#define DX_VER_LEGAL_COPYRIGHT   "Copyright (C) 2010-2017 Devexperts LLC"
+#define DX_VER_LEGAL_COPYRIGHT   "Copyright (C) 2010-2018 Devexperts LLC"
 #define DX_VER_PRODUCT_NAME      "DXFeed C API"
 
-#define DX_LIBRARY_VERSION L"DXFeed.cpp v 5.1.1.1 (c) Devexperts"
+#define DX_LIBRARY_VERSION L"DXFeed.cpp v 5.2.0 (c) Devexperts"
 
 extern dxf_const_string_t DX_LIBRARY_OPTIONS;
 
