@@ -536,6 +536,7 @@ bool RECORD_TRANSCODER_NAME(dx_summary_t) (dx_record_transcoder_connection_conte
 		cur_event->day_close_price = cur_record->day_close_price;
 		cur_event->prev_day_id = cur_record->prev_day_id;
 		cur_event->prev_day_close_price = cur_record->prev_day_close_price;
+		cur_event->prev_day_volume = cur_record->prev_day_volume;
 		cur_event->open_interest = cur_record->open_interest;
 		cur_event->raw_flags = cur_record->flags;
 		cur_event->exchange_code = exchange_code;

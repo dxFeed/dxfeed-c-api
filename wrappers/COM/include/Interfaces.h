@@ -186,6 +186,7 @@ struct IDXSummary : public IDispatch {
 	virtual HRESULT STDMETHODCALLTYPE GetDayClosePrice(DOUBLE* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetPrevDayId(LONGLONG* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetPrevDayClosePrice(DOUBLE* value) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetPrevDayVolume(DOUBLE* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetOpenInterest(LONGLONG* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetRawFlags(LONGLONG* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetExchange(SHORT* value) = 0;

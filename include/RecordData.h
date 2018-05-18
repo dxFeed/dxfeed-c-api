@@ -104,6 +104,7 @@ typedef struct {
     dxf_double_t day_close_price;
     dxf_dayid_t prev_day_id;
     dxf_double_t prev_day_close_price;
+    dxf_double_t prev_day_volume;
     dxf_int_t open_interest;
     dxf_int_t flags;
 } dx_summary_t;

@@ -432,6 +432,7 @@ private:
 	virtual HRESULT STDMETHODCALLTYPE GetDayClosePrice(DOUBLE* value);
 	virtual HRESULT STDMETHODCALLTYPE GetPrevDayId(LONGLONG* value);
 	virtual HRESULT STDMETHODCALLTYPE GetPrevDayClosePrice(DOUBLE* value);
+	virtual HRESULT STDMETHODCALLTYPE GetPrevDayVolume(DOUBLE* value);
 	virtual HRESULT STDMETHODCALLTYPE GetOpenInterest(LONGLONG* value);
 	virtual HRESULT STDMETHODCALLTYPE GetRawFlags(LONGLONG* value);
 	virtual HRESULT STDMETHODCALLTYPE GetExchange(SHORT* value);
@@ -524,6 +525,16 @@ HRESULT STDMETHODCALLTYPE DXSummary::GetPrevDayClosePrice(DOUBLE* value) {
 	CHECK_PTR(value);
 
 	*value = m_data->prev_day_close_price;
+
+	return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXSummary::GetPrevDayVolume(DOUBLE* value) {
+	CHECK_PTR(value);
+
+	*value = m_data->prev_day_volume;
 
 	return S_OK;
 }

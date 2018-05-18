@@ -139,15 +139,17 @@ library DXFeedCOM {
         HRESULT prevDayId ([out, retval] LONGLONG*);
         [id(7), propget, helpstring("Previous day close price value getter")]
         HRESULT prevDayClosePrice ([out, retval] DOUBLE*);
-        [id(8), propget, helpstring("Open interest value getter")]
+        [id(8), propget, helpstring("Previous day volume value getter")]
+        HRESULT prevDayVolume ([out, retval] DOUBLE*);
+        [id(9), propget, helpstring("Open interest value getter")]
         HRESULT openInterest ([out, retval] LONGLONG*);
-        [id(9), propget, helpstring("Flags value getter")]
+        [id(10), propget, helpstring("Flags value getter")]
         HRESULT rawFlags ([out, retval] LONGLONG*);
-        [id(10), propget, helpstring("Exchange code value getter")]
+        [id(11), propget, helpstring("Exchange code value getter")]
         HRESULT exchangeCode ([out, retval] SHORT*);
-        [id(11), propget, helpstring("Day close price type value getter")]
+        [id(12), propget, helpstring("Day close price type value getter")]
         HRESULT dayClosePriceType([out, retval] PriceType*);
-        [id(12), propget, helpstring("Prev day close price type value getter")]
+        [id(13), propget, helpstring("Prev day close price type value getter")]
         HRESULT prevDayClosePriceType([out, retval] PriceType*);
     };
     
