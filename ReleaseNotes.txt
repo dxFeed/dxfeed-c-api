@@ -1,3 +1,4 @@
+Version 5.2.0
 * Records and Events were overhauled:
   - All Records and Events were synced with Java API.
   - All indexed events has `event_flags' now.
