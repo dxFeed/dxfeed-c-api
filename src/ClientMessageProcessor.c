@@ -208,7 +208,7 @@ static bool dx_compose_body (void* bocc, dxf_int_t record_id, dxf_int_t cipher, 
 
 static bool dx_subscribe_symbol_to_record(dxf_connection_t connection, dx_message_type_t type,
 										dxf_const_string_t symbol, dxf_int_t cipher,
-										dxf_int_t record_id, dxf_long_t time) {
+										dxf_int_t record_id, dxf_long_t time, OUT dxf_byte_t** buffer, OUT int* buffer_size) {
 	static const dxf_int_t initial_buffer_size = 100;
 
 	void* bocc = NULL;
@@ -216,6 +216,8 @@ static bool dx_subscribe_symbol_to_record(dxf_connection_t connection, dx_messag
 	dxf_byte_t* subscr_buffer = NULL;
 	int message_size = 0;
 	dxf_long_t subscription_time;
+	*buffer_size = 0;
+	*buffer = NULL;
 
 	bocc = dx_get_buffered_output_connection_context(connection);
 	dscc = dx_get_data_structures_connection_context(connection);
@@ -255,16 +257,19 @@ static bool dx_subscribe_symbol_to_record(dxf_connection_t connection, dx_messag
 	subscr_buffer = dx_get_out_buffer(bocc);
 	message_size = dx_get_out_buffer_position(bocc);
 
-	if (!dx_unlock_buffered_output(bocc) ||
-		!dx_send_data(connection, subscr_buffer, message_size)) {
-
+	if (!dx_unlock_buffered_output(bocc)) {
 		dx_free(subscr_buffer);
-
 		return false;
 	}
-
-	dx_free(subscr_buffer);
-
+	if (subscr_buffer != NULL) {
+		if (message_size > 0) {
+			*buffer = subscr_buffer;
+			*buffer_size = message_size;
+		}
+		else {
+			dx_free(subscr_buffer);
+		}
+	}
 	return true;
 }
 
@@ -578,6 +583,9 @@ bool dx_subscribe_symbols_to_events (dxf_connection_t connection, dx_order_sourc
 	for (; i < symbol_count; ++i){
 		dx_event_id_t eid = dx_eid_begin;
 
+		dxf_byte_t* buffer = NULL;
+		int buffer_size = 0;
+		int buffer_capacity = 0;
 		for (; eid < dx_eid_count; ++eid) {
 			if (event_types & DX_EVENT_BIT_MASK(eid)) {
 				size_t j = 0;
@@ -589,16 +597,49 @@ bool dx_subscribe_symbols_to_events (dxf_connection_t connection, dx_order_sourc
 					const dx_event_subscription_param_t* cur_param = subscr_params.elements + j;
 					dx_message_type_t msg_type = dx_get_subscription_message_type(unsubscribe ? dx_at_remove_subscription : dx_at_add_subscription, cur_param->subscription_type);
 
+					dxf_byte_t* param_buffer = NULL;
+					int param_buffer_size = 0;
 					if (!dx_subscribe_symbol_to_record(connection, msg_type, symbols[i],
 													dx_encode_symbol_name(symbols[i]),
-													cur_param->record_id, time)) {
-
+													cur_param->record_id, time, &param_buffer, &param_buffer_size)) {
+						if (buffer != NULL) {
+							dx_free(buffer);
+						}
+						if (param_buffer != NULL) {
+							dx_free(param_buffer);
+						}
+						//subscr_params.elements is leaked?
 						return false;
 					}
+					if (param_buffer != NULL) {
+						if (buffer != NULL) {
+							if (buffer_capacity < buffer_size + param_buffer_size) {
+								dxf_byte_t* _temp = buffer;
+								buffer_capacity = (buffer_size + param_buffer_size) << 1;
+								buffer = (dxf_byte_t*)dx_malloc(buffer_capacity);
+								dx_memcpy(buffer, _temp, buffer_size);
+								dx_free(_temp);
+							}
+							dx_memcpy(buffer + buffer_size, param_buffer, param_buffer_size);
+							buffer_size += param_buffer_size;
+							dx_free(param_buffer);
+						}
+						else {
+							buffer = param_buffer;
+							buffer_size = param_buffer_size;
+							buffer_capacity = param_buffer_size;
+						}
+					}
 				}
-
 				dx_free(subscr_params.elements);
 			}
+		}
+		if (buffer != NULL) {
+			if (!dx_send_data(connection, buffer, buffer_size)) {
+				dx_free(buffer);
+				return false;
+			}
+			dx_free(buffer);
 		}
 	}
 
