@@ -816,7 +816,7 @@ int main (int argc, char* argv[]) {
 		process_last_error();
 		return -1;
 	}
-
+	Sleep(1000);
 	// create subscriptions
 	for (i = dx_eid_begin; i < dx_eid_count; ++i) {
 		subscriptions[i] = create_subscription(connection, i);
