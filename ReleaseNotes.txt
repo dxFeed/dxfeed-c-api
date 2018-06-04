@@ -1,3 +1,4 @@
+Version 5.2.2
 * Improve subscription: combine small network packets
   into one.
 
