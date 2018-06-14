@@ -60,7 +60,7 @@
 #define MRU_EVENT_FLAGS 1
 
 #define DX_RECV_PROPERTY_AUTH L"authentication"
-#define DX_RECV_PROPERTY_LOGIN_REQUIRED L"LOGIN Required"
+#define DX_RECV_PROPERTY_LOGIN_REQUIRED L"LOGIN "
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -1405,13 +1405,15 @@ bool dx_process_describe_protocol (dx_server_msg_proc_connection_context_t* cont
 
 	/* Check received properties from server */
 	if (dx_property_map_try_get_value(&(context->recv_props), DX_RECV_PROPERTY_AUTH, OUT &prop_value) && dx_string_length(prop_value) > 0) {
-		if (dx_compare_strings(DX_RECV_PROPERTY_LOGIN_REQUIRED, prop_value) == 0) {
+		if (dx_compare_strings_num(DX_RECV_PROPERTY_LOGIN_REQUIRED, prop_value, dx_string_length(DX_RECV_PROPERTY_LOGIN_REQUIRED)) == 0) {
+			dx_logging_info(L"Login required: \"%ls\"", &prop_value[dx_string_length(DX_RECV_PROPERTY_LOGIN_REQUIRED)]);
 			dx_connection_status_set(context->connection, dx_cs_login_required);
 			context->describe_protocol_status = dx_dps_pending;
 			dx_mutex_unlock(&(context->describe_protocol_guard));
 			return false;
 		} else {
 			dx_connection_status_set(context->connection, dx_cs_not_connected);
+			dx_logging_info(L"Login failed: \"%ls\"", prop_value);
 			dx_set_error_code(dx_pec_authentication_error);
 			dx_logging_error(prop_value);
 			dx_mutex_unlock(&(context->describe_protocol_guard));
