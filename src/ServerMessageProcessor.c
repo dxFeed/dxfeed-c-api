@@ -802,7 +802,7 @@ static bool dx_read_message_length_and_set_buffer_limit (dx_server_msg_proc_conn
 	int message_end_offset;
 
 	if (!dx_read_compact_long(context->bicc, &message_length)) {
-		return dx_set_error_code(dx_pec_message_incomplete);
+		return dx_set_error_code_impl(dx_pec_message_incomplete, false);
 	}
 
 	if (message_length < 0 || message_length > INT_MAX - dx_get_in_buffer_position(context->bicc)) {
@@ -812,7 +812,7 @@ static bool dx_read_message_length_and_set_buffer_limit (dx_server_msg_proc_conn
 	message_end_offset = dx_get_in_buffer_position(context->bicc) + (int)message_length;
 
 	if (message_end_offset > context->buffer_size) {
-		return dx_set_error_code(dx_pec_message_incomplete);
+		return dx_set_error_code_impl(dx_pec_message_incomplete, false);
 	}
 
 	dx_set_in_buffer_limit(context->bicc, message_end_offset); /* setting limit for this message */
@@ -1479,6 +1479,8 @@ bool dx_process_message (dx_server_msg_proc_connection_context_t* context, dx_me
 
 		break;
 	case MESSAGE_HEARTBEAT:
+		return dx_set_error_code_impl(dx_pec_server_message_not_supported, false);
+
 	case MESSAGE_TEXT_FORMAT_COMMENT:
 	case MESSAGE_TEXT_FORMAT_SPECIAL:
 	default:
@@ -1572,7 +1574,6 @@ bool dx_process_server_data (dxf_connection_t connection, const dxf_byte_t* data
 				*/
 
 				dx_set_in_buffer_position(context->bicc, message_start_pos);
-				dx_logging_last_error_verbose();
 				dx_set_error_code(dx_ec_success);
 
 				break;
@@ -1638,7 +1639,6 @@ bool dx_process_server_data (dxf_connection_t connection, const dxf_byte_t* data
 				/* skipping the message */
 
 				dx_set_in_buffer_position(context->bicc, dx_get_in_buffer_limit(context->bicc));
-				dx_logging_last_error();
 				dx_set_error_code(dx_ec_success);
 
 				continue;

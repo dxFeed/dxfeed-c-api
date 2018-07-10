@@ -77,7 +77,11 @@ dx_error_function_result_t dx_check_error_code (dx_error_code_t error_code) {
  */
 /* -------------------------------------------------------------------------- */
 
-dx_error_function_result_t dx_set_last_error (dx_error_code_t error_code) {
+dx_error_function_result_t dx_set_last_error(dx_error_code_t error_code) {
+	return dx_set_last_error_impl(error_code, true);
+}
+
+dx_error_function_result_t dx_set_last_error_impl(dx_error_code_t error_code, bool with_logging) {
 	dx_error_code_t* error_data = NULL;
 	dx_error_function_result_t res;
 
@@ -111,8 +115,8 @@ dx_error_function_result_t dx_set_last_error (dx_error_code_t error_code) {
 
 	*error_data = error_code;
 
-	if (error_code != dx_ec_success) {
-		dx_logging_error(dx_get_error_description(error_code));
+	if (with_logging && error_code != dx_ec_success) {
+		dx_logging_error_by_code(error_code);
 	}
 
 	return dx_efr_success;
@@ -223,7 +227,11 @@ dx_error_code_t dx_get_error_code (void) {
 /* -------------------------------------------------------------------------- */
 
 bool dx_set_error_code (dx_error_code_t code) {
-	dx_error_function_result_t res = dx_set_last_error(code);
+	return dx_set_error_code_impl(code, true);
+}
+
+bool dx_set_error_code_impl(dx_error_code_t code, bool with_logging) {
+	dx_error_function_result_t res = dx_set_last_error_impl(code, with_logging);
 
 	if (res != dx_efr_success) {
 		dx_logging_info(L"Setting error code failed: code = %d, return value = %d", code, res);

@@ -159,7 +159,7 @@ int main(int argc, char* argv[]) {
 	dxf_string_t base_symbol = NULL;
 	dxf_string_t dxfeed_host_u;
 	char* dxfeed_host = NULL;
-	char **order_sources;
+	const char **order_sources;
 	size_t string_len = 0;
 
 	if (argc < 3) {
@@ -218,7 +218,7 @@ int main(int argc, char* argv[]) {
 
 	wprintf(L"Subscription successful!\n");
 	if (argc > 3) {
-		free(order_sources);
+		free((void*) order_sources);
 	}
 
 	while (!is_thread_terminate()) {

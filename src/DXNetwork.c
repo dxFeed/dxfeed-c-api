@@ -983,20 +983,26 @@ bool dx_connect_to_resolved_addresses(dx_network_connection_context_t* context) 
 
 		/* Make backup of properties configured via API on first pass */
 		if (!IS_FLAG_SET(context->set_fields_flags, PROPERTIES_BACKUP_FLAG)) {
-			if (!dx_protocol_property_make_backup(context))
+			if (!dx_protocol_property_make_backup(context)) {
+				dx_mutex_unlock(&(context->socket_guard));
 				return false;
+			}
 			context->set_fields_flags |= PROPERTIES_BACKUP_FLAG;
 		} else {
 			/* Restore properties configured via API before next connection will be open */
-			if (!dx_protocol_property_restore_backup(context))
+			if (!dx_protocol_property_restore_backup(context)) {
+				dx_mutex_unlock(&(context->socket_guard));
 				return false;
+			}
 		}
 
 		if (cur_addr->username != NULL &&
 			cur_addr->password != NULL &&
 			!dx_property_map_contains(&context->properties, DX_PROPERTY_AUTH)) {
-			if (!dx_protocol_configure_basic_auth(context->connection, cur_addr->username, cur_addr->password))
+			if (!dx_protocol_configure_basic_auth(context->connection, cur_addr->username, cur_addr->password)) {
+				dx_mutex_unlock(&(context->socket_guard));
 				return false;
+			}
 		}
 
 #ifdef DXFEED_CODEC_TLS_ENABLED

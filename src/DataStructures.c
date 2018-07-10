@@ -418,11 +418,11 @@ void dx_clear_record_info(dx_record_item_t *record) {
 void dx_clear_records_list(dx_data_structures_connection_context_t* context) {
 	dx_record_list_t* records_list = &(context->records_list);
 	dx_record_id_t i;
-	dx_record_id_t records_count = (dx_record_id_t)records_list->size;
 	dx_record_item_t* record = records_list->elements;
 
 	dx_mutex_lock(&context->guard_records_list);
 
+	dx_record_id_t records_count = (dx_record_id_t)records_list->size;
 	for (i = 0; i < records_count; i++) {
 		dx_clear_record_info(record);
 		record++;
@@ -597,10 +597,11 @@ const dx_record_item_t* dx_get_record_by_id(void* context, dx_record_id_t record
 	dx_record_item_t* value = NULL;
 	dx_data_structures_connection_context_t* dscc = CTX(context);
 	dx_record_list_t* records_list = &(dscc->records_list);
+	dx_mutex_lock(&dscc->guard_records_list);
 	if (!dx_validate_record_id(context, record_id)) {
+		dx_mutex_unlock(&dscc->guard_records_list);
 		return NULL;
 	}
-	dx_mutex_lock(&dscc->guard_records_list);
 	value = &records_list->elements[record_id];
 	dx_mutex_unlock(&dscc->guard_records_list);
 	return value;
@@ -698,10 +699,11 @@ bool dx_set_record_exchange_code(void* context, dx_record_id_t record_id,
 								dxf_char_t exchange_code) {
 	dx_data_structures_connection_context_t* dscc = CTX(context);
 	dx_record_list_t* records_list = &(dscc->records_list);
-	if (!dx_validate_record_id(context, record_id))
-		return false;
-
 	dx_mutex_lock(&dscc->guard_records_list);
+	if (!dx_validate_record_id(context, record_id)) {
+		dx_mutex_unlock(&dscc->guard_records_list);
+		return false;
+	}
 
 	records_list->elements[record_id].exchange_code = exchange_code;
 
