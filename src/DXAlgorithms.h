@@ -542,4 +542,36 @@ bool dx_base64_encode(const char* in, size_t in_len, char* out, size_t out_len);
 bool dx_base64_decode(const char* in, size_t in_len, char* out, size_t *out_len);
 size_t dx_base64_length(size_t in_len);
 
+#ifdef _WIN32
+
+// Following functions provide generation of full memory barrier (or fence) to ensure that memory
+// operations are completed in order. Also 64 bits functions provide atomic read/write on 32 bit platforms
+
+__int64 atomic_read(__int64 volatile * value);
+void atomic_write(__int64 volatile * dest, __int64 src);
+__int32 atomic_read32(__int32 volatile * value);
+void atomic_write32(__int32 volatile * dest, __int32 src);
+
+#else
+
+#warning "no fence, no atomic read/write for 64 bit variables on 32 bit platforms, additional synchronization is needed";
+
+inline long long atomic_read(long long* value) {
+	return *value;
+}
+
+inline void atomic_write(long long* dest, long long src) {
+	*dest = src;
+}
+
+inline long atomic_read32(long* value) {
+	return *value;
+}
+
+inline void atomic_write32(long* dest, LONG src) {
+	*dest = src;
+}
+
+#endif
+
 #endif /* DX_ALGORITHMS_H_INCLUDED */

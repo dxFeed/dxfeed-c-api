@@ -474,3 +474,22 @@ bool dx_base64_decode(const char* in, size_t in_len, char* out, size_t* out_len)
 size_t dx_base64_length(size_t in_len) {
 	return ((4 * in_len / 3) + 3) & ~3;
 }
+
+#ifdef _WIN32
+
+__int64 atomic_read(__int64 volatile * value) {
+	return InterlockedExchangeAdd64(value, 0);
+}
+
+void atomic_write(__int64 volatile * dest, __int64 src) {
+	InterlockedExchange64(dest, src);
+}
+
+__int32 atomic_read32(__int32 volatile * value) {
+	return InterlockedExchangeAdd(value, 0);
+}
+
+void atomic_write32(__int32 volatile * dest, __int32 src) {
+	InterlockedExchange(dest, src);
+}
+#endif

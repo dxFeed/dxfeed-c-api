@@ -108,6 +108,7 @@ typedef struct {
 	const char* address;
 	dx_socket_t s;
 	time_t next_heartbeat;
+	__time64_t last_server_heartbeat;
 	dx_thread_t reader_thread;
 	dx_thread_t queue_thread;
 	dx_mutex_t socket_guard;
@@ -461,16 +462,17 @@ void dx_notify_conn_termination (dx_network_connection_context_t* context, OUT b
 
 /* -------------------------------------------------------------------------- */
 
+#define HEARTBEAT_TIMEOUT_IN_SECONDS 60
+#define MAX_MISSING_HEARTBEATS 2
+#define SERVER_HEARTBEAT_TIMEOUT_IN_SECONDS (MAX_MISSING_HEARTBEATS * HEARTBEAT_TIMEOUT_IN_SECONDS)
+
 #if !defined(_WIN32) || defined(USE_PTHREADS)
 void* dx_queue_executor (void* arg) {
 #else
 unsigned dx_queue_executor(void* arg) {
-#endif
-	static int s_idle_timeout = 100;
-	static int s_small_timeout = 25;
-	static int s_heartbeat_timeout = 60; // in seconds
-
-	time_t current_time;
+#endif	
+	static const int s_idle_timeout = 100;
+	static const int s_small_timeout = 25;
 
 	dx_network_connection_context_t* context = NULL;
 
@@ -496,14 +498,21 @@ unsigned dx_queue_executor(void* arg) {
 	for (;;) {
 		bool queue_empty = true;
 
-		time(&current_time);
-		if (difftime(current_time, context->next_heartbeat) >= 0) {
+		const __time64_t last_server_heartbeat = atomic_read(&context->last_server_heartbeat);
+		if (last_server_heartbeat != 0 && _difftime64(_time64(NULL), last_server_heartbeat) >= SERVER_HEARTBEAT_TIMEOUT_IN_SECONDS) {
+			dx_logging_info(L"No messages from server for at least %d seconds (%d missing heartbeats). Disconnecting...",
+				SERVER_HEARTBEAT_TIMEOUT_IN_SECONDS, MAX_MISSING_HEARTBEATS);
+			dx_close_socket(context);
+			dx_sleep(s_idle_timeout);
+			continue;
+		}
+		if (difftime(time(NULL), context->next_heartbeat) >= 0) {
 			if (!dx_send_heartbeat(context->connection, true)) {
 				dx_sleep(s_idle_timeout);
 				continue;
 			}
 			time(&context->next_heartbeat);
-			context->next_heartbeat += s_heartbeat_timeout;
+			context->next_heartbeat += HEARTBEAT_TIMEOUT_IN_SECONDS;
 		}
 
 
@@ -656,6 +665,7 @@ void dx_socket_reader (dx_network_connection_context_t* context) {
 				number_of_bytes_read = INVALID_DATA_SIZE;
 			}
 		} else {
+			atomic_write(&context->last_server_heartbeat, _time64(NULL));
 #ifdef DXFEED_CODEC_TLS_ENABLED
 			if (dx_get_current_address(context)->tls.enabled) {
 				number_of_bytes_read = (int)tls_read(context->tls_context, (void*)read_buf, READ_CHUNK_SIZE);
@@ -667,6 +677,7 @@ void dx_socket_reader (dx_network_connection_context_t* context) {
 #else
 			number_of_bytes_read = dx_recv(context->s, (void*)read_buf, READ_CHUNK_SIZE);
 #endif // DXFEED_CODEC_TLS_ENABLED
+			atomic_write(&context->last_server_heartbeat, 0);
 		}
 
 		if (number_of_bytes_read == INVALID_DATA_SIZE) {
@@ -1121,7 +1132,7 @@ bool dx_bind_to_address (dxf_connection_t connection, const char* address, const
 	it happens implicitly on the first call to any error reporting function, but to
 	ensure there'll be no potential thread race to create it, it's made sure such
 	key is created before any secondary thread is created. */
-	CHECKED_CALL_0(dx_init_error_subsystem);
+	CHECKED_CALL_0(dx_init_error_subsystem);	
 
 	if (!dx_thread_create(&(context->queue_thread), NULL, dx_queue_executor, context)) {
 		return false;
