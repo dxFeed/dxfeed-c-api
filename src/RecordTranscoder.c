@@ -367,7 +367,7 @@ static bool dx_trade_t_transcoder_impl(dx_record_transcoder_connection_context_t
 		cur_event->day_turnover = cur_record->day_turnover;
 		cur_event->direction = DX_TRADE_GET_DIR(cur_record);
 		cur_event->is_eth = DX_TRADE_GET_ETH(cur_record);
-		cur_event->is_composite = (exchange_code == 0);
+		cur_event->scope = (exchange_code == 0 ? dxf_osc_composite : dxf_osc_regional);
 	}
 
 	return dx_process_event_data(context->connection, event_id, record_params->symbol_name,
@@ -495,6 +495,7 @@ bool dx_transcode_quote (dx_record_transcoder_connection_context_t* context,
 		cur_event->ask_exchange_code = exchange_code ? exchange_code : cur_record->ask_exchange_code;
 		cur_event->ask_price = cur_record->ask_price;
 		cur_event->ask_size = cur_record->ask_size;
+		cur_event->scope = (exchange_code == 0 ? dxf_osc_composite : dxf_osc_regional);
 	}
 
 	return dx_process_event_data(context->connection, dx_eid_quote, record_params->symbol_name,

@@ -54,9 +54,10 @@ void first_listener(int event_type, dxf_const_string_t symbol_name,
 
 		for (; i < data_count; ++i) {
 			wprintf(L"bid time=%i, bid exchange code=%C, bid price=%f, bid size=%i; "
-				L"ask time=%i, ask exchange code=%C, ask price=%f, ask size=%i\n",
+				L"ask time=%i, ask exchange code=%C, ask price=%f, ask size=%i, scope=%d\n",
 				(int)quotes[i].bid_time, quotes[i].bid_exchange_code, quotes[i].bid_price, (int)quotes[i].bid_size,
-				(int)quotes[i].ask_time, quotes[i].ask_exchange_code, quotes[i].ask_price, (int)quotes[i].ask_size);
+				(int)quotes[i].ask_time, quotes[i].ask_exchange_code, quotes[i].ask_price, (int)quotes[i].ask_size,
+				(int)quotes[i].scope);
 		}
 	}
 
@@ -74,9 +75,9 @@ void first_listener(int event_type, dxf_const_string_t symbol_name,
 		dxf_trade_t* trades = (dxf_trade_t*)data;
 
 		for (; i < data_count; ++i) {
-			wprintf(L"time=%i, exchange code=%C, price=%f, size=%i, tick=%d, change=%f, day volume=%f, c=%d\n",
+			wprintf(L"time=%i, exchange code=%C, price=%f, size=%i, tick=%d, change=%f, day volume=%f, scope=%d\n",
 				(int)trades[i].time, trades[i].exchange_code, trades[i].price, (int)trades[i].size, trades[i].tick,
-				trades[i].change, trades[i].day_volume, trades[i].is_composite);
+				trades[i].change, trades[i].day_volume, (int)trades[i].scope);
 		}
 	}
 

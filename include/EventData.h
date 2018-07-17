@@ -107,6 +107,13 @@ typedef dx_order_source_array_t* dx_order_source_array_ptr_t;
 
 typedef void* dxf_event_data_t;
 
+typedef enum {
+	dxf_osc_composite = 0,
+	dxf_osc_regional = 1,
+	dxf_osc_aggregate = 2,
+	dxf_osc_order = 3
+} dxf_order_scope_t;
+
 /* Trade & Trade ETH -------------------------------------------------------- */
 
 typedef enum {
@@ -134,7 +141,7 @@ typedef struct {
     dxf_double_t day_turnover;
     dxf_direction_t direction;
     dxf_bool_t is_eth;
-	dxf_bool_t is_composite;
+	dxf_order_scope_t scope;
 } dxf_trade_t;
 
 /* Quote -------------------------------------------------------------------- */
@@ -151,6 +158,7 @@ typedef struct {
     dxf_char_t ask_exchange_code;
     dxf_double_t ask_price;
     dxf_int_t ask_size;
+	dxf_order_scope_t scope;
 } dxf_quote_t;
 
 /* Summary ------------------------------------------------------------------ */
@@ -214,13 +222,6 @@ typedef struct {
 } dxf_profile_t;
 
 /* Order & Spread Order ----------------------------------------------------- */
-
-typedef enum {
-    dxf_osc_composite = 0,
-    dxf_osc_regional = 1,
-    dxf_osc_aggregate = 2,
-    dxf_osc_order = 3
-} dxf_order_scope_t;
 
 typedef enum {
     dxf_osd_undefined = 0,

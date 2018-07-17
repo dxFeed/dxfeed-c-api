@@ -66,7 +66,7 @@ private:
 	virtual HRESULT STDMETHODCALLTYPE GetDayTurnover(DOUBLE* value);
 	virtual HRESULT STDMETHODCALLTYPE GetDirection(DXFDirection* value);
 	virtual HRESULT STDMETHODCALLTYPE IsETH(VARIANT_BOOL *value);
-	virtual HRESULT STDMETHODCALLTYPE IsComposite(VARIANT_BOOL *value);
+	virtual HRESULT STDMETHODCALLTYPE GetScope(DXFOrderScope* value);
 
 private:
 
@@ -218,10 +218,10 @@ HRESULT STDMETHODCALLTYPE DXTrade::IsETH(VARIANT_BOOL *value) {
 	return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE DXTrade::IsComposite(VARIANT_BOOL *value) {
+HRESULT STDMETHODCALLTYPE DXTrade::GetScope(DXFOrderScope *value) {
 	CHECK_PTR(value);
 
-	*value = m_data->is_composite ? VARIANT_TRUE : VARIANT_FALSE;
+	*value = (DXFOrderScope)m_data->scope;
 
 	return S_OK;
 }
@@ -270,6 +270,7 @@ private:
 	virtual HRESULT STDMETHODCALLTYPE GetTime(LONGLONG* value);
 	virtual HRESULT STDMETHODCALLTYPE GetSequence(INT* value);
 	virtual HRESULT STDMETHODCALLTYPE GetTimeNanos(INT* value);
+	virtual HRESULT STDMETHODCALLTYPE GetScope(DXFOrderScope* value);
 
 private:
 
@@ -397,6 +398,14 @@ HRESULT STDMETHODCALLTYPE DXQuote::GetAskSize(LONGLONG* value) {
 	CHECK_PTR(value);
 
 	*value = m_data->ask_size;
+
+	return S_OK;
+}
+
+HRESULT STDMETHODCALLTYPE DXQuote::GetScope(DXFOrderScope *value) {
+	CHECK_PTR(value);
+
+	*value = (DXFOrderScope)m_data->scope;
 
 	return S_OK;
 }
