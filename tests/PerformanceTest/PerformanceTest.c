@@ -126,8 +126,9 @@ void listener(int event_type, dxf_const_string_t symbol_name,
 
 		for (; i < data_count; ++i) {
 			print_timestamp(trades[i].time);
-			wprintf(L", exchangeCode=%c, price=%f, size=%i, tick=%i, change=%f, day volume=%.0f}\n",
-					trades[i].exchange_code, trades[i].price, trades[i].size, trades[i].tick, trades[i].change, trades[i].day_volume);
+			wprintf(L", exchangeCode=%c, price=%f, size=%i, tick=%i, change=%f, day volume=%.0f, c=%d}\n",
+					trades[i].exchange_code, trades[i].price, trades[i].size, trades[i].tick, trades[i].change,
+				trades[i].day_volume, trades[i].is_composite);
 		}
 	}
 

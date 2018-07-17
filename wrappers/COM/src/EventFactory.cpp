@@ -66,6 +66,7 @@ private:
 	virtual HRESULT STDMETHODCALLTYPE GetDayTurnover(DOUBLE* value);
 	virtual HRESULT STDMETHODCALLTYPE GetDirection(DXFDirection* value);
 	virtual HRESULT STDMETHODCALLTYPE IsETH(VARIANT_BOOL *value);
+	virtual HRESULT STDMETHODCALLTYPE IsComposite(VARIANT_BOOL *value);
 
 private:
 
@@ -213,6 +214,14 @@ HRESULT STDMETHODCALLTYPE DXTrade::IsETH(VARIANT_BOOL *value) {
 	CHECK_PTR(value);
 
 	*value = m_data->is_eth ? VARIANT_TRUE : VARIANT_FALSE;
+
+	return S_OK;
+}
+
+HRESULT STDMETHODCALLTYPE DXTrade::IsComposite(VARIANT_BOOL *value) {
+	CHECK_PTR(value);
+
+	*value = m_data->is_composite ? VARIANT_TRUE : VARIANT_FALSE;
 
 	return S_OK;
 }

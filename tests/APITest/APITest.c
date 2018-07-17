@@ -74,9 +74,9 @@ void first_listener(int event_type, dxf_const_string_t symbol_name,
 		dxf_trade_t* trades = (dxf_trade_t*)data;
 
 		for (; i < data_count; ++i) {
-			wprintf(L"time=%i, exchange code=%C, price=%f, size=%i, tick=%d, change=%f, day volume=%f\n",
+			wprintf(L"time=%i, exchange code=%C, price=%f, size=%i, tick=%d, change=%f, day volume=%f, c=%d\n",
 				(int)trades[i].time, trades[i].exchange_code, trades[i].price, (int)trades[i].size, trades[i].tick,
-				trades[i].change, trades[i].day_volume);
+				trades[i].change, trades[i].day_volume, trades[i].is_composite);
 		}
 	}
 

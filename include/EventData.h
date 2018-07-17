@@ -134,6 +134,7 @@ typedef struct {
     dxf_double_t day_turnover;
     dxf_direction_t direction;
     dxf_bool_t is_eth;
+	dxf_bool_t is_composite;
 } dxf_trade_t;
 
 /* Quote -------------------------------------------------------------------- */

@@ -146,6 +146,7 @@ struct IDXTrade : public IDispatch {
 	virtual HRESULT STDMETHODCALLTYPE GetDayTurnover(DOUBLE* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetDirection(DXFDirection* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE IsETH(VARIANT_BOOL *value) = 0;
+	virtual HRESULT STDMETHODCALLTYPE IsComposite(VARIANT_BOOL *value) = 0;
 };
 
 /* -------------------------------------------------------------------------- */
