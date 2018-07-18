@@ -1132,7 +1132,7 @@ bool dx_bind_to_address (dxf_connection_t connection, const char* address, const
 	it happens implicitly on the first call to any error reporting function, but to
 	ensure there'll be no potential thread race to create it, it's made sure such
 	key is created before any secondary thread is created. */
-	CHECKED_CALL_0(dx_init_error_subsystem);	
+	CHECKED_CALL_0(dx_init_error_subsystem);
 
 	if (!dx_thread_create(&(context->queue_thread), NULL, dx_queue_executor, context)) {
 		return false;
