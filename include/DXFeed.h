@@ -669,10 +669,10 @@ DXFEED_API ERRORCODE dxf_get_connection_properties_snapshot(dxf_connection_t con
 DXFEED_API ERRORCODE dxf_free_connection_properties_snapshot(dxf_property_item_t* properties, int count);
 
 /*
-*  Retrieves the null-terminated string with current connected address. If (*address) points to NULL then connection
-*  is not connected (reconnection, no valid addresses, closed connection and others). The memory for the resulting
-*  string is allocated during execution of the function and SHOULD be free by caller with call of dxf_free function.
-*  This is done because inner string with connected address can be free during reconnection.
+*  Retrieves the null-terminated string with current connected address in format <host>:<port>. If (*address)
+*  points to NULL then connection is not connected (reconnection, no valid addresses, closed connection and others).
+*  The memory for the resulting string is allocated during execution of the function and SHOULD be free by caller
+*  with call of dxf_free function. So done because inner string with connected address can be free during reconnection.
 *
 *  connection - a handle of a previously created connection
 *  OUT address - address of pointer to store address of the null-terminated string with current connected address
