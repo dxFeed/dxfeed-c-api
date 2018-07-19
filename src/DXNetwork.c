@@ -1328,6 +1328,7 @@ bool dx_protocol_property_get_snapshot(dxf_connection_t connection,
 	const dx_property_item_t* const pElements = pContext->properties.elements;
 	dxf_property_item_t* const pProperties = dx_calloc(size, sizeof(dxf_property_item_t));
 	if (pProperties == NULL) {
+		dx_mutex_unlock(&pContext->socket_guard);
 		return false;
 	}
 	for (int i = 0; i < size; i++) {
