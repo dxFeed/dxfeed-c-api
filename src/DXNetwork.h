@@ -132,6 +132,8 @@ dx_connection_status_t dx_connection_status_get(dxf_connection_t connection);
  */
 /* -------------------------------------------------------------------------- */
 
+bool dx_protocol_property_get_snapshot(dxf_connection_t connection,
+							OUT dxf_property_item_t** ppProperties, OUT int* pSize);
 bool dx_protocol_property_set(dxf_connection_t connection,
 							dxf_const_string_t key, dxf_const_string_t value);
 bool dx_protocol_property_set_many(dxf_connection_t connection,
@@ -146,5 +148,7 @@ bool dx_protocol_configure_basic_auth(dxf_connection_t connection,
 bool dx_protocol_configure_custom_auth(dxf_connection_t connection,
 									const char* authscheme,
 									const char* authdata);
+
+bool dx_get_current_connected_address(dxf_connection_t connection, OUT char** ppAddress);
 
 #endif /* DX_NETWORK_H_INCLUDED */

@@ -501,7 +501,7 @@ bool dx_mutex_destroy (dx_mutex_t* mutex) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_mutex_lock (dx_mutex_t* mutex) {
+bool dx_mutex_lock (const dx_mutex_t* mutex) {
 	int res;
 	res = WaitForSingleObject(*mutex, INFINITE);
 
@@ -521,7 +521,7 @@ bool dx_mutex_lock (dx_mutex_t* mutex) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_mutex_unlock (dx_mutex_t* mutex) {
+bool dx_mutex_unlock (const dx_mutex_t* mutex) {
 	return ReleaseMutex(*mutex);
 }
 

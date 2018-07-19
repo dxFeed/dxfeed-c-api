@@ -92,6 +92,8 @@ struct IDXConnection : public IDispatch {
 	virtual HRESULT STDMETHODCALLTYPE CreateSubscriptionTimed(INT eventTypes, LONGLONG time, IDispatch** subscription) = 0;
 	virtual HRESULT STDMETHODCALLTYPE CreateSnapshot(INT eventType, BSTR symbol, BSTR source, LONGLONG time, BOOL incremental, IDispatch** snapshot) = 0;
 	virtual HRESULT STDMETHODCALLTYPE CreateCandleSnapshot(IDXCandleSymbol* symbol, LONGLONG time, BOOL incremental, IDispatch** snapshot) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetProperties(SAFEARRAY** ppKeys, SAFEARRAY** ppValues) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetConnectedAddress(BSTR* pAddress) = 0;
 };
 
 /* -------------------------------------------------------------------------- */
