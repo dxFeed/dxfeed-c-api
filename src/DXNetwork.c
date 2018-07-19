@@ -1510,7 +1510,11 @@ bool dx_get_current_connected_address(dxf_connection_t connection, OUT char** pp
 		return false;
 	}
 	CHECKED_CALL(dx_mutex_lock, &pContext->socket_guard);
-	const dx_ext_address_t* const pExtAddress = dx_get_current_address(pContext);
+	if (pContext->addr_context.cur_addr_index < 0 || pContext->addr_context.cur_addr_index >= pContext->addr_context.size) {
+		dx_mutex_unlock(&pContext->socket_guard);
+		return true;
+	}
+	const dx_ext_address_t* const pExtAddress = &pContext->addr_context.elements[pContext->addr_context.cur_addr_index];
 	if (pExtAddress == NULL) {
 		dx_mutex_unlock(&pContext->socket_guard);
 		return true;
