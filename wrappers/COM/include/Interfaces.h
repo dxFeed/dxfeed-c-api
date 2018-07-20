@@ -146,6 +146,7 @@ struct IDXTrade : public IDispatch {
 	virtual HRESULT STDMETHODCALLTYPE GetDayTurnover(DOUBLE* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetDirection(DXFDirection* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE IsETH(VARIANT_BOOL *value) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetScope(DXFOrderScope* value) = 0;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -168,6 +169,7 @@ struct IDXQuote : public IDispatch {
 	virtual HRESULT STDMETHODCALLTYPE GetTime(LONGLONG* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetSequence(INT* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetTimeNanos(INT* value) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetScope(DXFOrderScope* value) = 0;
 };
 
 /* -------------------------------------------------------------------------- */

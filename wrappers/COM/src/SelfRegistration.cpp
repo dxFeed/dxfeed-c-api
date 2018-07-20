@@ -345,7 +345,7 @@ HRESULT PASCAL DllRegisterServer () {
 	_tsplitpath(libPath, driveBuf, dirBuf, NULL, NULL);
 
 	tstring tlbPath;
-	tlbPath = tlbPath + driveBuf + dirBuf + g_typeLibFileName;
+	tlbPath = tlbPath + driveBuf + dirBuf + _T("tlb\\") + g_typeLibFileName;
 	_bstr_t tlbPathBstr(tlbPath.c_str());
 
 	ITypeLib* pTypeLib;
