@@ -512,19 +512,13 @@ bool dx_is_message_supported_by_server (dxf_connection_t connection, dx_message_
 	if (lock_required) {
 		CHECKED_CALL(dx_mutex_lock, &(context->describe_protocol_guard));
 	}
-
-	res = true;
-
 	switch (context->describe_protocol_status) {
 	case dx_dps_not_sent:
-		dx_set_error_code(dx_pec_unexpected_message_sequence_internal);
-
-		res = false;
-
+		dx_logging_info(L"reconnection in progress");
+		*status = dx_mss_reconnection;
 		break;
 	case dx_dps_pending:
 		*status = dx_mss_pending;
-
 		break;
 	case dx_dps_received:
 	case dx_dps_not_received:
@@ -539,7 +533,10 @@ bool dx_is_message_supported_by_server (dxf_connection_t connection, dx_message_
 		}
 	}
 
-	return (lock_required ? dx_mutex_unlock(&(context->describe_protocol_guard)) && res : res);
+	if (lock_required) {
+		return dx_mutex_unlock(&context->describe_protocol_guard);
+	}
+	return true;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -657,7 +654,7 @@ int dx_describe_protocol_timeout_countdown_task (void* data, int command) {
 		*  The first is obvious. The second must not be met here because this function IS the ONLY place
 		*  where such state may be set, and it would pop itself from the task queue in that case.
 		*/
-
+		dx_logging_info(L"Oops, we are here: %d", context->describe_protocol_status);
 		dx_set_error_code(dx_ec_internal_assert_violation);
 
 		res = dx_tes_dont_advance;
@@ -1073,21 +1070,20 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 			return false;
 		}
 
+		dxf_int_t server_record_id;
 		{
-			dxf_int_t id;
-
-			if (!dx_read_compact_int(context->bicc, &id)) {
+			if (!dx_read_compact_int(context->bicc, &server_record_id)) {
 				dx_free_buffers(context->rbcc);
 
 				return false;
 			}
 
-			record_id = dx_get_record_id(context->dscc, id);
+			record_id = dx_get_record_id(context->dscc, server_record_id);
 		}
 
 		if (record_id < 0) {
 			dx_free_buffers(context->rbcc);
-
+			dx_logging_info(L"Not supported record from server (id=%d)", server_record_id);
 			return dx_set_error_code(dx_pec_record_not_supported);
 		}
 

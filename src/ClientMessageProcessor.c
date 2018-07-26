@@ -41,22 +41,25 @@
  */
 /* -------------------------------------------------------------------------- */
 
-typedef enum {
-	dx_at_add_subscription,
-	dx_at_remove_subscription,
-
-	/* add new action types above this line */
-
-	dx_at_count
-} dx_action_type_t;
-
-dx_message_type_t dx_get_subscription_message_type (dx_action_type_t action_type, dx_subscription_type_t subscr_type) {
-	static dx_message_type_t subscr_message_types[dx_at_count][dx_st_count] = {
-		{ MESSAGE_TICKER_ADD_SUBSCRIPTION, MESSAGE_STREAM_ADD_SUBSCRIPTION, MESSAGE_HISTORY_ADD_SUBSCRIPTION },
-		{ MESSAGE_TICKER_REMOVE_SUBSCRIPTION, MESSAGE_STREAM_REMOVE_SUBSCRIPTION, MESSAGE_HISTORY_REMOVE_SUBSCRIPTION }
+bool dx_to_subscription_message_type(bool subscribe, dx_subscription_type_t subscr_type, OUT dx_message_type_t* res) {
+	if (res == NULL) {
+		return dx_set_error_code(dx_ec_invalid_func_param_internal);
+	}
+	switch (subscr_type) {
+	case dx_st_ticker:
+		*res = subscribe ? MESSAGE_TICKER_ADD_SUBSCRIPTION : MESSAGE_TICKER_REMOVE_SUBSCRIPTION;
+		break;
+	case dx_st_stream:
+		*res = subscribe ? MESSAGE_STREAM_ADD_SUBSCRIPTION : MESSAGE_STREAM_REMOVE_SUBSCRIPTION;
+		break;
+	case dx_st_history:
+		*res = subscribe ? MESSAGE_HISTORY_ADD_SUBSCRIPTION : MESSAGE_HISTORY_REMOVE_SUBSCRIPTION;
+		break;
+	default:
+		dx_logging_info(L"Unknown dx_subscription_type_t: %d", subscr_type);
+		return dx_set_error_code(dx_ec_invalid_func_param_internal);
 	};
-
-	return subscr_message_types[action_type][subscr_type];
+	return true;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -378,71 +381,56 @@ bool dx_load_events_for_subscription (dxf_connection_t connection, dx_order_sour
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_get_event_server_support (dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
-								int event_types, bool unsubscribe, dxf_uint_t subscr_flags,
-								OUT dx_message_support_status_t* res) {
-	dx_event_id_t eid = dx_eid_begin;
-	bool halt = false;
-	bool success = true;
-
-	*res = dx_mss_pending;
-
+bool dx_get_event_server_support(dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
+	int event_types, bool unsubscribe, dxf_uint_t subscr_flags,
+	OUT dx_message_support_status_t* res)
+{
+	*res = dx_mss_supported;
 	CHECKED_CALL_2(dx_lock_describe_protocol_processing, connection, true);
-
-	for (; eid < dx_eid_count; ++eid) {
+	bool go_to_exit = false;
+	bool success = true;
+	for (dx_event_id_t eid = dx_eid_begin; eid < dx_eid_count && !go_to_exit; ++eid) {
 		if (event_types & DX_EVENT_BIT_MASK(eid)) {
 			size_t j = 0;
 			dx_event_subscription_param_list_t subscr_params;
 			size_t param_count = dx_get_event_subscription_params(connection, order_source, eid, subscr_flags, &subscr_params);
-
-			for (; j < param_count; ++j) {
+			for (; j < param_count && !go_to_exit; ++j) {
 				const dx_event_subscription_param_t* cur_param = subscr_params.elements + j;
-				dx_message_type_t msg_type = dx_get_subscription_message_type(unsubscribe ? dx_at_remove_subscription : dx_at_add_subscription, cur_param->subscription_type);
-				dx_message_support_status_t msg_res;
-
-				if (!dx_is_message_supported_by_server(connection, msg_type, false, &msg_res)) {
-					halt = true;
+				dx_message_type_t message_type;
+				if (!dx_to_subscription_message_type(!unsubscribe, cur_param->subscription_type, &message_type)) {
+					go_to_exit = true;
 					success = false;
-
+					continue;
+				}
+				dx_message_support_status_t message_support;
+				if (!dx_is_message_supported_by_server(connection, message_type, false, &message_support)) {
+					go_to_exit = true;
+					success = false;
+					continue;
+				}
+				switch (message_support) {
+				case dx_mss_supported:
 					break;
-				}
-
-				if (msg_res != *res) {
-					if (*res == dx_mss_pending) {
-						*res = msg_res;
-					} else {
-						if (msg_res == dx_mss_pending) {
-							/* combination of messages with known and unknown support is forbidden */
-
-							dx_set_error_code(dx_pec_inconsistent_message_support);
-
-							halt = true;
-							success = false;
-
-							break;
-						}
-
-						/* combination of supported and unsupported messages means that the server
-						does not fully support our requirements, hence the overall 'unsupported' result */
-
-						*res = dx_mss_not_supported;
-
-						halt = true;
-
-						break;
-					}
+				case dx_mss_not_supported:
+				case dx_mss_pending:
+				case dx_mss_reconnection:
+					*res = message_support;
+					go_to_exit = true;
+					break;
+				default:
+					dx_logging_info(L"Unknown dx_message_support_status_t: %d", message_support);
+					dx_set_error_code(dx_ec_internal_assert_violation);
+					go_to_exit = true;
+					success = false;
 				}
 			}
-
 			dx_free(subscr_params.elements);
-
-			if (halt) {
-				break;
-			}
 		}
 	}
-
-	return (dx_lock_describe_protocol_processing(connection, false) && success);
+	if (!dx_lock_describe_protocol_processing(connection, false)) {
+		return false;
+	}
+	return success;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -559,9 +547,12 @@ bool dx_subscribe_symbols_to_events (dxf_connection_t connection, dx_order_sourc
 		switch (msg_support_status) {
 		case dx_mss_not_supported:
 			return dx_set_error_code(dx_pec_local_message_not_supported_by_server);
+		case dx_mss_reconnection:
+			/* actual subscription will be sent after reconnection*/
+			return true;
 		case dx_mss_pending:
 			if (task_mode) {
-				/* this task must never be executed unless it's clear whether the message is supported */
+				dx_logging_info(L"Protocol timeout countdown task is complete but status is %d. We shouldn't be here.", msg_support_status);
 				return dx_set_error_code(dx_ec_internal_assert_violation);
 			}
 		default:
@@ -580,36 +571,30 @@ bool dx_subscribe_symbols_to_events (dxf_connection_t connection, dx_order_sourc
 		}
 	}
 
-	for (; i < symbol_count; ++i){
-		dx_event_id_t eid = dx_eid_begin;
-
+	/* executing in task mode (in background queue thread)*/
+	bool success = true;
+	for (; i < symbol_count && success; ++i){
 		dxf_byte_t* buffer = NULL;
 		int buffer_size = 0;
 		int buffer_capacity = 0;
-		for (; eid < dx_eid_count; ++eid) {
+		for (dx_event_id_t eid = dx_eid_begin; eid < dx_eid_count && success; ++eid) {
 			if (event_types & DX_EVENT_BIT_MASK(eid)) {
-				size_t j = 0;
 				dx_event_subscription_param_list_t subscr_params;
-				size_t param_count = dx_get_event_subscription_params(connection, order_source, eid,
-					subscr_flags, &subscr_params);
-
-				for (; j < param_count; ++j) {
+				size_t param_count = dx_get_event_subscription_params(connection, order_source, eid, subscr_flags, &subscr_params);
+				for (size_t j = 0; j < param_count; ++j) {
 					const dx_event_subscription_param_t* cur_param = subscr_params.elements + j;
-					dx_message_type_t msg_type = dx_get_subscription_message_type(unsubscribe ? dx_at_remove_subscription : dx_at_add_subscription, cur_param->subscription_type);
-
+					dx_message_type_t msg_type;
+					if (!dx_to_subscription_message_type(!unsubscribe, cur_param->subscription_type, &msg_type)) {
+						success = false;
+						break;
+					}
 					dxf_byte_t* param_buffer = NULL;
 					int param_buffer_size = 0;
 					if (!dx_subscribe_symbol_to_record(connection, msg_type, symbols[i],
 													dx_encode_symbol_name(symbols[i]),
 													cur_param->record_id, time, &param_buffer, &param_buffer_size)) {
-						if (buffer != NULL) {
-							dx_free(buffer);
-						}
-						if (param_buffer != NULL) {
-							dx_free(param_buffer);
-						}
-						//subscr_params.elements is leaked?
-						return false;
+						success = false;
+						break;
 					}
 					if (param_buffer != NULL) {
 						if (buffer != NULL) {
@@ -635,15 +620,15 @@ bool dx_subscribe_symbols_to_events (dxf_connection_t connection, dx_order_sourc
 			}
 		}
 		if (buffer != NULL) {
-			if (!dx_send_data(connection, buffer, buffer_size)) {
-				dx_free(buffer);
-				return false;
+			if (success) {
+				if (!dx_send_data(connection, buffer, buffer_size)) {
+					success = false;
+				}
 			}
 			dx_free(buffer);
 		}
 	}
-
-	return true;
+	return success;
 }
 
 /* -------------------------------------------------------------------------- */
