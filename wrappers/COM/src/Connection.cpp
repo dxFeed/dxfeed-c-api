@@ -14,6 +14,7 @@
 
 #include <ComDef.h>
 #include <crtdbg.h>
+#include <atlsafe.h>
 
 #include <string>
 
@@ -54,6 +55,8 @@ class DXConnection : private IDXConnection, private DefIDispatchImpl,
 	virtual HRESULT STDMETHODCALLTYPE CreateSubscriptionTimed(INT eventTypes, LONGLONG time, IDispatch** subscription);
 	virtual HRESULT STDMETHODCALLTYPE CreateSnapshot(INT eventType, BSTR symbol, BSTR source, LONGLONG time, BOOL incremental, IDispatch** snapshot);
 	virtual HRESULT STDMETHODCALLTYPE CreateCandleSnapshot(IDXCandleSymbol* symbol, LONGLONG time, BOOL incremental, IDispatch** snapshot);
+	virtual HRESULT STDMETHODCALLTYPE GetProperties(SAFEARRAY** ppKeys, SAFEARRAY** ppValues);
+	virtual HRESULT STDMETHODCALLTYPE GetConnectedAddress(BSTR* pAddress);
 
 private:
 
@@ -259,6 +262,84 @@ HRESULT STDMETHODCALLTYPE DXConnection::CreateCandleSnapshot(IDXCandleSymbol* sy
 	}
 
 	return NOERROR;
+}
+
+HRESULT STDMETHODCALLTYPE DXConnection::GetProperties(SAFEARRAY** ppKeys, SAFEARRAY** ppValues) {
+	if (ppKeys == NULL || ppValues == NULL) {
+		return E_POINTER;
+	}
+
+	*ppKeys = NULL;
+	*ppValues = NULL;
+
+	class PropertiesHolder {
+	private:
+		dxf_property_item_t* m_pProperties;
+		int m_count;
+
+	public:
+		PropertiesHolder(dxf_connection_t connection) {
+			if (dxf_get_connection_properties_snapshot(connection, &m_pProperties, &m_count) == DXF_FAILURE) {
+				throw CAtlException();
+			}
+		}
+
+		std::pair<LPSAFEARRAY, LPSAFEARRAY> toSafeArrays() const {
+			CComSafeArray<BSTR> keys;
+			CComSafeArray<BSTR> values;
+			for (int i = 0; i < m_count; ++i) {
+				HRESULT hr = keys.Add(CComBSTR(m_pProperties[i].key).Detach(), FALSE);
+				if (FAILED(hr)) {
+					throw CAtlException(hr);
+				}
+				hr = values.Add(CComBSTR(m_pProperties[i].value).Detach(), FALSE);
+				if (FAILED(hr)) {
+					throw CAtlException(hr);
+				}
+			}
+			return std::pair<LPSAFEARRAY, LPSAFEARRAY>(keys.Detach(), values.Detach());
+		}
+
+		virtual ~PropertiesHolder() {
+			dxf_free_connection_properties_snapshot(m_pProperties, m_count);
+		}
+	} holder(m_connHandle);
+
+	try {
+		const std::pair<LPSAFEARRAY, LPSAFEARRAY> safe_arrays = holder.toSafeArrays();
+		*ppKeys = safe_arrays.first;
+		*ppValues = safe_arrays.second;
+		return S_OK;
+	}
+	catch (const CAtlException& ex) {
+		return ex;
+	}
+	catch (...) {
+		return E_FAIL;
+	}
+}
+
+HRESULT STDMETHODCALLTYPE DXConnection::GetConnectedAddress(BSTR* pAddress) {
+	if (pAddress == NULL) {
+		return E_POINTER;
+	}
+	*pAddress = NULL;
+	char* pAddressBuf = NULL;
+	HRESULT hr = S_OK;
+	try {
+		if (dxf_get_current_connected_address(m_connHandle, &pAddressBuf) == DXF_FAILURE) {
+			return E_FAIL;
+		}
+		*pAddress = CComBSTR(pAddressBuf).Detach();
+	}
+	catch (const CAtlException& ex) {
+		hr = ex;
+	}
+	catch (...) {
+		hr = E_FAIL;
+	}
+	dxf_free(pAddressBuf);
+	return hr;
 }
 
 /* -------------------------------------------------------------------------- */

@@ -156,6 +156,14 @@ char* dx_ansi_create_string_src_len(const char* src, size_t len) {
 	return strncpy(res, src, len);
 }
 
+char* dx_ansi_copy_string_len(char* dest, const char* src, size_t len) {
+	return strncpy(dest, src, len);
+}
+
+size_t dx_ansi_string_length(const char* str) {
+	return strlen(str);
+}
+
 /* -------------------------------------------------------------------------- */
 
 dxf_string_t dx_create_string_src_len (dxf_const_string_t src, size_t len) {

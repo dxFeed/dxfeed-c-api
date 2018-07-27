@@ -1306,6 +1306,44 @@ static bool dx_protocol_property_restore_backup(dx_network_connection_context_t*
 
 /* -------------------------------------------------------------------------- */
 
+bool dx_protocol_property_get_snapshot(dxf_connection_t connection,
+                 OUT dxf_property_item_t** ppProperties, OUT int* pSize)
+{	
+	if (ppProperties == NULL || pSize == NULL) {
+		return dx_set_error_code(dx_ec_invalid_func_param);
+	}
+	*ppProperties = NULL;
+	*pSize = 0;
+
+	bool res = true;
+	const dx_network_connection_context_t* const pContext = dx_get_subsystem_data(connection, dx_ccs_network, &res);
+	if (pContext == NULL) {
+		if (res) {
+			dx_set_error_code(dx_cec_connection_context_not_initialized);
+		}
+		return false;
+	}
+	CHECKED_CALL(dx_mutex_lock, &pContext->socket_guard);
+	const size_t size = pContext->properties.size;
+	const dx_property_item_t* const pElements = pContext->properties.elements;
+	dxf_property_item_t* const pProperties = dx_calloc(size, sizeof(dxf_property_item_t));
+	if (pProperties == NULL) {
+		dx_mutex_unlock(&pContext->socket_guard);
+		return false;
+	}
+	for (int i = 0; i < size; i++) {
+		pProperties[i].key = dx_create_string_src(pElements[i].key);
+		pProperties[i].value = dx_create_string_src(pElements[i].value);
+	}
+	if (!dx_mutex_unlock(&pContext->socket_guard)) {
+		dxf_free_connection_properties_snapshot(pProperties, (int)size);
+		return false;
+	}
+	*pSize = (int)size;
+	*ppProperties = pProperties;
+	return true;
+}
+
 bool dx_protocol_property_set(dxf_connection_t connection, dxf_const_string_t key, dxf_const_string_t value) {
 	dx_network_connection_context_t* context = NULL;
 	bool res = true;
@@ -1456,4 +1494,48 @@ bool dx_protocol_configure_custom_auth(dxf_connection_t connection,
 	dx_free(w_authscheme);
 	dx_free(buf);
 	return res;
+}
+
+bool dx_get_current_connected_address(dxf_connection_t connection, OUT char** ppAddress) {
+	if (ppAddress == NULL) {
+		return dx_set_error_code(dx_ec_invalid_func_param);
+	}
+	*ppAddress = NULL;
+	bool res = true;
+	dx_network_connection_context_t* const pContext = dx_get_subsystem_data(connection, dx_ccs_network, &res);
+	if (pContext == NULL) {
+		if (res) {
+			dx_set_error_code(dx_cec_connection_context_not_initialized);
+		}
+		return false;
+	}
+	CHECKED_CALL(dx_mutex_lock, &pContext->socket_guard);
+	if (pContext->addr_context.cur_addr_index < 0 || pContext->addr_context.cur_addr_index >= pContext->addr_context.size) {
+		dx_mutex_unlock(&pContext->socket_guard);
+		return true;
+	}
+	const dx_ext_address_t* const pExtAddress = &pContext->addr_context.elements[pContext->addr_context.cur_addr_index];
+	if (pExtAddress == NULL) {
+		dx_mutex_unlock(&pContext->socket_guard);
+		return true;
+	}
+	const char* const host = pExtAddress->host;
+	const char* const port = pExtAddress->port;
+	const size_t host_len = dx_ansi_string_length(host);
+	const size_t port_len = dx_ansi_string_length(port);
+	char * const pAddress = dx_calloc(1, host_len + port_len + 2);
+	if (pAddress == NULL) {
+		dx_mutex_unlock(&pContext->socket_guard);
+		return false;
+	}
+	dx_ansi_copy_string_len(pAddress, host, host_len);
+	pAddress[host_len] = ':';
+	dx_ansi_copy_string_len(pAddress + host_len + 1, port, port_len);
+	pAddress[host_len + port_len + 1] = '\0';
+	if (!dx_mutex_unlock(&pContext->socket_guard)) {
+		free(pAddress);
+		return false;
+	}
+	*ppAddress = pAddress;
+	return true;
 }

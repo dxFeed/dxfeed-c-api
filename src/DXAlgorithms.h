@@ -482,9 +482,13 @@ bool dx_capacity_manager_halfer (size_t new_size, size_t* capacity);
 
 dxf_string_t dx_create_string (size_t size);
 dxf_string_t dx_create_string_src (dxf_const_string_t src);
+
 char* dx_ansi_create_string (size_t size);
 char* dx_ansi_create_string_src (const char* src);
 char* dx_ansi_create_string_src_len(const char* src, size_t len);
+char* dx_ansi_copy_string_len(char* dest, const char* src, size_t len);
+size_t dx_ansi_string_length(const char* str);
+
 dxf_string_t dx_create_string_src_len (dxf_const_string_t src, size_t len);
 dxf_string_t dx_copy_string (dxf_string_t dest, dxf_const_string_t src);
 dxf_string_t dx_copy_string_len (dxf_string_t dest, dxf_const_string_t src, size_t len);

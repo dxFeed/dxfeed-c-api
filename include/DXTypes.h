@@ -83,4 +83,9 @@ typedef struct {
     int capacity;
 } dxf_byte_array_t;
 
+typedef struct {
+	dxf_string_t key;
+	dxf_string_t value;
+} dxf_property_item_t;
+
 #endif /* DX_TYPES_H_INCLUDED */
