@@ -485,44 +485,31 @@ bool dx_compare_threads (dx_thread_t t1, dx_thread_t t2) {
 /* -------------------------------------------------------------------------- */
 
 bool dx_mutex_create (dx_mutex_t* mutex) {
-	*mutex = CreateMutex(NULL, FALSE, NULL);
-	if (*mutex != INVALID_HANDLE_VALUE) {
-		return true;
-	}
-	return dx_set_error_code(dx_tec_generic_error);
+	*mutex = dx_calloc(1, sizeof(CRITICAL_SECTION));
+	InitializeCriticalSection(*mutex);
+	return true;
 }
 
 /* -------------------------------------------------------------------------- */
 
 bool dx_mutex_destroy (dx_mutex_t* mutex) {
-	CloseHandle(*mutex);
+	DeleteCriticalSection(*mutex);
+	free(*mutex);
 	return true;
 }
 
 /* -------------------------------------------------------------------------- */
 
 bool dx_mutex_lock (const dx_mutex_t* mutex) {
-	int res;
-	res = WaitForSingleObject(*mutex, INFINITE);
-
-	switch (res) {
-	case WAIT_FAILED:
-		return dx_set_error_code(dx_tec_invalid_res_operation);
-	case WAIT_ABANDONED:
-		return dx_set_error_code(dx_tec_invalid_resource_id);
-	case WAIT_TIMEOUT:
-		return dx_set_error_code(dx_tec_deadlock_detected);
-	default:
-		return dx_set_error_code(dx_tec_generic_error);
-	case WAIT_OBJECT_0:
-		return true;
-	}
+	EnterCriticalSection(*mutex);
+	return true;
 }
 
 /* -------------------------------------------------------------------------- */
 
 bool dx_mutex_unlock (const dx_mutex_t* mutex) {
-	return ReleaseMutex(*mutex);
+	LeaveCriticalSection(*mutex);
+	return true;
 }
 
 /* -------------------------------------------------------------------------- */

@@ -468,7 +468,9 @@ dx_event_id_t dx_get_event_id_by_bitmask (int event_bitmask);
 /* -------------------------------------------------------------------------- */
 
 typedef enum {
-    dx_st_ticker,
+	dx_st_begin = 0,
+
+    dx_st_ticker = dx_st_begin,
     dx_st_stream,
     dx_st_history,
 

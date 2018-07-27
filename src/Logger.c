@@ -326,11 +326,29 @@ void dx_logging_error (dxf_const_string_t message ) {
 	dx_flush_log();
 }
 
+void dx_logging_error_by_code(int error_code) {
+	if (g_log_file == NULL) {
+		return;
+	}
+	dxf_const_string_t message = dx_get_error_description(error_code);
+	if (message == NULL) {
+		return;
+	}
+	dx_log_debug_message(L"%s (%d)", message, error_code);
+	fwprintf(g_log_file, L"\n%s [%08lx] %s%s (%d)", dx_get_current_time(),
+#ifdef _WIN32
+	(unsigned long)GetCurrentThreadId(),
+#else
+		(unsigned long)pthread_getthreadid_np(),
+#endif
+		g_error_prefix, message, error_code);
+	dx_flush_log();
+}
+
 /* -------------------------------------------------------------------------- */
 
 void dx_logging_last_error (void) {
-	dx_logging_error(dx_get_error_description(dx_get_error_code()));
-	dx_flush_log();
+	dx_logging_error_by_code(dx_get_error_code());
 }
 
 /* -------------------------------------------------------------------------- */
@@ -340,7 +358,7 @@ void dx_logging_last_error_verbose (void) {
 		return;
 	}
 
-	dx_logging_error(dx_get_error_description(dx_get_error_code()));
+	dx_logging_error_by_code(dx_get_error_code());
 	dx_flush_log();
 }
 

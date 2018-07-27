@@ -512,19 +512,13 @@ bool dx_is_message_supported_by_server (dxf_connection_t connection, dx_message_
 	if (lock_required) {
 		CHECKED_CALL(dx_mutex_lock, &(context->describe_protocol_guard));
 	}
-
-	res = true;
-
 	switch (context->describe_protocol_status) {
 	case dx_dps_not_sent:
-		dx_set_error_code(dx_pec_unexpected_message_sequence_internal);
-
-		res = false;
-
+		dx_logging_info(L"reconnection in progress");
+		*status = dx_mss_reconnection;
 		break;
 	case dx_dps_pending:
 		*status = dx_mss_pending;
-
 		break;
 	case dx_dps_received:
 	case dx_dps_not_received:
@@ -539,7 +533,10 @@ bool dx_is_message_supported_by_server (dxf_connection_t connection, dx_message_
 		}
 	}
 
-	return (lock_required ? dx_mutex_unlock(&(context->describe_protocol_guard)) && res : res);
+	if (lock_required) {
+		return dx_mutex_unlock(&context->describe_protocol_guard);
+	}
+	return true;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -657,7 +654,7 @@ int dx_describe_protocol_timeout_countdown_task (void* data, int command) {
 		*  The first is obvious. The second must not be met here because this function IS the ONLY place
 		*  where such state may be set, and it would pop itself from the task queue in that case.
 		*/
-
+		dx_logging_info(L"Oops, we are here: %d", context->describe_protocol_status);
 		dx_set_error_code(dx_ec_internal_assert_violation);
 
 		res = dx_tes_dont_advance;
@@ -802,7 +799,7 @@ static bool dx_read_message_length_and_set_buffer_limit (dx_server_msg_proc_conn
 	int message_end_offset;
 
 	if (!dx_read_compact_long(context->bicc, &message_length)) {
-		return dx_set_error_code(dx_pec_message_incomplete);
+		return dx_set_error_code_impl(dx_pec_message_incomplete, false);
 	}
 
 	if (message_length < 0 || message_length > INT_MAX - dx_get_in_buffer_position(context->bicc)) {
@@ -812,7 +809,7 @@ static bool dx_read_message_length_and_set_buffer_limit (dx_server_msg_proc_conn
 	message_end_offset = dx_get_in_buffer_position(context->bicc) + (int)message_length;
 
 	if (message_end_offset > context->buffer_size) {
-		return dx_set_error_code(dx_pec_message_incomplete);
+		return dx_set_error_code_impl(dx_pec_message_incomplete, false);
 	}
 
 	dx_set_in_buffer_limit(context->bicc, message_end_offset); /* setting limit for this message */
@@ -1073,21 +1070,20 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 			return false;
 		}
 
+		dxf_int_t server_record_id;
 		{
-			dxf_int_t id;
-
-			if (!dx_read_compact_int(context->bicc, &id)) {
+			if (!dx_read_compact_int(context->bicc, &server_record_id)) {
 				dx_free_buffers(context->rbcc);
 
 				return false;
 			}
 
-			record_id = dx_get_record_id(context->dscc, id);
+			record_id = dx_get_record_id(context->dscc, server_record_id);
 		}
 
 		if (record_id < 0) {
 			dx_free_buffers(context->rbcc);
-
+			dx_logging_info(L"Not supported record from server (id=%d)", server_record_id);
 			return dx_set_error_code(dx_pec_record_not_supported);
 		}
 
@@ -1481,6 +1477,8 @@ bool dx_process_message (dx_server_msg_proc_connection_context_t* context, dx_me
 
 		break;
 	case MESSAGE_HEARTBEAT:
+		return dx_set_error_code_impl(dx_pec_server_message_not_supported, false);
+
 	case MESSAGE_TEXT_FORMAT_COMMENT:
 	case MESSAGE_TEXT_FORMAT_SPECIAL:
 	default:
@@ -1574,7 +1572,6 @@ bool dx_process_server_data (dxf_connection_t connection, const dxf_byte_t* data
 				*/
 
 				dx_set_in_buffer_position(context->bicc, message_start_pos);
-				dx_logging_last_error_verbose();
 				dx_set_error_code(dx_ec_success);
 
 				break;
@@ -1640,7 +1637,6 @@ bool dx_process_server_data (dxf_connection_t connection, const dxf_byte_t* data
 				/* skipping the message */
 
 				dx_set_in_buffer_position(context->bicc, dx_get_in_buffer_limit(context->bicc));
-				dx_logging_last_error();
 				dx_set_error_code(dx_ec_success);
 
 				continue;

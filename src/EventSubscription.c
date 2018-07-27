@@ -909,17 +909,17 @@ bool dx_add_listener_impl(dxf_subscription_t subscr_id, dx_event_listener_ptr_t 
 	}
 
 	context = subscr_data->escc;
-	listener_index = dx_find_listener_in_array(&(subscr_data->listeners), listener, &found);
-
-	if (found) {
-		/* listener is already added */
-
-		return true;
-	}
 
 	/* a guard mutex is required to protect the internal containers
 	from the secondary data retriever threads */
 	CHECKED_CALL(dx_mutex_lock, &(context->subscr_guard));
+
+	listener_index = dx_find_listener_in_array(&(subscr_data->listeners), listener, &found);
+
+	if (found) {
+		/* listener is already added */
+		return dx_mutex_unlock(&(context->subscr_guard));
+	}
 
 	{
 		dx_listener_context_t listener_context = { listener, version, user_data };
@@ -960,19 +960,18 @@ bool dx_remove_listener_impl(dxf_subscription_t subscr_id, dx_event_listener_ptr
 	}
 
 	context = subscr_data->escc;
-	listener_index = dx_find_listener_in_array(&(subscr_data->listeners), listener, &found);
-
-	if (!found) {
-		/* listener isn't subscribed */
-
-		return true;
-	}
-
 	/*
 	a guard mutex is required to protect the internal containers
 	from the secondary data retriever threads
 	*/
 	CHECKED_CALL(dx_mutex_lock, &(context->subscr_guard));
+
+	listener_index = dx_find_listener_in_array(&(subscr_data->listeners), listener, &found);
+
+	if (!found) {
+		/* listener isn't subscribed */
+		return dx_mutex_unlock(&(context->subscr_guard));
+	}
 
 	DX_ARRAY_DELETE(subscr_data->listeners, dx_listener_context_t, listener_index, dx_capacity_manager_halfer, failed);
 

@@ -58,7 +58,9 @@ typedef enum {
 										successfully initialized.
  */
 
-dx_error_function_result_t dx_set_last_error (dx_error_code_t error_code);
+dx_error_function_result_t dx_set_last_error(dx_error_code_t error_code);
+
+dx_error_function_result_t dx_set_last_error_impl(dx_error_code_t error_code, bool with_logging);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -127,5 +129,7 @@ dx_error_code_t dx_get_error_code (void);
  */
 
 bool dx_set_error_code (dx_error_code_t code);
+
+bool dx_set_error_code_impl(dx_error_code_t code, bool with_logging);
 
 #endif /* DX_ERROR_HANDLING_H_INCLUDED */

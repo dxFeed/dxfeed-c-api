@@ -44,7 +44,7 @@ typedef void* (*dx_start_routine_t)(void*);
 #	define USE_WIN32_THREADS
 typedef HANDLE dx_thread_t;
 typedef DWORD dx_key_t;
-typedef HANDLE dx_mutex_t;
+typedef LPCRITICAL_SECTION dx_mutex_t;
 typedef void pthread_attr_t;
 typedef unsigned (*dx_start_routine_t)(void*);
 #define DX_THREAD_RETVAL_NULL 0
