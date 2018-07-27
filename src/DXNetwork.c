@@ -108,6 +108,7 @@ typedef struct {
 	const char* address;
 	dx_socket_t s;
 	time_t next_heartbeat;
+	__time64_t last_server_heartbeat;
 	dx_thread_t reader_thread;
 	dx_thread_t queue_thread;
 	dx_mutex_t socket_guard;
@@ -461,16 +462,17 @@ void dx_notify_conn_termination (dx_network_connection_context_t* context, OUT b
 
 /* -------------------------------------------------------------------------- */
 
+#define HEARTBEAT_TIMEOUT_IN_SECONDS 60
+#define MAX_MISSING_HEARTBEATS 2
+#define SERVER_HEARTBEAT_TIMEOUT_IN_SECONDS (MAX_MISSING_HEARTBEATS * HEARTBEAT_TIMEOUT_IN_SECONDS)
+
 #if !defined(_WIN32) || defined(USE_PTHREADS)
 void* dx_queue_executor (void* arg) {
 #else
 unsigned dx_queue_executor(void* arg) {
-#endif
-	static int s_idle_timeout = 100;
-	static int s_small_timeout = 25;
-	static int s_heartbeat_timeout = 60; // in seconds
-
-	time_t current_time;
+#endif	
+	static const int s_idle_timeout = 100;
+	static const int s_small_timeout = 25;
 
 	dx_network_connection_context_t* context = NULL;
 
@@ -496,14 +498,21 @@ unsigned dx_queue_executor(void* arg) {
 	for (;;) {
 		bool queue_empty = true;
 
-		time(&current_time);
-		if (difftime(current_time, context->next_heartbeat) >= 0) {
+		const __time64_t last_server_heartbeat = atomic_read(&context->last_server_heartbeat);
+		if (last_server_heartbeat != 0 && _difftime64(_time64(NULL), last_server_heartbeat) >= SERVER_HEARTBEAT_TIMEOUT_IN_SECONDS) {
+			dx_logging_info(L"No messages from server for at least %d seconds (%d missing heartbeats). Disconnecting...",
+				SERVER_HEARTBEAT_TIMEOUT_IN_SECONDS, MAX_MISSING_HEARTBEATS);
+			dx_close_socket(context);
+			dx_sleep(s_idle_timeout);
+			continue;
+		}
+		if (difftime(time(NULL), context->next_heartbeat) >= 0) {
 			if (!dx_send_heartbeat(context->connection, true)) {
 				dx_sleep(s_idle_timeout);
 				continue;
 			}
 			time(&context->next_heartbeat);
-			context->next_heartbeat += s_heartbeat_timeout;
+			context->next_heartbeat += HEARTBEAT_TIMEOUT_IN_SECONDS;
 		}
 
 
@@ -656,6 +665,7 @@ void dx_socket_reader (dx_network_connection_context_t* context) {
 				number_of_bytes_read = INVALID_DATA_SIZE;
 			}
 		} else {
+			atomic_write(&context->last_server_heartbeat, _time64(NULL));
 #ifdef DXFEED_CODEC_TLS_ENABLED
 			if (dx_get_current_address(context)->tls.enabled) {
 				number_of_bytes_read = (int)tls_read(context->tls_context, (void*)read_buf, READ_CHUNK_SIZE);
@@ -667,6 +677,7 @@ void dx_socket_reader (dx_network_connection_context_t* context) {
 #else
 			number_of_bytes_read = dx_recv(context->s, (void*)read_buf, READ_CHUNK_SIZE);
 #endif // DXFEED_CODEC_TLS_ENABLED
+			atomic_write(&context->last_server_heartbeat, 0);
 		}
 
 		if (number_of_bytes_read == INVALID_DATA_SIZE) {
@@ -1312,6 +1323,44 @@ static bool dx_protocol_property_restore_backup(dx_network_connection_context_t*
 
 /* -------------------------------------------------------------------------- */
 
+bool dx_protocol_property_get_snapshot(dxf_connection_t connection,
+                 OUT dxf_property_item_t** ppProperties, OUT int* pSize)
+{	
+	if (ppProperties == NULL || pSize == NULL) {
+		return dx_set_error_code(dx_ec_invalid_func_param);
+	}
+	*ppProperties = NULL;
+	*pSize = 0;
+
+	bool res = true;
+	const dx_network_connection_context_t* const pContext = dx_get_subsystem_data(connection, dx_ccs_network, &res);
+	if (pContext == NULL) {
+		if (res) {
+			dx_set_error_code(dx_cec_connection_context_not_initialized);
+		}
+		return false;
+	}
+	CHECKED_CALL(dx_mutex_lock, &pContext->socket_guard);
+	const size_t size = pContext->properties.size;
+	const dx_property_item_t* const pElements = pContext->properties.elements;
+	dxf_property_item_t* const pProperties = dx_calloc(size, sizeof(dxf_property_item_t));
+	if (pProperties == NULL) {
+		dx_mutex_unlock(&pContext->socket_guard);
+		return false;
+	}
+	for (int i = 0; i < size; i++) {
+		pProperties[i].key = dx_create_string_src(pElements[i].key);
+		pProperties[i].value = dx_create_string_src(pElements[i].value);
+	}
+	if (!dx_mutex_unlock(&pContext->socket_guard)) {
+		dxf_free_connection_properties_snapshot(pProperties, (int)size);
+		return false;
+	}
+	*pSize = (int)size;
+	*ppProperties = pProperties;
+	return true;
+}
+
 bool dx_protocol_property_set(dxf_connection_t connection, dxf_const_string_t key, dxf_const_string_t value) {
 	dx_network_connection_context_t* context = NULL;
 	bool res = true;
@@ -1462,4 +1511,48 @@ bool dx_protocol_configure_custom_auth(dxf_connection_t connection,
 	dx_free(w_authscheme);
 	dx_free(buf);
 	return res;
+}
+
+bool dx_get_current_connected_address(dxf_connection_t connection, OUT char** ppAddress) {
+	if (ppAddress == NULL) {
+		return dx_set_error_code(dx_ec_invalid_func_param);
+	}
+	*ppAddress = NULL;
+	bool res = true;
+	dx_network_connection_context_t* const pContext = dx_get_subsystem_data(connection, dx_ccs_network, &res);
+	if (pContext == NULL) {
+		if (res) {
+			dx_set_error_code(dx_cec_connection_context_not_initialized);
+		}
+		return false;
+	}
+	CHECKED_CALL(dx_mutex_lock, &pContext->socket_guard);
+	if (pContext->addr_context.cur_addr_index < 0 || pContext->addr_context.cur_addr_index >= pContext->addr_context.size) {
+		dx_mutex_unlock(&pContext->socket_guard);
+		return true;
+	}
+	const dx_ext_address_t* const pExtAddress = &pContext->addr_context.elements[pContext->addr_context.cur_addr_index];
+	if (pExtAddress == NULL) {
+		dx_mutex_unlock(&pContext->socket_guard);
+		return true;
+	}
+	const char* const host = pExtAddress->host;
+	const char* const port = pExtAddress->port;
+	const size_t host_len = dx_ansi_string_length(host);
+	const size_t port_len = dx_ansi_string_length(port);
+	char * const pAddress = dx_calloc(1, host_len + port_len + 2);
+	if (pAddress == NULL) {
+		dx_mutex_unlock(&pContext->socket_guard);
+		return false;
+	}
+	dx_ansi_copy_string_len(pAddress, host, host_len);
+	pAddress[host_len] = ':';
+	dx_ansi_copy_string_len(pAddress + host_len + 1, port, port_len);
+	pAddress[host_len + port_len + 1] = '\0';
+	if (!dx_mutex_unlock(&pContext->socket_guard)) {
+		free(pAddress);
+		return false;
+	}
+	*ppAddress = pAddress;
+	return true;
 }

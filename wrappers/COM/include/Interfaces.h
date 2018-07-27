@@ -92,6 +92,8 @@ struct IDXConnection : public IDispatch {
 	virtual HRESULT STDMETHODCALLTYPE CreateSubscriptionTimed(INT eventTypes, LONGLONG time, IDispatch** subscription) = 0;
 	virtual HRESULT STDMETHODCALLTYPE CreateSnapshot(INT eventType, BSTR symbol, BSTR source, LONGLONG time, BOOL incremental, IDispatch** snapshot) = 0;
 	virtual HRESULT STDMETHODCALLTYPE CreateCandleSnapshot(IDXCandleSymbol* symbol, LONGLONG time, BOOL incremental, IDispatch** snapshot) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetProperties(SAFEARRAY** ppKeys, SAFEARRAY** ppValues) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetConnectedAddress(BSTR* pAddress) = 0;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -146,6 +148,7 @@ struct IDXTrade : public IDispatch {
 	virtual HRESULT STDMETHODCALLTYPE GetDayTurnover(DOUBLE* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetDirection(DXFDirection* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE IsETH(VARIANT_BOOL *value) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetScope(DXFOrderScope* value) = 0;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -168,6 +171,7 @@ struct IDXQuote : public IDispatch {
 	virtual HRESULT STDMETHODCALLTYPE GetTime(LONGLONG* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetSequence(INT* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetTimeNanos(INT* value) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetScope(DXFOrderScope* value) = 0;
 };
 
 /* -------------------------------------------------------------------------- */

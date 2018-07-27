@@ -329,11 +329,16 @@ typedef bool (*dx_record_transcoder_t) (dx_record_transcoder_connection_context_
  */
 /* -------------------------------------------------------------------------- */
 
-bool RECORD_TRANSCODER_NAME(dx_trade_t) (dx_record_transcoder_connection_context_t* context,
-										const dx_record_params_t* record_params,
-										const dxf_event_params_t* event_params,
-										dx_trade_t* record_buffer, int record_count) {
-	dxf_trade_t* event_buffer = (dxf_trade_t*)dx_get_event_data_buffer(context, dx_eid_trade, record_count);
+static bool dx_trade_t_transcoder_impl(dx_record_transcoder_connection_context_t* context,
+	const dx_record_params_t* record_params,
+	const dxf_event_params_t* event_params,
+	dx_trade_t* record_buffer, int record_count, dx_event_id_t event_id)
+{
+	if (event_id != dx_eid_trade && event_id != dx_eid_trade_eth) {
+		return dx_set_error_code(dx_ec_internal_assert_violation);
+	}
+
+	dxf_trade_t* event_buffer = (dxf_trade_t*) dx_get_event_data_buffer(context, event_id, record_count);
 	dxf_char_t exchange_code = DX_EXCHANGE_FROM_RECORD(record_params);
 
 	if (event_buffer == NULL) {
@@ -353,17 +358,28 @@ bool RECORD_TRANSCODER_NAME(dx_trade_t) (dx_record_transcoder_connection_context
 		cur_event->exchange_code = cur_record->exchange_code ? cur_record->exchange_code : exchange_code;
 		cur_event->price = cur_record->price;
 		cur_event->size = cur_record->size;
-		cur_event->tick = cur_record->tick;
-		cur_event->change = cur_record->change;
+		if (event_id == dx_eid_trade) {
+			cur_event->tick = cur_record->tick;
+			cur_event->change = cur_record->change;
+		}
 		cur_event->raw_flags = cur_record->flags;
 		cur_event->day_volume = cur_record->day_volume;
 		cur_event->day_turnover = cur_record->day_turnover;
 		cur_event->direction = DX_TRADE_GET_DIR(cur_record);
 		cur_event->is_eth = DX_TRADE_GET_ETH(cur_record);
+		cur_event->scope = (exchange_code == 0 ? dxf_osc_composite : dxf_osc_regional);
 	}
 
-	return dx_process_event_data(context->connection, dx_eid_trade, record_params->symbol_name,
+	return dx_process_event_data(context->connection, event_id, record_params->symbol_name,
 		record_params->symbol_cipher, event_buffer, record_count, event_params);
+}
+
+bool RECORD_TRANSCODER_NAME(dx_trade_t) (dx_record_transcoder_connection_context_t* context,
+	const dx_record_params_t* record_params,
+	const dxf_event_params_t* event_params,
+	dx_trade_t* record_buffer, int record_count)
+{
+	return dx_trade_t_transcoder_impl(context, record_params, event_params, record_buffer, record_count, dx_eid_trade);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -479,6 +495,7 @@ bool dx_transcode_quote (dx_record_transcoder_connection_context_t* context,
 		cur_event->ask_exchange_code = exchange_code ? exchange_code : cur_record->ask_exchange_code;
 		cur_event->ask_price = cur_record->ask_price;
 		cur_event->ask_size = cur_record->ask_size;
+		cur_event->scope = (exchange_code == 0 ? dxf_osc_composite : dxf_osc_regional);
 	}
 
 	return dx_process_event_data(context->connection, dx_eid_quote, record_params->symbol_name,
@@ -863,35 +880,7 @@ bool RECORD_TRANSCODER_NAME(dx_trade_eth_t) (dx_record_transcoder_connection_con
 											const dx_record_params_t* record_params,
 											const dxf_event_params_t* event_params,
 											dx_trade_t* record_buffer, int record_count) {
-	dxf_trade_t* event_buffer = (dxf_trade_t*)dx_get_event_data_buffer(context, dx_eid_trade_eth, record_count);
-	dxf_char_t exchange_code = DX_EXCHANGE_FROM_RECORD(record_params);
-
-	if (event_buffer == NULL) {
-		return false;
-	}
-
-	if (!exchange_code)
-		dx_set_record_exchange_code(context->dscc, record_params->record_id, exchange_code);
-
-	for (int i = 0; i < record_count; ++i) {
-		dx_trade_t* cur_record = record_buffer + i;
-		dxf_trade_t* cur_event = event_buffer + i;
-
-		cur_event->time = DX_TIME_SEQ_TO_MS(cur_record);
-		cur_event->sequence = DX_SEQUENCE(cur_record);
-		cur_event->time_nanos = cur_record->time_nanos;
-		cur_event->exchange_code = cur_record->exchange_code ? cur_record->exchange_code : exchange_code;
-		cur_event->price = cur_record->price;
-		cur_event->size = cur_record->size;
-		cur_event->raw_flags = cur_record->flags;
-		cur_event->day_volume = cur_record->day_volume;
-		cur_event->day_turnover = cur_record->day_turnover;
-		cur_event->direction = DX_TRADE_GET_DIR(cur_record);
-		cur_event->is_eth = DX_TRADE_GET_ETH(cur_record);
-	}
-
-	return dx_process_event_data(context->connection, dx_eid_trade_eth, record_params->symbol_name,
-		record_params->symbol_cipher, event_buffer, record_count, event_params);
+	return dx_trade_t_transcoder_impl(context, record_params, event_params, record_buffer, record_count, dx_eid_trade_eth);
 }
 
 /* -------------------------------------------------------------------------- */

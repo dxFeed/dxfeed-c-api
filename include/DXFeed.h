@@ -646,4 +646,44 @@ DXFEED_API ERRORCODE dxf_detach_regional_book_listener(dxf_regional_book_t book,
  */
 DXFEED_API ERRORCODE dxf_write_raw_data(dxf_connection_t connection, const char* raw_file_name);
 
+/*
+*  Retrieves the array of key-value pairs (properties) for specified connection. The memory for the resulting array
+*  is allocated during execution of the function and SHOULD be free by caller with dxf_free_connection_properties_snapshot
+*  function. So done because connection properties can be changed during reconnection. Returned array is a snapshot
+*  of properties at the moment of the call.
+*
+*  connection - a handle of a previously created connection
+*  OUT properties - address of pointer to store address of key-value pairs array
+*  OUT count - address of variable to store length of key-value pairs array
+*/
+DXFEED_API ERRORCODE dxf_get_connection_properties_snapshot(dxf_connection_t connection,
+                                                            OUT dxf_property_item_t** properties,
+                                                            OUT int* count);
+
+/*
+* Frees memory allocated during dxf_get_connection_properties_snapshot function execution
+*
+*  properties - pointer to the key-value pairs array
+*  count - length of key-value pairs array
+*/
+DXFEED_API ERRORCODE dxf_free_connection_properties_snapshot(dxf_property_item_t* properties, int count);
+
+/*
+*  Retrieves the null-terminated string with current connected address in format <host>:<port>. If (*address)
+*  points to NULL then connection is not connected (reconnection, no valid addresses, closed connection and others).
+*  The memory for the resulting string is allocated during execution of the function and SHOULD be free by caller
+*  with call of dxf_free function. So done because inner string with connected address can be free during reconnection.
+*
+*  connection - a handle of a previously created connection
+*  OUT address - address of pointer to store address of the null-terminated string with current connected address
+*/
+DXFEED_API ERRORCODE dxf_get_current_connected_address(dxf_connection_t connection, OUT char** address);
+
+/*
+* Frees memory allocated in API functions from this module
+*
+*  pointer - pointer to memory allocated earlier in some API function from this module
+*/
+DXFEED_API ERRORCODE dxf_free(void* pointer);
+
 #endif /* DXFEED_API_H_INCLUDED */

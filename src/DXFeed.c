@@ -1259,3 +1259,39 @@ DXFEED_API ERRORCODE dxf_write_raw_data(dxf_connection_t connection, const char 
 
 	return DXF_SUCCESS;
 }
+
+DXFEED_API ERRORCODE dxf_get_connection_properties_snapshot(dxf_connection_t connection,
+	OUT dxf_property_item_t** properties, OUT int* count)
+{
+	if (!dx_protocol_property_get_snapshot(connection, properties, count)) {
+		return DXF_FAILURE;
+	}
+	return DXF_SUCCESS;
+}
+
+DXFEED_API ERRORCODE dxf_free_connection_properties_snapshot(dxf_property_item_t* properties, int count) {
+	if (properties != NULL) {
+		for (int i = 0; i < count; ++i) {
+			if (properties[i].key != NULL) {
+				dx_free(properties[i].key);
+			}
+			if (properties[i].value != NULL) {
+				dx_free(properties[i].value);
+			}
+		}
+		dx_free(properties);
+	}
+	return DXF_SUCCESS;
+}
+
+DXFEED_API ERRORCODE dxf_get_current_connected_address(dxf_connection_t connection, OUT char** address) {
+	if (!dx_get_current_connected_address(connection, address)) {
+		return DXF_FAILURE;
+	}
+	return DXF_SUCCESS;
+}
+
+DXFEED_API ERRORCODE dxf_free(void* pointer) {
+	dx_free(pointer);
+	return DXF_SUCCESS;
+}

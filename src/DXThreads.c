@@ -500,14 +500,14 @@ bool dx_mutex_destroy (dx_mutex_t* mutex) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_mutex_lock (dx_mutex_t* mutex) {
+bool dx_mutex_lock (const dx_mutex_t* mutex) {
 	EnterCriticalSection(*mutex);
 	return true;
 }
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_mutex_unlock (dx_mutex_t* mutex) {
+bool dx_mutex_unlock (const dx_mutex_t* mutex) {
 	LeaveCriticalSection(*mutex);
 	return true;
 }

@@ -156,6 +156,14 @@ char* dx_ansi_create_string_src_len(const char* src, size_t len) {
 	return strncpy(res, src, len);
 }
 
+char* dx_ansi_copy_string_len(char* dest, const char* src, size_t len) {
+	return strncpy(dest, src, len);
+}
+
+size_t dx_ansi_string_length(const char* str) {
+	return strlen(str);
+}
+
 /* -------------------------------------------------------------------------- */
 
 dxf_string_t dx_create_string_src_len (dxf_const_string_t src, size_t len) {
@@ -474,3 +482,22 @@ bool dx_base64_decode(const char* in, size_t in_len, char* out, size_t* out_len)
 size_t dx_base64_length(size_t in_len) {
 	return ((4 * in_len / 3) + 3) & ~3;
 }
+
+#ifdef _WIN32
+
+__int64 atomic_read(__int64 volatile * value) {
+	return InterlockedExchangeAdd64(value, 0);
+}
+
+void atomic_write(__int64 volatile * dest, __int64 src) {
+	InterlockedExchange64(dest, src);
+}
+
+__int32 atomic_read32(__int32 volatile * value) {
+	return InterlockedExchangeAdd(value, 0);
+}
+
+void atomic_write32(__int32 volatile * dest, __int32 src) {
+	InterlockedExchange(dest, src);
+}
+#endif
