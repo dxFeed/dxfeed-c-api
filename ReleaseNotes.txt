@@ -1,3 +1,4 @@
+Version 5.3.0
 + Add support of regional and composite events for trades and quotes
 + Add processing of server heartbeats
 + Add API functions to get current address and other properties from connection
