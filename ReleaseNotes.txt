@@ -1,3 +1,6 @@
+Version 5.3.1
+* Fix field flags for Trade and TradeETH records
+
 Version 5.3.0
 + Add support of regional and composite events for trades and quotes
 + Add processing of server heartbeats
