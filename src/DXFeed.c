@@ -1251,6 +1251,45 @@ DXFEED_API ERRORCODE dxf_detach_regional_book_listener(dxf_regional_book_t book,
 
 /* -------------------------------------------------------------------------- */
 
+DXFEED_API ERRORCODE dxf_attach_regional_book_listener_v2(dxf_regional_book_t book,
+    dxf_regional_quote_listener_t listener, void* user_data)
+{
+    dx_perform_common_actions();
+
+    if (book == NULL) {
+        dx_set_error_code(dx_ec_invalid_func_param);
+        return DXF_FAILURE;
+    }
+
+    if (!dx_add_regional_book_listener_v2(book, listener, user_data)) {
+        return DXF_FAILURE;
+    }
+
+    return DXF_SUCCESS;
+}
+
+/* -------------------------------------------------------------------------- */
+
+DXFEED_API ERRORCODE dxf_detach_regional_book_listener_v2(dxf_regional_book_t book,
+    dxf_regional_quote_listener_t listener)
+{
+    dx_perform_common_actions();
+
+    if (book == NULL) {
+        dx_set_error_code(dx_ec_invalid_func_param);
+
+        return DXF_FAILURE;
+    }
+
+    if (!dx_remove_regional_book_listener_v2(book, listener)) {
+        return DXF_FAILURE;
+    }
+
+    return DXF_SUCCESS;
+}
+
+/* -------------------------------------------------------------------------- */
+
 DXFEED_API ERRORCODE dxf_write_raw_data(dxf_connection_t connection, const char * raw_file_name)
 {
 	if (!dx_add_raw_dump_file(connection, raw_file_name)) {

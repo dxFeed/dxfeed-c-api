@@ -35,8 +35,16 @@
 struct dx_regional_book;
 typedef struct dx_regional_book dx_regional_book_t;
 
+typedef enum {
+    dx_rblv_default = 1,
+    dx_rblv_v2 = 2
+} dx_rb_listener_version_t;
+
+typedef void* dx_rb_listener_ptr_t;
+
 typedef struct {
-	dxf_price_level_book_listener_t listener;
+    dx_rb_listener_ptr_t listener;
+    dx_rb_listener_version_t version;
 	void* user_data;
 } dx_rb_listener_context_t;
 
@@ -246,10 +254,37 @@ static void dx_rb_book_update(dx_regional_book_t *book) {
 		if (!dx_mutex_lock(&book->guard)) {
 			return;
 		}
-		for (; i < book->listeners.size; i++)
-			book->listeners.elements[i].listener(&book->book, book->listeners.elements[i].user_data);
+        for (; i < book->listeners.size; i++) {
+            dx_rb_listener_context_t* ctx = &book->listeners.elements[i];
+            if (ctx->version == dx_rblv_default) {
+                ((dxf_price_level_book_listener_t)ctx->listener)(&book->book, book->listeners.elements[i].user_data);
+            }
+        }
 		dx_mutex_unlock(&book->guard);
 	}
+}
+
+static void notify_regional_listeners(dx_regional_book_t *book, const dxf_quote_t *quotes, int data_count)
+{
+    size_t i = 0;
+    size_t j = 0;
+    if (!dx_mutex_lock(&book->guard)) {
+        return;
+    }    
+    for (i = 0; i < data_count; ++i) {
+        const dxf_quote_t* quote = &quotes[i];
+        if (quote->ask_exchange_code >= 'A' && quote->ask_exchange_code <= 'Z'
+            && quote->bid_exchange_code >= 'A' && quote->bid_exchange_code <= 'Z')
+        {
+            for (j = 0; j < book->listeners.size; ++j) {
+                dx_rb_listener_context_t* ctx = &book->listeners.elements[j];
+                if (ctx->version == dx_rblv_v2) {
+                    ((dxf_regional_quote_listener_t)ctx->listener)(book->symbol, quote, ctx->user_data);
+                }
+            }
+        }
+    }
+    dx_mutex_unlock(&book->guard);
 }
 
 /******************/
@@ -277,6 +312,8 @@ static void rb_event_listener(int event_type, dxf_const_string_t symbol_name,
 		dx_logging_error(L"Listener for Regional Book was called with wrong symbol\n");
 		return;
 	}
+
+    notify_regional_listeners(book, quote, data_count);
 
 	/* Ok, process data */
 	for (; i < data_count; i++) {
@@ -389,12 +426,13 @@ bool dx_close_regional_book(dxf_regional_book_t book) {
 	return true;
 }
 
-bool dx_add_regional_book_listener(dxf_regional_book_t book,
-									dxf_price_level_book_listener_t book_listener,
+static bool dx_add_regional_book_listener_impl(dxf_regional_book_t book,
+                                    dx_rb_listener_ptr_t listener,
+                                    dx_rb_listener_version_t version,
 									void *user_data) {
 	dx_regional_book_t *b = (dx_regional_book_t *)book;
 	dx_rb_connection_context_t *context = CTX(b->context);
-	dx_rb_listener_context_t ctx = { book_listener, user_data };
+	dx_rb_listener_context_t ctx = { listener, version, user_data };
 	bool found = false;
 	bool error = false;
 	size_t idx;
@@ -410,11 +448,22 @@ bool dx_add_regional_book_listener(dxf_regional_book_t book,
 	return dx_mutex_unlock(&b->guard) && !error;
 }
 
-bool dx_remove_regional_book_listener(dxf_regional_book_t book,
-										dxf_price_level_book_listener_t book_listener) {
+bool dx_add_regional_book_listener(dxf_regional_book_t book, dxf_price_level_book_listener_t book_listener, void *user_data)
+{
+    return dx_add_regional_book_listener_impl(book, (dx_rb_listener_ptr_t)book_listener, dx_rblv_default, user_data);
+}
+
+bool dx_add_regional_book_listener_v2(dxf_regional_book_t book, dxf_regional_quote_listener_t book_listener,
+    void *user_data)
+{
+    return dx_add_regional_book_listener_impl(book, (dx_rb_listener_ptr_t)book_listener, dx_rblv_v2, user_data);
+}
+
+static bool dx_remove_regional_book_listener_impl(dxf_regional_book_t book, dx_rb_listener_ptr_t listener)
+{
 	dx_regional_book_t *b = (dx_regional_book_t *)book;
 	dx_rb_connection_context_t *context = CTX(b->context);
-	dx_rb_listener_context_t ctx = { book_listener, NULL };
+	dx_rb_listener_context_t ctx = { listener, 0, NULL };
 	bool found = false;
 	bool error = false;
 	size_t idx;
@@ -427,4 +476,14 @@ bool dx_remove_regional_book_listener(dxf_regional_book_t book,
 	CHECKED_CALL(dx_mutex_lock, &(b->guard));
 	DX_ARRAY_DELETE(b->listeners, dx_rb_listener_context_t, idx, dx_capacity_manager_halfer, error);
 	return dx_mutex_unlock(&b->guard) && !error;
+}
+
+bool dx_remove_regional_book_listener(dxf_regional_book_t book, dxf_price_level_book_listener_t listener)
+{
+    return dx_remove_regional_book_listener_impl(book, (dx_rb_listener_ptr_t)listener);
+}
+
+bool dx_remove_regional_book_listener_v2(dxf_regional_book_t book, dxf_regional_quote_listener_t listener)
+{
+    return dx_remove_regional_book_listener_impl(book, (dx_rb_listener_ptr_t)listener);
 }

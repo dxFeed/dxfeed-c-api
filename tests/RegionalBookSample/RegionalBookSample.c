@@ -146,6 +146,22 @@ void listener(const dxf_price_level_book_data_ptr_t book_data, void* user_data) 
 	}
 }
 
+void regional_listener(dxf_const_string_t symbol, const dxf_quote_t* quote, void* user_data) {
+    wprintf(L"Quote{symbol=%ls, ", symbol);
+    wprintf(L"bidTime=");
+    print_timestamp(quote->bid_time);
+    wprintf(L" bidExchangeCode=%c, bidPrice=%f, bidSize=%i, ",
+        quote->bid_exchange_code,
+        quote->bid_price,
+        quote->bid_size);
+    wprintf(L"askTime=");
+    print_timestamp(quote->ask_time);
+    wprintf(L" askExchangeCode=%c, askPrice=%f, askSize=%i, scope=%d}\n",
+        quote->ask_exchange_code,
+        quote->ask_price,
+        quote->ask_size, (int)quote->scope);
+}
+
 static const char *s_Default_Sources[] = { "BZX", "DEX", NULL };
 
 /* -------------------------------------------------------------------------- */
@@ -200,6 +216,11 @@ int main(int argc, char* argv[]) {
 		dxf_close_connection(connection);
 		return -1;
 	}
+    if (!dxf_attach_regional_book_listener_v2(book, &regional_listener, NULL)) {
+        process_last_error();
+        dxf_close_connection(connection);
+        return -1;
+    }    
 
 	wprintf(L"Subscription successful!\n");
 
