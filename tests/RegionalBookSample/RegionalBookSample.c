@@ -62,7 +62,7 @@ void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
 #endif
 
 void print_timestamp(dxf_long_t timestamp){
-	wchar_t timefmt[80];
+    wchar_t timefmt[80] = { 0 };
 
 	struct tm * timeinfo;
 	time_t tmpint = (time_t)(timestamp / 1000);
@@ -127,23 +127,43 @@ dxf_string_t ansi_to_unicode(const char* ansi_str) {
 
 void listener(const dxf_price_level_book_data_ptr_t book_data, void* user_data) {
 	size_t i = 0;
-	wprintf(L"New Regional Order Book for %s:\n", book_data->symbol);
+	wprintf(L"\nNew Regional Order Book for %s:\n", book_data->symbol);
 	/* Time is 4 + 2 + 2 + 1 + 2 + 2 + 2 = 15 */
-	wprintf(L" %-7s %-8s %-15s |  %-7s %-8s %-15s\n", L"Ask", L"Size", L"Time", L"Bid", L"Size", L"Time");
+	wprintf(L"%-7s %-8s %-15s | %-7s %-8s %-15s\n", L"Ask", L"Size", L"Time", L"Bid", L"Size", L"Time");
 	for (; i < max(book_data->asks_count, book_data->bids_count); i++) {
 		if (i < book_data->asks_count) {
-			wprintf(L"$%-7.2f %-8lld ", book_data->asks[i].price, book_data->asks[i].size);
+			wprintf(L"%-7.2f %-8lld ", book_data->asks[i].price, book_data->asks[i].size);
 			print_timestamp(book_data->asks[i].time);
 		} else {
-			wprintf(L" %-7s %-8s %-15s", L"", L"", L"");
+			wprintf(L"%-7s %-8s %-15s", L"", L"", L"");
 		}
 		wprintf(L" | ");
 		if (i < book_data->bids_count) {
-			wprintf(L"$%-7.2f %-8lld ", book_data->bids[i].price, book_data->bids[i].size);
+			wprintf(L"%-7.2f %-8lld ", book_data->bids[i].price, book_data->bids[i].size);
 			print_timestamp(book_data->bids[i].time);
 		}
 		wprintf(L"\n");
 	}
+}
+
+void regional_listener(dxf_const_string_t symbol, const dxf_quote_t* quotes, int count, void* user_data) {
+    int i = 0;
+    for (; i < count; ++i) {
+        const dxf_quote_t* quote = quotes + i;
+        wprintf(L"Quote{symbol=%ls, ", symbol);
+        wprintf(L"bidTime=");
+        print_timestamp(quote->bid_time);
+        wprintf(L" bidExchangeCode=%c, bidPrice=%f, bidSize=%i, ",
+            quote->bid_exchange_code,
+            quote->bid_price,
+            quote->bid_size);
+        wprintf(L"askTime=");
+        print_timestamp(quote->ask_time);
+        wprintf(L" askExchangeCode=%c, askPrice=%f, askSize=%i, scope=%d}\n",
+            quote->ask_exchange_code,
+            quote->ask_price,
+            quote->ask_size, (int)quote->scope);
+    }
 }
 
 static const char *s_Default_Sources[] = { "BZX", "DEX", NULL };
@@ -200,6 +220,11 @@ int main(int argc, char* argv[]) {
 		dxf_close_connection(connection);
 		return -1;
 	}
+    if (!dxf_attach_regional_book_listener_v2(book, &regional_listener, NULL)) {
+        process_last_error();
+        dxf_close_connection(connection);
+        return -1;
+    }
 
 	wprintf(L"Subscription successful!\n");
 

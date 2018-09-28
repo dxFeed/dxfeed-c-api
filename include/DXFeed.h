@@ -639,6 +639,26 @@ DXFEED_API ERRORCODE dxf_detach_regional_book_listener(dxf_regional_book_t book,
                                                        dxf_price_level_book_listener_t book_listener);
 
 /*
+*  Attaches a listener callback to regional book.
+*  This callback will be invoked when new regional quotes are received.
+*
+*  book - a handle of the book to which a listener is to be detached
+*  listener - a listener callback function pointer
+*/
+DXFEED_API ERRORCODE dxf_attach_regional_book_listener_v2(dxf_regional_book_t book,
+    dxf_regional_quote_listener_t listener, void* user_data);
+
+/*
+*  Detaches a listener from the regional book.
+*  No error occurs if it's attempted to detach a listener which wasn't previously attached.
+*
+*  book - a handle of the book to which a listener is to be detached
+*  book_listener - a listener callback function pointer
+*/
+DXFEED_API ERRORCODE dxf_detach_regional_book_listener_v2(dxf_regional_book_t book,
+    dxf_regional_quote_listener_t listener);
+
+/*
  *  Add dumping of incoming traffic into specific file
  *
  *  connection - a handle of a previously created connection which the subscription will be using

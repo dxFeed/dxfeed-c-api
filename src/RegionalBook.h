@@ -26,11 +26,21 @@
 
 dxf_regional_book_t dx_create_regional_book(dxf_connection_t connection,
 											dxf_const_string_t symbol);
+
 bool dx_close_regional_book(dxf_regional_book_t book);
+
 bool dx_add_regional_book_listener(dxf_regional_book_t book,
-								dxf_price_level_book_listener_t book_listener,
+  								dxf_price_level_book_listener_t book_listener,
 								void *user_data);
-bool  dx_remove_regional_book_listener(dxf_regional_book_t book,
+
+bool dx_remove_regional_book_listener(dxf_regional_book_t book,
 									dxf_price_level_book_listener_t book_listener);
+
+bool dx_add_regional_book_listener_v2(dxf_regional_book_t book,
+                                    dxf_regional_quote_listener_t book_listener,
+                                    void *user_data);
+
+bool dx_remove_regional_book_listener_v2(dxf_regional_book_t book,
+                                        dxf_regional_quote_listener_t book_listener);
 
 #endif /* REGIONALBOOK_H_INCLUDED */
