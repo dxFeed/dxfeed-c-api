@@ -585,7 +585,7 @@ typedef void(*dxf_price_level_book_listener_t) (const dxf_price_level_book_data_
 */
 /* -------------------------------------------------------------------------- */
 
-typedef void(*dxf_regional_quote_listener_t) (dxf_const_string_t symbol, const dxf_quote_t* quote, void* user_data);
+typedef void(*dxf_regional_quote_listener_t) (dxf_const_string_t symbol, const dxf_quote_t* quotes, int count, void* user_data);
 
 /* -------------------------------------------------------------------------- */
 /*

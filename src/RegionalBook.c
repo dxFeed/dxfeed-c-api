@@ -264,24 +264,16 @@ static void dx_rb_book_update(dx_regional_book_t *book) {
 	}
 }
 
-static void notify_regional_listeners(dx_regional_book_t *book, const dxf_quote_t *quotes, int data_count)
+static void notify_regional_listeners(dx_regional_book_t *book, const dxf_quote_t *quotes, int count)
 {
     size_t i = 0;
-    size_t j = 0;
     if (!dx_mutex_lock(&book->guard)) {
         return;
     }    
-    for (i = 0; i < data_count; ++i) {
-        const dxf_quote_t* quote = &quotes[i];
-        if (quote->ask_exchange_code >= 'A' && quote->ask_exchange_code <= 'Z'
-            && quote->bid_exchange_code >= 'A' && quote->bid_exchange_code <= 'Z')
-        {
-            for (j = 0; j < book->listeners.size; ++j) {
-                dx_rb_listener_context_t* ctx = &book->listeners.elements[j];
-                if (ctx->version == dx_rblv_v2) {
-                    ((dxf_regional_quote_listener_t)ctx->listener)(book->symbol, quote, ctx->user_data);
-                }
-            }
+    for (i = 0; i < book->listeners.size; ++i) {
+        dx_rb_listener_context_t* ctx = &book->listeners.elements[i];
+        if (ctx->version == dx_rblv_v2) {
+            ((dxf_regional_quote_listener_t)ctx->listener)(book->symbol, quotes, count, ctx->user_data);
         }
     }
     dx_mutex_unlock(&book->guard);
