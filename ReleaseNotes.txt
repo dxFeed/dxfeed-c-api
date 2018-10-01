@@ -1,3 +1,6 @@
+Version 5.3.2
+* New listener for dxf_quote_t events is added to dxf_regional_book_t
+
 Version 5.3.1
 * Fix field flags for Trade and TradeETH records
 
