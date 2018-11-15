@@ -318,11 +318,6 @@ int main(int argc, char* argv[]) {
 	if (base_symbol == NULL) {
 		return -1;
 	}
-	else {
-		int i = 0;
-		for (; base_symbol[i]; i++)
-			base_symbol[i] = towupper(base_symbol[i]);
-	}
 
 	if (argc == 5) {
 		param_ptr = argv[4];
