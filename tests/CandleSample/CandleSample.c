@@ -248,10 +248,6 @@ int main (int argc, char* argv[]) {
 	if (symbol == NULL) {
 		return -1;
 	}
-	else {
-		for (i = 0; symbol[i]; i++)
-			symbol[i] = towupper(symbol[i]);
-	}
 
 	if (argc > STATIC_PARAMS_COUNT) {
 		for (i = STATIC_PARAMS_COUNT; i < argc; i++) {

@@ -423,11 +423,6 @@ bool parse_symbols(char* symbols_string, OUT dxf_string_t** symbols, OUT int* sy
 			free_symbols(symbol_array, count);
 			return false;
 		}
-		else {
-			int i = 0;
-			for (; symbol[i]; i++)
-				symbol[i] = towupper(symbol[i]);
-		}
 
 		if (symbol_array == NULL) {
 			symbol_array = calloc(count + 1, sizeof(dxf_string_t));
