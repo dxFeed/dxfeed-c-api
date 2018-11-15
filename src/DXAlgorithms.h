@@ -24,6 +24,7 @@
 #ifndef DX_ALGORITHMS_H_INCLUDED
 #define DX_ALGORITHMS_H_INCLUDED
 
+#include <time.h>
 #include "PrimitiveTypes.h"
 #include "DXMemory.h"
 
@@ -555,6 +556,8 @@ __int64 atomic_read(__int64 volatile * value);
 void atomic_write(__int64 volatile * dest, __int64 src);
 __int32 atomic_read32(__int32 volatile * value);
 void atomic_write32(__int32 volatile * dest, __int32 src);
+time_t atomic_read_time(time_t volatile * value);
+void atomic_write_time(time_t volatile * dest, time_t src);
 
 #else
 
@@ -572,8 +575,18 @@ inline long atomic_read32(long* value) {
 	return *value;
 }
 
-inline void atomic_write32(long* dest, LONG src) {
+inline void atomic_write32(long* dest, long src) {
 	*dest = src;
+}
+
+inline time_t atomic_read_time(time_t* value)
+{
+    return *value;
+}
+
+inline void atomic_write_time(time_t* dest, time_t src)
+{
+    *dest = src;
 }
 
 #endif

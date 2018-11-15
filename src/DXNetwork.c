@@ -21,6 +21,7 @@
  *	Implementation of the network functions
  */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
@@ -108,7 +109,7 @@ typedef struct {
 	const char* address;
 	dx_socket_t s;
 	time_t next_heartbeat;
-	__time64_t last_server_heartbeat;
+	time_t last_server_heartbeat;
 	dx_thread_t reader_thread;
 	dx_thread_t queue_thread;
 	dx_mutex_t socket_guard;
@@ -498,8 +499,9 @@ unsigned dx_queue_executor(void* arg) {
 	for (;;) {
 		bool queue_empty = true;
 
-		const __time64_t last_server_heartbeat = atomic_read(&context->last_server_heartbeat);
-		if (last_server_heartbeat != 0 && _difftime64(_time64(NULL), last_server_heartbeat) >= SERVER_HEARTBEAT_TIMEOUT_IN_SECONDS) {
+
+        const time_t last_server_heartbeat = atomic_read_time(&context->last_server_heartbeat);
+		if (last_server_heartbeat != 0 && difftime(time(NULL), last_server_heartbeat) >= SERVER_HEARTBEAT_TIMEOUT_IN_SECONDS) {
 			dx_logging_info(L"No messages from server for at least %d seconds (%d missing heartbeats). Disconnecting...",
 				SERVER_HEARTBEAT_TIMEOUT_IN_SECONDS, MAX_MISSING_HEARTBEATS);
 			dx_close_socket(context);
@@ -665,7 +667,7 @@ void dx_socket_reader (dx_network_connection_context_t* context) {
 				number_of_bytes_read = INVALID_DATA_SIZE;
 			}
 		} else {
-			atomic_write(&context->last_server_heartbeat, _time64(NULL));
+			atomic_write_time(&context->last_server_heartbeat, time(NULL));
 #ifdef DXFEED_CODEC_TLS_ENABLED
 			if (dx_get_current_address(context)->tls.enabled) {
 				number_of_bytes_read = (int)tls_read(context->tls_context, (void*)read_buf, READ_CHUNK_SIZE);
@@ -677,7 +679,7 @@ void dx_socket_reader (dx_network_connection_context_t* context) {
 #else
 			number_of_bytes_read = dx_recv(context->s, (void*)read_buf, READ_CHUNK_SIZE);
 #endif // DXFEED_CODEC_TLS_ENABLED
-			atomic_write(&context->last_server_heartbeat, 0);
+            atomic_write_time(&context->last_server_heartbeat, 0);
 		}
 
 		if (number_of_bytes_read == INVALID_DATA_SIZE) {

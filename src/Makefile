@@ -22,10 +22,13 @@ LIB=	libdxfeed.so
 SRCS=	BufferedInput.c \
 	BufferedIOCommon.c \
 	BufferedOutput.c \
+	Candle.c \
 	ClientMessageProcessor.c \
+	ConfigurationDeserializer.c \
 	ConnectionContextData.c \
 	DataStructures.c \
 	Decimal.c \
+	DXAddressParser.c \
 	DXAlgorithms.c \
 	DXErrorCodes.c \
 	DXErrorHandling.c \
@@ -33,21 +36,26 @@ SRCS=	BufferedInput.c \
 	DXMemory.c \
 	DXNetwork.c \
 	DXPMessageData.c \
+	DXProperties.c \
 	DXSockets.c \
 	DXThreads.c \
 	EventData.c \
+	EventManager.c \
 	EventSubscription.c \
 	Linux.c \
 	Logger.c \
+	ObjectArray.c \
 	PriceLevelBook.c \
-	RegionalBook.c \
 	RecordBuffers.c \
 	RecordFieldSetters.c \
 	RecordTranscoder.c \
+	RegionalBook.c \
 	ServerMessageProcessor.c \
+	Snapshot.c \
 	SymbolCodec.c \
 	TaskQueue.c \
-	TestParser.c
+	TestParser.c \
+	Version.c
 OBJS=	$(SRCS:.c=.o)
 
 all: $(LIB)

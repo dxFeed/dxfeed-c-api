@@ -18,6 +18,7 @@
 
 #define RECORDS_PRINT_LIMIT 7
 #define MAX_SOURCE_SIZE 20
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
 
 typedef int bool;
 
@@ -133,7 +134,7 @@ void listener(const dxf_price_level_book_data_ptr_t book_data, void* user_data) 
 	wprintf(L"New Price Level Order Book for %s:\n", book_data->symbol);
 	/* Time is 4 + 2 + 2 + 1 + 2 + 2 + 2 = 15 */
 	wprintf(L" %-7s %-8s %-15s |  %-7s %-8s %-15s\n", L"Ask", L"Size", L"Time", L"Bid", L"Size", L"Time");
-	for (; i < max(book_data->asks_count, book_data->bids_count); i++) {
+	for (; i < MAX(book_data->asks_count, book_data->bids_count); i++) {
 		if (i < book_data->asks_count) {
 			wprintf(L"$%-7.2f %-8lld ", book_data->asks[i].price, book_data->asks[i].size);
 			print_timestamp(book_data->asks[i].time);
