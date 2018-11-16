@@ -1,3 +1,6 @@
+Version 5.3.3
+* Fix build for linux
+
 Version 5.3.2
 * New listener for dxf_quote_t events is added to dxf_regional_book_t
 
