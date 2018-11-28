@@ -182,7 +182,7 @@ if (MSVC)
         link_directories(${LIB_TLS}/${TARGET_PLATFORM})
         set (ADDITIONAL_LIBRARIES
             ${ADDITIONAL_LIBRARIES}
-            libtls-15${PLATFORM_POSTFIX}.lib
+            libtls-15.lib
         )
     endif (NOT DISABLE_TLS)
     
@@ -249,17 +249,28 @@ add_library (${PROJECT} SHARED ${ALL_HEADERS} ${ALL_SOURCES})
 target_link_libraries (${PROJECT} PRIVATE ${ADDITIONAL_LIBRARIES})
 
 
-if (MSVC)
-    if (NOT DISABLE_TLS)
+if (NOT DISABLE_TLS)
+    if (MSVC)    
         ADD_CUSTOM_COMMAND(
             TARGET ${PROJECT}
             POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/${TARGET_PLATFORM}/libtls-15${PLATFORM_POSTFIX}.dll ${CMAKE_BINARY_DIR}/$(Configuration)
-            COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/${TARGET_PLATFORM}/libssl-43${PLATFORM_POSTFIX}.dll ${CMAKE_BINARY_DIR}/$(Configuration)
-            COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/${TARGET_PLATFORM}/libcrypto-41${PLATFORM_POSTFIX}.dll ${CMAKE_BINARY_DIR}/$(Configuration)
+            COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/${TARGET_PLATFORM}/libtls-15.dll ${CMAKE_BINARY_DIR}/$(Configuration)
+            COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/${TARGET_PLATFORM}/libssl-43.dll ${CMAKE_BINARY_DIR}/$(Configuration)
+            COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/${TARGET_PLATFORM}/libcrypto-41.dll ${CMAKE_BINARY_DIR}/$(Configuration)
         )
-    endif (NOT DISABLE_TLS)
-endif (MSVC)
+    elseif(CMAKE_COMPILER_IS_GNUCC)
+        ADD_CUSTOM_COMMAND(
+            TARGET ${PROJECT}
+            PRE_BUILD
+            COMMAND ln -sf ${LIB_TLS}/nix/${TARGET_PLATFORM}/libcrypto.so.41.1.0 ${LIB_TLS}/nix/${TARGET_PLATFORM}/libcrypto.so.41
+            COMMAND ln -sf ${LIB_TLS}/nix/${TARGET_PLATFORM}/libcrypto.so.41.1.0 ${LIB_TLS}/nix/${TARGET_PLATFORM}/libcrypto.so
+            COMMAND ln -sf ${LIB_TLS}/nix/${TARGET_PLATFORM}/libssl.so.43.2.0 ${LIB_TLS}/nix/${TARGET_PLATFORM}/libssl.so.43
+            COMMAND ln -sf ${LIB_TLS}/nix/${TARGET_PLATFORM}/libssl.so.43.2.0 ${LIB_TLS}/nix/${TARGET_PLATFORM}/libssl.so
+            COMMAND ln -sf ${LIB_TLS}/nix/${TARGET_PLATFORM}/libtls.so.15.4.0 ${LIB_TLS}/nix/${TARGET_PLATFORM}/libtls.so.15
+            COMMAND ln -sf ${LIB_TLS}/nix/${TARGET_PLATFORM}/libtls.so.15.4.0 ${LIB_TLS}/nix/${TARGET_PLATFORM}/libtls.so
+        )    
+    endif (MSVC)
+endif (NOT DISABLE_TLS)
 
 
 set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/DXFeedAllCPackConfig.cmake")
@@ -278,9 +289,9 @@ install(FILES "../DXFeed.def" "../DXFeedd.def" "../DXFeed_64.def" "../DXFeedd_64
 
 if (NOT DISABLE_TLS)
     install(FILES 
-        "${LIB_TLS}/${TARGET_PLATFORM}/libtls-15${PLATFORM_POSTFIX}.dll" 
-        "${LIB_TLS}/${TARGET_PLATFORM}/libssl-43${PLATFORM_POSTFIX}.dll" 
-        "${LIB_TLS}/${TARGET_PLATFORM}/libcrypto-41${PLATFORM_POSTFIX}.dll"
+        "${LIB_TLS}/${TARGET_PLATFORM}/libtls-15.dll" 
+        "${LIB_TLS}/${TARGET_PLATFORM}/libssl-43.dll" 
+        "${LIB_TLS}/${TARGET_PLATFORM}/libcrypto-41.dll"
         DESTINATION "bin/${TARGET_PLATFORM}"
     )
     install(FILES "../COPYING.libressl"

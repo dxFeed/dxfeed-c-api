@@ -11,6 +11,7 @@ if(TARGET_PLATFORM STREQUAL "x64")
 endif()
 set(DEBUG_POSTFIX "d${PLATFORM_POSTFIX}")
 set(RELEASE_POSTFIX ${PLATFORM_POSTFIX})
+set(LIB_TLS ../../lib/libressl)
 set(LIB_DXFEED_SRC_DIR ../../src)
 set(LIB_DXFEED_PROJ DXFeed)
 set(LIB_DXFEED_NAME ${LIB_DXFEED_PROJ})
@@ -21,6 +22,12 @@ set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE TYPE INTERNAL FORCE)
 project(${PROJECT}) 
 
 include_directories(${INCLUDE_DIR})
+
+if(CMAKE_COMPILER_IS_GNUCC)
+    if (NOT DISABLE_TLS)
+        link_directories(${LIB_TLS}/nix/${TARGET_PLATFORM})
+    endif (NOT DISABLE_TLS)
+endif(CMAKE_COMPILER_IS_GNUCC)
 
 if (NOT TARGET ${LIB_DXFEED_PROJ})
     add_subdirectory(${LIB_DXFEED_SRC_DIR} ${LIB_DXFEED_OUT_DIR})
@@ -58,7 +65,13 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 
 add_executable (${PROJECT} ${SOURCE_FILES})
 
-target_link_libraries(${PROJECT} debug ${LIB_DXFEED_NAME}${DEBUG_POSTFIX} optimized ${LIB_DXFEED_NAME}${RELEASE_POSTFIX})
+if(CMAKE_COMPILER_IS_GNUCC)
+    if (NOT DISABLE_TLS)
+        set (ADDITIONAL_LIBRARIES ${ADDITIONAL_LIBRARIES} tls ssl crypto)
+    endif (NOT DISABLE_TLS)
+endif(CMAKE_COMPILER_IS_GNUCC)
+
+target_link_libraries(${PROJECT} debug ${LIB_DXFEED_NAME}${DEBUG_POSTFIX} optimized ${LIB_DXFEED_NAME}${RELEASE_POSTFIX} ${ADDITIONAL_LIBRARIES})
 
 set_target_properties(${PROJECT} 
     PROPERTIES 
