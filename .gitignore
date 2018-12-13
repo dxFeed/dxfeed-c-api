@@ -75,3 +75,8 @@ log.log
 /.vs
 /DXFeed.VC.db
 /DXFeed.VC.VC.opendb
+
+# CLion
+.idea
+cmake-build-debug*/**
+cmake-build-release*/**
