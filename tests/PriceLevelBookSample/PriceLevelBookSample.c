@@ -16,7 +16,6 @@
 #include <stdio.h>
 #include <time.h>
 
-#define RECORDS_PRINT_LIMIT 7
 #define MAX_SOURCE_SIZE 20
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 
