@@ -16,7 +16,11 @@
 #include <stdio.h>
 #include <time.h>
 
-#define RECORDS_PRINT_LIMIT 7
+#define STRINGIFY(a) STR(a)
+#define STR(a) #a
+
+#define DEFAULT_RECORDS_PRINT_LIMIT 7
+#define RECORDS_PRINT_LIMIT_PARAM "-l"
 #define MAX_SOURCE_SIZE 20
 
 typedef int bool;
@@ -149,6 +153,11 @@ dxf_string_t ansi_to_unicode(const char* ansi_str) {
 void listener(const dxf_snapshot_data_ptr_t snapshot_data, bool new_snapshot, void* user_data) {
 	size_t i;
 	size_t records_count = snapshot_data->records_count;
+	int records_print_limit = DEFAULT_RECORDS_PRINT_LIMIT;
+
+	if (user_data) {
+		records_print_limit = *(int*)user_data;
+	}
 
 	wprintf(L"Snapshot %ls{symbol=%ls, records_count=%zu, type=%ls}\n",
 			dx_event_type_to_string(snapshot_data->event_type), snapshot_data->symbol,
@@ -160,7 +169,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, bool new_snapshot, vo
 		for (i = 0; i < records_count; ++i) {
 			dxf_order_t order = order_records[i];
 
-			if (i >= RECORDS_PRINT_LIMIT) {
+			if (records_print_limit > 0 && i >= records_print_limit) {
 				wprintf(L"   { ... %zu records left ...}\n", records_count - i);
 				break;
 			}
@@ -183,7 +192,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, bool new_snapshot, vo
 		for (i = 0; i < snapshot_data->records_count; ++i) {
 			dxf_candle_t candle = candle_records[i];
 
-			if (i >= RECORDS_PRINT_LIMIT) {
+			if (records_print_limit > 0 && i >= records_print_limit) {
 				wprintf(L"   { ... %zu records left ...}\n", records_count - i);
 				break;
 			}
@@ -207,7 +216,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, bool new_snapshot, vo
 		for (i = 0; i < records_count; ++i) {
 			dxf_order_t order = order_records[i];
 
-			if (i >= RECORDS_PRINT_LIMIT) {
+			if (records_print_limit > 0 && i >= records_print_limit) {
 				wprintf(L"   { ... %zu records left ...}\n", records_count - i);
 				break;
 			}
@@ -231,7 +240,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, bool new_snapshot, vo
 		for (i = 0; i < snapshot_data->records_count; ++i) {
 			dxf_time_and_sale_t tns = time_and_sale_records[i];
 
-			if (i >= RECORDS_PRINT_LIMIT) {
+			if (records_print_limit > 0 && i >= records_print_limit) {
 				wprintf(L"   { ... %zu records left ...}\n", records_count - i);
 				break;
 			}
@@ -255,7 +264,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, bool new_snapshot, vo
 		for (i = 0; i < snapshot_data->records_count; ++i) {
 			dxf_greeks_t grks = greeks_records[i];
 
-			if (i >= RECORDS_PRINT_LIMIT) {
+			if (records_print_limit > 0 && i >= records_print_limit) {
 				wprintf(L"   { ... %zu records left ...}\n", records_count - i);
 				break;
 			}
@@ -278,7 +287,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, bool new_snapshot, vo
 		for (i = 0; i < snapshot_data->records_count; ++i) {
 			dxf_series_t srs = series_records[i];
 
-			if (i >= RECORDS_PRINT_LIMIT) {
+			if (records_print_limit > 0 && i >= records_print_limit) {
 				wprintf(L"   { ... %zu records left ...}\n", records_count - i);
 				break;
 			}
@@ -296,6 +305,37 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, bool new_snapshot, vo
 
 /* -------------------------------------------------------------------------- */
 
+/**
+ * @brief Tries to parse the records print limit
+ * @param argc the number of arguments passed to the program from the environment in which the program is run.
+ * @param argv Pointer to the first element of an array of pointers to strings that represent the arguments passed
+ *             to the program from the execution environment (argv[0] through argv[argc-1]).
+ * @param arg_number current argument number
+ * @return new records print limit or -1 (if unsuccessful)
+ */
+int try_parse_records_print_limit(int argc, char* argv[], int arg_number) {
+	if (argc <= arg_number + 1) {
+		return -1;
+	}
+
+	char* param_ptr = argv[arg_number];
+	char* value_ptr = argv[arg_number + 1];
+
+	if (strcmp(param_ptr, RECORDS_PRINT_LIMIT_PARAM) == 0) {
+		int new_records_print_limit = atoi(value_ptr);
+
+		if (new_records_print_limit != 0 || strcmp("0", value_ptr) == 0) {
+			return new_records_print_limit;
+		} else {
+			return -1;
+		}
+	}
+
+	return -1;
+}
+
+/* -------------------------------------------------------------------------- */
+
 int main(int argc, char* argv[]) {
 	dxf_connection_t connection;
 	dxf_snapshot_t snapshot;
@@ -307,12 +347,13 @@ int main(int argc, char* argv[]) {
 	dxf_string_t dxfeed_host_u = NULL;
 	char order_source[MAX_SOURCE_SIZE + 1] = { 0 };
 	char* order_source_ptr = NULL;
+	int records_print_limit = DEFAULT_RECORDS_PRINT_LIMIT;
 	char* param_ptr = NULL;
 	size_t string_len = 0;
 
 	if (argc < 4) {
 		wprintf(L"DXFeed command line sample.\n"
-			L"Usage: IncSnapshotConsoleSample <server address> <event type> <symbol> [order_source]\n"
+			L"Usage: IncSnapshotConsoleSample <server address> <event type> <symbol> [order_source] [" RECORDS_PRINT_LIMIT_PARAM " records_print_limit]\n"
 			L"  <server address> - a DXFeed server address, e.g. demo.dxfeed.com:7300\n"
 			L"  <event type> - an event type, one of the following: ORDER, CANDLE, SPREAD_ORDER,\n"
 			L"                 TIME_AND_SALE, GREEKS, SERIES\n"
@@ -320,7 +361,9 @@ int main(int argc, char* argv[]) {
 			L"  [order_source] - a) source for Order (also can be empty), e.g. NTV, BYX, BZX, DEA,\n"
 			L"                      ISE, DEX, IST\n"
 			L"                   b) source for MarketMaker, one of following: COMPOSITE_BID or \n"
-			L"                      COMPOSITE_ASK\n");
+			L"                      COMPOSITE_ASK\n"
+			L"  [records_print_limit] - the number of displayed records (0 - unlimited, default: " STRINGIFY(DEFAULT_RECORDS_PRINT_LIMIT) ")\n"
+			);
 
 		return 0;
 	}
@@ -352,15 +395,30 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 
-	if (argc == 5) {
-		param_ptr = argv[4];
-		string_len = strlen(param_ptr);
-		if (string_len > MAX_SOURCE_SIZE) {
-			wprintf(L"Error: Invalid order source param!\n");
-			return -1;
+	if (argc >= 5) {
+		if (argc == 6 || argc == 7) {
+			int new_records_print_limit = try_parse_records_print_limit(argc, argv, argc - 2);
+
+			if (new_records_print_limit == -1) {
+				wprintf(L"Error: Invalid [records_print_limit] (number of displayed records) value!\n");
+
+				return -1;
+			}
+
+			records_print_limit = new_records_print_limit;
 		}
-		strcpy(order_source, param_ptr);
-		order_source_ptr = &(order_source[0]);
+
+		if (argc != 6) {
+			param_ptr = argv[4];
+			string_len = strlen(param_ptr);
+
+			if (string_len > MAX_SOURCE_SIZE) {
+				wprintf(L"Error: Invalid order source param!\n");
+				return -1;
+			}
+			strcpy(order_source, param_ptr);
+			order_source_ptr = &(order_source[0]);
+		}
 	}
 
 	wprintf(L"IncSnapshotConsoleSample test started.\n");
@@ -411,7 +469,7 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
-	if (!dxf_attach_snapshot_inc_listener(snapshot, listener, NULL)) {
+	if (!dxf_attach_snapshot_inc_listener(snapshot, listener, (void*)&records_print_limit)) {
 		process_last_error();
 		if (candle_attributes != NULL)
 			dxf_delete_candle_symbol_attributes(candle_attributes);
