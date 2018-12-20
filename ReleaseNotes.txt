@@ -1,6 +1,6 @@
 Version 5.4.0
 * [Samples] Add the ability to change the number of displayed records
-  - The optional command line parameter is added (0 - unlimited).
+  - The optional command line parameter "[-l records_print_limit]" is added (0 - unlimited).
   - Affected samples: SnapshotConsoleSample, IncSnapshotConsoleSample
 * Fix build with CLion
 
