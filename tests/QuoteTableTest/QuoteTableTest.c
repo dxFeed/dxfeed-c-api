@@ -350,7 +350,7 @@ int main (int argc, char* argv[]) {
 		dxfeed_host = argv[1];
 	}
 
-	dxf_initialize_logger( "log.log", true, true, true );
+	dxf_initialize_logger("quote-table-api.log", true, true, true );
 
 	if (!initialize()) {
 		return -1;

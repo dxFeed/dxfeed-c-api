@@ -19,14 +19,17 @@
 #define STRINGIFY(a) STR(a)
 #define STR(a) #a
 
-#define DEFAULT_RECORDS_PRINT_LIMIT 7
-#define RECORDS_PRINT_LIMIT_PARAM "-l"
-#define MAX_SOURCE_SIZE 20
-
 typedef int bool;
 
 #define true 1
 #define false 0
+
+// plus the name of the executable
+#define STATIC_PARAMS_COUNT 4
+#define DEFAULT_RECORDS_PRINT_LIMIT 7
+#define RECORDS_PRINT_LIMIT_SHORT_PARAM "-l"
+#define MAX_SOURCE_SIZE 42
+#define TOKEN_PARAM_SHORT_TAG "-T"
 
 dxf_const_string_t dx_event_type_to_string(int event_type) {
 	switch (event_type) {
@@ -272,33 +275,26 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
 
 /* -------------------------------------------------------------------------- */
 
-/**
- * @brief Tries to parse the records print limit
- * @param argc the number of arguments passed to the program from the environment in which the program is run.
- * @param argv Pointer to the first element of an array of pointers to strings that represent the arguments passed
- *             to the program from the execution environment (argv[0] through argv[argc-1]).
- * @param arg_number current argument number
- * @return new records print limit or -1 (if unsuccessful)
- */
-int try_parse_records_print_limit(int argc, char* argv[], int arg_number) {
-	if (argc <= arg_number + 1) {
-		return -1;
+bool atoi2(char* str, int* result) {
+	if (str == NULL || str[0] == '\0' || result == NULL) {
+		return false;
 	}
 
-	char* param_ptr = argv[arg_number];
-	char* value_ptr = argv[arg_number + 1];
+	if (str[0] == '0' && str[1] == '\0') {
+		*result = 0;
 
-	if (strcmp(param_ptr, RECORDS_PRINT_LIMIT_PARAM) == 0) {
-		int new_records_print_limit = atoi(value_ptr);
-
-		if (new_records_print_limit != 0 || strcmp("0", value_ptr) == 0) {
-			return new_records_print_limit;
-		} else {
-			return -1;
-		}
+		return true;
 	}
 
-	return -1;
+	int r = atoi(str);
+
+	if (r == 0) {
+		return false;
+	}
+
+	*result = r;
+
+	return true;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -312,30 +308,26 @@ int main(int argc, char* argv[]) {
 	dxf_string_t base_symbol = NULL;
 	char* dxfeed_host = NULL;
 	dxf_string_t dxfeed_host_u = NULL;
-	char order_source[MAX_SOURCE_SIZE + 1] = { 0 };
-	char* order_source_ptr = NULL;
-	int records_print_limit = DEFAULT_RECORDS_PRINT_LIMIT;
-	char* param_ptr = NULL;
-	size_t string_len = 0;
 
-	if (argc < 4) {
+	if (argc < STATIC_PARAMS_COUNT) {
 		wprintf(L"DXFeed command line sample.\n"
-			L"Usage: SnapshotConsoleSample <server address> <event type> <symbol> [order_source] [" RECORDS_PRINT_LIMIT_PARAM " records_print_limit]\n"
-			L"  <server address> - a DXFeed server address, e.g. demo.dxfeed.com:7300\n"
-			L"  <event type> - an event type, one of the following: ORDER, CANDLE, SPREAD_ORDER,\n"
+			L"Usage: SnapshotConsoleSample <server address> <event type> <symbol> [order_source] [" RECORDS_PRINT_LIMIT_SHORT_PARAM " <records_print_limit>] [" TOKEN_PARAM_SHORT_TAG " <token>]\n"
+			L"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
+			L"  <event type> - The event type, one of the following: ORDER, CANDLE, SPREAD_ORDER,\n"
 			L"                 TIME_AND_SALE, GREEKS, SERIES\n"
-			L"  <symbol> - a trade symbol, e.g. C, MSFT, YHOO, IBM\n"
+			L"  <symbol> - The trade symbol, e.g. C, MSFT, YHOO, IBM\n"
 			L"  [order_source] - a) source for Order (also can be empty), e.g. NTV, BYX, BZX, DEA,\n"
 			L"                      ISE, DEX, IST\n"
 			L"                   b) source for MarketMaker, one of following: COMPOSITE_BID or \n"
 			L"                      COMPOSITE_ASK\n"
-			L"  [records_print_limit] - the number of displayed records (0 - unlimited, default: " STRINGIFY(DEFAULT_RECORDS_PRINT_LIMIT) ")\n"
+			L"  " RECORDS_PRINT_LIMIT_SHORT_PARAM " <records_print_limit> - The number of displayed records (0 - unlimited, default: " STRINGIFY(DEFAULT_RECORDS_PRINT_LIMIT) ")\n"
+			L"  " TOKEN_PARAM_SHORT_TAG " <token> - The authorization token\n"
 			);
 
 		return 0;
 	}
 
-	dxf_initialize_logger("log.log", true, true, true);
+	dxf_initialize_logger("snapshot-console-api.log", true, true, true);
 
 	dxfeed_host = argv[1];
 
@@ -362,29 +354,59 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 
-	if (argc >= 5) {
-		if (argc == 6 || argc == 7) {
-			int new_records_print_limit = try_parse_records_print_limit(argc, argv, argc - 2);
+	char* order_source_ptr = NULL;
+	int records_print_limit = DEFAULT_RECORDS_PRINT_LIMIT;
+	char* token = NULL;
 
-			if (new_records_print_limit == -1) {
-				wprintf(L"Error: Invalid [records_print_limit] (number of displayed records) value!\n");
+	if (argc > STATIC_PARAMS_COUNT) {
+		int i = 0;
+		bool records_print_limit_is_set = false;
+		bool token_is_set = false;
+		bool order_source_is_set = false;
 
-				return -1;
+		for (i = STATIC_PARAMS_COUNT; i < argc; i++) {
+			if (records_print_limit_is_set == false && strcmp(argv[i], RECORDS_PRINT_LIMIT_SHORT_PARAM) == 0) {
+				if (i + 1 == argc) {
+					wprintf(L"The records print limit argument error\n");
+
+					return -1;
+				}
+
+				int new_records_print_limit = -1;
+
+				if (!atoi2(argv[++i], &new_records_print_limit)) {
+					wprintf(L"The records print limit argument parsing error\n");
+
+					return -1;
+				}
+
+				records_print_limit = new_records_print_limit;
+				records_print_limit_is_set = true;
+			} else if (token_is_set == false && strcmp(argv[i], TOKEN_PARAM_SHORT_TAG) == 0) {
+				if (i + 1 == argc) {
+					wprintf(L"The token argument error\n");
+
+					return -1;
+				}
+
+				token = argv[++i];
+				token_is_set = true;
+			} else if (order_source_is_set == false) {
+				size_t string_len = 0;
+				string_len = strlen(argv[i]);
+
+				if (string_len > MAX_SOURCE_SIZE) {
+					wprintf(L"Invalid order source param!\n");
+
+					return -1;
+				}
+
+				char order_source[MAX_SOURCE_SIZE + 1] = { 0 };
+
+				strcpy(order_source, argv[i]);
+				order_source_ptr = &(order_source[0]);
+				order_source_is_set = true;
 			}
-
-			records_print_limit = new_records_print_limit;
-		}
-
-		if (argc != 6) {
-			param_ptr = argv[4];
-			string_len = strlen(param_ptr);
-
-			if (string_len > MAX_SOURCE_SIZE) {
-				wprintf(L"Error: Invalid order source param!\n");
-				return -1;
-			}
-			strcpy(order_source, param_ptr);
-			order_source_ptr = &(order_source[0]);
 		}
 	}
 
@@ -397,8 +419,16 @@ int main(int argc, char* argv[]) {
 	InitializeCriticalSection(&listener_thread_guard);
 #endif
 
-	if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, &connection)) {
+	if (token != NULL && token[0] != '\0') {
+		if (!dxf_create_connection_auth_bearer(dxfeed_host, token, on_reader_thread_terminate, NULL, NULL, NULL,
+																					 &connection)) {
+			process_last_error();
+
+			return -1;
+		}
+	} else if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, &connection)) {
 		process_last_error();
+
 		return -1;
 	}
 

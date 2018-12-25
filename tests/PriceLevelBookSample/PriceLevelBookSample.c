@@ -16,13 +16,18 @@
 #include <stdio.h>
 #include <time.h>
 
-#define MAX_SOURCE_SIZE 20
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 
 typedef int bool;
 
 #define true 1
 #define false 0
+
+// plus the name of the executable
+#define STATIC_PARAMS_COUNT 3
+#define TOKEN_PARAM_SHORT_TAG "-T"
+#define MAX_SOURCE_SIZE 42
+#define MAX_SOURCES 10
 
 /* -------------------------------------------------------------------------- */
 #ifdef _WIN32
@@ -45,7 +50,6 @@ bool is_thread_terminate() {
 	return res;
 }
 #endif
-
 
 /* -------------------------------------------------------------------------- */
 
@@ -149,7 +153,9 @@ void listener(const dxf_price_level_book_data_ptr_t book_data, void* user_data) 
 	}
 }
 
-static const char *s_Default_Sources[] = { "BZX", "DEX", NULL };
+/* -------------------------------------------------------------------------- */
+
+static const char *default_sources[] = { "BZX", "DEX", NULL };
 
 /* -------------------------------------------------------------------------- */
 
@@ -159,16 +165,16 @@ int main(int argc, char* argv[]) {
 	dxf_string_t base_symbol = NULL;
 	dxf_string_t dxfeed_host_u;
 	char* dxfeed_host = NULL;
-	const char **order_sources;
-	size_t string_len = 0;
 
-	if (argc < 3) {
+	if (argc < STATIC_PARAMS_COUNT) {
 		wprintf(L"DXFeed Price Level Book command line sample.\n"
-			L"Usage: PriceLevelBookSample <server address> <symbol> [order_source [order_soure [...]]]\n"
-			L"  <server address> - a DXFeed server address, e.g. demo.dxfeed.com:7300\n"
-			L"  <symbol> - a trade symbol, e.g. C, MSFT, YHOO, IBM\n"
-			L"  [order_source] - One or more order sources, e.g.. NTV, BYX, BZX, DEA,\n"
-			L"                   ISE, DEX, IST. Default is BZX DEX\n");
+			L"Usage: PriceLevelBookSample <server address> <symbol> [order_source] [" TOKEN_PARAM_SHORT_TAG " <token>]\n"
+			L"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
+			L"  <symbol>         - The trade symbol, e.g. C, MSFT, YHOO, IBM\n"
+			L"  [order_source]   - One or more order sources, e.g.. NTV, BYX, BZX, DEA,\n"
+			L"                     ISE, DEX, IST. Default is BZX DEX\n"
+			L"  " TOKEN_PARAM_SHORT_TAG " <token>       - The authorization token\n"
+			);
 		return 0;
 	}
 
@@ -180,13 +186,54 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 
-	if (argc > 3) {
-		/* Add NULL at end of list */
-		order_sources = calloc(argc - 3 + 1, sizeof(order_sources[0]));
-		for (int i = 3; i < argc; i++)
-			order_sources[i - 3] = argv[i];
-	} else {
-		order_sources = s_Default_Sources;
+	const char **order_sources_ptr = NULL;
+	char order_source[MAX_SOURCE_SIZE + 1] = { 0 };
+	const char* order_sources[MAX_SOURCES + 1] = {NULL};
+	char* token = NULL;
+	bool order_source_is_set = false;
+
+	if (argc > STATIC_PARAMS_COUNT) {
+		bool token_is_set = false;
+		int i = 0;
+
+		for (i = STATIC_PARAMS_COUNT; i < argc; i++) {
+			if (token_is_set == false && strcmp(argv[i], TOKEN_PARAM_SHORT_TAG) == 0) {
+				if (i + 1 == argc) {
+					wprintf(L"Token argument error\n");
+
+					return -1;
+				}
+
+				token = argv[++i];
+				token_is_set = true;
+			} else if (order_source_is_set == false) {
+				size_t string_len = 0;
+				string_len = strlen(argv[i]);
+
+				if (string_len > MAX_SOURCE_SIZE) {
+					wprintf(L"Invalid order source param!\n");
+
+					return -1;
+				}
+
+				strcpy(order_source, argv[i]);
+
+				char* source_part = strtok(order_source, ",");
+				int source_index = 0;
+
+				while (source_part != NULL && source_index < MAX_SOURCES) {
+					order_sources[source_index++] = source_part;
+					source_part = strtok(NULL, ",");
+				}
+
+				order_sources_ptr = &(order_sources[0]);
+				order_source_is_set = true;
+			}
+		}
+	}
+
+	if (order_source_is_set == false) {
+		order_sources_ptr = default_sources;
 	}
 
 	wprintf(L"PriceLevelBookSample test started.\n");
@@ -198,14 +245,20 @@ int main(int argc, char* argv[]) {
 	InitializeCriticalSection(&listener_thread_guard);
 #endif
 
-	if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, &connection)) {
+	if (token != NULL && token[0] != '\0') {
+		if (!dxf_create_connection_auth_bearer(dxfeed_host, token, on_reader_thread_terminate, NULL, NULL, NULL, &connection)) {
+			process_last_error();
+
+			return -1;
+		}
+	} else if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, &connection)) {
 		process_last_error();
 		return -1;
 	}
 
 	wprintf(L"Connection successful!\n");
 
-	if (!dxf_create_price_level_book(connection, base_symbol, order_sources, &book)) {
+	if (!dxf_create_price_level_book(connection, base_symbol, order_sources_ptr, &book)) {
 		process_last_error();
 		dxf_close_connection(connection);
 		return -1;
@@ -217,9 +270,6 @@ int main(int argc, char* argv[]) {
 	}
 
 	wprintf(L"Subscription successful!\n");
-	if (argc > 3) {
-		free((void*) order_sources);
-	}
 
 	while (!is_thread_terminate()) {
 #ifdef _WIN32

@@ -71,7 +71,6 @@
 /tests/CandleSample/*.user
 /tests/CandleSample/build
 
-log.log
 /.vs
 /DXFeed.VC.db
 /DXFeed.VC.VC.opendb
@@ -80,3 +79,5 @@ log.log
 .idea
 cmake-build-debug*/**
 cmake-build-release*/**
+
+*.log

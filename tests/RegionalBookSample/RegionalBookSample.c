@@ -23,6 +23,10 @@ typedef int bool;
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 
+// plus the name of the executable
+#define STATIC_PARAMS_COUNT 3
+#define TOKEN_PARAM_SHORT_TAG "-T"
+
 /* -------------------------------------------------------------------------- */
 #ifdef _WIN32
 static bool is_listener_thread_terminated = false;
@@ -168,8 +172,6 @@ void regional_listener(dxf_const_string_t symbol, const dxf_quote_t* quotes, int
     }
 }
 
-static const char *s_Default_Sources[] = { "BZX", "DEX", NULL };
-
 /* -------------------------------------------------------------------------- */
 
 int main(int argc, char* argv[]) {
@@ -178,13 +180,14 @@ int main(int argc, char* argv[]) {
 	dxf_string_t base_symbol = NULL;
 	dxf_string_t dxfeed_host_u;
 	char* dxfeed_host = NULL;
-	size_t string_len = 0;
 
-	if (argc < 3) {
+	if (argc < STATIC_PARAMS_COUNT) {
 		wprintf(L"DXFeed Regional Book command line sample.\n"
-			L"Usage: RegionalBookSample <server address> <symbol>\n"
-			L"  <server address> - a DXFeed server address, e.g. demo.dxfeed.com:7300\n"
-			L"  <symbol> - a trade symbol, e.g. C, MSFT, YHOO, IBM\n");
+			L"Usage: RegionalBookSample <server address> <symbol> [" TOKEN_PARAM_SHORT_TAG " <token>]\n"
+			L"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
+			L"  <symbol>         - The trade symbol, e.g. C, MSFT, YHOO, IBM\n"
+			L"  " TOKEN_PARAM_SHORT_TAG " <token>       - The authorization token\n"
+			);
 		return 0;
 	}
 
@@ -196,6 +199,26 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 
+	char* token = NULL;
+
+	if (argc > STATIC_PARAMS_COUNT) {
+		bool token_is_set = false;
+		int i = 0;
+
+		for (i = STATIC_PARAMS_COUNT; i < argc; i++) {
+			if (token_is_set == false && strcmp(argv[i], TOKEN_PARAM_SHORT_TAG) == 0) {
+				if (i + 1 == argc) {
+					wprintf(L"Token argument error\n");
+
+					return -1;
+				}
+
+				token = argv[++i];
+				token_is_set = true;
+			}
+		}
+	}
+
 	wprintf(L"RegionalBookSample test started.\n");
 	dxfeed_host_u = ansi_to_unicode(dxfeed_host);
 	wprintf(L"Connecting to host %ls...\n", dxfeed_host_u);
@@ -205,8 +228,15 @@ int main(int argc, char* argv[]) {
 	InitializeCriticalSection(&listener_thread_guard);
 #endif
 
-	if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, &connection)) {
+	if (token != NULL && token[0] != '\0') {
+		if (!dxf_create_connection_auth_bearer(dxfeed_host, token, on_reader_thread_terminate, NULL, NULL, NULL, &connection)) {
+			process_last_error();
+
+			return -1;
+		}
+	} else if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, &connection)) {
 		process_last_error();
+
 		return -1;
 	}
 
