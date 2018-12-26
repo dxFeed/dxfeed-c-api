@@ -13,7 +13,6 @@
 
 #include "DXFeed.h"
 #include "DXErrorCodes.h"
-#include <stdio.h>
 #include <time.h>
 
 #define STRINGIFY(a) STR(a)
@@ -420,8 +419,8 @@ int main(int argc, char* argv[]) {
 #endif
 
 	if (token != NULL && token[0] != '\0') {
-		if (!dxf_create_connection_auth_bearer(dxfeed_host, token, on_reader_thread_terminate, NULL, NULL, NULL,
-																					 &connection)) {
+		if (!dxf_create_connection_auth_bearer(
+				dxfeed_host, token, on_reader_thread_terminate, NULL, NULL, NULL, &connection)) {
 			process_last_error();
 
 			return -1;
