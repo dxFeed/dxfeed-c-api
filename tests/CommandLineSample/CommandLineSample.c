@@ -19,6 +19,12 @@ typedef int bool;
 #define true 1
 #define false 0
 
+// plus the name of the executable
+#define STATIC_PARAMS_COUNT 4
+#define DUMP_PARAM_SHORT_TAG "-d"
+#define DUMP_PARAM_LONG_TAG "--dump"
+#define TOKEN_PARAM_SHORT_TAG "-T"
+
 dxf_const_string_t dx_event_type_to_string (int event_type) {
 	switch (event_type) {
 	case DXF_ET_TRADE: return L"Trade";
@@ -465,25 +471,27 @@ int main (int argc, char* argv[]) {
 	int symbol_count = 0;
 	char* dxfeed_host = NULL;
 	dxf_string_t dxfeed_host_u = NULL;
-	char* dump_file_name = NULL;
 
-
-	if ( argc < 4 ) {
+	if ( argc < STATIC_PARAMS_COUNT ) {
 		wprintf(L"DXFeed command line sample.\n"
-				L"Usage: CommandLineSample <server address> <event type> <symbol> <dump filename>\n"
-				L"  <server address> - a DXFeed server address, e.g. demo.dxfeed.com:7300\n"
-				L"                     if you wont to use file instead of server data just\n"
-				L"                     just wrie there path to file e.g. path\\to\\raw.bin\n"
-				L"  <event type> - an event type, any of the following: TRADE, QUOTE, SUMMARY,\n"
-				L"                 PROFILE, ORDER, TIME_AND_SALE, TRADE_ETH, SPREAD_ORDER\n"
-				L"                 GREEKS, THEO_PRICE, UNDERLYING, SERIES, CONFIGURATION\n"
-				L"  <symbol> - a trade symbols, e.g. C, MSFT, YHOO, IBM\n"
-				L"Example: CommandLineSample.exe demo.dxfeed.com:7300 TRADE,ORDER MSFT,IBM");
+				L"Usage: CommandLineSample <server address> <event type> <symbol> [" DUMP_PARAM_LONG_TAG " | " DUMP_PARAM_SHORT_TAG " <filename>] [" TOKEN_PARAM_SHORT_TAG " <token>]\n"
+				L"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
+				L"                     If you want to use file instead of server data just\n"
+				L"                     write there path to file e.g. path\\to\\raw.bin\n"
+				L"  <event type>     - The event type, any of the following: TRADE, QUOTE,\n"
+				L"                     SUMMARY, PROFILE, ORDER, TIME_AND_SALE, TRADE_ETH,\n"
+				L"                     SPREAD_ORDER, GREEKS, THEO_PRICE, UNDERLYING, SERIES,\n"
+				L"                     CONFIGURATION\n"
+				L"  <symbol>               - The trade symbols, e.g. C, MSFT, YHOO, IBM\n"
+				L"  " DUMP_PARAM_LONG_TAG " | " DUMP_PARAM_SHORT_TAG " <filename> - The filename to dump the raw data\n"
+				L"  " TOKEN_PARAM_SHORT_TAG " <token>             - The authorization token\n"
+				L"Example: CommandLineSample.exe demo.dxfeed.com:7300 TRADE,ORDER MSFT,IBM"
+				);
 
 		return 0;
 	}
 
-	dxf_initialize_logger("log.log", true, true, true );
+	dxf_initialize_logger("command-line-api.log", true, true, true);
 
 	dxfeed_host = argv[1];
 
@@ -492,6 +500,38 @@ int main (int argc, char* argv[]) {
 
 	if (!parse_symbols(argv[3], &symbols, &symbol_count))
 		return -1;
+
+	char* dump_file_name = NULL;
+	char* token = NULL;
+
+	if (argc > STATIC_PARAMS_COUNT) {
+		int i = 0;
+		bool dump_filename_is_set = false;
+		bool token_is_set = false;
+
+		for (i = STATIC_PARAMS_COUNT; i < argc; i++) {
+			if (dump_filename_is_set == false &&
+					(strcmp(argv[i], DUMP_PARAM_SHORT_TAG) == 0 || strcmp(argv[i], DUMP_PARAM_LONG_TAG) == 0)) {
+				if (i + 1 == argc) {
+					wprintf(L"The dump argument error\n");
+
+					return -1;
+				}
+
+				dump_file_name = argv[++i];
+				dump_filename_is_set = true;
+			} else if (token_is_set == false && strcmp(argv[i], TOKEN_PARAM_SHORT_TAG) == 0) {
+				if (i + 1 == argc) {
+					wprintf(L"The token argument error\n");
+
+					return -1;
+				}
+
+				token = argv[++i];
+				token_is_set = true;
+			}
+		}
+	}
 
 	wprintf(L"CommandLineSample started.\n");
 	dxfeed_host_u = ansi_to_unicode(dxfeed_host, strlen(dxfeed_host));
@@ -502,7 +542,13 @@ int main (int argc, char* argv[]) {
 	InitializeCriticalSection(&listener_thread_guard);
 #endif
 
-	if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, &connection)) {
+	if (token != NULL && token[0] != '\0') {
+		if (!dxf_create_connection_auth_bearer(dxfeed_host, token, on_reader_thread_terminate, NULL, NULL, NULL, &connection)) {
+			process_last_error();
+			free_symbols(symbols, symbol_count);
+			return -1;
+		}
+	} else if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, &connection)) {
 		process_last_error();
 		free_symbols(symbols, symbol_count);
 		return -1;
@@ -510,8 +556,7 @@ int main (int argc, char* argv[]) {
 
 	wprintf(L"Connection successful!\n");
 
-	if (argc >= 6 && stricmp(argv[4], "dump") == 0) {
-		dump_file_name = argv[5];
+	if (dump_file_name != NULL) {
 		dxf_write_raw_data(connection, dump_file_name);
 	}
 

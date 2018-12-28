@@ -11,7 +11,6 @@
 
 #include "DXFeed.h"
 #include "DXErrorCodes.h"
-#include <stdio.h>
 #include <time.h>
 
 typedef int bool;
@@ -19,8 +18,10 @@ typedef int bool;
 #define true 1
 #define false 0
 
+// plus the name of the executable
 #define STATIC_PARAMS_COUNT 3
-
+#define TIME_PARAM_SHORT_TAG "-t"
+#define TOKEN_PARAM_SHORT_TAG "-T"
 
 /* -------------------------------------------------------------------------- */
 #ifdef _WIN32
@@ -220,7 +221,6 @@ int main (int argc, char* argv[]) {
 	time_t time_value = time(NULL);
 	struct tm time_struct;
 	struct tm* local_time = localtime(&time_value);
-	int i = 0;
 
 	time_struct.tm_sec = 0;
 	time_struct.tm_min = 0;
@@ -231,16 +231,19 @@ int main (int argc, char* argv[]) {
 	time_value = mktime(&time_struct);
 
 	if (argc < STATIC_PARAMS_COUNT) {
-		wprintf(L"DXFeed candle console sample.\n"
-			L"Usage: CandleSample <server address> <symbol> [-t DD-MM-YYYY]\n"
-			L"  <server address> - a DXFeed server address, e.g. demo.dxfeed.com:7300\n"
-			L"  <symbol> - a trade symbol, e.g. C, MSFT, YHOO, IBM\n"
-			L"  [-t DD-MM-YYYY] - time which candle started\n");
+		wprintf(
+				L"DXFeed candle console sample.\n"
+				L"Usage: CandleSample <server address> <symbol> [" TIME_PARAM_SHORT_TAG " <DD-MM-YYYY>] [" TOKEN_PARAM_SHORT_TAG " <token>]\n"
+				L"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
+				L"  <symbol>         - The trade symbol, e.g. C, MSFT, YHOO, IBM\n"
+				L"  " TIME_PARAM_SHORT_TAG " <DD-MM-YYYY>  - The time which candle started\n"
+				L"  " TOKEN_PARAM_SHORT_TAG " <token>       - The authorization token\n"
+			);
 
 		return 0;
 	}
 
-	dxf_initialize_logger( "log.log", true, true, true );
+	dxf_initialize_logger("candle-api.log", true, true, true);
 
 	dxfeed_host = argv[1];
 
@@ -249,9 +252,15 @@ int main (int argc, char* argv[]) {
 		return -1;
 	}
 
+	char* token = NULL;
+
 	if (argc > STATIC_PARAMS_COUNT) {
+		bool time_is_set = false;
+		bool token_is_set = false;
+		int i = 0;
+
 		for (i = STATIC_PARAMS_COUNT; i < argc; i++) {
-			if (strcmp(argv[i], "-t") == 0) {
+			if (time_is_set == false && strcmp(argv[i], TIME_PARAM_SHORT_TAG) == 0) {
 				if (i + 1 == argc) {
 					wprintf(L"Date argument error\n");
 					return -1;
@@ -262,6 +271,16 @@ int main (int argc, char* argv[]) {
 					return -1;
 				}
 				time_value = mktime(&time_struct);
+				time_is_set = true;
+			} else if (token_is_set == false && strcmp(argv[i], TOKEN_PARAM_SHORT_TAG) == 0) {
+				if (i + 1 == argc) {
+					wprintf(L"Token argument error\n");
+
+					return -1;
+				}
+
+				token = argv[++i];
+				token_is_set = true;
 			}
 		}
 	}
@@ -275,9 +294,17 @@ int main (int argc, char* argv[]) {
 	InitializeCriticalSection(&listener_thread_guard);
 #endif
 
-	if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, &connection)) {
+	if (token != NULL && token[0] != '\0') {
+		if (!dxf_create_connection_auth_bearer(dxfeed_host, token, on_reader_thread_terminate, NULL, NULL, NULL, &connection)) {
+			free(symbol);
+			process_last_error();
+
+			return -1;
+		}
+	} else if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, &connection)) {
 		free(symbol);
 		process_last_error();
+
 		return -1;
 	}
 
