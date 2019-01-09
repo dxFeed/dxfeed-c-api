@@ -421,12 +421,12 @@ int main(int argc, char* argv[]) {
 
 	if (token != NULL && token[0] != '\0') {
 		if (!dxf_create_connection_auth_bearer(
-				dxfeed_host, token, on_reader_thread_terminate, NULL, NULL, NULL, &connection)) {
+				dxfeed_host, token, on_reader_thread_terminate, NULL, NULL, NULL, NULL, &connection)) {
 			process_last_error();
 
 			return -1;
 		}
-	} else if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, &connection)) {
+	} else if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, NULL, &connection)) {
 		process_last_error();
 
 		return -1;
