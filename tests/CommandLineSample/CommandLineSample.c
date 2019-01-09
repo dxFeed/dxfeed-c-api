@@ -473,19 +473,19 @@ int main (int argc, char* argv[]) {
 	dxf_string_t dxfeed_host_u = NULL;
 
 	if ( argc < STATIC_PARAMS_COUNT ) {
-		wprintf(L"DXFeed command line sample.\n"
-				L"Usage: CommandLineSample <server address> <event type> <symbol> [" DUMP_PARAM_LONG_TAG " | " DUMP_PARAM_SHORT_TAG " <filename>] [" TOKEN_PARAM_SHORT_TAG " <token>]\n"
-				L"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
-				L"                     If you want to use file instead of server data just\n"
-				L"                     write there path to file e.g. path\\to\\raw.bin\n"
-				L"  <event type>     - The event type, any of the following: TRADE, QUOTE,\n"
-				L"                     SUMMARY, PROFILE, ORDER, TIME_AND_SALE, TRADE_ETH,\n"
-				L"                     SPREAD_ORDER, GREEKS, THEO_PRICE, UNDERLYING, SERIES,\n"
-				L"                     CONFIGURATION\n"
-				L"  <symbol>               - The trade symbols, e.g. C, MSFT, YHOO, IBM\n"
-				L"  " DUMP_PARAM_LONG_TAG " | " DUMP_PARAM_SHORT_TAG " <filename> - The filename to dump the raw data\n"
-				L"  " TOKEN_PARAM_SHORT_TAG " <token>             - The authorization token\n"
-				L"Example: CommandLineSample.exe demo.dxfeed.com:7300 TRADE,ORDER MSFT,IBM"
+		printf("DXFeed command line sample.\n"
+				"Usage: CommandLineSample <server address> <event type> <symbol> [" DUMP_PARAM_LONG_TAG " | " DUMP_PARAM_SHORT_TAG " <filename>] [" TOKEN_PARAM_SHORT_TAG " <token>]\n"
+				"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
+				"                     If you want to use file instead of server data just\n"
+				"                     write there path to file e.g. path\\to\\raw.bin\n"
+				"  <event type>     - The event type, any of the following: TRADE, QUOTE,\n"
+				"                     SUMMARY, PROFILE, ORDER, TIME_AND_SALE, TRADE_ETH,\n"
+				"                     SPREAD_ORDER, GREEKS, THEO_PRICE, UNDERLYING, SERIES,\n"
+				"                     CONFIGURATION\n"
+				"  <symbol>               - The trade symbols, e.g. C, MSFT, YHOO, IBM\n"
+				"  " DUMP_PARAM_LONG_TAG " | " DUMP_PARAM_SHORT_TAG " <filename> - The filename to dump the raw data\n"
+				"  " TOKEN_PARAM_SHORT_TAG " <token>             - The authorization token\n"
+				"Example: CommandLineSample.exe demo.dxfeed.com:7300 TRADE,ORDER MSFT,IBM"
 				);
 
 		return 0;

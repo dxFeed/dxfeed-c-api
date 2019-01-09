@@ -14,6 +14,7 @@
 #include "DXFeed.h"
 #include "DXErrorCodes.h"
 #include <time.h>
+#include <stdio.h>
 
 #define STRINGIFY(a) STR(a)
 #define STR(a) #a
@@ -340,18 +341,18 @@ int main(int argc, char* argv[]) {
 	dxf_string_t dxfeed_host_u = NULL;
 
 	if (argc < STATIC_PARAMS_COUNT) {
-		wprintf(L"DXFeed command line sample.\n"
-			L"Usage: IncSnapshotConsoleSample <server address> <event type> <symbol> [order_source] [" RECORDS_PRINT_LIMIT_SHORT_PARAM " <records_print_limit>] [" TOKEN_PARAM_SHORT_TAG " <token>]\n"
-			L"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
-			L"  <event type> - The event type, one of the following: ORDER, CANDLE, SPREAD_ORDER,\n"
-			L"                 TIME_AND_SALE, GREEKS, SERIES\n"
-			L"  <symbol> - The trade symbol, e.g. C, MSFT, YHOO, IBM\n"
-			L"  [order_source] - a) source for Order (also can be empty), e.g. NTV, BYX, BZX, DEA,\n"
-			L"                      ISE, DEX, IST\n"
-			L"                   b) source for MarketMaker, one of following: COMPOSITE_BID or \n"
-			L"                      COMPOSITE_ASK\n"
-			L"  " RECORDS_PRINT_LIMIT_SHORT_PARAM " <records_print_limit> - The number of displayed records (0 - unlimited, default: " STRINGIFY(DEFAULT_RECORDS_PRINT_LIMIT) ")\n"
-			L"  " TOKEN_PARAM_SHORT_TAG " <token> - The authorization token\n"
+		printf("DXFeed command line sample.\n"
+			"Usage: IncSnapshotConsoleSample <server address> <event type> <symbol> [order_source] [" RECORDS_PRINT_LIMIT_SHORT_PARAM " <records_print_limit>] [" TOKEN_PARAM_SHORT_TAG " <token>]\n"
+			"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
+			"  <event type> - The event type, one of the following: ORDER, CANDLE, SPREAD_ORDER,\n"
+			"                 TIME_AND_SALE, GREEKS, SERIES\n"
+			"  <symbol> - The trade symbol, e.g. C, MSFT, YHOO, IBM\n"
+			"  [order_source] - a) source for Order (also can be empty), e.g. NTV, BYX, BZX, DEA,\n"
+			"                      ISE, DEX, IST\n"
+			"                   b) source for MarketMaker, one of following: COMPOSITE_BID or \n"
+			"                      COMPOSITE_ASK\n"
+			"  " RECORDS_PRINT_LIMIT_SHORT_PARAM " <records_print_limit> - The number of displayed records (0 - unlimited, default: " STRINGIFY(DEFAULT_RECORDS_PRINT_LIMIT) ")\n"
+			"  " TOKEN_PARAM_SHORT_TAG " <token> - The authorization token\n"
 			);
 
 		return 0;
