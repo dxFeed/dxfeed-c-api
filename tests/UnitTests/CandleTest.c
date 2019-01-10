@@ -300,7 +300,7 @@ bool candle_subscription_test(void) {
 	dxf_connection_t connection = NULL;
 	dxf_subscription_t subscription = NULL;
 
-	if (!dxf_create_connection(dxfeed_host, candle_tests_on_thread_terminate, NULL, NULL, NULL, &connection)) {
+	if (!dxf_create_connection(dxfeed_host, candle_tests_on_thread_terminate, NULL, NULL, NULL, NULL, &connection)) {
 		PRINT_TEST_FAILED;
 		process_last_error();
 		return false;
@@ -357,7 +357,7 @@ bool candle_multiply_subscription_test(void) {
 	dxf_subscription_t ibm_candle_subscription = NULL;
 	dxf_subscription_t order_subscription = NULL;
 
-	if (!dxf_create_connection(dxfeed_host, candle_tests_on_thread_terminate, NULL, NULL, NULL,
+	if (!dxf_create_connection(dxfeed_host, candle_tests_on_thread_terminate, NULL, NULL, NULL, NULL,
 		&connection)) {
 
 		PRINT_TEST_FAILED;
@@ -454,7 +454,7 @@ bool candle_symbol_test(void) {
 	int symbol_count = 0;
 	int i;
 
-	if (!dxf_create_connection(dxfeed_host, candle_tests_on_thread_terminate, NULL, NULL, NULL, &connection)) {
+	if (!dxf_create_connection(dxfeed_host, candle_tests_on_thread_terminate, NULL, NULL, NULL, NULL, &connection)) {
 		PRINT_TEST_FAILED;
 		process_last_error();
 		return false;

@@ -160,7 +160,7 @@ bool snapshot_initialization_test(void) {
 	dxf_candle_attributes_t candle_attributes = NULL;
 	bool res = true;
 
-	if (!dxf_create_connection(g_dxfeed_host, snapshot_tests_on_thread_terminate, NULL, NULL, NULL, &connection)) {
+	if (!dxf_create_connection(g_dxfeed_host, snapshot_tests_on_thread_terminate, NULL, NULL, NULL, NULL, &connection)) {
 		process_last_error();
 		PRINT_TEST_FAILED;
 		return false;
@@ -330,7 +330,7 @@ bool snapshot_duplicates_test(void) {
 	int num = CANDLE_CASES_SIZE + ORDER_CASES_SIZE;
 	dxf_snapshot_t *snapshots = NULL;
 
-	if (!dxf_create_connection(g_dxfeed_host, snapshot_tests_on_thread_terminate, NULL, NULL, NULL, &connection)) {
+	if (!dxf_create_connection(g_dxfeed_host, snapshot_tests_on_thread_terminate, NULL, NULL, NULL, NULL, &connection)) {
 		process_last_error();
 		PRINT_TEST_FAILED;
 		return false;
@@ -520,7 +520,7 @@ bool snapshot_subscription_test(void) {
 	snapshot_order_data_reset();
 	reset_thread_terminate(g_st_listener_thread_data);
 
-	if (!dxf_create_connection(g_dxfeed_host, snapshot_tests_on_thread_terminate, NULL, NULL, NULL, &connection)) {
+	if (!dxf_create_connection(g_dxfeed_host, snapshot_tests_on_thread_terminate, NULL, NULL, NULL, NULL, &connection)) {
 		process_last_error();
 		PRINT_TEST_FAILED;
 		return false;
@@ -588,7 +588,7 @@ bool snapshot_multiply_subscription_test(void) {
 	dxf_snapshot_t invalid_snapshot = NULL;
 	bool res = true;
 
-	if (!dxf_create_connection(g_dxfeed_host, snapshot_tests_on_thread_terminate, NULL, NULL, NULL, &connection)) {
+	if (!dxf_create_connection(g_dxfeed_host, snapshot_tests_on_thread_terminate, NULL, NULL, NULL, NULL, &connection)) {
 		process_last_error();
 		PRINT_TEST_FAILED;
 		return false;
@@ -730,7 +730,7 @@ bool snapshot_subscription_and_events_test(void) {
 	dxf_snapshot_t order_snapshot;
 	dxf_subscription_t event_subscription;
 
-	if (!dxf_create_connection(g_dxfeed_host, snapshot_tests_on_thread_terminate, NULL, NULL, NULL, &connection)) {
+	if (!dxf_create_connection(g_dxfeed_host, snapshot_tests_on_thread_terminate, NULL, NULL, NULL, NULL, &connection)) {
 		process_last_error();
 		PRINT_TEST_FAILED;
 		return false;
@@ -814,7 +814,7 @@ bool snapshot_symbols_test(void) {
 	snapshot_order_data_reset();
 	reset_thread_terminate(g_st_listener_thread_data);
 
-	if (!dxf_create_connection(g_dxfeed_host, snapshot_tests_on_thread_terminate, NULL, NULL, NULL, &connection)) {
+	if (!dxf_create_connection(g_dxfeed_host, snapshot_tests_on_thread_terminate, NULL, NULL, NULL, NULL, &connection)) {
 		process_last_error();
 		PRINT_TEST_FAILED;
 		return false;

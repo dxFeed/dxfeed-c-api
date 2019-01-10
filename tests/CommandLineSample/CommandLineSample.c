@@ -110,6 +110,20 @@ void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
 }
 #endif
 
+// The example of processing a connection status change
+void on_connection_status_changed(dxf_connection_t connection, dxf_connection_status_t old_status,
+		dxf_connection_status_t new_status, void *user_data) {
+	switch (new_status) {
+		case dxf_cs_connected:
+			wprintf(L"Connected!\n");
+			break;
+		case dxf_cs_authorized:
+			wprintf(L"Authorized!\n");
+			break;
+		default:;
+	}
+}
+
 void print_timestamp(dxf_long_t timestamp){
 		wchar_t timefmt[80];
 
@@ -543,12 +557,12 @@ int main (int argc, char* argv[]) {
 #endif
 
 	if (token != NULL && token[0] != '\0') {
-		if (!dxf_create_connection_auth_bearer(dxfeed_host, token, on_reader_thread_terminate, NULL, NULL, NULL, NULL, &connection)) {
+		if (!dxf_create_connection_auth_bearer(dxfeed_host, token, on_reader_thread_terminate, on_connection_status_changed, NULL, NULL, NULL, &connection)) {
 			process_last_error();
 			free_symbols(symbols, symbol_count);
 			return -1;
 		}
-	} else if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, NULL, &connection)) {
+	} else if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, on_connection_status_changed, NULL, NULL, NULL, &connection)) {
 		process_last_error();
 		free_symbols(symbols, symbol_count);
 		return -1;

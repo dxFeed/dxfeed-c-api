@@ -95,15 +95,15 @@ bool invalid_connection_address_test(void) {
 	dxf_connection_t connection;
 
 	//invalid connection handler
-	DX_CHECK(dx_is_equal_ERRORCODE(DXF_FAILURE, dxf_create_connection("demo.dxfeed.com:7300", NULL, NULL, NULL, NULL, NULL)));
+	DX_CHECK(dx_is_equal_ERRORCODE(DXF_FAILURE, dxf_create_connection("demo.dxfeed.com:7300", NULL, NULL, NULL, NULL, NULL, NULL)));
 	//invalid address
-	DX_CHECK(dx_is_equal_ERRORCODE(DXF_FAILURE, dxf_create_connection(invalid_address, NULL, NULL, NULL, NULL, &connection)));
+	DX_CHECK(dx_is_equal_ERRORCODE(DXF_FAILURE, dxf_create_connection(invalid_address, NULL, NULL, NULL, NULL, NULL, &connection)));
 	DX_CHECK(dx_is_equal_ptr(NULL, connection));
-	DX_CHECK(dx_is_equal_ERRORCODE(DXF_FAILURE, dxf_create_connection("no-port", NULL, NULL, NULL, NULL, &connection)));
+	DX_CHECK(dx_is_equal_ERRORCODE(DXF_FAILURE, dxf_create_connection("no-port", NULL, NULL, NULL, NULL, NULL, &connection)));
 	DX_CHECK(dx_is_equal_ptr(NULL, connection));
-	DX_CHECK(dx_is_equal_ERRORCODE(DXF_FAILURE, dxf_create_connection(":123", NULL, NULL, NULL, NULL, &connection)));
+	DX_CHECK(dx_is_equal_ERRORCODE(DXF_FAILURE, dxf_create_connection(":123", NULL, NULL, NULL, NULL, NULL, &connection)));
 	DX_CHECK(dx_is_equal_ptr(NULL, connection));
-	DX_CHECK(dx_is_equal_ERRORCODE(DXF_FAILURE, dxf_create_connection("a:123", NULL, NULL, NULL, NULL, &connection)));
+	DX_CHECK(dx_is_equal_ERRORCODE(DXF_FAILURE, dxf_create_connection("a:123", NULL, NULL, NULL, NULL, NULL, &connection)));
 	DX_CHECK(dx_is_equal_ptr(NULL, connection));
 
 	return true;
