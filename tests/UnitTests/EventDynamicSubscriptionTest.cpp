@@ -239,7 +239,7 @@ bool event_dynamic_subscription_test(void) {
 
 	reset_thread_terminate(g_listener_thread_data);
 
-	if (!dxf_create_connection(dxfeed_host, on_thread_terminate, NULL, NULL, NULL, &connection)) {
+	if (!dxf_create_connection(dxfeed_host, on_thread_terminate, NULL, NULL, NULL, NULL, &connection)) {
 		process_last_error();
 		return false;
 	}
@@ -353,7 +353,7 @@ bool listener_v2_test(void) {
 
 	reset_thread_terminate(g_listener_thread_data);
 
-	if (!dxf_create_connection(dxfeed_host, on_thread_terminate, NULL, NULL, NULL, &connection)) {
+	if (!dxf_create_connection(dxfeed_host, on_thread_terminate, NULL, NULL, NULL, NULL, &connection)) {
 		process_last_error();
 		return false;
 	}

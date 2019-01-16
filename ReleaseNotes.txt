@@ -1,4 +1,7 @@
 Version 5.4.0
+* Notifications for connection status changes
+  - the ability to notify about changes in the connection status is added. See: dxf_connection_status_t enum,
+    dxf_conn_status_notifier_t callback, dxf_create_connection* and dxf_get_current_connection_status functions
 * [Samples] Expand the parameter set by passing an authentication token
   - The optional command line parameter "[-T <token>]" is added
 * [Samples] Add the ability to change the number of displayed records

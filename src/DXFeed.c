@@ -197,6 +197,7 @@ DXFEED_API ERRORCODE dxf_create_connection_impl(const char* address,
 												const char* authscheme,
 												const char* authdata,
 												dxf_conn_termination_notifier_t notifier,
+												dxf_conn_status_notifier_t conn_status_notifier,
 												dxf_socket_thread_creation_notifier_t stcn,
 												dxf_socket_thread_destruction_notifier_t stdn,
 												void* user_data,
@@ -233,6 +234,7 @@ DXFEED_API ERRORCODE dxf_create_connection_impl(const char* address,
 
 	ccd.receiver = dx_socket_data_receiver;
 	ccd.notifier = notifier;
+	ccd.conn_status_notifier = conn_status_notifier;
 	ccd.stcn = stcn;
 	ccd.stdn = stdn;
 	ccd.notifier_user_data = user_data;
@@ -255,11 +257,12 @@ DXFEED_API ERRORCODE dxf_create_connection_impl(const char* address,
 
 DXFEED_API ERRORCODE dxf_create_connection (const char* address,
 											dxf_conn_termination_notifier_t notifier,
+											dxf_conn_status_notifier_t conn_status_notifier,
 											dxf_socket_thread_creation_notifier_t stcn,
 											dxf_socket_thread_destruction_notifier_t stdn,
 											void* user_data,
 											OUT dxf_connection_t* connection) {
-	return dxf_create_connection_impl(address, NULL, NULL, notifier, stcn, stdn, user_data, OUT connection);
+	return dxf_create_connection_impl(address, NULL, NULL, notifier, conn_status_notifier, stcn, stdn, user_data, OUT connection);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -268,6 +271,7 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_basic(const char* address,
 													const char* user,
 													const char* password,
 													dxf_conn_termination_notifier_t notifier,
+													dxf_conn_status_notifier_t conn_status_notifier,
 													dxf_socket_thread_creation_notifier_t stcn,
 													dxf_socket_thread_destruction_notifier_t stdn,
 													void* user_data,
@@ -285,7 +289,7 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_basic(const char* address,
 	if (base64_buf == NULL)
 		return DXF_FAILURE;
 
-	res = dxf_create_connection_auth_custom(address, DX_AUTH_BASIC_KEY, base64_buf, notifier, stcn, stdn, user_data, connection);
+	res = dxf_create_connection_auth_custom(address, DX_AUTH_BASIC_KEY, base64_buf, notifier, conn_status_notifier, stcn, stdn, user_data, connection);
 
 	dx_free(base64_buf);
 	return res;
@@ -296,6 +300,7 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_basic(const char* address,
 DXFEED_API ERRORCODE dxf_create_connection_auth_bearer(const char* address,
 													const char* token,
 													dxf_conn_termination_notifier_t notifier,
+													dxf_conn_status_notifier_t conn_status_notifier,
 													dxf_socket_thread_creation_notifier_t stcn,
 													dxf_socket_thread_destruction_notifier_t stdn,
 													void* user_data,
@@ -306,7 +311,7 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_bearer(const char* address,
 		return DXF_FAILURE;
 	}
 
-	return dxf_create_connection_auth_custom(address, DX_AUTH_BEARER_KEY, token, notifier, stcn, stdn, user_data, connection);
+	return dxf_create_connection_auth_custom(address, DX_AUTH_BEARER_KEY, token, notifier, conn_status_notifier, stcn, stdn, user_data, connection);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -315,6 +320,7 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_custom(const char* address,
 													const char* authscheme,
 													const char* authdata,
 													dxf_conn_termination_notifier_t notifier,
+													dxf_conn_status_notifier_t conn_status_notifier,
 													dxf_socket_thread_creation_notifier_t stcn,
 													dxf_socket_thread_destruction_notifier_t stdn,
 													void* user_data,
@@ -325,7 +331,7 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_custom(const char* address,
 		return DXF_FAILURE;
 	}
 
-	return dxf_create_connection_impl(address, authscheme, authdata, notifier, stcn, stdn, user_data, OUT connection);
+	return dxf_create_connection_impl(address, authscheme, authdata, notifier, conn_status_notifier, stcn, stdn, user_data, OUT connection);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1327,6 +1333,18 @@ DXFEED_API ERRORCODE dxf_get_current_connected_address(dxf_connection_t connecti
 	if (!dx_get_current_connected_address(connection, address)) {
 		return DXF_FAILURE;
 	}
+	return DXF_SUCCESS;
+}
+
+DXFEED_API ERRORCODE dxf_get_current_connection_status(dxf_connection_t connection, OUT dxf_connection_status_t* status) {
+	if (status == NULL) {
+		dx_set_error_code(dx_ec_invalid_func_param);
+
+		return DXF_FAILURE;
+	}
+
+	*status = dx_connection_status_get(connection);
+
 	return DXF_SUCCESS;
 }
 

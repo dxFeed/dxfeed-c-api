@@ -164,7 +164,7 @@ bool mixed_order_source_test() {
 	drop_event_counter(g_dex_counter);
 	drop_event_counter(g_dea_counter);
 
-	if (!dxf_create_connection(DXFEED_HOST, order_source_tests_on_thread_terminate, NULL, NULL, NULL, &connection) ||
+	if (!dxf_create_connection(DXFEED_HOST, order_source_tests_on_thread_terminate, NULL, NULL, NULL, NULL, &connection) ||
 		!dxf_create_subscription(connection, DXF_ET_ORDER, &subscription) ||
 		!dxf_add_symbols(subscription, symbols, symbol_count) ||
 		!dxf_attach_event_listener(subscription, listener, NULL)) {
@@ -269,7 +269,7 @@ bool set_order_source_test() {
 	drop_event_counter(g_dex_counter);
 	drop_event_counter(g_dea_counter);
 
-	if (!dxf_create_connection(DXFEED_HOST, order_source_tests_on_thread_terminate, NULL, NULL, NULL, &connection) ||
+	if (!dxf_create_connection(DXFEED_HOST, order_source_tests_on_thread_terminate, NULL, NULL, NULL, NULL, &connection) ||
 		!dxf_create_subscription(connection, DXF_ET_ORDER, &subscription) ||
 		!dxf_add_symbols(subscription, symbols, symbol_count) ||
 		!dxf_attach_event_listener(subscription, listener, NULL)) {
@@ -375,7 +375,7 @@ bool add_order_source_test() {
 	drop_event_counter(g_dex_counter);
 	drop_event_counter(g_dea_counter);
 
-	if (!dxf_create_connection(DXFEED_HOST, order_source_tests_on_thread_terminate, NULL, NULL, NULL, &connection) ||
+	if (!dxf_create_connection(DXFEED_HOST, order_source_tests_on_thread_terminate, NULL, NULL, NULL, NULL, &connection) ||
 		!dxf_create_subscription(connection, DXF_ET_ORDER, &subscription) ||
 		!dxf_set_order_source(subscription, "NTV") ||
 		!dxf_add_symbols(subscription, symbols, symbol_count) ||
@@ -481,7 +481,7 @@ bool input_order_source_test() {
 	dxf_const_string_t symbols[] = { { L"IBM" },{ L"MSFT" },{ L"YHOO" },{ L"C" },{ L"AAPL" } };
 	dxf_int_t symbol_count = sizeof(symbols) / sizeof(symbols[0]);
 
-	if (!dxf_create_connection(DXFEED_HOST, order_source_tests_on_thread_terminate, NULL, NULL, NULL, &connection) ||
+	if (!dxf_create_connection(DXFEED_HOST, order_source_tests_on_thread_terminate, NULL, NULL, NULL, NULL, &connection) ||
 		!dxf_create_subscription(connection, DXF_ET_ORDER, &subscription)) {
 
 		process_last_error();

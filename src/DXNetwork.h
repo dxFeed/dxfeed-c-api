@@ -44,17 +44,11 @@ typedef bool (*dx_socket_data_receiver_t) (dxf_connection_t connection, const vo
 typedef struct {
 	dx_socket_data_receiver_t receiver; /* a callback to pass the read data to */
 	dxf_conn_termination_notifier_t notifier; /* a callback to notify client the current connection is to be finished and reestablished */
+	dxf_conn_status_notifier_t conn_status_notifier; /* the callback to inform the client side that the connection status has changed */
 	dxf_socket_thread_creation_notifier_t stcn; /* a callback that's called on a socket thread creation */
 	dxf_socket_thread_destruction_notifier_t stdn; /* a callback that is called on a socket thread destruction */
 	void* notifier_user_data; /* the user data passed to the notifier callbacks */
 } dx_connection_context_data_t;
-
-typedef enum {
-	dx_cs_not_connected = 0,
-	dx_cs_connected,
-	dx_cs_login_required,
-	dx_cs_authorized
-} dx_connection_status_t;
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -123,8 +117,8 @@ bool dx_add_worker_thread_task (dxf_connection_t connection, dx_task_processor_t
  */
 /* -------------------------------------------------------------------------- */
 
-void dx_connection_status_set(dxf_connection_t connection, dx_connection_status_t status);
-dx_connection_status_t dx_connection_status_get(dxf_connection_t connection);
+void dx_connection_status_set(dxf_connection_t connection, dxf_connection_status_t status);
+dxf_connection_status_t dx_connection_status_get(dxf_connection_t connection);
 
 /* -------------------------------------------------------------------------- */
 /*

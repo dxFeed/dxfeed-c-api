@@ -116,19 +116,19 @@ DXConnection::DXConnection (const char* address, AuthType type, const char* para
 	ERRORCODE result;
 	switch (type) {
 	case AuthType::none:
-	result = dxf_create_connection(address, OnConnectionTerminated, OnSocketThreadCreated,
+	result = dxf_create_connection(address, OnConnectionTerminated, NULL, OnSocketThreadCreated,
 	OnSocketThreadDestroyed, reinterpret_cast<void*>(this), &m_connHandle);
 	break;
 	case AuthType::basic:
-	result = dxf_create_connection_auth_basic(address, param1, param2, OnConnectionTerminated,
+	result = dxf_create_connection_auth_basic(address, param1, param2, OnConnectionTerminated, NULL,
 	OnSocketThreadCreated, OnSocketThreadDestroyed, reinterpret_cast<void*>(this), &m_connHandle);
 	break;
 	case AuthType::bearer:
-	result = dxf_create_connection_auth_bearer(address, param1, OnConnectionTerminated,
+	result = dxf_create_connection_auth_bearer(address, param1, OnConnectionTerminated, NULL,
 	OnSocketThreadCreated, OnSocketThreadDestroyed, reinterpret_cast<void*>(this), &m_connHandle);
 	break;
 	case AuthType::custom:
-	result = dxf_create_connection_auth_custom(address, param1, param2, OnConnectionTerminated,
+	result = dxf_create_connection_auth_custom(address, param1, param2, OnConnectionTerminated, NULL,
 	OnSocketThreadCreated, OnSocketThreadDestroyed, reinterpret_cast<void*>(this), &m_connHandle);
 	break;
 	}

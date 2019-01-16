@@ -88,4 +88,11 @@ typedef struct {
 	dxf_string_t value;
 } dxf_property_item_t;
 
+typedef enum {
+	dxf_cs_not_connected = 0,
+	dxf_cs_connected,
+	dxf_cs_login_required,
+	dxf_cs_authorized
+} dxf_connection_status_t;
+
 #endif /* DX_TYPES_H_INCLUDED */

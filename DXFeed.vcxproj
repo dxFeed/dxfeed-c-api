@@ -252,7 +252,7 @@
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>ws2_32.lib;dbghelp.lib;libtls-15.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;dbghelp.lib;libtls-15_64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName)d_64.dll</OutputFile>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\libressl\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>$(ProjectDir)\$(ProjectName)d_64.def</ModuleDefinitionFile>
@@ -359,7 +359,7 @@
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>ws2_32.lib;libtls-15.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;libtls-15_64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName)_64.dll</OutputFile>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\libressl\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>$(ProjectDir)\$(ProjectName)_64.def</ModuleDefinitionFile>

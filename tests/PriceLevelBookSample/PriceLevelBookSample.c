@@ -167,13 +167,13 @@ int main(int argc, char* argv[]) {
 	char* dxfeed_host = NULL;
 
 	if (argc < STATIC_PARAMS_COUNT) {
-		wprintf(L"DXFeed Price Level Book command line sample.\n"
-			L"Usage: PriceLevelBookSample <server address> <symbol> [order_source] [" TOKEN_PARAM_SHORT_TAG " <token>]\n"
-			L"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
-			L"  <symbol>         - The trade symbol, e.g. C, MSFT, YHOO, IBM\n"
-			L"  [order_source]   - One or more order sources, e.g.. NTV, BYX, BZX, DEA,\n"
-			L"                     ISE, DEX, IST. Default is BZX DEX\n"
-			L"  " TOKEN_PARAM_SHORT_TAG " <token>       - The authorization token\n"
+		printf("DXFeed Price Level Book command line sample.\n"
+			"Usage: PriceLevelBookSample <server address> <symbol> [order_source] [" TOKEN_PARAM_SHORT_TAG " <token>]\n"
+			"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
+			"  <symbol>         - The trade symbol, e.g. C, MSFT, YHOO, IBM\n"
+			"  [order_source]   - One or more order sources, e.g.. NTV, BYX, BZX, DEA,\n"
+			"                     ISE, DEX, IST. Default is BZX DEX\n"
+			"  " TOKEN_PARAM_SHORT_TAG " <token>       - The authorization token\n"
 			);
 		return 0;
 	}
@@ -246,12 +246,12 @@ int main(int argc, char* argv[]) {
 #endif
 
 	if (token != NULL && token[0] != '\0') {
-		if (!dxf_create_connection_auth_bearer(dxfeed_host, token, on_reader_thread_terminate, NULL, NULL, NULL, &connection)) {
+		if (!dxf_create_connection_auth_bearer(dxfeed_host, token, on_reader_thread_terminate, NULL, NULL, NULL, NULL, &connection)) {
 			process_last_error();
 
 			return -1;
 		}
-	} else if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, &connection)) {
+	} else if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, NULL, &connection)) {
 		process_last_error();
 		return -1;
 	}

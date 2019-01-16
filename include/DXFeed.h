@@ -53,6 +53,10 @@
 /* -------------------------------------------------------------------------- */
 
 typedef void (*dxf_conn_termination_notifier_t) (dxf_connection_t connection, void* user_data);
+typedef void (*dxf_conn_status_notifier_t) (dxf_connection_t connection,
+                                            dxf_connection_status_t old_status,
+                                            dxf_connection_status_t new_status,
+                                            void* user_data);
 
 /* the low level callback types, required in case some thread-specific initialization must be performed
    on the client side on the thread creation/destruction */
@@ -78,6 +82,7 @@ typedef void (*dxf_socket_thread_destruction_notifier_t) (dxf_connection_t conne
  *            multiple addresses: "(host1:port1)(host2)(host3:port3[username=xxx,password=yyy])"
  *            the data from file: "/path/to/file" on *nix and "drive:\path\to\file" on Windows
  *  notifier - the callback to inform the client side that the connection has stumbled upon and error and will go reconnecting
+ *  conn_status_notifier - the callback to inform the client side that the connection status has changed
  *  stcn - the callback for informing the client side about the socket thread creation;
            may be set to NULL if no specific action is required to perform on the client side on a new thread creation
  *  shdn - the callback for informing the client side about the socket thread destruction;
@@ -88,6 +93,7 @@ typedef void (*dxf_socket_thread_destruction_notifier_t) (dxf_connection_t conne
  */
 DXFEED_API ERRORCODE dxf_create_connection (const char* address,
                                             dxf_conn_termination_notifier_t notifier,
+                                            dxf_conn_status_notifier_t conn_status_notifier,
                                             dxf_socket_thread_creation_notifier_t stcn,
                                             dxf_socket_thread_destruction_notifier_t stdn,
                                             void* user_data,
@@ -103,6 +109,7 @@ DXFEED_API ERRORCODE dxf_create_connection (const char* address,
  *  user - the user name;
  *  password - the user password;
  *  notifier - the callback to inform the client side that the connection has stumbled upon and error and will go reconnecting
+ *  conn_status_notifier - the callback to inform the client side that the connection status has changed
  *  stcn - the callback for informing the client side about the socket thread creation;
            may be set to NULL if no specific action is required to perform on the client side on a new thread creation
  *  shdn - the callback for informing the client side about the socket thread destruction;
@@ -117,6 +124,7 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_basic(const char* address,
                                                       const char* user,
                                                       const char* password,
                                                       dxf_conn_termination_notifier_t notifier,
+                                                      dxf_conn_status_notifier_t conn_status_notifier,
                                                       dxf_socket_thread_creation_notifier_t stcn,
                                                       dxf_socket_thread_destruction_notifier_t stdn,
                                                       void* user_data,
@@ -131,6 +139,7 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_basic(const char* address,
  *            the data from file: "/path/to/file" on *nix and "drive:\path\to\file" on Windows
  *  token - the authorization token;
  *  notifier - the callback to inform the client side that the connection has stumbled upon and error and will go reconnecting
+ *  conn_status_notifier - the callback to inform the client side that the connection status has changed
  *  stcn - the callback for informing the client side about the socket thread creation;
            may be set to NULL if no specific action is required to perform on the client side on a new thread creation
  *  shdn - the callback for informing the client side about the socket thread destruction;
@@ -144,6 +153,7 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_basic(const char* address,
 DXFEED_API ERRORCODE dxf_create_connection_auth_bearer(const char* address,
                                                        const char* token,
                                                        dxf_conn_termination_notifier_t notifier,
+                                                       dxf_conn_status_notifier_t conn_status_notifier,
                                                        dxf_socket_thread_creation_notifier_t stcn,
                                                        dxf_socket_thread_destruction_notifier_t stdn,
                                                        void* user_data,
@@ -159,6 +169,7 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_bearer(const char* address,
  *  authscheme - the authorization scheme;
  *  authdata - the authorization data;
  *  notifier - the callback to inform the client side that the connection has stumbled upon and error and will go reconnecting
+ *  conn_status_notifier - the callback to inform the client side that the connection status has changed
  *  stcn - the callback for informing the client side about the socket thread creation;
            may be set to NULL if no specific action is required to perform on the client side on a new thread creation
  *  shdn - the callback for informing the client side about the socket thread destruction;
@@ -173,6 +184,7 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_custom(const char* address,
                                                        const char* authscheme,
                                                        const char* authdata,
                                                        dxf_conn_termination_notifier_t notifier,
+                                                       dxf_conn_status_notifier_t conn_status_notifier,
                                                        dxf_socket_thread_creation_notifier_t stcn,
                                                        dxf_socket_thread_destruction_notifier_t stdn,
                                                        void* user_data,
@@ -698,6 +710,14 @@ DXFEED_API ERRORCODE dxf_free_connection_properties_snapshot(dxf_property_item_t
 *  OUT address - address of pointer to store address of the null-terminated string with current connected address
 */
 DXFEED_API ERRORCODE dxf_get_current_connected_address(dxf_connection_t connection, OUT char** address);
+
+/*
+*  Retrieves the current connection status
+*
+*  connection - a handle of a previously created connection
+*  OUT status - connection status
+*/
+DXFEED_API ERRORCODE dxf_get_current_connection_status(dxf_connection_t connection, OUT dxf_connection_status_t* status);
 
 /*
 * Frees memory allocated in API functions from this module

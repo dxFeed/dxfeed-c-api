@@ -38,7 +38,6 @@
 #include "DXErrorHandling.h"
 #include "DXThreads.h"
 #include "DXMemory.h"
-#include "DXErrorCodes.h"
 #include "DXAlgorithms.h"
 #include "ConnectionContextData.h"
 #include "EventSubscription.h"
@@ -133,7 +132,7 @@ typedef struct {
 	dx_property_map_t properties;
 	dx_property_map_t prop_backup;
 
-	dx_connection_status_t status;
+	dxf_connection_status_t status;
 	dx_mutex_t status_guard;
 
 	int set_fields_flags;
@@ -404,7 +403,7 @@ bool dx_clear_connection_data (dx_network_connection_context_t* context) {
 static bool dx_close_socket (dx_network_connection_context_t* context) {
 	bool res = true;
 
-	dx_connection_status_set(context->connection, dx_cs_not_connected);
+	dx_connection_status_set(context->connection, dxf_cs_not_connected);
 
 	CHECKED_CALL(dx_mutex_lock, &(context->socket_guard));
 
@@ -438,8 +437,8 @@ static bool dx_have_credentials(dx_network_connection_context_t* context) {
 /* -------------------------------------------------------------------------- */
 
 void dx_notify_conn_termination (dx_network_connection_context_t* context, OUT bool* idle_thread_flag) {
-	//if connection required login and we have cresentials don't call notifier
-	if (dx_connection_status_get(context->connection) == dx_cs_login_required) {
+	//if connection required login and we have credentials - don't call notifier
+	if (dx_connection_status_get(context->connection) == dxf_cs_login_required) {
 		if (dx_have_credentials(context))
 			return;
 		dx_get_current_address(context)->is_connection_failed = true;
@@ -877,7 +876,7 @@ static bool dx_connect_via_socket(dx_network_connection_context_t* context, dx_e
 			continue;
 		}
 
-		dx_connection_status_set(context->connection, dx_cs_connected);
+		dx_connection_status_set(context->connection, dxf_cs_connected);
 		return true;
 	}
 	return false;
@@ -964,7 +963,7 @@ static bool dx_connect_via_tls(dx_network_connection_context_t* context, dx_ext_
 		return false;
 	}
 
-	dx_connection_status_set(context->connection, dx_cs_connected);
+	dx_connection_status_set(context->connection, dxf_cs_connected);
 	return true;
 }
 #endif // DXFEED_CODEC_TLS_ENABLED
@@ -1063,7 +1062,7 @@ bool dx_reestablish_connection (dx_network_connection_context_t* context) {
 	dx_cleanup_task_queue(context->tq);
 
 	// if connection required login send credentials again
-	if (dx_connection_status_get(context->connection) == dx_cs_login_required) {
+	if (dx_connection_status_get(context->connection) == dxf_cs_login_required) {
 		CHECKED_CALL_2(dx_send_protocol_description, context->connection, false);
 		CHECKED_CALL_2(dx_send_record_description, context->connection, false);
 		CHECKED_CALL_2(dx_process_connection_subscriptions, context->connection, dx_server_event_subscription_refresher);
@@ -1248,7 +1247,19 @@ bool dx_add_worker_thread_task (dxf_connection_t connection, dx_task_processor_t
  */
 /* -------------------------------------------------------------------------- */
 
-void dx_connection_status_set(dxf_connection_t connection, dx_connection_status_t status) {
+const dxf_char_t* dx_get_connection_status_string(dxf_connection_status_t status) {
+	static dxf_char_t* strings[(size_t)(dxf_cs_authorized + 1)] =
+			{L"Not Connected", L"Connected", L"Login Required", L"Authorized"};
+	static dxf_char_t* unknown = L"Unknown";
+
+	if (status < 0 || status > dxf_cs_authorized) {
+		return unknown;
+	}
+
+	return strings[(size_t)status];
+}
+
+void dx_connection_status_set(dxf_connection_t connection, dxf_connection_status_t status) {
 	dx_network_connection_context_t* context = NULL;
 	bool res = true;
 
@@ -1262,17 +1273,31 @@ void dx_connection_status_set(dxf_connection_t connection, dx_connection_status_
 		return;
 	}
 
+	dxf_connection_status_t old_status;
+
 	dx_mutex_lock(&(context->status_guard));
-	dx_logging_verbose_info(L"Connection status changed %d->%d", context->status, status);
+	old_status = context->status;
+	dx_logging_verbose_info(L"Connection status changed %d (%s) -> %d (%s)",
+							old_status, dx_get_connection_status_string(old_status),
+							status, dx_get_connection_status_string(status));
+
 	context->status = status;
 	dx_mutex_unlock(&(context->status_guard));
+
+	dxf_conn_status_notifier_t conn_status_notifier = context->context_data.conn_status_notifier;
+
+	if (conn_status_notifier == NULL) {
+		return;
+	}
+
+	conn_status_notifier(connection, old_status, status, context->context_data.notifier_user_data);
 }
 
 /* -------------------------------------------------------------------------- */
 
-dx_connection_status_t dx_connection_status_get(dxf_connection_t connection) {
+dxf_connection_status_t dx_connection_status_get(dxf_connection_t connection) {
 	dx_network_connection_context_t* context = NULL;
-	dx_connection_status_t status = dx_cs_not_connected;;
+	dxf_connection_status_t status = dxf_cs_not_connected;
 	bool res = true;
 
 	context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
