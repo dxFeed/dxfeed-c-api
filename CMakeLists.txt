@@ -30,8 +30,11 @@ add_subdirectory(tests/PriceLevelBookSample)
 add_subdirectory(tests/RegionalBookSample)
 add_subdirectory(tests/SnapshotConsoleSample)
 add_subdirectory(tests/IncSnapshotConsoleSample)
-add_subdirectory(wrappers/COM/src)
-add_subdirectory(wrappers/COM/samples/C++)
+
+if (WIN32 AND MSVC)
+    add_subdirectory(wrappers/COM/src)
+    add_subdirectory(wrappers/COM/samples/C++)
+endif (WIN32 AND MSVC)
 
 
 set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/DXFeedAllCPackConfig.cmake")

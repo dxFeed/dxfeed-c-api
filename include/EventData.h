@@ -245,7 +245,7 @@ typedef struct {
     union {
         dxf_const_string_t market_maker;
         dxf_const_string_t spread_symbol;
-	};
+    };
 } dxf_order_t;
 
 /* Time And Sale ------------------------------------------------------------ */
