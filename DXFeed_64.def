@@ -1,5 +1,5 @@
 ; The following line has the only difference between release and debug versions of DXFeed lib
 LIBRARY DXFeed_64
-VERSION 5.3
+VERSION 5.4
 EXPORTS
     dx_get_event_data_item
