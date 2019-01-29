@@ -54,6 +54,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IncSnapshotConsoleSample", 
 		{98DF2375-3C29-4806-A832-7C666F8BF54C} = {98DF2375-3C29-4806-A832-7C666F8BF54C}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DXFeedCppWrapperConnectionSample", "wrappers\cpp\samples\ConnectionSample\DXFeedCppWrapperConnectionSample.vcxproj", "{304F24BB-9348-4B1D-AA96-580BB6DE5578}"
+	ProjectSection(ProjectDependencies) = postProject
+		{98DF2375-3C29-4806-A832-7C666F8BF54C} = {98DF2375-3C29-4806-A832-7C666F8BF54C}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -334,6 +339,22 @@ Global
 		{70E09AD5-89E5-47E2-953B-860A53F1C1DC}.ReleaseNoTLS|Win32.Build.0 = ReleaseNoTLS|Win32
 		{70E09AD5-89E5-47E2-953B-860A53F1C1DC}.ReleaseNoTLS|x64.ActiveCfg = ReleaseNoTLS|x64
 		{70E09AD5-89E5-47E2-953B-860A53F1C1DC}.ReleaseNoTLS|x64.Build.0 = ReleaseNoTLS|x64
+		{304F24BB-9348-4B1D-AA96-580BB6DE5578}.Debug|Win32.ActiveCfg = Debug|Win32
+		{304F24BB-9348-4B1D-AA96-580BB6DE5578}.Debug|Win32.Build.0 = Debug|Win32
+		{304F24BB-9348-4B1D-AA96-580BB6DE5578}.Debug|x64.ActiveCfg = Debug|x64
+		{304F24BB-9348-4B1D-AA96-580BB6DE5578}.Debug|x64.Build.0 = Debug|x64
+		{304F24BB-9348-4B1D-AA96-580BB6DE5578}.DebugNoTLS|Win32.ActiveCfg = DebugNoTLS|Win32
+		{304F24BB-9348-4B1D-AA96-580BB6DE5578}.DebugNoTLS|Win32.Build.0 = DebugNoTLS|Win32
+		{304F24BB-9348-4B1D-AA96-580BB6DE5578}.DebugNoTLS|x64.ActiveCfg = DebugNoTLS|x64
+		{304F24BB-9348-4B1D-AA96-580BB6DE5578}.DebugNoTLS|x64.Build.0 = DebugNoTLS|x64
+		{304F24BB-9348-4B1D-AA96-580BB6DE5578}.Release|Win32.ActiveCfg = Release|Win32
+		{304F24BB-9348-4B1D-AA96-580BB6DE5578}.Release|Win32.Build.0 = Release|Win32
+		{304F24BB-9348-4B1D-AA96-580BB6DE5578}.Release|x64.ActiveCfg = Release|x64
+		{304F24BB-9348-4B1D-AA96-580BB6DE5578}.Release|x64.Build.0 = Release|x64
+		{304F24BB-9348-4B1D-AA96-580BB6DE5578}.ReleaseNoTLS|Win32.ActiveCfg = ReleaseNoTLS|Win32
+		{304F24BB-9348-4B1D-AA96-580BB6DE5578}.ReleaseNoTLS|Win32.Build.0 = ReleaseNoTLS|Win32
+		{304F24BB-9348-4B1D-AA96-580BB6DE5578}.ReleaseNoTLS|x64.ActiveCfg = ReleaseNoTLS|x64
+		{304F24BB-9348-4B1D-AA96-580BB6DE5578}.ReleaseNoTLS|x64.Build.0 = ReleaseNoTLS|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

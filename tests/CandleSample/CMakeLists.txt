@@ -85,12 +85,6 @@ set_target_properties(${PROJECT}
     LINK_FLAGS "${ADDITIONAL_PROPERTIES}"
     )
 
-set_target_properties(${LIB_DXFEED_PROJ}
-    PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/Debug"
-    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/Release"
-    )
-
 add_dependencies(${PROJECT} ${LIB_DXFEED_PROJ})
 
 set(PROJECT_FILES

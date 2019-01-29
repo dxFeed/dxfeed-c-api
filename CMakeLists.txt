@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.1)
+cmake_minimum_required(VERSION 3.12)
 
 cmake_policy(SET CMP0015 NEW)
 cmake_policy(SET CMP0013 NEW)
@@ -36,6 +36,7 @@ if (WIN32 AND MSVC)
     add_subdirectory(wrappers/COM/samples/C++)
 endif (WIN32 AND MSVC)
 
+add_subdirectory(wrappers/cpp)
 
 set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/DXFeedAllCPackConfig.cmake")
 set(CPACK_PACKAGE_VENDOR "Devexperts")

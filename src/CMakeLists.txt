@@ -255,6 +255,10 @@ add_library(${PROJECT} SHARED ${ALL_HEADERS} ${ALL_SOURCES})
 
 target_link_libraries(${PROJECT} PRIVATE ${ADDITIONAL_LIBRARIES})
 
+if (WIN32)
+    set_target_properties(${PROJECT} PROPERTIES PREFIX "")
+endif ()
+
 if (NOT DISABLE_TLS)
     if (WIN32)
         ADD_CUSTOM_COMMAND(

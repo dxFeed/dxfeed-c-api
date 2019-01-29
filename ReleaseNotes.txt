@@ -1,3 +1,6 @@
+Version 5.4.1
+* The C++ wrapper & sample are added
+
 Version 5.4.0
 * Notifications for connection status changes
   - the ability to notify about changes in the connection status is added. See: dxf_connection_status_t enum,
