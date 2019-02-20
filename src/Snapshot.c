@@ -778,7 +778,8 @@ dxf_snapshot_t dx_create_snapshot(dxf_connection_t connection,
 	snapshot_data->time = time;
 	if (order_source != NULL)
 		snapshot_data->order_source = dx_create_string_src(order_source);
-	snapshot_data->status = dx_status_unknown;
+	snapshot_data->status = dx_status_full;
+	snapshot_data->full_snapshot_published = true;
 	snapshot_data->sscc = context;
 	snapshot_data->subscription = subscription;
 
@@ -978,7 +979,7 @@ bool dx_remove_snapshot_inc_listener(dxf_snapshot_t snapshot, dxf_snapshot_inc_l
 	DX_ARRAY_DELETE(snapshot_data->listeners, dx_snapshot_listener_context_t, listener_index,
 		dx_capacity_manager_halfer, failed);
 
-	/* Check, do we have anymore incremental listenerts */
+	/* Check, do we have anymore incremental listeners */
 	for (listener_index = 0; !snapshot_data->has_inc_listeners && listener_index < snapshot_data->listeners.size; listener_index++) {
 		snapshot_data->has_inc_listeners |= snapshot_data->listeners.elements[listener_index].incremental;
 	}

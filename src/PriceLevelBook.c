@@ -463,6 +463,8 @@ static dx_plb_source_t *dx_plb_source_create(dxf_connection_t connection, dxf_co
 	source->bids.cmp = &dx_plb_pricelvel_comparator_bid;
 	source->asks.cmp = &dx_plb_pricelvel_comparator_ask;
 
+	source->snapshot_status = dx_status_full;
+
 	/* Create subscription */
 	if ((source->subscription = dx_create_event_subscription(connection, DXF_ET_ORDER, subscr_flags, 0)) == dx_invalid_subscription) {
 		dx_plb_source_free(source);
