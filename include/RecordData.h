@@ -226,8 +226,10 @@ typedef struct {
 } dx_underlying_t;
 
 typedef struct {
-    dxf_dayid_t expiration;
+    dxf_int_t index;
+    dxf_int_t time;
     dxf_int_t sequence;
+    dxf_dayid_t expiration;
     dxf_double_t volatility;
     dxf_double_t put_call_ratio;
     dxf_double_t forward_price;

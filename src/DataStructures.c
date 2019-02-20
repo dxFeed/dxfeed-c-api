@@ -282,8 +282,10 @@ static const dx_field_info_t dx_fields_underlying[] = {
 /* -------------------------------------------------------------------------- */
 
 static const dx_field_info_t dx_fields_series[] = {
-	{ dx_fid_compact_int | dx_fid_flag_date,     L"Expiration",   DX_RECORD_FIELD_STDOPS(dx_series_t, expiration),     dx_ft_first_time_int_field  },
-    { dx_fid_compact_int | dx_fid_flag_sequence, L"Sequence",     DX_RECORD_FIELD_STDOPS(dx_series_t, sequence),       dx_ft_second_time_int_field },
+    { dx_fid_compact_int,                        L"Index",        DX_RECORD_FIELD_STDOPS(dx_series_t, index),          dx_ft_second_time_int_field },
+    { dx_fid_compact_int,                        L"Time",         DX_RECORD_FIELD_STDOPS(dx_series_t, time),           dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_sequence, L"Sequence",     DX_RECORD_FIELD_STDOPS(dx_series_t, sequence),       dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_date,     L"Expiration",   DX_RECORD_FIELD_STDOPS(dx_series_t, expiration),     dx_ft_common_field },
     { dx_fid_compact_int | dx_fid_flag_decimal,  L"Volatility",   DX_RECORD_FIELD_STDOPS(dx_series_t, volatility),     dx_ft_common_field },
     { dx_fid_compact_int | dx_fid_flag_decimal,  L"PutCallRatio", DX_RECORD_FIELD_STDOPS(dx_series_t, put_call_ratio), dx_ft_common_field },
     { dx_fid_compact_int | dx_fid_flag_decimal,  L"ForwardPrice", DX_RECORD_FIELD_STDOPS(dx_series_t, forward_price),  dx_ft_common_field },

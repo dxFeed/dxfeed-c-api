@@ -1005,7 +1005,9 @@ bool RECORD_TRANSCODER_NAME(dx_series_t) (dx_record_transcoder_connection_contex
 		dxf_series_t* cur_event = event_buffer + i;
 
 		cur_event->event_flags = event_params->flags;
-		cur_event->index = (((dxf_long_t)cur_record->expiration) << DX_SERIES_INDEX_TIME_SHIFT) | (cur_record->sequence);
+		cur_event->index = cur_record->index;
+		cur_event->time = DX_TIME_SEQ_TO_MS(cur_record);
+		cur_event->sequence = DX_SEQUENCE(cur_record);
 		cur_event->expiration = cur_record->expiration;
 		cur_event->volatility = cur_record->volatility;
 		cur_event->put_call_ratio = cur_record->put_call_ratio;

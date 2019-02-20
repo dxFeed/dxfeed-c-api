@@ -303,13 +303,15 @@ DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_underlying_t, put_call_ratio);
  */
 /* -------------------------------------------------------------------------- */
 
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_series_t, expiration);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_series_t, sequence);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_series_t, volatility);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_series_t, put_call_ratio);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_series_t, forward_price);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_series_t, dividend);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_series_t, interest);
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_series_t, index)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_series_t, time)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_series_t, sequence)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_series_t, expiration)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_series_t, volatility)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_series_t, put_call_ratio)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_series_t, forward_price)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_series_t, dividend)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_series_t, interest)
 
 /* -------------------------------------------------------------------------- */
 /*

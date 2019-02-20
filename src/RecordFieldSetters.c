@@ -386,13 +386,15 @@ FIELD_STDOPS_BODIES(dx_underlying_t, put_call_ratio, dxf_double_t);
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_STDOPS_BODIES(dx_series_t, expiration, dxf_dayid_t);
-FIELD_STDOPS_BODIES(dx_series_t, sequence, dxf_int_t);
-FIELD_STDOPS_BODIES(dx_series_t, volatility, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_series_t, put_call_ratio, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_series_t, forward_price, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_series_t, dividend, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_series_t, interest, dxf_double_t);
+FIELD_STDOPS_BODIES(dx_series_t, index, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_series_t, time, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_series_t, sequence, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_series_t, expiration, dxf_dayid_t)
+FIELD_STDOPS_BODIES(dx_series_t, volatility, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_series_t, put_call_ratio, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_series_t, forward_price, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_series_t, dividend, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_series_t, interest, dxf_double_t)
 
 /* -------------------------------------------------------------------------- */
 /*

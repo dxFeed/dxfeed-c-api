@@ -195,7 +195,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
 				break;
 			}
 
-			wprintf(L"time=");
+			wprintf(L"   {time=");
 			print_timestamp(candle.time);
 			wprintf(L", sequence=%d, count=%f, open=%f, high=%f, low=%f, close=%f, volume=%f, "
 				L"VWAP=%f, bidVolume=%f, askVolume=%f}\n",
@@ -233,7 +233,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
 				break;
 			}
 
-			wprintf(L"event id=%I64i, time=%I64i, exchange code=%c, price=%f, size=%i, bid price=%f, ask price=%f, "
+			wprintf(L"   {event id=%I64i, time=%I64i, exchange code=%c, price=%f, size=%i, bid price=%f, ask price=%f, "
 				L"exchange sale conditions=\'%ls\', is ETH trade=%ls, type=%i}\n",
 				tns.index, tns.time, tns.exchange_code, tns.price, tns.size,
 				tns.bid_price, tns.ask_price, tns.exchange_sale_conditions,
@@ -249,7 +249,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
 				break;
 			}
 
-			wprintf(L"time=");
+			wprintf(L"   {time=");
 			print_timestamp(grks.time);
 			wprintf(L", index=0x%I64X, greeks price=%f, volatility=%f, "
 				L"delta=%f, gamma=%f, theta=%f, rho=%f, vega=%f}\n",
@@ -265,10 +265,12 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
 				wprintf(L"   { ... %zu records left ...}\n", records_count - i);
 				break;
 			}
-			wprintf(L"expiration=%d, index=0x%I64X, volatility=%f, put call ratio=%f, "
-				L"forward_price=%f, dividend=%f, interest=%f}\n",
-				srs.expiration, srs.index, srs.volatility, srs.put_call_ratio,
-				srs.forward_price, srs.dividend, srs.interest);
+			wprintf(L"   {index=%I64i, time=", srs.index);
+			print_timestamp(srs.time);
+			wprintf(L", sequence=%i, expiration=%d, volatility=%f, put call ratio=%f, "
+					L"forward_price=%f, dividend=%f, interest=%f, index=0x%I64X}\n",
+					srs.sequence, srs.expiration, srs.volatility, srs.put_call_ratio,
+					srs.forward_price, srs.dividend, srs.interest, srs.index);
 		}
 	}
 }
