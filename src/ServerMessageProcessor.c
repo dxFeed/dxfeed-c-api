@@ -123,6 +123,7 @@ typedef struct {
 
 	dx_record_server_support_state_list_t* record_server_support_states;
 	dx_record_digest_list_t record_digests;
+	dx_mutex_t record_digests_guard;
 
 	void* bicc; /* buffered input connection context */
 	void* rbcc; /* record buffers connection context */
@@ -162,6 +163,12 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_server_msg_processor) {
 
 	context->connection = connection;
 	dx_init_record_digests_list(&(context->record_digests));
+
+	if (!dx_mutex_create(&(context->record_digests_guard))) {
+		dx_free(context);
+
+		return false;
+	}
 
 	if ((context->bicc = dx_get_buffered_input_connection_context(connection)) == NULL ||
 		(context->rbcc = dx_get_record_buffers_connection_context(connection)) == NULL ||
@@ -378,8 +385,17 @@ void dx_clear_record_digest (dx_record_digest_t* digest) {
 void dx_clear_record_digests (dx_server_msg_proc_connection_context_t* context) {
 	dx_record_id_t i = 0;
 	dx_record_id_t count = 0;
-	if (context->record_digests.elements == NULL)
+
+	if (!dx_mutex_lock(&(context->record_digests_guard))) {
 		return;
+	}
+
+	if (context->record_digests.elements == NULL) {
+		dx_mutex_unlock(&(context->record_digests_guard));
+
+		return;
+	}
+
 	count = (dx_record_id_t)context->record_digests.size;
 	for (; i < count; ++i) {
 		dx_record_digest_t* record_digest = dx_get_record_digest(context, i);
@@ -390,6 +406,7 @@ void dx_clear_record_digests (dx_server_msg_proc_connection_context_t* context) 
 
 	dx_free(context->record_digests.elements);
 	dx_init_record_digests_list(&(context->record_digests));
+	dx_mutex_unlock(&(context->record_digests_guard));
 }
 
 /* -------------------------------------------------------------------------- */
@@ -901,13 +918,19 @@ bool dx_read_records (dx_server_msg_proc_connection_context_t* context,
 	dxf_double_t read_double;
 	dxf_string_t read_string;
 	dxf_byte_array_t read_byte_array;
-	const dx_record_digest_t* record_digest = dx_get_record_digest(context, record_id);
-
-	if (record_digest == NULL)
-		return dx_set_error_code(dx_ec_invalid_func_param_internal);
 
 	if (IS_FLAG_SET(context->last_flags, dxf_ef_remove_event)) {
 		return dx_read_qdtime_on_remove_event(context, record_id, record_buffer);
+	}
+
+	CHECKED_CALL(dx_mutex_lock, &(context->record_digests_guard));
+
+	const dx_record_digest_t* record_digest = dx_get_record_digest(context, record_id);
+
+	if (record_digest == NULL) {
+		CHECKED_CALL(dx_mutex_unlock, &(context->record_digests_guard));
+
+		return dx_set_error_code(dx_ec_invalid_func_param_internal);
 	}
 
 	for (; i < record_digest->size; ++i) {
@@ -1006,9 +1029,13 @@ bool dx_read_records (dx_server_msg_proc_connection_context_t* context,
 
 			break;
 		default:
+			CHECKED_CALL(dx_mutex_unlock, &(context->record_digests_guard));
+
 			return dx_set_error_code(dx_pec_record_field_type_not_supported);
 		}
 	}
+
+	CHECKED_CALL(dx_mutex_unlock, &(context->record_digests_guard));
 
 	return true;
 }
