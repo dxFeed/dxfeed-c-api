@@ -1,5 +1,9 @@
-Version 5.4.1
-* The C++ wrapper & sample are added
+Version 5.5.0
+
+* Fixed an issue with concurrent modification of record digests data
+* Updated the Series API to QDS 3.271
+* Fixed a Series snapshot data processing
+* Added the C++ wrapper & sample
 
 Version 5.4.0
 * Notifications for connection status changes
