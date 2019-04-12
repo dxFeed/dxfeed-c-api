@@ -1,5 +1,9 @@
-Version 5.5.0
+Version 5.5.1
+* Used recursive mutexes on Linux
+  - The pthread mutexes were converted to recursive
+  - Fixed zip packaging on Linux
 
+Version 5.5.0
 * Fixed an issue with concurrent modification of record digests data
 * Updated the Series API to QDS 3.271
 * Fixed a Series snapshot data processing
