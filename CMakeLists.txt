@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 2.8.1)
 
 cmake_policy(SET CMP0015 NEW)
 cmake_policy(SET CMP0013 NEW)
@@ -23,9 +23,14 @@ endif (NOT DISABLE_TLS)
 
 #Note: add projects to build and package below
 add_subdirectory(src)
+
 add_subdirectory(tests/CandleSample)
 add_subdirectory(tests/CommandLineSample)
-add_subdirectory(tests/FullTest)
+
+if (WIN32)
+    add_subdirectory(tests/FullTest)
+endif (WIN32)
+
 add_subdirectory(tests/PriceLevelBookSample)
 add_subdirectory(tests/RegionalBookSample)
 add_subdirectory(tests/SnapshotConsoleSample)
@@ -36,7 +41,9 @@ if (WIN32 AND MSVC)
     add_subdirectory(wrappers/COM/samples/C++)
 endif (WIN32 AND MSVC)
 
-add_subdirectory(wrappers/cpp)
+#if (WIN32)
+    add_subdirectory(wrappers/cpp)
+#endif (WIN32)
 
 set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/DXFeedAllCPackConfig.cmake")
 set(CPACK_PACKAGE_VENDOR "Devexperts")

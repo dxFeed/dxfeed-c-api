@@ -108,7 +108,7 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_regional_book) {
 
 	context->connection = connection;
 
-	if (!dx_mutex_create(&(context->guard))) {
+	if (!dx_mutex_create(&context->guard)) {
 		dx_rb_clear_connection_context(context);
 		return false;
 	}

@@ -82,8 +82,6 @@ typedef struct {
 /* -------------------------------------------------------------------------- */
 
 void* dx_destroy_event_subscription_task_data (dx_event_subscription_task_data_t* data) {
-	int i = 0;
-
 	if (data == NULL) {
 		return NULL;
 	}
@@ -369,9 +367,8 @@ bool dx_load_events_for_subscription (dxf_connection_t connection, dx_order_sour
 	dx_event_id_t eid = dx_eid_begin;
 	for (; eid < dx_eid_count; ++eid) {
 		if (event_types & DX_EVENT_BIT_MASK(eid)) {
-			size_t j = 0;
 			dx_event_subscription_param_list_t subscr_params;
-			size_t param_count = dx_get_event_subscription_params(connection, order_source, eid, subscr_flags, &subscr_params);
+			dx_get_event_subscription_params(connection, order_source, eid, subscr_flags, &subscr_params);
 			dx_free(subscr_params.elements);
 		}
 	}

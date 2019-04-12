@@ -69,17 +69,6 @@
 		return GENERIC_VALUE_GETTER_NAME(field_type)(); \
 	}
 
-#define FIELD_DEF_VAL_BODY_CUSTOM_FUN(struct_name, field_name, fun_name, fun_param) \
-	DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(struct_name, field_name) { \
-		/* this custom macro handles the case when some non-generic action needs \
-		to be taken. \
-		in fact, 'fun_name' may be not an explicit function name, but rather a \
-		macro name which may be parametrized by 'fun_param' into a real \
-		function name. */ \
-		\
-		return fun_name(fun_param); \
-	}
-
 /* -------------------------------------------------------------------------- */
 /*
  *	Some less-than-generic value getters macros
@@ -88,9 +77,6 @@
 
 #define RECORD_EXCHANGE_CODE_GETTER_NAME(record_id) \
 	record_id##_exchange_code_getter
-
-#define RECORD_EXCHANGE_CODE_GETTER_FUN(record_id) \
-	record_id##_exchange_code_getter(void* dscc)
 
 #define RECORD_EXCHANGE_CODE_GETTER_BODY(record_id) \
 	const void* RECORD_EXCHANGE_CODE_GETTER_NAME(record_id) (void* dscc) { \
@@ -218,15 +204,15 @@ FIELD_STDOPS_BODIES(dx_quote_t, ask_size, dxf_int_t)
 /* -------------------------------------------------------------------------- */
 
 FIELD_STDOPS_BODIES(dx_summary_t, day_id, dxf_dayid_t)
-FIELD_STDOPS_BODIES(dx_summary_t, day_open_price, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_summary_t, day_high_price, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_summary_t, day_low_price, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_summary_t, day_close_price, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_summary_t, prev_day_id, dxf_dayid_t);
-FIELD_STDOPS_BODIES(dx_summary_t, prev_day_close_price, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_summary_t, prev_day_volume, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_summary_t, open_interest, dxf_int_t);
-FIELD_STDOPS_BODIES(dx_summary_t, flags, dxf_int_t);
+FIELD_STDOPS_BODIES(dx_summary_t, day_open_price, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_summary_t, day_high_price, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_summary_t, day_low_price, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_summary_t, day_close_price, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_summary_t, prev_day_id, dxf_dayid_t)
+FIELD_STDOPS_BODIES(dx_summary_t, prev_day_close_price, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_summary_t, prev_day_volume, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_summary_t, open_interest, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_summary_t, flags, dxf_int_t)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -343,15 +329,15 @@ FIELD_STDOPS_BODIES(dx_spread_order_t, spread_symbol, dxf_const_string_t)
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_STDOPS_BODIES(dx_greeks_t, time, dxf_int_t);
-FIELD_STDOPS_BODIES(dx_greeks_t, sequence, dxf_int_t);
-FIELD_STDOPS_BODIES(dx_greeks_t, price, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_greeks_t, volatility, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_greeks_t, delta, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_greeks_t, gamma, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_greeks_t, theta, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_greeks_t, rho, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_greeks_t, vega, dxf_double_t);
+FIELD_STDOPS_BODIES(dx_greeks_t, time, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_greeks_t, sequence, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_greeks_t, price, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_greeks_t, volatility, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_greeks_t, delta, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_greeks_t, gamma, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_greeks_t, theta, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_greeks_t, rho, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_greeks_t, vega, dxf_double_t)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -359,15 +345,15 @@ FIELD_STDOPS_BODIES(dx_greeks_t, vega, dxf_double_t);
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_SETTER_BODY  (dx_theo_price_t, time, dxf_int_t);
-FIELD_DEF_VAL_BODY (dx_theo_price_t, time, dxf_int_t);
-FIELD_GETTER_BODY  (dx_theo_price_t, time, dxf_long_t);
-FIELD_STDOPS_BODIES(dx_theo_price_t, price, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_theo_price_t, underlying_price, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_theo_price_t, delta, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_theo_price_t, gamma, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_theo_price_t, dividend, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_theo_price_t, interest, dxf_double_t);
+FIELD_SETTER_BODY  (dx_theo_price_t, time, dxf_int_t)
+FIELD_DEF_VAL_BODY (dx_theo_price_t, time, dxf_int_t)
+FIELD_GETTER_BODY  (dx_theo_price_t, time, dxf_long_t)
+FIELD_STDOPS_BODIES(dx_theo_price_t, price, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_theo_price_t, underlying_price, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_theo_price_t, delta, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_theo_price_t, gamma, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_theo_price_t, dividend, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_theo_price_t, interest, dxf_double_t)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -375,10 +361,10 @@ FIELD_STDOPS_BODIES(dx_theo_price_t, interest, dxf_double_t);
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_STDOPS_BODIES(dx_underlying_t, volatility, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_underlying_t, front_volatility, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_underlying_t, back_volatility, dxf_double_t);
-FIELD_STDOPS_BODIES(dx_underlying_t, put_call_ratio, dxf_double_t);
+FIELD_STDOPS_BODIES(dx_underlying_t, volatility, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_underlying_t, front_volatility, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_underlying_t, back_volatility, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_underlying_t, put_call_ratio, dxf_double_t)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -402,8 +388,8 @@ FIELD_STDOPS_BODIES(dx_series_t, interest, dxf_double_t)
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_STDOPS_BODIES(dx_configuration_t, version, dxf_int_t);
-FIELD_STDOPS_BODIES(dx_configuration_t, object, dxf_byte_array_t);
+FIELD_STDOPS_BODIES(dx_configuration_t, version, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_configuration_t, object, dxf_byte_array_t)
 
 /* -------------------------------------------------------------------------- */
 

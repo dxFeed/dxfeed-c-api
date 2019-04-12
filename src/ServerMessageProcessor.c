@@ -164,7 +164,7 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_server_msg_processor) {
 	context->connection = connection;
 	dx_init_record_digests_list(&(context->record_digests));
 
-	if (!dx_mutex_create(&(context->record_digests_guard))) {
+	if (!dx_mutex_create(&context->record_digests_guard)) {
 		dx_free(context);
 
 		return false;
@@ -192,7 +192,7 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_server_msg_processor) {
 
 	context->describe_protocol_status = dx_dps_not_sent;
 
-	if (!dx_mutex_create(&(context->describe_protocol_guard))) {
+	if (!dx_mutex_create(&context->describe_protocol_guard)) {
 		dx_free(context);
 
 		return false;

@@ -1,62 +1,13 @@
-
 # /
 /bin
-/build
 /ipch
-**/*.suo
-**/*.user
+/**/*.suo
+/**/*.user
+/**/*.aps
+/**/build
 /*.ncb
 /*.sdf
 /*.opensdf
-
-/src/*.aps
-/src/build
-
-# /tests/APITest/
-/tests/APITest/build
-
-# /tests/CommandLineSample/
-/tests/CommandLineSample/build
-
-# /tests/ConnectionTest/
-/tests/ConnectionTest/build
-
-# /tests/FullTest/
-/tests/FullTest/build
-
-# /tests/LastEventTest/
-/tests/LastEventTest/build
-
-# /tests/PerformanceTest/
-/tests/PerformanceTest/build
-
-# /tests/PriceLevelBookSample/
-/tests/PriceLevelBookSample/build
-
-# /tests/QuoteTableTest/
-/tests/QuoteTableTest/build
-
-# /tests/SampleTest/
-/tests/SampleTest/build
-
-# /tests/UnitTests/
-/tests/UnitTests/*.log
-/tests/UnitTests/build
-
-# /tests/SnapshotConsoleSample/
-/tests/SnapshotConsoleSample/*.suo
-/tests/SnapshotConsoleSample/build
-
-# /wrappers/COM/samples/C++/
-/wrappers/COM/samples/C++/build
-
-# /wrappers/COM/src/
-/wrappers/COM/src/*.aps
-/wrappers/COM/src/build
-
-# /tests/CandleSample/
-/tests/CandleSample/build
-
 /.vs
 /DXFeed.VC.db
 /DXFeed.VC.VC.opendb
@@ -66,4 +17,5 @@
 cmake-build-debug*/**
 cmake-build-release*/**
 
-**/*.log
+/**/*.log
+/**/*.*~

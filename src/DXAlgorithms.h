@@ -563,31 +563,12 @@ void atomic_write_time(time_t volatile * dest, time_t src);
 
 #warning "no fence, no atomic read/write for 64 bit variables on 32 bit platforms, additional synchronization is needed";
 
-inline long long atomic_read(long long* value) {
-	return *value;
-}
-
-inline void atomic_write(long long* dest, long long src) {
-	*dest = src;
-}
-
-inline long atomic_read32(long* value) {
-	return *value;
-}
-
-inline void atomic_write32(long* dest, long src) {
-	*dest = src;
-}
-
-inline time_t atomic_read_time(time_t* value)
-{
-    return *value;
-}
-
-inline void atomic_write_time(time_t* dest, time_t src)
-{
-    *dest = src;
-}
+long long atomic_read(long long* value);
+void atomic_write(long long* dest, long long src);
+long atomic_read32(long* value);
+void atomic_write32(long* dest, long src);
+time_t atomic_read_time(time_t* value);
+void atomic_write_time(time_t* dest, time_t src);
 
 #endif
 

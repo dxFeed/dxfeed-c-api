@@ -204,7 +204,24 @@ bool dx_compare_threads (dx_thread_t t1, dx_thread_t t2) {
 /* -------------------------------------------------------------------------- */
 
 bool dx_mutex_create (dx_mutex_t* mutex) {
-	int res = pthread_mutex_init(mutex, NULL);
+	int res = pthread_mutexattr_init(&mutex->attr);
+
+	switch (res) {
+	case ENOMEM:
+		return dx_set_error_code(dx_tec_not_enough_memory);
+	case EINVAL:
+		return dx_set_error_code(dx_tec_invalid_resource_id);
+	default: break;
+	}
+
+	res = pthread_mutexattr_settype(&mutex->attr, PTHREAD_MUTEX_RECURSIVE);
+
+	if (res == EINVAL) {
+		return dx_set_error_code(dx_tec_invalid_resource_id);
+	}
+
+	res = pthread_mutex_init(&mutex->mutex, &mutex->attr);
+
 	switch (res) {
 	case EAGAIN:
 		return dx_set_error_code(dx_tec_not_enough_sys_resources);
@@ -226,15 +243,27 @@ bool dx_mutex_create (dx_mutex_t* mutex) {
 /* -------------------------------------------------------------------------- */
 
 bool dx_mutex_destroy (dx_mutex_t* mutex) {
-	int res = pthread_mutex_destroy(mutex);
+	int res = pthread_mutex_destroy(&mutex->mutex);
+
 	switch (res) {
 	case EBUSY:
 		return dx_set_error_code(dx_tec_resource_busy);
 	case EINVAL:
 		return dx_set_error_code(dx_tec_invalid_resource_id);
+	case 0:
+		break;
 	default:
 		return dx_set_error_code(dx_tec_generic_error);
-	case 0:
+	}
+
+	res = pthread_mutexattr_destroy(&mutex->attr);
+
+	switch (res) {
+	case ENOMEM:
+		return dx_set_error_code(dx_tec_not_enough_memory);
+	case EINVAL:
+		return dx_set_error_code(dx_tec_invalid_resource_id);
+	default:
 		return true;
 	}
 }
@@ -242,7 +271,7 @@ bool dx_mutex_destroy (dx_mutex_t* mutex) {
 /* -------------------------------------------------------------------------- */
 
 bool dx_mutex_lock (const dx_mutex_t* mutex) {
-	int res = pthread_mutex_lock(mutex);
+	int res = pthread_mutex_lock(&mutex->mutex);
 	switch (res) {
 	case EINVAL:
 		return dx_set_error_code(dx_tec_invalid_resource_id);
@@ -260,7 +289,7 @@ bool dx_mutex_lock (const dx_mutex_t* mutex) {
 /* -------------------------------------------------------------------------- */
 
 bool dx_mutex_unlock (const dx_mutex_t* mutex) {
-	int res = pthread_mutex_unlock(mutex);
+	int res = pthread_mutex_unlock(&mutex->mutex);
 	switch (res) {
 	case EINVAL:
 		return dx_set_error_code(dx_tec_invalid_resource_id);

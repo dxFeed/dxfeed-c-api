@@ -166,6 +166,8 @@ bool dx_property_map_contains(const dx_property_map_t* props, dxf_const_string_t
 		return dx_set_error_code(dx_ec_invalid_func_param);
 
 	DX_ARRAY_BINARY_SEARCH(props->elements, 0, props->size, item, dx_property_item_comparator, found, index);
+
+	(void)index;
 	return found;
 }
 

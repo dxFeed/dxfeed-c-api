@@ -159,7 +159,7 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_snapshot_subscription) {
 
 	context->connection = connection;
 
-	if (!dx_mutex_create(&(context->guard))) {
+	if (!dx_mutex_create(&context->guard)) {
 		dx_clear_snapshot_subscription_connection_context(context);
 
 		return false;

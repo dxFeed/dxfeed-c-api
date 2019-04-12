@@ -167,7 +167,7 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_price_level_book) {
 
 	context->connection = connection;
 
-	if (!dx_mutex_create(&(context->guard))) {
+	if (!dx_mutex_create(&context->guard)) {
 		dx_plb_clear_connection_context(context);
 		return false;
 	}

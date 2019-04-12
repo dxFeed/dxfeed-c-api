@@ -63,7 +63,7 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_buffered_output) {
 		return false;
 	}
 
-	if (!(dx_mutex_create(&(context->guard)) && (context->set_field_mask |= MUTEX_FIELD_FLAG)) || /* setting the flag if the function succeeded, not setting otherwise */
+	if (!(dx_mutex_create(&context->guard) && (context->set_field_mask |= MUTEX_FIELD_FLAG)) || /* setting the flag if the function succeeded, not setting otherwise */
 		!dx_set_subsystem_data(connection, dx_ccs_buffered_output, context)) {
 
 		dx_clear_buffered_output_context_data(context);

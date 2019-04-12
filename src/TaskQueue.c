@@ -61,7 +61,7 @@ bool dx_clear_task_queue_data (dx_task_queue_data_t* tqd) {
 	}
 
 	if (IS_FLAG_SET(tqd->set_fields_flags, MUTEX_FIELD_FLAG)) {
-		res = dx_mutex_destroy(&(tqd->guard)) && res;
+		res = dx_mutex_destroy(&tqd->guard) && res;
 	}
 
 	CHECKED_FREE(tqd->elements);
@@ -89,7 +89,7 @@ bool dx_create_task_queue (OUT dx_task_queue_t* tq) {
 		return false;
 	}
 
-	if (!(dx_mutex_create(&(tqd->guard)) && (tqd->set_fields_flags |= MUTEX_FIELD_FLAG))) { /* setting the flag if the function succeeded, not setting otherwise */
+	if (!(dx_mutex_create(&tqd->guard) && (tqd->set_fields_flags |= MUTEX_FIELD_FLAG))) { /* setting the flag if the function succeeded, not setting otherwise */
 		dx_clear_task_queue_data(tqd);
 
 		return false;

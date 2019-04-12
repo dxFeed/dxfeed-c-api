@@ -685,11 +685,6 @@ void dx_clear_address_array(dx_address_array_t* addresses) {
 
 bool dx_get_addresses_from_collection(const char* collection, OUT dx_address_array_t* addresses) {
 	char* collection_copied = NULL;
-	char* cur_address = NULL;
-	char* splitter_pos = NULL;
-	const char* last_port = NULL;
-	size_t i = 0;
-
 	const char* next = collection;
 
 	if (collection == NULL || addresses == NULL) {
@@ -698,7 +693,7 @@ bool dx_get_addresses_from_collection(const char* collection, OUT dx_address_arr
 		return false;
 	}
 
-	cur_address = collection_copied = dx_ansi_create_string_src(collection);
+	collection_copied = dx_ansi_create_string_src(collection);
 
 	if (collection_copied == NULL) {
 		return false;
@@ -731,7 +726,6 @@ bool dx_get_addresses_from_collection(const char* collection, OUT dx_address_arr
 			return false;
 		}
 
-		cur_address = splitter_pos;
 	} while (dx_has_next(next));
 
 	dx_free(collection_copied);

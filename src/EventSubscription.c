@@ -156,7 +156,7 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_event_subscription) {
 
 	context->connection = connection;
 
-	if (!dx_mutex_create(&(context->subscr_guard))) {
+	if (!dx_mutex_create(&context->subscr_guard)) {
 		dx_clear_event_subscription_connection_context(context);
 
 		return false;

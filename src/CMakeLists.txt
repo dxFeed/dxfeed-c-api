@@ -13,6 +13,8 @@ set(C_API_VERSION_PATCH 0)
 set(POSTFIX "")
 set(PLATFORM_POSTFIX "")
 set(LIB_TLS ${CMAKE_CURRENT_SOURCE_DIR}/../lib/libressl)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED on)
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(POSTFIX "d")
@@ -190,8 +192,8 @@ if (WIN32)
         # End hack
     elseif (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pedantic")
-        set(CMAKE_C_FLAGS_DEBUG "-g -O0 -std=gnu11")
-        set(CMAKE_C_FLAGS_RELEASE "-O2 -std=gnu11")
+        set(CMAKE_C_FLAGS_DEBUG "-g -O0")
+        set(CMAKE_C_FLAGS_RELEASE "-O2")
 
         set(ADDITIONAL_LIBRARIES
             ${ADDITIONAL_LIBRARIES}
@@ -214,8 +216,9 @@ if (WIN32)
         message("Unknown compiler")
     endif ()
 else ()
-    set(CMAKE_C_FLAGS_DEBUG "-g -O0 -std=gnu99 -fPIC")
-    set(CMAKE_C_FLAGS_RELEASE "-O2 -std=gnu99 -fPIC")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pedantic")
+    set(CMAKE_C_FLAGS_DEBUG "-g -O0 -fPIC")
+    set(CMAKE_C_FLAGS_RELEASE "-O2 -fPIC")
     add_definitions(-DUSE_PTHREADS)
 
     set(SOURCE_FILES
@@ -237,6 +240,8 @@ else ()
             tls
             )
     endif (NOT DISABLE_TLS)
+
+    set(ADDITIONAL_LIBRARIES ${ADDITIONAL_LIBRARIES} rt)
 endif (WIN32)
 
 if (NOT DISABLE_TLS)
@@ -271,13 +276,16 @@ if (NOT DISABLE_TLS)
     else ()
         ADD_CUSTOM_COMMAND(
             TARGET ${PROJECT}
-            PRE_BUILD
-            COMMAND ln -sf ${LIB_TLS}/nix/${TARGET_PLATFORM}/libcrypto.so.41.1.0 ${LIB_TLS}/nix/${TARGET_PLATFORM}/libcrypto.so.41
-            COMMAND ln -sf ${LIB_TLS}/nix/${TARGET_PLATFORM}/libcrypto.so.41.1.0 ${LIB_TLS}/nix/${TARGET_PLATFORM}/libcrypto.so
-            COMMAND ln -sf ${LIB_TLS}/nix/${TARGET_PLATFORM}/libssl.so.43.2.0 ${LIB_TLS}/nix/${TARGET_PLATFORM}/libssl.so.43
-            COMMAND ln -sf ${LIB_TLS}/nix/${TARGET_PLATFORM}/libssl.so.43.2.0 ${LIB_TLS}/nix/${TARGET_PLATFORM}/libssl.so
-            COMMAND ln -sf ${LIB_TLS}/nix/${TARGET_PLATFORM}/libtls.so.15.4.0 ${LIB_TLS}/nix/${TARGET_PLATFORM}/libtls.so.15
-            COMMAND ln -sf ${LIB_TLS}/nix/${TARGET_PLATFORM}/libtls.so.15.4.0 ${LIB_TLS}/nix/${TARGET_PLATFORM}/libtls.so
+            POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/nix/${TARGET_PLATFORM}/libcrypto.so.41.1.0 ${CMAKE_BINARY_DIR}/$(Configuration)
+            COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/nix/${TARGET_PLATFORM}/libcrypto.so.41 ${CMAKE_BINARY_DIR}/$(Configuration)
+            COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/nix/${TARGET_PLATFORM}/libcrypto.so ${CMAKE_BINARY_DIR}/$(Configuration)
+            COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/nix/${TARGET_PLATFORM}/libssl.so.43.2.0 ${CMAKE_BINARY_DIR}/$(Configuration)
+            COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/nix/${TARGET_PLATFORM}/libssl.so.43 ${CMAKE_BINARY_DIR}/$(Configuration)
+            COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/nix/${TARGET_PLATFORM}/libssl.so ${CMAKE_BINARY_DIR}/$(Configuration)
+            COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/nix/${TARGET_PLATFORM}/libtls.so.15.4.0 ${CMAKE_BINARY_DIR}/$(Configuration)
+            COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/nix/${TARGET_PLATFORM}/libtls.so.15 ${CMAKE_BINARY_DIR}/$(Configuration)
+            COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/nix/${TARGET_PLATFORM}/libtls.so ${CMAKE_BINARY_DIR}/$(Configuration)
         )
     endif (WIN32)
 endif (NOT DISABLE_TLS)
@@ -292,18 +300,33 @@ install(DIRECTORY "${INCLUDE_DIR}" "../scripts" "../src"
     PATTERN "build" EXCLUDE
     )
 install(FILES "../DXFeed.def" "../DXFeedd.def" "../DXFeed_64.def" "../DXFeedd_64.def"
-    "../DXFeed.sln" "../DXFeed.vcxproj" "../DXFeed.vcxproj.filters" "../Makefile"
-    "../CMakeLists.txt" "../build.bat" "../make_package.bat" "../ReleaseNotes.txt"
+    "../DXFeed.sln" "../DXFeed.vcxproj" "../DXFeed.vcxproj.filters"
+    "../CMakeLists.txt" "../build.bat" "../build.sh" "../make_package.bat" "../make_package.sh" "../ReleaseNotes.txt"
     DESTINATION "."
     )
 
 if (NOT DISABLE_TLS)
-    install(FILES
-        "${LIB_TLS}/${TARGET_PLATFORM}/libtls-15${PLATFORM_POSTFIX}.dll"
-        "${LIB_TLS}/${TARGET_PLATFORM}/libssl-43${PLATFORM_POSTFIX}.dll"
-        "${LIB_TLS}/${TARGET_PLATFORM}/libcrypto-41${PLATFORM_POSTFIX}.dll"
-        DESTINATION "bin/${TARGET_PLATFORM}"
-        )
+    if (WIN32)
+        install(FILES
+            "${LIB_TLS}/${TARGET_PLATFORM}/libtls-15${PLATFORM_POSTFIX}.dll"
+            "${LIB_TLS}/${TARGET_PLATFORM}/libssl-43${PLATFORM_POSTFIX}.dll"
+            "${LIB_TLS}/${TARGET_PLATFORM}/libcrypto-41${PLATFORM_POSTFIX}.dll"
+            DESTINATION "bin/${TARGET_PLATFORM}"
+            )
+    else ()
+        install(FILES
+            "${LIB_TLS}/nix/${TARGET_PLATFORM}/libtls.so.15.4.0"
+            "${LIB_TLS}/nix/${TARGET_PLATFORM}/libtls.so.15"
+            "${LIB_TLS}/nix/${TARGET_PLATFORM}/libtls.so"
+            "${LIB_TLS}/nix/${TARGET_PLATFORM}/libssl.so.43.2.0"
+            "${LIB_TLS}/nix/${TARGET_PLATFORM}/libssl.so.43"
+            "${LIB_TLS}/nix/${TARGET_PLATFORM}/libssl.so"
+            "${LIB_TLS}/nix/${TARGET_PLATFORM}/libcrypto.so.41.1.0"
+            "${LIB_TLS}/nix/${TARGET_PLATFORM}/libcrypto.so.41"
+            "${LIB_TLS}/nix/${TARGET_PLATFORM}/libcrypto.so"
+            DESTINATION "bin/${TARGET_PLATFORM}"
+            )
+    endif (WIN32)
     install(FILES "../COPYING.libressl"
         DESTINATION "."
         )

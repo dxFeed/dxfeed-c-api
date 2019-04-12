@@ -101,17 +101,17 @@ typedef void(*dx_record_field_getter_t)(void* object, OUT void* field);
  */
 /* -------------------------------------------------------------------------- */
 
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_t, time);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_t, sequence);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_t, time_nanos);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_t, exchange_code);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_t, price);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_t, size);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_t, tick);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_t, change);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_t, flags);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_t, day_volume);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_t, day_turnover);
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_t, time)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_t, sequence)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_t, time_nanos)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_t, exchange_code)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_t, price)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_t, size)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_t, tick)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_t, change)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_t, flags)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_t, day_volume)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_t, day_turnover)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -119,16 +119,16 @@ DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_t, day_turnover);
  */
 /* -------------------------------------------------------------------------- */
 
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_quote_t, sequence);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_quote_t, time_nanos);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_quote_t, bid_time);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_quote_t, bid_exchange_code);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_quote_t, bid_price);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_quote_t, bid_size);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_quote_t, ask_time);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_quote_t, ask_exchange_code);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_quote_t, ask_price);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_quote_t, ask_size);
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_quote_t, sequence)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_quote_t, time_nanos)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_quote_t, bid_time)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_quote_t, bid_exchange_code)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_quote_t, bid_price)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_quote_t, bid_size)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_quote_t, ask_time)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_quote_t, ask_exchange_code)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_quote_t, ask_price)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_quote_t, ask_size)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -136,16 +136,16 @@ DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_quote_t, ask_size);
  */
 /* -------------------------------------------------------------------------- */
 
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_summary_t, day_id);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_summary_t, day_open_price);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_summary_t, day_high_price);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_summary_t, day_low_price);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_summary_t, day_close_price);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_summary_t, prev_day_id);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_summary_t, prev_day_close_price);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_summary_t, prev_day_volume);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_summary_t, open_interest);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_summary_t, flags);
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_summary_t, day_id)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_summary_t, day_open_price)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_summary_t, day_high_price)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_summary_t, day_low_price)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_summary_t, day_close_price)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_summary_t, prev_day_id)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_summary_t, prev_day_close_price)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_summary_t, prev_day_volume)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_summary_t, open_interest)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_summary_t, flags)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -153,22 +153,22 @@ DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_summary_t, flags);
  */
 /* -------------------------------------------------------------------------- */
 
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, beta);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, eps);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, div_freq);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, exd_div_amount);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, exd_div_date);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, _52_high_price);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, _52_low_price);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, shares);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, free_float);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, high_limit_price);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, low_limit_price);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, halt_start_time);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, halt_end_time);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, flags);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, description);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, status_reason);
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, beta)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, eps)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, div_freq)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, exd_div_amount)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, exd_div_date)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, _52_high_price)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, _52_low_price)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, shares)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, free_float)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, high_limit_price)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, low_limit_price)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, halt_start_time)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, halt_end_time)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, flags)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, description)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, status_reason)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -176,16 +176,16 @@ DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_profile_t, status_reason);
  */
 /* -------------------------------------------------------------------------- */
 
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_market_maker_t, mm_exchange);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_market_maker_t, mm_id);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_market_maker_t, mmbid_time);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_market_maker_t, mmbid_price);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_market_maker_t, mmbid_size);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_market_maker_t, mmbid_count);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_market_maker_t, mmask_time);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_market_maker_t, mmask_price);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_market_maker_t, mmask_size);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_market_maker_t, mmask_count);
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_market_maker_t, mm_exchange)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_market_maker_t, mm_id)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_market_maker_t, mmbid_time)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_market_maker_t, mmbid_price)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_market_maker_t, mmbid_size)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_market_maker_t, mmbid_count)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_market_maker_t, mmask_time)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_market_maker_t, mmask_price)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_market_maker_t, mmask_size)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_market_maker_t, mmask_count)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -193,15 +193,15 @@ DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_market_maker_t, mmask_count);
  */
 /* -------------------------------------------------------------------------- */
 
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_order_t, index);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_order_t, time);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_order_t, time_nanos);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_order_t, sequence);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_order_t, price);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_order_t, size);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_order_t, flags);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_order_t, mmid);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_order_t, count);
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_order_t, index)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_order_t, time)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_order_t, time_nanos)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_order_t, sequence)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_order_t, price)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_order_t, size)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_order_t, flags)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_order_t, mmid)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_order_t, count)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -209,17 +209,17 @@ DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_order_t, count);
  */
 /* -------------------------------------------------------------------------- */
 
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_time_and_sale_t, time);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_time_and_sale_t, sequence);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_time_and_sale_t, exchange_code);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_time_and_sale_t, price);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_time_and_sale_t, size);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_time_and_sale_t, bid_price);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_time_and_sale_t, ask_price);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_time_and_sale_t, exchange_sale_conditions);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_time_and_sale_t, flags);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_time_and_sale_t, buyer);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_time_and_sale_t, seller);
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_time_and_sale_t, time)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_time_and_sale_t, sequence)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_time_and_sale_t, exchange_code)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_time_and_sale_t, price)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_time_and_sale_t, size)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_time_and_sale_t, bid_price)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_time_and_sale_t, ask_price)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_time_and_sale_t, exchange_sale_conditions)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_time_and_sale_t, flags)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_time_and_sale_t, buyer)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_time_and_sale_t, seller)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -227,19 +227,19 @@ DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_time_and_sale_t, seller);
  */
 /* -------------------------------------------------------------------------- */
 
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_candle_t, time);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_candle_t, sequence);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_candle_t, count);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_candle_t, open);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_candle_t, high);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_candle_t, low);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_candle_t, close);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_candle_t, volume);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_candle_t, vwap);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_candle_t, bid_volume);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_candle_t, ask_volume);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_candle_t, open_interest);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_candle_t, imp_volatility);
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_candle_t, time)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_candle_t, sequence)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_candle_t, count)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_candle_t, open)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_candle_t, high)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_candle_t, low)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_candle_t, close)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_candle_t, volume)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_candle_t, vwap)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_candle_t, bid_volume)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_candle_t, ask_volume)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_candle_t, open_interest)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_candle_t, imp_volatility)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -247,14 +247,14 @@ DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_candle_t, imp_volatility);
  */
 /* -------------------------------------------------------------------------- */
 
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_spread_order_t, index);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_spread_order_t, time);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_spread_order_t, sequence);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_spread_order_t, price);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_spread_order_t, size);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_spread_order_t, count);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_spread_order_t, flags);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_spread_order_t, spread_symbol);
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_spread_order_t, index)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_spread_order_t, time)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_spread_order_t, sequence)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_spread_order_t, price)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_spread_order_t, size)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_spread_order_t, count)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_spread_order_t, flags)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_spread_order_t, spread_symbol)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -262,15 +262,15 @@ DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_spread_order_t, spread_symbol);
  */
 /* -------------------------------------------------------------------------- */
 
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_greeks_t, time);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_greeks_t, sequence);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_greeks_t, price);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_greeks_t, volatility);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_greeks_t, delta);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_greeks_t, gamma);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_greeks_t, theta);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_greeks_t, rho);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_greeks_t, vega);
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_greeks_t, time)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_greeks_t, sequence)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_greeks_t, price)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_greeks_t, volatility)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_greeks_t, delta)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_greeks_t, gamma)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_greeks_t, theta)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_greeks_t, rho)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_greeks_t, vega)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -278,13 +278,13 @@ DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_greeks_t, vega);
  */
 /* -------------------------------------------------------------------------- */
 
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_theo_price_t, time);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_theo_price_t, price);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_theo_price_t, underlying_price);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_theo_price_t, delta);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_theo_price_t, gamma);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_theo_price_t, dividend);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_theo_price_t, interest);
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_theo_price_t, time)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_theo_price_t, price)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_theo_price_t, underlying_price)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_theo_price_t, delta)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_theo_price_t, gamma)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_theo_price_t, dividend)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_theo_price_t, interest)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -292,10 +292,10 @@ DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_theo_price_t, interest);
  */
 /* -------------------------------------------------------------------------- */
 
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_underlying_t, volatility);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_underlying_t, front_volatility);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_underlying_t, back_volatility);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_underlying_t, put_call_ratio);
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_underlying_t, volatility)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_underlying_t, front_volatility)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_underlying_t, back_volatility)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_underlying_t, put_call_ratio)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -319,7 +319,7 @@ DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_series_t, interest)
  */
 /* -------------------------------------------------------------------------- */
 
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_configuration_t, version);
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_configuration_t, object);
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_configuration_t, version)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_configuration_t, object)
 
 #endif /* RECORD_FIELD_SETTERS_H_INCLUDED */

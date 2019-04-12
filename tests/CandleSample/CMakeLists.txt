@@ -18,6 +18,8 @@ set(LIB_DXFEED_NAME ${LIB_DXFEED_PROJ})
 set(LIB_DXFEED_OUT_DIR ${CMAKE_BINARY_DIR}/${LIB_DXFEED_PROJ})
 
 set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE TYPE INTERNAL FORCE)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED on)
 
 project(${PROJECT})
 
@@ -53,14 +55,14 @@ if (WIN32)
         set(CMAKE_C_STANDARD_LIBRARIES "" CACHE STRING "" FORCE)
         # End hack
     elseif (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
-        set(CMAKE_C_FLAGS_DEBUG "-g -O0 -std=gnu11 -D_DEBUG")
-        set(CMAKE_C_FLAGS_RELEASE "-O2 -std=gnu11 -DNDEBUG -DWIN32")
+        set(CMAKE_C_FLAGS_DEBUG "-g -O0 -D_DEBUG")
+        set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG -DWIN32")
     else ()
         message("Unknown compiler")
     endif ()
 else ()
-    set(CMAKE_C_FLAGS_DEBUG "-g -O0 -std=gnu11 -fPIC")
-    set(CMAKE_C_FLAGS_RELEASE "-O2 -std=gnu11 -fPIC")
+    set(CMAKE_C_FLAGS_DEBUG "-g -O0 -fPIC")
+    set(CMAKE_C_FLAGS_RELEASE "-O2 -fPIC")
     add_definitions(-DUSE_PTHREADS)
 endif (WIN32)
 
@@ -76,7 +78,7 @@ if (CMAKE_COMPILER_IS_GNUCC)
     endif (NOT DISABLE_TLS)
 endif (CMAKE_COMPILER_IS_GNUCC)
 
-target_link_libraries(${PROJECT} debug ${LIB_DXFEED_NAME}${DEBUG_POSTFIX} optimized ${LIB_DXFEED_NAME}${RELEASE_POSTFIX} ${ADDITIONAL_LIBRARIES})
+target_link_libraries(${PROJECT} DXFeed ${ADDITIONAL_LIBRARIES})
 
 set_target_properties(${PROJECT}
     PROPERTIES
@@ -94,20 +96,13 @@ set(PROJECT_FILES
 set(BUILD_FILES
     build.bat
     CMakeLists.txt
-    build.sh
-    Makefile
     )
 set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/DXFeedAllCPackConfig.cmake")
 install(TARGETS ${PROJECT}
     DESTINATION "bin/${TARGET_PLATFORM}"
-    CONFIGURATIONS Release
     )
 install(FILES ${SOURCE_FILES} ${PROJECT_FILES} ${BUILD_FILES}
     DESTINATION "tests/${PROJECT}"
-    CONFIGURATIONS Release
-    )
-install(FILES "../Makefile"
-    DESTINATION "tests"
     CONFIGURATIONS Release
     )
 set(CPACK_PACKAGE_VENDOR "Devexperts")

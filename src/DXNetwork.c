@@ -166,7 +166,7 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_network) {
 	context->queue_thread_state = true;
 
 	if (!(dx_create_task_queue(&(context->tq)) && (context->set_fields_flags |= TASK_QUEUE_FIELD_FLAG)) ||
-		!(dx_mutex_create(&(context->status_guard)) && (context->set_fields_flags |= STATUS_GUARD_FLAG)) ||
+		!(dx_mutex_create(&context->status_guard) && (context->set_fields_flags |= STATUS_GUARD_FLAG)) ||
 		!dx_set_subsystem_data(connection, dx_ccs_network, context)) {
 		dx_clear_connection_data(context);
 
@@ -368,7 +368,7 @@ bool dx_clear_connection_data (dx_network_connection_context_t* context) {
 	dx_clear_addr_context_data(&(context->addr_context));
 
 	if (IS_FLAG_SET(set_fields_flags, MUTEX_FIELD_FLAG)) {
-		success = dx_mutex_destroy(&(context->socket_guard)) && success;
+		success = dx_mutex_destroy(&context->socket_guard) && success;
 	}
 
 	if (IS_FLAG_SET(set_fields_flags, READER_THREAD_FIELD_FLAG)) {
@@ -386,7 +386,7 @@ bool dx_clear_connection_data (dx_network_connection_context_t* context) {
 	}
 
 	if (IS_FLAG_SET(set_fields_flags, STATUS_GUARD_FLAG)) {
-		success = dx_mutex_destroy(&(context->status_guard)) && success;
+		success = dx_mutex_destroy(&context->status_guard) && success;
 	}
 
 	CHECKED_FREE(context->address);
@@ -1120,7 +1120,7 @@ bool dx_bind_to_address (dxf_connection_t connection, const char* address, const
 
 	context->context_data = *ccd;
 
-	CHECKED_CALL(dx_mutex_create, &(context->socket_guard));
+	CHECKED_CALL(dx_mutex_create, &context->socket_guard);
 
 	context->set_fields_flags |= MUTEX_FIELD_FLAG;
 

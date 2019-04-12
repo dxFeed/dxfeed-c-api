@@ -36,7 +36,10 @@
 #	endif
 typedef pthread_t dx_thread_t;
 typedef pthread_key_t dx_key_t;
-typedef pthread_mutex_t dx_mutex_t;
+typedef struct {
+	pthread_mutex_t mutex;
+	pthread_mutexattr_t attr;
+} dx_mutex_t;
 typedef void* (*dx_start_routine_t)(void*);
 #define DX_THREAD_RETVAL_NULL NULL
 #else /* !defined(_WIN32) || defined(USE_PTHREADS) */

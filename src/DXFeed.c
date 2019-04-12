@@ -1118,8 +1118,6 @@ DXFEED_API ERRORCODE dxf_create_price_level_book(dxf_connection_t connection,
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_close_price_level_book(dxf_price_level_book_t book) {
-	dxf_subscription_t subscription = NULL;
-
 	dx_perform_common_actions();
 
 	if (book == NULL) {
@@ -1202,8 +1200,6 @@ DXFEED_API ERRORCODE dxf_create_regional_book(dxf_connection_t connection,
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_close_regional_book(dxf_regional_book_t book) {
-	dxf_subscription_t subscription = NULL;
-
 	dx_perform_common_actions();
 
 	if (book == NULL) {
