@@ -855,6 +855,7 @@ static bool dx_read_symbol (dx_server_msg_proc_connection_context_t* context) {
 		context->last_symbol = NULL;
 	} else if (r > 0) {
 		context->last_cipher = 0;
+		CHECKED_FREE(context->last_symbol);
 		context->last_symbol = dx_create_string_src_len(context->symbol_buffer, r);
 
 		if (context->last_symbol == NULL) {

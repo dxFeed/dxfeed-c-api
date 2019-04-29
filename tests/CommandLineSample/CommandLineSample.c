@@ -479,7 +479,7 @@ bool parse_symbols(char* symbols_string, OUT dxf_string_t** symbols, OUT int* sy
 int main (int argc, char* argv[]) {
 	dxf_connection_t connection;
 	dxf_subscription_t subscription;
-	int loop_counter = 100000;
+	int loop_counter = 604800;
 	int event_type;
 	dxf_string_t* symbols = NULL;
 	int symbol_count = 0;
