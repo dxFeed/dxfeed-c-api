@@ -1,3 +1,6 @@
+Version 5.5.2
+* Fixed a memory leak in ServerMessageProcessor
+
 Version 5.5.1
 * Used recursive mutexes on Linux
   - The pthread mutexes were converted to recursive
