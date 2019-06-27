@@ -98,30 +98,53 @@ void* dx_destroy_event_subscription_task_data (dx_event_subscription_task_data_t
 	return NULL;
 }
 
+size_t dx_count_symbols(dxf_const_string_t *symbols, size_t symbol_count) {
+	size_t count = 0;
+
+	for (size_t i = 0; i < symbol_count; i++) {
+		if (dx_string_null_or_empty(symbols[i])) {
+			continue;
+		}
+
+		count++;
+	}
+
+	return count;
+}
+
 /* -------------------------------------------------------------------------- */
 
 void* dx_create_event_subscription_task_data (dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
 											dxf_const_string_t* symbols, size_t symbol_count, int event_types,
 											bool unsubscribe, dxf_uint_t subscr_flags, dxf_long_t time) {
-	size_t i = 0;
 	dx_event_subscription_task_data_t* data = dx_calloc(1, sizeof(dx_event_subscription_task_data_t));
 
 	if (data == NULL) {
 		return NULL;
 	}
 
-	data->symbols = dx_calloc(symbol_count, sizeof(dxf_const_string_t));
+	size_t count = dx_count_symbols(symbols, symbol_count);
+	data->symbols = dx_calloc(count, sizeof(dxf_const_string_t));
 
 	if (data->symbols == NULL) {
 		return dx_destroy_event_subscription_task_data(data);
 	}
 
-	data->symbol_count = symbol_count;
+	data->symbol_count = count;
 
-	for (; i < symbol_count; ++i) {
-		if ((data->symbols[i] = dx_create_string_src(symbols[i])) == NULL) {
+	for (size_t i = 0, data_symbol_index = 0; i < symbol_count; ++i) {
+		if (dx_string_null_or_empty(symbols[i])) {
+			continue;
+		}
+
+		dxf_string_t symbol = dx_create_string_src(symbols[i]);
+
+		if (symbol == NULL) {
 			return dx_destroy_event_subscription_task_data(data);
 		}
+
+		data->symbols[data_symbol_index] = symbol;
+		data_symbol_index++;
 	}
 
 	if (order_source->size > 0) {
@@ -530,8 +553,6 @@ int dx_describe_protocol_sender_task (void* data, int command) {
 bool dx_subscribe_symbols_to_events (dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
 									dxf_const_string_t* symbols, size_t symbol_count, int event_types, bool unsubscribe,
 									bool task_mode, dxf_uint_t subscr_flags, dxf_long_t time) {
-	size_t i = 0;
-
 	CHECKED_CALL_2(dx_validate_connection_handle, connection, true);
 
 	{
@@ -570,7 +591,11 @@ bool dx_subscribe_symbols_to_events (dxf_connection_t connection, dx_order_sourc
 
 	/* executing in task mode (in background queue thread)*/
 	bool success = true;
-	for (; i < symbol_count && success; ++i){
+	for (size_t i = 0; i < symbol_count && success; ++i) {
+		if (dx_string_null_or_empty(symbols[i])) {
+			continue;
+		}
+
 		dxf_byte_t* buffer = NULL;
 		int buffer_size = 0;
 		int buffer_capacity = 0;
@@ -783,7 +808,7 @@ bool dx_send_heartbeat (dxf_connection_t connection, bool task_mode) {
 
 		return true;
 	}
-	
+
 	bocc = dx_get_buffered_output_connection_context(connection);
 
 	if (bocc == NULL) {

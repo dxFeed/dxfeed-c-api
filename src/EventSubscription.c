@@ -802,10 +802,8 @@ bool dx_add_symbols (dxf_subscription_t subscr_id, dxf_const_string_t* symbols, 
 		bool found = false;
 		bool failed = false;
 
-		if (symbols[cur_symbol_index] == NULL) {
-			dx_mutex_unlock(&(context->subscr_guard));
-
-			return dx_set_error_code(dx_esec_invalid_symbol_name);
+		if (dx_string_null_or_empty(symbols[cur_symbol_index])) {
+			continue;
 		}
 
 		symbol_index = dx_find_symbol_in_array(&(subscr_data->symbols), symbols[cur_symbol_index], &found);
@@ -854,15 +852,13 @@ bool dx_remove_symbols (dxf_subscription_t subscr_id, dxf_const_string_t* symbol
 	CHECKED_CALL(dx_mutex_lock, &(context->subscr_guard));
 
 	for (; cur_symbol_index < symbol_count; ++cur_symbol_index) {
+		if (dx_string_null_or_empty(symbols[cur_symbol_index])) {
+			continue;
+		}
+
 		size_t symbol_index;
 		bool failed = false;
 		bool found = false;
-
-		if (symbols[cur_symbol_index] == NULL) {
-			dx_mutex_unlock(&(context->subscr_guard));
-
-			return dx_set_error_code(dx_esec_invalid_symbol_name);
-		}
 
 		symbol_index = dx_find_symbol_in_array(&(subscr_data->symbols), symbols[cur_symbol_index], &found);
 

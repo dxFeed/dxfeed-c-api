@@ -166,16 +166,10 @@ size_t dx_ansi_string_length(const char* str) {
 
 /* -------------------------------------------------------------------------- */
 
-dxf_string_t dx_create_string_src_len (dxf_const_string_t src, size_t len) {
-	dxf_string_t res = NULL;
+dxf_string_t dx_create_string_src_len(dxf_const_string_t src, size_t len) {
+	dxf_string_t res = dx_create_string(len);
 
-	if (len == 0) {
-		return res;
-	}
-
-	res = dx_create_string(len);
-
-	if (res == NULL) {
+	if (res == NULL || len == 0) {
 		return res;
 	}
 
@@ -198,6 +192,10 @@ dxf_string_t dx_copy_string_len (dxf_string_t dest, dxf_const_string_t src, size
 
 size_t dx_string_length (dxf_const_string_t str) {
 	return wcslen(str);
+}
+
+bool dx_string_null_or_empty(dxf_const_string_t str) {
+	return str == NULL || dx_string_length(str) == 0;
 }
 
 /* -------------------------------------------------------------------------- */
