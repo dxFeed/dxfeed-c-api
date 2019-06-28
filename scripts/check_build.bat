@@ -30,6 +30,8 @@ rem Write list of configurations here
 rem Allowed configurations is Debug Release
 set CONFIGURATIONS=Debug Release
 
+echo Test list file: '%TESTS_LIST_FILE_PATH%'
+
 if NOT EXIST %TESTS_LIST_FILE_PATH% (
     echo ERROR: The tests list file '%TESTS_LIST_FILE_NAME%' not found^^!
     goto exit_error
