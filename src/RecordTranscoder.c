@@ -56,9 +56,9 @@ dxf_ulong_t int_to_bits(dxf_int_t value)
 
 dxf_ulong_t char_to_bits(dxf_char_t value)
 {
-	size_t zero_bites = CHAR_BIT * (sizeof(dxf_ulong_t) - sizeof(dxf_char_t));
-	dxf_ulong_t res = ((dxf_ulong_t)value) << zero_bites;
-	return res >> zero_bites;
+	size_t leading_zero_bits = CHAR_BIT * (sizeof(dxf_ulong_t) - sizeof(dxf_char_t));
+	dxf_ulong_t res = ((dxf_ulong_t)value) << leading_zero_bits;
+	return res >> leading_zero_bits;
 }
 
 /* -------------------------------------------------------------------------- */
