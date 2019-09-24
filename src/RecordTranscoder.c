@@ -42,12 +42,24 @@ static const dxf_uint_t DX_SEQUENCE_MS_MASK  = 0x3FFU;
 
 static const dxf_long_t DX_TIME_TO_MS = 1000L;
                                    
-#define DX_TIME_FIELD_TO_MS(field) (((dxf_long_t)(field)) * DX_TIME_TO_MS)
-#define DX_SEQUENCE_TO_MS(rec)     (((rec)->sequence >> DX_SEQUENCE_MS_SHIFT) & DX_SEQUENCE_MS_MASK)
-#define DX_TIME_SEQ_TO_MS(rec)     (DX_TIME_FIELD_TO_MS((rec)->time) + DX_SEQUENCE_TO_MS(rec))
-#define DX_SEQUENCE(rec)           ((rec)->sequence & DX_SEQUENCE_MASK)
+#define DX_TIME_FIELD_TO_MS(field) (((dxf_long_t)(field)) * DX_TIME_TO_MS) // -> dxf_long_t
+#define DX_SEQUENCE_TO_MS(rec)     (((rec)->sequence >> DX_SEQUENCE_MS_SHIFT) & DX_SEQUENCE_MS_MASK) // -> dxf_uint_t
+#define DX_TIME_SEQ_TO_MS(rec)     (DX_TIME_FIELD_TO_MS((rec)->time) + DX_SEQUENCE_TO_MS(rec)) // -> dxf_long_t
+#define DX_SEQUENCE(rec)           ((rec)->sequence & DX_SEQUENCE_MASK) // -> dxf_uint_t
 
 #define DX_EXCHANGE_FROM_RECORD(rp) ((rp)->suffix == NULL ? 0 : (rp)->suffix[0])
+
+dxf_ulong_t int_to_bits(dxf_int_t value)
+{
+	return ((dxf_ulong_t)(dxf_uint_t)value);
+}
+
+dxf_ulong_t char_to_bits(dxf_char_t value)
+{
+	size_t leading_zero_bits = CHAR_BIT * (sizeof(dxf_ulong_t) - sizeof(dxf_char_t));
+	dxf_ulong_t res = ((dxf_ulong_t)value) << leading_zero_bits;
+	return res >> leading_zero_bits;
+}
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -111,13 +123,13 @@ static const dxf_uint_t DX_ORDER_FLAGS_SIDE_MASK      = 0x03;
 static const dxf_byte_t DX_ORDER_FLAGS_EXCHANGE_SHIFT = 4;
 static const dxf_uint_t DX_ORDER_FLAGS_EXCHANGE_MASK  = 0x7f;
 
-#define DX_ORDER_FROM_QUOTE_BID_INDEX(e) (((e) == 0 ? DX_ORDER_SOURCE_COMPOSITE_BID : DX_ORDER_SOURCE_REGIONAL_BID) << DX_ORDER_INDEX_SSRC_SHIFT) | ((dxf_long_t)(e) << DX_ORDER_INDEX_EXC_SHIFT)
-#define DX_ORDER_FROM_QUOTE_ASK_INDEX(e) (((e) == 0 ? DX_ORDER_SOURCE_COMPOSITE_ASK : DX_ORDER_SOURCE_REGIONAL_ASK) << DX_ORDER_INDEX_SSRC_SHIFT) | ((dxf_long_t)(e) << DX_ORDER_INDEX_EXC_SHIFT)
+#define DX_ORDER_FROM_QUOTE_BID_INDEX(e) (((e) == 0 ? DX_ORDER_SOURCE_COMPOSITE_BID : DX_ORDER_SOURCE_REGIONAL_BID) << DX_ORDER_INDEX_SSRC_SHIFT) | (char_to_bits(e) << DX_ORDER_INDEX_EXC_SHIFT)
+#define DX_ORDER_FROM_QUOTE_ASK_INDEX(e) (((e) == 0 ? DX_ORDER_SOURCE_COMPOSITE_ASK : DX_ORDER_SOURCE_REGIONAL_ASK) << DX_ORDER_INDEX_SSRC_SHIFT) | (char_to_bits(e) << DX_ORDER_INDEX_EXC_SHIFT)
 
-#define DX_ORDER_FORM_MM_BID_INDEX(mm) ((DX_ORDER_SOURCE_AGGREGATE_BID << DX_ORDER_INDEX_SSRC_SHIFT) | ((dxf_long_t)(mm)->mm_exchange << DX_ORDER_INDEX_EXC_SHIFT) | ((mm)->mm_id))
-#define DX_ORDER_FORM_MM_ASK_INDEX(mm) ((DX_ORDER_SOURCE_AGGREGATE_ASK << DX_ORDER_INDEX_SSRC_SHIFT) | ((dxf_long_t)(mm)->mm_exchange << DX_ORDER_INDEX_EXC_SHIFT) | ((mm)->mm_id))
+#define DX_ORDER_FORM_MM_BID_INDEX(mm) ((DX_ORDER_SOURCE_AGGREGATE_BID << DX_ORDER_INDEX_SSRC_SHIFT) | (char_to_bits((mm)->mm_exchange) << DX_ORDER_INDEX_EXC_SHIFT) | (int_to_bits((mm)->mm_id)))
+#define DX_ORDER_FORM_MM_ASK_INDEX(mm) ((DX_ORDER_SOURCE_AGGREGATE_ASK << DX_ORDER_INDEX_SSRC_SHIFT) | (char_to_bits((mm)->mm_exchange) << DX_ORDER_INDEX_EXC_SHIFT) | (int_to_bits((mm)->mm_id)))
 
-#define DX_ORDER_INDEX(order, suffix) ((suffix) << DX_ORDER_INDEX_TSRC_SHIFT | order->index)
+#define DX_ORDER_INDEX(order, suffix) ((suffix) << DX_ORDER_INDEX_TSRC_SHIFT | int_to_bits(order->index))
 
 #define DX_ORDER_GET_SCOPE(rec)    ((dxf_order_scope_t)(((rec)->flags >> DX_ORDER_FLAGS_SCOPE_SHIFT) & DX_ORDER_FLAGS_SCOPE_MASK))
 #define DX_ORDER_GET_SIDE(rec)     ((dxf_order_side_t)(((rec)->flags >> DX_ORDER_FLAGS_SIDE_SHIFT) & DX_ORDER_FLAGS_SIDE_MASK))
@@ -796,7 +808,7 @@ bool RECORD_TRANSCODER_NAME(dx_time_and_sale_t) (dx_record_transcoder_connection
 		dxf_time_and_sale_t* cur_event = event_buffer + i;
 
 		cur_event->event_flags = event_params->flags;
-		cur_event->index = (((dxf_long_t)cur_record->time) << DX_TNS_INDEX_TIME_SHIFT) | (cur_record->sequence);
+		cur_event->index = (int_to_bits(cur_record->time) << DX_TNS_INDEX_TIME_SHIFT) | int_to_bits(cur_record->sequence);
 		cur_event->time = DX_TIME_SEQ_TO_MS(cur_record);
 		cur_event->exchange_code = cur_record->exchange_code;
 		cur_event->price = cur_record->price;
@@ -854,7 +866,7 @@ bool RECORD_TRANSCODER_NAME(dx_candle_t) (dx_record_transcoder_connection_contex
 		dxf_candle_t* cur_event = event_buffer + i;
 
 		cur_event->event_flags = event_params->flags;
-		cur_event->index = (((dxf_long_t)cur_record->time) << DX_CANDLE_INDEX_TIME_SHIFT) | (cur_record->sequence);
+		cur_event->index = (int_to_bits(cur_record->time) << DX_CANDLE_INDEX_TIME_SHIFT) | int_to_bits(cur_record->sequence);
 		cur_event->time = DX_TIME_SEQ_TO_MS(cur_record);
 		cur_event->sequence = DX_SEQUENCE(cur_record);
 		cur_event->count = cur_record->count;
@@ -944,7 +956,7 @@ bool RECORD_TRANSCODER_NAME(dx_greeks_t) (dx_record_transcoder_connection_contex
 		dxf_greeks_t* cur_event = event_buffer + i;
 
 		cur_event->event_flags = event_params->flags;
-		cur_event->index = (((dxf_long_t)cur_record->time) << DX_GREEKS_INDEX_TIME_SHIFT) | (cur_record->sequence);
+		cur_event->index = (int_to_bits(cur_record->time) << DX_GREEKS_INDEX_TIME_SHIFT) | int_to_bits(cur_record->sequence);
 		cur_event->time = DX_TIME_SEQ_TO_MS(cur_record);
 		cur_event->price = cur_record->price;
 		cur_event->volatility = cur_record->volatility;
