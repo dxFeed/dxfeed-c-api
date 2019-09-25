@@ -19,6 +19,8 @@
 
 #include "DXFeed.h"
 
+#include <limits.h>
+
 #include "RecordTranscoder.h"
 #include "EventData.h"
 #include "DXMemory.h"
