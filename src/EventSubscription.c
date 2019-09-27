@@ -548,7 +548,7 @@ size_t dx_find_symbol_in_array (dx_symbol_data_array_t* symbols, dxf_const_strin
 		comparator = dx_name_symbol_comparator;
 	}
 
-	DX_ARRAY_SEARCH(symbols->elements, 0, symbols->size, &data, comparator, false, *found, symbol_index);
+	DX_ARRAY_SEARCH(symbols->elements, 0, symbols->size, &data, comparator, true, *found, symbol_index);
 
 	return symbol_index;
 }

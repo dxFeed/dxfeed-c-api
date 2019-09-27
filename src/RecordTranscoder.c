@@ -53,7 +53,7 @@ static const dxf_long_t DX_TIME_TO_MS = 1000L;
 
 dxf_ulong_t int_to_bits(dxf_int_t value)
 {
-	return ((dxf_ulong_t)(dxf_uint_t)value);
+	return (dxf_ulong_t)(dxf_uint_t)value;
 }
 
 dxf_ulong_t char_to_bits(dxf_char_t value)
