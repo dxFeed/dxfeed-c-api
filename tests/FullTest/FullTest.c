@@ -160,7 +160,7 @@ void trade_listener(int event_type, dxf_const_string_t symbol_name,
 	COORD coord = event_info[dx_eid_trade].coord;
 
 	if (event_type != DXF_ET_TRADE) {
-		swprintf(str, 200, L"Error: event: %s Symbol: %s, expected event: Trade\n", dx_event_type_to_string(event_type), symbol_name);
+		swprintf(str, 200, L"Error: event: %ls Symbol: %ls, expected event: Trade\n", dx_event_type_to_string(event_type), symbol_name);
 		print_at( coord, str);
 		return;
 	}
@@ -175,10 +175,8 @@ void trade_listener(int event_type, dxf_const_string_t symbol_name,
 
 	coord.X += 5;
 	coord.Y += ind + 1;
-	swprintf(str, 200, L"Symbol: \"%s\" Data count: %d, Total data count: %d            ", symbol_name, data_count, event_info[dx_eid_trade].total_data_count[ind]);
+	swprintf(str, 200, L"Symbol: \"%ls\" Data count: %d, Total data count: %d            ", symbol_name, data_count, event_info[dx_eid_trade].total_data_count[ind]);
 	print_at( coord, str);
-	//swprintf(str, sizeof(str), L"Event: %s Symbol: %s Data count: %d, Total data count: %d            ",dx_event_type_to_string(event_type), symbol_name, data_count, event_info[dx_eid_trade].total_data_count);
-	//print_at( event_info[dx_eid_trade].coord, str);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -191,7 +189,7 @@ void quote_listener(int event_type, dxf_const_string_t symbol_name,
 	COORD coord = event_info[dx_eid_quote].coord;
 
 	if (event_type != DXF_ET_QUOTE) {
-		swprintf(str, sizeof(str), L"Error: event: %s Symbol: %s, expected event: Quote\n",dx_event_type_to_string(event_type), symbol_name);
+		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: Quote\n",dx_event_type_to_string(event_type), symbol_name);
 		print_at( coord, str);
 		return;
 	}
@@ -206,12 +204,8 @@ void quote_listener(int event_type, dxf_const_string_t symbol_name,
 
 	coord.X += 5;
 	coord.Y += ind + 1;
-	swprintf(str, sizeof(str), L"Symbol: \"%s\" Data count: %d, Total data count: %d            ", symbol_name, data_count, event_info[dx_eid_quote].total_data_count[ind]);
+	swprintf(str, sizeof(str), L"Symbol: \"%ls\" Data count: %d, Total data count: %d            ", symbol_name, data_count, event_info[dx_eid_quote].total_data_count[ind]);
 	print_at( coord, str);
-
-	//event_info[dx_eid_quote].total_data_count += data_count;
-	//swprintf(str, sizeof(str), L"Event: %s Symbol: %s Data count: %d, Total data count: %d            ",dx_event_type_to_string(event_type), symbol_name, data_count, event_info[dx_eid_quote].total_data_count);
-	//print_at( event_info[dx_eid_quote].coord, str);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -224,7 +218,7 @@ void summary_listener(int event_type, dxf_const_string_t symbol_name,
 	COORD coord = event_info[dx_eid_summary].coord;
 
 	if (event_type != DXF_ET_SUMMARY) {
-		swprintf(str, sizeof(str), L"Error: event: %s Symbol: %s, expected event: Summary\n",dx_event_type_to_string(event_type), symbol_name);
+		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: Summary\n",dx_event_type_to_string(event_type), symbol_name);
 		print_at( coord, str);
 		return;
 	}
@@ -239,11 +233,8 @@ void summary_listener(int event_type, dxf_const_string_t symbol_name,
 
 	coord.X += 5;
 	coord.Y += ind + 1;
-	swprintf(str, sizeof(str), L"Symbol: \"%s\" Data count: %d, Total data count: %d            ", symbol_name, data_count, event_info[dx_eid_summary].total_data_count[ind]);
+	swprintf(str, sizeof(str), L"Symbol: \"%ls\" Data count: %d, Total data count: %d            ", symbol_name, data_count, event_info[dx_eid_summary].total_data_count[ind]);
 	print_at( coord, str);
-	//event_info[dx_eid_summary].total_data_count += data_count;
-	//swprintf(str, sizeof(str), L"Event: %s Symbol: %s Data count: %d, Total data count: %d            ",dx_event_type_to_string(event_type), symbol_name, data_count, event_info[dx_eid_summary].total_data_count);
-	//print_at( event_info[dx_eid_summary].coord, str);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -256,7 +247,7 @@ void profile_listener(int event_type, dxf_const_string_t symbol_name,
 	COORD coord = event_info[dx_eid_profile].coord;
 
 	if (event_type != DXF_ET_PROFILE) {
-		swprintf(str, sizeof(str), L"Error: event: %s Symbol: %s, expected event: Profile\n",dx_event_type_to_string(event_type), symbol_name);
+		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: Profile\n",dx_event_type_to_string(event_type), symbol_name);
 		print_at( coord, str);
 		return;
 	}
@@ -271,11 +262,8 @@ void profile_listener(int event_type, dxf_const_string_t symbol_name,
 
 	coord.X += 5;
 	coord.Y += ind + 1;
-	swprintf(str, sizeof(str), L"Symbol: \"%s\" Data count: %d, Total data count: %d            ", symbol_name, data_count, event_info[dx_eid_profile].total_data_count[ind]);
+	swprintf(str, sizeof(str), L"Symbol: \"%ls\" Data count: %d, Total data count: %d            ", symbol_name, data_count, event_info[dx_eid_profile].total_data_count[ind]);
 	print_at( coord, str);
-	//event_info[dx_eid_profile].total_data_count += data_count;
-	//swprintf(str, sizeof(str), L"Event: %s Symbol: %s Data count: %d, Total data count: %d            ",dx_event_type_to_string(event_type), symbol_name, data_count, event_info[dx_eid_profile].total_data_count);
-	//print_at( event_info[dx_eid_profile].coord, str);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -288,7 +276,7 @@ void order_listener(int event_type, dxf_const_string_t symbol_name,
 	COORD coord = event_info[dx_eid_order].coord;
 
 	if (event_type != DXF_ET_ORDER) {
-		swprintf(str, sizeof(str), L"Error: event: %s Symbol: %s, expected event: Order\n",dx_event_type_to_string(event_type), symbol_name);
+		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: Order\n",dx_event_type_to_string(event_type), symbol_name);
 		print_at( coord, str);
 		return;
 	}
@@ -303,11 +291,8 @@ void order_listener(int event_type, dxf_const_string_t symbol_name,
 
 	coord.X += 5;
 	coord.Y += ind + 1;
-	swprintf(str, sizeof(str), L"Symbol: \"%s\" Data count: %d, Total data count: %d            ", symbol_name, data_count, event_info[dx_eid_order].total_data_count[ind]);
+	swprintf(str, sizeof(str), L"Symbol: \"%ls\" Data count: %d, Total data count: %d            ", symbol_name, data_count, event_info[dx_eid_order].total_data_count[ind]);
 	print_at( coord, str);
-	//event_info[dx_eid_order].total_data_count += data_count;
-	//swprintf(str, sizeof(str), L"Event: %s Symbol: %s Data count: %d, Total data count: %d            ",dx_event_type_to_string(event_type), symbol_name, data_count, event_info[dx_eid_order].total_data_count);
-	//print_at( event_info[dx_eid_order].coord, str);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -320,7 +305,7 @@ void time_and_sale_listener(int event_type, dxf_const_string_t symbol_name,
 	COORD coord = event_info[dx_eid_time_and_sale].coord;
 
 	if (event_type != DXF_ET_TIME_AND_SALE) {
-		swprintf(str, sizeof(str), L"Error: event: %s Symbol: %s, expected event: Time&Sale\n",dx_event_type_to_string(event_type), symbol_name);
+		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: Time&Sale\n",dx_event_type_to_string(event_type), symbol_name);
 		print_at( coord, str);
 		return;
 	}
@@ -335,11 +320,8 @@ void time_and_sale_listener(int event_type, dxf_const_string_t symbol_name,
 
 	coord.X += 5;
 	coord.Y += ind + 1;
-	swprintf(str, sizeof(str), L"Symbol: \"%s\" Data count: %d, Total data count: %d            ", symbol_name, data_count, event_info[dx_eid_time_and_sale].total_data_count[ind]);
+	swprintf(str, sizeof(str), L"Symbol: \"%ls\" Data count: %d, Total data count: %d            ", symbol_name, data_count, event_info[dx_eid_time_and_sale].total_data_count[ind]);
 	print_at( coord, str);
-	//event_info[dx_eid_time_and_sale].total_data_count += data_count;
-	//swprintf(str, sizeof(str), L"Event: %s Symbol: %s Data count: %d, Total data count: %d            ",dx_event_type_to_string(event_type), symbol_name, data_count, event_info[dx_eid_time_and_sale].total_data_count);
-	//print_at( event_info[dx_eid_time_and_sale].coord, str);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -352,7 +334,7 @@ void candle_listener(int event_type, dxf_const_string_t symbol_name,
 	COORD coord = event_info[dx_eid_candle].coord;
 
 	if (event_type != DXF_ET_CANDLE) {
-		swprintf(str, sizeof(str), L"Error: event: %s Symbol: %s, expected event: Candle\n", dx_event_type_to_string(event_type), symbol_name);
+		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: Candle\n", dx_event_type_to_string(event_type), symbol_name);
 		print_at(coord, str);
 		return;
 	}
@@ -367,7 +349,7 @@ void candle_listener(int event_type, dxf_const_string_t symbol_name,
 
 	coord.X += 5;
 	coord.Y += ind + 1;
-	swprintf(str, sizeof(str), L"Symbol: \"%s\" Data count: %d, Total data count: %d            ", symbol_name, data_count, event_info[dx_eid_candle].total_data_count[ind]);
+	swprintf(str, sizeof(str), L"Symbol: \"%ls\" Data count: %d, Total data count: %d            ", symbol_name, data_count, event_info[dx_eid_candle].total_data_count[ind]);
 	print_at(coord, str);
 }
 
@@ -381,7 +363,7 @@ void trade_eth_listener(int event_type, dxf_const_string_t symbol_name,
 	COORD coord = event_info[dx_eid_trade_eth].coord;
 
 	if (event_type != DXF_ET_TRADE_ETH) {
-		swprintf(str, 200, L"Error: event: %s Symbol: %s, expected event: TradeETH\n", dx_event_type_to_string(event_type), symbol_name);
+		swprintf(str, 200, L"Error: event: %ls Symbol: %ls, expected event: TradeETH\n", dx_event_type_to_string(event_type), symbol_name);
 		print_at(coord, str);
 		return;
 	}
@@ -396,7 +378,7 @@ void trade_eth_listener(int event_type, dxf_const_string_t symbol_name,
 
 	coord.X += 5;
 	coord.Y += ind + 1;
-	swprintf(str, 200, L"Symbol: \"%s\" Data count: %d, Total data count: %d            ", symbol_name, data_count, event_info[dx_eid_trade_eth].total_data_count[ind]);
+	swprintf(str, 200, L"Symbol: \"%ls\" Data count: %d, Total data count: %d            ", symbol_name, data_count, event_info[dx_eid_trade_eth].total_data_count[ind]);
 	print_at(coord, str);
 }
 
@@ -410,7 +392,7 @@ void spread_order_listener(int event_type, dxf_const_string_t symbol_name,
 	COORD coord = event_info[dx_eid_spread_order].coord;
 
 	if (event_type != DXF_ET_SPREAD_ORDER) {
-		swprintf(str, sizeof(str), L"Error: event: %s Symbol: %s, expected event: SpreadOrder\n", dx_event_type_to_string(event_type), symbol_name);
+		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: SpreadOrder\n", dx_event_type_to_string(event_type), symbol_name);
 		print_at(coord, str);
 		return;
 	}
@@ -425,7 +407,7 @@ void spread_order_listener(int event_type, dxf_const_string_t symbol_name,
 
 	coord.X += 5;
 	coord.Y += ind + 1;
-	swprintf(str, sizeof(str), L"Symbol: \"%s\" Data count: %d, Total data count: %d            ", symbol_name, data_count, event_info[dx_eid_spread_order].total_data_count[ind]);
+	swprintf(str, sizeof(str), L"Symbol: \"%ls\" Data count: %d, Total data count: %d            ", symbol_name, data_count, event_info[dx_eid_spread_order].total_data_count[ind]);
 	print_at(coord, str);
 }
 
@@ -439,7 +421,7 @@ void greeks_listener(int event_type, dxf_const_string_t symbol_name,
 	COORD coord = event_info[dx_eid_greeks].coord;
 
 	if (event_type != DXF_ET_GREEKS) {
-		swprintf(str, sizeof(str), L"Error: event: %s Symbol: %s, expected event: Greeks\n", dx_event_type_to_string(event_type), symbol_name);
+		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: Greeks\n", dx_event_type_to_string(event_type), symbol_name);
 		print_at(coord, str);
 		return;
 	}
@@ -454,7 +436,7 @@ void greeks_listener(int event_type, dxf_const_string_t symbol_name,
 
 	coord.X += 5;
 	coord.Y += ind + 1;
-	swprintf(str, sizeof(str), L"Symbol: \"%s\" Data count: %d, Total data count: %d            ", symbol_name, data_count, event_info[dx_eid_greeks].total_data_count[ind]);
+	swprintf(str, sizeof(str), L"Symbol: \"%ls\" Data count: %d, Total data count: %d            ", symbol_name, data_count, event_info[dx_eid_greeks].total_data_count[ind]);
 	print_at(coord, str);
 }
 
@@ -468,7 +450,7 @@ void theo_price_listener(int event_type, dxf_const_string_t symbol_name,
 	COORD coord = event_info[dx_eid_theo_price].coord;
 
 	if (event_type != DXF_ET_THEO_PRICE) {
-		swprintf(str, sizeof(str), L"Error: event: %s Symbol: %s, expected event: TheoPrice\n", dx_event_type_to_string(event_type), symbol_name);
+		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: TheoPrice\n", dx_event_type_to_string(event_type), symbol_name);
 		print_at(coord, str);
 		return;
 	}
@@ -483,7 +465,7 @@ void theo_price_listener(int event_type, dxf_const_string_t symbol_name,
 
 	coord.X += 5;
 	coord.Y += ind + 1;
-	swprintf(str, sizeof(str), L"Symbol: \"%s\" Data count: %d, Total data count: %d            ", symbol_name, data_count, event_info[dx_eid_theo_price].total_data_count[ind]);
+	swprintf(str, sizeof(str), L"Symbol: \"%ls\" Data count: %d, Total data count: %d            ", symbol_name, data_count, event_info[dx_eid_theo_price].total_data_count[ind]);
 	print_at(coord, str);
 }
 
@@ -497,7 +479,7 @@ void underlying_listener(int event_type, dxf_const_string_t symbol_name,
 	COORD coord = event_info[dx_eid_underlying].coord;
 
 	if (event_type != DXF_ET_UNDERLYING) {
-		swprintf(str, sizeof(str), L"Error: event: %s Symbol: %s, expected event: Underlying\n", dx_event_type_to_string(event_type), symbol_name);
+		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: Underlying\n", dx_event_type_to_string(event_type), symbol_name);
 		print_at(coord, str);
 		return;
 	}
@@ -512,7 +494,7 @@ void underlying_listener(int event_type, dxf_const_string_t symbol_name,
 
 	coord.X += 5;
 	coord.Y += ind + 1;
-	swprintf(str, sizeof(str), L"Symbol: \"%s\" Data count: %d, Total data count: %d            ", symbol_name, data_count, event_info[dx_eid_underlying].total_data_count[ind]);
+	swprintf(str, sizeof(str), L"Symbol: \"%ls\" Data count: %d, Total data count: %d            ", symbol_name, data_count, event_info[dx_eid_underlying].total_data_count[ind]);
 	print_at(coord, str);
 }
 
@@ -526,7 +508,7 @@ void series_listener(int event_type, dxf_const_string_t symbol_name,
 	COORD coord = event_info[dx_eid_series].coord;
 
 	if (event_type != DXF_ET_SERIES) {
-		swprintf(str, sizeof(str), L"Error: event: %s Symbol: %s, expected event: Series\n", dx_event_type_to_string(event_type), symbol_name);
+		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: Series\n", dx_event_type_to_string(event_type), symbol_name);
 		print_at(coord, str);
 		return;
 	}
@@ -541,7 +523,7 @@ void series_listener(int event_type, dxf_const_string_t symbol_name,
 
 	coord.X += 5;
 	coord.Y += ind + 1;
-	swprintf(str, sizeof(str), L"Symbol: \"%s\" Data count: %d, Total data count: %d            ", symbol_name, data_count, event_info[dx_eid_series].total_data_count[ind]);
+	swprintf(str, sizeof(str), L"Symbol: \"%ls\" Data count: %d, Total data count: %d            ", symbol_name, data_count, event_info[dx_eid_series].total_data_count[ind]);
 	print_at(coord, str);
 }
 
@@ -555,7 +537,7 @@ void configuration_listener(int event_type, dxf_const_string_t symbol_name,
 	COORD coord = event_info[dx_eid_configuration].coord;
 
 	if (event_type != DXF_ET_CONFIGURATION) {
-		swprintf(str, sizeof(str), L"Error: event: %s Symbol: %s, expected event: Configuration\n", dx_event_type_to_string(event_type), symbol_name);
+		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: Configuration\n", dx_event_type_to_string(event_type), symbol_name);
 		print_at(coord, str);
 		return;
 	}
@@ -570,7 +552,7 @@ void configuration_listener(int event_type, dxf_const_string_t symbol_name,
 
 	coord.X += 5;
 	coord.Y += ind + 1;
-	swprintf(str, sizeof(str), L"Symbol: \"%s\" Data count: %d, Total data count: %d            ", symbol_name, data_count, event_info[dx_eid_configuration].total_data_count[ind]);
+	swprintf(str, sizeof(str), L"Symbol: \"%ls\" Data count: %d, Total data count: %d            ", symbol_name, data_count, event_info[dx_eid_configuration].total_data_count[ind]);
 	print_at(coord, str);
 }
 
@@ -584,14 +566,14 @@ void snapshot_listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_d
 	COORD coord = info->coord;
 
 	if (snapshot_data->event_type != info->event_type) {
-		swprintf(str, sizeof(str), L"Error: event: %s Symbol: %s, expected event: %s\n",
+		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: %ls\n",
 					dx_event_type_to_string(snapshot_data->event_type), snapshot_data->symbol,
 					dx_event_type_to_string(info->event_type));
 		print_at(coord, str);
 		return;
 	}
 
-	swprintf(str, sizeof(str), L"Snapshot %s#%S:                           ",
+	swprintf(str, sizeof(str), L"Snapshot %ls#%s:                           ",
 				dx_event_type_to_string(info->event_type), info->source);
 	print_at(coord, str);
 	ind = get_symbol_index(snapshot_data->symbol);
@@ -603,7 +585,7 @@ void snapshot_listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_d
 
 	coord.X += 5;
 	coord.Y += ind + 1;
-	swprintf(str, sizeof(str), L"Symbol: \"%s\" Data count: %zu, Total data count: %zu            ",
+	swprintf(str, sizeof(str), L"Symbol: \"%ls\" Data count: %zu, Total data count: %zu            ",
 				snapshot_data->symbol, snapshot_data->records_count, info->total_data_count[ind]);
 	print_at(coord, str);
 }
@@ -625,7 +607,7 @@ void process_last_error () {
 		}
 
 		wprintf(L"Error occurred and successfully retrieved:\n"
-			L"error code = %d, description = \"%s\"\n",
+			L"error code = %d, description = \"%ls\"\n",
 			error_code, error_descr);
 		return;
 	}
@@ -640,7 +622,7 @@ dxf_subscription_t create_subscription(dxf_connection_t connection, int event_id
 	int i;
 	COORD coord = event_info[event_id].coord;
 
-	swprintf(str, sizeof(str), L"There is no data for event: %s", dx_event_type_to_string(event_type));
+	swprintf(str, sizeof(str), L"There is no data for event: %ls", dx_event_type_to_string(event_type));
 	print_at( coord, str);
 
 	if (!dxf_create_subscription(connection, event_type, &subscription)) {
@@ -658,7 +640,7 @@ dxf_subscription_t create_subscription(dxf_connection_t connection, int event_id
 			return NULL;
 		};
 
-		swprintf(str, sizeof(str), L"Symbol: \"%s\": no data", g_symbols[i]);
+		swprintf(str, sizeof(str), L"Symbol: \"%ls\": no data", g_symbols[i]);
 		ind = get_symbol_index(g_symbols[i]);
 		if (ind == -1) {
 			return NULL;
@@ -682,7 +664,7 @@ void* create_snapshot_subscription(dxf_connection_t connection, struct snapshot_
 	int i;
 	COORD coord = info->coord;
 
-	swprintf(str, sizeof(str), L"There is no data for snapshot event: %s", dx_event_type_to_string(info->event_type));
+	swprintf(str, sizeof(str), L"There is no data for snapshot event: %ls", dx_event_type_to_string(info->event_type));
 	print_at(coord, str);
 
 	for (i = 0; i < SYMBOLS_COUNT; ++i) {
@@ -715,7 +697,7 @@ void* create_snapshot_subscription(dxf_connection_t connection, struct snapshot_
 			return NULL;
 		}
 
-		swprintf(str, sizeof(str), L"Symbol: \"%s\": no data", g_symbols[i]);
+		swprintf(str, sizeof(str), L"Symbol: \"%ls\": no data", g_symbols[i]);
 		ind = get_symbol_index(g_symbols[i]);
 		if (ind == -1) {
 			return NULL;

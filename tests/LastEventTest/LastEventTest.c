@@ -55,7 +55,7 @@ void process_last_error () {
 		}
 
 		wprintf(L"Error occurred and successfully retrieved:\n"
-			L"error code = %d, description = \"%s\"\n",
+			L"error code = %d, description = \"%ls\"\n",
 			error_code, error_descr);
 		return;
 	}
@@ -72,7 +72,7 @@ void listener(int event_type, dxf_const_string_t symbol_name,
 
 	for (; (DX_EVENT_BIT_MASK(eid) & event_type) == 0; ++eid);
 
-	wprintf(L"First listener. Event: %s Symbol: %s\n", dx_event_type_to_string(event_type), symbol_name);
+	wprintf(L"First listener. Event: %ls Symbol: %ls\n", dx_event_type_to_string(event_type), symbol_name);
 
 	if (event_type == DXF_ET_TRADE) {
 		dxf_trade_t* trades = (dxf_trade_t*)data;
@@ -144,7 +144,7 @@ int main (int argc, char* argv[]) {
 			if (data) {
 				trade = (dxf_trade_t*)data;
 
-				wprintf(L"\nSymbol: %s; time=%lld, exchange code=%C, price=%f, size=%ld, tick=%ld, change=%f, day volume=%f, scope=%d\n",
+				wprintf(L"\nSymbol: %ls; time=%lld, exchange code=%c, price=%f, size=%ld, tick=%ld, change=%f, day volume=%f, scope=%d\n",
 						g_symbols[i], trade->time, trade->exchange_code, trade->price, trade->size, trade->tick, trade->change,
 					trade->day_volume, (int)trade->scope);
 
@@ -154,7 +154,7 @@ int main (int argc, char* argv[]) {
 		Sleep (5000);
 	}
 
-	wprintf(L"\n Test %s \n", test_result ? L"complete successfully" : L"failed");
+	wprintf(L"\n Test %ls \n", test_result ? L"complete successfully" : L"failed");
 
 	wprintf(L"Disconnecting from host...\n");
 

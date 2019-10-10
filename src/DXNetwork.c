@@ -1277,7 +1277,7 @@ void dx_connection_status_set(dxf_connection_t connection, dxf_connection_status
 
 	dx_mutex_lock(&(context->status_guard));
 	old_status = context->status;
-	dx_logging_verbose_info(L"Connection status changed %d (%s) -> %d (%s)",
+	dx_logging_verbose_info(L"Connection status changed %d (%ls) -> %d (%ls)",
 							old_status, dx_get_connection_status_string(old_status),
 							status, dx_get_connection_status_string(status));
 

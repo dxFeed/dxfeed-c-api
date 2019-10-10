@@ -296,9 +296,9 @@ DXFEED_API ERRORCODE dxf_initialize_logger (const char* file_name, int rewrite_f
 		return DXF_FAILURE;
 	}
 
-	dx_logging_info(L"Logging started: file %s, verbose mode is %s",
+	dx_logging_info(L"Logging started: file %ls, verbose mode is %ls",
 					rewrite_file ? L"rewritten" : L"not rewritten", verbose ? L"on" : L"off");
-	dx_logging_info(L"Version: %s, options: %s", DX_VER_PRODUCT_VERSION_LSTR, DX_LIBRARY_OPTIONS);
+	dx_logging_info(L"Version: %ls, options: %ls", DX_VER_PRODUCT_VERSION_LSTR, DX_LIBRARY_OPTIONS);
 	dx_flush_log();
 
 #ifdef _DEBUG
@@ -315,8 +315,8 @@ void dx_logging_error (dxf_const_string_t message ) {
 		return;
 	}
 
-	dx_log_debug_message(L"%s", message);
-	fwprintf(g_log_file, L"\n%s [%08lx] %s%s", dx_get_current_time(),
+	dx_log_debug_message(L"%ls", message);
+	fwprintf(g_log_file, L"\n%ls [%08lx] %ls%ls", dx_get_current_time(),
 #ifdef _WIN32
 	(unsigned long)GetCurrentThreadId(),
 #else
@@ -334,8 +334,8 @@ void dx_logging_error_by_code(int error_code) {
 	if (message == NULL) {
 		return;
 	}
-	dx_log_debug_message(L"%s (%d)", message, error_code);
-	fwprintf(g_log_file, L"\n%s [%08lx] %s%s (%d)", dx_get_current_time(),
+	dx_log_debug_message(L"%ls (%d)", message, error_code);
+	fwprintf(g_log_file, L"\n%ls [%08lx] %ls%ls (%d)", dx_get_current_time(),
 #ifdef _WIN32
 	(unsigned long)GetCurrentThreadId(),
 #else
@@ -373,7 +373,7 @@ void dx_logging_verbose_info( const dxf_char_t* format, ... ) {
 		return;
 	}
 
-	fwprintf(g_log_file, L"\n%s [%08lx] %s ", dx_get_current_time(),
+	fwprintf(g_log_file, L"\n%ls [%08lx] %ls ", dx_get_current_time(),
 #ifdef _WIN32
 	(unsigned long)GetCurrentThreadId(),
 #else
@@ -438,7 +438,7 @@ void dx_logging_dbg_stack() {
 
 	for (USHORT i = 1; i < frames; i++) {
 		SymFromAddr(process, (DWORD64)(STACK[i]), 0, symbol);
-		dx_logging_dbg(L"* %3hu: %S - 0x%016p", frames - i - 1, symbol->Name, (void*)symbol->Address);
+		dx_logging_dbg(L"* %3hu: %ls - 0x%016p", frames - i - 1, symbol->Name, (void*)symbol->Address);
 	}
 	dx_logging_dbg_flush();
 #else
@@ -486,7 +486,7 @@ void dx_logging_info( const dxf_char_t* format, ... ) {
 		return;
 	}
 
-	fwprintf(g_log_file, L"\n%s [%08lx] %s", dx_get_current_time(),
+	fwprintf(g_log_file, L"\n%ls [%08lx] %ls", dx_get_current_time(),
 #ifdef _WIN32
 	(unsigned long)GetCurrentThreadId(),
 #else

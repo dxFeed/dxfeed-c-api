@@ -110,9 +110,9 @@ void output_data(int i) {
 	dx_profile_t* profile = profiles[i];
 	wchar_t dummy[2] = L"-";
 
-	wprintf(L"\nSymbol: %s, Last: %f, LastEx: %c, Change: %+f, Bid: %f, BidEx: %c, \
-			Ask: %f, AskEx: %c, High: %f, Low: %f, Open: %f, BidSize: %i, AskSize: %i,\
-			LastSize: %i, LastTick: %i, LastChange: %f, Volume: %i, Description: %s\n",
+	wprintf(L"\nSymbol: %ls, Last: %f, LastEx: %c, Change: %+f, Bid: %f, BidEx: %c, \
+			Ask: %f, AskEx: %c, High: %f, Low: %f, Open: %f, BidSize: %i, AskSize: %i, \
+			LastSize: %i, LastTick: %i, LastChange: %f, Volume: %i, Description: %ls\n",
 			g_symbols[i],
 			trade ? trade->price : 0.0,
 			trade ? trade->exchange_code : dummy[0],
@@ -173,12 +173,12 @@ void trade_listener(int event_type, dxf_const_string_t symbol_name,
 	int i = 0;
 	int symb_ind = get_symbol_index(symbol_name);
 	if (symb_ind == -1) {
-		wprintf(L"Error: unexpected symbol: %s\n", symbol_name);
+		wprintf(L"Error: unexpected symbol: %ls\n", symbol_name);
 		return;
 	}
 
 	if (event_type != DXF_ET_TRADE) {
-		wprintf(L"Error: event: %s Symbol: %s, expected event: Trade\n",dx_event_type_to_string(event_type), symbol_name);
+		wprintf(L"Error: event: %ls Symbol: %ls, expected event: Trade\n",dx_event_type_to_string(event_type), symbol_name);
 		return;
 	}
 
@@ -203,12 +203,12 @@ void quote_listener(int event_type, dxf_const_string_t symbol_name,
 	int i = 0;
 	int symb_ind = get_symbol_index(symbol_name);
 	if (symb_ind == -1) {
-		wprintf(L"Error: unexpected symbol: %s\n", symbol_name);
+		wprintf(L"Error: unexpected symbol: %ls\n", symbol_name);
 		return;
 	}
 
 	if (event_type != DXF_ET_QUOTE) {
-		wprintf(L"Error: event: %s Symbol: %s, expected event: Trade\n",dx_event_type_to_string(event_type), symbol_name);
+		wprintf(L"Error: event: %ls Symbol: %ls, expected event: Trade\n",dx_event_type_to_string(event_type), symbol_name);
 		return;
 	}
 
@@ -233,12 +233,12 @@ void summary_listener(int event_type, dxf_const_string_t symbol_name,
 	int i = 0;
 	int symb_ind = get_symbol_index(symbol_name);
 	if (symb_ind == -1) {
-		wprintf(L"Error: unexpected symbol: %s\n", symbol_name);
+		wprintf(L"Error: unexpected symbol: %ls\n", symbol_name);
 		return;
 	}
 
 	if (event_type != DXF_ET_SUMMARY) {
-		wprintf(L"Error: event: %s Symbol: %s, expected event: Trade\n",dx_event_type_to_string(event_type), symbol_name);
+		wprintf(L"Error: event: %ls Symbol: %ls, expected event: Trade\n",dx_event_type_to_string(event_type), symbol_name);
 		return;
 	}
 
@@ -263,12 +263,12 @@ void profile_listener(int event_type, dxf_const_string_t symbol_name,
 	int i = 0;
 	int symb_ind = get_symbol_index(symbol_name);
 	if (symb_ind == -1) {
-		wprintf(L"Error: unexpected symbol: %s\n", symbol_name);
+		wprintf(L"Error: unexpected symbol: %ls\n", symbol_name);
 		return;
 	}
 
 	if (event_type != DXF_ET_PROFILE) {
-		wprintf(L"Error: event: %s Symbol: %s, expected event: Trade\n",dx_event_type_to_string(event_type), symbol_name);
+		wprintf(L"Error: event: %ls Symbol: %ls, expected event: Trade\n",dx_event_type_to_string(event_type), symbol_name);
 		return;
 	}
 
@@ -301,7 +301,7 @@ void process_last_error () {
 		}
 
 		wprintf(L"Error occurred and successfully retrieved:\n"
-				L"error code = %d, description = \"%s\"\n",
+				L"error code = %d, description = \"%ls\"\n",
 				error_code, error_descr);
 		return;
 	}
