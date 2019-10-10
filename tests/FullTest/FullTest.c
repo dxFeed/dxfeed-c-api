@@ -573,8 +573,12 @@ void snapshot_listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_d
 		return;
 	}
 
+#ifdef _WIN32
+	swprintf(str, sizeof(str), L"Snapshot %ls#%hs:                           ",
+#else
 	swprintf(str, sizeof(str), L"Snapshot %ls#%s:                           ",
-				dx_event_type_to_string(info->event_type), info->source);
+#endif
+		dx_event_type_to_string(info->event_type), info->source);
 	print_at(coord, str);
 	ind = get_symbol_index(snapshot_data->symbol);
 	if (ind == -1) {
