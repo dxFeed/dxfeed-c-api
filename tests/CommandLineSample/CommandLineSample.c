@@ -25,7 +25,7 @@ typedef int bool;
 #define DUMP_PARAM_LONG_TAG "--dump"
 #define TOKEN_PARAM_SHORT_TAG "-T"
 
-dxf_const_string_t dx_event_type_to_string (int event_type) {
+dxf_const_string_t dx_event_type_to_string(int event_type) {
 	switch (event_type) {
 	case DXF_ET_TRADE: return L"Trade";
 	case DXF_ET_QUOTE: return L"Quote";
@@ -314,7 +314,7 @@ void listener(int event_type, dxf_const_string_t symbol_name,
 }
 /* -------------------------------------------------------------------------- */
 
-dxf_string_t ansi_to_unicode (const char* ansi_str, size_t len) {
+dxf_string_t ansi_to_unicode(const char* ansi_str, size_t len) {
 #ifdef _WIN32
 	dxf_string_t wide_str = NULL;
 
@@ -329,13 +329,14 @@ dxf_string_t ansi_to_unicode (const char* ansi_str, size_t len) {
 	return wide_str;
 #else /* _WIN32 */
 	dxf_string_t wide_str = NULL;
-	size_t wide_size = mbstowcs(NULL, ansi_str, len);
-	if (wide_size > 0) {
-		wide_str = calloc(wide_size + 1, sizeof(dxf_char_t));
-		mbstowcs(wide_str, ansi_str, wide_size + 1);
+	size_t wide_size = mbstowcs(NULL, ansi_str, len); // len is ignored
+
+	if (wide_size > 0 && wide_size != (size_t)-1) {
+		wide_str = calloc(len + 1, sizeof(dxf_char_t));
+		mbstowcs(wide_str, ansi_str, len);
 	}
 
-	return wide_str; /* todo */
+	return wide_str;
 #endif /* _WIN32 */
 }
 
