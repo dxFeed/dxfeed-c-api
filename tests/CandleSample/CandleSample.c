@@ -158,13 +158,14 @@ dxf_string_t ansi_to_unicode (const char* ansi_str) {
 	return wide_str;
 #else /* _WIN32 */
 	dxf_string_t wide_str = NULL;
-	size_t wide_size = mbstowcs(NULL, ansi_str, 0);
-	if (wide_size > 0) {
+	size_t wide_size = mbstowcs(NULL, ansi_str, 0); // 0 is ignored
+
+	if (wide_size > 0 && wide_size != (size_t)-1) {
 		wide_str = calloc(wide_size + 1, sizeof(dxf_char_t));
 		mbstowcs(wide_str, ansi_str, wide_size + 1);
 	}
 
-	return wide_str; /* todo */
+	return wide_str;
 #endif /* _WIN32 */
 }
 
@@ -316,7 +317,7 @@ int main (int argc, char* argv[]) {
 		free(symbol);
 		process_last_error();
 		return -1;
-	};
+	}
 
 	if (!dxf_create_candle_symbol_attributes(symbol, DXF_CANDLE_EXCHANGE_CODE_ATTRIBUTE_DEFAULT,
 											DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT, dxf_ctpa_default,
