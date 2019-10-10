@@ -15,14 +15,20 @@
 #include "DXErrorCodes.h"
 #include <time.h>
 #include <stdio.h>
+#include <inttypes.h>
 
 #define STRINGIFY(a) STR(a)
 #define STR(a) #a
 
+#define LS(s) LS2(s)
+#define LS2(s) L##s
+
+#ifndef true
 typedef int bool;
 
 #define true 1
 #define false 0
+#endif
 
 // plus the name of the executable
 #define STATIC_PARAMS_COUNT 4
@@ -234,7 +240,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
 				break;
 			}
 
-			wprintf(L"   {event id=%I64i, time=%I64i, exchange code=%c, price=%f, size=%i, bid price=%f, ask price=%f, "
+			wprintf(L"   {event id=%"LS(PRId64)L", time=%"LS(PRId64)L", exchange code=%c, price=%f, size=%i, bid price=%f, ask price=%f, "
 				L"exchange sale conditions=\'%ls\', is ETH trade=%ls, type=%i}\n",
 				tns.index, tns.time, tns.exchange_code, tns.price, tns.size,
 				tns.bid_price, tns.ask_price, tns.exchange_sale_conditions,
@@ -252,7 +258,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
 
 			wprintf(L"   {time=");
 			print_timestamp(grks.time);
-			wprintf(L", index=0x%I64X, greeks price=%f, volatility=%f, "
+			wprintf(L", index=0x%"LS(PRIX64)L", greeks price=%f, volatility=%f, "
 				L"delta=%f, gamma=%f, theta=%f, rho=%f, vega=%f}\n",
 				grks.index, grks.price, grks.volatility, grks.delta,
 				grks.gamma, grks.theta, grks.rho, grks.vega);
@@ -266,10 +272,10 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
 				wprintf(L"   { ... %zu records left ...}\n", records_count - i);
 				break;
 			}
-			wprintf(L"   {index=%I64i, time=", srs.index);
+			wprintf(L"   {index=%"LS(PRId64)L", time=", srs.index);
 			print_timestamp(srs.time);
 			wprintf(L", sequence=%i, expiration=%d, volatility=%f, put call ratio=%f, "
-					L"forward_price=%f, dividend=%f, interest=%f, index=0x%I64X}\n",
+					L"forward_price=%f, dividend=%f, interest=%f, index=0x%"LS(PRIX64)L"}\n",
 					srs.sequence, srs.expiration, srs.volatility, srs.put_call_ratio,
 					srs.forward_price, srs.dividend, srs.interest, srs.index);
 		}

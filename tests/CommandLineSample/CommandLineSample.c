@@ -13,11 +13,17 @@
 #include "DXErrorCodes.h"
 #include <stdio.h>
 #include <time.h>
+#include <inttypes.h>
 
+#define LS(s) LS2(s)
+#define LS2(s) L##s
+
+#ifndef true
 typedef int bool;
 
 #define true 1
 #define false 0
+#endif
 
 // plus the name of the executable
 #define STATIC_PARAMS_COUNT 4
@@ -218,7 +224,7 @@ void listener(int event_type, dxf_const_string_t symbol_name,
 		dxf_time_and_sale_t* tns = (dxf_time_and_sale_t*)data;
 
 		for (; i < data_count; ++i) {
-			wprintf(L"event id=%I64i, time=", tns[i].index);
+			wprintf(L"event id=%"LS(PRId64)L", time=", tns[i].index);
 			print_timestamp(tns[i].time);
 			wprintf(L", exchange code=%c, price=%f, size=%i, bid price=%f, ask price=%f, "
 				L"exchange sale conditions=\'%ls\', is ETH trade=%ls, type=%i, buyer=\'%ls\', seller=\'%ls\'}\n",
@@ -263,8 +269,8 @@ void listener(int event_type, dxf_const_string_t symbol_name,
 		for (; i < data_count; ++i) {
 			wprintf(L"time=");
 			print_timestamp(grks[i].time);
-			wprintf(L", index=%I64i, greeks price=%f, volatility=%f, "
-				L"delta=%f, gamma=%f, theta=%f, rho=%f, vega=%f, index=0x%I64X}\n",
+			wprintf(L", index=%"LS(PRId64)L", greeks price=%f, volatility=%f, "
+				L"delta=%f, gamma=%f, theta=%f, rho=%f, vega=%f, index=0x%"LS(PRIX64)L"}\n",
 				grks[i].index, grks[i].price, grks[i].volatility,
 				grks[i].delta, grks[i].gamma, grks[i].theta, grks[i].rho, grks[i].vega, grks[i].index);
 		}
@@ -296,8 +302,8 @@ void listener(int event_type, dxf_const_string_t symbol_name,
 		dxf_series_t* srs = (dxf_series_t*)data;
 
 		for (; i < data_count; ++i) {
-			wprintf(L"expiration=%d, index=%I64i, volatility=%f, put call ratio=%f, "
-				L"forward_price=%f, dividend=%f, interest=%f, index=0x%I64X}\n",
+			wprintf(L"expiration=%d, index=%"LS(PRId64)L", volatility=%f, put call ratio=%f, "
+				L"forward_price=%f, dividend=%f, interest=%f, index=0x%"LS(PRIX64)L"}\n",
 				srs[i].expiration, srs[i].index, srs[i].volatility, srs[i].put_call_ratio,
 				srs[i].forward_price, srs[i].dividend, srs[i].interest, srs[i].index);
 		}

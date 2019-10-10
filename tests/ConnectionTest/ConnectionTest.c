@@ -24,7 +24,7 @@ void process_last_error () {
 		}
 
 		wprintf(L"Error occurred and successfully retrieved:\n"
-			L"error code = %d, description = \"%s\"\n",
+			L"error code = %d, description = \"%ls\"\n",
 			error_code, error_descr);
 		return;
 	}

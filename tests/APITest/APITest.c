@@ -47,7 +47,7 @@ void first_listener(int event_type, dxf_const_string_t symbol_name,
 					const dxf_event_data_t* data, int data_count, void* user_data) {
 	dxf_int_t i = 0;
 
-	wprintf(L"First listener. Event: %s Symbol: %s\n", dx_event_type_to_string(event_type), symbol_name);
+	wprintf(L"First listener. Event: %ls Symbol: %ls\n", dx_event_type_to_string(event_type), symbol_name);
 
 	if (event_type == DXF_ET_QUOTE) {
 		dxf_quote_t* quotes = (dxf_quote_t*)data;
@@ -65,7 +65,7 @@ void first_listener(int event_type, dxf_const_string_t symbol_name,
 		dxf_order_t* orders = (dxf_order_t*)data;
 
 		for (; i < data_count; ++i) {
-			wprintf(L"index=%i, side=%i, scope=%i, time=%i, exchange code=%C, market maker=%s, price=%f, size=%i\n",
+			wprintf(L"index=%i, side=%i, scope=%i, time=%i, exchange code=%c, market maker=%ls, price=%f, size=%i\n",
 				(int)orders[i].index, (int)orders[i].side, (int)orders[i].scope, (int)orders[i].time,
 				orders[i].exchange_code, orders[i].market_maker, orders[i].price, (int)orders[i].size);
 		}
@@ -110,7 +110,7 @@ void first_listener(int event_type, dxf_const_string_t symbol_name,
 
 		for (; i < data_count ; ++i) {
 			wprintf(L"event id=%lld, time=%lld, exchange code=%c, price=%f, size=%li, bid price=%f, ask price=%f, "
-				L"exchange sale conditions=%s, is ETH trade=%s, type=%i\n",
+				L"exchange sale conditions=%ls, is ETH trade=%ls, type=%i\n",
 				tns[i].index, tns[i].time, tns[i].exchange_code, tns[i].price, (int)tns[i].size,
 				tns[i].bid_price, tns[i].ask_price, tns[i].exchange_sale_conditions,
 				tns[i].is_eth_trade ? L"True" : L"False", (int)tns[i].type);
@@ -124,7 +124,7 @@ void second_listener(int event_type, dxf_const_string_t symbol_name,
 					const dxf_event_data_t* data, int data_count, void* user_data) {
 	dxf_int_t i = 0;
 
-	wprintf(L"Second listener. Event: %s Symbol: %s\n", dx_event_type_to_string(event_type), symbol_name);
+	wprintf(L"Second listener. Event: %ls Symbol: %ls\n", dx_event_type_to_string(event_type), symbol_name);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -154,7 +154,7 @@ void process_last_error () {
 		}
 
 		wprintf(L"Error occurred and successfully retrieved:\n"
-			L"error code = %d, description = \"%s\"\n",
+			L"error code = %d, description = \"%ls\"\n",
 			error_code, error_descr);
 		return;
 	}
@@ -235,7 +235,7 @@ int main (int argc, char* argv[]) {
 	Sleep (5000);
 
 	printf("Master thread woke up\n");
-	printf("Adding symbols: %S %S %S...\n", symbols_to_add[0], symbols_to_add[1], symbols_to_add[2]);
+	printf("Adding symbols: %ls %ls %ls...\n", symbols_to_add[0], symbols_to_add[1], symbols_to_add[2]);
 
 	if (!dxf_add_symbols(subscription, symbols_to_add, symbols_to_add_size)) {
 		process_last_error();
@@ -277,7 +277,7 @@ int main (int argc, char* argv[]) {
 	Sleep (5000);
 
 	printf("Master thread woke up\n");
-	printf("Removing symbols: %S %S...\n", symbols_to_remove[0], symbols_to_remove[1]);
+	printf("Removing symbols: %ls %ls...\n", symbols_to_remove[0], symbols_to_remove[1]);
 
 	if (!dxf_remove_symbols(subscription, symbols_to_remove, symbols_to_remove_size)) {
 		process_last_error();
@@ -291,7 +291,7 @@ int main (int argc, char* argv[]) {
 	Sleep (5000);
 
 	printf("Master thread woke up\n");
-	printf("Setting symbols: %S %S...\n", symbols_to_set[0], symbols_to_set[1]);
+	printf("Setting symbols: %ls %ls...\n", symbols_to_set[0], symbols_to_set[1]);
 
 	if (!dxf_set_symbols(subscription, symbols_to_set, symbols_to_set_size)) {
 		process_last_error();
@@ -320,7 +320,7 @@ int main (int argc, char* argv[]) {
 
 		for (; eid < dx_eid_count; ++eid) {
 			if (get_event_types & DX_EVENT_BIT_MASK(eid)) {
-				printf("%S ", dx_event_type_to_string(DX_EVENT_BIT_MASK(eid)));
+				printf("%ls ", dx_event_type_to_string(DX_EVENT_BIT_MASK(eid)));
 			}
 		}
 
@@ -333,7 +333,7 @@ int main (int argc, char* argv[]) {
 	Sleep(5000);
 
 	printf("Master thread woke up\n");
-	printf("Adding new symbols: %S...\n", symbols_to_add_2[0]);
+	printf("Adding new symbols: %ls...\n", symbols_to_add_2[0]);
 
 	if (!dxf_add_symbols(subscription, symbols_to_add_2, symbols_to_add_2_size)) {
 		process_last_error();

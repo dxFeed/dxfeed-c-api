@@ -313,7 +313,7 @@ size_t dx_get_event_subscription_params(dxf_connection_t connection, dx_order_so
 
 	if (!result) {
 		dx_logging_last_error();
-		dx_logging_info(L"Unable to create subscription to event %d (%s)", event_id, dx_event_type_to_string(event_id));
+		dx_logging_info(L"Unable to create subscription to event %d (%ls)", event_id, dx_event_type_to_string(event_id));
 	}
 
 	*params = param_list;

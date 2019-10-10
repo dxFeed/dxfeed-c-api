@@ -9,6 +9,18 @@
 #include "signal.h"
 #include <stdio.h>
 
+#include <inttypes.h>
+
+#define LS(s) LS2(s)
+#define LS2(s) L##s
+
+#ifndef true
+typedef int bool;
+
+#define true 1
+#define false 0
+#endif
+
 const char dxfeed_host[] = "mddqa.in.devexperts.com:7400";
 //const char dxfeed_host[] = "demo.dxfeed.com:7300";
 
@@ -88,7 +100,7 @@ void listener(int event_type, dxf_const_string_t symbol_name,
 	if (!doPrint)
 		return;
 
-	wprintf(L"%s{symbol=%s, ",dx_event_type_to_string(event_type), symbol_name);
+	wprintf(L"%ls{symbol=%ls, ",dx_event_type_to_string(event_type), symbol_name);
 
 	if (event_type == DXF_ET_QUOTE) {
 		dxf_quote_t* quotes = (dxf_quote_t*)data;
@@ -113,10 +125,10 @@ void listener(int event_type, dxf_const_string_t symbol_name,
 		dxf_order_t* orders = (dxf_order_t*)data;
 
 		for (; i < data_count; ++i) {
-			wprintf(L"index=0x%I64X, side=%i, scope=%i, time=",
+			wprintf(L"index=0x%"LS(PRIX64)L", side=%i, scope=%i, time=",
 					orders[i].index, orders[i].side, orders[i].scope);
 					print_timestamp(orders[i].time);
-			wprintf(L", exchange code=%c, market maker=%s, price=%f, size=%i}\n",
+			wprintf(L", exchange code=%c, market maker=%ls, price=%f, size=%i}\n",
 					orders[i].exchange_code, orders[i].market_maker, orders[i].price, orders[i].size);
 		}
 	}
@@ -160,8 +172,8 @@ void listener(int event_type, dxf_const_string_t symbol_name,
 		dxf_time_and_sale_t* tns = (dxf_time_and_sale_t*)data;
 
 		for (; i < data_count ; ++i) {
-			wprintf(L"event id=%I64i, time=%I64i, exchange code=%c, price=%f, size=%i, bid price=%f, ask price=%f, "
-				L"exchange sale conditions=%s, is ETH trade=%s, type=%i}\n",
+			wprintf(L"event id=%"LS(PRId64)L", time=%"LS(PRId64)L", exchange code=%c, price=%f, size=%i, bid price=%f, ask price=%f, "
+				L"exchange sale conditions=%ls, is ETH trade=%ls, type=%i}\n",
 					tns[i].index, tns[i].time, tns[i].exchange_code, tns[i].price, tns[i].size,
 					tns[i].bid_price, tns[i].ask_price, tns[i].exchange_sale_conditions,
 					tns[i].is_eth_trade ? L"True" : L"False", tns[i].type);
@@ -185,7 +197,7 @@ void process_last_error () {
 		}
 
 		wprintf(L"Error occurred and successfully retrieved:\n"
-			L"error code = %d, description = \"%s\"\n",
+			L"error code = %d, description = \"%ls\"\n",
 			error_code, error_descr);
 		return;
 	}

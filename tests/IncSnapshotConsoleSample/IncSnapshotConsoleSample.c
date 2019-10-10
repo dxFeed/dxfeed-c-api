@@ -15,14 +15,20 @@
 #include "DXErrorCodes.h"
 #include <time.h>
 #include <stdio.h>
+#include <inttypes.h>
 
 #define STRINGIFY(a) STR(a)
 #define STR(a) #a
 
+#define LS(s) LS2(s)
+#define LS2(s) L##s
+
+#ifndef true
 typedef int bool;
 
 #define true 1
 #define false 0
+#endif
 
 // plus the name of the executable
 #define STATIC_PARAMS_COUNT 4
@@ -252,7 +258,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, bool new_snapshot, vo
 			if (!DXF_IS_TIME_AND_SALE_REMOVAL(&tns)) {
 				wprintf(L"    {time=");
 				print_timestamp(tns.time);
-				wprintf(L", event id=%I64i, exchange code=%c, price=%f, size=%i, bid price=%f, ask price=%f, "
+				wprintf(L", event id=%"LS(PRId64)L", exchange code=%c, price=%f, size=%i, bid price=%f, ask price=%f, "
 					L"exchange sale conditions=\'%ls\', is ETH trade=%ls, type=%i}\n",
 					tns.index, tns.exchange_code, tns.price, tns.size,
 					tns.bid_price, tns.ask_price, tns.exchange_sale_conditions,
@@ -260,7 +266,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, bool new_snapshot, vo
 			} else {
 				wprintf(L"    {time=");
 				print_timestamp(tns.time);
-				wprintf(L", event id=%I64i, REMOVAL}\n", tns.index);
+				wprintf(L", event id=%"LS(PRId64)L", REMOVAL}\n", tns.index);
 			}
 		}
 	} else if (snapshot_data->event_type == DXF_ET_GREEKS) {
@@ -276,14 +282,14 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, bool new_snapshot, vo
 			if (!DXF_IS_GREEKS_REMOVAL(&grks)) {
 				wprintf(L"    {time=");
 				print_timestamp(grks.time);
-				wprintf(L", index=0x%I64X, greeks price=%f, volatility=%f, "
+				wprintf(L", index=0x%"LS(PRIX64)L", greeks price=%f, volatility=%f, "
 					L"delta=%f, gamma=%f, theta=%f, rho=%f, vega=%f\n",
 					grks.index, grks.price, grks.volatility, grks.delta,
 					grks.gamma, grks.theta, grks.rho, grks.vega);
 			} else {
 				wprintf(L"    {time=");
 				print_timestamp(grks.time);
-				wprintf(L", index=0x%I64X, REMOVAL}\n", grks.index);
+				wprintf(L", index=0x%"LS(PRIX64)L", REMOVAL}\n", grks.index);
 			}
 		}
 	} else if (snapshot_data->event_type == DXF_ET_SERIES) {
@@ -296,12 +302,12 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, bool new_snapshot, vo
 				break;
 			}
 			if (!DXF_IS_SERIES_REMOVAL(&srs)) {
-				wprintf(L"expiration=%d, index=0x%I64X, volatility=%f, put call ratio=%f, "
+				wprintf(L"expiration=%d, index=0x%"LS(PRIX64)L", volatility=%f, put call ratio=%f, "
 				L"forward_price=%f, dividend=%f, interest=%f}\n",
 				srs.expiration, srs.index, srs.volatility, srs.put_call_ratio,
 				srs.forward_price, srs.dividend, srs.interest);
 			} else {
-				wprintf(L"    {expiration=%d, index=0x%I64X, REMOVAL}\n", srs.expiration, srs.index);
+				wprintf(L"    {expiration=%d, index=0x%"LS(PRIX64)L", REMOVAL}\n", srs.expiration, srs.index);
 			}
 		}
 	}
