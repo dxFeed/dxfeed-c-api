@@ -270,6 +270,10 @@ static void dx_logging_ansi_error(const char* ansi_error) {
 /* -------------------------------------------------------------------------- */
 
 static dx_ext_address_t* dx_get_current_address(dx_network_connection_context_t* context) {
+	if (context == NULL || context->addr_context.elements == NULL) {
+		return NULL;
+	}
+
 	return &(context->addr_context.elements[context->addr_context.cur_addr_index]);
 }
 
@@ -1193,12 +1197,17 @@ bool dx_send_data (dxf_connection_t connection, const void* buffer, int buffer_s
 			sent_count = buffer_size;
 		} else {
 #ifdef DXFEED_CODEC_TLS_ENABLED
-			if (dx_get_current_address(context)->tls.enabled) {
-				sent_count = (int)tls_write(context->tls_context, (const void*)char_buf, buffer_size);
-				if (sent_count == -1)
-					dx_logging_ansi_error(tls_error(context->tls_context));
-			} else {
-				sent_count = dx_send(context->s, (const void*)char_buf, buffer_size);
+			dx_ext_address_t* current_address = dx_get_current_address(context);
+
+			// prevent sending while reconnecting
+			if (current_address != NULL) {
+				if (current_address->tls.enabled) {
+					sent_count = (int) tls_write(context->tls_context, (const void *) char_buf, buffer_size);
+					if (sent_count == -1)
+						dx_logging_ansi_error(tls_error(context->tls_context));
+				} else {
+					sent_count = dx_send(context->s, (const void *) char_buf, buffer_size);
+				}
 			}
 #else
 			sent_count = dx_send(context->s, (const void*)char_buf, buffer_size);
