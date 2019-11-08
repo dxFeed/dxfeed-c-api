@@ -98,7 +98,7 @@ struct dx_subscription_data_struct_t {
 	dx_symbol_data_array_t symbols;
 	dx_listener_array_t listeners;
 	dx_order_source_array_t order_source;
-	dxf_uint_t subscr_flags;
+	dx_event_subscr_flag subscr_flags;
 	dxf_long_t time;
 
 	dxf_const_string_t* symbol_name_array;
@@ -685,7 +685,7 @@ void dx_free_event_subscription_data (dx_subscription_data_ptr_t subscr_data) {
 const dxf_subscription_t dx_invalid_subscription = (dxf_subscription_t)NULL;
 
 dxf_subscription_t dx_create_event_subscription(dxf_connection_t connection, int event_types,
-												dxf_uint_t subscr_flags, dxf_long_t time) {
+												dx_event_subscr_flag subscr_flags, dxf_long_t time) {
 	dx_subscription_data_ptr_t subscr_data = NULL;
 	bool res = true;
 	dx_event_subscription_connection_context_t* context = NULL;
@@ -1063,7 +1063,7 @@ bool dx_get_event_subscription_symbols(dxf_subscription_t subscr_id,
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_get_event_subscription_flags(dxf_subscription_t subscr_id, OUT dxf_uint_t* subscr_flags) {
+bool dx_get_event_subscription_flags(dxf_subscription_t subscr_id, OUT dx_event_subscr_flag* subscr_flags) {
 	dx_subscription_data_ptr_t subscr_data = (dx_subscription_data_ptr_t)subscr_id;
 
 	if (subscr_id == dx_invalid_subscription) {
@@ -1077,6 +1077,23 @@ bool dx_get_event_subscription_flags(dxf_subscription_t subscr_id, OUT dxf_uint_
 	*subscr_flags = subscr_data->subscr_flags;
 
 	return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+bool dx_set_event_subscription_flags(dxf_subscription_t subscr_id, dx_event_subscr_flag subscr_flags) {
+	dx_subscription_data_ptr_t subscr_data = (dx_subscription_data_ptr_t)subscr_id;
+	dx_event_subscription_connection_context_t* context = NULL;
+
+	if (subscr_id == dx_invalid_subscription) {
+		return dx_set_error_code(dx_esec_invalid_subscr_id);
+	}
+
+	context = subscr_data->escc;
+	CHECKED_CALL(dx_mutex_lock, &(context->subscr_guard));
+	subscr_data->subscr_flags = subscr_flags;
+
+	return dx_mutex_unlock(&(context->subscr_guard));
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1119,43 +1136,12 @@ static void dx_call_subscr_listeners(dx_subscription_data_ptr_t subscr_data, int
 
 #define DX_ORDER_SOURCE_COMPARATOR_NONSYM(l, r) (dx_compare_strings(l.suffix, r))
 
-bool dx_process_event_data (dxf_connection_t connection, dx_event_id_t event_id,
-							dxf_const_string_t symbol_name, dxf_int_t symbol_cipher,
-							const dxf_event_data_t data, int data_count,
-							const dxf_event_params_t* event_params) {
-	dx_symbol_data_ptr_t symbol_data = NULL;
+void pass_event_data_to_listeners(dx_symbol_data_ptr_t symbol_data, dx_event_id_t event_id,
+		dxf_const_string_t symbol_name, const dxf_event_data_t data, int data_count,
+		const dxf_event_params_t* event_params) {
 	size_t cur_subscr_index = 0;
 	int event_bitmask = DX_EVENT_BIT_MASK(event_id);
-	bool res;
-	dx_event_subscription_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_event_subscription, &res);
 
-	if (context == NULL) {
-		if (res) {
-			dx_set_error_code(dx_cec_connection_context_not_initialized);
-		}
-
-		return false;
-	}
-
-	if (event_id < dx_eid_begin || event_id >= dx_eid_count) {
-		return dx_set_error_code(dx_esec_invalid_event_type);
-	}
-
-	/* this function is supposed to be called from a different thread than the other
-	interface functions */
-	CHECKED_CALL(dx_mutex_lock, &(context->subscr_guard));
-
-	if ((symbol_data = dx_find_symbol(context, symbol_name, symbol_cipher)) == NULL) {
-		/* in fact, this is most likely a correct situation that occurred because
-		the data is received very soon after the symbol subscription
-		has been annulled */
-
-		return dx_mutex_unlock(&(context->subscr_guard));
-	}
-
-	dx_store_last_symbol_event(symbol_data, event_id, data, data_count);
-
-	/* passing the event data to listeners */
 	for (; cur_subscr_index < symbol_data->subscriptions.size; ++cur_subscr_index) {
 		dx_subscription_data_ptr_t subscr_data = symbol_data->subscriptions.elements[cur_subscr_index];
 
@@ -1199,6 +1185,47 @@ bool dx_process_event_data (dxf_connection_t connection, dx_event_id_t event_id,
 		} else {
 			dx_call_subscr_listeners(subscr_data, event_bitmask, symbol_name, data, data_count, event_params);
 		}
+	}
+}
+
+bool dx_process_event_data (dxf_connection_t connection, dx_event_id_t event_id,
+							dxf_const_string_t symbol_name, dxf_int_t symbol_cipher,
+							const dxf_event_data_t data, int data_count,
+							const dxf_event_params_t* event_params) {
+
+	bool res;
+	dx_event_subscription_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_event_subscription, &res);
+
+	if (context == NULL) {
+		if (res) {
+			dx_set_error_code(dx_cec_connection_context_not_initialized);
+		}
+
+		return false;
+	}
+
+	if (event_id < dx_eid_begin || event_id >= dx_eid_count) {
+		return dx_set_error_code(dx_esec_invalid_event_type);
+	}
+
+	/* this function is supposed to be called from a different thread than the other
+	interface functions */
+	CHECKED_CALL(dx_mutex_lock, &(context->subscr_guard));
+
+	dx_symbol_data_ptr_t symbol_data = dx_find_symbol(context, symbol_name, symbol_cipher);
+
+	/* symbol_data == NULL is most likely a correct situation that occurred because the data is received very soon
+	after the symbol subscription has been annulled */
+	if (symbol_data != NULL) {
+		dx_store_last_symbol_event(symbol_data, event_id, data, data_count);
+		pass_event_data_to_listeners(symbol_data, event_id, symbol_name, data, data_count, event_params);
+	}
+
+	dx_symbol_data_ptr_t wildcard_symbol_data = dx_find_symbol(context, L"*", g_wildcard_cipher);
+
+	if (wildcard_symbol_data != NULL) {
+		dx_store_last_symbol_event(wildcard_symbol_data, event_id, data, data_count);
+		pass_event_data_to_listeners(wildcard_symbol_data, event_id, symbol_name, data, data_count, event_params);
 	}
 
 	return dx_mutex_unlock(&(context->subscr_guard));
@@ -1274,7 +1301,7 @@ bool dx_process_connection_subscriptions (dxf_connection_t connection, dx_subscr
 		dxf_const_string_t* symbols = NULL;
 		size_t symbol_count = 0;
 		int event_types = 0;
-		dxf_uint_t subscr_flags = 0;
+		dx_event_subscr_flag subscr_flags = 0;
 		dxf_long_t time;
 
 		if (!dx_get_event_subscription_symbols(subscriptions->elements[i], &symbols, &symbol_count) ||

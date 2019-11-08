@@ -38,6 +38,8 @@
 #include "PriceLevelBook.h"
 #include "RegionalBook.h"
 
+static dxf_const_string_t wildcard_symbol = L"*";
+
 /* -------------------------------------------------------------------------- */
 /*
  *	Auxiliary internal functions
@@ -352,7 +354,7 @@ DXFEED_API ERRORCODE dxf_close_connection (dxf_connection_t connection) {
 /* -------------------------------------------------------------------------- */
 
 ERRORCODE dxf_create_subscription_impl (dxf_connection_t connection, int event_types,
-										dxf_uint_t subscr_flags, dxf_long_t time,
+										dx_event_subscr_flag subscr_flags, dxf_long_t time,
 										OUT dxf_subscription_t* subscription) {
 
 	dx_perform_common_actions();
@@ -380,7 +382,7 @@ ERRORCODE dxf_create_subscription_impl (dxf_connection_t connection, int event_t
 
 DXFEED_API ERRORCODE dxf_create_subscription(dxf_connection_t connection, int event_types,
 											OUT dxf_subscription_t* subscription) {
-	return dxf_create_subscription_impl(connection, event_types, DX_SUBSCR_FLAG_DEFAULT,
+	return dxf_create_subscription_impl(connection, event_types, dx_esf_default,
 		DEFAULT_SUBSCRIPTION_TIME, subscription);
 }
 
@@ -389,7 +391,7 @@ DXFEED_API ERRORCODE dxf_create_subscription(dxf_connection_t connection, int ev
 DXFEED_API ERRORCODE dxf_create_subscription_timed(dxf_connection_t connection, int event_types,
 												dxf_long_t time,
 												OUT dxf_subscription_t* subscription) {
-	return dxf_create_subscription_impl(connection, event_types, DX_SUBSCR_FLAG_TIME_SERIES, time,
+	return dxf_create_subscription_impl(connection, event_types, dx_esf_time_series, time,
 		subscription);
 }
 
@@ -399,7 +401,7 @@ DXFEED_API ERRORCODE dxf_close_subscription (dxf_subscription_t subscription) {
 
 	dxf_const_string_t* symbols;
 	size_t symbol_count;
-	dxf_uint_t subscr_flags;
+	dx_event_subscr_flag subscr_flags;
 	dxf_long_t time;
 
 	dx_perform_common_actions();
@@ -432,12 +434,11 @@ DXFEED_API ERRORCODE dxf_add_symbol (dxf_subscription_t subscription, dxf_const_
 
 /* -------------------------------------------------------------------------- */
 
-DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dxf_const_string_t* symbols, int symbol_count) {
-	dxf_int_t events;
-	dxf_connection_t connection;
-	dxf_uint_t subscr_flags;
-	dxf_long_t time;
+#define DX_WILDCARD_COMPARATOR(l, r) (dx_compare_strings_num(l, r, 1))
 
+/* -------------------------------------------------------------------------- */
+
+DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dxf_const_string_t* symbols, int symbol_count) {
 	dx_perform_common_actions();
 
 	if (subscription == dx_invalid_subscription || symbols == NULL || symbol_count < 0) {
@@ -446,14 +447,49 @@ DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dxf_const
 		return DXF_FAILURE;
 	}
 
+	if (symbol_count == 0) {
+		return DXF_SUCCESS;
+	}
+
+	dxf_int_t events;
+	dxf_connection_t connection;
+	dx_event_subscr_flag subscr_flags;
+
 	if (!dx_get_subscription_connection(subscription, &connection) ||
 		!dx_get_event_subscription_event_types(subscription, &events) ||
-		!dx_get_event_subscription_flags(subscription, &subscr_flags) ||
-		!dx_get_event_subscription_time(subscription, &time) ||
-		!dx_add_symbols(subscription, symbols, symbol_count) ||
+		!dx_get_event_subscription_flags(subscription, &subscr_flags)) {
+		return DXF_FAILURE;
+	}
+
+	if (IS_FLAG_SET(subscr_flags, dx_esf_wildcard)) {
+		return DXF_SUCCESS;
+	}
+
+	dxf_const_string_t* subscr_symbols = symbols;
+	int subscr_symbol_count = symbol_count;
+	bool found_wildcard;
+	size_t index;
+
+	DX_ARRAY_SEARCH(symbols, 0, symbol_count, wildcard_symbol, DX_WILDCARD_COMPARATOR, false, found_wildcard, index);
+
+	if (found_wildcard) {
+		subscr_symbols = &wildcard_symbol;
+		subscr_symbol_count = 1;
+
+		if (!dxf_clear_symbols(subscription)) {
+			return DXF_FAILURE;
+		}
+
+		subscr_flags ^= dx_esf_wildcard;
+	}
+
+	dxf_long_t time;
+
+	if (!dx_get_event_subscription_time(subscription, &time) ||
+		!dx_add_symbols(subscription, subscr_symbols, subscr_symbol_count) ||
 		!dx_load_events_for_subscription(connection, dx_get_order_source(subscription), events, subscr_flags) ||
 		!dx_send_record_description(connection, false) ||
-		!dx_subscribe(connection, dx_get_order_source(subscription), symbols, symbol_count, events, subscr_flags, time)) {
+		!dx_subscribe(connection, dx_get_order_source(subscription), subscr_symbols, subscr_symbol_count, events, subscr_flags, time)) {
 
 		return DXF_FAILURE;
 	}
@@ -470,11 +506,6 @@ DXFEED_API ERRORCODE dxf_remove_symbol (dxf_subscription_t subscription, dxf_con
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_remove_symbols (dxf_subscription_t subscription, dxf_const_string_t* symbols, int symbol_count) {
-	dxf_connection_t connection;
-	int events;
-	dxf_uint_t subscr_flags;
-	dxf_long_t time;
-
 	dx_perform_common_actions();
 
 	if (subscription == dx_invalid_subscription || symbols == NULL || symbol_count < 0) {
@@ -483,10 +514,32 @@ DXFEED_API ERRORCODE dxf_remove_symbols (dxf_subscription_t subscription, dxf_co
 		return DXF_FAILURE;
 	}
 
+	bool found_wildcard;
+	size_t index;
+
+	DX_ARRAY_SEARCH(symbols, 0, symbol_count, wildcard_symbol, DX_WILDCARD_COMPARATOR, false, found_wildcard, index);
+
+	if (found_wildcard) {
+		return dxf_clear_symbols(subscription);
+	}
+
+	dxf_connection_t connection;
+	int events;
+	dx_event_subscr_flag subscr_flags;
+
 	if (!dx_get_subscription_connection(subscription, &connection) ||
 		!dx_get_event_subscription_event_types(subscription, &events) ||
-		!dx_get_event_subscription_flags(subscription, &subscr_flags) ||
-		!dx_get_event_subscription_time(subscription, &time) ||
+		!dx_get_event_subscription_flags(subscription, &subscr_flags)) {
+		return DXF_FAILURE;
+	}
+
+	if (IS_FLAG_SET(subscr_flags, dx_esf_wildcard)) {
+		return DXF_SUCCESS;
+	}
+
+	dxf_long_t time;
+
+	if (!dx_get_event_subscription_time(subscription, &time) ||
 		!dx_unsubscribe(connection, dx_get_order_source(subscription), symbols, symbol_count, events, subscr_flags, time) ||
 		!dx_remove_symbols(subscription, symbols, symbol_count)) {
 
@@ -544,7 +597,7 @@ DXFEED_API ERRORCODE dxf_clear_symbols (dxf_subscription_t subscription) {
 
 	dxf_const_string_t* symbols;
 	size_t symbol_count;
-	dxf_uint_t subscr_flags;
+	dx_event_subscr_flag subscr_flags;
 	dxf_long_t time;
 
 	dx_perform_common_actions();
@@ -564,6 +617,14 @@ DXFEED_API ERRORCODE dxf_clear_symbols (dxf_subscription_t subscription) {
 		!dx_remove_symbols(subscription, symbols, symbol_count)) {
 
 		return DXF_FAILURE;
+	}
+
+	if (IS_FLAG_SET(subscr_flags, dx_esf_wildcard)) {
+		subscr_flags ^= dx_esf_wildcard;
+
+		if (!dx_set_event_subscription_flags(subscription, subscr_flags)) {
+			return DXF_FAILURE;
+		}
 	}
 
 	return DXF_SUCCESS;
@@ -715,7 +776,7 @@ DXFEED_API ERRORCODE dxf_set_order_source(dxf_subscription_t subscription, const
 	dxf_const_string_t* symbols;
 	size_t symbol_count;
 	int events;
-	dxf_uint_t subscr_flags;
+	dx_event_subscr_flag subscr_flags;
 	dxf_long_t time;
 	size_t source_len;
 
@@ -776,7 +837,7 @@ DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const
 	dxf_const_string_t* symbols;
 	size_t symbol_count;
 	int events;
-	dxf_uint_t subscr_flags;
+	dx_event_subscr_flag subscr_flags;
 	dxf_long_t time;
 	bool failed = false;
 
@@ -829,15 +890,15 @@ ERRORCODE dxf_create_snapshot_impl(dxf_connection_t connection, dx_event_id_t ev
 	ERRORCODE error_code;
 	int event_types = DX_EVENT_BIT_MASK(event_id);
 	size_t source_len = (source == NULL ? 0 : dx_string_length(source));
-	dxf_uint_t subscr_flags = DX_SUBSCR_FLAG_TIME_SERIES;
+	dx_event_subscr_flag subscr_flags = dx_esf_time_series;
 
 	if (event_id == dx_eid_order) {
-		subscr_flags |= DX_SUBSCR_FLAG_SINGLE_RECORD;
+		subscr_flags |= dx_esf_single_record;
 		if (source_len > 0 &&
 			(dx_compare_strings(source, DXF_ORDER_COMPOSITE_BID_STR) == 0 ||
 			dx_compare_strings(source, DXF_ORDER_COMPOSITE_ASK_STR) == 0)) {
 			record_info_id = dx_rid_market_maker;
-			subscr_flags |= DX_SUBSCR_FLAG_SR_MARKET_MAKER_ORDER;
+			subscr_flags |= dx_esf_sr_market_maker_order;
 		} else {
 			record_info_id = dx_rid_order;
 			if (source_len > 0)

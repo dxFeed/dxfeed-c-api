@@ -8,6 +8,11 @@
 #include <args.hxx>
 #include <nonstd/variant.hpp>
 
+//Prevents file names globbing (converting * to all files in the current dir)
+#ifdef __MINGW64_VERSION_MAJOR
+int _CRT_glob = 0;
+#endif
+
 int main(int argc, char **argv) {
 	args::ArgumentParser parser("This is a connection sample program.",
 								"Examples:\n"

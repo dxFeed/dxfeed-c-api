@@ -430,7 +430,7 @@ static size_t dx_plb_source_find_pos(dx_plb_connection_context_t* context, dxf_c
 /* -------------------------------------------------------------------------- */
 
 static dx_plb_source_t *dx_plb_source_create(dxf_connection_t connection, dxf_const_string_t symbol, dxf_const_string_t src) {
-	const static dxf_int_t subscr_flags = DX_SUBSCR_FLAG_SINGLE_RECORD | DX_SUBSCR_FLAG_TIME_SERIES;
+	const static dx_event_subscr_flag subscr_flags = dx_esf_single_record | dx_esf_time_series;
 	dx_plb_source_t *source = NULL;
 
 	/* Create new source */

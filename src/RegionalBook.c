@@ -383,7 +383,7 @@ dxf_regional_book_t dx_create_regional_book(dxf_connection_t connection,
 	}
 
 	/* Create subscription which we need, for needed regions */
-	if ((book->subscription = dx_create_event_subscription(connection, DXF_ET_QUOTE, DX_SUBSCR_QUOTES_REGIONAL, 0)) == dx_invalid_subscription) {
+	if ((book->subscription = dx_create_event_subscription(connection, DXF_ET_QUOTE, dx_esf_quotes_regional, 0)) == dx_invalid_subscription) {
 		dx_rb_book_free(book);
 		dx_set_error_code(dx_mec_insufficient_memory);
 		return NULL;
@@ -402,10 +402,10 @@ dxf_regional_book_t dx_create_regional_book(dxf_connection_t connection,
 	}
 
 	/* And make all these motions */
-	if (!dx_load_events_for_subscription(connection, dx_get_order_source(book->subscription), DXF_ET_QUOTE, DX_SUBSCR_QUOTES_REGIONAL) ||
+	if (!dx_load_events_for_subscription(connection, dx_get_order_source(book->subscription), DXF_ET_QUOTE, dx_esf_quotes_regional) ||
 		!dx_send_record_description(connection, false) ||
 		!dx_subscribe_symbols_to_events(connection, dx_get_order_source(book->subscription),
-			&symbol, 1, DXF_ET_QUOTE, false, false, DX_SUBSCR_QUOTES_REGIONAL, 0)) {
+			&symbol, 1, DXF_ET_QUOTE, false, false, dx_esf_quotes_regional, 0)) {
 		dx_rb_book_free(book);
 		return NULL;
 	}

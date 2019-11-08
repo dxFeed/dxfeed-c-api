@@ -131,125 +131,193 @@ bool dx_add_subscription_param_to_list(dxf_connection_t connection, dx_event_sub
 }
 
 bool dx_get_single_order_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
-											dxf_uint_t subscr_flags,
+											 dx_event_subscr_flag subscr_flags,
 											OUT dx_event_subscription_param_list_t* param_list) {
 	dxf_char_t order_name_buf[ORDER_TMPL_LEN + DXF_RECORD_SUFFIX_SIZE] = { 0 };
 
-	if (!IS_FLAG_SET(subscr_flags, DX_SUBSCR_FLAG_SINGLE_RECORD)) {
+	if (!IS_FLAG_SET(subscr_flags, dx_esf_single_record)) {
 		return false;
 	}
-	if (IS_FLAG_SET(subscr_flags, DX_SUBSCR_FLAG_SR_MARKET_MAKER_ORDER)) {
-		CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"MarketMaker", dx_st_history);
+
+	dx_subscription_type_t subscription_type = IS_FLAG_SET(subscr_flags, dx_esf_wildcard) ? dx_st_stream : dx_st_history;
+
+	if (IS_FLAG_SET(subscr_flags, dx_esf_sr_market_maker_order)) {
+		CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"MarketMaker", subscription_type);
 	}
 	else {
 		if (order_source->size > 1) {
 			return false;
 		}
 		if (order_source->size == 0) {
-			CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Order", dx_st_history);
+			CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Order", subscription_type);
 		} else {
 			dx_copy_string(order_name_buf, g_order_tmpl);
 			dx_copy_string_len(&order_name_buf[ORDER_TMPL_LEN], order_source->elements[0].suffix, DXF_RECORD_SUFFIX_SIZE);
-			CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, order_name_buf, dx_st_history);
+			CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, order_name_buf, subscription_type);
 		}
 	}
 	return true;
 }
 
-bool dx_get_quote_subscription_params(dxf_connection_t connection, dxf_uint_t subscr_flags,
+bool dx_get_quote_subscription_params(dxf_connection_t connection, dx_event_subscr_flag subscr_flags,
 									OUT dx_event_subscription_param_list_t* param_list) {
+	dx_subscription_type_t subscription_type = IS_FLAG_SET(subscr_flags, dx_esf_wildcard) ? dx_st_stream : dx_st_ticker;
 	dxf_char_t ch = 'A';
 	dxf_char_t quote_name_buf[QUOTE_TMPL_LEN + 2] = { 0 };
 
-	if (!IS_FLAG_SET(subscr_flags, DX_SUBSCR_QUOTES_REGIONAL)) {
-		return dx_add_subscription_param_to_list(connection, param_list, L"Quote", dx_st_ticker);
+	if (!IS_FLAG_SET(subscr_flags, dx_esf_quotes_regional)) {
+		return dx_add_subscription_param_to_list(connection, param_list, L"Quote", subscription_type);
 	}
 
 	/* fill quotes Quote&A..Quote&Z */
 	dx_copy_string(quote_name_buf, g_quote_tmpl);
 	for (; ch <= 'Z'; ch++) {
 		quote_name_buf[QUOTE_TMPL_LEN] = ch;
-		CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, quote_name_buf, dx_st_ticker);
+		CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, quote_name_buf, subscription_type);
 	}
 
 	return true;
 }
 
 bool dx_get_order_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
-									dxf_uint_t subscr_flags,
+									dx_event_subscr_flag subscr_flags,
 									OUT dx_event_subscription_param_list_t* param_list) {
 	dxf_char_t ch = 'A';
 	dxf_char_t order_name_buf[ORDER_TMPL_LEN + DXF_RECORD_SUFFIX_SIZE] = { 0 };
 	dxf_char_t quote_name_buf[QUOTE_TMPL_LEN + 2] = { 0 };
 	size_t i;
 
-	if (IS_FLAG_SET(subscr_flags, DX_SUBSCR_FLAG_SINGLE_RECORD)) {
+	if (IS_FLAG_SET(subscr_flags, dx_esf_single_record)) {
 		return dx_get_single_order_subscription_params(connection, order_source, subscr_flags, param_list);
 	}
 
-	CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Quote", dx_st_ticker);
-	CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"MarketMaker", dx_st_history);
-	CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Order", dx_st_history);
+	bool is_wildcard = IS_FLAG_SET(subscr_flags, dx_esf_wildcard);
+
+	CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Quote", is_wildcard ? dx_st_stream : dx_st_ticker);
+	CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"MarketMaker", is_wildcard ? dx_st_stream : dx_st_history);
+	CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Order", is_wildcard ? dx_st_stream : dx_st_history);
 
 	dx_copy_string(order_name_buf, g_order_tmpl);
 	for (i = 0; i < order_source->size; ++i) {
 		dx_copy_string_len(&order_name_buf[ORDER_TMPL_LEN], order_source->elements[i].suffix, DXF_RECORD_SUFFIX_SIZE);
-		CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, order_name_buf, dx_st_history);
+		CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, order_name_buf, is_wildcard ? dx_st_stream : dx_st_history);
 	}
 
 	/* fill quotes Quote&A..Quote&Z */
 	dx_copy_string(quote_name_buf, g_quote_tmpl);
 	for (; ch <= 'Z'; ch++) {
 		quote_name_buf[QUOTE_TMPL_LEN] = ch;
-		CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, quote_name_buf, dx_st_ticker);
+		CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, quote_name_buf, is_wildcard ? dx_st_stream : dx_st_ticker);
 	}
 
 	return true;
 }
 
-bool dx_get_trade_subscription_params(dxf_connection_t connection, OUT dx_event_subscription_param_list_t* param_list) {
+bool dx_get_trade_subscription_params(dxf_connection_t connection, dx_event_subscr_flag subscr_flags, OUT dx_event_subscription_param_list_t* param_list) {
+	dx_subscription_type_t subscription_type = IS_FLAG_SET(subscr_flags, dx_esf_wildcard) ? dx_st_stream : dx_st_ticker;
 	dxf_char_t ch = 'A';
 	dxf_char_t trade_name_buf[TRADE_TMPL_LEN + 2] = { 0 };
-	CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Trade", dx_st_ticker);
+	CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Trade", subscription_type);
 
 	/* fill trades Trade&A..Trade&Z */
 	dx_copy_string(trade_name_buf, g_trade_tmpl);
 	for (; ch <= 'Z'; ch++) {
 		trade_name_buf[TRADE_TMPL_LEN] = ch;
-		CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, trade_name_buf, dx_st_ticker);
+		CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, trade_name_buf, subscription_type);
 	}
 
 	return true;
 }
 
-bool dx_get_summary_subscription_params(dxf_connection_t connection, OUT dx_event_subscription_param_list_t* param_list) {
+bool dx_get_summary_subscription_params(dxf_connection_t connection, dx_event_subscr_flag subscr_flags, OUT dx_event_subscription_param_list_t* param_list) {
+	dx_subscription_type_t subscription_type = IS_FLAG_SET(subscr_flags, dx_esf_wildcard) ? dx_st_stream : dx_st_ticker;
 	dxf_char_t ch = 'A';
 	dxf_char_t summary_name_buf[SUMMARY_TMPL_LEN + 2] = { 0 };
-	CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Summary", dx_st_ticker);
+	CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Summary", subscription_type);
 
 	/* fill summaries Summary&A..Summary&Z */
 	dx_copy_string(summary_name_buf, g_summary_tmpl);
 	for (; ch <= 'Z'; ch++) {
 		summary_name_buf[SUMMARY_TMPL_LEN] = ch;
-		CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, summary_name_buf, dx_st_ticker);
+		CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, summary_name_buf, subscription_type);
 	}
 
 	return true;
 }
 
-bool dx_get_trade_eth_subscription_params(dxf_connection_t connection, OUT dx_event_subscription_param_list_t* param_list) {
+bool dx_get_profile_subscription_params(dxf_connection_t connection, dx_event_subscr_flag subscr_flags, OUT dx_event_subscription_param_list_t* param_list) {
+	dx_subscription_type_t subscription_type = IS_FLAG_SET(subscr_flags, dx_esf_wildcard) ? dx_st_stream : dx_st_ticker;
+
+	return dx_add_subscription_param_to_list(connection, param_list, L"Profile", subscription_type);
+}
+
+bool dx_get_time_and_sale_subscription_params(dxf_connection_t connection, dx_event_subscr_flag subscr_flags, OUT dx_event_subscription_param_list_t* param_list) {
+	dx_subscription_type_t subscription_type =
+		IS_FLAG_SET(subscr_flags, dx_esf_wildcard) || !IS_FLAG_SET(subscr_flags, dx_esf_time_series) ? dx_st_stream
+																									 : dx_st_history;
+
+	return dx_add_subscription_param_to_list(connection, param_list, L"TimeAndSale", subscription_type);
+}
+
+bool dx_get_candle_subscription_params(dxf_connection_t connection, dx_event_subscr_flag subscr_flags, OUT dx_event_subscription_param_list_t* param_list) {
+	dx_subscription_type_t subscription_type = IS_FLAG_SET(subscr_flags, dx_esf_wildcard) ? dx_st_stream : dx_st_history;
+
+	return dx_add_subscription_param_to_list(connection, param_list, L"Candle", subscription_type);
+}
+
+bool dx_get_trade_eth_subscription_params(dxf_connection_t connection, dx_event_subscr_flag subscr_flags, OUT dx_event_subscription_param_list_t* param_list) {
+	dx_subscription_type_t subscription_type = IS_FLAG_SET(subscr_flags, dx_esf_wildcard) ? dx_st_stream : dx_st_ticker;
 	dxf_char_t ch = 'A';
 	dxf_char_t trade_name_buf[TRADE_ETH_TMPL_LEN + 2] = { 0 };
-	CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"TradeETH", dx_st_ticker);
+	CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"TradeETH", subscription_type);
 
 	/* fill trades TradeETH&A..TradeETH&Z */
 	dx_copy_string(trade_name_buf, g_trade_eth_tmpl);
 	for (; ch <= 'Z'; ch++) {
 		trade_name_buf[TRADE_ETH_TMPL_LEN] = ch;
-		CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, trade_name_buf, dx_st_ticker);
+		CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, trade_name_buf, subscription_type);
 	}
 
 	return true;
+}
+
+bool dx_get_spread_order_subscription_params(dxf_connection_t connection, dx_event_subscr_flag subscr_flags, OUT dx_event_subscription_param_list_t* param_list) {
+	dx_subscription_type_t subscription_type = IS_FLAG_SET(subscr_flags, dx_esf_wildcard) ? dx_st_stream : dx_st_history;
+
+	return dx_add_subscription_param_to_list(connection, param_list, L"SpreadOrder", subscription_type)
+		&& dx_add_subscription_param_to_list(connection, param_list, L"SpreadOrder#ISE", subscription_type);
+}
+
+bool dx_get_greeks_subscription_params(dxf_connection_t connection, dx_event_subscr_flag subscr_flags, OUT dx_event_subscription_param_list_t* param_list) {
+	dx_subscription_type_t subscription_type =
+		IS_FLAG_SET(subscr_flags, dx_esf_wildcard) ? dx_st_stream : IS_FLAG_SET(subscr_flags, dx_esf_time_series)
+																	? dx_st_history : dx_st_ticker;
+
+	return dx_add_subscription_param_to_list(connection, param_list, L"Greeks", subscription_type);
+}
+
+bool dx_get_theo_price_subscription_params(dxf_connection_t connection, dx_event_subscr_flag subscr_flags, OUT dx_event_subscription_param_list_t* param_list) {
+	dx_subscription_type_t subscription_type = IS_FLAG_SET(subscr_flags, dx_esf_wildcard) ? dx_st_stream : dx_st_ticker;
+
+	return dx_add_subscription_param_to_list(connection, param_list, L"TheoPrice", subscription_type);
+}
+
+bool dx_get_underlying_subscription_params(dxf_connection_t connection, dx_event_subscr_flag subscr_flags, OUT dx_event_subscription_param_list_t* param_list) {
+	dx_subscription_type_t subscription_type = IS_FLAG_SET(subscr_flags, dx_esf_wildcard) ? dx_st_stream : dx_st_ticker;
+
+	return dx_add_subscription_param_to_list(connection, param_list, L"Underlying", subscription_type);
+}
+
+bool dx_get_series_subscription_params(dxf_connection_t connection, dx_event_subscr_flag subscr_flags, OUT dx_event_subscription_param_list_t* param_list) {
+	dx_subscription_type_t subscription_type = IS_FLAG_SET(subscr_flags, dx_esf_wildcard) ? dx_st_stream : dx_st_history;
+
+	return dx_add_subscription_param_to_list(connection, param_list, L"Series", subscription_type);
+}
+
+bool dx_get_configuration_subscription_params(dxf_connection_t connection, dx_event_subscr_flag subscr_flags, OUT dx_event_subscription_param_list_t* param_list) {
+	dx_subscription_type_t subscription_type = IS_FLAG_SET(subscr_flags, dx_esf_wildcard) ? dx_st_stream : dx_st_ticker;
+
+	return dx_add_subscription_param_to_list(connection, param_list, L"Configuration", subscription_type);
 }
 
 /*
@@ -258,56 +326,52 @@ bool dx_get_trade_eth_subscription_params(dxf_connection_t connection, OUT dx_ev
  * You need to call dx_free(params.elements) to free resources.
  */
 size_t dx_get_event_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source, dx_event_id_t event_id,
-									dxf_uint_t subscr_flags, OUT dx_event_subscription_param_list_t* params) {
+										dx_event_subscr_flag subscr_flags, OUT dx_event_subscription_param_list_t* params) {
 	bool result = true;
 	dx_event_subscription_param_list_t param_list = { NULL, 0, 0 };
-	dx_subscription_type_t sub_type;
 
 	switch (event_id) {
 	case dx_eid_trade:
-		result = dx_get_trade_subscription_params(connection, &param_list);
+		result = dx_get_trade_subscription_params(connection, subscr_flags, &param_list);
 		break;
 	case dx_eid_quote:
 		result = dx_get_quote_subscription_params(connection, subscr_flags, &param_list);
 		break;
 	case dx_eid_summary:
-		result = dx_get_summary_subscription_params(connection, &param_list);
+		result = dx_get_summary_subscription_params(connection, subscr_flags, &param_list);
 		break;
 	case dx_eid_profile:
-		result = dx_add_subscription_param_to_list(connection, &param_list, L"Profile", dx_st_ticker);
+		result = dx_get_profile_subscription_params(connection, subscr_flags, &param_list);
 		break;
 	case dx_eid_order:
 		result = dx_get_order_subscription_params(connection, order_source, subscr_flags, &param_list);
 		break;
 	case dx_eid_time_and_sale:
-		sub_type = IS_FLAG_SET(subscr_flags, DX_SUBSCR_FLAG_TIME_SERIES) ? dx_st_history : dx_st_stream;
-		result = dx_add_subscription_param_to_list(connection, &param_list, L"TimeAndSale", sub_type);
+		result = dx_get_time_and_sale_subscription_params(connection, subscr_flags, &param_list);
 		break;
 	case dx_eid_candle:
-		result = dx_add_subscription_param_to_list(connection, &param_list, L"Candle", dx_st_history);
+		result = dx_get_candle_subscription_params(connection, subscr_flags, &param_list);
 		break;
 	case dx_eid_trade_eth:
-		result = dx_get_trade_eth_subscription_params(connection, &param_list);
+		result = dx_get_trade_eth_subscription_params(connection, subscr_flags, &param_list);
 		break;
 	case dx_eid_spread_order:
-		result = dx_add_subscription_param_to_list(connection, &param_list, L"SpreadOrder", dx_st_history) &&
-			dx_add_subscription_param_to_list(connection, &param_list, L"SpreadOrder#ISE", dx_st_history);
+		result = dx_get_spread_order_subscription_params(connection, subscr_flags, &param_list);
 		break;
 	case dx_eid_greeks:
-		sub_type = IS_FLAG_SET(subscr_flags, DX_SUBSCR_FLAG_TIME_SERIES) ? dx_st_history : dx_st_ticker;
-		result = dx_add_subscription_param_to_list(connection, &param_list, L"Greeks", sub_type);
+		result = dx_get_greeks_subscription_params(connection, subscr_flags, &param_list);
 		break;
 	case dx_eid_theo_price:
-		result = dx_add_subscription_param_to_list(connection, &param_list, L"TheoPrice", dx_st_ticker);
+		result = dx_get_theo_price_subscription_params(connection, subscr_flags, &param_list);
 		break;
 	case dx_eid_underlying:
-		result = dx_add_subscription_param_to_list(connection, &param_list, L"Underlying", dx_st_ticker);
+		result = dx_get_underlying_subscription_params(connection, subscr_flags, &param_list);
 		break;
 	case dx_eid_series:
-		result = dx_add_subscription_param_to_list(connection, &param_list, L"Series", dx_st_history);
+		result = dx_get_series_subscription_params(connection, subscr_flags, &param_list);
 		break;
 	case dx_eid_configuration:
-		result = dx_add_subscription_param_to_list(connection, &param_list, L"Configuration", dx_st_ticker);
+		result = dx_get_configuration_subscription_params(connection, subscr_flags, &param_list);
 		break;
 	}
 
@@ -317,6 +381,7 @@ size_t dx_get_event_subscription_params(dxf_connection_t connection, dx_order_so
 	}
 
 	*params = param_list;
+
 	return param_list.size;
 }
 

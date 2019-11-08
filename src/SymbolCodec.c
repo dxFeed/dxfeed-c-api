@@ -52,7 +52,7 @@ static dxf_int_t g_penta_lengths[PENTA_LENGTH];
  */
 static dxf_char_t g_penta_characters[1024];
 
-static dxf_int_t g_wildcard_cipher;
+dxf_int_t g_wildcard_cipher;
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -165,8 +165,6 @@ bool dx_init_symbol_codec (void) {
 	dxf_int_t i = PENTA_LENGTH;
 	dxf_int_t penta = 0x03C0;
 
-	g_wildcard_cipher = dx_encode_symbol_name(L"*");
-
 	for (; --i >= 0;) {
 		g_penta_lengths[i] = 64;
 	}
@@ -192,6 +190,8 @@ bool dx_init_symbol_codec (void) {
 	if (penta != 0x0400) {
 		return dx_set_error_code(dx_ec_internal_assert_violation);
 	}
+
+	g_wildcard_cipher = dx_encode_symbol_name(L"*");
 
 	return true;
 }

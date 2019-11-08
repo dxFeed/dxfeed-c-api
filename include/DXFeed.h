@@ -229,21 +229,37 @@ DXFEED_API ERRORCODE dxf_create_subscription_timed(dxf_connection_t connection, 
  */
 DXFEED_API ERRORCODE dxf_close_subscription (dxf_subscription_t subscription);
 
-/*
- *	Adds a single symbol to the subscription.
- 
- *  subscription - a handle of the subscription to which a symbol is added
- *  symbol - the symbol to add
+/**
+ * @ingroup c-api-symbol-subscription-functions
+ *
+ * Adds a single symbol to the subscription.
+ * A wildcard symbol "*" will replace all symbols: there will be an unsubscription from messages on all current symbols
+ * and a subscription to "*". The subscription type will be changed to {@link dx_st_stream}
+ * If there is already a subscription to "*", then nothing will happen
+ *
+ * @param[in] subscription A handle of the subscription to which a symbol is added
+ * @param[in] symbol       The symbol to add
+ *
+ * @return {@link DXF_SUCCESS} if the operation succeed or {@link DXF_FAILURE} if the operation fails. The error code
+ * can be obtained using the function {@link dxf_get_last_error}
  */
 DXFEED_API ERRORCODE dxf_add_symbol (dxf_subscription_t subscription, dxf_const_string_t symbol);
 
-/*
- *	Adds several symbols to the subscription.
- *  No error occurs if the symbol is attempted to add for the second time.
- 
- *  subscription - a handle of the subscription to which the symbols are added
- *  symbols - the symbols to add
- *  symbol_count - a number of symbols
+/**
+ * @ingroup c-api-symbol-subscription-functions
+ *
+ * Adds several symbols to the subscription. No error occurs if the symbol is attempted to add for the second time.
+ * Empty symbols will be ignored.
+ * First met the "*" symbol (wildcard) will overwrite all other symbols: there will be an unsubscription from messages
+ * on all current symbols and a subscription to "*". The subscription type will be changed to {@link dx_st_stream}
+ * If there is already a subscription to "*", then nothing will happen.
+ *
+ * @param[in] subscription A handle of the subscription to which the symbols are added
+ * @param[in] symbols      The symbols to add
+ * @param[in] symbol_count A number of symbols
+ *
+ * @return {@link DXF_SUCCESS} if the operation succeed or {@link DXF_FAILURE} if the operation fails. The error code
+ * can be obtained using the function {@link dxf_get_last_error}
  */
 DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dxf_const_string_t* symbols, int symbol_count);
 
@@ -263,21 +279,37 @@ DXFEED_API ERRORCODE dxf_add_candle_symbol(dxf_subscription_t subscription, dxf_
 */
 DXFEED_API ERRORCODE dxf_remove_candle_symbol(dxf_subscription_t subscription, dxf_candle_attributes_t candle_attributes);
 
-/*
- *	Removes a single symbol from the subscription.
-
- *  subscription - a handle of the subscription from which a symbol is removed
- *  symbol - the symbol to remove
+/**
+ * @ingroup c-api-symbol-subscription-functions
+ *
+ * Removes a single symbol from the subscription.
+ * A wildcard symbol "*" will remove all symbols: there will be an unsubscription from messages on all current symbols
+ * If there is already a subscription to "*" and the @a symbol to remove is not a "*", then nothing will happen.
+ *
+ * @param[in] subscription A handle of the subscription from which a symbol is removed
+ * @param[in] symbol       The symbol to remove
+ *
+ * @return {@link DXF_SUCCESS} if the operation succeed or {@link DXF_FAILURE} if the operation fails. The error code
+ * can be obtained using the function {@link dxf_get_last_error}
  */
 DXFEED_API ERRORCODE dxf_remove_symbol (dxf_subscription_t subscription, dxf_const_string_t symbol);
 
-/*
- *	Removes several symbols from the subscription.
- *  No error occurs if it's attempted to remove symbols that weren't added beforehand.
-
- *  subscription - a handle of the subscription to which the symbols are added
- *  symbols - the symbols to remove
- *  symbol_count - a number of symbols
+/**
+ * @ingroup c-api-symbol-subscription-functions
+ *
+ * Removes several symbols from the subscription.
+ * No error occurs if it's attempted to remove symbols that weren't added beforehand.
+ * First met the "*" symbol (wildcard) will remove all symbols: there will be an unsubscription from messages on all
+ * current symbols.
+ * If there is already a subscription to "*" and the @a symbols to remove are not contain a "*", then nothing will
+ * happen.
+ *
+ * @param[in] subscription A handle of the subscription from which symbols are removed
+ * @param[in] symbols      The symbols to remove
+ * @param[in] symbol_count A number of symbols
+ *
+ * @return {@link DXF_SUCCESS} if the operation succeed or {@link DXF_FAILURE} if the operation fails. The error code
+ * can be obtained using the function {@link dxf_get_last_error}
  */
 DXFEED_API ERRORCODE dxf_remove_symbols (dxf_subscription_t subscription, dxf_const_string_t* symbols, int symbol_count);
 
@@ -293,21 +325,31 @@ DXFEED_API ERRORCODE dxf_remove_symbols (dxf_subscription_t subscription, dxf_co
  */
 DXFEED_API ERRORCODE dxf_get_symbols (dxf_subscription_t subscription, OUT dxf_const_string_t** symbols, OUT int* symbol_count);
 
-/*
- *	Sets the symbols for the subscription.
- *  The difference between this function and 'dxf_add_symbols' is that all the previously added symbols
- *  that do not belong to the symbol list passed to this function will be removed.
- 
- *  subscription - a handle of the subscription whose symbols are to be set
- *  symbols - the symbol list to set
- *  symbol_count - the symbol count
+/**
+ * @ingroup c-api-symbol-subscription-functions
+ *
+ * Sets the symbols for the subscription.
+ * The difference between this function and {@link dxf_add_symbols} is that all the previously added symbols that do not
+ * belong to the symbol list passed to this function will be removed.
+ *
+ * @param[in] subscription A handle of the subscription whose symbols are to be set
+ * @param[in] symbols      The symbol list to set
+ * @param[in] symbol_count The symbol count
+ *
+ * @return {@link DXF_SUCCESS} if the operation succeed or {@link DXF_FAILURE} if the operation fails. The error code
+ * can be obtained using the function {@link dxf_get_last_error}
  */
 DXFEED_API ERRORCODE dxf_set_symbols (dxf_subscription_t subscription, dxf_const_string_t* symbols, int symbol_count);
 
-/*
- *	Removes all the symbols from the subscription.
- 
- *  subscription - a handle of the subscription whose symbols are to be cleared
+/**
+ * @ingroup c-api-symbol-subscription-functions
+ *
+ * Removes all the symbols from the subscription.
+ *
+ * @param[in] subscription A handle of the subscription whose symbols are to be cleared
+ *
+ * @return {@link DXF_SUCCESS} if the operation succeed or {@link DXF_FAILURE} if the operation fails. The error code
+ * can be obtained using the function {@link dxf_get_last_error}
  */
 DXFEED_API ERRORCODE dxf_clear_symbols (dxf_subscription_t subscription);
 

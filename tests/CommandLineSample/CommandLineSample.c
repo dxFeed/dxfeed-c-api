@@ -51,6 +51,11 @@ dxf_const_string_t dx_event_type_to_string(int event_type) {
 	}
 }
 
+//Prevents file names globbing (converting * to all files in the current dir)
+#ifdef __MINGW64_VERSION_MAJOR
+int _CRT_glob = 0;
+#endif
+
 /* -------------------------------------------------------------------------- */
 #ifdef _WIN32
 static bool is_listener_thread_terminated = false;
@@ -503,7 +508,7 @@ int main (int argc, char* argv[]) {
 				"                     SUMMARY, PROFILE, ORDER, TIME_AND_SALE, TRADE_ETH,\n"
 				"                     SPREAD_ORDER, GREEKS, THEO_PRICE, UNDERLYING, SERIES,\n"
 				"                     CONFIGURATION\n"
-				"  <symbol>               - The trade symbols, e.g. C, MSFT, YHOO, IBM\n"
+				"  <symbol>         - The trade symbols, e.g. C, MSFT, YHOO, IBM. All symbols - *\n"
 				"  " DUMP_PARAM_LONG_TAG " | " DUMP_PARAM_SHORT_TAG " <filename> - The filename to dump the raw data\n"
 				"  " TOKEN_PARAM_SHORT_TAG " <token>             - The authorization token\n"
 				"Example: CommandLineSample.exe demo.dxfeed.com:7300 TRADE,ORDER MSFT,IBM"

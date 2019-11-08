@@ -24,6 +24,11 @@ typedef int bool;
 #define TIME_PARAM_SHORT_TAG "-t"
 #define TOKEN_PARAM_SHORT_TAG "-T"
 
+//Prevents file names globbing (converting * to all files in the current dir)
+#ifdef __MINGW64_VERSION_MAJOR
+int _CRT_glob = 0;
+#endif
+
 /* -------------------------------------------------------------------------- */
 #ifdef _WIN32
 static bool is_listener_thread_terminated = false;

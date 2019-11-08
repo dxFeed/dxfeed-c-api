@@ -30,17 +30,6 @@
  */
 /* -------------------------------------------------------------------------- */
 
-/* used for default subscription */
-#define DX_SUBSCR_FLAG_DEFAULT                  0
-/* used for subscribing on one record only in case of snapshots */
-#define DX_SUBSCR_FLAG_SINGLE_RECORD            0x1
-/* use with DX_SUBSCR_FLAG_SINGLE_RECORD flag and for dx_eid_order (Order) event */
-#define DX_SUBSCR_FLAG_SR_MARKET_MAKER_ORDER    0x2
-/* used for time series subscription */
-#define DX_SUBSCR_FLAG_TIME_SERIES              0x4
-/* used for regional quotes */
-#define DX_SUBSCR_QUOTES_REGIONAL               0x8
-
 extern const dxf_subscription_t dx_invalid_subscription;
 
 extern const dxf_const_string_t dx_all_order_sources[];
@@ -67,7 +56,7 @@ typedef bool (*dx_subscription_processor_t) (dxf_connection_t connection,
 
 /* returns dx_invalid_subscription on error */
 dxf_subscription_t dx_create_event_subscription (dxf_connection_t connection, int event_types,
-												dxf_uint_t subscr_flags, dxf_long_t time);
+												 dx_event_subscr_flag subscr_flags, dxf_long_t time);
 bool dx_close_event_subscription (dxf_subscription_t subscr_id);
 bool dx_add_symbols (dxf_subscription_t subscr_id, dxf_const_string_t* symbols, int symbol_count);
 bool dx_remove_symbols (dxf_subscription_t subscr_id, dxf_const_string_t* symbols, size_t symbol_count);
@@ -79,7 +68,8 @@ bool dx_get_subscription_connection (dxf_subscription_t subscr_id, OUT dxf_conne
 bool dx_get_event_subscription_event_types (dxf_subscription_t subscr_id, OUT int* event_types);
 bool dx_get_event_subscription_symbols (dxf_subscription_t subscr_id,
 										OUT dxf_const_string_t** symbols, OUT size_t* symbol_count);
-bool dx_get_event_subscription_flags(dxf_subscription_t subscr_id, OUT dxf_uint_t* subscr_flags);
+bool dx_get_event_subscription_flags(dxf_subscription_t subscr_id, OUT dx_event_subscr_flag* subscr_flags);
+bool dx_set_event_subscription_flags(dxf_subscription_t subscr_id, dx_event_subscr_flag subscr_flags);
 bool dx_get_event_subscription_time(dxf_subscription_t subscr_id, OUT dxf_long_t* time);
 bool dx_process_event_data (dxf_connection_t connection, dx_event_id_t event_id,
 							dxf_const_string_t symbol_name, dxf_int_t symbol_cipher,

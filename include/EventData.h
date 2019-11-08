@@ -26,6 +26,7 @@
 
 #include "RecordData.h"
 #include "DXTypes.h"
+#include <limits.h>
 
 #ifndef OUT
     #define OUT
@@ -77,6 +78,26 @@ typedef enum {
 #define DXF_ET_UNUSED        (~((1 << dx_eid_count) - 1))
 
 #define DX_EVENT_BIT_MASK(event_id) (1 << event_id)
+
+/**
+ * Event Subscription flags
+ */
+typedef enum {
+  ///Used for default subscription
+  dx_esf_default = 0x0,
+  ///Used for subscribing on one record only in case of snapshots
+  dx_esf_single_record = 0x1,
+  ///Used with \a dx_esf_single_record flag and for \a dx_eid_order (Order) event
+  dx_esf_sr_market_maker_order = 0x2,
+  ///Used for time series subscription
+  dx_esf_time_series = 0x4,
+  ///Used for regional quotes
+  dx_esf_quotes_regional = 0x8,
+  ///Used for wildcard ("*") subscription
+  dx_esf_wildcard = 0x10,
+
+  dx_esf_force_enum_unsigned = UINT_MAX
+} dx_event_subscr_flag;
 
 // The length of record suffix including including the terminating null character 
 #define DXF_RECORD_SUFFIX_SIZE 5
@@ -498,7 +519,7 @@ typedef struct {
  * You need to call dx_free(params.elements) to free resources.
  */
 size_t dx_get_event_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source, dx_event_id_t event_id,
-                                     dxf_uint_t subscr_flags, OUT dx_event_subscription_param_list_t* params);
+										dx_event_subscr_flag subscr_flags, OUT dx_event_subscription_param_list_t* params);
 
 /* -------------------------------------------------------------------------- */
 /*

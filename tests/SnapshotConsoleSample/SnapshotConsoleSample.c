@@ -30,6 +30,11 @@ typedef int bool;
 #define false 0
 #endif
 
+//Prevents file names globbing (converting * to all files in the current dir)
+#ifdef __MINGW64_VERSION_MAJOR
+int _CRT_glob = 0;
+#endif
+
 // plus the name of the executable
 #define STATIC_PARAMS_COUNT 4
 #define DEFAULT_RECORDS_PRINT_LIMIT 7

@@ -68,6 +68,8 @@
 #include "PrimitiveTypes.h"
 #include "DXTypes.h"
 
+extern dxf_int_t g_wildcard_cipher;
+
 /* -------------------------------------------------------------------------- */
 /*
  *	Symbol codec functions

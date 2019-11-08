@@ -55,6 +55,11 @@ dxf_const_string_t dx_event_type_to_string(int event_type) {
 	}
 }
 
+//Prevents file names globbing (converting * to all files in the current dir)
+#ifdef __MINGW64_VERSION_MAJOR
+int _CRT_glob = 0;
+#endif
+
 /* -------------------------------------------------------------------------- */
 #ifdef _WIN32
 static bool is_listener_thread_terminated = false;
