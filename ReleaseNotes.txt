@@ -1,3 +1,8 @@
+Version 5.7.0
+* Fixed an issue with crash on reconnect (connection by TLS)
+* Added ability to subscribe to "*" (wildcard) symbol
+  - See descriptions of the `dxf_add_symbol`, `dxf_add_symbols`, `dxf_remove_symbol`, `dxf_remove_symbols` functions in the DXFeed.h
+
 Version 5.6.3
 * Fixed multiple symbols subscription in samples on Linux
 * Fixed formatting and logging of indices, strings, timestamps and identifiers on Linux
