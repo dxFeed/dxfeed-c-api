@@ -22,12 +22,19 @@
 
 #include "DXTypes.h"
 
+/**
+ * @file
+ * @brief dxFeed C API errors declarations
+ */
+
+
 /* -------------------------------------------------------------------------- */
 /*
  *	Error codes
  */
 /* -------------------------------------------------------------------------- */
 
+/// Error code
 typedef enum {
     /* common error codes */
     
@@ -197,11 +204,17 @@ typedef enum {
 } dx_error_code_t;
 
 /* -------------------------------------------------------------------------- */
-/*
- *	Message description functions
+/**
+ * @ingroup c-api-common
+ *
+ * @brief Get error description
+ *
+ * @param[in] code Error code
+ *
+ * @returns Error description string
+ *
  */
 /* -------------------------------------------------------------------------- */
-
 dxf_const_string_t dx_get_error_description (dx_error_code_t code);
 
 #endif /* DX_ERROR_CODES_H_INCLUDED */
