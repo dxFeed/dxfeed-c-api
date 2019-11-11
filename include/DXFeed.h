@@ -18,46 +18,71 @@
  */
 
 /**
- *  @defgroup macros Defined macros
- *  @brief macros
+ * @file
+ * @brief dxFeed C API functions declarations
+ */
+
+/**
+ * @defgroup functions Functions
+ * @brief DXFeed C API functions
  */
 /**
- *  @defgroup callback_types API Events' Callbacks
- *  @brief Event callbacks
+ * @ingroup functions
+ * @defgroup macros Defined macros
+ * @brief macros
  */
 /**
- *  @defgroup c-api-event-listener-functions Listeners
- *  @brief API event listeners management functions
+ * @ingroup functions
+ * @defgroup callback_types API Events' Callbacks
+ * @brief Event callbacks
  */
 /**
- *  @defgroup c-api-common Common functions
- *  @brief Common API functions
+ * @ingroup functions
+ * @defgroup c-api-event-listener-functions Listeners
+ * @brief API event listeners management functions
  */
 /**
- *  @defgroup c-api-connection-functions Connections
- *  @brief Connection establishment/teardown functions
+ * @ingroup functions
+ * @defgroup c-api-common Common functions
+ * @brief Common API functions
  */
 /**
+ * @ingroup functions
+ * @defgroup c-api-connection-functions Connections
+ * @brief Connection establishment/teardown functions
+ */
+/**
+ * @ingroup functions
  * @defgroup c-api-basic-subscription-functions Subscriptions
  * @brief Subscription initiation/closing functions
  */
 /**
+ * @ingroup functions
+ * @defgroup c-api-symbol-subscription-functions Symbols
+ * @brief Symbol-related functions
+ */
+/**
+ * @ingroup functions
  * @defgroup c-api-orders Orders
  * @brief Order-related functions
  */
 /**
+ * @ingroup functions
  * @defgroup c-api-candle-attributes Candle symbol attributes
  * @brief Candle attributes manipulation functions
  */
 /**
+ * @ingroup functions
  * @defgroup c-api-snapshots Snapshots
  * @brief Snapshot functions
  */
 /**
+ * @ingroup functions
  * @defgroup c-api-price-level-book Price level books
  * @brief Price level book functions
  */
 /**
+ * @ingroup functions
  * @defgroup c-api-regional-book Regional books
  * @brief Regional book functions
  */
@@ -459,7 +484,7 @@ DXFEED_API ERRORCODE dxf_add_candle_symbol(dxf_subscription_t subscription, dxf_
  *
  * @details
  *
- * @param[in] subscription       {@link dxf_subscription_t} a handle of the subscription from symbol will be removed
+ * @param[in] subscription       a handle of the subscription from symbol will be removed
  * @param[in] candle_attributes  pointer to the candle structure
  *
  * @return  {@link DXF_SUCCESS} on successful symbol removal or {@link DXF_FAILURE} on error;

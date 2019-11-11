@@ -26,12 +26,18 @@
 
 #include "DXTypes.h"
 
+/**
+ * @file
+ * @brief dxFeed C API domain types declarations
+ */
+
 /* -------------------------------------------------------------------------- */
 /*
  *	Record type constants
  */
 /* -------------------------------------------------------------------------- */
 
+/// Record info ID
 typedef enum {
     dx_rid_begin = 0,
     dx_rid_trade = dx_rid_begin,
@@ -56,6 +62,7 @@ typedef enum {
     dx_rid_invalid
 } dx_record_info_id_t;
 
+/// Record ID
 typedef dxf_int_t dx_record_id_t;
 
 /* Invalid or empty record id */
@@ -67,6 +74,7 @@ static const dx_record_id_t DX_RECORD_ID_INVALID = -1;
  */
 /* -------------------------------------------------------------------------- */
 
+/// Trade
 typedef struct {
     dxf_int_t time;
     dxf_int_t sequence;
@@ -81,8 +89,10 @@ typedef struct {
     dxf_double_t day_turnover;
 } dx_trade_t;
 
+/// Trade Eth
 typedef dx_trade_t dx_trade_eth_t;
 
+/// Quote
 typedef struct {
     dxf_int_t sequence;
     dxf_int_t time_nanos;
@@ -96,6 +106,7 @@ typedef struct {
     dxf_int_t ask_size;
 } dx_quote_t;
 
+/// Summary
 typedef struct {
     dxf_dayid_t day_id;	
     dxf_double_t day_open_price;
@@ -109,6 +120,7 @@ typedef struct {
     dxf_int_t flags;
 } dx_summary_t;
 
+/// Profile
 typedef struct {
     dxf_double_t beta;
     dxf_double_t eps;
@@ -128,6 +140,7 @@ typedef struct {
     dxf_const_string_t status_reason;
 } dx_profile_t;
 
+/// Market maker
 typedef struct {
     dxf_char_t mm_exchange;
     dxf_int_t mm_id;
@@ -141,6 +154,7 @@ typedef struct {
     dxf_int_t mmask_count;
 } dx_market_maker_t;
 
+/// Order
 typedef struct {
     dxf_int_t index;
     dxf_int_t time;
@@ -153,6 +167,7 @@ typedef struct {
     dxf_int_t mmid;
 } dx_order_t;
 
+/// Spread order
 typedef struct {
     dxf_int_t index;
     dxf_int_t time;
@@ -165,6 +180,7 @@ typedef struct {
     dxf_const_string_t spread_symbol;
 } dx_spread_order_t;
 
+/// Time & sale
 typedef struct {
     dxf_int_t time;
     dxf_int_t sequence;
@@ -179,6 +195,7 @@ typedef struct {
     dxf_const_string_t seller;
 } dx_time_and_sale_t;
 
+/// Candle
 typedef struct {
     dxf_int_t time;
     dxf_int_t sequence;
@@ -195,6 +212,7 @@ typedef struct {
     dxf_double_t imp_volatility;
 } dx_candle_t;
 
+/// Greeks
 typedef struct {
     dxf_int_t time;
     dxf_int_t sequence;
@@ -207,6 +225,7 @@ typedef struct {
     dxf_double_t vega;
 } dx_greeks_t;
 
+/// Theo price
 typedef struct {
     // To have same record for record and event
     dxf_long_t time;
@@ -218,6 +237,7 @@ typedef struct {
     dxf_double_t interest;
 } dx_theo_price_t;
 
+/// Underlying
 typedef struct {
     dxf_double_t volatility;
     dxf_double_t front_volatility;
@@ -225,6 +245,7 @@ typedef struct {
     dxf_double_t put_call_ratio;
 } dx_underlying_t;
 
+/// Series
 typedef struct {
     dxf_int_t index;
     dxf_int_t time;
@@ -237,6 +258,7 @@ typedef struct {
     dxf_double_t interest;
 } dx_series_t;
 
+/// Configuration
 typedef struct {
     dxf_int_t version;
     dxf_byte_array_t object;

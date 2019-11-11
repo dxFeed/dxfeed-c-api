@@ -19,3 +19,4 @@ cmake-build-release*/**
 
 /**/*.log
 /**/*.*~
+/docs/dxfeed*/
