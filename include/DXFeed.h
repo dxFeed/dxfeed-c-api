@@ -208,7 +208,7 @@ typedef void (*dxf_socket_thread_destruction_notifier_t) (dxf_connection_t conne
  * @param[in] stcn                 The callback for informing the client side about the socket thread creation;
  *                                 may be set to NULL if no specific action is required to perform on the client side
  *                                 on a new thread creation
- * @param[in] shdn                 The callback for informing the client side about the socket thread destruction;
+ * @param[in] stdn                 The callback for informing the client side about the socket thread destruction;
  *                                 may be set to NULL if no specific action is required to perform on the client side
  *                                 on a thread destruction
  * @param[in] user_data            The user defined value passed to the termination notifier callback along with the
@@ -248,7 +248,7 @@ DXFEED_API ERRORCODE dxf_create_connection (const char* address,
  * @param[in] stcn                 The callback for informing the client side about the socket thread creation;
  *                                 may be set to NULL if no specific action is required to perform on the client side
  *                                 on a new thread creation
- * @param[in] shdn                 The callback for informing the client side about the socket thread destruction;
+ * @param[in] stdn                 The callback for informing the client side about the socket thread destruction;
  *                                 may be set to NULL if no specific action is required to perform on the client side
  *                                 on a thread destruction;
  * @param[in] user_data            The user defined value passed to the termination notifier callback along with the
@@ -276,7 +276,7 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_basic(const char* address,
  *
  * @brief Creates connection with the specified parameters and token authorization.
  *
- * @detials
+ * @details
  *
  * @param[in] address              Connection string
  *                                   - the single address: "host:port" or just "host"
@@ -290,7 +290,7 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_basic(const char* address,
  * @param[in] stcn                 The callback for informing the client side about the socket thread creation;
  *                                 may be set to NULL if no specific action is required to perform on the client side
  *                                 on a new thread creation
- * @param[in] shdn                 The callback for informing the client side about the socket thread destruction;
+ * @param[in] stdn                 The callback for informing the client side about the socket thread destruction;
  *                                 may be set to NULL if no specific action is required to perform on the client side
  *                                 on a thread destruction;
  * @param[in] user_data            The user defined value passed to the termination notifier callback along with the
@@ -333,7 +333,7 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_bearer(const char* address,
  * @param[in] stcn                 The callback for informing the client side about the socket thread creation;
                                    may be set to NULL if no specific action is required to perform on the client side
                                    on a new thread creation
- * @param[in] shdn                 The callback for informing the client side about the socket thread destruction;
+ * @param[in] stdn                 The callback for informing the client side about the socket thread destruction;
                                    may be set to NULL if no specific action is required to perform on the client side
                                    on a thread destruction;
  * @param[in] user_data            The user defined value passed to the termination notifier callback along with the
@@ -431,7 +431,7 @@ DXFEED_API ERRORCODE dxf_close_subscription (dxf_subscription_t subscription);
  * @brief Adds a single symbol to the subscription.
  *
  * @details A wildcard symbol "*" will replace all symbols: there will be an unsubscription from messages on all
- *          current symbols and a subscription to "*". The subscription type will be changed to {@link dx_st_stream}
+ *          current symbols and a subscription to "*". The subscription type will be changed to dx_st_stream.
  *          If there is already a subscription to "*", then nothing will happen
  *
  * @param[in] subscription A handle of the subscription to which a symbol is added
@@ -450,7 +450,7 @@ DXFEED_API ERRORCODE dxf_add_symbol (dxf_subscription_t subscription, dxf_const_
  * @details No error occurs if the symbol is attempted to add for the second time.
  *          Empty symbols will be ignored. First met the "*" symbol (wildcard) will overwrite all other symbols:
  *          there will be an unsubscription from messages on all current symbols and a subscription to "*". The
- *          subscription type will be changed to {@link dx_st_stream}. If there is already a subscription to "*",
+ *          subscription type will be changed to dx_st_stream. If there is already a subscription to "*",
  *          then nothing will happen.
  *
  * @param[in] subscription A handle of the subscription to which the symbols are added
@@ -533,9 +533,9 @@ DXFEED_API ERRORCODE dxf_remove_symbols (dxf_subscription_t subscription, dxf_co
  *
  * @brief Retrieves the list of symbols currently added to the subscription.
  *
- * @detial The memory for the resulting list is allocated internally, so no actions to free it are required.
- *         The symbol name buffer is guaranteed to be valid until either the subscription symbol list is changed or
- *         a new call of this function is performed.
+ * @details The memory for the resulting list is allocated internally, so no actions to free it are required.
+ *          The symbol name buffer is guaranteed to be valid until either the subscription symbol list is changed or
+ *          a new call of this function is performed.
  *
  * @param[in] subscription  A handle of the subscriptions whose symbols are to retrieve
  * @param[out] symbols      A pointer to the string array object to which the symbol list is to be stored
@@ -1133,8 +1133,8 @@ DXFEED_API ERRORCODE dxf_attach_regional_book_listener_v2(dxf_regional_book_t bo
  *
  * @details No error occurs if it's attempted to detach a listener which wasn't previously attached.
  *
- * @param[in] book          A handle of the book to which a listener is to be detached
- * @param[in] book_listener A listener callback function pointer
+ * @param[in] book     A handle of the book to which a listener is to be detached
+ * @param[in] listener A listener callback function pointer
  *
  * @return {@link DXF_SUCCESS} if listener has been successfully detached or {@link DXF_FAILURE} on error;
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
@@ -1195,7 +1195,7 @@ DXFEED_API ERRORCODE dxf_free_connection_properties_snapshot(dxf_property_item_t
 /**
  * @ingroup c-api-connection-functions
  *
- * @brief Retrieves the null-terminated string with current connected address in format <host>:<port>.
+ * @brief Retrieves the null-terminated string with current connected address in format ```<host>:<port>```.
  *
  * @details If (*address) points to NULL then connection is not connected (reconnection, no valid addresses,
  *          closed connection and others). The memory for the resulting string is allocated during execution
