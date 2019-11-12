@@ -532,8 +532,37 @@ typedef void (*dxf_event_listener_v2_t) (int event_type, dxf_const_string_t symb
  */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * @ingroup c-api-event-listener-functions
+ *
+ * @brief Converts event type code to its string representation
+ *
+ * @param event_type Event type code
+ *
+ * @return String representation of event type
+ */
 dxf_const_string_t dx_event_type_to_string (int event_type);
+
+/**
+ * @ingroup c-api-event-listener-functions
+ *
+ * @brief Get event data structure size for given event id
+ *
+ * @param event_id Event id
+ *
+ * @return Data structure size
+ */
 int dx_get_event_data_struct_size (int event_id);
+
+/**
+ * @ingroup c-api-event-listener-functions
+ *
+ * @brief Get event id by event bitmask
+ *
+ * @param event_bitmask Event bitmask
+ *
+ * @return Event id
+ */
 dx_event_id_t dx_get_event_id_by_bitmask (int event_bitmask);
 
 /* -------------------------------------------------------------------------- */
@@ -568,10 +597,18 @@ typedef struct {
     size_t capacity;
 } dx_event_subscription_param_list_t;
 
-/*
- * Returns the list of subscription params. Fills records list according to event_id.
+/**
+ * @ingroup c-api-basic-subscription-functions
  *
- * You need to call dx_free(params.elements) to free resources.
+ * @brief Returns the list of subscription params. Fills records list according to event_id.
+ *
+ * @param[in]  connection    Connection handle
+ * @param[in]  order_source  Order source
+ * @param[in]  event_id      Event id
+ * @param[in]  subscr_flags  Subscription flags
+ * @param[out] params        Subscription params
+ *
+ * @warning You need to call dx_free(params.elements) to free resources.
  */
 size_t dx_get_event_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source, dx_event_id_t event_id,
 										dx_event_subscr_flag subscr_flags, OUT dx_event_subscription_param_list_t* params);
@@ -604,6 +641,12 @@ typedef struct {
 typedef void(*dxf_snapshot_listener_t) (const dxf_snapshot_data_ptr_t snapshot_data, void* user_data);
 
 /* -------------------------------------------------------------------------- */
+#define DXF_IS_CANDLE_REMOVAL(c) (((c)->event_flags & dxf_ef_remove_event) != 0)
+#define DXF_IS_ORDER_REMOVAL(o) ((((o)->event_flags & dxf_ef_remove_event) != 0) || ((o)->size == 0))
+#define DXF_IS_SPREAD_ORDER_REMOVAL(o) ((((o)->event_flags & dxf_ef_remove_event) != 0) || ((o)->size == 0))
+#define DXF_IS_TIME_AND_SALE_REMOVAL(t) (((t)->event_flags & dxf_ef_remove_event) != 0)
+#define DXF_IS_GREEKS_REMOVAL(g) (((g)->event_flags & dxf_ef_remove_event) != 0)
+#define DXF_IS_SERIES_REMOVAL(s) (((s)->event_flags & dxf_ef_remove_event) != 0)
 /**
  *  @brief Incremental Snapshot listener prototype
 
@@ -611,13 +654,6 @@ typedef void(*dxf_snapshot_listener_t) (const dxf_snapshot_data_ptr_t snapshot_d
  *  @param[in] new_snapshot  Flag, is this call with new snapshot or incremental update.
  *  @param[in] user_data     Pointer to user struct, use NULL by default
  */
-/* -------------------------------------------------------------------------- */
-#define DXF_IS_CANDLE_REMOVAL(c) (((c)->event_flags & dxf_ef_remove_event) != 0)
-#define DXF_IS_ORDER_REMOVAL(o) ((((o)->event_flags & dxf_ef_remove_event) != 0) || ((o)->size == 0))
-#define DXF_IS_SPREAD_ORDER_REMOVAL(o) ((((o)->event_flags & dxf_ef_remove_event) != 0) || ((o)->size == 0))
-#define DXF_IS_TIME_AND_SALE_REMOVAL(t) (((t)->event_flags & dxf_ef_remove_event) != 0)
-#define DXF_IS_GREEKS_REMOVAL(g) (((g)->event_flags & dxf_ef_remove_event) != 0)
-#define DXF_IS_SERIES_REMOVAL(s) (((s)->event_flags & dxf_ef_remove_event) != 0)
 typedef void(*dxf_snapshot_inc_listener_t) (const dxf_snapshot_data_ptr_t snapshot_data, int new_snapshot, void* user_data);
 
 /* -------------------------------------------------------------------------- */
@@ -681,6 +717,16 @@ typedef void(*dxf_regional_quote_listener_t) (dxf_const_string_t symbol, const d
 #ifdef __cplusplus
     extern "C"
 #endif
+/**
+ * @ingroup c-api-event-listener-functions
+ *
+ * @brief  Get event data item from event data
+ *
+ * @param event_mask Event mask
+ * @param data       Event data
+ * @param index      Event data item index
+ * @return Event data item
+ */
 const dxf_event_data_t dx_get_event_data_item (int event_mask, const dxf_event_data_t data, size_t index);
  
 #endif /* EVENT_DATA_H_INCLUDED */
