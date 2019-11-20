@@ -56,7 +56,7 @@ bool snapshot_test_runner(dxf_order_t* events, size_t size, dxf_snapshot_listene
 	dxf_connection_t connection;
 	dxf_subscription_t subscription;
 	dxf_snapshot_t snapshot;
-	dxf_uint_t subscr_flags = DX_SUBSCR_FLAG_TIME_SERIES | DX_SUBSCR_FLAG_SINGLE_RECORD;
+	dx_event_subscr_flag subscr_flags = dx_esf_time_series | dx_esf_single_record;
 	dxf_const_string_t symbol = SYMBOL_DEFAULT;
 	dx_snap_test_state_t state = { 0, true };
 
