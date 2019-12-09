@@ -6,6 +6,13 @@ stages:
 centos:
   image: 'dxfeedcapi/dx-builder-linux:centos-6.10'
   script:
+    - whoami
+    - chmod +x ./make_ci.sh
+    - chmod +x ./make_package.sh
+    - chmod +x ./build.sh
+    - chmod +x ./scripts/chack_build.sh
+    - chmod +x ./scripts/combine_package.sh
+    - chmod +x ./scripts/run_test.sh
     - mkdir artifacts
     - sudo ./make_ci.sh rebuild no-test no-tls
     - cp build artifacts
@@ -18,6 +25,13 @@ centos:
 debian:
   image: 'dxfeedcapi/dx-builder-linux:debian-9'
   script:
+    - whoami
+    - chmod +x ./make_ci.sh
+    - chmod +x ./make_package.sh
+    - chmod +x ./build.sh
+    - chmod +x ./scripts/chack_build.sh
+    - chmod +x ./scripts/combine_package.sh
+    - chmod +x ./scripts/run_test.sh
     - mkdir artifacts
     - sudo ./make_ci.sh rebuild no-test no-tls
     - cp build artifacts
