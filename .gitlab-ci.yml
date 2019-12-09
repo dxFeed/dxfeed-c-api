@@ -7,9 +7,9 @@ centos:
   image: 'dxfeedcapi/dx-builder-linux:centos-6.10'
   script:
     - mkdir artifacts
-    - ./make_ci.sh rebuild no-test no-tls
+    - sudo ./make_ci.sh rebuild no-test no-tls
     - cp build artifacts
-    - ./make_ci.sh rebuild no-test
+    - sudo ./make_ci.sh rebuild no-test
     - cp build artifacts
   artifacts:
     paths:
@@ -19,9 +19,9 @@ debian:
   image: 'dxfeedcapi/dx-builder-linux:debian-9'
   script:
     - mkdir artifacts
-    - ./make_ci.sh rebuild no-test no-tls
+    - sudo ./make_ci.sh rebuild no-test no-tls
     - cp build artifacts
-    - ./make_ci.sh rebuild no-test
+    - sudo ./make_ci.sh rebuild no-test
     - cp build artifacts
   artifacts:
     paths:
