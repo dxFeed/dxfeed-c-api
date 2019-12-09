@@ -7,6 +7,9 @@ centos:
   image: 'dxfeedcapi/dx-builder-linux:centos-6.10'
   script:
     - whoami
+    - git describe
+    - git describe --abbrev=0
+    - git describe --abbrev=0 --tags
     - chmod +x ./make_ci.sh
     - chmod +x ./make_package.sh
     - chmod +x ./build.sh
@@ -14,10 +17,12 @@ centos:
     - chmod +x ./scripts/combine_package.sh
     - chmod +x ./scripts/run_test.sh
     - mkdir artifacts
+    - scl enable devtoolset-2 bash
+    - source /opt/rh/devtoolset-2/enable
     - ./make_ci.sh rebuild no-test no-tls
-    - cp build artifacts
+    - cp -r build artifacts
     - ./make_ci.sh rebuild no-test
-    - cp build artifacts
+    - cp -r build artifacts
   artifacts:
     paths:
       - dxfeed-c-api*.zip
@@ -26,6 +31,9 @@ debian:
   image: 'dxfeedcapi/dx-builder-linux:debian-9'
   script:
     - whoami
+    - git describe
+    - git describe --abbrev=0
+    - git describe --abbrev=0 --tags
     - chmod +x ./make_ci.sh
     - chmod +x ./make_package.sh
     - chmod +x ./build.sh
@@ -34,9 +42,9 @@ debian:
     - chmod +x ./scripts/run_test.sh
     - mkdir artifacts
     - ./make_ci.sh rebuild no-test no-tls
-    - cp build artifacts
+    - cp -r build artifacts
     - ./make_ci.sh rebuild no-test
-    - cp build artifacts
+    - cp -r build artifacts
   artifacts:
     paths:
       - dxfeed-c-api*.zip
