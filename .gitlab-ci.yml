@@ -1,7 +1,6 @@
 stages:
-  - build-release
-#  - build-debug
-  - test
+  - build
+#  - test
 
 centos:
   image: 'dxfeedcapi/dx-builder-linux:centos-6.10'
@@ -16,12 +15,9 @@ centos:
     - scl enable devtoolset-2 bash
     - source /opt/rh/devtoolset-2/enable
     - ./make_ci.sh rebuild no-test no-tls
-    - cp -R ./build artifacts
-    - ls ./build
+    - for f in ./dxfeed-c-api*.zip; do cp $f ./artifacts; done
     - ./make_ci.sh rebuild no-test
-    - cp -R ./build artifacts
-    - ls ./build
-    - ls ./artifacts
+    - for f in ./dxfeed-c-api*.zip; do cp $f ./artifacts; done
   artifacts:
     paths:
       - ./artifacts/dxfeed-c-api*.zip
@@ -37,12 +33,9 @@ debian:
     - chmod +x ./scripts/run_test.sh
     - mkdir artifacts
     - ./make_ci.sh rebuild no-test no-tls
-    - cp -R ./build artifacts
-    - ls ./build
+    - for f in ./dxfeed-c-api*.zip; do cp $f ./artifacts; done
     - ./make_ci.sh rebuild no-test
-    - cp -R ./build artifacts
-    - ls ./build
-    - ls ./artifacts
+    - for f in ./dxfeed-c-api*.zip; do cp $f ./artifacts; done
   artifacts:
     paths:
       - ./artifacts/dxfeed-c-api*.zip
