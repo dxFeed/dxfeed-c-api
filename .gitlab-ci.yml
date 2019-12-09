@@ -10,7 +10,7 @@ centos:
     - chmod +x ./make_ci.sh
     - chmod +x ./make_package.sh
     - chmod +x ./build.sh
-    - chmod +x ./scripts/chack_build.sh
+    - chmod +x ./scripts/check_build.sh
     - chmod +x ./scripts/combine_package.sh
     - chmod +x ./scripts/run_test.sh
     - mkdir artifacts
@@ -29,7 +29,7 @@ debian:
     - chmod +x ./make_ci.sh
     - chmod +x ./make_package.sh
     - chmod +x ./build.sh
-    - chmod +x ./scripts/chack_build.sh
+    - chmod +x ./scripts/check_build.sh
     - chmod +x ./scripts/combine_package.sh
     - chmod +x ./scripts/run_test.sh
     - mkdir artifacts
