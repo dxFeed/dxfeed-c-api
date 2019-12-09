@@ -19,7 +19,7 @@ centos:
     - cp build artifacts
   artifacts:
     paths:
-      - *.zip
+      - dxfeed-c-api*.zip
 
 debian:
   image: 'dxfeedcapi/dx-builder-linux:debian-9'
@@ -31,4 +31,4 @@ debian:
     - cp build artifacts
   artifacts:
     paths:
-      - *.zip
+      - dxfeed-c-api*.zip
