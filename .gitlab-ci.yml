@@ -16,9 +16,12 @@ centos:
     - scl enable devtoolset-2 bash
     - source /opt/rh/devtoolset-2/enable
     - ./make_ci.sh rebuild no-test no-tls
-    - cp -r ./build artifacts
+    - cp -R ./build artifacts
+    - ls ./build
     - ./make_ci.sh rebuild no-test
-    - cp -r ./build artifacts
+    - cp -R ./build artifacts
+    - ls ./build
+    - ls ./artifacts
   artifacts:
     paths:
       - ./artifacts/dxfeed-c-api*.zip
@@ -34,9 +37,12 @@ debian:
     - chmod +x ./scripts/run_test.sh
     - mkdir artifacts
     - ./make_ci.sh rebuild no-test no-tls
-    - cp -r ./build artifacts
+    - cp -R ./build artifacts
+    - ls ./build
     - ./make_ci.sh rebuild no-test
-    - cp -r ./build artifacts
+    - cp -R ./build artifacts
+    - ls ./build
+    - ls ./artifacts
   artifacts:
     paths:
       - ./artifacts/dxfeed-c-api*.zip
