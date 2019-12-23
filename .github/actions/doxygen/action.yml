@@ -1,0 +1,18 @@
+# action.yml
+name: 'DoxyDoc'
+description: 'Build doxygen documentation from project sources'
+inputs:
+  command:  # id of input
+    description: 'build command'
+    required: true
+  artifact:
+    description: 'generated artifact prefix'
+    required: true
+  release:
+    description: 'artifact version'
+    required: true
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+#  args:
+#    - ${{ inputs. }}

@@ -1,0 +1,18 @@
+# action.yml
+name: 'GitHub Upload Release Artifacts'
+description: 'Upload Artifacts to a GitHub release.'
+branding:
+  icon: 'upload-cloud'
+  color: 'yellow'
+inputs:
+  draft_regex:
+    description: 'regex for draft tag detection'
+    default: ''
+    required: false
+  prerelease_regex:
+    description: 'regex for prerelease tag detection'
+    default: ''
+    required: false
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
