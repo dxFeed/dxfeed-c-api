@@ -45,6 +45,11 @@ project(${PROJECT})
 # If library version is not specified through parameters version from the source will be used
 if(NOT ${APP_VERSION} STREQUAL "")
 
+    message(>>>>\ Application\ version\ original\ :\ ${APP_VERSION})
+    string(REGEX REPLACE "([a-zA-Z]+)-" "" APP_VERSION ${APP_VERSION})
+    string(REGEX REPLACE "-([a-zA-Z]+)$" "" APP_VERSION ${APP_VERSION})
+    message(>>>>\ Application\ version\ processed:\ ${APP_VERSION})
+
     #separate version string on components
     string(REPLACE "." ";" VERSION_COMPONENTS_LIST ${APP_VERSION})
     list(LENGTH VERSION_COMPONENTS_LIST VERSION_COMPONENTS_COUNT)
