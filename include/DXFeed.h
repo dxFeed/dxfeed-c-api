@@ -380,7 +380,6 @@ DXFEED_API ERRORCODE dxf_close_connection (dxf_connection_t connection);
  * @param[in] connection    A handle of a previously created connection which the subscription will be using
  * @param[in] event_types   A bitmask of the subscription event types. See {@link dx_event_id_t} and
  *                          {@link DX_EVENT_BIT_MASK} for information on how to create an event type bitmask
- *
  * @param[out] subscription A handle of the created subscription
  *
  * @return {@link DXF_SUCCESS} on successful subscription creation or {@link DXF_FAILURE} on error;
@@ -393,7 +392,28 @@ DXFEED_API ERRORCODE dxf_create_subscription (dxf_connection_t connection, int e
 /**
  * @ingroup c-api-basic-subscription-functions
  *
- * @brief Creates a subscription with the specified parameters.
+ * @brief Creates a timed subscription with the specified parameters and the subscription flags.
+ *
+ * @details
+ *
+ * @param[in] connection    A handle of a previously created connection which the subscription will be using
+ * @param[in] event_types   A bitmask of the subscription event types. See {@link dx_event_id_t} and
+ *                          {@link DX_EVENT_BIT_MASK} for information on how to create an event type bitmask
+ * @param[in] subscr_flags  A bitmask of the subscription event types. See {@link dx_event_subscr_flag}
+ * @param[out] subscription A handle of the created subscription
+ *
+ * @return {@link DXF_SUCCESS} on successful subscription creation or {@link DXF_FAILURE} on error;
+ *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
+ *         a handle to newly created subscription is returned via ```subscription``` out parameter
+ */
+DXFEED_API ERRORCODE dxf_create_subscription_with_flags(dxf_connection_t connection, int event_types,
+                                                        dx_event_subscr_flag subscr_flags,
+                                                        OUT dxf_subscription_t* subscription);
+
+/**
+ * @ingroup c-api-basic-subscription-functions
+ *
+ * @brief Creates a timed subscription with the specified parameters.
  *
  * @details
  *
@@ -410,6 +430,28 @@ DXFEED_API ERRORCODE dxf_create_subscription (dxf_connection_t connection, int e
 DXFEED_API ERRORCODE dxf_create_subscription_timed(dxf_connection_t connection, int event_types, 
                                                    dxf_long_t time,
                                                    OUT dxf_subscription_t* subscription);
+
+/**
+ * @ingroup c-api-basic-subscription-functions
+ *
+ * @brief Creates a timed subscription with the specified parameters and the subscription flags.
+ *
+ * @details
+ *
+ * @param[in] connection    A handle of a previously created connection which the subscription will be using
+ * @param[in] event_types   A bitmask of the subscription event types. See {@link dx_event_id_t} and
+ *                          {@link DX_EVENT_BIT_MASK} for information on how to create an event type bitmask
+ * @param[in] time          UTC time in the past (unix time in milliseconds)
+ * @param[in] subscr_flags  A bitmask of the subscription event types. See {@link dx_event_subscr_flag}
+ * @param[out] subscription A handle of the created subscription
+ *
+ * @return {@link DXF_SUCCESS} on successful subscription creation or {@link DXF_FAILURE} on error;
+ *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
+ *         a handle to newly created subscription is returned via ```subscription``` out parameter
+ */
+DXFEED_API ERRORCODE dxf_create_subscription_timed_with_flags(dxf_connection_t connection, int event_types,
+                                                              dxf_long_t time, dx_event_subscr_flag subscr_flags,
+                                                              OUT dxf_subscription_t* subscription);
 
 /**
  * @ingroup c-api-basic-subscription-functions

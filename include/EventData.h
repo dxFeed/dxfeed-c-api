@@ -117,6 +117,12 @@ typedef enum {
   dx_esf_quotes_regional = 0x8,
   ///Used for wildcard ("*") subscription
   dx_esf_wildcard = 0x10,
+  ///Used for forcing subscription to ticker data
+  dx_esf_force_ticker = 0x20,
+  ///Used for forcing subscription to stream data
+  dx_esf_force_stream = 0x40,
+  ///Used for forcing subscription to history data
+  dx_esf_force_history = 0x80,
 
   dx_esf_force_enum_unsigned = UINT_MAX
 } dx_event_subscr_flag;
