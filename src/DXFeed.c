@@ -381,17 +381,30 @@ ERRORCODE dxf_create_subscription_impl (dxf_connection_t connection, int event_t
 }
 
 DXFEED_API ERRORCODE dxf_create_subscription(dxf_connection_t connection, int event_types,
-											OUT dxf_subscription_t* subscription) {
-	return dxf_create_subscription_impl(connection, event_types, dx_esf_default,
-		DEFAULT_SUBSCRIPTION_TIME, subscription);
+	OUT dxf_subscription_t* subscription)
+{
+	return dxf_create_subscription_impl(connection, event_types, dx_esf_default, DEFAULT_SUBSCRIPTION_TIME, subscription);
+}
+
+DXFEED_API ERRORCODE dxf_create_subscription_with_flags(dxf_connection_t connection, int event_types,
+	dx_event_subscr_flag subscr_flags, OUT dxf_subscription_t* subscription)
+{
+	return dxf_create_subscription_impl(connection, event_types, subscr_flags, DEFAULT_SUBSCRIPTION_TIME, subscription);
 }
 
 /* -------------------------------------------------------------------------- */
 
-DXFEED_API ERRORCODE dxf_create_subscription_timed(dxf_connection_t connection, int event_types,
-												dxf_long_t time,
-												OUT dxf_subscription_t* subscription) {
+DXFEED_API ERRORCODE dxf_create_subscription_timed(dxf_connection_t connection, int event_types, dxf_long_t time,
+	OUT dxf_subscription_t* subscription)
+{
 	return dxf_create_subscription_impl(connection, event_types, dx_esf_time_series, time,
+		subscription);
+}
+
+DXFEED_API ERRORCODE dxf_create_subscription_timed_with_flags(dxf_connection_t connection, int event_types,
+	dxf_long_t time, dx_event_subscr_flag subscr_flags, OUT dxf_subscription_t* subscription)
+{
+	return dxf_create_subscription_impl(connection, event_types, dx_esf_time_series | subscr_flags, time,
 		subscription);
 }
 
