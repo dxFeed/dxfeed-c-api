@@ -30,6 +30,7 @@ typedef int bool;
 #define DUMP_PARAM_SHORT_TAG "-d"
 #define DUMP_PARAM_LONG_TAG "--dump"
 #define TOKEN_PARAM_SHORT_TAG "-T"
+#define SUBSCRIPTION_DATA_PARAM_TAG "-s"
 
 dxf_const_string_t dx_event_type_to_string(int event_type) {
 	switch (event_type) {
@@ -486,6 +487,22 @@ bool parse_symbols(char* symbols_string, OUT dxf_string_t** symbols, OUT int* sy
 	return true;
 }
 
+dx_event_subscr_flag subscr_data_to_flags(char* subscr_data) {
+	if (subscr_data == NULL) {
+		return dx_esf_default;
+	}
+
+	if (strcmp(subscr_data, "TICKER") == 0) {
+		return dx_esf_force_ticker;
+	} else if (strcmp(subscr_data, "STREAM") == 0) {
+		return dx_esf_force_stream;
+	} else if (strcmp(subscr_data, "HISTORY") == 0) {
+		return dx_esf_force_history;
+	}
+
+	return dx_esf_default;
+}
+
 /* -------------------------------------------------------------------------- */
 
 int main (int argc, char* argv[]) {
@@ -500,7 +517,9 @@ int main (int argc, char* argv[]) {
 
 	if ( argc < STATIC_PARAMS_COUNT ) {
 		printf("DXFeed command line sample.\n"
-				"Usage: CommandLineSample <server address> <event type> <symbol> [" DUMP_PARAM_LONG_TAG " | " DUMP_PARAM_SHORT_TAG " <filename>] [" TOKEN_PARAM_SHORT_TAG " <token>]\n"
+				"Usage: CommandLineSample <server address> <event type> <symbol> "
+				"[" DUMP_PARAM_LONG_TAG " | " DUMP_PARAM_SHORT_TAG " <filename>] [" TOKEN_PARAM_SHORT_TAG " <token>] "
+				"[" SUBSCRIPTION_DATA_PARAM_TAG " <subscr_data>]\n"
 				"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
 				"                     If you want to use file instead of server data just\n"
 				"                     write there path to file e.g. path\\to\\raw.bin\n"
@@ -511,7 +530,8 @@ int main (int argc, char* argv[]) {
 				"  <symbol>         - The trade symbols, e.g. C, MSFT, YHOO, IBM. All symbols - *\n"
 				"  " DUMP_PARAM_LONG_TAG " | " DUMP_PARAM_SHORT_TAG " <filename> - The filename to dump the raw data\n"
 				"  " TOKEN_PARAM_SHORT_TAG " <token>             - The authorization token\n"
-				"Example: CommandLineSample.exe demo.dxfeed.com:7300 TRADE,ORDER MSFT,IBM"
+				"  " SUBSCRIPTION_DATA_PARAM_TAG " <subscr_data>       - The subscription data: TICKER, STREAM or HISTORY\n"
+				"Example: CommandLineSample.exe demo.dxfeed.com:7300 TRADE,ORDER MSFT,IBM\n"
 				);
 
 		return 0;
@@ -529,11 +549,13 @@ int main (int argc, char* argv[]) {
 
 	char* dump_file_name = NULL;
 	char* token = NULL;
+	char* subscr_data = NULL;
 
 	if (argc > STATIC_PARAMS_COUNT) {
 		int i = 0;
 		bool dump_filename_is_set = false;
 		bool token_is_set = false;
+		bool subscr_data_is_set = false;
 
 		for (i = STATIC_PARAMS_COUNT; i < argc; i++) {
 			if (dump_filename_is_set == false &&
@@ -555,6 +577,15 @@ int main (int argc, char* argv[]) {
 
 				token = argv[++i];
 				token_is_set = true;
+			} else if (subscr_data_is_set == false && strcmp(argv[i], SUBSCRIPTION_DATA_PARAM_TAG) == 0) {
+				if (i + 1 == argc) {
+					wprintf(L"The subscription data argument error\n");
+
+					return -1;
+				}
+
+				subscr_data = argv[++i];
+				subscr_data_is_set = true;
 			}
 		}
 	}
@@ -586,7 +617,17 @@ int main (int argc, char* argv[]) {
 		dxf_write_raw_data(connection, dump_file_name);
 	}
 
-	if (!dxf_create_subscription(connection, event_type, &subscription)) {
+	dx_event_subscr_flag subsc_flags = subscr_data_to_flags(subscr_data);
+
+	ERRORCODE subscription_result;
+
+	if (subsc_flags == dx_esf_default) {
+		subscription_result = dxf_create_subscription(connection, event_type, &subscription);
+	} else {
+		subscription_result = dxf_create_subscription_with_flags(connection, event_type, subsc_flags, &subscription);
+	}
+
+	if (subscription_result == DXF_FAILURE) {
 		process_last_error();
 		free_symbols(symbols, symbol_count);
 		return -1;
