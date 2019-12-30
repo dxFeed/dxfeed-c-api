@@ -399,7 +399,7 @@ DXFEED_API ERRORCODE dxf_create_subscription (dxf_connection_t connection, int e
  * @param[in] connection    A handle of a previously created connection which the subscription will be using
  * @param[in] event_types   A bitmask of the subscription event types. See {@link dx_event_id_t} and
  *                          {@link DX_EVENT_BIT_MASK} for information on how to create an event type bitmask
- * @param[in] subscr_flags  A bitmask of the subscription event types. See {@link dx_event_subscr_flag}
+ * @param[in] subscr_flags  A bitmask of the subscription event flags. See {@link dx_event_subscr_flag}
  * @param[out] subscription A handle of the created subscription
  *
  * @return {@link DXF_SUCCESS} on successful subscription creation or {@link DXF_FAILURE} on error;
@@ -442,7 +442,7 @@ DXFEED_API ERRORCODE dxf_create_subscription_timed(dxf_connection_t connection, 
  * @param[in] event_types   A bitmask of the subscription event types. See {@link dx_event_id_t} and
  *                          {@link DX_EVENT_BIT_MASK} for information on how to create an event type bitmask
  * @param[in] time          UTC time in the past (unix time in milliseconds)
- * @param[in] subscr_flags  A bitmask of the subscription event types. See {@link dx_event_subscr_flag}
+ * @param[in] subscr_flags  A bitmask of the subscription event flags. See {@link dx_event_subscr_flag}
  * @param[out] subscription A handle of the created subscription
  *
  * @return {@link DXF_SUCCESS} on successful subscription creation or {@link DXF_FAILURE} on error;
