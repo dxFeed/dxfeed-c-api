@@ -21,6 +21,7 @@ typedef struct {
 	dxf_candle_price_attribute_t price;
 	dxf_candle_session_attribute_t session;
 	dxf_candle_alignment_attribute_t alignment;
+	dxf_double_t price_level;
 
 	dxf_const_string_t expected;
 	int line;
