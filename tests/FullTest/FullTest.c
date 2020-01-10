@@ -681,7 +681,7 @@ void* create_snapshot_subscription(dxf_connection_t connection, struct snapshot_
 				DXF_CANDLE_EXCHANGE_CODE_ATTRIBUTE_DEFAULT,
 				DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT,
 				dxf_ctpa_day, dxf_cpa_default, dxf_csa_default,
-				dxf_caa_default, &candle_attributes)) {
+				dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, &candle_attributes)) {
 
 				process_last_error();
 				return NULL;
