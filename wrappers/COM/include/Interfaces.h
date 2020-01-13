@@ -453,5 +453,7 @@ struct IDXCandleSymbol : public IDispatch {
 	virtual HRESULT STDMETHODCALLTYPE put_PeriodValue(DOUBLE periodValue) = 0;
 	virtual HRESULT STDMETHODCALLTYPE get_Alignment(INT* alignment) = 0;
 	virtual HRESULT STDMETHODCALLTYPE put_Alignment(INT alignment) = 0;
+	virtual HRESULT STDMETHODCALLTYPE get_PriceLevel(DOUBLE* priceLevel) = 0;
+	virtual HRESULT STDMETHODCALLTYPE put_PriceLevel(DOUBLE priceLevel) = 0;
 	virtual HRESULT STDMETHODCALLTYPE ToString(BSTR* value) = 0;
 };
