@@ -8,6 +8,7 @@ on:
 name: Build & Release
 
 env:
+  WIN_BUILDER_IMAGE: dxfeedcapi/builder:1809-4.5.2-2015
   DOCS_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-docs
   LINUX_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-linux
   CENTOS_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-centos
@@ -177,7 +178,7 @@ jobs:
 
       - name: Pull build image
         run: |
-          docker pull mvkvl/msbuild:2015
+          docker pull ${{ env.WIN_BUILDER_IMAGE }}
 
       - name: Make artifacts directory
         run: |
@@ -185,7 +186,7 @@ jobs:
 
       - name: Build windows (no TLS)
         run: |
-          docker run -v "${pwd}:${{ env.WIN_SRC_DIR }}" -e SRCDIR="${{ env.WIN_SRC_DIR }}" -e FLAGS="no-test no-tls" -e RELEASE=${{ env.RELEASE_VERSION }} mvkvl/msbuild:2015
+          docker run --rm -v "${pwd}:${{ env.WIN_SRC_DIR }}" -e SRCDIR="${{ env.WIN_SRC_DIR }}" -e FLAGS="rebuild no-test no-tls" -e RELEASE=${{ env.RELEASE_VERSION }} ${{ env.WIN_BUILDER_IMAGE }}
 
       - name: Copy build artifact (windows no-tls)
         run: |
@@ -194,7 +195,7 @@ jobs:
 
       - name: Build windows (TLS)
         run: |
-          docker run -v "${pwd}:${{ env.WIN_SRC_DIR }}" -e SRCDIR="${{ env.WIN_SRC_DIR }}" -e FLAGS="no-test" -e RELEASE=${{ env.RELEASE_VERSION }} mvkvl/msbuild:2015
+          docker run --rm -v "${pwd}:${{ env.WIN_SRC_DIR }}" -e SRCDIR="${{ env.WIN_SRC_DIR }}" -e FLAGS="rebuild no-test" -e RELEASE=${{ env.RELEASE_VERSION }} ${{ env.WIN_BUILDER_IMAGE }}
 
       - name: Copy build artifact (windows)
         run: |
