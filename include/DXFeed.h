@@ -805,9 +805,31 @@ DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const
  * @param[in] exchange_code      Exchange attribute of this symbol
  * @param[in] period_value       Aggregation period value of this symbol
  * @param[in] period_type        Aggregation period type of this symbol
- * @param[in] price              Price type attribute of this symbol
- * @param[in] session            Session attribute of this symbol
- * @param[in] alignment          Alignment attribute of this symbol
+ * @param[in] price              Price ("price" key) type attribute of this symbol. The dxf_candle_price_attribute_t
+ *                               enum defines possible values with dxf_cpa_last being default. For legacy
+ *                               backwards-compatibility purposes, most of the price values cannot be abbreviated, so a
+ *                               one-minute candle of "EUR/USD" bid price shall be specified with
+ *                               ```EUR/USD{=m,price=bid}``` candle symbol string. However, the dxf_cpa_settlement can
+ *                               be abbreviated to "s", so a daily candle on "/ES" futures settlement prices can be
+ *                               specified with ```/ES{=d,price=s}``` string.
+ * @param[in] session            Session ("tho" key) attribute of this symbol. "tho" key with a value of "true"
+ *                               corresponds to session set to dxf_csa_regular which limits the candle to trading hours
+ *                               only, so a 133 tick candles on "GOOG" base symbol collected over trading hours only
+ *                               can be specified with ```GOOG{=133t,tho=true}``` string. Note, that the default daily
+ *                               candles for US equities are special for historical reasons and correspond to the way
+ *                               US equity exchange report their daily summary data. The volume the US equity default
+ *                               daily candle corresponds to the total daily traded volume, while open, high, low,
+ *                               and close correspond to the regular trading hours only.
+ * @param[in] alignment          Alignment ("a" key) attribute of this symbol. The dxf_candle_alignment_attribute_t
+ *                               enum defines possible values with dxf_caa_midnight being default. The alignment
+ *                               values can be abbreviated to the first letter. So, a 1 hour candle on a symbol "AAPL"
+ *                               that starts at the regular trading session at 9:30 am ET can be specified with
+ *                               ```AAPL{=h,a=s,tho=true}```. Contrast that to the ```AAPL{=h,tho=true}``` candle that
+ *                               is aligned at midnight and thus starts at 9:00 am.
+ * @param[in] price_level        Price level ("pl" key) attribute of this symbol. The candle price level defines
+ *                               additional axis to split candles within particular price corridor in addition to
+ *                               candle period attribute with the default value NAN. So a one-minute candles of "AAPL"
+ *                               with price level 0.1 shall be specified with ```AAPL{=m,pl=0.1}```.
  * @param[out] candle_attributes Pointer to the configured candle attributes struct
  *
  * \return {@link DXF_SUCCESS} if candle attributes have been created successfully or {@link DXF_FAILURE} on error;
@@ -821,6 +843,7 @@ DXFEED_API ERRORCODE dxf_create_candle_symbol_attributes(dxf_const_string_t base
                                                          dxf_candle_price_attribute_t price,
                                                          dxf_candle_session_attribute_t session,
                                                          dxf_candle_alignment_attribute_t alignment,
+                                                         dxf_double_t price_level,
                                                          OUT dxf_candle_attributes_t* candle_attributes);
 
 /**

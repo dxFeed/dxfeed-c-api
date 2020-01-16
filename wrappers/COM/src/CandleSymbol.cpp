@@ -64,6 +64,8 @@ private:
 	virtual HRESULT STDMETHODCALLTYPE put_PeriodValue(DOUBLE value);
 	virtual HRESULT STDMETHODCALLTYPE get_Alignment(INT* value);
 	virtual HRESULT STDMETHODCALLTYPE put_Alignment(INT value);
+	virtual HRESULT STDMETHODCALLTYPE get_PriceLevel(DOUBLE* value);
+	virtual HRESULT STDMETHODCALLTYPE put_PriceLevel(DOUBLE value);
 	virtual HRESULT STDMETHODCALLTYPE ToString(BSTR* value);
 
 public:
@@ -79,6 +81,7 @@ private:
 	INT periodType;
 	DOUBLE periodValue;
 	INT alignment;
+	DOUBLE priceLevel;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -91,7 +94,8 @@ DXCandleSymbol::DXCandleSymbol()
 	, session(dxf_csa_default)
 	, periodType(dxf_cpa_default)
 	, periodValue(DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT)
-	, alignment(dxf_caa_default) {}
+	, alignment(dxf_caa_default)
+	, priceLevel(NAN){}
 
 /* -------------------------------------------------------------------------- */
 
@@ -208,6 +212,21 @@ HRESULT STDMETHODCALLTYPE DXCandleSymbol::put_Alignment(INT value) {
 
 /* -------------------------------------------------------------------------- */
 
+HRESULT STDMETHODCALLTYPE DXCandleSymbol::get_PriceLevel(DOUBLE* value) {
+	CHECK_PTR(value);
+	*value = priceLevel;
+	return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
+HRESULT STDMETHODCALLTYPE DXCandleSymbol::put_PriceLevel(DOUBLE value) {
+	priceLevel = value;
+	return S_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+
 typedef struct {
 	dxf_string_t string;
 	dxf_long_t period_interval_millis;
@@ -261,7 +280,8 @@ HRESULT STDMETHODCALLTYPE DXCandleSymbol::ToString(BSTR* value) {
 	periodType == dxf_ctpa_default &&
 	alignment == dxf_caa_default &&
 	price == dxf_cpa_default &&
-	session == dxf_csa_default) {
+	session == dxf_csa_default &&
+	isnan(priceLevel)) {
 
 	*value = SysAllocStringLen(buf.c_str(), (UINT)buf.size());
 	if (*value == NULL)
@@ -289,6 +309,14 @@ HRESULT STDMETHODCALLTYPE DXCandleSymbol::ToString(BSTR* value) {
 	}
 	buf.append(L"a=").append(g_candle_alignment[alignment]);
 	put_comma = true;
+	}
+
+	if (!isnan(priceLevel)) {
+		if (put_comma) {
+			buf.append(L",");
+		}
+		buf.append(L"pl=").append(std::to_wstring(priceLevel));
+		put_comma = true;
 	}
 
 	if (price != dxf_cpa_default) {
