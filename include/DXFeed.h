@@ -392,7 +392,7 @@ DXFEED_API ERRORCODE dxf_create_subscription (dxf_connection_t connection, int e
 /**
  * @ingroup c-api-basic-subscription-functions
  *
- * @brief Creates a timed subscription with the specified parameters and the subscription flags.
+ * @brief Creates a subscription with the specified parameters and the subscription flags.
  *
  * @details
  *
