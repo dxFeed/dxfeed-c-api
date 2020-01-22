@@ -573,6 +573,7 @@ bool RECORD_TRANSCODER_NAME(dx_summary_t) (dx_record_transcoder_connection_conte
 		cur_event->exchange_code = exchange_code;
 		cur_event->day_close_price_type = DX_SUMMARY_GET_DCPT(cur_record);
 		cur_event->prev_day_close_price_type = DX_SUMMARY_GET_PDCPT(cur_record);
+		cur_event->scope = (exchange_code == 0 ? dxf_osc_composite : dxf_osc_regional);
 	}
 
 	return dx_process_event_data(context->connection, dx_eid_summary, record_params->symbol_name,
@@ -800,6 +801,7 @@ bool RECORD_TRANSCODER_NAME(dx_time_and_sale_t) (dx_record_transcoder_connection
 												const dxf_event_params_t* event_params,
 												dx_time_and_sale_t* record_buffer, int record_count) {
 	dxf_time_and_sale_t* event_buffer = (dxf_time_and_sale_t*)dx_get_event_data_buffer(context, dx_eid_time_and_sale, record_count);
+	dxf_char_t exchange_code = DX_EXCHANGE_FROM_RECORD(record_params);
 
 	if (event_buffer == NULL) {
 		return false;
@@ -845,6 +847,7 @@ bool RECORD_TRANSCODER_NAME(dx_time_and_sale_t) (dx_record_transcoder_connection
 		cur_event->is_eth_trade = DX_TNS_GET_ETH(cur_record);
 		cur_event->trade_through_exempt = DX_TNS_GET_TTE(cur_record);
 		cur_event->is_spread_leg = DX_TNS_GET_SPREAD_LEG(cur_record);
+		cur_event->scope = (exchange_code == 0 ? dxf_osc_composite : dxf_osc_regional);
 	}
 
 	return dx_process_event_data(context->connection, dx_eid_time_and_sale, record_params->symbol_name,

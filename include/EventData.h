@@ -209,7 +209,7 @@ typedef struct {
     dxf_char_t ask_exchange_code;
     dxf_double_t ask_price;
     dxf_int_t ask_size;
-	dxf_order_scope_t scope;
+    dxf_order_scope_t scope;
 } dxf_quote_t;
 
 /* Summary ------------------------------------------------------------------ */
@@ -237,6 +237,7 @@ typedef struct {
     dxf_char_t exchange_code;
     dxf_price_type_t day_close_price_type;
     dxf_price_type_t prev_day_close_price_type;
+    dxf_order_scope_t scope;
 } dxf_summary_t;
 
 /* Profile ------------------------------------------------------------------ */
@@ -335,6 +336,7 @@ typedef struct {
     dxf_bool_t is_eth_trade;
     dxf_char_t trade_through_exempt;
     dxf_bool_t is_spread_leg;
+    dxf_order_scope_t scope;
 } dxf_time_and_sale_t;
 
 /* Candle ------------------------------------------------------------------- */

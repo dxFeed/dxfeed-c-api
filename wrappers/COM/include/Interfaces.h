@@ -196,6 +196,7 @@ struct IDXSummary : public IDispatch {
 	virtual HRESULT STDMETHODCALLTYPE GetExchange(SHORT* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetDayClosePriceType(DXFPriceType* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetPrevDayClosePriceType(DXFPriceType* value) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetScope(DXFOrderScope* value) = 0;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -281,6 +282,7 @@ struct IDXTimeAndSale : public IDispatch {
 	virtual HRESULT STDMETHODCALLTYPE GetBuyer(BSTR* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetSeller(BSTR* value) = 0;
 	virtual HRESULT STDMETHODCALLTYPE GetRawFlags(INT* value) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetScope(DXFOrderScope* value) = 0;
 };
 
 /* -------------------------------------------------------------------------- */

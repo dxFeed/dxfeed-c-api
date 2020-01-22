@@ -920,7 +920,8 @@ bool init_record_info(dx_record_item_t *record, dxf_const_string_t name) {
 	} else if (record_info_id == dx_rid_trade ||
 			record_info_id == dx_rid_quote ||
 			record_info_id == dx_rid_summary ||
-			record_info_id == dx_rid_trade_eth) {
+			record_info_id == dx_rid_trade_eth ||
+			record_info_id == dx_rid_time_and_sale) {
 		if (record->name[suffix_index] != L'&')
 			return true;
 		dx_copy_string_len(record->suffix, &record->name[suffix_index + 1], 1);
