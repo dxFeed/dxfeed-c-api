@@ -456,6 +456,7 @@ private:
 	virtual HRESULT STDMETHODCALLTYPE GetExchange(SHORT* value);
 	virtual HRESULT STDMETHODCALLTYPE GetDayClosePriceType(DXFPriceType* value);
 	virtual HRESULT STDMETHODCALLTYPE GetPrevDayClosePriceType(DXFPriceType* value);
+	virtual HRESULT STDMETHODCALLTYPE GetScope(DXFOrderScope* value);
 
 private:
 
@@ -603,6 +604,14 @@ HRESULT STDMETHODCALLTYPE DXSummary::GetPrevDayClosePriceType(DXFPriceType* valu
 	CHECK_PTR(value);
 
 	*value = (DXFPriceType)m_data->prev_day_close_price_type;
+
+	return S_OK;
+}
+
+HRESULT STDMETHODCALLTYPE DXSummary::GetScope(DXFOrderScope *value) {
+	CHECK_PTR(value);
+
+	*value = (DXFOrderScope)m_data->scope;
 
 	return S_OK;
 }
@@ -1157,6 +1166,7 @@ private:
 	virtual HRESULT STDMETHODCALLTYPE GetBuyer(BSTR* value);
 	virtual HRESULT STDMETHODCALLTYPE GetSeller(BSTR* value);
 	virtual HRESULT STDMETHODCALLTYPE GetRawFlags(INT* value);
+	virtual HRESULT STDMETHODCALLTYPE GetScope(DXFOrderScope* value);
 
 private:
 
@@ -1390,6 +1400,14 @@ HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetRawFlags(INT* value) {
 	CHECK_PTR(value);
 
 	*value = m_data->raw_flags;
+
+	return S_OK;
+}
+
+HRESULT STDMETHODCALLTYPE DXTimeAndSale::GetScope(DXFOrderScope *value) {
+	CHECK_PTR(value);
+
+	*value = (DXFOrderScope)m_data->scope;
 
 	return S_OK;
 }

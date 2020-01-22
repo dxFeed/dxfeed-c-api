@@ -204,10 +204,10 @@ void listener(int event_type, dxf_const_string_t symbol_name,
 		for (; i < data_count; ++i) {
 			wprintf(L"day id=%d, day open price=%f, day high price=%f, day low price=%f, day close price=%f, "
 				L"prev day id=%d, prev day close price=%f, open interest=%i, flags=0x%X, exchange=%c, "
-				L"day close price type=%i, prev day close price type=%i}\n",
+				L"day close price type=%i, prev day close price type=%i, scope=%d}\n",
 				s[i].day_id, s[i].day_open_price, s[i].day_high_price, s[i].day_low_price, s[i].day_close_price,
 				s[i].prev_day_id, s[i].prev_day_close_price, s[i].open_interest, s[i].raw_flags, s[i].exchange_code,
-				s[i].day_close_price_type, s[i].prev_day_close_price_type);
+				s[i].day_close_price_type, s[i].prev_day_close_price_type, s[i].scope);
 		}
 	}
 
@@ -233,12 +233,13 @@ void listener(int event_type, dxf_const_string_t symbol_name,
 			wprintf(L"event id=%"LS(PRId64)L", time=", tns[i].index);
 			print_timestamp(tns[i].time);
 			wprintf(L", exchange code=%c, price=%f, size=%i, bid price=%f, ask price=%f, "
-				L"exchange sale conditions=\'%ls\', is ETH trade=%ls, type=%i, buyer=\'%ls\', seller=\'%ls\'}\n",
+				L"exchange sale conditions=\'%ls\', is ETH trade=%ls, type=%i, buyer=\'%ls\', seller=\'%ls\', scope=%d}\n",
 				tns[i].exchange_code, tns[i].price, tns[i].size,
 				tns[i].bid_price, tns[i].ask_price, tns[i].exchange_sale_conditions,
 				tns[i].is_eth_trade ? L"True" : L"False", tns[i].type,
 				tns[i].buyer ? tns[i].buyer : L"<UNKNOWN>", 
-				tns[i].seller ? tns[i].seller : L"<UNKNOWN>");
+				tns[i].seller ? tns[i].seller : L"<UNKNOWN>",
+				tns[i].scope);
 		}
 	}
 

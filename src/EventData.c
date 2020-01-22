@@ -52,6 +52,7 @@ static const dxf_char_t g_order_tmpl[] = L"Order#";
 static const dxf_char_t g_trade_tmpl[] = L"Trade&";
 static const dxf_char_t g_summary_tmpl[] = L"Summary&";
 static const dxf_char_t g_trade_eth_tmpl[] = L"TradeETH&";
+static const dxf_char_t g_time_and_sale_tmpl[] = L"TimeAndSale&";
 
 #define STRLEN(char_array) (sizeof(char_array) / sizeof(char_array[0]) - 1)
 #define QUOTE_TMPL_LEN STRLEN(g_quote_tmpl)
@@ -59,6 +60,7 @@ static const dxf_char_t g_trade_eth_tmpl[] = L"TradeETH&";
 #define TRADE_TMPL_LEN STRLEN(g_trade_tmpl)
 #define SUMMARY_TMPL_LEN STRLEN(g_summary_tmpl)
 #define TRADE_ETH_TMPL_LEN STRLEN(g_trade_eth_tmpl)
+#define TIME_AND_SALE_TMPL_LEN STRLEN(g_time_and_sale_tmpl)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -265,7 +267,19 @@ bool dx_get_profile_subscription_params(dxf_connection_t connection, dx_event_su
 bool dx_get_time_and_sale_subscription_params(dxf_connection_t connection, dx_event_subscr_flag subscr_flags, OUT dx_event_subscription_param_list_t* param_list) {
 	dx_subscription_type_t subscription_type = dx_infer_subscription_type(subscr_flags, IS_FLAG_SET(subscr_flags, dx_esf_time_series) ? dx_st_history : dx_st_stream);
 
-	return dx_add_subscription_param_to_list(connection, param_list, L"TimeAndSale", subscription_type);
+	CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"TimeAndSale", subscription_type);
+
+	dxf_char_t ch = 'A';
+	dxf_char_t time_and_sale_name_buf[TIME_AND_SALE_TMPL_LEN + 2] = {0};
+
+	/* fill trades TimeAndSale&A..TimeAndSale&Z */
+	dx_copy_string(time_and_sale_name_buf, g_time_and_sale_tmpl);
+	for (; ch <= 'Z'; ch++) {
+		time_and_sale_name_buf[TIME_AND_SALE_TMPL_LEN] = ch;
+		CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, time_and_sale_name_buf, subscription_type);
+	}
+
+	return true;
 }
 
 bool dx_get_candle_subscription_params(dxf_connection_t connection, dx_event_subscr_flag subscr_flags, OUT dx_event_subscription_param_list_t* param_list) {
