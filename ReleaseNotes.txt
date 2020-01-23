@@ -1,3 +1,18 @@
+Version 5.9.0
+* Added the ability to override the type of data the application subscribes to
+  - Added the API functions: `dxf_create_subscription_with_flags` and `dxf_create_subscription_timed_with_flags` which accept an additional parameter `subscr_flags`.
+    - Use `dx_esf_force_ticker` flag to force subscription to ticker data
+    - Use `dx_esf_force_stream` flag to force subscription to stream data
+    - Use `dx_esf_force_history` flag to force subscription to history data
+  - [Samples] Added an additional command line parameter "[-s <subscr_data>]" to CommandLineSample (to describe how to use the new function with flags). This parameter accepts the next values:
+    - TICKER to force subscription to ticker data
+    - STREAM to force subscription to stream data
+    - HISTORY to force subscription to history data
+* Added the candle price level attribute support. The candle price level (pl) defines additional axis to split candles within particular price corridor in addition to candle period attribute with the default value Double.NaN.
+  So a one-minute candles of "AAPL" with price level 0.1 shall be specified with "AAPL{=m,pl=0.1}".
+  Example: `CandleSample demo.dxfeed.com:7300 AAPL{=m,pl=0.1} -t 2020-01-01`
+* Added ability to retrieve regional TnS. Now API backend (C-API) subsribes to both composite and regional TimeAndSale events. Sometimes server may sent equal composite and regional TnS which differ by suffix only (for example: TimeAndSale and TimeAndSale&K). So the `scope` field was added with possible values: dxf_osc_composite and dxf_osc_regional. Same field was added for Summary events. Please, use the `scope` field to filter out duplicates.
+
 Version 5.8.0
 * Improved the documentation (converted to doxygen format)
 
