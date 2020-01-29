@@ -4,10 +4,12 @@
 #ifdef _WIN32
 #include <Windows.h>
 #else
+
 #include <unistd.h>
 #include <string.h>
 #include <wctype.h>
 #include <stdlib.h>
+
 #define stricmp strcasecmp
 #endif
 
@@ -42,21 +44,34 @@ int _CRT_glob = 0;
 #define MAX_SOURCE_SIZE 42
 #define TOKEN_PARAM_SHORT_TAG "-T"
 
-dxf_const_string_t dx_event_type_to_string(int event_type) {
+dxf_const_string_t dx_event_type_to_string (int event_type) {
 	switch (event_type) {
-		case DXF_ET_TRADE: return L"Trade";
-		case DXF_ET_QUOTE: return L"Quote";
-		case DXF_ET_SUMMARY: return L"Summary";
-		case DXF_ET_PROFILE: return L"Profile";
-		case DXF_ET_ORDER: return L"Order";
-		case DXF_ET_TIME_AND_SALE: return L"Time&Sale";
-		case DXF_ET_CANDLE: return L"Candle";
-		case DXF_ET_TRADE_ETH: return L"TradeETH";
-		case DXF_ET_SPREAD_ORDER: return L"SpreadOrder";
-		case DXF_ET_GREEKS: return L"Greeks";
-		case DXF_ET_SERIES: return L"Series";
-		case DXF_ET_CONFIGURATION: return L"Configuration";
-		default: return L"";
+		case DXF_ET_TRADE:
+			return L"Trade";
+		case DXF_ET_QUOTE:
+			return L"Quote";
+		case DXF_ET_SUMMARY:
+			return L"Summary";
+		case DXF_ET_PROFILE:
+			return L"Profile";
+		case DXF_ET_ORDER:
+			return L"Order";
+		case DXF_ET_TIME_AND_SALE:
+			return L"Time&Sale";
+		case DXF_ET_CANDLE:
+			return L"Candle";
+		case DXF_ET_TRADE_ETH:
+			return L"TradeETH";
+		case DXF_ET_SPREAD_ORDER:
+			return L"SpreadOrder";
+		case DXF_ET_GREEKS:
+			return L"Greeks";
+		case DXF_ET_SERIES:
+			return L"Series";
+		case DXF_ET_CONFIGURATION:
+			return L"Configuration";
+		default:
+			return L"";
 	}
 }
 
@@ -75,11 +90,13 @@ bool is_thread_terminate() {
 }
 #else
 static volatile bool is_listener_thread_terminated = false;
-bool is_thread_terminate() {
+
+bool is_thread_terminate () {
 	bool res;
 	res = is_listener_thread_terminated;
 	return res;
 }
+
 #endif
 
 
@@ -94,17 +111,19 @@ void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
 	wprintf(L"\nTerminating listener thread\n");
 }
 #else
-void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
+
+void on_reader_thread_terminate (dxf_connection_t connection, void *user_data) {
 	is_listener_thread_terminated = true;
 	wprintf(L"\nTerminating listener thread\n");
 }
+
 #endif
 
-void print_timestamp(dxf_long_t timestamp){
+void print_timestamp (dxf_long_t timestamp) {
 	wchar_t timefmt[80];
 
-	struct tm * timeinfo;
-	time_t tmpint = (time_t)(timestamp / 1000);
+	struct tm *timeinfo;
+	time_t tmpint = (time_t) (timestamp / 1000);
 	timeinfo = localtime(&tmpint);
 	wcsftime(timefmt, 80, L"%Y%m%d-%H%M%S", timeinfo);
 	wprintf(L"%ls", timefmt);
@@ -112,7 +131,7 @@ void print_timestamp(dxf_long_t timestamp){
 
 /* -------------------------------------------------------------------------- */
 
-void process_last_error() {
+void process_last_error () {
 	int error_code = dx_ec_success;
 	dxf_const_string_t error_descr = NULL;
 	int res;
@@ -126,8 +145,8 @@ void process_last_error() {
 		}
 
 		wprintf(L"Error occurred and successfully retrieved:\n"
-			L"error code = %d, description = \"%ls\"\n",
-			error_code, error_descr);
+		        L"error code = %d, description = \"%ls\"\n",
+		        error_code, error_descr);
 		return;
 	}
 
@@ -136,7 +155,7 @@ void process_last_error() {
 
 /* -------------------------------------------------------------------------- */
 
-dxf_string_t ansi_to_unicode(const char* ansi_str) {
+dxf_string_t ansi_to_unicode (const char *ansi_str) {
 #ifdef _WIN32
 	size_t len = strlen(ansi_str);
 	dxf_string_t wide_str = NULL;
@@ -154,7 +173,7 @@ dxf_string_t ansi_to_unicode(const char* ansi_str) {
 	dxf_string_t wide_str = NULL;
 	size_t wide_size = mbstowcs(NULL, ansi_str, 0); // 0 is ignored
 
-	if (wide_size > 0 && wide_size != (size_t)-1) {
+	if (wide_size > 0 && wide_size != (size_t) -1) {
 		wide_str = calloc(wide_size + 1, sizeof(dxf_char_t));
 		mbstowcs(wide_str, ansi_str, wide_size + 1);
 	}
@@ -165,21 +184,21 @@ dxf_string_t ansi_to_unicode(const char* ansi_str) {
 
 /* -------------------------------------------------------------------------- */
 
-void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
+void listener (const dxf_snapshot_data_ptr_t snapshot_data, void *user_data) {
 	size_t i;
 	size_t records_count = snapshot_data->records_count;
 	int records_print_limit = DEFAULT_RECORDS_PRINT_LIMIT;
 
 	if (user_data) {
-		records_print_limit = *(int*)user_data;
+		records_print_limit = *(int *) user_data;
 	}
 
 	wprintf(L"Snapshot %ls{symbol=%ls, records_count=%zu}\n",
-			dx_event_type_to_string(snapshot_data->event_type), snapshot_data->symbol,
-			records_count);
+	        dx_event_type_to_string(snapshot_data->event_type), snapshot_data->symbol,
+	        records_count);
 
 	if (snapshot_data->event_type == DXF_ET_ORDER) {
-		dxf_order_t* order_records = (dxf_order_t*)snapshot_data->records;
+		dxf_order_t *order_records = (dxf_order_t *) snapshot_data->records;
 		for (i = 0; i < records_count; ++i) {
 			dxf_order_t order = order_records[i];
 
@@ -189,16 +208,16 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
 			}
 
 			wprintf(L"   {index=0x%llX, side=%i, scope=%i, time=",
-				order.index, order.side, order.scope);
+			        order.index, order.side, order.scope);
 			print_timestamp(order.time);
 			wprintf(L", exchange code=%c, market maker=%ls, price=%f, size=%d",
-				order.exchange_code, order.market_maker, order.price, order.size);
+			        order.exchange_code, order.market_maker, order.price, order.size);
 			if (wcslen(order.source) > 0)
 				wprintf(L", source=%ls", order.source);
 			wprintf(L", count=%d}\n", order.count);
 		}
 	} else if (snapshot_data->event_type == DXF_ET_CANDLE) {
-		dxf_candle_t* candle_records = (dxf_candle_t*)snapshot_data->records;
+		dxf_candle_t *candle_records = (dxf_candle_t *) snapshot_data->records;
 		for (i = 0; i < snapshot_data->records_count; ++i) {
 			dxf_candle_t candle = candle_records[i];
 
@@ -210,13 +229,13 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
 			wprintf(L"   {time=");
 			print_timestamp(candle.time);
 			wprintf(L", sequence=%d, count=%f, open=%f, high=%f, low=%f, close=%f, volume=%f, "
-				L"VWAP=%f, bidVolume=%f, askVolume=%f}\n",
-				candle.sequence, candle.count, candle.open, candle.high,
-				candle.low, candle.close, candle.volume, candle.vwap,
-				candle.bid_volume, candle.ask_volume);
+			        L"VWAP=%f, bidVolume=%f, askVolume=%f}\n",
+			        candle.sequence, candle.count, candle.open, candle.high,
+			        candle.low, candle.close, candle.volume, candle.vwap,
+			        candle.bid_volume, candle.ask_volume);
 		}
 	} else if (snapshot_data->event_type == DXF_ET_SPREAD_ORDER) {
-		dxf_order_t* order_records = (dxf_order_t*)snapshot_data->records;
+		dxf_order_t *order_records = (dxf_order_t *) snapshot_data->records;
 		for (i = 0; i < records_count; ++i) {
 			dxf_order_t order = order_records[i];
 
@@ -226,17 +245,17 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
 			}
 
 			wprintf(L"   {index=0x%llX, side=%i, scope=%i, time=",
-				order.index, order.side, order.scope);
+			        order.index, order.side, order.scope);
 			print_timestamp(order.time);
 			wprintf(L", sequence=%i, exchange code=%c, price=%f, size=%d, source=%ls, "
-				L"count=%i, flags=%i, spread symbol=%ls}\n",
-				order.sequence, order.exchange_code, order.price, order.size,
-				wcslen(order.source) > 0 ? order.source : L"",
-				order.count, order.event_flags,
-				wcslen(order.spread_symbol) > 0 ? order.spread_symbol : L"");
+			        L"count=%i, flags=%i, spread symbol=%ls}\n",
+			        order.sequence, order.exchange_code, order.price, order.size,
+			        wcslen(order.source) > 0 ? order.source : L"",
+			        order.count, order.event_flags,
+			        wcslen(order.spread_symbol) > 0 ? order.spread_symbol : L"");
 		}
 	} else if (snapshot_data->event_type == DXF_ET_TIME_AND_SALE) {
-		dxf_time_and_sale_t* time_and_sale_records = (dxf_time_and_sale_t*)snapshot_data->records;
+		dxf_time_and_sale_t *time_and_sale_records = (dxf_time_and_sale_t *) snapshot_data->records;
 		for (i = 0; i < snapshot_data->records_count; ++i) {
 			dxf_time_and_sale_t tns = time_and_sale_records[i];
 
@@ -245,14 +264,15 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
 				break;
 			}
 
-			wprintf(L"   {event id=%"LS(PRId64)L", time=%"LS(PRId64)L", exchange code=%c, price=%f, size=%i, bid price=%f, ask price=%f, "
-				L"exchange sale conditions=\'%ls\', is ETH trade=%ls, type=%i}\n",
-				tns.index, tns.time, tns.exchange_code, tns.price, tns.size,
-				tns.bid_price, tns.ask_price, tns.exchange_sale_conditions,
-				tns.is_eth_trade ? L"True" : L"False", tns.type);
+			wprintf(L"   {event id=%"LS(PRId64)L", time=%"LS(
+					        PRId64)L", exchange code=%c, price=%f, size=%i, bid price=%f, ask price=%f, "
+			        L"exchange sale conditions=\'%ls\', is ETH trade=%ls, type=%i}\n",
+			        tns.index, tns.time, tns.exchange_code, tns.price, tns.size,
+			        tns.bid_price, tns.ask_price, tns.exchange_sale_conditions,
+			        tns.is_eth_trade ? L"True" : L"False", tns.type);
 		}
 	} else if (snapshot_data->event_type == DXF_ET_GREEKS) {
-		dxf_greeks_t* greeks_records = (dxf_greeks_t*)snapshot_data->records;
+		dxf_greeks_t *greeks_records = (dxf_greeks_t *) snapshot_data->records;
 		for (i = 0; i < snapshot_data->records_count; ++i) {
 			dxf_greeks_t grks = greeks_records[i];
 
@@ -264,12 +284,12 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
 			wprintf(L"   {time=");
 			print_timestamp(grks.time);
 			wprintf(L", index=0x%"LS(PRIX64)L", greeks price=%f, volatility=%f, "
-				L"delta=%f, gamma=%f, theta=%f, rho=%f, vega=%f}\n",
-				grks.index, grks.price, grks.volatility, grks.delta,
-				grks.gamma, grks.theta, grks.rho, grks.vega);
+			        L"delta=%f, gamma=%f, theta=%f, rho=%f, vega=%f}\n",
+			        grks.index, grks.price, grks.volatility, grks.delta,
+			        grks.gamma, grks.theta, grks.rho, grks.vega);
 		}
 	} else if (snapshot_data->event_type == DXF_ET_SERIES) {
-		dxf_series_t* series_records = (dxf_series_t*)snapshot_data->records;
+		dxf_series_t *series_records = (dxf_series_t *) snapshot_data->records;
 		for (i = 0; i < snapshot_data->records_count; ++i) {
 			dxf_series_t srs = series_records[i];
 
@@ -280,16 +300,16 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
 			wprintf(L"   {index=%"LS(PRId64)L", time=", srs.index);
 			print_timestamp(srs.time);
 			wprintf(L", sequence=%i, expiration=%d, volatility=%f, put call ratio=%f, "
-					L"forward_price=%f, dividend=%f, interest=%f, index=0x%"LS(PRIX64)L"}\n",
-					srs.sequence, srs.expiration, srs.volatility, srs.put_call_ratio,
-					srs.forward_price, srs.dividend, srs.interest, srs.index);
+			        L"forward_price=%f, dividend=%f, interest=%f, index=0x%"LS(PRIX64)L"}\n",
+			        srs.sequence, srs.expiration, srs.volatility, srs.put_call_ratio,
+			        srs.forward_price, srs.dividend, srs.interest, srs.index);
 		}
 	}
 }
 
 /* -------------------------------------------------------------------------- */
 
-bool atoi2(char* str, int* result) {
+bool atoi2 (char *str, int *result) {
 	if (str == NULL || str[0] == '\0' || result == NULL) {
 		return false;
 	}
@@ -313,30 +333,31 @@ bool atoi2(char* str, int* result) {
 
 /* -------------------------------------------------------------------------- */
 
-int main(int argc, char* argv[]) {
+int main (int argc, char *argv[]) {
 	dxf_connection_t connection;
 	dxf_snapshot_t snapshot;
 	dxf_candle_attributes_t candle_attributes = NULL;
-	char* event_type_name = NULL;
+	char *event_type_name = NULL;
 	dx_event_id_t event_id;
 	dxf_string_t base_symbol = NULL;
-	char* dxfeed_host = NULL;
+	char *dxfeed_host = NULL;
 	dxf_string_t dxfeed_host_u = NULL;
 
 	if (argc < STATIC_PARAMS_COUNT) {
 		printf("DXFeed command line sample.\n"
-			"Usage: SnapshotConsoleSample <server address> <event type> <symbol> [order_source] [" RECORDS_PRINT_LIMIT_SHORT_PARAM " <records_print_limit>] [" TOKEN_PARAM_SHORT_TAG " <token>]\n"
-			"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
-			"  <event type> - The event type, one of the following: ORDER, CANDLE, SPREAD_ORDER,\n"
-			"                 TIME_AND_SALE, GREEKS, SERIES\n"
-			"  <symbol> - The trade symbol, e.g. C, MSFT, YHOO, IBM\n"
-			"  [order_source] - a) source for Order (also can be empty), e.g. NTV, BYX, BZX, DEA,\n"
-			"                      ISE, DEX, IST\n"
-			"                   b) source for MarketMaker, one of following: COMPOSITE_BID or \n"
-			"                      COMPOSITE_ASK\n"
-			"  " RECORDS_PRINT_LIMIT_SHORT_PARAM " <records_print_limit> - The number of displayed records (0 - unlimited, default: " STRINGIFY(DEFAULT_RECORDS_PRINT_LIMIT) ")\n"
-			"  " TOKEN_PARAM_SHORT_TAG " <token> - The authorization token\n"
-			);
+		       "Usage: SnapshotConsoleSample <server address> <event type> <symbol> [order_source] [" RECORDS_PRINT_LIMIT_SHORT_PARAM " <records_print_limit>] [" TOKEN_PARAM_SHORT_TAG " <token>]\n"
+		       "  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
+		       "  <event type> - The event type, one of the following: ORDER, CANDLE, SPREAD_ORDER,\n"
+		       "                 TIME_AND_SALE, GREEKS, SERIES\n"
+		       "  <symbol> - The trade symbol, e.g. C, MSFT, YHOO, IBM\n"
+		       "  [order_source] - a) source for Order (also can be empty), e.g. NTV, BYX, BZX, DEA,\n"
+		       "                      ISE, DEX, IST\n"
+		       "                   b) source for MarketMaker, one of following: COMPOSITE_BID or \n"
+		       "                      COMPOSITE_ASK\n"
+		       "  " RECORDS_PRINT_LIMIT_SHORT_PARAM " <records_print_limit> - The number of displayed records (0 - unlimited, default: " STRINGIFY(
+				       DEFAULT_RECORDS_PRINT_LIMIT) ")\n"
+		       "  " TOKEN_PARAM_SHORT_TAG " <token> - The authorization token\n"
+		);
 
 		return 0;
 	}
@@ -368,9 +389,9 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 
-	char* order_source_ptr = NULL;
+	char *order_source_ptr = NULL;
 	int records_print_limit = DEFAULT_RECORDS_PRINT_LIMIT;
-	char* token = NULL;
+	char *token = NULL;
 
 	if (argc > STATIC_PARAMS_COUNT) {
 		int i = 0;
@@ -415,7 +436,7 @@ int main(int argc, char* argv[]) {
 					return -1;
 				}
 
-				char order_source[MAX_SOURCE_SIZE + 1] = { 0 };
+				char order_source[MAX_SOURCE_SIZE + 1] = {0};
 
 				strcpy(order_source, argv[i]);
 				order_source_ptr = &(order_source[0]);
@@ -450,10 +471,11 @@ int main(int argc, char* argv[]) {
 
 	if (event_id == dx_eid_candle) {
 		if (!dxf_create_candle_symbol_attributes(base_symbol,
-			DXF_CANDLE_EXCHANGE_CODE_ATTRIBUTE_DEFAULT,
-			DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT,
-			dxf_ctpa_day, dxf_cpa_default, dxf_csa_default,
-			dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, &candle_attributes)) {
+		                                         DXF_CANDLE_EXCHANGE_CODE_ATTRIBUTE_DEFAULT,
+		                                         DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT,
+		                                         dxf_ctpa_day, dxf_cpa_default, dxf_csa_default,
+		                                         dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT,
+		                                         &candle_attributes)) {
 
 			process_last_error();
 			dxf_close_connection(connection);
@@ -480,7 +502,7 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
-	if (!dxf_attach_snapshot_listener(snapshot, listener, (void*)&records_print_limit)) {
+	if (!dxf_attach_snapshot_listener(snapshot, listener, (void *) &records_print_limit)) {
 		process_last_error();
 		if (candle_attributes != NULL)
 			dxf_delete_candle_symbol_attributes(candle_attributes);
@@ -497,7 +519,7 @@ int main(int argc, char* argv[]) {
 #endif
 	}
 
-    if (!dxf_close_snapshot(snapshot)) {
+	if (!dxf_close_snapshot(snapshot)) {
 		process_last_error();
 		if (candle_attributes != NULL)
 			dxf_delete_candle_symbol_attributes(candle_attributes);
