@@ -1,3 +1,7 @@
+* [DXFC-136] Fixed error erasure on repeated snapshot creation with same parameters
+  - Changed `dx_perform_common_actions` to use `resetError` flag
+  - Added internal `dx_close_subscription` function to implement `resetError` flag usage
+
 Version 5.9.0
 * Added the ability to override the type of data the application subscribes to
   - Added the API functions: `dxf_create_subscription_with_flags` and `dxf_create_subscription_timed_with_flags` which accept an additional parameter `subscr_flags`.
