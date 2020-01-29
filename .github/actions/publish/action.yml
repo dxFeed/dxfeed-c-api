@@ -13,6 +13,8 @@ inputs:
     description: 'regex for prerelease tag detection'
     default: ''
     required: false
+  notes:
+    description: "release notes"
 runs:
   using: 'docker'
   image: 'Dockerfile'

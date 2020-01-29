@@ -287,12 +287,24 @@ jobs:
           name: ${{ env.WINDOWS_NO_TLS_ARTIFACT }}
           path: downloads/
 
+      - name: Get release notes
+        uses: ./.github/actions/notes
+        id: notes
+        with:
+          file: ReleaseNotes.txt
+
+      - name: Print release notes
+        run: |
+          echo "=== Release notes ============="
+          echo '${{ steps.notes.outputs.data }}'
+
       - name: Publish release
         uses: ./.github/actions/publish
         with:
           args: downloads/
           draft_regex: '[0-9]+.[0-9]+.[0-9]+-[a-zA-Z]+'
           prerelease_regex: '[a-zA-Z]+-[0-9]+.[0-9]+.[0-9]+'
+          notes: '${{ steps.notes.outputs.data }}'
         env:
           RELEASE_PREFIX: ${{ env.RELEASE_PREFIX }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

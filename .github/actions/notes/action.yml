@@ -1,0 +1,17 @@
+# action.yml
+name: 'Release Notes'
+description: 'Gets release notes from file'
+branding:
+  icon: 'upload-cloud'
+  color: 'yellow'
+inputs:
+  file:
+    description: 'file containing release notes'
+    default: ''
+    required: true
+outputs:
+  data:
+    description: 'release notes for current release'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'

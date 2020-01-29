@@ -34,3 +34,22 @@ fi
 
 # recreate release
 ghr -u "${GITHUB_REPOSITORY%/*}" -r "${GITHUB_REPOSITORY#*/}" $DRAFT_ARG $PRERELEASE_ARG -replace -delete -n "$RELEASE_TITLE" "$TAG" $@
+
+#
+# update release notes
+#
+if [ -n "${INPUT_NOTES}" ]; then
+    echo "--- json ------------------------------------------"
+    DATA=$(jq -n --arg message "$INPUT_NOTES" '{"body":$message}')
+    echo "$DATA"
+
+    RELEASE_ID=$(curl --silent -X 'GET' https://api.github.com/repos/${GITHUB_REPOSITORY%/*}/${GITHUB_REPOSITORY#*/}/releases/tags/${TAG} | jq ".id")
+    echo "RELEASE_ID: $RELEASE_ID"
+
+    echo "API URL: https://api.github.com/repos/${GITHUB_REPOSITORY%/*}/${GITHUB_REPOSITORY#*/}/releases/$RELEASE_ID?access_token=${GITHUB_TOKEN}"
+    curl --silent -X 'PATCH' https://api.github.com/repos/${GITHUB_REPOSITORY%/*}/${GITHUB_REPOSITORY#*/}/releases/$RELEASE_ID?access_token=${GITHUB_TOKEN} -d "$DATA"
+else
+  echo ""
+  echo "Release notes not found for $TAG. Won't update release description."
+  echo ""
+fi
