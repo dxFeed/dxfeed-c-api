@@ -480,6 +480,20 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
+    dxf_snapshot_t snapshot2;
+    if (!dxf_create_snapshot(connection, event_id, base_symbol, NULL, 0, &snapshot2)) {
+        wprintf(L"could not create second snapshot!\n");
+        process_last_error();
+        int error_code;
+        dxf_get_last_error(&error_code, NULL);
+        if (error_code != dx_ssec_snapshot_exist) {
+            dxf_close_connection(connection);
+            return -1;
+        } else {
+            snapshot2 = NULL;
+        }
+    }
+
 	if (!dxf_attach_snapshot_listener(snapshot, listener, (void*)&records_print_limit)) {
 		process_last_error();
 		if (candle_attributes != NULL)
@@ -487,6 +501,14 @@ int main(int argc, char* argv[]) {
 		dxf_close_connection(connection);
 		return -1;
 	};
+
+    if (NULL != snapshot2 && !dxf_attach_snapshot_listener(snapshot2, listener, (void*)&records_print_limit)) {
+        process_last_error();
+        dxf_close_connection(connection);
+        wprintf(L"could not attach to second snapshot listener!\n");
+        return -1;
+    }
+
 	wprintf(L"Subscription successful!\n");
 
 	while (!is_thread_terminate()) {
@@ -497,7 +519,14 @@ int main(int argc, char* argv[]) {
 #endif
 	}
 
-	if (!dxf_close_snapshot(snapshot)) {
+    if (NULL != snapshot2 && !dxf_close_snapshot(snapshot2)) {
+        process_last_error();
+        dxf_close_connection(connection);
+        wprintf(L"could not close second snapshot!\n");
+        return -1;
+    }
+
+    if (!dxf_close_snapshot(snapshot)) {
 		process_last_error();
 		if (candle_attributes != NULL)
 			dxf_delete_candle_symbol_attributes(candle_attributes);
