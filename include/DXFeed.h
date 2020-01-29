@@ -458,7 +458,7 @@ DXFEED_API ERRORCODE dxf_create_subscription_timed_with_flags(dxf_connection_t c
  *
  * @brief Closes a subscription.
  *
- * @details All the data associated with it will be disposed.
+ * @details All the data associated with it will be disposed. As a side-effect, API error is reset.
  *
  * @param[in] subscription A handle of the subscription to close
  *
