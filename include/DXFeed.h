@@ -110,10 +110,6 @@
 
 #include "DXTypes.h"
 #include "EventData.h"
-#include "../src/PrimitiveTypes.h"
-
-#define DX_KEEP_ERROR  false
-#define DX_RESET_ERROR true
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -470,22 +466,6 @@ DXFEED_API ERRORCODE dxf_create_subscription_timed_with_flags(dxf_connection_t c
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
  */
 DXFEED_API ERRORCODE dxf_close_subscription (dxf_subscription_t subscription);
-
-/**
- * @ingroup c-api-basic-subscription-functions
- *
- * @brief Closes a subscription.
- *
- * @details All the data associated with it will be disposed. As a side-effect API error either kept, or reset
- *          (according to resetError flag).
- *
- * @param[in] subscription A handle of the subscription to close
- * @param[in] resetError   boolean flag indicating the need of error reset {DX_KEEP_ERROR | DX_RESET_ERROR}
- *
- * @return {@link DXF_SUCCESS} on successful subscription closure or {@link DXF_FAILURE} on error;
- *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
- */
-DXFEED_API ERRORCODE dxf_close_subscription_ex (dxf_subscription_t subscription, bool resetError);
 
 /**
  * @ingroup c-api-symbol-subscription-functions

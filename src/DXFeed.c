@@ -38,6 +38,9 @@
 #include "PriceLevelBook.h"
 #include "RegionalBook.h"
 
+#define DX_KEEP_ERROR  false
+#define DX_RESET_ERROR true
+
 static dxf_const_string_t wildcard_symbol = L"*";
 
 /* -------------------------------------------------------------------------- */
@@ -179,6 +182,39 @@ static ERRORCODE dx_init_codec() {
 		}
 	}
 	return DXF_SUCCESS;
+}
+
+/* -------------------------------------------------------------------------- */
+
+ERRORCODE dx_close_subscription (dxf_subscription_t subscription, bool resetError) {
+    dxf_connection_t connection;
+    int events;
+
+    dxf_const_string_t* symbols;
+    size_t symbol_count;
+    dx_event_subscr_flag subscr_flags;
+    dxf_long_t time;
+
+    dx_perform_common_actions(resetError);
+
+    if (subscription == dx_invalid_subscription) {
+        dx_set_error_code(dx_ec_invalid_func_param);
+
+        return DXF_FAILURE;
+    }
+
+    if (!dx_get_subscription_connection(subscription, &connection) ||
+        !dx_get_event_subscription_event_types(subscription, &events) ||
+        !dx_get_event_subscription_symbols(subscription, &symbols, &symbol_count) ||
+        !dx_get_event_subscription_flags(subscription, &subscr_flags) ||
+        !dx_get_event_subscription_time(subscription, &time) ||
+        !dx_unsubscribe(connection, dx_get_order_source(subscription), symbols, symbol_count, events, subscr_flags, time) ||
+        !dx_close_event_subscription(subscription)) {
+
+        return DXF_FAILURE;
+    }
+
+    return DXF_SUCCESS;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -409,38 +445,7 @@ DXFEED_API ERRORCODE dxf_create_subscription_timed_with_flags(dxf_connection_t c
 }
 
 DXFEED_API ERRORCODE dxf_close_subscription (dxf_subscription_t subscription) {
-    return dxf_close_subscription_ex(subscription, DX_RESET_ERROR);
-}
-
-DXFEED_API ERRORCODE dxf_close_subscription_ex (dxf_subscription_t subscription, bool resetError) {
-    dxf_connection_t connection;
-    int events;
-
-    dxf_const_string_t* symbols;
-    size_t symbol_count;
-    dx_event_subscr_flag subscr_flags;
-    dxf_long_t time;
-
-    dx_perform_common_actions(resetError);
-
-    if (subscription == dx_invalid_subscription) {
-        dx_set_error_code(dx_ec_invalid_func_param);
-
-        return DXF_FAILURE;
-    }
-
-    if (!dx_get_subscription_connection(subscription, &connection) ||
-        !dx_get_event_subscription_event_types(subscription, &events) ||
-        !dx_get_event_subscription_symbols(subscription, &symbols, &symbol_count) ||
-        !dx_get_event_subscription_flags(subscription, &subscr_flags) ||
-        !dx_get_event_subscription_time(subscription, &time) ||
-        !dx_unsubscribe(connection, dx_get_order_source(subscription), symbols, symbol_count, events, subscr_flags, time) ||
-        !dx_close_event_subscription(subscription)) {
-
-        return DXF_FAILURE;
-    }
-
-    return DXF_SUCCESS;
+    return dx_close_subscription(subscription, DX_RESET_ERROR);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -960,7 +965,7 @@ ERRORCODE dxf_create_snapshot_impl(dxf_connection_t connection, dx_event_id_t ev
 	*snapshot = dx_create_snapshot(connection, subscription, event_id, record_info_id,
 		symbol, order_source_value, time);
 	if (*snapshot == dx_invalid_snapshot) {
-        dxf_close_subscription_ex(subscription, DX_KEEP_ERROR);
+        dx_close_subscription(subscription, DX_KEEP_ERROR);
 		return DXF_FAILURE;
 	}
 
