@@ -35,6 +35,7 @@ add_subdirectory(tests/PriceLevelBookSample)
 add_subdirectory(tests/RegionalBookSample)
 add_subdirectory(tests/SnapshotConsoleSample)
 add_subdirectory(tests/IncSnapshotConsoleSample)
+add_subdirectory(tests/HashMapTest)
 
 if (WIN32 AND MSVC)
     add_subdirectory(wrappers/COM/src)

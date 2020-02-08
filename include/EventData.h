@@ -513,7 +513,8 @@ typedef dxf_ulong_t dxf_time_int_field_t;
 typedef struct {
     dxf_event_flags_t flags;
     dxf_time_int_field_t time_int_field;
-    dxf_ulong_t snapshot_key;
+//    dxf_ulong_t snapshot_key;
+    char *snapshot_key;
 } dxf_event_params_t;
 
 /* -------------------------------------------------------------------------- */

@@ -509,6 +509,18 @@ int main (int argc, char *argv[]) {
 		dxf_close_connection(connection);
 		return -1;
 	};
+
+        dxf_snapshot_t snapshot2;
+        if (!dxf_create_snapshot(connection, event_id, base_symbol, NULL, 0, &snapshot2)) {
+              process_last_error();
+              int code;
+              dxf_get_last_error(&code, NULL);
+              if (code != dx_ssec_snapshot_exist) {
+                    dxf_close_connection(connection);
+                    return -1;
+              }
+        }
+
 	wprintf(L"Subscription successful!\n");
 
 	while (!is_thread_terminate()) {

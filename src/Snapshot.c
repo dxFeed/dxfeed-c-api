@@ -17,6 +17,7 @@
  *
  */
 
+#include <wchar.h>
 #include "ConnectionContextData.h"
 #include "DXAlgorithms.h"
 #include "DXErrorCodes.h"
@@ -26,6 +27,7 @@
 #include "EventSubscription.h"
 #include "Logger.h"
 #include "Snapshot.h"
+#include "map.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -87,7 +89,8 @@ typedef struct {
 typedef struct {
 	dx_mutex_t guard;
 
-	dxf_ulong_t key;
+//	dxf_ulong_t key;
+	char *key;
 	dxf_subscription_t subscription;
 	dx_record_info_id_t record_info_id;
 	dx_event_id_t event_id;
@@ -111,11 +114,13 @@ typedef struct {
  * Use DX_ARRAY_BINARY_SEARCH with dx_snapshot_comparator for searching elements and before
  * inserting new once
  */
-typedef struct {
-	dx_snapshot_data_ptr_t* elements;
-	size_t size;
-	size_t capacity;
-} dx_snapshots_data_array_t;
+//typedef struct {
+//	dx_snapshot_data_ptr_t* elements;
+//	size_t size;
+//	size_t capacity;
+//} dx_snapshots_data_array_t;
+
+typedef map_t_ext(char*, dx_snapshot_data_ptr_t*) dx_snapshots_data_map_t;
 
 const dxf_snapshot_t dx_invalid_snapshot = (dxf_snapshot_t)NULL;
 
@@ -132,7 +137,8 @@ const dxf_snapshot_t dx_invalid_snapshot = (dxf_snapshot_t)NULL;
 typedef struct {
 	dxf_connection_t connection;
 	dx_mutex_t guard;
-	dx_snapshots_data_array_t snapshots_array;
+//	dx_snapshots_data_array_t snapshots_array;
+        dx_snapshots_data_map_t snapshots_map;
 	int fields_flags;
 } dx_snapshot_subscription_connection_context_t;
 
@@ -198,24 +204,36 @@ DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_snapshot_subscription) {
 /* -------------------------------------------------------------------------- */
 
 bool dx_clear_snapshot_subscription_connection_context(dx_snapshot_subscription_connection_context_t* context) {
-	bool res = true;
-	size_t i = 0;
 
-	for (; i < context->snapshots_array.size; ++i) {
-		res = dx_free_snapshot_data((dx_snapshot_data_t*)context->snapshots_array.elements[i]) && res;
-	}
+    bool res = true;
+    map_iter_t iter = map_iter(&(context->snapshots_map));
+    char *key;
+    while ((key = map_next_(&(context->snapshots_map), &iter))) {
+      dx_snapshot_data_ptr_t *value = *map_get(&(context->snapshots_map), key);
+      if (NULL != value)
+        res = dx_free_snapshot_data(value) && res;
+    }
 
-	if (IS_FLAG_SET(context->fields_flags, GUARD_FIELD_FLAG)) {
-		res = dx_mutex_destroy(&(context->guard)) && res;
-	}
+    if (IS_FLAG_SET(context->fields_flags, GUARD_FIELD_FLAG)) {
+      res = dx_mutex_destroy(&(context->guard)) && res;
+    }
 
-	if (context->snapshots_array.elements != NULL) {
-		dx_free(context->snapshots_array.elements);
-	}
+    map_deinit(&(context->snapshots_map));
+    dx_free(context);
+    return res;
 
-	dx_free(context);
-
-	return res;
+//	size_t i = 0;
+//	for (; i < context->snapshots_array.size; ++i) {
+//		res = dx_free_snapshot_data((dx_snapshot_data_t*)context->snapshots_array.elements[i]) && res;
+//	}
+//	if (IS_FLAG_SET(context->fields_flags, GUARD_FIELD_FLAG)) {
+//		res = dx_mutex_destroy(&(context->guard)) && res;
+//	}
+//	if (context->snapshots_array.elements != NULL) {
+//		dx_free(context->snapshots_array.elements);
+//	}
+//	dx_free(context);
+//	return res;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -574,7 +592,8 @@ bool dx_is_snapshot_event(const dx_snapshot_data_ptr_t snapshot_data, int event_
 						const dxf_event_params_t* event_params,
 						const dxf_event_data_t event_row) {
 	// comparing by snapshot key
-	return snapshot_data->key == event_params->snapshot_key;
+//	return snapshot_data->key == event_params->snapshot_key;
+        return (strcmp(snapshot_data->key, event_params->snapshot_key) == 0);
 }
 
 
@@ -665,17 +684,56 @@ void event_listener(int event_type, dxf_const_string_t symbol_name,
  * order_source - source for Order records or keyword for MarketMaker; can be NULL also
  * returns 64 bit unsigned decimal
  */
-dxf_ulong_t dx_new_snapshot_key(dx_record_info_id_t record_info_id, dxf_const_string_t symbol,
-								dxf_const_string_t order_source) {
-	dxf_int_t symbol_hash = dx_symbol_name_hasher(symbol);
-	dxf_int_t order_source_hash = (order_source == NULL ? 0 : dx_symbol_name_hasher(order_source));
-	return ((dxf_ulong_t)record_info_id << 56) |
-		((dxf_ulong_t)symbol_hash << 24) |
-		(order_source_hash & SNAPSHOT_KEY_SOURCE_MASK);
-}
+//dxf_ulong_t dx_new_snapshot_key(dx_record_info_id_t record_info_id, dxf_const_string_t symbol,
+//								dxf_const_string_t order_source) {
+//	dxf_int_t symbol_hash = dx_symbol_name_hasher(symbol);
+//	dxf_int_t order_source_hash = (order_source == NULL ? 0 : dx_symbol_name_hasher(order_source));
+//	return ((dxf_ulong_t)record_info_id << 56) |
+//		((dxf_ulong_t)symbol_hash << 24) |
+//		(order_source_hash & SNAPSHOT_KEY_SOURCE_MASK);
+//}
 
-int dx_snapshots_comparator(dx_snapshot_data_ptr_t s1, dx_snapshot_data_ptr_t s2) {
-	return DX_NUMERIC_COMPARATOR(s1->key, s2->key);
+//int dx_snapshots_comparator(dx_snapshot_data_ptr_t s1, dx_snapshot_data_ptr_t s2) {
+//	return DX_NUMERIC_COMPARATOR(s1->key, s2->key);
+//}
+char* dx_wstr_to_str(dxf_string_t input) {
+    char s[1024];
+    if (NULL == input)
+      return NULL;
+    size_t len = wcstombs(s, input, sizeof(s));
+    if (len > 0) {
+      s[len] = '\0';
+      printf("converted string: %s\n", s);
+      return strdup(s);
+    } else {
+      return NULL;
+    }
+}
+char* dx_new_snapshot_key(dx_record_info_id_t record_info_id, dxf_const_string_t symbol,
+                          dxf_const_string_t order_source) {
+
+    char *s = dx_wstr_to_str(symbol);
+    char *o = dx_wstr_to_str(order_source);
+
+    char n[64];
+    snprintf(n, 64, "%d\0", record_info_id);
+
+    char *key;
+
+    if (NULL == o) {
+      key = malloc(sizeof(char) * (strlen(s) + strlen(n) + 1));
+      sprintf(key, "%s%s\0", n, s);
+    } else {
+      key = malloc(sizeof(char) * (strlen(s) + strlen(n) + strlen(o) + 1));
+      sprintf(key, "%s%s%s\0", n, s, o);
+    }
+
+    if (s)
+      free(s);
+    if (o)
+      free(o);
+
+    return key;
 }
 
 void dx_clear_snapshot_listener_array(dx_snapshot_listener_array_t* listeners) {
@@ -718,6 +776,8 @@ bool dx_free_snapshot_data(dx_snapshot_data_ptr_t snapshot_data) {
 		dx_free(snapshot_data->symbol);
 	if (snapshot_data->order_source != NULL)
 		dx_free(snapshot_data->order_source);
+
+        dx_free(snapshot_data->key);
 
 	dx_mutex_destroy(&snapshot_data->guard);
 	dx_free(snapshot_data);
@@ -793,22 +853,24 @@ dxf_snapshot_t dx_create_snapshot(dxf_connection_t connection,
 		return dx_invalid_snapshot;
 	}
 
-	if (context->snapshots_array.size > 0) {
-		DX_ARRAY_BINARY_SEARCH(context->snapshots_array.elements, 0, context->snapshots_array.size,
-			snapshot_data, dx_snapshots_comparator, found, position);
-		if (found) {
-			dx_free_snapshot_data(snapshot_data);
+//	if (context->snapshots_array.size > 0) {
+//		DX_ARRAY_BINARY_SEARCH(context->snapshots_array.elements, 0, context->snapshots_array.size,
+//			snapshot_data, dx_snapshots_comparator, found, position);
+//		if (found) {
+                if (NULL != map_get(&(context->snapshots_map), snapshot_data->key)) {
+                        dx_free_snapshot_data(snapshot_data);
 			dx_set_error_code(dx_ssec_snapshot_exist);
 			dx_mutex_unlock(&(context->guard));
 			return dx_invalid_snapshot;
 		}
-	}
+//	}
 
 	/* add snapshot to array */
-	DX_ARRAY_INSERT(context->snapshots_array, dx_snapshot_data_ptr_t, snapshot_data, position,
-		dx_capacity_manager_halfer, failed);
-	if (failed) {
-		dx_free_snapshot_data(snapshot_data);
+//	DX_ARRAY_INSERT(context->snapshots_array, dx_snapshot_data_ptr_t, snapshot_data, position,
+//		dx_capacity_manager_halfer, failed);
+//	if (failed) {
+        if (map_set(&(context->snapshots_map), snapshot_data->key, snapshot_data) < 0) {
+                dx_free_snapshot_data(snapshot_data);
 		snapshot_data = dx_invalid_snapshot;
 	}
 
@@ -833,14 +895,17 @@ bool dx_close_snapshot(dxf_snapshot_t snapshot) {
 	CHECKED_CALL(dx_mutex_lock, &(context->guard));
 
 	/* remove item from snapshots_array */
-	DX_ARRAY_BINARY_SEARCH(context->snapshots_array.elements, 0, context->snapshots_array.size,
-		snapshot_data, dx_snapshots_comparator, found, position);
-	if (found) {
-		DX_ARRAY_DELETE(context->snapshots_array, dx_snapshot_data_ptr_t, position,
-			dx_capacity_manager_halfer, failed);
-		if (failed) {
-			dx_set_error_code(dx_mec_insufficient_memory);
-		}
+//	DX_ARRAY_BINARY_SEARCH(context->snapshots_array.elements, 0, context->snapshots_array.size,
+//		snapshot_data, dx_snapshots_comparator, found, position);
+        dx_snapshot_data_ptr_t cached_snapshot = map_get(&(context->snapshots_map), snapshot_data->key);
+//	if (found) {
+        if (NULL != cached_snapshot) {
+//		DX_ARRAY_DELETE(context->snapshots_array, dx_snapshot_data_ptr_t, position,
+//			dx_capacity_manager_halfer, failed);
+//		if (failed) {
+//			dx_set_error_code(dx_mec_insufficient_memory);
+//		}
+                map_remove(&(context->snapshots_map), snapshot_data->key);
 		dx_free_snapshot_data(snapshot_data);
 		dx_mutex_unlock(&(context->guard));
 		return !failed;
