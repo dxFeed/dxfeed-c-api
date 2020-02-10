@@ -703,7 +703,7 @@ char* dx_wstr_to_str(dxf_string_t input) {
     size_t len = wcstombs(s, input, sizeof(s));
     if (len > 0) {
       s[len] = '\0';
-      printf("converted string: %s\n", s);
+//      printf("converted string: %s\n", s);
       return strdup(s);
     } else {
       return NULL;

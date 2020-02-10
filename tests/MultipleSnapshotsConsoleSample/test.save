@@ -1,0 +1,22 @@
+    a) `Snapshot.c : dx_create_snapshot`
+        - проверяет, что такой snapshot уже есть, устанавливает error code (`g_master_thread_last_error_code`) в `dx_ssec_snapshot_exist` и возвращает невалидный snapshot
+
+    b) `DXFeed.c : dxf_create_snapshot_impl`
+        - получив невалидный snapshot, закрывает подписку и возвращает ошибку
+
+    c) `DXFeed.c : dxf_close_subscription`
+        - вызывает `dx_perform_common_actions() -> dx_pop_last_error()`
+
+    d) `DXErrorHandling.c : dx_pop_last_error`
+        - сбрасывает ошибку в `dx_ec_success`
+
+    e)  По-финалу в клиентском коде имеем:
+        - ошибка вызова `dxf_create_snapshot`
+        - `dx_ec_success` в коде ошибки
+        таким образом, отрабатывается эта ветка:
+        ```
+            process_last_error();
+            dxf_close_connection(connection);
+            return -1;
+        ```
+        А, т.к. ошибка сброшена в `dx_pop_last_error` информации о произошедшем у нас нет
