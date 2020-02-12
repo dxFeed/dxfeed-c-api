@@ -297,6 +297,12 @@ target_link_libraries(${PROJECT} PRIVATE ${ADDITIONAL_LIBRARIES})
 
 if (WIN32)
     set_target_properties(${PROJECT} PROPERTIES PREFIX "")
+elseif(MACOSX)
+    set_target_properties(
+            ${PROJECT}
+            PROPERTIES
+            INSTALL_RPATH "@executable_path/."
+    )
 endif ()
 
 if (NOT DISABLE_TLS)
