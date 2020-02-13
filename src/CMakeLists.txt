@@ -16,6 +16,11 @@ set(LIB_TLS ${CMAKE_CURRENT_SOURCE_DIR}/../lib/libressl)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED on)
 
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set(MACOSX TRUE)
+    add_definitions(-DMACOSX)
+endif()
+
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(POSTFIX "d")
 endif ()
@@ -220,6 +225,31 @@ if (WIN32)
     else ()
         message("Unknown compiler")
     endif ()
+elseif(MACOSX)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pedantic")
+    set(CMAKE_C_FLAGS_DEBUG "-g -O0 -fPIC")
+    set(CMAKE_C_FLAGS_RELEASE "-O2 -fPIC")
+    add_definitions(-DUSE_PTHREADS)
+    set(SOURCE_FILES
+            ${SOURCE_FILES}
+            Linux.c
+            )
+    set(ALL_SOURCES
+            ${ALL_SOURCES}
+            Linux.c
+            )
+    set(ADDITIONAL_LIBRARIES
+            ${ADDITIONAL_LIBRARIES}
+            pthread
+            )
+    if (NOT DISABLE_TLS)
+        link_directories(${LIB_TLS}/mac/${TARGET_PLATFORM})
+        set(ADDITIONAL_LIBRARIES
+                ${ADDITIONAL_LIBRARIES}
+                tls ssl crypto
+#                tls
+                )
+    endif (NOT DISABLE_TLS)
 else ()
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pedantic")
     set(CMAKE_C_FLAGS_DEBUG "-g -O0 -fPIC")
@@ -267,6 +297,12 @@ target_link_libraries(${PROJECT} PRIVATE ${ADDITIONAL_LIBRARIES})
 
 if (WIN32)
     set_target_properties(${PROJECT} PROPERTIES PREFIX "")
+elseif(MACOSX)
+    set_target_properties(
+            ${PROJECT}
+            PROPERTIES
+            INSTALL_RPATH "@executable_path/."
+    )
 endif ()
 
 if (NOT DISABLE_TLS)
@@ -277,6 +313,23 @@ if (NOT DISABLE_TLS)
             COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/${TARGET_PLATFORM}/libtls-15${PLATFORM_POSTFIX}.dll ${CMAKE_BINARY_DIR}/$(Configuration)
             COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/${TARGET_PLATFORM}/libssl-43${PLATFORM_POSTFIX}.dll ${CMAKE_BINARY_DIR}/$(Configuration)
             COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/${TARGET_PLATFORM}/libcrypto-41${PLATFORM_POSTFIX}.dll ${CMAKE_BINARY_DIR}/$(Configuration)
+        )
+    elseif(MACOSX)
+        ADD_CUSTOM_COMMAND(
+                TARGET ${PROJECT}
+                POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libcrypto.46.0.0.dylib ${CMAKE_BINARY_DIR}/$(Configuration)
+                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libcrypto.46.dylib ${CMAKE_BINARY_DIR}/$(Configuration)
+                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libcrypto.a ${CMAKE_BINARY_DIR}/$(Configuration)
+                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libcrypto.dylib ${CMAKE_BINARY_DIR}/$(Configuration)
+                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libssl.48.0.0.dylib ${CMAKE_BINARY_DIR}/$(Configuration)
+                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libssl.48.dylib ${CMAKE_BINARY_DIR}/$(Configuration)
+                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libssl.a ${CMAKE_BINARY_DIR}/$(Configuration)
+                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libssl.dylib ${CMAKE_BINARY_DIR}/$(Configuration)
+                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libtls.20.0.0.dylib ${CMAKE_BINARY_DIR}/$(Configuration)
+                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libtls.20.dylib ${CMAKE_BINARY_DIR}/$(Configuration)
+                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libtls.a ${CMAKE_BINARY_DIR}/$(Configuration)
+                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libtls.dylib ${CMAKE_BINARY_DIR}/$(Configuration)
         )
     else ()
         ADD_CUSTOM_COMMAND(
@@ -318,6 +371,22 @@ if (NOT DISABLE_TLS)
             "${LIB_TLS}/${TARGET_PLATFORM}/libcrypto-41${PLATFORM_POSTFIX}.dll"
             DESTINATION "bin/${TARGET_PLATFORM}"
             )
+    elseif (MACOSX)
+        install(FILES
+                "${LIB_TLS}/mac/${TARGET_PLATFORM}/libcrypto.46.0.0.dylib"
+                "${LIB_TLS}/mac/${TARGET_PLATFORM}/libcrypto.46.dylib"
+                "${LIB_TLS}/mac/${TARGET_PLATFORM}/libcrypto.a"
+                "${LIB_TLS}/mac/${TARGET_PLATFORM}/libcrypto.dylib"
+                "${LIB_TLS}/mac/${TARGET_PLATFORM}/libssl.48.0.0.dylib"
+                "${LIB_TLS}/mac/${TARGET_PLATFORM}/libssl.48.dylib"
+                "${LIB_TLS}/mac/${TARGET_PLATFORM}/libssl.a"
+                "${LIB_TLS}/mac/${TARGET_PLATFORM}/libssl.dylib"
+                "${LIB_TLS}/mac/${TARGET_PLATFORM}/libtls.20.0.0.dylib"
+                "${LIB_TLS}/mac/${TARGET_PLATFORM}/libtls.20.dylib"
+                "${LIB_TLS}/mac/${TARGET_PLATFORM}/libtls.a"
+                "${LIB_TLS}/mac/${TARGET_PLATFORM}/libtls.dylib"
+                DESTINATION "bin/${TARGET_PLATFORM}"
+                )
     else ()
         install(FILES
             "${LIB_TLS}/nix/${TARGET_PLATFORM}/libtls.so.15.4.0"
