@@ -403,9 +403,7 @@ bool atoi2 (char *str, int *result) {
 
 dxf_connection_t connection;
 struct Node *symbols_list = NULL;
-//struct Node *snapshots_list = NULL;
-//struct Node *candle_attributes_list = NULL;
-dxf_snapshot_t          *snapshots ;
+dxf_snapshot_t          *snapshots;
 dxf_candle_attributes_t *candle_attributes;
 
 int process_exit(int exit_code) {
@@ -429,19 +427,7 @@ int process_exit(int exit_code) {
     n = n->next;
   }
 
-//  list_free(snapshots_list);
-//
-//  n = candle_attributes_list;
-//  while (n != NULL) {
-//    void *candle_attributes = n->data;
-//    if (!dxf_delete_candle_symbol_attributes(&candle_attributes)) {
-//      process_last_error();
-//    }
-//    n = n->next;
-//  }
-//  list_free(candle_attributes_list);
-//
-//  list_free(symbols_list);
+  list_free(symbols_list);
 
   if (NULL != connection) {
     if (!dxf_close_connection(connection)) {

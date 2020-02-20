@@ -523,7 +523,8 @@ int main (int argc, char *argv[]) {
 
 	wprintf(L"Subscription successful!\n");
 
-	while (!is_thread_terminate()) {
+        int i = 0;
+	while (!is_thread_terminate() && i++ < 10) {
 #ifdef _WIN32
 		Sleep(100);
 #else

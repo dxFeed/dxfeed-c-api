@@ -1164,10 +1164,13 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 
 			dx_free_buffers(context->rbcc);
 
+			dx_free(event_params.snapshot_key);
+
 			return false;
 		}
 
 		dx_free_buffers(context->rbcc);
+                dx_free(event_params.snapshot_key);
 	}
 
 	return true;

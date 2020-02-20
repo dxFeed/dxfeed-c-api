@@ -716,21 +716,26 @@ char* dx_new_snapshot_key(dx_record_info_id_t record_info_id, dxf_const_string_t
     char *o = dx_wstr_to_str(order_source);
 
     char n[64];
-    snprintf(n, 64, "%d\0", record_info_id);
+    snprintf(n, 64, "%d", record_info_id);
 
     char *key;
 
+    size_t size;
     if (NULL == o) {
-      key = malloc(sizeof(char) * (strlen(s) + strlen(n) + 1));
-      sprintf(key, "%s%s\0", n, s);
+      size = sizeof(char) * (strlen(s) + strlen(n));
+      key = malloc(size);
+      memset(key, 0, size);
+      sprintf(key, "%s%s", n, s);
     } else {
-      key = malloc(sizeof(char) * (strlen(s) + strlen(n) + strlen(o) + 1));
-      sprintf(key, "%s%s%s\0", n, s, o);
+      size = sizeof(char) * (strlen(s) + strlen(n) + strlen(o));
+      key = malloc(size);
+      memset(key, 0, size);
+      sprintf(key, "%s%s%s", n, s, o);
     }
 
-    if (s)
+    if (NULL != s)
       free(s);
-    if (o)
+    if (NULL != o)
       free(o);
 
     return key;
