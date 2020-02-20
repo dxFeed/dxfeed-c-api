@@ -28,7 +28,7 @@ void test_strgen() {
 #include "DXFeed.h"
 #include "DXErrorCodes.h"
 #define MAX_STR_LEN 250
-#define MAX_ITEMS_AMOUNT 30000000
+#define MAX_ITEMS_AMOUNT 300000
 typedef struct {
 	char *key;
 	char *value;
@@ -93,6 +93,8 @@ void map_test() {
                 addCount++;
 		s1 = strgen(key);
 	} while (strcmp(s1, "ZZZZZZ") != 0 && addCount < MAX_ITEMS_AMOUNT);
+        free(s1);
+        free(key);
 
 	t = clock() - t;
 	double time_taken = ((double)t)/CLOCKS_PER_SEC;
@@ -142,6 +144,8 @@ void map_test() {
                 }
                 s1 = strgen(key);
 	} while (ref && strcmp(s1, "ZZZZZZ") != 0 && getCount < addCount);
+        free(s1);
+        free(key);
 
         ref = map_get(&m, key);
         if (ref) {
@@ -208,6 +212,7 @@ char* dx_wchar_to_char(wchar_t *input) {
 	}
 
 }
+
 void char_test() {
 	char *c;
 
@@ -226,143 +231,6 @@ void char_test() {
 }
 // --------------------------------------------------------------------------
 
-int snapshot_test(int argc, char *argv[], char *inputFileName) {
-    struct Node *symbols = readFile(inputFileName);
-//    list_print(list);
-
-    dxf_connection_t connection;
-    dxf_candle_attributes_t candle_attributes = NULL;
-    char *event_type_name = NULL;
-    dx_event_id_t event_id;
-    dxf_string_t base_symbol = NULL;
-    char *dxfeed_host = NULL;
-    dxf_string_t dxfeed_host_u = NULL;
-
-    dxf_initialize_logger("snapshot-console-api.log", true, true, true);
-
-    dxfeed_host = argv[1];
-    event_type_name = argv[2];
-    if (stricmp(event_type_name, "ORDER") == 0) {
-    event_id = dx_eid_order;
-    } else if (stricmp(event_type_name, "CANDLE") == 0) {
-        event_id = dx_eid_candle;
-    } else if (stricmp(event_type_name, "SPREAD_ORDER") == 0) {
-        event_id = dx_eid_spread_order;
-    } else if (stricmp(event_type_name, "TIME_AND_SALE") == 0) {
-        event_id = dx_eid_time_and_sale;
-    } else if (stricmp(event_type_name, "GREEKS") == 0) {
-        event_id = dx_eid_greeks;
-    } else if (stricmp(event_type_name, "SERIES") == 0) {
-        event_id = dx_eid_series;
-    } else {
-        wprintf(L"Unknown event type.\n");
-        return -1;
-    }
-
-    char *order_source_ptr = NULL;
-    int records_print_limit = DEFAULT_RECORDS_PRINT_LIMIT;
-    char *token = NULL;
-
-    if (argc > STATIC_PARAMS_COUNT) {
-        int i = 0;
-        bool records_print_limit_is_set = false;
-        bool token_is_set = false;
-        bool order_source_is_set = false;
-
-        for (i = STATIC_PARAMS_COUNT; i < argc; i++) {
-            if (records_print_limit_is_set == false && strcmp(argv[i], RECORDS_PRINT_LIMIT_SHORT_PARAM) == 0) {
-                if (i + 1 == argc) {
-                    wprintf(L"The records print limit argument error\n");
-                    return -1;
-                }
-                int new_records_print_limit = -1;
-                if (!atoi2(argv[++i], &new_records_print_limit)) {
-                  wprintf(L"The records print limit argument parsing error\n");
-
-                  return -1;
-                }
-                records_print_limit = new_records_print_limit;
-                records_print_limit_is_set = true;
-            } else if (token_is_set == false && strcmp(argv[i], TOKEN_PARAM_SHORT_TAG) == 0) {
-                if (i + 1 == argc) {
-                  wprintf(L"The token argument error\n");
-
-                  return -1;
-                }
-                token = argv[++i];
-                token_is_set = true;
-            } else if (order_source_is_set == false) {
-                size_t string_len = 0;
-                string_len = strlen(argv[i]);
-                if (string_len > MAX_SOURCE_SIZE) {
-                    wprintf(L"Invalid order source param!\n");
-
-                    return -1;
-                }
-                char order_source[MAX_SOURCE_SIZE + 1] = {0};
-                strcpy(order_source, argv[i]);
-                order_source_ptr = &(order_source[0]);
-                order_source_is_set = true;
-            }
-        }
-    }
-
-    wprintf(L"HashMapTest started.\n");
-    dxfeed_host_u = ansi_to_unicode(dxfeed_host);
-    wprintf(L"Connecting to host %ls...\n", dxfeed_host_u);
-    free(dxfeed_host_u);
-
-    if (token != NULL && token[0] != '\0') {
-        if (!dxf_create_connection_auth_bearer(
-            dxfeed_host, token, on_reader_thread_terminate, NULL, NULL, NULL, NULL, &connection)) {
-            process_last_error();
-            return -1;
-        }
-    } else if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, NULL, &connection)) {
-        process_last_error();
-        return -1;
-    }
-
-    wprintf(L"Connection successful!\n");
-
-    // create snapshot for each symbol read from file and attach snapshot listener for every created snapshot
-
-    struct Node *snapshots = NULL;
-
-    struct Node *node = symbols;
-    while (node != NULL) {
-        char symbol = node->data;
-        node = node->next;
-        dxf_snapshot_t snapshot;
-        if (!dxf_create_snapshot(connection, event_id, base_symbol, NULL, 0, &snapshot)) {
-            process_last_error();
-            dxf_close_connection(connection);
-            return -1;
-        }
-        list_push(&snapshots, snapshot, sizeof(dxf_snapshot_t));
-    }
-
-    if (!dxf_create_snapshot(connection, event_id, base_symbol, NULL, 0, &snapshot)) {
-    process_last_error();
-    dxf_close_connection(connection);
-    return -1;
-  }
-
-    // ...
-    // ...
-    // ...
-
-    wprintf(L"Disconnecting from host...\n");
-    if (!dxf_close_connection(connection)) {
-        process_last_error();
-        return -1;
-    }
-    wprintf(L"Disconnect successful!\nHashMapTest completed successfully!\n");
-
-    list_free(symbols);
-}
-// --------------------------------------------------------------------------
-
 
 #define INPUT_FILE ""
 
@@ -370,6 +238,5 @@ int main(int argc, char *argv[]) {
 //    test_strgen();
     map_test();
 //    char_test();
-//    return snapshot_test(argc, argv, INPUT_FILE);
     return 0;
 }
