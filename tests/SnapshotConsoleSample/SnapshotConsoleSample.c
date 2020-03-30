@@ -351,7 +351,7 @@ int main (int argc, char *argv[]) {
 		       "                 TIME_AND_SALE, GREEKS, SERIES\n"
 		       "  <symbol> - The trade symbol, e.g. C, MSFT, YHOO, IBM\n"
 		       "  [order_source] - a) source for Order (also can be empty), e.g. NTV, BYX, BZX, DEA,\n"
-		       "                      ISE, DEX, IST\n"
+		       "                      ISE, DEX, IST, ...\n"
 		       "                   b) source for MarketMaker, one of following: COMPOSITE_BID or \n"
 		       "                      COMPOSITE_ASK\n"
 		       "  " RECORDS_PRINT_LIMIT_SHORT_PARAM " <records_print_limit> - The number of displayed records (0 - unlimited, default: " STRINGIFY(

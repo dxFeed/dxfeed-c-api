@@ -37,12 +37,28 @@
 
 const dxf_const_string_t dx_all_order_sources[] = {
 	L"NTV",
+	L"NFX",
+	L"ESPD",
+	L"XNFI",
+	L"ICE",
+	L"ISE",
+	L"DEA",
+	L"DEX",
 	L"BYX",
 	L"BZX",
-	L"DEA",
-	L"ISE",
-	L"DEX",
+	L"BATE",
+	L"CHIX",
+	L"CEUX",
+	L"BXTR",
 	L"IST",
+	L"BI20",
+	L"ABE",
+	L"FAIR",
+	L"GLBX",
+	L"ERIS",
+	L"XEUR",
+	L"CFE",
+	L"SMFE",
 	NULL
 };
 const size_t dx_all_order_sources_count = sizeof(dx_all_order_sources) / sizeof(dx_all_order_sources[0]) - 1;
