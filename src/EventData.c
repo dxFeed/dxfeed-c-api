@@ -176,19 +176,19 @@ bool dx_get_single_order_subscription_params(dxf_connection_t connection, dx_ord
 
 bool dx_get_quote_subscription_params(dxf_connection_t connection, dx_event_subscr_flag subscr_flags,
 									OUT dx_event_subscription_param_list_t* param_list) {
-	dx_subscription_type_t subscription_type = dx_infer_subscription_type(subscr_flags, dx_st_ticker);
+	const dx_subscription_type_t subscription_type = dx_infer_subscription_type(subscr_flags, dx_st_ticker);
 	dxf_char_t ch = 'A';
 	dxf_char_t quote_name_buf[QUOTE_TMPL_LEN + 2] = { 0 };
 
-	if (!IS_FLAG_SET(subscr_flags, dx_esf_quotes_regional)) {
-		return dx_add_subscription_param_to_list(connection, param_list, L"Quote", subscription_type);
-	}
-
 	/* fill quotes Quote&A..Quote&Z */
 	dx_copy_string(quote_name_buf, g_quote_tmpl);
-	for (; ch <= 'Z'; ch++) {
+	for (; ch <= (dxf_char_t)'Z'; ch++) {
 		quote_name_buf[QUOTE_TMPL_LEN] = ch;
 		CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, quote_name_buf, subscription_type);
+	}
+
+	if (!IS_FLAG_SET(subscr_flags, dx_esf_quotes_regional)) {
+		return dx_add_subscription_param_to_list(connection, param_list, L"Quote", subscription_type);
 	}
 
 	return true;
