@@ -1,5 +1,6 @@
 * [DXFC-174] Added the ability to subscribe to regional quotes. Now Quote subscription requests both composite and regional events. Please, use the `scope` field to filter events.
-* [DXFC-136] Fixed the error erasure on repeated snapshot creation with same parameters
+* [DXFC-168] The list of supported order sources was updated: NTV,NFX,ESPD,XNFI,ICE,ISE,DEA,DEX,BYX,BZX,BATE,CHIX,CEUX,BXTR,IST,BI20,ABE,FAIR,GLBX,ERIS,XEUR,CFE,SMFE
+* [DXFC-136] Fixed error erasure on repeated snapshot creation with same parameters
   - Changed `dx_perform_common_actions` to use `resetError` flag
   - Added internal `dx_close_subscription` function to implement `resetError` flag usage
 
