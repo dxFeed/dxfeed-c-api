@@ -641,13 +641,15 @@ int main (int argc, char *argv[]) {
 
 	printf("Subscription successful!\n");
 
-        while (!is_thread_terminate()) {
+	int i = 0;
+        while (!is_thread_terminate() && i++ < 10) {
           #ifdef _WIN32
           Sleep(100);
           #else
           sleep(1);
           #endif
         }
+        is_listener_thread_terminated = true;
 
         process_exit(0);
 
