@@ -83,8 +83,7 @@ OBJS	= \
 	  $(OBJ)/Version.c.o
 
 $(LIB_TARGET): Prepare $(OBJS) 
-	$(CC) $(LIB_CFLAGS) $(LIB_LDFLAGS) -shared -Wl,-soname,$(LIB) \
-		-o $(LIB_TARGET) $(OBJS)
+	$(CC) $(LIB_CFLAGS) $(LIB_LDFLAGS) -shared -o $(LIB_TARGET) $(OBJS)
 
 $(OBJ)/BufferedInput.c.o: ../src/BufferedInput.c ../include/DXFeed.h \
 	../src/BufferedInput.h ../src/DXErrorHandling.h ../src/DXMemory.h \
