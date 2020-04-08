@@ -121,6 +121,14 @@ const dxf_char_t* dx_get_current_time (void) {
 }
 
 #else // _WIN32
+int local_utc_offset_seconds() {
+	time_t raw_time = time(NULL);
+	struct tm *gmt_tm = gmtime(&raw_time);
+	gmt_tm->tm_isdst = -1;
+	time_t gmt = mktime(gmt_tm);
+
+	return (int)(difftime(raw_time, gmt));
+}
 
 dxf_const_string_t dx_get_current_time () {
 	dxf_char_t* time_buffer = dx_get_current_time_buffer();
@@ -138,7 +146,7 @@ dxf_const_string_t dx_get_current_time () {
 													ltm.tm_hour, ltm.tm_min, ltm.tm_sec,
 													0);
 	if (g_show_timezone) {
-		swprintf(time_buffer + CURRENT_TIME_STR_TIME_OFFSET, 7, L" GMT%+.2d", ltm.tm_gmtoff / 3600);
+		swprintf(time_buffer + CURRENT_TIME_STR_TIME_OFFSET, 7, L" GMT%+.2d", local_utc_offset_seconds() / 3600);
 	}
 
 	return time_buffer;
