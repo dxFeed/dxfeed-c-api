@@ -1,10 +1,14 @@
 # /
+/obj
+*.o
+*.swp
 /bin
 /ipch
 /**/*.suo
 /**/*.user
 /**/*.aps
 /**/build
+/**/build*
 /*.ncb
 /*.sdf
 /*.opensdf

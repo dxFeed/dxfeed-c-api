@@ -1,0 +1,244 @@
+.POSIX:
+.SUFFIXES:
+.PHONY: all clean
+
+OBJ = obj
+BIN = bin
+COMMON_CFLAGS	= -O2 -DUSE_PTHREADS -std=c99 -D_POSIX_SOURCE \
+		  -D_POSIX_C_SOURCE=200809L -fPIC -I../include
+COMMON_LDFLAGS	= -pthread
+LIB_NAME = DXFeed
+LIB	= lib$(LIB_NAME).so
+LIB_TARGET = $(BIN)/$(LIB)
+COMMAND_LINE_SAMPLE = CommandLineSample
+COMMAND_LINE_SAMPLE_TARGET = $(BIN)/$(COMMAND_LINE_SAMPLE)
+CANDLE_SAMPLE = CandleSample
+CANDLE_SAMPLE_TARGET = $(BIN)/$(CANDLE_SAMPLE)
+SNAPSHOT_CONSOLE_SAMPLE = SnapshotConsoleSample
+SNAPSHOT_CONSOLE_SAMPLE_TARGET = $(BIN)/$(SNAPSHOT_CONSOLE_SAMPLE)
+INC_SNAPSHOT_CONSOLE_SAMPLE = IncSnapshotConsoleSample
+INC_SNAPSHOT_CONSOLE_SAMPLE_TARGET = $(BIN)/$(INC_SNAPSHOT_CONSOLE_SAMPLE)
+PRICE_LEVEL_BOOK_SAMPLE = PriceLevelBookSample
+PRICE_LEVEL_BOOK_SAMPLE_TARGET = $(BIN)/$(PRICE_LEVEL_BOOK_SAMPLE)
+REGIONAL_BOOK_SAMPLE = RegionalBookSample
+REGIONAL_BOOK_SAMPLE_TARGET = $(BIN)/$(REGIONAL_BOOK_SAMPLE)
+
+all: $(LIB_TARGET) $(COMMAND_LINE_SAMPLE_TARGET) $(CANDLE_SAMPLE_TARGET) \
+	$(SNAPSHOT_CONSOLE_SAMPLE_TARGET) \
+	$(INC_SNAPSHOT_CONSOLE_SAMPLE_TARGET) \
+	$(PRICE_LEVEL_BOOK_SAMPLE_TARGET) $(REGIONAL_BOOK_SAMPLE_TARGET)
+
+lib: $(LIB_TARGET)
+
+clean:
+	rm -f $(BIN)/*.so && rm -f $(OBJ)/*.o
+
+# Common
+
+Prepare:
+	mkdir -p obj && mkdir -p bin
+
+# DXFeed library
+
+LIB_CFLAGS = $(CFLAGS) $(COMMON_CFLAGS) -I../src
+LIB_LDFLAGS = $(LD_FLAGS) $(COMMON_LDFLAGS) -lrt
+
+OBJS	= \
+	  $(OBJ)/BufferedInput.c.o \
+	  $(OBJ)/BufferedIOCommon.c.o \
+	  $(OBJ)/BufferedOutput.c.o \
+	  $(OBJ)/Candle.c.o \
+	  $(OBJ)/ClientMessageProcessor.c.o \
+	  $(OBJ)/ConfigurationDeserializer.c.o \
+	  $(OBJ)/ConnectionContextData.c.o \
+	  $(OBJ)/DataStructures.c.o \
+	  $(OBJ)/Decimal.c.o \
+	  $(OBJ)/DXAddressParser.c.o \
+	  $(OBJ)/DXAlgorithms.c.o \
+	  $(OBJ)/DXErrorCodes.c.o \
+	  $(OBJ)/DXErrorHandling.c.o \
+	  $(OBJ)/DXFeed.c.o \
+	  $(OBJ)/DXMemory.c.o \
+	  $(OBJ)/DXNetwork.c.o \
+	  $(OBJ)/DXPMessageData.c.o \
+	  $(OBJ)/DXProperties.c.o \
+	  $(OBJ)/DXSockets.c.o \
+	  $(OBJ)/DXThreads.c.o \
+	  $(OBJ)/EventData.c.o \
+	  $(OBJ)/EventManager.c.o \
+	  $(OBJ)/EventSubscription.c.o \
+	  $(OBJ)/Linux.c.o \
+	  $(OBJ)/Logger.c.o \
+	  $(OBJ)/ObjectArray.c.o \
+	  $(OBJ)/PriceLevelBook.c.o \
+	  $(OBJ)/RecordBuffers.c.o \
+	  $(OBJ)/RecordFieldSetters.c.o \
+	  $(OBJ)/RecordTranscoder.c.o \
+	  $(OBJ)/RegionalBook.c.o \
+	  $(OBJ)/ServerMessageProcessor.c.o \
+	  $(OBJ)/Snapshot.c.o \
+	  $(OBJ)/SymbolCodec.c.o \
+	  $(OBJ)/TaskQueue.c.o \
+	  $(OBJ)/TestParser.c.o \
+	  $(OBJ)/Version.c.o
+
+$(LIB_TARGET): Prepare $(OBJS) 
+	$(CC) $(LIB_CFLAGS) $(LIB_LDFLAGS) -shared -o $(LIB_TARGET) $(OBJS)
+
+$(OBJ)/BufferedInput.c.o: ../src/BufferedInput.c ../include/DXFeed.h \
+	../src/BufferedInput.h ../src/DXErrorHandling.h ../src/DXMemory.h \
+	../src/DXAlgorithms.h ../src/ConnectionContextData.h
+	$(CC) $(LIB_CFLAGS) ../src/BufferedInput.c -c -o ./$@
+
+$(OBJ)/BufferedIOCommon.c.o: ../src/BufferedIOCommon.c \
+	../src/BufferedIOCommon.h ../src/DXErrorHandling.h ../src/DXMemory.h
+	$(CC) $(LIB_CFLAGS) ../src/BufferedIOCommon.c -c -o ./$@
+
+$(OBJ)/BufferedOutput.c.o: ../src/BufferedOutput.c ../include/DXFeed.h \
+	../src/BufferedOutput.h ../src/DXErrorHandling.h ../src/DXMemory.h \
+	../src/DXAlgorithms.h ../src/DXThreads.h ../src/ConnectionContextData.h
+	$(CC) $(LIB_CFLAGS) ../src/BufferedOutput.c -c -o $@
+
+$(OBJ)/Candle.c.o:
+	$(CC) $(LIB_CFLAGS) ../src/Candle.c -c -o $@
+
+$(OBJ)/ClientMessageProcessor.c.o:
+	$(CC) $(LIB_CFLAGS) ../src/ClientMessageProcessor.c -c -o $@
+
+$(OBJ)/ConfigurationDeserializer.c.o:
+	$(CC) $(LIB_CFLAGS) ../src/ConfigurationDeserializer.c -c -o $@
+
+$(OBJ)/ConnectionContextData.c.o:
+	$(CC) $(LIB_CFLAGS) ../src/ConnectionContextData.c -c -o $@
+
+$(OBJ)/DataStructures.c.o:
+	$(CC) $(LIB_CFLAGS) ../src/DataStructures.c -c -o $@
+
+$(OBJ)/Decimal.c.o:
+	$(CC) $(LIB_CFLAGS) ../src/Decimal.c -c -o $@
+
+$(OBJ)/DXAddressParser.c.o:
+	$(CC) $(LIB_CFLAGS) ../src/DXAddressParser.c -c -o $@
+
+$(OBJ)/DXAlgorithms.c.o:
+	$(CC) $(LIB_CFLAGS) ../src/DXAlgorithms.c -c -o $@
+
+$(OBJ)/DXErrorCodes.c.o:
+	$(CC) $(LIB_CFLAGS) ../src/DXErrorCodes.c -c -o $@
+
+$(OBJ)/DXErrorHandling.c.o:
+	$(CC) $(LIB_CFLAGS) ../src/DXErrorHandling.c -c -o $@
+
+$(OBJ)/DXFeed.c.o:
+	$(CC) $(LIB_CFLAGS) ../src/DXFeed.c -c -o $@
+
+$(OBJ)/DXMemory.c.o:
+	$(CC) $(LIB_CFLAGS) ../src/DXMemory.c -c -o $@
+
+$(OBJ)/DXNetwork.c.o:
+	$(CC) $(LIB_CFLAGS) ../src/DXNetwork.c -c -o $@
+
+$(OBJ)/DXPMessageData.c.o:
+	$(CC) $(LIB_CFLAGS) ../src/DXPMessageData.c -c -o $@
+
+$(OBJ)/DXProperties.c.o:
+	$(CC) $(LIB_CFLAGS) ../src/DXProperties.c -c -o $@
+
+$(OBJ)/DXSockets.c.o:
+	$(CC) $(LIB_CFLAGS) ../src/DXSockets.c -c -o $@
+
+$(OBJ)/DXThreads.c.o:
+	$(CC) $(LIB_CFLAGS) ../src/DXThreads.c -c -o $@
+
+$(OBJ)/EventData.c.o:
+	$(CC) $(LIB_CFLAGS) ../src/EventData.c -c -o $@
+
+$(OBJ)/EventManager.c.o:
+	$(CC) $(LIB_CFLAGS) ../src/EventManager.c -c -o $@
+
+$(OBJ)/EventSubscription.c.o:
+	$(CC) $(LIB_CFLAGS) ../src/EventSubscription.c -c -o $@
+
+$(OBJ)/Linux.c.o:
+	$(CC) $(LIB_CFLAGS) ../src/Linux.c -c -o $@
+
+$(OBJ)/Logger.c.o:
+	$(CC) $(LIB_CFLAGS) ../src/Logger.c -c -o $@
+
+$(OBJ)/ObjectArray.c.o:
+	$(CC) $(LIB_CFLAGS) ../src/ObjectArray.c -c -o $@
+
+$(OBJ)/PriceLevelBook.c.o:
+	$(CC) $(LIB_CFLAGS) ../src/PriceLevelBook.c -c -o $@
+
+$(OBJ)/RecordBuffers.c.o:
+	$(CC) $(LIB_CFLAGS) ../src/RecordBuffers.c -c -o $@
+
+$(OBJ)/RecordFieldSetters.c.o:
+	$(CC) $(LIB_CFLAGS) ../src/RecordFieldSetters.c -c -o $@
+
+$(OBJ)/RecordTranscoder.c.o:
+	$(CC) $(LIB_CFLAGS) ../src/RecordTranscoder.c -c -o $@
+
+$(OBJ)/RegionalBook.c.o:
+	$(CC) $(LIB_CFLAGS) ../src/RegionalBook.c -c -o $@
+
+$(OBJ)/ServerMessageProcessor.c.o:
+	$(CC) $(LIB_CFLAGS) ../src/ServerMessageProcessor.c -c -o $@
+
+$(OBJ)/Snapshot.c.o:
+	$(CC) $(LIB_CFLAGS) ../src/Snapshot.c -c -o $@
+
+$(OBJ)/SymbolCodec.c.o:
+	$(CC) $(LIB_CFLAGS) ../src/SymbolCodec.c -c -o $@
+
+$(OBJ)/TaskQueue.c.o:
+	$(CC) $(LIB_CFLAGS) ../src/TaskQueue.c -c -o $@
+
+$(OBJ)/TestParser.c.o:
+	$(CC) $(LIB_CFLAGS) ../src/TestParser.c -c -o $@
+
+$(OBJ)/Version.c.o:
+	$(CC) $(LIB_CFLAGS) ../src/Version.c -c -o $@
+
+# Samples
+
+SAMPLES_CFLAGS = $(CFLAGS) $(COMMON_CFLAGS) -I../src
+SAMPLES_LDFLAGS = $(LDFLAGS) $(COMMON_LDFLAGS) -L$(BIN) -l$(LIB_NAME)
+
+$(CANDLE_SAMPLE_TARGET): $(OBJ)/CandleSample.c.o
+	$(CC) $(SAMPLES_CFLAGS) $(SAMPLES_LDFLAGS) -o $@ $(OBJ)/CandleSample.c.o
+
+$(OBJ)/CandleSample.c.o: ../tests/CandleSample/CandleSample.c ../include/DXFeed.h ../include/DXErrorCodes.h
+	$(CC) $(SAMPLES_CFLAGS) ../tests/CandleSample/CandleSample.c -c -o $@
+
+$(COMMAND_LINE_SAMPLE_TARGET): $(OBJ)/CommandLineSample.c.o
+	$(CC) $(SAMPLES_CFLAGS) $(SAMPLES_LDFLAGS) -o $@ $(OBJ)/CommandLineSample.c.o
+
+$(OBJ)/CommandLineSample.c.o: ../tests/CommandLineSample/CommandLineSample.c ../include/DXFeed.h ../include/DXErrorCodes.h
+	$(CC) $(SAMPLES_CFLAGS) ../tests/CommandLineSample/CommandLineSample.c -c -o $@
+
+$(SNAPSHOT_CONSOLE_SAMPLE_TARGET): $(OBJ)/SnapshotConsoleSample.c.o
+	$(CC) $(SAMPLES_CFLAGS) $(SAMPLES_LDFLAGS) -o $@ $(OBJ)/SnapshotConsoleSample.c.o
+
+$(OBJ)/SnapshotConsoleSample.c.o: ../tests/SnapshotConsoleSample/SnapshotConsoleSample.c ../include/DXFeed.h ../include/DXErrorCodes.h
+	$(CC) $(SAMPLES_CFLAGS) ../tests/SnapshotConsoleSample/SnapshotConsoleSample.c -c -o $@
+
+$(INC_SNAPSHOT_CONSOLE_SAMPLE_TARGET): $(OBJ)/IncSnapshotConsoleSample.c.o
+	$(CC) $(SAMPLES_CFLAGS) $(SAMPLES_LDFLAGS) -o $@ $(OBJ)/IncSnapshotConsoleSample.c.o
+
+$(OBJ)/IncSnapshotConsoleSample.c.o: ../tests/IncSnapshotConsoleSample/IncSnapshotConsoleSample.c ../include/DXFeed.h ../include/DXErrorCodes.h
+	$(CC) $(SAMPLES_CFLAGS) ../tests/IncSnapshotConsoleSample/IncSnapshotConsoleSample.c -c -o $@
+
+$(PRICE_LEVEL_BOOK_SAMPLE_TARGET): $(OBJ)/PriceLevelBookSample.c.o
+	$(CC) $(SAMPLES_CFLAGS) $(SAMPLES_LDFLAGS) -o $@ $(OBJ)/PriceLevelBookSample.c.o
+
+$(OBJ)/PriceLevelBookSample.c.o: ../tests/PriceLevelBookSample/PriceLevelBookSample.c ../include/DXFeed.h ../include/DXErrorCodes.h
+	$(CC) $(SAMPLES_CFLAGS) ../tests/PriceLevelBookSample/PriceLevelBookSample.c -c -o $@
+
+$(REGIONAL_BOOK_SAMPLE_TARGET): $(OBJ)/RegionalBookSample.c.o
+	$(CC) $(SAMPLES_CFLAGS) $(SAMPLES_LDFLAGS) -o $@ $(OBJ)/RegionalBookSample.c.o
+
+$(OBJ)/RegionalBookSample.c.o: ../tests/RegionalBookSample/RegionalBookSample.c ../include/DXFeed.h ../include/DXErrorCodes.h
+	$(CC) $(SAMPLES_CFLAGS) ../tests/RegionalBookSample/RegionalBookSample.c -c -o $@
+
