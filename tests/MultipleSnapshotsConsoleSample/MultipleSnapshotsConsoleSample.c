@@ -49,7 +49,7 @@ void list_push(struct Node** head_ref, void *new_data, size_t data_size) {
   int i;
   for (i=0; i<data_size; i++)
     *(char *)(new_node->data + i) = *(char *)(new_data + i);
-  (*head_ref)    = new_node;
+  (*head_ref) = new_node;
 }
 void list_print(struct Node *node) {
   while (node != NULL) {
@@ -406,25 +406,34 @@ struct Node *symbols_list = NULL;
 dxf_snapshot_t          *snapshots;
 dxf_candle_attributes_t *candle_attributes;
 
+
 int process_exit(int exit_code) {
 
   struct Node *n = symbols_list;
   int index = 0;
 
   while (n != NULL) {
+    printf("   > clean data for %s\n", n->data);
     if (NULL != snapshots) {
       void *snapshot = snapshots[index];
+      if (NULL != snapshot)
+        printf("     - close snapshot\n");
       if (NULL != snapshot && !dxf_close_snapshot(snapshot)) {
         process_last_error();
       }
     }
+
     if (NULL != candle_attributes) {
-      void *candle_attribute = snapshots[index];
+      void *candle_attribute = candle_attributes[index];
+      if (NULL != candle_attribute)
+        printf("     - remove symbol attributes\n");
       if (NULL != candle_attribute && !dxf_delete_candle_symbol_attributes(candle_attribute)) {
         process_last_error();
       }
     }
+
     n = n->next;
+    index++;
   }
 
   list_free(symbols_list);
@@ -435,8 +444,8 @@ int process_exit(int exit_code) {
     } else {
       printf("Disconnect successful!\n");
     }
+//    free(connection);
   }
-
 
   return exit_code;
 }
@@ -500,7 +509,6 @@ int main (int argc, char *argv[]) {
 
 	printf("total symbols loaded from file: %d\n", list_size(symbols_list));
 
-
 	char *order_source_ptr = NULL;
 	int records_print_limit = DEFAULT_RECORDS_PRINT_LIMIT;
 	char *token = NULL;
@@ -562,7 +570,6 @@ int main (int argc, char *argv[]) {
 	printf("Connecting to host %ls...\n", dxfeed_host_u);
 	free(dxfeed_host_u);
 
-
 #ifdef _WIN32
 	InitializeCriticalSection(&listener_thread_guard);
 #endif
@@ -582,21 +589,17 @@ int main (int argc, char *argv[]) {
 
 	printf("Connection successful!\n");
 
-        snapshots = malloc(sizeof(dxf_snapshot_t) * list_size(symbols_list));
+
+        snapshots = malloc(sizeof(dxf_snapshot_data_ptr_t) * list_size(symbols_list));
         candle_attributes = malloc(sizeof(dxf_candle_attributes_t) * list_size(symbols_list));
 
 	struct Node *symbol = symbols_list;
 	int index = 0;
 	while(symbol != NULL) {
 
-            dxf_snapshot_t           snapshot         = snapshots[index];
-            dxf_candle_attributes_t  candle_attribute = candle_attributes[index];
+            dxf_snapshot_t           snapshot;
+            dxf_candle_attributes_t  candle_attribute;
             dxf_string_t base_symbol = ansi_to_unicode(symbol->data);
-
-//            void *snapshot          = malloc(sizeof(void)); // dxf_snapshot_t *snapshot = malloc(sizeof(dxf_snapshot_t));
-//            void *candle_attributes = malloc(sizeof(void)); // dxf_candle_attributes_t *candle_attributes = malloc(sizeof(dxf_candle_attributes_t));
-//            list_push(&snapshots_list, snapshot, sizeof(dxf_snapshot_t));
-//            list_push(&candle_attributes_list, candle_attribute, sizeof(dxf_candle_attributes_t));
 
 //            printf("%ls\n", base_symbol);
 
@@ -616,16 +619,19 @@ int main (int argc, char *argv[]) {
                 process_last_error();
                 return process_exit(-1);
               }
+              candle_attributes[index] = candle_attribute;
             } else if (event_id == dx_eid_order) {
               if (!dxf_create_order_snapshot(connection, base_symbol, order_source_ptr, 0, &snapshot)) {
                 process_last_error();
                 process_exit(-1);
               }
+              snapshots[index] = snapshot;
             } else {
               if (!dxf_create_snapshot(connection, event_id, base_symbol, NULL, 0, &snapshot)) {
                 process_last_error();
                 return process_exit(-1);
               }
+              snapshots[index] = snapshot;
             }
 
             if (!dxf_attach_snapshot_listener(snapshot, listener, (void *) &records_print_limit)) {
@@ -635,8 +641,10 @@ int main (int argc, char *argv[]) {
 
             printf("Subscribed to '%ls'\n", base_symbol);
 
-//            free(base_symbol);
-          symbol = symbol->next;
+            free(base_symbol);
+
+            symbol = symbol->next;
+            index++;
         }
 
 	printf("Subscription successful!\n");
@@ -660,3 +668,4 @@ int main (int argc, char *argv[]) {
         return 0;
 }
 
+// valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=valgrind-out.txt ./MultipleSnapshotsConsoleSampled_64 mddqa.in.devexperts.com:7400 TIME_AND_SALE /data/symbols3

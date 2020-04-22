@@ -722,15 +722,15 @@ char* dx_new_snapshot_key(dx_record_info_id_t record_info_id, dxf_const_string_t
 
     size_t size;
     if (NULL == o) {
-      size = sizeof(char) * (strlen(s) + strlen(n));
+      size = sizeof(char) * (strlen(s) + strlen(n) + 1);
       key = malloc(size);
       memset(key, 0, size);
-      sprintf(key, "%s%s", n, s);
+      snprintf(key, size, "%s%s", n, s);
     } else {
-      size = sizeof(char) * (strlen(s) + strlen(n) + strlen(o));
+      size = sizeof(char) * (strlen(s) + strlen(n) + strlen(o) + 1);
       key = malloc(size);
       memset(key, 0, size);
-      sprintf(key, "%s%s%s", n, s, o);
+      snprintf(key, size, "%s%s%s", n, s, o);
     }
 
     if (NULL != s)
