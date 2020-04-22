@@ -67,7 +67,7 @@ set(EXPORT_HEADERS
     )
 
 set(HEADER_FILES
-    map.h
+    ../thirdparty/map/map.h
     Candle.h
     ClientMessageProcessor.h
     ConnectionContextData.h
@@ -124,7 +124,7 @@ set(PARSER_TESTS
     )
 
 set(SOURCE_FILES
-    map.c
+    ../thirdparty/map/map.c
     Candle.c
     ClientMessageProcessor.c
     ConnectionContextData.c

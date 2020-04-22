@@ -507,7 +507,7 @@ int main (int argc, char *argv[]) {
           return -1;
         }
 
-	printf("total symbols loaded from file: %d\n", list_size(symbols_list));
+	printf("Total symbols loaded from file: %d\n", list_size(symbols_list));
 
 	char *order_source_ptr = NULL;
 	int records_print_limit = DEFAULT_RECORDS_PRINT_LIMIT;

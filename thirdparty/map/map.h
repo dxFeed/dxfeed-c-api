@@ -10,7 +10,7 @@
 
 #include <string.h>
 
-#include "PrimitiveTypes.h"
+#include "../../src/PrimitiveTypes.h"
 
 #define MAP_VERSION "0.1.0"
 

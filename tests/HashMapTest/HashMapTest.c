@@ -4,7 +4,7 @@
 #include <wchar.h>
 #include <time.h>
 
-#include "../../src/map.h"
+#include "../../thirdparty/map/map.h"
 
 // test string generator
 # include "strgen.h"

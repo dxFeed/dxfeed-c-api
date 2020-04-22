@@ -17,7 +17,8 @@
  *
  */
 
-#include <wchar.h>
+#include "Snapshot.h"
+#include "../thirdparty/map/map.h"
 #include "ConnectionContextData.h"
 #include "DXAlgorithms.h"
 #include "DXErrorCodes.h"
@@ -26,8 +27,7 @@
 #include "EventManager.h"
 #include "EventSubscription.h"
 #include "Logger.h"
-#include "Snapshot.h"
-#include "map.h"
+#include <wchar.h>
 
 /* -------------------------------------------------------------------------- */
 /*
