@@ -57,6 +57,7 @@ if (NOT ${APP_VERSION} STREQUAL "")
 endif ()
 
 include_directories(${INCLUDE_DIR})
+include_directories(BEFORE ../thirdparty/map)
 
 set(EXPORT_HEADERS
     ${INCLUDE_DIR}/DXErrorCodes.h
@@ -67,7 +68,6 @@ set(EXPORT_HEADERS
     )
 
 set(HEADER_FILES
-    ../thirdparty/map/map.h
     Candle.h
     ClientMessageProcessor.h
     ConnectionContextData.h
@@ -270,6 +270,7 @@ target_link_libraries(${PROJECT} PRIVATE ${ADDITIONAL_LIBRARIES})
 if (WIN32)
     set_target_properties(${PROJECT} PROPERTIES PREFIX "")
 endif ()
+
 
 if (NOT DISABLE_TLS)
     if (WIN32)

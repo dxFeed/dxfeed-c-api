@@ -18,7 +18,6 @@
  */
 
 #include "Snapshot.h"
-#include "../thirdparty/map/map.h"
 #include "ConnectionContextData.h"
 #include "DXAlgorithms.h"
 #include "DXErrorCodes.h"
@@ -27,6 +26,8 @@
 #include "EventManager.h"
 #include "EventSubscription.h"
 #include "Logger.h"
+#include "map.h"
+#include <stdlib.h>
 #include <wchar.h>
 
 /* -------------------------------------------------------------------------- */
@@ -696,6 +697,17 @@ void event_listener(int event_type, dxf_const_string_t symbol_name,
 //int dx_snapshots_comparator(dx_snapshot_data_ptr_t s1, dx_snapshot_data_ptr_t s2) {
 //	return DX_NUMERIC_COMPARATOR(s1->key, s2->key);
 //}
+/**
+ * @brief Converts wide char string to char string
+ *
+ * @details New memory is allocated here for converted string, so caller should
+ *          free this memory when conversion result is no longer needed
+ *
+ * @param[in] input wide char string to convert
+ *
+ * @return char* converted string if convertion is successful or NULL otherwise
+ *
+ */
 char* dx_wstr_to_str(dxf_string_t input) {
     char s[1024];
     if (NULL == input)
@@ -709,34 +721,49 @@ char* dx_wstr_to_str(dxf_string_t input) {
       return NULL;
     }
 }
+
+/**
+ * @brief Creates new snapshot key (to be used as a snapshot identifier in
+ *        snapshots hash map)
+ *
+ * @details New memory is allocated here for snapshot key, so on snapshot closure
+ *          this memory should be freed.
+ *
+ *          New key has a form of:
+ *
+ *             - "{ record_info_id }{ symbol }{ order_source }" if order_source != NULL
+ *
+ *             - "{ record_info_id }{ symbol }" otherwise
+ *
+ * @param[in] record_info_id
+ * @param[in] symbol
+ * @param[in] order_source
+ *
+ * @return char* new snapshot key
+ *
+ */
 char* dx_new_snapshot_key(dx_record_info_id_t record_info_id, dxf_const_string_t symbol,
                           dxf_const_string_t order_source) {
 
-    char *s = dx_wstr_to_str(symbol);
-    char *o = dx_wstr_to_str(order_source);
+    char *s_symbol       = dx_wstr_to_str(symbol);
+    char *s_order_source = dx_wstr_to_str(order_source);
 
-    char n[64];
-    snprintf(n, 64, "%d", record_info_id);
+    char s_record_info_id[64];
+    snprintf(s_record_info_id, 64, "%d", record_info_id);
 
     char *key;
-
-    size_t size;
-    if (NULL == o) {
-      size = sizeof(char) * (strlen(s) + strlen(n) + 1);
-      key = malloc(size);
-      memset(key, 0, size);
-      snprintf(key, size, "%s%s", n, s);
+    if (NULL == s_order_source) {
+      key = dx_calloc(strlen(s_symbol) + strlen(s_record_info_id) + 1, sizeof(char));
+      sprintf(key, "%s%s", s_record_info_id, s_symbol);
     } else {
-      size = sizeof(char) * (strlen(s) + strlen(n) + strlen(o) + 1);
-      key = malloc(size);
-      memset(key, 0, size);
-      snprintf(key, size, "%s%s%s", n, s, o);
+      key = dx_calloc(strlen(s_symbol) + strlen(s_record_info_id) + strlen(s_order_source) + 1, sizeof(char));
+      sprintf(key, "%s%s%s", s_record_info_id, s_symbol, s_order_source);
     }
 
-    if (NULL != s)
-      free(s);
-    if (NULL != o)
-      free(o);
+    if (NULL != s_symbol)
+      free(s_symbol);
+    if (NULL != s_order_source)
+      free(s_order_source);
 
     return key;
 }
