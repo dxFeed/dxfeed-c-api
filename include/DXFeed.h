@@ -751,14 +751,16 @@ DXFEED_API ERRORCODE dxf_get_last_error (OUT int* error_code, OUT dxf_const_stri
  * @param[in] file_name          A full path to the file where the log is to be stored
  * @param[in] rewrite_file       A flag defining the file open mode; if it's nonzero then the log file will be rewritten
  * @param[in] show_timezone_info A flag defining the time display option in the log file; if it's nonzero then
- *                               the time will be displayed with the timezone suffix
+ *                                the time will be displayed with the timezone suffix
  * @param[in] verbose            A flag defining the logging mode; if it's nonzero then the verbose logging will be
- *                               enabled
+ *                                enabled
+ * @param[in] log_packets        A flag defining the logging mode; if it's nonzero then the packets logging will be
+ *                                enabled
  *
  * @return {@link DXF_SUCCESS} on successful logger initialization or {@link DXF_FAILURE} on error;
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
  */
-DXFEED_API ERRORCODE dxf_initialize_logger (const char* file_name, int rewrite_file, int show_timezone_info, int verbose);
+DXFEED_API ERRORCODE dxf_initialize_logger(const char* file_name, int rewrite_file, int show_timezone_info, int verbose, int log_packets);
 
 /**
  * @ingroup c-api-orders

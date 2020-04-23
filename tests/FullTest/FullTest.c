@@ -792,7 +792,7 @@ int main (int argc, char* argv[]) {
 
 	InitializeCriticalSection(&listener_thread_guard);
 
-	dxf_initialize_logger("full-test-api.log", true, true, true);
+	dxf_initialize_logger("full-test-api.log", true, true, true, false);
 
 	if (!initialize_console()) {
 		return -1;

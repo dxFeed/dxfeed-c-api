@@ -54,8 +54,11 @@ static dxf_const_string_t g_info_prefix = L"";
 static dxf_const_string_t g_default_time_string = L"Incorrect time";
 
 static bool g_verbose_logger_mode;
+static bool g_packets_logger_mode;
 static bool g_show_timezone;
 static FILE* g_log_file = NULL;
+static FILE* g_packets_read_log_file = NULL;
+static FILE* g_packets_write_log_file = NULL;
 #ifdef _DEBUG
 static FILE* g_dbg_file = NULL;
 static dx_mutex_t g_dbg_lock;
@@ -265,6 +268,18 @@ static void dx_close_logging(void *arg) {
 		fclose(g_log_file);
 		g_log_file = NULL;
 	}
+
+  if (g_packets_logger_mode) {
+    if (g_packets_read_log_file != NULL) {
+      fclose(g_packets_read_log_file);
+      g_packets_read_log_file = NULL;
+    }
+
+    if (g_packets_write_log_file != NULL) {
+      fclose(g_packets_write_log_file);
+      g_packets_write_log_file = NULL;
+    }
+  }
 }
 
 
@@ -274,7 +289,7 @@ static void dx_close_logging(void *arg) {
  */
 /* -------------------------------------------------------------------------- */
 
-DXFEED_API ERRORCODE dxf_initialize_logger (const char* file_name, int rewrite_file, int show_timezone_info, int verbose) {
+DXFEED_API ERRORCODE dxf_initialize_logger(const char* file_name, int rewrite_file, int show_timezone_info, int verbose, int log_packets) {
 	if (!dx_init_error_subsystem()) {
 		wprintf(L"\nCan not init error subsystem\n");
 		return DXF_FAILURE;
@@ -285,6 +300,28 @@ DXFEED_API ERRORCODE dxf_initialize_logger (const char* file_name, int rewrite_f
 	if (g_log_file == NULL) {
 		printf("\nCan not open log-file %s", file_name);
 		return DXF_FAILURE;
+	}
+
+	g_packets_logger_mode = log_packets ? true : false;
+
+	if (g_packets_logger_mode) {
+		char packets_file_name[1024];
+
+		sprintf_s(packets_file_name, 1024, "%s.read.packets", file_name);
+		g_packets_read_log_file = fopen(packets_file_name, rewrite_file ? "w" : "a");
+
+		if (g_packets_read_log_file == NULL) {
+			printf("\nCan not open log-file %s", packets_file_name);
+			return DXF_FAILURE;
+		}
+
+		sprintf_s(packets_file_name, 1024, "%s.write.packets", file_name);
+		g_packets_write_log_file = fopen(packets_file_name, rewrite_file ? "w" : "a");
+
+		if (g_packets_write_log_file == NULL) {
+			printf("\nCan not open log-file %s", packets_file_name);
+			return DXF_FAILURE;
+		}
 	}
 
 	dx_register_process_destructor(&dx_close_logging, NULL);
@@ -511,4 +548,65 @@ void dx_logging_verbose_gap (void) {
 	}
 	fwprintf(g_log_file, L"\n");
 	dx_flush_log();
+}
+
+/**
+ * Logs the raw packets data
+ *
+ * @param read_packets The logging mode (true - read packets, false - write packets)
+ * @param buffer       The buffer data
+ * @param buffer_size  The buffer data size
+ */
+void dx_logging_packets(int read_packets, const void *buffer, int buffer_size) {
+	if (g_packets_read_log_file == NULL || g_packets_write_log_file == NULL) {
+		return;
+	}
+
+	static char HEX[] = "0123456789ABCDEF";
+	const dxf_byte_t *bytes_buffer = (const dxf_byte_t *) buffer;
+	FILE *log_file = (read_packets) ? g_packets_read_log_file : g_packets_write_log_file;
+
+	fwprintf(log_file, L"\n%ls [%08lx] size = %d\n", dx_get_current_time(),
+#ifdef _WIN32
+			 (unsigned long) GetCurrentThreadId(),
+#else
+		(unsigned long)pthread_getthreadid_np(),
+#endif
+			 buffer_size
+	);
+
+
+	char line_buf[11] = {0};
+	char hex_buf[49] = {0};
+	char ascii_buf[17] = {0};
+
+	for (unsigned int i = 0; i < buffer_size; i++) {
+		if ((i & 15u) == 0) {
+			sprintf_s(line_buf, 11, "0x%08x", i);
+		}
+
+		dxf_byte_t byte = bytes_buffer[i];
+
+		hex_buf[(i & 15u) * 3] = HEX[(dxf_ubyte_t)((dxf_ubyte_t)byte >> 4u) & 15u];
+		hex_buf[(i & 15u) * 3 + 1] = HEX[(dxf_ubyte_t)byte & 15u];
+		hex_buf[(i & 15u) * 3 + 2] = ' ';
+
+		if (i == buffer_size - 1) {
+			hex_buf[(i & 15u) * 3 + 3] = '\0';
+		}
+
+		ascii_buf[i & 15u] = (byte >= ' ' && byte <= '~') ? byte : '.';
+
+		if (i == buffer_size - 1) {
+			hex_buf[(i & 15u) * 3 + 3] = '\0';
+			ascii_buf[(i & 15u) + 1] = '\0';
+		}
+
+		if ((i & 15u) == 15u || i == buffer_size - 1) {
+			fprintf(log_file, "\n%s:  %-48s  %-16s", line_buf, hex_buf, ascii_buf);
+		}
+	}
+
+	fprintf(log_file, "\n");
+	fflush(log_file);
 }

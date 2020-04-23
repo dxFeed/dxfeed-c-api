@@ -52,4 +52,6 @@ void dx_logging_dbg_unlock ();
 void dx_logging_last_error (void);
 void dx_logging_last_error_verbose (void);
 
+void dx_logging_packets(int read_packets, const void* buffer, int buffer_size);
+
 #endif // LOGGER_H

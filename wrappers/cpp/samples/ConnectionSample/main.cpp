@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
 	auto address = args::get(addressParameter);
 	auto symbols = args::get(symbolsParameter);
 
-	dxf_initialize_logger("ConnectionSample.log", true, true, true);
+	dxf_initialize_logger("ConnectionSample.log", true, true, true, false);
 	std::cout << "Connecting...\n";
 	//auto connection = Connection::create("demo.dxfeed.com:7300");
 	auto connection = Connection::create(address);

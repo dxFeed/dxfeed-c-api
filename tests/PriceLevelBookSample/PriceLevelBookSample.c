@@ -184,7 +184,7 @@ int main(int argc, char* argv[]) {
 		return 0;
 	}
 
-	dxf_initialize_logger("price-level-book-api.log", true, true, true);
+	dxf_initialize_logger("price-level-book-api.log", true, true, true, false);
 
 	dxfeed_host = argv[1];
 	base_symbol = ansi_to_unicode(argv[2]);

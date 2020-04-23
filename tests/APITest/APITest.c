@@ -181,7 +181,7 @@ int main (int argc, char* argv[]) {
 
 	dxf_int_t get_event_types;
 
-	dxf_initialize_logger("api-test.log", true, true, false);
+	dxf_initialize_logger("api-test.log", true, true, false, false);
 
 	printf("API test started.\n");
 	printf("Connecting to host %s...\n", dxfeed_host);

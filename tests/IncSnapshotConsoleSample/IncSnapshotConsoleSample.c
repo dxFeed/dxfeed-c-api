@@ -370,7 +370,7 @@ int main(int argc, char* argv[]) {
 		return 0;
 	}
 
-	dxf_initialize_logger("inc-snapshot-console-api.log", true, true, true);
+	dxf_initialize_logger("inc-snapshot-console-api.log", true, true, true, false);
 
 	dxfeed_host = argv[1];
 

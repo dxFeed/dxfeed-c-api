@@ -145,7 +145,7 @@ HRESULT STDMETHODCALLTYPE DXFeed::InitLogger (BSTR file, VARIANT_BOOL overwrite,
 	try {
 	fileWrapper = _bstr_t(file, false);
 
-	if (dxf_initialize_logger((const char*)fileWrapper, overwrite, showTimezone, verbose) == DXF_FAILURE) {
+	if (dxf_initialize_logger((const char*)fileWrapper, overwrite, showTimezone, verbose, FALSE) == DXF_FAILURE) {
 	hr = E_FAIL;
 	}
 	} catch (const _com_error& e) {

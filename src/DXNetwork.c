@@ -1177,6 +1177,8 @@ bool dx_send_data (dxf_connection_t connection, const void* buffer, int buffer_s
 		return dx_set_error_code(dx_ec_invalid_func_param_internal);
 	}
 
+	dx_logging_packets(false, buffer, buffer_size);
+
 	context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
 
 	if (context == NULL) {
