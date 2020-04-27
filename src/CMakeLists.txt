@@ -272,7 +272,7 @@ else ()
         link_directories(${LIB_TLS}/nix/${TARGET_PLATFORM})
         set(ADDITIONAL_LIBRARIES
             ${ADDITIONAL_LIBRARIES}
-            tls
+            tls ssl crypto
             )
     endif (NOT DISABLE_TLS)
 

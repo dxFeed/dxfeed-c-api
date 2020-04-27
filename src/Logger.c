@@ -163,7 +163,7 @@ void dx_log_debug_message(const dxf_char_t *format, ...) {
 	swprintf(message, 255, L"[%08lx] ", (unsigned long)pthread_getthreadid_np());
 	va_start(ap, format);
 	vswprintf(&message[11], 244, format, ap);
-	printf("%s", message);
+	wprintf(L"%ls", message);
 	va_end(ap);
 }
 
@@ -171,7 +171,7 @@ void dx_vlog_debug_message(const dxf_char_t *format, va_list ap) {
 	dxf_char_t message[256];
 	swprintf(message, 255, L"[%08lx] ", (unsigned long)pthread_getthreadid_np());
 	vswprintf(&message[11], 244, format, ap);
-	printf("%s", message);
+	wprintf(L"%ls", message);
 }
 #else
 #define dx_vlog_debug_message(f, ap)
@@ -307,7 +307,7 @@ DXFEED_API ERRORCODE dxf_initialize_logger(const char* file_name, int rewrite_fi
 	if (g_packets_logger_mode) {
 		char packets_file_name[1024];
 
-		sprintf_s(packets_file_name, 1024, "%s.read.packets", file_name);
+		snprintf(packets_file_name, 1024, "%s.read.packets", file_name);
 		g_packets_read_log_file = fopen(packets_file_name, rewrite_file ? "w" : "a");
 
 		if (g_packets_read_log_file == NULL) {
@@ -315,7 +315,7 @@ DXFEED_API ERRORCODE dxf_initialize_logger(const char* file_name, int rewrite_fi
 			return DXF_FAILURE;
 		}
 
-		sprintf_s(packets_file_name, 1024, "%s.write.packets", file_name);
+		snprintf(packets_file_name, 1024, "%s.write.packets", file_name);
 		g_packets_write_log_file = fopen(packets_file_name, rewrite_file ? "w" : "a");
 
 		if (g_packets_write_log_file == NULL) {
@@ -582,7 +582,7 @@ void dx_logging_packets(int read_packets, const void *buffer, int buffer_size) {
 
 	for (unsigned int i = 0; i < buffer_size; i++) {
 		if ((i & 15u) == 0) {
-			sprintf_s(line_buf, 11, "0x%08x", i);
+			snprintf(line_buf, 11, "0x%08x", i);
 		}
 
 		dxf_byte_t byte = bytes_buffer[i];
@@ -603,10 +603,10 @@ void dx_logging_packets(int read_packets, const void *buffer, int buffer_size) {
 		}
 
 		if ((i & 15u) == 15u || i == buffer_size - 1) {
-			fprintf(log_file, "\n%s:  %-48s  %-16s", line_buf, hex_buf, ascii_buf);
+			fwprintf(log_file, L"\n%s:  %-48s  %-16s", line_buf, hex_buf, ascii_buf);
 		}
 	}
 
-	fprintf(log_file, "\n");
+	fwprintf(log_file, L"\n");
 	fflush(log_file);
 }
