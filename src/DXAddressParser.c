@@ -28,8 +28,12 @@
 #include "Logger.h"
 
 #ifdef _WIN32
+#ifndef strncasecmp
 #define strncasecmp strnicmp
+#endif
+#ifndef strcasecmp
 #define strcasecmp stricmp
+#endif
 #endif /* _WIN32 */
 
 /* To add TLS codec support for library add 'DXFEED_CODEC_TLS_ENABLED' string

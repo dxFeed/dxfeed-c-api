@@ -27,16 +27,17 @@
 #include <time.h>
 #endif
 
-#include <stdio.h>
+#include <assert.h>
 #include <stdarg.h>
+#include <stdio.h>
 
-#include "Logger.h"
-#include "DXErrorHandling.h"
 #include "BufferedIOCommon.h"
-#include "DXMemory.h"
 #include "DXAlgorithms.h"
-#include "DXThreads.h"
 #include "DXErrorCodes.h"
+#include "DXErrorHandling.h"
+#include "DXMemory.h"
+#include "DXThreads.h"
+#include "Logger.h"
 #include "Version.h"
 
 /* -------------------------------------------------------------------------- */
@@ -558,29 +559,29 @@ void dx_logging_verbose_gap (void) {
  * @param buffer_size  The buffer data size
  */
 void dx_logging_packets(int read_packets, const void *buffer, int buffer_size) {
+	assert(buffer != NULL && buffer_size > 0);
+
 	if (g_packets_read_log_file == NULL || g_packets_write_log_file == NULL) {
 		return;
 	}
 
 	static char HEX[] = "0123456789ABCDEF";
-	const dxf_byte_t *bytes_buffer = (const dxf_byte_t *) buffer;
+	const dxf_byte_t *bytes_buffer = (const dxf_byte_t *)buffer;
 	FILE *log_file = (read_packets) ? g_packets_read_log_file : g_packets_write_log_file;
 
 	fwprintf(log_file, L"\n%ls [%08lx] size = %d\n", dx_get_current_time(),
 #ifdef _WIN32
-			 (unsigned long) GetCurrentThreadId(),
+			 (unsigned long)GetCurrentThreadId(),
 #else
-		(unsigned long)pthread_getthreadid_np(),
+			 (unsigned long)pthread_getthreadid_np(),
 #endif
-			 buffer_size
-	);
-
+			 buffer_size);
 
 	char line_buf[11] = {0};
 	char hex_buf[49] = {0};
 	char ascii_buf[17] = {0};
 
-	for (unsigned int i = 0; i < buffer_size; i++) {
+	for (unsigned int i = 0; i < (unsigned int)buffer_size; i++) {
 		if ((i & 15u) == 0) {
 			sprintf_s(line_buf, 11, "0x%08x", i);
 		}

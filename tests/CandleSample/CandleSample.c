@@ -23,6 +23,8 @@ typedef int bool;
 #define STATIC_PARAMS_COUNT 3
 #define TIME_PARAM_SHORT_TAG "-t"
 #define TOKEN_PARAM_SHORT_TAG "-T"
+#define LOG_PACKETS_TAG "-p"
+#define TIMEOUT_TAG "-tt"
 
 //Prevents file names globbing (converting * to all files in the current dir)
 #ifdef __MINGW64_VERSION_MAJOR
@@ -219,7 +221,7 @@ bool parse_date(const char* date_str, struct tm* time_struct) {
 int main (int argc, char* argv[]) {
 	dxf_connection_t connection;
 	dxf_subscription_t subscription;
-	int loop_counter = 100000;
+	int loop_counter = 604800;
 	int event_type = DXF_ET_CANDLE;
 	dxf_candle_attributes_t candle_attributes;
 	dxf_string_t symbol = NULL;
@@ -239,13 +241,18 @@ int main (int argc, char* argv[]) {
 
 	if (argc < STATIC_PARAMS_COUNT) {
 		printf(
-				"DXFeed candle console sample.\n"
-				"Usage: CandleSample <server address> <symbol> [" TIME_PARAM_SHORT_TAG " <DD-MM-YYYY>] [" TOKEN_PARAM_SHORT_TAG " <token>]\n"
-				"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
-				"  <symbol>         - The trade symbol, e.g. C, MSFT, YHOO, IBM\n"
-				"  " TIME_PARAM_SHORT_TAG " <DD-MM-YYYY>  - The time which candle started\n"
-				"  " TOKEN_PARAM_SHORT_TAG " <token>       - The authorization token\n"
-		);
+			"DXFeed candle console sample.\n"
+			"Usage: CandleSample <server address> <symbol> [" TIME_PARAM_SHORT_TAG
+			" <DD-MM-YYYY>] [" TOKEN_PARAM_SHORT_TAG " <token>] [" LOG_PACKETS_TAG "] [" TIMEOUT_TAG
+			" <timeout>]\n"
+			"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
+			"  <symbol>         - The trade symbol, e.g. C, MSFT, YHOO, IBM\n"
+			"  " TIME_PARAM_SHORT_TAG
+			" <DD-MM-YYYY>  - The time which candle started\n"
+			"  " TOKEN_PARAM_SHORT_TAG " <token>       - The authorization token\n"
+			"  " LOG_PACKETS_TAG "               - Enables the packets logging\n"
+			"  " TIMEOUT_TAG " <timeout>    - Sets the program timeout in seconds (default = 604800, i.e a week)\n"
+			);
 
 		return 0;
 	}
