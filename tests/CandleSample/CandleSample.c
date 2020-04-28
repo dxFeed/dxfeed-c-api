@@ -218,10 +218,31 @@ bool parse_date(const char* date_str, struct tm* time_struct) {
 	return true;
 }
 
+bool atoi2 (char *str, int *result) {
+	if (str == NULL || str[0] == '\0' || result == NULL) {
+		return false;
+	}
+
+	if (str[0] == '0' && str[1] == '\0') {
+		*result = 0;
+
+		return true;
+	}
+
+	int r = atoi(str);
+
+	if (r == 0) {
+		return false;
+	}
+
+	*result = r;
+
+	return true;
+}
+
 int main (int argc, char* argv[]) {
 	dxf_connection_t connection;
 	dxf_subscription_t subscription;
-	int loop_counter = 604800;
 	int event_type = DXF_ET_CANDLE;
 	dxf_candle_attributes_t candle_attributes;
 	dxf_string_t symbol = NULL;
@@ -257,8 +278,6 @@ int main (int argc, char* argv[]) {
 		return 0;
 	}
 
-	dxf_initialize_logger("candle-api.log", true, true, true, false);
-
 	dxfeed_host = argv[1];
 
 	symbol = ansi_to_unicode(argv[2]);
@@ -267,10 +286,14 @@ int main (int argc, char* argv[]) {
 	}
 
 	char* token = NULL;
+	bool log_packets_flag = false;
+	int program_timeout = 604800; // a week
 
 	if (argc > STATIC_PARAMS_COUNT) {
 		bool time_is_set = false;
 		bool token_is_set = false;
+		bool log_packets_flag_is_set = false;
+		bool program_timeout_is_set = false;
 		int i = 0;
 
 		for (i = STATIC_PARAMS_COUNT; i < argc; i++) {
@@ -295,10 +318,31 @@ int main (int argc, char* argv[]) {
 
 				token = argv[++i];
 				token_is_set = true;
+			} else if (log_packets_flag_is_set == false && strcmp(argv[i], LOG_PACKETS_TAG) == 0) {
+				log_packets_flag_is_set = true;
+				log_packets_flag = true;
+			} else if (program_timeout_is_set == false && strcmp(argv[i], TIMEOUT_TAG) == 0) {
+				if (i + 1 == argc) {
+					wprintf(L"The program timeout argument error\n");
+
+					return -1;
+				}
+
+				int new_program_timeout = -1;
+
+				if (!atoi2(argv[++i], &new_program_timeout)) {
+					wprintf(L"The program timeout argument parsing error\n");
+
+					return -1;
+				}
+
+				program_timeout = new_program_timeout;
+				program_timeout_is_set = true;
 			}
 		}
 	}
 
+	dxf_initialize_logger("candle-api.log", true, true, true, log_packets_flag);
 	wprintf(L"Sample test started.\n");
 	dxfeed_host_u = ansi_to_unicode(dxfeed_host);
 	wprintf(L"Connecting to host %ls...\n", dxfeed_host_u);
@@ -361,9 +405,9 @@ int main (int argc, char* argv[]) {
 	};
 	wprintf(L"Subscription successful!\n");
 
-	while (!is_thread_terminate() && loop_counter--) {
+	while (!is_thread_terminate() && program_timeout--) {
 #ifdef _WIN32
-		Sleep(100);
+		Sleep(1000);
 #else
 		sleep(1);
 #endif
@@ -390,7 +434,7 @@ int main (int argc, char* argv[]) {
 	free(symbol);
 
 	wprintf(L"Disconnect successful!\nConnection test completed successfully!\n");
-	wprintf(L"loops remain:%d\n", loop_counter);
+	wprintf(L"loops remain:%d\n", program_timeout);
 
 #ifdef _WIN32
 	DeleteCriticalSection(&listener_thread_guard);

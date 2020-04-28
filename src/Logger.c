@@ -565,7 +565,6 @@ void dx_logging_packets(int read_packets, const void *buffer, int buffer_size) {
 		return;
 	}
 
-	static char HEX[] = "0123456789ABCDEF";
 	const dxf_byte_t *bytes_buffer = (const dxf_byte_t *)buffer;
 	FILE *log_file = (read_packets) ? g_packets_read_log_file : g_packets_write_log_file;
 
@@ -577,37 +576,52 @@ void dx_logging_packets(int read_packets, const void *buffer, int buffer_size) {
 #endif
 			 buffer_size);
 
-	char line_buf[11] = {0};
-	char hex_buf[49] = {0};
-	char ascii_buf[17] = {0};
+	static const char HEX[] = "0123456789ABCDEF";
 
-	for (unsigned int i = 0; i < (unsigned int)buffer_size; i++) {
-		if ((i & 15u) == 0) {
-			snprintf(line_buf, 11, "0x%08x", i);
+#define BLOCK_SIZE (size_t)16
+// 10 + \0
+#define LINE_NUMBER_BUF_LENGTH (size_t)11
+// HH HH HH ... HH
+#define HEX_BUF_LENGTH ((size_t)(BLOCK_SIZE * 3 + 1))
+// aaa...aa
+#define ASCII_BUF_LENGTH (size_t)(BLOCK_SIZE + 1)
+
+	char line_number_buf[LINE_NUMBER_BUF_LENGTH] = {0};
+	char hex_buf[HEX_BUF_LENGTH] = {0};
+	char ascii_buf[ASCII_BUF_LENGTH] = {0};
+
+	for (size_t i = 0; i < (size_t)buffer_size; i++) {
+		if (i % BLOCK_SIZE == 0) {
+			snprintf(line_number_buf, LINE_NUMBER_BUF_LENGTH, "0x%08zx", i);
 		}
 
 		dxf_byte_t byte = bytes_buffer[i];
 
-		hex_buf[(i & 15u) * 3] = HEX[(dxf_ubyte_t)((dxf_ubyte_t)byte >> 4u) & 15u];
-		hex_buf[(i & 15u) * 3 + 1] = HEX[(dxf_ubyte_t)byte & 15u];
-		hex_buf[(i & 15u) * 3 + 2] = ' ';
+		hex_buf[(i % BLOCK_SIZE) * 3] = HEX[(dxf_ubyte_t)((dxf_ubyte_t)byte >> 4u) % 16];
+		hex_buf[(i % BLOCK_SIZE) * 3 + 1] = HEX[(dxf_ubyte_t)byte % 16];
+		hex_buf[(i % BLOCK_SIZE) * 3 + 2] = ' ';
 
 		if (i == buffer_size - 1) {
-			hex_buf[(i & 15u) * 3 + 3] = '\0';
+			hex_buf[(i % BLOCK_SIZE) * 3 + 3] = '\0';
 		}
 
-		ascii_buf[i & 15u] = (byte >= ' ' && byte <= '~') ? byte : '.';
+		ascii_buf[i % BLOCK_SIZE] = (byte >= ' ' && byte <= '~') ? byte : '.';
 
 		if (i == buffer_size - 1) {
-			hex_buf[(i & 15u) * 3 + 3] = '\0';
-			ascii_buf[(i & 15u) + 1] = '\0';
+			hex_buf[(i % BLOCK_SIZE) * 3 + 3] = '\0';
+			ascii_buf[(i % BLOCK_SIZE) + 1] = '\0';
 		}
 
-		if ((i & 15u) == 15u || i == buffer_size - 1) {
-			fwprintf(log_file, L"\n%s:  %-48s  %-16s", line_buf, hex_buf, ascii_buf);
+		if ((i % BLOCK_SIZE) == (BLOCK_SIZE - 1) || i == buffer_size - 1) {
+			fprintf(log_file, "\n%s:  %-48s  %-16s", line_number_buf, hex_buf, ascii_buf);
 		}
 	}
 
-	fwprintf(log_file, L"\n");
+#undef ASCII_BUF_LENGTH
+#undef HEX_BUF_LENGTH
+#undef LINE_NUMBER_BUF_LENGTH
+#undef BLOCK_SIZE
+
+	fprintf(log_file, "\n");
 	fflush(log_file);
 }

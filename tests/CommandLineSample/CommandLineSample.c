@@ -637,8 +637,8 @@ int main (int argc, char* argv[]) {
 			}
 		}
 	}
-	dxf_initialize_logger("command-line-api.log", true, true, true, log_packets_flag);
 
+	dxf_initialize_logger("command-line-api.log", true, true, true, log_packets_flag);
 	wprintf(L"CommandLineSample started.\n");
 	dxfeed_host_u = ansi_to_unicode(dxfeed_host, strlen(dxfeed_host));
 	wprintf(L"Connecting to host %ls...\n", dxfeed_host_u);
