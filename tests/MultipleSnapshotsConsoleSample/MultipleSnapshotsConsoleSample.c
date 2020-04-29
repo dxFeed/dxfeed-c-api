@@ -5,24 +5,25 @@
 #include <Windows.h>
 #else
 
-#include <unistd.h>
-#include <string.h>
-#include <wctype.h>
 #include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <wctype.h>
 
 #define stricmp strcasecmp
 #endif
 
-#include "DXFeed.h"
-#include "DXErrorCodes.h"
-#include <time.h>
-#include <stdio.h>
 #include <inttypes.h>
+#include <stdio.h>
+#include <time.h>
+
+#include "DXErrorCodes.h"
+#include "DXFeed.h"
 
 #define STRINGIFY(a) STR(a)
-#define STR(a) #a
+#define STR(a)		 #a
 
-#define LS(s) LS2(s)
+#define LS(s)  LS2(s)
 #define LS2(s) L##s
 
 #ifndef true
@@ -32,86 +33,81 @@ typedef int bool;
 #define false 0
 #endif
 
-//Prevents file names globbing (converting * to all files in the current dir)
+// Prevents file names globbing (converting * to all files in the current dir)
 #ifdef __MINGW64_VERSION_MAJOR
 int _CRT_glob = 0;
 #endif
 
 // ------ linked list to store symbols read from file
 struct Node {
-  void  *data;
-  struct Node *next;
+	void *data;
+	struct Node *next;
 };
-void list_push(struct Node** head_ref, void *new_data, size_t data_size) {
-  struct Node* new_node = (struct Node*)malloc(sizeof(struct Node));
-  new_node->data  = malloc(data_size);
-  new_node->next = (*head_ref);
-  int i;
-  for (i=0; i<data_size; i++)
-    *(char *)(new_node->data + i) = *(char *)(new_data + i);
-  (*head_ref) = new_node;
+void list_push(struct Node **head_ref, void *new_data, size_t data_size) {
+	struct Node *new_node = (struct Node *)malloc(sizeof(struct Node));
+	new_node->data = malloc(data_size);
+	new_node->next = (*head_ref);
+	int i;
+	for (i = 0; i < data_size; i++) *(char *)(new_node->data + i) = *(char *)(new_data + i);
+	(*head_ref) = new_node;
 }
 void list_print(struct Node *node) {
-  while (node != NULL) {
-    printf("%s\n", node->data);
-    node = node->next;
-  }
+	while (node != NULL) {
+		printf("%s\n", node->data);
+		node = node->next;
+	}
 }
 int list_size(struct Node *node) {
-  int size = 0;
-  while (node != NULL) {
-    node = node->next;
-    size++;
-  }
-  return size;
+	int size = 0;
+	while (node != NULL) {
+		node = node->next;
+		size++;
+	}
+	return size;
 }
 void list_free(struct Node *node) {
-  while (node != NULL) {
-    struct Node *curr = node;
-    node = node->next;
-    free(curr->data);
-    free(curr);
-  }
+	while (node != NULL) {
+		struct Node *curr = node;
+		node = node->next;
+		free(curr->data);
+		free(curr);
+	}
 }
 
 // ------ read symbols from file into list
-struct Node * readFile(char *fileName) {
-  FILE * fp;
-  char * line = NULL;
-  size_t len = 0;
-  ssize_t read;
+struct Node *readFile(char *fileName) {
+	FILE *fp;
+	char *line = NULL;
+	size_t len = 0;
+	ssize_t read;
 
-  fp = fopen(fileName, "r");
-  if (fp == NULL)
-    return NULL;
+	fp = fopen(fileName, "r");
+	if (fp == NULL) return NULL;
 
-  struct Node *result = NULL;
+	struct Node *result = NULL;
 
-  int readLines = 0;
-  while ((read = getline(&line, &len, fp)) != -1) {
-    char *pos;
-    if ((pos=strchr(line, '\n')) != NULL)
-      *pos = '\0';
-    if (strlen(line) > 0)
-      list_push(&result, line, read * sizeof(char));
-    readLines++;
-  }
+	int readLines = 0;
+	while ((read = getline(&line, &len, fp)) != -1) {
+		char *pos;
+		if ((pos = strchr(line, '\n')) != NULL) *pos = '\0';
+		if (strlen(line) > 0) list_push(&result, line, read * sizeof(char));
+		readLines++;
+	}
 
-  fclose(fp);
-  if (line)
-    free(line);
+	fclose(fp);
+	if (line) free(line);
 
-  return result;
+	return result;
 }
 
 // plus the name of the executable
-#define STATIC_PARAMS_COUNT 4
-#define DEFAULT_RECORDS_PRINT_LIMIT 7
+#define STATIC_PARAMS_COUNT				4
+#define DEFAULT_RECORDS_PRINT_LIMIT		7
 #define RECORDS_PRINT_LIMIT_SHORT_PARAM "-l"
-#define MAX_SOURCE_SIZE 42
-#define TOKEN_PARAM_SHORT_TAG "-T"
+#define MAX_SOURCE_SIZE					42
+#define TOKEN_PARAM_SHORT_TAG			"-T"
 
-dxf_const_string_t dx_event_type_to_string (int event_type) {
+dxf_const_string_t dx_event_type_to_string(int event_type) {
 	switch (event_type) {
 		case DXF_ET_TRADE:
 			return L"Trade";
@@ -158,7 +154,7 @@ bool is_thread_terminate() {
 #else
 static volatile bool is_listener_thread_terminated = false;
 
-bool is_thread_terminate () {
+bool is_thread_terminate() {
 	bool res;
 	res = is_listener_thread_terminated;
 	return res;
@@ -166,11 +162,10 @@ bool is_thread_terminate () {
 
 #endif
 
-
 /* -------------------------------------------------------------------------- */
 
 #ifdef _WIN32
-void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
+void on_reader_thread_terminate(dxf_connection_t connection, void *user_data) {
 	EnterCriticalSection(&listener_thread_guard);
 	is_listener_thread_terminated = true;
 	LeaveCriticalSection(&listener_thread_guard);
@@ -179,18 +174,18 @@ void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
 }
 #else
 
-void on_reader_thread_terminate (dxf_connection_t connection, void *user_data) {
+void on_reader_thread_terminate(dxf_connection_t connection, void *user_data) {
 	is_listener_thread_terminated = true;
 	printf("\nTerminating listener thread\n");
 }
 
 #endif
 
-void print_timestamp (dxf_long_t timestamp) {
+void print_timestamp(dxf_long_t timestamp) {
 	char timefmt[80];
 
 	struct tm *timeinfo;
-	time_t tmpint = (time_t) (timestamp / 1000);
+	time_t tmpint = (time_t)(timestamp / 1000);
 	timeinfo = localtime(&tmpint);
 	strftime(timefmt, 80, "%Y%m%d-%H%M%S", timeinfo);
 	printf("<<< TIME STAMP >>>: %s\n", timefmt);
@@ -198,7 +193,7 @@ void print_timestamp (dxf_long_t timestamp) {
 
 /* -------------------------------------------------------------------------- */
 
-void process_last_error () {
+void process_last_error() {
 	int error_code = dx_ec_success;
 	dxf_const_string_t error_descr = NULL;
 	int res;
@@ -211,9 +206,10 @@ void process_last_error () {
 			return;
 		}
 
-		printf("Error occurred and successfully retrieved:\n"
-		        "error code = %d, description = \"%ls\"\n",
-		        error_code, error_descr);
+		printf(
+			"Error occurred and successfully retrieved:\n"
+			"error code = %d, description = \"%ls\"\n",
+			error_code, error_descr);
 		return;
 	}
 
@@ -222,7 +218,7 @@ void process_last_error () {
 
 /* -------------------------------------------------------------------------- */
 
-dxf_string_t ansi_to_unicode (const char *ansi_str) {
+dxf_string_t ansi_to_unicode(const char *ansi_str) {
 #ifdef _WIN32
 	size_t len = strlen(ansi_str);
 	dxf_string_t wide_str = NULL;
@@ -236,11 +232,11 @@ dxf_string_t ansi_to_unicode (const char *ansi_str) {
 	}
 
 	return wide_str;
-#else /* _WIN32 */
+#else  /* _WIN32 */
 	dxf_string_t wide_str = NULL;
-	size_t wide_size = mbstowcs(NULL, ansi_str, 0); // 0 is ignored
+	size_t wide_size = mbstowcs(NULL, ansi_str, 0);	 // 0 is ignored
 
-	if (wide_size > 0 && wide_size != (size_t) -1) {
+	if (wide_size > 0 && wide_size != (size_t)-1) {
 		wide_str = calloc(wide_size + 1, sizeof(dxf_char_t));
 		mbstowcs(wide_str, ansi_str, wide_size + 1);
 	}
@@ -251,93 +247,93 @@ dxf_string_t ansi_to_unicode (const char *ansi_str) {
 
 /* -------------------------------------------------------------------------- */
 
-void listener (const dxf_snapshot_data_ptr_t snapshot_data, void *user_data) {
+void listener(const dxf_snapshot_data_ptr_t snapshot_data, void *user_data) {
 	size_t i;
 	size_t records_count = snapshot_data->records_count;
 	int records_print_limit = DEFAULT_RECORDS_PRINT_LIMIT;
 
 	if (user_data) {
-		records_print_limit = *(int *) user_data;
+		records_print_limit = *(int *)user_data;
 	}
 
-        int printDetails = false;
+	int printDetails = false;
 
-	printf("Snapshot %ls{symbol=%ls, records_count=%zu}\n",
-	        dx_event_type_to_string(snapshot_data->event_type), snapshot_data->symbol,
-	        records_count);
-        /*
-	if (snapshot_data->event_type == DXF_ET_ORDER) {
-		dxf_order_t *order_records = (dxf_order_t *) snapshot_data->records;
-		for (i = 0; i < records_count; ++i) {
-			dxf_order_t order = order_records[i];
+	printf("Snapshot %ls{symbol=%ls, records_count=%zu}\n", dx_event_type_to_string(snapshot_data->event_type),
+		   snapshot_data->symbol, records_count);
+	/*
+if (snapshot_data->event_type == DXF_ET_ORDER) {
+	dxf_order_t *order_records = (dxf_order_t *) snapshot_data->records;
+	for (i = 0; i < records_count; ++i) {
+		dxf_order_t order = order_records[i];
 
-			if (records_print_limit > 0 && i >= records_print_limit) {
-				printf("   { ... %zu records left ...}\n", records_count - i);
-				break;
-			}
+		if (records_print_limit > 0 && i >= records_print_limit) {
+			printf("   { ... %zu records left ...}\n", records_count - i);
+			break;
+		}
 
 //			printf("   {index=0x%llX, side=%i, scope=%i, time=",
 //			        order.index, order.side, order.scope);
-			print_timestamp(order.time);
+		print_timestamp(order.time);
 //			printf(", exchange code=%c, market maker=%ls, price=%f, size=%d",
 //			        order.exchange_code, order.market_maker, order.price, order.size);
 //			if (wcslen(order.source) > 0)
 //				printf(", source=%ls", order.source);
 //			printf(", count=%d}\n", order.count);
-		}
-	} else if (snapshot_data->event_type == DXF_ET_CANDLE) {
-		dxf_candle_t *candle_records = (dxf_candle_t *) snapshot_data->records;
-		for (i = 0; i < snapshot_data->records_count; ++i) {
-			dxf_candle_t candle = candle_records[i];
+	}
+} else if (snapshot_data->event_type == DXF_ET_CANDLE) {
+	dxf_candle_t *candle_records = (dxf_candle_t *) snapshot_data->records;
+	for (i = 0; i < snapshot_data->records_count; ++i) {
+		dxf_candle_t candle = candle_records[i];
 
-			if (records_print_limit > 0 && i >= records_print_limit) {
-				printf("   { ... %zu records left ...}\n", records_count - i);
-				break;
-			}
+		if (records_print_limit > 0 && i >= records_print_limit) {
+			printf("   { ... %zu records left ...}\n", records_count - i);
+			break;
+		}
 
 //			printf("   {time=");
-			print_timestamp(candle.time);
+		print_timestamp(candle.time);
 //			printf(", sequence=%d, count=%f, open=%f, high=%f, low=%f, close=%f, volume=%f, "
 //			        "VWAP=%f, bidVolume=%f, askVolume=%f}\n",
 //			        candle.sequence, candle.count, candle.open, candle.high,
 //			        candle.low, candle.close, candle.volume, candle.vwap,
 //			        candle.bid_volume, candle.ask_volume);
-		}
-	} else if (snapshot_data->event_type == DXF_ET_SPREAD_ORDER) {
-		dxf_order_t *order_records = (dxf_order_t *) snapshot_data->records;
-		for (i = 0; i < records_count; ++i) {
-			dxf_order_t order = order_records[i];
+	}
+} else if (snapshot_data->event_type == DXF_ET_SPREAD_ORDER) {
+	dxf_order_t *order_records = (dxf_order_t *) snapshot_data->records;
+	for (i = 0; i < records_count; ++i) {
+		dxf_order_t order = order_records[i];
 
-			if (records_print_limit > 0 && i >= records_print_limit) {
-				printf("   { ... %zu records left ...}\n", records_count - i);
-				break;
-			}
+		if (records_print_limit > 0 && i >= records_print_limit) {
+			printf("   { ... %zu records left ...}\n", records_count - i);
+			break;
+		}
 
 //			printf("   {index=0x%llX, side=%i, scope=%i, time=",
 //			        order.index, order.side, order.scope);
-			print_timestamp(order.time);
+		print_timestamp(order.time);
 //			printf(", sequence=%i, exchange code=%c, price=%f, size=%d, source=%ls, "
 //			        "count=%i, flags=%i, spread symbol=%ls}\n",
 //			        order.sequence, order.exchange_code, order.price, order.size,
 //			        wcslen(order.source) > 0 ? order.source : L"",
 //			        order.count, order.event_flags,
 //			        wcslen(order.spread_symbol) > 0 ? order.spread_symbol : L"");
-		}
-	} else */if (printDetails && snapshot_data->event_type == DXF_ET_TIME_AND_SALE) {
-		dxf_time_and_sale_t *time_and_sale_records = (dxf_time_and_sale_t *) snapshot_data->records;
+	}
+} else */
+	if (printDetails && snapshot_data->event_type == DXF_ET_TIME_AND_SALE) {
+		dxf_time_and_sale_t *time_and_sale_records = (dxf_time_and_sale_t *)snapshot_data->records;
 		for (i = 0; i < snapshot_data->records_count; ++i) {
 			dxf_time_and_sale_t tns = time_and_sale_records[i];
 
-                    if (records_print_limit > 0 && i >= records_print_limit) {
-                          printf("   { ... %zu records left ...}\n", records_count - i);
-                          break;
-                    }
+			if (records_print_limit > 0 && i >= records_print_limit) {
+				printf("   { ... %zu records left ...}\n", records_count - i);
+				break;
+			}
 
-                    printf("   {event id=%d, time=%d, exchange code=%c, price=%f, size=%i, bid price=%f, ask price=%f, "
-                            "exchange sale conditions=\'%ls\', is ETH trade=%s, type=%i}\n",
-                            tns.index, tns.time, tns.exchange_code, tns.price, tns.size,
-                            tns.bid_price, tns.ask_price, tns.exchange_sale_conditions,
-                            tns.is_eth_trade ? "True" : "False", tns.type);
+			printf(
+				"   {event id=%d, time=%d, exchange code=%c, price=%f, size=%i, bid price=%f, ask price=%f, "
+				"exchange sale conditions=\'%ls\', is ETH trade=%s, type=%i}\n",
+				tns.index, tns.time, tns.exchange_code, tns.price, tns.size, tns.bid_price, tns.ask_price,
+				tns.exchange_sale_conditions, tns.is_eth_trade ? "True" : "False", tns.type);
 		}
 	} /*else if (snapshot_data->event_type == DXF_ET_GREEKS) {
 		dxf_greeks_t *greeks_records = (dxf_greeks_t *) snapshot_data->records;
@@ -377,7 +373,7 @@ void listener (const dxf_snapshot_data_ptr_t snapshot_data, void *user_data) {
 
 /* -------------------------------------------------------------------------- */
 
-bool atoi2 (char *str, int *result) {
+bool atoi2(char *str, int *result) {
 	if (str == NULL || str[0] == '\0' || result == NULL) {
 		return false;
 	}
@@ -403,59 +399,55 @@ bool atoi2 (char *str, int *result) {
 
 dxf_connection_t connection;
 struct Node *symbols_list = NULL;
-dxf_snapshot_t          *snapshots;
+dxf_snapshot_t *snapshots;
 dxf_candle_attributes_t *candle_attributes;
 
-
 int process_exit(int exit_code) {
+	struct Node *n = symbols_list;
+	int index = 0;
 
-  struct Node *n = symbols_list;
-  int index = 0;
+	while (n != NULL) {
+		printf("   > clean data for %s\n", n->data);
+		if (NULL != snapshots) {
+			void *snapshot = snapshots[index];
+			if (NULL != snapshot) printf("     - close snapshot\n");
+			if (NULL != snapshot && !dxf_close_snapshot(snapshot)) {
+				process_last_error();
+			}
+		}
 
-  while (n != NULL) {
-    printf("   > clean data for %s\n", n->data);
-    if (NULL != snapshots) {
-      void *snapshot = snapshots[index];
-      if (NULL != snapshot)
-        printf("     - close snapshot\n");
-      if (NULL != snapshot && !dxf_close_snapshot(snapshot)) {
-        process_last_error();
-      }
-    }
+		if (NULL != candle_attributes) {
+			void *candle_attribute = candle_attributes[index];
+			if (NULL != candle_attribute) printf("     - remove symbol attributes\n");
+			if (NULL != candle_attribute && !dxf_delete_candle_symbol_attributes(candle_attribute)) {
+				process_last_error();
+			}
+		}
 
-    if (NULL != candle_attributes) {
-      void *candle_attribute = candle_attributes[index];
-      if (NULL != candle_attribute)
-        printf("     - remove symbol attributes\n");
-      if (NULL != candle_attribute && !dxf_delete_candle_symbol_attributes(candle_attribute)) {
-        process_last_error();
-      }
-    }
+		n = n->next;
+		index++;
+	}
 
-    n = n->next;
-    index++;
-  }
+	list_free(symbols_list);
 
-  list_free(symbols_list);
+	if (NULL != connection) {
+		if (!dxf_close_connection(connection)) {
+			process_last_error();
+		} else {
+			printf("Disconnect successful!\n");
+		}
+		//    free(connection);
+	}
 
-  if (NULL != connection) {
-    if (!dxf_close_connection(connection)) {
-      process_last_error();
-    } else {
-      printf("Disconnect successful!\n");
-    }
-//    free(connection);
-  }
-
-  return exit_code;
+	return exit_code;
 }
 
-int main (int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
 	char *event_type_name = NULL;
 	dx_event_id_t event_id;
 	char *dxfeed_host = NULL;
 	dxf_string_t dxfeed_host_u = NULL;
-        char *inputFileName;
+	char *inputFileName;
 
 	if (argc < STATIC_PARAMS_COUNT) {
 		printf("DXFeed command line sample.\n"
@@ -498,14 +490,14 @@ int main (int argc, char *argv[]) {
 		return -1;
 	}
 
-        inputFileName = argv[3];
+	inputFileName = argv[3];
 	if (inputFileName == NULL) {
-              return -1;
+		return -1;
 	}
-        symbols_list = readFile(inputFileName);
+	symbols_list = readFile(inputFileName);
 	if (symbols_list == NULL) {
-          return -1;
-        }
+		return -1;
+	}
 
 	printf("Total symbols loaded from file: %d\n", list_size(symbols_list));
 
@@ -575,8 +567,8 @@ int main (int argc, char *argv[]) {
 #endif
 
 	if (token != NULL && token[0] != '\0') {
-		if (!dxf_create_connection_auth_bearer(
-				dxfeed_host, token, on_reader_thread_terminate, NULL, NULL, NULL, NULL, &connection)) {
+		if (!dxf_create_connection_auth_bearer(dxfeed_host, token, on_reader_thread_terminate, NULL, NULL, NULL, NULL,
+											   &connection)) {
 			process_last_error();
 
 			return -1;
@@ -589,83 +581,79 @@ int main (int argc, char *argv[]) {
 
 	printf("Connection successful!\n");
 
-
-        snapshots = malloc(sizeof(dxf_snapshot_data_ptr_t) * list_size(symbols_list));
-        candle_attributes = malloc(sizeof(dxf_candle_attributes_t) * list_size(symbols_list));
+	snapshots = malloc(sizeof(dxf_snapshot_data_ptr_t) * list_size(symbols_list));
+	candle_attributes = malloc(sizeof(dxf_candle_attributes_t) * list_size(symbols_list));
 
 	struct Node *symbol = symbols_list;
 	int index = 0;
-	while(symbol != NULL) {
+	while (symbol != NULL) {
+		dxf_snapshot_t snapshot;
+		dxf_candle_attributes_t candle_attribute;
+		dxf_string_t base_symbol = ansi_to_unicode(symbol->data);
 
-            dxf_snapshot_t           snapshot;
-            dxf_candle_attributes_t  candle_attribute;
-            dxf_string_t base_symbol = ansi_to_unicode(symbol->data);
+		//            printf("%ls\n", base_symbol);
 
-//            printf("%ls\n", base_symbol);
+		if (event_id == dx_eid_candle) {
+			if (!dxf_create_candle_symbol_attributes(base_symbol, DXF_CANDLE_EXCHANGE_CODE_ATTRIBUTE_DEFAULT,
+													 DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT, dxf_ctpa_day,
+													 dxf_cpa_default, dxf_csa_default, dxf_caa_default,
+													 DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, &candle_attribute)) {
+				process_last_error();
+				return process_exit(-1);
+			}
 
-            if (event_id == dx_eid_candle) {
-              if (!dxf_create_candle_symbol_attributes(base_symbol,
-                                                       DXF_CANDLE_EXCHANGE_CODE_ATTRIBUTE_DEFAULT,
-                                                       DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT,
-                                                       dxf_ctpa_day, dxf_cpa_default, dxf_csa_default,
-                                                       dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT,
-                                                       &candle_attribute)) {
+			if (!dxf_create_candle_snapshot(connection, candle_attribute, 0, &snapshot)) {
+				process_last_error();
+				return process_exit(-1);
+			}
+			candle_attributes[index] = candle_attribute;
+		} else if (event_id == dx_eid_order) {
+			if (!dxf_create_order_snapshot(connection, base_symbol, order_source_ptr, 0, &snapshot)) {
+				process_last_error();
+				process_exit(-1);
+			}
+			snapshots[index] = snapshot;
+		} else {
+			if (!dxf_create_snapshot(connection, event_id, base_symbol, NULL, 0, &snapshot)) {
+				process_last_error();
+				return process_exit(-1);
+			}
+			snapshots[index] = snapshot;
+		}
 
-                process_last_error();
-                return process_exit(-1);
-              }
+		if (!dxf_attach_snapshot_listener(snapshot, listener, (void *)&records_print_limit)) {
+			process_last_error();
+			return process_exit(-1);
+		};
 
-              if (!dxf_create_candle_snapshot(connection, candle_attribute, 0, &snapshot)) {
-                process_last_error();
-                return process_exit(-1);
-              }
-              candle_attributes[index] = candle_attribute;
-            } else if (event_id == dx_eid_order) {
-              if (!dxf_create_order_snapshot(connection, base_symbol, order_source_ptr, 0, &snapshot)) {
-                process_last_error();
-                process_exit(-1);
-              }
-              snapshots[index] = snapshot;
-            } else {
-              if (!dxf_create_snapshot(connection, event_id, base_symbol, NULL, 0, &snapshot)) {
-                process_last_error();
-                return process_exit(-1);
-              }
-              snapshots[index] = snapshot;
-            }
+		printf("Subscribed to '%ls'\n", base_symbol);
 
-            if (!dxf_attach_snapshot_listener(snapshot, listener, (void *) &records_print_limit)) {
-              process_last_error();
-              return process_exit(-1);
-            };
+		free(base_symbol);
 
-            printf("Subscribed to '%ls'\n", base_symbol);
-
-            free(base_symbol);
-
-            symbol = symbol->next;
-            index++;
-        }
+		symbol = symbol->next;
+		index++;
+	}
 
 	printf("Subscription successful!\n");
 
 	int i = 0;
-        while (!is_thread_terminate() && i++ < 10) {
-          #ifdef _WIN32
-          Sleep(100);
-          #else
-          sleep(1);
-          #endif
-        }
-        is_listener_thread_terminated = true;
+	while (!is_thread_terminate() && i++ < 10) {
+#ifdef _WIN32
+		Sleep(100);
+#else
+		sleep(1);
+#endif
+	}
+	is_listener_thread_terminated = true;
 
-        process_exit(0);
+	process_exit(0);
 
 #ifdef _WIN32
-  DeleteCriticalSection(&listener_thread_guard);
+	DeleteCriticalSection(&listener_thread_guard);
 #endif
-        printf("MultipleSnapshots test completed successfully!\n");
-        return 0;
+	printf("MultipleSnapshots test completed successfully!\n");
+	return 0;
 }
 
-// valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=valgrind-out.txt ./MultipleSnapshotsConsoleSampled_64 mddqa.in.devexperts.com:7400 TIME_AND_SALE /data/symbols3
+// valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=valgrind-out.txt
+// ./MultipleSnapshotsConsoleSampled_64 mddqa.in.devexperts.com:7400 TIME_AND_SALE /data/symbols3
