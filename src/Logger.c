@@ -568,7 +568,7 @@ void dx_logging_packets(int read_packets, const void *buffer, int buffer_size) {
 	const dxf_byte_t *bytes_buffer = (const dxf_byte_t *)buffer;
 	FILE *log_file = (read_packets) ? g_packets_read_log_file : g_packets_write_log_file;
 
-	fwprintf(log_file, L"\n%ls [%08lx] size = %d\n", dx_get_current_time(),
+	fprintf(log_file, "\n%ls [%08lx] size = %d\n", dx_get_current_time(),
 #ifdef _WIN32
 			 (unsigned long)GetCurrentThreadId(),
 #else
