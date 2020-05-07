@@ -26,6 +26,8 @@ typedef int bool;
 // plus the name of the executable
 #define STATIC_PARAMS_COUNT 3
 #define TOKEN_PARAM_SHORT_TAG "-T"
+#define LOG_DATA_TRANSFER_TAG "-p"
+#define TIMEOUT_TAG "-o"
 #define MAX_SOURCE_SIZE 42
 #define MAX_SOURCES 10
 
@@ -159,6 +161,28 @@ void listener(const dxf_price_level_book_data_ptr_t book_data, void* user_data) 
 	}
 }
 
+bool atoi2(char* str, int* result) {
+	if (str == NULL || str[0] == '\0' || result == NULL) {
+		return false;
+	}
+
+	if (str[0] == '0' && str[1] == '\0') {
+		*result = 0;
+
+		return true;
+	}
+
+	int r = atoi(str);
+
+	if (r == 0) {
+		return false;
+	}
+
+	*result = r;
+
+	return true;
+}
+
 /* -------------------------------------------------------------------------- */
 
 static const char *default_sources[] = { "BZX", "DEX", NULL };
@@ -174,17 +198,18 @@ int main(int argc, char* argv[]) {
 
 	if (argc < STATIC_PARAMS_COUNT) {
 		printf("DXFeed Price Level Book command line sample.\n"
-			"Usage: PriceLevelBookSample <server address> <symbol> [order_source] [" TOKEN_PARAM_SHORT_TAG " <token>]\n"
+			"Usage: PriceLevelBookSample <server address> <symbol> [order_source] [" TOKEN_PARAM_SHORT_TAG " <token>] "
+			"[" LOG_DATA_TRANSFER_TAG "] [" TIMEOUT_TAG " <timeout>]\n"
 			"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
 			"  <symbol>         - The trade symbol, e.g. C, MSFT, YHOO, IBM\n"
 			"  [order_source]   - One or more order sources, e.g.. NTV, BYX, BZX, DEA,\n"
 			"                     ISE, DEX, IST. Default is BZX DEX\n"
 			"  " TOKEN_PARAM_SHORT_TAG " <token>       - The authorization token\n"
+			"  " LOG_DATA_TRANSFER_TAG "               - Enables the data transfer logging\n"
+			"  " TIMEOUT_TAG " <timeout>     - Sets the program timeout in seconds (default = 604800, i.e a week)\n"
 			);
 		return 0;
 	}
-
-	dxf_initialize_logger("price-level-book-api.log", true, true, true, false);
 
 	dxfeed_host = argv[1];
 	base_symbol = ansi_to_unicode(argv[2]);
@@ -197,12 +222,14 @@ int main(int argc, char* argv[]) {
 	const char* order_sources[MAX_SOURCES + 1] = {NULL};
 	char* token = NULL;
 	bool order_source_is_set = false;
+	bool log_data_transfer_flag = false;
+	int program_timeout = 604800; // a week
 
 	if (argc > STATIC_PARAMS_COUNT) {
 		bool token_is_set = false;
-		int i = 0;
+		bool program_timeout_is_set = false;
 
-		for (i = STATIC_PARAMS_COUNT; i < argc; i++) {
+		for (int i = STATIC_PARAMS_COUNT; i < argc; i++) {
 			if (token_is_set == false && strcmp(argv[i], TOKEN_PARAM_SHORT_TAG) == 0) {
 				if (i + 1 == argc) {
 					wprintf(L"Token argument error\n");
@@ -212,9 +239,27 @@ int main(int argc, char* argv[]) {
 
 				token = argv[++i];
 				token_is_set = true;
+			} else if (log_data_transfer_flag == false && strcmp(argv[i], LOG_DATA_TRANSFER_TAG) == 0) {
+				log_data_transfer_flag = true;
+			} else if (program_timeout_is_set == false && strcmp(argv[i], TIMEOUT_TAG) == 0) {
+				if (i + 1 == argc) {
+					wprintf(L"The program timeout argument error\n");
+
+					return -1;
+				}
+
+				int new_program_timeout = -1;
+
+				if (!atoi2(argv[++i], &new_program_timeout)) {
+					wprintf(L"The program timeout argument parsing error\n");
+
+					return -1;
+				}
+
+				program_timeout = new_program_timeout;
+				program_timeout_is_set = true;
 			} else if (order_source_is_set == false) {
-				size_t string_len = 0;
-				string_len = strlen(argv[i]);
+				size_t string_len = strlen(argv[i]);
 
 				if (string_len > MAX_SOURCE_SIZE) {
 					wprintf(L"Invalid order source param!\n");
@@ -242,6 +287,7 @@ int main(int argc, char* argv[]) {
 		order_sources_ptr = default_sources;
 	}
 
+	dxf_initialize_logger("price-level-book-api.log", true, true, true, log_data_transfer_flag);
 	wprintf(L"PriceLevelBookSample test started.\n");
 	dxfeed_host_u = ansi_to_unicode(dxfeed_host);
 	wprintf(L"Connecting to host %ls...\n", dxfeed_host_u);
@@ -277,9 +323,9 @@ int main(int argc, char* argv[]) {
 
 	wprintf(L"Subscription successful!\n");
 
-	while (!is_thread_terminate()) {
+	while (!is_thread_terminate() && program_timeout--) {
 #ifdef _WIN32
-		Sleep(100);
+		Sleep(1000);
 #else
 		sleep(1);
 #endif

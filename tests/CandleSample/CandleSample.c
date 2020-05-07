@@ -263,9 +263,8 @@ int main (int argc, char* argv[]) {
 	if (argc < STATIC_PARAMS_COUNT) {
 		printf(
 			"DXFeed candle console sample.\n"
-			"Usage: CandleSample <server address> <symbol> [" TIME_PARAM_SHORT_TAG
-			" <DD-MM-YYYY>] [" TOKEN_PARAM_SHORT_TAG " <token>] [" LOG_DATA_TRANSFER_TAG "] [" TIMEOUT_TAG
-			" <timeout>]\n"
+			"Usage: CandleSample <server address> <symbol> [" TIME_PARAM_SHORT_TAG " <DD-MM-YYYY>] "
+			"[" TOKEN_PARAM_SHORT_TAG " <token>] [" LOG_DATA_TRANSFER_TAG "] [" TIMEOUT_TAG	" <timeout>]\n"
 			"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
 			"  <symbol>         - The trade symbol, e.g. C, MSFT, YHOO, IBM\n"
 			"  " TIME_PARAM_SHORT_TAG
@@ -292,11 +291,9 @@ int main (int argc, char* argv[]) {
 	if (argc > STATIC_PARAMS_COUNT) {
 		bool time_is_set = false;
 		bool token_is_set = false;
-		bool log_data_transfer_flag_is_set = false;
 		bool program_timeout_is_set = false;
-		int i = 0;
 
-		for (i = STATIC_PARAMS_COUNT; i < argc; i++) {
+		for (int i = STATIC_PARAMS_COUNT; i < argc; i++) {
 			if (time_is_set == false && strcmp(argv[i], TIME_PARAM_SHORT_TAG) == 0) {
 				if (i + 1 == argc) {
 					wprintf(L"Date argument error\n");
@@ -318,8 +315,7 @@ int main (int argc, char* argv[]) {
 
 				token = argv[++i];
 				token_is_set = true;
-			} else if (log_data_transfer_flag_is_set == false && strcmp(argv[i], LOG_DATA_TRANSFER_TAG) == 0) {
-				log_data_transfer_flag_is_set = true;
+			} else if (log_data_transfer_flag == false && strcmp(argv[i], LOG_DATA_TRANSFER_TAG) == 0) {
 				log_data_transfer_flag = true;
 			} else if (program_timeout_is_set == false && strcmp(argv[i], TIMEOUT_TAG) == 0) {
 				if (i + 1 == argc) {

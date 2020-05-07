@@ -578,14 +578,12 @@ int main (int argc, char* argv[]) {
 	int program_timeout = 604800; // a week
 
 	if (argc > STATIC_PARAMS_COUNT) {
-		int i = 0;
 		bool dump_filename_is_set = false;
 		bool token_is_set = false;
 		bool subscr_data_is_set = false;
-		bool log_data_transfer_flag_is_set = false;
 		bool program_timeout_is_set = false;
 
-		for (i = STATIC_PARAMS_COUNT; i < argc; i++) {
+		for (int i = STATIC_PARAMS_COUNT; i < argc; i++) {
 			if (dump_filename_is_set == false &&
 					(strcmp(argv[i], DUMP_PARAM_SHORT_TAG) == 0 || strcmp(argv[i], DUMP_PARAM_LONG_TAG) == 0)) {
 				if (i + 1 == argc) {
@@ -614,8 +612,7 @@ int main (int argc, char* argv[]) {
 
 				subscr_data = argv[++i];
 				subscr_data_is_set = true;
-			} else if (log_data_transfer_flag_is_set == false && strcmp(argv[i], LOG_DATA_TRANSFER_TAG) == 0) {
-				log_data_transfer_flag_is_set = true;
+			} else if (log_data_transfer_flag == false && strcmp(argv[i], LOG_DATA_TRANSFER_TAG) == 0) {
 				log_data_transfer_flag = true;
 			} else if (program_timeout_is_set == false && strcmp(argv[i], TIMEOUT_TAG) == 0) {
 				if (i + 1 == argc) {
@@ -649,12 +646,14 @@ int main (int argc, char* argv[]) {
 #endif
 
 	if (token != NULL && token[0] != '\0') {
-		if (!dxf_create_connection_auth_bearer(dxfeed_host, token, on_reader_thread_terminate, on_connection_status_changed, NULL, NULL, NULL, &connection)) {
+		if (!dxf_create_connection_auth_bearer(dxfeed_host, token, on_reader_thread_terminate,
+											   on_connection_status_changed, NULL, NULL, NULL, &connection)) {
 			process_last_error();
 			free_symbols(symbols, symbol_count);
 			return -1;
 		}
-	} else if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, on_connection_status_changed, NULL, NULL, NULL, &connection)) {
+	} else if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, on_connection_status_changed, NULL, NULL,
+									  NULL, &connection)) {
 		process_last_error();
 		free_symbols(symbols, symbol_count);
 		return -1;

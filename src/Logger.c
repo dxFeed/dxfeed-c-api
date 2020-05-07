@@ -567,6 +567,10 @@ void dx_logging_verbose_gap (void) {
 }
 
 void dx_logging_transfer_data(FILE *log_file, const void *buffer, int buffer_size) {
+	if (!g_data_transfer_logger_mode) {
+		return;
+	}
+
 	const dxf_byte_t *bytes_buffer = (const dxf_byte_t *)buffer;
 	fprintf(log_file, "\n%ls [%08lx] size = %d\n", dx_get_current_time(),
 #ifdef _WIN32
@@ -627,6 +631,10 @@ void dx_logging_transfer_data(FILE *log_file, const void *buffer, int buffer_siz
 }
 
 void dx_logging_send_data(const void *buffer, int buffer_size) {
+	if (!g_data_transfer_logger_mode) {
+		return;
+	}
+
 	assert(buffer != NULL && buffer_size > 0);
 
 	if (!dx_mutex_lock(&g_data_send_log_file_lock)) {
@@ -641,6 +649,10 @@ void dx_logging_send_data(const void *buffer, int buffer_size) {
 }
 
 void dx_logging_receive_data(const void *buffer, int buffer_size) {
+	if (!g_data_transfer_logger_mode) {
+		return;
+	}
+
 	assert(buffer != NULL && buffer_size > 0);
 
 	if (!dx_mutex_lock(&g_data_receive_log_file_lock)) {
@@ -655,6 +667,10 @@ void dx_logging_receive_data(const void *buffer, int buffer_size) {
 }
 
 void dx_logging_send_data_start(int buffer_size) {
+	if (!g_data_transfer_logger_mode) {
+		return;
+	}
+
 	if (!dx_mutex_lock(&g_data_send_log_file_lock)) {
 		return;
 	}
