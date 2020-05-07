@@ -23,8 +23,8 @@ typedef int bool;
 #define STATIC_PARAMS_COUNT 3
 #define TIME_PARAM_SHORT_TAG "-t"
 #define TOKEN_PARAM_SHORT_TAG "-T"
-#define LOG_PACKETS_TAG "-p"
-#define TIMEOUT_TAG "-tt"
+#define LOG_DATA_TRANSFER_TAG "-p"
+#define TIMEOUT_TAG "-o"
 
 //Prevents file names globbing (converting * to all files in the current dir)
 #ifdef __MINGW64_VERSION_MAJOR
@@ -264,15 +264,15 @@ int main (int argc, char* argv[]) {
 		printf(
 			"DXFeed candle console sample.\n"
 			"Usage: CandleSample <server address> <symbol> [" TIME_PARAM_SHORT_TAG
-			" <DD-MM-YYYY>] [" TOKEN_PARAM_SHORT_TAG " <token>] [" LOG_PACKETS_TAG "] [" TIMEOUT_TAG
+			" <DD-MM-YYYY>] [" TOKEN_PARAM_SHORT_TAG " <token>] [" LOG_DATA_TRANSFER_TAG "] [" TIMEOUT_TAG
 			" <timeout>]\n"
 			"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
 			"  <symbol>         - The trade symbol, e.g. C, MSFT, YHOO, IBM\n"
 			"  " TIME_PARAM_SHORT_TAG
 			" <DD-MM-YYYY>  - The time which candle started\n"
 			"  " TOKEN_PARAM_SHORT_TAG " <token>       - The authorization token\n"
-			"  " LOG_PACKETS_TAG "               - Enables the packets logging\n"
-			"  " TIMEOUT_TAG " <timeout>    - Sets the program timeout in seconds (default = 604800, i.e a week)\n"
+			"  " LOG_DATA_TRANSFER_TAG "               - Enables the packets logging\n"
+			"  " TIMEOUT_TAG " <timeout>     - Sets the program timeout in seconds (default = 604800, i.e a week)\n"
 			);
 
 		return 0;
@@ -286,13 +286,13 @@ int main (int argc, char* argv[]) {
 	}
 
 	char* token = NULL;
-	bool log_packets_flag = false;
+	bool log_data_transfer_flag = false;
 	int program_timeout = 604800; // a week
 
 	if (argc > STATIC_PARAMS_COUNT) {
 		bool time_is_set = false;
 		bool token_is_set = false;
-		bool log_packets_flag_is_set = false;
+		bool log_data_transfer_flag_is_set = false;
 		bool program_timeout_is_set = false;
 		int i = 0;
 
@@ -318,9 +318,9 @@ int main (int argc, char* argv[]) {
 
 				token = argv[++i];
 				token_is_set = true;
-			} else if (log_packets_flag_is_set == false && strcmp(argv[i], LOG_PACKETS_TAG) == 0) {
-				log_packets_flag_is_set = true;
-				log_packets_flag = true;
+			} else if (log_data_transfer_flag_is_set == false && strcmp(argv[i], LOG_DATA_TRANSFER_TAG) == 0) {
+				log_data_transfer_flag_is_set = true;
+				log_data_transfer_flag = true;
 			} else if (program_timeout_is_set == false && strcmp(argv[i], TIMEOUT_TAG) == 0) {
 				if (i + 1 == argc) {
 					wprintf(L"The program timeout argument error\n");
@@ -342,7 +342,7 @@ int main (int argc, char* argv[]) {
 		}
 	}
 
-	dxf_initialize_logger("candle-api.log", true, true, true, log_packets_flag);
+	dxf_initialize_logger("candle-api.log", true, true, true, log_data_transfer_flag);
 	wprintf(L"Sample test started.\n");
 	dxfeed_host_u = ansi_to_unicode(dxfeed_host);
 	wprintf(L"Connecting to host %ls...\n", dxfeed_host_u);

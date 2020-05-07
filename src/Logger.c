@@ -55,11 +55,14 @@ static dxf_const_string_t g_info_prefix = L"";
 static dxf_const_string_t g_default_time_string = L"Incorrect time";
 
 static bool g_verbose_logger_mode;
-static bool g_packets_logger_mode;
+static bool g_data_transfer_logger_mode;
 static bool g_show_timezone;
 static FILE* g_log_file = NULL;
-static FILE* g_packets_read_log_file = NULL;
-static FILE* g_packets_write_log_file = NULL;
+static FILE*g_data_receive_log_file = NULL;
+static FILE*g_data_send_log_file = NULL;
+static dx_mutex_t g_data_receive_log_file_lock;
+static dx_mutex_t g_data_send_log_file_lock;
+
 #ifdef _DEBUG
 static FILE* g_dbg_file = NULL;
 static dx_mutex_t g_dbg_lock;
@@ -270,19 +273,28 @@ static void dx_close_logging(void *arg) {
 		g_log_file = NULL;
 	}
 
-  if (g_packets_logger_mode) {
-    if (g_packets_read_log_file != NULL) {
-      fclose(g_packets_read_log_file);
-      g_packets_read_log_file = NULL;
-    }
+	if (g_data_transfer_logger_mode) {
+		if (dx_mutex_lock(&g_data_receive_log_file_lock)) {
+			if (g_data_receive_log_file != NULL) {
+				fclose(g_data_receive_log_file);
+				g_data_receive_log_file = NULL;
+			}
 
-    if (g_packets_write_log_file != NULL) {
-      fclose(g_packets_write_log_file);
-      g_packets_write_log_file = NULL;
-    }
-  }
+			dx_mutex_unlock(&g_data_receive_log_file_lock);
+		}
+		dx_mutex_destroy(&g_data_receive_log_file_lock);
+
+		if (dx_mutex_lock(&g_data_send_log_file_lock)) {
+			if (g_data_send_log_file != NULL) {
+				fclose(g_data_send_log_file);
+				g_data_send_log_file = NULL;
+			}
+
+			dx_mutex_unlock(&g_data_send_log_file_lock);
+		}
+		dx_mutex_destroy(&g_data_send_log_file_lock);
+	}
 }
-
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -290,7 +302,7 @@ static void dx_close_logging(void *arg) {
  */
 /* -------------------------------------------------------------------------- */
 
-DXFEED_API ERRORCODE dxf_initialize_logger(const char* file_name, int rewrite_file, int show_timezone_info, int verbose, int log_packets) {
+DXFEED_API ERRORCODE dxf_initialize_logger(const char* file_name, int rewrite_file, int show_timezone_info, int verbose, int log_data_transfer) {
 	if (!dx_init_error_subsystem()) {
 		wprintf(L"\nCan not init error subsystem\n");
 		return DXF_FAILURE;
@@ -303,24 +315,27 @@ DXFEED_API ERRORCODE dxf_initialize_logger(const char* file_name, int rewrite_fi
 		return DXF_FAILURE;
 	}
 
-	g_packets_logger_mode = log_packets ? true : false;
+	g_data_transfer_logger_mode = log_data_transfer ? true : false;
 
-	if (g_packets_logger_mode) {
-		char packets_file_name[1024];
+	if (g_data_transfer_logger_mode) {
+		char data_transfer_file_name[1024];
 
-		snprintf(packets_file_name, 1024, "%s.read.packets", file_name);
-		g_packets_read_log_file = fopen(packets_file_name, rewrite_file ? "w" : "a");
+		dx_mutex_create(&g_data_receive_log_file_lock);
+		dx_mutex_create(&g_data_send_log_file_lock);
 
-		if (g_packets_read_log_file == NULL) {
-			printf("\nCan not open log-file %s", packets_file_name);
+		snprintf(data_transfer_file_name, 1024, "%s.receive.data", file_name);
+		g_data_receive_log_file = fopen(data_transfer_file_name, rewrite_file ? "w" : "a");
+
+		if (g_data_receive_log_file == NULL) {
+			printf("\nCan not open log-file %s", data_transfer_file_name);
 			return DXF_FAILURE;
 		}
 
-		snprintf(packets_file_name, 1024, "%s.write.packets", file_name);
-		g_packets_write_log_file = fopen(packets_file_name, rewrite_file ? "w" : "a");
+		snprintf(data_transfer_file_name, 1024, "%s.send.data", file_name);
+		g_data_send_log_file = fopen(data_transfer_file_name, rewrite_file ? "w" : "a");
 
-		if (g_packets_write_log_file == NULL) {
-			printf("\nCan not open log-file %s", packets_file_name);
+		if (g_data_send_log_file == NULL) {
+			printf("\nCan not open log-file %s", data_transfer_file_name);
 			return DXF_FAILURE;
 		}
 	}
@@ -551,30 +566,15 @@ void dx_logging_verbose_gap (void) {
 	dx_flush_log();
 }
 
-/**
- * Logs the raw packets data
- *
- * @param read_packets The logging mode (true - read packets, false - write packets)
- * @param buffer       The buffer data
- * @param buffer_size  The buffer data size
- */
-void dx_logging_packets(int read_packets, const void *buffer, int buffer_size) {
-	assert(buffer != NULL && buffer_size > 0);
-
-	if (g_packets_read_log_file == NULL || g_packets_write_log_file == NULL) {
-		return;
-	}
-
+void dx_logging_transfer_data(FILE *log_file, const void *buffer, int buffer_size) {
 	const dxf_byte_t *bytes_buffer = (const dxf_byte_t *)buffer;
-	FILE *log_file = (read_packets) ? g_packets_read_log_file : g_packets_write_log_file;
-
 	fprintf(log_file, "\n%ls [%08lx] size = %d\n", dx_get_current_time(),
 #ifdef _WIN32
-			 (unsigned long)GetCurrentThreadId(),
+			(unsigned long)GetCurrentThreadId(),
 #else
-			 (unsigned long)pthread_getthreadid_np(),
+		(unsigned long)pthread_getthreadid_np(),
 #endif
-			 buffer_size);
+			buffer_size);
 
 	static const char HEX[] = "0123456789ABCDEF";
 
@@ -624,4 +624,50 @@ void dx_logging_packets(int read_packets, const void *buffer, int buffer_size) {
 
 	fprintf(log_file, "\n");
 	fflush(log_file);
+}
+
+void dx_logging_send_data(const void *buffer, int buffer_size) {
+	assert(buffer != NULL && buffer_size > 0);
+
+	if (!dx_mutex_lock(&g_data_send_log_file_lock)) {
+		return;
+	}
+
+	if (g_data_send_log_file != NULL) {
+		dx_logging_transfer_data(g_data_send_log_file, buffer, buffer_size);
+	}
+
+	dx_mutex_unlock(&g_data_send_log_file_lock);
+}
+
+void dx_logging_receive_data(const void *buffer, int buffer_size) {
+	assert(buffer != NULL && buffer_size > 0);
+
+	if (!dx_mutex_lock(&g_data_receive_log_file_lock)) {
+		return;
+	}
+
+	if (g_data_receive_log_file != NULL) {
+		dx_logging_transfer_data(g_data_receive_log_file, buffer, buffer_size);
+	}
+
+	dx_mutex_unlock(&g_data_receive_log_file_lock);
+}
+
+void dx_logging_send_data_start(int buffer_size) {
+	if (!dx_mutex_lock(&g_data_send_log_file_lock)) {
+		return;
+	}
+
+	if (g_data_send_log_file != NULL) {
+		fprintf(g_data_send_log_file, "\n%ls [%08lx] Starting to send the data: size = %d\n", dx_get_current_time(),
+#ifdef _WIN32
+				(unsigned long)GetCurrentThreadId(),
+#else
+				(unsigned long)pthread_getthreadid_np(),
+#endif
+				buffer_size);
+	}
+
+	dx_mutex_unlock(&g_data_send_log_file_lock);
 }
