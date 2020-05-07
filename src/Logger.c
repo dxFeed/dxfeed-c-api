@@ -572,7 +572,7 @@ void dx_logging_transfer_data(FILE *log_file, const void *buffer, int buffer_siz
 	}
 
 	const dxf_byte_t *bytes_buffer = (const dxf_byte_t *)buffer;
-	fprintf(log_file, "\n%ls [%08lx] size = %d\n", dx_get_current_time(),
+	fprintf(log_file, "\n%ls [%08lx] The data block. Size = %d\n", dx_get_current_time(),
 #ifdef _WIN32
 			(unsigned long)GetCurrentThreadId(),
 #else
@@ -676,7 +676,7 @@ void dx_logging_send_data_start(int buffer_size) {
 	}
 
 	if (g_data_send_log_file != NULL) {
-		fprintf(g_data_send_log_file, "\n%ls [%08lx] Starting to send the data: size = %d\n", dx_get_current_time(),
+		fprintf(g_data_send_log_file, "\n%ls [%08lx] Sending the data. Size = %d\n", dx_get_current_time(),
 #ifdef _WIN32
 				(unsigned long)GetCurrentThreadId(),
 #else
