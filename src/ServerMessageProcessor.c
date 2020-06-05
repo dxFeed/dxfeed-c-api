@@ -1698,7 +1698,7 @@ bool dx_socket_data_receiver (dxf_connection_t connection, const void* buffer, i
 	bool conn_ctx_res = true;
 	dx_server_msg_proc_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_server_msg_processor, &conn_ctx_res);
 
-	dx_logging_packets(true, buffer, buffer_size);
+	dx_logging_receive_data(buffer, buffer_size);
 
 	if (context != NULL && context->raw_dump_file_name != NULL) {
 		FILE* raw_out = fopen(context->raw_dump_file_name, "ab+");

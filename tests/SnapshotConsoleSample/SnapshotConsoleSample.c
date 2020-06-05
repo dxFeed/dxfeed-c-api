@@ -43,6 +43,9 @@ int _CRT_glob = 0;
 #define RECORDS_PRINT_LIMIT_SHORT_PARAM "-l"
 #define MAX_SOURCE_SIZE 42
 #define TOKEN_PARAM_SHORT_TAG "-T"
+#define LOG_DATA_TRANSFER_TAG "-p"
+#define TIMEOUT_TAG "-o"
+
 
 dxf_const_string_t dx_event_type_to_string (int event_type) {
 	switch (event_type) {
@@ -345,28 +348,30 @@ int main (int argc, char *argv[]) {
 
 	if (argc < STATIC_PARAMS_COUNT) {
 		printf("DXFeed command line sample.\n"
-		       "Usage: SnapshotConsoleSample <server address> <event type> <symbol> [order_source] [" RECORDS_PRINT_LIMIT_SHORT_PARAM " <records_print_limit>] [" TOKEN_PARAM_SHORT_TAG " <token>]\n"
-		       "  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
-		       "  <event type> - The event type, one of the following: ORDER, CANDLE, SPREAD_ORDER,\n"
-		       "                 TIME_AND_SALE, GREEKS, SERIES\n"
-		       "  <symbol> - The trade symbol, e.g. C, MSFT, YHOO, IBM\n"
-		       "  [order_source] - a) source for Order (also can be empty), e.g. NTV, BYX, BZX, DEA,\n"
-		       "                      ISE, DEX, IST, ...\n"
-		       "                   b) source for MarketMaker, one of following: COMPOSITE_BID or \n"
-		       "                      COMPOSITE_ASK\n"
-		       "  " RECORDS_PRINT_LIMIT_SHORT_PARAM " <records_print_limit> - The number of displayed records (0 - unlimited, default: " STRINGIFY(
-				       DEFAULT_RECORDS_PRINT_LIMIT) ")\n"
-		       "  " TOKEN_PARAM_SHORT_TAG " <token> - The authorization token\n"
+			"Usage: SnapshotConsoleSample <server address> <event type> <symbol> [order_source] "
+			"[" RECORDS_PRINT_LIMIT_SHORT_PARAM " <records_print_limit>] [" TOKEN_PARAM_SHORT_TAG " <token>] "
+			"[" LOG_DATA_TRANSFER_TAG "] [" TIMEOUT_TAG " <timeout>]\n"
+			"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
+			"  <event type>     - The event type, one of the following: ORDER, CANDLE, SPREAD_ORDER,\n"
+			"                     TIME_AND_SALE, GREEKS, SERIES\n"
+			"  <symbol>         - The trade symbol, e.g. C, MSFT, YHOO, IBM\n"
+			"  [order_source]   - a) source for Order (also can be empty), e.g. NTV, BYX, BZX, DEA,\n"
+			"                        ISE, DEX, IST, ...\n"
+			"                     b) source for MarketMaker, one of following: COMPOSITE_BID or \n"
+			"                        COMPOSITE_ASK\n"
+			"  " RECORDS_PRINT_LIMIT_SHORT_PARAM " <limit>       - The number of displayed records "
+			"(0 - unlimited, default: " STRINGIFY(DEFAULT_RECORDS_PRINT_LIMIT) ")\n"
+			"  " TOKEN_PARAM_SHORT_TAG " <token>       - The authorization token\n"
+			"  " LOG_DATA_TRANSFER_TAG "               - Enables the data transfer logging\n"
+			"  " TIMEOUT_TAG " <timeout>     - Sets the program timeout in seconds (default = 604800, i.e a week)\n"
 		);
 
 		return 0;
 	}
 
-	dxf_initialize_logger("snapshot-console-api.log", true, true, true, false);
-
 	dxfeed_host = argv[1];
-
 	event_type_name = argv[2];
+
 	if (stricmp(event_type_name, "ORDER") == 0) {
 		event_id = dx_eid_order;
 	} else if (stricmp(event_type_name, "CANDLE") == 0) {
@@ -392,14 +397,16 @@ int main (int argc, char *argv[]) {
 	char *order_source_ptr = NULL;
 	int records_print_limit = DEFAULT_RECORDS_PRINT_LIMIT;
 	char *token = NULL;
+	bool log_data_transfer_flag = false;
+	int program_timeout = 604800; // a week
 
 	if (argc > STATIC_PARAMS_COUNT) {
-		int i = 0;
 		bool records_print_limit_is_set = false;
 		bool token_is_set = false;
 		bool order_source_is_set = false;
+		bool program_timeout_is_set = false;
 
-		for (i = STATIC_PARAMS_COUNT; i < argc; i++) {
+		for (int i = STATIC_PARAMS_COUNT; i < argc; i++) {
 			if (records_print_limit_is_set == false && strcmp(argv[i], RECORDS_PRINT_LIMIT_SHORT_PARAM) == 0) {
 				if (i + 1 == argc) {
 					wprintf(L"The records print limit argument error\n");
@@ -426,6 +433,25 @@ int main (int argc, char *argv[]) {
 
 				token = argv[++i];
 				token_is_set = true;
+			} else if (log_data_transfer_flag == false && strcmp(argv[i], LOG_DATA_TRANSFER_TAG) == 0) {
+				log_data_transfer_flag = true;
+			} else if (program_timeout_is_set == false && strcmp(argv[i], TIMEOUT_TAG) == 0) {
+				if (i + 1 == argc) {
+					wprintf(L"The program timeout argument error\n");
+
+					return -1;
+				}
+
+				int new_program_timeout = -1;
+
+				if (!atoi2(argv[++i], &new_program_timeout)) {
+					wprintf(L"The program timeout argument parsing error\n");
+
+					return -1;
+				}
+
+				program_timeout = new_program_timeout;
+				program_timeout_is_set = true;
 			} else if (order_source_is_set == false) {
 				size_t string_len = 0;
 				string_len = strlen(argv[i]);
@@ -445,6 +471,7 @@ int main (int argc, char *argv[]) {
 		}
 	}
 
+	dxf_initialize_logger("snapshot-console-api.log", true, true, true, log_data_transfer_flag);
 	wprintf(L"SnapshotConsoleSample test started.\n");
 	dxfeed_host_u = ansi_to_unicode(dxfeed_host);
 	wprintf(L"Connecting to host %ls...\n", dxfeed_host_u);
@@ -511,9 +538,9 @@ int main (int argc, char *argv[]) {
 	};
 	wprintf(L"Subscription successful!\n");
 
-	while (!is_thread_terminate()) {
+	while (!is_thread_terminate() && program_timeout--) {
 #ifdef _WIN32
-		Sleep(100);
+		Sleep(1000);
 #else
 		sleep(1);
 #endif
