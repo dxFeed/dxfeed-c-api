@@ -471,7 +471,7 @@ int main (int argc, char *argv[]) {
 		}
 	}
 
-	dxf_initialize_logger("snapshot-console-api.log", true, true, true, log_data_transfer_flag);
+	dxf_initialize_logger_v2("snapshot-console-api.log", true, true, true, log_data_transfer_flag);
 	wprintf(L"SnapshotConsoleSample test started.\n");
 	dxfeed_host_u = ansi_to_unicode(dxfeed_host);
 	wprintf(L"Connecting to host %ls...\n", dxfeed_host_u);

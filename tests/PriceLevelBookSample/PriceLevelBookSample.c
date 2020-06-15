@@ -287,7 +287,7 @@ int main(int argc, char* argv[]) {
 		order_sources_ptr = default_sources;
 	}
 
-	dxf_initialize_logger("price-level-book-api.log", true, true, true, log_data_transfer_flag);
+	dxf_initialize_logger_v2("price-level-book-api.log", true, true, true, log_data_transfer_flag);
 	wprintf(L"PriceLevelBookSample test started.\n");
 	dxfeed_host_u = ansi_to_unicode(dxfeed_host);
 	wprintf(L"Connecting to host %ls...\n", dxfeed_host_u);

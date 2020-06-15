@@ -302,7 +302,7 @@ static void dx_close_logging(void *arg) {
  */
 /* -------------------------------------------------------------------------- */
 
-DXFEED_API ERRORCODE dxf_initialize_logger(const char* file_name, int rewrite_file, int show_timezone_info, int verbose, int log_data_transfer) {
+ERRORCODE dx_initialize_logger_impl(const char* file_name, int rewrite_file, int show_timezone_info, int verbose, int log_data_transfer) {
 	if (!dx_init_error_subsystem()) {
 		wprintf(L"\nCan not init error subsystem\n");
 		return DXF_FAILURE;
@@ -359,6 +359,14 @@ DXFEED_API ERRORCODE dxf_initialize_logger(const char* file_name, int rewrite_fi
 #endif
 
 	return DXF_SUCCESS;
+}
+
+DXFEED_API ERRORCODE dxf_initialize_logger(const char* file_name, int rewrite_file, int show_timezone_info, int verbose) {
+	return dx_initialize_logger_impl(file_name, rewrite_file, show_timezone_info, verbose, false);
+}
+
+DXFEED_API ERRORCODE dxf_initialize_logger_v2(const char* file_name, int rewrite_file, int show_timezone_info, int verbose, int log_data_transfer) {
+	return dx_initialize_logger_impl(file_name, rewrite_file, show_timezone_info, verbose, log_data_transfer);
 }
 
 /* -------------------------------------------------------------------------- */
