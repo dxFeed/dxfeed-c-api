@@ -890,7 +890,7 @@ DXFEED_API ERRORCODE dxf_delete_candle_symbol_attributes(dxf_candle_attributes_t
  *
  *          For order events (event_id is 'dx_eid_order')
  *          If source is NULL string subscription on Order event will be performed. You can specify order
- *          source for Order event by passing suffix: "BYX", "BZX", "DEA", "DEX", "ISE", "IST", "NTV".
+ *          source for Order event by passing suffix: "BYX", "BZX", "DEA", "DEX", "ISE", "IST", "NTV" etc.
  *          If source is equal to "COMPOSITE_BID" or "COMPOSITE_ASK" subscription on MarketMaker event will
  *          be performed. For other events source parameter does not matter.
  *
@@ -898,9 +898,10 @@ DXFEED_API ERRORCODE dxf_delete_candle_symbol_attributes(dxf_candle_attributes_t
  * @param[in] event_id   Single event id. Next events is supported: dxf_eid_order, dxf_eid_candle,
  *                       dx_eid_spread_order, dx_eid_time_and_sale, dx_eid_greeks, dx_eid_series.
  * @param[in] symbol     The symbol to add.
- * @param[in] source     Order source for Order, which can be one of following: "BYX", "BZX", "DEA", "DEX",
- *                       "ISE", "IST", "NTV". For MarketMaker subscription use "COMPOSITE_BID" or
- *                       "COMPOSITE_ASK" keyword.
+ * @param[in] source     Order source for Order, which can be one of following: "NTV", "ntv", "NFX", "ESPD", "XNFI",
+ *                       "ICE", "ISE", "DEA", "DEX", "BYX", "BZX", "BATE", "CHIX", "CEUX", "BXTR", "IST", "BI20",
+ *                       "ABE", "FAIR", "GLBX", "glbx", "ERIS", "XEUR", "xeur", "CFE", "SMFE".
+ *                       For MarketMaker subscription use "COMPOSITE_BID" or "COMPOSITE_ASK" keyword.
  * @param[in] time       Time in the past (unix time in milliseconds).
  * @param[out] snapshot  A handle of the created snapshot
  *
@@ -918,15 +919,16 @@ DXFEED_API ERRORCODE dxf_create_snapshot(dxf_connection_t connection, dx_event_i
  * @brief Creates Order snapshot with the specified parameters.
  *
  * @details If source is NULL string subscription on Order event will be performed. You can specify order
- *          source for Order event by passing suffix: "BYX", "BZX", "DEA", "DEX", "ISE", "IST", "NTV".
+ *          source for Order event by passing suffix: "BYX", "BZX", "DEA", "DEX", "ISE", "IST", "NTV" etc.
  *          If source is equal to "COMPOSITE_BID" or "COMPOSITE_ASK" subscription on MarketMaker event will
  *          be performed.
  *
  * @param[in] connection A handle of a previously created connection which the subscription will be using
  * @param[in] symbol     The symbol to add
- * @param[in] source     Order source for Order, which can be one of following: "BYX", "BZX", "DEA", "DEX",
- *                       "ISE", "IST", "NTV". For MarketMaker subscription use "COMPOSITE_BID" or
- *                       "COMPOSITE_ASK" keyword.
+ * @param[in] source     Order source for Order, which can be one of following: "NTV", "ntv", "NFX", "ESPD", "XNFI",
+ *                       "ICE", "ISE", "DEA", "DEX", "BYX", "BZX", "BATE", "CHIX", "CEUX", "BXTR", "IST", "BI20",
+ *                       "ABE", "FAIR", "GLBX", "glbx", "ERIS", "XEUR", "xeur", "CFE", "SMFE".
+ *                       For MarketMaker subscription use "COMPOSITE_BID" or "COMPOSITE_ASK" keyword.
  * @param[in] time       Time in the past (unix time in milliseconds)
  * @param[out] snapshot  A handle of the created snapshot
  *
@@ -1068,7 +1070,9 @@ DXFEED_API ERRORCODE dxf_get_snapshot_symbol(dxf_snapshot_t snapshot, OUT dxf_st
  * @param[in] connection A handle of a previously created connection which the subscription will be using
  * @param[in] symbol     The symbol to use
  * @param[in] sources    Order sources for Order, NULL-terminated list. Each element can be one of following:
- *                       "BYX", "BZX", "DEA", "DEX", "ISE", "IST", "NTV".
+ *                       "NTV", "ntv", "NFX", "ESPD", "XNFI", "ICE", "ISE", "DEA", "DEX", "BYX", "BZX", "BATE", "CHIX",
+ *                       "CEUX", "BXTR", "IST", "BI20", "ABE", "FAIR", "GLBX", "glbx", "ERIS", "XEUR", "xeur", "CFE",
+ *                       "SMFE"
  * @param[out] book      A handle of the created price level book
  *
  * @return {@link DXF_SUCCESS} if price level book has been successfully created or {@link DXF_FAILURE} on error;

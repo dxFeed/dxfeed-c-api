@@ -1,4 +1,5 @@
 Version 5.11.0
+* [DXFC-182] The new order (price level) sources were added: ntv, glbx, xeur
 * [DXFC-178] Added the ability to log received and transmitted data blocks
   - [API] Added the new function `dxf_initialize_logger_v2` with additional parameter `log_data_transfer`(compare with `dxf_initialize_logger` function).
     This flag defining the logging mode; if it's nonzero then the data transfer (portions of received and sent data) logging will be enabled.

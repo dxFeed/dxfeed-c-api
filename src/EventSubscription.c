@@ -37,6 +37,7 @@
 
 const dxf_const_string_t dx_all_order_sources[] = {
 	L"NTV",
+	L"ntv",
 	L"NFX",
 	L"ESPD",
 	L"XNFI",
@@ -55,8 +56,10 @@ const dxf_const_string_t dx_all_order_sources[] = {
 	L"ABE",
 	L"FAIR",
 	L"GLBX",
+	L"glbx",
 	L"ERIS",
 	L"XEUR",
+	L"xeur",
 	L"CFE",
 	L"SMFE",
 	NULL
