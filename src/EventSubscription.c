@@ -743,8 +743,8 @@ dxf_subscription_t dx_create_event_subscription(dxf_connection_t connection, int
 		for (; dx_all_order_sources[i]; i++) {
 			res &= dx_add_order_source(subscr_data, dx_all_order_sources[i]);
 		}
-		res &= dx_add_order_source(subscr_data, L"");
 	}
+
 	if (!res) {
 		dx_free_event_subscription_data(subscr_data);
 		return dx_invalid_subscription;

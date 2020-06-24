@@ -758,7 +758,29 @@ DXFEED_API ERRORCODE dxf_get_last_error (OUT int* error_code, OUT dxf_const_stri
  * @return {@link DXF_SUCCESS} on successful logger initialization or {@link DXF_FAILURE} on error;
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
  */
-DXFEED_API ERRORCODE dxf_initialize_logger (const char* file_name, int rewrite_file, int show_timezone_info, int verbose);
+DXFEED_API ERRORCODE dxf_initialize_logger(const char* file_name, int rewrite_file, int show_timezone_info, int verbose);
+
+/**
+ * @ingroup c-api-common
+ *
+ * @brief Initializes the internal logger with data transfer logging.
+ *
+ * @details Various actions and events, including the errors, are being logged
+ *          throughout the library. They may be stored into the file.
+ *
+ * @param[in] file_name          A full path to the file where the log is to be stored
+ * @param[in] rewrite_file       A flag defining the file open mode; if it's nonzero then the log file will be rewritten
+ * @param[in] show_timezone_info A flag defining the time display option in the log file; if it's nonzero then
+ *                               the time will be displayed with the timezone suffix
+ * @param[in] verbose            A flag defining the logging mode; if it's nonzero then the verbose logging will be
+ *                               enabled
+ * @param[in] log_data_transfer  A flag defining the logging mode; if it's nonzero then the data transfer (portions of
+ *                               received and sent data) logging will be enabled
+ *
+ * @return {@link DXF_SUCCESS} on successful logger initialization or {@link DXF_FAILURE} on error;
+ *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
+ */
+DXFEED_API ERRORCODE dxf_initialize_logger_v2(const char* file_name, int rewrite_file, int show_timezone_info, int verbose, int log_data_transfer);
 
 /**
  * @ingroup c-api-orders

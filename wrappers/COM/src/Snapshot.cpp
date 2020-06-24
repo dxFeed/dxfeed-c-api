@@ -3,6 +3,7 @@
 #include <ComDef.h>
 
 #include <map>
+#include <stdexcept>
 
 #include "ConnectionPointImpl.h"
 #include "DispatchImpl.h"

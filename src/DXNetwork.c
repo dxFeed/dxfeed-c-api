@@ -1177,6 +1177,7 @@ bool dx_send_data (dxf_connection_t connection, const void* buffer, int buffer_s
 		return dx_set_error_code(dx_ec_invalid_func_param_internal);
 	}
 
+	dx_logging_send_data_start(buffer_size);
 	context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
 
 	if (context == NULL) {
@@ -1224,6 +1225,7 @@ bool dx_send_data (dxf_connection_t connection, const void* buffer, int buffer_s
 			return false;
 		}
 
+		dx_logging_send_data(char_buf, sent_count);
 		char_buf += sent_count;
 		buffer_size -= sent_count;
 	} while (buffer_size > 0);

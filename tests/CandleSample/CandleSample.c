@@ -23,6 +23,8 @@ typedef int bool;
 #define STATIC_PARAMS_COUNT 3
 #define TIME_PARAM_SHORT_TAG "-t"
 #define TOKEN_PARAM_SHORT_TAG "-T"
+#define LOG_DATA_TRANSFER_TAG "-p"
+#define TIMEOUT_TAG "-o"
 
 //Prevents file names globbing (converting * to all files in the current dir)
 #ifdef __MINGW64_VERSION_MAJOR
@@ -216,10 +218,31 @@ bool parse_date(const char* date_str, struct tm* time_struct) {
 	return true;
 }
 
+bool atoi2 (char *str, int *result) {
+	if (str == NULL || str[0] == '\0' || result == NULL) {
+		return false;
+	}
+
+	if (str[0] == '0' && str[1] == '\0') {
+		*result = 0;
+
+		return true;
+	}
+
+	int r = atoi(str);
+
+	if (r == 0) {
+		return false;
+	}
+
+	*result = r;
+
+	return true;
+}
+
 int main (int argc, char* argv[]) {
 	dxf_connection_t connection;
 	dxf_subscription_t subscription;
-	int loop_counter = 100000;
 	int event_type = DXF_ET_CANDLE;
 	dxf_candle_attributes_t candle_attributes;
 	dxf_string_t symbol = NULL;
@@ -239,18 +262,20 @@ int main (int argc, char* argv[]) {
 
 	if (argc < STATIC_PARAMS_COUNT) {
 		printf(
-				"DXFeed candle console sample.\n"
-				"Usage: CandleSample <server address> <symbol> [" TIME_PARAM_SHORT_TAG " <DD-MM-YYYY>] [" TOKEN_PARAM_SHORT_TAG " <token>]\n"
-				"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
-				"  <symbol>         - The trade symbol, e.g. C, MSFT, YHOO, IBM\n"
-				"  " TIME_PARAM_SHORT_TAG " <DD-MM-YYYY>  - The time which candle started\n"
-				"  " TOKEN_PARAM_SHORT_TAG " <token>       - The authorization token\n"
-		);
+			"DXFeed candle console sample.\n"
+			"Usage: CandleSample <server address> <symbol> [" TIME_PARAM_SHORT_TAG " <DD-MM-YYYY>] "
+			"[" TOKEN_PARAM_SHORT_TAG " <token>] [" LOG_DATA_TRANSFER_TAG "] [" TIMEOUT_TAG	" <timeout>]\n"
+			"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
+			"  <symbol>         - The trade symbol, e.g. C, MSFT, YHOO, IBM\n"
+			"  " TIME_PARAM_SHORT_TAG
+			" <DD-MM-YYYY>  - The time which candle started\n"
+			"  " TOKEN_PARAM_SHORT_TAG " <token>       - The authorization token\n"
+			"  " LOG_DATA_TRANSFER_TAG "               - Enables the packets logging\n"
+			"  " TIMEOUT_TAG " <timeout>     - Sets the program timeout in seconds (default = 604800, i.e a week)\n"
+			);
 
 		return 0;
 	}
-
-	dxf_initialize_logger("candle-api.log", true, true, true);
 
 	dxfeed_host = argv[1];
 
@@ -260,13 +285,15 @@ int main (int argc, char* argv[]) {
 	}
 
 	char* token = NULL;
+	bool log_data_transfer_flag = false;
+	int program_timeout = 604800; // a week
 
 	if (argc > STATIC_PARAMS_COUNT) {
 		bool time_is_set = false;
 		bool token_is_set = false;
-		int i = 0;
+		bool program_timeout_is_set = false;
 
-		for (i = STATIC_PARAMS_COUNT; i < argc; i++) {
+		for (int i = STATIC_PARAMS_COUNT; i < argc; i++) {
 			if (time_is_set == false && strcmp(argv[i], TIME_PARAM_SHORT_TAG) == 0) {
 				if (i + 1 == argc) {
 					wprintf(L"Date argument error\n");
@@ -288,10 +315,30 @@ int main (int argc, char* argv[]) {
 
 				token = argv[++i];
 				token_is_set = true;
+			} else if (log_data_transfer_flag == false && strcmp(argv[i], LOG_DATA_TRANSFER_TAG) == 0) {
+				log_data_transfer_flag = true;
+			} else if (program_timeout_is_set == false && strcmp(argv[i], TIMEOUT_TAG) == 0) {
+				if (i + 1 == argc) {
+					wprintf(L"The program timeout argument error\n");
+
+					return -1;
+				}
+
+				int new_program_timeout = -1;
+
+				if (!atoi2(argv[++i], &new_program_timeout)) {
+					wprintf(L"The program timeout argument parsing error\n");
+
+					return -1;
+				}
+
+				program_timeout = new_program_timeout;
+				program_timeout_is_set = true;
 			}
 		}
 	}
 
+	dxf_initialize_logger_v2("candle-api.log", true, true, true, log_data_transfer_flag);
 	wprintf(L"Sample test started.\n");
 	dxfeed_host_u = ansi_to_unicode(dxfeed_host);
 	wprintf(L"Connecting to host %ls...\n", dxfeed_host_u);
@@ -354,9 +401,9 @@ int main (int argc, char* argv[]) {
 	};
 	wprintf(L"Subscription successful!\n");
 
-	while (!is_thread_terminate() && loop_counter--) {
+	while (!is_thread_terminate() && program_timeout--) {
 #ifdef _WIN32
-		Sleep(100);
+		Sleep(1000);
 #else
 		sleep(1);
 #endif
@@ -383,7 +430,7 @@ int main (int argc, char* argv[]) {
 	free(symbol);
 
 	wprintf(L"Disconnect successful!\nConnection test completed successfully!\n");
-	wprintf(L"loops remain:%d\n", loop_counter);
+	wprintf(L"loops remain:%d\n", program_timeout);
 
 #ifdef _WIN32
 	DeleteCriticalSection(&listener_thread_guard);

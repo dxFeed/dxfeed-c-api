@@ -17,8 +17,7 @@
  *
  */
 
-#ifndef LOGGER_H
-#define LOGGER_H
+#pragma once
 
 #include "DXFeed.h"
 #include "PrimitiveTypes.h"
@@ -52,4 +51,25 @@ void dx_logging_dbg_unlock ();
 void dx_logging_last_error (void);
 void dx_logging_last_error_verbose (void);
 
-#endif // LOGGER_H
+/**
+ * Logs the data that was sent
+ *
+ * @param buffer       The buffer of data
+ * @param buffer_size  The buffer of data size
+ */
+void dx_logging_send_data(const void *buffer, int buffer_size);
+
+/**
+ * Logs the data that was received
+ *
+ * @param buffer       The buffer of data
+ * @param buffer_size  The buffer of data size
+ */
+void dx_logging_receive_data(const void *buffer, int buffer_size);
+
+/**
+ * Logs the description of a start sending data
+ *
+ * @param buffer_size The buffer of data size
+ */
+void dx_logging_send_data_start(int buffer_size);

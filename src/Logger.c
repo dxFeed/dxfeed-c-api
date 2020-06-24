@@ -27,16 +27,17 @@
 #include <time.h>
 #endif
 
-#include <stdio.h>
+#include <assert.h>
 #include <stdarg.h>
+#include <stdio.h>
 
-#include "Logger.h"
-#include "DXErrorHandling.h"
 #include "BufferedIOCommon.h"
-#include "DXMemory.h"
 #include "DXAlgorithms.h"
-#include "DXThreads.h"
 #include "DXErrorCodes.h"
+#include "DXErrorHandling.h"
+#include "DXMemory.h"
+#include "DXThreads.h"
+#include "Logger.h"
 #include "Version.h"
 
 /* -------------------------------------------------------------------------- */
@@ -54,8 +55,14 @@ static dxf_const_string_t g_info_prefix = L"";
 static dxf_const_string_t g_default_time_string = L"Incorrect time";
 
 static bool g_verbose_logger_mode;
+static bool g_data_transfer_logger_mode;
 static bool g_show_timezone;
 static FILE* g_log_file = NULL;
+static FILE*g_data_receive_log_file = NULL;
+static FILE*g_data_send_log_file = NULL;
+static dx_mutex_t g_data_receive_log_file_lock;
+static dx_mutex_t g_data_send_log_file_lock;
+
 #ifdef _DEBUG
 static FILE* g_dbg_file = NULL;
 static dx_mutex_t g_dbg_lock;
@@ -160,7 +167,7 @@ void dx_log_debug_message(const dxf_char_t *format, ...) {
 	swprintf(message, 255, L"[%08lx] ", (unsigned long)pthread_getthreadid_np());
 	va_start(ap, format);
 	vswprintf(&message[11], 244, format, ap);
-	printf("%s", message);
+	wprintf(L"%ls", message);
 	va_end(ap);
 }
 
@@ -168,7 +175,7 @@ void dx_vlog_debug_message(const dxf_char_t *format, va_list ap) {
 	dxf_char_t message[256];
 	swprintf(message, 255, L"[%08lx] ", (unsigned long)pthread_getthreadid_np());
 	vswprintf(&message[11], 244, format, ap);
-	printf("%s", message);
+	wprintf(L"%ls", message);
 }
 #else
 #define dx_vlog_debug_message(f, ap)
@@ -265,8 +272,29 @@ static void dx_close_logging(void *arg) {
 		fclose(g_log_file);
 		g_log_file = NULL;
 	}
-}
 
+	if (g_data_transfer_logger_mode) {
+		if (dx_mutex_lock(&g_data_receive_log_file_lock)) {
+			if (g_data_receive_log_file != NULL) {
+				fclose(g_data_receive_log_file);
+				g_data_receive_log_file = NULL;
+			}
+
+			dx_mutex_unlock(&g_data_receive_log_file_lock);
+		}
+		dx_mutex_destroy(&g_data_receive_log_file_lock);
+
+		if (dx_mutex_lock(&g_data_send_log_file_lock)) {
+			if (g_data_send_log_file != NULL) {
+				fclose(g_data_send_log_file);
+				g_data_send_log_file = NULL;
+			}
+
+			dx_mutex_unlock(&g_data_send_log_file_lock);
+		}
+		dx_mutex_destroy(&g_data_send_log_file_lock);
+	}
+}
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -274,7 +302,7 @@ static void dx_close_logging(void *arg) {
  */
 /* -------------------------------------------------------------------------- */
 
-DXFEED_API ERRORCODE dxf_initialize_logger (const char* file_name, int rewrite_file, int show_timezone_info, int verbose) {
+ERRORCODE dx_initialize_logger_impl(const char* file_name, int rewrite_file, int show_timezone_info, int verbose, int log_data_transfer) {
 	if (!dx_init_error_subsystem()) {
 		wprintf(L"\nCan not init error subsystem\n");
 		return DXF_FAILURE;
@@ -285,6 +313,31 @@ DXFEED_API ERRORCODE dxf_initialize_logger (const char* file_name, int rewrite_f
 	if (g_log_file == NULL) {
 		printf("\nCan not open log-file %s", file_name);
 		return DXF_FAILURE;
+	}
+
+	g_data_transfer_logger_mode = log_data_transfer ? true : false;
+
+	if (g_data_transfer_logger_mode) {
+		char data_transfer_file_name[1024];
+
+		dx_mutex_create(&g_data_receive_log_file_lock);
+		dx_mutex_create(&g_data_send_log_file_lock);
+
+		snprintf(data_transfer_file_name, 1024, "%s.receive.data", file_name);
+		g_data_receive_log_file = fopen(data_transfer_file_name, rewrite_file ? "w" : "a");
+
+		if (g_data_receive_log_file == NULL) {
+			printf("\nCan not open log-file %s", data_transfer_file_name);
+			return DXF_FAILURE;
+		}
+
+		snprintf(data_transfer_file_name, 1024, "%s.send.data", file_name);
+		g_data_send_log_file = fopen(data_transfer_file_name, rewrite_file ? "w" : "a");
+
+		if (g_data_send_log_file == NULL) {
+			printf("\nCan not open log-file %s", data_transfer_file_name);
+			return DXF_FAILURE;
+		}
 	}
 
 	dx_register_process_destructor(&dx_close_logging, NULL);
@@ -306,6 +359,14 @@ DXFEED_API ERRORCODE dxf_initialize_logger (const char* file_name, int rewrite_f
 #endif
 
 	return DXF_SUCCESS;
+}
+
+DXFEED_API ERRORCODE dxf_initialize_logger(const char* file_name, int rewrite_file, int show_timezone_info, int verbose) {
+	return dx_initialize_logger_impl(file_name, rewrite_file, show_timezone_info, verbose, false);
+}
+
+DXFEED_API ERRORCODE dxf_initialize_logger_v2(const char* file_name, int rewrite_file, int show_timezone_info, int verbose, int log_data_transfer) {
+	return dx_initialize_logger_impl(file_name, rewrite_file, show_timezone_info, verbose, log_data_transfer);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -511,4 +572,126 @@ void dx_logging_verbose_gap (void) {
 	}
 	fwprintf(g_log_file, L"\n");
 	dx_flush_log();
+}
+
+void dx_logging_transfer_data(FILE *log_file, const void *buffer, int buffer_size) {
+	if (!g_data_transfer_logger_mode) {
+		return;
+	}
+
+	const dxf_byte_t *bytes_buffer = (const dxf_byte_t *)buffer;
+	fprintf(log_file, "\n%ls [%08lx] The data block. Size = %d\n", dx_get_current_time(),
+#ifdef _WIN32
+			(unsigned long)GetCurrentThreadId(),
+#else
+		(unsigned long)pthread_getthreadid_np(),
+#endif
+			buffer_size);
+
+	static const char HEX[] = "0123456789ABCDEF";
+
+#define BLOCK_SIZE (size_t)16
+// 10 + \0
+#define LINE_NUMBER_BUF_LENGTH (size_t)11
+// HH HH HH ... HH
+#define HEX_BUF_LENGTH ((size_t)(BLOCK_SIZE * 3 + 1))
+// aaa...aa
+#define ASCII_BUF_LENGTH (size_t)(BLOCK_SIZE + 1)
+
+	char line_number_buf[LINE_NUMBER_BUF_LENGTH] = {0};
+	char hex_buf[HEX_BUF_LENGTH] = {0};
+	char ascii_buf[ASCII_BUF_LENGTH] = {0};
+
+	for (size_t i = 0; i < (size_t)buffer_size; i++) {
+		if (i % BLOCK_SIZE == 0) {
+			snprintf(line_number_buf, LINE_NUMBER_BUF_LENGTH, "0x%08zx", i);
+		}
+
+		dxf_byte_t byte = bytes_buffer[i];
+
+		hex_buf[(i % BLOCK_SIZE) * 3] = HEX[(dxf_ubyte_t)((dxf_ubyte_t)byte >> 4u) % 16];
+		hex_buf[(i % BLOCK_SIZE) * 3 + 1] = HEX[(dxf_ubyte_t)byte % 16];
+		hex_buf[(i % BLOCK_SIZE) * 3 + 2] = ' ';
+
+		if (i == buffer_size - 1) {
+			hex_buf[(i % BLOCK_SIZE) * 3 + 3] = '\0';
+		}
+
+		ascii_buf[i % BLOCK_SIZE] = (byte >= ' ' && byte <= '~') ? byte : '.';
+
+		if (i == buffer_size - 1) {
+			hex_buf[(i % BLOCK_SIZE) * 3 + 3] = '\0';
+			ascii_buf[(i % BLOCK_SIZE) + 1] = '\0';
+		}
+
+		if ((i % BLOCK_SIZE) == (BLOCK_SIZE - 1) || i == buffer_size - 1) {
+			fprintf(log_file, "\n%s:  %-48s  %-16s", line_number_buf, hex_buf, ascii_buf);
+		}
+	}
+
+#undef ASCII_BUF_LENGTH
+#undef HEX_BUF_LENGTH
+#undef LINE_NUMBER_BUF_LENGTH
+#undef BLOCK_SIZE
+
+	fprintf(log_file, "\n");
+	fflush(log_file);
+}
+
+void dx_logging_send_data(const void *buffer, int buffer_size) {
+	if (!g_data_transfer_logger_mode) {
+		return;
+	}
+
+	assert(buffer != NULL && buffer_size > 0);
+
+	if (!dx_mutex_lock(&g_data_send_log_file_lock)) {
+		return;
+	}
+
+	if (g_data_send_log_file != NULL) {
+		dx_logging_transfer_data(g_data_send_log_file, buffer, buffer_size);
+	}
+
+	dx_mutex_unlock(&g_data_send_log_file_lock);
+}
+
+void dx_logging_receive_data(const void *buffer, int buffer_size) {
+	if (!g_data_transfer_logger_mode) {
+		return;
+	}
+
+	assert(buffer != NULL && buffer_size > 0);
+
+	if (!dx_mutex_lock(&g_data_receive_log_file_lock)) {
+		return;
+	}
+
+	if (g_data_receive_log_file != NULL) {
+		dx_logging_transfer_data(g_data_receive_log_file, buffer, buffer_size);
+	}
+
+	dx_mutex_unlock(&g_data_receive_log_file_lock);
+}
+
+void dx_logging_send_data_start(int buffer_size) {
+	if (!g_data_transfer_logger_mode) {
+		return;
+	}
+
+	if (!dx_mutex_lock(&g_data_send_log_file_lock)) {
+		return;
+	}
+
+	if (g_data_send_log_file != NULL) {
+		fprintf(g_data_send_log_file, "\n%ls [%08lx] Sending the data. Size = %d\n", dx_get_current_time(),
+#ifdef _WIN32
+				(unsigned long)GetCurrentThreadId(),
+#else
+				(unsigned long)pthread_getthreadid_np(),
+#endif
+				buffer_size);
+	}
+
+	dx_mutex_unlock(&g_data_send_log_file_lock);
 }

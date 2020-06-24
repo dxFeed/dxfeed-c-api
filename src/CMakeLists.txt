@@ -32,7 +32,7 @@ endif ()
 
 set(DEF_FILE ../${PROJECT}${POSTFIX}.def)
 
-set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE TYPE INTERNAL FORCE)
+set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE INTERNAL "" FORCE)
 set(CMAKE_DEBUG_POSTFIX "d${PLATFORM_POSTFIX}")
 set(CMAKE_RELEASE_POSTFIX "${PLATFORM_POSTFIX}")
 
@@ -272,7 +272,7 @@ else ()
         link_directories(${LIB_TLS}/nix/${TARGET_PLATFORM})
         set(ADDITIONAL_LIBRARIES
             ${ADDITIONAL_LIBRARIES}
-            tls
+            tls ssl crypto
             )
     endif (NOT DISABLE_TLS)
 

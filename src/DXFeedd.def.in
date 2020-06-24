@@ -29,6 +29,7 @@ EXPORTS
     dxf_get_last_event
     dxf_get_last_error
     dxf_initialize_logger
+    dxf_initialize_logger_v2
     dxf_set_order_source
     dxf_add_order_source
     dxf_create_candle_symbol_attributes

@@ -31,6 +31,8 @@ typedef int bool;
 #define DUMP_PARAM_LONG_TAG "--dump"
 #define TOKEN_PARAM_SHORT_TAG "-T"
 #define SUBSCRIPTION_DATA_PARAM_TAG "-s"
+#define LOG_DATA_TRANSFER_TAG "-p"
+#define TIMEOUT_TAG "-o"
 
 dxf_const_string_t dx_event_type_to_string(int event_type) {
 	switch (event_type) {
@@ -504,12 +506,33 @@ dx_event_subscr_flag subscr_data_to_flags(char* subscr_data) {
 	return dx_esf_default;
 }
 
+bool atoi2 (char *str, int *result) {
+	if (str == NULL || str[0] == '\0' || result == NULL) {
+		return false;
+	}
+
+	if (str[0] == '0' && str[1] == '\0') {
+		*result = 0;
+
+		return true;
+	}
+
+	int r = atoi(str);
+
+	if (r == 0) {
+		return false;
+	}
+
+	*result = r;
+
+	return true;
+}
+
 /* -------------------------------------------------------------------------- */
 
 int main (int argc, char* argv[]) {
 	dxf_connection_t connection;
 	dxf_subscription_t subscription;
-	int loop_counter = 604800;
 	int event_type;
 	dxf_string_t* symbols = NULL;
 	int symbol_count = 0;
@@ -520,7 +543,7 @@ int main (int argc, char* argv[]) {
 		printf("DXFeed command line sample.\n"
 				"Usage: CommandLineSample <server address> <event type> <symbol> "
 				"[" DUMP_PARAM_LONG_TAG " | " DUMP_PARAM_SHORT_TAG " <filename>] [" TOKEN_PARAM_SHORT_TAG " <token>] "
-				"[" SUBSCRIPTION_DATA_PARAM_TAG " <subscr_data>]\n"
+				"[" SUBSCRIPTION_DATA_PARAM_TAG " <subscr_data>] [" LOG_DATA_TRANSFER_TAG "] [" TIMEOUT_TAG " <timeout>]\n"
 				"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
 				"                     If you want to use file instead of server data just\n"
 				"                     write there path to file e.g. path\\to\\raw.bin\n"
@@ -532,13 +555,13 @@ int main (int argc, char* argv[]) {
 				"  " DUMP_PARAM_LONG_TAG " | " DUMP_PARAM_SHORT_TAG " <filename> - The filename to dump the raw data\n"
 				"  " TOKEN_PARAM_SHORT_TAG " <token>             - The authorization token\n"
 				"  " SUBSCRIPTION_DATA_PARAM_TAG " <subscr_data>       - The subscription data: TICKER, STREAM or HISTORY\n"
+				"  " LOG_DATA_TRANSFER_TAG "                     - Enables the data transfer logging\n"
+				"  " TIMEOUT_TAG " <timeout>           - Sets the program timeout in seconds (default = 604800, i.e a week)\n"
 				"Example: CommandLineSample.exe demo.dxfeed.com:7300 TRADE,ORDER MSFT,IBM\n"
 				);
 
 		return 0;
 	}
-
-	dxf_initialize_logger("command-line-api.log", true, true, true);
 
 	dxfeed_host = argv[1];
 
@@ -551,14 +574,16 @@ int main (int argc, char* argv[]) {
 	char* dump_file_name = NULL;
 	char* token = NULL;
 	char* subscr_data = NULL;
+	bool log_data_transfer_flag = false;
+	int program_timeout = 604800; // a week
 
 	if (argc > STATIC_PARAMS_COUNT) {
-		int i = 0;
 		bool dump_filename_is_set = false;
 		bool token_is_set = false;
 		bool subscr_data_is_set = false;
+		bool program_timeout_is_set = false;
 
-		for (i = STATIC_PARAMS_COUNT; i < argc; i++) {
+		for (int i = STATIC_PARAMS_COUNT; i < argc; i++) {
 			if (dump_filename_is_set == false &&
 					(strcmp(argv[i], DUMP_PARAM_SHORT_TAG) == 0 || strcmp(argv[i], DUMP_PARAM_LONG_TAG) == 0)) {
 				if (i + 1 == argc) {
@@ -587,10 +612,30 @@ int main (int argc, char* argv[]) {
 
 				subscr_data = argv[++i];
 				subscr_data_is_set = true;
+			} else if (log_data_transfer_flag == false && strcmp(argv[i], LOG_DATA_TRANSFER_TAG) == 0) {
+				log_data_transfer_flag = true;
+			} else if (program_timeout_is_set == false && strcmp(argv[i], TIMEOUT_TAG) == 0) {
+				if (i + 1 == argc) {
+					wprintf(L"The program timeout argument error\n");
+
+					return -1;
+				}
+
+				int new_program_timeout = -1;
+
+				if (!atoi2(argv[++i], &new_program_timeout)) {
+					wprintf(L"The program timeout argument parsing error\n");
+
+					return -1;
+				}
+
+				program_timeout = new_program_timeout;
+				program_timeout_is_set = true;
 			}
 		}
 	}
 
+	dxf_initialize_logger_v2("command-line-api.log", true, true, true, log_data_transfer_flag);
 	wprintf(L"CommandLineSample started.\n");
 	dxfeed_host_u = ansi_to_unicode(dxfeed_host, strlen(dxfeed_host));
 	wprintf(L"Connecting to host %ls...\n", dxfeed_host_u);
@@ -601,12 +646,14 @@ int main (int argc, char* argv[]) {
 #endif
 
 	if (token != NULL && token[0] != '\0') {
-		if (!dxf_create_connection_auth_bearer(dxfeed_host, token, on_reader_thread_terminate, on_connection_status_changed, NULL, NULL, NULL, &connection)) {
+		if (!dxf_create_connection_auth_bearer(dxfeed_host, token, on_reader_thread_terminate,
+											   on_connection_status_changed, NULL, NULL, NULL, &connection)) {
 			process_last_error();
 			free_symbols(symbols, symbol_count);
 			return -1;
 		}
-	} else if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, on_connection_status_changed, NULL, NULL, NULL, &connection)) {
+	} else if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, on_connection_status_changed, NULL, NULL,
+									  NULL, &connection)) {
 		process_last_error();
 		free_symbols(symbols, symbol_count);
 		return -1;
@@ -649,7 +696,7 @@ int main (int argc, char* argv[]) {
 	}
 	wprintf(L"Subscription successful!\n");
 
-	while (!is_thread_terminate() && loop_counter--) {
+	while (!is_thread_terminate() && program_timeout--) {
 #ifdef _WIN32
 		Sleep(1000);
 #else
