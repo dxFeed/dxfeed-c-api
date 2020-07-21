@@ -1,5 +1,5 @@
 Version 5.12.0
-* [DXFC-185] New order source for cboe C2 options was added: C2OX
+* [DXFC-185] The new order source for cboe C2 options was added: C2OX
 
 Version 5.11.0
 * [DXFC-182] The new order (price level) sources were added: ntv, glbx, xeur
