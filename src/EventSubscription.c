@@ -36,32 +36,33 @@
 /* -------------------------------------------------------------------------- */
 
 const dxf_const_string_t dx_all_order_sources[] = {
-	L"NTV",
-	L"ntv",
-	L"NFX",
-	L"ESPD",
-	L"XNFI",
-	L"ICE",
-	L"ISE",
-	L"DEA",
-	L"DEX",
-	L"BYX",
-	L"BZX",
-	L"BATE",
-	L"CHIX",
-	L"CEUX",
-	L"BXTR",
-	L"IST",
-	L"BI20",
-	L"ABE",
-	L"FAIR",
-	L"GLBX",
-	L"glbx",
-	L"ERIS",
-	L"XEUR",
-	L"xeur",
-	L"CFE",
-	L"SMFE",
+	L"NTV",  /// NASDAQ Total View.
+	L"ntv",  /// NASDAQ Total View. Record for price level book.
+	L"NFX",  /// NASDAQ Futures Exchange.
+	L"ESPD", /// NASDAQ eSpeed.
+	L"XNFI", /// NASDAQ Fixed Income.
+	L"ICE",  /// Intercontinental Exchange.
+	L"ISE",  /// International Securities Exchange.
+	L"DEA",  /// Direct-Edge EDGA Exchange.
+	L"DEX",  /// Direct-Edge EDGX Exchange.
+	L"BYX",  /// Bats BYX Exchange.
+	L"BZX",  /// Bats BZX Exchange.
+	L"BATE", /// Bats Europe BXE Exchange.
+	L"CHIX", /// Bats Europe CXE Exchange.
+	L"CEUX", /// Bats Europe DXE Exchange.
+	L"BXTR", /// Bats Europe TRF.
+	L"IST",  /// Borsa Istanbul Exchange.
+	L"BI20", /// Borsa Istanbul Exchange. Record for particular top 20 order book.
+	L"ABE",  /// ABE (abe.io) exchange.
+	L"FAIR", /// FAIR (FairX) exchange.
+	L"GLBX", /// CME Globex.
+	L"glbx", /// CME Globex. Record for price level book.
+	L"ERIS", /// Eris Exchange group of companies.
+	L"XEUR", /// Eurex Exchange.
+	L"xeur", /// Eurex Exchange. Record for price level book.
+	L"CFE",  /// CBOE Futures Exchange.
+	L"C2OX", /// CBOE Options C2 Exchange.
+	L"SMFE", /// Small Exchange.
 	NULL
 };
 const size_t dx_all_order_sources_count = sizeof(dx_all_order_sources) / sizeof(dx_all_order_sources[0]) - 1;

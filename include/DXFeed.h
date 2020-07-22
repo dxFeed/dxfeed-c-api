@@ -900,7 +900,7 @@ DXFEED_API ERRORCODE dxf_delete_candle_symbol_attributes(dxf_candle_attributes_t
  * @param[in] symbol     The symbol to add.
  * @param[in] source     Order source for Order, which can be one of following: "NTV", "ntv", "NFX", "ESPD", "XNFI",
  *                       "ICE", "ISE", "DEA", "DEX", "BYX", "BZX", "BATE", "CHIX", "CEUX", "BXTR", "IST", "BI20",
- *                       "ABE", "FAIR", "GLBX", "glbx", "ERIS", "XEUR", "xeur", "CFE", "SMFE".
+ *                       "ABE", "FAIR", "GLBX", "glbx", "ERIS", "XEUR", "xeur", "CFE", "C2OX", "SMFE".
  *                       For MarketMaker subscription use "COMPOSITE_BID" or "COMPOSITE_ASK" keyword.
  * @param[in] time       Time in the past (unix time in milliseconds).
  * @param[out] snapshot  A handle of the created snapshot
@@ -927,7 +927,7 @@ DXFEED_API ERRORCODE dxf_create_snapshot(dxf_connection_t connection, dx_event_i
  * @param[in] symbol     The symbol to add
  * @param[in] source     Order source for Order, which can be one of following: "NTV", "ntv", "NFX", "ESPD", "XNFI",
  *                       "ICE", "ISE", "DEA", "DEX", "BYX", "BZX", "BATE", "CHIX", "CEUX", "BXTR", "IST", "BI20",
- *                       "ABE", "FAIR", "GLBX", "glbx", "ERIS", "XEUR", "xeur", "CFE", "SMFE".
+ *                       "ABE", "FAIR", "GLBX", "glbx", "ERIS", "XEUR", "xeur", "CFE", "C2OX", "SMFE".
  *                       For MarketMaker subscription use "COMPOSITE_BID" or "COMPOSITE_ASK" keyword.
  * @param[in] time       Time in the past (unix time in milliseconds)
  * @param[out] snapshot  A handle of the created snapshot
@@ -1072,7 +1072,7 @@ DXFEED_API ERRORCODE dxf_get_snapshot_symbol(dxf_snapshot_t snapshot, OUT dxf_st
  * @param[in] sources    Order sources for Order, NULL-terminated list. Each element can be one of following:
  *                       "NTV", "ntv", "NFX", "ESPD", "XNFI", "ICE", "ISE", "DEA", "DEX", "BYX", "BZX", "BATE", "CHIX",
  *                       "CEUX", "BXTR", "IST", "BI20", "ABE", "FAIR", "GLBX", "glbx", "ERIS", "XEUR", "xeur", "CFE",
- *                       "SMFE"
+ *                       "C2OX", "SMFE"
  * @param[out] book      A handle of the created price level book
  *
  * @return {@link DXF_SUCCESS} if price level book has been successfully created or {@link DXF_FAILURE} on error;
