@@ -190,7 +190,7 @@ if (WIN32)
         endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
 
         if (NOT DISABLE_TLS)
-            link_directories(${LIB_TLS}/${TARGET_PLATFORM})
+            link_directories(${LIB_TLS}/win/${TARGET_PLATFORM})
             set(ADDITIONAL_LIBRARIES
                 ${ADDITIONAL_LIBRARIES}
                 libtls-15${PLATFORM_POSTFIX}.lib
@@ -216,7 +216,7 @@ if (WIN32)
                 )
         endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
         if (NOT DISABLE_TLS)
-            link_directories(${LIB_TLS}/${TARGET_PLATFORM})
+            link_directories(${LIB_TLS}/win/${TARGET_PLATFORM})
             set(ADDITIONAL_LIBRARIES
                 ${ADDITIONAL_LIBRARIES}
                 tls-15${PLATFORM_POSTFIX}
@@ -310,9 +310,9 @@ if (NOT DISABLE_TLS)
         ADD_CUSTOM_COMMAND(
             TARGET ${PROJECT}
             POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/${TARGET_PLATFORM}/libtls-15${PLATFORM_POSTFIX}.dll ${CMAKE_BINARY_DIR}/$(Configuration)
-            COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/${TARGET_PLATFORM}/libssl-43${PLATFORM_POSTFIX}.dll ${CMAKE_BINARY_DIR}/$(Configuration)
-            COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/${TARGET_PLATFORM}/libcrypto-41${PLATFORM_POSTFIX}.dll ${CMAKE_BINARY_DIR}/$(Configuration)
+            COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/win/${TARGET_PLATFORM}/libtls-15${PLATFORM_POSTFIX}.dll ${CMAKE_BINARY_DIR}/$(Configuration)
+            COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/win/${TARGET_PLATFORM}/libssl-43${PLATFORM_POSTFIX}.dll ${CMAKE_BINARY_DIR}/$(Configuration)
+            COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/win/${TARGET_PLATFORM}/libcrypto-41${PLATFORM_POSTFIX}.dll ${CMAKE_BINARY_DIR}/$(Configuration)
         )
     elseif(MACOSX)
         ADD_CUSTOM_COMMAND(
@@ -331,7 +331,7 @@ if (NOT DISABLE_TLS)
                 COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libtls.a ${CMAKE_BINARY_DIR}/$(Configuration)
                 COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libtls.dylib ${CMAKE_BINARY_DIR}/$(Configuration)
         )
-    else ()
+    else (WIN32)
         ADD_CUSTOM_COMMAND(
             TARGET ${PROJECT}
             POST_BUILD
@@ -366,9 +366,9 @@ install(FILES "../DXFeed.def" "../DXFeedd.def" "../DXFeed_64.def" "../DXFeedd_64
 if (NOT DISABLE_TLS)
     if (WIN32)
         install(FILES
-            "${LIB_TLS}/${TARGET_PLATFORM}/libtls-15${PLATFORM_POSTFIX}.dll"
-            "${LIB_TLS}/${TARGET_PLATFORM}/libssl-43${PLATFORM_POSTFIX}.dll"
-            "${LIB_TLS}/${TARGET_PLATFORM}/libcrypto-41${PLATFORM_POSTFIX}.dll"
+            "${LIB_TLS}/win/${TARGET_PLATFORM}/libtls-15${PLATFORM_POSTFIX}.dll"
+            "${LIB_TLS}/win/${TARGET_PLATFORM}/libssl-43${PLATFORM_POSTFIX}.dll"
+            "${LIB_TLS}/win/${TARGET_PLATFORM}/libcrypto-41${PLATFORM_POSTFIX}.dll"
             DESTINATION "bin/${TARGET_PLATFORM}"
             )
     elseif (MACOSX)
@@ -433,3 +433,21 @@ set(CPACK_PACKAGE_NAME "${PROJECT}")
 set(CPACK_PACKAGE_VERSION "${APP_VERSION}")
 set(CPACK_PACKAGE_FILE_NAME "${PROJECT}-${APP_VERSION}-${TARGET_PLATFORM}${PACKAGE_SUFFIX}")
 include(CPack)
+
+
+
+message([AUTHOR_WARNING] "================================================")
+message([AUTHOR_WARNING] "===\ CMAKE\ SYSTEM:\ ${CMAKE_SYSTEM_NAME}\ =========")
+message([AUTHOR_WARNING] "================================================")
+
+if (WIN32)
+    message([AUTHOR_WARNING] "================================================")
+    message([AUTHOR_WARNING] "=============\ WINDOWS\ BUILD\ ====================")
+    message([AUTHOR_WARNING] "================================================")
+endif (WIN32)
+
+if (MACOSX)
+    message([AUTHOR_WARNING] "================================================")
+    message([AUTHOR_WARNING] "==============\ MACOSX\ BUILD\ ====================")
+    message([AUTHOR_WARNING] "================================================")
+endif (MACOSX)

@@ -67,6 +67,16 @@ if [%NO_TLS%] EQU [no-tls] (
     set PACKAGE_SUFFIX=-no-tls
 )
 
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo "PLATFORM: %PLATFORM%"
+echo "CONFIG  : %CONFIG%"
+echo "PROJECT : %PROJECT_NAME%"
+echo "NO_TLS  : %NO_TLS%"
+echo "VERSION : %VERSION%"
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+more "%PLATFORM%\DXFeedAllCPackConfig.cmake"
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+
 cpack -G ZIP -C %CONFIG% --config %PLATFORM%\DXFeedAllCPackConfig.cmake
 if %ERRORLEVEL% GEQ 1 goto exit_error
 set PACKAGE_NAME=%PROJECT_NAME%-%VERSION%-%PLATFORM%%PACKAGE_SUFFIX%
