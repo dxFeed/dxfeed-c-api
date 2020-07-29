@@ -433,3 +433,22 @@ set(CPACK_PACKAGE_NAME "${PROJECT}")
 set(CPACK_PACKAGE_VERSION "${APP_VERSION}")
 set(CPACK_PACKAGE_FILE_NAME "${PROJECT}-${APP_VERSION}-${TARGET_PLATFORM}${PACKAGE_SUFFIX}")
 include(CPack)
+
+
+
+mesage([AUTHOR_WARNING] "================================================gbr
+")
+mesage([AUTHOR_WARNING] "===\ CMAKE\ SYSTEM:\ ${CMAKE_SYSTEM_NAME}\ =========")
+mesage([AUTHOR_WARNING] "================================================")
+
+if (WIN32)
+    mesage([AUTHOR_WARNING] "================================================")
+    mesage([AUTHOR_WARNING] "=============\ WINDOWS\ BUILD\ ====================")
+    mesage([AUTHOR_WARNING] "================================================")
+endif (WIN32)
+
+if (MACOSX)
+    mesage([AUTHOR_WARNING] "================================================")
+    mesage([AUTHOR_WARNING] "==============\ MACOSX\ BUILD\ ====================")
+    mesage([AUTHOR_WARNING] "================================================")
+endif (MACOSX)
