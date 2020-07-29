@@ -387,7 +387,7 @@ if (NOT DISABLE_TLS)
                 "${LIB_TLS}/mac/${TARGET_PLATFORM}/libtls.dylib"
                 DESTINATION "bin/${TARGET_PLATFORM}"
                 )
-    else ()
+    else (WIN32)
         install(FILES
             "${LIB_TLS}/nix/${TARGET_PLATFORM}/libtls.so.15.4.0"
             "${LIB_TLS}/nix/${TARGET_PLATFORM}/libtls.so.15"
