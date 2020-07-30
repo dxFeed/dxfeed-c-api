@@ -316,6 +316,11 @@ if (NOT DISABLE_TLS)
         )
     elseif(MACOSX)
         ADD_CUSTOM_COMMAND(
+            TARGET ${PROJECT}
+            PRE_BUILD
+            COMMAND tar xfz ${LIB_TLS}/mac/${TARGET_PLATFORM}/libressl.tar.gz -C ${LIB_TLS}/mac/${TARGET_PLATFORM}/
+        )
+        ADD_CUSTOM_COMMAND(
                 TARGET ${PROJECT}
                 POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libcrypto.46.0.0.dylib ${CMAKE_BINARY_DIR}/$(Configuration)
@@ -332,6 +337,11 @@ if (NOT DISABLE_TLS)
                 COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libtls.dylib ${CMAKE_BINARY_DIR}/$(Configuration)
         )
     else (WIN32)
+        ADD_CUSTOM_COMMAND(
+            TARGET ${PROJECT}
+            PRE_BUILD
+            COMMAND tar xfz ${LIB_TLS}/nix/${TARGET_PLATFORM}/libressl.tar.gz -C ${LIB_TLS}/nix/${TARGET_PLATFORM}/
+        )
         ADD_CUSTOM_COMMAND(
             TARGET ${PROJECT}
             POST_BUILD

@@ -95,33 +95,6 @@ echo "Start building package $VERSION"
 # === UPDATE VERSION ===
 APP_VERSION=$VERSION
 
-# === prepare LIBRESSL ===
-unameOut="$(uname -s)"
-case "${unameOut}" in
-    Linux*)     machine=Linux;;
-    Darwin*)    machine=Mac;;
-    CYGWIN*)    machine=Cygwin;;
-    MINGW*)     machine=MinGw;;
-    *)          machine="UNKNOWN:${unameOut}"
-esac
-
-CURRENT_DIR=$(pwd)
-echo "CURRENT OS: $machine"
-if [ "$machine" = "Mac" ]; then
-  cd lib/libressl/mac/x64
-  tar xfz libressl.tar.gz
-  cd ${CURRENT_DIR}
-else
-  echo " >>>>>>>>>>>>>>>>>> NOT A MAC BUILD <<<<<<<<<<<<<<<<<<"
-fi
-if [ "$machine" = "Linux" ]; then
-  cd lib/libressl/nix/x64
-  tar xfz libressl.tar.gz
-  cd ${CURRENT_DIR}
-else
-  echo " >>>>>>>>>>>>>>>>>> NOT A NIX BUILD <<<<<<<<<<<<<<<<<<"
-fi
-
 # === BUILD ALL TARGETS ===
 
 export APP_VERSION
