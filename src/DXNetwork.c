@@ -138,6 +138,9 @@ typedef struct {
 	int set_fields_flags;
 } dx_network_connection_context_t;
 
+static dx_mutex_t g_tls_init_guard;
+static bool g_tls_init_guard_initialized = false;
+
 #define SOCKET_FIELD_FLAG           (1 << 0)
 #define READER_THREAD_FIELD_FLAG    (1 << 1)
 #define MUTEX_FIELD_FLAG            (1 << 2)
@@ -174,10 +177,22 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_network) {
 	}
 
 #ifdef DXFEED_CODEC_TLS_ENABLED
+	if (!g_tls_init_guard_initialized) {
+		CHECKED_CALL(dx_mutex_create, &g_tls_init_guard);
+
+		g_tls_init_guard_initialized = true;
+	}
+
+	CHECKED_CALL(dx_mutex_lock, &g_tls_init_guard);
+
 	if (tls_init() < 0) {
 		dx_clear_connection_data(context);
+		dx_mutex_unlock(&g_tls_init_guard);
+
 		return false;
 	}
+
+	CHECKED_CALL(dx_mutex_unlock, &g_tls_init_guard);
 #endif // DXFEED_CODEC_TLS_ENABLED
 
 	return true;
