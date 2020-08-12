@@ -9,7 +9,7 @@
 * for the specific language governing rights and limitations under the
 * License.
 *
-* The Initial Developer of the Original Code is Devexperts LLC.
+* The Initial Developer of the Original Code is dxFeed Solutions DE GmbH LLC.
 * Portions created by the Initial Developer are Copyright (C) 2010
 * the Initial Developer. All Rights Reserved.
 *
@@ -24,7 +24,7 @@
 #define DX_TO_STRING(x) DX_STRINGIFY(x)
 
 #define DX_VERSION_MAJOR 5
-#define DX_VERSION_MINOR 11
+#define DX_VERSION_MINOR 12
 #define DX_VERSION_PATCH 0
 
 #define DX_VER_FILE_VERSION        DX_VERSION_MAJOR, DX_VERSION_MINOR, DX_VERSION_PATCH
@@ -38,9 +38,9 @@
 
 #define DX_VER_ORIGINAL_FILENAME DX_VER_FILENAME ".dll"
 #define DX_VER_INTERNAL_FILENAME DX_VER_ORIGINAL_FILENAME 
-#define DX_VER_COMPANY_NAME      "Devexperts LLC"
+#define DX_VER_COMPANY_NAME      "dxFeed Solutions DE GmbH"
 #define DX_VER_FILE_DESCRIPTION  "COM dynamic-link library that provides a common application programming interface (API) to real-time, delayed and historical market data feeds."
-#define DX_VER_LEGAL_COPYRIGHT   "Copyright (C) 2010-2019 Devexperts LLC"
+#define DX_VER_LEGAL_COPYRIGHT   "Copyright (C) 2010-2020 dxFeed Solutions DE GmbH"
 #define DX_VER_PRODUCT_NAME      "DXFeed C API"
 
 #endif // VERSION_H

@@ -74,7 +74,7 @@ echo "PROJECT : %PROJECT_NAME%"
 echo "NO_TLS  : %NO_TLS%"
 echo "VERSION : %VERSION%"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-more "%PLATFORM%\DXFeedAllCPackConfig.cmake"
+type "%PLATFORM%\DXFeedAllCPackConfig.cmake"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
 cpack -G ZIP -C %CONFIG% --config %PLATFORM%\DXFeedAllCPackConfig.cmake
