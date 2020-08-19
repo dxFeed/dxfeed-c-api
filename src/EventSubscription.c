@@ -747,6 +747,7 @@ dxf_subscription_t dx_create_event_subscription(dxf_connection_t connection, int
 		for (; dx_all_order_sources[i]; i++) {
 			res &= dx_add_order_source(subscr_data, dx_all_order_sources[i]);
 		}
+		res &= dx_add_order_source(subscr_data, L""); //Used by MM
 	}
 
 	if (!res) {
