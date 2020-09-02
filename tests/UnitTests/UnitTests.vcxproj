@@ -180,7 +180,7 @@
     <Link>
       <AdditionalDependencies>DXFeedd.lib;ws2_32.lib;dbghelp.lib;libtls-15.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName)d.exe</OutputFile>
-      <AdditionalLibraryDirectories>$(SolutionDir)bin\32;$(SolutionDir)\lib;$(SolutionDir)lib\libressl\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)bin\32;$(SolutionDir)\lib;$(SolutionDir)lib\libressl\win\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)$(ProjectName)d.pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
@@ -237,7 +237,7 @@
     <Link>
       <AdditionalDependencies>DXFeedd_64.lib;ws2_32.lib;dbghelp.lib;libtls-15_64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName)d_64.exe</OutputFile>
-      <AdditionalLibraryDirectories>$(SolutionDir)bin\64;$(SolutionDir)\lib;$(SolutionDir)lib\libressl\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)bin\64;$(SolutionDir)\lib;$(SolutionDir)lib\libressl\win\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)$(ProjectName)d_64.pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
@@ -283,7 +283,7 @@
     <Link>
       <AdditionalDependencies>DXFeed.lib;ws2_32.lib;libtls-15.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
-      <AdditionalLibraryDirectories>$(SolutionDir)bin\32;$(SolutionDir)\lib;$(SolutionDir)lib\libressl\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)bin\32;$(SolutionDir)\lib;$(SolutionDir)lib\libressl\win\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
@@ -324,7 +324,7 @@
     <Link>
       <AdditionalDependencies>DXFeed_64.lib;ws2_32.lib;libtls-15_64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName)_64.exe</OutputFile>
-      <AdditionalLibraryDirectories>$(SolutionDir)bin\64;$(SolutionDir)\lib;$(SolutionDir)lib\libressl\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)bin\64;$(SolutionDir)\lib;$(SolutionDir)lib\libressl\win\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
@@ -333,6 +333,26 @@
     <ClCompile Include="..\..\src\ConfigurationDeserializer.c" />
     <ClCompile Include="..\..\src\DXAddressParser.c" />
     <ClCompile Include="..\..\src\DXProperties.c" />
+    <ClCompile Include="..\..\src\EventSubscription.cpp">
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='ReleaseNoTLS|x64'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='DebugNoTLS|x64'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsCpp</CompileAs>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Sync</ExceptionHandling>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='ReleaseNoTLS|Win32'">Sync</ExceptionHandling>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='DebugNoTLS|Win32'">Sync</ExceptionHandling>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Sync</ExceptionHandling>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Sync</ExceptionHandling>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='ReleaseNoTLS|x64'">Sync</ExceptionHandling>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='DebugNoTLS|x64'">Sync</ExceptionHandling>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Sync</ExceptionHandling>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='ReleaseNoTLS|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='DebugNoTLS|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsCpp</CompileAs>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Default</BasicRuntimeChecks>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Default</BasicRuntimeChecks>
+    </ClCompile>
     <ClCompile Include="..\..\src\PriceLevelBook.c" />
     <ClCompile Include="..\..\src\Version.c" />
     <ClCompile Include="AddressParserTest.c" />
@@ -363,7 +383,6 @@
     <ClCompile Include="..\..\src\EventData.c" />
     <ClCompile Include="..\..\src\TaskQueue.c" />
     <ClCompile Include="..\..\src\Win32.c" />
-    <ClCompile Include="..\..\src\EventSubscription.c" />
     <ClCompile Include="..\..\src\BufferedInput.c" />
     <ClCompile Include="..\..\src\BufferedIOCommon.c" />
     <ClCompile Include="..\..\src\BufferedOutput.c" />

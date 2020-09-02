@@ -52,7 +52,6 @@
 
 static dxf_const_string_t g_error_prefix = L"Error: ";
 static dxf_const_string_t g_info_prefix = L"";
-static dxf_const_string_t g_default_time_string = L"Incorrect time";
 
 static bool g_verbose_logger_mode;
 static bool g_data_transfer_logger_mode;

@@ -46,7 +46,7 @@
 
 /// Event ID
 typedef enum {
-    dx_eid_begin = 0,
+    dx_eid_begin = 0u,
     dx_eid_trade = dx_eid_begin,
     dx_eid_quote,
     dx_eid_summary,
@@ -77,7 +77,7 @@ typedef enum {
 /// Profile event
 #define DXF_ET_PROFILE       (1 << dx_eid_profile)
 /// Order event
-#define DXF_ET_ORDER         (1 << dx_eid_order)
+#define DXF_ET_ORDER         (1u << dx_eid_order)
 /// Time & sale event
 #define DXF_ET_TIME_AND_SALE (1 << dx_eid_time_and_sale)
 /// Candle event
@@ -96,33 +96,33 @@ typedef enum {
 #define DXF_ET_SERIES        (1 << dx_eid_series)
 /// Configuration event
 #define DXF_ET_CONFIGURATION (1 << dx_eid_configuration)
-#define DXF_ET_UNUSED        (~((1 << dx_eid_count) - 1))
+#define DXF_ET_UNUSED        (~((1u << dx_eid_count) - 1u))
 
 /// Event bit-mask
-#define DX_EVENT_BIT_MASK(event_id) (1 << event_id)
+#define DX_EVENT_BIT_MASK(event_id) (1u << event_id)
 
 /**
  * Event Subscription flags
  */
 typedef enum {
   ///Used for default subscription
-  dx_esf_default = 0x0,
+  dx_esf_default = 0x0u,
   ///Used for subscribing on one record only in case of snapshots
-  dx_esf_single_record = 0x1,
+  dx_esf_single_record = 0x1u,
   ///Used with \a dx_esf_single_record flag and for \a dx_eid_order (Order) event
-  dx_esf_sr_market_maker_order = 0x2,
+  dx_esf_sr_market_maker_order = 0x2u,
   ///Used for time series subscription
-  dx_esf_time_series = 0x4,
+  dx_esf_time_series = 0x4u,
   ///Used for regional quotes
-  dx_esf_quotes_regional = 0x8,
+  dx_esf_quotes_regional = 0x8u,
   ///Used for wildcard ("*") subscription
-  dx_esf_wildcard = 0x10,
+  dx_esf_wildcard = 0x10u,
   ///Used for forcing subscription to ticker data
-  dx_esf_force_ticker = 0x20,
+  dx_esf_force_ticker = 0x20u,
   ///Used for forcing subscription to stream data
-  dx_esf_force_stream = 0x40,
+  dx_esf_force_stream = 0x40u,
   ///Used for forcing subscription to history data
-  dx_esf_force_history = 0x80,
+  dx_esf_force_history = 0x80u,
 
   dx_esf_force_enum_unsigned = UINT_MAX
 } dx_event_subscr_flag;
@@ -159,6 +159,7 @@ typedef dx_order_source_array_t* dx_order_source_array_ptr_t;
 
 /// Event data
 typedef void* dxf_event_data_t;
+typedef const void* dxf_const_event_data_t;
 
 /// Order scope
 typedef enum {
@@ -746,6 +747,6 @@ typedef void(*dxf_regional_quote_listener_t) (dxf_const_string_t symbol, const d
  * @param index      Event data item index
  * @return Event data item
  */
-const dxf_event_data_t dx_get_event_data_item (int event_mask, const dxf_event_data_t data, size_t index);
+const dxf_event_data_t dx_get_event_data_item (int event_mask, dxf_const_event_data_t data, size_t index);
  
 #endif /* EVENT_DATA_H_INCLUDED */

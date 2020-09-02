@@ -310,24 +310,6 @@ static const dx_field_info_t dx_fields_configuration[] = {
  */
 /* -------------------------------------------------------------------------- */
 
-static const int g_record_field_counts[dx_rid_count] = {
-	sizeof(dx_fields_trade) / sizeof(dx_fields_trade[0]),
-	sizeof(dx_fields_quote) / sizeof(dx_fields_quote[0]),
-	sizeof(dx_fields_summary) / sizeof(dx_fields_summary[0]),
-	sizeof(dx_fields_profile) / sizeof(dx_fields_profile[0]),
-	sizeof(dx_fields_market_maker) / sizeof(dx_fields_market_maker[0]),
-	sizeof(dx_fields_order) / sizeof(dx_fields_order[0]),
-	sizeof(dx_fields_time_and_sale) / sizeof(dx_fields_time_and_sale[0]),
-	sizeof(dx_fields_candle) / sizeof(dx_fields_candle[0]),
-	sizeof(dx_fields_trade_eth) / sizeof(dx_fields_trade_eth[0]),
-	sizeof(dx_fields_spread_order) / sizeof(dx_fields_spread_order[0]),
-	sizeof(dx_fields_greeks) / sizeof(dx_fields_greeks[0]),
-	sizeof(dx_fields_theo_price) / sizeof(dx_fields_theo_price[0]),
-	sizeof(dx_fields_underlying) / sizeof(dx_fields_underlying[0]),
-	sizeof(dx_fields_series) / sizeof(dx_fields_series[0]),
-	sizeof(dx_fields_configuration) / sizeof(dx_fields_configuration[0])
-};
-
 static const dx_record_info_t g_record_info[dx_rid_count] = {
 	{ L"Trade", sizeof(dx_fields_trade) / sizeof(dx_fields_trade[0]), dx_fields_trade },
 	{ L"Quote", sizeof(dx_fields_quote) / sizeof(dx_fields_quote[0]), dx_fields_quote },

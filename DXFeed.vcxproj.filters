@@ -68,9 +68,6 @@
     <ClCompile Include="src\EventData.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\EventSubscription.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Logger.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -141,6 +138,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Version.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EventSubscription.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

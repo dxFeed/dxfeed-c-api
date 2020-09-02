@@ -74,9 +74,6 @@
     <ClCompile Include="..\..\src\Win32.c">
       <Filter>Common\Sources</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\EventSubscription.c">
-      <Filter>Event subscription</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\BufferedInput.c">
       <Filter>Parser\Sources</Filter>
     </ClCompile>
@@ -172,6 +169,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Version.c">
       <Filter>Common\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\EventSubscription.cpp">
+      <Filter>Event subscription</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

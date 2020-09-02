@@ -1034,7 +1034,6 @@ bool dx_add_price_level_book_listener(dxf_price_level_book_t book,
 									dxf_price_level_book_listener_t book_listener,
 									void *user_data) {
 	dx_price_level_book_t *b = (dx_price_level_book_t *)book;
-	dx_plb_connection_context_t *context = CTX(b->context);
 	dx_plb_listener_context_t ctx = { book_listener, user_data };
 	bool found = false;
 	bool error = false;
@@ -1054,7 +1053,6 @@ bool dx_add_price_level_book_listener(dxf_price_level_book_t book,
 bool dx_remove_price_level_book_listener(dxf_price_level_book_t book,
 										dxf_price_level_book_listener_t book_listener) {
 	dx_price_level_book_t *b = (dx_price_level_book_t *)book;
-	dx_plb_connection_context_t *context = CTX(b->context);
 	dx_plb_listener_context_t ctx = { book_listener, NULL };
 	bool found = false;
 	bool error = false;

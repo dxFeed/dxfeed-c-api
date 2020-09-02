@@ -412,8 +412,12 @@ void dx_init_threads() {
 
 /* Public API */
 
-bool dx_thread_create (dx_thread_t* thread_id, const pthread_attr_t* attr,
-					dx_start_routine_t start_routine, void *arg) {
+#if defined(_WIN32)
+bool dx_thread_create (dx_thread_t* thread_id, const void* attr, dx_start_routine_t start_routine, void *arg)
+#else
+bool dx_thread_create (dx_thread_t* thread_id, const pthread_attr_t* attr, dx_start_routine_t start_routine, void *arg)
+#endif
+{
 	dx_thread_wrapper_args_t *wargs = dx_calloc(1, sizeof(*wargs));
 
 	wargs->start_routine = start_routine;
