@@ -37,7 +37,7 @@
  */
 /* -------------------------------------------------------------------------- */
 
-static bool g_initialization_attempted = false;
+static int g_initialization_attempted = false;
 static dx_key_t g_last_error_data_key;
 
 static dx_error_code_t g_master_thread_last_error_code = dx_ec_success;
@@ -81,7 +81,7 @@ dx_error_function_result_t dx_set_last_error(dx_error_code_t error_code) {
 	return dx_set_last_error_impl(error_code, true);
 }
 
-dx_error_function_result_t dx_set_last_error_impl(dx_error_code_t error_code, bool with_logging) {
+dx_error_function_result_t dx_set_last_error_impl(dx_error_code_t error_code, int with_logging) {
 	dx_error_code_t* error_data = NULL;
 	dx_error_function_result_t res;
 
@@ -156,13 +156,13 @@ dx_error_function_result_t dx_get_last_error (int* error_code) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_pop_last_error () {
+int dx_pop_last_error () {
 	return (dx_set_last_error(dx_ec_success) == dx_efr_success);
 }
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_init_error_subsystem (void) {
+int dx_init_error_subsystem (void) {
 	dx_error_code_t* error_data = NULL;
 
 	if (!g_initialization_attempted) {
@@ -226,11 +226,11 @@ dx_error_code_t dx_get_error_code (void) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_set_error_code (dx_error_code_t code) {
+int dx_set_error_code (dx_error_code_t code) {
 	return dx_set_error_code_impl(code, true);
 }
 
-bool dx_set_error_code_impl(dx_error_code_t code, bool with_logging) {
+int dx_set_error_code_impl(dx_error_code_t code, int with_logging) {
 	dx_error_function_result_t res = dx_set_last_error_impl(code, with_logging);
 
 	if (res != dx_efr_success) {

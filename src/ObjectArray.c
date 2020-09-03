@@ -23,7 +23,7 @@
 
 #define DX_OBJECT_ARRAY_ADD_BODY(type, alias) \
 DX_OBJECT_ARRAY_ADD_PROTOTYPE(type, alias) {\
-	bool failed = false; \
+	int failed = false; \
 	\
 	if (object_array == NULL) { \
 		return dx_set_error_code(dx_ec_invalid_func_param_internal); \

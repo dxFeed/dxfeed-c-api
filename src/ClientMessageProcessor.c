@@ -41,7 +41,7 @@
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_to_subscription_message_type(bool subscribe, dx_subscription_type_t subscr_type, OUT dx_message_type_t* res) {
+int dx_to_subscription_message_type(int subscribe, dx_subscription_type_t subscr_type, OUT dx_message_type_t* res) {
 	if (res == NULL) {
 		return dx_set_error_code(dx_ec_invalid_func_param_internal);
 	}
@@ -74,7 +74,7 @@ typedef struct {
 	dxf_const_string_t* symbols;
 	size_t symbol_count;
 	int event_types;
-	bool unsubscribe;
+	int unsubscribe;
 	dxf_uint_t subscr_flags;
 	dxf_long_t time;
 } dx_event_subscription_task_data_t;
@@ -116,7 +116,7 @@ size_t dx_count_symbols(dxf_const_string_t *symbols, size_t symbol_count) {
 
 void* dx_create_event_subscription_task_data (dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
 											dxf_const_string_t* symbols, size_t symbol_count, int event_types,
-											bool unsubscribe, dxf_uint_t subscr_flags, dxf_long_t time) {
+											  int unsubscribe, dxf_uint_t subscr_flags, dxf_long_t time) {
 	dx_event_subscription_task_data_t* data = dx_calloc(1, sizeof(dx_event_subscription_task_data_t));
 
 	if (data == NULL) {
@@ -171,20 +171,20 @@ void* dx_create_event_subscription_task_data (dxf_connection_t connection, dx_or
  */
 /* -------------------------------------------------------------------------- */
 
-static bool dx_compose_message_header (void* bocc, dx_message_type_t message_type) {
+static int dx_compose_message_header (void* bocc, dx_message_type_t message_type) {
 	CHECKED_CALL_2(dx_write_byte, bocc, (dxf_byte_t)0); /* reserve one byte for message length */
 	CHECKED_CALL_2(dx_write_compact_int, bocc, message_type);
 
 	return true;
 }
-static bool dx_compose_heartbeat (void* bocc) {
+static int dx_compose_heartbeat (void* bocc) {
 	CHECKED_CALL_2(dx_write_byte, bocc, (dxf_byte_t)0); /* reserve one byte for message length */
 
 	return true;
 }
 /* -------------------------------------------------------------------------- */
 
-static bool dx_move_message_data (void* bocc, int old_offset, int new_offset, int data_length) {
+static int dx_move_message_data (void* bocc, int old_offset, int new_offset, int data_length) {
 	CHECKED_CALL_2(dx_ensure_capacity, bocc, new_offset + data_length);
 
 	dx_memmove(dx_get_out_buffer(bocc) + new_offset, dx_get_out_buffer(bocc) + old_offset, data_length);
@@ -194,7 +194,7 @@ static bool dx_move_message_data (void* bocc, int old_offset, int new_offset, in
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_finish_composing_message (void* bocc) {
+static int dx_finish_composing_message (void* bocc) {
 	int message_length = dx_get_out_buffer_position(bocc) - 1; /* 1 is for the one byte reserved for size */
 	int length_size = dx_get_compact_size(message_length);
 
@@ -217,7 +217,7 @@ static bool dx_finish_composing_message (void* bocc) {
  */
 /* -------------------------------------------------------------------------- */
 
-static bool dx_compose_body (void* bocc, dxf_int_t record_id, dxf_int_t cipher, dxf_const_string_t symbol) {
+static int dx_compose_body (void* bocc, dxf_int_t record_id, dxf_int_t cipher, dxf_const_string_t symbol) {
 	if (cipher == 0 && symbol == NULL) {
 		return dx_set_error_code(dx_ec_invalid_func_param_internal);
 	}
@@ -230,7 +230,7 @@ static bool dx_compose_body (void* bocc, dxf_int_t record_id, dxf_int_t cipher, 
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_subscribe_symbol_to_record(dxf_connection_t connection, dx_message_type_t type,
+static int dx_subscribe_symbol_to_record(dxf_connection_t connection, dx_message_type_t type,
 										dxf_const_string_t symbol, dxf_int_t cipher,
 										dxf_int_t record_id, dxf_long_t time, OUT dxf_byte_t** buffer, OUT int* buffer_size) {
 	static const dxf_int_t initial_buffer_size = 100;
@@ -331,7 +331,7 @@ int dx_subscribe_symbols_to_events_task (void* data, int command) {
  */
 /* -------------------------------------------------------------------------- */
 
-static bool dx_write_record_field (void* bocc, const dx_field_info_t* field) {
+static int dx_write_record_field (void* bocc, const dx_field_info_t* field) {
 	CHECKED_CALL_2(dx_write_utf_string, bocc, field->name);
 	CHECKED_CALL_2(dx_write_compact_int, bocc, field->type);
 
@@ -340,7 +340,7 @@ static bool dx_write_record_field (void* bocc, const dx_field_info_t* field) {
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_write_event_record(void* bocc, const dx_record_item_t* record, dx_record_id_t record_id) {
+static int dx_write_event_record(void* bocc, const dx_record_item_t* record, dx_record_id_t record_id) {
 	int field_index = 0;
 
 	CHECKED_CALL_2(dx_write_compact_int, bocc, (dxf_int_t)record_id);
@@ -356,7 +356,7 @@ static bool dx_write_event_record(void* bocc, const dx_record_item_t* record, dx
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_write_event_records (void* bocc, void* dscc) {
+int dx_write_event_records (void* bocc, void* dscc) {
 	dx_record_id_t record_id = dx_get_next_unsubscribed_record_id(dscc, false);
 	dx_record_id_t count = dx_get_records_list_count(dscc);
 
@@ -385,7 +385,7 @@ int dx_describe_records_sender_task (void* data, int command) {
 }
 
 /* -------------------------------------------------------------------------- */
-bool dx_load_events_for_subscription (dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
+int dx_load_events_for_subscription (dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
 										int event_types, dxf_uint_t subscr_flags) {
 	dx_event_id_t eid = dx_eid_begin;
 	for (; eid < dx_eid_count; ++eid) {
@@ -401,14 +401,14 @@ bool dx_load_events_for_subscription (dxf_connection_t connection, dx_order_sour
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_get_event_server_support(dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
-	int event_types, bool unsubscribe, dxf_uint_t subscr_flags,
+int dx_get_event_server_support(dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
+	int event_types, int unsubscribe, dxf_uint_t subscr_flags,
 	OUT dx_message_support_status_t* res)
 {
 	*res = dx_mss_supported;
 	CHECKED_CALL_2(dx_lock_describe_protocol_processing, connection, true);
-	bool go_to_exit = false;
-	bool success = true;
+	int go_to_exit = false;
+	int success = true;
 	for (dx_event_id_t eid = dx_eid_begin; eid < dx_eid_count && !go_to_exit; ++eid) {
 		if (event_types & DX_EVENT_BIT_MASK(eid)) {
 			size_t j = 0;
@@ -459,7 +459,7 @@ bool dx_get_event_server_support(dxf_connection_t connection, dx_order_source_ar
  */
 /* -------------------------------------------------------------------------- */
 
-static bool dx_write_describe_protocol_magic (void* bocc) {
+static int dx_write_describe_protocol_magic (void* bocc) {
 	/* hex value is 0x44585033 */
 	CHECKED_CALL_2(dx_write_byte, bocc, (dxf_byte_t)'D');
 	CHECKED_CALL_2(dx_write_byte, bocc, (dxf_byte_t)'X');
@@ -471,7 +471,7 @@ static bool dx_write_describe_protocol_magic (void* bocc) {
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_write_describe_protocol_properties (void* bocc, const dx_property_map_t* properties) {
+static int dx_write_describe_protocol_properties (void* bocc, const dx_property_map_t* properties) {
 	size_t i;
 
 	if (properties == NULL)
@@ -489,7 +489,7 @@ static bool dx_write_describe_protocol_properties (void* bocc, const dx_property
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_write_describe_protocol_message_data (void* bocc, const int* msg_roster, int msg_count) {
+static int dx_write_describe_protocol_message_data (void* bocc, const int* msg_roster, int msg_count) {
 	int i = 0;
 
 	CHECKED_CALL_2(dx_write_compact_int, bocc, msg_count);
@@ -505,13 +505,13 @@ static bool dx_write_describe_protocol_message_data (void* bocc, const int* msg_
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_write_describe_protocol_sends (void* bocc) {
+static int dx_write_describe_protocol_sends (void* bocc) {
 	return dx_write_describe_protocol_message_data(bocc, dx_get_send_message_roster(), dx_get_send_message_roster_size());
 }
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_write_describe_protocol_recvs (void* bocc) {
+static int dx_write_describe_protocol_recvs (void* bocc) {
 	return dx_write_describe_protocol_message_data(bocc, dx_get_recv_message_roster(), dx_get_recv_message_roster_size());
 }
 
@@ -550,9 +550,9 @@ int dx_describe_protocol_sender_task (void* data, int command) {
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_subscribe_symbols_to_events (dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
-									dxf_const_string_t* symbols, size_t symbol_count, int event_types, bool unsubscribe,
-									bool task_mode, dxf_uint_t subscr_flags, dxf_long_t time) {
+int dx_subscribe_symbols_to_events (dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
+									dxf_const_string_t* symbols, size_t symbol_count, int event_types, int unsubscribe,
+									int task_mode, dxf_uint_t subscr_flags, dxf_long_t time) {
 	CHECKED_CALL_2(dx_validate_connection_handle, connection, true);
 
 	{
@@ -590,7 +590,7 @@ bool dx_subscribe_symbols_to_events (dxf_connection_t connection, dx_order_sourc
 	}
 
 	/* executing in task mode (in background queue thread)*/
-	bool success = true;
+	int success = true;
 	for (size_t i = 0; i < symbol_count && success; ++i) {
 		if (dx_string_null_or_empty(symbols[i])) {
 			continue;
@@ -655,7 +655,7 @@ bool dx_subscribe_symbols_to_events (dxf_connection_t connection, dx_order_sourc
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_send_record_description (dxf_connection_t connection, bool task_mode) {
+int dx_send_record_description (dxf_connection_t connection, int task_mode) {
 	static const int initial_size = 1024;
 
 	void* bocc = NULL;
@@ -716,7 +716,7 @@ bool dx_send_record_description (dxf_connection_t connection, bool task_mode) {
 }
 /* -------------------------------------------------------------------------- */
 
-bool dx_send_protocol_description (dxf_connection_t connection, bool task_mode) {
+int dx_send_protocol_description (dxf_connection_t connection, int task_mode) {
 	static const int initial_size = 1024;
 
 	void* bocc = NULL;
@@ -790,7 +790,7 @@ bool dx_send_protocol_description (dxf_connection_t connection, bool task_mode) 
 	return true;
 }
 
-bool dx_send_heartbeat (dxf_connection_t connection, bool task_mode) {
+int dx_send_heartbeat (dxf_connection_t connection, int task_mode) {
 	static const int initial_size = 1024;
 
 	void* bocc = NULL;

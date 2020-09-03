@@ -175,7 +175,7 @@ void common_candle_listener(int event_type, dxf_const_string_t symbol_name, cons
 
 /* -------------------------------------------------------------------------- */
 
-bool add_symbol_to_existing_candle(dxf_subscription_t subscription, dxf_const_string_t symbol) {
+int add_symbol_to_existing_candle(dxf_subscription_t subscription, dxf_const_string_t symbol) {
 	dxf_candle_attributes_t candle_attributes = NULL;
 
 	if (!dxf_create_candle_symbol_attributes(symbol, DXF_CANDLE_EXCHANGE_CODE_ATTRIBUTE_DEFAULT,
@@ -196,7 +196,7 @@ bool add_symbol_to_existing_candle(dxf_subscription_t subscription, dxf_const_st
 	return true;
 }
 
-bool remove_symbol_from_existing_candle(dxf_subscription_t subscription, dxf_const_string_t symbol) {
+int remove_symbol_from_existing_candle(dxf_subscription_t subscription, dxf_const_string_t symbol) {
 	dxf_candle_attributes_t candle_attributes = NULL;
 
 	if (!dxf_create_candle_symbol_attributes(symbol, DXF_CANDLE_EXCHANGE_CODE_ATTRIBUTE_DEFAULT,
@@ -217,7 +217,7 @@ bool remove_symbol_from_existing_candle(dxf_subscription_t subscription, dxf_con
 	return true;
 }
 
-bool create_candle_subscription(dxf_connection_t connection, dxf_const_string_t symbol,
+int create_candle_subscription(dxf_connection_t connection, dxf_const_string_t symbol,
 								dxf_event_listener_t event_listener,
 								OUT dxf_subscription_t* res_subscription) {
 	dxf_subscription_t subscription = NULL;
@@ -243,7 +243,7 @@ bool create_candle_subscription(dxf_connection_t connection, dxf_const_string_t 
 	return true;
 }
 
-bool wait_events(int (*get_counter_function)()) {
+int wait_events(int (*get_counter_function)()) {
 	int timestamp = dx_millisecond_timestamp();
 	while (get_counter_function() == 0) {
 		if (is_thread_terminate(g_ct_listener_thread_data)) {
@@ -274,14 +274,14 @@ int get_order_event_counter() {
 /* -------------------------------------------------------------------------- */
 
 /*Test*/
-bool candle_attributes_test(void) {
+int candle_attributes_test(void) {
 	int candle_attribute_cases_size = sizeof(g_candle_attribute_cases) / sizeof(g_candle_attribute_cases[0]);
 	int i;
 	for (i = 0; i < candle_attribute_cases_size; i++) {
 		dxf_candle_attributes_t attributes;
 		candle_attribute_test_case_t* params = &g_candle_attribute_cases[i];
 		dxf_string_t attributes_string = NULL;
-		bool res = true;
+		int res = true;
 		dxf_create_candle_symbol_attributes(params->symbol, params->exchange_code,
 			params->period_value, params->period_type, params->price, params->session,
 			params->alignment, params->price_level, &attributes);
@@ -305,7 +305,7 @@ bool candle_attributes_test(void) {
 /* -------------------------------------------------------------------------- */
 
 /*Test*/
-bool candle_subscription_test(void) {
+int candle_subscription_test(void) {
 	dxf_connection_t connection = NULL;
 	dxf_subscription_t subscription = NULL;
 
@@ -360,7 +360,7 @@ bool candle_subscription_test(void) {
 }
 
 /*Test*/
-bool candle_multiply_subscription_test(void) {
+int candle_multiply_subscription_test(void) {
 	dxf_connection_t connection = NULL;
 	dxf_subscription_t aapl_candle_subscription = NULL;
 	dxf_subscription_t ibm_candle_subscription = NULL;
@@ -456,7 +456,7 @@ bool candle_multiply_subscription_test(void) {
 }
 
 /*Test*/
-bool candle_symbol_test(void) {
+int candle_symbol_test(void) {
 	dxf_connection_t connection = NULL;
 	dxf_subscription_t subscription = NULL;
 	dxf_const_string_t* symbols = NULL;
@@ -579,8 +579,8 @@ bool candle_symbol_test(void) {
 	return true;
 }
 
-bool candle_all_tests(void) {
-	bool res = true;
+int candle_all_tests(void) {
+	int res = true;
 
 	dxf_initialize_logger("log.log", true, true, true);
 

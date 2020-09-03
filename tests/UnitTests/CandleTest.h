@@ -3,10 +3,10 @@
 
 #include "PrimitiveTypes.h"
 
-bool candle_attributes_test(void);
-bool candle_subscription_test(void);
-bool candle_multiply_subscription_test(void);
-bool candle_symbol_test(void);
-bool candle_all_tests(void);
+int candle_attributes_test(void);
+int candle_subscription_test(void);
+int candle_multiply_subscription_test(void);
+int candle_symbol_test(void);
+int candle_all_tests(void);
 
 #endif /* CANDLE_TEST_H_INCLUDED */

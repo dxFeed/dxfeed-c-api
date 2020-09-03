@@ -23,6 +23,6 @@
 #include "BufferedIOCommon.h"
 
 // Parse decimals stored as compact int
-bool dx_int_to_double(dxf_int_t integer, OUT dxf_double_t* decimal);
+int dx_int_to_double(dxf_int_t integer, OUT dxf_double_t* decimal);
 
 #endif // DECIMAL_H

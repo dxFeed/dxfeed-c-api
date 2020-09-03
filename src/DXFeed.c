@@ -49,7 +49,7 @@ static dxf_const_string_t wildcard_symbol = L"*";
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_subscribe (dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
+int dx_subscribe (dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
                    dxf_const_string_t *symbols, size_t symbols_count, int event_types,
                    dxf_uint_t subscr_flags, dxf_long_t time) {
 	return dx_subscribe_symbols_to_events(connection, order_source, symbols, symbols_count,
@@ -58,7 +58,7 @@ bool dx_subscribe (dxf_connection_t connection, dx_order_source_array_ptr_t orde
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_unsubscribe (dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
+int dx_unsubscribe (dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
                      dxf_const_string_t *symbols, size_t symbols_count, int event_types,
                      dxf_uint_t subscr_flags, dxf_long_t time) {
 	return dx_subscribe_symbols_to_events(connection, order_source, symbols, symbols_count,
@@ -77,17 +77,17 @@ typedef struct {
 	size_t capacity;
 
 	dx_mutex_t guard;
-	bool guard_initialized;
+	int guard_initialized;
 } dx_connection_array_t;
 
 static dx_connection_array_t g_connection_queue = {0};
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_queue_connection_for_close (dxf_connection_t connection) {
-	bool conn_exists = false;
+int dx_queue_connection_for_close (dxf_connection_t connection) {
+	int conn_exists = false;
 	size_t conn_index;
-	bool failed = false;
+	int failed = false;
 
 	if (!g_connection_queue.guard_initialized) {
 		return false;
@@ -145,7 +145,7 @@ void dx_close_queued_connections (void) {
 /* -------------------------------------------------------------------------- */
 
 void dx_init_connection_queue (void) {
-	static bool initialized = false;
+	static int initialized = false;
 
 	if (!initialized) {
 		initialized = true;
@@ -163,7 +163,7 @@ void dx_perform_implicit_tasks (void) {
 
 /* -------------------------------------------------------------------------- */
 
-ERRORCODE dx_perform_common_actions (bool resetError) {
+ERRORCODE dx_perform_common_actions (int resetError) {
 	dx_perform_implicit_tasks();
 
 	if (resetError && !dx_pop_last_error()) {
@@ -174,7 +174,7 @@ ERRORCODE dx_perform_common_actions (bool resetError) {
 }
 
 static ERRORCODE dx_init_codec () {
-	static bool symbol_codec_initialized = false;
+	static int symbol_codec_initialized = false;
 	if (!symbol_codec_initialized) {
 		symbol_codec_initialized = true;
 		if (dx_init_symbol_codec() != true) {
@@ -186,7 +186,7 @@ static ERRORCODE dx_init_codec () {
 
 /* -------------------------------------------------------------------------- */
 
-ERRORCODE dx_close_subscription (dxf_subscription_t subscription, bool resetError) {
+ERRORCODE dx_close_subscription (dxf_subscription_t subscription, int resetError) {
 	dxf_connection_t connection;
 	int events;
 
@@ -494,7 +494,7 @@ DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dxf_const
 
 	dxf_const_string_t *subscr_symbols = symbols;
 	int subscr_symbol_count = symbol_count;
-	bool found_wildcard;
+	int found_wildcard;
 	size_t index;
 
 	DX_ARRAY_SEARCH(symbols, 0, symbol_count, wildcard_symbol, DX_WILDCARD_COMPARATOR, false, found_wildcard, index);
@@ -543,7 +543,7 @@ dxf_remove_symbols (dxf_subscription_t subscription, dxf_const_string_t *symbols
 		return DXF_FAILURE;
 	}
 
-	bool found_wildcard;
+	int found_wildcard;
 	size_t index;
 
 	DX_ARRAY_SEARCH(symbols, 0, symbol_count, wildcard_symbol, DX_WILDCARD_COMPARATOR, false, found_wildcard, index);
@@ -874,7 +874,7 @@ DXFEED_API ERRORCODE dxf_add_order_source (dxf_subscription_t subscription, cons
 	int events;
 	dx_event_subscr_flag subscr_flags;
 	dxf_long_t time;
-	bool failed = false;
+	int failed = false;
 
 	dx_perform_common_actions(DX_RESET_ERROR);
 
@@ -1156,7 +1156,7 @@ DXFEED_API ERRORCODE dxf_create_price_level_book (dxf_connection_t connection,
 	dxf_ulong_t srcflags = 0;
 	dxf_string_t wsrc;
 	size_t srccount = 0;
-	bool found;
+	int found;
 
 	dx_perform_common_actions(DX_RESET_ERROR);
 	if (!dx_init_codec()) {

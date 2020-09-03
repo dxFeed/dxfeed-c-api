@@ -104,7 +104,7 @@ typedef struct {
 	int data_count;
 	void *user_data;
 
-	bool is_received;
+	int is_received;
 	CRITICAL_SECTION guard;
 } event_listener_data_t;
 
@@ -137,8 +137,8 @@ void free_event_listener_data(event_listener_data_t* listener_data) {
 	reset_event_listener_data(listener_data);
 }
 
-bool is_received_event_listener_data(event_listener_data_t* listener_data) {
-	bool is_received = false;
+int is_received_event_listener_data(event_listener_data_t* listener_data) {
+	int is_received = false;
 	EnterCriticalSection(&(listener_data->guard));
 	is_received = listener_data->is_received;
 	LeaveCriticalSection(&(listener_data->guard));
@@ -196,7 +196,7 @@ void order_event_copy_listener_v2(int event_type, dxf_const_string_t symbol_name
 
 /* -------------------------------------------------------------------------- */
 
-bool subscribe_to_event(dxf_connection_t connection, dxf_subscription_t* subscription,
+int subscribe_to_event(dxf_connection_t connection, dxf_subscription_t* subscription,
 						int event_type, dxf_event_listener_t event_listener, void* user_data) {
 	if (!dxf_create_subscription(connection, event_type, subscription)) {
 		process_last_error();
@@ -230,7 +230,7 @@ void on_thread_terminate(dxf_connection_t connection, void* user_data) {
 /* -------------------------------------------------------------------------- */
 
 /*Test*/
-bool event_dynamic_subscription_test(void) {
+int event_dynamic_subscription_test(void) {
 	dxf_connection_t connection = NULL;
 	dxf_subscription_t trade_subscription = NULL;
 	dxf_subscription_t order_subscription = NULL;
@@ -344,12 +344,12 @@ bool event_dynamic_subscription_test(void) {
 }
 
 /*Test*/
-bool listener_v2_test(void) {
+int listener_v2_test(void) {
 	dxf_connection_t connection = NULL;
 	dxf_subscription_t order_subscription = NULL;
 	int timestamp = 0;
 	int user_data = 1;
-	bool res = true;
+	int res = true;
 
 	reset_thread_terminate(g_listener_thread_data);
 
@@ -420,8 +420,8 @@ bool listener_v2_test(void) {
 	return res;
 }
 
-bool event_dynamic_subscription_all_test(void) {
-	bool res = true;
+int event_dynamic_subscription_all_test(void) {
+	int res = true;
 
 	dxf_initialize_logger("log.log", true, true, true);
 	init_listener_thread_data(&g_listener_thread_data);

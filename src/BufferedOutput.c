@@ -77,7 +77,7 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_buffered_output) {
 /* -------------------------------------------------------------------------- */
 
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_buffered_output) {
-	bool res = true;
+	int res = true;
 	dx_buffered_output_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_buffered_output, &res);
 
 	if (context == NULL) {
@@ -121,13 +121,13 @@ void* dx_get_buffered_output_connection_context (dxf_connection_t connection) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_lock_buffered_output (void* context) {
+int dx_lock_buffered_output (void* context) {
 	return dx_mutex_lock(&(CTX(context)->guard));
 }
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_unlock_buffered_output (void* context) {
+int dx_unlock_buffered_output (void* context) {
 	return dx_mutex_unlock(&(CTX(context)->guard));
 }
 
@@ -169,7 +169,7 @@ void dx_set_out_buffer_position (void* context, int new_position) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_ensure_capacity (void* context, int required_capacity) {
+int dx_ensure_capacity (void* context, int required_capacity) {
 	if (INT_MAX - CTX(context)->current_out_buffer_position < CTX(context)->out_buffer_length) {
 		return dx_set_error_code(dx_bioec_buffer_overflow);
 	}
@@ -200,7 +200,7 @@ bool dx_ensure_capacity (void* context, int required_capacity) {
  */
 /* -------------------------------------------------------------------------- */
 
-static bool dx_check_write_possibility (void* context, int bytes_to_write) {
+static int dx_check_write_possibility (void* context, int bytes_to_write) {
 	if (CTX(context)->out_buffer == NULL) {
 		return dx_set_error_code(dx_bioec_buffer_not_initialized);
 	}
@@ -243,7 +243,7 @@ void dx_write_int_unchecked (void* context, dxf_int_t value) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_write_byte_buffer_segment (void* context, const dxf_byte_t* buffer, int buffer_length,
+int dx_write_byte_buffer_segment (void* context, const dxf_byte_t* buffer, int buffer_length,
 								int segment_offset, int segment_length) {
 	if ((segment_offset | segment_length | (segment_offset + segment_length) |
 		(buffer_length - (segment_offset + segment_length))) < 0) {
@@ -269,7 +269,7 @@ bool dx_write_byte_buffer_segment (void* context, const dxf_byte_t* buffer, int 
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_write_boolean (void* context, dxf_bool_t value) {
+int dx_write_boolean (void* context, dxf_bool_t value) {
 	CHECKED_CALL_2(dx_check_write_possibility, context, 1);
 
 	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (value ? (dxf_byte_t)1 : (dxf_byte_t)0);
@@ -279,7 +279,7 @@ bool dx_write_boolean (void* context, dxf_bool_t value) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_write_byte (void* context, dxf_byte_t value) {
+int dx_write_byte (void* context, dxf_byte_t value) {
 	CHECKED_CALL_2(dx_check_write_possibility, context, 1);
 
 	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)value;
@@ -289,7 +289,7 @@ bool dx_write_byte (void* context, dxf_byte_t value) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_write_short (void* context, dxf_short_t value) {
+int dx_write_short (void* context, dxf_short_t value) {
 	CHECKED_CALL_2(dx_check_write_possibility, context, 2);
 
 	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 8);
@@ -300,7 +300,7 @@ bool dx_write_short (void* context, dxf_short_t value) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_write_char (void* context, dxf_char_t value) {
+int dx_write_char (void* context, dxf_char_t value) {
 	CHECKED_CALL_2(dx_check_write_possibility, context, 2);
 
 	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 8);
@@ -311,7 +311,7 @@ bool dx_write_char (void* context, dxf_char_t value) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_write_int (void* context, dxf_int_t value) {
+int dx_write_int (void* context, dxf_int_t value) {
 	CHECKED_CALL_2(dx_check_write_possibility, context, 4);
 
 	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 24);
@@ -324,7 +324,7 @@ bool dx_write_int (void* context, dxf_int_t value) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_write_long (void* context, dxf_long_t value) {
+int dx_write_long (void* context, dxf_long_t value) {
 	CHECKED_CALL_2(dx_check_write_possibility, context, 8);
 
 	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 56);
@@ -341,19 +341,19 @@ bool dx_write_long (void* context, dxf_long_t value) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_write_float (void* context, dxf_float_t value) {
+int dx_write_float (void* context, dxf_float_t value) {
 	return dx_write_int(context, *((dxf_int_t*)&value));
 }
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_write_double (void* context, dxf_double_t value) {
+int dx_write_double (void* context, dxf_double_t value) {
 	return dx_write_long(context, *((dxf_long_t*)&value));
 }
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_write_byte_buffer (void* context, const dxf_char_t* value) {
+int dx_write_byte_buffer (void* context, const dxf_char_t* value) {
 	size_t length = dx_string_length(value);
 	size_t i = 0;
 
@@ -366,7 +366,7 @@ bool dx_write_byte_buffer (void* context, const dxf_char_t* value) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_write_char_buffer (void* context, const dxf_char_t* value) {
+int dx_write_char_buffer (void* context, const dxf_char_t* value) {
 	size_t length = dx_string_length(value);
 	size_t i = 0;
 
@@ -379,7 +379,7 @@ bool dx_write_char_buffer (void* context, const dxf_char_t* value) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_write_utf (void* context, dxf_const_string_t value) {
+int dx_write_utf (void* context, dxf_const_string_t value) {
 	size_t strlen = dx_string_length(value);
 	dxf_short_t utflen = 0;
 	size_t i = 0;
@@ -429,7 +429,7 @@ bool dx_write_utf (void* context, dxf_const_string_t value) {
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_write_compact_int (void* context, dxf_int_t value) {
+int dx_write_compact_int (void* context, dxf_int_t value) {
 	CHECKED_CALL_2(dx_check_write_possibility, context, 5);
 
 	if (value >= 0) {
@@ -471,7 +471,7 @@ bool dx_write_compact_int (void* context, dxf_int_t value) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_write_compact_long (void* context, dxf_long_t value) {
+int dx_write_compact_long (void* context, dxf_long_t value) {
 	dxf_int_t hi = (dxf_int_t)(value >> 32);
 
 	if (value == (dxf_long_t)(dxf_int_t)value) {
@@ -521,7 +521,7 @@ bool dx_write_compact_long (void* context, dxf_long_t value) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_write_byte_array (void* context, const dxf_byte_t* buffer, dxf_int_t buffer_size) {
+int dx_write_byte_array (void* context, const dxf_byte_t* buffer, dxf_int_t buffer_size) {
 	if (buffer == NULL) {
 		return dx_write_compact_int(context, -1);
 	}
@@ -538,7 +538,7 @@ bool dx_write_byte_array (void* context, const dxf_byte_t* buffer, dxf_int_t buf
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_write_utf_char (void* context, dxf_int_t code_point) {
+int dx_write_utf_char (void* context, dxf_int_t code_point) {
 	CHECKED_CALL_2(dx_check_write_possibility, context, 4);
 
 	if (code_point < 0) {
@@ -562,7 +562,7 @@ bool dx_write_utf_char (void* context, dxf_int_t code_point) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_write_utf_string (void* context, dxf_const_string_t value) {
+int dx_write_utf_string (void* context, dxf_const_string_t value) {
 	size_t strlen;
 	dxf_int_t utflen;
 	size_t i = 0;

@@ -13,7 +13,6 @@
 #define LS2(s) L##s
 
 #ifndef true
-typedef int bool;
 
 #define true 1
 #define false 0
@@ -43,11 +42,11 @@ dxf_const_string_t dx_event_type_to_string (int event_type) {
 }
 
 /* -------------------------------------------------------------------------- */
-static bool is_listener_thread_terminated = false;
+static int is_listener_thread_terminated = false;
 CRITICAL_SECTION listener_thread_guard;
 
-bool is_thread_terminate() {
-	bool res;
+int is_thread_terminate() {
+	int res;
 	EnterCriticalSection(&listener_thread_guard);
 	res = is_listener_thread_terminated;
 	LeaveCriticalSection(&listener_thread_guard);

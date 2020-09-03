@@ -92,7 +92,7 @@ int main (int argc, char* argv[]) {
 	dxf_connection_t connection;
 	dxf_subscription_t subscription;
 	int i = 0;
-	bool test_result = true;
+	int test_result = true;
 
 	dxf_initialize_logger( "log.log", true, true, true );
 

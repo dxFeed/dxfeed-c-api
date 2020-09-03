@@ -59,7 +59,7 @@ unsigned multiple_connection_routine(void* arg) {
  * Simulates opening multiple connections simultaneously.
  * Expected: application shouldn't crash.
  */
-bool multiple_connection_test(void) {
+int multiple_connection_test(void) {
 	size_t i;
 	dx_thread_t thread_list[MULTIPLE_CONNECTION_THREAD_COUNT];
 	size_t thread_count = MULTIPLE_CONNECTION_THREAD_COUNT;
@@ -90,7 +90,7 @@ bool multiple_connection_test(void) {
  * Expected: application shouldn't crash; all attempts to create connection with invalid data
  *           should completes with error state.
  */
-bool invalid_connection_address_test(void) {
+int invalid_connection_address_test(void) {
 	const char* invalid_address = "demo.dxfeed.com::7300";
 	dxf_connection_t connection;
 
@@ -111,8 +111,8 @@ bool invalid_connection_address_test(void) {
 
 /* -------------------------------------------------------------------------- */
 
-bool connection_all_test(void) {
-	bool res = true;
+int connection_all_test(void) {
+	int res = true;
 
 	if (!multiple_connection_test() ||
 		!invalid_connection_address_test()) {

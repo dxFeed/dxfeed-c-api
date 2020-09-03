@@ -57,7 +57,7 @@ void snapshot_tests_on_thread_terminate(dxf_connection_t connection, void* user_
 }
 
 CRITICAL_SECTION g_snap_order_guard;
-bool g_snap_order_is_received = false;
+int g_snap_order_is_received = false;
 dxf_snapshot_data_t g_snap_order_data = { 0, NULL, 0, NULL };
 dxf_char_t g_snap_order_symbol_buf[100] = { 0 };
 dxf_char_t g_snap_order_source[DXF_RECORD_SUFFIX_SIZE] = { 0 };
@@ -89,8 +89,8 @@ void snapshot_order_data_reset() {
 	g_snap_order_is_received = false;
 	LeaveCriticalSection(&g_snap_order_guard);
 }
-bool snapshot_order_data_is_received() {
-	bool res = false;
+int snapshot_order_data_is_received() {
+	int res = false;
 	EnterCriticalSection(&g_snap_order_guard);
 	res = g_snap_order_is_received;
 	LeaveCriticalSection(&g_snap_order_guard);
@@ -112,7 +112,7 @@ dxf_const_string_t snapshot_order_data_get_source() {
 }
 
 CRITICAL_SECTION g_snap_candle_guard;
-bool g_snap_candle_is_received = false;
+int g_snap_candle_is_received = false;
 int g_snap_candle_event_type = dx_eid_invalid;
 dxf_snapshot_data_t g_snap_candle_data = { 0, NULL, 0, NULL };
 dxf_char_t g_snap_candle_symbol_buf[100] = { 0 };
@@ -139,8 +139,8 @@ void snapshot_candle_data_reset() {
 	g_snap_candle_is_received = false;
 	LeaveCriticalSection(&g_snap_candle_guard);
 }
-bool snapshot_candle_data_is_received() {
-	bool res = false;
+int snapshot_candle_data_is_received() {
+	int res = false;
 	EnterCriticalSection(&g_snap_candle_guard);
 	res = g_snap_candle_is_received;
 	LeaveCriticalSection(&g_snap_candle_guard);
@@ -155,11 +155,11 @@ const dxf_snapshot_data_ptr_t snapshot_candle_data_get_obj() {
 }
 
 /*Test*/
-bool snapshot_initialization_test(void) {
+int snapshot_initialization_test(void) {
 	dxf_connection_t connection;
 	dxf_snapshot_t snapshot;
 	dxf_candle_attributes_t candle_attributes = NULL;
-	bool res = true;
+	int res = true;
 
 	if (!dxf_create_connection(g_dxfeed_host, snapshot_tests_on_thread_terminate, NULL, NULL, NULL, NULL, &connection)) {
 		process_last_error();
@@ -331,10 +331,10 @@ dxf_const_string_t g_order_symbol_cases[] = {
 #define ORDER_CASES_SIZE sizeof(g_order_source_cases) / sizeof(g_order_source_cases[0])
 
 /*Test*/
-bool snapshot_duplicates_test(void) {
+int snapshot_duplicates_test(void) {
 	dxf_connection_t connection;
 	dxf_snapshot_t invalid_snapshot = NULL;
-	bool res = true;
+	int res = true;
 	int i;
 	int num = CANDLE_CASES_SIZE + ORDER_CASES_SIZE;
 	dxf_snapshot_t *snapshots = NULL;
@@ -389,7 +389,7 @@ bool snapshot_duplicates_test(void) {
 	return res;
 }
 
-bool wait_snapshot(bool (*snapshot_data_is_received_func_ptr)(),
+int wait_snapshot(int (*snapshot_data_is_received_func_ptr)(),
 				const dxf_snapshot_data_ptr_t (*snapshot_data_get_obj_func_ptr)()) {
 	int timestamp = dx_millisecond_timestamp();
 	while (!snapshot_data_is_received_func_ptr() || snapshot_data_get_obj_func_ptr()->records_count == 0) {
@@ -406,11 +406,11 @@ bool wait_snapshot(bool (*snapshot_data_is_received_func_ptr)(),
 	return true;
 }
 
-bool create_order_snapshot_no_errors(dxf_connection_t connection, OUT dxf_snapshot_t *res_snapshot,
-									bool is_no_errors) {
+int create_order_snapshot_no_errors(dxf_connection_t connection, OUT dxf_snapshot_t *res_snapshot,
+									int is_no_errors) {
 	dxf_snapshot_t snapshot;
 	dxf_string_t w_order_source = NULL;
-	bool res = true;
+	int res = true;
 	dxf_snapshot_data_ptr_t snapshot_order_data = NULL;
 
 	if (!dxf_create_order_snapshot(connection, g_default_symbol, g_ntv_order_source, g_default_time, &snapshot)) {
@@ -433,13 +433,13 @@ bool create_order_snapshot_no_errors(dxf_connection_t connection, OUT dxf_snapsh
 	return true;
 }
 
-bool create_order_snapshot(dxf_connection_t connection, OUT dxf_snapshot_t *res_snapshot) {
+int create_order_snapshot(dxf_connection_t connection, OUT dxf_snapshot_t *res_snapshot) {
 	return create_order_snapshot_no_errors(connection, res_snapshot, false);
 }
 
-bool check_order_snapshot_data_test(dxf_connection_t connection, dxf_snapshot_t snapshot) {
+int check_order_snapshot_data_test(dxf_connection_t connection, dxf_snapshot_t snapshot) {
 	dxf_string_t w_order_source = NULL;
-	bool res = true;
+	int res = true;
 	dxf_snapshot_data_ptr_t snapshot_order_data = NULL;
 
 	if (!wait_snapshot(snapshot_order_data_is_received, snapshot_order_data_get_obj)) {
@@ -462,9 +462,9 @@ bool check_order_snapshot_data_test(dxf_connection_t connection, dxf_snapshot_t 
 	return true;
 }
 
-bool create_candle_snapshot(dxf_connection_t connection, OUT dxf_snapshot_t *res_snapshot) {
+int create_candle_snapshot(dxf_connection_t connection, OUT dxf_snapshot_t *res_snapshot) {
 	dxf_snapshot_t snapshot;
-	bool res = true;
+	int res = true;
 	dxf_snapshot_data_ptr_t snapshot_candle_data = NULL;
 	dxf_candle_attributes_t candle_attributes;
 
@@ -499,8 +499,8 @@ bool create_candle_snapshot(dxf_connection_t connection, OUT dxf_snapshot_t *res
 	return true;
 }
 
-bool check_candle_snapshot_data_test(dxf_connection_t connection, dxf_snapshot_t snapshot) {
-	bool res = true;
+int check_candle_snapshot_data_test(dxf_connection_t connection, dxf_snapshot_t snapshot) {
+	int res = true;
 	dxf_snapshot_data_ptr_t snapshot_candle_data = NULL;
 
 	if (!wait_snapshot(snapshot_candle_data_is_received, snapshot_candle_data_get_obj)) {
@@ -521,10 +521,10 @@ bool check_candle_snapshot_data_test(dxf_connection_t connection, dxf_snapshot_t
 }
 
 /*Test*/
-bool snapshot_subscription_test(void) {
+int snapshot_subscription_test(void) {
 	dxf_connection_t connection;
 	dxf_snapshot_t snapshot;
-	bool res = true;
+	int res = true;
 
 	snapshot_order_data_reset();
 	reset_thread_terminate(g_st_listener_thread_data);
@@ -590,12 +590,12 @@ bool snapshot_subscription_test(void) {
 }
 
 /*Test*/
-bool snapshot_multiply_subscription_test(void) {
+int snapshot_multiply_subscription_test(void) {
 	dxf_connection_t connection;
 	dxf_snapshot_t order_snapshot;
 	dxf_snapshot_t candle_snapshot;
 	dxf_snapshot_t invalid_snapshot = NULL;
-	bool res = true;
+	int res = true;
 
 	if (!dxf_create_connection(g_dxfeed_host, snapshot_tests_on_thread_terminate, NULL, NULL, NULL, NULL, &connection)) {
 		process_last_error();
@@ -714,7 +714,7 @@ void events_listener(int event_type, dxf_const_string_t symbol_name,
 	}
 }
 
-bool check_event_subscription_test() {
+int check_event_subscription_test() {
 	int timestamp = dx_millisecond_timestamp();
 	while (get_event_subscription_counter() == 0) {
 		if (is_thread_terminate(g_st_listener_thread_data)) {
@@ -734,7 +734,7 @@ bool check_event_subscription_test() {
 /* -------------------------------------------------------------------------- */
 
 /*Test*/
-bool snapshot_subscription_and_events_test(void) {
+int snapshot_subscription_and_events_test(void) {
 	dxf_connection_t connection;
 	dxf_snapshot_t order_snapshot;
 	dxf_subscription_t event_subscription;
@@ -814,10 +814,10 @@ bool snapshot_subscription_and_events_test(void) {
 }
 
 /*Test*/
-bool snapshot_symbols_test(void) {
+int snapshot_symbols_test(void) {
 	dxf_connection_t connection;
 	dxf_snapshot_t snapshot;
-	bool res = true;
+	int res = true;
 	dxf_string_t returned_symbol = NULL;
 
 	snapshot_order_data_reset();
@@ -889,8 +889,8 @@ bool snapshot_symbols_test(void) {
 	return true;
 }
 
-bool snapshot_all_test(void) {
-	bool res = true;
+int snapshot_all_test(void) {
+	int res = true;
 	init_listener_thread_data(&g_st_listener_thread_data);
 	snapshot_order_data_init();
 	snapshot_candle_data_init();

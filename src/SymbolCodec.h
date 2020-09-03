@@ -81,7 +81,7 @@ extern dxf_int_t g_wildcard_cipher;
 
  *  Must be called once per application, no need to perform per-thread initialization
  */
-bool dx_init_symbol_codec (void);
+int dx_init_symbol_codec (void);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -101,7 +101,7 @@ dxf_int_t dx_encode_symbol_name (dxf_const_string_t symbol);
  * Restores symbol for specified cipher.
  * Restored symbol is NULL if specified cipher is 0.
  */
-bool dx_decode_symbol_name (dxf_int_t cipher, OUT dxf_const_string_t* symbol);
+int dx_decode_symbol_name (dxf_int_t cipher, OUT dxf_const_string_t* symbol);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -118,7 +118,7 @@ bool dx_decode_symbol_name (dxf_int_t cipher, OUT dxf_const_string_t* symbol);
  * characters. The 'result' shall have length 1 because only first element is ever used.
  *
  */
-bool dx_codec_read_symbol(void* bicc, dxf_char_t* buffer, int buffer_length, OUT dxf_string_t* result,
+int dx_codec_read_symbol(void* bicc, dxf_char_t* buffer, int buffer_length, OUT dxf_string_t* result,
 						OUT dxf_int_t* cipher_result, OUT dxf_event_flags_t* flags,
 						OUT dxf_event_flags_t* mru_event_flags);
 
@@ -126,6 +126,6 @@ bool dx_codec_read_symbol(void* bicc, dxf_char_t* buffer, int buffer_length, OUT
 /*
  *	Writes the symbol into the buffered output connection context buffer
  */
-bool dx_codec_write_symbol (void* bocc, dxf_int_t cipher, dxf_const_string_t symbol);
+int dx_codec_write_symbol (void* bocc, dxf_int_t cipher, dxf_const_string_t symbol);
 
 #endif /* SYMBOL_CODEC_H_INCLUDED */

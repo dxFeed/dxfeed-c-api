@@ -259,7 +259,7 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_record_transcoder) {
 /* -------------------------------------------------------------------------- */
 
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_record_transcoder) {
-	bool res = true;
+	int res = true;
 	dx_record_transcoder_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_record_transcoder, &res);
 
 	if (context == NULL) {
@@ -332,7 +332,7 @@ dxf_event_data_t dx_get_event_data_buffer(dx_record_transcoder_connection_contex
 #define RECORD_TRANSCODER_NAME(struct_name) \
 	struct_name##_transcoder
 
-typedef bool (*dx_record_transcoder_t) (dx_record_transcoder_connection_context_t* context,
+typedef int (*dx_record_transcoder_t) (dx_record_transcoder_connection_context_t* context,
 										const dx_record_params_t* record_params,
 										const dxf_event_params_t* event_params,
 										void* record_buffer, int record_count);
@@ -343,7 +343,7 @@ typedef bool (*dx_record_transcoder_t) (dx_record_transcoder_connection_context_
  */
 /* -------------------------------------------------------------------------- */
 
-static bool dx_trade_t_transcoder_impl(dx_record_transcoder_connection_context_t* context,
+static int dx_trade_t_transcoder_impl(dx_record_transcoder_connection_context_t* context,
 	const dx_record_params_t* record_params,
 	const dxf_event_params_t* event_params,
 	dx_trade_t* record_buffer, int record_count, dx_event_id_t event_id)
@@ -388,7 +388,7 @@ static bool dx_trade_t_transcoder_impl(dx_record_transcoder_connection_context_t
 		record_params->symbol_cipher, event_buffer, record_count, event_params);
 }
 
-bool RECORD_TRANSCODER_NAME(dx_trade_t) (dx_record_transcoder_connection_context_t* context,
+int RECORD_TRANSCODER_NAME(dx_trade_t) (dx_record_transcoder_connection_context_t* context,
 	const dx_record_params_t* record_params,
 	const dxf_event_params_t* event_params,
 	dx_trade_t* record_buffer, int record_count)
@@ -398,7 +398,7 @@ bool RECORD_TRANSCODER_NAME(dx_trade_t) (dx_record_transcoder_connection_context
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_transcode_quote_to_order_bid (dx_record_transcoder_connection_context_t* context,
+int dx_transcode_quote_to_order_bid (dx_record_transcoder_connection_context_t* context,
 									const dx_record_params_t* record_params,
 									const dxf_event_params_t* event_params,
 									dx_quote_t* record_buffer, int record_count) {
@@ -438,7 +438,7 @@ bool dx_transcode_quote_to_order_bid (dx_record_transcoder_connection_context_t*
 
 /* ---------------------------------- */
 
-bool dx_transcode_quote_to_order_ask (dx_record_transcoder_connection_context_t* context,
+int dx_transcode_quote_to_order_ask (dx_record_transcoder_connection_context_t* context,
 									const dx_record_params_t* record_params,
 									const dxf_event_params_t* event_params,
 									dx_quote_t* record_buffer, int record_count) {
@@ -479,7 +479,7 @@ bool dx_transcode_quote_to_order_ask (dx_record_transcoder_connection_context_t*
 
 /* ---------------------------------- */
 
-bool dx_transcode_quote (dx_record_transcoder_connection_context_t* context,
+int dx_transcode_quote (dx_record_transcoder_connection_context_t* context,
 						const dx_record_params_t* record_params,
 						const dxf_event_params_t* event_params,
 						dx_quote_t* record_buffer, int record_count) {
@@ -518,7 +518,7 @@ bool dx_transcode_quote (dx_record_transcoder_connection_context_t* context,
 
 /* ---------------------------------- */
 
-bool RECORD_TRANSCODER_NAME(dx_quote_t) (dx_record_transcoder_connection_context_t* context,
+int RECORD_TRANSCODER_NAME(dx_quote_t) (dx_record_transcoder_connection_context_t* context,
 										const dx_record_params_t* record_params,
 										const dxf_event_params_t* event_params,
 										dx_quote_t* record_buffer, int record_count) {
@@ -540,7 +540,7 @@ bool RECORD_TRANSCODER_NAME(dx_quote_t) (dx_record_transcoder_connection_context
 
 /* -------------------------------------------------------------------------- */
 
-bool RECORD_TRANSCODER_NAME(dx_summary_t) (dx_record_transcoder_connection_context_t* context,
+int RECORD_TRANSCODER_NAME(dx_summary_t) (dx_record_transcoder_connection_context_t* context,
 										const dx_record_params_t* record_params,
 										const dxf_event_params_t* event_params,
 										dx_summary_t* record_buffer, int record_count) {
@@ -582,7 +582,7 @@ bool RECORD_TRANSCODER_NAME(dx_summary_t) (dx_record_transcoder_connection_conte
 
 /* -------------------------------------------------------------------------- */
 
-bool RECORD_TRANSCODER_NAME(dx_profile_t) (dx_record_transcoder_connection_context_t* context,
+int RECORD_TRANSCODER_NAME(dx_profile_t) (dx_record_transcoder_connection_context_t* context,
 										const dx_record_params_t* record_params,
 										const dxf_event_params_t* event_params,
 										dx_profile_t* record_buffer, int record_count) {
@@ -633,7 +633,7 @@ bool RECORD_TRANSCODER_NAME(dx_profile_t) (dx_record_transcoder_connection_conte
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_transcode_market_maker_to_order_bid (dx_record_transcoder_connection_context_t* context,
+int dx_transcode_market_maker_to_order_bid (dx_record_transcoder_connection_context_t* context,
 											const dx_record_params_t* record_params,
 											const dxf_event_params_t* event_params,
 											dx_market_maker_t* record_buffer, int record_count) {
@@ -673,7 +673,7 @@ bool dx_transcode_market_maker_to_order_bid (dx_record_transcoder_connection_con
 
 /* ---------------------------------- */
 
-bool dx_transcode_market_maker_to_order_ask (dx_record_transcoder_connection_context_t* context,
+int dx_transcode_market_maker_to_order_ask (dx_record_transcoder_connection_context_t* context,
 											const dx_record_params_t* record_params,
 											const dxf_event_params_t* event_params,
 											dx_market_maker_t* record_buffer, int record_count) {
@@ -713,7 +713,7 @@ bool dx_transcode_market_maker_to_order_ask (dx_record_transcoder_connection_con
 
 /* ---------------------------------- */
 
-bool RECORD_TRANSCODER_NAME(dx_market_maker_t) (dx_record_transcoder_connection_context_t* context,
+int RECORD_TRANSCODER_NAME(dx_market_maker_t) (dx_record_transcoder_connection_context_t* context,
 												const dx_record_params_t* record_params,
 												const dxf_event_params_t* event_params,
 												dx_market_maker_t* record_buffer, int record_count) {
@@ -752,7 +752,7 @@ dxf_long_t suffix_to_long(dxf_const_string_t suffix)
 	return ret;
 }
 
-bool RECORD_TRANSCODER_NAME(dx_order_t) (dx_record_transcoder_connection_context_t* context,
+int RECORD_TRANSCODER_NAME(dx_order_t) (dx_record_transcoder_connection_context_t* context,
 										const dx_record_params_t* record_params,
 										const dxf_event_params_t* event_params,
 										dx_order_t* record_buffer, int record_count) {
@@ -796,7 +796,7 @@ bool RECORD_TRANSCODER_NAME(dx_order_t) (dx_record_transcoder_connection_context
 
 /* -------------------------------------------------------------------------- */
 
-bool RECORD_TRANSCODER_NAME(dx_time_and_sale_t) (dx_record_transcoder_connection_context_t* context,
+int RECORD_TRANSCODER_NAME(dx_time_and_sale_t) (dx_record_transcoder_connection_context_t* context,
 												const dx_record_params_t* record_params,
 												const dxf_event_params_t* event_params,
 												dx_time_and_sale_t* record_buffer, int record_count) {
@@ -856,7 +856,7 @@ bool RECORD_TRANSCODER_NAME(dx_time_and_sale_t) (dx_record_transcoder_connection
 
 /* -------------------------------------------------------------------------- */
 
-bool RECORD_TRANSCODER_NAME(dx_candle_t) (dx_record_transcoder_connection_context_t* context,
+int RECORD_TRANSCODER_NAME(dx_candle_t) (dx_record_transcoder_connection_context_t* context,
 										const dx_record_params_t* record_params,
 										const dxf_event_params_t* event_params,
 										dx_candle_t* record_buffer, int record_count) {
@@ -893,7 +893,7 @@ bool RECORD_TRANSCODER_NAME(dx_candle_t) (dx_record_transcoder_connection_contex
 
 /* -------------------------------------------------------------------------- */
 
-bool RECORD_TRANSCODER_NAME(dx_trade_eth_t) (dx_record_transcoder_connection_context_t* context,
+int RECORD_TRANSCODER_NAME(dx_trade_eth_t) (dx_record_transcoder_connection_context_t* context,
 											const dx_record_params_t* record_params,
 											const dxf_event_params_t* event_params,
 											dx_trade_t* record_buffer, int record_count) {
@@ -902,7 +902,7 @@ bool RECORD_TRANSCODER_NAME(dx_trade_eth_t) (dx_record_transcoder_connection_con
 
 /* -------------------------------------------------------------------------- */
 
-bool RECORD_TRANSCODER_NAME(dx_spread_order_t) (dx_record_transcoder_connection_context_t* context,
+int RECORD_TRANSCODER_NAME(dx_spread_order_t) (dx_record_transcoder_connection_context_t* context,
 												const dx_record_params_t* record_params,
 												const dxf_event_params_t* event_params,
 												dx_spread_order_t* record_buffer, int record_count) {
@@ -946,7 +946,7 @@ bool RECORD_TRANSCODER_NAME(dx_spread_order_t) (dx_record_transcoder_connection_
 
 /* -------------------------------------------------------------------------- */
 
-bool RECORD_TRANSCODER_NAME(dx_greeks_t) (dx_record_transcoder_connection_context_t* context,
+int RECORD_TRANSCODER_NAME(dx_greeks_t) (dx_record_transcoder_connection_context_t* context,
 										const dx_record_params_t* record_params,
 										const dxf_event_params_t* event_params,
 										dx_greeks_t* record_buffer, int record_count) {
@@ -978,7 +978,7 @@ bool RECORD_TRANSCODER_NAME(dx_greeks_t) (dx_record_transcoder_connection_contex
 
 /* -------------------------------------------------------------------------- */
 
-bool RECORD_TRANSCODER_NAME(dx_theo_price_t) (dx_record_transcoder_connection_context_t* context,
+int RECORD_TRANSCODER_NAME(dx_theo_price_t) (dx_record_transcoder_connection_context_t* context,
 										const dx_record_params_t* record_params,
 										const dxf_event_params_t* event_params,
 										dx_theo_price_t* record_buffer, int record_count) {
@@ -995,7 +995,7 @@ bool RECORD_TRANSCODER_NAME(dx_theo_price_t) (dx_record_transcoder_connection_co
 
 /* -------------------------------------------------------------------------- */
 
-bool RECORD_TRANSCODER_NAME(dx_underlying_t) (dx_record_transcoder_connection_context_t* context,
+int RECORD_TRANSCODER_NAME(dx_underlying_t) (dx_record_transcoder_connection_context_t* context,
 										const dx_record_params_t* record_params,
 										const dxf_event_params_t* event_params,
 										dx_underlying_t* record_buffer, int record_count) {
@@ -1007,7 +1007,7 @@ bool RECORD_TRANSCODER_NAME(dx_underlying_t) (dx_record_transcoder_connection_co
 
 /* -------------------------------------------------------------------------- */
 
-bool RECORD_TRANSCODER_NAME(dx_series_t) (dx_record_transcoder_connection_context_t* context,
+int RECORD_TRANSCODER_NAME(dx_series_t) (dx_record_transcoder_connection_context_t* context,
 										const dx_record_params_t* record_params,
 										const dxf_event_params_t* event_params,
 										dx_series_t* record_buffer, int record_count) {
@@ -1039,7 +1039,7 @@ bool RECORD_TRANSCODER_NAME(dx_series_t) (dx_record_transcoder_connection_contex
 
 /* -------------------------------------------------------------------------- */
 
-bool RECORD_TRANSCODER_NAME(dx_configuration_t) (dx_record_transcoder_connection_context_t* context,
+int RECORD_TRANSCODER_NAME(dx_configuration_t) (dx_record_transcoder_connection_context_t* context,
 												const dx_record_params_t* record_params,
 												const dxf_event_params_t* event_params,
 												dx_configuration_t* record_buffer, int record_count) {
@@ -1091,7 +1091,7 @@ static const dx_record_transcoder_t g_record_transcoders[dx_rid_count] = {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_transcode_record_data (dxf_connection_t connection,
+int dx_transcode_record_data (dxf_connection_t connection,
 							const dx_record_params_t* record_params,
 							const dxf_event_params_t* event_params,
 							void* record_buffer, int record_count) {

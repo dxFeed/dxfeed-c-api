@@ -54,11 +54,11 @@
 #define DX_CODEC_GZIP_STATUS false
 #endif
 
-typedef bool(*dx_codec_parser_t)(const char* codec, size_t size, dx_address_t* addr);
+typedef int(*dx_codec_parser_t)(const char* codec, size_t size, dx_address_t* addr);
 
 typedef struct {
 	const char* name;
-	bool supported;
+	int supported;
 	dx_codec_parser_t parser;
 } dx_codec_info_t;
 
@@ -68,9 +68,9 @@ typedef struct {
 } dx_address_property_t;
 
 //function forward declaration
-static bool dx_codec_tls_parser(const char* codec, size_t size, OUT dx_address_t* addr);
+static int dx_codec_tls_parser(const char* codec, size_t size, OUT dx_address_t* addr);
 //function forward declaration
-static bool dx_codec_gzip_parser(const char* codec, size_t size, OUT dx_address_t* addr);
+static int dx_codec_gzip_parser(const char* codec, size_t size, OUT dx_address_t* addr);
 
 static const dx_codec_info_t codecs[] = {
 	{ "tls", DX_CODEC_TLS_STATUS, dx_codec_tls_parser },
@@ -100,7 +100,7 @@ static const size_t scheme_count = sizeof(schemes) / sizeof(schemes[0]);
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_is_empty_entry(const char* entry_begin, const char* entry_end) {
+static int dx_is_empty_entry(const char* entry_begin, const char* entry_end) {
 	if (entry_begin >= entry_end)
 		return true;
 	while (*entry_begin == whitespace) {
@@ -152,13 +152,13 @@ static const char* dx_find_first_of_values(const char* from, const char* to, int
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_has_next(const char* next) {
+static int dx_has_next(const char* next) {
 	return next != NULL && *next != null_symbol;
 }
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_is_numeric(const char* str) {
+static int dx_is_numeric(const char* str) {
 	const char* next = str;
 	if (str == NULL || strlen(str) == 0)
 		return false;
@@ -171,7 +171,7 @@ static bool dx_is_numeric(const char* str) {
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_get_next_entry(OUT const char** next, OUT const char** entry, OUT size_t* size) {
+static int dx_get_next_entry(OUT const char** next, OUT const char** entry, OUT size_t* size) {
 	if (entry == NULL || size == NULL || next == NULL)
 		return dx_set_error_code(dx_ec_invalid_func_param_internal);
 
@@ -208,7 +208,7 @@ static bool dx_get_next_entry(OUT const char** next, OUT const char** entry, OUT
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_get_next_codec(OUT const char** next, const char* next_end, OUT const char** codec, OUT size_t* size) {
+static int dx_get_next_codec(OUT const char** next, const char* next_end, OUT const char** codec, OUT size_t* size) {
 	if (codec == NULL || size == NULL || next == NULL)
 		return dx_set_error_code(dx_ec_invalid_func_param_internal);
 
@@ -237,7 +237,7 @@ static bool dx_get_next_codec(OUT const char** next, const char* next_end, OUT c
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_get_codec_name(const char* codec, size_t codec_size, OUT const char** name, OUT size_t* name_size) {
+static int dx_get_codec_name(const char* codec, size_t codec_size, OUT const char** name, OUT size_t* name_size) {
 	char* end = NULL;
 	if (codec == NULL || name == NULL || name_size == NULL) {
 		return dx_set_error_code(dx_ec_invalid_func_param_internal);
@@ -260,7 +260,7 @@ static bool dx_get_codec_name(const char* codec, size_t codec_size, OUT const ch
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_get_codec_properties(const char* codec, size_t codec_size, OUT const char** props, OUT size_t* props_size) {
+static int dx_get_codec_properties(const char* codec, size_t codec_size, OUT const char** props, OUT size_t* props_size) {
 	const char* name;
 	size_t name_size;
 	const char* props_begin;
@@ -288,7 +288,7 @@ static bool dx_get_codec_properties(const char* codec, size_t codec_size, OUT co
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_get_next_property(OUT const char** next, OUT size_t* next_size, OUT const char** prop, OUT size_t* prop_size) {
+static int dx_get_next_property(OUT const char** next, OUT size_t* next_size, OUT const char** prop, OUT size_t* prop_size) {
 	if (next == NULL || next_size == NULL || prop == NULL || prop_size == NULL) {
 		return dx_set_error_code(dx_ec_invalid_func_param_internal);
 	}
@@ -328,7 +328,7 @@ static bool dx_get_next_property(OUT const char** next, OUT size_t* next_size, O
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_get_host_port_string(const char* entry, size_t entry_size, OUT const char** address, OUT size_t* size) {
+static int dx_get_host_port_string(const char* entry, size_t entry_size, OUT const char** address, OUT size_t* size) {
 	const char* begin;
 	const char* end;
 	const char* entry_end = entry + entry_size;
@@ -349,7 +349,7 @@ static bool dx_get_host_port_string(const char* entry, size_t entry_size, OUT co
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_get_properties(const char* entry, size_t entry_size, OUT const char** props, OUT size_t* props_size) {
+static int dx_get_properties(const char* entry, size_t entry_size, OUT const char** props, OUT size_t* props_size) {
 	const char* begin;
 	const char* end;
 	const char* address;
@@ -390,7 +390,7 @@ static void dx_free_property(OUT dx_address_property_t* prop) {
 /* -------------------------------------------------------------------------- */
 
 //Note: free allocated memory for prop!
-static bool dx_parse_property(const char* str, size_t size, OUT dx_address_property_t* prop) {
+static int dx_parse_property(const char* str, size_t size, OUT dx_address_property_t* prop) {
 	const char* splitter = dx_find_first(str, str + size, property_value_splitter);
 	size_t key_size;
 	size_t value_size;
@@ -412,7 +412,7 @@ static bool dx_parse_property(const char* str, size_t size, OUT dx_address_prope
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_codec_tls_copy(const dx_codec_tls_t* src, OUT dx_codec_tls_t* dest) {
+int dx_codec_tls_copy(const dx_codec_tls_t* src, OUT dx_codec_tls_t* dest) {
 	if (src == NULL || dest == NULL)
 		return dx_set_error_code(dx_ec_invalid_func_param_internal);
 
@@ -450,7 +450,7 @@ void dx_codec_tls_free(dx_codec_tls_t* tls) {
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_codec_tls_parser(const char* codec, size_t size, OUT dx_address_t* addr) {
+static int dx_codec_tls_parser(const char* codec, size_t size, OUT dx_address_t* addr) {
 	const char* next;
 	size_t next_size;
 	dx_codec_tls_t tls = { true, NULL, NULL, NULL, NULL };
@@ -495,7 +495,7 @@ static bool dx_codec_tls_parser(const char* codec, size_t size, OUT dx_address_t
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_codec_gzip_copy(const dx_codec_gzip_t* src, OUT dx_codec_gzip_t* dest) {
+int dx_codec_gzip_copy(const dx_codec_gzip_t* src, OUT dx_codec_gzip_t* dest) {
 	if (src == NULL || dest == NULL)
 		return dx_set_error_code(dx_ec_invalid_func_param_internal);
 
@@ -505,14 +505,14 @@ bool dx_codec_gzip_copy(const dx_codec_gzip_t* src, OUT dx_codec_gzip_t* dest) {
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_codec_gzip_parser(const char* codec, size_t size, OUT dx_address_t* addr) {
+static int dx_codec_gzip_parser(const char* codec, size_t size, OUT dx_address_t* addr) {
 	addr->gzip.enabled = true;
 	return true;
 }
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_codec_parse(const char* codec, size_t codec_size, OUT dx_address_t* addr) {
+static int dx_codec_parse(const char* codec, size_t codec_size, OUT dx_address_t* addr) {
 	const char* codec_name;
 	size_t codec_name_size;
 	size_t count = sizeof(codecs) / sizeof(codecs[0]);
@@ -532,7 +532,7 @@ static bool dx_codec_parse(const char* codec, size_t codec_size, OUT dx_address_
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_parse_host_port(const char* host, size_t size, OUT dx_address_t* addr) {
+static int dx_parse_host_port(const char* host, size_t size, OUT dx_address_t* addr) {
 	size_t i;
 	const char* host_start = NULL;
 	const char* port_start = NULL;
@@ -599,7 +599,7 @@ static void dx_free_address(OUT dx_address_t* addr) {
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_parse_address(const char* entry, size_t entry_size, OUT dx_address_t* addr) {
+static int dx_parse_address(const char* entry, size_t entry_size, OUT dx_address_t* addr) {
 	const char* next = entry;
 	const char* next_end = entry + entry_size;
 	size_t next_size;
@@ -687,7 +687,7 @@ void dx_clear_address_array(dx_address_array_t* addresses) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_get_addresses_from_collection(const char* collection, OUT dx_address_array_t* addresses) {
+int dx_get_addresses_from_collection(const char* collection, OUT dx_address_array_t* addresses) {
 	char* collection_copied = NULL;
 	const char* next = collection;
 
@@ -707,7 +707,7 @@ bool dx_get_addresses_from_collection(const char* collection, OUT dx_address_arr
 
 	do {
 		dx_address_t addr = { 0 };
-		bool failed;
+		int failed;
 
 		const char* entry;
 		size_t entry_size;

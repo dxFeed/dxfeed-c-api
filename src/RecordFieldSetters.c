@@ -80,7 +80,7 @@
 
 #define RECORD_EXCHANGE_CODE_GETTER_BODY(record_id) \
 	const void* RECORD_EXCHANGE_CODE_GETTER_NAME(record_id) (void* dscc) { \
-		bool is_initialized = false; \
+		int is_initialized = false; \
 		static dxf_char_t exchange_code = 0; \
 		\
 		if (!is_initialized) { \

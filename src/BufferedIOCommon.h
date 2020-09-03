@@ -100,7 +100,7 @@ dxf_int_t dx_surrogates_to_code_point (dxf_char_t high, dxf_char_t low);
  * value(s). (If dest_buffer_pos is equal to dest_buffer_length-1 and the specified code_point is a supplementary
  * character, the high-surrogate value is not stored in dest_buffer[dest_buffer_pos].)
  */
-bool dx_code_point_to_utf16_chars (dxf_int_t code_point, dxf_string_t dest_buffer, int dest_buffer_pos, int dest_buffer_length, OUT int* result);
+int dx_code_point_to_utf16_chars (dxf_int_t code_point, dxf_string_t dest_buffer, int dest_buffer_pos, int dest_buffer_length, OUT int* result);
 
 /* -------------------------------------------------------------------------- */
 /*

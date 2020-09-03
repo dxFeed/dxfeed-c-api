@@ -49,11 +49,11 @@ typedef void* dx_task_queue_t;
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_create_task_queue (OUT dx_task_queue_t* tq);
-bool dx_cleanup_task_queue (dx_task_queue_t tq);
-bool dx_destroy_task_queue (dx_task_queue_t tq);
-bool dx_add_task_to_queue (dx_task_queue_t tq, dx_task_processor_t processor, void* data);
-bool dx_execute_task_queue (dx_task_queue_t tq);
-bool dx_is_queue_empty (dx_task_queue_t tq, OUT bool* res);
+int dx_create_task_queue (OUT dx_task_queue_t* tq);
+int dx_cleanup_task_queue (dx_task_queue_t tq);
+int dx_destroy_task_queue (dx_task_queue_t tq);
+int dx_add_task_to_queue (dx_task_queue_t tq, dx_task_processor_t processor, void* data);
+int dx_execute_task_queue (dx_task_queue_t tq);
+int dx_is_queue_empty (dx_task_queue_t tq, OUT int* res);
 
 #endif /* TASK_QUEUE_H_INCLUDED */

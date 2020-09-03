@@ -50,19 +50,19 @@ void dx_set_in_buffer_limit (void* context, int new_limit);
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_read_boolean (void* context, OUT dxf_bool_t* value);
-bool dx_read_byte (void* context, OUT dxf_byte_t* value);
-bool dx_read_unsigned_byte (void* context, OUT dxf_uint_t* value);
-bool dx_read_short (void* context, OUT dxf_short_t* value);
-bool dx_read_unsigned_short (void* context, OUT dxf_uint_t* value);
-bool dx_read_char (void* context, OUT dxf_char_t* value);
-bool dx_read_int (void* context, OUT dxf_int_t* value);
-bool dx_read_long (void* context, OUT dxf_long_t* value);
-bool dx_read_float (void* context, OUT dxf_float_t* value);
-bool dx_read_double (void* context, OUT dxf_double_t* value);
-bool dx_read_line (void* context, OUT dxf_string_t* value);
+int dx_read_boolean (void* context, OUT dxf_bool_t* value);
+int dx_read_byte (void* context, OUT dxf_byte_t* value);
+int dx_read_unsigned_byte (void* context, OUT dxf_uint_t* value);
+int dx_read_short (void* context, OUT dxf_short_t* value);
+int dx_read_unsigned_short (void* context, OUT dxf_uint_t* value);
+int dx_read_char (void* context, OUT dxf_char_t* value);
+int dx_read_int (void* context, OUT dxf_int_t* value);
+int dx_read_long (void* context, OUT dxf_long_t* value);
+int dx_read_float (void* context, OUT dxf_float_t* value);
+int dx_read_double (void* context, OUT dxf_double_t* value);
+int dx_read_line (void* context, OUT dxf_string_t* value);
 /*
-bool dx_read_utf (void* context, OUT dxf_string_t* value);
+int dx_read_utf (void* context, OUT dxf_string_t* value);
  */
 
 /* -------------------------------------------------------------------------- */
@@ -79,14 +79,14 @@ bool dx_read_utf (void* context, OUT dxf_string_t* value);
  *
  * @param value - the dx_int_t value read
  */
-bool dx_read_compact_int (void* context, OUT dxf_int_t* value);
+int dx_read_compact_int (void* context, OUT dxf_int_t* value);
 
 /*
  * Reads a dx_long_t value in a compact format.
  *
  * @param value - the dx_long_t value read
  */
-bool dx_read_compact_long (void* context, OUT dxf_long_t* value);
+int dx_read_compact_long (void* context, OUT dxf_long_t* value);
 
 /*
  * Reads an array of bytes in a compact encapsulation format.
@@ -96,7 +96,7 @@ bool dx_read_compact_long (void* context, OUT dxf_long_t* value);
  *
  * Note: you must to free returned byte array itself.
  */
-bool dx_read_byte_array (void* context, OUT dxf_byte_array_t* value);
+int dx_read_byte_array (void* context, OUT dxf_byte_array_t* value);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -110,7 +110,7 @@ bool dx_read_byte_array (void* context, OUT dxf_byte_array_t* value);
  *
  * @param value - the Unicode code point read
  */
-bool dx_read_utf_char (void* context, OUT dxf_int_t* value);
+int dx_read_utf_char (void* context, OUT dxf_int_t* value);
 
 /*
  * Reads Unicode string in a UTF-8 format with compact encapsulation.
@@ -119,7 +119,7 @@ bool dx_read_utf_char (void* context, OUT dxf_int_t* value);
  *
  * @param value - the Unicode string read
  */
-bool dx_read_utf_char_array (void* context, OUT dxf_string_t* value);
+int dx_read_utf_char_array (void* context, OUT dxf_string_t* value);
 
 /*
  * Reads Unicode string in a UTF-8 format with compact encapsulation.
@@ -128,7 +128,7 @@ bool dx_read_utf_char_array (void* context, OUT dxf_string_t* value);
  *
  * @param value - the Unicode string read
  */
-bool dx_read_utf_string (void* context, OUT dxf_string_t* value);
+int dx_read_utf_string (void* context, OUT dxf_string_t* value);
 
 void dx_get_raw(void* context, OUT dxf_ubyte_t** raw, OUT dxf_int_t* len);
 

@@ -47,10 +47,10 @@ typedef struct {
 } dx_property_map_t;
 
 void dx_property_map_free_collection(dx_property_map_t* props);
-bool dx_property_map_clone(const dx_property_map_t* src, dx_property_map_t* dest);
-bool dx_property_map_set(dx_property_map_t* props, dxf_const_string_t key, dxf_const_string_t value);
-bool dx_property_map_set_many(dx_property_map_t* props, const dx_property_map_t* other);
-bool dx_property_map_contains(const dx_property_map_t* props, dxf_const_string_t key);
-bool dx_property_map_try_get_value(const dx_property_map_t* props, dxf_const_string_t key, OUT dxf_const_string_t* value);
+int dx_property_map_clone(const dx_property_map_t* src, dx_property_map_t* dest);
+int dx_property_map_set(dx_property_map_t* props, dxf_const_string_t key, dxf_const_string_t value);
+int dx_property_map_set_many(dx_property_map_t* props, const dx_property_map_t* other);
+int dx_property_map_contains(const dx_property_map_t* props, dxf_const_string_t key);
+int dx_property_map_try_get_value(const dx_property_map_t* props, dxf_const_string_t key, OUT dxf_const_string_t* value);
 
 #endif //DX_PROPERTIES_H_INCLUDED

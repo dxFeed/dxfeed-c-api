@@ -54,8 +54,8 @@
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_on_connection_created (void);
-bool dx_on_connection_destroyed (void);
+int dx_on_connection_created (void);
+int dx_on_connection_destroyed (void);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -64,11 +64,11 @@ bool dx_on_connection_destroyed (void);
 /* -------------------------------------------------------------------------- */
 
 dx_socket_t dx_socket (int family, int type, int protocol);
-bool dx_connect (dx_socket_t s, const struct sockaddr* addr, socklen_t addrlen);
+int dx_connect (dx_socket_t s, const struct sockaddr* addr, socklen_t addrlen);
 int dx_send (dx_socket_t s, const void* buffer, int buflen);
 int dx_recv (dx_socket_t s, void* buffer, int buflen);
-bool dx_close (dx_socket_t s);
-bool dx_getaddrinfo (const char* nodename, const char* servname,
+int dx_close (dx_socket_t s);
+int dx_getaddrinfo (const char* nodename, const char* servname,
 					const struct addrinfo* hints, struct addrinfo** res);
 void dx_freeaddrinfo (struct addrinfo* res);
 

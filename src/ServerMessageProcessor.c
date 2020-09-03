@@ -48,7 +48,7 @@
  */
 /* -------------------------------------------------------------------------- */
 
-#define SYMBOL_BUFFER_LEN 64
+#define SYMBOL_BUFFER_LEN 128
 
 #define MIN_FIELD_TYPE_ID 0x00
 #define MAX_FIELD_TYPE_ID 0xFF
@@ -77,7 +77,7 @@ typedef struct {
 typedef struct {
 	dx_field_digest_ptr_t* elements;
 	int size;
-	bool in_sync_with_server;
+	int in_sync_with_server;
 } dx_record_digest_t;
 
 typedef struct {
@@ -216,7 +216,7 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_server_msg_processor) {
 void dx_clear_record_digests (dx_server_msg_proc_connection_context_t* context);
 
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_server_msg_processor) {
-	bool res = true;
+	int res = true;
 	dx_server_msg_proc_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_server_msg_processor, &res);
 
 	if (context == NULL) {
@@ -255,7 +255,7 @@ dx_record_digest_t* dx_get_record_digest(dx_server_msg_proc_connection_context_t
 	return &(record_digests->elements[record_id]);
 }
 
-bool dx_create_field_digest (dx_server_msg_proc_connection_context_t* context,
+int dx_create_field_digest (dx_server_msg_proc_connection_context_t* context,
 							dx_record_id_t record_id, const dx_record_item_t* record_info,
 							OUT dx_field_digest_ptr_t* field_digest) {
 	dxf_string_t field_name = NULL;
@@ -309,7 +309,7 @@ bool dx_create_field_digest (dx_server_msg_proc_connection_context_t* context,
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_digest_unsupported_fields (dx_server_msg_proc_connection_context_t* context,
+int dx_digest_unsupported_fields (dx_server_msg_proc_connection_context_t* context,
 								dx_record_id_t record_id, const dx_record_item_t* record_info) {
 	dx_record_digest_t* record_digest = NULL;
 	int field_index = 0;
@@ -425,8 +425,8 @@ void dx_init_record_digests(dx_server_msg_proc_connection_context_t* context) {
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_clear_server_info (dxf_connection_t connection) {
-	bool res = true;
+int dx_clear_server_info (dxf_connection_t connection) {
+	int res = true;
 	dx_server_msg_proc_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_server_msg_processor, &res);
 	dx_record_id_t rid;
 	dx_record_id_t records_count;
@@ -469,8 +469,8 @@ bool dx_clear_server_info (dxf_connection_t connection) {
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_lock_describe_protocol_processing (dxf_connection_t connection, bool lock) {
-	bool res = true;
+int dx_lock_describe_protocol_processing (dxf_connection_t connection, int lock) {
+	int res = true;
 	dx_server_msg_proc_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_server_msg_processor, &res);
 
 	if (context == NULL) {
@@ -490,9 +490,9 @@ bool dx_lock_describe_protocol_processing (dxf_connection_t connection, bool loc
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_get_msg_support_state (int msg, const int* roster, size_t count, int bitmask) {
+static int dx_get_msg_support_state (int msg, const int* roster, size_t count, int bitmask) {
 	size_t idx;
-	bool found = false;
+	int found = false;
 
 	DX_ARRAY_SEARCH(roster, 0, count, msg, DX_NUMERIC_COMPARATOR, false, found, idx);
 
@@ -509,9 +509,9 @@ static bool dx_get_msg_support_state (int msg, const int* roster, size_t count, 
 
 /* ---------------------------------- */
 
-bool dx_is_message_supported_by_server (dxf_connection_t connection, dx_message_type_t msg, bool lock_required,
+int dx_is_message_supported_by_server (dxf_connection_t connection, dx_message_type_t msg, int lock_required,
 										OUT dx_message_support_status_t* status) {
-	bool res = true;
+	int res = true;
 	dx_server_msg_proc_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_server_msg_processor, &res);
 
 	if (context == NULL) {
@@ -558,7 +558,7 @@ bool dx_is_message_supported_by_server (dxf_connection_t connection, dx_message_
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_legacy_send_msg_bitmask (OUT int* bitmask) {
+int dx_legacy_send_msg_bitmask (OUT int* bitmask) {
 	static int s_legacy_msg_list[] = {
 		MESSAGE_TICKER_ADD_SUBSCRIPTION,
 		MESSAGE_TICKER_REMOVE_SUBSCRIPTION,
@@ -583,7 +583,7 @@ bool dx_legacy_send_msg_bitmask (OUT int* bitmask) {
 
 		for (; i < s_msg_count; ++i) {
 			size_t msg_index = 0;
-			bool found = false;
+			int found = false;
 
 			DX_ARRAY_SEARCH(msg_roster, 0, roster_size, s_legacy_msg_list[i], DX_NUMERIC_COMPARATOR, false, found, msg_index);
 
@@ -604,7 +604,7 @@ bool dx_legacy_send_msg_bitmask (OUT int* bitmask) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_legacy_recv_msg_bitmask (int* bitmask) {
+int dx_legacy_recv_msg_bitmask (int* bitmask) {
 	static int s_legacy_msg_list[] = {
 		MESSAGE_TICKER_DATA,
 
@@ -626,7 +626,7 @@ bool dx_legacy_recv_msg_bitmask (int* bitmask) {
 
 		for (; i < s_msg_count; ++i) {
 			size_t msg_index = 0;
-			bool found = false;
+			int found = false;
 
 			DX_ARRAY_SEARCH(msg_roster, 0, roster_size, s_legacy_msg_list[i], DX_NUMERIC_COMPARATOR, false, found, msg_index);
 
@@ -725,8 +725,8 @@ int dx_describe_protocol_timeout_countdown_task (void* data, int command) {
 
 /* ---------------------------------- */
 
-bool dx_describe_protocol_sent (dxf_connection_t connection) {
-	bool res = true;
+int dx_describe_protocol_sent (dxf_connection_t connection) {
+	int res = true;
 	dx_server_msg_proc_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_server_msg_processor, &res);
 
 	if (context == NULL) {
@@ -789,7 +789,7 @@ bool dx_describe_protocol_sent (dxf_connection_t connection) {
  */
 /* -------------------------------------------------------------------------- */
 
-static bool dx_read_message_type (dx_server_msg_proc_connection_context_t* context, OUT dx_message_type_t* value) {
+static int dx_read_message_type (dx_server_msg_proc_connection_context_t* context, OUT dx_message_type_t* value) {
 	dxf_long_t type;
 
 	if (!dx_read_compact_long(context->bicc, &type)) {
@@ -811,7 +811,7 @@ static bool dx_read_message_type (dx_server_msg_proc_connection_context_t* conte
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_read_message_length_and_set_buffer_limit (dx_server_msg_proc_connection_context_t* context) {
+static int dx_read_message_length_and_set_buffer_limit (dx_server_msg_proc_connection_context_t* context) {
 	dxf_long_t message_length;
 	int message_end_offset;
 
@@ -836,7 +836,7 @@ static bool dx_read_message_length_and_set_buffer_limit (dx_server_msg_proc_conn
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_read_symbol (dx_server_msg_proc_connection_context_t* context) {
+static int dx_read_symbol (dx_server_msg_proc_connection_context_t* context) {
 	dxf_int_t r;
 
 	if (context == NULL ) {
@@ -882,7 +882,7 @@ static bool dx_read_symbol (dx_server_msg_proc_connection_context_t* context) {
 		setter(buffer, value); \
 	}
 
-bool dx_read_qdtime_on_remove_event(dx_server_msg_proc_connection_context_t* context,
+int dx_read_qdtime_on_remove_event(dx_server_msg_proc_connection_context_t* context,
 									dx_record_id_t record_id, void* row) {
 	int i;
 	dxf_int_t high;
@@ -909,7 +909,7 @@ bool dx_read_qdtime_on_remove_event(dx_server_msg_proc_connection_context_t* con
 	return true;
 }
 
-bool dx_read_records (dx_server_msg_proc_connection_context_t* context,
+int dx_read_records (dx_server_msg_proc_connection_context_t* context,
 					dx_record_id_t record_id, void* record_buffer) {
 	int i = 0;
 	dxf_byte_t read_byte;
@@ -1075,7 +1075,7 @@ dxf_time_int_field_t dx_get_time_int_field(void* dscc, dx_record_id_t record_id,
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) {
+int dx_process_data_message (dx_server_msg_proc_connection_context_t* context) {
 	context->last_cipher = 0;
 	CHECKED_FREE(context->last_symbol);
 	context->last_symbol = NULL;
@@ -1175,7 +1175,7 @@ bool dx_process_data_message (dx_server_msg_proc_connection_context_t* context) 
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_fill_record_digest(dx_server_msg_proc_connection_context_t* context, dx_record_id_t rid, const dx_record_item_t* record_info,
+int dx_fill_record_digest(dx_server_msg_proc_connection_context_t* context, dx_record_id_t rid, const dx_record_item_t* record_info,
 						dxf_int_t field_count, OUT dx_record_digest_t* record_digest) {
 	int i = 0;
 
@@ -1203,7 +1203,7 @@ bool dx_fill_record_digest(dx_server_msg_proc_connection_context_t* context, dx_
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_process_describe_records (dx_server_msg_proc_connection_context_t* context) {
+int dx_process_describe_records (dx_server_msg_proc_connection_context_t* context) {
 	while (dx_get_in_buffer_position(context->bicc) < dx_get_in_buffer_limit(context->bicc)) {
 		dxf_int_t server_record_id;
 		dxf_string_t record_name = NULL;
@@ -1263,7 +1263,7 @@ bool dx_process_describe_records (dx_server_msg_proc_connection_context_t* conte
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_read_describe_protocol_properties (dx_server_msg_proc_connection_context_t* context) {
+int dx_read_describe_protocol_properties (dx_server_msg_proc_connection_context_t* context) {
 	dxf_string_t key;
 	dxf_string_t value;
 	dxf_int_t count;
@@ -1298,7 +1298,7 @@ typedef void (*dx_message_type_processor_t)(dx_server_msg_proc_connection_contex
 
 static void dx_process_server_send_message_type (dx_server_msg_proc_connection_context_t* context, int message_id, dxf_string_t message_name) {
 	size_t msg_index;
-	bool found = false;
+	int found = false;
 	const int* msg_roster = dx_get_recv_message_roster();
 	size_t roster_size = dx_get_recv_message_roster_size();
 
@@ -1324,7 +1324,7 @@ static void dx_process_server_send_message_type (dx_server_msg_proc_connection_c
 
 static void dx_process_server_recv_message_type (dx_server_msg_proc_connection_context_t* context, int message_id, dxf_string_t message_name) {
 	size_t msg_index;
-	bool found = false;
+	int found = false;
 	const int* msg_roster = dx_get_send_message_roster();
 	size_t roster_size = dx_get_send_message_roster_size();
 
@@ -1350,7 +1350,7 @@ static void dx_process_server_recv_message_type (dx_server_msg_proc_connection_c
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_read_describe_protocol_message_list (dx_server_msg_proc_connection_context_t* context, dx_message_type_processor_t processor) {
+int dx_read_describe_protocol_message_list (dx_server_msg_proc_connection_context_t* context, dx_message_type_processor_t processor) {
 	dxf_int_t count;
 	int i = 0;
 
@@ -1380,7 +1380,7 @@ bool dx_read_describe_protocol_message_list (dx_server_msg_proc_connection_conte
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_process_describe_protocol (dx_server_msg_proc_connection_context_t* context) {
+int dx_process_describe_protocol (dx_server_msg_proc_connection_context_t* context) {
 	dxf_int_t magic;
 	int buf_pos;
 	int buf_limit;
@@ -1464,7 +1464,7 @@ bool dx_process_describe_protocol (dx_server_msg_proc_connection_context_t* cont
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_process_message (dx_server_msg_proc_connection_context_t* context, dx_message_type_t message_type) {
+int dx_process_message (dx_server_msg_proc_connection_context_t* context, dx_message_type_t message_type) {
 	if (dx_is_data_message(message_type)) {
 		if (!dx_process_data_message(context)) {
 			if (dx_get_error_code() == dx_bioec_buffer_underflow) {
@@ -1519,7 +1519,7 @@ bool dx_process_message (dx_server_msg_proc_connection_context_t* context, dx_me
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_append_new_data (dx_server_msg_proc_connection_context_t* context,
+int dx_append_new_data (dx_server_msg_proc_connection_context_t* context,
 						const dxf_byte_t* new_buffer, dxf_int_t new_buffer_size) {
 	if (context->buffer_size != context->buffer_pos) {
 		/* copy all unprocessed data to beginning of buffer */
@@ -1567,9 +1567,9 @@ bool dx_append_new_data (dx_server_msg_proc_connection_context_t* context,
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_process_server_data (dxf_connection_t connection, const dxf_byte_t* data_buffer, int data_buffer_size) {
-	bool process_result = true;
-	bool conn_ctx_res = true;
+int dx_process_server_data (dxf_connection_t connection, const dxf_byte_t* data_buffer, int data_buffer_size) {
+	int process_result = true;
+	int conn_ctx_res = true;
 	dx_server_msg_proc_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_server_msg_processor, &conn_ctx_res);
 
 	if (context == NULL) {
@@ -1694,8 +1694,8 @@ bool dx_process_server_data (dxf_connection_t connection, const dxf_byte_t* data
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_socket_data_receiver (dxf_connection_t connection, const void* buffer, int buffer_size) {
-	bool conn_ctx_res = true;
+int dx_socket_data_receiver (dxf_connection_t connection, const void* buffer, int buffer_size) {
+	int conn_ctx_res = true;
 	dx_server_msg_proc_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_server_msg_processor, &conn_ctx_res);
 
 	dx_logging_receive_data(buffer, buffer_size);
@@ -1716,8 +1716,8 @@ bool dx_socket_data_receiver (dxf_connection_t connection, const void* buffer, i
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_add_record_digest_to_list(dxf_connection_t connection, dx_record_id_t index) {
-	bool failed = false;
+int dx_add_record_digest_to_list(dxf_connection_t connection, dx_record_id_t index) {
+	int failed = false;
 	dx_record_digest_t new_digest;
 	dx_server_msg_proc_connection_context_t* mpcc = dx_get_subsystem_data(connection, dx_ccs_server_msg_processor, &failed);
 	if (mpcc == NULL) {
@@ -1748,7 +1748,7 @@ bool dx_add_record_digest_to_list(dxf_connection_t connection, dx_record_id_t in
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_add_raw_dump_file(dxf_connection_t connection, const char * raw_file_name)
+int dx_add_raw_dump_file(dxf_connection_t connection, const char * raw_file_name)
 {
 	FILE* raw_out = fopen(raw_file_name, "wb");
 	if (raw_out == NULL) {
@@ -1757,7 +1757,7 @@ bool dx_add_raw_dump_file(dxf_connection_t connection, const char * raw_file_nam
 	}
 	fclose(raw_out);
 	{
-		bool conn_ctx_res = true;
+		int conn_ctx_res = true;
 		dx_server_msg_proc_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_server_msg_processor, &conn_ctx_res);
 
 		CHECKED_FREE(context->raw_dump_file_name);

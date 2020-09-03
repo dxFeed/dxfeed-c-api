@@ -56,7 +56,7 @@ void dx_test_read(OUT struct test_data_t* data) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_compare(const struct test_data_t* data_1, const struct test_data_t* data_2) {
+int dx_compare(const struct test_data_t* data_1, const struct test_data_t* data_2) {
 	//return data_1->bool_data == data_2->bool_data
 	//    && data_1->byte_data == data_2->byte_data
 	//    && data_1->char_data == data_2->char_data
@@ -72,7 +72,7 @@ bool dx_compare(const struct test_data_t* data_1, const struct test_data_t* data
 
 /* -------------------------------------------------------------------------- */
 
-bool test() {
+int test() {
 /*    struct test_data_t read_data;
 
 	dx_byte_t* buffer = dx_malloc(10);

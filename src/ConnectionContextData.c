@@ -108,9 +108,9 @@ dxf_connection_t dx_init_connection (void) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_deinit_connection (dxf_connection_t connection) {
+int dx_deinit_connection (dxf_connection_t connection) {
 	int i = dx_ccs_begin;
-	bool res = true;
+	int res = true;
 
 	for (; i < dx_ccs_count; ++i) {
 		res = g_deinitializer_queue[i](connection) && res;
@@ -123,7 +123,7 @@ bool dx_deinit_connection (dxf_connection_t connection) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_can_deinit_connection (dxf_connection_t connection) {
+int dx_can_deinit_connection (dxf_connection_t connection) {
 	int i = dx_ccs_begin;
 
 	for (; i < dx_ccs_count; ++i) {
@@ -137,7 +137,7 @@ bool dx_can_deinit_connection (dxf_connection_t connection) {
 
 /* -------------------------------------------------------------------------- */
 
-void* dx_get_subsystem_data (dxf_connection_t connection, dx_connection_context_subsystem_t subsystem, OUT bool* res) {
+void* dx_get_subsystem_data (dxf_connection_t connection, dx_connection_context_subsystem_t subsystem, OUT int* res) {
 	if (connection == NULL) {
 		dx_set_error_code(dx_cec_invalid_connection_handle_internal);
 		DX_CHECKED_SET_VAL_TO_PTR(res, false);
@@ -159,7 +159,7 @@ void* dx_get_subsystem_data (dxf_connection_t connection, dx_connection_context_
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_set_subsystem_data (dxf_connection_t connection, dx_connection_context_subsystem_t subsystem, void* data) {
+int dx_set_subsystem_data (dxf_connection_t connection, dx_connection_context_subsystem_t subsystem, void* data) {
 	if (connection == NULL) {
 		dx_set_last_error(dx_cec_invalid_connection_handle_internal);
 
@@ -179,7 +179,7 @@ bool dx_set_subsystem_data (dxf_connection_t connection, dx_connection_context_s
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_validate_connection_handle (dxf_connection_t connection, bool is_internal) {
+int dx_validate_connection_handle (dxf_connection_t connection, int is_internal) {
 	if (connection == NULL) {
 		return dx_set_error_code(is_internal ? dx_cec_invalid_connection_handle_internal : dx_cec_invalid_connection_handle);
 	}

@@ -463,7 +463,7 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_data_structures) {
 /* -------------------------------------------------------------------------- */
 
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_data_structures) {
-	bool res = true;
+	int res = true;
 	dx_data_structures_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_data_structures, &res);
 
 	if (context == NULL) {
@@ -508,7 +508,7 @@ dx_record_id_t dx_get_record_id(void* context, dxf_int_t server_record_id) {
 		return record_id_map->frequent_ids[server_record_id];
 	} else {
 		size_t idx;
-		bool found = false;
+		int found = false;
 		dx_record_id_pair_t dummy;
 
 		dummy.server_record_id = server_record_id;
@@ -525,15 +525,15 @@ dx_record_id_t dx_get_record_id(void* context, dxf_int_t server_record_id) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_assign_server_record_id(void* context, dx_record_id_t record_id, dxf_int_t server_record_id) {
+int dx_assign_server_record_id(void* context, dx_record_id_t record_id, dxf_int_t server_record_id) {
 	dx_server_local_record_id_map_t* record_id_map = &(CTX(context)->record_id_map);
 
 	if (server_record_id >= 0 && server_record_id < RECORD_ID_VECTOR_SIZE) {
 		record_id_map->frequent_ids[server_record_id] = record_id;
 	} else {
 		size_t idx;
-		bool found = false;
-		bool failed = false;
+		int found = false;
+		int failed = false;
 		dx_record_id_pair_t rip;
 
 		rip.server_record_id = server_record_id;
@@ -559,7 +559,7 @@ bool dx_assign_server_record_id(void* context, dx_record_id_t record_id, dxf_int
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_validate_record_id(void* context, dx_record_id_t record_id) {
+int dx_validate_record_id(void* context, dx_record_id_t record_id) {
 	dx_record_list_t* records_list = &(CTX(context)->records_list);
 	if (record_id < 0 || record_id >= (dx_record_id_t)records_list->size) {
 		return dx_set_error_code(dx_ec_invalid_func_param_internal);
@@ -614,7 +614,7 @@ dx_record_id_t dx_get_record_id_by_name(void* context, dxf_const_string_t record
 
 /* -------------------------------------------------------------------------- */
 
-dx_record_id_t dx_get_next_unsubscribed_record_id(void* context, bool isUpdate) {
+dx_record_id_t dx_get_next_unsubscribed_record_id(void* context, int isUpdate) {
 	dx_record_id_t record_id = DX_RECORD_ID_INVALID;
 	dx_data_structures_connection_context_t* dscc = CTX(context);
 	dx_record_list_t* records_list = &(dscc->records_list);
@@ -679,7 +679,7 @@ dxf_char_t dx_get_record_exchange_code(void* context, dx_record_id_t record_id) 
 	return exchange_code;
 }
 
-bool dx_set_record_exchange_code(void* context, dx_record_id_t record_id,
+int dx_set_record_exchange_code(void* context, dx_record_id_t record_id,
 								dxf_char_t exchange_code) {
 	dx_data_structures_connection_context_t* dscc = CTX(context);
 	dx_record_list_t* records_list = &(dscc->records_list);
@@ -710,12 +710,12 @@ bool dx_set_record_exchange_code(void* context, dx_record_id_t record_id,
  * value        - the result subscription time
  * return true if no errors occur otherwise returns false
  */
-bool dx_create_subscription_time(void* context, dx_record_id_t record_id,
+int dx_create_subscription_time(void* context, dx_record_id_t record_id,
 								dxf_long_t time, OUT dxf_long_t* value) {
 	int i;
-	bool has_first_time = false;
-	bool has_second_time = false;
-	bool is_timed_record = false;
+	int has_first_time = false;
+	int has_second_time = false;
+	int is_timed_record = false;
 	dxf_int_t seconds = dx_get_seconds_from_time(time);
 	dxf_int_t millis = dx_get_millis_from_time(time);
 	dxf_long_t subscription_time = 0;
@@ -760,7 +760,7 @@ dx_record_server_support_state_list_t* dx_get_record_server_support_states(void*
 	return &(CTX(context)->record_server_support_states);
 }
 
-bool dx_get_record_server_support_state_value(dx_record_server_support_state_list_t* states,
+int dx_get_record_server_support_state_value(dx_record_server_support_state_list_t* states,
 											dx_record_id_t record_id,
 											OUT dx_record_server_support_state_t **value) {
 	if (record_id < 0 || record_id >= (dx_record_id_t)states->size)
@@ -773,8 +773,8 @@ bool dx_get_record_server_support_state_value(dx_record_server_support_state_lis
 
 /* Functions for working with records list */
 
-bool dx_add_record_to_list(dxf_connection_t connection, dx_record_item_t record, dx_record_id_t index) {
-	bool failed = false;
+int dx_add_record_to_list(dxf_connection_t connection, dx_record_item_t record, dx_record_id_t index) {
+	int failed = false;
 	dx_record_item_t new_record;
 	dx_record_server_support_state_t new_state;
 	dx_data_structures_connection_context_t* dscc = NULL;
@@ -871,7 +871,7 @@ dx_record_info_id_t dx_string_to_record_info(dxf_const_string_t name)
 		return dx_rid_invalid;
 }
 
-bool init_record_info(dx_record_item_t *record, dxf_const_string_t name) {
+int init_record_info(dx_record_item_t *record, dxf_const_string_t name) {
 	dx_record_info_id_t record_info_id;
 	dx_record_info_t record_info;
 	size_t suffix_index;
@@ -916,8 +916,8 @@ bool init_record_info(dx_record_item_t *record, dxf_const_string_t name) {
 #define DX_RECORDS_COMPARATOR(l, r) (dx_compare_strings(l.name, r.name))
 
 dx_record_id_t dx_add_or_get_record_id(dxf_connection_t connection, dxf_const_string_t name) {
-	bool result = true;
-	bool found = false;
+	int result = true;
+	int found = false;
 	dx_record_id_t index = DX_RECORD_ID_INVALID;
 	dx_record_item_t record;
 	dx_data_structures_connection_context_t* dscc = NULL;

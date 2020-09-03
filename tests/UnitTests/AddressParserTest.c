@@ -30,7 +30,7 @@
 typedef struct {
 	const char* collection;
 	dx_address_array_t expected;
-	bool result;
+	int result;
 } dx_test_case_t;
 
 static dx_address_t addresses[] = {
@@ -122,7 +122,7 @@ static const size_t all_cases_count = SIZE_OF_ARRAY(all_cases);
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_is_equal_address(const dx_address_t* expected, const dx_address_t* actual) {
+static int dx_is_equal_address(const dx_address_t* expected, const dx_address_t* actual) {
 	DX_CHECK(dx_is_equal_ansi(expected->host, actual->host));
 	DX_CHECK(dx_is_equal_const_ansi(expected->port, actual->port));
 	DX_CHECK(dx_is_equal_ansi(expected->username, actual->username));
@@ -140,7 +140,7 @@ static bool dx_is_equal_address(const dx_address_t* expected, const dx_address_t
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_is_equal_address_array(const dx_address_array_t* expected, const dx_address_array_t* actual) {
+static int dx_is_equal_address_array(const dx_address_array_t* expected, const dx_address_array_t* actual) {
 	size_t i;
 	DX_CHECK(dx_is_equal_size_t(expected->size, actual->size));
 	for (i = 0; i < expected->size; i++) {
@@ -158,7 +158,7 @@ static bool dx_is_equal_address_array(const dx_address_array_t* expected, const 
  *
  * Expected: application shouldn't crash; all checks should be passed.
  */
-static bool get_addresses_from_collection_test(void) {
+static int get_addresses_from_collection_test(void) {
 	size_t i;
 	for (i = 0; i < all_cases_count; i++) {
 		dx_address_array_t actual = DX_EMPTY_ARRAY;
@@ -174,8 +174,8 @@ static bool get_addresses_from_collection_test(void) {
 
 /* -------------------------------------------------------------------------- */
 
-bool address_parser_all_tests(void) {
-	bool res = true;
+int address_parser_all_tests(void) {
+	int res = true;
 
 	if (!get_addresses_from_collection_test()) {
 

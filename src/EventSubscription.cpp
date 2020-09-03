@@ -195,7 +195,7 @@ struct EventSubscriptionConnectionContext {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_clear_event_subscription_connection_context(EventSubscriptionConnectionContext* context);
+int dx_clear_event_subscription_connection_context(EventSubscriptionConnectionContext* context);
 
 DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_event_subscription) {
 	CHECKED_CALL_2(dx_validate_connection_handle, connection, true);
@@ -228,7 +228,7 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_event_subscription) {
 /* -------------------------------------------------------------------------- */
 
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_event_subscription) {
-	bool res = true;
+	int res = true;
 	auto* context = static_cast<EventSubscriptionConnectionContext*>(
 		dx_get_subsystem_data(connection, dx_ccs_event_subscription, &res));
 
@@ -245,8 +245,8 @@ DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_event_subscription) { return true; }
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_clear_event_subscription_connection_context(EventSubscriptionConnectionContext* context) {
-	bool res = true;
+int dx_clear_event_subscription_connection_context(EventSubscriptionConnectionContext* context) {
+	int res = true;
 	size_t i = 0;
 
 	for (; i < context->subscriptions.size; ++i) {
@@ -354,7 +354,7 @@ SymbolData* dx_create_symbol_data(dxf_const_string_t name, dxf_int_t cipher) {
 SymbolData* dx_subscribe_symbol(EventSubscriptionConnectionContext* context, dxf_const_string_t symbol_name,
 								SubscriptionData* owner) {
 	SymbolData* res;
-	bool is_just_created = false;
+	int is_just_created = false;
 
 	{
 		SymbolData dummy{};
@@ -377,9 +377,9 @@ SymbolData* dx_subscribe_symbol(EventSubscriptionConnectionContext* context, dxf
 	}
 
 	{
-		bool subscr_exists;
+		int subscr_exists;
 		size_t subscr_index;
-		bool failed;
+		int failed;
 
 		DX_ARRAY_SEARCH(res->subscriptions.elements, 0, res->subscriptions.size, owner, DX_NUMERIC_COMPARATOR, false,
 						subscr_exists, subscr_index);
@@ -402,14 +402,14 @@ SymbolData* dx_subscribe_symbol(EventSubscriptionConnectionContext* context, dxf
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_unsubscribe_symbol(EventSubscriptionConnectionContext* context, SymbolData* symbol_data,
+int dx_unsubscribe_symbol(EventSubscriptionConnectionContext* context, SymbolData* symbol_data,
 						   SubscriptionData* owner) {
-	bool res = true;
+	int res = true;
 
 	do {
-		bool subscr_exists;
+		int subscr_exists;
 		size_t subscr_index;
-		bool failed;
+		int failed;
 
 		DX_ARRAY_SEARCH(symbol_data->subscriptions.elements, 0, symbol_data->subscriptions.size, owner,
 						DX_NUMERIC_COMPARATOR, false, subscr_exists, subscr_index);
@@ -464,9 +464,9 @@ void dx_clear_listener_array(dx_listener_array_t* listeners) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_clear_symbol_array(EventSubscriptionConnectionContext* context,
+int dx_clear_symbol_array(EventSubscriptionConnectionContext* context,
 						   std::unordered_map<std::wstring, SymbolData*>& symbols, SubscriptionData* owner) {
-	bool res = true;
+	int res = true;
 
 	for (auto&& s : symbols) {
 		res = dx_unsubscribe_symbol(context, s.second, owner) && res;
@@ -488,7 +488,7 @@ int dx_listener_comparator(ListenerContext e1, ListenerContext e2) {
 
 /* -------------------------------------------------------------------------- */
 
-size_t dx_find_listener_in_array(dx_listener_array_t* listeners, dx_event_listener_ptr_t listener, OUT bool* found) {
+size_t dx_find_listener_in_array(dx_listener_array_t* listeners, dx_event_listener_ptr_t listener, OUT int* found) {
 	size_t listener_index;
 	/* There is comparing listeners by address, so fill version and user_data with default values */
 	ListenerContext listener_context{listener, dx_elv_default, nullptr};
@@ -522,10 +522,10 @@ void dx_store_last_symbol_event(SymbolData* symbol_data, dx_event_id_t event_id,
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_add_subscription_to_context(SubscriptionData* subscr_data) {
-	bool subscr_exists;
+int dx_add_subscription_to_context(SubscriptionData* subscr_data) {
+	int subscr_exists;
 	size_t subscr_index;
-	bool failed;
+	int failed;
 	dx_subscription_data_array_t* subscriptions = &(CTX(subscr_data->escc)->subscriptions);
 
 	DX_ARRAY_SEARCH(subscriptions->elements, 0, subscriptions->size, subscr_data, DX_NUMERIC_COMPARATOR, false,
@@ -544,10 +544,10 @@ bool dx_add_subscription_to_context(SubscriptionData* subscr_data) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_remove_subscription_from_context(SubscriptionData* subscr_data) {
-	bool subscr_exists;
+int dx_remove_subscription_from_context(SubscriptionData* subscr_data) {
+	int subscr_exists;
 	size_t subscr_index;
-	bool failed;
+	int failed;
 	dx_subscription_data_array_t* subscriptions = &(CTX(subscr_data->escc)->subscriptions);
 
 	DX_ARRAY_SEARCH(subscriptions->elements, 0, subscriptions->size, subscr_data, DX_NUMERIC_COMPARATOR, false,
@@ -597,7 +597,7 @@ dxf_subscription_t dx_create_event_subscription(dxf_connection_t connection, uns
 		return dx_invalid_subscription;
 	}
 
-	bool res = true;
+	int res = true;
 
 	auto context = static_cast<EventSubscriptionConnectionContext*>(
 		dx_get_subsystem_data(connection, dx_ccs_event_subscription, &res));
@@ -658,9 +658,9 @@ dxf_subscription_t dx_create_event_subscription(dxf_connection_t connection, uns
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_close_event_subscription(dxf_subscription_t subscr_id) {
+int dx_close_event_subscription(dxf_subscription_t subscr_id) {
 	auto subscr_data = (SubscriptionData*)subscr_id;
-	bool res = true;
+	int res = true;
 
 	if (subscr_id == dx_invalid_subscription) {
 		return dx_set_error_code(dx_esec_invalid_subscr_id);
@@ -687,7 +687,7 @@ bool dx_close_event_subscription(dxf_subscription_t subscr_id) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_add_symbols(dxf_subscription_t subscr_id, dxf_const_string_t* symbols, int symbol_count) {
+int dx_add_symbols(dxf_subscription_t subscr_id, dxf_const_string_t* symbols, int symbol_count) {
 	auto subscr_data = (SubscriptionData*)subscr_id;
 	int cur_symbol_index = 0;
 
@@ -729,7 +729,7 @@ bool dx_add_symbols(dxf_subscription_t subscr_id, dxf_const_string_t* symbols, i
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_remove_symbols(dxf_subscription_t subscr_id, dxf_const_string_t* symbols, size_t symbol_count) {
+int dx_remove_symbols(dxf_subscription_t subscr_id, dxf_const_string_t* symbols, size_t symbol_count) {
 	auto subscr_data = (SubscriptionData*)subscr_id;
 	size_t cur_symbol_index = 0;
 
@@ -769,12 +769,12 @@ bool dx_remove_symbols(dxf_subscription_t subscr_id, dxf_const_string_t* symbols
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_add_listener_impl(dxf_subscription_t subscr_id, dx_event_listener_ptr_t listener,
+int dx_add_listener_impl(dxf_subscription_t subscr_id, dx_event_listener_ptr_t listener,
 						  dx_event_listener_version_t version, void* user_data) {
 	auto subscr_data = (SubscriptionData*)subscr_id;
 	size_t listener_index;
-	bool failed;
-	bool found = false;
+	int failed;
+	int found = false;
 
 	if (subscr_id == dx_invalid_subscription) {
 		return dx_set_error_code(dx_esec_invalid_subscr_id);
@@ -809,23 +809,23 @@ bool dx_add_listener_impl(dxf_subscription_t subscr_id, dx_event_listener_ptr_t 
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_add_listener(dxf_subscription_t subscr_id, dxf_event_listener_t listener, void* user_data) {
+int dx_add_listener(dxf_subscription_t subscr_id, dxf_event_listener_t listener, void* user_data) {
 	return dx_add_listener_impl(subscr_id, (dx_event_listener_ptr_t)listener, dx_elv_default, user_data);
 }
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_add_listener_v2(dxf_subscription_t subscr_id, dxf_event_listener_v2_t listener, void* user_data) {
+int dx_add_listener_v2(dxf_subscription_t subscr_id, dxf_event_listener_v2_t listener, void* user_data) {
 	return dx_add_listener_impl(subscr_id, (dx_event_listener_ptr_t)listener, dx_elv_v2, user_data);
 }
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_remove_listener_impl(dxf_subscription_t subscr_id, dx_event_listener_ptr_t listener) {
+int dx_remove_listener_impl(dxf_subscription_t subscr_id, dx_event_listener_ptr_t listener) {
 	auto subscr_data = (SubscriptionData*)subscr_id;
 	size_t listener_index;
-	bool failed;
-	bool found = false;
+	int failed;
+	int found = false;
 
 	if (subscr_id == dx_invalid_subscription) {
 		return dx_set_error_code(dx_esec_invalid_subscr_id);
@@ -854,19 +854,19 @@ bool dx_remove_listener_impl(dxf_subscription_t subscr_id, dx_event_listener_ptr
 	return dx_mutex_unlock(&(context->subscr_guard)) && !failed;
 }
 
-bool dx_remove_listener(dxf_subscription_t subscr_id, dxf_event_listener_t listener) {
+int dx_remove_listener(dxf_subscription_t subscr_id, dxf_event_listener_t listener) {
 	return dx_remove_listener_impl(subscr_id, (dx_event_listener_ptr_t)listener);
 }
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_remove_listener_v2(dxf_subscription_t subscr_id, dxf_event_listener_v2_t listener) {
+int dx_remove_listener_v2(dxf_subscription_t subscr_id, dxf_event_listener_v2_t listener) {
 	return dx_remove_listener_impl(subscr_id, (dx_event_listener_ptr_t)listener);
 }
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_get_subscription_connection(dxf_subscription_t subscr_id, OUT dxf_connection_t* connection) {
+int dx_get_subscription_connection(dxf_subscription_t subscr_id, OUT dxf_connection_t* connection) {
 	auto subscr_data = (SubscriptionData*)subscr_id;
 
 	if (subscr_id == dx_invalid_subscription) {
@@ -884,7 +884,7 @@ bool dx_get_subscription_connection(dxf_subscription_t subscr_id, OUT dxf_connec
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_get_event_subscription_event_types(dxf_subscription_t subscr_id, OUT unsigned* event_types) {
+int dx_get_event_subscription_event_types(dxf_subscription_t subscr_id, OUT unsigned* event_types) {
 	auto subscr_data = (SubscriptionData*)subscr_id;
 
 	if (subscr_id == dx_invalid_subscription) {
@@ -902,7 +902,7 @@ bool dx_get_event_subscription_event_types(dxf_subscription_t subscr_id, OUT uns
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_get_event_subscription_symbols(dxf_subscription_t subscr_id, OUT dxf_const_string_t** symbols,
+int dx_get_event_subscription_symbols(dxf_subscription_t subscr_id, OUT dxf_const_string_t** symbols,
 									   OUT size_t* symbol_count) {
 	if (subscr_id == dx_invalid_subscription) {
 		return dx_set_error_code(dx_esec_invalid_subscr_id);
@@ -945,7 +945,7 @@ bool dx_get_event_subscription_symbols(dxf_subscription_t subscr_id, OUT dxf_con
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_get_event_subscription_flags(dxf_subscription_t subscr_id, OUT dx_event_subscr_flag* subscr_flags) {
+int dx_get_event_subscription_flags(dxf_subscription_t subscr_id, OUT dx_event_subscr_flag* subscr_flags) {
 	auto subscr_data = (SubscriptionData*)subscr_id;
 
 	if (subscr_id == dx_invalid_subscription) {
@@ -963,7 +963,7 @@ bool dx_get_event_subscription_flags(dxf_subscription_t subscr_id, OUT dx_event_
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_set_event_subscription_flags(dxf_subscription_t subscr_id, dx_event_subscr_flag subscr_flags) {
+int dx_set_event_subscription_flags(dxf_subscription_t subscr_id, dx_event_subscr_flag subscr_flags) {
 	auto subscr_data = (SubscriptionData*)subscr_id;
 
 	if (subscr_id == dx_invalid_subscription) {
@@ -979,7 +979,7 @@ bool dx_set_event_subscription_flags(dxf_subscription_t subscr_id, dx_event_subs
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_get_event_subscription_time(dxf_subscription_t subscr_id, OUT dxf_long_t* time) {
+int dx_get_event_subscription_time(dxf_subscription_t subscr_id, OUT dxf_long_t* time) {
 	auto subscr_data = (SubscriptionData*)subscr_id;
 
 	if (subscr_id == dx_invalid_subscription) {
@@ -1040,7 +1040,7 @@ void pass_event_data_to_listeners(SymbolData* symbol_data, dx_event_id_t event_i
 			while (end_index != data_count) {
 				/* Skip all non-needed orders */
 				while (start_index < data_count) {
-					bool found;
+					int found;
 					size_t index;
 					DX_ARRAY_SEARCH(subscr_data->order_source.elements, 0, subscr_data->order_source.size,
 									orders[start_index].source, DX_ORDER_SOURCE_COMPARATOR_NONSYM, false, found, index);
@@ -1053,7 +1053,7 @@ void pass_event_data_to_listeners(SymbolData* symbol_data, dx_event_id_t event_i
 				/* Count all suitable orders */
 				end_index = start_index;
 				while (end_index < data_count) {
-					bool found;
+					int found;
 					size_t index;
 					DX_ARRAY_SEARCH(subscr_data->order_source.elements, 0, subscr_data->order_source.size,
 									orders[end_index].source, DX_ORDER_SOURCE_COMPARATOR_NONSYM, false, found, index);
@@ -1072,10 +1072,10 @@ void pass_event_data_to_listeners(SymbolData* symbol_data, dx_event_id_t event_i
 	}
 }
 
-bool dx_process_event_data(dxf_connection_t connection, dx_event_id_t event_id, dxf_const_string_t symbol_name,
+int dx_process_event_data(dxf_connection_t connection, dx_event_id_t event_id, dxf_const_string_t symbol_name,
 						   dxf_int_t symbol_cipher, dxf_const_event_data_t data, int data_count,
 						   const dxf_event_params_t* event_params) {
-	bool res;
+	int res;
 	auto* context = static_cast<EventSubscriptionConnectionContext*>(
 		dx_get_subsystem_data(connection, dx_ccs_event_subscription, &res));
 
@@ -1119,12 +1119,12 @@ bool dx_process_event_data(dxf_connection_t connection, dx_event_id_t event_id, 
  *	event type is a one-bit mask here
  */
 
-bool dx_get_last_symbol_event(dxf_connection_t connection, dxf_const_string_t symbol_name, int event_type,
+int dx_get_last_symbol_event(dxf_connection_t connection, dxf_const_string_t symbol_name, int event_type,
 							  OUT dxf_event_data_t* event_data) {
 	SymbolData* symbol_data;
 	dxf_int_t cipher = dx_encode_symbol_name(symbol_name);
 	dx_event_id_t event_id;
-	bool res;
+	int res;
 	auto* context = static_cast<EventSubscriptionConnectionContext*>(
 		dx_get_subsystem_data(connection, dx_ccs_event_subscription, &res));
 
@@ -1164,8 +1164,8 @@ bool dx_get_last_symbol_event(dxf_connection_t connection, dxf_const_string_t sy
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_process_connection_subscriptions(dxf_connection_t connection, dx_subscription_processor_t processor) {
-	bool res;
+int dx_process_connection_subscriptions(dxf_connection_t connection, dx_subscription_processor_t processor) {
+	int res;
 	auto* context = static_cast<EventSubscriptionConnectionContext*>(
 		dx_get_subsystem_data(connection, dx_ccs_event_subscription, &res));
 	size_t i = 0;
@@ -1212,12 +1212,12 @@ bool dx_process_connection_subscriptions(dxf_connection_t connection, dx_subscri
 
 #define DX_ORDER_SOURCE_COMPARATOR(l, r) (dx_compare_strings(l.suffix, r.suffix))
 
-bool dx_add_order_source(dxf_subscription_t subscr_id, dxf_const_string_t source) {
+int dx_add_order_source(dxf_subscription_t subscr_id, dxf_const_string_t source) {
 	auto subscr_data = (SubscriptionData*)subscr_id;
 
-	bool failed = false;
+	int failed = false;
 	dx_suffix_t new_source;
-	bool found;
+	int found;
 	size_t index = 0;
 	dx_copy_string_len(new_source.suffix, source, DXF_RECORD_SUFFIX_SIZE);
 	if (subscr_data->order_source.elements == nullptr) {

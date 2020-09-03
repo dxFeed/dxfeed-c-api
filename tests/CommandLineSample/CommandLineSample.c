@@ -19,7 +19,6 @@
 #define LS2(s) L##s
 
 #ifndef true
-typedef int bool;
 
 #define true 1
 #define false 0
@@ -61,11 +60,11 @@ int _CRT_glob = 0;
 
 /* -------------------------------------------------------------------------- */
 #ifdef _WIN32
-static bool is_listener_thread_terminated = false;
+static int is_listener_thread_terminated = false;
 CRITICAL_SECTION listener_thread_guard;
 
-bool is_thread_terminate() {
-	bool res;
+int is_thread_terminate() {
+	int res;
 	EnterCriticalSection(&listener_thread_guard);
 	res = is_listener_thread_terminated;
 	LeaveCriticalSection(&listener_thread_guard);
@@ -73,9 +72,9 @@ bool is_thread_terminate() {
 	return res;
 }
 #else
-static volatile bool is_listener_thread_terminated = false;
-bool is_thread_terminate() {
-	bool res;
+static volatile int is_listener_thread_terminated = false;
+int is_thread_terminate() {
+	int res;
 	res = is_listener_thread_terminated;
 	return res;
 }
@@ -151,8 +150,15 @@ void print_timestamp(dxf_long_t timestamp){
 
 void listener(int event_type, dxf_const_string_t symbol_name,
 			const dxf_event_data_t* data, int data_count, void* user_data) {
+	static size_t max_len = 0;
 	dxf_int_t i = 0;
+	size_t len = wcslen(symbol_name);
+	if (len > max_len) {
+		max_len = len;
+		wprintf(L"\n\n\nmax len = %"LS(PRIX64)L", symbol = %ls\n\n\n", max_len, symbol_name);
 
+	}
+	return;
 	wprintf(L"%ls{symbol=%ls, ", dx_event_type_to_string(event_type), symbol_name);
 
 	if (event_type == DXF_ET_QUOTE) {
@@ -382,7 +388,7 @@ static event_type_data_t types_data[] = {
 
 static const int types_count = sizeof(types_data) / sizeof(types_data[0]);
 
-bool get_next_substring(OUT char** substring_start, OUT size_t* substring_length) {
+int get_next_substring(OUT char** substring_start, OUT size_t* substring_length) {
 	char* string = *substring_start;
 	char* sep_pos;
 	if (strlen(string) == 0)
@@ -401,7 +407,7 @@ bool get_next_substring(OUT char** substring_start, OUT size_t* substring_length
 	return true;
 }
 
-bool is_equal_type_names(event_type_data_t type_data, const char* type_name, size_t len) {
+int is_equal_type_names(event_type_data_t type_data, const char* type_name, size_t len) {
 #ifdef _WIN32
 	return strlen(type_data.name) == len && strnicmp(type_data.name, type_name, len) == 0;
 #else
@@ -409,7 +415,7 @@ bool is_equal_type_names(event_type_data_t type_data, const char* type_name, siz
 #endif
 }
 
-bool parse_event_types(char* types_string, OUT int* types_bitmask) {
+int parse_event_types(char* types_string, OUT int* types_bitmask) {
 	char* next_string = types_string;
 	size_t next_len = 0;
 	int i;
@@ -419,7 +425,7 @@ bool parse_event_types(char* types_string, OUT int* types_bitmask) {
 	}
 	*types_bitmask = 0;
 	while (get_next_substring(&next_string, &next_len)) {
-		bool is_found = false;
+		int is_found = false;
 		for (i = 0; i < types_count; i++) {
 			if (is_equal_type_names(types_data[i], (const char*)next_string, next_len)) {
 				*types_bitmask |= types_data[i].type;
@@ -443,7 +449,7 @@ void free_symbols(dxf_string_t* symbols, int symbol_count) {
 	free(symbols);
 }
 
-bool parse_symbols(char* symbols_string, OUT dxf_string_t** symbols, OUT int* symbol_count) {
+int parse_symbols(char* symbols_string, OUT dxf_string_t** symbols, OUT int* symbol_count) {
 	int count = 0;
 	char* next_string = symbols_string;
 	size_t next_len = 0;
@@ -506,7 +512,7 @@ dx_event_subscr_flag subscr_data_to_flags(char* subscr_data) {
 	return dx_esf_default;
 }
 
-bool atoi2 (char *str, int *result) {
+int atoi2 (char *str, int *result) {
 	if (str == NULL || str[0] == '\0' || result == NULL) {
 		return false;
 	}
@@ -574,14 +580,14 @@ int main (int argc, char* argv[]) {
 	char* dump_file_name = NULL;
 	char* token = NULL;
 	char* subscr_data = NULL;
-	bool log_data_transfer_flag = false;
+	int log_data_transfer_flag = false;
 	int program_timeout = 604800; // a week
 
 	if (argc > STATIC_PARAMS_COUNT) {
-		bool dump_filename_is_set = false;
-		bool token_is_set = false;
-		bool subscr_data_is_set = false;
-		bool program_timeout_is_set = false;
+		int dump_filename_is_set = false;
+		int token_is_set = false;
+		int subscr_data_is_set = false;
+		int program_timeout_is_set = false;
 
 		for (int i = STATIC_PARAMS_COUNT; i < argc; i++) {
 			if (dump_filename_is_set == false &&

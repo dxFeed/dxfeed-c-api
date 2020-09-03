@@ -66,11 +66,11 @@ static struct event_info_t event_info[EVENTS_COUNT] = { {DXF_ET_TRADE, trade_lis
 
 /* -------------------------------------------------------------------------- */
 
-static bool is_listener_thread_terminated = false;
+static int is_listener_thread_terminated = false;
 CRITICAL_SECTION listener_thread_guard;
 
-bool is_thread_terminate() {
-	bool res;
+int is_thread_terminate() {
+	int res;
 	EnterCriticalSection(&listener_thread_guard);
 	res = is_listener_thread_terminated;
 	LeaveCriticalSection(&listener_thread_guard);
@@ -333,7 +333,7 @@ dxf_subscription_t create_subscription(dxf_connection_t connection, int event_id
 }
 /* -------------------------------------------------------------------------- */
 
-bool initialize() {
+int initialize() {
 	return true;
 }
 
