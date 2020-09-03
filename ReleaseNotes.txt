@@ -1,3 +1,6 @@
+Version 6.0.0
+* [DXFC-191] Fixed a bug where crashes and memory corruption occurred when adding and removing symbols
+
 Version 5.13.0
 * [DXFC-189] Fixed bug with inability to receive (API does not publish) orders with Scope = Aggregate
 
