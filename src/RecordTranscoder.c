@@ -180,7 +180,7 @@ static const dxf_byte_t DX_GREEKS_INDEX_TIME_SHIFT = 32;
  *	Series calculation constants
  */
 /* -------------------------------------------------------------------------- */
-static const dxf_byte_t DX_SERIES_INDEX_TIME_SHIFT = 32;
+//static const dxf_byte_t DX_SERIES_INDEX_TIME_SHIFT = 32;
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -384,8 +384,8 @@ static int dx_trade_t_transcoder_impl(dx_record_transcoder_connection_context_t*
 		cur_event->scope = (exchange_code == 0 ? dxf_osc_composite : dxf_osc_regional);
 	}
 
-	return dx_process_event_data(context->connection, event_id, record_params->symbol_name,
-		record_params->symbol_cipher, event_buffer, record_count, event_params);
+	return dx_process_event_data(context->connection, event_id, record_params->symbol_name, event_buffer, record_count,
+								 event_params);
 }
 
 int RECORD_TRANSCODER_NAME(dx_trade_t) (dx_record_transcoder_connection_context_t* context,
@@ -432,8 +432,8 @@ int dx_transcode_quote_to_order_bid (dx_record_transcoder_connection_context_t* 
 		cur_event->market_maker = NULL;
 	}
 
-	return dx_process_event_data(context->connection, dx_eid_order, record_params->symbol_name,
-		record_params->symbol_cipher, event_buffer, record_count, event_params);
+	return dx_process_event_data(context->connection, dx_eid_order, record_params->symbol_name, event_buffer,
+								 record_count, event_params);
 }
 
 /* ---------------------------------- */
@@ -473,8 +473,8 @@ int dx_transcode_quote_to_order_ask (dx_record_transcoder_connection_context_t* 
 		cur_event->market_maker = NULL;
 	}
 
-	return dx_process_event_data(context->connection, dx_eid_order, record_params->symbol_name,
-		record_params->symbol_cipher, event_buffer, record_count, event_params);
+	return dx_process_event_data(context->connection, dx_eid_order, record_params->symbol_name, event_buffer,
+								 record_count, event_params);
 }
 
 /* ---------------------------------- */
@@ -512,8 +512,8 @@ int dx_transcode_quote (dx_record_transcoder_connection_context_t* context,
 		cur_event->scope = (exchange_code == 0 ? dxf_osc_composite : dxf_osc_regional);
 	}
 
-	return dx_process_event_data(context->connection, dx_eid_quote, record_params->symbol_name,
-		record_params->symbol_cipher, event_buffer, record_count, event_params);
+	return dx_process_event_data(context->connection, dx_eid_quote, record_params->symbol_name, event_buffer,
+								 record_count, event_params);
 }
 
 /* ---------------------------------- */
@@ -576,8 +576,8 @@ int RECORD_TRANSCODER_NAME(dx_summary_t) (dx_record_transcoder_connection_contex
 		cur_event->scope = (exchange_code == 0 ? dxf_osc_composite : dxf_osc_regional);
 	}
 
-	return dx_process_event_data(context->connection, dx_eid_summary, record_params->symbol_name,
-		record_params->symbol_cipher, event_buffer, record_count, event_params);
+	return dx_process_event_data(context->connection, dx_eid_summary, record_params->symbol_name, event_buffer,
+								 record_count, event_params);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -627,8 +627,8 @@ int RECORD_TRANSCODER_NAME(dx_profile_t) (dx_record_transcoder_connection_contex
 		cur_event->ssr = DX_PROFILE_GET_SSR(cur_record);
 	}
 
-	return dx_process_event_data(context->connection, dx_eid_profile, record_params->symbol_name,
-		record_params->symbol_cipher, event_buffer, record_count, event_params);
+	return dx_process_event_data(context->connection, dx_eid_profile, record_params->symbol_name, event_buffer,
+								 record_count, event_params);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -667,8 +667,8 @@ int dx_transcode_market_maker_to_order_bid (dx_record_transcoder_connection_cont
 		}
 	}
 
-	return dx_process_event_data(context->connection, dx_eid_order, record_params->symbol_name,
-		record_params->symbol_cipher, event_buffer, record_count, event_params);
+	return dx_process_event_data(context->connection, dx_eid_order, record_params->symbol_name, event_buffer,
+								 record_count, event_params);
 }
 
 /* ---------------------------------- */
@@ -707,8 +707,8 @@ int dx_transcode_market_maker_to_order_ask (dx_record_transcoder_connection_cont
 		}
 	}
 
-	return dx_process_event_data(context->connection, dx_eid_order, record_params->symbol_name,
-		record_params->symbol_cipher, event_buffer, record_count, event_params);
+	return dx_process_event_data(context->connection, dx_eid_order, record_params->symbol_name, event_buffer,
+								 record_count, event_params);
 }
 
 /* ---------------------------------- */
@@ -790,8 +790,8 @@ int RECORD_TRANSCODER_NAME(dx_order_t) (dx_record_transcoder_connection_context_
 		}
 	}
 
-	return dx_process_event_data(context->connection, dx_eid_order, record_params->symbol_name,
-		record_params->symbol_cipher, event_buffer, record_count, event_params);
+	return dx_process_event_data(context->connection, dx_eid_order, record_params->symbol_name, event_buffer,
+								 record_count, event_params);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -850,8 +850,8 @@ int RECORD_TRANSCODER_NAME(dx_time_and_sale_t) (dx_record_transcoder_connection_
 		cur_event->scope = (exchange_code == 0 ? dxf_osc_composite : dxf_osc_regional);
 	}
 
-	return dx_process_event_data(context->connection, dx_eid_time_and_sale, record_params->symbol_name,
-		record_params->symbol_cipher, event_buffer, record_count, event_params);
+	return dx_process_event_data(context->connection, dx_eid_time_and_sale, record_params->symbol_name, event_buffer,
+								 record_count, event_params);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -887,8 +887,8 @@ int RECORD_TRANSCODER_NAME(dx_candle_t) (dx_record_transcoder_connection_context
 		cur_event->imp_volatility = cur_record->imp_volatility;
 	}
 
-	return dx_process_event_data(context->connection, dx_eid_candle, record_params->symbol_name,
-		record_params->symbol_cipher, event_buffer, record_count, event_params);
+	return dx_process_event_data(context->connection, dx_eid_candle, record_params->symbol_name, event_buffer,
+								 record_count, event_params);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -940,8 +940,8 @@ int RECORD_TRANSCODER_NAME(dx_spread_order_t) (dx_record_transcoder_connection_c
 		}
 	}
 
-	return dx_process_event_data(context->connection, dx_eid_spread_order, record_params->symbol_name,
-		record_params->symbol_cipher, event_buffer, record_count, event_params);
+	return dx_process_event_data(context->connection, dx_eid_spread_order, record_params->symbol_name, event_buffer,
+								 record_count, event_params);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -972,8 +972,8 @@ int RECORD_TRANSCODER_NAME(dx_greeks_t) (dx_record_transcoder_connection_context
 		cur_event->vega = cur_record->vega;
 	}
 
-	return dx_process_event_data(context->connection, dx_eid_greeks, record_params->symbol_name,
-		record_params->symbol_cipher, event_buffer, record_count, event_params);
+	return dx_process_event_data(context->connection, dx_eid_greeks, record_params->symbol_name, event_buffer,
+								 record_count, event_params);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -989,8 +989,8 @@ int RECORD_TRANSCODER_NAME(dx_theo_price_t) (dx_record_transcoder_connection_con
 		cur_event->time = DX_TIME_FIELD_TO_MS(cur_event->time);
 	}
 
-	return dx_process_event_data(context->connection, dx_eid_theo_price, record_params->symbol_name,
-		record_params->symbol_cipher, event_buffer, record_count, event_params);
+	return dx_process_event_data(context->connection, dx_eid_theo_price, record_params->symbol_name, event_buffer,
+								 record_count, event_params);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1001,8 +1001,8 @@ int RECORD_TRANSCODER_NAME(dx_underlying_t) (dx_record_transcoder_connection_con
 										dx_underlying_t* record_buffer, int record_count) {
 	dxf_underlying_t* event_buffer = (dxf_underlying_t*)record_buffer;
 
-	return dx_process_event_data(context->connection, dx_eid_underlying, record_params->symbol_name,
-		record_params->symbol_cipher, event_buffer, record_count, event_params);
+	return dx_process_event_data(context->connection, dx_eid_underlying, record_params->symbol_name, event_buffer,
+								 record_count, event_params);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1033,8 +1033,8 @@ int RECORD_TRANSCODER_NAME(dx_series_t) (dx_record_transcoder_connection_context
 		cur_event->interest = cur_record->interest;
 	}
 
-	return dx_process_event_data(context->connection, dx_eid_series, record_params->symbol_name,
-		record_params->symbol_cipher, event_buffer, record_count, event_params);
+	return dx_process_event_data(context->connection, dx_eid_series, record_params->symbol_name, event_buffer,
+								 record_count, event_params);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1061,8 +1061,8 @@ int RECORD_TRANSCODER_NAME(dx_configuration_t) (dx_record_transcoder_connection_
 		}
 	}
 
-	return dx_process_event_data(context->connection, dx_eid_configuration, record_params->symbol_name,
-		record_params->symbol_cipher, event_buffer, record_count, event_params);
+	return dx_process_event_data(context->connection, dx_eid_configuration, record_params->symbol_name, event_buffer,
+								 record_count, event_params);
 }
 
 /* -------------------------------------------------------------------------- */

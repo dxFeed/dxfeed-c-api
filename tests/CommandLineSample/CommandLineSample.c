@@ -150,15 +150,7 @@ void print_timestamp(dxf_long_t timestamp){
 
 void listener(int event_type, dxf_const_string_t symbol_name,
 			const dxf_event_data_t* data, int data_count, void* user_data) {
-	static size_t max_len = 0;
 	dxf_int_t i = 0;
-	size_t len = wcslen(symbol_name);
-	if (len > max_len) {
-		max_len = len;
-		wprintf(L"\n\n\nmax len = %"LS(PRIX64)L", symbol = %ls\n\n\n", max_len, symbol_name);
-
-	}
-	return;
 	wprintf(L"%ls{symbol=%ls, ", dx_event_type_to_string(event_type), symbol_name);
 
 	if (event_type == DXF_ET_QUOTE) {

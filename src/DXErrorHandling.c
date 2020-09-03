@@ -90,8 +90,6 @@ dx_error_function_result_t dx_set_last_error_impl(dx_error_code_t error_code, in
 
 		res = dx_efr_success;
 	} else {
-		if (error_code)
-
 		res = dx_check_error_code(error_code);
 	}
 

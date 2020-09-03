@@ -40,9 +40,8 @@ typedef enum {
     
     dx_ec_success = 0,
     
-    dx_ec_error_subsystem_failure, /* this code may be set if passed from another thread */
-    
-    dx_ec_invalid_func_param, /* the invalid param is submitted by client */
+    dx_ec_error_subsystem_failure,     /* this code may be set if passed from another thread */
+    dx_ec_invalid_func_param,          /* the invalid param is submitted by client */
     dx_ec_invalid_func_param_internal, /* the invalid param is a result of internal error */
     
     dx_ec_internal_assert_violation,
@@ -53,8 +52,8 @@ typedef enum {
     
     /* socket error codes */
     
-    dx_sec_socket_subsystem_init_failed, /* Win32-specific */
-    dx_sec_socket_subsystem_init_required, /* Win32-specific */
+    dx_sec_socket_subsystem_init_failed,          /* Win32-specific */
+    dx_sec_socket_subsystem_init_required,        /* Win32-specific */
     dx_sec_socket_subsystem_incompatible_version, /* Win32-specific */
     dx_sec_connection_gracefully_closed,
     dx_sec_network_is_down,
@@ -196,7 +195,7 @@ typedef enum {
     dx_csdec_unsupported_version,
     
     /* miscellaneous error codes */
-    
+
     /* error code count */
     /* this MUST be the last element in the enumeration */
     
