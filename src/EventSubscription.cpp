@@ -413,15 +413,6 @@ int dx_clear_symbol_array(EventSubscriptionConnectionContext* context,
 
 /* -------------------------------------------------------------------------- */
 
-int dx_listener_comparator(ListenerContext e1, ListenerContext e2) {
-	ListenerPtr l1 = e1.getListener();
-	ListenerPtr l2 = e2.getListener();
-
-	return DX_NUMERIC_COMPARATOR(l1, l2);
-}
-
-/* -------------------------------------------------------------------------- */
-
 SymbolData* dx_find_symbol(EventSubscriptionConnectionContext* context, dxf_const_string_t symbol_name) {
 	auto found = context->symbols.find(std::wstring(symbol_name));
 
