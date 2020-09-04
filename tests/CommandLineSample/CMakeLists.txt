@@ -71,12 +71,6 @@ add_executable(${PROJECT} ${SOURCE_FILES})
 
 set(ADDITIONAL_LIBRARIES "")
 
-if (CMAKE_COMPILER_IS_GNUCC)
-    if (NOT DISABLE_TLS)
-        set(ADDITIONAL_LIBRARIES ${ADDITIONAL_LIBRARIES} tls ssl crypto)
-    endif (NOT DISABLE_TLS)
-endif (CMAKE_COMPILER_IS_GNUCC)
-
 target_link_libraries(${PROJECT} DXFeed ${ADDITIONAL_LIBRARIES})
 
 set_target_properties(${PROJECT} 

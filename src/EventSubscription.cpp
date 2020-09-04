@@ -201,6 +201,8 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_event_subscription) {
 		return false;
 	}
 
+	context->symbols = std::unordered_map<std::wstring, SymbolData*>();
+	context->subscriptions = std::unordered_set<SubscriptionData*>();
 	context->set_fields_flags |= MUTEX_FIELD_FLAG;
 
 	if (!dx_set_subsystem_data(connection, dx_ccs_event_subscription, context)) {
@@ -442,23 +444,6 @@ int dx_add_subscription_to_context(SubscriptionData* subscr_data) {
 
 /* -------------------------------------------------------------------------- */
 
-int dx_remove_subscription_from_context(SubscriptionData* subscr_data) {
-	auto subscriptions = &(CTX(subscr_data->connection_context)->subscriptions);
-	auto found_subscription_data = subscriptions->find(subscr_data);
-
-	if (found_subscription_data == subscriptions->end()) {
-		/* should never be here */
-
-		return dx_set_error_code(dx_ec_internal_assert_violation);
-	}
-
-	subscriptions->erase(found_subscription_data);
-
-	return true;
-}
-
-/* -------------------------------------------------------------------------- */
-
 void dx_free_event_subscription_data(SubscriptionData* subscr_data) {
 	if (subscr_data == nullptr) {
 		return;
@@ -562,10 +547,6 @@ int dx_close_event_subscription(dxf_subscription_t subscr_id) {
 
 	res = dx_clear_symbol_array(context, subscr_data->symbols, subscr_data) && res;
 	subscr_data->listeners.clear();
-
-	if (!dx_remove_subscription_from_context(subscr_data)) {
-		res = false;
-	}
 
 	res = dx_mutex_unlock(&(context->subscr_guard)) && res;
 
