@@ -891,7 +891,7 @@ DXFEED_API ERRORCODE dxf_delete_candle_symbol_attributes(dxf_candle_attributes_t
  *          For order events (event_id is 'dx_eid_order')
  *          If source is NULL string subscription on Order event will be performed. You can specify order
  *          source for Order event by passing suffix: "BYX", "BZX", "DEA", "DEX", "ISE", "IST", "NTV" etc.
- *          If source is equal to "COMPOSITE_BID" or "COMPOSITE_ASK" subscription on MarketMaker event will
+ *          If source is equal to "AGGREGATE_BID" or "AGGREGATE_ASK" subscription on MarketMaker event will
  *          be performed. For other events source parameter does not matter.
  *
  * @param[in] connection A handle of a previously created connection which the subscription will be using
@@ -901,7 +901,7 @@ DXFEED_API ERRORCODE dxf_delete_candle_symbol_attributes(dxf_candle_attributes_t
  * @param[in] source     Order source for Order, which can be one of following: "NTV", "ntv", "NFX", "ESPD", "XNFI",
  *                       "ICE", "ISE", "DEA", "DEX", "BYX", "BZX", "BATE", "CHIX", "CEUX", "BXTR", "IST", "BI20",
  *                       "ABE", "FAIR", "GLBX", "glbx", "ERIS", "XEUR", "xeur", "CFE", "C2OX", "SMFE".
- *                       For MarketMaker subscription use "COMPOSITE_BID" or "COMPOSITE_ASK" keyword.
+ *                       For MarketMaker subscription use "AGGREGATE_BID" or "AGGREGATE_ASK" keyword.
  * @param[in] time       Time in the past (unix time in milliseconds).
  * @param[out] snapshot  A handle of the created snapshot
  *
@@ -920,7 +920,7 @@ DXFEED_API ERRORCODE dxf_create_snapshot(dxf_connection_t connection, dx_event_i
  *
  * @details If source is NULL string subscription on Order event will be performed. You can specify order
  *          source for Order event by passing suffix: "BYX", "BZX", "DEA", "DEX", "ISE", "IST", "NTV" etc.
- *          If source is equal to "COMPOSITE_BID" or "COMPOSITE_ASK" subscription on MarketMaker event will
+ *          If source is equal to "AGGREGATE_BID" or "AGGREGATE_ASK" subscription on MarketMaker event will
  *          be performed.
  *
  * @param[in] connection A handle of a previously created connection which the subscription will be using
@@ -928,7 +928,7 @@ DXFEED_API ERRORCODE dxf_create_snapshot(dxf_connection_t connection, dx_event_i
  * @param[in] source     Order source for Order, which can be one of following: "NTV", "ntv", "NFX", "ESPD", "XNFI",
  *                       "ICE", "ISE", "DEA", "DEX", "BYX", "BZX", "BATE", "CHIX", "CEUX", "BXTR", "IST", "BI20",
  *                       "ABE", "FAIR", "GLBX", "glbx", "ERIS", "XEUR", "xeur", "CFE", "C2OX", "SMFE".
- *                       For MarketMaker subscription use "COMPOSITE_BID" or "COMPOSITE_ASK" keyword.
+ *                       For MarketMaker subscription use "AGGREGATE_BID" or "AGGREGATE_ASK" keyword.
  * @param[in] time       Time in the past (unix time in milliseconds)
  * @param[out] snapshot  A handle of the created snapshot
  *
