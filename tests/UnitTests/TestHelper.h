@@ -106,7 +106,6 @@ const char *get_event_counter_name(event_counter_data_ptr_t counter_data);
 #define DX_IS_EQUAL_FUNCTION_DECLARATION_A(type, alias) int dx_is_equal_##alias##(type expected, type actual)
 
 DX_IS_EQUAL_FUNCTION_DECLARATION(int);
-DX_IS_EQUAL_FUNCTION_DECLARATION(int);
 DX_IS_EQUAL_FUNCTION_DECLARATION(ERRORCODE);
 DX_IS_EQUAL_FUNCTION_DECLARATION(dxf_const_string_t);
 DX_IS_EQUAL_FUNCTION_DECLARATION(dxf_string_t);

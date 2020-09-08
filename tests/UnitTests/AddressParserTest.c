@@ -128,13 +128,13 @@ static int dx_is_equal_address(const dx_address_t* expected, const dx_address_t*
 	DX_CHECK(dx_is_equal_ansi(expected->username, actual->username));
 	DX_CHECK(dx_is_equal_ansi(expected->password, actual->password));
 
-	DX_CHECK(dx_is_equal_bool(expected->tls.enabled, actual->tls.enabled));
+	DX_CHECK(dx_is_equal_int(expected->tls.enabled, actual->tls.enabled));
 	DX_CHECK(dx_is_equal_ansi(expected->tls.key_store, actual->tls.key_store));
 	DX_CHECK(dx_is_equal_ansi(expected->tls.key_store_password, actual->tls.key_store_password));
 	DX_CHECK(dx_is_equal_ansi(expected->tls.trust_store, actual->tls.trust_store));
 	DX_CHECK(dx_is_equal_ansi(expected->tls.trust_store_password, actual->tls.trust_store_password));
 
-	DX_CHECK(dx_is_equal_bool(expected->gzip.enabled, actual->gzip.enabled));
+	DX_CHECK(dx_is_equal_int(expected->gzip.enabled, actual->gzip.enabled));
 	return true;
 }
 
@@ -164,7 +164,7 @@ static int get_addresses_from_collection_test(void) {
 		dx_address_array_t actual = DX_EMPTY_ARRAY;
 		dx_test_case_t c = all_cases[i];
 		dx_pop_last_error();
-		DX_CHECK_MESSAGE(dx_is_equal_bool(c.result, dx_get_addresses_from_collection(c.collection, &actual)), c.collection);
+		DX_CHECK_MESSAGE(dx_is_equal_int(c.result, dx_get_addresses_from_collection(c.collection, &actual)), c.collection);
 		if (c.result)
 			DX_CHECK(dx_is_equal_address_array((const dx_address_array_t*)&c.expected, (const dx_address_array_t*)&actual));
 		dx_clear_address_array(&actual);

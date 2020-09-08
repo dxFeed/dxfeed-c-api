@@ -263,9 +263,9 @@ int subscription_time_test(void) {
 		}
 	}
 
-	if (!dx_is_equal_bool(false, dx_create_subscription_time(NULL, record_id, TIME_STAMP, OUT &subscription_time)) ||
-		!dx_is_equal_bool(false, dx_create_subscription_time(dscc, -1, TIME_STAMP, OUT &subscription_time)) ||
-		!dx_is_equal_bool(false, dx_create_subscription_time(dscc, record_id, TIME_STAMP, NULL))) {
+	if (!dx_is_equal_int(false, dx_create_subscription_time(NULL, record_id, TIME_STAMP, OUT &subscription_time)) ||
+		!dx_is_equal_int(false, dx_create_subscription_time(dscc, -1, TIME_STAMP, OUT &subscription_time)) ||
+		!dx_is_equal_int(false, dx_create_subscription_time(dscc, record_id, TIME_STAMP, NULL))) {
 		return false;
 	}
 
