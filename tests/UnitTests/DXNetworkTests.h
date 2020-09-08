@@ -3,6 +3,6 @@
 
 #include "PrimitiveTypes.h"
 
-bool network_all_test(void);
+int network_all_test(void);
 
 #endif /* DXNETWORK_TESTS_H_INCLUDED */

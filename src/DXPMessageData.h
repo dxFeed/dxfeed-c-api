@@ -74,9 +74,9 @@ typedef enum {
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_is_message_type_valid (int type);
-bool dx_is_data_message (int type);
-bool dx_is_subscription_message (int type);
+int dx_is_message_type_valid (int type);
+int dx_is_data_message (int type);
+int dx_is_subscription_message (int type);
 
 /* -------------------------------------------------------------------------- */
 /*

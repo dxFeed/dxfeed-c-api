@@ -102,7 +102,7 @@ dxf_int_t dx_surrogates_to_code_point (dxf_char_t high, dxf_char_t low) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_code_point_to_utf16_chars (dxf_int_t code_point, dxf_string_t dest_buffer, int dest_buffer_pos, int dest_buffer_length, OUT int* result) {
+int dx_code_point_to_utf16_chars (dxf_int_t code_point, dxf_string_t dest_buffer, int dest_buffer_pos, int dest_buffer_length, OUT int* result) {
 	if (code_point < 0 || code_point > MAX_CODE_POINT || dest_buffer == NULL || result == NULL) {
 		return dx_set_error_code(dx_ec_invalid_func_param_internal);
 	}

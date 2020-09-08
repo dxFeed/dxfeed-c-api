@@ -163,7 +163,7 @@
 #define UNSIGNED_RIGHT_SHIFT(value, offset, type) \
 	((type)((UNSIGNED_TYPE(type))value >> offset))
 
-bool dx_is_only_single_bit_set (int value);
+int dx_is_only_single_bit_set (int value);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -473,7 +473,7 @@ size_t dx_random_size(size_t max_value);
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_capacity_manager_halfer (size_t new_size, size_t* capacity);
+int dx_capacity_manager_halfer (size_t new_size, size_t* capacity);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -494,7 +494,7 @@ dxf_string_t dx_create_string_src_len (dxf_const_string_t src, size_t len);
 dxf_string_t dx_copy_string (dxf_string_t dest, dxf_const_string_t src);
 dxf_string_t dx_copy_string_len(dxf_string_t dest, dxf_const_string_t src, size_t len);
 size_t dx_string_length(dxf_const_string_t str);
-bool dx_string_null_or_empty(dxf_const_string_t str);
+int dx_string_null_or_empty(dxf_const_string_t str);
 int dx_compare_strings (dxf_const_string_t s1, dxf_const_string_t s2);
 int dx_compare_strings_num (dxf_const_string_t s1, dxf_const_string_t s2, size_t num);
 dxf_char_t dx_toupper (dxf_char_t c);
@@ -544,8 +544,8 @@ dxf_int_t dx_get_millis_from_time(dxf_long_t millis);
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_base64_encode(const char* in, size_t in_len, char* out, size_t out_len);
-bool dx_base64_decode(const char* in, size_t in_len, char* out, size_t *out_len);
+int dx_base64_encode(const char* in, size_t in_len, char* out, size_t out_len);
+int dx_base64_decode(const char* in, size_t in_len, char* out, size_t *out_len);
 size_t dx_base64_length(size_t in_len);
 
 #ifdef _WIN32

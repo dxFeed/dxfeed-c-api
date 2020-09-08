@@ -79,7 +79,7 @@ void dx_free_string_buffers_impl (dx_string_array_t* string_buffers);
 void dx_free_byte_array_buffers_impl(dx_byte_buffer_array_t* byte_array_buffers);
 
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_record_buffers) {
-	bool res = true;
+	int res = true;
 	dx_record_buffers_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_record_buffers, &res);
 
 	if (context == NULL) {
@@ -232,13 +232,13 @@ void dx_clear_record_buffers (dx_event_record_buffer_t* record_buffers) {
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_store_string_buffer (void* context, dxf_const_string_t buf) {
+int dx_store_string_buffer (void* context, dxf_const_string_t buf) {
 	return dx_string_array_add(&(CTX(context)->string_buffers), buf);
 }
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_store_byte_array_buffer(void* context, dxf_byte_array_t buf) {
+int dx_store_byte_array_buffer(void* context, dxf_byte_array_t buf) {
 	return dx_byte_buffer_array_add(&(CTX(context)->byte_array_buffers), buf);
 }
 

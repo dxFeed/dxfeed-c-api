@@ -32,10 +32,10 @@
 
 typedef struct {
 	int listener_call_counter;
-	bool result;
+	int result;
 } dx_snap_test_state_t;
 
-bool play_events(dxf_connection_t connection, dxf_snapshot_t snapshot, dxf_order_t* events, size_t size) {
+int play_events(dxf_connection_t connection, dxf_snapshot_t snapshot, dxf_order_t* events, size_t size) {
 	size_t i;
 	dxf_string_t symbol = dx_get_snapshot_symbol(snapshot);
 	dxf_int_t symbol_code = dx_encode_symbol_name(symbol);
@@ -52,7 +52,7 @@ bool play_events(dxf_connection_t connection, dxf_snapshot_t snapshot, dxf_order
 	return true;
 }
 
-bool snapshot_test_runner(dxf_order_t* events, size_t size, dxf_snapshot_listener_t listener, int expected_listener_call_count) {
+int snapshot_test_runner(dxf_order_t* events, size_t size, dxf_snapshot_listener_t listener, int expected_listener_call_count) {
 	dxf_connection_t connection;
 	dxf_subscription_t subscription;
 	dxf_snapshot_t snapshot;
@@ -92,9 +92,9 @@ bool snapshot_test_runner(dxf_order_t* events, size_t size, dxf_snapshot_listene
 }
 
 //Compare snapshots by index and size
-bool dx_compare_snapshots(const dxf_snapshot_data_ptr_t snapshot_data, dxf_order_t* test_snap_data, size_t test_snap_size) {
+int dx_compare_snapshots(const dxf_snapshot_data_ptr_t snapshot_data, dxf_order_t* test_snap_data, size_t test_snap_size) {
 	size_t i;
-	bool res = true;
+	int res = true;
 	dxf_order_t* order_records = (dxf_order_t*)snapshot_data->records;
 	if (!dx_is_equal_size_t(test_snap_size, snapshot_data->records_count)) {
 		return false;
@@ -139,7 +139,7 @@ void simple_test_listener(const dxf_snapshot_data_ptr_t snapshot_data, void* use
  * Test
  * Simulates a simple receiving of snapshot data with two zero-events.
  */
-bool snapshot_simple_test(void) {
+int snapshot_simple_test(void) {
 	return snapshot_test_runner(simple_test_data, SIZE_OF_ARRAY(simple_test_data), simple_test_listener, 1);
 }
 
@@ -159,7 +159,7 @@ void empty_test_listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user
  * Test
  * Simulates receiving of empty snapshot.
  */
-bool snapshot_empty_test(void) {
+int snapshot_empty_test(void) {
 	return snapshot_test_runner(empty_test_data, SIZE_OF_ARRAY(empty_test_data), empty_test_listener, 1);
 }
 
@@ -248,7 +248,7 @@ void update_test_listener(const dxf_snapshot_data_ptr_t snapshot_data, void* use
  * Test
  * Simulates various variants of update.
  */
-bool snapshot_update_test(void) {
+int snapshot_update_test(void) {
 	return snapshot_test_runner(update_test_data, SIZE_OF_ARRAY(update_test_data), update_test_listener, 5);
 }
 
@@ -327,7 +327,7 @@ void bid_ask_test_listener(const dxf_snapshot_data_ptr_t snapshot_data, void* us
  * Simulates the changing max bid and min ask values via update. This test
  * checks correctness of the bid ask data after update.
  */
-bool snapshot_bid_ask_test(void) {
+int snapshot_bid_ask_test(void) {
 	return snapshot_test_runner(bid_ask_test_data, SIZE_OF_ARRAY(bid_ask_test_data), bid_ask_test_listener, 2);
 }
 
@@ -363,7 +363,7 @@ void duplicate_index_test_listener(const dxf_snapshot_data_ptr_t snapshot_data, 
  * Test
  * Simulates duplicated indexes in snapshot transmission.
  */
-bool snapshot_duplicate_index_test(void) {
+int snapshot_duplicate_index_test(void) {
 	return snapshot_test_runner(duplicate_index_test_data, SIZE_OF_ARRAY(duplicate_index_test_data), duplicate_index_test_listener, 1);
 }
 
@@ -398,7 +398,7 @@ void buildin_update_test_listener(const dxf_snapshot_data_ptr_t snapshot_data, v
  * Test
  * Simulates start of update before SNAPSHOT_END flag transmitted.
  */
-bool snapshot_buildin_update_test(void) {
+int snapshot_buildin_update_test(void) {
 	return snapshot_test_runner(buildin_update_test_data, SIZE_OF_ARRAY(buildin_update_test_data), buildin_update_test_listener, 1);
 }
 
@@ -443,14 +443,14 @@ typedef struct {
 /*
  * Test
  */
-bool snapshot_key_test(void) {
+int snapshot_key_test(void) {
 	size_t record_index;
 	size_t symbol_index;
 	size_t source_index;
 	dxf_ulong_t key;
 	snapshot_key_array_t all_keys = DX_EMPTY_ARRAY;
-	bool found = false;
-	bool error = false;
+	int found = false;
+	int error = false;
 	size_t position = 0;
 	for (record_index = 0; record_index < g_record_info_ids_count; record_index++) {
 		for (symbol_index = 0; symbol_index < g_symbols_count; symbol_index++) {
@@ -491,12 +491,12 @@ typedef struct {
 /*
  * Test
  */
-bool symbol_name_hasher_test(void) {
+int symbol_name_hasher_test(void) {
 	size_t symbol_index;
 	dxf_int_t hash;
 	hashs_array_t all_hashs = DX_EMPTY_ARRAY;
-	bool found = false;
-	bool error = false;
+	int found = false;
+	int error = false;
 	size_t position = 0;
 	for (symbol_index = 0; symbol_index < g_symbols_count; symbol_index++) {
 		dxf_const_string_t symbol = g_symbols[symbol_index];
@@ -523,8 +523,8 @@ bool symbol_name_hasher_test(void) {
 
 /* -------------------------------------------------------------------------- */
 
-bool snapshot_all_unit_test(void) {
-	bool res = true;
+int snapshot_all_unit_test(void) {
+	int res = true;
 
 	if (!snapshot_simple_test() ||
 		!snapshot_empty_test() ||

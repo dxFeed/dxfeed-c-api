@@ -11,14 +11,14 @@
 #include "CandleTest.h"
 #include "SnapshotTests.h"
 
-typedef bool(*test_function_t)(void);
+typedef int(*test_function_t)(void);
 
 typedef struct {
 	const char* name;
 	test_function_t function;
 } test_function_data_t;
 
-const char* result_to_text (bool res) {
+const char* result_to_text (int res) {
 	if (res) {
 		return "OK";
 	} else {
@@ -49,10 +49,10 @@ void print_usage() {
 		printf("   %s\n", g_tests[i].name);
 }
 
-bool run_test(const char* test_name) {
+int run_test(const char* test_name) {
 	int i;
-	bool result = true;
-	bool test_complete = false;
+	int result = true;
+	int test_complete = false;
 	for (i = 0; i < TESTS_COUNT; i++) {
 		if (test_name == NULL || stricmp(test_name, g_tests[i].name) == 0) {
 			printf("\t%-35s:\r", g_tests[i].name);
@@ -70,7 +70,7 @@ bool run_test(const char* test_name) {
 
 int main (int argc, char* argv[]) {
 	int i;
-	bool result = true;
+	int result = true;
 
 	print_usage();
 

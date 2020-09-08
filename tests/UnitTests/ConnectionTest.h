@@ -3,6 +3,6 @@
 
 #include "PrimitiveTypes.h"
 
-bool connection_all_test(void);
+int connection_all_test(void);
 
 #endif /* CONNECTION_TEST_H_INCLUDED */

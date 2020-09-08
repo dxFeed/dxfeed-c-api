@@ -14,6 +14,7 @@ set(POSTFIX "")
 set(PLATFORM_POSTFIX "")
 set(LIB_TLS ${CMAKE_CURRENT_SOURCE_DIR}/../lib/libressl)
 set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED on)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -144,7 +145,7 @@ set(SOURCE_FILES
     DXThreads.c
     EventData.c
     EventManager.c
-    EventSubscription.c
+        EventSubscription.cpp
     Logger.c
     ObjectArray.c
     PriceLevelBook.c
@@ -179,9 +180,12 @@ set(ADDITIONAL_LIBRARIES "")
 if (WIN32)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE -D_USRDLL -DDXFEED_EXPORTS)
     if (MSVC)
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /Gd /TC /Zc:wchar_t /Zc:forScope /Gm- /W3 /Ob0")
-        set(CMAKE_C_FLAGS_DEBUG "/TC /RTC1 /MTd /Od")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /Gd /Zc:wchar_t /Zc:forScope /Gm- /W3 /Ob0")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Gd /Zc:wchar_t /Zc:forScope /Gm- /W3 /Ob0")
+        set(CMAKE_C_FLAGS_DEBUG "/RTC1 /MTd /Od")
+        set(CMAKE_CXX_FLAGS_DEBUG "/MTd /Od")
         set(CMAKE_C_FLAGS_RELEASE "/O2 /MT /Zi")
+        set(CMAKE_CXX_FLAGS_RELEASE "/O2 /MT /Zi")
         set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF")
         set(ADDITIONAL_LIBRARIES ${ADDITIONAL_LIBRARIES} ws2_32.lib)
 

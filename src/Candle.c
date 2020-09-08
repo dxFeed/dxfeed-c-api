@@ -135,10 +135,10 @@ DXFEED_API ERRORCODE dxf_delete_candle_symbol_attributes(dxf_candle_attributes_t
 	return DXF_SUCCESS;
 }
 
-bool dx_candle_symbol_to_string(dxf_candle_attributes_t _attr, OUT dxf_string_t* string) {
+int dx_candle_symbol_to_string(dxf_candle_attributes_t _attr, OUT dxf_string_t* string) {
 	dx_candle_attributes_data_t *attributes = _attr;
 	dxf_char_t buffer_str[1000];
-	bool put_comma = false;
+	int put_comma = false;
 
 	if (attributes == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param_internal);

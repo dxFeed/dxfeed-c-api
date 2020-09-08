@@ -67,7 +67,7 @@ void dx_mark_thread_master (void) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_is_thread_master (void) {
+int dx_is_thread_master (void) {
 	return dx_compare_threads(dx_get_thread_id(), g_master_thread_id);
 }
 
@@ -78,7 +78,7 @@ bool dx_is_thread_master (void) {
 /* -------------------------------------------------------------------------- */
 
 #ifdef USE_PTHREADS
-bool dx_thread_create (dx_thread_t* thread_id, const pthread_attr_t* attr,
+int dx_thread_create (dx_thread_t* thread_id, const pthread_attr_t* attr,
 					dx_start_routine_t start_routine, void *arg) {
 	int res = pthread_create(thread_id, attr, start_routine, arg);
 
@@ -98,7 +98,7 @@ bool dx_thread_create (dx_thread_t* thread_id, const pthread_attr_t* attr,
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_wait_for_thread (dx_thread_t thread_id, void **value_ptr) {
+int dx_wait_for_thread (dx_thread_t thread_id, void **value_ptr) {
 	int res = pthread_join(thread_id, value_ptr);
 
 	switch (res) {
@@ -117,7 +117,7 @@ bool dx_wait_for_thread (dx_thread_t thread_id, void **value_ptr) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_close_thread_handle (dx_thread_t thread_id) {
+int dx_close_thread_handle (dx_thread_t thread_id) {
 	int res = pthread_detach(thread_id);
 
 	switch (res) {
@@ -136,7 +136,7 @@ bool dx_close_thread_handle (dx_thread_t thread_id) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_thread_data_key_create (dx_key_t* key, void (*destructor)(void*)) {
+int dx_thread_data_key_create (dx_key_t* key, void (*destructor)(void*)) {
 	int res = pthread_key_create(key, destructor);
 
 	switch (res) {
@@ -153,7 +153,7 @@ bool dx_thread_data_key_create (dx_key_t* key, void (*destructor)(void*)) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_thread_data_key_destroy (dx_key_t key) {
+int dx_thread_data_key_destroy (dx_key_t key) {
 	int res = pthread_key_delete(key);
 
 	switch (res) {
@@ -168,7 +168,7 @@ bool dx_thread_data_key_destroy (dx_key_t key) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_set_thread_data (dx_key_t key, const void* data) {
+int dx_set_thread_data (dx_key_t key, const void* data) {
 	int res = pthread_setspecific(key, data);
 
 	switch (res) {
@@ -197,13 +197,13 @@ dx_thread_t dx_get_thread_id () {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_compare_threads (dx_thread_t t1, dx_thread_t t2) {
+int dx_compare_threads (dx_thread_t t1, dx_thread_t t2) {
 	return (pthread_equal(t1, t2) != 0);
 }
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_mutex_create (dx_mutex_t* mutex) {
+int dx_mutex_create (dx_mutex_t* mutex) {
 	int res = pthread_mutexattr_init(&mutex->attr);
 
 	switch (res) {
@@ -242,7 +242,7 @@ bool dx_mutex_create (dx_mutex_t* mutex) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_mutex_destroy (dx_mutex_t* mutex) {
+int dx_mutex_destroy (dx_mutex_t* mutex) {
 	int res = pthread_mutex_destroy(&mutex->mutex);
 
 	switch (res) {
@@ -270,7 +270,7 @@ bool dx_mutex_destroy (dx_mutex_t* mutex) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_mutex_lock (const dx_mutex_t* mutex) {
+int dx_mutex_lock (const dx_mutex_t* mutex) {
 	int res = pthread_mutex_lock(&mutex->mutex);
 	switch (res) {
 	case EINVAL:
@@ -288,7 +288,7 @@ bool dx_mutex_lock (const dx_mutex_t* mutex) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_mutex_unlock (const dx_mutex_t* mutex) {
+int dx_mutex_unlock (const dx_mutex_t* mutex) {
 	int res = pthread_mutex_unlock(&mutex->mutex);
 	switch (res) {
 	case EINVAL:
@@ -309,7 +309,7 @@ bool dx_mutex_unlock (const dx_mutex_t* mutex) {
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_set_thread_data_no_ehm (dx_key_t key, const void* data) {
+int dx_set_thread_data_no_ehm (dx_key_t key, const void* data) {
 	return (pthread_setspecific(key, data) == 0);
 }
 
@@ -412,8 +412,12 @@ void dx_init_threads() {
 
 /* Public API */
 
-bool dx_thread_create (dx_thread_t* thread_id, const pthread_attr_t* attr,
-					dx_start_routine_t start_routine, void *arg) {
+#if defined(_WIN32)
+int dx_thread_create (dx_thread_t* thread_id, const void* attr, dx_start_routine_t start_routine, void *arg)
+#else
+int dx_thread_create (dx_thread_t* thread_id, const pthread_attr_t* attr, dx_start_routine_t start_routine, void *arg)
+#endif
+{
 	dx_thread_wrapper_args_t *wargs = dx_calloc(1, sizeof(*wargs));
 
 	wargs->start_routine = start_routine;
@@ -437,7 +441,7 @@ bool dx_thread_create (dx_thread_t* thread_id, const pthread_attr_t* attr,
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_wait_for_thread (dx_thread_t thread_id, void **value_ptr) {
+int dx_wait_for_thread (dx_thread_t thread_id, void **value_ptr) {
 	int res;
 	res = WaitForSingleObject(thread_id, INFINITE);
 
@@ -459,7 +463,7 @@ bool dx_wait_for_thread (dx_thread_t thread_id, void **value_ptr) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_close_thread_handle (dx_thread_t thread_id) {
+int dx_close_thread_handle (dx_thread_t thread_id) {
 	if (CloseHandle(thread_id)) {
 		return true;
 	}
@@ -468,7 +472,7 @@ bool dx_close_thread_handle (dx_thread_t thread_id) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_thread_data_key_create (dx_key_t* key, void (*destructor)(void*)) {
+int dx_thread_data_key_create (dx_key_t* key, void (*destructor)(void*)) {
 	*key = TlsAlloc();
 	if (*key !=  TLS_OUT_OF_INDEXES) {
 		if (destructor != NULL)
@@ -480,7 +484,7 @@ bool dx_thread_data_key_create (dx_key_t* key, void (*destructor)(void*)) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_thread_data_key_destroy (dx_key_t key) {
+int dx_thread_data_key_destroy (dx_key_t key) {
 	dx_remove_key_destructor(key);
 	TlsFree(key);
 	return true;
@@ -488,7 +492,7 @@ bool dx_thread_data_key_destroy (dx_key_t key) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_set_thread_data (dx_key_t key, const void* data) {
+int dx_set_thread_data (dx_key_t key, const void* data) {
 	TlsSetValue(key, (void*)data);
 	return true;
 }
@@ -507,13 +511,13 @@ dx_thread_t dx_get_thread_id () {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_compare_threads (dx_thread_t t1, dx_thread_t t2) {
+int dx_compare_threads (dx_thread_t t1, dx_thread_t t2) {
 	return t1 == t2;
 }
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_mutex_create (dx_mutex_t* mutex) {
+int dx_mutex_create (dx_mutex_t* mutex) {
 	*mutex = dx_calloc(1, sizeof(CRITICAL_SECTION));
 	InitializeCriticalSection(*mutex);
 	return true;
@@ -521,7 +525,7 @@ bool dx_mutex_create (dx_mutex_t* mutex) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_mutex_destroy (dx_mutex_t* mutex) {
+int dx_mutex_destroy (dx_mutex_t* mutex) {
 	DeleteCriticalSection(*mutex);
 	free(*mutex);
 	return true;
@@ -529,14 +533,14 @@ bool dx_mutex_destroy (dx_mutex_t* mutex) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_mutex_lock (const dx_mutex_t* mutex) {
+int dx_mutex_lock (const dx_mutex_t* mutex) {
 	EnterCriticalSection(*mutex);
 	return true;
 }
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_mutex_unlock (const dx_mutex_t* mutex) {
+int dx_mutex_unlock (const dx_mutex_t* mutex) {
 	LeaveCriticalSection(*mutex);
 	return true;
 }
@@ -547,7 +551,7 @@ bool dx_mutex_unlock (const dx_mutex_t* mutex) {
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_set_thread_data_no_ehm (dx_key_t key, const void* data) {
+int dx_set_thread_data_no_ehm (dx_key_t key, const void* data) {
 	return dx_set_thread_data(key, data);
 }
 

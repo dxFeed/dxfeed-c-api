@@ -3,6 +3,6 @@
 
 #include "PrimitiveTypes.h"
 
-bool algorithms_all_tests(void);
+int algorithms_all_tests(void);
 
 #endif //ALGORITHMS_TEST_H_INCLUDED

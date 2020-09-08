@@ -55,10 +55,10 @@ typedef struct { \
  * Macro declares function prototype that adds new element in object array.
  * The macro DX_OBJECT_ARRAY_STRUCT(dxf_const_string_t, string) will produce
  * next function prototype:
- *      bool dx_string_array_add(dx_string_array_t* string_array, dxf_const_string_t str);
+ *      int dx_string_array_add(dx_string_array_t* string_array, dxf_const_string_t str);
  */
 #define DX_OBJECT_ARRAY_ADD_PROTOTYPE(type, alias) \
-bool dx_##alias##_array_add(DX_OBJECT_ARRAY_NAME(alias)* object_array, type obj)
+int dx_##alias##_array_add(DX_OBJECT_ARRAY_NAME(alias)* object_array, type obj)
 
 /*
  * Macro declares function prototype frees object array.

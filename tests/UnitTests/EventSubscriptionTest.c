@@ -23,7 +23,7 @@ void dummy_listener(int event_type, dxf_const_string_t symbol_name,
 /*
  * Test
  */
-bool event_subscription_test (void) {
+int event_subscription_test (void) {
 	dxf_connection_t connection;
 	dxf_subscription_t sub1;
 	dxf_subscription_t sub2;
@@ -211,7 +211,7 @@ static subscription_time_struct_t g_subscr_time_structs_list[] = {
 };
 static size_t g_subscr_time_structs_count = SIZE_OF_ARRAY(g_subscr_time_structs_list);
 
-bool is_history_record(const dx_record_item_t* record_info) {
+int is_history_record(const dx_record_item_t* record_info) {
 	int i;
 	for (i = 0; i < record_info->field_count; ++i) {
 		dx_field_info_t field = record_info->fields[i];
@@ -233,7 +233,7 @@ bool is_history_record(const dx_record_item_t* record_info) {
  * etalon data from g_subscr_time_structs_list. If checking performs succesfully returns true,
  * otherwise returns false.
  */
-bool subscription_time_test(void) {
+int subscription_time_test(void) {
 	size_t i;
 	dxf_connection_t connection;
 	dx_record_id_t record_id;
@@ -287,8 +287,8 @@ bool subscription_time_test(void) {
 
 /* -------------------------------------------------------------------------- */
 
-bool event_subscription_all_test(void) {
-	bool res = true;
+int event_subscription_all_test(void) {
+	int res = true;
 
 	if (!event_subscription_test() ||
 		!subscription_time_test()) {

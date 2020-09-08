@@ -27,11 +27,11 @@
 dxf_price_level_book_t dx_create_price_level_book(dxf_connection_t connection,
 												dxf_const_string_t symbol,
 												size_t srccount, dxf_ulong_t srcflags);
-bool dx_close_price_level_book(dxf_price_level_book_t book);
-bool dx_add_price_level_book_listener(dxf_price_level_book_t book,
+int dx_close_price_level_book(dxf_price_level_book_t book);
+int dx_add_price_level_book_listener(dxf_price_level_book_t book,
 									dxf_price_level_book_listener_t book_listener,
 									void *user_data);
-bool  dx_remove_price_level_book_listener(dxf_price_level_book_t book,
+int dx_remove_price_level_book_listener(dxf_price_level_book_t book,
 										dxf_price_level_book_listener_t book_listener);
 
 #endif /* PRICELVELBOOK_H_INCLUDED */

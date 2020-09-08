@@ -67,7 +67,7 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_buffered_input) {
 /* -------------------------------------------------------------------------- */
 
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_buffered_input) {
-	bool res = true;
+	int res = true;
 	dx_buffered_input_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_buffered_input, &res);
 
 	if (context == NULL) {
@@ -159,7 +159,7 @@ static int dx_move_buffer_pos (void* context, int offset) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_validate_buffer_and_value (void* context, void* value, int value_size) {
+int dx_validate_buffer_and_value (void* context, void* value, int value_size) {
 	if (CTX(context)->in_buffer == NULL) {
 		return dx_set_error_code(dx_bioec_buffer_not_initialized);
 	}
@@ -177,7 +177,7 @@ bool dx_validate_buffer_and_value (void* context, void* value, int value_size) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_read_utf2 (void* context, int first, OUT dxf_int_t* value) {
+int dx_read_utf2 (void* context, int first, OUT dxf_int_t* value) {
 	dxf_byte_t second;
 
 	if (value == NULL) {
@@ -197,7 +197,7 @@ bool dx_read_utf2 (void* context, int first, OUT dxf_int_t* value) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_read_utf3 (void* context, int first, OUT dxf_int_t* value) {
+int dx_read_utf3 (void* context, int first, OUT dxf_int_t* value) {
 	dxf_short_t tail;
 
 	if (value == NULL) {
@@ -217,7 +217,7 @@ bool dx_read_utf3 (void* context, int first, OUT dxf_int_t* value) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_read_utf4 (void* context, int first, OUT dxf_int_t* res) {
+int dx_read_utf4 (void* context, int first, OUT dxf_int_t* res) {
 	dxf_byte_t second;
 	dxf_short_t tail;
 
@@ -243,7 +243,7 @@ bool dx_read_utf4 (void* context, int first, OUT dxf_int_t* res) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_read_utf_sequence (void* context, int utflen, bool lenInChars, OUT dxf_string_t* value) {
+int dx_read_utf_sequence (void* context, int utflen, int lenInChars, OUT dxf_string_t* value) {
 	dxf_string_t buffer;
 	int count = 0;
 	dxf_int_t tmpCh;
@@ -312,7 +312,7 @@ bool dx_read_utf_sequence (void* context, int utflen, bool lenInChars, OUT dxf_s
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_read_byte_buffer_segment (void* context, dxf_byte_t* buffer, int buffer_length,
+int dx_read_byte_buffer_segment (void* context, dxf_byte_t* buffer, int buffer_length,
 								int segment_offset, int segment_length) {
 	if ((segment_offset | segment_length | (segment_offset + segment_length) |
 		(buffer_length - (segment_offset + segment_length))) < 0) {
@@ -338,7 +338,7 @@ bool dx_read_byte_buffer_segment (void* context, dxf_byte_t* buffer, int buffer_
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_read_boolean (void* context, OUT dxf_bool_t* value) {
+int dx_read_boolean (void* context, OUT dxf_bool_t* value) {
 	CHECKED_CALL_3(dx_validate_buffer_and_value, context, value, 1);
 
 	*value = CTX(context)->in_buffer[CTX(context)->current_in_buffer_position++];
@@ -348,7 +348,7 @@ bool dx_read_boolean (void* context, OUT dxf_bool_t* value) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_read_byte (void* context, OUT dxf_byte_t* value) {
+int dx_read_byte (void* context, OUT dxf_byte_t* value) {
 	CHECKED_CALL_3(dx_validate_buffer_and_value, context, value, 1);
 
 	*value = CTX(context)->in_buffer[CTX(context)->current_in_buffer_position++];
@@ -358,7 +358,7 @@ bool dx_read_byte (void* context, OUT dxf_byte_t* value) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_read_unsigned_byte (void* context, OUT dxf_uint_t* value) {
+int dx_read_unsigned_byte (void* context, OUT dxf_uint_t* value) {
 	CHECKED_CALL_3(dx_validate_buffer_and_value, context, value, 1);
 
 	*value = ((dxf_uint_t)CTX(context)->in_buffer[CTX(context)->current_in_buffer_position++]) & 0xFF;
@@ -368,7 +368,7 @@ bool dx_read_unsigned_byte (void* context, OUT dxf_uint_t* value) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_read_short (void* context, OUT dxf_short_t* value) {
+int dx_read_short (void* context, OUT dxf_short_t* value) {
 	CHECKED_CALL_3(dx_validate_buffer_and_value, context, value, 2);
 
 	*value = ((dxf_short_t)CTX(context)->in_buffer[CTX(context)->current_in_buffer_position++] << 8);
@@ -379,7 +379,7 @@ bool dx_read_short (void* context, OUT dxf_short_t* value) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_read_unsigned_short (void* context, OUT dxf_uint_t* value) {
+int dx_read_unsigned_short (void* context, OUT dxf_uint_t* value) {
 	CHECKED_CALL_3(dx_validate_buffer_and_value, context, value, 2);
 
 	*value = ((dxf_uint_t)(CTX(context)->in_buffer[CTX(context)->current_in_buffer_position++] & 0xFF) << 8);
@@ -390,7 +390,7 @@ bool dx_read_unsigned_short (void* context, OUT dxf_uint_t* value) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_read_int (void* context, OUT dxf_int_t* value) {
+int dx_read_int (void* context, OUT dxf_int_t* value) {
 	CHECKED_CALL_3(dx_validate_buffer_and_value, context, value, 4);
 
 	*value = ((dxf_int_t)(CTX(context)->in_buffer[CTX(context)->current_in_buffer_position++] & 0xFF) << 24);
@@ -403,7 +403,7 @@ bool dx_read_int (void* context, OUT dxf_int_t* value) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_read_long (void* context, OUT dxf_long_t* value) {
+int dx_read_long (void* context, OUT dxf_long_t* value) {
 	CHECKED_CALL_3(dx_validate_buffer_and_value, context, value, 8);
 
 	*value = ((dxf_long_t)CTX(context)->in_buffer[CTX(context)->current_in_buffer_position++] << 56);
@@ -420,7 +420,7 @@ bool dx_read_long (void* context, OUT dxf_long_t* value) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_read_float (void* context, OUT dxf_float_t* value) {
+int dx_read_float (void* context, OUT dxf_float_t* value) {
 	dxf_int_t int_val;
 
 	CHECKED_CALL_2(dx_read_int, context, &int_val);
@@ -432,7 +432,7 @@ bool dx_read_float (void* context, OUT dxf_float_t* value) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_read_double (void* context, OUT dxf_double_t* value) {
+int dx_read_double (void* context, OUT dxf_double_t* value) {
 	dxf_long_t long_val;
 
 	CHECKED_CALL_2(dx_read_long, context, &long_val);
@@ -444,7 +444,7 @@ bool dx_read_double (void* context, OUT dxf_double_t* value) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_read_line (void* context, OUT dxf_string_t* value) {
+int dx_read_line (void* context, OUT dxf_string_t* value) {
 	static const int tmp_buf_size = 128;
 
 	dxf_string_t tmp_buffer = NULL;
@@ -497,7 +497,7 @@ bool dx_read_line (void* context, OUT dxf_string_t* value) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_read_utf (void* context, OUT dxf_string_t* value) {
+int dx_read_utf (void* context, OUT dxf_string_t* value) {
 	dxf_int_t utflen;
 
 	CHECKED_CALL_2(dx_read_unsigned_short, context, &utflen);
@@ -511,7 +511,7 @@ bool dx_read_utf (void* context, OUT dxf_string_t* value) {
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_read_compact_int (void* context, OUT dxf_int_t* value) {
+int dx_read_compact_int (void* context, OUT dxf_int_t* value) {
 	dxf_int_t n;
 
 	if (value == NULL) {
@@ -575,7 +575,7 @@ bool dx_read_compact_int (void* context, OUT dxf_int_t* value) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_read_compact_long (void* context, OUT dxf_long_t* value) {
+int dx_read_compact_long (void* context, OUT dxf_long_t* value) {
 	dxf_int_t n;
 	dxf_int_t tmp_int;
 
@@ -659,10 +659,10 @@ bool dx_read_compact_long (void* context, OUT dxf_long_t* value) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_read_byte_array (void* context, OUT dxf_byte_array_t* value) {
+int dx_read_byte_array (void* context, OUT dxf_byte_array_t* value) {
 	dxf_byte_array_t buffer = DX_EMPTY_ARRAY;
 	dxf_long_t buffer_length;
-	bool failed = false;
+	int failed = false;
 
 	if (value == NULL) {
 		return dx_set_error_code(dx_ec_invalid_func_param_internal);
@@ -706,7 +706,7 @@ bool dx_read_byte_array (void* context, OUT dxf_byte_array_t* value) {
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_read_utf_char (void* context, OUT dxf_int_t* value) {
+int dx_read_utf_char (void* context, OUT dxf_int_t* value) {
 	dxf_byte_t c;
 
 	if (value == NULL) {
@@ -738,7 +738,7 @@ bool dx_read_utf_char (void* context, OUT dxf_int_t* value) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_read_utf_char_array (void* context, OUT dxf_string_t* value) {
+int dx_read_utf_char_array (void* context, OUT dxf_string_t* value) {
 	dxf_long_t utflen;
 
 	CHECKED_CALL_2(dx_read_compact_long, context, &utflen);
@@ -756,7 +756,7 @@ bool dx_read_utf_char_array (void* context, OUT dxf_string_t* value) {
 	return dx_read_utf_sequence(context, (int)utflen, true, value);
 }
 
-bool dx_read_utf_string (void* context, OUT dxf_string_t* value) {
+int dx_read_utf_string (void* context, OUT dxf_string_t* value) {
 	dxf_long_t utflen;
 
 	CHECKED_CALL_2(dx_read_compact_long, context, &utflen);

@@ -85,7 +85,7 @@ static const dxf_int_t EXTRA_PRECISION_DIVISORS[] = {
 	0, // for canonical negative infinity
 };
 
-bool dx_int_to_double (dxf_int_t integer, OUT dxf_double_t* decimal) {
+int dx_int_to_double (dxf_int_t integer, OUT dxf_double_t* decimal) {
 	dxf_int_t power = integer & 0x0F;
 	dxf_int_t mantissa ;
 

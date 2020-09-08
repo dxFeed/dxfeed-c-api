@@ -52,11 +52,10 @@
 
 static dxf_const_string_t g_error_prefix = L"Error: ";
 static dxf_const_string_t g_info_prefix = L"";
-static dxf_const_string_t g_default_time_string = L"Incorrect time";
 
-static bool g_verbose_logger_mode;
-static bool g_data_transfer_logger_mode;
-static bool g_show_timezone;
+static int g_verbose_logger_mode;
+static int g_data_transfer_logger_mode;
+static int g_show_timezone;
 static FILE* g_log_file = NULL;
 static FILE*g_data_receive_log_file = NULL;
 static FILE*g_data_send_log_file = NULL;
@@ -69,8 +68,8 @@ static dx_mutex_t g_dbg_lock;
 #endif
 
 static dx_key_t g_current_time_str_key;
-static bool g_key_creation_attempted = false;
-static bool g_key_created = false;
+static int g_key_creation_attempted = false;
+static int g_key_created = false;
 
 static dxf_char_t current_time_str[CURRENT_TIME_STR_LENGTH + 1];
 
@@ -234,7 +233,7 @@ dxf_string_t dx_get_current_time_buffer (void) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_init_current_time_key (void) {
+int dx_init_current_time_key (void) {
 	if (g_key_creation_attempted) {
 		return g_key_created;
 	}

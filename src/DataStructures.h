@@ -118,7 +118,7 @@ typedef struct {
 /* -------------------------------------------------------------------------- */
 
 dx_record_id_t dx_get_record_id(void* context, dxf_int_t server_record_id);
-bool dx_assign_server_record_id(void* context, dx_record_id_t record_id, dxf_int_t server_record_id);
+int dx_assign_server_record_id(void* context, dx_record_id_t record_id, dxf_int_t server_record_id);
 
 /*
  * Returns pointer to record data.
@@ -130,13 +130,13 @@ bool dx_assign_server_record_id(void* context, dx_record_id_t record_id, dxf_int
  */
 const dx_record_item_t* dx_get_record_by_id(void* context, dx_record_id_t record_id);
 dx_record_id_t dx_get_record_id_by_name(void* context, dxf_const_string_t record_name);
-dx_record_id_t dx_get_next_unsubscribed_record_id(void* context, bool isUpdate);
+dx_record_id_t dx_get_next_unsubscribed_record_id(void* context, int isUpdate);
 void dx_drop_unsubscribe_counter(void* context);
 
 int dx_find_record_field(const dx_record_item_t* record_info, dxf_const_string_t field_name,
 						dxf_int_t field_type);
 dxf_char_t dx_get_record_exchange_code(void* context, dx_record_id_t record_id);
-bool dx_set_record_exchange_code(void* context, dx_record_id_t record_id, dxf_char_t exchange_code);
+int dx_set_record_exchange_code(void* context, dx_record_id_t record_id, dxf_char_t exchange_code);
 /*
  * Creates subscription time field according to record model. Function uses
  * dx_ft_first_time_int_field and dx_ft_second_time_int_field flags of the
@@ -149,11 +149,11 @@ bool dx_set_record_exchange_code(void* context, dx_record_id_t record_id, dxf_ch
  * value        - the result subscription time
  * return true if no errors occur otherwise returns false
  */
-bool dx_create_subscription_time(void* context, dx_record_id_t record_id,
+int dx_create_subscription_time(void* context, dx_record_id_t record_id,
 								dxf_long_t time, OUT dxf_long_t* value);
 
 dx_record_server_support_state_list_t* dx_get_record_server_support_states(void* context);
-bool dx_get_record_server_support_state_value(dx_record_server_support_state_list_t* states,
+int dx_get_record_server_support_state_value(dx_record_server_support_state_list_t* states,
 											dx_record_id_t record_id,
 											OUT dx_record_server_support_state_t **value);
 

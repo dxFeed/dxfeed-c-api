@@ -190,7 +190,7 @@
     <Link>
       <AdditionalDependencies>ws2_32.lib;dbghelp.lib;libtls-15.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName)d.dll</OutputFile>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib\libressl\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib\libressl\win\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>$(ProjectDir)\$(ProjectName)d.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)$(ProjectName)d.pdb</ProgramDatabaseFile>
@@ -202,7 +202,7 @@
       <OutputFile>$(OutDir)$(ProjectName)d.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>copy /Y/V $(SolutionDir)lib\libressl\x86\*.dll $(TargetDir)</Command>
+      <Command>copy /Y/V $(SolutionDir)lib\libressl\win\x86\*.dll $(TargetDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugNoTLS|x64'">
@@ -254,7 +254,7 @@
     <Link>
       <AdditionalDependencies>ws2_32.lib;dbghelp.lib;libtls-15_64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName)d_64.dll</OutputFile>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib\libressl\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib\libressl\win\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>$(ProjectDir)\$(ProjectName)d_64.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)$(ProjectName)d_64.pdb</ProgramDatabaseFile>
@@ -265,7 +265,7 @@
       <OutputFile>$(OutDir)$(ProjectName)d_64.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>copy /Y/V $(SolutionDir)lib\libressl\x64\*.dll $(TargetDir)</Command>
+      <Command>copy /Y/V $(SolutionDir)lib\libressl\win\x64\*.dll $(TargetDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoTLS|Win32'">
@@ -309,7 +309,7 @@
     <Link>
       <AdditionalDependencies>ws2_32.lib;libtls-15.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib\libressl\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib\libressl\win\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>$(ProjectDir)\$(ProjectName).def</ModuleDefinitionFile>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)$(ProjectName).pdb</ProgramDatabaseFile>
@@ -318,7 +318,7 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Command>copy /Y/V $(SolutionDir)lib\libressl\x86\*.dll $(TargetDir)</Command>
+      <Command>copy /Y/V $(SolutionDir)lib\libressl\win\x86\*.dll $(TargetDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoTLS|x64'">
@@ -361,7 +361,7 @@
     <Link>
       <AdditionalDependencies>ws2_32.lib;libtls-15_64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName)_64.dll</OutputFile>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib\libressl\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib\libressl\win\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>$(ProjectDir)\$(ProjectName)_64.def</ModuleDefinitionFile>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)$(ProjectName)_64.pdb</ProgramDatabaseFile>
@@ -369,7 +369,7 @@
       <ImportLibrary>$(OutDir)$(ProjectName)_64.lib</ImportLibrary>
     </Link>
     <PostBuildEvent>
-      <Command>copy /Y/V $(SolutionDir)lib\libressl\x64\*.dll $(TargetDir)</Command>
+      <Command>copy /Y/V $(SolutionDir)lib\libressl\win\x64\*.dll $(TargetDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -390,7 +390,26 @@
     <ClCompile Include="src\DXThreads.c" />
     <ClCompile Include="src\EventData.c" />
     <ClCompile Include="src\EventManager.c" />
-    <ClCompile Include="src\EventSubscription.c" />
+    <ClCompile Include="src\EventSubscription.cpp">
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='ReleaseNoTLS|x64'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='DebugNoTLS|x64'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='ReleaseNoTLS|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='DebugNoTLS|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsCpp</CompileAs>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Sync</ExceptionHandling>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='ReleaseNoTLS|Win32'">Sync</ExceptionHandling>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='DebugNoTLS|Win32'">Sync</ExceptionHandling>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Sync</ExceptionHandling>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Sync</ExceptionHandling>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='ReleaseNoTLS|x64'">Sync</ExceptionHandling>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='DebugNoTLS|x64'">Sync</ExceptionHandling>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Sync</ExceptionHandling>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">EnableFastChecks</BasicRuntimeChecks>
+    </ClCompile>
     <ClCompile Include="src\Logger.c" />
     <ClCompile Include="src\PriceLevelBook.c" />
     <ClCompile Include="src\RegionalBook.c" />

@@ -33,14 +33,14 @@ typedef void* dxf_listener_thread_data_t;
 
 void init_listener_thread_data(OUT dxf_listener_thread_data_t* data);
 void free_listener_thread_data(dxf_listener_thread_data_t data);
-bool is_thread_terminate(dxf_listener_thread_data_t data);
+int is_thread_terminate(dxf_listener_thread_data_t data);
 void on_reader_thread_terminate(dxf_listener_thread_data_t data, dxf_connection_t connection, void* user_data);
 void reset_thread_terminate(dxf_listener_thread_data_t data);
 
 /* -------------------------------------------------------------------------- */
 
 void process_last_error();
-bool create_event_subscription(dxf_connection_t connection, int event_type,
+int create_event_subscription(dxf_connection_t connection, int event_type,
 							dxf_const_string_t symbol,
 							dxf_event_listener_t event_listener,
 							OUT dxf_subscription_t* res_subscription);
@@ -100,12 +100,12 @@ const char *get_event_counter_name(event_counter_data_ptr_t counter_data);
 		} \
 	} while (false)
 
-#define DX_IS_EQUAL_FUNCTION_DECLARATION(type) bool dx_is_equal_##type##(type expected, type actual)
-#define DX_IS_GREATER_OR_EQUAL_FUNCTION_DECLARATION(type) bool dx_ge_##type##(type actual, type param)
+#define DX_IS_EQUAL_FUNCTION_DECLARATION(type) int dx_is_equal_##type##(type expected, type actual)
+#define DX_IS_GREATER_OR_EQUAL_FUNCTION_DECLARATION(type) int dx_ge_##type##(type actual, type param)
 
-#define DX_IS_EQUAL_FUNCTION_DECLARATION_A(type, alias) bool dx_is_equal_##alias##(type expected, type actual)
+#define DX_IS_EQUAL_FUNCTION_DECLARATION_A(type, alias) int dx_is_equal_##alias##(type expected, type actual)
 
-DX_IS_EQUAL_FUNCTION_DECLARATION(bool);
+DX_IS_EQUAL_FUNCTION_DECLARATION(int);
 DX_IS_EQUAL_FUNCTION_DECLARATION(int);
 DX_IS_EQUAL_FUNCTION_DECLARATION(ERRORCODE);
 DX_IS_EQUAL_FUNCTION_DECLARATION(dxf_const_string_t);
@@ -123,11 +123,11 @@ DX_IS_GREATER_OR_EQUAL_FUNCTION_DECLARATION(double);
 DX_IS_EQUAL_FUNCTION_DECLARATION_A(char*, ansi);
 DX_IS_EQUAL_FUNCTION_DECLARATION_A(const char*, const_ansi);
 
-bool dx_is_not_null(void* actual);
-bool dx_is_null(void* actual);
-bool dx_is_true(bool actual);
-bool dx_is_false(bool actual);
+int dx_is_not_null(void* actual);
+int dx_is_null(void* actual);
+int dx_is_true(int actual);
+int dx_is_false(int actual);
 
-bool dx_is_equal_ptr(void* expected, void* actual);
+int dx_is_equal_ptr(void* expected, void* actual);
 
 #endif //TEST_HELPER_H_INCLUDED

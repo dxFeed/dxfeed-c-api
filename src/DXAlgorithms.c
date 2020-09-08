@@ -39,7 +39,7 @@
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_is_only_single_bit_set (int value) {
+int dx_is_only_single_bit_set (int value) {
 	return (value != 0 && (value & (value - 1)) == 0);
 }
 
@@ -52,7 +52,7 @@ bool dx_is_only_single_bit_set (int value) {
 static dxf_ulong_t dx_seed;
 
 static void dx_init_randomizer (void) {
-	static bool is_randomizer_initialized = false;
+	static int is_randomizer_initialized = false;
 
 	if (!is_randomizer_initialized) {
 		is_randomizer_initialized = true;
@@ -95,7 +95,7 @@ size_t dx_random_size(size_t max_value) {
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_capacity_manager_halfer (size_t new_size, size_t* capacity) {
+int dx_capacity_manager_halfer (size_t new_size, size_t* capacity) {
 	if (new_size > *capacity) {
 		*capacity = (size_t)((double)*capacity * 1.5) + 1;
 
@@ -194,7 +194,7 @@ size_t dx_string_length (dxf_const_string_t str) {
 	return wcslen(str);
 }
 
-bool dx_string_null_or_empty(dxf_const_string_t str) {
+int dx_string_null_or_empty(dxf_const_string_t str) {
 	return str == NULL || dx_string_length(str) == 0;
 }
 
@@ -341,7 +341,7 @@ dxf_int_t dx_get_millis_from_time(dxf_long_t millis) {
 #define EQUALS     65
 #define INVALID    66
 
-bool dx_base64_encode(const char* in, size_t in_len, char* out, size_t out_len) {
+int dx_base64_encode(const char* in, size_t in_len, char* out, size_t out_len) {
 	const char base64chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 	const uint8_t *data = (const uint8_t *)in;
 	size_t resultIndex = 0;
@@ -429,7 +429,7 @@ static const unsigned char d[] = {
 	66,66,66,66,66,66
 };
 
-bool dx_base64_decode(const char* in, size_t in_len, char* out, size_t* out_len) {
+int dx_base64_decode(const char* in, size_t in_len, char* out, size_t* out_len) {
 	const char *end = in + in_len;
 	char iter = 0;
 	uint32_t buf = 0;

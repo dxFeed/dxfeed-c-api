@@ -108,11 +108,11 @@ static struct snapshot_info_t snapshot_info[SNAPSHOT_COUNT] = {
 
 /* -------------------------------------------------------------------------- */
 
-static bool is_listener_thread_terminated = false;
+static int is_listener_thread_terminated = false;
 CRITICAL_SECTION listener_thread_guard;
 
-bool is_thread_terminate() {
-	bool res;
+int is_thread_terminate() {
+	int res;
 	EnterCriticalSection(&listener_thread_guard);
 	res = is_listener_thread_terminated;
 	LeaveCriticalSection(&listener_thread_guard);
@@ -721,7 +721,7 @@ void* create_snapshot_subscription(dxf_connection_t connection, struct snapshot_
 }
 /* -------------------------------------------------------------------------- */
 
-bool initialize_console() {
+int initialize_console() {
 	CONSOLE_SCREEN_BUFFER_INFO info;
 	COORD c = {80, 40};
 	SMALL_RECT rect = {0, 0, 79, 48};

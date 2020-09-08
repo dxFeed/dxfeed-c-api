@@ -7,6 +7,8 @@ ColumnLimit: 120
 ContinuationIndentWidth: 4
 IndentWidth: 4
 TabWidth: 4
+AccessModifierOffset: 0
+IndentPPDirectives: AfterHash
 UseTab: Always
 
 ...

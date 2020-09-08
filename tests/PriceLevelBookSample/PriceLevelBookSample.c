@@ -18,8 +18,6 @@
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 
-typedef int bool;
-
 #define true 1
 #define false 0
 
@@ -38,11 +36,11 @@ int _CRT_glob = 0;
 
 /* -------------------------------------------------------------------------- */
 #ifdef _WIN32
-static bool is_listener_thread_terminated = false;
+static int is_listener_thread_terminated = false;
 CRITICAL_SECTION listener_thread_guard;
 
-bool is_thread_terminate() {
-	bool res;
+int is_thread_terminate() {
+	int res;
 	EnterCriticalSection(&listener_thread_guard);
 	res = is_listener_thread_terminated;
 	LeaveCriticalSection(&listener_thread_guard);
@@ -50,9 +48,9 @@ bool is_thread_terminate() {
 	return res;
 }
 #else
-static volatile bool is_listener_thread_terminated = false;
-bool is_thread_terminate() {
-	bool res;
+static volatile int is_listener_thread_terminated = false;
+int is_thread_terminate() {
+	int res;
 	res = is_listener_thread_terminated;
 	return res;
 }
@@ -161,7 +159,7 @@ void listener(const dxf_price_level_book_data_ptr_t book_data, void* user_data) 
 	}
 }
 
-bool atoi2(char* str, int* result) {
+int atoi2(char* str, int* result) {
 	if (str == NULL || str[0] == '\0' || result == NULL) {
 		return false;
 	}
@@ -221,13 +219,13 @@ int main(int argc, char* argv[]) {
 	char order_source[MAX_SOURCE_SIZE + 1] = { 0 };
 	const char* order_sources[MAX_SOURCES + 1] = {NULL};
 	char* token = NULL;
-	bool order_source_is_set = false;
-	bool log_data_transfer_flag = false;
+	int order_source_is_set = false;
+	int log_data_transfer_flag = false;
 	int program_timeout = 604800; // a week
 
 	if (argc > STATIC_PARAMS_COUNT) {
-		bool token_is_set = false;
-		bool program_timeout_is_set = false;
+		int token_is_set = false;
+		int program_timeout_is_set = false;
 
 		for (int i = STATIC_PARAMS_COUNT; i < argc; i++) {
 			if (token_is_set == false && strcmp(argv[i], TOKEN_PARAM_SHORT_TAG) == 0) {

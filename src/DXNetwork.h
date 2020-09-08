@@ -39,7 +39,7 @@
  */
 /* -------------------------------------------------------------------------- */
 
-typedef bool (*dx_socket_data_receiver_t) (dxf_connection_t connection, const void* buffer, int buffer_size);
+typedef int (*dx_socket_data_receiver_t) (dxf_connection_t connection, const void* buffer, int buffer_size);
 
 typedef struct {
 	dx_socket_data_receiver_t receiver; /* a callback to pass the read data to */
@@ -72,7 +72,7 @@ typedef struct {
 		false - some error occurred, use 'dx_get_last_error' for details.
  */
 
-bool dx_bind_to_address (dxf_connection_t connection, const char* address,
+int dx_bind_to_address (dxf_connection_t connection, const char* address,
 						const dx_connection_context_data_t* ccd);
 
 /* -------------------------------------------------------------------------- */
@@ -89,7 +89,7 @@ bool dx_bind_to_address (dxf_connection_t connection, const char* address,
 		false - some error occurred, use 'dx_get_last_error' for details.
  */
 
-bool dx_send_data (dxf_connection_t connection, const void* buffer, int buffer_size);
+int dx_send_data (dxf_connection_t connection, const void* buffer, int buffer_size);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -109,7 +109,7 @@ bool dx_send_data (dxf_connection_t connection, const void* buffer, int buffer_s
 		false - some error occurred, use 'dx_get_last_error' for details.
  */
 
-bool dx_add_worker_thread_task (dxf_connection_t connection, dx_task_processor_t processor, void* data);
+int dx_add_worker_thread_task (dxf_connection_t connection, dx_task_processor_t processor, void* data);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -126,23 +126,23 @@ dxf_connection_status_t dx_connection_status_get(dxf_connection_t connection);
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_protocol_property_get_snapshot(dxf_connection_t connection,
+int dx_protocol_property_get_snapshot(dxf_connection_t connection,
 							OUT dxf_property_item_t** ppProperties, OUT int* pSize);
-bool dx_protocol_property_set(dxf_connection_t connection,
+int dx_protocol_property_set(dxf_connection_t connection,
 							dxf_const_string_t key, dxf_const_string_t value);
-bool dx_protocol_property_set_many(dxf_connection_t connection,
+int dx_protocol_property_set_many(dxf_connection_t connection,
 								const dx_property_map_t* other);
 const dx_property_map_t* dx_protocol_property_get_all(dxf_connection_t connection);
-bool dx_protocol_property_contains(dxf_connection_t connection,
+int dx_protocol_property_contains(dxf_connection_t connection,
 								dxf_const_string_t key);
 
 char* dx_protocol_get_basic_auth_data(const char* user, const char* password);
-bool dx_protocol_configure_basic_auth(dxf_connection_t connection,
+int dx_protocol_configure_basic_auth(dxf_connection_t connection,
 									const char* user, const char* password);
-bool dx_protocol_configure_custom_auth(dxf_connection_t connection,
+int dx_protocol_configure_custom_auth(dxf_connection_t connection,
 									const char* authscheme,
 									const char* authdata);
 
-bool dx_get_current_connected_address(dxf_connection_t connection, OUT char** ppAddress);
+int dx_get_current_connected_address(dxf_connection_t connection, OUT char** ppAddress);
 
 #endif /* DX_NETWORK_H_INCLUDED */

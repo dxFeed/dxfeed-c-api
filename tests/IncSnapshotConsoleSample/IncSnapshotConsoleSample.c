@@ -24,7 +24,6 @@
 #define LS2(s) L##s
 
 #ifndef true
-typedef int bool;
 
 #define true 1
 #define false 0
@@ -64,11 +63,11 @@ int _CRT_glob = 0;
 
 /* -------------------------------------------------------------------------- */
 #ifdef _WIN32
-static bool is_listener_thread_terminated = false;
+static int is_listener_thread_terminated = false;
 CRITICAL_SECTION listener_thread_guard;
 
-bool is_thread_terminate() {
-	bool res;
+int is_thread_terminate() {
+	int res;
 	EnterCriticalSection(&listener_thread_guard);
 	res = is_listener_thread_terminated;
 	LeaveCriticalSection(&listener_thread_guard);
@@ -76,9 +75,9 @@ bool is_thread_terminate() {
 	return res;
 }
 #else
-static volatile bool is_listener_thread_terminated = false;
-bool is_thread_terminate() {
-	bool res;
+static volatile int is_listener_thread_terminated = false;
+int is_thread_terminate() {
+	int res;
 	res = is_listener_thread_terminated;
 	return res;
 }
@@ -167,7 +166,7 @@ dxf_string_t ansi_to_unicode(const char* ansi_str) {
 
 /* -------------------------------------------------------------------------- */
 
-void listener(const dxf_snapshot_data_ptr_t snapshot_data, bool new_snapshot, void* user_data) {
+void listener(const dxf_snapshot_data_ptr_t snapshot_data, int new_snapshot, void* user_data) {
 	size_t i;
 	size_t records_count = snapshot_data->records_count;
 	int records_print_limit = DEFAULT_RECORDS_PRINT_LIMIT;
@@ -320,7 +319,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, bool new_snapshot, vo
 	}
 }
 
-bool atoi2(char* str, int* result) {
+int atoi2(char* str, int* result) {
 	if (str == NULL || str[0] == '\0' || result == NULL) {
 		return false;
 	}
@@ -404,14 +403,14 @@ int main(int argc, char* argv[]) {
 	char* order_source_ptr = NULL;
 	int records_print_limit = DEFAULT_RECORDS_PRINT_LIMIT;
 	char* token = NULL;
-	bool log_data_transfer_flag = false;
+	int log_data_transfer_flag = false;
 	int program_timeout = 604800; // a week
 
 	if (argc > STATIC_PARAMS_COUNT) {
-		bool records_print_limit_is_set = false;
-		bool token_is_set = false;
-		bool order_source_is_set = false;
-		bool program_timeout_is_set = false;
+		int records_print_limit_is_set = false;
+		int token_is_set = false;
+		int order_source_is_set = false;
+		int program_timeout_is_set = false;
 
 		for (int i = STATIC_PARAMS_COUNT; i < argc; i++) {
 			if (records_print_limit_is_set == false && strcmp(argv[i], RECORDS_PRINT_LIMIT_SHORT_PARAM) == 0) {

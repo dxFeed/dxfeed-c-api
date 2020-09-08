@@ -48,7 +48,7 @@ typedef void* (*dx_start_routine_t)(void*);
 typedef HANDLE dx_thread_t;
 typedef DWORD dx_key_t;
 typedef LPCRITICAL_SECTION dx_mutex_t;
-typedef void pthread_attr_t;
+//typedef void pthread_attr_t;
 typedef unsigned (*dx_start_routine_t)(void*);
 #define DX_THREAD_RETVAL_NULL 0
 #endif /* !defined(_WIN32) || defined(USE_PTHREADS) */
@@ -72,7 +72,7 @@ void dx_register_process_destructor(void (*destructor)(void*), void *arg);
 
 void dx_sleep (int milliseconds);
 void dx_mark_thread_master (void);
-bool dx_is_thread_master (void);
+int dx_is_thread_master (void);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -84,20 +84,25 @@ bool dx_is_thread_master (void);
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_thread_create (dx_thread_t* thread_id, const pthread_attr_t* attr,
+#if !defined(_WIN32)
+int dx_thread_create (dx_thread_t* thread_id, const pthread_attr_t* attr,
 					dx_start_routine_t start_routine, void *arg);
-bool dx_wait_for_thread (dx_thread_t thread_id, void **value_ptr);
-bool dx_close_thread_handle (dx_thread_t thread_id);
-bool dx_thread_data_key_create (dx_key_t* key, void (*destructor)(void*));
-bool dx_thread_data_key_destroy (dx_key_t key);
-bool dx_set_thread_data (dx_key_t key, const void* data);
+#else
+int dx_thread_create (dx_thread_t* thread_id, const void* attr,
+					   dx_start_routine_t start_routine, void *arg);
+#endif
+int dx_wait_for_thread (dx_thread_t thread_id, void **value_ptr);
+int dx_close_thread_handle (dx_thread_t thread_id);
+int dx_thread_data_key_create (dx_key_t* key, void (*destructor)(void*));
+int dx_thread_data_key_destroy (dx_key_t key);
+int dx_set_thread_data (dx_key_t key, const void* data);
 void* dx_get_thread_data (dx_key_t key);
 dx_thread_t dx_get_thread_id ();
-bool dx_compare_threads (dx_thread_t t1, dx_thread_t t2);
-bool dx_mutex_create (dx_mutex_t* mutex);
-bool dx_mutex_destroy (dx_mutex_t* mutex);
-bool dx_mutex_lock (const dx_mutex_t* mutex);
-bool dx_mutex_unlock (const dx_mutex_t* mutex);
+int dx_compare_threads (dx_thread_t t1, dx_thread_t t2);
+int dx_mutex_create (dx_mutex_t* mutex);
+int dx_mutex_destroy (dx_mutex_t* mutex);
+int dx_mutex_lock (const dx_mutex_t* mutex);
+int dx_mutex_unlock (const dx_mutex_t* mutex);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -108,6 +113,6 @@ bool dx_mutex_unlock (const dx_mutex_t* mutex);
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_set_thread_data_no_ehm (dx_key_t key, const void* data);
+int dx_set_thread_data_no_ehm (dx_key_t key, const void* data);
 
 #endif /* THREADS_H_INCLUDED */

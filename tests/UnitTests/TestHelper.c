@@ -13,7 +13,7 @@
 
 #ifdef _WIN32
 typedef struct {
-	bool is_listener_thread_terminated;
+	int is_listener_thread_terminated;
 	CRITICAL_SECTION listener_thread_guard;
 } dx_listener_thread_data_t;
 
@@ -30,8 +30,8 @@ void free_listener_thread_data(dxf_listener_thread_data_t data) {
 	free(data);
 }
 
-bool is_thread_terminate(dxf_listener_thread_data_t data) {
-	bool res;
+int is_thread_terminate(dxf_listener_thread_data_t data) {
+	int res;
 	dx_listener_thread_data_t* internal_data = (dx_listener_thread_data_t*)data;
 	EnterCriticalSection(&internal_data->listener_thread_guard);
 	res = internal_data->is_listener_thread_terminated;
@@ -57,7 +57,7 @@ void reset_thread_terminate(dxf_listener_thread_data_t data) {
 
 #else
 typedef struct {
-	volatile bool is_listener_thread_terminated;
+	volatile int is_listener_thread_terminated;
 } dx_listener_thread_data_t;
 
 void init_listener_thread_data(OUT dxf_listener_thread_data_t* data) {
@@ -70,8 +70,8 @@ void free_listener_thread_data(dxf_listener_thread_data_t data) {
 	free(data);
 }
 
-bool is_thread_terminate(dxf_listener_thread_data_t data) {
-	bool res;
+int is_thread_terminate(dxf_listener_thread_data_t data) {
+	int res;
 	dx_listener_thread_data_t* internal_data = (dx_listener_thread_data_t*)data;
 	res = internal_data->is_listener_thread_terminated;
 	return res;
@@ -110,7 +110,7 @@ void process_last_error() {
 
 /* -------------------------------------------------------------------------- */
 
-bool create_event_subscription(dxf_connection_t connection, int event_type,
+int create_event_subscription(dxf_connection_t connection, int event_type,
 							dxf_const_string_t symbol,
 							dxf_event_listener_t event_listener,
 							OUT dxf_subscription_t* res_subscription) {
@@ -225,7 +225,7 @@ DX_IS_EQUAL_FUNCTION_DECLARATION_A(type, alias) { \
 	return true; \
 }
 
-DX_IS_EQUAL_FUNCTION_DEFINITION(bool, L"%d")
+DX_IS_EQUAL_FUNCTION_DEFINITION(int, L"%d")
 DX_IS_EQUAL_FUNCTION_DEFINITION(int, L"%d")
 DX_IS_EQUAL_FUNCTION_DEFINITION(ERRORCODE, L"%d")
 DX_IS_EQUAL_STRING_FUNCTION_DEFINITION(dxf_const_string_t, L"%ls")
@@ -254,7 +254,7 @@ DX_IS_EQUAL_FUNCTION_DECLARATION(size_t) {
 	return dx_is_equal_dxf_ulong_t((dxf_ulong_t)expected, actual);
 }
 
-bool dx_is_not_null(void* actual) {
+int dx_is_not_null(void* actual) {
 	if (actual == NULL) {
 		wprintf(L"%ls failed: expected is not NULL, but was NULL\n", __FUNCTIONW__);
 		return false;
@@ -262,7 +262,7 @@ bool dx_is_not_null(void* actual) {
 	return true;
 }
 
-bool dx_is_null(void* actual) {
+int dx_is_null(void* actual) {
 	if (actual != NULL) {
 		wprintf(L"%ls failed: expected is NULL, but was not NULL\n", __FUNCTIONW__);
 		return false;
@@ -270,7 +270,7 @@ bool dx_is_null(void* actual) {
 	return true;
 }
 
-bool dx_is_true(bool actual) {
+int dx_is_true(int actual) {
 	if (actual != true) {
 		wprintf(L"%ls failed: expected 'true', but was 'false'\n", __FUNCTIONW__);
 		return false;
@@ -278,7 +278,7 @@ bool dx_is_true(bool actual) {
 	return true;
 }
 
-bool dx_is_false(bool actual) {
+int dx_is_false(int actual) {
 	if (actual != false) {
 		wprintf(L"%ls failed: expected 'false', but was 'true'\n", __FUNCTIONW__);
 		return false;
@@ -286,7 +286,7 @@ bool dx_is_false(bool actual) {
 	return true;
 }
 
-bool dx_is_equal_ptr(void* expected, void* actual)
+int dx_is_equal_ptr(void* expected, void* actual)
 {
 	if (expected != actual) {
 		wprintf(L"%ls failed: expected=%p, but was=%p\n", __FUNCTIONW__, expected, actual);
