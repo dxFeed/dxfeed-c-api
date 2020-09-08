@@ -1,6 +1,7 @@
 Version 6.0.0
 * [DXFC-191] Fixed bug where crashes and memory corruption occurred when adding and removing symbols
 * [DXFC-190] Fixed bug with memory corruption during connection restoration and changing the list of subscription symbols
+* [DXFC-146] COM support was removed
 
 Version 5.13.0
 * [DXFC-189] Fixed bug with inability to receive (API does not publish) orders with Scope = Aggregate
