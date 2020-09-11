@@ -423,8 +423,8 @@ typedef struct {
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #endif
 
-static dxf_const_string_t DXF_ORDER_COMPOSITE_BID_STR = L"COMPOSITE_BID";
-static dxf_const_string_t DXF_ORDER_COMPOSITE_ASK_STR = L"COMPOSITE_ASK";
+static dxf_const_string_t DXF_ORDER_AGGREGATE_BID_STR = L"AGGREGATE_BID";
+static dxf_const_string_t DXF_ORDER_AGGREGATE_ASK_STR = L"AGGREGATE_ASK";
 
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
