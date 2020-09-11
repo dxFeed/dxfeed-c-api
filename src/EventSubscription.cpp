@@ -142,7 +142,7 @@ namespace std {
 
 template<>
 struct hash<ListenerContext> {
-	bool operator()(const ListenerContext& lc) const noexcept {
+	std::size_t operator()(const ListenerContext& lc) const noexcept {
 		return std::hash<ListenerPtr>{}(lc.getListener());
 	}
 };

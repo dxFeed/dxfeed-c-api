@@ -36,14 +36,7 @@ add_subdirectory(tests/RegionalBookSample)
 add_subdirectory(tests/SnapshotConsoleSample)
 add_subdirectory(tests/IncSnapshotConsoleSample)
 
-if (WIN32 AND MSVC)
-    add_subdirectory(wrappers/COM/src)
-    add_subdirectory(wrappers/COM/samples/C++)
-endif (WIN32 AND MSVC)
-
-#if (WIN32)
-    add_subdirectory(wrappers/cpp)
-#endif (WIN32)
+add_subdirectory(wrappers/cpp)
 
 set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/DXFeedAllCPackConfig.cmake")
 set(CPACK_PACKAGE_VENDOR "dxFeed Solutions DE GmbH")

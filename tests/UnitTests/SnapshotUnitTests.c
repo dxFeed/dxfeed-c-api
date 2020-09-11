@@ -38,14 +38,13 @@ typedef struct {
 int play_events(dxf_connection_t connection, dxf_snapshot_t snapshot, dxf_order_t* events, size_t size) {
 	size_t i;
 	dxf_string_t symbol = dx_get_snapshot_symbol(snapshot);
-	dxf_int_t symbol_code = dx_encode_symbol_name(symbol);
 	for (i = 0; i < size; i++) {
 		dxf_order_t order = events[i];
 		dxf_event_data_t event_data = (dxf_event_data_t)&order;
 		dxf_ulong_t snapshot_key = dx_new_snapshot_key(dx_rid_order, symbol, order.source);
 		// Note: use index as time_int_field for test only
 		dxf_event_params_t event_params = { order.event_flags, order.index, snapshot_key };
-		if (!dx_process_event_data(connection, dx_eid_order, symbol, symbol_code, event_data, 1, &event_params)) {
+		if (!dx_process_event_data(connection, dx_eid_order, symbol, event_data, 1, &event_params)) {
 			return false;
 		}
 	}
@@ -467,7 +466,7 @@ int snapshot_key_test(void) {
 					return false;
 				} else {
 					DX_ARRAY_INSERT(all_keys, dxf_ulong_t, key, position, dx_capacity_manager_halfer, error);
-					if (!dx_is_equal_bool(false, error)) {
+					if (!dx_is_equal_int(false, error)) {
 						PRINT_TEST_FAILED_MESSAGE("Insert array error!");
 						dx_free(all_keys.elements);
 						return false;
@@ -510,7 +509,7 @@ int symbol_name_hasher_test(void) {
 		}
 		else {
 			DX_ARRAY_INSERT(all_hashs, dxf_int_t, hash, position, dx_capacity_manager_halfer, error);
-			if (!dx_is_equal_bool(false, error)) {
+			if (!dx_is_equal_int(false, error)) {
 				PRINT_TEST_FAILED_MESSAGE("Insert array error!");
 				dx_free(all_hashs.elements);
 				return false;

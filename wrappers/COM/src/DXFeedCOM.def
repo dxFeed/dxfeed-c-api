@@ -1,7 +1,0 @@
-LIBRARY DXFeedCOM
-VERSION 5.13
-EXPORTS
-DllCanUnloadNow		PRIVATE
-DllGetClassObject	PRIVATE
-DllRegisterServer	PRIVATE
-DllUnregisterServer	PRIVATE
