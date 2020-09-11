@@ -930,8 +930,8 @@ ERRORCODE dxf_create_snapshot_impl (dxf_connection_t connection, dx_event_id_t e
 	if (event_id == dx_eid_order) {
 		subscr_flags |= dx_esf_single_record;
 		if (source_len > 0 &&
-		    (dx_compare_strings(source, DXF_ORDER_COMPOSITE_BID_STR) == 0 ||
-		     dx_compare_strings(source, DXF_ORDER_COMPOSITE_ASK_STR) == 0)) {
+		    (dx_compare_strings(source, DXF_ORDER_AGGREGATE_BID_STR) == 0 ||
+		     dx_compare_strings(source, DXF_ORDER_AGGREGATE_ASK_STR) == 0)) {
 			record_info_id = dx_rid_market_maker;
 			subscr_flags |= dx_esf_sr_market_maker_order;
 		} else {
