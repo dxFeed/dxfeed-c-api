@@ -1,18 +1,19 @@
 Version 6.0.0
-* [DXFC-191] Fixed bug where crashes and memory corruption occurred when adding and removing symbols
-* [DXFC-190] Fixed bug with memory corruption during connection restoration and changing the list of subscription symbols
+* [DXFC-191] Fixed a bug where crashes and memory corruption occurred when adding and removing symbols
+* [DXFC-190] Fixed a bug with memory corruption during connection restoration and changing the list of subscription symbols
 * [DXFC-184] [Breaking changes] The order source for subscribing to aggregated data (MarketMaker) has been changed from COMPOSITE_ASK|BID to AGGREGATE_ASK|BID.
   This is now compliant with Java API
 * [DXFC-146] COM support was removed
-* [DXFC-192] Fixed bug with SEGFAULT in TLS mode when sending data on reconnection
+* [DXFC-192] Fixed a bug with SEGFAULT in TLS mode when sending data on reconnection
+* [DXFC-193] Fixed a bug with excess memory consumption when retrieving Option symbols
 * [DXFC-171] Added descriptions to all error codes
 
 Version 5.13.0
-* [DXFC-189] Fixed bug with inability to receive (API does not publish) orders with Scope = Aggregate
+* [DXFC-189] Fixed a bug with inability to receive (API does not publish) orders with Scope = Aggregate
 
 Version 5.12.0
 * [DXFC-185] The new order source for cboe C2 options was added: C2OX
-* [DXFC-188] Fixed bug with concurrent call of `tls_init` function
+* [DXFC-188] Fixed a bug with concurrent call of `tls_init` function
 
 Version 5.11.0
 * [DXFC-182] The new order (price level) sources were added: ntv, glbx, xeur
