@@ -6,6 +6,7 @@ Version 6.0.0
 * [DXFC-146] COM support was removed
 * [DXFC-192] Fixed a bug with SEGFAULT in TLS mode when sending data on reconnection
 * [DXFC-193] Fixed a bug with excess memory consumption when retrieving Option symbols
+* [DXFC-171] Added descriptions to all error codes
 
 Version 5.13.0
 * [DXFC-189] Fixed a bug with inability to receive (API does not publish) orders with Scope = Aggregate
