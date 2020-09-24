@@ -48,7 +48,7 @@
  */
 /* -------------------------------------------------------------------------- */
 
-#define SYMBOL_BUFFER_LEN 128
+#define SYMBOL_BUFFER_LEN 2048
 
 #define MIN_FIELD_TYPE_ID 0x00
 #define MAX_FIELD_TYPE_ID 0xFF
