@@ -5,6 +5,7 @@ Version 6.0.0
   This is now compliant with Java API
 * [DXFC-146] COM support was removed
 * [DXFC-192] Fixed bug with SEGFAULT in TLS mode when sending data on reconnection
+* [DXFC-171] Added descriptions to all error codes
 
 Version 5.13.0
 * [DXFC-189] Fixed bug with inability to receive (API does not publish) orders with Scope = Aggregate
