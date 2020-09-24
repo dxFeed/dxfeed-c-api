@@ -4,6 +4,7 @@ Version 6.0.0
 * [DXFC-184] [Breaking changes] The order source for subscribing to aggregated data (MarketMaker) has been changed from COMPOSITE_ASK|BID to AGGREGATE_ASK|BID.
   This is now compliant with Java API
 * [DXFC-146] COM support was removed
+* [DXFC-192] Fixed bug with SEGFAULT in TLS mode when sending data on reconnection
 
 Version 5.13.0
 * [DXFC-189] Fixed bug with inability to receive (API does not publish) orders with Scope = Aggregate
