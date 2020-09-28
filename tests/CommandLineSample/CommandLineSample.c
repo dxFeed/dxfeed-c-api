@@ -702,7 +702,18 @@ int main (int argc, char* argv[]) {
 #endif
 	}
 
+
+	wprintf(L"Unsubscribing...\n");
+
+	if (!dxf_close_subscription(subscription)) {
+		process_last_error();
+
+		return -1;
+	}
+
+
 	wprintf(L"Disconnecting from host...\n");
+
 
 	if (!dxf_close_connection(connection)) {
 		process_last_error();

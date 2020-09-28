@@ -57,7 +57,7 @@ dxf_const_string_t dx_get_error_description (dx_error_code_t code) {
 	case dx_sec_socket_type_proto_incompat: return L"Protocol wrong type for socket (WSAEPROTOTYPE/EPROTOTYPE)";
 	case dx_sec_socket_type_addrfam_incompat: return L"Socket type not supported (WSAESOCKTNOSUPPORT/ESOCKTNOSUPPORT)";
 	case dx_sec_addr_already_in_use: return L"Address already in use (WSAEADDRINUSE/EADDRINUSE)";
-	case dx_sec_blocking_call_interrupted: return L"Interrupted socket function call (WSAEINTR/EINTR). Check firewall/ports";
+	case dx_sec_blocking_call_interrupted: return L"Interrupted socket function call (WSAEINTR/EINTR)";
 	case dx_sec_nonblocking_oper_pending: return L"Socket operation already in progress (WSAEALREADY/EALREADY)";
 	case dx_sec_addr_not_valid: return L"Cannot assign requested address. The requested address is not valid in its context (WSAEADDRNOTAVAIL/EADDRNOTAVAIL)";
 	case dx_sec_connection_refused: return L"Connection refused (WSAECONNREFUSED/ECONNREFUSED)";

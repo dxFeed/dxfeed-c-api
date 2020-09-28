@@ -69,37 +69,37 @@ typedef enum {
 } dx_event_id_t;
 
 /// Trade event
-#define DXF_ET_TRADE         (1 << dx_eid_trade)
+#define DXF_ET_TRADE         (1u << (unsigned)dx_eid_trade)
 /// Quote event
-#define DXF_ET_QUOTE         (1 << dx_eid_quote)
+#define DXF_ET_QUOTE         (1u << (unsigned)dx_eid_quote)
 /// Summary event
-#define DXF_ET_SUMMARY       (1 << dx_eid_summary)
+#define DXF_ET_SUMMARY       (1u << (unsigned)dx_eid_summary)
 /// Profile event
-#define DXF_ET_PROFILE       (1 << dx_eid_profile)
+#define DXF_ET_PROFILE       (1u << (unsigned)dx_eid_profile)
 /// Order event
-#define DXF_ET_ORDER         (1u << dx_eid_order)
+#define DXF_ET_ORDER         (1u << (unsigned)dx_eid_order)
 /// Time & sale event
-#define DXF_ET_TIME_AND_SALE (1 << dx_eid_time_and_sale)
+#define DXF_ET_TIME_AND_SALE (1u << (unsigned)dx_eid_time_and_sale)
 /// Candle event
-#define DXF_ET_CANDLE        (1 << dx_eid_candle)
+#define DXF_ET_CANDLE        (1u << (unsigned)dx_eid_candle)
 /// Trade eth event
-#define DXF_ET_TRADE_ETH     (1 << dx_eid_trade_eth)
+#define DXF_ET_TRADE_ETH     (1u << (unsigned)dx_eid_trade_eth)
 /// Spread order event
-#define DXF_ET_SPREAD_ORDER  (1 << dx_eid_spread_order)
+#define DXF_ET_SPREAD_ORDER  (1u << (unsigned)dx_eid_spread_order)
 /// Greeks event
-#define DXF_ET_GREEKS        (1 << dx_eid_greeks)
+#define DXF_ET_GREEKS        (1u << (unsigned)dx_eid_greeks)
 /// Theo price event
-#define DXF_ET_THEO_PRICE    (1 << dx_eid_theo_price)
+#define DXF_ET_THEO_PRICE    (1u << (unsigned)dx_eid_theo_price)
 /// Underlying event
-#define DXF_ET_UNDERLYING    (1 << dx_eid_underlying)
+#define DXF_ET_UNDERLYING    (1u << (unsigned)dx_eid_underlying)
 /// Series event
-#define DXF_ET_SERIES        (1 << dx_eid_series)
+#define DXF_ET_SERIES        (1u << (unsigned)dx_eid_series)
 /// Configuration event
-#define DXF_ET_CONFIGURATION (1 << dx_eid_configuration)
-#define DXF_ET_UNUSED        (~((1u << dx_eid_count) - 1u))
+#define DXF_ET_CONFIGURATION (1u << (unsigned)dx_eid_configuration)
+#define DXF_ET_UNUSED        (~((1u << (unsigned)dx_eid_count) - 1u))
 
 /// Event bit-mask
-#define DX_EVENT_BIT_MASK(event_id) (1u << event_id)
+#define DX_EVENT_BIT_MASK(event_id) (1u << (unsigned)event_id)
 
 /**
  * Event Subscription flags
