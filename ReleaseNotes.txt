@@ -1,3 +1,6 @@
+Version 6.0.1
+* [DXFC-194] Fixed bug with System.AccessViolationException while closing connection
+
 Version 6.0.0
 * [DXFC-191] Fixed a bug where crashes and memory corruption occurred when adding and removing symbols
 * [DXFC-190] Fixed a bug with memory corruption during connection restoration and changing the list of subscription symbols

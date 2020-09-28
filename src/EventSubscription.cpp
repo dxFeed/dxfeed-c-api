@@ -265,6 +265,12 @@ class EventSubscriptionConnectionContext {
 		subscriptions.insert(data);
 	}
 
+	void removeSubscription(SubscriptionData* data) {
+		std::lock_guard<std::recursive_mutex> lk(subscr_guard);
+
+		subscriptions.erase(data);
+	}
+
 	~EventSubscriptionConnectionContext() {
 		std::lock_guard<std::recursive_mutex> lk(subscr_guard);
 
@@ -489,6 +495,7 @@ int dx_close_event_subscription(dxf_subscription_t subscr_id) {
 
 		subscr_data->symbols.clear();
 		subscr_data->listeners.clear();
+	  	ctx->removeSubscription(subscr_data);
 	});
 
 	dx_free_event_subscription_data(subscr_data);
