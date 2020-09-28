@@ -38,6 +38,7 @@ extern "C" {
 
 #include <cmath>
 #include <functional>
+#include <mutex>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -96,7 +97,7 @@ struct SymbolData {
 
 typedef void* ListenerPtr;
 
-enum class EventListenerVersion{ Default = 1, V2 = 2 };
+enum class EventListenerVersion { Default = 1, V2 = 2 };
 
 class ListenerContext {
 	union {
@@ -107,7 +108,6 @@ class ListenerContext {
 	void* user_data;
 
 	public:
-
 	ListenerContext(ListenerPtr listener, EventListenerVersion version, void* user_data) noexcept
 		: version{version}, user_data{user_data} {
 		if (version == EventListenerVersion::Default) {
@@ -133,21 +133,21 @@ class ListenerContext {
 
 	void* getUserData() const noexcept { return user_data; }
 
-	friend bool operator == (const ListenerContext& lc1, const ListenerContext& lc2) {
+	friend bool operator==(const ListenerContext& lc1, const ListenerContext& lc2) {
 		return lc1.getListener() == lc2.getListener();
 	}
 };
 
 namespace std {
 
-template<>
+template <>
 struct hash<ListenerContext> {
 	std::size_t operator()(const ListenerContext& lc) const noexcept {
 		return std::hash<ListenerPtr>{}(lc.getListener());
 	}
 };
 
-}
+}  // namespace std
 
 struct SubscriptionData {
 	unsigned event_types;
@@ -162,51 +162,127 @@ struct SubscriptionData {
 	void* connection_context; /* event subscription connection context */
 };
 
+SymbolData* dx_create_symbol_data(dxf_const_string_t name);
+SymbolData* dx_cleanup_symbol_data(SymbolData* symbol_data);
+
 /* -------------------------------------------------------------------------- */
 /*
  *	Event subscription connection context
  */
 /* -------------------------------------------------------------------------- */
 
-struct EventSubscriptionConnectionContext {
+class EventSubscriptionConnectionContext {
 	dxf_connection_t connection;
-	dx_mutex_t subscr_guard;
+	std::recursive_mutex subscr_guard{};
 	std::unordered_map<std::wstring, SymbolData*> symbols{};
 	std::unordered_set<SubscriptionData*> subscriptions{};
-	unsigned set_fields_flags;
+
+	public:
+	explicit EventSubscriptionConnectionContext(dxf_connection_t conn)
+		: connection{conn}, subscr_guard{}, symbols{}, subscriptions{} {}
+
+	dxf_connection_t getConnection() { return connection; }
+
+	std::unordered_set<SubscriptionData*> getSubscriptions() { return subscriptions; }
+
+	SymbolData* subscribeSymbol(dxf_const_string_t symbol_name, SubscriptionData* owner) {
+		SymbolData* res;
+		auto found_symbol_data = symbols.find(std::wstring(symbol_name));
+
+		if (found_symbol_data == symbols.end()) {
+			res = dx_create_symbol_data(symbol_name);
+
+			if (res == nullptr) {
+				return nullptr;
+			}
+
+			symbols[symbol_name] = res;
+		} else {
+			res = found_symbol_data->second;
+		}
+
+		if (res->subscriptions.find(owner) != res->subscriptions.end()) {
+			return res;
+		}
+
+		res->subscriptions.insert(owner);
+		res->ref_count++;
+
+		return res;
+	}
+
+	int unsubscribeSymbol(SymbolData* symbol_data, SubscriptionData* owner) {
+		int res = true;
+
+		auto found_subscription = symbol_data->subscriptions.find(owner);
+
+		if (found_subscription == symbol_data->subscriptions.end()) {
+			dx_set_error_code(dx_ec_internal_assert_violation);
+
+			res = false;
+		} else {
+			symbol_data->subscriptions.erase(owner);
+		}
+
+		if (--(symbol_data->ref_count) == 0) {
+			auto found = symbols.find(std::wstring(symbol_data->name));
+
+			if (found == symbols.end()) {
+				/* the symbol must've had been found in the container */
+				dx_set_error_code(dx_ec_internal_assert_violation);
+
+				res = false;
+			} else {
+				symbols.erase(found);
+			}
+
+			dx_cleanup_symbol_data(symbol_data);
+		}
+
+		return res;
+	}
+
+	SymbolData* findSymbol(dxf_const_string_t symbol_name) {
+		auto found = symbols.find(std::wstring(symbol_name));
+
+		if (found == symbols.end()) {
+			return nullptr;
+		}
+
+		return found->second;
+	}
+
+	template <typename F>
+	auto process(F&& f) {
+		std::lock_guard<std::recursive_mutex> lk(subscr_guard);
+
+		return f(this);
+	}
+
+	void addSubscription(SubscriptionData* data) {
+		std::lock_guard<std::recursive_mutex> lk(subscr_guard);
+
+		subscriptions.insert(data);
+	}
+
+	~EventSubscriptionConnectionContext() {
+		std::lock_guard<std::recursive_mutex> lk(subscr_guard);
+
+		for (auto&& subscription_data : subscriptions) {
+			dx_close_event_subscription((dxf_subscription_t)subscription_data);
+		}
+	}
 };
 
-#define MUTEX_FIELD_FLAG (0x1u)
-
-#define CTX(context) ((EventSubscriptionConnectionContext*)context)
-
 /* -------------------------------------------------------------------------- */
-
-int dx_clear_event_subscription_connection_context(EventSubscriptionConnectionContext* context);
 
 DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_event_subscription) {
 	CHECKED_CALL_2(dx_validate_connection_handle, connection, true);
 
-	auto context = new (std::nothrow) EventSubscriptionConnectionContext{};
-
-	if (context == nullptr) {
-		return false;
-	}
-
-	context->connection = connection;
-
-	if (!dx_mutex_create(&context->subscr_guard)) {
-		dx_clear_event_subscription_connection_context(context);
-
-		return false;
-	}
-
-	context->symbols = std::unordered_map<std::wstring, SymbolData*>();
-	context->subscriptions = std::unordered_set<SubscriptionData*>();
-	context->set_fields_flags |= MUTEX_FIELD_FLAG;
+	auto context = new (std::nothrow) EventSubscriptionConnectionContext(connection);
 
 	if (!dx_set_subsystem_data(connection, dx_ccs_event_subscription, context)) {
-		dx_clear_event_subscription_connection_context(context);
+		delete context;
 
 		return false;
 	}
@@ -225,7 +301,9 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_event_subscription) {
 		return res;
 	}
 
-	return dx_clear_event_subscription_connection_context(context);
+	delete context;
+
+	return res;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -233,32 +311,14 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_event_subscription) {
 DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_event_subscription) { return true; }
 
 /* -------------------------------------------------------------------------- */
-
-int dx_clear_event_subscription_connection_context(EventSubscriptionConnectionContext* context) {
-	int res = true;
-
-	for (auto&& subscription_data : context->subscriptions) {
-		res = dx_close_event_subscription((dxf_subscription_t)subscription_data) && res;
-	}
-
-	if (IS_FLAG_SET(context->set_fields_flags, MUTEX_FIELD_FLAG)) {
-		res = dx_mutex_destroy(&(context->subscr_guard)) && res;
-	}
-
-	context->subscriptions.clear();
-
-	delete context;
-
-	return res;
-}
-
-/* -------------------------------------------------------------------------- */
 /*
  *	Helper functions
  */
 /* -------------------------------------------------------------------------- */
 
-dxf_int_t dx_symbol_name_hasher(dxf_const_string_t symbol_name) { return std::hash<std::wstring>{}(symbol_name); }
+dxf_int_t dx_symbol_name_hasher(dxf_const_string_t symbol_name) {
+	return (dxf_int_t)std::hash<std::wstring>{}(symbol_name);
+}
 
 /* -------------------------------------------------------------------------- */
 
@@ -324,122 +384,12 @@ SymbolData* dx_create_symbol_data(dxf_const_string_t name) {
 }
 
 /* -------------------------------------------------------------------------- */
-/*
- *	Auxiliary functions
- */
-/* -------------------------------------------------------------------------- */
-
-SymbolData* dx_subscribe_symbol(EventSubscriptionConnectionContext* context, dxf_const_string_t symbol_name,
-								SubscriptionData* owner) {
-	SymbolData* res;
-	auto found_symbol_data = context->symbols.find(std::wstring(symbol_name));
-
-	if (found_symbol_data == context->symbols.end()) {
-		res = dx_create_symbol_data(symbol_name);
-
-		if (res == nullptr) {
-			return nullptr;
-		}
-
-		context->symbols[symbol_name] = res;
-	} else {
-		res = found_symbol_data->second;
-	}
-
-	if (res->subscriptions.find(owner) != res->subscriptions.end()) {
-		return res;
-	}
-
-	res->subscriptions.insert(owner);
-	++(res->ref_count);
-
-	return res;
-}
-
-/* -------------------------------------------------------------------------- */
-
-int dx_unsubscribe_symbol(EventSubscriptionConnectionContext* context, SymbolData* symbol_data,
-						  SubscriptionData* owner) {
-	int res = true;
-
-	auto found_subscription = symbol_data->subscriptions.find(owner);
-
-	if (found_subscription == symbol_data->subscriptions.end()) {
-		dx_set_error_code(dx_ec_internal_assert_violation);
-
-		res = false;
-	} else {
-		symbol_data->subscriptions.erase(owner);
-	}
-
-	if (--(symbol_data->ref_count) == 0) {
-		auto found = context->symbols.find(std::wstring(symbol_data->name));
-
-		if (found == context->symbols.end()) {
-			/* the symbol must've had been found in the container */
-			dx_set_error_code(dx_ec_internal_assert_violation);
-
-			res = false;
-		} else {
-			context->symbols.erase(found);
-		}
-
-		dx_cleanup_symbol_data(symbol_data);
-	}
-
-	return res;
-}
-
-/* -------------------------------------------------------------------------- */
-
-int dx_clear_symbol_array(EventSubscriptionConnectionContext* context,
-						  std::unordered_map<std::wstring, SymbolData*>& symbols, SubscriptionData* owner) {
-	int res = true;
-
-	for (auto&& s : symbols) {
-		res = dx_unsubscribe_symbol(context, s.second, owner) && res;
-	}
-
-	symbols.clear();
-
-	return res;
-}
-
-/* -------------------------------------------------------------------------- */
-
-SymbolData* dx_find_symbol(EventSubscriptionConnectionContext* context, dxf_const_string_t symbol_name) {
-	auto found = context->symbols.find(std::wstring(symbol_name));
-
-	if (found == context->symbols.end()) {
-		return nullptr;
-	}
-
-	return found->second;
-}
-
-/* -------------------------------------------------------------------------- */
 
 void dx_store_last_symbol_event(SymbolData* symbol_data, dx_event_id_t event_id, dxf_const_event_data_t data,
 								int data_count) {
 	dx_memcpy(symbol_data->last_events[event_id],
-			  dx_get_event_data_item(DX_EVENT_BIT_MASK(event_id), data, data_count - 1),
+			  dx_get_event_data_item(DX_EVENT_BIT_MASK((unsigned)event_id), data, data_count - 1),
 			  dx_get_event_data_struct_size(event_id));
-}
-
-/* -------------------------------------------------------------------------- */
-
-int dx_add_subscription_to_context(SubscriptionData* subscr_data) {
-	auto subscriptions = &(CTX(subscr_data->connection_context)->subscriptions);
-	auto found_subscription_data = subscriptions->find(subscr_data);
-
-	if (found_subscription_data != subscriptions->end()) {
-		/* should never be here */
-		return dx_set_error_code(dx_ec_internal_assert_violation);
-	}
-
-	subscriptions->insert(subscr_data);
-
-	return true;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -484,7 +434,7 @@ dxf_subscription_t dx_create_event_subscription(dxf_connection_t connection, uns
 		return dx_invalid_subscription;
 	}
 
-	if (event_types & DXF_ET_UNUSED) {
+	if (event_types & (unsigned)DXF_ET_UNUSED) {
 		dx_set_error_code(dx_esec_invalid_event_type);
 
 		return dx_invalid_subscription;
@@ -515,19 +465,9 @@ dxf_subscription_t dx_create_event_subscription(dxf_connection_t connection, uns
 		return dx_invalid_subscription;
 	}
 
-	if (!dx_mutex_lock(&(context->subscr_guard))) {
-		dx_free_event_subscription_data(subscr_data);
+	context->addSubscription(subscr_data);
 
-		return dx_invalid_subscription;
-	}
-
-	if (!dx_add_subscription_to_context(subscr_data)) {
-		dx_free_event_subscription_data(subscr_data);
-
-		subscr_data = (SubscriptionData*)dx_invalid_subscription;
-	}
-
-	return (dx_mutex_unlock(&(context->subscr_guard)) ? (dxf_subscription_t)subscr_data : dx_invalid_subscription);
+	return (dxf_subscription_t)subscr_data;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -542,13 +482,14 @@ int dx_close_event_subscription(dxf_subscription_t subscr_id) {
 
 	auto context = static_cast<EventSubscriptionConnectionContext*>(subscr_data->connection_context);
 
-	/* locking a guard mutex */
-	CHECKED_CALL(dx_mutex_lock, &(context->subscr_guard));
+	context->process([&res, &subscr_data](auto ctx) {
+		for (auto&& s : subscr_data->symbols) {
+			res = ctx->unsubscribeSymbol(s.second, subscr_data) && res;
+		}
 
-	res = dx_clear_symbol_array(context, subscr_data->symbols, subscr_data) && res;
-	subscr_data->listeners.clear();
-
-	res = dx_mutex_unlock(&(context->subscr_guard)) && res;
+		subscr_data->symbols.clear();
+		subscr_data->listeners.clear();
+	});
 
 	dx_free_event_subscription_data(subscr_data);
 
@@ -559,7 +500,6 @@ int dx_close_event_subscription(dxf_subscription_t subscr_id) {
 
 int dx_add_symbols(dxf_subscription_t subscr_id, dxf_const_string_t* symbols, int symbol_count) {
 	auto subscr_data = (SubscriptionData*)subscr_id;
-	int cur_symbol_index = 0;
 
 	if (subscr_id == dx_invalid_subscription) {
 		return dx_set_error_code(dx_esec_invalid_subscr_id);
@@ -567,41 +507,36 @@ int dx_add_symbols(dxf_subscription_t subscr_id, dxf_const_string_t* symbols, in
 
 	auto context = static_cast<EventSubscriptionConnectionContext*>(subscr_data->connection_context);
 
-	/* a guard mutex is required to protect the internal containers
-	from the secondary data retriever threads */
-	CHECKED_CALL(dx_mutex_lock, &(context->subscr_guard));
+	return context->process([symbols, symbol_count, &subscr_data](auto ctx) {
+		for (int cur_symbol_index = 0; cur_symbol_index < symbol_count; ++cur_symbol_index) {
+			if (dx_string_null_or_empty(symbols[cur_symbol_index])) {
+				continue;
+			}
 
-	for (; cur_symbol_index < symbol_count; ++cur_symbol_index) {
-		if (dx_string_null_or_empty(symbols[cur_symbol_index])) {
-			continue;
+			auto found = subscr_data->symbols.find(std::wstring(symbols[cur_symbol_index]));
+
+			if (found != subscr_data->symbols.end()) {
+				/* symbol is already subscribed */
+				continue;
+			}
+
+			auto symbol_data = ctx->subscribeSymbol(symbols[cur_symbol_index], subscr_data);
+
+			if (symbol_data == nullptr) {
+				return false;
+			}
+
+			subscr_data->symbols[symbols[cur_symbol_index]] = symbol_data;
 		}
 
-		auto found = subscr_data->symbols.find(std::wstring(symbols[cur_symbol_index]));
-
-		if (found != subscr_data->symbols.end()) {
-			/* symbol is already subscribed */
-			continue;
-		}
-
-		auto symbol_data = dx_subscribe_symbol(context, symbols[cur_symbol_index], subscr_data);
-
-		if (symbol_data == nullptr) {
-			dx_mutex_unlock(&(context->subscr_guard));
-
-			return false;
-		}
-
-		subscr_data->symbols[symbols[cur_symbol_index]] = symbol_data;
-	}
-
-	return dx_mutex_unlock(&(context->subscr_guard));
+		return true;
+	});
 }
 
 /* -------------------------------------------------------------------------- */
 
 int dx_remove_symbols(dxf_subscription_t subscr_id, dxf_const_string_t* symbols, size_t symbol_count) {
 	auto subscr_data = (SubscriptionData*)subscr_id;
-	size_t cur_symbol_index = 0;
 
 	if (subscr_id == dx_invalid_subscription) {
 		return dx_set_error_code(dx_esec_invalid_subscr_id);
@@ -609,32 +544,28 @@ int dx_remove_symbols(dxf_subscription_t subscr_id, dxf_const_string_t* symbols,
 
 	auto context = static_cast<EventSubscriptionConnectionContext*>(subscr_data->connection_context);
 
-	/* a guard mutex is required to protect the internal containers
-	from the secondary data retriever threads */
-	CHECKED_CALL(dx_mutex_lock, &(context->subscr_guard));
+	return context->process([&subscr_data, symbols, symbol_count](auto ctx) {
+		for (size_t cur_symbol_index = 0; cur_symbol_index < symbol_count; ++cur_symbol_index) {
+			if (dx_string_null_or_empty(symbols[cur_symbol_index])) {
+				continue;
+			}
 
-	for (; cur_symbol_index < symbol_count; ++cur_symbol_index) {
-		if (dx_string_null_or_empty(symbols[cur_symbol_index])) {
-			continue;
+			auto found = subscr_data->symbols.find(std::wstring(symbols[cur_symbol_index]));
+
+			if (found == subscr_data->symbols.end()) {
+				/* symbol wasn't subscribed */
+				continue;
+			}
+
+			if (!ctx->unsubscribeSymbol(found->second, subscr_data)) {
+				return false;
+			}
+
+			subscr_data->symbols.erase(found);
 		}
 
-		auto found = subscr_data->symbols.find(std::wstring(symbols[cur_symbol_index]));
-
-		if (found == subscr_data->symbols.end()) {
-			/* symbol wasn't subscribed */
-			continue;
-		}
-
-		if (!dx_unsubscribe_symbol(context, found->second, subscr_data)) {
-			dx_mutex_unlock(&(context->subscr_guard));
-
-			return false;
-		}
-
-		subscr_data->symbols.erase(found);
-	}
-
-	return dx_mutex_unlock(&(context->subscr_guard));
+		return true;
+	});
 }
 
 /* -------------------------------------------------------------------------- */
@@ -651,21 +582,15 @@ int dx_add_listener_impl(dxf_subscription_t subscr_id, ListenerPtr listener, Eve
 
 	auto subscr_data = (SubscriptionData*)subscr_id;
 	auto context = static_cast<EventSubscriptionConnectionContext*>(subscr_data->connection_context);
-
-	/* a guard mutex is required to protect the internal containers
-	from the secondary data retriever threads */
-	CHECKED_CALL(dx_mutex_lock, &(context->subscr_guard));
-
 	auto listener_context = ListenerContext(listener, version, user_data);
 
-	if (subscr_data->listeners.find(listener_context) != subscr_data->listeners.end()) {
-		/* listener is already added */
-		return dx_mutex_unlock(&(context->subscr_guard));
-	}
+	context->process([&subscr_data, listener_context](auto ctx) {
+		if (subscr_data->listeners.find(listener_context) == subscr_data->listeners.end()) {
+			subscr_data->listeners.emplace(listener_context);
+		}
+	});
 
-	subscr_data->listeners.emplace(listener_context);
-
-	return dx_mutex_unlock(&(context->subscr_guard));
+	return true;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -683,7 +608,6 @@ int dx_add_listener_v2(dxf_subscription_t subscr_id, dxf_event_listener_v2_t lis
 /* -------------------------------------------------------------------------- */
 
 int dx_remove_listener_impl(dxf_subscription_t subscr_id, ListenerPtr listener) {
-
 	if (subscr_id == dx_invalid_subscription) {
 		return dx_set_error_code(dx_esec_invalid_subscr_id);
 	}
@@ -694,21 +618,15 @@ int dx_remove_listener_impl(dxf_subscription_t subscr_id, ListenerPtr listener) 
 
 	auto subscr_data = (SubscriptionData*)subscr_id;
 	auto context = static_cast<EventSubscriptionConnectionContext*>(subscr_data->connection_context);
-	/*
-	a guard mutex is required to protect the internal containers
-	from the secondary data retriever threads
-	*/
-	CHECKED_CALL(dx_mutex_lock, &(context->subscr_guard));
 
-	auto listener_context_it = subscr_data->listeners.find(ListenerContext::createDummy(listener));
-	if (listener_context_it == subscr_data->listeners.end()) {
-		/* listener isn't subscribed */
-		return dx_mutex_unlock(&(context->subscr_guard));
-	}
+	context->process([&subscr_data, listener](auto ctx) {
+		auto listener_context_it = subscr_data->listeners.find(ListenerContext::createDummy(listener));
+		if (listener_context_it != subscr_data->listeners.end()) {
+			subscr_data->listeners.erase(listener_context_it);
+		}
+	});
 
-	subscr_data->listeners.erase(listener_context_it);
-
-	return dx_mutex_unlock(&(context->subscr_guard));
+	return true;
 }
 
 int dx_remove_listener(dxf_subscription_t subscr_id, dxf_event_listener_t listener) {
@@ -734,7 +652,7 @@ int dx_get_subscription_connection(dxf_subscription_t subscr_id, OUT dxf_connect
 		return dx_set_error_code(dx_ec_invalid_func_param_internal);
 	}
 
-	*connection = CTX(subscr_data->connection_context)->connection;
+	*connection = ((EventSubscriptionConnectionContext*)subscr_data->connection_context)->getConnection();
 
 	return true;
 }
@@ -813,10 +731,10 @@ int dx_set_event_subscription_flags(dxf_subscription_t subscr_id, dx_event_subsc
 	}
 
 	auto context = static_cast<EventSubscriptionConnectionContext*>(subscr_data->connection_context);
-	CHECKED_CALL(dx_mutex_lock, &(context->subscr_guard));
-	subscr_data->subscr_flags = subscr_flags;
 
-	return dx_mutex_unlock(&(context->subscr_guard));
+	context->process([&subscr_data, subscr_flags](auto ctx) { subscr_data->subscr_flags = subscr_flags; });
+
+	return true;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -842,7 +760,6 @@ int dx_get_event_subscription_time(dxf_subscription_t subscr_id, OUT dxf_long_t*
 static void dx_call_subscr_listeners(SubscriptionData* subscr_data, unsigned event_bitmask,
 									 dxf_const_string_t symbol_name, dxf_const_event_data_t data, int data_count,
 									 const dxf_event_params_t* event_params) {
-	size_t cur_listener_index = 0;
 	for (auto&& listener_context : subscr_data->listeners) {
 		switch (listener_context.getVersion()) {
 			case EventListenerVersion::Default: {
@@ -861,7 +778,6 @@ static void dx_call_subscr_listeners(SubscriptionData* subscr_data, unsigned eve
 
 			default:
 				dx_set_error_code(dx_esec_invalid_listener);
-
 		}
 	}
 }
@@ -870,7 +786,7 @@ static void dx_call_subscr_listeners(SubscriptionData* subscr_data, unsigned eve
 
 void pass_event_data_to_listeners(SymbolData* symbol_data, dx_event_id_t event_id, dxf_const_string_t symbol_name,
 								  dxf_const_event_data_t data, int data_count, const dxf_event_params_t* event_params) {
-	unsigned event_bitmask = DX_EVENT_BIT_MASK(event_id);
+	unsigned event_bitmask = DX_EVENT_BIT_MASK((unsigned)event_id);
 
 	for (auto&& subscription_data : symbol_data->subscriptions) {
 		if (!(subscription_data->event_types &
@@ -937,27 +853,25 @@ int dx_process_event_data(dxf_connection_t connection, dx_event_id_t event_id, d
 		return dx_set_error_code(dx_esec_invalid_event_type);
 	}
 
-	/* this function is supposed to be called from a different thread than the other
-	interface functions */
-	CHECKED_CALL(dx_mutex_lock, &(context->subscr_guard));
+	context->process([event_id, symbol_name, data, data_count, event_params](auto ctx) {
+		SymbolData* symbol_data = ctx->findSymbol(symbol_name);
 
-	SymbolData* symbol_data = dx_find_symbol(context, symbol_name);
+		/* symbol_data == nullptr is most likely a correct situation that occurred because the data is received very
+		soon after the symbol subscription has been annulled */
+		if (symbol_data != nullptr) {
+			dx_store_last_symbol_event(symbol_data, event_id, data, data_count);
+			pass_event_data_to_listeners(symbol_data, event_id, symbol_name, data, data_count, event_params);
+		}
 
-	/* symbol_data == nullptr is most likely a correct situation that occurred because the data is received very soon
-	after the symbol subscription has been annulled */
-	if (symbol_data != nullptr) {
-		dx_store_last_symbol_event(symbol_data, event_id, data, data_count);
-		pass_event_data_to_listeners(symbol_data, event_id, symbol_name, data, data_count, event_params);
-	}
+		SymbolData* wildcard_symbol_data = ctx->findSymbol(L"*");
 
-	SymbolData* wildcard_symbol_data = dx_find_symbol(context, L"*");
+		if (wildcard_symbol_data != nullptr) {
+			dx_store_last_symbol_event(wildcard_symbol_data, event_id, data, data_count);
+			pass_event_data_to_listeners(wildcard_symbol_data, event_id, symbol_name, data, data_count, event_params);
+		}
+	});
 
-	if (wildcard_symbol_data != nullptr) {
-		dx_store_last_symbol_event(wildcard_symbol_data, event_id, data, data_count);
-		pass_event_data_to_listeners(wildcard_symbol_data, event_id, symbol_name, data, data_count, event_params);
-	}
-
-	return dx_mutex_unlock(&(context->subscr_guard));
+	return true;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -967,7 +881,6 @@ int dx_process_event_data(dxf_connection_t connection, dx_event_id_t event_id, d
 
 int dx_get_last_symbol_event(dxf_connection_t connection, dxf_const_string_t symbol_name, int event_type,
 							 OUT dxf_event_data_t* event_data) {
-	SymbolData* symbol_data;
 	dx_event_id_t event_id;
 	int res;
 	auto context = static_cast<EventSubscriptionConnectionContext*>(
@@ -991,20 +904,19 @@ int dx_get_last_symbol_event(dxf_connection_t connection, dxf_const_string_t sym
 
 	event_id = dx_get_event_id_by_bitmask(event_type);
 
-	CHECKED_CALL(dx_mutex_lock, &(context->subscr_guard));
+	return context->process([symbol_name, event_id, &event_data](auto ctx) -> int {
+		SymbolData* symbol_data;
 
-	if ((symbol_data = dx_find_symbol(context, symbol_name)) == nullptr) {
-		dx_mutex_unlock(&(context->subscr_guard));
+		if ((symbol_data = ctx->findSymbol(symbol_name)) == nullptr) {
+			return dx_set_error_code(dx_esec_invalid_symbol_name);
+		}
 
-		return dx_set_error_code(dx_esec_invalid_symbol_name);
-	}
+		dx_memcpy(symbol_data->last_events_accessed[event_id], symbol_data->last_events[event_id],
+				  dx_get_event_data_struct_size(event_id));
+		*event_data = symbol_data->last_events_accessed[event_id];
 
-	dx_memcpy(symbol_data->last_events_accessed[event_id], symbol_data->last_events[event_id],
-			  dx_get_event_data_struct_size(event_id));
-
-	*event_data = symbol_data->last_events_accessed[event_id];
-
-	return dx_mutex_unlock(&(context->subscr_guard));
+		return true;
+	});
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1022,30 +934,28 @@ int dx_process_connection_subscriptions(dxf_connection_t connection, dx_subscrip
 		return false;
 	}
 
-	CHECKED_CALL(dx_mutex_lock, &(context->subscr_guard));
+	return context->process([connection, processor](auto ctx) {
+		const auto& subscriptions = ctx->getSubscriptions();
 
-	auto& subscriptions = CTX(context)->subscriptions;
+		for (auto&& subscription_data : subscriptions) {
+			dxf_const_string_t* symbols = nullptr;
+			size_t symbol_count = 0;
+			unsigned event_types = 0;
+			auto subscr_flags = static_cast<dx_event_subscr_flag>(0);
+			dxf_long_t time;
 
-	for (auto&& subscription_data : subscriptions) {
-		dxf_const_string_t* symbols = nullptr;
-		size_t symbol_count = 0;
-		unsigned event_types = 0;
-		auto subscr_flags = static_cast<dx_event_subscr_flag>(0);
-		dxf_long_t time;
-
-		if (!dx_get_event_subscription_symbols(subscription_data, &symbols, &symbol_count) ||
-			!dx_get_event_subscription_event_types(subscription_data, &event_types) ||
-			!dx_get_event_subscription_flags(subscription_data, &subscr_flags) ||
-			!dx_get_event_subscription_time(subscription_data, &time) ||
-			!processor(connection, dx_get_order_source(subscription_data), symbols, symbol_count, event_types,
-					   subscr_flags, time)) {
-			dx_mutex_unlock(&(context->subscr_guard));
-
-			return false;
+			if (!dx_get_event_subscription_symbols(subscription_data, &symbols, &symbol_count) ||
+				!dx_get_event_subscription_event_types(subscription_data, &event_types) ||
+				!dx_get_event_subscription_flags(subscription_data, &subscr_flags) ||
+				!dx_get_event_subscription_time(subscription_data, &time) ||
+				!processor(connection, dx_get_order_source(subscription_data), symbols, symbol_count, event_types,
+						   subscr_flags, time)) {
+				return false;
+			}
 		}
-	}
 
-	return dx_mutex_unlock(&(context->subscr_guard));
+		return true;
+	});
 }
 
 /* -------------------------------------------------------------------------- */
