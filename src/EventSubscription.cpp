@@ -489,14 +489,14 @@ int dx_close_event_subscription_impl(dxf_subscription_t subscr_id, bool remove_f
 
 	auto context = static_cast<EventSubscriptionConnectionContext*>(subscr_data->connection_context);
 
-	context->process([&res, &subscr_data, remove_from_context](auto ctx) {
+	context->process([&res, &subscr_data, remove_from_context](EventSubscriptionConnectionContext* ctx) {
 		for (auto&& s : subscr_data->symbols) {
 			res = ctx->unsubscribeSymbol(s.second, subscr_data) && res;
 		}
 
 		subscr_data->symbols.clear();
 		subscr_data->listeners.clear();
-		
+
 		if (remove_from_context) {
 			ctx->removeSubscription(subscr_data);
 		}
@@ -522,7 +522,7 @@ int dx_add_symbols(dxf_subscription_t subscr_id, dxf_const_string_t* symbols, in
 
 	auto context = static_cast<EventSubscriptionConnectionContext*>(subscr_data->connection_context);
 
-	return context->process([symbols, symbol_count, &subscr_data](auto ctx) {
+	return context->process([symbols, symbol_count, &subscr_data](EventSubscriptionConnectionContext* ctx) {
 		for (int cur_symbol_index = 0; cur_symbol_index < symbol_count; ++cur_symbol_index) {
 			if (dx_string_null_or_empty(symbols[cur_symbol_index])) {
 				continue;
@@ -559,7 +559,7 @@ int dx_remove_symbols(dxf_subscription_t subscr_id, dxf_const_string_t* symbols,
 
 	auto context = static_cast<EventSubscriptionConnectionContext*>(subscr_data->connection_context);
 
-	return context->process([&subscr_data, symbols, symbol_count](auto ctx) {
+	return context->process([&subscr_data, symbols, symbol_count](EventSubscriptionConnectionContext* ctx) {
 		for (size_t cur_symbol_index = 0; cur_symbol_index < symbol_count; ++cur_symbol_index) {
 			if (dx_string_null_or_empty(symbols[cur_symbol_index])) {
 				continue;
@@ -599,7 +599,7 @@ int dx_add_listener_impl(dxf_subscription_t subscr_id, ListenerPtr listener, Eve
 	auto context = static_cast<EventSubscriptionConnectionContext*>(subscr_data->connection_context);
 	auto listener_context = ListenerContext(listener, version, user_data);
 
-	context->process([&subscr_data, listener_context](auto ctx) {
+	context->process([&subscr_data, listener_context](EventSubscriptionConnectionContext* ctx) {
 		if (subscr_data->listeners.find(listener_context) == subscr_data->listeners.end()) {
 			subscr_data->listeners.emplace(listener_context);
 		}
@@ -634,7 +634,7 @@ int dx_remove_listener_impl(dxf_subscription_t subscr_id, ListenerPtr listener) 
 	auto subscr_data = static_cast<SubscriptionData*>(subscr_id);
 	auto context = static_cast<EventSubscriptionConnectionContext*>(subscr_data->connection_context);
 
-	context->process([&subscr_data, listener](auto ctx) {
+	context->process([&subscr_data, listener](EventSubscriptionConnectionContext* ctx) {
 		auto listener_context_it = subscr_data->listeners.find(ListenerContext::createDummy(listener));
 		if (listener_context_it != subscr_data->listeners.end()) {
 			subscr_data->listeners.erase(listener_context_it);
@@ -747,7 +747,9 @@ int dx_set_event_subscription_flags(dxf_subscription_t subscr_id, dx_event_subsc
 
 	auto context = static_cast<EventSubscriptionConnectionContext*>(subscr_data->connection_context);
 
-	context->process([&subscr_data, subscr_flags](auto ctx) { subscr_data->subscr_flags = subscr_flags; });
+	context->process([&subscr_data, subscr_flags](EventSubscriptionConnectionContext* ctx) {
+		subscr_data->subscr_flags = subscr_flags;
+	});
 
 	return true;
 }
@@ -868,7 +870,7 @@ int dx_process_event_data(dxf_connection_t connection, dx_event_id_t event_id, d
 		return dx_set_error_code(dx_esec_invalid_event_type);
 	}
 
-	context->process([event_id, symbol_name, data, data_count, event_params](auto ctx) {
+	context->process([event_id, symbol_name, data, data_count, event_params](EventSubscriptionConnectionContext* ctx) {
 		SymbolData* symbol_data = ctx->findSymbol(symbol_name);
 
 		/* symbol_data == nullptr is most likely a correct situation that occurred because the data is received very
@@ -919,7 +921,7 @@ int dx_get_last_symbol_event(dxf_connection_t connection, dxf_const_string_t sym
 
 	event_id = dx_get_event_id_by_bitmask(event_type);
 
-	return context->process([symbol_name, event_id, &event_data](auto ctx) -> int {
+	return context->process([symbol_name, event_id, &event_data](EventSubscriptionConnectionContext* ctx) -> int {
 		SymbolData* symbol_data;
 
 		if ((symbol_data = ctx->findSymbol(symbol_name)) == nullptr) {
@@ -949,7 +951,7 @@ int dx_process_connection_subscriptions(dxf_connection_t connection, dx_subscrip
 		return false;
 	}
 
-	return context->process([connection, processor](auto ctx) {
+	return context->process([connection, processor](EventSubscriptionConnectionContext* ctx) {
 		const auto& subscriptions = ctx->getSubscriptions();
 
 		for (auto&& subscription_data : subscriptions) {
