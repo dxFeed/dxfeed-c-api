@@ -563,7 +563,7 @@ void atomic_write_time(time_t volatile * dest, time_t src);
 #else
 
 #ifdef __GNUC__
-#warning "no fence, no atomic read/write for 64 bit variables on 32 bit platforms, additional synchronization is needed";
+#pragma message ("no fence, no atomic read/write for 64 bit variables on 32 bit platforms, additional synchronization is needed")
 #endif
 
 long long atomic_read(long long* value);

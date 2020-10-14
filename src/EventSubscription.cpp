@@ -258,7 +258,9 @@ int dx_clear_event_subscription_connection_context(EventSubscriptionConnectionCo
  */
 /* -------------------------------------------------------------------------- */
 
-dxf_int_t dx_symbol_name_hasher(dxf_const_string_t symbol_name) { return std::hash<std::wstring>{}(symbol_name); }
+dxf_ulong_t dx_symbol_name_hasher(dxf_const_string_t symbol_name) {
+	return static_cast<dxf_ulong_t>(std::hash<std::wstring>{}(symbol_name));
+}
 
 /* -------------------------------------------------------------------------- */
 

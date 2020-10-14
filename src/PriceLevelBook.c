@@ -405,9 +405,9 @@ static void dx_plb_source_cleanup(dx_plb_connection_context_t* context, dx_plb_s
 /* -------------------------------------------------------------------------- */
 
 static dxf_ulong_t dx_plb_source_hash(dxf_const_string_t symbol, dxf_const_string_t src) {
-	dxf_int_t h1 = dx_symbol_name_hasher(symbol);
-	dxf_int_t h2 = dx_symbol_name_hasher(src);
-	return ((dxf_ulong_t)h1) << 32 | (dxf_ulong_t)h2;
+	dxf_ulong_t h1 = dx_symbol_name_hasher(symbol);
+	dxf_ulong_t h2 = dx_symbol_name_hasher(src);
+	return ((dxf_ulong_t)h1) << 32u | (dxf_ulong_t)h2;
 }
 
 /* -------------------------------------------------------------------------- */

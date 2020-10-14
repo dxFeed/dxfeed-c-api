@@ -412,15 +412,15 @@ size_t dx_get_event_subscription_params(dxf_connection_t connection, dx_order_so
  */
 /* -------------------------------------------------------------------------- */
 
-typedef const dxf_event_data_t (*dx_event_data_navigator) (const dxf_event_data_t data, size_t index);
+typedef dxf_const_event_data_t (*dx_event_data_navigator) (dxf_const_event_data_t data, size_t index);
 #define EVENT_DATA_NAVIGATOR_NAME(struct_name) \
 	struct_name##_data_navigator
 
 #define EVENT_DATA_NAVIGATOR_BODY(struct_name) \
-	const dxf_event_data_t EVENT_DATA_NAVIGATOR_NAME(struct_name) (const dxf_event_data_t data, size_t index) { \
+	dxf_const_event_data_t EVENT_DATA_NAVIGATOR_NAME(struct_name) (dxf_const_event_data_t data, size_t index) { \
 		struct_name* buffer = (struct_name*)data; \
 		\
-		return (const dxf_event_data_t)(buffer + index); \
+		return (dxf_const_event_data_t)(buffer + index); \
 	}
 
 EVENT_DATA_NAVIGATOR_BODY(dxf_trade_t)
@@ -455,6 +455,6 @@ static const dx_event_data_navigator g_event_data_navigators[dx_eid_count] = {
 
 /* -------------------------------------------------------------------------- */
 
-const dxf_event_data_t dx_get_event_data_item (int event_mask, dxf_const_event_data_t data, size_t index) {
+dxf_const_event_data_t dx_get_event_data_item (int event_mask, dxf_const_event_data_t data, size_t index) {
 	return g_event_data_navigators[dx_get_event_id_by_bitmask(event_mask)](data, index);
 }

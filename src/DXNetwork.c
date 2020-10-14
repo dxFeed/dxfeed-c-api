@@ -138,9 +138,6 @@ typedef struct {
 	int set_fields_flags;
 } dx_network_connection_context_t;
 
-static dx_mutex_t g_tls_init_guard;
-static int g_tls_init_guard_initialized = false;
-
 #define SOCKET_FIELD_FLAG           (1 << 0)
 #define READER_THREAD_FIELD_FLAG    (1 << 1)
 #define MUTEX_FIELD_FLAG            (1 << 2)
@@ -1390,7 +1387,7 @@ int dx_protocol_property_get_snapshot(dxf_connection_t connection,
 	*pSize = 0;
 
 	int res = true;
-	const dx_network_connection_context_t* const pContext = dx_get_subsystem_data(connection, dx_ccs_network, &res);
+	dx_network_connection_context_t* pContext = dx_get_subsystem_data(connection, dx_ccs_network, &res);
 	if (pContext == NULL) {
 		if (res) {
 			dx_set_error_code(dx_cec_connection_context_not_initialized);
