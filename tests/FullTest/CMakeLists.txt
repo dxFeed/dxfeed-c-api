@@ -21,7 +21,7 @@ set(LIB_DXFEED_OUT_DIR ${CMAKE_BINARY_DIR}/${LIB_DXFEED_PROJ})
 
 set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE INTERNAL "" FORCE)
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED on)
+set(CMAKE_C_STANDARD_REQUIRED on)
 
 project(${PROJECT}) 
 
@@ -38,6 +38,7 @@ set(SOURCE_FILES
     )
     
 set(ADDITIONAL_PROPERTIES "")
+set(ADDITIONAL_LIBRARIES "")
 
 if (WIN32)
     add_definitions(-D_CONSOLE -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE)
@@ -60,13 +61,17 @@ else ()
     set(CMAKE_C_FLAGS_DEBUG "-g -O0 -fPIC")
     set(CMAKE_C_FLAGS_RELEASE "-O2 -fPIC")
     add_definitions(-DUSE_PTHREADS)
+    set(ADDITIONAL_LIBRARIES
+            ${ADDITIONAL_LIBRARIES}
+            pthread rt
+            )
 endif (WIN32)
 
 source_group("Source Files" FILES ${SOURCE_FILES}) 
 
 add_executable(${PROJECT} ${SOURCE_FILES})
 
-target_link_libraries(${PROJECT} DXFeed)
+target_link_libraries(${PROJECT} DXFeed ${ADDITIONAL_LIBRARIES})
 
 set_target_properties(${PROJECT} 
     PROPERTIES 

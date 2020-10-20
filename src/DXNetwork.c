@@ -138,6 +138,11 @@ typedef struct {
 	int set_fields_flags;
 } dx_network_connection_context_t;
 
+#ifdef DXFEED_CODEC_TLS_ENABLED
+static dx_mutex_t g_tls_init_guard;
+static int g_tls_init_guard_initialized = false;
+#endif
+
 #define SOCKET_FIELD_FLAG           (1 << 0)
 #define READER_THREAD_FIELD_FLAG    (1 << 1)
 #define MUTEX_FIELD_FLAG            (1 << 2)
