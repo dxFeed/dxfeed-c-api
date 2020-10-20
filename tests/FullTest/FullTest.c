@@ -1,3 +1,9 @@
+#ifdef _WIN32
+#	ifndef _CRT_STDIO_ISO_WIDE_SPECIFIERS
+#		define _CRT_STDIO_ISO_WIDE_SPECIFIERS 1
+#	endif
+#endif
+
 #include <DXThreads.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -259,7 +265,7 @@ void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
 	is_listener_thread_terminated = true;
 	dx_mutex_unlock(&listener_thread_guard);
 
-	printf("\nTerminating listener thread, host: %s\n", dxfeed_host);
+	wprintf(L"\nTerminating listener thread, host: %s\n", dxfeed_host);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -680,12 +686,7 @@ void snapshot_listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_d
 		return;
 	}
 
-#ifdef _WIN32
-	swprintf(str, sizeof(str), L"Snapshot %ls#%hs:        ",
-#else
-	swprintf(str, sizeof(str), L"Snapshot %ls#%s:        ",
-#endif
-			 dx_event_type_to_string(info->event_type), info->source);
+	swprintf(str, sizeof(str), L"Snapshot %ls#%s:        ", dx_event_type_to_string(info->event_type), info->source);
 	print_at(coord, str);
 	int ind = get_symbol_index(snapshot_data->symbol);
 	if (ind == -1) {
@@ -711,7 +712,7 @@ void process_last_error() {
 
 	if (res == DXF_SUCCESS) {
 		if (error_code == dx_ec_success) {
-			printf("No error information is stored");
+			wprintf(L"No error information is stored");
 
 			return;
 		}
@@ -723,7 +724,7 @@ void process_last_error() {
 		return;
 	}
 
-	printf("An error occurred but the error subsystem failed to initialize\n");
+	wprintf(L"An error occurred but the error subsystem failed to initialize\n");
 }
 
 dxf_subscription_t create_subscription(dxf_connection_t connection, int event_id) {
@@ -952,7 +953,7 @@ int main(int argc, char* argv[]) {
 		dx_sleep(MAIN_LOOP_SLEEP_MILLIS);
 	}
 
-	printf("Disconnecting from host...\n");
+	wprintf(L"Disconnecting from host...\n");
 
 	if (!dxf_close_connection(connection)) {
 		process_last_error();
@@ -960,9 +961,9 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 
-	printf(
-		"Disconnect successful!\n"
-		"Connection test completed successfully!\n");
+	wprintf(
+		L"Disconnect successful!\n"
+		L"Connection test completed successfully!\n");
 
 	dx_mutex_destroy(&listener_thread_guard);
 

@@ -149,7 +149,7 @@
 	(1 << (index))
 
 #define IS_FLAG_SET(flags, flag) \
-	((flags & flag) != 0)
+	((flags & (flag)) != 0)
 
 #define UNSIGNED_TYPE_dxf_int_t \
 	dxf_uint_t

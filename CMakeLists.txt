@@ -36,6 +36,7 @@ add_subdirectory(wrappers/cpp)
 add_subdirectory(tests/FullTest)
 add_subdirectory(tests/APITest)
 add_subdirectory(tests/ConnectionTest)
+add_subdirectory(tests/LastEventTest)
 
 set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/DXFeedAllCPackConfig.cmake")
 set(CPACK_PACKAGE_VENDOR "dxFeed Solutions DE GmbH")

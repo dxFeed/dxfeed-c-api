@@ -20,6 +20,8 @@ set(LIB_DXFEED_NAME ${LIB_DXFEED_PROJ})
 set(LIB_DXFEED_OUT_DIR ${CMAKE_BINARY_DIR}/${LIB_DXFEED_PROJ})
 
 set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE INTERNAL "" FORCE)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED on)
 
 project(${PROJECT})
 
@@ -49,14 +51,15 @@ if (WIN32)
         set(CMAKE_C_STANDARD_LIBRARIES "" CACHE STRING "" FORCE)
         # End hack
     elseif (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
-        set(CMAKE_C_FLAGS_DEBUG "-g -O0 -std=gnu11 -D_DEBUG")
-        set(CMAKE_C_FLAGS_RELEASE "-O2 -std=gnu11 -DNDEBUG -DWIN32")
+        set(CMAKE_C_FLAGS_DEBUG "-g -O0 -D_DEBUG")
+        set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG -DWIN32")
     else ()
         message("Unknown compiler")
     endif ()
 else ()
-    set(CMAKE_C_FLAGS_DEBUG "-g -O0 -std=gnu11 -fPIC")
-    set(CMAKE_C_FLAGS_RELEASE "-O2 -std=gnu11 -fPIC")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pedantic")
+    set(CMAKE_C_FLAGS_DEBUG "-g -O0 -fPIC")
+    set(CMAKE_C_FLAGS_RELEASE "-O2 -fPIC")
     add_definitions(-DUSE_PTHREADS)
 endif (WIN32)
 
