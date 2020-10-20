@@ -34,6 +34,8 @@ add_subdirectory(tests/IncSnapshotConsoleSample)
 add_subdirectory(wrappers/cpp)
 
 add_subdirectory(tests/FullTest)
+add_subdirectory(tests/APITest)
+add_subdirectory(tests/ConnectionTest)
 
 set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/DXFeedAllCPackConfig.cmake")
 set(CPACK_PACKAGE_VENDOR "dxFeed Solutions DE GmbH")

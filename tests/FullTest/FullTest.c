@@ -1,23 +1,22 @@
-#include "DXFeed.h"
-#include "DXErrorCodes.h"
-#include "Logger.h"
-#include <stdio.h>
-#include <wctype.h>
-#include <stdlib.h>
 #include <DXThreads.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <wctype.h>
+
+#include "DXErrorCodes.h"
+#include "DXFeed.h"
+#include "Logger.h"
 
 #ifdef _WIN32
-#include <Windows.h>
+#	include <Windows.h>
 
 // To fix problem with MS implementation of swprintf
-#define swprintf _snwprintf
+#	define swprintf _snwprintf
 HANDLE g_out_console;
 
-void dx_sleep (int milliseconds) {
-	Sleep((DWORD)milliseconds);
-}
+void dx_sleep(int milliseconds) { Sleep((DWORD)milliseconds); }
 
-int dx_mutex_create (dx_mutex_t* mutex) {
+int dx_mutex_create(dx_mutex_t* mutex) {
 	*mutex = calloc(1, sizeof(CRITICAL_SECTION));
 	InitializeCriticalSection(*mutex);
 	return true;
@@ -25,7 +24,7 @@ int dx_mutex_create (dx_mutex_t* mutex) {
 
 /* -------------------------------------------------------------------------- */
 
-int dx_mutex_destroy (dx_mutex_t* mutex) {
+int dx_mutex_destroy(dx_mutex_t* mutex) {
 	DeleteCriticalSection(*mutex);
 	free(*mutex);
 	return true;
@@ -33,24 +32,25 @@ int dx_mutex_destroy (dx_mutex_t* mutex) {
 
 /* -------------------------------------------------------------------------- */
 
-int dx_mutex_lock (dx_mutex_t* mutex) {
+int dx_mutex_lock(dx_mutex_t* mutex) {
 	EnterCriticalSection(*mutex);
 	return true;
 }
 
 /* -------------------------------------------------------------------------- */
 
-int dx_mutex_unlock (dx_mutex_t* mutex) {
+int dx_mutex_unlock(dx_mutex_t* mutex) {
 	LeaveCriticalSection(*mutex);
 	return true;
 }
 #else
-#include <time.h>
-#include "pthread.h"
+#	include <time.h>
 
-void dx_sleep (int milliseconds) {
+#	include "pthread.h"
+
+void dx_sleep(int milliseconds) {
 	struct timespec ts;
-	ts.tv_sec  = milliseconds / 1000;
+	ts.tv_sec = milliseconds / 1000;
 	ts.tv_nsec = (milliseconds % 1000) * 1000000;
 	nanosleep(&ts, NULL);
 }
@@ -60,7 +60,7 @@ typedef struct {
 	int Y;
 } COORD;
 
-int dx_mutex_create (dx_mutex_t* mutex) {
+int dx_mutex_create(dx_mutex_t* mutex) {
 	if (pthread_mutexattr_init(&mutex->attr) != 0) {
 		return false;
 	}
@@ -78,7 +78,7 @@ int dx_mutex_create (dx_mutex_t* mutex) {
 
 /* -------------------------------------------------------------------------- */
 
-int dx_mutex_destroy (dx_mutex_t* mutex) {
+int dx_mutex_destroy(dx_mutex_t* mutex) {
 	if (pthread_mutex_destroy(&mutex->mutex) != 0) {
 		return false;
 	}
@@ -92,7 +92,7 @@ int dx_mutex_destroy (dx_mutex_t* mutex) {
 
 /* -------------------------------------------------------------------------- */
 
-int dx_mutex_lock (dx_mutex_t* mutex) {
+int dx_mutex_lock(dx_mutex_t* mutex) {
 	if (pthread_mutex_lock(&mutex->mutex) != 0) {
 		return false;
 	}
@@ -102,7 +102,7 @@ int dx_mutex_lock (dx_mutex_t* mutex) {
 
 /* -------------------------------------------------------------------------- */
 
-int dx_mutex_unlock (dx_mutex_t* mutex) {
+int dx_mutex_unlock(dx_mutex_t* mutex) {
 	if (pthread_mutex_unlock(&mutex->mutex) != 0) {
 		return false;
 	}
@@ -113,103 +113,115 @@ int dx_mutex_unlock (dx_mutex_t* mutex) {
 #endif
 
 static char dxfeed_host_default[] = "demo.dxfeed.com:7300";
-//const char dxfeed_host[] = "localhost:5678";
-
+// const char dxfeed_host[] = "localhost:5678";
 
 dxf_const_string_t dx_event_type_to_string(int event_type) {
 	switch (event_type) {
-		case DXF_ET_TRADE: return L"Trade";
-		case DXF_ET_QUOTE: return L"Quote";
-		case DXF_ET_SUMMARY: return L"Summary";
-		case DXF_ET_PROFILE: return L"Profile";
-		case DXF_ET_ORDER: return L"Order";
-		case DXF_ET_TIME_AND_SALE: return L"Time&Sale";
-		case DXF_ET_CANDLE: return L"Candle";
-		case DXF_ET_TRADE_ETH: return L"TradeETH";
-		case DXF_ET_SPREAD_ORDER: return L"SpreadOrder";
-		case DXF_ET_GREEKS: return L"Greeks";
-		case DXF_ET_THEO_PRICE: return L"THEO_PRICE";
-		case DXF_ET_UNDERLYING: return L"Underlying";
-		case DXF_ET_SERIES: return L"Series";
-		case DXF_ET_CONFIGURATION: return L"Configuration";
-		default: return L"";
+		case DXF_ET_TRADE:
+			return L"Trade";
+		case DXF_ET_QUOTE:
+			return L"Quote";
+		case DXF_ET_SUMMARY:
+			return L"Summary";
+		case DXF_ET_PROFILE:
+			return L"Profile";
+		case DXF_ET_ORDER:
+			return L"Order";
+		case DXF_ET_TIME_AND_SALE:
+			return L"Time&Sale";
+		case DXF_ET_CANDLE:
+			return L"Candle";
+		case DXF_ET_TRADE_ETH:
+			return L"TradeETH";
+		case DXF_ET_SPREAD_ORDER:
+			return L"SpreadOrder";
+		case DXF_ET_GREEKS:
+			return L"Greeks";
+		case DXF_ET_THEO_PRICE:
+			return L"TheoPrice";
+		case DXF_ET_UNDERLYING:
+			return L"Underlying";
+		case DXF_ET_SERIES:
+			return L"Series";
+		case DXF_ET_CONFIGURATION:
+			return L"Configuration";
+		default:
+			return L"";
 	}
 }
 
 #define SYMBOLS_COUNT 4
-static const dxf_const_string_t g_symbols[] = { L"IBM", L"MSFT", L"YHOO", L"C" };
+static const dxf_const_string_t g_symbols[] = {L"IBM", L"MSFT", L"YHOO", L"C"};
 #define MAIN_LOOP_SLEEP_MILLIS 100
 
 /* -------------------------------------------------------------------------- */
-void trade_listener(int event_type, dxf_const_string_t symbol_name,
-					const dxf_event_data_t* data, int data_count, void* user_data);
-void quote_listener(int event_type, dxf_const_string_t symbol_name,
-					const dxf_event_data_t* data, int data_count, void* user_data);
-void summary_listener(int event_type, dxf_const_string_t symbol_name,
-					const dxf_event_data_t* data, int data_count, void* user_data);
-void profile_listener(int event_type, dxf_const_string_t symbol_name,
-					const dxf_event_data_t* data, int data_count, void* user_data);
-void order_listener(int event_type, dxf_const_string_t symbol_name,
-					const dxf_event_data_t* data, int data_count, void* user_data);
-void time_and_sale_listener(int event_type, dxf_const_string_t symbol_name,
-							const dxf_event_data_t* data, int data_count, void* user_data);
-void candle_listener(int event_type, dxf_const_string_t symbol_name,
-					const dxf_event_data_t* data, int data_count, void* user_data);
-void trade_eth_listener(int event_type, dxf_const_string_t symbol_name,
-						const dxf_event_data_t* data, int data_count, void* user_data);
-void spread_order_listener(int event_type, dxf_const_string_t symbol_name,
-						const dxf_event_data_t* data, int data_count, void* user_data);
-void greeks_listener(int event_type, dxf_const_string_t symbol_name,
-					const dxf_event_data_t* data, int data_count, void* user_data);
-void theo_price_listener(int event_type, dxf_const_string_t symbol_name,
-						const dxf_event_data_t* data, int data_count, void* user_data);
-void underlying_listener(int event_type, dxf_const_string_t symbol_name,
-						const dxf_event_data_t* data, int data_count, void* user_data);
-void series_listener(int event_type, dxf_const_string_t symbol_name,
-					const dxf_event_data_t* data, int data_count, void* user_data);
-void configuration_listener(int event_type, dxf_const_string_t symbol_name,
-							const dxf_event_data_t* data, int data_count, void* user_data);
+void trade_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
+					void* user_data);
+void quote_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
+					void* user_data);
+void summary_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
+					  void* user_data);
+void profile_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
+					  void* user_data);
+void order_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
+					void* user_data);
+void time_and_sale_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data,
+							int data_count, void* user_data);
+void candle_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
+					 void* user_data);
+void trade_eth_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
+						void* user_data);
+void spread_order_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
+						   void* user_data);
+void greeks_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
+					 void* user_data);
+void theo_price_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
+						 void* user_data);
+void underlying_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
+						 void* user_data);
+void series_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
+					 void* user_data);
+void configuration_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data,
+							int data_count, void* user_data);
 void snapshot_listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data);
 
 struct event_info_t {
-	dx_event_id_t       id;
-	int                 event_type;
-	COORD               coord;
+	dx_event_id_t id;
+	int event_type;
+	COORD coord;
 	dxf_event_listener_t listener;
-	unsigned int        total_data_count[SYMBOLS_COUNT];
+	unsigned int total_data_count[SYMBOLS_COUNT];
 };
 
 static struct event_info_t event_info[dx_eid_count] = {
-	{ dx_eid_trade, DXF_ET_TRADE, { 0, 0 }, trade_listener, 0 },
-	{ dx_eid_quote, DXF_ET_QUOTE, { 22, 0 }, quote_listener, 0 },
-	{ dx_eid_summary, DXF_ET_SUMMARY, { 0, 6 }, summary_listener, 0 },
-	{ dx_eid_profile, DXF_ET_PROFILE, { 22, 6 }, profile_listener, 0 },
-	{ dx_eid_order, DXF_ET_ORDER, { 0, 12 }, order_listener, 0 },
-	{ dx_eid_time_and_sale, DXF_ET_TIME_AND_SALE, { 20, 12 }, time_and_sale_listener, 0 },
-	{ dx_eid_candle, DXF_ET_CANDLE, { 0,  18}, candle_listener, 0 },
-	{ dx_eid_trade_eth, DXF_ET_TRADE_ETH, { 22, 18 }, trade_eth_listener, 0 },
-	{ dx_eid_spread_order, DXF_ET_SPREAD_ORDER, { 0, 24 }, spread_order_listener, 0 },
-	{ dx_eid_greeks, DXF_ET_GREEKS, { 22, 24 }, greeks_listener, 0 },
-	{ dx_eid_theo_price, DXF_ET_THEO_PRICE, { 0, 30 }, theo_price_listener, 0 },
-	{ dx_eid_underlying, DXF_ET_UNDERLYING, { 22, 30 }, underlying_listener, 0 },
-	{ dx_eid_series, DXF_ET_SERIES, { 0, 36 }, series_listener, 0 },
-	{ dx_eid_configuration, DXF_ET_CONFIGURATION,{ 22, 36 }, configuration_listener, 0 }
-};
+	{dx_eid_trade, DXF_ET_TRADE, {0, 0}, trade_listener, {0}},
+	{dx_eid_quote, DXF_ET_QUOTE, {22, 0}, quote_listener, {0}},
+	{dx_eid_summary, DXF_ET_SUMMARY, {0, 6}, summary_listener, {0}},
+	{dx_eid_profile, DXF_ET_PROFILE, {22, 6}, profile_listener, {0}},
+	{dx_eid_order, DXF_ET_ORDER, {0, 12}, order_listener, {0}},
+	{dx_eid_time_and_sale, DXF_ET_TIME_AND_SALE, {20, 12}, time_and_sale_listener, {0}},
+	{dx_eid_candle, DXF_ET_CANDLE, {0, 18}, candle_listener, {0}},
+	{dx_eid_trade_eth, DXF_ET_TRADE_ETH, {22, 18}, trade_eth_listener, {0}},
+	{dx_eid_spread_order, DXF_ET_SPREAD_ORDER, {0, 24}, spread_order_listener, {0}},
+	{dx_eid_greeks, DXF_ET_GREEKS, {22, 24}, greeks_listener, {0}},
+	{dx_eid_theo_price, DXF_ET_THEO_PRICE, {0, 30}, theo_price_listener, {0}},
+	{dx_eid_underlying, DXF_ET_UNDERLYING, {22, 30}, underlying_listener, {0}},
+	{dx_eid_series, DXF_ET_SERIES, {0, 36}, series_listener, {0}},
+	{dx_eid_configuration, DXF_ET_CONFIGURATION, {22, 36}, configuration_listener, {0}}};
 
 struct snapshot_info_t {
-	dx_event_id_t           id;
-	int                     event_type;
-	const char              source[100];
-	COORD                   coord;
+	dx_event_id_t id;
+	int event_type;
+	const char source[100];
+	COORD coord;
 	dxf_snapshot_listener_t listener;
-	size_t                  total_data_count[SYMBOLS_COUNT];
-	dxf_snapshot_t          obj[SYMBOLS_COUNT];
+	size_t total_data_count[SYMBOLS_COUNT];
+	dxf_snapshot_t obj[SYMBOLS_COUNT];
 };
 
 #define SNAPSHOT_COUNT 1
 static struct snapshot_info_t snapshot_info[SNAPSHOT_COUNT] = {
-	{ dx_eid_order, DXF_ET_ORDER, "NTV", {0, 42}, snapshot_listener, 0 }
-};
+	{dx_eid_order, DXF_ET_ORDER, "NTV", {0, 42}, snapshot_listener, {0}}};
 
 /* -------------------------------------------------------------------------- */
 
@@ -241,7 +253,7 @@ void print_at(COORD c, wchar_t* str) {
 }
 #endif
 
-void on_reader_thread_terminate (dxf_connection_t connection, void* user_data) {
+void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
 	char* dxfeed_host = (char*)user_data;
 	dx_mutex_lock(&listener_thread_guard);
 	is_listener_thread_terminated = true;
@@ -265,21 +277,20 @@ int get_symbol_index(dxf_const_string_t symbol_name) {
 
 /* -------------------------------------------------------------------------- */
 
-void trade_listener(int event_type, dxf_const_string_t symbol_name,
-					const dxf_event_data_t* data, int data_count, void* user_data) {
-	dxf_int_t i = 0;
+void trade_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
+					void* user_data) {
 	wchar_t str[200];
-	int ind;
 	COORD coord = event_info[dx_eid_trade].coord;
 
 	if (event_type != DXF_ET_TRADE) {
-		swprintf(str, 200, L"Error: event: %ls Symbol: %ls, expected event: Trade\n", dx_event_type_to_string(event_type), symbol_name);
-		print_at( coord, str);
+		swprintf(str, 200, L"Error: event: %ls Symbol: %ls, expected event: Trade\n",
+				 dx_event_type_to_string(event_type), symbol_name);
+		print_at(coord, str);
 		return;
 	}
 
-	print_at( coord, L"Trade:        ");
-	ind = get_symbol_index(symbol_name);
+	print_at(coord, L"Trade:        ");
+	int ind = get_symbol_index(symbol_name);
 	if (ind == -1) {
 		return;
 	}
@@ -288,26 +299,25 @@ void trade_listener(int event_type, dxf_const_string_t symbol_name,
 
 	coord.Y += ind + 1;
 	swprintf(str, 200, L"%5ls: %6d/%6d", symbol_name, data_count, event_info[dx_eid_trade].total_data_count[ind]);
-	print_at( coord, str);
+	print_at(coord, str);
 }
 
 /* -------------------------------------------------------------------------- */
 
-void quote_listener(int event_type, dxf_const_string_t symbol_name,
-					const dxf_event_data_t* data, int data_count, void* user_data) {
-	dxf_int_t i = 0;
+void quote_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
+					void* user_data) {
 	wchar_t str[200];
-	int ind;
 	COORD coord = event_info[dx_eid_quote].coord;
 
 	if (event_type != DXF_ET_QUOTE) {
-		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: Quote\n",dx_event_type_to_string(event_type), symbol_name);
-		print_at( coord, str);
+		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: Quote\n",
+				 dx_event_type_to_string(event_type), symbol_name);
+		print_at(coord, str);
 		return;
 	}
 
-	print_at( coord, L"Quote:        ");
-	ind = get_symbol_index(symbol_name);
+	print_at(coord, L"Quote:        ");
+	int ind = get_symbol_index(symbol_name);
 	if (ind == -1) {
 		return;
 	}
@@ -315,27 +325,27 @@ void quote_listener(int event_type, dxf_const_string_t symbol_name,
 	event_info[dx_eid_quote].total_data_count[ind] += data_count;
 
 	coord.Y += ind + 1;
-	swprintf(str, sizeof(str), L"%5ls: %6d/%6d", symbol_name, data_count, event_info[dx_eid_quote].total_data_count[ind]);
-	print_at( coord, str);
+	swprintf(str, sizeof(str), L"%5ls: %6d/%6d", symbol_name, data_count,
+			 event_info[dx_eid_quote].total_data_count[ind]);
+	print_at(coord, str);
 }
 
 /* -------------------------------------------------------------------------- */
 
-void summary_listener(int event_type, dxf_const_string_t symbol_name,
-					const dxf_event_data_t* data, int data_count, void* user_data) {
-	dxf_int_t i = 0;
+void summary_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
+					  void* user_data) {
 	wchar_t str[200];
-	int ind;
 	COORD coord = event_info[dx_eid_summary].coord;
 
 	if (event_type != DXF_ET_SUMMARY) {
-		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: Summary\n",dx_event_type_to_string(event_type), symbol_name);
-		print_at( coord, str);
+		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: Summary\n",
+				 dx_event_type_to_string(event_type), symbol_name);
+		print_at(coord, str);
 		return;
 	}
 
-	print_at( coord, L"Summary:        ");
-	ind = get_symbol_index(symbol_name);
+	print_at(coord, L"Summary:        ");
+	int ind = get_symbol_index(symbol_name);
 	if (ind == -1) {
 		return;
 	}
@@ -343,27 +353,27 @@ void summary_listener(int event_type, dxf_const_string_t symbol_name,
 	event_info[dx_eid_summary].total_data_count[ind] += data_count;
 
 	coord.Y += ind + 1;
-	swprintf(str, sizeof(str), L"%5ls: %6d/%6d", symbol_name, data_count, event_info[dx_eid_summary].total_data_count[ind]);
-	print_at( coord, str);
+	swprintf(str, sizeof(str), L"%5ls: %6d/%6d", symbol_name, data_count,
+			 event_info[dx_eid_summary].total_data_count[ind]);
+	print_at(coord, str);
 }
 
 /* -------------------------------------------------------------------------- */
 
-void profile_listener(int event_type, dxf_const_string_t symbol_name,
-					const dxf_event_data_t* data, int data_count, void* user_data) {
-	dxf_int_t i = 0;
+void profile_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
+					  void* user_data) {
 	wchar_t str[200];
-	int ind;
 	COORD coord = event_info[dx_eid_profile].coord;
 
 	if (event_type != DXF_ET_PROFILE) {
-		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: Profile\n",dx_event_type_to_string(event_type), symbol_name);
-		print_at( coord, str);
+		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: Profile\n",
+				 dx_event_type_to_string(event_type), symbol_name);
+		print_at(coord, str);
 		return;
 	}
 
-	print_at( coord, L"Profile:        ");
-	ind = get_symbol_index(symbol_name);
+	print_at(coord, L"Profile:        ");
+	int ind = get_symbol_index(symbol_name);
 	if (ind == -1) {
 		return;
 	}
@@ -371,27 +381,27 @@ void profile_listener(int event_type, dxf_const_string_t symbol_name,
 	event_info[dx_eid_profile].total_data_count[ind] += data_count;
 
 	coord.Y += ind + 1;
-	swprintf(str, sizeof(str), L"%5ls: %6d/%6d", symbol_name, data_count, event_info[dx_eid_profile].total_data_count[ind]);
-	print_at( coord, str);
+	swprintf(str, sizeof(str), L"%5ls: %6d/%6d", symbol_name, data_count,
+			 event_info[dx_eid_profile].total_data_count[ind]);
+	print_at(coord, str);
 }
 
 /* -------------------------------------------------------------------------- */
 
-void order_listener(int event_type, dxf_const_string_t symbol_name,
-					const dxf_event_data_t* data, int data_count, void* user_data) {
-	dxf_int_t i = 0;
+void order_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
+					void* user_data) {
 	wchar_t str[200];
-	int ind;
 	COORD coord = event_info[dx_eid_order].coord;
 
 	if (event_type != DXF_ET_ORDER) {
-		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: Order\n",dx_event_type_to_string(event_type), symbol_name);
-		print_at( coord, str);
+		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: Order\n",
+				 dx_event_type_to_string(event_type), symbol_name);
+		print_at(coord, str);
 		return;
 	}
 
-	print_at( coord, L"Order:        ");
-	ind = get_symbol_index(symbol_name);
+	print_at(coord, L"Order:        ");
+	int ind = get_symbol_index(symbol_name);
 	if (ind == -1) {
 		return;
 	}
@@ -399,27 +409,27 @@ void order_listener(int event_type, dxf_const_string_t symbol_name,
 	event_info[dx_eid_order].total_data_count[ind] += data_count;
 
 	coord.Y += ind + 1;
-	swprintf(str, sizeof(str), L"%5ls: %6d/%6d", symbol_name, data_count, event_info[dx_eid_order].total_data_count[ind]);
-	print_at( coord, str);
+	swprintf(str, sizeof(str), L"%5ls: %6d/%6d", symbol_name, data_count,
+			 event_info[dx_eid_order].total_data_count[ind]);
+	print_at(coord, str);
 }
 
 /* -------------------------------------------------------------------------- */
 
-void time_and_sale_listener(int event_type, dxf_const_string_t symbol_name,
-							const dxf_event_data_t* data, int data_count, void* user_data) {
-	dxf_int_t i = 0;
+void time_and_sale_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data,
+							int data_count, void* user_data) {
 	wchar_t str[200];
-	int ind;
 	COORD coord = event_info[dx_eid_time_and_sale].coord;
 
 	if (event_type != DXF_ET_TIME_AND_SALE) {
-		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: Time&Sale\n",dx_event_type_to_string(event_type), symbol_name);
-		print_at( coord, str);
+		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: Time&Sale\n",
+				 dx_event_type_to_string(event_type), symbol_name);
+		print_at(coord, str);
 		return;
 	}
 
-	print_at( coord, L"Time&Sale:        ");
-	ind = get_symbol_index(symbol_name);
+	print_at(coord, L"Time&Sale:        ");
+	int ind = get_symbol_index(symbol_name);
 	if (ind == -1) {
 		return;
 	}
@@ -427,27 +437,27 @@ void time_and_sale_listener(int event_type, dxf_const_string_t symbol_name,
 	event_info[dx_eid_time_and_sale].total_data_count[ind] += data_count;
 
 	coord.Y += ind + 1;
-	swprintf(str, sizeof(str), L"%5ls: %6d/%6d", symbol_name, data_count, event_info[dx_eid_time_and_sale].total_data_count[ind]);
-	print_at( coord, str);
+	swprintf(str, sizeof(str), L"%5ls: %6d/%6d", symbol_name, data_count,
+			 event_info[dx_eid_time_and_sale].total_data_count[ind]);
+	print_at(coord, str);
 }
 
 /* -------------------------------------------------------------------------- */
 
-void candle_listener(int event_type, dxf_const_string_t symbol_name,
-					const dxf_event_data_t* data, int data_count, void* user_data) {
-	dxf_int_t i = 0;
+void candle_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
+					 void* user_data) {
 	wchar_t str[200];
-	int ind;
 	COORD coord = event_info[dx_eid_candle].coord;
 
 	if (event_type != DXF_ET_CANDLE) {
-		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: Candle\n", dx_event_type_to_string(event_type), symbol_name);
+		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: Candle\n",
+				 dx_event_type_to_string(event_type), symbol_name);
 		print_at(coord, str);
 		return;
 	}
 
 	print_at(coord, L"Candle:        ");
-	ind = get_symbol_index(symbol_name);
+	int ind = get_symbol_index(symbol_name);
 	if (ind == -1) {
 		return;
 	}
@@ -455,27 +465,27 @@ void candle_listener(int event_type, dxf_const_string_t symbol_name,
 	event_info[dx_eid_candle].total_data_count[ind] += data_count;
 
 	coord.Y += ind + 1;
-	swprintf(str, sizeof(str), L"%5ls: %6d/%6d", symbol_name, data_count, event_info[dx_eid_candle].total_data_count[ind]);
+	swprintf(str, sizeof(str), L"%5ls: %6d/%6d", symbol_name, data_count,
+			 event_info[dx_eid_candle].total_data_count[ind]);
 	print_at(coord, str);
 }
 
 /* -------------------------------------------------------------------------- */
 
-void trade_eth_listener(int event_type, dxf_const_string_t symbol_name,
-						const dxf_event_data_t* data, int data_count, void* user_data) {
-	dxf_int_t i = 0;
+void trade_eth_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
+						void* user_data) {
 	wchar_t str[200];
-	int ind;
 	COORD coord = event_info[dx_eid_trade_eth].coord;
 
 	if (event_type != DXF_ET_TRADE_ETH) {
-		swprintf(str, 200, L"Error: event: %ls Symbol: %ls, expected event: TradeETH\n", dx_event_type_to_string(event_type), symbol_name);
+		swprintf(str, 200, L"Error: event: %ls Symbol: %ls, expected event: TradeETH\n",
+				 dx_event_type_to_string(event_type), symbol_name);
 		print_at(coord, str);
 		return;
 	}
 
 	print_at(coord, L"TradeETH:        ");
-	ind = get_symbol_index(symbol_name);
+	int ind = get_symbol_index(symbol_name);
 	if (ind == -1) {
 		return;
 	}
@@ -489,21 +499,20 @@ void trade_eth_listener(int event_type, dxf_const_string_t symbol_name,
 
 /* -------------------------------------------------------------------------- */
 
-void spread_order_listener(int event_type, dxf_const_string_t symbol_name,
-						const dxf_event_data_t* data, int data_count, void* user_data) {
-	dxf_int_t i = 0;
+void spread_order_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
+						   void* user_data) {
 	wchar_t str[200];
-	int ind;
 	COORD coord = event_info[dx_eid_spread_order].coord;
 
 	if (event_type != DXF_ET_SPREAD_ORDER) {
-		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: SpreadOrder\n", dx_event_type_to_string(event_type), symbol_name);
+		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: SpreadOrder\n",
+				 dx_event_type_to_string(event_type), symbol_name);
 		print_at(coord, str);
 		return;
 	}
 
 	print_at(coord, L"SpreadOrder:        ");
-	ind = get_symbol_index(symbol_name);
+	int ind = get_symbol_index(symbol_name);
 	if (ind == -1) {
 		return;
 	}
@@ -511,27 +520,27 @@ void spread_order_listener(int event_type, dxf_const_string_t symbol_name,
 	event_info[dx_eid_spread_order].total_data_count[ind] += data_count;
 
 	coord.Y += ind + 1;
-	swprintf(str, sizeof(str), L"%5ls: %6d/%6d", symbol_name, data_count, event_info[dx_eid_spread_order].total_data_count[ind]);
+	swprintf(str, sizeof(str), L"%5ls: %6d/%6d", symbol_name, data_count,
+			 event_info[dx_eid_spread_order].total_data_count[ind]);
 	print_at(coord, str);
 }
 
 /* -------------------------------------------------------------------------- */
 
-void greeks_listener(int event_type, dxf_const_string_t symbol_name,
-					const dxf_event_data_t* data, int data_count, void* user_data) {
-	dxf_int_t i = 0;
+void greeks_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
+					 void* user_data) {
 	wchar_t str[200];
-	int ind;
 	COORD coord = event_info[dx_eid_greeks].coord;
 
 	if (event_type != DXF_ET_GREEKS) {
-		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: Greeks\n", dx_event_type_to_string(event_type), symbol_name);
+		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: Greeks\n",
+				 dx_event_type_to_string(event_type), symbol_name);
 		print_at(coord, str);
 		return;
 	}
 
 	print_at(coord, L"Greeks:        ");
-	ind = get_symbol_index(symbol_name);
+	int ind = get_symbol_index(symbol_name);
 	if (ind == -1) {
 		return;
 	}
@@ -539,27 +548,27 @@ void greeks_listener(int event_type, dxf_const_string_t symbol_name,
 	event_info[dx_eid_greeks].total_data_count[ind] += data_count;
 
 	coord.Y += ind + 1;
-	swprintf(str, sizeof(str), L"%5ls: %6d/%6d", symbol_name, data_count, event_info[dx_eid_greeks].total_data_count[ind]);
+	swprintf(str, sizeof(str), L"%5ls: %6d/%6d", symbol_name, data_count,
+			 event_info[dx_eid_greeks].total_data_count[ind]);
 	print_at(coord, str);
 }
 
 /* -------------------------------------------------------------------------- */
 
-void theo_price_listener(int event_type, dxf_const_string_t symbol_name,
-						const dxf_event_data_t* data, int data_count, void* user_data) {
-	dxf_int_t i = 0;
+void theo_price_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
+						 void* user_data) {
 	wchar_t str[200];
-	int ind;
 	COORD coord = event_info[dx_eid_theo_price].coord;
 
 	if (event_type != DXF_ET_THEO_PRICE) {
-		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: TheoPrice\n", dx_event_type_to_string(event_type), symbol_name);
+		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: TheoPrice\n",
+				 dx_event_type_to_string(event_type), symbol_name);
 		print_at(coord, str);
 		return;
 	}
 
 	print_at(coord, L"TheoPrice:        ");
-	ind = get_symbol_index(symbol_name);
+	int ind = get_symbol_index(symbol_name);
 	if (ind == -1) {
 		return;
 	}
@@ -567,27 +576,27 @@ void theo_price_listener(int event_type, dxf_const_string_t symbol_name,
 	event_info[dx_eid_theo_price].total_data_count[ind] += data_count;
 
 	coord.Y += ind + 1;
-	swprintf(str, sizeof(str), L"%5ls: %6d/%6d", symbol_name, data_count, event_info[dx_eid_theo_price].total_data_count[ind]);
+	swprintf(str, sizeof(str), L"%5ls: %6d/%6d", symbol_name, data_count,
+			 event_info[dx_eid_theo_price].total_data_count[ind]);
 	print_at(coord, str);
 }
 
 /* -------------------------------------------------------------------------- */
 
-void underlying_listener(int event_type, dxf_const_string_t symbol_name,
-						const dxf_event_data_t* data, int data_count, void* user_data) {
-	dxf_int_t i = 0;
+void underlying_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
+						 void* user_data) {
 	wchar_t str[200];
-	int ind;
 	COORD coord = event_info[dx_eid_underlying].coord;
 
 	if (event_type != DXF_ET_UNDERLYING) {
-		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: Underlying\n", dx_event_type_to_string(event_type), symbol_name);
+		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: Underlying\n",
+				 dx_event_type_to_string(event_type), symbol_name);
 		print_at(coord, str);
 		return;
 	}
 
 	print_at(coord, L"Underlying:        ");
-	ind = get_symbol_index(symbol_name);
+	int ind = get_symbol_index(symbol_name);
 	if (ind == -1) {
 		return;
 	}
@@ -595,27 +604,27 @@ void underlying_listener(int event_type, dxf_const_string_t symbol_name,
 	event_info[dx_eid_underlying].total_data_count[ind] += data_count;
 
 	coord.Y += ind + 1;
-	swprintf(str, sizeof(str), L"%5ls: %6d/%6d", symbol_name, data_count, event_info[dx_eid_underlying].total_data_count[ind]);
+	swprintf(str, sizeof(str), L"%5ls: %6d/%6d", symbol_name, data_count,
+			 event_info[dx_eid_underlying].total_data_count[ind]);
 	print_at(coord, str);
 }
 
 /* -------------------------------------------------------------------------- */
 
-void series_listener(int event_type, dxf_const_string_t symbol_name,
-	const dxf_event_data_t* data, int data_count, void* user_data) {
-	dxf_int_t i = 0;
+void series_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
+					 void* user_data) {
 	wchar_t str[200];
-	int ind;
 	COORD coord = event_info[dx_eid_series].coord;
 
 	if (event_type != DXF_ET_SERIES) {
-		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: Series\n", dx_event_type_to_string(event_type), symbol_name);
+		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: Series\n",
+				 dx_event_type_to_string(event_type), symbol_name);
 		print_at(coord, str);
 		return;
 	}
 
 	print_at(coord, L"Series:        ");
-	ind = get_symbol_index(symbol_name);
+	int ind = get_symbol_index(symbol_name);
 	if (ind == -1) {
 		return;
 	}
@@ -623,27 +632,27 @@ void series_listener(int event_type, dxf_const_string_t symbol_name,
 	event_info[dx_eid_series].total_data_count[ind] += data_count;
 
 	coord.Y += ind + 1;
-	swprintf(str, sizeof(str), L"%5ls: %6d/%6d", symbol_name, data_count, event_info[dx_eid_series].total_data_count[ind]);
+	swprintf(str, sizeof(str), L"%5ls: %6d/%6d", symbol_name, data_count,
+			 event_info[dx_eid_series].total_data_count[ind]);
 	print_at(coord, str);
 }
 
 /* -------------------------------------------------------------------------- */
 
-void configuration_listener(int event_type, dxf_const_string_t symbol_name,
-							const dxf_event_data_t* data, int data_count, void* user_data) {
-	dxf_int_t i = 0;
+void configuration_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data,
+							int data_count, void* user_data) {
 	wchar_t str[200];
-	int ind;
 	COORD coord = event_info[dx_eid_configuration].coord;
 
 	if (event_type != DXF_ET_CONFIGURATION) {
-		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: Configuration\n", dx_event_type_to_string(event_type), symbol_name);
+		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: Configuration\n",
+				 dx_event_type_to_string(event_type), symbol_name);
 		print_at(coord, str);
 		return;
 	}
 
 	print_at(coord, L"Configuration:        ");
-	ind = get_symbol_index(symbol_name);
+	int ind = get_symbol_index(symbol_name);
 	if (ind == -1) {
 		return;
 	}
@@ -651,23 +660,22 @@ void configuration_listener(int event_type, dxf_const_string_t symbol_name,
 	event_info[dx_eid_configuration].total_data_count[ind] += data_count;
 
 	coord.Y += ind + 1;
-	swprintf(str, sizeof(str), L"%5ls: %6d/%6d", symbol_name, data_count, event_info[dx_eid_configuration].total_data_count[ind]);
+	swprintf(str, sizeof(str), L"%5ls: %6d/%6d", symbol_name, data_count,
+			 event_info[dx_eid_configuration].total_data_count[ind]);
 	print_at(coord, str);
 }
 
 /* -------------------------------------------------------------------------- */
 
 void snapshot_listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
-	dxf_int_t i = 0;
 	wchar_t str[200];
-	int ind;
-	struct snapshot_info_t *info = user_data;
+	struct snapshot_info_t* info = user_data;
 	COORD coord = info->coord;
 
 	if (snapshot_data->event_type != info->event_type) {
 		swprintf(str, sizeof(str), L"Error: event: %ls Symbol: %ls, expected event: %ls\n",
-					dx_event_type_to_string(snapshot_data->event_type), snapshot_data->symbol,
-					dx_event_type_to_string(info->event_type));
+				 dx_event_type_to_string(snapshot_data->event_type), snapshot_data->symbol,
+				 dx_event_type_to_string(info->event_type));
 		print_at(coord, str);
 		return;
 	}
@@ -677,9 +685,9 @@ void snapshot_listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_d
 #else
 	swprintf(str, sizeof(str), L"Snapshot %ls#%s:        ",
 #endif
-		dx_event_type_to_string(info->event_type), info->source);
+			 dx_event_type_to_string(info->event_type), info->source);
 	print_at(coord, str);
-	ind = get_symbol_index(snapshot_data->symbol);
+	int ind = get_symbol_index(snapshot_data->symbol);
 	if (ind == -1) {
 		return;
 	}
@@ -687,14 +695,14 @@ void snapshot_listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_d
 	info->total_data_count[ind] += snapshot_data->records_count;
 
 	coord.Y += ind + 1;
-	swprintf(str, sizeof(str), L"%5ls: %6zu/%10zu",
-				snapshot_data->symbol, snapshot_data->records_count, info->total_data_count[ind]);
+	swprintf(str, sizeof(str), L"%5ls: %6zu/%10zu", snapshot_data->symbol, snapshot_data->records_count,
+			 info->total_data_count[ind]);
 	print_at(coord, str);
 }
 
 /* -------------------------------------------------------------------------- */
 
-void process_last_error () {
+void process_last_error() {
 	int error_code = dx_ec_success;
 	dxf_const_string_t error_descr = NULL;
 	int res;
@@ -708,7 +716,8 @@ void process_last_error () {
 			return;
 		}
 
-		wprintf(L"Error occurred and successfully retrieved:\n"
+		wprintf(
+			L"Error occurred and successfully retrieved:\n"
 			L"error code = %d, description = \"%ls\"\n",
 			error_code, error_descr);
 		return;
@@ -721,11 +730,10 @@ dxf_subscription_t create_subscription(dxf_connection_t connection, int event_id
 	dxf_subscription_t subscription;
 	wchar_t str[100];
 	const int event_type = event_info[event_id].event_type;
-	int i;
 	COORD coord = event_info[event_id].coord;
 
 	swprintf(str, sizeof(str), L"%5ls: no data", dx_event_type_to_string(event_type));
-	print_at( coord, str);
+	print_at(coord, str);
 
 	if (!dxf_create_subscription(connection, event_type, &subscription)) {
 		process_last_error();
@@ -733,8 +741,7 @@ dxf_subscription_t create_subscription(dxf_connection_t connection, int event_id
 		return NULL;
 	};
 
-	for (i = 0; i < SYMBOLS_COUNT; ++i) {
-		int ind;
+	for (int i = 0; i < SYMBOLS_COUNT; ++i) {
 		COORD symbol_coord = coord;
 		if (!dxf_add_symbol(subscription, g_symbols[i])) {
 			process_last_error();
@@ -743,7 +750,7 @@ dxf_subscription_t create_subscription(dxf_connection_t connection, int event_id
 		};
 
 		swprintf(str, sizeof(str), L"%5ls: no data", g_symbols[i]);
-		ind = get_symbol_index(g_symbols[i]);
+		int ind = get_symbol_index(g_symbols[i]);
 		if (ind == -1) {
 			return NULL;
 		}
@@ -760,26 +767,22 @@ dxf_subscription_t create_subscription(dxf_connection_t connection, int event_id
 	return subscription;
 }
 
-void* create_snapshot_subscription(dxf_connection_t connection, struct snapshot_info_t *info) {
+void* create_snapshot_subscription(dxf_connection_t connection, struct snapshot_info_t* info) {
 	wchar_t str[100];
-	int i;
 	COORD coord = info->coord;
 
 	swprintf(str, sizeof(str), L"%ls snapshot: no data", dx_event_type_to_string(info->event_type));
 	print_at(coord, str);
 
-	for (i = 0; i < SYMBOLS_COUNT; ++i) {
-		int ind;
+	for (int i = 0; i < SYMBOLS_COUNT; ++i) {
 		COORD symbol_coord = coord;
 		dxf_candle_attributes_t candle_attributes = NULL;
 
 		if (info->id == dx_eid_candle) {
-			if (!dxf_create_candle_symbol_attributes(g_symbols[i],
-				DXF_CANDLE_EXCHANGE_CODE_ATTRIBUTE_DEFAULT,
-				DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT,
-				dxf_ctpa_day, dxf_cpa_default, dxf_csa_default,
-				dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, &candle_attributes)) {
-
+			if (!dxf_create_candle_symbol_attributes(g_symbols[i], DXF_CANDLE_EXCHANGE_CODE_ATTRIBUTE_DEFAULT,
+													 DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT, dxf_ctpa_day,
+													 dxf_cpa_default, dxf_csa_default, dxf_caa_default,
+													 DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, &candle_attributes)) {
 				process_last_error();
 				return NULL;
 			}
@@ -799,7 +802,7 @@ void* create_snapshot_subscription(dxf_connection_t connection, struct snapshot_
 		}
 
 		swprintf(str, sizeof(str), L"%5ls: no data", g_symbols[i]);
-		ind = get_symbol_index(g_symbols[i]);
+		int ind = get_symbol_index(g_symbols[i]);
 		if (ind == -1) {
 			return NULL;
 		}
@@ -853,11 +856,11 @@ int initialize_console() {
 	}
 
 	///* get the current text attribute */
-	//bSuccess = GetConsoleScreenBufferInfo( hConsole, &csbi );
+	// bSuccess = GetConsoleScreenBufferInfo( hConsole, &csbi );
 
 	///* now set the buffer's attributes accordingly */
 
-	//bSuccess = FillConsoleOutputAttribute( hConsole, csbi.wAttributes,
+	// bSuccess = FillConsoleOutputAttribute( hConsole, csbi.wAttributes,
 	//    dwConSize, coordScreen, &cCharsWritten );
 
 	// put the cursor at (0, 0)
@@ -869,12 +872,14 @@ int initialize_console() {
 }
 #else
 int initialize_console() {
-	wprintf(L"\033[8;49;80t"); // set console size = 80x49
-	wprintf(L"\033[2J"); // clear
+	wprintf(L"\033[8;49;80t");	// set console size = 80x49
+	wprintf(L"\033[2J");		// clear
+
+	return true;
 }
 #endif
 
-int atoi2 (char *str, int *result) {
+int atoi2(char* str, int* result) {
 	if (str == NULL || str[0] == '\0' || result == NULL) {
 		return false;
 	}
@@ -896,11 +901,10 @@ int atoi2 (char *str, int *result) {
 	return true;
 }
 
-int main (int argc, char* argv[]) {
+int main(int argc, char* argv[]) {
 	dxf_connection_t connection;
 	dxf_subscription_t subscriptions[dx_eid_count];
 	int loop_counter = 10000;
-	int i;
 	char* dxfeed_host = NULL;
 
 	if (argc < 2) {
@@ -910,8 +914,8 @@ int main (int argc, char* argv[]) {
 	}
 
 	if (argc >= 3) {
-		//expect the second param in seconds
-		//convert seconds time interval to loop number
+		// expect the second param in seconds
+		// convert seconds time interval to loop number
 		int timeout_seconds = 0;
 
 		if (atoi2(argv[2], &timeout_seconds)) {
@@ -927,21 +931,21 @@ int main (int argc, char* argv[]) {
 		return -1;
 	}
 
-	if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, (void*)dxfeed_host, &connection)) {
+	if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, (void*)dxfeed_host,
+							   &connection)) {
 		process_last_error();
 		return -1;
 	}
 	// create subscriptions
-	for (i = dx_eid_begin; i < dx_eid_count; ++i) {
+	for (int i = dx_eid_begin; i < dx_eid_count; ++i) {
 		subscriptions[i] = create_subscription(connection, i);
 		if (subscriptions[i] == NULL) {
 			return -1;
 		}
 	}
-	//create snapshots
-	for (i = 0; i < SNAPSHOT_COUNT; ++i) {
-		if (create_snapshot_subscription(connection, &(snapshot_info[i])) == NULL)
-			return -1;
+	// create snapshots
+	for (int i = 0; i < SNAPSHOT_COUNT; ++i) {
+		if (create_snapshot_subscription(connection, &(snapshot_info[i])) == NULL) return -1;
 	}
 	// main loop
 	while (!is_thread_terminate() && loop_counter--) {
@@ -956,11 +960,11 @@ int main (int argc, char* argv[]) {
 		return -1;
 	}
 
-	printf("Disconnect successful!\n"
+	printf(
+		"Disconnect successful!\n"
 		"Connection test completed successfully!\n");
 
 	dx_mutex_destroy(&listener_thread_guard);
 
 	return 0;
 }
-

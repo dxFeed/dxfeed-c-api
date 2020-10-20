@@ -251,7 +251,6 @@ elseif(MACOSX)
         set(ADDITIONAL_LIBRARIES
                 ${ADDITIONAL_LIBRARIES}
                 tls ssl crypto
-#                tls
                 )
     endif (NOT DISABLE_TLS)
 else ()
