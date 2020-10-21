@@ -67,7 +67,7 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 
 add_executable(${PROJECT} ${SOURCE_FILES})
 
-target_link_libraries(${PROJECT} debug ${LIB_DXFEED_NAME}${DEBUG_POSTFIX} optimized ${LIB_DXFEED_NAME}${RELEASE_POSTFIX})
+target_link_libraries(${PROJECT} DXFeed ${ADDITIONAL_LIBRARIES})
 
 set_target_properties(${PROJECT}
     PROPERTIES
