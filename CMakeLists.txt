@@ -38,6 +38,7 @@ add_subdirectory(tests/APITest)
 add_subdirectory(tests/ConnectionTest)
 add_subdirectory(tests/LastEventTest)
 add_subdirectory(tests/PerformanceTest)
+add_subdirectory(tests/QuoteTableTest)
 
 set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/DXFeedAllCPackConfig.cmake")
 set(CPACK_PACKAGE_VENDOR "dxFeed Solutions DE GmbH")
