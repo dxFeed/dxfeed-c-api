@@ -1224,9 +1224,13 @@ int dx_send_data (dxf_connection_t connection, const void* buffer, int buffer_si
 			// prevent sending while reconnecting
 			if (current_address != NULL) {
 				if (current_address->tls.enabled) {
-					sent_count = (int)tls_write(context->tls_context, (const void*)char_buf, buffer_size);
-					if (sent_count == -1)
-						dx_logging_ansi_error(tls_error(context->tls_context));
+					if (context->tls_context != NULL) {
+						sent_count = (int)tls_write(context->tls_context, (const void*)char_buf, buffer_size);
+
+						if (sent_count == -1) dx_logging_ansi_error(tls_error(context->tls_context));
+					} else {
+						dx_logging_ansi_error("TLS context is NULL");
+					}
 				} else {
 					sent_count = dx_send(context->s, (const void*)char_buf, buffer_size);
 				}

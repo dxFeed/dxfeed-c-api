@@ -51,7 +51,8 @@
 #define TIME_ZONE_BIAS_TO_HOURS -60
 
 static dxf_const_string_t g_error_prefix = L"Error: ";
-static dxf_const_string_t g_info_prefix = L"";
+static dxf_const_string_t g_warn_prefix = L"Warn: ";
+static dxf_const_string_t g_info_prefix = L"Info: ";
 
 static int g_verbose_logger_mode;
 static int g_data_transfer_logger_mode;
@@ -113,7 +114,7 @@ const dxf_char_t* dx_get_current_time (void) {
 	}
 
 	GetLocalTime(&current_time);
-	_snwprintf(time_buffer, CURRENT_TIME_STR_LENGTH, L"%.2u.%.2u.%.4u %.2u:%.2u:%.2u.%.4u",
+	_snwprintf(time_buffer, CURRENT_TIME_STR_LENGTH, L"%.2u.%.2u.%.4u %.2u:%.2u:%.2u.%.3u",
 													current_time.wDay, current_time.wMonth, current_time.wYear,
 													current_time.wHour, current_time.wMinute, current_time.wSecond,
 													current_time.wMilliseconds);
@@ -139,7 +140,7 @@ dxf_const_string_t dx_get_current_time () {
 
 	time(&clock);
 	localtime_r(&clock, &ltm);
-	swprintf(time_buffer, CURRENT_TIME_STR_LENGTH, L"%.2u.%.2u.%.4u %.2u:%.2u:%.2u.%.4u",
+	swprintf(time_buffer, CURRENT_TIME_STR_LENGTH, L"%.2u.%.2u.%.4u %.2u:%.2u:%.2u.%.3u",
 													ltm.tm_mday, ltm.tm_mon + 1, ltm.tm_year + 1900,
 													ltm.tm_hour, ltm.tm_min, ltm.tm_sec,
 													0);
@@ -394,14 +395,29 @@ void dx_logging_error_by_code(int error_code) {
 	if (message == NULL) {
 		return;
 	}
+
+	dxf_const_string_t error_prefix = g_error_prefix;
+
+	switch (dx_get_error_level(error_code)) {
+		case dx_el_info:
+			error_prefix = g_info_prefix;
+			break;
+		case dx_el_warn:
+			error_prefix = g_warn_prefix;
+			break;
+		case dx_el_error:
+			error_prefix = g_error_prefix;
+			break;
+	}
+
 	dx_log_debug_message(L"%ls (%d)", message, error_code);
 	fwprintf(g_log_file, L"\n%ls [%08lx] %ls%ls (%d)", dx_get_current_time(),
 #ifdef _WIN32
-	(unsigned long)GetCurrentThreadId(),
+			 (unsigned long)GetCurrentThreadId(),
 #else
-		(unsigned long)pthread_getthreadid_np(),
+			 (unsigned long)pthread_getthreadid_np(),
 #endif
-		g_error_prefix, message, error_code);
+			 error_prefix, message, error_code);
 	dx_flush_log();
 }
 
