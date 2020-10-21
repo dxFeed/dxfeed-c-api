@@ -53,6 +53,7 @@ void process_last_error() {
 int main(int argc, char* argv[]) {
 	dxf_connection_t connection;
 
+	dxf_initialize_logger("connection-test-api.log", 1, 1, 0);
 	wprintf(L"Connection test started.\n");
 	wprintf(L"Connecting to host %s...\n", dxfeed_host);
 

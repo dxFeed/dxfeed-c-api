@@ -38,8 +38,8 @@ if (NOT WIN32)
 endif (NOT WIN32)
 
 set(SOURCE_FILES
-    CandleSample.c
-    )
+        CandleSample.c
+        )
 
 set(ADDITIONAL_PROPERTIES "")
 
@@ -75,30 +75,30 @@ set(ADDITIONAL_LIBRARIES "")
 target_link_libraries(${PROJECT} DXFeed ${ADDITIONAL_LIBRARIES})
 
 set_target_properties(${PROJECT}
-    PROPERTIES
-    DEBUG_POSTFIX "${DEBUG_POSTFIX}"
-    RELEASE_POSTFIX "${RELEASE_POSTFIX}"
-    LINK_FLAGS "${ADDITIONAL_PROPERTIES}"
-    )
+        PROPERTIES
+        DEBUG_POSTFIX "${DEBUG_POSTFIX}"
+        RELEASE_POSTFIX "${RELEASE_POSTFIX}"
+        LINK_FLAGS "${ADDITIONAL_PROPERTIES}"
+        )
 
 add_dependencies(${PROJECT} ${LIB_DXFEED_PROJ})
 
 set(PROJECT_FILES
-    ${PROJECT}.vcxproj
-    ${PROJECT}.vcxproj.filters
-    )
+        ${PROJECT}.vcxproj
+        ${PROJECT}.vcxproj.filters
+        )
 set(BUILD_FILES
-    build.bat
-    CMakeLists.txt
-    )
+        build.bat
+        CMakeLists.txt
+        )
 set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/DXFeedAllCPackConfig.cmake")
 install(TARGETS ${PROJECT}
-    DESTINATION "bin/${TARGET_PLATFORM}"
-    )
+        DESTINATION "bin/${TARGET_PLATFORM}"
+        )
 install(FILES ${SOURCE_FILES} ${PROJECT_FILES} ${BUILD_FILES}
-    DESTINATION "tests/${PROJECT}"
-    CONFIGURATIONS Release
-    )
+        DESTINATION "tests/${PROJECT}"
+        CONFIGURATIONS Release
+        )
 set(CPACK_PACKAGE_VENDOR "dxFeed Solutions DE GmbH")
 set(CPACK_PACKAGE_NAME "${PROJECT}")
 set(CPACK_PACKAGE_VERSION "${APP_VERSION}")

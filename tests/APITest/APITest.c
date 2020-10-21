@@ -158,8 +158,6 @@ void first_listener(int event_type, dxf_const_string_t symbol_name, const dxf_ev
 
 void second_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
 					 void* user_data) {
-	dxf_int_t i = 0;
-
 	wprintf(L"Second listener. Event: %ls Symbol: %ls\n", dx_event_type_to_string(event_type), symbol_name);
 }
 

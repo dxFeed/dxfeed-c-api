@@ -32,11 +32,11 @@ if (NOT TARGET ${LIB_DXFEED_PROJ})
 endif ()
 
 link_directories(${LIB_DXFEED_OUT_DIR})
- 
+
 set(SOURCE_FILES
-    ConnectionTest.c
-    )
-    
+        ConnectionTest.c
+        )
+
 set(ADDITIONAL_PROPERTIES "")
 
 if (WIN32)
@@ -63,38 +63,38 @@ else ()
     add_definitions(-DUSE_PTHREADS)
 endif (WIN32)
 
-source_group("Source Files" FILES ${SOURCE_FILES}) 
+source_group("Source Files" FILES ${SOURCE_FILES})
 
-add_executable (${PROJECT} ${SOURCE_FILES})
+add_executable(${PROJECT} ${SOURCE_FILES})
 
 target_link_libraries(${PROJECT} debug ${LIB_DXFEED_NAME}${DEBUG_POSTFIX} optimized ${LIB_DXFEED_NAME}${RELEASE_POSTFIX})
 
-set_target_properties(${PROJECT} 
-    PROPERTIES 
-    DEBUG_POSTFIX "${DEBUG_POSTFIX}"
-    RELEASE_POSTFIX "${RELEASE_POSTFIX}"
-    LINK_FLAGS "${ADDITIONAL_PROPERTIES}"
-)
+set_target_properties(${PROJECT}
+        PROPERTIES
+        DEBUG_POSTFIX "${DEBUG_POSTFIX}"
+        RELEASE_POSTFIX "${RELEASE_POSTFIX}"
+        LINK_FLAGS "${ADDITIONAL_PROPERTIES}"
+        )
 
 add_dependencies(${PROJECT} ${LIB_DXFEED_PROJ})
 
 set(PROJECT_FILES
-    ${PROJECT}.vcxproj
-    ${PROJECT}.vcxproj.filters
-)
+        ${PROJECT}.vcxproj
+        ${PROJECT}.vcxproj.filters
+        )
 set(BUILD_FILES
-    build.bat
-    CMakeLists.txt
-)
+        build.bat
+        CMakeLists.txt
+        )
 set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/DXFeedAllCPackConfig.cmake")
 install(TARGETS ${PROJECT}
-    DESTINATION "bin/${TARGET_PLATFORM}"
-    CONFIGURATIONS Release
-)
+        DESTINATION "bin/${TARGET_PLATFORM}"
+        CONFIGURATIONS Release
+        )
 install(FILES ${SOURCE_FILES} ${PROJECT_FILES} ${BUILD_FILES}
-    DESTINATION "tests/${PROJECT}"
-    CONFIGURATIONS Release
-)
+        DESTINATION "tests/${PROJECT}"
+        CONFIGURATIONS Release
+        )
 set(CPACK_PACKAGE_VENDOR "dxFeed Solutions DE GmbH")
 set(CPACK_PACKAGE_NAME "${PROJECT}")
 set(CPACK_PACKAGE_VERSION "${APP_VERSION}")

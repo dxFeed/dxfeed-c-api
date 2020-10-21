@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <wctype.h>
-
+#include <string.h>
 #include "DXErrorCodes.h"
 #include "DXFeed.h"
 #include "Logger.h"
@@ -51,7 +51,6 @@ int dx_mutex_unlock(dx_mutex_t* mutex) {
 }
 #else
 #	include <time.h>
-
 #	include "pthread.h"
 
 void dx_sleep(int milliseconds) {
@@ -189,7 +188,7 @@ void series_listener(int event_type, dxf_const_string_t symbol_name, const dxf_e
 					 void* user_data);
 void configuration_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data,
 							int data_count, void* user_data);
-void snapshot_listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data);
+void snapshot_listener(dxf_snapshot_data_ptr_t snapshot_data, void* user_data);
 
 struct event_info_t {
 	dx_event_id_t id;
@@ -902,6 +901,13 @@ int atoi2(char* str, int* result) {
 	return true;
 }
 
+void print_usage() {
+	wprintf(L"Usage: FullTest [<host>] [<timeout>] [-h|--help|-?]\n"
+		L"  <host>       - dxfeed host (default: demo.dxfeed.com:7300)\n"
+		L"  <timeout>    - timeout in seconds (default: 10000)\n"
+		L"  -h|--help|-? - print usage\n\n");
+}
+
 int main(int argc, char* argv[]) {
 	dxf_connection_t connection;
 	dxf_subscription_t subscriptions[dx_eid_count];
@@ -911,6 +917,12 @@ int main(int argc, char* argv[]) {
 	if (argc < 2) {
 		dxfeed_host = dxfeed_host_default;
 	} else {
+		if (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "-?") == 0 || strcmp(argv[1], "--help") == 0) {
+			print_usage();
+
+			return 0;
+		}
+
 		dxfeed_host = argv[1];
 	}
 

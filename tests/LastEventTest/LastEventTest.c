@@ -125,7 +125,7 @@ int main(int argc, char* argv[]) {
 	dxf_connection_t connection;
 	dxf_subscription_t subscription;
 
-	dxf_initialize_logger("log.log", true, true, true);
+	dxf_initialize_logger("last-event-test-api.log", true, true, true);
 
 	wprintf(L"LastEvent test started.\n");
 	wprintf(L"Connecting to host %s...\n", dxfeed_host);
