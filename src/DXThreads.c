@@ -270,7 +270,7 @@ int dx_mutex_destroy (dx_mutex_t* mutex) {
 
 /* -------------------------------------------------------------------------- */
 
-int dx_mutex_lock (const dx_mutex_t* mutex) {
+int dx_mutex_lock (dx_mutex_t* mutex) {
 	int res = pthread_mutex_lock(&mutex->mutex);
 	switch (res) {
 	case EINVAL:
@@ -288,7 +288,7 @@ int dx_mutex_lock (const dx_mutex_t* mutex) {
 
 /* -------------------------------------------------------------------------- */
 
-int dx_mutex_unlock (const dx_mutex_t* mutex) {
+int dx_mutex_unlock (dx_mutex_t* mutex) {
 	int res = pthread_mutex_unlock(&mutex->mutex);
 	switch (res) {
 	case EINVAL:
@@ -533,14 +533,14 @@ int dx_mutex_destroy (dx_mutex_t* mutex) {
 
 /* -------------------------------------------------------------------------- */
 
-int dx_mutex_lock (const dx_mutex_t* mutex) {
+int dx_mutex_lock (dx_mutex_t* mutex) {
 	EnterCriticalSection(*mutex);
 	return true;
 }
 
 /* -------------------------------------------------------------------------- */
 
-int dx_mutex_unlock (const dx_mutex_t* mutex) {
+int dx_mutex_unlock (dx_mutex_t* mutex) {
 	LeaveCriticalSection(*mutex);
 	return true;
 }

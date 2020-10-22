@@ -101,8 +101,8 @@ dx_thread_t dx_get_thread_id ();
 int dx_compare_threads (dx_thread_t t1, dx_thread_t t2);
 int dx_mutex_create (dx_mutex_t* mutex);
 int dx_mutex_destroy (dx_mutex_t* mutex);
-int dx_mutex_lock (const dx_mutex_t* mutex);
-int dx_mutex_unlock (const dx_mutex_t* mutex);
+int dx_mutex_lock (dx_mutex_t* mutex);
+int dx_mutex_unlock (dx_mutex_t* mutex);
 
 /* -------------------------------------------------------------------------- */
 /*

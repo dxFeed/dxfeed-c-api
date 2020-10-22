@@ -492,7 +492,7 @@ typedef struct {
  */
 int symbol_name_hasher_test(void) {
 	size_t symbol_index;
-	dxf_int_t hash;
+	dxf_ulong_t hash;
 	hashs_array_t all_hashs = DX_EMPTY_ARRAY;
 	int found = false;
 	int error = false;
@@ -502,7 +502,7 @@ int symbol_name_hasher_test(void) {
 		hash = dx_symbol_name_hasher(symbol);
 		DX_ARRAY_BINARY_SEARCH(all_hashs.elements, 0, all_hashs.size, hash, DX_NUMERIC_COMPARATOR, found, position);
 		if (found) {
-			wprintf(L"Duplicate hashs detected: %d! symbol:'%ls'.\n", hash, symbol);
+			wprintf(L"Duplicate hashs detected: %lu! symbol:'%ls'.\n", hash, symbol);
 			PRINT_TEST_FAILED;
 			dx_free(all_hashs.elements);
 			return false;

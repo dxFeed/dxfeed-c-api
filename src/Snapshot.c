@@ -121,7 +121,7 @@ const dxf_snapshot_t dx_invalid_snapshot = (dxf_snapshot_t)NULL;
 
 #define SYMBOL_COUNT 1
 
-#define SNAPSHOT_KEY_SOURCE_MASK 0xFFFFFF
+#define SNAPSHOT_KEY_SOURCE_MASK 0xFFFFFFu
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -667,10 +667,10 @@ void event_listener(int event_type, dxf_const_string_t symbol_name,
  */
 dxf_ulong_t dx_new_snapshot_key(dx_record_info_id_t record_info_id, dxf_const_string_t symbol,
 								dxf_const_string_t order_source) {
-	dxf_int_t symbol_hash = dx_symbol_name_hasher(symbol);
-	dxf_int_t order_source_hash = (order_source == NULL ? 0 : dx_symbol_name_hasher(order_source));
-	return ((dxf_ulong_t)record_info_id << 56) |
-		((dxf_ulong_t)symbol_hash << 24) |
+	dxf_ulong_t symbol_hash = dx_symbol_name_hasher(symbol);
+	dxf_ulong_t order_source_hash = (order_source == NULL ? 0u : dx_symbol_name_hasher(order_source));
+	return ((dxf_ulong_t)record_info_id << 56u) |
+		((dxf_ulong_t)symbol_hash << 24u) |
 		(order_source_hash & SNAPSHOT_KEY_SOURCE_MASK);
 }
 

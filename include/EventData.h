@@ -747,6 +747,6 @@ typedef void(*dxf_regional_quote_listener_t) (dxf_const_string_t symbol, const d
  * @param index      Event data item index
  * @return Event data item
  */
-const dxf_event_data_t dx_get_event_data_item (int event_mask, dxf_const_event_data_t data, size_t index);
+dxf_const_event_data_t dx_get_event_data_item (int event_mask, dxf_const_event_data_t data, size_t index);
  
 #endif /* EVENT_DATA_H_INCLUDED */

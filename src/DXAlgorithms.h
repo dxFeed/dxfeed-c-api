@@ -149,7 +149,7 @@
 	(1 << (index))
 
 #define IS_FLAG_SET(flags, flag) \
-	((flags & flag) != 0)
+	((flags & (flag)) != 0)
 
 #define UNSIGNED_TYPE_dxf_int_t \
 	dxf_uint_t
@@ -563,7 +563,7 @@ void atomic_write_time(time_t volatile * dest, time_t src);
 #else
 
 #ifdef __GNUC__
-#warning "no fence, no atomic read/write for 64 bit variables on 32 bit platforms, additional synchronization is needed";
+#pragma message ("no fence, no atomic read/write for 64 bit variables on 32 bit platforms, additional synchronization is needed")
 #endif
 
 long long atomic_read(long long* value);

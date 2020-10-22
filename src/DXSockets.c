@@ -211,7 +211,6 @@ dx_error_code_t dx_eai_code_to_internal(int code) {
 /* -------------------------------------------------------------------------- */
 
 static const int g_name_resolution_attempt_count = 5;
-static const unsigned g_connect_timeout = 5; /* timeout in seconds */
 
 static int g_connection_count = 0;
 static dx_mutex_t g_count_guard;

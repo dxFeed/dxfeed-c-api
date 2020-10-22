@@ -323,8 +323,8 @@ DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_event_subscription) { return true; }
  */
 /* -------------------------------------------------------------------------- */
 
-dxf_int_t dx_symbol_name_hasher(dxf_const_string_t symbol_name) {
-	return static_cast<dxf_int_t>(std::hash<std::wstring>{}(symbol_name));
+dxf_ulong_t dx_symbol_name_hasher(dxf_const_string_t symbol_name) {
+	return static_cast<dxf_ulong_t>(std::hash<std::wstring>{}(symbol_name));
 }
 
 /* -------------------------------------------------------------------------- */

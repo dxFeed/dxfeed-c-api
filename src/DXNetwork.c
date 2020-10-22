@@ -138,8 +138,10 @@ typedef struct {
 	int set_fields_flags;
 } dx_network_connection_context_t;
 
+#ifdef DXFEED_CODEC_TLS_ENABLED
 static dx_mutex_t g_tls_init_guard;
 static int g_tls_init_guard_initialized = false;
+#endif
 
 #define SOCKET_FIELD_FLAG           (1 << 0)
 #define READER_THREAD_FIELD_FLAG    (1 << 1)
@@ -274,7 +276,6 @@ void tls_unload_file(uint8_t* buf, size_t len) {
 	//Note: it is simple stub since current TLS API do not support unloading files
 }
 #endif
-#endif
 
 /* -------------------------------------------------------------------------- */
 
@@ -285,6 +286,7 @@ static void dx_logging_ansi_error(const char* ansi_error) {
 	dx_logging_error(w_error);
 	dx_free(w_error);
 }
+#endif
 
 /* -------------------------------------------------------------------------- */
 
@@ -493,7 +495,7 @@ void dx_notify_conn_termination (dx_network_connection_context_t* context, OUT i
 void* dx_queue_executor (void* arg) {
 #else
 unsigned dx_queue_executor(void* arg) {
-#endif	
+#endif
 	static const int s_idle_timeout = 100;
 	static const int s_small_timeout = 25;
 
@@ -1072,7 +1074,7 @@ int dx_connect_to_resolved_addresses(dx_network_connection_context_t* context) {
 static int dx_server_event_subscription_refresher (dxf_connection_t connection,
 													dx_order_source_array_ptr_t order_source,
 													dxf_const_string_t* symbols, size_t symbol_count,
-													int event_types, dxf_uint_t subscr_flags,
+												    unsigned event_types, dxf_uint_t subscr_flags,
 													dxf_long_t time) {
 	return dx_subscribe_symbols_to_events(connection, order_source, symbols, symbol_count,
 		event_types, false, false, subscr_flags, time);
@@ -1386,7 +1388,7 @@ static int dx_protocol_property_restore_backup(dx_network_connection_context_t* 
 
 int dx_protocol_property_get_snapshot(dxf_connection_t connection,
                  OUT dxf_property_item_t** ppProperties, OUT int* pSize)
-{	
+{
 	if (ppProperties == NULL || pSize == NULL) {
 		return dx_set_error_code(dx_ec_invalid_func_param);
 	}
@@ -1394,7 +1396,7 @@ int dx_protocol_property_get_snapshot(dxf_connection_t connection,
 	*pSize = 0;
 
 	int res = true;
-	const dx_network_connection_context_t* const pContext = dx_get_subsystem_data(connection, dx_ccs_network, &res);
+	dx_network_connection_context_t* pContext = dx_get_subsystem_data(connection, dx_ccs_network, &res);
 	if (pContext == NULL) {
 		if (res) {
 			dx_set_error_code(dx_cec_connection_context_not_initialized);

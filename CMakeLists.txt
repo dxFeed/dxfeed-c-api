@@ -26,17 +26,20 @@ add_subdirectory(src)
 
 add_subdirectory(tests/CandleSample)
 add_subdirectory(tests/CommandLineSample)
-
-if (WIN32)
-    add_subdirectory(tests/FullTest)
-endif (WIN32)
-
 add_subdirectory(tests/PriceLevelBookSample)
 add_subdirectory(tests/RegionalBookSample)
 add_subdirectory(tests/SnapshotConsoleSample)
 add_subdirectory(tests/IncSnapshotConsoleSample)
 
 add_subdirectory(wrappers/cpp)
+
+add_subdirectory(tests/FullTest)
+add_subdirectory(tests/APITest)
+add_subdirectory(tests/ConnectionTest)
+add_subdirectory(tests/LastEventTest)
+add_subdirectory(tests/PerformanceTest)
+add_subdirectory(tests/QuoteTableTest)
+add_subdirectory(tests/SampleTest)
 
 set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/DXFeedAllCPackConfig.cmake")
 set(CPACK_PACKAGE_VENDOR "dxFeed Solutions DE GmbH")

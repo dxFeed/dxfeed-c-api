@@ -4,9 +4,9 @@ cmake_policy(SET CMP0015 NEW)
 
 set(PROJECT APITest)
 set(INCLUDE_DIR
-    ../../include
-    ../../src
-    )
+        ../../include
+        ../../src
+        )
 set(TARGET_PLATFORM "x86" CACHE STRING "Target platform specification")
 set(PLATFORM_POSTFIX "")
 if (TARGET_PLATFORM STREQUAL "x64")
@@ -20,6 +20,8 @@ set(LIB_DXFEED_NAME ${LIB_DXFEED_PROJ})
 set(LIB_DXFEED_OUT_DIR ${CMAKE_BINARY_DIR}/${LIB_DXFEED_PROJ})
 
 set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE INTERNAL "" FORCE)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED on)
 
 project(${PROJECT})
 
@@ -32,8 +34,8 @@ endif ()
 link_directories(${LIB_DXFEED_OUT_DIR})
 
 set(SOURCE_FILES
-    APITest.c
-    )
+        APITest.c
+        )
 
 set(ADDITIONAL_PROPERTIES "")
 
@@ -49,14 +51,15 @@ if (WIN32)
         set(CMAKE_C_STANDARD_LIBRARIES "" CACHE STRING "" FORCE)
         # End hack
     elseif (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
-        set(CMAKE_C_FLAGS_DEBUG "-g -O0 -std=gnu11 -D_DEBUG")
-        set(CMAKE_C_FLAGS_RELEASE "-O2 -std=gnu11 -DNDEBUG -DWIN32")
+        set(CMAKE_C_FLAGS_DEBUG "-g -O0 -D_DEBUG")
+        set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG -DWIN32")
     else ()
         message("Unknown compiler")
     endif ()
 else ()
-    set(CMAKE_C_FLAGS_DEBUG "-g -O0 -std=gnu11 -fPIC")
-    set(CMAKE_C_FLAGS_RELEASE "-O2 -std=gnu11 -fPIC")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pedantic")
+    set(CMAKE_C_FLAGS_DEBUG "-g -O0 -fPIC")
+    set(CMAKE_C_FLAGS_RELEASE "-O2 -fPIC")
     add_definitions(-DUSE_PTHREADS)
 endif (WIN32)
 
@@ -64,34 +67,34 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 
 add_executable(${PROJECT} ${SOURCE_FILES})
 
-target_link_libraries(${PROJECT} debug ${LIB_DXFEED_NAME}${DEBUG_POSTFIX} optimized ${LIB_DXFEED_NAME}${RELEASE_POSTFIX})
+target_link_libraries(${PROJECT} DXFeed ${ADDITIONAL_LIBRARIES})
 
 set_target_properties(${PROJECT}
-    PROPERTIES
-    DEBUG_POSTFIX "${DEBUG_POSTFIX}"
-    RELEASE_POSTFIX "${RELEASE_POSTFIX}"
-    LINK_FLAGS "${ADDITIONAL_PROPERTIES}"
-    )
+        PROPERTIES
+        DEBUG_POSTFIX "${DEBUG_POSTFIX}"
+        RELEASE_POSTFIX "${RELEASE_POSTFIX}"
+        LINK_FLAGS "${ADDITIONAL_PROPERTIES}"
+        )
 
 add_dependencies(${PROJECT} ${LIB_DXFEED_PROJ})
 
 set(PROJECT_FILES
-    ${PROJECT}.vcxproj
-    ${PROJECT}.vcxproj.filters
-    )
+        ${PROJECT}.vcxproj
+        ${PROJECT}.vcxproj.filters
+        )
 set(BUILD_FILES
-    build.bat
-    CMakeLists.txt
-    )
+        build.bat
+        CMakeLists.txt
+        )
 set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/DXFeedAllCPackConfig.cmake")
 install(TARGETS ${PROJECT}
-    DESTINATION "bin/${TARGET_PLATFORM}"
-    CONFIGURATIONS Release
-    )
+        DESTINATION "bin/${TARGET_PLATFORM}"
+        CONFIGURATIONS Release
+        )
 install(FILES ${SOURCE_FILES} ${PROJECT_FILES} ${BUILD_FILES}
-    DESTINATION "tests/${PROJECT}"
-    CONFIGURATIONS Release
-    )
+        DESTINATION "tests/${PROJECT}"
+        CONFIGURATIONS Release
+        )
 set(CPACK_PACKAGE_VENDOR "dxFeed Solutions DE GmbH")
 set(CPACK_PACKAGE_NAME "${PROJECT}")
 set(CPACK_PACKAGE_VERSION "${APP_VERSION}")
