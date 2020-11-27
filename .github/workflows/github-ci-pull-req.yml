@@ -10,6 +10,7 @@ env:
   MAC_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-macosx
   LINUX_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-linux
   CENTOS_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-centos
+  CENTOS65_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-centos65
   WINDOWS_ARTIFACT_TEMPLATE: dxfeed-c-api-#VERSION#-windows
   WINDOWS_BUILD_TEMPLATE: dxfeed-c-api-#VERSION#
   WIN_SRC_DIR: "C:\\dxfeed-c-api"
@@ -82,7 +83,7 @@ jobs:
           release:  ${{ env.RELEASE_VERSION }}
           notls: true
 
-# --------------------------- BUILD OLD LINUX (CENTOS 6.1) LIBRARY (WITH TLS SUPPORT)
+# --------------------------- BUILD OLD LINUX (CENTOS 6.10) LIBRARY (WITH TLS SUPPORT)
   build_centos_tls:
     runs-on: ubuntu-latest
     name: build centos (TLS)
@@ -103,7 +104,7 @@ jobs:
           artifact: ${{ env.ARTIFACT }}
           release:  ${{ env.RELEASE_VERSION }}
 
-# --------------------------- BUILD OLD LINUX (CENTOS 6.1) LIBRARY (WITHOUT TLS SUPPORT)
+# --------------------------- BUILD OLD LINUX (CENTOS 6.10) LIBRARY (WITHOUT TLS SUPPORT)
   build_centos_no_tls:
     runs-on: ubuntu-latest
     name: build centos (no TLS)
@@ -120,6 +121,28 @@ jobs:
       - name: Build centos library (no TLS)
         uses: ./.github/actions/centos
         id: build-centos-nt
+        with:
+          artifact: ${{ env.ARTIFACT }}
+          release:  ${{ env.RELEASE_VERSION }}
+          notls: true
+
+  # --------------------------- BUILD OLD LINUX (CENTOS 6.5) LIBRARY (WITHOUT TLS SUPPORT)
+  build_centos65_no_tls:
+    runs-on: ubuntu-latest
+    name: build centos 6.5 (no TLS)
+    steps:
+      - name: Set env
+        run: |
+          echo ::set-env name=RELEASE_VERSION::${BUILD_VERSION}
+          echo ::set-env name=ARTIFACT::$(echo ${CENTOS65_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/${BUILD_VERSION}/g" )
+      - name: Check env
+        run: |
+          echo Artifact: ${{ env.ARTIFACT }}
+          echo Release : ${{ env.RELEASE_VERSION }}
+      - uses: actions/checkout@main
+      - name: Build centos library (no TLS)
+        uses: ./.github/actions/centos65
+        id: build-centos65-nt
         with:
           artifact: ${{ env.ARTIFACT }}
           release:  ${{ env.RELEASE_VERSION }}
