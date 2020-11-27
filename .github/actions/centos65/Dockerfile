@@ -2,7 +2,7 @@ FROM gpmidi/centos-6.5
 
 RUN                                                                                                                \
      yum -y update                                                                                              && \
-     yum install -y wget                                                                                        && \
+     yum install -y wget tar which                                                                              && \
      wget http://people.centos.org/tru/devtools-2/devtools-2.repo -O /etc/yum.repos.d/devtools-2.repo           && \
      yum install -y devtoolset-2-gcc devtoolset-2-binutils devtoolset-2-binutils-devel                          && \
      yum install -y devtoolset-2-gcc-c++                                                                        && \

@@ -271,11 +271,9 @@ static int dx_protocol_property_restore_backup(dx_network_connection_context_t* 
 /* -------------------------------------------------------------------------- */
 
 #ifdef DXFEED_CODEC_TLS_ENABLED
-#ifndef MACOSX
 void tls_unload_file(uint8_t* buf, size_t len) {
 	//Note: it is simple stub since current TLS API do not support unloading files
 }
-#endif
 
 /* -------------------------------------------------------------------------- */
 
