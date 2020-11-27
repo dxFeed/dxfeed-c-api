@@ -45,7 +45,7 @@
 /* -------------------------------------------------------------------------- */
 
 /// Event ID
-typedef enum {
+typedef enum dx_event_id {
     dx_eid_begin = 0u,
     dx_eid_trade = dx_eid_begin,
     dx_eid_quote,
@@ -104,7 +104,7 @@ typedef enum {
 /**
  * Event Subscription flags
  */
-typedef enum {
+typedef enum dx_event_subscr_flag_t {
   ///Used for default subscription
   dx_esf_default = 0x0u,
   ///Used for subscribing on one record only in case of snapshots
@@ -137,12 +137,12 @@ typedef enum {
 /* -------------------------------------------------------------------------- */
 
 /// Suffix
-typedef struct {
+typedef struct dx_suffix {
     dxf_char_t suffix[DXF_RECORD_SUFFIX_SIZE];
 } dx_suffix_t;
 
 /// Order source
-typedef struct {
+typedef struct dx_order_source_array {
     dx_suffix_t *elements;
     size_t size;
     size_t capacity;
@@ -162,7 +162,7 @@ typedef void* dxf_event_data_t;
 typedef const void* dxf_const_event_data_t;
 
 /// Order scope
-typedef enum {
+typedef enum dxf_order_scope {
 	dxf_osc_composite = 0,
 	dxf_osc_regional = 1,
 	dxf_osc_aggregate = 2,
@@ -182,7 +182,7 @@ typedef enum {
 } dxf_direction_t;
 
 /// Trade
-typedef struct {
+typedef struct dxf_trade {
     dxf_long_t time;
     dxf_int_t sequence;
     dxf_int_t time_nanos;
@@ -204,7 +204,7 @@ typedef struct {
 /* Quote -------------------------------------------------------------------- */
 
 /// Quote
-typedef struct {
+typedef struct dxf_quote {
     dxf_long_t time;
     dxf_int_t sequence;
     dxf_int_t time_nanos;
@@ -222,7 +222,7 @@ typedef struct {
 /* Summary ------------------------------------------------------------------ */
 
 /// Price type
-typedef enum {
+typedef enum dxf_price_type {
     dxf_pt_regular = 0,
     dxf_pt_indicative = 1,
     dxf_pt_preliminary = 2,
@@ -230,7 +230,7 @@ typedef enum {
 } dxf_price_type_t;
 
 /// Summary
-typedef struct {
+typedef struct dxf_summary {
     dxf_dayid_t day_id;
     dxf_double_t day_open_price;
     dxf_double_t day_high_price;
@@ -250,21 +250,21 @@ typedef struct {
 /* Profile ------------------------------------------------------------------ */
 
 /// Trading status
-typedef enum {
+typedef enum dxf_trading_status {
   dxf_ts_undefined = 0,
   dxf_ts_halted = 1,
   dxf_ts_active = 2
 } dxf_trading_status_t;
 
 /// Short sale restriction
-typedef enum {
+typedef enum dxf_short_sale_restriction {
   dxf_ssr_undefined = 0,
   dxf_ssr_active = 1,
   dxf_ssr_inactive = 2
 } dxf_short_sale_restriction_t;
 
 /// Profile
-typedef struct {
+typedef struct dxf_profile {
     dxf_double_t beta;
     dxf_double_t eps;
     dxf_int_t div_freq;
@@ -288,14 +288,14 @@ typedef struct {
 /* Order & Spread Order ----------------------------------------------------- */
 
 /// Order side
-typedef enum {
+typedef enum dxf_order_side {
     dxf_osd_undefined = 0,
     dxf_osd_buy = 1,
     dxf_osd_sell = 2
 } dxf_order_side_t;
 
 /// Order
-typedef struct {
+typedef struct dxf_order {
     dxf_event_flags_t event_flags;
     dxf_long_t index;
     dxf_long_t time;
@@ -317,14 +317,14 @@ typedef struct {
 /* Time And Sale ------------------------------------------------------------ */
 
 /// Time & sale type
-typedef enum {
+typedef enum dxf_tns_type {
     dxf_tnst_new = 0,
     dxf_tnst_correction = 1,
     dxf_tnst_cancel = 2
 } dxf_tns_type_t;
 
 /// Time & sale
-typedef struct {
+typedef struct dxf_time_and_sale {
     dxf_event_flags_t event_flags;
     dxf_long_t index;
     dxf_long_t time;
@@ -368,7 +368,7 @@ typedef struct {
 
 /* Greeks ------------------------------------------------------------------- */
 /// Greeks
-typedef struct {
+typedef struct dxf_greeks {
     dxf_event_flags_t event_flags;
     dxf_long_t index;
     dxf_long_t time;
@@ -393,7 +393,7 @@ typedef dx_underlying_t dxf_underlying_t;
 
 /* Series ------------------------------------------------------------------- */
 /// Series
-typedef struct {
+typedef struct dxf_series {
     dxf_event_flags_t event_flags;
     dxf_long_t index;
     dxf_long_t time;
@@ -407,7 +407,7 @@ typedef struct {
 } dxf_series_t;
 
 /// Configuration
-typedef struct {
+typedef struct dxf_configuration {
     dxf_int_t version;
     dxf_string_t object;
 } dxf_configuration_t;
@@ -418,17 +418,8 @@ typedef struct {
  */
 /* -------------------------------------------------------------------------- */
 
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#endif
-
-static dxf_const_string_t DXF_ORDER_AGGREGATE_BID_STR = L"AGGREGATE_BID";
-static dxf_const_string_t DXF_ORDER_AGGREGATE_ASK_STR = L"AGGREGATE_ASK";
-
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#endif
+static DX_MAYBE_UNUSED dxf_const_string_t DXF_ORDER_AGGREGATE_BID_STR = L"AGGREGATE_BID";
+static DX_MAYBE_UNUSED dxf_const_string_t DXF_ORDER_AGGREGATE_ASK_STR = L"AGGREGATE_ASK";
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -442,7 +433,7 @@ static dxf_const_string_t DXF_ORDER_AGGREGATE_ASK_STR = L"AGGREGATE_ASK";
 #define DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT (NAN)
 
 /// Candle price attribute
-typedef enum {
+typedef enum dxf_candle_price_attribute {
     dxf_cpa_last,
     dxf_cpa_bid,
     dxf_cpa_ask,
@@ -455,7 +446,7 @@ typedef enum {
 } dxf_candle_price_attribute_t;
 
 /// Candle session attribute
-typedef enum {
+typedef enum dxf_candle_session_attribute {
     dxf_csa_any,
     dxf_csa_regular,
 
@@ -465,7 +456,7 @@ typedef enum {
 } dxf_candle_session_attribute_t;
 
 /// Candle type period attribute
-typedef enum {
+typedef enum dxf_candle_type_period_attribute {
     dxf_ctpa_tick,
     dxf_ctpa_second,
     dxf_ctpa_minute,
@@ -486,7 +477,7 @@ typedef enum {
 } dxf_candle_type_period_attribute_t;
 
 /// Candle alignment attribute
-typedef enum {
+typedef enum dxf_candle_alignment_attribute {
     dxf_caa_midnight,
     dxf_caa_session,
 
@@ -502,7 +493,7 @@ typedef enum {
 /* -------------------------------------------------------------------------- */
 
 /// Event flag
-typedef enum {
+typedef enum dxf_event_flag_t {
     dxf_ef_tx_pending = 0x01,
     dxf_ef_remove_event = 0x02,
     dxf_ef_snapshot_begin = 0x04,
@@ -520,7 +511,7 @@ typedef enum {
 typedef dxf_ulong_t dxf_time_int_field_t;
 
 /// Event params
-typedef struct {
+typedef struct dxf_event_params {
     dxf_event_flags_t flags;
     dxf_time_int_field_t time_int_field;
     dxf_ulong_t snapshot_key;
@@ -592,7 +583,7 @@ dx_event_id_t dx_get_event_id_by_bitmask (int event_bitmask);
 /* -------------------------------------------------------------------------- */
 
 /// Subscription type
-typedef enum {
+typedef enum dx_subscription_type {
 	dx_st_begin = 0,
 
     dx_st_ticker = dx_st_begin,
@@ -605,13 +596,13 @@ typedef enum {
 } dx_subscription_type_t;
 
 /// Event subscription param
-typedef struct {
+typedef struct dx_event_subscription_param {
     dx_record_id_t record_id;
     dx_subscription_type_t subscription_type;
 } dx_event_subscription_param_t;
 
 /// Event subscription param list
-typedef struct {
+typedef struct dx_event_subscription_param_list {
     dx_event_subscription_param_t* elements;
     size_t size;
     size_t capacity;
@@ -640,7 +631,7 @@ size_t dx_get_event_subscription_params(dxf_connection_t connection, dx_order_so
 /* -------------------------------------------------------------------------- */
 
 /// Snapshot
-typedef struct {
+typedef struct dxf_snapshot_data {
     int event_type;
     dxf_string_t symbol;
 
@@ -682,14 +673,14 @@ typedef void(*dxf_snapshot_inc_listener_t) (const dxf_snapshot_data_ptr_t snapsh
 */
 /* -------------------------------------------------------------------------- */
 /// Price level element
-typedef struct {
+typedef struct dxf_price_level_element {
     dxf_double_t price;
     dxf_long_t size;
     dxf_long_t time;
 } dxf_price_level_element_t;
 
 /// Price level book data
-typedef struct {
+typedef struct dxf_price_level_book_data {
     dxf_const_string_t symbol;
 
     size_t bids_count;

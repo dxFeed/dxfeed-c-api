@@ -25,6 +25,12 @@
 #ifndef DX_TYPES_H_INCLUDED
 #define DX_TYPES_H_INCLUDED
 
+#ifdef __GNUC__
+#	define DX_MAYBE_UNUSED __attribute__ ((__unused__))
+#else
+#	define DX_MAYBE_UNUSED
+#endif
+
 /// Error code
 typedef int ERRORCODE;
 

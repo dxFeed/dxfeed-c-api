@@ -394,6 +394,7 @@ size_t dx_get_event_subscription_params(dxf_connection_t connection, dx_order_so
 	case dx_eid_configuration:
 		result = dx_get_configuration_subscription_params(connection, subscr_flags, &param_list);
 		break;
+	default: break;
 	}
 
 	if (!result) {

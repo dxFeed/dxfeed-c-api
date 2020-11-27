@@ -18,6 +18,7 @@
  */
 
 #include <math.h>
+#include <string.h>
 
 #include "ConnectionContextData.h"
 #include "DXAlgorithms.h"
@@ -257,7 +258,8 @@ static void dx_rb_book_update(dx_regional_book_t *book) {
         for (; i < book->listeners.size; i++) {
             dx_rb_listener_context_t* ctx = &book->listeners.elements[i];
             if (ctx->version == dx_rblv_default) {
-                ((dxf_price_level_book_listener_t)ctx->listener)(&book->book, book->listeners.elements[i].user_data);
+				dxf_price_level_book_listener_t listener = *(dxf_price_level_book_listener_t*)(&ctx->listener);
+				listener(&book->book, book->listeners.elements[i].user_data);
             }
         }
 		dx_mutex_unlock(&book->guard);
@@ -273,7 +275,8 @@ static void notify_regional_listeners(dx_regional_book_t *book, const dxf_quote_
     for (i = 0; i < book->listeners.size; ++i) {
         dx_rb_listener_context_t* ctx = &book->listeners.elements[i];
         if (ctx->version == dx_rblv_v2) {
-            ((dxf_regional_quote_listener_t)ctx->listener)(book->symbol, quotes, count, ctx->user_data);
+			dxf_regional_quote_listener_t listener = *(dxf_regional_quote_listener_t*)(&ctx->listener);
+			listener(book->symbol, quotes, count, ctx->user_data);
         }
     }
     dx_mutex_unlock(&book->guard);
@@ -335,7 +338,6 @@ dxf_regional_book_t dx_create_regional_book(dxf_connection_t connection,
 	int res = true;
 	dx_rb_connection_context_t *context = NULL;
 	dx_regional_book_t *book = NULL;
-	int i = 0;
 
 	context = dx_get_subsystem_data(connection, dx_ccs_regional_book, &res);
 	if (context == NULL) {
@@ -423,7 +425,6 @@ static int dx_add_regional_book_listener_impl(dxf_regional_book_t book,
                                     dx_rb_listener_version_t version,
 									void *user_data) {
 	dx_regional_book_t *b = (dx_regional_book_t *)book;
-	dx_rb_connection_context_t *context = CTX(b->context);
 	dx_rb_listener_context_t ctx = { listener, version, user_data };
 	int found = false;
 	int error = false;
@@ -442,19 +443,18 @@ static int dx_add_regional_book_listener_impl(dxf_regional_book_t book,
 
 int dx_add_regional_book_listener(dxf_regional_book_t book, dxf_price_level_book_listener_t book_listener, void *user_data)
 {
-    return dx_add_regional_book_listener_impl(book, (dx_rb_listener_ptr_t)book_listener, dx_rblv_default, user_data);
+    return dx_add_regional_book_listener_impl(book, *(dx_rb_listener_ptr_t*)(&book_listener), dx_rblv_default, user_data);
 }
 
 int dx_add_regional_book_listener_v2(dxf_regional_book_t book, dxf_regional_quote_listener_t book_listener,
     void *user_data)
 {
-    return dx_add_regional_book_listener_impl(book, (dx_rb_listener_ptr_t)book_listener, dx_rblv_v2, user_data);
+    return dx_add_regional_book_listener_impl(book, *(dx_rb_listener_ptr_t*)(&book_listener), dx_rblv_v2, user_data);
 }
 
 static int dx_remove_regional_book_listener_impl(dxf_regional_book_t book, dx_rb_listener_ptr_t listener)
 {
 	dx_regional_book_t *b = (dx_regional_book_t *)book;
-	dx_rb_connection_context_t *context = CTX(b->context);
 	dx_rb_listener_context_t ctx = { listener, 0, NULL };
 	int found = false;
 	int error = false;
@@ -472,10 +472,10 @@ static int dx_remove_regional_book_listener_impl(dxf_regional_book_t book, dx_rb
 
 int dx_remove_regional_book_listener(dxf_regional_book_t book, dxf_price_level_book_listener_t listener)
 {
-    return dx_remove_regional_book_listener_impl(book, (dx_rb_listener_ptr_t)listener);
+    return dx_remove_regional_book_listener_impl(book, *(dx_rb_listener_ptr_t*)(&listener));
 }
 
 int dx_remove_regional_book_listener_v2(dxf_regional_book_t book, dxf_regional_quote_listener_t listener)
 {
-    return dx_remove_regional_book_listener_impl(book, (dx_rb_listener_ptr_t)listener);
+    return dx_remove_regional_book_listener_impl(book, *(dx_rb_listener_ptr_t*)(&listener));
 }

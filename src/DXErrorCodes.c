@@ -26,8 +26,6 @@
 /* -------------------------------------------------------------------------- */
 
 dxf_const_string_t dx_get_error_description (dx_error_code_t code) {
-	static dxf_const_string_t s_internal_error_descr = L"Internal software error";
-
 	switch (code) {
 	/* common error codes */
 

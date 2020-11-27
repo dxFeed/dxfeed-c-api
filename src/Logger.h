@@ -25,7 +25,7 @@
 #if defined(_WIN32) && defined(_DEBUG)
 void dx_log_debug_message(const dxf_char_t *format, ...);
 #else
-#define dx_log_debug_message(f, ...)
+#define dx_log_debug_message(...)
 #endif
 
 //typedef DXFEED_API enum dx_log_date_format {

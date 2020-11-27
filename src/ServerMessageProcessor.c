@@ -887,15 +887,16 @@ int dx_read_qdtime_on_remove_event(dx_server_msg_proc_connection_context_t* cont
 	int i;
 	dxf_int_t high;
 	dxf_int_t low;
-	dxf_ulong_t qdtime;
 	const dx_record_item_t* record_info = dx_get_record_by_id(context->dscc, record_id);
 
 	if (record_info == NULL)
 		return dx_set_error_code(dx_ec_invalid_func_param_internal);
 
-	CHECKED_CALL_2(dx_read_compact_long, context->bicc, &qdtime);
+	dxf_long_t qdtime_signed;
+	CHECKED_CALL_2(dx_read_compact_long, context->bicc, &qdtime_signed);
+	dxf_ulong_t qdtime = (dxf_ulong_t)qdtime_signed;
 
-	high = (dxf_int_t)(qdtime >> 32);
+	high = (dxf_int_t)(qdtime >> 32u);
 	low = (dxf_int_t)(qdtime & 0xFFFFFFFF);
 	for (i = 0; i < record_info->field_count; ++i) {
 		dx_field_info_t field = record_info->fields[i];
@@ -916,6 +917,7 @@ int dx_read_records (dx_server_msg_proc_connection_context_t* context,
 	dxf_short_t read_short;
 	dxf_int_t read_int;
 	dxf_char_t read_utf_char;
+	(void)read_utf_char;
 	dxf_double_t read_double;
 	dxf_string_t read_string;
 	dxf_byte_array_t read_byte_array;

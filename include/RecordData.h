@@ -75,7 +75,7 @@ static const dx_record_id_t DX_RECORD_ID_INVALID = -1;
 /* -------------------------------------------------------------------------- */
 
 /// Trade
-typedef struct {
+typedef struct dx_trade {
     dxf_int_t time;
     dxf_int_t sequence;
     dxf_int_t time_nanos;
@@ -93,7 +93,7 @@ typedef struct {
 typedef dx_trade_t dx_trade_eth_t;
 
 /// Quote
-typedef struct {
+typedef struct dx_quote {
     dxf_int_t sequence;
     dxf_int_t time_nanos;
     dxf_int_t bid_time;
@@ -107,7 +107,7 @@ typedef struct {
 } dx_quote_t;
 
 /// Summary
-typedef struct {
+typedef struct dx_summary {
     dxf_dayid_t day_id;	
     dxf_double_t day_open_price;
     dxf_double_t day_high_price;
@@ -121,7 +121,7 @@ typedef struct {
 } dx_summary_t;
 
 /// Profile
-typedef struct {
+typedef struct dx_profile {
     dxf_double_t beta;
     dxf_double_t eps;
     dxf_int_t div_freq;
@@ -141,7 +141,7 @@ typedef struct {
 } dx_profile_t;
 
 /// Market maker
-typedef struct {
+typedef struct dx_market_maker {
     dxf_char_t mm_exchange;
     dxf_int_t mm_id;
     dxf_int_t mmbid_time;
@@ -155,7 +155,7 @@ typedef struct {
 } dx_market_maker_t;
 
 /// Order
-typedef struct {
+typedef struct dx_order {
     dxf_int_t index;
     dxf_int_t time;
     dxf_int_t time_nanos;
@@ -168,7 +168,7 @@ typedef struct {
 } dx_order_t;
 
 /// Spread order
-typedef struct {
+typedef struct dx_spread_order {
     dxf_int_t index;
     dxf_int_t time;
     dxf_int_t time_nanos;
@@ -181,7 +181,7 @@ typedef struct {
 } dx_spread_order_t;
 
 /// Time & sale
-typedef struct {
+typedef struct dx_time_and_sale {
     dxf_int_t time;
     dxf_int_t sequence;
     dxf_char_t exchange_code;
@@ -196,7 +196,7 @@ typedef struct {
 } dx_time_and_sale_t;
 
 /// Candle
-typedef struct {
+typedef struct dx_candle {
     dxf_int_t time;
     dxf_int_t sequence;
     dxf_double_t count;
@@ -213,7 +213,7 @@ typedef struct {
 } dx_candle_t;
 
 /// Greeks
-typedef struct {
+typedef struct dx_greeks {
     dxf_int_t time;
     dxf_int_t sequence;
     dxf_double_t price;
@@ -226,7 +226,7 @@ typedef struct {
 } dx_greeks_t;
 
 /// Theo price
-typedef struct {
+typedef struct dx_theo_price {
     // To have same record for record and event
     dxf_long_t time;
     dxf_double_t price;
@@ -238,7 +238,7 @@ typedef struct {
 } dx_theo_price_t;
 
 /// Underlying
-typedef struct {
+typedef struct dx_underlying {
     dxf_double_t volatility;
     dxf_double_t front_volatility;
     dxf_double_t back_volatility;
@@ -246,7 +246,7 @@ typedef struct {
 } dx_underlying_t;
 
 /// Series
-typedef struct {
+typedef struct dx_series {
     dxf_int_t index;
     dxf_int_t time;
     dxf_int_t sequence;
@@ -259,7 +259,7 @@ typedef struct {
 } dx_series_t;
 
 /// Configuration
-typedef struct {
+typedef struct dx_configuration {
     dxf_int_t version;
     dxf_byte_array_t object;
 } dx_configuration_t;

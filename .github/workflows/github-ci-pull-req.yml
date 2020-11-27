@@ -10,6 +10,7 @@ env:
   MAC_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-macosx
   LINUX_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-linux
   CENTOS_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-centos
+  CENTOS65_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-centos65
   WINDOWS_ARTIFACT_TEMPLATE: dxfeed-c-api-#VERSION#-windows
   WINDOWS_BUILD_TEMPLATE: dxfeed-c-api-#VERSION#
   WIN_SRC_DIR: "C:\\dxfeed-c-api"
@@ -25,8 +26,8 @@ jobs:
     steps:
       - name: Set env
         run: |
-          echo ::set-env name=RELEASE_VERSION::${BUILD_VERSION}
-          echo ::set-env name=ARTIFACT::$(echo ${DOCS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/${BUILD_VERSION}/g")
+          echo RELEASE_VERSION=${BUILD_VERSION} >> $GITHUB_ENV
+          echo ARTIFACT=$(echo ${DOCS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/${BUILD_VERSION}/g") >> $GITHUB_ENV
       - name: Check env
         run: |
           echo Artifact: ${{ env.ARTIFACT }}
@@ -46,8 +47,8 @@ jobs:
     steps:
       - name: Set env
         run: |
-          echo ::set-env name=RELEASE_VERSION::${BUILD_VERSION}
-          echo ::set-env name=ARTIFACT::$(echo ${LINUX_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/${BUILD_VERSION}/g" )
+          echo RELEASE_VERSION=${BUILD_VERSION} >> $GITHUB_ENV
+          echo ARTIFACT=$(echo ${LINUX_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/${BUILD_VERSION}/g" ) >> $GITHUB_ENV
       - name: Check env
         run: |
           echo Artifact: ${{ env.ARTIFACT }}
@@ -67,8 +68,8 @@ jobs:
     steps:
       - name: Set env
         run: |
-          echo ::set-env name=RELEASE_VERSION::${BUILD_VERSION}
-          echo ::set-env name=ARTIFACT::$(echo ${LINUX_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/${BUILD_VERSION}/g" )
+          echo RELEASE_VERSION=${BUILD_VERSION} >> $GITHUB_ENV
+          echo ARTIFACT=$(echo ${LINUX_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/${BUILD_VERSION}/g" ) >> $GITHUB_ENV
       - name: Check env
         run: |
           echo Artifact: ${{ env.ARTIFACT }}
@@ -82,15 +83,15 @@ jobs:
           release:  ${{ env.RELEASE_VERSION }}
           notls: true
 
-# --------------------------- BUILD OLD LINUX (CENTOS 6.1) LIBRARY (WITH TLS SUPPORT)
+# --------------------------- BUILD OLD LINUX (CENTOS 6.10) LIBRARY (WITH TLS SUPPORT)
   build_centos_tls:
     runs-on: ubuntu-latest
     name: build centos (TLS)
     steps:
       - name: Set env
         run: |
-          echo ::set-env name=RELEASE_VERSION::${BUILD_VERSION}
-          echo ::set-env name=ARTIFACT::$(echo ${CENTOS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/${BUILD_VERSION}/g" )
+          echo RELEASE_VERSION=${BUILD_VERSION} >> $GITHUB_ENV
+          echo ARTIFACT=$(echo ${CENTOS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/${BUILD_VERSION}/g" ) >> $GITHUB_ENV
       - name: Check env
         run: |
           echo Artifact: ${{ env.ARTIFACT }}
@@ -103,15 +104,15 @@ jobs:
           artifact: ${{ env.ARTIFACT }}
           release:  ${{ env.RELEASE_VERSION }}
 
-# --------------------------- BUILD OLD LINUX (CENTOS 6.1) LIBRARY (WITHOUT TLS SUPPORT)
+# --------------------------- BUILD OLD LINUX (CENTOS 6.10) LIBRARY (WITHOUT TLS SUPPORT)
   build_centos_no_tls:
     runs-on: ubuntu-latest
     name: build centos (no TLS)
     steps:
       - name: Set env
         run: |
-          echo ::set-env name=RELEASE_VERSION::${BUILD_VERSION}
-          echo ::set-env name=ARTIFACT::$(echo ${CENTOS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/${BUILD_VERSION}/g" )
+          echo RELEASE_VERSION=${BUILD_VERSION} >> $GITHUB_ENV
+          echo ARTIFACT=$(echo ${CENTOS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/${BUILD_VERSION}/g" ) >> $GITHUB_ENV
       - name: Check env
         run: |
           echo Artifact: ${{ env.ARTIFACT }}
@@ -125,6 +126,28 @@ jobs:
           release:  ${{ env.RELEASE_VERSION }}
           notls: true
 
+  # --------------------------- BUILD OLD LINUX (CENTOS 6.5) LIBRARY (WITHOUT TLS SUPPORT)
+  build_centos65_no_tls:
+    runs-on: ubuntu-latest
+    name: build centos 6.5 (no TLS)
+    steps:
+      - name: Set env
+        run: |
+          echo RELEASE_VERSION=${BUILD_VERSION} >> $GITHUB_ENV
+          echo ARTIFACT=$(echo ${CENTOS65_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/${BUILD_VERSION}/g" ) >> $GITHUB_ENV
+      - name: Check env
+        run: |
+          echo Artifact: ${{ env.ARTIFACT }}
+          echo Release : ${{ env.RELEASE_VERSION }}
+      - uses: actions/checkout@main
+      - name: Build centos library (no TLS)
+        uses: ./.github/actions/centos65
+        id: build-centos65-nt
+        with:
+          artifact: ${{ env.ARTIFACT }}
+          release:  ${{ env.RELEASE_VERSION }}
+          notls: true
+
 # --------------------------- BUILD MACOSX LIBRARY (WITH TLS SUPPORT)
   build_macos_tls:
     runs-on: macos-latest
@@ -133,8 +156,8 @@ jobs:
       - uses: actions/checkout@main
       - name: Set env
         run: |
-          echo ::set-env name=RELEASE_VERSION::${BUILD_VERSION}
-          echo ::set-env name=ARTIFACT::$(echo ${MAC_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/${BUILD_VERSION}/g" )
+          echo RELEASE_VERSION=${BUILD_VERSION} >> $GITHUB_ENV
+          echo ARTIFACT=$(echo ${MAC_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/${BUILD_VERSION}/g" ) >> $GITHUB_ENV
       - name: Check env
         run: |
           echo Artifact: ${{ env.ARTIFACT }}
@@ -161,8 +184,8 @@ jobs:
       - uses: actions/checkout@main
       - name: Set env
         run: |
-          echo ::set-env name=RELEASE_VERSION::${BUILD_VERSION}
-          echo ::set-env name=ARTIFACT::$(echo ${MAC_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/${BUILD_VERSION}/g" )
+          echo RELEASE_VERSION=${BUILD_VERSION} >> $GITHUB_ENV
+          echo ARTIFACT=$(echo ${MAC_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/${BUILD_VERSION}/g" ) >> $GITHUB_ENV
       - name: Check env
         run: |
           echo Artifact: ${{ env.ARTIFACT }}
@@ -181,10 +204,6 @@ jobs:
 
 
 
-
-
-
-
 # --------------------------- BUILD WINDOWS LIBRARY [ VS2015 ]
   build_windows:
     runs-on: windows-latest
@@ -193,9 +212,9 @@ jobs:
 
       - name: Set env
         run: |
-          echo "::set-env name=RELEASE_VERSION::$("$Env:BUILD_VERSION")"
-          echo "::set-env name=ARTIFACT::$(echo $Env:WINDOWS_ARTIFACT_TEMPLATE | %{$_ -replace '#VERSION#', $Env:BUILD_VERSION })"
-          echo "::set-env name=WB_ARTIFACT::$(echo $Env:WINDOWS_BUILD_TEMPLATE | %{$_ -replace '#VERSION#', $Env:BUILD_VERSION })"
+          echo RELEASE_VERSION=$("$Env:BUILD_VERSION") | Add-Content -Path $env:GITHUB_ENV -Encoding utf8
+          echo ARTIFACT=$(echo $Env:WINDOWS_ARTIFACT_TEMPLATE | %{$_ -replace '#VERSION#', $Env:BUILD_VERSION }) | Add-Content -Path $env:GITHUB_ENV -Encoding utf8
+          echo WB_ARTIFACT=$(echo $Env:WINDOWS_BUILD_TEMPLATE | %{$_ -replace '#VERSION#', $Env:BUILD_VERSION }) | Add-Content -Path $env:GITHUB_ENV -Encoding utf8
 
       - name: Check env
         run: |
