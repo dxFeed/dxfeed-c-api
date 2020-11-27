@@ -1,4 +1,4 @@
-FROM gpmidi/centos-6.5
+FROM centos:6.6
 
 RUN                                                                                                                \
      yum -y update                                                                                              && \
