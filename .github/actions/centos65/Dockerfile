@@ -1,4 +1,4 @@
-FROM centos:6.6
+FROM gpmidi/centos-6.5
 
 RUN                                                                                                                \
      yum -y update                                                                                              && \
@@ -14,6 +14,7 @@ RUN                                                                             
      yum install -y git                                                                                         && \
      echo "DONE!!!"
 
+RUN chmod +x entrypoint.sh
 COPY entrypoint.sh /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
