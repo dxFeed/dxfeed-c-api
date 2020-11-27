@@ -564,10 +564,6 @@ void atomic_write_time(time_t volatile * dest, time_t src);
 
 #else
 
-#ifdef __GNUC__
-#pragma message ("no fence, no atomic read/write for 64 bit variables on 32 bit platforms, additional synchronization is needed")
-#endif
-
 long long atomic_read(long long* value);
 void atomic_write(long long* dest, long long src);
 long atomic_read32(long* value);
@@ -575,6 +571,6 @@ void atomic_write32(long* dest, long src);
 time_t atomic_read_time(time_t* value);
 void atomic_write_time(time_t* dest, time_t src);
 
-#endif
+#endif //_WIN32
 
 #endif /* DX_ALGORITHMS_H_INCLUDED */

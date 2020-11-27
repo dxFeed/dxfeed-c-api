@@ -25,7 +25,7 @@
 
 typedef int dx_byte_array_pos_t;
 
-static const dxf_short_t STREAM_MAGIC = 0xACED;
+static const dxf_short_t STREAM_MAGIC = (dxf_short_t)0xACED;
 static const dxf_short_t STREAM_VERSION = 5;
 #define TC_NULL         0x70
 #define TC_STRING       0x74

@@ -212,24 +212,24 @@ static int dx_check_write_possibility (void* context, int bytes_to_write) {
 
 void dx_write_utf2_unchecked (void* context, dxf_int_t code_point) {
 	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0xC0 | code_point >> 6);
-	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0x80 | code_point & 0x3F);
+	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0x80 | (code_point & 0x3F));
 }
 
 /* -------------------------------------------------------------------------- */
 
 void dx_write_utf3_unchecked (void* context, dxf_int_t code_point) {
 	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0xE0 | code_point >> 12);
-	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0x80 | code_point >> 6 & 0x3F);
-	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0x80 | code_point & 0x3F);
+	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0x80 | (code_point >> 6 & 0x3F));
+	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0x80 | (code_point & 0x3F));
 }
 
 /* -------------------------------------------------------------------------- */
 
 void dx_write_utf4_unchecked (void* context, dxf_int_t code_point) {
 	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0xF0 | code_point >> 18);
-	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0x80 | code_point >> 12 & 0x3F);
-	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0x80 | code_point >> 6 & 0x3F);
-	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0x80 | code_point & 0x3F);
+	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0x80 | (code_point >> 12 & 0x3F));
+	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0x80 | (code_point >> 6 & 0x3F));
+	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0x80 | (code_point & 0x3F));
 }
 
 /* -------------------------------------------------------------------------- */

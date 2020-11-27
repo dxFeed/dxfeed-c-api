@@ -271,10 +271,11 @@ int dx_decode_symbol_name (dxf_int_t cipher, OUT dxf_const_string_t* symbol) {
 int dx_codec_read_symbol (void* bicc, dxf_char_t* buffer, int buffer_length, OUT dxf_string_t* result,
 						OUT dxf_int_t* cipher_result, OUT dxf_event_flags_t* flags,
 						OUT dxf_event_flags_t* mru_event_flags) {
-	dxf_int_t i;
+	dxf_uint_t i;
 	dxf_long_t penta;
-	dxf_int_t tmp_int_1;
-	dxf_int_t tmp_int_2;
+	dxf_uint_t tmp_int_1;
+	dxf_uint_t tmp_int_2;
+	dxf_int_t tmp_int_3;
 	dxf_int_t plen;
 	dxf_int_t cipher;
 	int event_flags_pos = 0;
@@ -288,13 +289,13 @@ int dx_codec_read_symbol (void* bicc, dxf_char_t* buffer, int buffer_length, OUT
 		if (i < 0x80) { // 15-bit
 			CHECKED_CALL_2(dx_read_unsigned_byte, bicc, &tmp_int_1);
 
-			penta = (i << 8) + tmp_int_1;
+			penta = (i << 8u) + tmp_int_1;
 		}
 		else if (i < 0xC0) { // 30-bit
 			CHECKED_CALL_2(dx_read_unsigned_byte, bicc, &tmp_int_1);
 			CHECKED_CALL_2(dx_read_unsigned_short, bicc, &tmp_int_2);
 
-			penta = ((i & 0x3F) << 24) + (tmp_int_1 << 16) + tmp_int_2;
+			penta = ((i & 0x3Fu) << 24u) + (tmp_int_1 << 16u) + tmp_int_2;
 		}
 		else if (i < 0xE0) { // reserved (first diapason)
 			return dx_set_error_code(dx_pcec_reserved_bit_sequence);
@@ -302,12 +303,12 @@ int dx_codec_read_symbol (void* bicc, dxf_char_t* buffer, int buffer_length, OUT
 		else if (i < 0xF0) { // 20-bit
 			CHECKED_CALL_2(dx_read_unsigned_short, bicc, &tmp_int_1);
 
-			penta = ((i & 0x0F) << 16) + tmp_int_1;
+			penta = ((i & 0x0Fu) << 16u) + tmp_int_1;
 		}
 		else if (i < 0xF8) { // 35-bit
-			CHECKED_CALL_2(dx_read_int, bicc, &tmp_int_1);
+			CHECKED_CALL_2(dx_read_int, bicc, &tmp_int_3);
 
-			penta = ((dxf_long_t)(i & 0x07) << 32) + (tmp_int_1 & 0xFFFFFFFFL);
+			penta = ((dxf_long_t)(i & 0x07u) << 32u) + (tmp_int_3 & 0xFFFFFFFFL);
 		}
 		else if (i == 0xF8) { // mru event flags
 			if (event_flags_bytes > 0)
@@ -320,7 +321,9 @@ int dx_codec_read_symbol (void* bicc, dxf_char_t* buffer, int buffer_length, OUT
 			if (event_flags_bytes > 0)
 				return dx_set_error_code(dx_pcec_invalid_event_flag);
 			event_flags_pos = dx_get_in_buffer_position(bicc);
-			CHECKED_CALL_2(dx_read_compact_int, bicc, mru_event_flags);
+			dxf_int_t tmp_flags;
+			CHECKED_CALL_2(dx_read_compact_int, bicc, &tmp_flags);
+			*mru_event_flags = (dxf_event_flags_t)tmp_flags;
 			*flags = *mru_event_flags;
 			event_flags_bytes = dx_get_in_buffer_position(bicc) - event_flags_pos;
 			continue; // read next byte
@@ -446,7 +449,7 @@ int dx_codec_write_symbol (void* bocc, dxf_int_t cipher, dxf_const_string_t symb
 		CHECKED_CALL_2(dx_decode_cipher, cipher, &penta);
 
 		if (penta == 0) { // 0-bit
-			CHECKED_CALL_2(dx_write_byte, bocc, 0xFE);
+			CHECKED_CALL_2(dx_write_byte, bocc, (dxf_byte_t)0xFE);
 		} else if (penta < 0x8000L) { // 15-bit
 			CHECKED_CALL_2(dx_write_short, bocc, (dxf_short_t)penta);
 		} else if (penta < 0x100000L) { // 20-bit
@@ -465,7 +468,7 @@ int dx_codec_write_symbol (void* bocc, dxf_int_t cipher, dxf_const_string_t symb
 			dxf_int_t length;
 			int i;
 
-			CHECKED_CALL_2(dx_write_byte, bocc, 0xFD);
+			CHECKED_CALL_2(dx_write_byte, bocc, (dxf_byte_t)0xFD);
 
 			length = (dxf_int_t)dx_string_length(symbol);
 
@@ -475,7 +478,7 @@ int dx_codec_write_symbol (void* bocc, dxf_int_t cipher, dxf_const_string_t symb
 				CHECKED_CALL_2(dx_write_utf_char, bocc, symbol[i]);
 			}
 		} else { // void (null)
-			CHECKED_CALL_2(dx_write_byte, bocc, 0xFF);
+			CHECKED_CALL_2(dx_write_byte, bocc, (dxf_byte_t)0xFF);
 		}
 	}
 

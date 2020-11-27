@@ -577,7 +577,7 @@ int dx_is_snapshot_event(const dx_snapshot_data_ptr_t snapshot_data, int event_t
 }
 
 
-int dx_is_zero_event(dx_event_id_t event_id, const dxf_event_data_t event_row, size_t idx) {
+int dx_is_zero_event(dx_event_id_t event_id, const dxf_event_data_t* event_row, size_t idx) {
 	if (event_id != dx_eid_order)
 		return false;
 	return ((dxf_order_t*)event_row)[idx].size == 0;
@@ -692,7 +692,7 @@ int dx_snapshot_listener_comparator(dx_snapshot_listener_context_t e1,
 size_t dx_find_snapshot_listener_in_array(dx_snapshot_listener_array_t* listeners,
 									int incremental, void *listener, OUT int* found) {
 	size_t listener_index;
-	dx_snapshot_listener_context_t listener_context = { incremental, false, {listener}, NULL };
+	dx_snapshot_listener_context_t listener_context = { incremental, false, {.full_listener = *(dxf_snapshot_listener_t*)(&listener)}, NULL };
 
 	DX_ARRAY_SEARCH(listeners->elements, 0, listeners->size, listener_context,
 		dx_snapshot_listener_comparator, false, *found, listener_index);
@@ -741,7 +741,7 @@ dxf_snapshot_t dx_create_snapshot(dxf_connection_t connection,
 	int found = false;
 	int res = false;
 	size_t position = 0;
-	int event_types;
+	unsigned event_types;
 
 	if (!dx_validate_connection_handle(connection, false)) {
 		return dx_invalid_snapshot;
@@ -771,7 +771,7 @@ dxf_snapshot_t dx_create_snapshot(dxf_connection_t connection,
 	snapshot_data->key = dx_new_snapshot_key(record_info_id, symbol, order_source);
 	snapshot_data->record_info_id = record_info_id;
 	snapshot_data->event_id = event_id;
-	snapshot_data->event_type = event_types;
+	snapshot_data->event_type = (int)event_types;
 	snapshot_data->symbol = dx_create_string_src(symbol);
 	snapshot_data->time = time;
 	if (order_source != NULL)
@@ -865,7 +865,7 @@ int dx_add_snapshot_listener(dxf_snapshot_t snapshot, dxf_snapshot_listener_t li
 
 	CHECKED_CALL(dx_mutex_lock, &(snapshot_data->guard));
 
-	listener_index = dx_find_snapshot_listener_in_array(&(snapshot_data->listeners), false, listener, &found);
+	listener_index = dx_find_snapshot_listener_in_array(&(snapshot_data->listeners), false, *(void**)(&listener), &found);
 
 	if (found) {
 		return dx_mutex_unlock(&snapshot_data->guard);
@@ -900,7 +900,7 @@ int dx_remove_snapshot_listener(dxf_snapshot_t snapshot, dxf_snapshot_listener_t
 	}
 
 	CHECKED_CALL(dx_mutex_lock, &(snapshot_data->guard));
-	listener_index = dx_find_snapshot_listener_in_array(&(snapshot_data->listeners), false, listener, &found);
+	listener_index = dx_find_snapshot_listener_in_array(&(snapshot_data->listeners), false, *(void**)(&listener), &found);
 
 	if (!found) {
 		return dx_mutex_unlock(&snapshot_data->guard);
@@ -932,7 +932,7 @@ int dx_add_snapshot_inc_listener(dxf_snapshot_t snapshot, dxf_snapshot_inc_liste
 	}
 
 	CHECKED_CALL(dx_mutex_lock, &(snapshot_data->guard));
-	listener_index = dx_find_snapshot_listener_in_array(&(snapshot_data->listeners), true, listener, &found);
+	listener_index = dx_find_snapshot_listener_in_array(&(snapshot_data->listeners), true, *(void**)(&listener), &found);
 
 	if (found) {
 		return dx_mutex_unlock(&snapshot_data->guard);
@@ -968,7 +968,7 @@ int dx_remove_snapshot_inc_listener(dxf_snapshot_t snapshot, dxf_snapshot_inc_li
 	}
 
 	CHECKED_CALL(dx_mutex_lock, &(snapshot_data->guard));
-	listener_index = dx_find_snapshot_listener_in_array(&(snapshot_data->listeners), true, listener, &found);
+	listener_index = dx_find_snapshot_listener_in_array(&(snapshot_data->listeners), true, *(void**)(&listener), &found);
 
 	if (!found) {
 		return dx_mutex_unlock(&snapshot_data->guard);

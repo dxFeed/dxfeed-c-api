@@ -258,7 +258,8 @@ static void dx_rb_book_update(dx_regional_book_t *book) {
         for (; i < book->listeners.size; i++) {
             dx_rb_listener_context_t* ctx = &book->listeners.elements[i];
             if (ctx->version == dx_rblv_default) {
-                ((dxf_price_level_book_listener_t)ctx->listener)(&book->book, book->listeners.elements[i].user_data);
+				dxf_price_level_book_listener_t listener = *(dxf_price_level_book_listener_t*)(&ctx->listener);
+				listener(&book->book, book->listeners.elements[i].user_data);
             }
         }
 		dx_mutex_unlock(&book->guard);
@@ -274,7 +275,8 @@ static void notify_regional_listeners(dx_regional_book_t *book, const dxf_quote_
     for (i = 0; i < book->listeners.size; ++i) {
         dx_rb_listener_context_t* ctx = &book->listeners.elements[i];
         if (ctx->version == dx_rblv_v2) {
-            ((dxf_regional_quote_listener_t)ctx->listener)(book->symbol, quotes, count, ctx->user_data);
+			dxf_regional_quote_listener_t listener = *(dxf_regional_quote_listener_t*)(&ctx->listener);
+			listener(book->symbol, quotes, count, ctx->user_data);
         }
     }
     dx_mutex_unlock(&book->guard);
