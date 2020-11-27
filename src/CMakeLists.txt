@@ -155,7 +155,6 @@ set(SOURCE_FILES
         Snapshot.c
         TaskQueue.c
         Version.c
-        Win32.c
         ${DEF_FILE})
 
 set(RESOURCE_FILES
@@ -179,6 +178,14 @@ set(ADDITIONAL_LIBRARIES "")
 
 if (WIN32)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE -D_USRDLL -DDXFEED_EXPORTS)
+    set(SOURCE_FILES
+            ${SOURCE_FILES}
+            Win32.c
+            )
+    set(ALL_SOURCES
+            ${ALL_SOURCES}
+            Win32.c
+            )
     if (MSVC)
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /Gd /Zc:wchar_t /Zc:forScope /Gm- /W3 /Ob0")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Gd /Zc:wchar_t /Zc:forScope /Gm- /W3 /Ob0")

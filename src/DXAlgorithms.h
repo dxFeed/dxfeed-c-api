@@ -471,6 +471,8 @@ size_t dx_random_size(size_t max_value);
  */
 #define DX_NUMERIC_COMPARATOR(l, r) (((l)>(r)?1:((l)<(r)?-1:0)))
 
+#define DX_FORCED_NUMERIC_COMPARATOR(l, r) (((dxf_ulong_t)(l)>(dxf_ulong_t)(r)?1:((dxf_ulong_t)(l)<(dxf_ulong_t)(r)?-1:0)))
+
 /* -------------------------------------------------------------------------- */
 
 int dx_capacity_manager_halfer (size_t new_size, size_t* capacity);

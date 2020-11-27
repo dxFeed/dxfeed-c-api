@@ -544,7 +544,6 @@ int dx_snapshot_call_listeners(dx_snapshot_data_ptr_t snapshot_data, int new_sna
 
 	for (; cur_listener_index < snapshot_data->listeners.size; ++cur_listener_index) {
 		dx_snapshot_listener_context_t* listener_context = snapshot_data->listeners.elements + cur_listener_index;
-		int failed = false;
 		dxf_snapshot_data_t callback_data;
 		callback_data.event_type = snapshot_data->event_type;
 		callback_data.symbol = dx_create_string_src(snapshot_data->symbol);
@@ -588,7 +587,6 @@ void event_listener(int event_type, dxf_const_string_t symbol_name,
 					const dxf_event_data_t* data, int data_count,
 					const dxf_event_params_t* event_params, void* user_data) {
 	size_t i = 0;
-	dxf_event_flags_t flags = event_params->flags;
 	dx_snapshot_data_ptr_t snapshot_data = (dx_snapshot_data_ptr_t)user_data;
 	int sb, se, rm, tx;
 
@@ -688,13 +686,13 @@ void dx_clear_snapshot_listener_array(dx_snapshot_listener_array_t* listeners) {
 
 int dx_snapshot_listener_comparator(dx_snapshot_listener_context_t e1,
 									dx_snapshot_listener_context_t e2) {
-	return e1.incremental == e2.incremental ? DX_NUMERIC_COMPARATOR(e1.full_listener, e2.full_listener) : -1;
+	return e1.incremental == e2.incremental ? DX_FORCED_NUMERIC_COMPARATOR(e1.full_listener, e2.full_listener) : -1;
 }
 
 size_t dx_find_snapshot_listener_in_array(dx_snapshot_listener_array_t* listeners,
 									int incremental, void *listener, OUT int* found) {
 	size_t listener_index;
-	dx_snapshot_listener_context_t listener_context = { incremental, false, listener, NULL };
+	dx_snapshot_listener_context_t listener_context = { incremental, false, {listener}, NULL };
 
 	DX_ARRAY_SEARCH(listeners->elements, 0, listeners->size, listener_context,
 		dx_snapshot_listener_comparator, false, *found, listener_index);

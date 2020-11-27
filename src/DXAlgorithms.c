@@ -233,8 +233,6 @@ dxf_string_t dx_ansi_to_unicode (const char* ansi_str) {
 #else /* _WIN32 */
 	mbstate_t state;
 	dxf_string_t wide_str = NULL;
-	// We trust it
-	size_t len = strlen(ansi_str);
 
 	memset(&state, 0, sizeof(state));
 	mbrlen(NULL, 0, &state);
@@ -436,7 +434,7 @@ int dx_base64_decode(const char* in, size_t in_len, char* out, size_t* out_len) 
 	size_t len = 0;
 
 	while (in < end) {
-		unsigned char c = d[*in++];
+		unsigned char c = d[(unsigned char)(*in++)];
 
 		switch (c) {
 			case WHITESPACE:

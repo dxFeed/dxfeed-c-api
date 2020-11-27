@@ -496,6 +496,7 @@ DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dxf_const
 	int subscr_symbol_count = symbol_count;
 	int found_wildcard;
 	size_t index;
+	(void)index;
 
 	DX_ARRAY_SEARCH(symbols, 0, symbol_count, wildcard_symbol, DX_WILDCARD_COMPARATOR, false, found_wildcard, index);
 
@@ -545,6 +546,7 @@ dxf_remove_symbols (dxf_subscription_t subscription, dxf_const_string_t *symbols
 
 	int found_wildcard;
 	size_t index;
+	(void)index;
 
 	DX_ARRAY_SEARCH(symbols, 0, symbol_count, wildcard_symbol, DX_WILDCARD_COMPARATOR, false, found_wildcard, index);
 

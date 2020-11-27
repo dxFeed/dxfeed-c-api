@@ -338,7 +338,7 @@ static inline int dx_plb_pricelvel_comparator_bid(const dxf_price_level_element_
 }
 
 static inline int dx_plb_listener_comparator(dx_plb_listener_context_t e1, dx_plb_listener_context_t e2) {
-	return DX_NUMERIC_COMPARATOR(e1.listener, e2.listener);
+	return DX_FORCED_NUMERIC_COMPARATOR(e1.listener, e2.listener);
 }
 
 /*******************************/
@@ -648,6 +648,7 @@ static void dx_plb_source_process_order(dx_plb_source_t *source, const dxf_order
 	size_t top, bottom;
 	int found = true;
 	int error;
+	(void)error;
 	dxf_order_t *oo;
 
 	/* Fast path: maybe, order could be found directly from it index? */
