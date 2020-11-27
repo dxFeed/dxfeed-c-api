@@ -342,13 +342,13 @@ int dx_write_long (void* context, dxf_long_t value) {
 /* -------------------------------------------------------------------------- */
 
 int dx_write_float (void* context, dxf_float_t value) {
-	return dx_write_int(context, *((dxf_int_t*)&value));
+	return dx_write_int(context, (dxf_int_t)value);
 }
 
 /* -------------------------------------------------------------------------- */
 
 int dx_write_double (void* context, dxf_double_t value) {
-	return dx_write_long(context, *((dxf_long_t*)&value));
+	return dx_write_long(context, (dxf_long_t)value);
 }
 
 /* -------------------------------------------------------------------------- */
