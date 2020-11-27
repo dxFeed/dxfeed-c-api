@@ -29,8 +29,8 @@ jobs:
       - uses: actions/checkout@master
       - name: Set env
         run: |
-          echo ::set-env name=RELEASE_VERSION::$(echo ${GITHUB_REF:10})
-          echo ::set-env name=ARTIFACT::$(echo ${DOCS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g" )
+          echo RELEASE_VERSION=$(echo ${GITHUB_REF:10}) >> $GITHUB_ENV
+          echo ARTIFACT=$(echo ${DOCS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g" ) >> $GITHUB_ENV
       - name: Check env
         run: |
           echo Artifact: ${{ env.ARTIFACT }}
@@ -55,8 +55,8 @@ jobs:
       - uses: actions/checkout@master
       - name: Set env
         run: |
-          echo ::set-env name=RELEASE_VERSION::$(echo ${GITHUB_REF:10})
-          echo ::set-env name=ARTIFACT::$(echo ${LINUX_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g" )
+          echo RELEASE_VERSION=$(echo ${GITHUB_REF:10}) >> $GITHUB_ENV
+          echo ARTIFACT=$(echo ${LINUX_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g" ) >> $GITHUB_ENV
       - name: Check env
         run: |
           echo Artifact: ${{ env.ARTIFACT }}
@@ -81,8 +81,8 @@ jobs:
       - uses: actions/checkout@master
       - name: Set env
         run: |
-          echo ::set-env name=RELEASE_VERSION::$(echo ${GITHUB_REF:10})
-          echo ::set-env name=ARTIFACT::$(echo ${LINUX_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g" )
+          echo RELEASE_VERSION=$(echo ${GITHUB_REF:10}) >> $GITHUB_ENV
+          echo ARTIFACT=$(echo ${LINUX_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g" ) >> $GITHUB_ENV
       - name: Check env
         run: |
           echo Artifact: ${{ env.ARTIFACT }}
@@ -108,8 +108,8 @@ jobs:
       - uses: actions/checkout@master
       - name: Set env
         run: |
-          echo ::set-env name=RELEASE_VERSION::$(echo ${GITHUB_REF:10})
-          echo ::set-env name=ARTIFACT::$(echo ${CENTOS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g" )
+          echo RELEASE_VERSION=$(echo ${GITHUB_REF:10}) >> $GITHUB_ENV
+          echo ARTIFACT=$(echo ${CENTOS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g" ) >> $GITHUB_ENV
       - name: Check env
         run: |
           echo Artifact: ${{ env.ARTIFACT }}
@@ -134,8 +134,8 @@ jobs:
       - uses: actions/checkout@master
       - name: Set env
         run: |
-          echo ::set-env name=RELEASE_VERSION::$(echo ${GITHUB_REF:10})
-          echo ::set-env name=ARTIFACT::$(echo ${CENTOS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g" )
+          echo RELEASE_VERSION=$(echo ${GITHUB_REF:10}) >> $GITHUB_ENV
+          echo ARTIFACT=$(echo ${CENTOS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g" ) >> $GITHUB_ENV
       - name: Check env
         run: |
           echo Artifact: ${{ env.ARTIFACT }}
@@ -152,7 +152,7 @@ jobs:
           name: ${{ env.ARTIFACT }}-no-tls.zip
           path: artifact/${{ env.ARTIFACT }}-no-tls.zip
 
-  # --------------------------- BUILD OLD LINUX (CENTOS 6.10) LIBRARY (WITHOUT TLS SUPPORT)
+  # --------------------------- BUILD OLD LINUX (CENTOS 6.5) LIBRARY (WITHOUT TLS SUPPORT)
   build_centos65_no_tls:
     runs-on: ubuntu-latest
     name: build centos 6.5 (no TLS)
@@ -160,8 +160,8 @@ jobs:
       - uses: actions/checkout@master
       - name: Set env
         run: |
-          echo ::set-env name=RELEASE_VERSION::$(echo ${GITHUB_REF:10})
-          echo ::set-env name=ARTIFACT::$(echo ${CENTOS65_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g" )
+          echo RELEASE_VERSION=$(echo ${GITHUB_REF:10}) >> $GITHUB_ENV
+          echo ARTIFACT=$(echo ${CENTOS65_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g" ) >> $GITHUB_ENV
       - name: Check env
         run: |
           echo Artifact: ${{ env.ARTIFACT }}
@@ -186,8 +186,8 @@ jobs:
       - uses: actions/checkout@master
       - name: Set env
         run: |
-          echo ::set-env name=RELEASE_VERSION::$(echo ${GITHUB_REF:10})
-          echo ::set-env name=ARTIFACT::$(echo ${MAC_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g" )
+          echo RELEASE_VERSION=$(echo ${GITHUB_REF:10}) >> $GITHUB_ENV
+          echo ARTIFACT=$(echo ${MAC_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g" ) >> $GITHUB_ENV
       - name: Check env
         run: |
           echo Artifact: ${{ env.ARTIFACT }}
@@ -217,8 +217,8 @@ jobs:
       - uses: actions/checkout@master
       - name: Set env
         run: |
-          echo ::set-env name=RELEASE_VERSION::$(echo ${GITHUB_REF:10})
-          echo ::set-env name=ARTIFACT::$(echo ${MAC_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g" )
+          echo RELEASE_VERSION=$(echo ${GITHUB_REF:10}) >> $GITHUB_ENV
+          echo ARTIFACT=$(echo ${MAC_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g" ) >> $GITHUB_ENV
       - name: Check env
         run: |
           echo Artifact: ${{ env.ARTIFACT }}
@@ -254,9 +254,9 @@ jobs:
 
       - name: Set env
         run: |
-          echo "::set-env name=RELEASE_VERSION::$("$Env:GITHUB_REF".Substring(10))"
-          echo "::set-env name=ARTIFACT::$(echo $Env:WINDOWS_ARTIFACT_TEMPLATE | %{$_ -replace '#VERSION#', $("$Env:GITHUB_REF".Substring(10)) })"
-          echo "::set-env name=WB_ARTIFACT::$(echo $Env:WINDOWS_BUILD_TEMPLATE | %{$_ -replace '#VERSION#', $("$Env:GITHUB_REF".Substring(10)) })"
+          echo RELEASE_VERSION=$("$Env:GITHUB_REF".Substring(10)) | Add-Content -Path $env:GITHUB_ENV -Encoding utf8
+          echo ARTIFACT=$(echo $Env:WINDOWS_ARTIFACT_TEMPLATE | %{$_ -replace '#VERSION#', $("$Env:GITHUB_REF".Substring(10)) }) | Add-Content -Path $env:GITHUB_ENV -Encoding utf8
+          echo WB_ARTIFACT=$(echo $Env:WINDOWS_BUILD_TEMPLATE | %{$_ -replace '#VERSION#', $("$Env:GITHUB_REF".Substring(10)) }) | Add-Content -Path $env:GITHUB_ENV -Encoding utf8
 
       - name: Check env
         run: |
@@ -314,17 +314,17 @@ jobs:
 
       - name: Set env
         run: |
-          echo ::set-env name=RELEASE_VERSION::$(echo ${GITHUB_REF:10})
-          echo ::set-env name=DOC_ARTIFACT::$(echo ${DOCS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g").zip
-          echo ::set-env name=LINUX_ARTIFACT::$(echo ${LINUX_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g").zip
-          echo ::set-env name=LINUX_NO_TLS_ARTIFACT::$(echo ${LINUX_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g")-no-tls.zip
-          echo ::set-env name=CENTOS_ARTIFACT::$(echo ${CENTOS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g").zip
-          echo ::set-env name=CENTOS_NO_TLS_ARTIFACT::$(echo ${CENTOS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g")-no-tls.zip
-          echo ::set-env name=CENTOS65_NO_TLS_ARTIFACT::$(echo ${CENTOS65_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g")-no-tls.zip
-          echo ::set-env name=WINDOWS_ARTIFACT::$(echo ${WINDOWS_ARTIFACT_TEMPLATE} | sed "s/#VERSION#/$(echo ${GITHUB_REF:10})/g").zip
-          echo ::set-env name=WINDOWS_NO_TLS_ARTIFACT::$(echo ${WINDOWS_ARTIFACT_TEMPLATE} | sed "s/#VERSION#/$(echo ${GITHUB_REF:10})/g")-no-tls.zip
-          echo ::set-env name=MAC_ARTIFACT::$(echo ${MAC_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g").zip
-          echo ::set-env name=MAC_NO_TLS_ARTIFACT::$(echo ${MAC_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g")-no-tls.zip
+          echo RELEASE_VERSION=$(echo ${GITHUB_REF:10}) >> $GITHUB_ENV
+          echo DOC_ARTIFACT=$(echo ${DOCS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g").zip >> $GITHUB_ENV
+          echo LINUX_ARTIFACT=$(echo ${LINUX_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g").zip >> $GITHUB_ENV
+          echo LINUX_NO_TLS_ARTIFACT=$(echo ${LINUX_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g")-no-tls.zip >> $GITHUB_ENV
+          echo CENTOS_ARTIFACT=$(echo ${CENTOS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g").zip >> $GITHUB_ENV
+          echo CENTOS_NO_TLS_ARTIFACT=$(echo ${CENTOS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g")-no-tls.zip >> $GITHUB_ENV
+          echo CENTOS65_NO_TLS_ARTIFACT=$(echo ${CENTOS65_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g")-no-tls.zip >> $GITHUB_ENV
+          echo WINDOWS_ARTIFACT=$(echo ${WINDOWS_ARTIFACT_TEMPLATE} | sed "s/#VERSION#/$(echo ${GITHUB_REF:10})/g").zip >> $GITHUB_ENV
+          echo WINDOWS_NO_TLS_ARTIFACT=$(echo ${WINDOWS_ARTIFACT_TEMPLATE} | sed "s/#VERSION#/$(echo ${GITHUB_REF:10})/g")-no-tls.zip >> $GITHUB_ENV
+          echo MAC_ARTIFACT=$(echo ${MAC_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g").zip >> $GITHUB_ENV
+          echo MAC_NO_TLS_ARTIFACT=$(echo ${MAC_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g")-no-tls.zip >> $GITHUB_ENV
 
       - name: Check env
         run: |
