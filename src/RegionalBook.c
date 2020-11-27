@@ -18,6 +18,7 @@
  */
 
 #include <math.h>
+#include <string.h>
 
 #include "ConnectionContextData.h"
 #include "DXAlgorithms.h"
