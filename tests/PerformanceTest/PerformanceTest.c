@@ -13,8 +13,6 @@
 
 #include "DXErrorCodes.h"
 #include "DXFeed.h"
-#include "Logger.h"
-#include "signal.h"
 
 #ifdef _WIN32
 #	include <Windows.h>
@@ -176,6 +174,7 @@ int is_thread_terminate() {
 /* -------------------------------------------------------------------------- */
 
 void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
+	(void)connection;
 	char* host = (char*)user_data;
 	dx_mutex_lock(&listener_thread_guard);
 	is_listener_thread_terminated = true;
@@ -198,14 +197,12 @@ void print_timestamp(dxf_long_t timestamp) {
 	wprintf(L"%s", timefmt);
 }
 
-void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
-			  void* user_data) {
+void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count, void* user_data) {
+	(void)user_data;
 	dxf_int_t i = 0;
 
 	++quotes_counter;
-
 	if (!doPrint) return;
-
 	wprintf(L"%ls{symbol=%ls, ", dx_event_type_to_string(event_type), symbol_name);
 
 	if (event_type == DXF_ET_QUOTE) {
@@ -347,22 +344,20 @@ void print_usage() {
 		L"  -h|--help|-? - print usage\n\n");
 }
 
+#define LINE_SIZE 4096
+#define SYMBOLS_MAX 100000
+
 int main(int argc, char* argv[]) {
 	dxf_connection_t connection;
 	dxf_subscription_t subscription;
 	int loop_counter = 1000;  // *100 = msec of running
-	int i = 0;
 	int arg = 1;
-	int line_size = 200;
-	char line[200];
-	char* pch;
-	char** symbols;
+	char line[LINE_SIZE];
 	int symbols_pos = 0;
-	int symbols_max = 10000;
 	time_t start, end;
 	int diff_time;
 
-	symbols = (char**)malloc(symbols_max * sizeof(char*));
+	char** symbols = (char**)malloc(SYMBOLS_MAX * sizeof(char*));
 	if (argc > 1) {	 // we have params
 		if (strcmp(argv[1], "print") == 0) {
 			doPrint = true;
@@ -373,18 +368,22 @@ int main(int argc, char* argv[]) {
 			return 0;
 		}
 
-		for (i = arg; i < argc; ++i) {
+		for (size_t i = arg; i < argc; ++i) {
 			FILE* file;
 			file = fopen(argv[i], "rt");
 			if (file == NULL) {
 				wprintf(L"Couldn't open input file.");
 				return -1;
 			}
-			while (fgets(line, line_size, file) != NULL) {	// read symbols from IPF file
-				if (line[0] == '#') continue;
-				pch = strtok(line, ",");
+
+			while (fgets(line, LINE_SIZE, file) != NULL) {	// read symbols from IPF file
+				if (line[0] == '#' || line[0] == '\r' || line[0] == '\n' || line[0] == '\0') continue;
+
+				char* pch = strtok(line, ",");
+
 				pch = strtok(NULL, ",");  // we need a second token (SYMBOL)
-				if (symbols_pos < symbols_max) {
+
+				if (symbols_pos < SYMBOLS_MAX) {
 					symbols[symbols_pos] = strdup(pch);
 					++symbols_pos;
 				}
@@ -418,27 +417,28 @@ int main(int argc, char* argv[]) {
 	}
 
 	if (symbols_pos > 0) {
-		for (i = 0; i < symbols_pos; ++i) {
+		for (size_t i = 0; i < symbols_pos; ++i) {
 			wprintf(L"Subscribing to: %s\n", symbols[i]);
 			if (!dxf_add_symbol(subscription, ansi_to_unicode(symbols[i]))) {
 				process_last_error();
 				return -1;
-			};
-		};
-	};
+			}
+		}
+	}
 
 	if (!dxf_attach_event_listener(subscription, listener, NULL)) {
 		process_last_error();
 
 		return -1;
-	};
+	}
+
 	wprintf(L"Subscription successful!\n");
 
 	while (!is_thread_terminate() && loop_counter--) {
 		dx_sleep(100);
 	}
-	dx_mutex_destroy(&listener_thread_guard);
 
+	dx_mutex_destroy(&listener_thread_guard);
 	wprintf(L"Disconnecting from host...\n");
 
 	if (!dxf_close_connection(connection)) {
@@ -446,14 +446,12 @@ int main(int argc, char* argv[]) {
 
 		return -1;
 	}
+
 	time(&end);
 	diff_time = (int)difftime(end, start);
 
-	wprintf(
-		L"Disconnect successful!\n"
-		L"Connection test completed successfully!\n");
-
-	wprintf(L"received %i quotes in %i sec. %i qoutes in 1 sec\n", quotes_counter, diff_time,
+	wprintf(L"Disconnect successful!\nConnection test completed successfully!\n");
+	wprintf(L"received %i quotes in %i sec. %i quotes in 1 sec\n", quotes_counter, diff_time,
 			(int)(quotes_counter / diff_time));
 
 	return 0;

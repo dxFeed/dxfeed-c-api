@@ -1,3 +1,8 @@
+Version 6.1.0
+* [DXFC-199] Fixed the IPF parsing in the PerformanceTest
+* The minimal version of CMake has been changed to 3.0.0
+* Added build on CentOS 6.5 (no SSL\TLS)
+
 Version 6.0.1
 * [DXFC-194] Fixed bug with System.AccessViolationException while closing connection
 
