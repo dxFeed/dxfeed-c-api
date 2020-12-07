@@ -365,7 +365,7 @@ int main (int argc, char *argv[]) {
 			"  " TIMEOUT_TAG " <timeout>     - Sets the program timeout in seconds (default = 604800, i.e a week)\n"
 		);
 
-		return 0;
+		return 1;
 	}
 
 	dxfeed_host = argv[1];
@@ -385,12 +385,12 @@ int main (int argc, char *argv[]) {
 		event_id = dx_eid_series;
 	} else {
 		wprintf(L"Unknown event type.\n");
-		return -1;
+		return 2;
 	}
 
 	base_symbol = ansi_to_unicode(argv[3]);
 	if (base_symbol == NULL) {
-		return -1;
+		return 3;
 	}
 
 	char *order_source_ptr = NULL;
@@ -410,7 +410,7 @@ int main (int argc, char *argv[]) {
 				if (i + 1 == argc) {
 					wprintf(L"The records print limit argument error\n");
 
-					return -1;
+					return 4;
 				}
 
 				int new_records_print_limit = -1;
@@ -418,7 +418,7 @@ int main (int argc, char *argv[]) {
 				if (!atoi2(argv[++i], &new_records_print_limit)) {
 					wprintf(L"The records print limit argument parsing error\n");
 
-					return -1;
+					return 5;
 				}
 
 				records_print_limit = new_records_print_limit;
@@ -427,7 +427,7 @@ int main (int argc, char *argv[]) {
 				if (i + 1 == argc) {
 					wprintf(L"The token argument error\n");
 
-					return -1;
+					return 6;
 				}
 
 				token = argv[++i];
@@ -438,7 +438,7 @@ int main (int argc, char *argv[]) {
 				if (i + 1 == argc) {
 					wprintf(L"The program timeout argument error\n");
 
-					return -1;
+					return 7;
 				}
 
 				int new_program_timeout = -1;
@@ -446,7 +446,7 @@ int main (int argc, char *argv[]) {
 				if (!atoi2(argv[++i], &new_program_timeout)) {
 					wprintf(L"The program timeout argument parsing error\n");
 
-					return -1;
+					return 8;
 				}
 
 				program_timeout = new_program_timeout;
@@ -458,7 +458,7 @@ int main (int argc, char *argv[]) {
 				if (string_len > MAX_SOURCE_SIZE) {
 					wprintf(L"Invalid order source param!\n");
 
-					return -1;
+					return 9;
 				}
 
 				char order_source[MAX_SOURCE_SIZE + 1] = {0};
@@ -485,12 +485,12 @@ int main (int argc, char *argv[]) {
 				dxfeed_host, token, on_reader_thread_terminate, NULL, NULL, NULL, NULL, &connection)) {
 			process_last_error();
 
-			return -1;
+			return 10;
 		}
 	} else if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, NULL, &connection)) {
 		process_last_error();
 
-		return -1;
+		return 11;
 	}
 
 	wprintf(L"Connection successful!\n");
@@ -505,26 +505,26 @@ int main (int argc, char *argv[]) {
 
 			process_last_error();
 			dxf_close_connection(connection);
-			return -1;
+			return 12;
 		}
 
 		if (!dxf_create_candle_snapshot(connection, candle_attributes, 0, &snapshot)) {
 			process_last_error();
 			dxf_delete_candle_symbol_attributes(candle_attributes);
 			dxf_close_connection(connection);
-			return -1;
+			return 13;
 		}
 	} else if (event_id == dx_eid_order) {
 		if (!dxf_create_order_snapshot(connection, base_symbol, order_source_ptr, 0, &snapshot)) {
 			process_last_error();
 			dxf_close_connection(connection);
-			return -1;
+			return 14;
 		}
 	} else {
 		if (!dxf_create_snapshot(connection, event_id, base_symbol, NULL, 0, &snapshot)) {
 			process_last_error();
 			dxf_close_connection(connection);
-			return -1;
+			return 15;
 		}
 	}
 
@@ -533,7 +533,7 @@ int main (int argc, char *argv[]) {
 		if (candle_attributes != NULL)
 			dxf_delete_candle_symbol_attributes(candle_attributes);
 		dxf_close_connection(connection);
-		return -1;
+		return 16;
 	};
 	wprintf(L"Subscription successful!\n");
 
@@ -550,13 +550,13 @@ int main (int argc, char *argv[]) {
 		if (candle_attributes != NULL)
 			dxf_delete_candle_symbol_attributes(candle_attributes);
 		dxf_close_connection(connection);
-		return -1;
+		return 17;
 	}
 
-	if (!dxf_delete_candle_symbol_attributes(candle_attributes)) {
+	if (candle_attributes != NULL && !dxf_delete_candle_symbol_attributes(candle_attributes)) {
 		process_last_error();
 		dxf_close_connection(connection);
-		return -1;
+		return 18;
 	}
 
 	wprintf(L"Disconnecting from host...\n");
@@ -564,10 +564,10 @@ int main (int argc, char *argv[]) {
 	if (!dxf_close_connection(connection)) {
 		process_last_error();
 
-		return -1;
+		return 19;
 	}
 
-	wprintf(L"Disconnect successful!\nConnection test completed successfully!\n");
+	wprintf(L"Disconnected\n");
 
 #ifdef _WIN32
 	DeleteCriticalSection(&listener_thread_guard);

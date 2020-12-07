@@ -213,7 +213,7 @@ if (WIN32)
         # End hack
     elseif (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pedantic")
-        set(CMAKE_C_FLAGS_DEBUG "-g -O0")
+        set(CMAKE_C_FLAGS_DEBUG "-g -O0 -fsanitize=address")
         set(CMAKE_C_FLAGS_RELEASE "-O2")
 
         set(ADDITIONAL_LIBRARIES
