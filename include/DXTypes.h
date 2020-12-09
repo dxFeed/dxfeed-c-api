@@ -26,10 +26,28 @@
 #define DX_TYPES_H_INCLUDED
 
 #ifdef __GNUC__
-#	define DX_MAYBE_UNUSED __attribute__ ((__unused__))
+#	define DX_MAYBE_UNUSED __attribute__((__unused__))
 #else
 #	define DX_MAYBE_UNUSED
 #endif
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#	ifdef DXFEED_EXPORTS
+#		define DXFEED_API __declspec(dllexport)
+#	elif DXFEED_IMPORTS
+#		define DXFEED_API __declspec(dllimport)
+#	elif __cplusplus
+#		define DXFEED_API extern "C"
+#	else
+#		define DXFEED_API
+#	endif
+#endif	// DOXYGEN_SHOULD_SKIP_THIS
+
+#ifndef OUT
+#	ifndef DOXYGEN_SHOULD_SKIP_THIS
+#		define OUT
+#	endif	// DOXYGEN_SHOULD_SKIP_THIS
+#endif		/* OUT */
 
 /// Error code
 typedef int ERRORCODE;
@@ -54,79 +72,79 @@ typedef void* dxf_regional_book_t;
 
 #ifdef _WIN32
 
-#include <wchar.h>
+#	include <wchar.h>
 
-typedef unsigned char      dxf_bool_t;           // 8 bit
-typedef char               dxf_byte_t;           // 8 bit
-typedef unsigned char      dxf_ubyte_t;  // 8 bit
-typedef wchar_t            dxf_char_t;           // 16 bit
-//typedef unsigned wchar_t   dx_unsigned_char_t;  // 16 bit
-typedef short int          dxf_short_t;          // 16 bit
-typedef unsigned short int dxf_ushort_t; // 16 bit
-typedef int                dxf_int_t;            // 32 bit
-typedef unsigned int       dxf_uint_t;   // 32 bit
-typedef float              dxf_float_t;          // 32 bit
-typedef long long          dxf_long_t;           // 64 bit
-typedef unsigned long long dxf_ulong_t;  // 64 bit
-typedef double             dxf_double_t;         // 64 bit
-typedef int                dxf_dayid_t;
+typedef unsigned char dxf_bool_t;	// 8 bit
+typedef char dxf_byte_t;			// 8 bit
+typedef unsigned char dxf_ubyte_t;	// 8 bit
+typedef wchar_t dxf_char_t;			// 16 bit
+// typedef unsigned wchar_t   dx_unsigned_char_t;  // 16 bit
+typedef short int dxf_short_t;			  // 16 bit
+typedef unsigned short int dxf_ushort_t;  // 16 bit
+typedef int dxf_int_t;					  // 32 bit
+typedef unsigned int dxf_uint_t;		  // 32 bit
+typedef float dxf_float_t;				  // 32 bit
+typedef long long dxf_long_t;			  // 64 bit
+typedef unsigned long long dxf_ulong_t;	  // 64 bit
+typedef double dxf_double_t;			  // 64 bit
+typedef int dxf_dayid_t;
 
 /// String
-typedef dxf_char_t*        dxf_string_t;
+typedef dxf_char_t* dxf_string_t;
 
 /// Const String
-typedef const dxf_char_t*  dxf_const_string_t;
+typedef const dxf_char_t* dxf_const_string_t;
 
 #else /* POSIX? */
 
-#include <stdint.h>
-#include <wchar.h>
+#	include <stdint.h>
+#	include <wchar.h>
 
 /// Boolean
-typedef unsigned char    dxf_bool_t;           // 8 bit
+typedef unsigned char dxf_bool_t;  // 8 bit
 
 /// Byte
-typedef int8_t           dxf_byte_t;           // 8 bit
+typedef int8_t dxf_byte_t;	// 8 bit
 
 /// Unsigned byte
-typedef uint8_t          dxf_ubyte_t;  // 8 bit
+typedef uint8_t dxf_ubyte_t;  // 8 bit
 
 /// Char
-typedef wchar_t          dxf_char_t;           // 16 bit
-//typedef unsigned wchar_t   dx_unsigned_char_t;  // 16 bit
+typedef wchar_t dxf_char_t;	 // 16 bit
+// typedef unsigned wchar_t   dx_unsigned_char_t;  // 16 bit
 
 /// Short
-typedef int16_t          dxf_short_t;          // 16 bit
+typedef int16_t dxf_short_t;  // 16 bit
 
 /// Unsigned short
-typedef uint16_t         dxf_ushort_t; // 16 bit
+typedef uint16_t dxf_ushort_t;	// 16 bit
 
 /// Int
-typedef int32_t          dxf_int_t;            // 32 bit
+typedef int32_t dxf_int_t;	// 32 bit
 
 /// Unsigned int
-typedef uint32_t         dxf_uint_t;   // 32 bit
+typedef uint32_t dxf_uint_t;  // 32 bit
 
 /// Float
-typedef float            dxf_float_t;          // 32 bit
+typedef float dxf_float_t;	// 32 bit
 
 /// Long
-typedef int64_t          dxf_long_t;           // 64 bit
+typedef int64_t dxf_long_t;	 // 64 bit
 
 /// Unsigned long
-typedef uint64_t         dxf_ulong_t;  // 64 bit
+typedef uint64_t dxf_ulong_t;  // 64 bit
 
 /// Double
-typedef double           dxf_double_t;         // 64 bit
+typedef double dxf_double_t;  // 64 bit
 
 /// DayId
-typedef int32_t          dxf_dayid_t;
+typedef int32_t dxf_dayid_t;
 
 /// String
-typedef dxf_char_t*        dxf_string_t;
+typedef dxf_char_t* dxf_string_t;
 
 /// Const String
-typedef const dxf_char_t*  dxf_const_string_t;
+typedef const dxf_char_t* dxf_const_string_t;
 
 #endif /* _WIN32/POSIX */
 
@@ -135,9 +153,9 @@ typedef dxf_uint_t dxf_event_flags_t;
 
 /// Byte array
 typedef struct {
-    dxf_byte_t* elements;
-    int size;
-    int capacity;
+	dxf_byte_t* elements;
+	int size;
+	int capacity;
 } dxf_byte_array_t;
 
 /// Property item

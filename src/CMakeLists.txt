@@ -301,7 +301,11 @@ source_group("Parser\\Sources" FILES ${PARSER_SOURCES})
 source_group("Parser\\Test" FILES ${PARSER_TESTS})
 source_group("Source Files" FILES ${SOURCE_FILES})
 
-add_library(${PROJECT} SHARED ${ALL_HEADERS} ${ALL_SOURCES})
+if (BUILD_STATIC_LIBS)
+    add_library(${PROJECT} STATIC ${ALL_HEADERS} ${ALL_SOURCES})
+else ()
+    add_library(${PROJECT} SHARED ${ALL_HEADERS} ${ALL_SOURCES})
+endif ()
 
 target_link_libraries(${PROJECT} PRIVATE ${ADDITIONAL_LIBRARIES})
 

@@ -552,7 +552,7 @@ typedef void (*dxf_event_listener_v2_t) (int event_type, dxf_const_string_t symb
  *
  * @return String representation of event type
  */
-dxf_const_string_t dx_event_type_to_string (int event_type);
+DXFEED_API dxf_const_string_t dx_event_type_to_string (int event_type);
 
 /**
  * @ingroup c-api-event-listener-functions
