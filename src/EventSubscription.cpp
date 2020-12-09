@@ -254,7 +254,7 @@ class EventSubscriptionConnectionContext {
 	}
 
 	template <typename F>
-	auto process(F&& f) {
+	auto process(F&& f) -> decltype(f(this)) {
 		std::lock_guard<std::recursive_mutex> lk(subscr_guard);
 
 		return f(this);
@@ -815,13 +815,14 @@ void pass_event_data_to_listeners(SymbolData* symbol_data, dx_event_id_t event_i
 		if (event_id == dx_eid_order && subscription_data->order_source.size) {
 			/* We need to filter data in parts, unfortunately */
 			auto orders = (dxf_order_t*)data;
-			int start_index, end_index;
-			end_index = start_index = 0;
+			int start_index = 0, end_index = 0;
+
 			while (end_index != data_count) {
 				/* Skip all non-needed orders */
 				while (start_index < data_count) {
 					int found;
-					size_t index;
+					DX_MAYBE_UNUSED size_t index;
+
 					DX_ARRAY_SEARCH(subscription_data->order_source.elements, 0, subscription_data->order_source.size,
 									orders[start_index].source, DX_ORDER_SOURCE_COMPARATOR_NONSYM, false, found, index);
 					if (!found)
@@ -834,7 +835,7 @@ void pass_event_data_to_listeners(SymbolData* symbol_data, dx_event_id_t event_i
 				end_index = start_index;
 				while (end_index < data_count) {
 					int found;
-					size_t index;
+					DX_MAYBE_UNUSED size_t index;
 					DX_ARRAY_SEARCH(subscription_data->order_source.elements, 0, subscription_data->order_source.size,
 									orders[end_index].source, DX_ORDER_SOURCE_COMPARATOR_NONSYM, false, found, index);
 					if (found)

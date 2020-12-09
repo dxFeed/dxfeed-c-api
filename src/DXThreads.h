@@ -26,11 +26,7 @@
 #define DX_THREADS_H_INCLUDED
 
 #if !defined(_WIN32) || defined(USE_PTHREADS)
-#	ifdef _WIN32
-#		include "pthreads/pthread.h"
-#	else
-#		include "pthread.h"
-#	endif
+#	include "pthread.h"
 #	ifndef USE_PTHREADS
 #		define USE_PTHREADS
 #	endif
@@ -48,7 +44,6 @@ typedef void* (*dx_start_routine_t)(void*);
 typedef HANDLE dx_thread_t;
 typedef DWORD dx_key_t;
 typedef LPCRITICAL_SECTION dx_mutex_t;
-//typedef void pthread_attr_t;
 typedef unsigned (*dx_start_routine_t)(void*);
 #define DX_THREAD_RETVAL_NULL 0
 #endif /* !defined(_WIN32) || defined(USE_PTHREADS) */

@@ -4,7 +4,6 @@ cmake_policy(SET CMP0015 NEW)
 
 set(PROJECT DXFeed)
 set(INCLUDE_DIR ../include)
-set(PTHREADS_INCLUDE_DIR ../include/pthreads)
 set(TARGET_PLATFORM "x86" CACHE STRING "Target platform specification")
 set(APP_VERSION "" CACHE STRING "The version of library")
 set(C_API_VERSION_MAJOR 0)
@@ -14,7 +13,8 @@ set(POSTFIX "")
 set(PLATFORM_POSTFIX "")
 set(LIB_TLS ${CMAKE_CURRENT_SOURCE_DIR}/../lib/libressl)
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_C_STANDARD_REQUIRED on)
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED on)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -213,8 +213,11 @@ if (WIN32)
         # End hack
     elseif (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pedantic")
-        set(CMAKE_C_FLAGS_DEBUG "-g -O0 -fsanitize=address")
+        set(CMAKE_C_FLAGS_DEBUG "-g -O0")
         set(CMAKE_C_FLAGS_RELEASE "-O2")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic")
+        set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
+        set(CMAKE_CXX_FLAGS_RELEASE "-O2")
 
         set(ADDITIONAL_LIBRARIES
                 ${ADDITIONAL_LIBRARIES}
@@ -240,6 +243,10 @@ elseif (MACOSX)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pedantic")
     set(CMAKE_C_FLAGS_DEBUG "-g -O0 -fPIC")
     set(CMAKE_C_FLAGS_RELEASE "-O2 -fPIC")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic")
+    set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O2")
+
     add_definitions(-DUSE_PTHREADS)
     set(SOURCE_FILES
             ${SOURCE_FILES}
