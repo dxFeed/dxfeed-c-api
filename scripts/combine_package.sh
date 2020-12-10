@@ -68,7 +68,7 @@ if [ "$NO_TLS" = "no-tls" ]; then
     PACKAGE_SUFFIX="-no-tls"
 fi
 
-if [ "BUILD_STATIC_LIBS" = "static" ]; then
+if [ "$BUILD_STATIC_LIBS" = "static" ]; then
     PACKAGE_SUFFIX="-static"
 fi
 
