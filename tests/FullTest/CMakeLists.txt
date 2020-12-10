@@ -53,14 +53,14 @@ if (WIN32)
         # End hack
     elseif (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
         set(CMAKE_C_FLAGS_DEBUG "-g -O0 -D_DEBUG")
-        set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG -DWIN32")
+        set(CMAKE_C_FLAGS_RELEASE "-g -O2 -DNDEBUG -DWIN32")
     else ()
         message("Unknown compiler")
     endif ()
 else ()
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pedantic")
     set(CMAKE_C_FLAGS_DEBUG "-g -O0 -fPIC")
-    set(CMAKE_C_FLAGS_RELEASE "-O2 -fPIC")
+    set(CMAKE_C_FLAGS_RELEASE "-g -O2 -fPIC")
     add_definitions(-DUSE_PTHREADS)
     set(ADDITIONAL_LIBRARIES
             ${ADDITIONAL_LIBRARIES}
