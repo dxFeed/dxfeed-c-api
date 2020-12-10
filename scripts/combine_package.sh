@@ -3,7 +3,7 @@
 # Script CPack archives with specified platform and configuration. After
 # packing all files extracted to single release directory.
 # Usage:
-#     combine_package <project-name> <configuration> <platform> <version> <no-tls> <static>
+#     combine_package <project-name> <configuration> <platform> <version> [no-tls] [static]
 # where:
 #     project-name    - The name of target project package
 #     configuration   - Debug or Release
@@ -41,7 +41,7 @@ PROJECT_NAME=$1
 CONFIG=$2
 PLATFORM=$3
 VERSION=$4
-NO_TLS=$5
+NO_TLS_OR_BUILD_STATIC_LIBS=$5
 BUILD_STATIC_LIBS=$6
 PACKAGE_SUFFIX=""
 
@@ -57,19 +57,21 @@ if [ ! "$CONFIG" = "Debug" ]; then
     fi
 fi
 
-if [ ! "$PLATFORM" =  "x86" ]; then
+if [ ! "$PLATFORM" = "x86" ]; then
     if [ ! "$PLATFORM" = "x64" ]; then
         echo "ERROR: Invalid platform value '$PLATFORM'"
         exit 36
     fi
 fi
 
-if [ "$NO_TLS" = "no-tls" ]; then
+if [ "$NO_TLS_OR_BUILD_STATIC_LIBS" = "no-tls" ]; then
     PACKAGE_SUFFIX="-no-tls"
-fi
 
-if [ "$BUILD_STATIC_LIBS" = "static" ]; then
-    PACKAGE_SUFFIX="-no-tls"
+    if [ "$BUILD_STATIC_LIBS" = "static" ]; then
+        PACKAGE_SUFFIX="-static-no-tls"
+    fi
+elif [ "$NO_TLS_OR_BUILD_STATIC_LIBS" = "static" ]; then
+    PACKAGE_SUFFIX="-static-no-tls"
 fi
 
 cpack -G ZIP -C $CONFIG --config $PLATFORM/$CONFIG/DXFeedAllCPackConfig.cmake

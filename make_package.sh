@@ -81,10 +81,12 @@ for A in "$@"; do
         DO_TEST=0
     elif [ "$A" = "no-tls" ]; then
         NO_TLS="no-tls"
-        PACKAGE_SUFFIX="-no-tls"
+        if [ "$PACKAGE_SUFFIX" = "" ]; then
+            PACKAGE_SUFFIX="-no-tls"
+        fi
     elif [ "$A" = "static" ]; then
         BUILD_STATIC_LIBS="static"
-        PACKAGE_SUFFIX="-no-tls"
+        PACKAGE_SUFFIX="-static-no-tls"
     fi
 done
 
