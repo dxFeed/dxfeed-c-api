@@ -956,8 +956,6 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 
-	wprintf(L"Connected\n");
-
 	// create subscriptions
 	for (int i = dx_eid_begin; i < dx_eid_count; ++i) {
 		subscriptions[i] = create_subscription(connection, i);
@@ -970,13 +968,9 @@ int main(int argc, char* argv[]) {
 		if (create_snapshot_subscription(connection, &(snapshot_info[i])) == NULL) return -1;
 	}
 
-	wprintf(L"Subscribed\n");
-
 	while (!is_thread_terminate() && loop_counter--) {
 		dxs_sleep(MAIN_LOOP_SLEEP_MILLIS);
 	}
-
-	wprintf(L"Disconnecting from host...\n");
 
 	if (!dxf_close_connection(connection)) {
 		process_last_error();
