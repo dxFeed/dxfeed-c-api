@@ -1,7 +1,9 @@
 Version 6.1.0
 * [DXFC-199] Fixed the IPF parsing in the PerformanceTest
 * The minimal version of CMake has been changed to 3.0.0
-* Added build on CentOS 6.5 (no SSL\TLS)
+* Build on CentOS switched to CentOS 7
+* [DXFC-200] [Linux] Added ability to build a static library and samples
+* Win pthreads headers were removed from the project
 
 Version 6.0.1
 * [DXFC-194] Fixed bug with System.AccessViolationException while closing connection
@@ -15,7 +17,7 @@ Version 6.0.0
 * [DXFC-192] Fixed a bug with SEGFAULT in TLS mode when sending data on reconnection
 * [DXFC-193] Fixed a bug with excess memory consumption when retrieving Option symbols
 * [DXFC-171] Added descriptions to all error codes
-* [DXFC-187] Fixed a bug with a second addition o the same symbols
+* [DXFC-187] Fixed a bug with a second addition of the same symbols
 
 Version 5.13.0
 * [DXFC-189] Fixed a bug with inability to receive (API does not publish) orders with Scope = Aggregate

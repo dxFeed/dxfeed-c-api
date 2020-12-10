@@ -1,3 +1,21 @@
+/*
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Initial Developer of the Original Code is Devexperts LLC.
+ * Portions created by the Initial Developer are Copyright (C) 2010
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *
+ */
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -32,26 +50,6 @@
 #define SUBSCRIPTION_DATA_PARAM_TAG "-s"
 #define LOG_DATA_TRANSFER_TAG "-p"
 #define TIMEOUT_TAG "-o"
-
-dxf_const_string_t dx_event_type_to_string(int event_type) {
-	switch (event_type) {
-	case DXF_ET_TRADE: return L"Trade";
-	case DXF_ET_QUOTE: return L"Quote";
-	case DXF_ET_SUMMARY: return L"Summary";
-	case DXF_ET_PROFILE: return L"Profile";
-	case DXF_ET_ORDER: return L"Order";
-	case DXF_ET_TIME_AND_SALE: return L"Time&Sale";
-	case DXF_ET_CANDLE: return L"Candle";
-	case DXF_ET_TRADE_ETH: return L"TradeETH";
-	case DXF_ET_SPREAD_ORDER: return L"SpreadOrder";
-	case DXF_ET_GREEKS: return L"Greeks";
-	case DXF_ET_THEO_PRICE: return L"THEO_PRICE";
-	case DXF_ET_UNDERLYING: return L"Underlying";
-	case DXF_ET_SERIES: return L"Series";
-	case DXF_ET_CONFIGURATION: return L"Configuration";
-	default: return L"";
-	}
-}
 
 //Prevents file names globbing (converting * to all files in the current dir)
 #ifdef __MINGW64_VERSION_MAJOR

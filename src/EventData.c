@@ -9,7 +9,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Initial Developer of the Original Code is dxFeed Solutions DE GmbH.
+ * The Initial Developer of the Original Code is Devexperts LLC.
  * Portions created by the Initial Developer are Copyright (C) 2010
  * the Initial Developer. All Rights Reserved.
  *
@@ -68,7 +68,7 @@ static const dxf_char_t g_time_and_sale_tmpl[] = L"TimeAndSale&";
  */
 /* -------------------------------------------------------------------------- */
 
-dxf_const_string_t dx_event_type_to_string (int event_type) {
+DXFEED_API dxf_const_string_t dx_event_type_to_string (int event_type) {
 	switch (event_type) {
 	case DXF_ET_TRADE: return L"Trade";
 	case DXF_ET_QUOTE: return L"Quote";

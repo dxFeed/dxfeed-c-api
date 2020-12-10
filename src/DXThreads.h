@@ -9,7 +9,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Initial Developer of the Original Code is dxFeed Solutions DE GmbH.
+ * The Initial Developer of the Original Code is Devexperts LLC.
  * Portions created by the Initial Developer are Copyright (C) 2010
  * the Initial Developer. All Rights Reserved.
  *
@@ -26,11 +26,7 @@
 #define DX_THREADS_H_INCLUDED
 
 #if !defined(_WIN32) || defined(USE_PTHREADS)
-#	ifdef _WIN32
-#		include "pthreads/pthread.h"
-#	else
-#		include "pthread.h"
-#	endif
+#	include "pthread.h"
 #	ifndef USE_PTHREADS
 #		define USE_PTHREADS
 #	endif

@@ -9,7 +9,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Initial Developer of the Original Code is dxFeed Solutions DE GmbH.
+ * The Initial Developer of the Original Code is Devexperts LLC.
  * Portions created by the Initial Developer are Copyright (C) 2010
  * the Initial Developer. All Rights Reserved.
  *
@@ -507,7 +507,7 @@ dx_record_id_t dx_get_record_id(void* context, dxf_int_t server_record_id) {
 	if (server_record_id >= 0 && server_record_id < RECORD_ID_VECTOR_SIZE) {
 		return record_id_map->frequent_ids[server_record_id];
 	} else {
-		size_t idx;
+		size_t idx = 0;
 		int found = false;
 		dx_record_id_pair_t dummy;
 
@@ -531,7 +531,7 @@ int dx_assign_server_record_id(void* context, dx_record_id_t record_id, dxf_int_
 	if (server_record_id >= 0 && server_record_id < RECORD_ID_VECTOR_SIZE) {
 		record_id_map->frequent_ids[server_record_id] = record_id;
 	} else {
-		size_t idx;
+		size_t idx = 0;
 		int found = false;
 		int failed = false;
 		dx_record_id_pair_t rip;

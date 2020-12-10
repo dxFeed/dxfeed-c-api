@@ -1,10 +1,28 @@
+/*
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Initial Developer of the Original Code is Devexperts LLC.
+ * Portions created by the Initial Developer are Copyright (C) 2010
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *
+ */
+
 #ifdef _WIN32
 #	ifndef _CRT_STDIO_ISO_WIDE_SPECIFIERS
 #		define _CRT_STDIO_ISO_WIDE_SPECIFIERS 1
 #	endif
 #endif
 
-#include <DXThreads.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,16 +33,33 @@
 #include "DXFeed.h"
 #include "Logger.h"
 
-#ifdef _WIN32
-#	include <Windows.h>
+#if !defined(_WIN32) || defined(USE_PTHREADS)
+#	include "pthread.h"
+#	ifndef USE_PTHREADS
+#		define USE_PTHREADS
+#	endif
+typedef pthread_t dxs_thread_t;
+typedef pthread_key_t dxs_key_t;
+typedef struct {
+	pthread_mutex_t mutex;
+	pthread_mutexattr_t attr;
+} dxs_mutex_t;
+#else /* !defined(_WIN32) || defined(USE_PTHREADS) */
+#	include <windows.h>
+#	define USE_WIN32_THREADS
+typedef HANDLE dxs_thread_t;
+typedef DWORD dxs_key_t;
+typedef LPCRITICAL_SECTION dxs_mutex_t;
+#endif /* !defined(_WIN32) || defined(USE_PTHREADS) */
 
+#ifdef _WIN32
 // To fix problem with MS implementation of swprintf
 #	define swprintf _snwprintf
 HANDLE g_out_console;
 
-void dx_sleep(int milliseconds) { Sleep((DWORD)milliseconds); }
+void dxs_sleep(int milliseconds) { Sleep((DWORD)milliseconds); }
 
-int dx_mutex_create(dx_mutex_t* mutex) {
+int dxs_mutex_create(dxs_mutex_t* mutex) {
 	*mutex = calloc(1, sizeof(CRITICAL_SECTION));
 	InitializeCriticalSection(*mutex);
 	return true;
@@ -32,7 +67,7 @@ int dx_mutex_create(dx_mutex_t* mutex) {
 
 /* -------------------------------------------------------------------------- */
 
-int dx_mutex_destroy(dx_mutex_t* mutex) {
+int dxs_mutex_destroy(dxs_mutex_t* mutex) {
 	DeleteCriticalSection(*mutex);
 	free(*mutex);
 	return true;
@@ -40,28 +75,28 @@ int dx_mutex_destroy(dx_mutex_t* mutex) {
 
 /* -------------------------------------------------------------------------- */
 
-int dx_mutex_lock(dx_mutex_t* mutex) {
+int dxs_mutex_lock(dxs_mutex_t* mutex) {
 	EnterCriticalSection(*mutex);
 	return true;
 }
 
 /* -------------------------------------------------------------------------- */
 
-int dx_mutex_unlock(dx_mutex_t* mutex) {
+int dxs_mutex_unlock(dxs_mutex_t* mutex) {
 	LeaveCriticalSection(*mutex);
 	return true;
 }
 #else
 #	include "pthread.h"
 
-void dx_sleep(int milliseconds) {
+void dxs_sleep(int milliseconds) {
 	struct timespec ts;
 	ts.tv_sec = milliseconds / 1000;
 	ts.tv_nsec = (milliseconds % 1000) * 1000000;
 	nanosleep(&ts, NULL);
 }
 
-int dx_mutex_create(dx_mutex_t* mutex) {
+int dxs_mutex_create(dxs_mutex_t* mutex) {
 	if (pthread_mutexattr_init(&mutex->attr) != 0) {
 		return false;
 	}
@@ -79,7 +114,7 @@ int dx_mutex_create(dx_mutex_t* mutex) {
 
 /* -------------------------------------------------------------------------- */
 
-int dx_mutex_destroy(dx_mutex_t* mutex) {
+int dxs_mutex_destroy(dxs_mutex_t* mutex) {
 	if (pthread_mutex_destroy(&mutex->mutex) != 0) {
 		return false;
 	}
@@ -93,7 +128,7 @@ int dx_mutex_destroy(dx_mutex_t* mutex) {
 
 /* -------------------------------------------------------------------------- */
 
-int dx_mutex_lock(dx_mutex_t* mutex) {
+int dxs_mutex_lock(dxs_mutex_t* mutex) {
 	if (pthread_mutex_lock(&mutex->mutex) != 0) {
 		return false;
 	}
@@ -103,7 +138,7 @@ int dx_mutex_lock(dx_mutex_t* mutex) {
 
 /* -------------------------------------------------------------------------- */
 
-int dx_mutex_unlock(dx_mutex_t* mutex) {
+int dxs_mutex_unlock(dxs_mutex_t* mutex) {
 	if (pthread_mutex_unlock(&mutex->mutex) != 0) {
 		return false;
 	}
@@ -114,41 +149,6 @@ int dx_mutex_unlock(dx_mutex_t* mutex) {
 #endif	//_WIN32
 
 static char dxfeed_host_default[] = "demo.dxfeed.com:7300";
-
-dxf_const_string_t dx_event_type_to_string(int event_type) {
-	switch (event_type) {
-		case DXF_ET_TRADE:
-			return L"Trade";
-		case DXF_ET_QUOTE:
-			return L"Quote";
-		case DXF_ET_SUMMARY:
-			return L"Summary";
-		case DXF_ET_PROFILE:
-			return L"Profile";
-		case DXF_ET_ORDER:
-			return L"Order";
-		case DXF_ET_TIME_AND_SALE:
-			return L"Time&Sale";
-		case DXF_ET_CANDLE:
-			return L"Candle";
-		case DXF_ET_TRADE_ETH:
-			return L"TradeETH";
-		case DXF_ET_SPREAD_ORDER:
-			return L"SpreadOrder";
-		case DXF_ET_GREEKS:
-			return L"Greeks";
-		case DXF_ET_THEO_PRICE:
-			return L"THEO_PRICE";
-		case DXF_ET_UNDERLYING:
-			return L"Underlying";
-		case DXF_ET_SERIES:
-			return L"Series";
-		case DXF_ET_CONFIGURATION:
-			return L"Configuration";
-		default:
-			return L"";
-	}
-}
 
 struct event_info_t {
 	int event_type;
@@ -193,13 +193,13 @@ static struct event_info_t event_info[EVENTS_COUNT] = {{DXF_ET_TRADE, trade_list
 /* -------------------------------------------------------------------------- */
 
 static int is_listener_thread_terminated = false;
-static dx_mutex_t listener_thread_guard;
+static dxs_mutex_t listener_thread_guard;
 
 int is_thread_terminate() {
 	int res;
-	dx_mutex_lock(&listener_thread_guard);
+	dxs_mutex_lock(&listener_thread_guard);
 	res = is_listener_thread_terminated;
-	dx_mutex_unlock(&listener_thread_guard);
+	dxs_mutex_unlock(&listener_thread_guard);
 
 	return res;
 }
@@ -208,9 +208,9 @@ int is_thread_terminate() {
 
 void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
 	char* host = (char*)user_data;
-	dx_mutex_lock(&listener_thread_guard);
+	dxs_mutex_lock(&listener_thread_guard);
 	is_listener_thread_terminated = true;
-	dx_mutex_unlock(&listener_thread_guard);
+	dxs_mutex_unlock(&listener_thread_guard);
 
 	wprintf(L"\nTerminating listener thread, host: %s\n", host);
 }
@@ -489,12 +489,11 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
-	// main loop
-	dx_mutex_create(&listener_thread_guard);
+	dxs_mutex_create(&listener_thread_guard);
 	while (!is_thread_terminate() && loop_counter--) {
-		dx_sleep(100);
+		dxs_sleep(100);
 	}
-	dx_mutex_destroy(&listener_thread_guard);
+	dxs_mutex_destroy(&listener_thread_guard);
 
 	wprintf(L"Disconnecting from host...\n");
 
@@ -504,9 +503,7 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 
-	wprintf(
-		L"Disconnect successful!\n"
-		L"Connection test completed successfully!\n");
+	wprintf(L"Disconnected\nQuote table test completed\n");
 
 	return 0;
 }

@@ -1,17 +1,19 @@
 #!/bin/sh
 
 # Script builds, tests and makes package.
-# Script build all targets from CMakeLists.txt by sequentionally calling 
+# Script build all targets from CMakeLists.txt by successively calling
 # build.sh for next configurations: Debug x86, Release x86, Debug x64, Release x64. 
 # If one of configurations fail the process stopped.
 # Usage: 
-#     make_package <major>.<minor>[.<patch>] [rebuild|clean] [no-test] [no-tls]
+#     make_package <major>.<minor>[.<patch>] [rebuild|clean] [no-test] [no-tls] [static]
 # Where
 #     <major>.<minor>[.<patch>] - Version of package, i.e. 1.2.6
 #     clean                     - removes build directory
 #     rebuild                   - performs clean and build
 #     no-test                   - build testing will not be started
-# 
+#     no-tls                    - build without TLS support
+#     static                    - build static library, samples and tests (without TLS support)
+#
 # The operation order:
 #     1. Build sources in next configurations Debug x86, Release x86, 
 #        Debug x64, Release x64. The result of build is located into the 
@@ -26,12 +28,13 @@
 #     2. 7z
 
 print_usage() {
-    echo "Usage: $0 <major>.<minor>[.<patch>] [rebuild|clean] [no-test] [no-tls]"
+    echo "Usage: $0 <major>.<minor>[.<patch>] [rebuild|clean] [no-test] [no-tls] [static]"
     echo "   <major>.<minor>[.<patch>] - Version of package, i.e. 1.2.6"
     echo "   clean                     - removes build directory"
     echo "   rebuild                   - performs clean and build"
     echo "   no-test                   - build tests will not be started"
     echo "   no-tls                    - build without TLS support"
+    echo "   static                    - build static library, samples and tests (without TLS support)"
 }
 
 # Check cmake application in PATH
@@ -62,11 +65,11 @@ PROJECT_NAME="DXFeedAll"
 PACKAGE_WORK_DIR="_CPack_Packages"
 TARGET_PACKAGE="dxfeed-c-api-$VERSION"
 NO_TLS=""
+BUILD_STATIC_LIBS=""
 PACKAGE_SUFFIX=""
 #PLATFORMS="x64 x86"
 PLATFORMS="x64"
 CONFIGURATIONS="Debug Release"
-#CONFIGURATIONS="Release"
 
 for A in "$@"; do
     if [ "$A" = "clean" ]; then
@@ -78,7 +81,12 @@ for A in "$@"; do
         DO_TEST=0
     elif [ "$A" = "no-tls" ]; then
         NO_TLS="no-tls"
-        PACKAGE_SUFFIX="-no-tls"
+        if [ "$PACKAGE_SUFFIX" = "" ]; then
+            PACKAGE_SUFFIX="-no-tls"
+        fi
+    elif [ "$A" = "static" ]; then
+        BUILD_STATIC_LIBS="static"
+        PACKAGE_SUFFIX="-static-no-tls"
     fi
 done
 
@@ -101,9 +109,9 @@ export APP_VERSION
 
 for P in $PLATFORMS; do
     for C in $CONFIGURATIONS; do
-        echo "./build.sh $C $P $NO_TLS"
+        echo "./build.sh $C $P $NO_TLS $BUILD_STATIC_LIBS"
     
-        ./build.sh $C $P $NO_TLS
+        ./build.sh $C $P $NO_TLS $BUILD_STATIC_LIBS
 
         if [ $? -ne 0 ]; then
             echo "Making package failed! $?"
@@ -136,8 +144,8 @@ export PACKAGE_WORK_DIR
 
 for P in $PLATFORMS; do
     for C in $CONFIGURATIONS; do
-        echo "$HOME_DIR/scripts/combine_package.sh $PROJECT_NAME $C $P $VERSION $NO_TLS $PACKAGE_WORK_DIR"
-        $HOME_DIR/scripts/combine_package.sh $PROJECT_NAME $C $P $VERSION $NO_TLS
+        echo "$HOME_DIR/scripts/combine_package.sh $PROJECT_NAME $C $P $VERSION $NO_TLS $BUILD_STATIC_LIBS $PACKAGE_WORK_DIR"
+        $HOME_DIR/scripts/combine_package.sh $PROJECT_NAME $C $P $VERSION $NO_TLS $BUILD_STATIC_LIBS
 
         if [ $? -ne 0 ]; then
             cd $HOME_DIR
@@ -160,6 +168,7 @@ fi
 mkdir $TARGET_PACKAGE$PACKAGE_SUFFIX
 for P in $PLATFORMS; do
     cp -rf $PROJECT_NAME-$VERSION-$P$PACKAGE_SUFFIX $TARGET_PACKAGE$PACKAGE_SUFFIX
+    echo "$PROJECT_NAME-$VERSION-$P$PACKAGE_SUFFIX -> $TARGET_PACKAGE$PACKAGE_SUFFIX"
 done
 
 7z a $TARGET_PACKAGE$PACKAGE_SUFFIX.zip $TARGET_PACKAGE$PACKAGE_SUFFIX

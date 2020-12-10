@@ -9,7 +9,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Initial Developer of the Original Code is dxFeed Solutions DE GmbH.
+ * The Initial Developer of the Original Code is Devexperts LLC.
  * Portions created by the Initial Developer are Copyright (C) 2010
  * the Initial Developer. All Rights Reserved.
  *
@@ -552,7 +552,7 @@ typedef void (*dxf_event_listener_v2_t) (int event_type, dxf_const_string_t symb
  *
  * @return String representation of event type
  */
-dxf_const_string_t dx_event_type_to_string (int event_type);
+DXFEED_API dxf_const_string_t dx_event_type_to_string (int event_type);
 
 /**
  * @ingroup c-api-event-listener-functions

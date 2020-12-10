@@ -9,7 +9,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Initial Developer of the Original Code is dxFeed Solutions DE GmbH.
+ * The Initial Developer of the Original Code is Devexperts LLC.
  * Portions created by the Initial Developer are Copyright (C) 2010
  * the Initial Developer. All Rights Reserved.
  *
@@ -89,24 +89,6 @@
 
 #ifndef DXFEED_API_H_INCLUDED
 #define DXFEED_API_H_INCLUDED
-
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-    #ifdef DXFEED_EXPORTS
-        #define DXFEED_API __declspec(dllexport)
-    #elif  DXFEED_IMPORTS
-        #define DXFEED_API __declspec(dllimport)
-    #elif __cplusplus
-        #define DXFEED_API extern "C"
-    #else
-        #define DXFEED_API
-    #endif
-#endif // DOXYGEN_SHOULD_SKIP_THIS
-
-#ifndef OUT
-    #ifndef DOXYGEN_SHOULD_SKIP_THIS
-        #define OUT
-    #endif // DOXYGEN_SHOULD_SKIP_THIS
-#endif /* OUT */
 
 #include "DXTypes.h"
 #include "EventData.h"

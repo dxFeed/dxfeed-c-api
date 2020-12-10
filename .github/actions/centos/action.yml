@@ -1,6 +1,6 @@
 # action.yml
-name: 'OldLinuxBuild'
-description: 'build old linux (centos 6.10) version of dxfeed-c-api library'
+name: 'CentOS 7 build'
+description: 'build old linux (CentOS 7) version of dxfeed-c-api library'
 inputs:
   command:
     description: 'build command'

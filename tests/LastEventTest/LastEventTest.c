@@ -1,3 +1,22 @@
+/*
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Initial Developer of the Original Code is Devexperts LLC.
+ * Portions created by the Initial Developer are Copyright (C) 2010
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *
+ */
+
 #ifdef _WIN32
 #	ifndef _CRT_STDIO_ISO_WIDE_SPECIFIERS
 #		define _CRT_STDIO_ISO_WIDE_SPECIFIERS 1
@@ -8,17 +27,15 @@
 
 #include "DXErrorCodes.h"
 #include "DXFeed.h"
-#include "DXMemory.h"
-#include "DXThreads.h"
 #include "EventData.h"
 #include "Logger.h"
 
 #ifdef _WIN32
 #	include <Windows.h>
-void dx_sleep(int milliseconds) { Sleep((DWORD)milliseconds); }
+void dxs_sleep(int milliseconds) { Sleep((DWORD)milliseconds); }
 #else
 #	include <time.h>
-void dx_sleep(int milliseconds) {
+void dxs_sleep(int milliseconds) {
 	struct timespec ts;
 	ts.tv_sec = milliseconds / 1000;
 	ts.tv_nsec = (milliseconds % 1000) * 1000000;
@@ -35,43 +52,6 @@ static int g_iteration_count = 10;
 
 /* -------------------------------------------------------------------------- */
 
-dxf_const_string_t dx_event_type_to_string(int event_type) {
-	switch (event_type) {
-		case DXF_ET_TRADE:
-			return L"Trade";
-		case DXF_ET_QUOTE:
-			return L"Quote";
-		case DXF_ET_SUMMARY:
-			return L"Summary";
-		case DXF_ET_PROFILE:
-			return L"Profile";
-		case DXF_ET_ORDER:
-			return L"Order";
-		case DXF_ET_TIME_AND_SALE:
-			return L"Time&Sale";
-		case DXF_ET_CANDLE:
-			return L"Candle";
-		case DXF_ET_TRADE_ETH:
-			return L"TradeETH";
-		case DXF_ET_SPREAD_ORDER:
-			return L"SpreadOrder";
-		case DXF_ET_GREEKS:
-			return L"Greeks";
-		case DXF_ET_THEO_PRICE:
-			return L"THEO_PRICE";
-		case DXF_ET_UNDERLYING:
-			return L"Underlying";
-		case DXF_ET_SERIES:
-			return L"Series";
-		case DXF_ET_CONFIGURATION:
-			return L"Configuration";
-		default:
-			return L"";
-	}
-}
-
-/* -------------------------------------------------------------------------- */
-
 void process_last_error() {
 	int error_code = dx_ec_success;
 	dxf_const_string_t error_descr = NULL;
@@ -81,7 +61,7 @@ void process_last_error() {
 
 	if (res == DXF_SUCCESS) {
 		if (error_code == dx_ec_success) {
-			wprintf(L"WTF - no error information is stored");
+			wprintf(L"No error information is stored");
 
 			return;
 		}
@@ -135,7 +115,7 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 
-	wprintf(L"Connection successful!\n");
+	wprintf(L"Connected\n");
 
 	wprintf(L"Creating subscription to: Trade\n");
 	if (!dxf_create_subscription(connection, g_event_type, &subscription)) {
@@ -183,10 +163,10 @@ int main(int argc, char* argv[]) {
 			}
 		}
 		wprintf(L"\n");
-		dx_sleep(5000);
+		dxs_sleep(5000);
 	}
 
-	wprintf(L"\n Test complete successfully \n");
+	wprintf(L"\n Test complete\n");
 	wprintf(L"Disconnecting from host...\n");
 
 	if (!dxf_close_connection(connection)) {
@@ -195,11 +175,9 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 
-	wprintf(
-		L"Disconnect successful!\n"
-		L"Connection test completed successfully!\n");
+	wprintf(L"Disconnected\n");
 
-	dx_sleep(5000);
+	dxs_sleep(5000);
 
 	return 0;
 }

@@ -1,5 +1,21 @@
-// SnapshotConsoleSample.cpp : Defines the entry point for the console application.
-//
+/*
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Initial Developer of the Original Code is Devexperts LLC.
+ * Portions created by the Initial Developer are Copyright (C) 2010
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *
+ */
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -44,38 +60,6 @@ int _CRT_glob = 0;
 #define TOKEN_PARAM_SHORT_TAG "-T"
 #define LOG_DATA_TRANSFER_TAG "-p"
 #define TIMEOUT_TAG "-o"
-
-
-dxf_const_string_t dx_event_type_to_string (int event_type) {
-	switch (event_type) {
-		case DXF_ET_TRADE:
-			return L"Trade";
-		case DXF_ET_QUOTE:
-			return L"Quote";
-		case DXF_ET_SUMMARY:
-			return L"Summary";
-		case DXF_ET_PROFILE:
-			return L"Profile";
-		case DXF_ET_ORDER:
-			return L"Order";
-		case DXF_ET_TIME_AND_SALE:
-			return L"Time&Sale";
-		case DXF_ET_CANDLE:
-			return L"Candle";
-		case DXF_ET_TRADE_ETH:
-			return L"TradeETH";
-		case DXF_ET_SPREAD_ORDER:
-			return L"SpreadOrder";
-		case DXF_ET_GREEKS:
-			return L"Greeks";
-		case DXF_ET_SERIES:
-			return L"Series";
-		case DXF_ET_CONFIGURATION:
-			return L"Configuration";
-		default:
-			return L"";
-	}
-}
 
 /* -------------------------------------------------------------------------- */
 #ifdef _WIN32
@@ -142,7 +126,7 @@ void process_last_error () {
 
 	if (res == DXF_SUCCESS) {
 		if (error_code == dx_ec_success) {
-			wprintf(L"no error information is stored");
+			wprintf(L"No error information is stored");
 			return;
 		}
 
@@ -493,7 +477,7 @@ int main (int argc, char *argv[]) {
 		return -1;
 	}
 
-	wprintf(L"Connection successful!\n");
+	wprintf(L"Connected\n");
 
 	if (event_id == dx_eid_candle) {
 		if (!dxf_create_candle_symbol_attributes(base_symbol,
@@ -535,7 +519,7 @@ int main (int argc, char *argv[]) {
 		dxf_close_connection(connection);
 		return -1;
 	};
-	wprintf(L"Subscription successful!\n");
+	wprintf(L"Subscribed\n");
 
 	while (!is_thread_terminate() && program_timeout--) {
 #ifdef _WIN32
@@ -567,7 +551,7 @@ int main (int argc, char *argv[]) {
 		return -1;
 	}
 
-	wprintf(L"Disconnect successful!\nConnection test completed successfully!\n");
+	wprintf(L"Disconnected\n");
 
 #ifdef _WIN32
 	DeleteCriticalSection(&listener_thread_guard);

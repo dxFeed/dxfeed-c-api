@@ -38,6 +38,7 @@ set(SOURCE_FILES
         )
 
 set(ADDITIONAL_PROPERTIES "")
+set(ADDITIONAL_LIBRARIES "")
 
 if (WIN32)
     add_definitions(-D_CONSOLE -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE)
@@ -67,7 +68,7 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 
 add_executable(${PROJECT} ${SOURCE_FILES})
 
-target_link_libraries(${PROJECT} debug ${LIB_DXFEED_NAME}${DEBUG_POSTFIX} optimized ${LIB_DXFEED_NAME}${RELEASE_POSTFIX})
+target_link_libraries(${PROJECT} DXFeed ${ADDITIONAL_LIBRARIES})
 
 set_target_properties(${PROJECT}
         PROPERTIES
@@ -95,7 +96,7 @@ install(FILES ${SOURCE_FILES} ${PROJECT_FILES} ${BUILD_FILES}
         DESTINATION "tests/${PROJECT}"
         CONFIGURATIONS Release
         )
-set(CPACK_PACKAGE_VENDOR "dxFeed Solutions DE GmbH")
+set(CPACK_PACKAGE_VENDOR "Devexperts LLC")
 set(CPACK_PACKAGE_NAME "${PROJECT}")
 set(CPACK_PACKAGE_VERSION "${APP_VERSION}")
 set(CPACK_PACKAGE_FILE_NAME "${PROJECT}-${APP_VERSION}-${TARGET_PLATFORM}")

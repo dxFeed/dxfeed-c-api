@@ -1,6 +1,6 @@
 @echo off
 rem Script builds, tests and makes package.
-rem Script build all targets from CMakeLists.txt by sequentionally calling 
+rem Script build all targets from CMakeLists.txt by successively calling
 rem build.bat for next configurations: Debug x86, Release x86, Debug x64, 
 rem Release x64. If one of configurations fail the process stopped.
 rem Usage: 

@@ -1,3 +1,22 @@
+/*
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Initial Developer of the Original Code is Devexperts LLC.
+ * Portions created by the Initial Developer are Copyright (C) 2010
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *
+ */
+
 #ifdef _WIN32
 #	define _CRT_STDIO_ISO_WIDE_SPECIFIERS 1
 #endif
@@ -9,10 +28,10 @@
 
 #ifdef _WIN32
 #	include <Windows.h>
-void dx_sleep(int milliseconds) { Sleep((DWORD)milliseconds); }
+void dxs_sleep(int milliseconds) { Sleep((DWORD)milliseconds); }
 #else
 #include <time.h>
-void dx_sleep(int milliseconds) {
+void dxs_sleep(int milliseconds) {
 	struct timespec ts;
 	ts.tv_sec = milliseconds / 1000;
 	ts.tv_nsec = (milliseconds % 1000) * 1000000;
@@ -63,9 +82,9 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 
-	wprintf(L"Connection successful!\n");
+	wprintf(L"Connected\n");
 
-	dx_sleep(121000);  // 2m01s
+	dxs_sleep(121000);  // 2m01s
 
 	wprintf(L"Disconnecting from host...\n");
 
@@ -76,8 +95,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	wprintf(
-		L"Disconnect successful!\n"
-		L"Connection test completed successfully!\n");
+		L"Disconnected\nConnection test completed\n");
 
 	return 0;
 }
