@@ -97,26 +97,6 @@ void print_timestamp(dxf_long_t timestamp){
 		wprintf(L"%ls",timefmt);
 }
 
-dxf_const_string_t dx_event_type_to_string(int event_type) {
-	switch (event_type) {
-		case DXF_ET_TRADE: return L"Trade";
-		case DXF_ET_QUOTE: return L"Quote";
-		case DXF_ET_SUMMARY: return L"Summary";
-		case DXF_ET_PROFILE: return L"Profile";
-		case DXF_ET_ORDER: return L"Order";
-		case DXF_ET_TIME_AND_SALE: return L"Time&Sale";
-		case DXF_ET_CANDLE: return L"Candle";
-		case DXF_ET_TRADE_ETH: return L"TradeETH";
-		case DXF_ET_SPREAD_ORDER: return L"SpreadOrder";
-		case DXF_ET_GREEKS: return L"Greeks";
-		case DXF_ET_THEO_PRICE: return L"THEO_PRICE";
-		case DXF_ET_UNDERLYING: return L"Underlying";
-		case DXF_ET_SERIES: return L"Series";
-		case DXF_ET_CONFIGURATION: return L"Configuration";
-		default: return L"";
-	}
-}
-
 /* -------------------------------------------------------------------------- */
 
 void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data,
@@ -192,6 +172,28 @@ dxf_string_t ansi_to_unicode (const char* ansi_str) {
 #endif /* _WIN32 */
 }
 
+int atoi2 (char *str, int *result) {
+	if (str == NULL || str[0] == '\0' || result == NULL) {
+		return false;
+	}
+
+	if (str[0] == '0' && str[1] == '\0') {
+		*result = 0;
+
+		return true;
+	}
+
+	int r = atoi(str);
+
+	if (r == 0) {
+		return false;
+	}
+
+	*result = r;
+
+	return true;
+}
+
 #define DATE_TIME_BUF_SIZE 4
 /*
  * Parse date string in format 'DD-MM-YYYY'
@@ -231,28 +233,6 @@ int parse_date(const char* date_str, struct tm* time_struct) {
 	time_struct->tm_mday = mday;
 	time_struct->tm_mon = month - 1;
 	time_struct->tm_year = year - 1900;
-	return true;
-}
-
-int atoi2 (char *str, int *result) {
-	if (str == NULL || str[0] == '\0' || result == NULL) {
-		return false;
-	}
-
-	if (str[0] == '0' && str[1] == '\0') {
-		*result = 0;
-
-		return true;
-	}
-
-	int r = atoi(str);
-
-	if (r == 0) {
-		return false;
-	}
-
-	*result = r;
-
 	return true;
 }
 
@@ -445,8 +425,7 @@ int main (int argc, char* argv[]) {
 
 	free(symbol);
 
-	wprintf(L"Disconnect successful!\nConnection test completed successfully!\n");
-	wprintf(L"loops remain:%d\n", program_timeout);
+	wprintf(L"Disconnected\n");
 
 #ifdef _WIN32
 	DeleteCriticalSection(&listener_thread_guard);

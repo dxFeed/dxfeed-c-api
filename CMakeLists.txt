@@ -32,8 +32,9 @@ add_subdirectory(src)
 
 add_subdirectory(tests/CommandLineSample)
 
+add_subdirectory(tests/CandleSample)
+
 if (NOT BUILD_STATIC_LIBS)
-    add_subdirectory(tests/CandleSample)
     add_subdirectory(tests/PriceLevelBookSample)
     add_subdirectory(tests/RegionalBookSample)
     add_subdirectory(tests/SnapshotConsoleSample)
