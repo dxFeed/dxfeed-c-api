@@ -44,17 +44,14 @@ add_subdirectory(tests/IncSnapshotConsoleSample)
 
 add_subdirectory(wrappers/cpp)
 
-add_subdirectory(tests/PerformanceTest)
 add_subdirectory(tests/FullTest)
+
 add_subdirectory(tests/APITest)
 add_subdirectory(tests/ConnectionTest)
-
-if (NOT BUILD_STATIC_LIBS)
-    add_subdirectory(tests/LastEventTest)
-
-    add_subdirectory(tests/QuoteTableTest)
-    add_subdirectory(tests/SampleTest)
-endif ()
+add_subdirectory(tests/PerformanceTest)
+add_subdirectory(tests/LastEventTest)
+add_subdirectory(tests/QuoteTableTest)
+add_subdirectory(tests/SampleTest)
 
 set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/DXFeedAllCPackConfig.cmake")
 set(CPACK_PACKAGE_VENDOR "Devexperts LLC")

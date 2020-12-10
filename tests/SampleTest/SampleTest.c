@@ -362,7 +362,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	wprintf(
-		L"Disconnected\nSample test completed successfully\n");
+		L"Disconnected\nSample test completed\n");
 
 	return 0;
 }

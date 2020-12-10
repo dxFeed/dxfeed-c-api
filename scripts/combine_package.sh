@@ -3,12 +3,14 @@
 # Script CPack archives with specified platform and configuration. After
 # packing all files extracted to single release directory.
 # Usage:
-#     combine_package <project-name> <configuration> <platform> <version> [no-tls]
+#     combine_package <project-name> <configuration> <platform> <version> <no-tls> <static>
 # where:
 #     project-name    - The name of target project package
 #     configuration   - Debug or Release
 #     platform        - x86 or x64
 #     version         - version of application i.e. 1.2.6
+#     no-tls          - build without TLS support
+#     static          - build static library, samples and tests (without TLS support)
 #
 # WARNING: you must set the next environment variables
 #     PACKAGE_WORK_DIR - the working directory where cpack result arhive will be stored and unpacked
@@ -40,6 +42,7 @@ CONFIG=$2
 PLATFORM=$3
 VERSION=$4
 NO_TLS=$5
+BUILD_STATIC_LIBS=$6
 PACKAGE_SUFFIX=""
 
 if [ "$PROJECT_NAME" = "" ]; then
@@ -63,6 +66,10 @@ fi
 
 if [ "$NO_TLS" = "no-tls" ]; then
     PACKAGE_SUFFIX="-no-tls"
+fi
+
+if [ "BUILD_STATIC_LIBS" = "static" ]; then
+    PACKAGE_SUFFIX="-static"
 fi
 
 cpack -G ZIP -C $CONFIG --config $PLATFORM/$CONFIG/DXFeedAllCPackConfig.cmake
