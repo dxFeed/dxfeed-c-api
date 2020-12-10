@@ -60,3 +60,4 @@ EXPORTS
     dxf_get_current_connection_status
     dxf_free
     dx_get_event_data_item
+    dx_event_type_to_string

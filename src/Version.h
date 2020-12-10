@@ -27,8 +27,8 @@
 #define DX_TO_STRING(x) DX_STRINGIFY(x)
 
 #define DX_VERSION_MAJOR 6
-#define DX_VERSION_MINOR 0
-#define DX_VERSION_PATCH 1
+#define DX_VERSION_MINOR 1
+#define DX_VERSION_PATCH 0
 
 #define DX_VER_FILE_VERSION         DX_VERSION_MAJOR, DX_VERSION_MINOR, DX_VERSION_PATCH
 #define DX_VER_FILE_VERSION_STR     DX_TO_STRING(DX_VERSION_MAJOR.DX_VERSION_MINOR.DX_VERSION_PATCH)
@@ -46,7 +46,7 @@
 #define DX_VER_LEGAL_COPYRIGHT   "Copyright (C) 2010-2020 Devexperts LLC"
 #define DX_VER_PRODUCT_NAME      "DXFeed C API"
 
-#define DX_LIBRARY_VERSION L"DXFeed.cpp v 6.0.1 (c) Devexperts LLC"
+#define DX_LIBRARY_VERSION L"DXFeed.cpp v 6.1.0 (c) Devexperts LLC"
 
 extern dxf_const_string_t DX_LIBRARY_OPTIONS;
 
