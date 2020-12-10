@@ -22,7 +22,7 @@ endif()
 
 if (BUILD_STATIC_LIBS)
     set(DISABLE_TLS ON)
-    set(PACKAGE_SUFFIX "-static")
+    set(PACKAGE_SUFFIX "-no-tls")
 else ()
     if (NOT DISABLE_TLS)
         set(PACKAGE_SUFFIX "")
