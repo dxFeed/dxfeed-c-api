@@ -69,7 +69,7 @@ if [ "$NO_TLS" = "no-tls" ]; then
 fi
 
 if [ "$BUILD_STATIC_LIBS" = "static" ]; then
-    PACKAGE_SUFFIX="-static"
+    PACKAGE_SUFFIX="-no-tls"
 fi
 
 cpack -G ZIP -C $CONFIG --config $PLATFORM/$CONFIG/DXFeedAllCPackConfig.cmake
