@@ -4,7 +4,6 @@ cmake_policy(SET CMP0015 NEW)
 
 set(PROJECT DXFeed)
 set(INCLUDE_DIR ../include)
-set(PTHREADS_INCLUDE_DIR ../include/pthreads)
 set(TARGET_PLATFORM "x86" CACHE STRING "Target platform specification")
 set(APP_VERSION "" CACHE STRING "The version of library")
 set(C_API_VERSION_MAJOR 0)
