@@ -32,9 +32,9 @@
 
 #ifdef _WIN32
 #	include <Windows.h>
-void dx_sleep(int milliseconds) { Sleep((DWORD)milliseconds); }
+void dxs_sleep(int milliseconds) { Sleep((DWORD)milliseconds); }
 #else
-void dx_sleep(int milliseconds) {
+void dxs_sleep(int milliseconds) {
 	struct timespec ts;
 	ts.tv_sec = milliseconds / 1000;
 	ts.tv_nsec = (milliseconds % 1000) * 1000000;
@@ -43,41 +43,6 @@ void dx_sleep(int milliseconds) {
 #endif
 
 const char dxfeed_host[] = "demo.dxfeed.com:7300";
-
-dxf_const_string_t dx_event_type_to_string(int event_type) {
-	switch (event_type) {
-		case DXF_ET_TRADE:
-			return L"Trade";
-		case DXF_ET_QUOTE:
-			return L"Quote";
-		case DXF_ET_SUMMARY:
-			return L"Summary";
-		case DXF_ET_PROFILE:
-			return L"Profile";
-		case DXF_ET_ORDER:
-			return L"Order";
-		case DXF_ET_TIME_AND_SALE:
-			return L"Time&Sale";
-		case DXF_ET_CANDLE:
-			return L"Candle";
-		case DXF_ET_TRADE_ETH:
-			return L"TradeETH";
-		case DXF_ET_SPREAD_ORDER:
-			return L"SpreadOrder";
-		case DXF_ET_GREEKS:
-			return L"Greeks";
-		case DXF_ET_THEO_PRICE:
-			return L"THEO_PRICE";
-		case DXF_ET_UNDERLYING:
-			return L"Underlying";
-		case DXF_ET_SERIES:
-			return L"Series";
-		case DXF_ET_CONFIGURATION:
-			return L"Configuration";
-		default:
-			return L"";
-	}
-}
 
 /* -------------------------------------------------------------------------- */
 
@@ -246,7 +211,7 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 
-	wprintf(L"Connection successful!\n");
+	wprintf(L"Connected\n");
 
 	wprintf(L"Creating subscription to: Trade...\n");
 
@@ -258,7 +223,7 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 
-	wprintf(L"Subscription created\n");
+	wprintf(L"Subscribed\n");
 	wprintf(L"Adding symbols: %s...\n", "IBM");
 
 	if (!dxf_add_symbol(subscription, L"IBM")) {
@@ -288,7 +253,7 @@ int main(int argc, char* argv[]) {
 	wprintf(L"Second listener attached\n");
 	wprintf(L"Master thread sleeping for %d ms...\n", 5000);
 
-	dx_sleep(5000);
+	dxs_sleep(5000);
 
 	wprintf(L"Master thread woke up\n");
 	wprintf(L"Adding symbols: %ls %ls %ls...\n", symbols_to_add[0], symbols_to_add[1], symbols_to_add[2]);
@@ -302,7 +267,7 @@ int main(int argc, char* argv[]) {
 	wprintf(L"Symbols added\n");
 	wprintf(L"Master thread sleeping for %d ms...\n", 5000);
 
-	dx_sleep(5000);
+	dxs_sleep(5000);
 
 	wprintf(L"Master thread woke up\n");
 	wprintf(L"Detaching second listener...\n");
@@ -316,7 +281,7 @@ int main(int argc, char* argv[]) {
 	wprintf(L"Second listener detached\n");
 	wprintf(L"Master thread sleeping for %d ms...\n", 5000);
 
-	dx_sleep(5000);
+	dxs_sleep(5000);
 
 	wprintf(L"Master thread woke up\n");
 	wprintf(L"Clearing symbols...\n");
@@ -330,7 +295,7 @@ int main(int argc, char* argv[]) {
 	wprintf(L"Symbols cleared\n");
 	wprintf(L"Master thread sleeping for %d ms...\n", 5000);
 
-	dx_sleep(5000);
+	dxs_sleep(5000);
 
 	wprintf(L"Master thread woke up\n");
 	wprintf(L"Removing symbols: %ls %ls...\n", symbols_to_remove[0], symbols_to_remove[1]);
@@ -344,7 +309,7 @@ int main(int argc, char* argv[]) {
 	wprintf(L"Symbols cleared\n");
 	wprintf(L"Master thread sleeping for %d ms...\n", 5000);
 
-	dx_sleep(5000);
+	dxs_sleep(5000);
 
 	wprintf(L"Master thread woke up\n");
 	wprintf(L"Setting symbols: %ls %ls...\n", symbols_to_set[0], symbols_to_set[1]);
@@ -358,7 +323,7 @@ int main(int argc, char* argv[]) {
 	wprintf(L"Symbols set\n");
 	wprintf(L"Master thread sleeping for %d ms...\n", 5000);
 
-	dx_sleep(5000);
+	dxs_sleep(5000);
 
 	wprintf(L"Master thread woke up\n");
 	wprintf(L"Retrieving the subscription events...\n");
@@ -386,7 +351,7 @@ int main(int argc, char* argv[]) {
 	wprintf(L"Subscription events retrieved\n");
 	wprintf(L"Master thread sleeping for %d ms...\n", 5000);
 
-	dx_sleep(5000);
+	dxs_sleep(5000);
 
 	wprintf(L"Master thread woke up\n");
 	wprintf(L"Adding new symbols: %ls...\n", symbols_to_add_2[0]);
@@ -400,7 +365,7 @@ int main(int argc, char* argv[]) {
 	wprintf(L"New symbols added\n");
 	wprintf(L"Master thread sleeping for %d ms...\n", 1000000);
 
-	dx_sleep(1000000);
+	dxs_sleep(1000000);
 
 	wprintf(L"Master thread woke up\n");
 	wprintf(L"Disconnecting from host...\n");
@@ -411,9 +376,7 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 
-	wprintf(
-		L"Disconnect successful!\n"
-		L"Connection test completed successfully!\n");
+	wprintf(L"Disconnected\nAPI test completed\n");
 
 	return 0;
 }

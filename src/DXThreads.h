@@ -26,11 +26,7 @@
 #define DX_THREADS_H_INCLUDED
 
 #if !defined(_WIN32) || defined(USE_PTHREADS)
-#	ifdef _WIN32
-#		include "pthreads/pthread.h"
-#	else
-#		include "pthread.h"
-#	endif
+#	include "pthread.h"
 #	ifndef USE_PTHREADS
 #		define USE_PTHREADS
 #	endif

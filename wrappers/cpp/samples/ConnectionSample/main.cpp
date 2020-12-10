@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
 
 	try {
 		parser.ParseCLI(argc, argv);
-	} catch (args::Help) {
+	} catch (const args::Help&) {
 		std::cout << parser;
 		return 0;
 	} catch (const args::ParseError &e) {
@@ -79,7 +79,7 @@ int main(int argc, char **argv) {
 		return 3;
 	}
 
-	std::cout << "Connected successfully!\n";
+	std::cout << "Connected\n";
 
 	auto subscription = connection->createSubscription(DXF_ET_GREEKS | DXF_ET_UNDERLYING | DXF_ET_QUOTE);
 
@@ -89,7 +89,7 @@ int main(int argc, char **argv) {
 		return 4;
 	}
 
-	std::cout << "Subscribed successfully!\n";
+	std::cout << "Subscribed\n";
 
 	for (auto symbol : symbols) {
 		if (!subscription->addSymbol(symbol)) {
@@ -99,7 +99,7 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	std::cout << "Symbols added successfully!\n";
+	std::cout << "Symbols added\n";
 
 	auto result = subscription->attachListener([](std::string symbol, std::vector<Subscription::Event> events) {
 		struct CommonVisitor {
@@ -127,7 +127,7 @@ int main(int argc, char **argv) {
 		std::cout << "\n";
 	});
 
-	std::cout << "Listener attached successfully!\n";
+	std::cout << "Listener attached\n";
 
 	if (!result) {
 		std::cerr << "Error:" << Error::getLast() << "\n";

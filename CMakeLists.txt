@@ -16,6 +16,10 @@ set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE INTERNAL "" FORCE)
 project(${PROJECT})
 link_directories(${CMAKE_BINARY_DIR})
 
+if (WIN32 OR MACOS)
+    set(BUILD_STATIC_LIBS OFF)
+endif()
+
 if (BUILD_STATIC_LIBS)
     set(DISABLE_TLS ON)
     set(PACKAGE_SUFFIX "-static")
@@ -33,20 +37,21 @@ add_subdirectory(src)
 add_subdirectory(tests/CommandLineSample)
 
 add_subdirectory(tests/CandleSample)
+add_subdirectory(tests/PriceLevelBookSample)
+add_subdirectory(tests/RegionalBookSample)
+add_subdirectory(tests/SnapshotConsoleSample)
+add_subdirectory(tests/IncSnapshotConsoleSample)
+
+add_subdirectory(wrappers/cpp)
+
+add_subdirectory(tests/PerformanceTest)
+add_subdirectory(tests/FullTest)
+add_subdirectory(tests/APITest)
+add_subdirectory(tests/ConnectionTest)
 
 if (NOT BUILD_STATIC_LIBS)
-    add_subdirectory(tests/PriceLevelBookSample)
-    add_subdirectory(tests/RegionalBookSample)
-    add_subdirectory(tests/SnapshotConsoleSample)
-    add_subdirectory(tests/IncSnapshotConsoleSample)
-
-    add_subdirectory(wrappers/cpp)
-
-    add_subdirectory(tests/FullTest)
-    add_subdirectory(tests/APITest)
-    add_subdirectory(tests/ConnectionTest)
     add_subdirectory(tests/LastEventTest)
-    add_subdirectory(tests/PerformanceTest)
+
     add_subdirectory(tests/QuoteTableTest)
     add_subdirectory(tests/SampleTest)
 endif ()

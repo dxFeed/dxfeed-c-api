@@ -28,10 +28,10 @@
 
 #ifdef _WIN32
 #	include <Windows.h>
-void dx_sleep(int milliseconds) { Sleep((DWORD)milliseconds); }
+void dxs_sleep(int milliseconds) { Sleep((DWORD)milliseconds); }
 #else
 #include <time.h>
-void dx_sleep(int milliseconds) {
+void dxs_sleep(int milliseconds) {
 	struct timespec ts;
 	ts.tv_sec = milliseconds / 1000;
 	ts.tv_nsec = (milliseconds % 1000) * 1000000;
@@ -82,9 +82,9 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 
-	wprintf(L"Connection successful!\n");
+	wprintf(L"Connected\n");
 
-	dx_sleep(121000);  // 2m01s
+	dxs_sleep(121000);  // 2m01s
 
 	wprintf(L"Disconnecting from host...\n");
 
@@ -95,8 +95,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	wprintf(
-		L"Disconnect successful!\n"
-		L"Connection test completed successfully!\n");
+		L"Disconnected\nConnection test completed\n");
 
 	return 0;
 }
