@@ -13,7 +13,6 @@ env:
   MAC_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-macosx
   LINUX_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-linux
   CENTOS_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-centos
-  CENTOS65_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-centos65
   WINDOWS_ARTIFACT_TEMPLATE: dxfeed-c-api-#VERSION#-windows
   WINDOWS_BUILD_TEMPLATE: dxfeed-c-api-#VERSION#
   WIN_SRC_DIR: "C:\\dxfeed-c-api"
@@ -100,7 +99,7 @@ jobs:
           path: artifact/${{ env.ARTIFACT }}-no-tls.zip
 
 
-# --------------------------- BUILD OLD LINUX (CENTOS 6.10) LIBRARY (WITH TLS SUPPORT)
+# --------------------------- BUILD OLD LINUX (CENTOS 7) LIBRARY (WITH TLS SUPPORT)
   build_centos_tls:
     runs-on: ubuntu-latest
     name: build centos (TLS)
@@ -126,7 +125,7 @@ jobs:
           path: artifact/${{ env.ARTIFACT }}.zip
 
 
-# --------------------------- BUILD OLD LINUX (CENTOS 6.10) LIBRARY (WITHOUT TLS SUPPORT)
+# --------------------------- BUILD OLD LINUX (CENTOS 7) LIBRARY (WITHOUT TLS SUPPORT)
   build_centos_no_tls:
     runs-on: ubuntu-latest
     name: build centos (no TLS)
@@ -143,32 +142,6 @@ jobs:
       - name: Build centos library (no TLS)
         uses: ./.github/actions/centos
         id: build-centos-nt
-        with:
-          artifact: ${{ env.ARTIFACT }}
-          release:  ${{ env.RELEASE_VERSION }}
-          notls: true
-      - uses: actions/upload-artifact@v1
-        with:
-          name: ${{ env.ARTIFACT }}-no-tls.zip
-          path: artifact/${{ env.ARTIFACT }}-no-tls.zip
-
-  # --------------------------- BUILD OLD LINUX (CENTOS 6.5) LIBRARY (WITHOUT TLS SUPPORT)
-  build_centos65_no_tls:
-    runs-on: ubuntu-latest
-    name: build centos 6.5 (no TLS)
-    steps:
-      - uses: actions/checkout@master
-      - name: Set env
-        run: |
-          echo RELEASE_VERSION=$(echo ${GITHUB_REF:10}) >> $GITHUB_ENV
-          echo ARTIFACT=$(echo ${CENTOS65_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g" ) >> $GITHUB_ENV
-      - name: Check env
-        run: |
-          echo Artifact: ${{ env.ARTIFACT }}
-          echo Release : ${{ env.RELEASE_VERSION }}
-      - name: Build centos 6.5 library (no TLS)
-        uses: ./.github/actions/centos65
-        id: build-centos65-nt
         with:
           artifact: ${{ env.ARTIFACT }}
           release:  ${{ env.RELEASE_VERSION }}
@@ -307,7 +280,7 @@ jobs:
   publish_release:
     runs-on: ubuntu-latest
     name: publish release
-    needs: [build_docs, build_linux_tls, build_linux_no_tls, build_centos_tls, build_centos_no_tls, build_centos65_no_tls, build_macos_tls, build_macos_no_tls, build_windows]
+    needs: [build_docs, build_linux_tls, build_linux_no_tls, build_centos_tls, build_centos_no_tls, build_macos_tls, build_macos_no_tls, build_windows]
     steps:
 
       - uses: actions/checkout@master
@@ -320,7 +293,6 @@ jobs:
           echo LINUX_NO_TLS_ARTIFACT=$(echo ${LINUX_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g")-no-tls.zip >> $GITHUB_ENV
           echo CENTOS_ARTIFACT=$(echo ${CENTOS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g").zip >> $GITHUB_ENV
           echo CENTOS_NO_TLS_ARTIFACT=$(echo ${CENTOS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g")-no-tls.zip >> $GITHUB_ENV
-          echo CENTOS65_NO_TLS_ARTIFACT=$(echo ${CENTOS65_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g")-no-tls.zip >> $GITHUB_ENV
           echo WINDOWS_ARTIFACT=$(echo ${WINDOWS_ARTIFACT_TEMPLATE} | sed "s/#VERSION#/$(echo ${GITHUB_REF:10})/g").zip >> $GITHUB_ENV
           echo WINDOWS_NO_TLS_ARTIFACT=$(echo ${WINDOWS_ARTIFACT_TEMPLATE} | sed "s/#VERSION#/$(echo ${GITHUB_REF:10})/g")-no-tls.zip >> $GITHUB_ENV
           echo MAC_ARTIFACT=$(echo ${MAC_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g").zip >> $GITHUB_ENV
@@ -334,7 +306,6 @@ jobs:
           echo "Linux (no TLS) Artifact: ${{ env.LINUX_NO_TLS_ARTIFACT }}"
           echo "Centos Artifact: ${{ env.CENTOS_ARTIFACT }}"
           echo "Centos (no TLS) Artifact: ${{ env.CENTOS_NO_TLS_ARTIFACT }}"
-          echo "Centos 6.5 (no TLS) Artifact: ${{ env.CENTOS65_NO_TLS_ARTIFACT }}"
           echo "Windows Artifact: ${{ env.WINDOWS_ARTIFACT }}"
           echo "Windows (no TLS) Artifact: ${{ env.WINDOWS_NO_TLS_ARTIFACT }}"
           echo "MacOSX Artifact: ${{ env.MAC_ARTIFACT }}"
@@ -368,12 +339,6 @@ jobs:
         uses: actions/download-artifact@v1
         with:
           name: ${{ env.CENTOS_NO_TLS_ARTIFACT }}
-          path: downloads/
-
-      - name: Download centos65-no-tls artifact
-        uses: actions/download-artifact@v1
-        with:
-          name: ${{ env.CENTOS65_NO_TLS_ARTIFACT }}
           path: downloads/
 
       - name: Download windows artifact

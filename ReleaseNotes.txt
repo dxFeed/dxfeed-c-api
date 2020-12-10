@@ -1,7 +1,7 @@
 Version 6.1.0
 * [DXFC-199] Fixed the IPF parsing in the PerformanceTest
 * The minimal version of CMake has been changed to 3.0.0
-* Added build on CentOS 6.5 (no SSL\TLS)
+* Build on CentOS switched to CentOS 7
 * [DXFC-200] [Linux] Added ability to build a static library and samples
 * Win pthreads headers were removed from the project
 
