@@ -225,25 +225,64 @@ typedef struct dx_greeks {
     dxf_double_t vega;
 } dx_greeks_t;
 
-/// Theo price
+/**
+ * @addtogroup event-data-structures-theo-price
+ * @{
+ */
+
+/**
+ * @brief Theo price
+ *
+ * @details Theo price is a snapshot of the theoretical option price computation that is periodically performed by
+ * dxPrice model-free computation. It represents the most recent information that is available about the corresponding
+ * values at any given moment of time. The values include first and second order derivative of the price curve by
+ * price, so that the real-time theoretical option price can be estimated on real-time changes of the underlying price
+ * in the vicinity.
+ */
 typedef struct dx_theo_price {
     // To have same record for record and event
+	/// Timestamp of this event in milliseconds
     dxf_long_t time;
+	/// Theoretical option price
     dxf_double_t price;
+	/// Underlying price at the time of theo price computation
     dxf_double_t underlying_price;
+	/// Delta of the theoretical price
     dxf_double_t delta;
+	/// Gamma of the theoretical price
     dxf_double_t gamma;
+	/// Implied simple dividend return of the corresponding option series
     dxf_double_t dividend;
+	/// Implied simple interest return of the corresponding option series
     dxf_double_t interest;
 } dx_theo_price_t;
 
-/// Underlying
+///@}
+
+/**
+ * @addtogroup event-data-structures-underlying
+ * @{
+ */
+
+/**
+ * @brief Underlying
+ *
+ * @details Underlying event is a snapshot of computed values that are available for an option underlying symbol based
+ * on the option prices on the market. It represents the most recent information that is available about the
+ * corresponding values on the market at any given moment of time.
+ */
 typedef struct dx_underlying {
+	/// 30-day implied volatility for this underlying based on VIX methodology
     dxf_double_t volatility;
+	/// Front month implied volatility for this underlying based on VIX methodology;
     dxf_double_t front_volatility;
+	/// Back month implied volatility for this underlying based on VIX methodology
     dxf_double_t back_volatility;
+	/// Ratio of put options traded volume to call options traded volume for a day
     dxf_double_t put_call_ratio;
 } dx_underlying_t;
+
+///@}
 
 /// Series
 typedef struct dx_series {
