@@ -87,6 +87,7 @@ typedef float dxf_float_t;				  // 32 bit
 typedef long long dxf_long_t;			  // 64 bit
 typedef unsigned long long dxf_ulong_t;	  // 64 bit
 typedef double dxf_double_t;			  // 64 bit
+/// Identifier of the day is the number of days passed since January 1, 1970.
 typedef int dxf_dayid_t;
 
 /// String

@@ -28,12 +28,12 @@
  */
 /**
  * @ingroup functions
- * @defgroup macros Defined macros
+ * @defgroup functions-macros Defined macros
  * @brief macros
  */
 /**
  * @ingroup functions
- * @defgroup callback_types API Events' Callbacks
+ * @defgroup callback-types API Events' Callbacks
  * @brief Event callbacks
  */
 /**
@@ -100,13 +100,13 @@
 /* -------------------------------------------------------------------------- */
 
 /**
- * @ingroup  macros
+ * @ingroup  functions-macros
  * @brief Successful API call
  * @details The value is returned on successful API call
  */
 #define DXF_SUCCESS 1
 /**
- * @ingroup macros
+ * @ingroup functions-macros
  * @brief Failed API call
  * @details The value is returned on failed API call
  */
@@ -119,7 +119,7 @@
 /* -------------------------------------------------------------------------- */
 
 /**
- * @ingroup callback_types
+ * @ingroup callback-types
  *
  * @brief Connection termination notification callback type
  *
@@ -128,7 +128,7 @@
 typedef void (*dxf_conn_termination_notifier_t) (dxf_connection_t connection, void* user_data);
 
 /**
- * @ingroup callback_types
+ * @ingroup callback-types
  *
  * @brief connection Status notification callback type
  *
@@ -142,7 +142,7 @@ typedef void (*dxf_conn_status_notifier_t) (dxf_connection_t connection,
 /* the low level callback types, required in case some thread-specific initialization must be performed
    on the client side on the thread creation/destruction */
 /**
- * @ingroup callback_types
+ * @ingroup callback-types
  *
  * @brief The low level callback type, required in case some thread-specific initialization must be performed
  *        on the client side on the thread creation/destruction
@@ -152,7 +152,7 @@ typedef void (*dxf_conn_status_notifier_t) (dxf_connection_t connection,
 typedef int (*dxf_socket_thread_creation_notifier_t) (dxf_connection_t connection, void* user_data);
 
 /**
- * @ingroup callback_types
+ * @ingroup callback-types
  *
  * @brief The low level callback type, required in case some thread-specific initialization must be performed
  *        on the client side on the thread creation/destruction
