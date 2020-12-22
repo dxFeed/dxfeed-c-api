@@ -1,3 +1,6 @@
+Version 6.2.0
+* Added missing documentation to EventData.h file
+
 Version 6.1.0
 * [DXFC-199] Fixed the IPF parsing in the PerformanceTest
 * The minimal version of CMake has been changed to 3.0.0
