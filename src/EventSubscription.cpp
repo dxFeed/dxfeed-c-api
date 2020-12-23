@@ -690,7 +690,19 @@ int dx_get_event_subscription_event_types(dxf_subscription_t subscr_id, OUT unsi
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
+int dx_get_event_subscription_symbols_count(dxf_subscription_t subscr_id, OUT size_t* symbol_count) {
+	if (subscr_id == dx_invalid_subscription) {
+		return dx_set_error_code(dx_esec_invalid_subscr_id);
+	}
+
+	if (symbol_count == nullptr) {
+		return dx_set_error_code(dx_ec_invalid_func_param_internal);
+	}
+
+	*symbol_count = static_cast<SubscriptionData*>(subscr_id)->symbols.size();
+
+	return true;
+}
 
 int dx_get_event_subscription_symbols(dxf_subscription_t subscr_id, OUT dxf_const_string_t** symbols,
 									  OUT size_t* symbol_count) {
@@ -704,6 +716,7 @@ int dx_get_event_subscription_symbols(dxf_subscription_t subscr_id, OUT dxf_cons
 		return dx_set_error_code(dx_ec_invalid_func_param_internal);
 	}
 
+	// Lazyly copy symbols to the intermediate buffer
 	subscr_data->symbol_names.resize(subscr_data->symbols.size());
 
 	std::size_t i = 0;
