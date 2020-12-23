@@ -158,7 +158,7 @@ int dxs_mutex_unlock(dxs_mutex_t* mutex) {
 #	define false 0
 #endif
 
-//const char dxfeed_host[] = "mddqa.in.devexperts.com:7400";
+// const char dxfeed_host[] = "mddqa.in.devexperts.com:7400";
 const char dxfeed_host[] = "demo.dxfeed.com:7300";
 
 /* -------------------------------------------------------------------------- */
@@ -312,7 +312,7 @@ void process_last_error() {
 int main(int argc, char* argv[]) {
 	dxf_connection_t connection;
 	dxf_subscription_t subscription;
-	int loop_counter = 1000000;
+	int loop_counter = 30;	// seconds
 
 	dxf_initialize_logger("sample-test-api.log", true, true, true);
 	dxs_mutex_create(&listener_thread_guard);
@@ -323,7 +323,7 @@ int main(int argc, char* argv[]) {
 	if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, (void*)dxfeed_host,
 							   &connection)) {
 		process_last_error();
-		return -1;
+		return 1;
 	}
 
 	wprintf(L"Connected!\n");
@@ -332,24 +332,25 @@ int main(int argc, char* argv[]) {
 			connection, DXF_ET_TRADE | DXF_ET_QUOTE | DXF_ET_ORDER | DXF_ET_SUMMARY | DXF_ET_PROFILE, &subscription)) {
 		process_last_error();
 
-		return -1;
-	};
-
-	if (!dxf_add_symbol(subscription, L"EREGL:TR")) {
-		process_last_error();
-
-		return -1;
+		return 2;
 	};
 
 	if (!dxf_attach_event_listener(subscription, listener, NULL)) {
 		process_last_error();
 
-		return -1;
+		return 3;
 	};
+
+	if (!dxf_add_symbol(subscription, L"IBM")) {
+		process_last_error();
+
+		return 4;
+	};
+
 	wprintf(L"Subscribed\n");
 
 	while (!is_thread_terminate() && loop_counter--) {
-		dxs_sleep(100);
+		dxs_sleep(1000);
 	}
 	dxs_mutex_destroy(&listener_thread_guard);
 
@@ -358,11 +359,10 @@ int main(int argc, char* argv[]) {
 	if (!dxf_close_connection(connection)) {
 		process_last_error();
 
-		return -1;
+		return 5;
 	}
 
-	wprintf(
-		L"Disconnected\nSample test completed\n");
+	wprintf(L"Disconnected\nSample test completed\n");
 
 	return 0;
 }

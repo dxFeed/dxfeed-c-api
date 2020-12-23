@@ -544,6 +544,18 @@ dxf_remove_symbols (dxf_subscription_t subscription, dxf_const_string_t *symbols
 		return DXF_FAILURE;
 	}
 
+	size_t current_symbol_count;
+
+	if (!dx_get_event_subscription_symbols_count(subscription, &current_symbol_count)) {
+		return DXF_FAILURE;
+	}
+
+	// The QD API does not allow us to unsubscribe from symbols if we have not made any subscriptions in this session.
+	// Let's use a simple check to remove symbols so that we don't use a flag for each subscription.
+	if (current_symbol_count == 0u) {
+		return DXF_SUCCESS;
+	}
+
 	int found_wildcard;
 	size_t index;
 	(void)index;

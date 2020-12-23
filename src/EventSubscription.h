@@ -69,6 +69,7 @@ int dx_remove_listener(dxf_subscription_t subscr_id, dxf_event_listener_t listen
 int dx_remove_listener_v2(dxf_subscription_t subscr_id, dxf_event_listener_v2_t listener);
 int dx_get_subscription_connection(dxf_subscription_t subscr_id, OUT dxf_connection_t* connection);
 int dx_get_event_subscription_event_types(dxf_subscription_t subscr_id, OUT unsigned* event_types);
+int dx_get_event_subscription_symbols_count(dxf_subscription_t subscr_id, OUT size_t* symbol_count);
 int dx_get_event_subscription_symbols(dxf_subscription_t subscr_id, OUT dxf_const_string_t** symbols,
 									   OUT size_t* symbol_count);
 int dx_get_event_subscription_flags(dxf_subscription_t subscr_id, OUT dx_event_subscr_flag* subscr_flags);
