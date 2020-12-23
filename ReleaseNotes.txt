@@ -1,5 +1,6 @@
 Version 6.2.0
 * Added missing documentation to EventData.h file
+* [DXFC-205] Fixed a bug with disconnecting (by server side) when removing symbols if no symbols have been added
 
 Version 6.1.0
 * [DXFC-199] Fixed the IPF parsing in the PerformanceTest
