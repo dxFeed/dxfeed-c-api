@@ -303,6 +303,10 @@ static void dx_close_logging(void *arg) {
 /* -------------------------------------------------------------------------- */
 
 ERRORCODE dx_initialize_logger_impl(const char* file_name, int rewrite_file, int show_timezone_info, int verbose, int log_data_transfer) {
+	if (g_log_file != NULL) {
+		return DXF_SUCCESS;
+	}
+
 	if (!dx_init_error_subsystem()) {
 		wprintf(L"\nCan not init error subsystem\n");
 		return DXF_FAILURE;
