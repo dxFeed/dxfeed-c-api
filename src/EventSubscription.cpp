@@ -212,6 +212,16 @@ class EventSubscriptionConnectionContext {
 		return res;
 	}
 
+	void removeSymbolData(SymbolData* symbol_data) {
+		auto found = symbols.find(std::wstring(symbol_data->name));
+
+		if (found != symbols.end()) {
+			symbols.erase(found);
+		}
+
+		dx_cleanup_symbol_data(symbol_data);
+	}
+
 	int unsubscribeSymbol(SymbolData* symbol_data, SubscriptionData* owner) {
 		int res = true;
 
@@ -226,18 +236,7 @@ class EventSubscriptionConnectionContext {
 		}
 
 		if (--(symbol_data->ref_count) == 0) {
-			auto found = symbols.find(std::wstring(symbol_data->name));
-
-			if (found == symbols.end()) {
-				/* the symbol must've had been found in the container */
-				dx_set_error_code(dx_ec_internal_assert_violation);
-
-				res = false;
-			} else {
-				symbols.erase(found);
-			}
-
-			dx_cleanup_symbol_data(symbol_data);
+			removeSymbolData(symbol_data);
 		}
 
 		return res;
@@ -790,6 +789,10 @@ int dx_get_event_subscription_time(dxf_subscription_t subscr_id, OUT dxf_long_t*
 static void dx_call_subscr_listeners(SubscriptionData* subscr_data, unsigned event_bitmask,
 									 dxf_const_string_t symbol_name, dxf_const_event_data_t data, int data_count,
 									 const dxf_event_params_t* event_params) {
+	if (subscr_data == nullptr || subscr_data->symbols.find(symbol_name) == subscr_data->symbols.end()) {
+		return;
+	}
+
 	for (auto&& listener_context : subscr_data->listeners) {
 		switch (listener_context.getVersion()) {
 			case EventListenerVersion::Default: {
@@ -814,11 +817,13 @@ static void dx_call_subscr_listeners(SubscriptionData* subscr_data, unsigned eve
 
 #define DX_ORDER_SOURCE_COMPARATOR_NONSYM(l, r) (dx_compare_strings(l.suffix, r))
 
-void pass_event_data_to_listeners(SymbolData* symbol_data, dx_event_id_t event_id, dxf_const_string_t symbol_name,
+void pass_event_data_to_listeners(EventSubscriptionConnectionContext* ctx, SymbolData* symbol_data, dx_event_id_t event_id, dxf_const_string_t symbol_name,
 								  dxf_const_event_data_t data, int data_count, const dxf_event_params_t* event_params) {
+	symbol_data->ref_count++; //TODO replace by std::shared_ptr\std::weak_ptr
 	unsigned event_bitmask = DX_EVENT_BIT_MASK(static_cast<unsigned>(event_id));
+	auto subscriptions = symbol_data->subscriptions; //number of subscriptions may be changed in the listeners
 
-	for (auto&& subscription_data : symbol_data->subscriptions) {
+	for (auto&& subscription_data : subscriptions) {
 		if (!(subscription_data->event_types &
 			  event_bitmask)) { /* subscription doesn't want this specific event type */
 			continue;
@@ -863,6 +868,12 @@ void pass_event_data_to_listeners(SymbolData* symbol_data, dx_event_id_t event_i
 			dx_call_subscr_listeners(subscription_data, event_bitmask, symbol_name, data, data_count, event_params);
 		}
 	}
+
+	//TODO replace by std::shared_ptr\std::weak_ptr
+	symbol_data->ref_count--;
+	if (symbol_data->ref_count == 0) {
+		ctx->removeSymbolData(symbol_data);
+	}
 }
 
 int dx_process_event_data(dxf_connection_t connection, dx_event_id_t event_id, dxf_const_string_t symbol_name,
@@ -890,14 +901,14 @@ int dx_process_event_data(dxf_connection_t connection, dx_event_id_t event_id, d
 		soon after the symbol subscription has been annulled */
 		if (symbol_data != nullptr) {
 			dx_store_last_symbol_event(symbol_data, event_id, data, data_count);
-			pass_event_data_to_listeners(symbol_data, event_id, symbol_name, data, data_count, event_params);
+			pass_event_data_to_listeners(ctx, symbol_data, event_id, symbol_name, data, data_count, event_params);
 		}
 
 		SymbolData* wildcard_symbol_data = ctx->findSymbol(L"*");
 
 		if (wildcard_symbol_data != nullptr) {
 			dx_store_last_symbol_event(wildcard_symbol_data, event_id, data, data_count);
-			pass_event_data_to_listeners(wildcard_symbol_data, event_id, symbol_name, data, data_count, event_params);
+			pass_event_data_to_listeners(ctx, wildcard_symbol_data, event_id, symbol_name, data, data_count, event_params);
 		}
 	});
 
