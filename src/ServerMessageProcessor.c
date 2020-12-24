@@ -224,6 +224,7 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_server_msg_processor) {
 	}
 
 	CHECKED_FREE(context->buffer);
+	CHECKED_FREE(context->last_symbol);
 	CHECKED_FREE(context->raw_dump_file_name);
 
 	dx_clear_record_digests(context);
