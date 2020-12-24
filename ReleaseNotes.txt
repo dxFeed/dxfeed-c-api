@@ -3,6 +3,7 @@ Version 6.2.0
 * [DXFC-205] Fixed a bug with disconnecting (by server side) when removing symbols if no symbols have been added
 * [DXFC-203] Fixed segfaults and debug assertion failings when clearing symbols in a subscription's event listener
 * [DXFC-201] Added the ability to call logging initialization again without any effect
+* [DXFC-206] Fixed a minor memory leak related to incomplete deinitialization of the server message processor context.
 
 Version 6.1.0
 * [DXFC-199] Fixed the IPF parsing in the PerformanceTest
