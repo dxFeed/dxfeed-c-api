@@ -253,10 +253,12 @@ typedef struct dxf_trade {
 	/**
 	 * Change of the last trade.
 	 * Value equals price minus dxf_summary_t#prev_day_close_price
-	 *
-	 * This field is absent in TradeETH
 	 */
 	dxf_double_t change;
+	/// Total volume traded for a day
+	dxf_double_t day_volume;
+	/// Total turnover traded for a day
+	dxf_double_t day_turnover;
 	/**
 	 * This field contains several individual flags encoded as an integer number the following way:
 	 *
@@ -269,10 +271,6 @@ typedef struct dxf_trade {
 	 *    trading hours, 1 - extended trading hours).
 	 */
 	dxf_int_t raw_flags;
-	/// Total volume traded for a day
-	dxf_double_t day_volume;
-	/// Total turnover traded for a day
-	dxf_double_t day_turnover;
 	/// Tick direction of the last trade
 	dxf_direction_t direction;
 	/// Last trade was in extended trading hours
@@ -447,9 +445,9 @@ typedef struct dxf_profile {
 	/// Date of the last dividend payment
 	dxf_dayid_t exd_div_date;
 	/// Maximal (high) price in last 52 weeks
-	dxf_double_t _52_high_price;
+	dxf_double_t high_52_week_price;
 	/// Minimal (low) price in last 52 weeks
-	dxf_double_t _52_low_price;
+	dxf_double_t low_52_week_price;
 	/// Shares outstanding. In general, this is the total number of shares issued by this company (only for stocks)
 	dxf_double_t shares;
 	/// The number of shares outstanding that are available to the public for trade. This field always has NaN value.
@@ -580,7 +578,6 @@ typedef struct dxf_time_and_sale {
  * specified CandleSession (#dxf_candle_session_attribute) with further details of aggregation provided by
  * CandleAlignment (#dxf_candle_alignment_attribute)
  */
-/// Candle
 typedef struct {
 	/// Transactional event flags
 	dxf_event_flags_t event_flags;
