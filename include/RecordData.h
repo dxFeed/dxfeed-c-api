@@ -127,8 +127,8 @@ typedef struct dx_profile {
     dxf_int_t div_freq;
     dxf_double_t exd_div_amount;
     dxf_dayid_t exd_div_date;
-    dxf_double_t _52_high_price;
-    dxf_double_t _52_low_price;
+    dxf_double_t high_price_52;
+    dxf_double_t low_price_52;
     dxf_double_t shares;
     dxf_double_t free_float;
     dxf_double_t high_limit_price;

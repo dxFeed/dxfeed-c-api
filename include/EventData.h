@@ -447,9 +447,9 @@ typedef struct dxf_profile {
 	/// Date of the last dividend payment
 	dxf_dayid_t exd_div_date;
 	/// Maximal (high) price in last 52 weeks
-	dxf_double_t _52_high_price;
+	dxf_double_t high_52_week_price;
 	/// Minimal (low) price in last 52 weeks
-	dxf_double_t _52_low_price;
+	dxf_double_t low_52_week_price;
 	/// Shares outstanding. In general, this is the total number of shares issued by this company (only for stocks)
 	dxf_double_t shares;
 	/// The number of shares outstanding that are available to the public for trade. This field always has NaN value.

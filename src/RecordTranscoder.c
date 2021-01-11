@@ -603,8 +603,8 @@ int RECORD_TRANSCODER_NAME(dx_profile_t) (dx_record_transcoder_connection_contex
 		cur_event->div_freq = cur_record->div_freq;
 		cur_event->exd_div_amount = cur_record->exd_div_amount;
 		cur_event->exd_div_date = cur_record->exd_div_date;
-		cur_event->_52_high_price = cur_record->_52_high_price;
-		cur_event->_52_low_price = cur_record->_52_low_price;
+		cur_event->high_52_week_price = cur_record->high_price_52;
+		cur_event->low_52_week_price = cur_record->low_price_52;
 		cur_event->shares = cur_record->shares;
 		cur_event->free_float = cur_record->free_float;
 		cur_event->high_limit_price = cur_record->high_limit_price;

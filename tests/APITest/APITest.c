@@ -115,8 +115,8 @@ void first_listener(int event_type, dxf_const_string_t symbol_name, const dxf_ev
 			wprintf(
 				L"Beta=%f, eps=%f, div freq=%i, exd div amount=%f, exd div date=%i, 52 high price=%f, "
 				L"52 low price=%f, shares=%f, Description=%ls, flags=%i, status_reason=%ls, halt start time=",
-				p[i].beta, p[i].eps, p[i].div_freq, p[i].exd_div_amount, p[i].exd_div_date, p[i]._52_high_price,
-				p[i]._52_low_price, p[i].shares, p[i].description, p[i].raw_flags, p[i].status_reason);
+				p[i].beta, p[i].eps, p[i].div_freq, p[i].exd_div_amount, p[i].exd_div_date, p[i].high_52_week_price,
+				p[i].low_52_week_price, p[i].shares, p[i].description, p[i].raw_flags, p[i].status_reason);
 			print_timestamp(p[i].halt_start_time);
 			wprintf(L", halt end time=");
 			print_timestamp(p[i].halt_end_time);

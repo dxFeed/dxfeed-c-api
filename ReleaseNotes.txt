@@ -1,3 +1,7 @@
+Version 7.0.0
+* [DXFC-175] Extended Trade and Profile events to support additional fields from QD records
+- _52_high_price & _52_low_price Profile fields were renamed to high_52_week_price & low_52_week_price respectively
+
 Version 6.2.0
 * Added missing documentation to EventData.h file
 * [DXFC-205] Fixed a bug with disconnecting (by server side) when removing symbols if no symbols have been added
