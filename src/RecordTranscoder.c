@@ -374,11 +374,11 @@ static int dx_trade_t_transcoder_impl(dx_record_transcoder_connection_context_t*
 		cur_event->size = cur_record->size;
 		if (event_id == dx_eid_trade) {
 			cur_event->tick = cur_record->tick;
-			cur_event->change = cur_record->change;
 		}
-		cur_event->raw_flags = cur_record->flags;
+		cur_event->change = cur_record->change;
 		cur_event->day_volume = cur_record->day_volume;
 		cur_event->day_turnover = cur_record->day_turnover;
+		cur_event->raw_flags = cur_record->flags;
 		cur_event->direction = DX_TRADE_GET_DIR(cur_record);
 		cur_event->is_eth = DX_TRADE_GET_ETH(cur_record);
 		cur_event->scope = (exchange_code == 0 ? dxf_osc_composite : dxf_osc_regional);
@@ -736,15 +736,14 @@ int RECORD_TRANSCODER_NAME(dx_market_maker_t) (dx_record_transcoder_connection_c
 
 dxf_long_t suffix_to_long(dxf_const_string_t suffix)
 {
-	size_t suffix_length = 0;
-	size_t i = 0;
-	dxf_long_t ret = 0;
 	if (suffix == NULL)
 		return 0;
-	suffix_length = dx_string_length(suffix);
+	size_t suffix_length = dx_string_length(suffix);
 	if (suffix_length == 0)
 		return 0;
 
+	size_t i = 0;
+	dxf_long_t ret = 0;
 	if (suffix_length > MAX_SUFFIX_LEN_FOR_INDEX)
 		i = suffix_length - MAX_SUFFIX_LEN_FOR_INDEX;
 	for (; i < suffix_length; i++) {

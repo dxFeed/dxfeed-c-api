@@ -1,6 +1,7 @@
 Version 7.0.0
 * [DXFC-175] Extended Trade and Profile events to support additional fields from QD records
-- _52_high_price & _52_low_price Profile fields were renamed to high_52_week_price & low_52_week_price respectively
+- the `_52_high_price` & `_52_low_price` `Profile` fields were renamed to `high_52_week_price` & `low_52_week_price` respectively
+- the `change` field was added to `TradeETH` event
 
 Version 6.2.0
 * Added missing documentation to EventData.h file

@@ -18,40 +18,41 @@
  */
 
 #ifdef _WIN32
-#include <Windows.h>
+#	include <Windows.h>
 #else
-#include <unistd.h>
-#include <string.h>
-#include <wctype.h>
-#include <stdlib.h>
-#define stricmp strcasecmp
+#	include <stdlib.h>
+#	include <string.h>
+#	include <unistd.h>
+#	include <wctype.h>
+#	define stricmp strcasecmp
 #endif
 
-#include "DXFeed.h"
-#include "DXErrorCodes.h"
+#include <inttypes.h>
 #include <stdio.h>
 #include <time.h>
-#include <inttypes.h>
 
-#define LS(s) LS2(s)
+#include "DXErrorCodes.h"
+#include "DXFeed.h"
+
+#define LS(s)  LS2(s)
 #define LS2(s) L##s
 
 #ifndef true
 
-#define true 1
-#define false 0
+#	define true 1
+#	define false 0
 #endif
 
 // plus the name of the executable
-#define STATIC_PARAMS_COUNT 4
-#define DUMP_PARAM_SHORT_TAG "-d"
-#define DUMP_PARAM_LONG_TAG "--dump"
-#define TOKEN_PARAM_SHORT_TAG "-T"
+#define STATIC_PARAMS_COUNT			4
+#define DUMP_PARAM_SHORT_TAG		"-d"
+#define DUMP_PARAM_LONG_TAG			"--dump"
+#define TOKEN_PARAM_SHORT_TAG		"-T"
 #define SUBSCRIPTION_DATA_PARAM_TAG "-s"
-#define LOG_DATA_TRANSFER_TAG "-p"
-#define TIMEOUT_TAG "-o"
+#define LOG_DATA_TRANSFER_TAG		"-p"
+#define TIMEOUT_TAG					"-o"
 
-//Prevents file names globbing (converting * to all files in the current dir)
+// Prevents file names globbing (converting * to all files in the current dir)
 #ifdef __MINGW64_VERSION_MAJOR
 int _CRT_glob = 0;
 #endif
@@ -93,7 +94,8 @@ void process_last_error() {
 			return;
 		}
 
-		wprintf(L"Error occurred and successfully retrieved:\n"
+		wprintf(
+			L"Error occurred and successfully retrieved:\n"
 			L"error code = %d, description = \"%ls\"\n",
 			error_code, error_descr);
 		return;
@@ -123,7 +125,7 @@ void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
 
 // The example of processing a connection status change
 void on_connection_status_changed(dxf_connection_t connection, dxf_connection_status_t old_status,
-		dxf_connection_status_t new_status, void *user_data) {
+								  dxf_connection_status_t new_status, void* user_data) {
 	switch (new_status) {
 		case dxf_cs_connected:
 			wprintf(L"Connected!\n");
@@ -135,19 +137,19 @@ void on_connection_status_changed(dxf_connection_t connection, dxf_connection_st
 	}
 }
 
-void print_timestamp(dxf_long_t timestamp){
-		wchar_t timefmt[80];
+void print_timestamp(dxf_long_t timestamp) {
+	wchar_t timefmt[80];
 
-		struct tm * timeinfo;
-		time_t tmpint = (time_t)(timestamp /1000);
-		timeinfo = localtime ( &tmpint );
-		wcsftime(timefmt,80, L"%Y%m%d-%H%M%S" ,timeinfo);
-		wprintf(L"%ls",timefmt);
+	struct tm* timeinfo;
+	time_t tmpint = (time_t)(timestamp / 1000);
+	timeinfo = localtime(&tmpint);
+	wcsftime(timefmt, 80, L"%Y%m%d-%H%M%S", timeinfo);
+	wprintf(L"%ls", timefmt);
 }
 /* -------------------------------------------------------------------------- */
 
-void listener(int event_type, dxf_const_string_t symbol_name,
-			const dxf_event_data_t* data, int data_count, void* user_data) {
+void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
+			  void* user_data) {
 	dxf_int_t i = 0;
 	wprintf(L"%ls{symbol=%ls, ", dx_event_type_to_string(event_type), symbol_name);
 
@@ -157,30 +159,24 @@ void listener(int event_type, dxf_const_string_t symbol_name,
 		for (; i < data_count; ++i) {
 			wprintf(L"bidTime=");
 			print_timestamp(quotes[i].bid_time);
-			wprintf(L" bidExchangeCode=%c, bidPrice=%f, bidSize=%i, ",
-					quotes[i].bid_exchange_code,
-					quotes[i].bid_price,
+			wprintf(L" bidExchangeCode=%c, bidPrice=%f, bidSize=%i, ", quotes[i].bid_exchange_code, quotes[i].bid_price,
 					quotes[i].bid_size);
 			wprintf(L"askTime=");
 			print_timestamp(quotes[i].ask_time);
-			wprintf(L" askExchangeCode=%c, askPrice=%f, askSize=%i, scope=%d}\n",
-					quotes[i].ask_exchange_code,
-					quotes[i].ask_price,
-					quotes[i].ask_size, (int)quotes[i].scope);
+			wprintf(L" askExchangeCode=%c, askPrice=%f, askSize=%i, scope=%d}\n", quotes[i].ask_exchange_code,
+					quotes[i].ask_price, quotes[i].ask_size, (int)quotes[i].scope);
 		}
 	}
 
-	if (event_type == DXF_ET_ORDER){
+	if (event_type == DXF_ET_ORDER) {
 		dxf_order_t* orders = (dxf_order_t*)data;
 
 		for (; i < data_count; ++i) {
-			wprintf(L"index=0x%llX, side=%i, scope=%i, time=",
-					orders[i].index, orders[i].side, orders[i].scope);
-					print_timestamp(orders[i].time);
-			wprintf(L", exchange code=%c, market maker=%ls, price=%f, size=%d",
-					orders[i].exchange_code, orders[i].market_maker, orders[i].price, orders[i].size);
-			if (wcslen(orders[i].source) > 0)
-				wprintf(L", source=%ls", orders[i].source);
+			wprintf(L"index=0x%llX, side=%i, scope=%i, time=", orders[i].index, orders[i].side, orders[i].scope);
+			print_timestamp(orders[i].time);
+			wprintf(L", exchange code=%c, market maker=%ls, price=%f, size=%d", orders[i].exchange_code,
+					orders[i].market_maker, orders[i].price, orders[i].size);
+			if (wcslen(orders[i].source) > 0) wprintf(L", source=%ls", orders[i].source);
 			wprintf(L", count=%d}\n", orders[i].count);
 		}
 	}
@@ -192,7 +188,7 @@ void listener(int event_type, dxf_const_string_t symbol_name,
 			print_timestamp(trades[i].time);
 			wprintf(L", exchangeCode=%c, price=%f, size=%i, tick=%i, change=%f, day volume=%.0f, scope=%d}\n",
 					trades[i].exchange_code, trades[i].price, trades[i].size, trades[i].tick, trades[i].change,
-				trades[i].day_volume, (int)trades[i].scope);
+					trades[i].day_volume, (int)trades[i].scope);
 		}
 	}
 
@@ -200,7 +196,8 @@ void listener(int event_type, dxf_const_string_t symbol_name,
 		dxf_summary_t* s = (dxf_summary_t*)data;
 
 		for (; i < data_count; ++i) {
-			wprintf(L"day id=%d, day open price=%f, day high price=%f, day low price=%f, day close price=%f, "
+			wprintf(
+				L"day id=%d, day open price=%f, day high price=%f, day low price=%f, day close price=%f, "
 				L"prev day id=%d, prev day close price=%f, open interest=%i, flags=0x%X, exchange=%c, "
 				L"day close price type=%i, prev day close price type=%i, scope=%d}\n",
 				s[i].day_id, s[i].day_open_price, s[i].day_high_price, s[i].day_low_price, s[i].day_close_price,
@@ -213,7 +210,8 @@ void listener(int event_type, dxf_const_string_t symbol_name,
 		dxf_profile_t* p = (dxf_profile_t*)data;
 
 		for (; i < data_count; ++i) {
-			wprintf(L"Beta=%f, eps=%f, div freq=%i, exd div amount=%f, exd div date=%i, 52 high price=%f, "
+			wprintf(
+				L"Beta=%f, eps=%f, div freq=%i, exd div amount=%f, exd div date=%i, 52 high price=%f, "
 				L"52 low price=%f, shares=%f, Description=%ls, flags=%i, status_reason=%ls, halt start time=",
 				p[i].beta, p[i].eps, p[i].div_freq, p[i].exd_div_amount, p[i].exd_div_date, p[i].high_52_week_price,
 				p[i].low_52_week_price, p[i].shares, p[i].description, p[i].raw_flags, p[i].status_reason);
@@ -228,16 +226,15 @@ void listener(int event_type, dxf_const_string_t symbol_name,
 		dxf_time_and_sale_t* tns = (dxf_time_and_sale_t*)data;
 
 		for (; i < data_count; ++i) {
-			wprintf(L"event id=%"LS(PRId64)L", time=", tns[i].index);
+			wprintf(L"event id=%" LS(PRId64) L", time=", tns[i].index);
 			print_timestamp(tns[i].time);
-			wprintf(L", exchange code=%c, price=%f, size=%i, bid price=%f, ask price=%f, "
-				L"exchange sale conditions=\'%ls\', is ETH trade=%ls, type=%i, buyer=\'%ls\', seller=\'%ls\', scope=%d}\n",
-				tns[i].exchange_code, tns[i].price, tns[i].size,
-				tns[i].bid_price, tns[i].ask_price, tns[i].exchange_sale_conditions,
-				tns[i].is_eth_trade ? L"True" : L"False", tns[i].type,
-				tns[i].buyer ? tns[i].buyer : L"<UNKNOWN>", 
-				tns[i].seller ? tns[i].seller : L"<UNKNOWN>",
-				tns[i].scope);
+			wprintf(
+				L", exchange code=%c, price=%f, size=%i, bid price=%f, ask price=%f, "
+				L"exchange sale conditions=\'%ls\', is ETH trade=%ls, type=%i, buyer=\'%ls\', seller=\'%ls\', "
+				L"scope=%d}\n",
+				tns[i].exchange_code, tns[i].price, tns[i].size, tns[i].bid_price, tns[i].ask_price,
+				tns[i].exchange_sale_conditions, tns[i].is_eth_trade ? L"True" : L"False", tns[i].type,
+				tns[i].buyer ? tns[i].buyer : L"<UNKNOWN>", tns[i].seller ? tns[i].seller : L"<UNKNOWN>", tns[i].scope);
 		}
 	}
 
@@ -246,9 +243,9 @@ void listener(int event_type, dxf_const_string_t symbol_name,
 
 		for (; i < data_count; ++i) {
 			print_timestamp(trades[i].time);
-			wprintf(L", exchangeCode=%c, flags=%d, price=%f, size=%i, day volume=%.0f, scope=%d}\n",
-				trades[i].exchange_code, trades[i].raw_flags, trades[i].price, trades[i].size, trades[i].day_volume,
-				(int)trades[i].scope);
+			wprintf(L", exchangeCode=%c, flags=%d, price=%f, size=%i, change=%f, day volume=%.0f, scope=%d}\n",
+					trades[i].exchange_code, trades[i].raw_flags, trades[i].price, trades[i].size, trades[i].change,
+					trades[i].day_volume, (int)trades[i].scope);
 		}
 	}
 
@@ -256,14 +253,13 @@ void listener(int event_type, dxf_const_string_t symbol_name,
 		dxf_order_t* orders = (dxf_order_t*)data;
 
 		for (; i < data_count; ++i) {
-			wprintf(L"index=0x%llX, side=%i, scope=%i, time=",
-				orders[i].index, orders[i].side, orders[i].scope);
+			wprintf(L"index=0x%llX, side=%i, scope=%i, time=", orders[i].index, orders[i].side, orders[i].scope);
 			print_timestamp(orders[i].time);
-			wprintf(L", sequence=%i, exchange code=%c, price=%f, size=%d, source=%ls, "
+			wprintf(
+				L", sequence=%i, exchange code=%c, price=%f, size=%d, source=%ls, "
 				L"count=%i, flags=%i, spread symbol=%ls}\n",
 				orders[i].sequence, orders[i].exchange_code, orders[i].price, orders[i].size,
-				wcslen(orders[i].source) > 0 ? orders[i].source : L"",
-				orders[i].count, orders[i].event_flags,
+				wcslen(orders[i].source) > 0 ? orders[i].source : L"", orders[i].count, orders[i].event_flags,
 				wcslen(orders[i].spread_symbol) > 0 ? orders[i].spread_symbol : L"");
 		}
 	}
@@ -287,10 +283,10 @@ void listener(int event_type, dxf_const_string_t symbol_name,
 		for (; i < data_count; ++i) {
 			wprintf(L"theo time=");
 			print_timestamp(tp[i].time);
-			wprintf(L", theo price=%f, theo underlying price=%f, theo delta=%f, "
+			wprintf(
+				L", theo price=%f, theo underlying price=%f, theo delta=%f, "
 				L"theo gamma=%f, theo dividend=%f, theo_interest=%f}\n",
-				tp[i].price, tp[i].underlying_price, tp[i].delta,
-				tp[i].gamma, tp[i].dividend, tp[i].interest);
+				tp[i].price, tp[i].underlying_price, tp[i].delta, tp[i].gamma, tp[i].dividend, tp[i].interest);
 		}
 	}
 
@@ -298,8 +294,8 @@ void listener(int event_type, dxf_const_string_t symbol_name,
 		dxf_underlying_t* u = (dxf_underlying_t*)data;
 
 		for (; i < data_count; ++i) {
-			wprintf(L"volatility=%f, front volatility=%f, back volatility=%f, put call ratio=%f}\n",
-				u[i].volatility, u[i].front_volatility, u[i].back_volatility, u[i].put_call_ratio);
+			wprintf(L"volatility=%f, front volatility=%f, back volatility=%f, put call ratio=%f}\n", u[i].volatility,
+					u[i].front_volatility, u[i].back_volatility, u[i].put_call_ratio);
 		}
 	}
 
@@ -318,8 +314,7 @@ void listener(int event_type, dxf_const_string_t symbol_name,
 		dxf_configuration_t* cnf = (dxf_configuration_t*)data;
 
 		for (; i < data_count; ++i) {
-			wprintf(L"object=%ls}\n",
-				cnf[i].object);
+			wprintf(L"object=%ls}\n", cnf[i].object);
 		}
 	}
 }
@@ -340,7 +335,7 @@ dxf_string_t ansi_to_unicode(const char* ansi_str, size_t len) {
 	return wide_str;
 #else /* _WIN32 */
 	dxf_string_t wide_str = NULL;
-	size_t wide_size = mbstowcs(NULL, ansi_str, len); // len is ignored
+	size_t wide_size = mbstowcs(NULL, ansi_str, len);  // len is ignored
 
 	if (wide_size > 0 && wide_size != (size_t)-1) {
 		wide_str = calloc(len + 1, sizeof(dxf_char_t));
@@ -358,36 +353,32 @@ typedef struct {
 	const char* name;
 } event_type_data_t;
 
-static event_type_data_t types_data[] = {
-	{ DXF_ET_TRADE, "TRADE" },
-	{ DXF_ET_QUOTE, "QUOTE" },
-	{ DXF_ET_SUMMARY, "SUMMARY" },
-	{ DXF_ET_PROFILE, "PROFILE" },
-	{ DXF_ET_ORDER, "ORDER" },
-	{ DXF_ET_TIME_AND_SALE, "TIME_AND_SALE" },
-	/* The Candle event is not supported in this sample
-	{ DXF_ET_CANDLE, "CANDLE" },*/
-	{ DXF_ET_TRADE_ETH, "TRADE_ETH" },
-	{ DXF_ET_SPREAD_ORDER, "SPREAD_ORDER" },
-	{ DXF_ET_GREEKS, "GREEKS" },
-	{ DXF_ET_THEO_PRICE, "THEO_PRICE" },
-	{ DXF_ET_UNDERLYING, "UNDERLYING" },
-	{ DXF_ET_SERIES, "SERIES" },
-	{ DXF_ET_CONFIGURATION, "CONFIGURATION" }
-};
+static event_type_data_t types_data[] = {{DXF_ET_TRADE, "TRADE"},
+										 {DXF_ET_QUOTE, "QUOTE"},
+										 {DXF_ET_SUMMARY, "SUMMARY"},
+										 {DXF_ET_PROFILE, "PROFILE"},
+										 {DXF_ET_ORDER, "ORDER"},
+										 {DXF_ET_TIME_AND_SALE, "TIME_AND_SALE"},
+										 /* The Candle event is not supported in this sample
+										 { DXF_ET_CANDLE, "CANDLE" },*/
+										 {DXF_ET_TRADE_ETH, "TRADE_ETH"},
+										 {DXF_ET_SPREAD_ORDER, "SPREAD_ORDER"},
+										 {DXF_ET_GREEKS, "GREEKS"},
+										 {DXF_ET_THEO_PRICE, "THEO_PRICE"},
+										 {DXF_ET_UNDERLYING, "UNDERLYING"},
+										 {DXF_ET_SERIES, "SERIES"},
+										 {DXF_ET_CONFIGURATION, "CONFIGURATION"}};
 
 static const int types_count = sizeof(types_data) / sizeof(types_data[0]);
 
 int get_next_substring(OUT char** substring_start, OUT size_t* substring_length) {
 	char* string = *substring_start;
 	char* sep_pos;
-	if (strlen(string) == 0)
-		return false;
-	//remove separators from begin of string
+	if (strlen(string) == 0) return false;
+	// remove separators from begin of string
 	while ((sep_pos = strchr(string, ',')) == string) {
 		string++;
-		if (strlen(string) == 0)
-			return false;
+		if (strlen(string) == 0) return false;
 	}
 	if (sep_pos == NULL)
 		*substring_length = strlen(string);
@@ -422,8 +413,7 @@ int parse_event_types(char* types_string, OUT int* types_bitmask) {
 				is_found = true;
 			}
 		}
-		if (!is_found)
-			printf("Invalid type parameter begining with:%s\n", next_string);
+		if (!is_found) printf("Invalid type parameter begining with:%s\n", next_string);
 		next_string += next_len;
 	}
 	return true;
@@ -431,8 +421,7 @@ int parse_event_types(char* types_string, OUT int* types_bitmask) {
 
 void free_symbols(dxf_string_t* symbols, int symbol_count) {
 	int i;
-	if (symbols == NULL)
-		return;
+	if (symbols == NULL) return;
 	for (i = 0; i < symbol_count; i++) {
 		free(symbols[i]);
 	}
@@ -502,7 +491,7 @@ dx_event_subscr_flag subscr_data_to_flags(char* subscr_data) {
 	return dx_esf_default;
 }
 
-int atoi2 (char *str, int *result) {
+int atoi2(char* str, int* result) {
 	if (str == NULL || str[0] == '\0' || result == NULL) {
 		return false;
 	}
@@ -526,7 +515,7 @@ int atoi2 (char *str, int *result) {
 
 /* -------------------------------------------------------------------------- */
 
-int main (int argc, char* argv[]) {
+int main(int argc, char* argv[]) {
 	dxf_connection_t connection;
 	dxf_subscription_t subscription;
 	int event_type;
@@ -535,43 +524,48 @@ int main (int argc, char* argv[]) {
 	char* dxfeed_host = NULL;
 	dxf_string_t dxfeed_host_u = NULL;
 
-	if ( argc < STATIC_PARAMS_COUNT ) {
-		printf("DXFeed command line sample.\n"
-				"Usage: CommandLineSample <server address> <event type> <symbol> "
-				"[" DUMP_PARAM_LONG_TAG " | " DUMP_PARAM_SHORT_TAG " <filename>] [" TOKEN_PARAM_SHORT_TAG " <token>] "
-				"[" SUBSCRIPTION_DATA_PARAM_TAG " <subscr_data>] [" LOG_DATA_TRANSFER_TAG "] [" TIMEOUT_TAG " <timeout>]\n"
-				"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
-				"                     If you want to use file instead of server data just\n"
-				"                     write there path to file e.g. path\\to\\raw.bin\n"
-				"  <event type>     - The event type, any of the following: TRADE, QUOTE,\n"
-				"                     SUMMARY, PROFILE, ORDER, TIME_AND_SALE, TRADE_ETH,\n"
-				"                     SPREAD_ORDER, GREEKS, THEO_PRICE, UNDERLYING, SERIES,\n"
-				"                     CONFIGURATION\n"
-				"  <symbol>         - The trade symbols, e.g. C, MSFT, YHOO, IBM. All symbols - *\n"
-				"  " DUMP_PARAM_LONG_TAG " | " DUMP_PARAM_SHORT_TAG " <filename> - The filename to dump the raw data\n"
-				"  " TOKEN_PARAM_SHORT_TAG " <token>             - The authorization token\n"
-				"  " SUBSCRIPTION_DATA_PARAM_TAG " <subscr_data>       - The subscription data: TICKER, STREAM or HISTORY\n"
-				"  " LOG_DATA_TRANSFER_TAG "                     - Enables the data transfer logging\n"
-				"  " TIMEOUT_TAG " <timeout>           - Sets the program timeout in seconds (default = 604800, i.e a week)\n"
-				"Example: CommandLineSample.exe demo.dxfeed.com:7300 TRADE,ORDER MSFT,IBM\n"
-				);
+	if (argc < STATIC_PARAMS_COUNT) {
+		printf(
+			"DXFeed command line sample.\n"
+			"Usage: CommandLineSample <server address> <event type> <symbol> "
+			"[" DUMP_PARAM_LONG_TAG " | " DUMP_PARAM_SHORT_TAG " <filename>] [" TOKEN_PARAM_SHORT_TAG
+			" <token>] "
+			"[" SUBSCRIPTION_DATA_PARAM_TAG " <subscr_data>] [" LOG_DATA_TRANSFER_TAG "] [" TIMEOUT_TAG
+			" <timeout>]\n"
+			"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
+			"                     If you want to use file instead of server data just\n"
+			"                     write there path to file e.g. path\\to\\raw.bin\n"
+			"  <event type>     - The event type, any of the following: TRADE, QUOTE,\n"
+			"                     SUMMARY, PROFILE, ORDER, TIME_AND_SALE, TRADE_ETH,\n"
+			"                     SPREAD_ORDER, GREEKS, THEO_PRICE, UNDERLYING, SERIES,\n"
+			"                     CONFIGURATION\n"
+			"  <symbol>         - The trade symbols, e.g. C, MSFT, YHOO, IBM. All symbols - *\n"
+			"  " DUMP_PARAM_LONG_TAG " | " DUMP_PARAM_SHORT_TAG
+			" <filename> - The filename to dump the raw data\n"
+			"  " TOKEN_PARAM_SHORT_TAG
+			" <token>             - The authorization token\n"
+			"  " SUBSCRIPTION_DATA_PARAM_TAG
+			" <subscr_data>       - The subscription data: TICKER, STREAM or HISTORY\n"
+			"  " LOG_DATA_TRANSFER_TAG
+			"                     - Enables the data transfer logging\n"
+			"  " TIMEOUT_TAG
+			" <timeout>           - Sets the program timeout in seconds (default = 604800, i.e a week)\n"
+			"Example: CommandLineSample.exe demo.dxfeed.com:7300 TRADE,ORDER MSFT,IBM\n");
 
 		return 0;
 	}
 
 	dxfeed_host = argv[1];
 
-	if (!parse_event_types(argv[2], &event_type))
-		return -1;
+	if (!parse_event_types(argv[2], &event_type)) return -1;
 
-	if (!parse_symbols(argv[3], &symbols, &symbol_count))
-		return -1;
+	if (!parse_symbols(argv[3], &symbols, &symbol_count)) return -1;
 
 	char* dump_file_name = NULL;
 	char* token = NULL;
 	char* subscr_data = NULL;
 	int log_data_transfer_flag = false;
-	int program_timeout = 604800; // a week
+	int program_timeout = 604800;  // a week
 
 	if (argc > STATIC_PARAMS_COUNT) {
 		int dump_filename_is_set = false;
@@ -581,7 +575,7 @@ int main (int argc, char* argv[]) {
 
 		for (int i = STATIC_PARAMS_COUNT; i < argc; i++) {
 			if (dump_filename_is_set == false &&
-					(strcmp(argv[i], DUMP_PARAM_SHORT_TAG) == 0 || strcmp(argv[i], DUMP_PARAM_LONG_TAG) == 0)) {
+				(strcmp(argv[i], DUMP_PARAM_SHORT_TAG) == 0 || strcmp(argv[i], DUMP_PARAM_LONG_TAG) == 0)) {
 				if (i + 1 == argc) {
 					wprintf(L"The dump argument error\n");
 
@@ -700,7 +694,6 @@ int main (int argc, char* argv[]) {
 #endif
 	}
 
-
 	wprintf(L"Unsubscribing...\n");
 
 	if (!dxf_close_subscription(subscription)) {
@@ -709,9 +702,7 @@ int main (int argc, char* argv[]) {
 		return -1;
 	}
 
-
 	wprintf(L"Disconnecting from host...\n");
-
 
 	if (!dxf_close_connection(connection)) {
 		process_last_error();

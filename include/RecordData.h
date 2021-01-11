@@ -84,9 +84,9 @@ typedef struct dx_trade {
     dxf_int_t size;
     dxf_int_t tick;
     dxf_double_t change;
-    dxf_int_t flags;
     dxf_double_t day_volume;
     dxf_double_t day_turnover;
+	dxf_int_t flags;
 } dx_trade_t;
 
 /// Trade Eth

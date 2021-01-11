@@ -176,9 +176,9 @@ FIELD_STDOPS_BODIES(dx_trade_t, price, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_trade_t, size, dxf_int_t)
 FIELD_STDOPS_BODIES(dx_trade_t, tick, dxf_int_t)
 FIELD_STDOPS_BODIES(dx_trade_t, change, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_trade_t, flags, dxf_int_t)
 FIELD_STDOPS_BODIES(dx_trade_t, day_volume, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_trade_t, day_turnover, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_trade_t, flags, dxf_int_t)
 
 /* -------------------------------------------------------------------------- */
 /*

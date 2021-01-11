@@ -109,9 +109,9 @@ DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_t, price)
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_t, size)
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_t, tick)
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_t, change)
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_t, flags)
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_t, day_volume)
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_t, day_turnover)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_trade_t, flags)
 
 /* -------------------------------------------------------------------------- */
 /*
