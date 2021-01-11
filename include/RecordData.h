@@ -84,6 +84,7 @@ typedef struct dx_trade {
     dxf_int_t size;
     dxf_int_t tick;
     dxf_double_t change;
+	dxf_dayid_t day_id;
     dxf_double_t day_volume;
     dxf_double_t day_turnover;
 	dxf_int_t flags;

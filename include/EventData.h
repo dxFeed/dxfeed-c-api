@@ -255,6 +255,9 @@ typedef struct dxf_trade {
 	 * Value equals price minus dxf_summary_t#prev_day_close_price
 	 */
 	dxf_double_t change;
+	/// Identifier of the day that this `trade` or `trade_eth` represents. Identifier of the day is the number of days passed since
+	/// January 1, 1970.
+	dxf_dayid_t day_id;
 	/// Total volume traded for a day
 	dxf_double_t day_volume;
 	/// Total turnover traded for a day

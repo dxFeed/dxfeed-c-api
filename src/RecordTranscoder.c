@@ -376,6 +376,7 @@ static int dx_trade_t_transcoder_impl(dx_record_transcoder_connection_context_t*
 			cur_event->tick = cur_record->tick;
 		}
 		cur_event->change = cur_record->change;
+		cur_event->day_id = cur_record->day_id;
 		cur_event->day_volume = cur_record->day_volume;
 		cur_event->day_turnover = cur_record->day_turnover;
 		cur_event->raw_flags = cur_record->flags;
@@ -561,7 +562,7 @@ int RECORD_TRANSCODER_NAME(dx_summary_t) (dx_record_transcoder_connection_contex
 		dx_summary_t* cur_record = record_buffer + i;
 		dxf_summary_t* cur_event = event_buffer + i;
 
-		cur_event->day_id = cur_record->day_id;	
+		cur_event->day_id = cur_record->day_id;
 		cur_event->day_open_price = cur_record->day_open_price;
 		cur_event->day_high_price = cur_record->day_high_price;
 		cur_event->day_low_price = cur_record->day_low_price;

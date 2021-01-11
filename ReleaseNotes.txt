@@ -1,8 +1,11 @@
 Version 7.0.0
-* [DXFC-175] [Breaking changes] Extended Trade and Profile events to support additional fields from QD records
+* [DXFC-175] [Breaking changes] Extended the Trade and Profile events to support additional fields from QD records
   - the `_52_high_price` & `_52_low_price` `Profile` fields were renamed to `high_52_week_price` & `low_52_week_price`
     respectively
   - the `change` field was added to `TradeETH` event
+* [DXFC-207] [Breaking changes] Extended the Trade and TradeETH events with new field dayId
+  - the `day_id` field was added to dx_trade_t, dx_trade_eth_t and dxf_trade_t struct. `day_id` - identifier of the day
+    that `trade` or `trade_eth` represents. Identifier of the day is the number of days passed since January 1, 1970.
 
 Version 6.2.0
 * Added missing documentation to EventData.h file

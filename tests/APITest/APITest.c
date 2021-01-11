@@ -91,9 +91,9 @@ void first_listener(int event_type, dxf_const_string_t symbol_name, const dxf_ev
 		dxf_trade_t* trades = (dxf_trade_t*)data;
 
 		for (; i < data_count; ++i) {
-			wprintf(L"time=%i, exchange code=%c, price=%f, size=%i, tick=%d, change=%f, day volume=%f, scope=%d\n",
+			wprintf(L"time=%i, exchange code=%c, price=%f, size=%i, tick=%d, change=%f, day id=%d, day volume=%f, scope=%d\n",
 					(int)trades[i].time, trades[i].exchange_code, trades[i].price, (int)trades[i].size, trades[i].tick,
-					trades[i].change, trades[i].day_volume, (int)trades[i].scope);
+					trades[i].change, trades[i].day_id, trades[i].day_volume, (int)trades[i].scope);
 		}
 	}
 
