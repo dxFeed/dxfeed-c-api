@@ -286,6 +286,9 @@ typedef struct dxf_trade {
 	dxf_order_scope_t scope;
 } dxf_trade_t;
 
+/// TradeETH
+typedef dxf_trade_t dxf_trade_eth_t;
+
 ///@}
 
 /**
@@ -656,9 +659,7 @@ typedef struct dxf_greeks {
  * @{
  */
 
-/* TheoPrice ---------------------------------------------------------------- */
-/* Event and record are the same */
-/// Theo price
+/// Theo price. Event and record are the same
 typedef dx_theo_price_t dxf_theo_price_t;
 
 ///@}
@@ -668,9 +669,7 @@ typedef dx_theo_price_t dxf_theo_price_t;
  * @{
  */
 
-/* Underlying --------------------------------------------------------------- */
-/* Event and record are the same */
-/// Underlying
+/// Underlying. Event and record are the same
 typedef dx_underlying_t dxf_underlying_t;
 
 ///@}
@@ -701,6 +700,12 @@ typedef struct dxf_series {
 	dxf_dayid_t expiration;
 	/// Implied volatility index for this series based on VIX methodology
 	dxf_double_t volatility;
+	/// Call options traded volume for a day
+	dxf_double_t call_volume;
+	/// Put options traded volume for a day
+	dxf_double_t put_volume;
+	/// Options traded volume  for a day
+	dxf_double_t option_volume;
 	/// Ratio of put options traded volume to call options traded volume for a day
 	dxf_double_t put_call_ratio;
 	/// Implied forward price for this option series

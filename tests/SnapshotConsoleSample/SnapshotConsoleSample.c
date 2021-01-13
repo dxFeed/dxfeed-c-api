@@ -285,10 +285,11 @@ void listener (const dxf_snapshot_data_ptr_t snapshot_data, void *user_data) {
 			}
 			wprintf(L"   {index=%"LS(PRId64)L", time=", srs.index);
 			print_timestamp(srs.time);
-			wprintf(L", sequence=%i, expiration=%d, volatility=%f, put call ratio=%f, "
-			        L"forward_price=%f, dividend=%f, interest=%f, index=0x%"LS(PRIX64)L"}\n",
-			        srs.sequence, srs.expiration, srs.volatility, srs.put_call_ratio,
-			        srs.forward_price, srs.dividend, srs.interest, srs.index);
+			wprintf(L", sequence=%i, expiration=%d, volatility=%f, call volume=%f, put volume=%f, "
+				L"option volume=%f, put call ratio=%f, forward_price=%f, dividend=%f, interest=%f, "
+				L"index=0x%"LS(PRIX64)L"}\n",
+				srs.sequence, srs.expiration, srs.volatility, srs.call_volume, srs.put_volume, srs.option_volume,
+				srs.put_call_ratio, srs.forward_price, srs.dividend, srs.interest, srs.index);
 		}
 	}
 }

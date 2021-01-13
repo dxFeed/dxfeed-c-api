@@ -20,11 +20,85 @@
 #pragma once
 
 #include <EventData.h>
+#include <fmt/format.h>
+
 #include <string>
 #include <utility>
-#include <fmt/format.h>
-#include "Utils.hpp"
+
 #include "StringConverter.hpp"
+#include "Utils.hpp"
+
+/**
+ * @brief Quote.
+ *
+ * @details Quote event is a snapshot of the best bid and ask prices, and other fields that change with each quote. It
+ * represents the most recent information that is available about the best quote on the market at any given moment of
+ * time.
+ */
+struct Quote final {
+	std::string symbol{};
+	/// Time of the last bid or ask change
+	dxf_long_t time{};
+	/// Sequence number of this quote to distinguish quotes that have the same #time.
+	dxf_int_t sequence{};
+	/// Microseconds and nanoseconds part of time of the last bid or ask change
+	dxf_int_t time_nanos{};
+	/// Time of the last bid change
+	dxf_long_t bid_time{};
+	/// Bid exchange code
+	dxf_char_t bid_exchange_code{};
+	/// Bid price
+	dxf_double_t bid_price{};
+	/// Bid size
+	dxf_int_t bid_size{};
+	/// Time of the last ask change
+	dxf_long_t ask_time{};
+	/// Ask exchange code
+	dxf_char_t ask_exchange_code{};
+	/// Ask price
+	dxf_double_t ask_price{};
+	/// Ask size
+	dxf_int_t ask_size{};
+	/**
+	 * Scope of this quote.
+	 *
+	 * Possible values: #dxf_osc_composite (Quote events) , #dxf_osc_regional (Quote& events)
+	 */
+	dxf_order_scope_t scope{};
+
+	explicit Quote(std::string symbol, dxf_quote_t quote)
+		: symbol{std::move(symbol)},
+		  time{quote.time},
+		  sequence{quote.sequence},
+		  time_nanos{quote.time_nanos},
+		  bid_time{quote.bid_time},
+		  bid_exchange_code{quote.bid_exchange_code},
+		  bid_price{quote.bid_price},
+		  bid_size{quote.bid_size},
+		  ask_time{quote.ask_time},
+		  ask_exchange_code{quote.ask_exchange_code},
+		  ask_price{quote.ask_price},
+		  ask_size{quote.ask_size},
+		  scope{quote.scope} {}
+
+	std::string toString() const {
+		return fmt::format(
+			"Quote{{symbol = {}, time(UTC) = {}, sequence = {}, time_nanos = {}, "
+			"bid_time(UTC) = {}, bid_exchange_code = {}, bid_price = {}, bid_size = {}, "
+			"ask_time(UTC) = {}, ask_exchange_code = {}, ask_price = {}, ask_size = {}, scope = {}}}",
+			symbol, formatTimestampWithMillis(time), sequence, time_nanos, formatTimestampWithMillis(bid_time),
+			StringConverter::toString(std::wstring() + bid_exchange_code), bid_price, bid_size,
+			formatTimestampWithMillis(ask_time), StringConverter::toString(std::wstring() + ask_exchange_code),
+			ask_price, ask_size, scope);
+	}
+
+	template <typename OutStream>
+	friend OutStream &operator<<(OutStream &os, const Quote &quote) {
+		os << quote.toString();
+
+		return os;
+	}
+};
 
 struct Greeks final {
 	std::string symbol;
@@ -41,19 +115,27 @@ struct Greeks final {
 
 	Greeks() = default;
 
-	explicit Greeks(std::string symbol, dxf_greeks_t greeks) :
-			symbol{std::move(symbol)}, event_flags{greeks.event_flags}, index{greeks.index}, time{greeks.time},
-			price{greeks.price},
-			volatility{greeks.volatility}, delta{greeks.delta}, gamma{greeks.gamma}, theta{greeks.theta},
-			rho{greeks.rho}, vega{greeks.vega} {}
+	explicit Greeks(std::string symbol, dxf_greeks_t greeks)
+		: symbol{std::move(symbol)},
+		  event_flags{greeks.event_flags},
+		  index{greeks.index},
+		  time{greeks.time},
+		  price{greeks.price},
+		  volatility{greeks.volatility},
+		  delta{greeks.delta},
+		  gamma{greeks.gamma},
+		  theta{greeks.theta},
+		  rho{greeks.rho},
+		  vega{greeks.vega} {}
 
 	std::string toString() const {
 		return fmt::format(
-				"Greeks{{symbol = {}, time = {}, index = {}, price = {}, delta = {}, gamma = {}, rho = {}, vega = {}, index(hex) = 0x{:x}}}",
-				symbol, formatTimestampWithMillis(time), index, price, delta, gamma, rho, vega, index);
+			"Greeks{{symbol = {}, time = {}, index = {}, price = {}, delta = {}, gamma = {}, rho = {}, vega = {}, "
+			"index(hex) = 0x{:x}}}",
+			symbol, formatTimestampWithMillis(time), index, price, delta, gamma, rho, vega, index);
 	}
 
-	template<typename OutStream>
+	template <typename OutStream>
 	friend OutStream &operator<<(OutStream &os, const Greeks &greeks) {
 		os << greeks.toString();
 
@@ -70,74 +152,25 @@ struct Underlying final {
 
 	Underlying() = default;
 
-	explicit Underlying(std::string symbol, dxf_underlying_t underlying) :
-			symbol{std::move(symbol)}, volatility{underlying.volatility}, front_volatility{underlying.front_volatility},
-			back_volatility{underlying.back_volatility}, put_call_ratio{underlying.put_call_ratio} {}
+	explicit Underlying(std::string symbol, dxf_underlying_t underlying)
+		: symbol{std::move(symbol)},
+		  volatility{underlying.volatility},
+		  front_volatility{underlying.front_volatility},
+		  back_volatility{underlying.back_volatility},
+		  put_call_ratio{underlying.put_call_ratio} {}
 
 	std::string toString() const {
 		return fmt::format(
-				"Underlying{{symbol = {}, volatility = {}, front_volatility = {}, back_volatility = {}, put_call_ratio = {}}}",
-				symbol, volatility, front_volatility, back_volatility, put_call_ratio);
+			"Underlying{{symbol = {}, volatility = {}, front_volatility = {}, back_volatility = {}, put_call_ratio = "
+			"{}}}",
+			symbol, volatility, front_volatility, back_volatility, put_call_ratio);
 	}
 
-	template<typename OutStream>
+	template <typename OutStream>
 	friend OutStream &operator<<(OutStream &os, const Underlying &underlying) {
 		os << underlying.toString();
 
 		return os;
 	}
 };
-
-struct Quote final {
-	std::string symbol;
-	dxf_long_t time;
-	dxf_int_t sequence;
-	dxf_int_t time_nanos;
-	dxf_long_t bid_time;
-	dxf_char_t bid_exchange_code;
-	dxf_double_t bid_price;
-	dxf_int_t bid_size;
-	dxf_long_t ask_time;
-	dxf_char_t ask_exchange_code;
-	dxf_double_t ask_price;
-	dxf_int_t ask_size;
-	dxf_order_scope_t scope;
-
-	Quote() = default;
-
-	explicit Quote(std::string symbol, dxf_quote_t quote) :
-			symbol{std::move(symbol)},
-			time{quote.time},
-			sequence{quote.sequence},
-			time_nanos{quote.time_nanos},
-			bid_time{quote.bid_time},
-			bid_exchange_code{quote.bid_exchange_code},
-			bid_price{quote.bid_price},
-			bid_size{quote.bid_size},
-			ask_time{quote.ask_time},
-			ask_exchange_code{quote.ask_exchange_code},
-			ask_price{quote.ask_price},
-			ask_size{quote.ask_size},
-			scope{quote.scope} {}
-
-	std::string toString() const {
-		return fmt::format(
-				"Quote{{symbol = {}, time(UTC) = {}, sequence = {}, time_nanos = {}, "
-				"bid_time(UTC) = {}, bid_exchange_code = {}, bid_price = {}, bid_size = {}, "
-				"ask_time(UTC) = {}, ask_exchange_code = {}, ask_price = {}, ask_size = {}, scope = {}}}",
-				symbol, formatTimestampWithMillis(time), sequence, time_nanos,
-				formatTimestampWithMillis(bid_time), StringConverter::toString(std::wstring() + bid_exchange_code), bid_price, bid_size,
-				formatTimestampWithMillis(ask_time), StringConverter::toString(std::wstring() + ask_exchange_code), ask_price, ask_size,
-				scope
-		);
-	}
-
-	template<typename OutStream>
-	friend OutStream &operator<<(OutStream &os, const Quote &quote) {
-		os << quote.toString();
-
-		return os;
-	}
-};
-
 

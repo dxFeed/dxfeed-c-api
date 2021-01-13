@@ -1014,9 +1014,8 @@ int RECORD_TRANSCODER_NAME(dx_underlying_t) (dx_record_transcoder_connection_con
 
 /* -------------------------------------------------------------------------- */
 
-int RECORD_TRANSCODER_NAME(dx_series_t) (dx_record_transcoder_connection_context_t* context,
-										const dx_record_params_t* record_params,
-										const dxf_event_params_t* event_params,
+int RECORD_TRANSCODER_NAME(dx_series_t)(dx_record_transcoder_connection_context_t* context,
+										const dx_record_params_t* record_params, const dxf_event_params_t* event_params,
 										void* record_buff, int record_count) {
 	dxf_series_t* event_buffer = (dxf_series_t*)dx_get_event_data_buffer(context, dx_eid_series, record_count);
 
@@ -1035,6 +1034,11 @@ int RECORD_TRANSCODER_NAME(dx_series_t) (dx_record_transcoder_connection_context
 		cur_event->sequence = DX_SEQUENCE(cur_record);
 		cur_event->expiration = cur_record->expiration;
 		cur_event->volatility = cur_record->volatility;
+		cur_event->call_volume = cur_event->call_volume;
+		cur_event->put_volume = cur_event->put_volume;
+		cur_event->option_volume = isnan(cur_event->put_volume)
+			? cur_event->call_volume
+			: isnan(cur_event->call_volume) ? cur_event->put_volume : cur_event->put_volume + cur_event->call_volume;
 		cur_event->put_call_ratio = cur_record->put_call_ratio;
 		cur_event->forward_price = cur_record->forward_price;
 		cur_event->dividend = cur_record->dividend;

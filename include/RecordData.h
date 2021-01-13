@@ -90,7 +90,7 @@ typedef struct dx_trade {
 	dxf_int_t flags;
 } dx_trade_t;
 
-/// Trade Eth
+/// TradeETH
 typedef dx_trade_t dx_trade_eth_t;
 
 /// Quote
@@ -292,6 +292,8 @@ typedef struct dx_series {
     dxf_int_t sequence;
     dxf_dayid_t expiration;
     dxf_double_t volatility;
+	dxf_double_t call_volume;
+	dxf_double_t put_volume;
     dxf_double_t put_call_ratio;
     dxf_double_t forward_price;
     dxf_double_t dividend;

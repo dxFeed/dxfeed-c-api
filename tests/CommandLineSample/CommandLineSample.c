@@ -303,10 +303,12 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 		dxf_series_t* srs = (dxf_series_t*)data;
 
 		for (; i < data_count; ++i) {
-			wprintf(L"expiration=%d, index=%"LS(PRId64)L", volatility=%f, put call ratio=%f, "
-				L"forward_price=%f, dividend=%f, interest=%f, index=0x%"LS(PRIX64)L"}\n",
-				srs[i].expiration, srs[i].index, srs[i].volatility, srs[i].put_call_ratio,
-				srs[i].forward_price, srs[i].dividend, srs[i].interest, srs[i].index);
+			wprintf(L"expiration=%d, index=%"LS(PRId64)L", volatility=%f, call volume=%f, put volume=%f, "
+				L"option volume=%f, put call ratio=%f, forward_price=%f, dividend=%f, interest=%f, "
+				L"index=0x%"LS(PRIX64)L"}\n",
+				srs[i].expiration, srs[i].index, srs[i].volatility, srs[i].call_volume, srs[i].put_volume,
+				srs[i].option_volume, srs[i].put_call_ratio, srs[i].forward_price, srs[i].dividend, srs[i].interest,
+				srs[i].index);
 		}
 	}
 
