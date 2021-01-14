@@ -704,7 +704,7 @@ typedef struct dxf_series {
 	dxf_double_t call_volume;
 	/// Put options traded volume for a day
 	dxf_double_t put_volume;
-	/// Options traded volume  for a day
+	/// Options traded volume for a day
 	dxf_double_t option_volume;
 	/// Ratio of put options traded volume to call options traded volume for a day
 	dxf_double_t put_call_ratio;
