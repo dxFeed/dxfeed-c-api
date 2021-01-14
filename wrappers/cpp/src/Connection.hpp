@@ -34,7 +34,7 @@ struct Connection final : std::enable_shared_from_this<Connection> {
 
 private:
 
-	dxf_connection_t handle_;
+	dxf_connection_t handle_{};
 	std::vector<Subscription::Ptr> subscriptions_;
 
 	Connection() = default;
@@ -74,6 +74,16 @@ public:
 		subscriptions_.push_back(subscription);
 
 		return subscription;
+	}
+
+	Subscription::Ptr createSubscription(std::initializer_list<dx_event_id_t> eventIds) {
+		unsigned eventTypes = 0;
+
+		for (auto type : eventIds) {
+			eventTypes |= DX_EVENT_BIT_MASK(type);
+		}
+
+		return createSubscription(static_cast<int>(eventTypes));
 	}
 
 	~Connection() {

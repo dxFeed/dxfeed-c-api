@@ -90,7 +90,7 @@ typedef struct dx_trade {
 	dxf_int_t flags;
 } dx_trade_t;
 
-/// Trade Eth
+/// TradeETH
 typedef dx_trade_t dx_trade_eth_t;
 
 /// Quote
@@ -260,30 +260,15 @@ typedef struct dx_theo_price {
 
 ///@}
 
-/**
- * @addtogroup event-data-structures-underlying
- * @{
- */
-
-/**
- * @brief Underlying
- *
- * @details Underlying event is a snapshot of computed values that are available for an option underlying symbol based
- * on the option prices on the market. It represents the most recent information that is available about the
- * corresponding values on the market at any given moment of time.
- */
+/// Underlying
 typedef struct dx_underlying {
-	/// 30-day implied volatility for this underlying based on VIX methodology
     dxf_double_t volatility;
-	/// Front month implied volatility for this underlying based on VIX methodology;
     dxf_double_t front_volatility;
-	/// Back month implied volatility for this underlying based on VIX methodology
     dxf_double_t back_volatility;
-	/// Ratio of put options traded volume to call options traded volume for a day
+	dxf_double_t call_volume;
+	dxf_double_t put_volume;
     dxf_double_t put_call_ratio;
 } dx_underlying_t;
-
-///@}
 
 /// Series
 typedef struct dx_series {
@@ -292,6 +277,8 @@ typedef struct dx_series {
     dxf_int_t sequence;
     dxf_dayid_t expiration;
     dxf_double_t volatility;
+	dxf_double_t call_volume;
+	dxf_double_t put_volume;
     dxf_double_t put_call_ratio;
     dxf_double_t forward_price;
     dxf_double_t dividend;

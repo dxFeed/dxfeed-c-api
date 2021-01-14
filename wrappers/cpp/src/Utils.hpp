@@ -46,3 +46,31 @@ inline std::string formatTimestampWithMillis(long long timestamp) {
 
 	return fmt::format("{}.{:0>3}", ss.str(), ms);
 }
+
+inline std::string orderScopeToString(dxf_order_scope_t scope) {
+	switch (scope) {
+		case dxf_osc_composite:
+			return "Composite";
+		case dxf_osc_regional:
+			return "Regional";
+		case dxf_osc_aggregate:
+			return "Aggregate";
+		case dxf_osc_order:
+			return "Order";
+	}
+
+	return "";
+}
+
+inline std::string orderSideToString(dxf_order_side_t side) {
+	switch (side) {
+		case dxf_osd_undefined:
+			return "Undefined";
+		case dxf_osd_buy:
+			return "Buy";
+		case dxf_osd_sell:
+			return "Sell";
+	}
+
+	return "";
+}

@@ -29,13 +29,13 @@
 
 ///Not thread-safe subscription wrapper
 struct Subscription : std::enable_shared_from_this<Subscription> {
-	using Event = nonstd::variant<Greeks, Underlying, Quote>;
-	using ListenerType = std::function<void(std::string, std::vector<Event>)>;
+	using EventType = nonstd::variant<Greeks, Underlying, Quote>;
+	using ListenerType = std::function<void(const std::string&, const std::vector<EventType>&)>;
 	using Ptr = std::shared_ptr<Subscription>;
 
 private:
 
-	dxf_subscription_t handle_;
+	dxf_subscription_t handle_{};
 	ListenerType listener_;
 
 	Subscription() = default;
@@ -76,7 +76,7 @@ public:
 		}
 
 		std::string symbol = StringConverter::toString(std::wstring(symbolName));
-		std::vector<Event> events(static_cast<std::size_t>(dataCount));
+		std::vector<EventType> events(static_cast<std::size_t>(dataCount));
 
 		for (std::size_t i = 0; i < events.size(); i++) {
 			if (eventType == DXF_ET_GREEKS) {

@@ -27,6 +27,15 @@ struct StringConverter {
 		return std::string(wstring.begin(), wstring.end());
 	}
 
+	static std::string toString(wchar_t wchar) {
+		return toString(std::wstring(1, wchar));
+	}
+
+	template <typename InputIterator>
+	static std::string toString(InputIterator first, InputIterator last) {
+		return toString(std::wstring(first, last));
+	}
+
 	static std::wstring toWString(const std::string &string) {
 		return std::wstring(string.begin(), string.end());
 	}
