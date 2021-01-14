@@ -1034,11 +1034,11 @@ int RECORD_TRANSCODER_NAME(dx_series_t)(dx_record_transcoder_connection_context_
 		cur_event->sequence = DX_SEQUENCE(cur_record);
 		cur_event->expiration = cur_record->expiration;
 		cur_event->volatility = cur_record->volatility;
-		cur_event->call_volume = cur_event->call_volume;
-		cur_event->put_volume = cur_event->put_volume;
-		cur_event->option_volume = isnan(cur_event->put_volume)
-			? cur_event->call_volume
-			: isnan(cur_event->call_volume) ? cur_event->put_volume : cur_event->put_volume + cur_event->call_volume;
+		cur_event->call_volume = cur_record->call_volume;
+		cur_event->put_volume = cur_record->put_volume;
+		cur_event->option_volume = isnan(cur_record->put_volume)
+			? cur_record->call_volume
+			: isnan(cur_record->call_volume) ? cur_record->put_volume : cur_record->put_volume + cur_record->call_volume;
 		cur_event->put_call_ratio = cur_record->put_call_ratio;
 		cur_event->forward_price = cur_record->forward_price;
 		cur_event->dividend = cur_record->dividend;
