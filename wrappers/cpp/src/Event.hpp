@@ -36,6 +36,7 @@
  * time.
  */
 struct Quote final {
+	/// Event symbol that identifies this quote
 	std::string symbol{};
 	/// Time of the last bid or ask change
 	dxf_long_t time{};
@@ -87,9 +88,8 @@ struct Quote final {
 			"bid_time(UTC) = {}, bid_exchange_code = {}, bid_price = {}, bid_size = {}, "
 			"ask_time(UTC) = {}, ask_exchange_code = {}, ask_price = {}, ask_size = {}, scope = {}}}",
 			symbol, formatTimestampWithMillis(time), sequence, time_nanos, formatTimestampWithMillis(bid_time),
-			StringConverter::toString(std::wstring() + bid_exchange_code), bid_price, bid_size,
-			formatTimestampWithMillis(ask_time), StringConverter::toString(std::wstring() + ask_exchange_code),
-			ask_price, ask_size, scope);
+			StringConverter::toString(bid_exchange_code), bid_price, bid_size, formatTimestampWithMillis(ask_time),
+			StringConverter::toString(ask_exchange_code), ask_price, ask_size, orderScopeToString(scope));
 	}
 
 	template <typename OutStream>
@@ -100,18 +100,70 @@ struct Quote final {
 	}
 };
 
-struct Greeks final {
-	std::string symbol;
+struct OrderBase {
+	/// Event symbol that identifies this order
+	std::string symbol{};
+	/// Transactional event flags.
 	dxf_event_flags_t event_flags;
+	/// Unique per-symbol index of this order.
 	dxf_long_t index;
+	/// Time of this order. Time is measured in milliseconds between the current time and midnight, January 1, 1970 UTC.
 	dxf_long_t time;
+	/// Microseconds and nanoseconds part of time of this order.
+	dxf_int_t time_nanos;
+	/// Sequence number of this order to distinguish orders that have the same #time.
+	dxf_int_t sequence;
+	/// Price of this order.
 	dxf_double_t price;
-	dxf_double_t volatility;
-	dxf_double_t delta;
-	dxf_double_t gamma;
-	dxf_double_t theta;
-	dxf_double_t rho;
-	dxf_double_t vega;
+	/// Size of this order
+	dxf_int_t size;
+	/// Number of individual orders in this aggregate order.
+	dxf_int_t count;
+	/// Scope of this order
+	dxf_order_scope_t scope;
+	/// Side of this order
+	dxf_order_side_t side;
+	/// Exchange code of this order
+	dxf_char_t exchange_code;
+	/// Source of this order
+	std::string source;
+
+	explicit OrderBase(std::string symbol, dxf_order_t order)
+		: symbol{std::move(symbol)},
+		  event_flags{order.event_flags},
+		  index{order.index},
+		  time{order.time},
+		  time_nanos{order.time_nanos},
+		  sequence{order.sequence},
+		  price{order.price},
+		  size{order.size},
+		  count{order.count},
+		  scope{order.scope},
+		  side{order.side},
+		  exchange_code{order.exchange_code},
+		  source{StringConverter::toString(std::begin(order.source), std::end(order.source))} {}
+
+	std::string toString() const {
+		return fmt::format(
+			"symbol = {}, event_flags = {:#x}, index = {:#x}, time(UTC) = {}, time_nanos = {}, sequence = {}, "
+			"price = {}, size = {}, count = {}, scope = {}, side = {}, exchange_code = {}, source = {}",
+			symbol, event_flags, index, formatTimestampWithMillis(time), time_nanos, sequence, price, size, count,
+			orderScopeToString(scope), orderSideToString(side), StringConverter::toString(exchange_code), source);
+	}
+};
+
+struct Greeks final {
+	std::string symbol{};
+	dxf_event_flags_t event_flags{};
+	dxf_long_t index{};
+	dxf_long_t time{};
+	dxf_double_t price{};
+	dxf_double_t volatility{};
+	dxf_double_t delta{};
+	dxf_double_t gamma{};
+	dxf_double_t theta{};
+	dxf_double_t rho{};
+	dxf_double_t vega{};
 
 	Greeks() = default;
 
@@ -173,4 +225,3 @@ struct Underlying final {
 		return os;
 	}
 };
-

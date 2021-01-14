@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
 
 	std::cout << "Subscribed\n";
 
-	for (auto symbol : symbols) {
+	for (const auto& symbol : symbols) {
 		if (!subscription->addSymbol(symbol)) {
 			std::cerr << "Error:" << Error::getLast() << "\n";
 
@@ -99,19 +99,19 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	std::cout << "Symbols added\n";
+	std::cout << "Added symbols\n";
 
-	auto result = subscription->attachListener([](std::string symbol, std::vector<Subscription::Event> events) {
+	auto result = subscription->attachListener([](const std::string& symbol, const std::vector<Subscription::EventType>& events) {
 		struct CommonVisitor {
-			std::string operator()(Greeks greeks) const {
+			std::string operator()(const Greeks& greeks) const {
 				return greeks.toString();
 			}
 
-			std::string operator()(Underlying underlying) const {
+			std::string operator()(const Underlying& underlying) const {
 				return underlying.toString();
 			}
 
-			std::string operator()(Quote quote) const {
+			std::string operator()(const Quote& quote) const {
 				return quote.toString();
 			}
 		};
@@ -120,7 +120,7 @@ int main(int argc, char **argv) {
 
 		fmt::print("Symbol = {}:\n", symbol);
 
-		for (auto e : events) {
+		for (const auto& e : events) {
 			fmt::print("{}\n", nonstd::visit(visitor, e));
 		}
 

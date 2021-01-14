@@ -133,7 +133,7 @@
 
 /**
  * @addtogroup event-data-structures-order-spread-order
- * @{
+ * @{s
  */
 
 static DX_MAYBE_UNUSED dxf_const_string_t DXF_ORDER_AGGREGATE_BID_STR = L"AGGREGATE_BID";
