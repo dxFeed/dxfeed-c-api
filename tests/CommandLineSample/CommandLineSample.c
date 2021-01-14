@@ -294,8 +294,10 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 		dxf_underlying_t* u = (dxf_underlying_t*)data;
 
 		for (; i < data_count; ++i) {
-			wprintf(L"volatility=%f, front volatility=%f, back volatility=%f, put call ratio=%f}\n", u[i].volatility,
-					u[i].front_volatility, u[i].back_volatility, u[i].put_call_ratio);
+			wprintf(L"volatility=%f, front volatility=%f, back volatility=%f, call volume=%f, put volume=%f, "
+				L"option volume=%f, put call ratio=%f}\n",
+				u[i].volatility, u[i].front_volatility, u[i].back_volatility, u[i].call_volume, u[i].put_volume,
+				u[i].option_volume, u[i].put_call_ratio);
 		}
 	}
 

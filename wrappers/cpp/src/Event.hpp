@@ -67,6 +67,8 @@ struct Quote final {
 	 */
 	dxf_order_scope_t scope{};
 
+	Quote() = default;
+
 	explicit Quote(std::string symbol, dxf_quote_t quote)
 		: symbol{std::move(symbol)},
 		  time{quote.time},
@@ -182,9 +184,9 @@ struct Greeks final {
 
 	std::string toString() const {
 		return fmt::format(
-			"Greeks{{symbol = {}, time = {}, index = {}, price = {}, delta = {}, gamma = {}, rho = {}, vega = {}, "
-			"index(hex) = 0x{:x}}}",
-			symbol, formatTimestampWithMillis(time), index, price, delta, gamma, rho, vega, index);
+			"Greeks{{symbol = {}, time = {}, index = {}, price = {}, volatility = {}, delta = {}, gamma = {}, "
+			"theta = {}, rho = {}, vega = {}, index(hex) = 0x{:x}}}",
+			symbol, formatTimestampWithMillis(time), index, price, volatility, delta, gamma, theta, rho, vega, index);
 	}
 
 	template <typename OutStream>
@@ -195,12 +197,30 @@ struct Greeks final {
 	}
 };
 
+/**
+ * @brief Underlying
+ *
+ * @details Underlying event is a snapshot of computed values that are available for an option underlying symbol based
+ * on the option prices on the market. It represents the most recent information that is available about the
+ * corresponding values on the market at any given moment of time.
+ */
 struct Underlying final {
-	std::string symbol;
-	dxf_double_t volatility;
-	dxf_double_t front_volatility;
-	dxf_double_t back_volatility;
-	dxf_double_t put_call_ratio;
+	/// Event symbol that identifies this underlying
+	std::string symbol{};
+	/// 30-day implied volatility for this underlying based on VIX methodology
+	dxf_double_t volatility{};
+	/// Front month implied volatility for this underlying based on VIX methodology;
+	dxf_double_t front_volatility{};
+	/// Back month implied volatility for this underlying based on VIX methodology
+	dxf_double_t back_volatility{};
+	/// Call options traded volume for a day
+	dxf_double_t call_volume{};
+	/// Put options traded volume for a day
+	dxf_double_t put_volume{};
+	/// Options traded volume for a day
+	dxf_double_t option_volume{};
+	/// Ratio of put options traded volume to call options traded volume for a day
+	dxf_double_t put_call_ratio{};
 
 	Underlying() = default;
 
@@ -209,13 +229,17 @@ struct Underlying final {
 		  volatility{underlying.volatility},
 		  front_volatility{underlying.front_volatility},
 		  back_volatility{underlying.back_volatility},
+		  call_volume{underlying.call_volume},
+		  put_volume{underlying.put_volume},
+		  option_volume{underlying.option_volume},
 		  put_call_ratio{underlying.put_call_ratio} {}
 
 	std::string toString() const {
 		return fmt::format(
-			"Underlying{{symbol = {}, volatility = {}, front_volatility = {}, back_volatility = {}, put_call_ratio = "
-			"{}}}",
-			symbol, volatility, front_volatility, back_volatility, put_call_ratio);
+			"Underlying{{symbol = {}, volatility = {}, front_volatility = {}, back_volatility = {}, "
+			"call_volume = {}, put_volume {}, option_volume = {}, put_call_ratio = {}}}",
+			symbol, volatility, front_volatility, back_volatility, call_volume, put_volume, option_volume,
+			put_call_ratio);
 	}
 
 	template <typename OutStream>

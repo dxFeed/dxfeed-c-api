@@ -296,6 +296,8 @@ DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_theo_price_t, interest)
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_underlying_t, volatility)
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_underlying_t, front_volatility)
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_underlying_t, back_volatility)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_underlying_t, call_volume)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_underlying_t, put_volume)
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_underlying_t, put_call_ratio)
 
 /* -------------------------------------------------------------------------- */

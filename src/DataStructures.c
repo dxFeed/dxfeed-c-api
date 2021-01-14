@@ -275,6 +275,8 @@ static const dx_field_info_t dx_fields_underlying[] = {
 	{ dx_fid_compact_int | dx_fid_flag_decimal, L"Volatility",      DX_RECORD_FIELD_STDOPS(dx_underlying_t, volatility),       dx_ft_common_field },
     { dx_fid_compact_int | dx_fid_flag_decimal, L"FrontVolatility", DX_RECORD_FIELD_STDOPS(dx_underlying_t, front_volatility), dx_ft_common_field },
     { dx_fid_compact_int | dx_fid_flag_decimal, L"BackVolatility",  DX_RECORD_FIELD_STDOPS(dx_underlying_t, back_volatility),  dx_ft_common_field },
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"CallVolume",      DX_RECORD_FIELD_STDOPS(dx_underlying_t, call_volume),      dx_ft_common_field },
+	{ dx_fid_compact_int | dx_fid_flag_decimal, L"PutVolume",       DX_RECORD_FIELD_STDOPS(dx_underlying_t, put_volume),       dx_ft_common_field },
     { dx_fid_compact_int | dx_fid_flag_decimal, L"PutCallRatio",    DX_RECORD_FIELD_STDOPS(dx_underlying_t, put_call_ratio),   dx_ft_common_field }
 };
 

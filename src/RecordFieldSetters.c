@@ -365,6 +365,8 @@ FIELD_STDOPS_BODIES(dx_theo_price_t, interest, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_underlying_t, volatility, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_underlying_t, front_volatility, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_underlying_t, back_volatility, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_underlying_t, call_volume, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_underlying_t, put_volume, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_underlying_t, put_call_ratio, dxf_double_t)
 
 /* -------------------------------------------------------------------------- */

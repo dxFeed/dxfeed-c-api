@@ -669,11 +669,31 @@ typedef dx_theo_price_t dxf_theo_price_t;
  * @{
  */
 
-/// Underlying. Event and record are the same
-typedef dx_underlying_t dxf_underlying_t;
+/**
+ * @brief Underlying
+ *
+ * @details Underlying event is a snapshot of computed values that are available for an option underlying symbol based
+ * on the option prices on the market. It represents the most recent information that is available about the
+ * corresponding values on the market at any given moment of time.
+ */
+typedef struct dxf_underlying {
+	/// 30-day implied volatility for this underlying based on VIX methodology
+	dxf_double_t volatility;
+	/// Front month implied volatility for this underlying based on VIX methodology;
+	dxf_double_t front_volatility;
+	/// Back month implied volatility for this underlying based on VIX methodology
+	dxf_double_t back_volatility;
+	/// Call options traded volume for a day
+	dxf_double_t call_volume;
+	/// Put options traded volume for a day
+	dxf_double_t put_volume;
+	/// Options traded volume for a day
+	dxf_double_t option_volume;
+	/// Ratio of put options traded volume to call options traded volume for a day
+	dxf_double_t put_call_ratio;
+} dxf_underlying_t;
 
 ///@}
-
 
 /**
  * @addtogroup event-data-structures-series

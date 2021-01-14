@@ -1005,8 +1005,29 @@ int RECORD_TRANSCODER_NAME(dx_theo_price_t) (dx_record_transcoder_connection_con
 int RECORD_TRANSCODER_NAME(dx_underlying_t) (dx_record_transcoder_connection_context_t* context,
 										const dx_record_params_t* record_params,
 										const dxf_event_params_t* event_params,
-										void* record_buffer, int record_count) {
-	dxf_underlying_t* event_buffer = (dxf_underlying_t*)record_buffer;
+										void* record_buff, int record_count) {
+	dxf_underlying_t* event_buffer = (dxf_underlying_t*)dx_get_event_data_buffer(context, dx_eid_underlying, record_count);
+
+	if (event_buffer == NULL) {
+		return false;
+	}
+
+	dx_underlying_t* record_buffer = (dx_underlying_t*)record_buff;
+
+	for (int i = 0; i < record_count; ++i) {
+		dx_underlying_t* cur_record = record_buffer + i;
+		dxf_underlying_t* cur_event = event_buffer + i;
+
+		cur_event->volatility = cur_record->volatility;
+		cur_event->front_volatility = cur_record->front_volatility;
+		cur_event->back_volatility = cur_record->back_volatility;
+		cur_event->call_volume = cur_record->call_volume;
+		cur_event->put_volume = cur_record->put_volume;
+		cur_event->option_volume = isnan(cur_record->put_volume)
+		   ? cur_record->call_volume
+		   : isnan(cur_record->call_volume) ? cur_record->put_volume : cur_record->put_volume + cur_record->call_volume;
+		cur_event->put_call_ratio = cur_record->put_call_ratio;
+	}
 
 	return dx_process_event_data(context->connection, dx_eid_underlying, record_params->symbol_name, event_buffer,
 								 record_count, event_params);
