@@ -2,11 +2,11 @@ Version 7.0.0
 * [DXFC-175] [Breaking changes] Extended the Trade and Profile events to support additional fields from QD records
   - the `_52_high_price` & `_52_low_price` `Profile` event fields were renamed to `high_52_week_price` &
     `low_52_week_price` respectively
-  - the `change` field was added to `TradeETH` event ()
+  - the `change` field was added to `TradeETH` event
 * [DXFC-207] [Breaking changes] Extended the Trade and TradeETH events with new field dayId
-  - the `day_id` field was added to the `dx_trade_t`, `dx_trade_eth_t` and `dxf_trade_t` structures. `day_id` -
-    identifier of the day that `Trade` or `TradeETH` represents. Identifier of the day is the number of days passed
-    since January 1, 1970.
+  - the `day_id` field was added to the `dx_trade_t`, `dx_trade_eth_t` and `dxf_trade_t` structures.
+    `day_id` - identifier of the day that `Trade` or `TradeETH` represents. Identifier of the day is the number of
+    days passed since January 1, 1970.
 * [DXFC-181] Extended the Underlying and Series events with putVolume and callVolume fields
   - the `call_volume` and `put_volume` fields were added to the `dx_series_t`, `dxf_series_t`, `dx_underlying_t`
     and `dxf_underlying_t` structures.
