@@ -89,10 +89,10 @@ void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
 }
 #endif
 
-void print_timestamp(dxf_long_t timestamp){
+void print_timestamp(dxf_long_t timestamp) {
 	wchar_t timefmt[80];
 
-	struct tm * timeinfo;
+	struct tm* timeinfo;
 	time_t tmpint = (time_t)(timestamp / 1000);
 	timeinfo = localtime(&tmpint);
 	wcsftime(timefmt, 80, L"%Y%m%d-%H%M%S", timeinfo);
@@ -110,7 +110,7 @@ void process_last_error() {
 
 	if (res == DXF_SUCCESS) {
 		if (error_code == dx_ec_success) {
-			wprintf(L"no error information is stored");
+			wprintf(L"No error information is stored");
 			return;
 		}
 
@@ -207,7 +207,6 @@ int main(int argc, char* argv[]) {
 	dxf_connection_t connection;
 	dxf_price_level_book_t book;
 	dxf_string_t base_symbol = NULL;
-	dxf_string_t dxfeed_host_u;
 	char* dxfeed_host = NULL;
 
 	if (argc < STATIC_PARAMS_COUNT) {
@@ -228,7 +227,7 @@ int main(int argc, char* argv[]) {
 	dxfeed_host = argv[1];
 	base_symbol = ansi_to_unicode(argv[2]);
 	if (base_symbol == NULL) {
-		return -1;
+		return 1;
 	}
 
 	const char **order_sources_ptr = NULL;
@@ -248,7 +247,7 @@ int main(int argc, char* argv[]) {
 				if (i + 1 == argc) {
 					wprintf(L"Token argument error\n");
 
-					return -1;
+					return 2;
 				}
 
 				token = argv[++i];
@@ -259,7 +258,7 @@ int main(int argc, char* argv[]) {
 				if (i + 1 == argc) {
 					wprintf(L"The program timeout argument error\n");
 
-					return -1;
+					return 3;
 				}
 
 				int new_program_timeout = -1;
@@ -267,7 +266,7 @@ int main(int argc, char* argv[]) {
 				if (!atoi2(argv[++i], &new_program_timeout)) {
 					wprintf(L"The program timeout argument parsing error\n");
 
-					return -1;
+					return 4;
 				}
 
 				program_timeout = new_program_timeout;
@@ -278,7 +277,7 @@ int main(int argc, char* argv[]) {
 				if (string_len > MAX_SOURCE_SIZE) {
 					wprintf(L"Invalid order source param!\n");
 
-					return -1;
+					return 5;
 				}
 
 				strcpy(order_source, argv[i]);
@@ -302,40 +301,51 @@ int main(int argc, char* argv[]) {
 	}
 
 	dxf_initialize_logger_v2("price-level-book-api.log", true, true, true, log_data_transfer_flag);
-	wprintf(L"PriceLevelBookSample test started.\n");
-	dxfeed_host_u = ansi_to_unicode(dxfeed_host);
-	wprintf(L"Connecting to host %ls...\n", dxfeed_host_u);
-	free(dxfeed_host_u);
+	wprintf(L"Price level book sample started.\n");
+	wprintf(L"Connecting to host %hs...\n", dxfeed_host);
 
 #ifdef _WIN32
 	InitializeCriticalSection(&listener_thread_guard);
 #endif
 
+	ERRORCODE connection_result;
 	if (token != NULL && token[0] != '\0') {
-		if (!dxf_create_connection_auth_bearer(dxfeed_host, token, on_reader_thread_terminate, NULL, NULL, NULL, NULL, &connection)) {
-			process_last_error();
-
-			return -1;
-		}
-	} else if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, NULL, &connection)) {
-		process_last_error();
-		return -1;
+		connection_result =
+			dxf_create_connection_auth_bearer(dxfeed_host, token, on_reader_thread_terminate,
+											  NULL, NULL, NULL, NULL, &connection);
+	} else {
+		connection_result = dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL,
+												  NULL, NULL, NULL, &connection);
 	}
 
-	wprintf(L"Connection successful!\n");
+	if (connection_result == DXF_FAILURE) {
+		free(base_symbol);
+		process_last_error();
+
+		return 10;
+	}
+
+	wprintf(L"Connected\n");
 
 	if (!dxf_create_price_level_book(connection, base_symbol, order_sources_ptr, &book)) {
+		free(base_symbol);
 		process_last_error();
 		dxf_close_connection(connection);
-		return -1;
-	}
-	if (!dxf_attach_price_level_book_listener(book, &listener, NULL)) {
-		process_last_error();
-		dxf_close_connection(connection);
-		return -1;
+
+		return 20;
 	}
 
-	wprintf(L"Subscription successful!\n");
+	free(base_symbol);
+
+	if (!dxf_attach_price_level_book_listener(book, &listener, NULL)) {
+		process_last_error();
+		dxf_close_price_level_book(book);
+		dxf_close_connection(connection);
+
+		return 21;
+	}
+
+	wprintf(L"Subscribed\n");
 
 	while (!is_thread_terminate() && program_timeout--) {
 #ifdef _WIN32
@@ -348,16 +358,19 @@ int main(int argc, char* argv[]) {
 	if (!dxf_close_price_level_book(book)) {
 		process_last_error();
 		dxf_close_connection(connection);
-		return -1;
+
+		return 22;
 	}
 
 	wprintf(L"Disconnecting from host...\n");
+
 	if (!dxf_close_connection(connection)) {
 		process_last_error();
 
-		return -1;
+		return 11;
 	}
-	wprintf(L"Disconnect successful!\nConnection test completed successfully!\n");
+
+	wprintf(L"Disconnected\n");
 
 #ifdef _WIN32
 	DeleteCriticalSection(&listener_thread_guard);

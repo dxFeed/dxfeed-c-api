@@ -74,12 +74,12 @@ int main(int argc, char* argv[]) {
 
 	dxf_initialize_logger("connection-test-api.log", 1, 1, 0);
 	wprintf(L"Connection test started.\n");
-	wprintf(L"Connecting to host %s...\n", dxfeed_host);
+	wprintf(L"Connecting to host %hs...\n", dxfeed_host);
 
 	if (!dxf_create_connection(dxfeed_host, NULL, NULL, NULL, NULL, NULL, &connection)) {
 		process_last_error();
 
-		return -1;
+		return 1;
 	}
 
 	wprintf(L"Connected\n");
@@ -91,7 +91,7 @@ int main(int argc, char* argv[]) {
 	if (!dxf_close_connection(connection)) {
 		process_last_error();
 
-		return -1;
+		return 2;
 	}
 
 	wprintf(

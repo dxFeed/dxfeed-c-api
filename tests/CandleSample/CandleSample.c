@@ -87,14 +87,14 @@ void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
 }
 #endif
 
-void print_timestamp(dxf_long_t timestamp){
-		wchar_t timefmt[80];
+void print_timestamp(dxf_long_t timestamp) {
+	wchar_t timefmt[80];
 
-		struct tm * timeinfo;
-		time_t tmpint = (time_t)(timestamp /1000);
-		timeinfo = localtime ( &tmpint );
-		wcsftime(timefmt,80, L"%Y%m%d-%H%M%S" ,timeinfo);
-		wprintf(L"%ls",timefmt);
+	struct tm* timeinfo;
+	time_t tmpint = (time_t)(timestamp / 1000);
+	timeinfo = localtime(&tmpint);
+	wcsftime(timefmt, 80, L"%Y%m%d-%H%M%S", timeinfo);
+	wprintf(L"%ls", timefmt);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -131,7 +131,7 @@ void process_last_error () {
 
 	if (res == DXF_SUCCESS) {
 		if (error_code == dx_ec_success) {
-			wprintf(L"WTF - no error information is stored");
+			wprintf(L"No error information is stored");
 			return;
 		}
 
@@ -172,7 +172,7 @@ dxf_string_t ansi_to_unicode (const char* ansi_str) {
 #endif /* _WIN32 */
 }
 
-int atoi2 (char *str, int *result) {
+int atoi2(char *str, int *result) {
 	if (str == NULL || str[0] == '\0' || result == NULL) {
 		return false;
 	}
@@ -203,16 +203,18 @@ int parse_date(const char* date_str, struct tm* time_struct) {
 	size_t date_string_len = strlen(date_str);
 	int separator_count = 0;
 	char buf[DATE_TIME_BUF_SIZE + 1] = { 0 };
-	size_t buf_len = 0;
 	int mday = 0;
 	int month = 0;
 	int year = 0;
+
 	for (i = 0; i < date_string_len; i++) {
 		if (date_str[i] == '-') {
-			if (separator_count == 0)
-				mday = atoi(buf);
-			else if (separator_count == 1)
-				month = atoi(buf);
+			if (separator_count == 0) {
+				if (!atoi2(buf, &mday)) return false;
+			}
+			else if (separator_count == 1) {
+				if (!atoi2(buf, &month)) return false;
+			}
 			else
 				return false;
 			separator_count++;
@@ -220,19 +222,21 @@ int parse_date(const char* date_str, struct tm* time_struct) {
 			continue;
 		}
 
-		buf_len = strlen(buf);
+		size_t buf_len = strlen(buf);
 		if (buf_len >= DATE_TIME_BUF_SIZE)
 			return false;
 		buf[buf_len] = date_str[i];
 	}
 
-	year = atoi(buf);
+	if (!atoi2(buf, &year)) return false;
 
 	if (mday == 0 || month == 0 || year == 0)
 		return false;
+
 	time_struct->tm_mday = mday;
 	time_struct->tm_mon = month - 1;
 	time_struct->tm_year = year - 1900;
+
 	return true;
 }
 
@@ -243,7 +247,6 @@ int main (int argc, char* argv[]) {
 	dxf_candle_attributes_t candle_attributes;
 	dxf_string_t symbol = NULL;
 	char* dxfeed_host = NULL;
-	dxf_string_t dxfeed_host_u = NULL;
 	time_t time_value = time(NULL);
 	struct tm time_struct;
 	struct tm* local_time = localtime(&time_value);
@@ -277,7 +280,7 @@ int main (int argc, char* argv[]) {
 
 	symbol = ansi_to_unicode(argv[2]);
 	if (symbol == NULL) {
-		return -1;
+		return 1;
 	}
 
 	char* token = NULL;
@@ -293,12 +296,12 @@ int main (int argc, char* argv[]) {
 			if (time_is_set == false && strcmp(argv[i], TIME_PARAM_SHORT_TAG) == 0) {
 				if (i + 1 == argc) {
 					wprintf(L"Date argument error\n");
-					return -1;
+					return 2;
 				}
 				i += 1;
 				if (!parse_date(argv[i], &time_struct)) {
 					wprintf(L"Date format error\n");
-					return -1;
+					return 3;
 				}
 				time_value = mktime(&time_struct);
 				time_is_set = true;
@@ -306,7 +309,7 @@ int main (int argc, char* argv[]) {
 				if (i + 1 == argc) {
 					wprintf(L"Token argument error\n");
 
-					return -1;
+					return 4;
 				}
 
 				token = argv[++i];
@@ -317,7 +320,7 @@ int main (int argc, char* argv[]) {
 				if (i + 1 == argc) {
 					wprintf(L"The program timeout argument error\n");
 
-					return -1;
+					return 5;
 				}
 
 				int new_program_timeout = -1;
@@ -325,7 +328,7 @@ int main (int argc, char* argv[]) {
 				if (!atoi2(argv[++i], &new_program_timeout)) {
 					wprintf(L"The program timeout argument parsing error\n");
 
-					return -1;
+					return 6;
 				}
 
 				program_timeout = new_program_timeout;
@@ -336,9 +339,7 @@ int main (int argc, char* argv[]) {
 
 	dxf_initialize_logger_v2("candle-api.log", true, true, true, log_data_transfer_flag);
 	wprintf(L"Sample test started.\n");
-	dxfeed_host_u = ansi_to_unicode(dxfeed_host);
-	wprintf(L"Connecting to host %ls...\n", dxfeed_host_u);
-	free(dxfeed_host_u);
+	wprintf(L"Connecting to host %hs...\n", dxfeed_host);
 
 #ifdef _WIN32
 	InitializeCriticalSection(&listener_thread_guard);
@@ -346,56 +347,62 @@ int main (int argc, char* argv[]) {
 
 	if (token != NULL && token[0] != '\0') {
 		if (!dxf_create_connection_auth_bearer(dxfeed_host, token, on_reader_thread_terminate, NULL, NULL, NULL, NULL, &connection)) {
-			free(symbol);
 			process_last_error();
+			free(symbol);
 
-			return -1;
+			return 10;
 		}
 	} else if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, NULL, &connection)) {
 		free(symbol);
 		process_last_error();
 
-		return -1;
+		return 11;
 	}
 
-	wprintf(L"Connection successful!\n");
+	wprintf(L"Connected\n");
 
 	//Note: The docs requires time as unix time in milliseconds. So convert time_value to milliseconds timestamp.
 	if (!dxf_create_subscription_timed(connection, event_type, time_value * 1000, &subscription)) {
 		free(symbol);
 		process_last_error();
-		return -1;
+		dxf_close_connection(connection);
+
+		return 20;
+	}
+
+	if (!dxf_attach_event_listener(subscription, listener, NULL)) {
+		free(symbol);
+		process_last_error();
+		dxf_close_subscription(subscription);
+		dxf_close_connection(connection);
+
+		return 21;
 	}
 
 	if (!dxf_create_candle_symbol_attributes(symbol, DXF_CANDLE_EXCHANGE_CODE_ATTRIBUTE_DEFAULT,
 											DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT, dxf_ctpa_default,
 											dxf_cpa_default, dxf_csa_default, dxf_caa_default,
 											DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, &candle_attributes)) {
-		dxf_close_subscription(subscription);
-		dxf_close_connection(connection);
 		free(symbol);
 		process_last_error();
-		return -1;
+		dxf_close_subscription(subscription);
+		dxf_close_connection(connection);
+
+		return 22;
 	}
 
 	if (!dxf_add_candle_symbol(subscription, candle_attributes)) {
+		free(symbol);
+		process_last_error();
 		dxf_delete_candle_symbol_attributes(candle_attributes);
 		dxf_close_subscription(subscription);
 		dxf_close_connection(connection);
-		free(symbol);
-		process_last_error();
-		return -1;
-	};
 
-	if (!dxf_attach_event_listener(subscription, listener, NULL)) {
-		dxf_delete_candle_symbol_attributes(candle_attributes);
-		dxf_close_subscription(subscription);
-		dxf_close_connection(connection);
-		free(symbol);
-		process_last_error();
-		return -1;
-	};
-	wprintf(L"Subscription successful!\n");
+		return 23;
+	}
+
+	wprintf(L"Subscribed\n");
+	free(symbol);
 
 	while (!is_thread_terminate() && program_timeout--) {
 #ifdef _WIN32
@@ -409,21 +416,21 @@ int main (int argc, char* argv[]) {
 
 	if (!dxf_delete_candle_symbol_attributes(candle_attributes)) {
 		process_last_error();
-		return -1;
+
+		return 24;
 	}
 
 	if (!dxf_close_subscription(subscription)) {
 		process_last_error();
-		return -1;
+
+		return 25;
 	}
 
 	if (!dxf_close_connection(connection)) {
 		process_last_error();
 
-		return -1;
+		return 12;
 	}
-
-	free(symbol);
 
 	wprintf(L"Disconnected\n");
 

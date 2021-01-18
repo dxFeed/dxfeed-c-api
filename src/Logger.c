@@ -315,7 +315,7 @@ ERRORCODE dx_initialize_logger_impl(const char* file_name, int rewrite_file, int
 	g_log_file = fopen(file_name, rewrite_file ? "w" : "a");
 
 	if (g_log_file == NULL) {
-		printf("\nCan not open log-file %s", file_name);
+		wprintf(L"\nCan not open log-file %hs", file_name);
 		return DXF_FAILURE;
 	}
 
@@ -331,7 +331,7 @@ ERRORCODE dx_initialize_logger_impl(const char* file_name, int rewrite_file, int
 		g_data_receive_log_file = fopen(data_transfer_file_name, rewrite_file ? "w" : "a");
 
 		if (g_data_receive_log_file == NULL) {
-			printf("\nCan not open log-file %s", data_transfer_file_name);
+			wprintf(L"\nCan not open log-file %hs", data_transfer_file_name);
 			return DXF_FAILURE;
 		}
 
@@ -339,7 +339,7 @@ ERRORCODE dx_initialize_logger_impl(const char* file_name, int rewrite_file, int
 		g_data_send_log_file = fopen(data_transfer_file_name, rewrite_file ? "w" : "a");
 
 		if (g_data_send_log_file == NULL) {
-			printf("\nCan not open log-file %s", data_transfer_file_name);
+			wprintf(L"\nCan not open log-file %hs", data_transfer_file_name);
 			return DXF_FAILURE;
 		}
 	}

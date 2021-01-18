@@ -182,19 +182,19 @@ void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
 	is_listener_thread_terminated = true;
 	dxs_mutex_unlock(&listener_thread_guard);
 
-	wprintf(L"\nTerminating listener thread, host: %s\n", host);
+	wprintf(L"\nTerminating listener thread, host: %hs\n", host);
 }
 
 /* -------------------------------------------------------------------------- */
 
 void print_timestamp(dxf_long_t timestamp) {
-	char timefmt[80];
+	wchar_t timefmt[80];
 
 	struct tm* timeinfo;
-	time_t tmpint = (int)(timestamp / 1000);
+	time_t tmpint = (time_t)(timestamp / 1000);
 	timeinfo = localtime(&tmpint);
-	strftime(timefmt, 80, "%Y%m%d-%H%M%S", timeinfo);
-	wprintf(L"%s", timefmt);
+	wcsftime(timefmt, 80, L"%Y%m%d-%H%M%S", timeinfo);
+	wprintf(L"%ls", timefmt);
 }
 /* -------------------------------------------------------------------------- */
 
@@ -318,7 +318,7 @@ int main(int argc, char* argv[]) {
 	dxs_mutex_create(&listener_thread_guard);
 
 	wprintf(L"Sample test started.\n");
-	wprintf(L"Connecting to host %s...\n", dxfeed_host);
+	wprintf(L"Connecting to host %hs...\n", dxfeed_host);
 
 	if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, (void*)dxfeed_host,
 							   &connection)) {
@@ -326,25 +326,25 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 
-	wprintf(L"Connected!\n");
+	wprintf(L"Connected\n");
 
 	if (!dxf_create_subscription(
 			connection, DXF_ET_TRADE | DXF_ET_QUOTE | DXF_ET_ORDER | DXF_ET_SUMMARY | DXF_ET_PROFILE, &subscription)) {
 		process_last_error();
 
-		return 2;
+		return 10;
 	};
 
 	if (!dxf_attach_event_listener(subscription, listener, NULL)) {
 		process_last_error();
 
-		return 3;
+		return 11;
 	};
 
 	if (!dxf_add_symbol(subscription, L"IBM")) {
 		process_last_error();
 
-		return 4;
+		return 12;
 	};
 
 	wprintf(L"Subscribed\n");
@@ -352,17 +352,17 @@ int main(int argc, char* argv[]) {
 	while (!is_thread_terminate() && loop_counter--) {
 		dxs_sleep(1000);
 	}
-	dxs_mutex_destroy(&listener_thread_guard);
 
 	wprintf(L"Disconnecting from host...\n");
 
 	if (!dxf_close_connection(connection)) {
 		process_last_error();
 
-		return 5;
+		return 2;
 	}
 
 	wprintf(L"Disconnected\nSample test completed\n");
+	dxs_mutex_destroy(&listener_thread_guard);
 
 	return 0;
 }

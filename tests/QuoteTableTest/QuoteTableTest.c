@@ -212,7 +212,7 @@ void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
 	is_listener_thread_terminated = true;
 	dxs_mutex_unlock(&listener_thread_guard);
 
-	wprintf(L"\nTerminating listener thread, host: %s\n", host);
+	wprintf(L"\nTerminating listener thread, host: %hs\n", host);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -476,18 +476,25 @@ int main(int argc, char* argv[]) {
 
 	dxf_initialize_logger("quote-table-api.log", true, true, true);
 
+	wprintf(L"Quote table test started.\n");
+	wprintf(L"Connecting to host %hs...\n", dxfeed_host);
+
 	if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, dxfeed_host, &connection)) {
 		process_last_error();
-		return -1;
+		return 1;
 	}
+
+	wprintf(L"Connected\n");
 
 	// create subscriptions
 	for (i = 0; i < EVENTS_COUNT; ++i) {
 		subscriptions[i] = create_subscription(connection, i);
 		if (subscriptions[i] == NULL) {
-			return -1;
+			return 10;
 		}
 	}
+
+	wprintf(L"Subscribed\n");
 
 	dxs_mutex_create(&listener_thread_guard);
 	while (!is_thread_terminate() && loop_counter--) {
@@ -500,7 +507,7 @@ int main(int argc, char* argv[]) {
 	if (!dxf_close_connection(connection)) {
 		process_last_error();
 
-		return -1;
+		return 2;
 	}
 
 	wprintf(L"Disconnected\nQuote table test completed\n");
