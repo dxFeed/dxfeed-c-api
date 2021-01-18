@@ -108,11 +108,12 @@ int main(int argc, char* argv[]) {
 	dxf_initialize_logger("last-event-test-api.log", true, true, true);
 
 	wprintf(L"LastEvent test started.\n");
-	wprintf(L"Connecting to host %s...\n", dxfeed_host);
+	wprintf(L"Connecting to host %hs...\n", dxfeed_host);
 
 	if (!dxf_create_connection(dxfeed_host, NULL, NULL, NULL, NULL, NULL, &connection)) {
 		process_last_error();
-		return -1;
+
+		return 1;
 	}
 
 	wprintf(L"Connected\n");
@@ -120,9 +121,19 @@ int main(int argc, char* argv[]) {
 	wprintf(L"Creating subscription to: Trade\n");
 	if (!dxf_create_subscription(connection, g_event_type, &subscription)) {
 		process_last_error();
+		dxf_close_connection(connection);
 
-		return -1;
+		return 10;
 	};
+
+	if (!dxf_attach_event_listener(subscription, listener, NULL)) {
+		process_last_error();
+		dxf_close_subscription(subscription);
+		dxf_close_connection(connection);
+
+		return 11;
+	};
+	wprintf(L"Listener has been attached\n");
 
 	wprintf(L"Adding symbols:");
 	for (int i = 0; i < g_symbols_size; ++i) {
@@ -132,15 +143,10 @@ int main(int argc, char* argv[]) {
 
 	if (!dxf_add_symbols(subscription, g_symbols, g_symbols_size)) {
 		process_last_error();
+		dxf_close_subscription(subscription);
+		dxf_close_connection(connection);
 
-		return -1;
-	};
-
-	wprintf(L"Listener attached\n");
-	if (!dxf_attach_event_listener(subscription, listener, NULL)) {
-		process_last_error();
-
-		return -1;
+		return 12;
 	};
 
 	while (g_iteration_count--) {
@@ -172,7 +178,7 @@ int main(int argc, char* argv[]) {
 	if (!dxf_close_connection(connection)) {
 		process_last_error();
 
-		return -1;
+		return 2;
 	}
 
 	wprintf(L"Disconnected\n");

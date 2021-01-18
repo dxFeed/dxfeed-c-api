@@ -90,7 +90,7 @@ void process_last_error() {
 
 	if (res == DXF_SUCCESS) {
 		if (error_code == dx_ec_success) {
-			wprintf(L"WTF - no error information is stored");
+			wprintf(L"No error information is stored");
 			return;
 		}
 
@@ -123,18 +123,23 @@ void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
 }
 #endif
 
+dxf_const_string_t connection_status_to_string(dxf_connection_status_t status) {
+	switch (status) {
+		case dxf_cs_not_connected: return L"Not connected";
+		case dxf_cs_connected: return L"Connected";
+		case dxf_cs_login_required: return L"Login required";
+		case dxf_cs_authorized: return L"Authorized";
+		default: return L"";
+	}
+
+	return L"";
+}
+
 // The example of processing a connection status change
 void on_connection_status_changed(dxf_connection_t connection, dxf_connection_status_t old_status,
 								  dxf_connection_status_t new_status, void* user_data) {
-	switch (new_status) {
-		case dxf_cs_connected:
-			wprintf(L"Connected!\n");
-			break;
-		case dxf_cs_authorized:
-			wprintf(L"Authorized!\n");
-			break;
-		default:;
-	}
+	wprintf(L"The connection status has been changed: %ls -> %ls\n", connection_status_to_string(old_status),
+			connection_status_to_string(new_status));
 }
 
 void print_timestamp(dxf_long_t timestamp) {
@@ -186,9 +191,10 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 
 		for (; i < data_count; ++i) {
 			print_timestamp(trades[i].time);
-			wprintf(L", exchangeCode=%c, price=%f, size=%i, tick=%i, change=%f, day id=%d, day volume=%.0f, scope=%d}\n",
-					trades[i].exchange_code, trades[i].price, trades[i].size, trades[i].tick, trades[i].change,
-					trades[i].day_id, trades[i].day_volume, (int)trades[i].scope);
+			wprintf(
+				L", exchangeCode=%c, price=%f, size=%i, tick=%i, change=%f, day id=%d, day volume=%.0f, scope=%d}\n",
+				trades[i].exchange_code, trades[i].price, trades[i].size, trades[i].tick, trades[i].change,
+				trades[i].day_id, trades[i].day_volume, (int)trades[i].scope);
 		}
 	}
 
@@ -243,9 +249,10 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 
 		for (; i < data_count; ++i) {
 			print_timestamp(trades[i].time);
-			wprintf(L", exchangeCode=%c, flags=%d, price=%f, size=%i, change=%f, day id=%d, day volume=%.0f, scope=%d}\n",
-					trades[i].exchange_code, trades[i].raw_flags, trades[i].price, trades[i].size, trades[i].change,
-					trades[i].day_id, trades[i].day_volume, (int)trades[i].scope);
+			wprintf(
+				L", exchangeCode=%c, flags=%d, price=%f, size=%i, change=%f, day id=%d, day volume=%.0f, scope=%d}\n",
+				trades[i].exchange_code, trades[i].raw_flags, trades[i].price, trades[i].size, trades[i].change,
+				trades[i].day_id, trades[i].day_volume, (int)trades[i].scope);
 		}
 	}
 
@@ -294,7 +301,8 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 		dxf_underlying_t* u = (dxf_underlying_t*)data;
 
 		for (; i < data_count; ++i) {
-			wprintf(L"volatility=%f, front volatility=%f, back volatility=%f, call volume=%f, put volume=%f, "
+			wprintf(
+				L"volatility=%f, front volatility=%f, back volatility=%f, call volume=%f, put volume=%f, "
 				L"option volume=%f, put call ratio=%f}\n",
 				u[i].volatility, u[i].front_volatility, u[i].back_volatility, u[i].call_volume, u[i].put_volume,
 				u[i].option_volume, u[i].put_call_ratio);
@@ -405,7 +413,7 @@ int parse_event_types(char* types_string, OUT int* types_bitmask) {
 	size_t next_len = 0;
 	int i;
 	if (types_string == NULL || types_bitmask == NULL) {
-		printf("Invalid input parameter.\n");
+		wprintf(L"Invalid input parameter.\n");
 		return false;
 	}
 	*types_bitmask = 0;
@@ -417,7 +425,7 @@ int parse_event_types(char* types_string, OUT int* types_bitmask) {
 				is_found = true;
 			}
 		}
-		if (!is_found) printf("Invalid type parameter begining with:%s\n", next_string);
+		if (!is_found) wprintf(L"Invalid type parameter begining with:%hs\n", next_string);
 		next_string += next_len;
 	}
 	return true;
@@ -438,7 +446,7 @@ int parse_symbols(char* symbols_string, OUT dxf_string_t** symbols, OUT int* sym
 	size_t next_len = 0;
 	dxf_string_t* symbol_array = NULL;
 	if (symbols_string == NULL || symbols == NULL || symbol_count == NULL) {
-		printf("Invalid input parameter.\n");
+		wprintf(L"Invalid input parameter.\n");
 		return false;
 	}
 	while (get_next_substring(&next_string, &next_len)) {
@@ -526,7 +534,6 @@ int main(int argc, char* argv[]) {
 	dxf_string_t* symbols = NULL;
 	int symbol_count = 0;
 	char* dxfeed_host = NULL;
-	dxf_string_t dxfeed_host_u = NULL;
 
 	if (argc < STATIC_PARAMS_COUNT) {
 		printf(
@@ -583,7 +590,7 @@ int main(int argc, char* argv[]) {
 				if (i + 1 == argc) {
 					wprintf(L"The dump argument error\n");
 
-					return -1;
+					return 1;
 				}
 
 				dump_file_name = argv[++i];
@@ -592,7 +599,7 @@ int main(int argc, char* argv[]) {
 				if (i + 1 == argc) {
 					wprintf(L"The token argument error\n");
 
-					return -1;
+					return 2;
 				}
 
 				token = argv[++i];
@@ -601,7 +608,7 @@ int main(int argc, char* argv[]) {
 				if (i + 1 == argc) {
 					wprintf(L"The subscription data argument error\n");
 
-					return -1;
+					return 3;
 				}
 
 				subscr_data = argv[++i];
@@ -612,7 +619,7 @@ int main(int argc, char* argv[]) {
 				if (i + 1 == argc) {
 					wprintf(L"The program timeout argument error\n");
 
-					return -1;
+					return 4;
 				}
 
 				int new_program_timeout = -1;
@@ -620,7 +627,7 @@ int main(int argc, char* argv[]) {
 				if (!atoi2(argv[++i], &new_program_timeout)) {
 					wprintf(L"The program timeout argument parsing error\n");
 
-					return -1;
+					return 5;
 				}
 
 				program_timeout = new_program_timeout;
@@ -630,33 +637,40 @@ int main(int argc, char* argv[]) {
 	}
 
 	dxf_initialize_logger_v2("command-line-api.log", true, true, true, log_data_transfer_flag);
-	wprintf(L"CommandLineSample started.\n");
-	dxfeed_host_u = ansi_to_unicode(dxfeed_host, strlen(dxfeed_host));
-	wprintf(L"Connecting to host %ls...\n", dxfeed_host_u);
-	free(dxfeed_host_u);
+	wprintf(L"Command line sample started.\n");
+	wprintf(L"Connecting to host %hs...\n", dxfeed_host);
 
 #ifdef _WIN32
 	InitializeCriticalSection(&listener_thread_guard);
 #endif
 
+	ERRORCODE connection_result;
 	if (token != NULL && token[0] != '\0') {
-		if (!dxf_create_connection_auth_bearer(dxfeed_host, token, on_reader_thread_terminate,
-											   on_connection_status_changed, NULL, NULL, NULL, &connection)) {
-			process_last_error();
-			free_symbols(symbols, symbol_count);
-			return -1;
-		}
-	} else if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, on_connection_status_changed, NULL, NULL,
-									  NULL, &connection)) {
-		process_last_error();
-		free_symbols(symbols, symbol_count);
-		return -1;
+		connection_result =
+			dxf_create_connection_auth_bearer(dxfeed_host, token, on_reader_thread_terminate,
+											  on_connection_status_changed, NULL, NULL, NULL, &connection);
+	} else {
+		connection_result = dxf_create_connection(dxfeed_host, on_reader_thread_terminate, on_connection_status_changed,
+												  NULL, NULL, NULL, &connection);
 	}
 
-	wprintf(L"Connection successful!\n");
+	if (connection_result == DXF_FAILURE) {
+		free_symbols(symbols, symbol_count);
+		process_last_error();
+
+		return 10;
+	}
+
+	wprintf(L"Connected\n");
 
 	if (dump_file_name != NULL) {
-		dxf_write_raw_data(connection, dump_file_name);
+		if (!dxf_write_raw_data(connection, dump_file_name)) {
+			free_symbols(symbols, symbol_count);
+			process_last_error();
+			dxf_close_connection(connection);
+
+			return 20;
+		}
 	}
 
 	dx_event_subscr_flag subsc_flags = subscr_data_to_flags(subscr_data);
@@ -670,25 +684,33 @@ int main(int argc, char* argv[]) {
 	}
 
 	if (subscription_result == DXF_FAILURE) {
-		process_last_error();
 		free_symbols(symbols, symbol_count);
-		return -1;
+		process_last_error();
+		dxf_close_connection(connection);
+
+		return 30;
+	}
+
+	if (!dxf_attach_event_listener(subscription, listener, NULL)) {
+		free_symbols(symbols, symbol_count);
+		process_last_error();
+		dxf_close_subscription(subscription);
+		dxf_close_connection(connection);
+
+		return 31;
 	}
 
 	if (!dxf_add_symbols(subscription, (dxf_const_string_t*)symbols, symbol_count)) {
-		process_last_error();
 		free_symbols(symbols, symbol_count);
-		return -1;
-	}
-
-	free_symbols(symbols, symbol_count);
-
-	if (!dxf_attach_event_listener(subscription, listener, NULL)) {
 		process_last_error();
+		dxf_close_subscription(subscription);
+		dxf_close_connection(connection);
 
-		return -1;
+		return 32;
 	}
-	wprintf(L"Subscription successful!\n");
+
+	wprintf(L"Subscribed\n");
+	free_symbols(symbols, symbol_count);
 
 	while (!is_thread_terminate() && program_timeout--) {
 #ifdef _WIN32
@@ -703,7 +725,7 @@ int main(int argc, char* argv[]) {
 	if (!dxf_close_subscription(subscription)) {
 		process_last_error();
 
-		return -1;
+		return 33;
 	}
 
 	wprintf(L"Disconnecting from host...\n");
@@ -711,10 +733,10 @@ int main(int argc, char* argv[]) {
 	if (!dxf_close_connection(connection)) {
 		process_last_error();
 
-		return -1;
+		return 12;
 	}
 
-	wprintf(L"Disconnect successful!\n");
+	wprintf(L"Disconnected\n");
 
 #ifdef _WIN32
 	DeleteCriticalSection(&listener_thread_guard);

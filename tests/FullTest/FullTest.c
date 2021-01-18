@@ -268,7 +268,7 @@ void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
 	is_listener_thread_terminated = true;
 	dxs_mutex_unlock(&listener_thread_guard);
 
-	wprintf(L"\nTerminating listener thread, host: %s\n", dxfeed_host);
+	wprintf(L"\nTerminating listener thread, host: %hs\n", dxfeed_host);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -691,7 +691,7 @@ void snapshot_listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_d
 		return;
 	}
 
-	swprintf(buf, DXT_BUF_LEN, L"Snapshot %ls#%s:        ", dx_event_type_to_string(info->event_type), info->source);
+	swprintf(buf, DXT_BUF_LEN, L"Snapshot %ls#%hs:        ", dx_event_type_to_string(info->event_type), info->source);
 	print_at(coord, buf);
 	int ind = get_symbol_index(snapshot_data->symbol);
 	if (ind == -1) {
@@ -947,25 +947,26 @@ int main(int argc, char* argv[]) {
 	dxf_initialize_logger("full-test-api.log", true, true, true);
 
 	if (!initialize_console()) {
-		return -1;
+		return 1;
 	}
 
 	if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, (void*)dxfeed_host,
 							   &connection)) {
 		process_last_error();
-		return -1;
+
+		return 10;
 	}
 
 	// create subscriptions
 	for (int i = dx_eid_begin; i < dx_eid_count; ++i) {
 		subscriptions[i] = create_subscription(connection, i);
 		if (subscriptions[i] == NULL) {
-			return -1;
+			return 20;
 		}
 	}
 	// create snapshots
 	for (int i = 0; i < SNAPSHOT_COUNT; ++i) {
-		if (create_snapshot_subscription(connection, &(snapshot_info[i])) == NULL) return -1;
+		if (create_snapshot_subscription(connection, &(snapshot_info[i])) == NULL) return 21;
 	}
 
 	while (!is_thread_terminate() && loop_counter--) {
@@ -975,7 +976,7 @@ int main(int argc, char* argv[]) {
 	if (!dxf_close_connection(connection)) {
 		process_last_error();
 
-		return -1;
+		return 11;
 	}
 
 	wprintf(L"Disconnected\n");

@@ -88,10 +88,10 @@ void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
 }
 #endif
 
-void print_timestamp(dxf_long_t timestamp){
-    wchar_t timefmt[80] = { 0 };
+void print_timestamp(dxf_long_t timestamp) {
+	wchar_t timefmt[80];
 
-	struct tm * timeinfo;
+	struct tm* timeinfo;
 	time_t tmpint = (time_t)(timestamp / 1000);
 	timeinfo = localtime(&tmpint);
 	wcsftime(timefmt, 80, L"%Y%m%d-%H%M%S", timeinfo);
@@ -109,7 +109,7 @@ void process_last_error() {
 
 	if (res == DXF_SUCCESS) {
 		if (error_code == dx_ec_success) {
-			wprintf(L"no error information is stored");
+			wprintf(L"No error information is stored");
 			return;
 		}
 
@@ -241,7 +241,7 @@ int main(int argc, char* argv[]) {
 	dxfeed_host = argv[1];
 	base_symbol = ansi_to_unicode(argv[2]);
 	if (base_symbol == NULL) {
-		return -1;
+		return 1;
 	}
 
 	char* token = NULL;
@@ -257,7 +257,7 @@ int main(int argc, char* argv[]) {
 				if (i + 1 == argc) {
 					wprintf(L"Token argument error\n");
 
-					return -1;
+					return 2;
 				}
 
 				token = argv[++i];
@@ -268,7 +268,7 @@ int main(int argc, char* argv[]) {
 				if (i + 1 == argc) {
 					wprintf(L"The program timeout argument error\n");
 
-					return -1;
+					return 3;
 				}
 
 				int new_program_timeout = -1;
@@ -276,7 +276,7 @@ int main(int argc, char* argv[]) {
 				if (!atoi2(argv[++i], &new_program_timeout)) {
 					wprintf(L"The program timeout argument parsing error\n");
 
-					return -1;
+					return 4;
 				}
 
 				program_timeout = new_program_timeout;
@@ -286,7 +286,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	dxf_initialize_logger_v2("regional-book-api.log", true, true, true, log_data_transfer_flag);
-	wprintf(L"RegionalBookSample test started.\n");
+	wprintf(L"Regional book sample started.\n");
 	dxfeed_host_u = ansi_to_unicode(dxfeed_host);
 	wprintf(L"Connecting to host %ls...\n", dxfeed_host_u);
 	free(dxfeed_host_u);
@@ -295,34 +295,49 @@ int main(int argc, char* argv[]) {
 	InitializeCriticalSection(&listener_thread_guard);
 #endif
 
+	ERRORCODE connection_result;
 	if (token != NULL && token[0] != '\0') {
-		if (!dxf_create_connection_auth_bearer(dxfeed_host, token, on_reader_thread_terminate, NULL, NULL, NULL, NULL, &connection)) {
-			process_last_error();
+		connection_result =
+			dxf_create_connection_auth_bearer(dxfeed_host, token, on_reader_thread_terminate,
+											  NULL, NULL, NULL, NULL, &connection);
+	} else {
+		connection_result = dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL,
+												  NULL, NULL, NULL, &connection);
+	}
 
-			return -1;
-		}
-	} else if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, NULL, &connection)) {
+	if (connection_result == DXF_FAILURE) {
+		free(base_symbol);
 		process_last_error();
 
-		return -1;
+		return 10;
 	}
 
 	wprintf(L"Connected\n");
 
 	if (!dxf_create_regional_book(connection, base_symbol, &book)) {
+		free(base_symbol);
 		process_last_error();
 		dxf_close_connection(connection);
-		return -1;
+
+		return 20;
 	}
+
+	free(base_symbol);
+
 	if (!dxf_attach_regional_book_listener(book, &listener, NULL)) {
 		process_last_error();
+		dxf_close_regional_book(book);
 		dxf_close_connection(connection);
-		return -1;
+
+		return 21;
 	}
+
     if (!dxf_attach_regional_book_listener_v2(book, &regional_listener, NULL)) {
-        process_last_error();
-        dxf_close_connection(connection);
-        return -1;
+		process_last_error();
+		dxf_close_regional_book(book);
+		dxf_close_connection(connection);
+
+        return 22;
     }
 
 	wprintf(L"Subscribed\n");
@@ -338,14 +353,15 @@ int main(int argc, char* argv[]) {
 	if (!dxf_close_regional_book(book)) {
 		process_last_error();
 		dxf_close_connection(connection);
-		return -1;
+
+		return 23;
 	}
 
 	wprintf(L"Disconnecting from host...\n");
 	if (!dxf_close_connection(connection)) {
 		process_last_error();
 
-		return -1;
+		return 11;
 	}
 	wprintf(L"Disconnected\n");
 

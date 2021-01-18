@@ -91,6 +91,40 @@ int main(int argc, char **argv) {
 
 	std::cout << "Subscribed\n";
 
+	auto result = subscription->attachListener([](const std::string& symbol, const std::vector<Subscription::EventType>& events) {
+	  struct CommonVisitor {
+		  std::string operator()(const Greeks& greeks) const {
+			  return greeks.toString();
+		  }
+
+		  std::string operator()(const Underlying& underlying) const {
+			  return underlying.toString();
+		  }
+
+		  std::string operator()(const Quote& quote) const {
+			  return quote.toString();
+		  }
+	  };
+
+	  CommonVisitor visitor;
+
+	  fmt::print("Symbol = {}:\n", symbol);
+
+	  for (const auto& e : events) {
+		  fmt::print("{}\n", nonstd::visit(visitor, e));
+	  }
+
+	  std::cout << "\n";
+	});
+
+	if (!result) {
+		std::cerr << "Error:" << Error::getLast() << "\n";
+
+		return 6;
+	}
+
+	std::cout << "Listener attached\n";
+
 	for (const auto& symbol : symbols) {
 		if (!subscription->addSymbol(symbol)) {
 			std::cerr << "Error:" << Error::getLast() << "\n";
@@ -100,40 +134,6 @@ int main(int argc, char **argv) {
 	}
 
 	std::cout << "Added symbols\n";
-
-	auto result = subscription->attachListener([](const std::string& symbol, const std::vector<Subscription::EventType>& events) {
-		struct CommonVisitor {
-			std::string operator()(const Greeks& greeks) const {
-				return greeks.toString();
-			}
-
-			std::string operator()(const Underlying& underlying) const {
-				return underlying.toString();
-			}
-
-			std::string operator()(const Quote& quote) const {
-				return quote.toString();
-			}
-		};
-
-		CommonVisitor visitor;
-
-		fmt::print("Symbol = {}:\n", symbol);
-
-		for (const auto& e : events) {
-			fmt::print("{}\n", nonstd::visit(visitor, e));
-		}
-
-		std::cout << "\n";
-	});
-
-	std::cout << "Listener attached\n";
-
-	if (!result) {
-		std::cerr << "Error:" << Error::getLast() << "\n";
-
-		return 6;
-	}
 
 	std::this_thread::sleep_for(std::chrono::hours(1));
 

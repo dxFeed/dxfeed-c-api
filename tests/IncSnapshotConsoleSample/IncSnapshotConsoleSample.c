@@ -346,7 +346,6 @@ int main(int argc, char* argv[]) {
 	dx_event_id_t event_id;
 	dxf_string_t base_symbol = NULL;
 	char* dxfeed_host = NULL;
-	dxf_string_t dxfeed_host_u = NULL;
 
 	if (argc < STATIC_PARAMS_COUNT) {
 		printf("DXFeed command line sample.\n"
@@ -392,7 +391,7 @@ int main(int argc, char* argv[]) {
 
 	base_symbol = ansi_to_unicode(argv[3]);
 	if (base_symbol == NULL) {
-		return -1;
+		return 1;
 	}
 
 	char* order_source_ptr = NULL;
@@ -412,7 +411,7 @@ int main(int argc, char* argv[]) {
 				if (i + 1 == argc) {
 					wprintf(L"The records print limit argument error\n");
 
-					return -1;
+					return 2;
 				}
 
 				int new_records_print_limit = -1;
@@ -420,7 +419,7 @@ int main(int argc, char* argv[]) {
 				if (!atoi2(argv[++i], &new_records_print_limit)) {
 					wprintf(L"The records print limit argument parsing error\n");
 
-					return -1;
+					return 3;
 				}
 
 				records_print_limit = new_records_print_limit;
@@ -429,7 +428,7 @@ int main(int argc, char* argv[]) {
 				if (i + 1 == argc) {
 					wprintf(L"The token argument error\n");
 
-					return -1;
+					return 4;
 				}
 
 				token = argv[++i];
@@ -440,7 +439,7 @@ int main(int argc, char* argv[]) {
 				if (i + 1 == argc) {
 					wprintf(L"The program timeout argument error\n");
 
-					return -1;
+					return 5;
 				}
 
 				int new_program_timeout = -1;
@@ -448,7 +447,7 @@ int main(int argc, char* argv[]) {
 				if (!atoi2(argv[++i], &new_program_timeout)) {
 					wprintf(L"The program timeout argument parsing error\n");
 
-					return -1;
+					return 6;
 				}
 
 				program_timeout = new_program_timeout;
@@ -459,7 +458,7 @@ int main(int argc, char* argv[]) {
 				if (string_len > MAX_SOURCE_SIZE) {
 					wprintf(L"Invalid order source param!\n");
 
-					return -1;
+					return 7;
 				}
 
 				char order_source[MAX_SOURCE_SIZE + 1] = {0};
@@ -472,67 +471,82 @@ int main(int argc, char* argv[]) {
 	}
 
 	dxf_initialize_logger_v2("inc-snapshot-console-api.log", true, true, true, log_data_transfer_flag);
-	wprintf(L"IncSnapshotConsoleSample test started.\n");
-	dxfeed_host_u = ansi_to_unicode(dxfeed_host);
-	wprintf(L"Connecting to host %ls...\n", dxfeed_host_u);
-	free(dxfeed_host_u);
+	wprintf(L"Incremental snapshot sample started.\n");
+	wprintf(L"Connecting to host %hs...\n", dxfeed_host);
 
 #ifdef _WIN32
 	InitializeCriticalSection(&listener_thread_guard);
 #endif
 
+	ERRORCODE connection_result;
 	if (token != NULL && token[0] != '\0') {
-		if (!dxf_create_connection_auth_bearer(dxfeed_host, token, on_reader_thread_terminate, NULL, NULL, NULL, NULL,
-											   &connection)) {
-			process_last_error();
-
-			return -1;
-		}
-	} else if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, NULL, &connection)) {
-		process_last_error();
-
-		return -1;
+		connection_result =
+			dxf_create_connection_auth_bearer(dxfeed_host, token, on_reader_thread_terminate,
+											  NULL, NULL, NULL, NULL, &connection);
+	} else {
+		connection_result = dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL,
+												  NULL, NULL, NULL, &connection);
 	}
 
-	wprintf(L"Connection successful!\n");
+	if (connection_result == DXF_FAILURE) {
+		free(base_symbol);
+		process_last_error();
+
+		return 10;
+	}
+
+	wprintf(L"Connected\n");
 
 	if (event_id == dx_eid_candle) {
 		if (!dxf_create_candle_symbol_attributes(base_symbol, DXF_CANDLE_EXCHANGE_CODE_ATTRIBUTE_DEFAULT,
 												 DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT, dxf_ctpa_day,
 												 dxf_cpa_default, dxf_csa_default, dxf_caa_default,
 												 DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, &candle_attributes)) {
+			free(base_symbol);
 			process_last_error();
 			dxf_close_connection(connection);
-			return -1;
+
+			return 20;
 		}
 
 		if (!dxf_create_candle_snapshot(connection, candle_attributes, 0, &snapshot)) {
+			free(base_symbol);
 			process_last_error();
 			dxf_delete_candle_symbol_attributes(candle_attributes);
 			dxf_close_connection(connection);
-			return -1;
+
+			return 21;
 		}
 	} else if (event_id == dx_eid_order) {
 		if (!dxf_create_order_snapshot(connection, base_symbol, order_source_ptr, 0, &snapshot)) {
+			free(base_symbol);
 			process_last_error();
 			dxf_close_connection(connection);
-			return -1;
+
+			return 22;
 		}
 	} else {
 		if (!dxf_create_snapshot(connection, event_id, base_symbol, NULL, 0, &snapshot)) {
+			free(base_symbol);
 			process_last_error();
 			dxf_close_connection(connection);
-			return -1;
+
+			return 23;
 		}
 	}
 
+	free(base_symbol);
+
 	if (!dxf_attach_snapshot_inc_listener(snapshot, listener, (void*)&records_print_limit)) {
 		process_last_error();
+		dxf_close_snapshot(snapshot);
 		if (candle_attributes != NULL) dxf_delete_candle_symbol_attributes(candle_attributes);
 		dxf_close_connection(connection);
-		return -1;
-	};
-	wprintf(L"Subscription successful!\n");
+
+		return 24;
+	}
+
+	wprintf(L"Subscribed\n");
 
 	while (!is_thread_terminate() && program_timeout--) {
 #ifdef _WIN32
@@ -546,13 +560,17 @@ int main(int argc, char* argv[]) {
 		process_last_error();
 		if (candle_attributes != NULL) dxf_delete_candle_symbol_attributes(candle_attributes);
 		dxf_close_connection(connection);
-		return -1;
+
+		return 25;
 	}
 
-	if (!dxf_delete_candle_symbol_attributes(candle_attributes)) {
-		process_last_error();
-		dxf_close_connection(connection);
-		return -1;
+	if (candle_attributes != NULL) {
+		if (!dxf_delete_candle_symbol_attributes(candle_attributes)) {
+			process_last_error();
+			dxf_close_connection(connection);
+
+			return 26;
+		}
 	}
 
 	wprintf(L"Disconnecting from host...\n");
@@ -560,10 +578,10 @@ int main(int argc, char* argv[]) {
 	if (!dxf_close_connection(connection)) {
 		process_last_error();
 
-		return -1;
+		return 11;
 	}
 
-	wprintf(L"Disconnect successful!\nConnection test completed successfully!\n");
+	wprintf(L"Disconnected\n");
 
 #ifdef _WIN32
 	DeleteCriticalSection(&listener_thread_guard);

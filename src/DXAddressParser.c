@@ -395,7 +395,7 @@ static int dx_parse_property(const char* str, size_t size, OUT dx_address_proper
 	size_t key_size;
 	size_t value_size;
 	if (splitter == NULL || dx_is_empty_entry(str, splitter - 1) || dx_is_empty_entry(splitter + 1, str + size)) {
-		dx_logging_info(L"Invalid property from: ...%s", str);
+		dx_logging_info(L"Invalid property from: ...%hs", str);
 		return dx_set_error_code(dx_nec_invalid_function_arg);
 	}
 	key_size = splitter - str;
@@ -480,7 +480,7 @@ static int dx_codec_tls_parser(const char* codec, size_t size, OUT dx_address_t*
 		} else if (strcmp(prop.key, "trustStorePassword") == 0) {
 			DX_SWAP(char*, tls.trust_store_password, prop.value);
 		} else {
-			dx_logging_info(L"Unknown property for TLS: %s=%s", prop.key, prop.value);
+			dx_logging_info(L"Unknown property for TLS: %hs=%hs", prop.key, prop.value);
 			dx_free_property(&prop);
 			dx_codec_tls_free(&tls);
 			return dx_set_error_code(dx_nec_invalid_function_arg);
@@ -657,7 +657,7 @@ static int dx_parse_address(const char* entry, size_t entry_size, OUT dx_address
 		} else if (strcmp(prop.key, "password") == 0) {
 			DX_SWAP(char*, addr->password, prop.value);
 		} else {
-			dx_logging_info(L"Unknown property: %s=%s", prop.key, prop.value);
+			dx_logging_info(L"Unknown property: %hs=%hs", prop.key, prop.value);
 			dx_free_property(&prop);
 			dx_free_address(addr);
 			return dx_set_error_code(dx_nec_invalid_function_arg);

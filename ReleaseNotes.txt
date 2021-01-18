@@ -7,13 +7,13 @@ Version 7.0.0
   - the `day_id` field was added to the `dx_trade_t`, `dx_trade_eth_t` and `dxf_trade_t` structures.
     `day_id` - identifier of the day that `Trade` or `TradeETH` represents. Identifier of the day is the number of
     days passed since January 1, 1970.
-* [DXFC-181] Extended the Underlying and Series events with putVolume and callVolume fields
+* [DXFC-181] [Breaking changes] Extended the Underlying and Series events with putVolume and callVolume fields
   - the `call_volume` and `put_volume` fields were added to the `dx_series_t`, `dxf_series_t`, `dx_underlying_t`
     and `dxf_underlying_t` structures.
     `call_volume` - call options traded volume for a day. `put_volume` - put options traded volume for a day
   - the `option_volume` field was added to the `dxf_series_t`, `dxf_underlying_t` structures.
     `option_volume` - options traded volume  for a day.
-
+* [DXFC-176] [Samples] Subscription methods are now called in a more correct order. Fixed output of hostnames.
 
 Version 6.2.0
 * Added missing documentation to EventData.h file

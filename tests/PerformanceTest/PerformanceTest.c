@@ -190,7 +190,7 @@ void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
 	is_listener_thread_terminated = true;
 	dxs_mutex_unlock(&listener_thread_guard);
 
-	wprintf(L"\nTerminating listener thread, host: %s\n", host);
+	wprintf(L"\nTerminating listener thread, host: %hs\n", host);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -198,13 +198,13 @@ int quotes_counter = 0;
 int doPrint = false;
 
 void print_timestamp(dxf_long_t timestamp) {
-	char timefmt[80];
+	wchar_t timefmt[80];
 
 	struct tm* timeinfo;
-	time_t tmpint = (int)(timestamp / 1000);
+	time_t tmpint = (time_t)(timestamp / 1000);
 	timeinfo = localtime(&tmpint);
-	strftime(timefmt, 80, "%Y%m%d-%H%M%S", timeinfo);
-	wprintf(L"%s", timefmt);
+	wcsftime(timefmt, 80, L"%Y%m%d-%H%M%S", timeinfo);
+	wprintf(L"%ls", timefmt);
 }
 
 void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count, void* user_data) {
@@ -360,7 +360,7 @@ void print_usage() {
 int main(int argc, char* argv[]) {
 	dxf_connection_t connection;
 	dxf_subscription_t subscription;
-	int loop_counter = 1000;  // *100 = msec of running
+	int loop_counter = 3600;  // seconds
 	int arg = 1;
 	char line[LINE_SIZE];
 	int symbols_pos = 0;
@@ -383,7 +383,7 @@ int main(int argc, char* argv[]) {
 			file = fopen(argv[i], "rt");
 			if (file == NULL) {
 				wprintf(L"Couldn't open input file.");
-				return -1;
+				return 1;
 			}
 
 			while (fgets(line, LINE_SIZE, file) != NULL) {	// read symbols from IPF file
@@ -406,46 +406,55 @@ int main(int argc, char* argv[]) {
 		return 0;
 	}
 
-	dxf_initialize_logger("perfomance-test-api.log", true, true, true);
+	dxf_initialize_logger("performance-test-api.log", true, true, true);
 	dxs_mutex_create(&listener_thread_guard);
 
-	wprintf(L"Sample test started.\n");
-	wprintf(L"Connecting to host %s...\n", dxfeed_host);
+	wprintf(L"Performance test started.\n");
+	wprintf(L"Connecting to host %hs...\n", dxfeed_host);
 
 	if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, (void*)dxfeed_host,
 							   &connection)) {
 		process_last_error();
-		return -1;
+
+		return 10;
 	}
 
-	wprintf(L"Connection successful!\n");
+	wprintf(L"Connected\n");
 	time(&start);
+
 	if (!dxf_create_subscription(
 			connection, DXF_ET_TRADE | DXF_ET_QUOTE | DXF_ET_ORDER | DXF_ET_SUMMARY | DXF_ET_PROFILE, &subscription)) {
 		process_last_error();
-		return -1;
-	}
+		dxf_close_connection(connection);
 
-	if (symbols_pos > 0) {
-		for (size_t i = 0; i < symbols_pos; ++i) {
-			wprintf(L"Subscribing to: %s\n", symbols[i]);
-			if (!dxf_add_symbol(subscription, ansi_to_unicode(symbols[i]))) {
-				process_last_error();
-				return -1;
-			}
-		}
+		return 20;
 	}
 
 	if (!dxf_attach_event_listener(subscription, listener, NULL)) {
 		process_last_error();
+		dxf_close_subscription(subscription);
+		dxf_close_connection(connection);
 
-		return -1;
+		return 21;
 	}
 
-	wprintf(L"Subscription successful!\n");
+	if (symbols_pos > 0) {
+		for (size_t i = 0; i < symbols_pos; ++i) {
+			wprintf(L"Subscribing to: %hs\n", symbols[i]);
+			if (!dxf_add_symbol(subscription, ansi_to_unicode(symbols[i]))) {
+				process_last_error();
+				dxf_close_subscription(subscription);
+				dxf_close_connection(connection);
+
+				return 22;
+			}
+		}
+	}
+
+	wprintf(L"Subscribed\n");
 
 	while (!is_thread_terminate() && loop_counter--) {
-		dxs_sleep(100);
+		dxs_sleep(1000);
 	}
 
 	dxs_mutex_destroy(&listener_thread_guard);
@@ -454,14 +463,14 @@ int main(int argc, char* argv[]) {
 	if (!dxf_close_connection(connection)) {
 		process_last_error();
 
-		return -1;
+		return 11;
 	}
 
 	time(&end);
 	diff_time = (int)difftime(end, start);
 
-	wprintf(L"Disconnect successful!\nConnection test completed successfully!\n");
-	wprintf(L"received %i quotes in %i sec. %i quotes in 1 sec\n", quotes_counter, diff_time,
+	wprintf(L"Disconnected\nConnection test completed\n");
+	wprintf(L"Received %i quotes in %i sec. %i quotes in 1 sec\n", quotes_counter, diff_time,
 			(int)(quotes_counter / diff_time));
 
 	return 0;
