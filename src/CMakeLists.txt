@@ -86,6 +86,7 @@ set(HEADER_FILES
         DXThreads.h
         EventManager.h
         EventSubscription.h
+        Configuration.hpp
         Logger.h
         ObjectArray.h
         PriceLevelBook.h

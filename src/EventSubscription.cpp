@@ -107,7 +107,7 @@ class ListenerContext {
 	EventListenerVersion version;
 	void* user_data;
 
-	public:
+public:
 	ListenerContext(ListenerPtr listener, EventListenerVersion version, void* user_data) noexcept
 		: version{version}, user_data{user_data} {
 		if (version == EventListenerVersion::Default) {
@@ -178,7 +178,7 @@ class EventSubscriptionConnectionContext {
 	std::unordered_map<std::wstring, SymbolData*> symbols{};
 	std::unordered_set<SubscriptionData*> subscriptions{};
 
-	public:
+public:
 	explicit EventSubscriptionConnectionContext(dxf_connection_t conn)
 		: connection{conn}, subscr_guard{}, symbols{}, subscriptions{} {}
 
@@ -817,11 +817,12 @@ static void dx_call_subscr_listeners(SubscriptionData* subscr_data, unsigned eve
 
 #define DX_ORDER_SOURCE_COMPARATOR_NONSYM(l, r) (dx_compare_strings(l.suffix, r))
 
-void pass_event_data_to_listeners(EventSubscriptionConnectionContext* ctx, SymbolData* symbol_data, dx_event_id_t event_id, dxf_const_string_t symbol_name,
-								  dxf_const_event_data_t data, int data_count, const dxf_event_params_t* event_params) {
-	symbol_data->ref_count++; //TODO replace by std::shared_ptr\std::weak_ptr
+void pass_event_data_to_listeners(EventSubscriptionConnectionContext* ctx, SymbolData* symbol_data,
+								  dx_event_id_t event_id, dxf_const_string_t symbol_name, dxf_const_event_data_t data,
+								  int data_count, const dxf_event_params_t* event_params) {
+	symbol_data->ref_count++;  // TODO replace by std::shared_ptr\std::weak_ptr
 	unsigned event_bitmask = DX_EVENT_BIT_MASK(static_cast<unsigned>(event_id));
-	auto subscriptions = symbol_data->subscriptions; //number of subscriptions may be changed in the listeners
+	auto subscriptions = symbol_data->subscriptions;  // number of subscriptions may be changed in the listeners
 
 	for (auto&& subscription_data : subscriptions) {
 		if (!(subscription_data->event_types &
@@ -869,7 +870,7 @@ void pass_event_data_to_listeners(EventSubscriptionConnectionContext* ctx, Symbo
 		}
 	}
 
-	//TODO replace by std::shared_ptr\std::weak_ptr
+	// TODO replace by std::shared_ptr\std::weak_ptr
 	symbol_data->ref_count--;
 	if (symbol_data->ref_count == 0) {
 		ctx->removeSymbolData(symbol_data);
@@ -908,7 +909,8 @@ int dx_process_event_data(dxf_connection_t connection, dx_event_id_t event_id, d
 
 		if (wildcard_symbol_data != nullptr) {
 			dx_store_last_symbol_event(wildcard_symbol_data, event_id, data, data_count);
-			pass_event_data_to_listeners(ctx, wildcard_symbol_data, event_id, symbol_name, data, data_count, event_params);
+			pass_event_data_to_listeners(ctx, wildcard_symbol_data, event_id, symbol_name, data, data_count,
+										 event_params);
 		}
 	});
 
