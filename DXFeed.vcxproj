@@ -455,6 +455,7 @@
     <ClInclude Include="src\DXThreads.h" />
     <ClInclude Include="src\EventManager.h" />
     <ClInclude Include="src\EventSubscription.h" />
+    <ClInclude Include="src\EventSubscription.hpp" />
     <ClInclude Include="src\Logger.h" />
     <ClInclude Include="src\PrimitiveTypes.h" />
     <ClInclude Include="src\RecordTranscoder.h" />

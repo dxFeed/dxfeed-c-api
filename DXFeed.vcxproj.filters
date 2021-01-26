@@ -189,6 +189,9 @@
     <ClInclude Include="src\EventSubscription.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\EventSubscription.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="src\Logger.h">
       <Filter>Header Files</Filter>
     </ClInclude>

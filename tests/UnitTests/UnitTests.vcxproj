@@ -418,6 +418,7 @@
     <ClInclude Include="..\..\src\ObjectArray.h" />
     <ClInclude Include="..\..\src\TaskQueue.h" />
     <ClInclude Include="..\..\src\EventSubscription.h" />
+    <ClInclude Include="..\..\src\EventSubscription.hpp" />
     <ClInclude Include="AddressParserTest.h" />
     <ClInclude Include="AlgorithmsTest.h" />
     <ClInclude Include="CandleTest.h" />
