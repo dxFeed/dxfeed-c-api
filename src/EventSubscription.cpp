@@ -46,6 +46,7 @@ extern "C" {
 #include <vector>
 
 #include "EventSubscription.hpp"
+#include "Configuration.hpp"
 
 /* -------------------------------------------------------------------------- */
 /*

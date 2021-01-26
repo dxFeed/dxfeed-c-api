@@ -19,17 +19,115 @@
 
 #pragma once
 
+#include <iterator>
+#include <locale>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 
 namespace dx {
+namespace algorithm {
+namespace detail {
+
+class IsIEqual {
+	std::locale locale_;
+
+public:
+	explicit IsIEqual(const std::locale& locale = std::locale()) : locale_{locale} {}
+
+	template <typename T, typename U>
+	bool operator()(const T& t, const U& u) const {
+		return std::tolower<T>(t, locale_) == std::tolower<U>(u, locale_);
+	}
+};
+
+class IsSpace {
+	std::locale locale_;
+
+public:
+	explicit IsSpace(const std::locale& locale = std::locale()) : locale_{locale} {}
+
+	template <typename T>
+	bool operator()(const T& t) const {
+		return std::isspace<T>(t, locale_);
+	}
+};
+
+template <typename ForwardIterator, typename Predicate>
+inline ForwardIterator trimEndWithIteratorCategory(ForwardIterator begin, ForwardIterator end, Predicate isSpace,
+												   std::forward_iterator_tag) {
+	ForwardIterator result = begin;
+
+	for (ForwardIterator it = begin; it != end; ++it) {
+		if (!isSpace(*it)) {
+			result = it;
+			++result;
+		}
+	}
+
+	return result;
+}
+
+template <typename BidirectionalIterator, typename Predicate>
+inline BidirectionalIterator trimEndWithIteratorCategory(BidirectionalIterator begin, BidirectionalIterator end,
+														 Predicate isSpace, std::bidirectional_iterator_tag) {
+	for (BidirectionalIterator it = end; it != begin;) {
+		if (!isSpace(*(--it))) {
+			return ++it;
+		}
+	}
+
+	return begin;
+}
+
+template <typename ForwardIterator, typename Predicate>
+inline ForwardIterator trimBegin(ForwardIterator begin, ForwardIterator end, Predicate isSpace) {
+	ForwardIterator it = begin;
+
+	for (; it != end; ++it) {
+		if (!isSpace(*it)) {
+			return it;
+		}
+	}
+
+	return it;
+}
+
+template <typename Iterator, typename Predicate>
+inline Iterator trimEnd(Iterator begin, Iterator end, Predicate isSpace) {
+	return trimEndWithIteratorCategory(begin, end, isSpace, std::iterator_traits<Iterator>::iterator_category());
+}
+
+}  // namespace detail
+
+template <typename Range1, typename Range2, typename Predicate>
+inline bool equals(const Range1& first, const Range2& second, Predicate cmp) {
+	auto firstIt = std::begin(first);
+	auto secondIt = std::begin(second);
+
+	for (; firstIt != std::end(first) && secondIt != std::end(second); ++firstIt, secondIt++) {
+		if (!cmp(*firstIt, *secondIt)) {
+			return false;
+		}
+	}
+
+	return (secondIt == std::end(second)) && (firstIt == std::end(first));
+}
+
+template <typename Range1, typename Range2>
+inline bool iEquals(const Range1& first, const Range2& second, const std::locale& locale = std::locale()) {
+	return equals(first, second, detail::IsIEqual(locale));
+}
+
+}  // namespace algorithm
+
 class Configuration {
 	std::unordered_map<std::string, std::string> properties{};
 
 public:
 	Configuration() = default;
 
-	std::string getString(const std::string& key, std::string defaultValue) {
+	std::string getString(const std::string& key, const std::string& defaultValue) {
 		auto found = properties.find(key);
 
 		if (found == properties.end()) {
@@ -37,6 +135,85 @@ public:
 		}
 
 		return found->second;
+	}
+
+	int getInt(const std::string& key, int defaultValue) {
+		auto found = properties.find(key);
+
+		if (found == properties.end()) {
+			return defaultValue;
+		}
+
+		auto foundValue = found->second;
+
+		try {
+			return std::stoi(foundValue, nullptr, 10);
+		} catch (const std::exception&) {
+			return defaultValue;
+		}
+	}
+
+	long getLong(const std::string& key, long defaultValue) {
+		auto found = properties.find(key);
+
+		if (found == properties.end()) {
+			return defaultValue;
+		}
+
+		auto foundValue = found->second;
+
+		try {
+			return std::stol(foundValue, nullptr, 10);
+		} catch (const std::exception&) {
+			return defaultValue;
+		}
+	}
+
+	long long getLongLong(const std::string& key, long long defaultValue) {
+		auto found = properties.find(key);
+
+		if (found == properties.end()) {
+			return defaultValue;
+		}
+
+		auto foundValue = found->second;
+
+		try {
+			return std::stoll(foundValue, nullptr, 10);
+		} catch (const std::exception&) {
+			return defaultValue;
+		}
+	}
+
+	double getDouble(const std::string& key, double defaultValue) {
+		auto found = properties.find(key);
+
+		if (found == properties.end()) {
+			return defaultValue;
+		}
+
+		auto foundValue = found->second;
+
+		try {
+			return std::stod(foundValue, nullptr);
+		} catch (const std::exception&) {
+			return defaultValue;
+		}
+	}
+
+	bool getBool(const std::string& key, bool defaultValue) {
+		if (properties.count(key) > 0) {
+		}
+
+		auto found = properties.find(key);
+
+		if (found == properties.end()) {
+			return defaultValue;
+		}
+
+		auto foundValue = found->second;
+
+		return algorithm::iEquals("true", foundValue);
 	}
 };
 }  // namespace dx
