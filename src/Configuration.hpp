@@ -24,6 +24,10 @@
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
+#include <memory>
+#include <mutex>
+#include <toml.hpp>
+#include <sstream>
 
 namespace dx {
 namespace algorithm {
@@ -134,15 +138,75 @@ inline Range trimCopy(const Range& range, const std::locale& locale = std::local
 
 }  // namespace algorithm
 
-class Configuration {
+struct Configuration : std::enable_shared_from_this<Configuration> {
+	enum class Type {None, String, File};
+
+private:
+
+	Type type_;
+	std::string config_;
+	std::mutex mutex_;
+	bool loaded_ = false;
 	std::unordered_map<std::string, std::string> properties_{};
 
-public:
-	Configuration() = default;
+	Configuration(): type_{Type::None}, config_{}, mutex_{} {}
 
-	Configuration(const std::unordered_map<std::string, std::string>& properties) : properties_{properties} {}
+public:
+
+	static std::shared_ptr<Configuration> getInstance() {
+		static std::shared_ptr<Configuration> instance{new Configuration()};
+
+		return instance;
+	}
+
+	bool loadFromFile(const std::string& fileName) {
+		std::lock_guard<std::mutex> lock(mutex_);
+
+		if (loaded_ || algorithm::trimCopy(fileName).empty()) {
+			return false;
+		}
+
+		try {
+			auto data = toml::parse(fileName);
+
+			loaded_ = true;
+			type_ = Type::File;
+			config_ = fileName;
+
+			return true;
+		} catch (const std::exception&) {
+			loaded_ = false;
+		}
+
+		return false;
+	}
+
+	bool loadFromString(const std::string& config) {
+		std::lock_guard<std::mutex> lock(mutex_);
+
+		if (loaded_ || algorithm::trimCopy(config).empty()) {
+			return false;
+		}
+
+		try {
+			std::istringstream iss(config);
+
+			auto data = toml::parse(iss);
+
+			loaded_ = true;
+			type_ = Type::String;
+			config_ = config;
+
+			return true;
+		} catch (const std::exception&) {
+			loaded_ = false;
+		}
+
+		return false;
+	}
 
 	std::string getString(const std::string& key, const std::string& defaultValue) {
+		std::lock_guard<std::mutex> lock(mutex_);
 		auto found = properties_.find(key);
 
 		if (found == properties_.end()) {
@@ -153,6 +217,7 @@ public:
 	}
 
 	int getInt(const std::string& key, int defaultValue) {
+		std::lock_guard<std::mutex> lock(mutex_);
 		auto found = properties_.find(key);
 
 		if (found == properties_.end()) {
@@ -169,6 +234,7 @@ public:
 	}
 
 	long getLong(const std::string& key, long defaultValue) {
+		std::lock_guard<std::mutex> lock(mutex_);
 		auto found = properties_.find(key);
 
 		if (found == properties_.end()) {
@@ -185,6 +251,7 @@ public:
 	}
 
 	long long getLongLong(const std::string& key, long long defaultValue) {
+		std::lock_guard<std::mutex> lock(mutex_);
 		auto found = properties_.find(key);
 
 		if (found == properties_.end()) {
@@ -201,6 +268,7 @@ public:
 	}
 
 	double getDouble(const std::string& key, double defaultValue) {
+		std::lock_guard<std::mutex> lock(mutex_);
 		auto found = properties_.find(key);
 
 		if (found == properties_.end()) {
@@ -217,6 +285,7 @@ public:
 	}
 
 	bool getBool(const std::string& key, bool defaultValue) {
+		std::lock_guard<std::mutex> lock(mutex_);
 		auto found = properties_.find(key);
 
 		if (found == properties_.end()) {

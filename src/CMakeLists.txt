@@ -61,7 +61,7 @@ if (NOT ${APP_VERSION} STREQUAL "")
     configure_file("${PROJECT_SOURCE_DIR}/${PROJECT}${POSTFIX}.def.in" "${PROJECT_SOURCE_DIR}/${DEF_FILE}")
 endif ()
 
-include_directories(${INCLUDE_DIR})
+include_directories(${INCLUDE_DIR} ../thirdparty/toml11)
 
 set(EXPORT_HEADERS
         ${INCLUDE_DIR}/DXErrorCodes.h
@@ -378,7 +378,7 @@ set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/DXFeedAllCPackConfig.cmake")
 install(TARGETS ${PROJECT}
         DESTINATION "bin/${TARGET_PLATFORM}"
         )
-install(DIRECTORY "${INCLUDE_DIR}" "../scripts" "../src"
+install(DIRECTORY "${INCLUDE_DIR}" "../scripts" "../src" "../thirdparty"
         DESTINATION "."
         PATTERN "build" EXCLUDE
         )
