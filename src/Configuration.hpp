@@ -95,7 +95,8 @@ inline ForwardIterator trimBegin(ForwardIterator begin, ForwardIterator end, Pre
 
 template <typename Iterator, typename Predicate>
 inline Iterator trimEnd(Iterator begin, Iterator end, Predicate isSpace) {
-	return trimEndWithIteratorCategory(begin, end, isSpace, typename std::iterator_traits<Iterator>::iterator_category());
+	return trimEndWithIteratorCategory(begin, end, isSpace,
+									   typename std::iterator_traits<Iterator>::iterator_category());
 }
 
 }  // namespace detail
@@ -134,15 +135,17 @@ inline Range trimCopy(const Range& range, const std::locale& locale = std::local
 }  // namespace algorithm
 
 class Configuration {
-	std::unordered_map<std::string, std::string> properties{};
+	std::unordered_map<std::string, std::string> properties_{};
 
 public:
 	Configuration() = default;
 
-	std::string getString(const std::string& key, const std::string& defaultValue) {
-		auto found = properties.find(key);
+	Configuration(const std::unordered_map<std::string, std::string>& properties) : properties_{properties} {}
 
-		if (found == properties.end()) {
+	std::string getString(const std::string& key, const std::string& defaultValue) {
+		auto found = properties_.find(key);
+
+		if (found == properties_.end()) {
 			return defaultValue;
 		}
 
@@ -150,9 +153,9 @@ public:
 	}
 
 	int getInt(const std::string& key, int defaultValue) {
-		auto found = properties.find(key);
+		auto found = properties_.find(key);
 
-		if (found == properties.end()) {
+		if (found == properties_.end()) {
 			return defaultValue;
 		}
 
@@ -166,9 +169,9 @@ public:
 	}
 
 	long getLong(const std::string& key, long defaultValue) {
-		auto found = properties.find(key);
+		auto found = properties_.find(key);
 
-		if (found == properties.end()) {
+		if (found == properties_.end()) {
 			return defaultValue;
 		}
 
@@ -182,9 +185,9 @@ public:
 	}
 
 	long long getLongLong(const std::string& key, long long defaultValue) {
-		auto found = properties.find(key);
+		auto found = properties_.find(key);
 
-		if (found == properties.end()) {
+		if (found == properties_.end()) {
 			return defaultValue;
 		}
 
@@ -198,9 +201,9 @@ public:
 	}
 
 	double getDouble(const std::string& key, double defaultValue) {
-		auto found = properties.find(key);
+		auto found = properties_.find(key);
 
-		if (found == properties.end()) {
+		if (found == properties_.end()) {
 			return defaultValue;
 		}
 
@@ -214,12 +217,9 @@ public:
 	}
 
 	bool getBool(const std::string& key, bool defaultValue) {
-		if (properties.count(key) > 0) {
-		}
+		auto found = properties_.find(key);
 
-		auto found = properties.find(key);
-
-		if (found == properties.end()) {
+		if (found == properties_.end()) {
 			return defaultValue;
 		}
 
