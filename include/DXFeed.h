@@ -86,6 +86,11 @@
  * @defgroup c-api-regional-book Regional books
  * @brief Regional book functions
  */
+/**
+* @ingroup functions
+* @defgroup c-api-config Config
+* @brief Config functions
+*/
 
 #ifndef DXFEED_API_H_INCLUDED
 #define DXFEED_API_H_INCLUDED
@@ -1310,5 +1315,89 @@ DXFEED_API ERRORCODE dxf_get_current_connection_status(dxf_connection_t connecti
  * @param[in] pointer Pointer to memory allocated earlier in some API function from this module
  */
 DXFEED_API ERRORCODE dxf_free(void* pointer);
+
+
+/**
+ * @ingroup c-api-config
+ *
+ * @brief Initializes the C-API configuration and loads a config (in TOML format) from a wide string (dxf_const_string_t)
+ *
+ * @details The config file sample: [Sample](https://github.com/dxFeed/dxfeed-c-api/dxfeed-api-config.sample.toml)
+ *
+ * The TOML format specification: https://toml.io/en/v1.0.0-rc.2
+ *
+ * Example #1:
+ * ```c
+ * dxf_load_config_from_wstring(
+ *     L"network.heartbeatPeriod = 10\n"
+ *     L"network.heartbeatTimeout = 120\n"
+ * );
+ * ```
+ *
+ * Example #2:
+ * ```c
+ * dxf_load_config_from_wstring(
+ *     L"[network]\n"
+ *     L"heartbeatPeriod = 10\n"
+ *     L"heartbeatTimeout = 120\n"
+ * );
+ * ```
+ *
+ * @param[in] config The config (in TOML format) string
+ */
+DXFEED_API ERRORCODE dxf_load_config_from_wstring(dxf_const_string_t config);
+
+/**
+ * @ingroup c-api-config
+ *
+ * @brief Initializes the C-API configuration and loads a config (in TOML format) from a string
+ *
+ * @details The config file sample: [Sample](https://github.com/dxFeed/dxfeed-c-api/dxfeed-api-config.sample.toml)
+ *
+ * The TOML format specification: https://toml.io/en/v1.0.0-rc.2
+ *
+ * Example #1:
+ * ```c
+ * dxf_load_config_from_string(
+ *     "network.heartbeatPeriod = 10\n"
+ *     "network.heartbeatTimeout = 120\n"
+ * );
+ * ```
+ *
+ * Example #2:
+ * ```c
+ * dxf_load_config_from_string(
+ *     "[network]\n"
+ *     "heartbeatPeriod = 10\n"
+ *     "heartbeatTimeout = 120\n"
+ * );
+ * ```
+ *
+ * @param[in] config The config (in TOML format) string
+ */
+DXFEED_API ERRORCODE dxf_load_config_from_string(const char* config);
+
+/**
+ * @ingroup c-api-config
+ *
+ * @brief Initializes the C-API configuration and loads a config (in TOML format) from a file
+ *
+ * @details The config file sample: [Sample](https://github.com/dxFeed/dxfeed-c-api/dxfeed-api-config.sample.toml)
+ *
+ * The TOML format specification: https://toml.io/en/v1.0.0-rc.2
+ *
+ * Example:
+ * ```c
+ * dxf_load_config_from_file("./dxfeed-api-config.toml");
+ * ```
+ *
+ * Example #2:
+ * ```c
+ * dxf_load_config_from_file("C:\\dxFeedApp\\dxfeed-api-config.toml");
+ * ```
+ *
+ * @param[in] file_name The config (in TOML format) file name
+ */
+DXFEED_API ERRORCODE dxf_load_config_from_file(const char* file_name);
 
 #endif /* DXFEED_API_H_INCLUDED */

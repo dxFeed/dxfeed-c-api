@@ -87,6 +87,7 @@ set(HEADER_FILES
         EventManager.h
         EventSubscription.h
         EventSubscription.hpp
+        Configuration.h
         Configuration.hpp
         Logger.h
         ObjectArray.h
@@ -147,6 +148,7 @@ set(SOURCE_FILES
         EventData.c
         EventManager.c
         EventSubscription.cpp
+        Configuration.cpp
         Logger.c
         ObjectArray.c
         PriceLevelBook.c

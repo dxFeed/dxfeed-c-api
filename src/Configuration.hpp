@@ -19,16 +19,16 @@
 
 #pragma once
 
+#include <iostream>
 #include <iterator>
 #include <locale>
-#include <stdexcept>
-#include <string>
-#include <unordered_map>
 #include <memory>
 #include <mutex>
-#include <toml.hpp>
 #include <sstream>
-#include <iostream>
+#include <stdexcept>
+#include <string>
+#include <toml.hpp>
+#include <unordered_map>
 
 namespace dx {
 namespace algorithm {
@@ -140,20 +140,18 @@ inline Range trimCopy(const Range& range, const std::locale& locale = std::local
 }  // namespace algorithm
 
 struct Configuration : std::enable_shared_from_this<Configuration> {
-	enum class Type {None, String, File};
+	enum class Type { None, String, File };
 
 private:
-
 	Type type_;
 	std::string config_;
 	mutable std::mutex mutex_;
 	bool loaded_ = false;
 	toml::value properties_;
 
-	Configuration(): type_{Type::None}, config_{}, mutex_{}, properties_{} {}
+	Configuration() : type_{Type::None}, config_{}, mutex_{}, properties_{} {}
 
 public:
-
 	static std::shared_ptr<Configuration> getInstance() {
 		static std::shared_ptr<Configuration> instance{new Configuration()};
 
@@ -236,6 +234,5 @@ public:
 	int getHeartbeatTimeout(int defaultValue = 120) const {
 		return getProperty("network", "heartbeatTimeout", defaultValue);
 	}
-
 };
 }  // namespace dx
