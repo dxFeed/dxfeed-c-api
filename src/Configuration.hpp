@@ -95,7 +95,7 @@ inline ForwardIterator trimBegin(ForwardIterator begin, ForwardIterator end, Pre
 
 template <typename Iterator, typename Predicate>
 inline Iterator trimEnd(Iterator begin, Iterator end, Predicate isSpace) {
-	return trimEndWithIteratorCategory(begin, end, isSpace, std::iterator_traits<Iterator>::iterator_category());
+	return trimEndWithIteratorCategory(begin, end, isSpace, typename std::iterator_traits<Iterator>::iterator_category());
 }
 
 }  // namespace detail
@@ -117,6 +117,18 @@ inline bool equals(const Range1& first, const Range2& second, Predicate cmp) {
 template <typename Range1, typename Range2>
 inline bool iEquals(const Range1& first, const Range2& second, const std::locale& locale = std::locale()) {
 	return equals(first, second, detail::IsIEqual(locale));
+}
+
+template <typename Range, typename Predicate>
+inline Range trimCopyIf(const Range& range, Predicate isSpace) {
+	auto trimEnd = detail::trimEnd(std::begin(range), std::end(range), isSpace);
+
+	return Range(detail::trimBegin(std::begin(range), trimEnd, isSpace), trimEnd);
+}
+
+template <typename Range>
+inline Range trimCopy(const Range& range, const std::locale& locale = std::locale()) {
+	return trimCopyIf(range, detail::IsSpace(locale));
 }
 
 }  // namespace algorithm
@@ -213,7 +225,7 @@ public:
 
 		auto foundValue = found->second;
 
-		return algorithm::iEquals("true", foundValue);
+		return algorithm::iEquals("true", algorithm::trimCopy(foundValue));
 	}
 };
 }  // namespace dx
