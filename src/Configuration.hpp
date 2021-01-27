@@ -28,6 +28,7 @@
 #include <mutex>
 #include <toml.hpp>
 #include <sstream>
+#include <iostream>
 
 namespace dx {
 namespace algorithm {
@@ -145,11 +146,11 @@ private:
 
 	Type type_;
 	std::string config_;
-	std::mutex mutex_;
+	mutable std::mutex mutex_;
 	bool loaded_ = false;
-	std::unordered_map<std::string, std::string> properties_{};
+	toml::value properties_;
 
-	Configuration(): type_{Type::None}, config_{}, mutex_{} {}
+	Configuration(): type_{Type::None}, config_{}, mutex_{}, properties_{} {}
 
 public:
 
@@ -157,6 +158,12 @@ public:
 		static std::shared_ptr<Configuration> instance{new Configuration()};
 
 		return instance;
+	}
+
+	bool isLoaded() const {
+		std::lock_guard<std::mutex> lock(mutex_);
+
+		return loaded_;
 	}
 
 	bool loadFromFile(const std::string& fileName) {
@@ -167,14 +174,14 @@ public:
 		}
 
 		try {
-			auto data = toml::parse(fileName);
-
+			properties_ = toml::parse(fileName);
 			loaded_ = true;
 			type_ = Type::File;
 			config_ = fileName;
 
 			return true;
-		} catch (const std::exception&) {
+		} catch (const std::exception& e) {
+			std::cerr << e.what() << "\n";
 			loaded_ = false;
 		}
 
@@ -191,110 +198,44 @@ public:
 		try {
 			std::istringstream iss(config);
 
-			auto data = toml::parse(iss);
-
+			properties_ = toml::parse(iss);
 			loaded_ = true;
 			type_ = Type::String;
 			config_ = config;
 
 			return true;
-		} catch (const std::exception&) {
+		} catch (const std::exception& e) {
+			std::cerr << e.what() << "\n";
 			loaded_ = false;
 		}
 
 		return false;
 	}
 
-	std::string getString(const std::string& key, const std::string& defaultValue) {
+	template <typename T>
+	T getProperty(const std::string& groupName, const std::string& fieldName, T defaultValue) const {
 		std::lock_guard<std::mutex> lock(mutex_);
-		auto found = properties_.find(key);
 
-		if (found == properties_.end()) {
+		if (!loaded_) {
 			return defaultValue;
 		}
-
-		return found->second;
-	}
-
-	int getInt(const std::string& key, int defaultValue) {
-		std::lock_guard<std::mutex> lock(mutex_);
-		auto found = properties_.find(key);
-
-		if (found == properties_.end()) {
-			return defaultValue;
-		}
-
-		auto foundValue = found->second;
 
 		try {
-			return std::stoi(foundValue, nullptr, 10);
+			auto group = toml::find(properties_, groupName);
+			auto value = toml::find_or(group, fieldName, defaultValue);
+			return value;
 		} catch (const std::exception&) {
 			return defaultValue;
 		}
 	}
 
-	long getLong(const std::string& key, long defaultValue) {
-		std::lock_guard<std::mutex> lock(mutex_);
-		auto found = properties_.find(key);
-
-		if (found == properties_.end()) {
-			return defaultValue;
-		}
-
-		auto foundValue = found->second;
-
-		try {
-			return std::stol(foundValue, nullptr, 10);
-		} catch (const std::exception&) {
-			return defaultValue;
-		}
+	int getHeartbeatPeriod(int defaultValue = 10) const {
+		return getProperty("network", "heartbeatPeriod", defaultValue);
 	}
 
-	long long getLongLong(const std::string& key, long long defaultValue) {
-		std::lock_guard<std::mutex> lock(mutex_);
-		auto found = properties_.find(key);
-
-		if (found == properties_.end()) {
-			return defaultValue;
-		}
-
-		auto foundValue = found->second;
-
-		try {
-			return std::stoll(foundValue, nullptr, 10);
-		} catch (const std::exception&) {
-			return defaultValue;
-		}
+	int getHeartbeatTimeout(int defaultValue = 120) const {
+		return getProperty("network", "heartbeatTimeout", defaultValue);
 	}
 
-	double getDouble(const std::string& key, double defaultValue) {
-		std::lock_guard<std::mutex> lock(mutex_);
-		auto found = properties_.find(key);
-
-		if (found == properties_.end()) {
-			return defaultValue;
-		}
-
-		auto foundValue = found->second;
-
-		try {
-			return std::stod(foundValue, nullptr);
-		} catch (const std::exception&) {
-			return defaultValue;
-		}
-	}
-
-	bool getBool(const std::string& key, bool defaultValue) {
-		std::lock_guard<std::mutex> lock(mutex_);
-		auto found = properties_.find(key);
-
-		if (found == properties_.end()) {
-			return defaultValue;
-		}
-
-		auto foundValue = found->second;
-
-		return algorithm::iEquals("true", algorithm::trimCopy(foundValue));
-	}
 };
 }  // namespace dx
