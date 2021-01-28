@@ -36,16 +36,13 @@ extern "C" {
 }
 #endif
 
-#include <codecvt>
-#include <locale>
-#include <memory>
+#include <boost/locale/encoding_utf.hpp>
 #include <string>
 
 #include "Configuration.hpp"
 
 int dx_load_config_from_wstring(dxf_const_string_t config) {
-	return dx::Configuration::getInstance()->loadFromString(
-		std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t>().to_bytes(config));
+	return dx::Configuration::getInstance()->loadFromString(boost::locale::conv::utf_to_utf<char>(config));
 }
 
 int dx_load_config_from_string(const char* config) { return dx::Configuration::getInstance()->loadFromString(config); }

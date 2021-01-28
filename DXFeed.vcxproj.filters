@@ -30,9 +30,6 @@
     <Filter Include="Third Party\toml11">
       <UniqueIdentifier>{6235c237-ec50-4fec-9ac7-3b5bac50ebe9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Third Party\toml11\toml">
-      <UniqueIdentifier>{acf2e5ca-9779-4be9-9514-f50ba209c5db}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\ClientMessageProcessor.c">
@@ -290,6 +287,9 @@
     </ClInclude>
     <ClInclude Include="src\RegionalBook.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\toml11\toml.hpp">
+      <Filter>Third Party\toml11</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

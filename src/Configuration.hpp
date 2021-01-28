@@ -167,7 +167,7 @@ public:
 	void dump() {
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
 
-		std::cerr << "C-API Configuration:\n" << toml::format(properties_, 120) << std::endl;
+		std::cerr << "\nC-API Configuration:\n" << toml::format(properties_, 120) << std::endl;
 		std::cerr << "Loaded defaults:\n";
 		std::cerr << "dump = " << std::boolalpha << getDump() << std::endl;
 		std::cerr << "network.heartbeatPeriod = " << getNetworkHeartbeatPeriod() << std::endl;
