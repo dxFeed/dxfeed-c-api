@@ -713,7 +713,7 @@ int main(int argc, char* argv[]) {
 	wprintf(L"Subscribed\n");
 	free_symbols(symbols, symbol_count);
 
-	while (/*!is_thread_terminate() &&*/ program_timeout--) {
+	while (!is_thread_terminate() && program_timeout--) {
 #ifdef _WIN32
 		Sleep(1000);
 #else
