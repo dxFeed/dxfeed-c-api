@@ -31,6 +31,8 @@ else ()
     endif (DISABLE_TLS)
 endif (BUILD_STATIC_LIBS)
 
+add_subdirectory(thirdparty/toml11)
+
 #Note: add projects to build and package below
 add_subdirectory(src)
 

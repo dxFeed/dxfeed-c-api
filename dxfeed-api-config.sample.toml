@@ -1,0 +1,6 @@
+# The period between sending heartbeat messages (default value = 10 seconds)
+network.heartbeatPeriod = 10
+
+# Timeout for receiving messages from the server, after which the api tries to change the server and/or reconnect
+#   (default value = 120 seconds)
+network.heartbeatTimeout = 120

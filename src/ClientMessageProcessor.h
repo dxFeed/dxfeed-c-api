@@ -22,6 +22,7 @@
 
 #include "PrimitiveTypes.h"
 #include "DXPMessageData.h"
+#include "EventData.h"
 
 int dx_load_events_for_subscription (dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
 										int event_types, dxf_uint_t subscr_flags);

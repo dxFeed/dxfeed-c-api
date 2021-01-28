@@ -78,7 +78,8 @@ set(COMMON_SOURCES
     
 set(EVENT_SUBSCRIPTION_SOURCES
     ${LIB_DXFEED_SRC_DIR}/EventSubscription.h
-    ${LIB_DXFEED_SRC_DIR}/EventSubscription.c
+    ${LIB_DXFEED_SRC_DIR}/EventSubscription.hpp
+    ${LIB_DXFEED_SRC_DIR}/EventSubscription.cpp
     )
     
 set(HEADER_FILES

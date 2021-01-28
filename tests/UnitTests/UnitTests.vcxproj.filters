@@ -202,6 +202,9 @@
     <ClInclude Include="..\..\src\EventSubscription.h">
       <Filter>Event subscription</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\EventSubscription.hpp">
+      <Filter>Event subscription</Filter>
+    </ClInclude>
     <ClInclude Include="EventSubscriptionTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>

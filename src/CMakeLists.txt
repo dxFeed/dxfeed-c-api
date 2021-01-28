@@ -61,7 +61,7 @@ if (NOT ${APP_VERSION} STREQUAL "")
     configure_file("${PROJECT_SOURCE_DIR}/${PROJECT}${POSTFIX}.def.in" "${PROJECT_SOURCE_DIR}/${DEF_FILE}")
 endif ()
 
-include_directories(${INCLUDE_DIR})
+include_directories(${INCLUDE_DIR} ../thirdparty/toml11 ../thirdparty/boost-1_75)
 
 set(EXPORT_HEADERS
         ${INCLUDE_DIR}/DXErrorCodes.h
@@ -86,6 +86,9 @@ set(HEADER_FILES
         DXThreads.h
         EventManager.h
         EventSubscription.h
+        EventSubscription.hpp
+        Configuration.h
+        Configuration.hpp
         Logger.h
         ObjectArray.h
         PriceLevelBook.h
@@ -145,6 +148,7 @@ set(SOURCE_FILES
         EventData.c
         EventManager.c
         EventSubscription.cpp
+        Configuration.cpp
         Logger.c
         ObjectArray.c
         PriceLevelBook.c
@@ -376,7 +380,7 @@ set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/DXFeedAllCPackConfig.cmake")
 install(TARGETS ${PROJECT}
         DESTINATION "bin/${TARGET_PLATFORM}"
         )
-install(DIRECTORY "${INCLUDE_DIR}" "../scripts" "../src"
+install(DIRECTORY "${INCLUDE_DIR}" "../scripts" "../src" "../thirdparty"
         DESTINATION "."
         PATTERN "build" EXCLUDE
         )

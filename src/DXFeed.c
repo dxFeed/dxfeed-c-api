@@ -37,6 +37,7 @@
 #include "Snapshot.h"
 #include "PriceLevelBook.h"
 #include "RegionalBook.h"
+#include "Configuration.h"
 
 #define DX_KEEP_ERROR  false
 #define DX_RESET_ERROR true
@@ -1458,5 +1459,47 @@ DXFEED_API ERRORCODE dxf_get_current_connection_status (dxf_connection_t connect
 
 DXFEED_API ERRORCODE dxf_free (void *pointer) {
 	dx_free(pointer);
+	return DXF_SUCCESS;
+}
+
+DXFEED_API ERRORCODE dxf_load_config_from_wstring(dxf_const_string_t config) {
+	if (config == NULL) {
+		dx_set_error_code(dx_ec_invalid_func_param);
+
+		return DXF_FAILURE;
+	}
+
+	if (!dx_load_config_from_wstring(config)) {
+		return DXF_FAILURE;
+	}
+
+	return DXF_SUCCESS;
+}
+
+DXFEED_API ERRORCODE dxf_load_config_from_string(const char* config) {
+	if (config == NULL) {
+		dx_set_error_code(dx_ec_invalid_func_param);
+
+		return DXF_FAILURE;
+	}
+
+	if (!dx_load_config_from_string(config)) {
+		return DXF_FAILURE;
+	}
+
+	return DXF_SUCCESS;
+}
+
+DXFEED_API ERRORCODE dxf_load_config_from_file(const char* file_name) {
+	if (file_name == NULL) {
+		dx_set_error_code(dx_ec_invalid_func_param);
+
+		return DXF_FAILURE;
+	}
+
+	if (!dx_load_config_from_file(file_name)) {
+		return DXF_FAILURE;
+	}
+
 	return DXF_SUCCESS;
 }
