@@ -18,7 +18,9 @@ Version 7.0.0
   - The default heartbeat period (DEFAULT_HEARTBEAT_PERIOD) is set to 10. Which corresponds to the defaults
     of Java API. The default heartbeat timout remains the same.
   - Added the ability to load a configuration from a file:
+
     The config file sample: [Sample](https://github.com/dxFeed/dxfeed-c-api/dxfeed-api-config.sample.toml)
+
     The config file properties:
     - `network.heartbeatPeriod` -- The period between sending heartbeat messages (default value = 10 seconds)
     - `network.heartbeatTimeout` -- Timeout for receiving messages from the server, after which the api tries to
@@ -34,6 +36,7 @@ Version 7.0.0
       - `config` -- The config (in TOML format) string
 
   For the successful application of the configuration, these functions must be called before creating any connection.
+
   Examples of using functions can be found in their descriptions and in the generated documentation.
 
 Version 6.2.0
