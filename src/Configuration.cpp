@@ -53,3 +53,11 @@ int dx_load_config_from_string(const char* config) { return dx::Configuration::g
 int dx_load_config_from_file(const char* file_name) {
 	return dx::Configuration::getInstance()->loadFromFile(file_name);
 }
+
+int dx_get_network_heartbeat_period(int default_heartbeat_period) {
+	return dx::Configuration::getInstance()->getNetworkHeartbeatPeriod(default_heartbeat_period);
+}
+
+int dx_get_network_heartbeat_timeout(int default_heartbeat_timeout) {
+	return dx::Configuration::getInstance()->getNetworkHeartbeatTimeout(default_heartbeat_timeout);
+}

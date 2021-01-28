@@ -1321,6 +1321,7 @@ DXFEED_API ERRORCODE dxf_free(void* pointer);
  * @ingroup c-api-config
  *
  * @brief Initializes the C-API configuration and loads a config (in TOML format) from a wide string (dxf_const_string_t)
+ * For the successful application of the configuration, this function must be called before creating any connection
  *
  * @details The config file sample: [Sample](https://github.com/dxFeed/dxfeed-c-api/dxfeed-api-config.sample.toml)
  *
@@ -1344,6 +1345,9 @@ DXFEED_API ERRORCODE dxf_free(void* pointer);
  * ```
  *
  * @param[in] config The config (in TOML format) string
+ *
+ * @return {@link DXF_SUCCESS} if configuration has been successfully loaded or {@link DXF_FAILURE} on error;
+ *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure
  */
 DXFEED_API ERRORCODE dxf_load_config_from_wstring(dxf_const_string_t config);
 
@@ -1351,6 +1355,7 @@ DXFEED_API ERRORCODE dxf_load_config_from_wstring(dxf_const_string_t config);
  * @ingroup c-api-config
  *
  * @brief Initializes the C-API configuration and loads a config (in TOML format) from a string
+ * For the successful application of the configuration, this function must be called before creating any connection
  *
  * @details The config file sample: [Sample](https://github.com/dxFeed/dxfeed-c-api/dxfeed-api-config.sample.toml)
  *
@@ -1374,6 +1379,9 @@ DXFEED_API ERRORCODE dxf_load_config_from_wstring(dxf_const_string_t config);
  * ```
  *
  * @param[in] config The config (in TOML format) string
+ *
+ * @return {@link DXF_SUCCESS} if configuration has been successfully loaded or {@link DXF_FAILURE} on error;
+ *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure
  */
 DXFEED_API ERRORCODE dxf_load_config_from_string(const char* config);
 
@@ -1381,12 +1389,13 @@ DXFEED_API ERRORCODE dxf_load_config_from_string(const char* config);
  * @ingroup c-api-config
  *
  * @brief Initializes the C-API configuration and loads a config (in TOML format) from a file
+ * For the successful application of the configuration, this function must be called before creating any connection
  *
  * @details The config file sample: [Sample](https://github.com/dxFeed/dxfeed-c-api/dxfeed-api-config.sample.toml)
  *
  * The TOML format specification: https://toml.io/en/v1.0.0-rc.2
  *
- * Example:
+ * Example #1:
  * ```c
  * dxf_load_config_from_file("./dxfeed-api-config.toml");
  * ```
@@ -1397,6 +1406,9 @@ DXFEED_API ERRORCODE dxf_load_config_from_string(const char* config);
  * ```
  *
  * @param[in] file_name The config (in TOML format) file name
+ *
+ * @return {@link DXF_SUCCESS} if configuration has been successfully loaded or {@link DXF_FAILURE} on error;
+ *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure
  */
 DXFEED_API ERRORCODE dxf_load_config_from_file(const char* file_name);
 

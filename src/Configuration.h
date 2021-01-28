@@ -33,6 +33,10 @@ int dx_load_config_from_string(const char* config);
 
 int dx_load_config_from_file(const char* file_name);
 
+int dx_get_network_heartbeat_period(int default_heartbeat_period);
+
+int dx_get_network_heartbeat_timeout(int default_heartbeat_timeout);
+
 #ifdef __cplusplus
 }
 #endif

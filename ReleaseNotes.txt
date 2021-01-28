@@ -3,17 +3,38 @@ Version 7.0.0
   - the `_52_high_price` & `_52_low_price` `Profile` event fields were renamed to `high_52_week_price` &
     `low_52_week_price` respectively
   - the `change` field was added to `TradeETH` event
-* [DXFC-207] [Breaking changes] Extended the Trade and TradeETH events with new field dayId
+* [DXFC-207] Extended the Trade and TradeETH events with new field dayId
   - the `day_id` field was added to the `dx_trade_t`, `dx_trade_eth_t` and `dxf_trade_t` structures.
     `day_id` - identifier of the day that `Trade` or `TradeETH` represents. Identifier of the day is the number of
     days passed since January 1, 1970.
-* [DXFC-181] [Breaking changes] Extended the Underlying and Series events with putVolume and callVolume fields
+* [DXFC-181] Extended the Underlying and Series events with putVolume and callVolume fields
   - the `call_volume` and `put_volume` fields were added to the `dx_series_t`, `dxf_series_t`, `dx_underlying_t`
     and `dxf_underlying_t` structures.
     `call_volume` - call options traded volume for a day. `put_volume` - put options traded volume for a day
   - the `option_volume` field was added to the `dxf_series_t`, `dxf_underlying_t` structures.
     `option_volume` - options traded volume  for a day.
 * [DXFC-176] [Samples] Subscription methods are now called in a more correct order. Fixed output of hostnames.
+* [DXFC-208] Added the ability to configure client\server heartbeat parameters
+  - The default heartbeat period (DEFAULT_HEARTBEAT_PERIOD) is set to 10. Which corresponds to the defaults
+    of Java API. The default heartbeat timout remains the same.
+  - Added the ability to load a configuration from a file:
+    The config file sample: [Sample](https://github.com/dxFeed/dxfeed-c-api/dxfeed-api-config.sample.toml)
+    The config file properties:
+    - `network.heartbeatPeriod` -- The period between sending heartbeat messages (default value = 10 seconds)
+    - `network.heartbeatTimeout` -- Timeout for receiving messages from the server, after which the api tries to
+      change the server and/or reconnect (default value = 120 seconds)
+  - Added the new function `dxf_load_config_from_file(const char* file_name)` that initializes the C-API configuration
+    and loads a config (in TOML format) from a file.
+      - `file_name` -- The config (in TOML format) file name
+  - Added the new function `dxf_load_config_from_string(const char* config)` that initializes the C-API configuration
+    and loads a config (in TOML format) from a string.
+      - `config` -- The config (in TOML format) string
+  - Added the new function `dxf_load_config_from_wstring(dxf_const_string_t config)` that initializes the C-API configuration
+    and loads a config (in TOML format) from a wide string (dxf_const_string_t)
+      - `config` -- The config (in TOML format) string
+
+  For the successful application of the configuration, these functions must be called before creating any connection.
+  Examples of using functions can be found in their descriptions and in the generated documentation.
 
 Version 6.2.0
 * Added missing documentation to EventData.h file

@@ -227,11 +227,11 @@ public:
 		}
 	}
 
-	int getHeartbeatPeriod(int defaultValue = 10) const {
+	int getNetworkHeartbeatPeriod(int defaultValue = 10) const {
 		return getProperty("network", "heartbeatPeriod", defaultValue);
 	}
 
-	int getHeartbeatTimeout(int defaultValue = 120) const {
+	int getNetworkHeartbeatTimeout(int defaultValue = 120) const {
 		return getProperty("network", "heartbeatTimeout", defaultValue);
 	}
 };
