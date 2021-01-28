@@ -15,9 +15,9 @@ Version 7.0.0
     `option_volume` - options traded volume  for a day.
 * [DXFC-176] [Samples] Subscription methods are now called in a more correct order. Fixed output of hostnames.
 * [DXFC-208] Added the ability to configure client\server heartbeat parameters
-  - The default heartbeat period (DEFAULT_HEARTBEAT_PERIOD) is set to 10. Which corresponds to the defaults
-    of Java API. The default heartbeat timout remains the same.
-  - Added the ability to load a configuration from a file:
+  - The default heartbeat period (DEFAULT_HEARTBEAT_PERIOD) is set to 10 seconds. Which corresponds to the defaults
+    of Java API. The default heartbeat timeout remains the same (120 seconds).
+  - Added the ability to load a configuration from a file or a string:
 
     The config file sample: [Sample](https://github.com/dxFeed/dxfeed-c-api/dxfeed-api-config.sample.toml)
 
