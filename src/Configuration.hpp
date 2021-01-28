@@ -145,7 +145,7 @@ struct Configuration : std::enable_shared_from_this<Configuration> {
 private:
 	Type type_;
 	std::string config_;
-	mutable std::mutex mutex_;
+	mutable std::recursive_mutex mutex_;
 	bool loaded_ = false;
 	toml::value properties_;
 
@@ -159,13 +159,23 @@ public:
 	}
 
 	bool isLoaded() const {
-		std::lock_guard<std::mutex> lock(mutex_);
+		std::lock_guard<std::recursive_mutex> lock(mutex_);
 
 		return loaded_;
 	}
 
+	void dump() {
+		std::lock_guard<std::recursive_mutex> lock(mutex_);
+
+		std::cerr << "C-API Configuration:\n" << toml::format(properties_, 120) << std::endl;
+		std::cerr << "Loaded defaults:\n";
+		std::cerr << "dump = " << std::boolalpha << getDump() << std::endl;
+		std::cerr << "network.heartbeatPeriod = " << getNetworkHeartbeatPeriod() << std::endl;
+		std::cerr << "network.heartbeatTimeout = " << getNetworkHeartbeatTimeout() << std::endl << std::endl;
+	}
+
 	bool loadFromFile(const std::string& fileName) {
-		std::lock_guard<std::mutex> lock(mutex_);
+		std::lock_guard<std::recursive_mutex> lock(mutex_);
 
 		if (loaded_ || algorithm::trimCopy(fileName).empty()) {
 			return false;
@@ -177,6 +187,10 @@ public:
 			type_ = Type::File;
 			config_ = fileName;
 
+			if (getDump()) {
+				dump();
+			}
+
 			return true;
 		} catch (const std::exception& e) {
 			std::cerr << "dxFeed::API::Configuration.loadFromFile: Error: " << e.what() << "\n";
@@ -187,7 +201,7 @@ public:
 	}
 
 	bool loadFromString(const std::string& config) {
-		std::lock_guard<std::mutex> lock(mutex_);
+		std::lock_guard<std::recursive_mutex> lock(mutex_);
 
 		if (loaded_ || algorithm::trimCopy(config).empty()) {
 			return false;
@@ -201,6 +215,10 @@ public:
 			type_ = Type::String;
 			config_ = config;
 
+			if (getDump()) {
+				dump();
+			}
+
 			return true;
 		} catch (const std::exception& e) {
 			std::cerr << "dxFeed::API::Configuration.loadFromString: Error: " << e.what() << "\n";
@@ -212,16 +230,15 @@ public:
 
 	template <typename T>
 	T getProperty(const std::string& groupName, const std::string& fieldName, T defaultValue) const {
-		std::lock_guard<std::mutex> lock(mutex_);
+		std::lock_guard<std::recursive_mutex> lock(mutex_);
 
 		if (!loaded_) {
 			return defaultValue;
 		}
 
 		try {
-			auto group = toml::find(properties_, groupName);
-			auto value = toml::find_or(group, fieldName, defaultValue);
-			return value;
+			return toml::find_or((groupName.empty()) ? properties_ : toml::find(properties_, groupName), fieldName,
+								 defaultValue);
 		} catch (const std::exception&) {
 			return defaultValue;
 		}
@@ -234,5 +251,7 @@ public:
 	int getNetworkHeartbeatTimeout(int defaultValue = 120) const {
 		return getProperty("network", "heartbeatTimeout", defaultValue);
 	}
+
+	bool getDump(bool defaultValue = false) const { return getProperty("", "dump", defaultValue); }
 };
 }  // namespace dx
