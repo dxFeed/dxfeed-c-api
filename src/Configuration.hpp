@@ -179,7 +179,7 @@ public:
 
 			return true;
 		} catch (const std::exception& e) {
-			std::cerr << e.what() << "\n";
+			std::cerr << "dxFeed::API::Configuration.loadFromFile: Error: " << e.what() << "\n";
 			loaded_ = false;
 		}
 
@@ -203,7 +203,7 @@ public:
 
 			return true;
 		} catch (const std::exception& e) {
-			std::cerr << e.what() << "\n";
+			std::cerr << "dxFeed::API::Configuration.loadFromString: Error: " << e.what() << "\n";
 			loaded_ = false;
 		}
 
