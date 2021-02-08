@@ -74,6 +74,8 @@ set(EXPORT_HEADERS
 set(HEADER_FILES
         Candle.h
         ClientMessageProcessor.h
+        Configuration.h
+        Configuration.hpp
         ConnectionContextData.h
         DXAddressParser.h
         DXAlgorithms.h
@@ -87,8 +89,7 @@ set(HEADER_FILES
         EventManager.h
         EventSubscription.h
         EventSubscription.hpp
-        Configuration.h
-        Configuration.hpp
+        HeartbeatPayload.hpp
         Logger.h
         ObjectArray.h
         PriceLevelBook.h
@@ -133,6 +134,7 @@ set(PARSER_TESTS
 set(SOURCE_FILES
         Candle.c
         ClientMessageProcessor.c
+        Configuration.cpp
         ConnectionContextData.c
         DXAddressParser.c
         DXAlgorithms.c
@@ -148,7 +150,7 @@ set(SOURCE_FILES
         EventData.c
         EventManager.c
         EventSubscription.cpp
-        Configuration.cpp
+        HeartbeatPayload.cpp
         Logger.c
         ObjectArray.c
         PriceLevelBook.c
