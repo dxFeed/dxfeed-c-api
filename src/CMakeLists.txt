@@ -72,6 +72,8 @@ set(EXPORT_HEADERS
         )
 
 set(HEADER_FILES
+        BinaryQTPComposer.h
+        BinaryQTPComposer.hpp
         Candle.h
         ClientMessageProcessor.h
         Configuration.h
@@ -133,6 +135,7 @@ set(PARSER_TESTS
         )
 
 set(SOURCE_FILES
+        BinaryQTPComposer.cpp
         Candle.c
         ClientMessageProcessor.c
         Configuration.cpp

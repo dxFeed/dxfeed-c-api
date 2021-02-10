@@ -23,9 +23,9 @@
 extern "C" {
 #endif
 
-int dx_heartbeat_payload_parse_from(void* buffered_output_connection_context);
+int dx_compose_empty_heartbeat(void* qtp_composer, void* buffered_output_connection_context);
 
-int dx_heartbeat_payload_compose_to(void* buffered_input_connection_context);
+int dx_compose_heartbeat(void* qtp_composer, void* buffered_output_connection_context, const void* heartbeat_payload);
 
 #ifdef __cplusplus
 }

@@ -19,14 +19,15 @@
 
 #pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "HeartbeatPayload.hpp"
 
-int dx_heartbeat_payload_parse_from(void* buffered_output_connection_context);
+namespace dx {
 
-int dx_heartbeat_payload_compose_to(void* buffered_input_connection_context);
+struct BinaryQTPComposer {
+	int writeEmptyHeartbeatMessage(void* bufferedOutputConnectionContext) const;
 
-#ifdef __cplusplus
+	int writeHeartbeatMessage(void* bufferedOutputConnectionContext, const HeartbeatPayload& heartbeatPayload) const;
+};
+
 }
-#endif
+
