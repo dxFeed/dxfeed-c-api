@@ -23,24 +23,58 @@
 
 namespace dx {
 
-enum class ContentType : unsigned {
-	EMPTY = 0x0U,		 // no heartbeat payload
-	TIME_MILLIS = 0x1U,	 // currentTimeMillis only
-	TIME_MARK = 0x2U,
-	DELTA_MARK = 0x4U,
-	LAG_MARK = 0x8U,
-};
-
 struct HeartbeatPayload {
-	unsigned contentMask; // content bits
-	std::uint64_t timeMillis;
-	int timeMark;
-	int deltaMark;
-	int lagMark;
+	enum ContentType : unsigned {
+		EMPTY = 0x0U,		 // no heartbeat payload
+		TIME_MILLIS = 0x1U,	 // currentTimeMillis only
+		TIME_MARK = 0x2U,
+		DELTA_MARK = 0x4U,
+		LAG_MARK = 0x8U,
+	};
 
-	void composeTo(void* context) {
+private:
 
-	}
+	unsigned contentMask_; // content bits
+	std::uint64_t timeMillis_;
+	int timeMark_;
+	int deltaMark_;
+	int lagMark_;
+
+public:
+
+	HeartbeatPayload();
+
+	bool isEmpty() const;
+
+	void clear();
+
+	bool hasTimeMillis() const;
+
+	std::uint64_t getTimeMillis() const;
+
+	void setTimeMillis(std::uint64_t timeMillis);
+
+	bool hasTimeMark() const;
+
+	int getTimeMark() const;
+
+	void setTimeMark(int timeMark);
+
+	bool hasDeltaMark() const;
+
+	int getDeltaMark() const;
+
+	void setDeltaMark(int deltaMark);
+
+	bool hasLagMark() const;
+
+	int getLagMark() const;
+
+	void setLagMark(int lagMark);
+
+	bool composeTo(void* bufferedOutputConnectionContext) const;
+
+	bool parseFrom(void* bufferedInputConnectionContext);
 };
 
 }  // namespace dx

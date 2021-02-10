@@ -33,7 +33,7 @@
  */
 /* -------------------------------------------------------------------------- */
 
-typedef struct {
+typedef struct dx_buffered_input_connection_context_t {
 	dxf_byte_t* in_buffer;
 	int in_buffer_length;
 	int in_buffer_limit;

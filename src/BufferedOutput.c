@@ -28,22 +28,6 @@
 #include "DXThreads.h"
 #include "ConnectionContextData.h"
 
-/* -------------------------------------------------------------------------- */
-/*
- *	Buffered output connection context
- */
-/* -------------------------------------------------------------------------- */
-
-typedef struct dx_buffered_output_connection_context_t {
-	dxf_byte_t* out_buffer;
-	int out_buffer_length;
-	int current_out_buffer_position;
-
-	dx_mutex_t guard;
-
-	int set_field_mask;
-} dx_buffered_output_connection_context_t;
-
 #define MUTEX_FIELD_FLAG    (0x1)
 
 #define CTX(context) \

@@ -89,6 +89,7 @@ set(HEADER_FILES
         EventManager.h
         EventSubscription.h
         EventSubscription.hpp
+        HeartbeatPayload.h
         HeartbeatPayload.hpp
         Logger.h
         ObjectArray.h
