@@ -34,7 +34,7 @@
  */
 /* -------------------------------------------------------------------------- */
 
-typedef struct {
+typedef struct dx_buffered_output_connection_context_t {
 	dxf_byte_t* out_buffer;
 	int out_buffer_length;
 	int current_out_buffer_position;

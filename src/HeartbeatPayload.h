@@ -19,28 +19,18 @@
 
 #pragma once
 
-#include <cstdint>
+#include "PrimitiveTypes.h"
+#include "EventData.h"
+#include "DXTypes.h"
 
-namespace dx {
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-enum class ContentType : unsigned {
-	EMPTY = 0x0U,		 // no heartbeat payload
-	TIME_MILLIS = 0x1U,	 // currentTimeMillis only
-	TIME_MARK = 0x2U,
-	DELTA_MARK = 0x4U,
-	LAG_MARK = 0x8U,
-};
+int dx_heartbeat_payload_parse_from(void* buffered_output_connection_context);
 
-struct HeartbeatPayload {
-	unsigned contentMask; // content bits
-	std::uint64_t timeMillis;
-	int timeMark;
-	int deltaMark;
-	int lagMark;
+int dx_heartbeat_payload_compose_to(void* buffered_input_connection_context);
 
-	void composeTo(void* context) {
-
-	}
-};
-
-}  // namespace dx
+#ifdef __cplusplus
+}
+#endif
