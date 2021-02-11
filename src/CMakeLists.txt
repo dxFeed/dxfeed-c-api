@@ -74,10 +74,14 @@ set(EXPORT_HEADERS
 set(HEADER_FILES
         BinaryQTPComposer.h
         BinaryQTPComposer.hpp
+        BinaryQTPParser.h
+        BinaryQTPParser.hpp
         Candle.h
         ClientMessageProcessor.h
         Configuration.h
         Configuration.hpp
+        Connection.h
+        Connection.hpp
         ConnectionContextData.h
         DXAddressParser.h
         DXAlgorithms.h
@@ -103,6 +107,7 @@ set(HEADER_FILES
         ServerMessageProcessor.h
         Snapshot.h
         TaskQueue.h
+        TimeMarkUtil.hpp
         Version.h
         )
 
@@ -136,9 +141,11 @@ set(PARSER_TESTS
 
 set(SOURCE_FILES
         BinaryQTPComposer.cpp
+        BinaryQTPParser.cpp
         Candle.c
         ClientMessageProcessor.c
         Configuration.cpp
+        Connection.cpp
         ConnectionContextData.c
         DXAddressParser.c
         DXAlgorithms.c
