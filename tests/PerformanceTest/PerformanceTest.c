@@ -428,7 +428,7 @@ int main(int argc, char* argv[]) {
 			file = fopen(argv[i], "rt");
 			if (file == NULL) {
 				wprintf(L"Couldn't open input file.");
-				return 1;
+				return 2;
 			}
 
 			while (fgets(line, LINE_SIZE, file) != NULL) {	// read symbols from IPF file
