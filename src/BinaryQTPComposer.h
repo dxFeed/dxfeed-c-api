@@ -19,13 +19,23 @@
 
 #pragma once
 
+#include "DXTypes.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int dx_compose_empty_heartbeat(void* qtp_composer, void* buffered_output_connection_context);
+void* dx_create_binary_qtp_composer();
 
-int dx_compose_heartbeat(void* qtp_composer, void* buffered_output_connection_context, const void* heartbeat_payload);
+int dx_destroy_binary_qtp_composer(void* binary_qtp_composer);
+
+int dx_set_composer_context(void* binary_qtp_composer, void* buffered_output_connection_context);
+
+int dx_compose_empty_heartbeat(void* binary_qtp_composer);
+
+int dx_compose_heartbeat(void* binary_qtp_composer, const void* heartbeat_payload);
+
+void* dx_get_binary_qtp_composer(dxf_connection_t connection);
 
 #ifdef __cplusplus
 }

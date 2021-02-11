@@ -43,6 +43,7 @@ typedef enum {
 	dx_ccs_server_msg_processor,
 	dx_ccs_buffered_input,
 	dx_ccs_buffered_output,
+	dx_ccs_binary_qtp_composer,
 	dx_ccs_snapshot_subscription,
 	dx_ccs_price_level_book,
 	dx_ccs_regional_book,
@@ -90,6 +91,7 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_record_buffers);
 DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_server_msg_processor);
 DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_buffered_input);
 DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_buffered_output);
+DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_binary_qtp_composer);
 DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_snapshot_subscription);
 DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_price_level_book);
 DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_regional_book);
@@ -101,6 +103,7 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_record_buffers);
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_server_msg_processor);
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_buffered_input);
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_buffered_output);
+DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_binary_qtp_composer);
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_snapshot_subscription);
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_price_level_book);
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_regional_book);
@@ -112,6 +115,7 @@ DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_record_buffers);
 DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_server_msg_processor);
 DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_buffered_input);
 DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_buffered_output);
+DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_binary_qtp_composer);
 DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_snapshot_subscription);
 DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_price_level_book);
 DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_regional_book);

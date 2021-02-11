@@ -72,8 +72,10 @@ public:
 
 	void setLagMark(int lagMark);
 
+	// bufferedOutputConnectionContext should be locked outside this function
 	bool composeTo(void* bufferedOutputConnectionContext) const;
 
+	// bufferedInputConnectionContext should be locked outside this function
 	bool parseFrom(void* bufferedInputConnectionContext);
 };
 

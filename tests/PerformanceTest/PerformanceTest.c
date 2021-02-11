@@ -168,6 +168,8 @@ int dxs_mutex_unlock(dxs_mutex_t* mutex) {
 const char dxfeed_host[] = "mddqa.in.devexperts.com:7400";
 // const char dxfeed_host[] = "demo.dxfeed.com:7300";
 
+#define TIMEOUT_TAG "-o"
+
 /* -------------------------------------------------------------------------- */
 static int is_listener_thread_terminated = false;
 static dxs_mutex_t listener_thread_guard;
@@ -207,7 +209,8 @@ void print_timestamp(dxf_long_t timestamp) {
 	wprintf(L"%ls", timefmt);
 }
 
-void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count, void* user_data) {
+void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
+			  void* user_data) {
 	(void)user_data;
 	dxf_int_t i = 0;
 
@@ -247,9 +250,10 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 
 		for (; i < data_count; ++i) {
 			print_timestamp(trades[i].time);
-			wprintf(L", exchangeCode=%c, price=%f, size=%i, tick=%i, change=%f, day id=%d, day volume=%.0f, scope=%d}\n",
-					trades[i].exchange_code, trades[i].price, trades[i].size, trades[i].tick, trades[i].change,
-					trades[i].day_id, trades[i].day_volume, (int)trades[i].scope);
+			wprintf(
+				L", exchangeCode=%c, price=%f, size=%i, tick=%i, change=%f, day id=%d, day volume=%.0f, scope=%d}\n",
+				trades[i].exchange_code, trades[i].price, trades[i].size, trades[i].tick, trades[i].change,
+				trades[i].day_id, trades[i].day_volume, (int)trades[i].scope);
 		}
 	}
 
@@ -344,23 +348,47 @@ dxf_string_t ansi_to_unicode(const char* ansi_str) {
 #endif /* _WIN32 */
 }
 
+int atoi2(char* str, int* result) {
+	if (str == NULL || str[0] == '\0' || result == NULL) {
+		return false;
+	}
+
+	if (str[0] == '0' && str[1] == '\0') {
+		*result = 0;
+
+		return true;
+	}
+
+	int r = atoi(str);
+
+	if (r == 0) {
+		return false;
+	}
+
+	*result = r;
+
+	return true;
+}
+
 /* -------------------------------------------------------------------------- */
 
 void print_usage() {
-	wprintf(
-		L"Usage: PerformanceTest [print] [<IPF file> ... <IPF file>] [-h|--help|-?]\n"
-		L"  print        - print events\n"
-		L"  <IPF file>   - IPF file with symbols\n"
-		L"  -h|--help|-? - print usage\n\n");
+	wprintf(L"Usage: PerformanceTest [print] [" LS(TIMEOUT_TAG)
+		   L" <timeout>] [<IPF file> ... <IPF file>] [-h|--help|-?]\n"
+		   L"  print        - Prints events\n"
+		   L"  " LS(TIMEOUT_TAG)
+		   L" <timeout> - Sets the program timeout in seconds (default = 3600, i.e a hour)\n"
+		   L"  <IPF file>   - IPF file with symbols\n"
+		   L"  -h|--help|-? - Prints usage\n\n");
 }
 
-#define LINE_SIZE 4096
+#define LINE_SIZE	4096
 #define SYMBOLS_MAX 100000
 
 int main(int argc, char* argv[]) {
 	dxf_connection_t connection;
 	dxf_subscription_t subscription;
-	int loop_counter = 3600;  // seconds
+	int program_timeout = 3600;	 // a hour
 	int arg = 1;
 	char line[LINE_SIZE];
 	int symbols_pos = 0;
@@ -369,10 +397,27 @@ int main(int argc, char* argv[]) {
 
 	char** symbols = (char**)malloc(SYMBOLS_MAX * sizeof(char*));
 	if (argc > 1) {	 // we have params
-		if (strcmp(argv[1], "print") == 0) {
+		if (strcmp(argv[arg], "print") == 0) {
 			doPrint = true;
 			++arg;
-		} else if (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "-?") == 0 || strcmp(argv[1], "--help") == 0) {
+
+			if (argc > 3) {
+				if (strcmp(argv[arg], TIMEOUT_TAG) == 0) {
+					++arg;
+					int new_program_timeout = -1;
+
+					if (!atoi2(argv[arg], &new_program_timeout)) {
+						wprintf(L"The program timeout argument parsing error: \"%s %s\"\n\n", argv[arg - 1], argv[arg]);
+						print_usage();
+
+						return 1;
+					}
+
+					program_timeout = new_program_timeout;
+					++arg;
+				}
+			}
+		} else if (strcmp(argv[arg], "-h") == 0 || strcmp(argv[arg], "-?") == 0 || strcmp(argv[arg], "--help") == 0) {
 			print_usage();
 
 			return 0;
@@ -453,7 +498,7 @@ int main(int argc, char* argv[]) {
 
 	wprintf(L"Subscribed\n");
 
-	while (!is_thread_terminate() && loop_counter--) {
+	while (!is_thread_terminate() && program_timeout--) {
 		dxs_sleep(1000);
 	}
 

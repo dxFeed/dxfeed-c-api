@@ -23,10 +23,29 @@
 
 namespace dx {
 
-struct BinaryQTPComposer {
-	int writeEmptyHeartbeatMessage(void* bufferedOutputConnectionContext) const;
+// Not thread safe. bufferedOutputConnectionContext_ should be set and locked before any usage
+class BinaryQTPComposer {
+	void* bufferedOutputConnectionContext_;
 
-	int writeHeartbeatMessage(void* bufferedOutputConnectionContext, const HeartbeatPayload& heartbeatPayload) const;
+	BinaryQTPComposer();
+
+protected:
+
+	int writeEmptyHeartbeatMessage() const;
+
+	int writeHeartbeatMessage(const HeartbeatPayload& heartbeatPayload) const;
+
+public:
+
+	static BinaryQTPComposer* create();
+
+	static void destroy(BinaryQTPComposer* composer);
+
+	void setContext(void* bufferedOutputConnectionContext);
+
+	int composeEmptyHeartbeatMessage() const;
+
+	int composeHeartbeatMessage(const HeartbeatPayload& heartbeatPayload) const;
 };
 
 }

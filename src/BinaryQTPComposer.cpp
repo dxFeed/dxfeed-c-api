@@ -25,53 +25,139 @@ extern "C" {
 
 #include "BufferedInput.h"
 #include "BufferedOutput.h"
+#include "ConnectionContextData.h"
 
 #ifdef __cplusplus
 }
 #endif
 
 #include "BinaryQTPComposer.hpp"
+#include <new>
 
 namespace dx {
 
-int BinaryQTPComposer::writeEmptyHeartbeatMessage(void *bufferedOutputConnectionContext) const {
-	if (!dx_write_byte(bufferedOutputConnectionContext, 0)) {
+int BinaryQTPComposer::writeEmptyHeartbeatMessage() const {
+	if (!dx_write_byte(bufferedOutputConnectionContext_, 0)) {
 		return false;
 	}
 
 	return true;
 }
 
-int BinaryQTPComposer::writeHeartbeatMessage(void *bufferedOutputConnectionContext,
-											 const HeartbeatPayload &heartbeatPayload) const {
+int BinaryQTPComposer::writeHeartbeatMessage(const HeartbeatPayload &heartbeatPayload) const {
+
 
 
 	return true;
+}
+
+BinaryQTPComposer::BinaryQTPComposer(): bufferedOutputConnectionContext_{nullptr} {}
+
+BinaryQTPComposer* BinaryQTPComposer::create() {
+	return new (std::nothrow) BinaryQTPComposer{};
+}
+
+void BinaryQTPComposer::destroy(BinaryQTPComposer* composer) {
+	delete composer;
+}
+
+void BinaryQTPComposer::setContext(void* bufferedOutputConnectionContext) {
+	bufferedOutputConnectionContext_ = bufferedOutputConnectionContext;
+}
+
+int BinaryQTPComposer::composeEmptyHeartbeatMessage() const {
+	//TODO: stats
+
+	return writeEmptyHeartbeatMessage();
+}
+
+
+int BinaryQTPComposer::composeHeartbeatMessage(const HeartbeatPayload& heartbeatPayload) const {
+	//TODO: stats
+
+	return writeHeartbeatMessage(heartbeatPayload);
 }
 
 }  // namespace dx
 
-int dx_compose_empty_heartbeat(void* qtp_composer, void* buffered_output_connection_context) {
-	if (qtp_composer == nullptr || buffered_output_connection_context == nullptr) {
+DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_binary_qtp_composer) {
+	auto composer = dx::BinaryQTPComposer::create();
+
+	if (!dx_set_subsystem_data(connection, dx_ccs_binary_qtp_composer, static_cast<void*>(composer))) {
+		dx::BinaryQTPComposer::destroy(composer);
+
 		return false;
 	}
 
-	auto composer = reinterpret_cast<dx::BinaryQTPComposer*>(qtp_composer);
-
-	return composer->writeEmptyHeartbeatMessage(buffered_output_connection_context);
+	return true;
 }
 
-int dx_compose_heartbeat(void* qtp_composer, void* buffered_output_connection_context, const void* heartbeat_payload) {
-	if (qtp_composer == nullptr || buffered_output_connection_context == nullptr) {
+DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_binary_qtp_composer) {
+	int res = true;
+	auto composer = static_cast<dx::BinaryQTPComposer*>(
+		dx_get_subsystem_data(connection, dx_ccs_binary_qtp_composer, &res));
+
+	if (composer == nullptr) {
+		return res;
+	}
+
+	dx::BinaryQTPComposer::destroy(composer);
+
+	return res;
+}
+
+DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_binary_qtp_composer) {
+	return true;
+}
+
+
+void* dx_create_binary_qtp_composer() {
+	return static_cast<void*>(dx::BinaryQTPComposer::create());
+}
+
+int dx_destroy_binary_qtp_composer(void* binary_qtp_composer) {
+	dx::BinaryQTPComposer::destroy(static_cast<dx::BinaryQTPComposer*>(binary_qtp_composer));
+
+	return true;
+}
+
+int dx_set_composer_context(void* binary_qtp_composer, void* buffered_output_connection_context) {
+	if (binary_qtp_composer == nullptr) {
+		return false;
+	}
+
+	auto composer = static_cast<dx::BinaryQTPComposer*>(binary_qtp_composer);
+
+	composer->setContext(buffered_output_connection_context);
+
+	return true;
+}
+
+int dx_compose_empty_heartbeat(void* binary_qtp_composer) {
+	if (binary_qtp_composer == nullptr) {
+		return false;
+	}
+
+	auto composer = static_cast<dx::BinaryQTPComposer*>(binary_qtp_composer);
+
+	return composer->composeEmptyHeartbeatMessage();
+}
+
+int dx_compose_heartbeat(void* binary_qtp_composer, const void* heartbeat_payload) {
+	if (binary_qtp_composer == nullptr) {
 		return false;
 	}
 
 	if (heartbeat_payload == nullptr) {
-		return dx_compose_empty_heartbeat(qtp_composer, buffered_output_connection_context);
+		return dx_compose_empty_heartbeat(binary_qtp_composer);
 	}
 
-	auto composer = reinterpret_cast<dx::BinaryQTPComposer*>(qtp_composer);
-	auto heartbeatPayload = reinterpret_cast<const dx::HeartbeatPayload*>(heartbeat_payload);
+	auto composer = static_cast<dx::BinaryQTPComposer*>(binary_qtp_composer);
+	auto heartbeatPayload = static_cast<const dx::HeartbeatPayload*>(heartbeat_payload);
 
-	return composer->writeHeartbeatMessage(buffered_output_connection_context, *heartbeatPayload);
+	return composer->composeHeartbeatMessage(*heartbeatPayload);
+}
+
+void* dx_get_binary_qtp_composer(dxf_connection_t connection) {
+	return dx_get_subsystem_data(connection, dx_ccs_binary_qtp_composer, nullptr);
 }

@@ -68,7 +68,7 @@ public:
 
 	static void
 	nativeEventsListener(int eventType, dxf_const_string_t symbolName, const dxf_event_data_t *data, int dataCount, void *userData) {
-		auto subscription = reinterpret_cast<Subscription *>(userData);
+		auto subscription = static_cast<Subscription *>(userData);
 		auto listener = subscription->getListener();
 
 		if (!listener) {
@@ -107,7 +107,7 @@ public:
 
 		auto result = dxf_attach_event_listener(
 				handle_, &Subscription::nativeEventsListener,
-				reinterpret_cast<void *>(this));
+				static_cast<void *>(this));
 
 		if (result == DXF_SUCCESS) {
 			listener_ = listener;
