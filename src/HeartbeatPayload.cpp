@@ -21,8 +21,6 @@
 extern "C" {
 #endif
 
-#include "HeartbeatPayload.h"
-
 #include "BufferedInput.h"
 #include "BufferedOutput.h"
 
@@ -171,6 +169,3 @@ bool HeartbeatPayload::composeTo(void* bufferedOutputConnectionContext) const {
 
 }  // namespace dx
 
-int dx_heartbeat_payload_parse_from(void* buffered_output_connection_context) { return true; }
-
-int dx_heartbeat_payload_compose_to(void* buffered_input_connection_context) { return true; }

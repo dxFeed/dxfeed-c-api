@@ -64,3 +64,4 @@ EXPORTS
     dxf_load_config_from_wstring
     dxf_load_config_from_string
     dxf_load_config_from_file
+    dxf_set_on_server_heartbeat_notifier
