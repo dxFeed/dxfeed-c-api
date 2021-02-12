@@ -25,13 +25,18 @@ class Connection;
 
 class BinaryQTPParser {
 	Connection* connection_;
-	int currentTimeMark_ = 0;  // =0 when unknown
+	void* bufferedInputConnectionContext_;
+	int currentTimeMark_;  // =0 when unknown
 
 public:
 
 	explicit BinaryQTPParser(Connection* connection);
 
+	void setContext(void* bufferedInputConnectionContext);
+
 	void setCurrentTimeMark(int currentTimeMark);
+
+	void parseHeartbeat();
 };
 
 }  // namespace dx

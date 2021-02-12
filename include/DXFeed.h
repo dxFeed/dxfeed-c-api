@@ -135,7 +135,7 @@ typedef void (*dxf_conn_termination_notifier_t) (dxf_connection_t connection, vo
 /**
  * @ingroup callback-types
  *
- * @brief connection Status notification callback type
+ * @brief Connection Status notification callback type
  *
  * @details Called whenever connection status to dxFeed servers changes
  */
@@ -143,6 +143,17 @@ typedef void (*dxf_conn_status_notifier_t) (dxf_connection_t connection,
                                             dxf_connection_status_t old_status,
                                             dxf_connection_status_t new_status,
                                             void* user_data);
+
+/**
+ * @ingroup callback-types
+ *
+ * @brief The callback type of a connection incoming heartbeat notification
+ *
+ * @details Called when a server heartbeat arrives and contains the delta for RTT calculating
+ *  delta mark = current time mark - previous incoming heartbeat time mark
+ */
+typedef void (*dxf_conn_on_server_heartbeat_notifier_t) (dxf_connection_t connection, dxf_int_t connection_rtt,
+														void* user_data);
 
 /* the low level callback types, required in case some thread-specific initialization must be performed
    on the client side on the thread creation/destruction */
@@ -342,6 +353,26 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_custom(const char* address,
                                                        dxf_socket_thread_destruction_notifier_t stdn,
                                                        void* user_data,
                                                        OUT dxf_connection_t* connection);
+
+/**
+ * @ingroup c-api-connection-functions
+ *
+ * @brief Sets a server heartbeat notifier's callback to the connection.
+ *
+ * @details This notifier will be invoked when the new heartbeat arrives from a server contains the delta for RTT
+ *  calculating
+ *  delta mark = current time mark - previous incoming heartbeat time mark
+ *
+ * @param[in] connection  A handle of a previously created connection
+ * @param[in] notifier    A listener callback function pointer
+ * @param[in] user_data   Data to be passed to the callback function
+ *
+ * @return {@link DXF_SUCCESS} on successful set of the heartbeat notifier's or {@link DXF_FAILURE} on error;
+ *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
+ */
+DXFEED_API ERRORCODE dxf_set_on_server_heartbeat_notifier(dxf_connection_t connection,
+														  dxf_conn_on_server_heartbeat_notifier_t notifier,
+														  void* user_data);
 
 /**
  * @ingroup c-api-connection-functions

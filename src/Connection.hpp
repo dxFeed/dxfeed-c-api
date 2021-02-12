@@ -19,33 +19,42 @@
 
 #pragma once
 
+#include <atomic>
+#include <chrono>
+#include <cstdint>
 #include <limits>
 #include <memory>
-#include <chrono>
 
 #include "BinaryQTPComposer.hpp"
 #include "BinaryQTPParser.hpp"
+#include "DXTypes.h"
 #include "HeartbeatPayload.hpp"
 #include "TimeMarkUtil.hpp"
 
 namespace dx {
 
-struct Connection {
+class Connection {
 	static const int DELTA_MARK_UNKNOWN = std::numeric_limits<int>::max();
 
-	std::unique_ptr<BinaryQTPComposer> composer;
-	std::unique_ptr<BinaryQTPParser> parser;
+	dxf_connection_t connectionHandle_;
+	std::atomic<int> lastDeltaMark_;
+	int connectionRttMark_;	 // assume rtt = 0 until we know it
+	int incomingLagMark_;	 // includes connection rtt
 
-	// TODO: atomic
-	int lastDeltaMark = DELTA_MARK_UNKNOWN;
-	int connectionRttMark = 0;
-	int incomingLagMark;
-
-	void processIncomingHeartBeat(const HeartbeatPayload& heartbeatPayload);
-
-	void createOutgoingHeartbeat(long currentTimeMillis, int currentTimeMark, int lagMark);
+	std::unique_ptr<BinaryQTPComposer> composer_;
+	std::unique_ptr<BinaryQTPParser> parser_;
 
 	int computeTimeMark(int currentTimeMark) const;
+
+public:
+	Connection(dxf_connection_t connectionHandle, void* bufferedOutputConnectionContext,
+			   void* bufferedInputConnectionContext);
+
+	void processIncomingHeartbeatPayload(const HeartbeatPayload& heartbeatPayload);
+
+	int createOutgoingHeartbeat();
+
+	void processIncomingHeartbeat();
 };
 
 }  // namespace dx

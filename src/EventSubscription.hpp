@@ -130,7 +130,7 @@ public:
 	SymbolData* findSymbol(dxf_const_string_t symbolName);
 
 	template <typename F>
-	auto process(F&& f) {
+	auto process(F&& f) -> decltype(f(this)) {
 		std::lock_guard<std::recursive_mutex> lk(mutex);
 
 		return f(this);

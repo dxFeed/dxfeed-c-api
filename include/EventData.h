@@ -1077,7 +1077,8 @@ typedef enum dx_subscription_type {
 	 *
 	 * @details Delivery of latest actual value, queued older events could be conflated to conserve bandwidth and
 	 * resources.
-	 * @example Values of the latest bid/ask and last sale prices for IBM
+	 *
+	 * Example: Values of the latest bid/ask and last sale prices for IBM
 	 */
 	dx_st_ticker = dx_st_begin,
 
@@ -1085,7 +1086,8 @@ typedef enum dx_subscription_type {
 	 * @brief STREAM subscription type
 	 *
 	 * @details All events are delivered in order.
-	 * @example Incoming tape of all trades for IBM
+	 *
+	 * Example: Incoming tape of all trades for IBM
 	 */
 	dx_st_stream,
 
@@ -1094,7 +1096,8 @@ typedef enum dx_subscription_type {
 	 *
 	 * @details Request data history - values for certain records (groups of elements) which have arrived into QDS and
 	 * have special timestamp value fitting into period requested by consumer.
-	 * @example Charting: daily bars for IBM from Sep 1st till Sep 10th 2011
+	 *
+	 * Example: Charting: daily bars for IBM from Sep 1st till Sep 10th 2011
 	 */
 	dx_st_history,
 

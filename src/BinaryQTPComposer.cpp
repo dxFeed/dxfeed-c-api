@@ -21,143 +21,112 @@
 extern "C" {
 #endif
 
-#include "BinaryQTPComposer.h"
-
-#include "BufferedInput.h"
 #include "BufferedOutput.h"
-#include "ConnectionContextData.h"
 
 #ifdef __cplusplus
 }
 #endif
 
-#include "BinaryQTPComposer.hpp"
+#include <cstring>
 #include <new>
+
+#include "BinaryQTPComposer.hpp"
+#include "Connection.hpp"
 
 namespace dx {
 
 int BinaryQTPComposer::writeEmptyHeartbeatMessage() const {
-	if (!dx_write_byte(bufferedOutputConnectionContext_, 0)) {
+	return dx_write_byte(bufferedOutputConnectionContext_, MESSAGE_HEARTBEAT);
+}
+
+int BinaryQTPComposer::writeHeartbeatMessage(const HeartbeatPayload& heartbeatPayload) const {
+	if (!writeMessageHeader(MESSAGE_HEARTBEAT)) {
 		return false;
 	}
 
-	return true;
+	if (!heartbeatPayload.composeTo(bufferedOutputConnectionContext_)) {
+		return false;
+	}
+
+	return finishComposingMessage();
 }
 
-int BinaryQTPComposer::writeHeartbeatMessage(const HeartbeatPayload &heartbeatPayload) const {
-
-
-
-	return true;
-}
-
-BinaryQTPComposer::BinaryQTPComposer(): bufferedOutputConnectionContext_{nullptr} {}
-
-BinaryQTPComposer* BinaryQTPComposer::create() {
-	return new (std::nothrow) BinaryQTPComposer{};
-}
-
-void BinaryQTPComposer::destroy(BinaryQTPComposer* composer) {
-	delete composer;
-}
+BinaryQTPComposer::BinaryQTPComposer(Connection* connection)
+	: connection_{connection}, bufferedOutputConnectionContext_{nullptr}, totalLag_{0} {}
 
 void BinaryQTPComposer::setContext(void* bufferedOutputConnectionContext) {
 	bufferedOutputConnectionContext_ = bufferedOutputConnectionContext;
 }
 
 int BinaryQTPComposer::composeEmptyHeartbeatMessage() const {
-	//TODO: stats
+	// TODO: stats
 
 	return writeEmptyHeartbeatMessage();
 }
 
-
 int BinaryQTPComposer::composeHeartbeatMessage(const HeartbeatPayload& heartbeatPayload) const {
-	//TODO: stats
+	// TODO: stats
 
 	return writeHeartbeatMessage(heartbeatPayload);
 }
 
+void BinaryQTPComposer::addComposingLag(int composingLagMark) { totalLag_ += composingLagMark; }
+
+int BinaryQTPComposer::getTotalLagAndClear() {
+	auto result = totalLag_;
+
+	totalLag_ = 0;
+
+	return result;
+}
+
+int BinaryQTPComposer::writeMessageHeader(dx_message_type_t messageType) const {
+	// reserve one byte for message length
+	if (!dx_write_byte(bufferedOutputConnectionContext_, 0)) {
+		return false;
+	}
+
+	if (!dx_write_compact_int(bufferedOutputConnectionContext_, messageType)) {
+		return false;
+	}
+
+	return true;
+}
+
+int moveMessageData(void* bufferedOutputConnectionContext, int oldOffset, int newOffset, int dataLength) {
+	if (!dx_ensure_capacity(bufferedOutputConnectionContext, newOffset + dataLength)) {
+		return false;
+	}
+
+	auto* outBuffer = dx_get_out_buffer(bufferedOutputConnectionContext);
+
+	(void)memmove(outBuffer + newOffset, outBuffer + oldOffset, dataLength);
+
+	return true;
+}
+
+int BinaryQTPComposer::finishComposingMessage() const {
+	auto messageLength =
+		dx_get_out_buffer_position(bufferedOutputConnectionContext_) - 1;  // 1 is for the one byte reserved for size
+	auto lengthSize = dx_get_compact_size(messageLength);
+
+	if (lengthSize > 1) {
+		/* Only one byte was initially reserved. Moving the message buffer */
+
+		if (!moveMessageData(bufferedOutputConnectionContext_, 1, lengthSize, messageLength)) {
+			return false;
+		}
+	}
+
+	dx_set_out_buffer_position(bufferedOutputConnectionContext_, 0);
+
+	if (!dx_write_compact_int(bufferedOutputConnectionContext_, messageLength)) {
+		return false;
+	}
+
+	dx_set_out_buffer_position(bufferedOutputConnectionContext_, lengthSize + messageLength);
+
+	return true;
+}
+
 }  // namespace dx
-
-DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_binary_qtp_composer) {
-	auto composer = dx::BinaryQTPComposer::create();
-
-	if (!dx_set_subsystem_data(connection, dx_ccs_binary_qtp_composer, static_cast<void*>(composer))) {
-		dx::BinaryQTPComposer::destroy(composer);
-
-		return false;
-	}
-
-	return true;
-}
-
-DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_binary_qtp_composer) {
-	int res = true;
-	auto composer = static_cast<dx::BinaryQTPComposer*>(
-		dx_get_subsystem_data(connection, dx_ccs_binary_qtp_composer, &res));
-
-	if (composer == nullptr) {
-		return res;
-	}
-
-	dx::BinaryQTPComposer::destroy(composer);
-
-	return res;
-}
-
-DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_binary_qtp_composer) {
-	return true;
-}
-
-
-void* dx_create_binary_qtp_composer() {
-	return static_cast<void*>(dx::BinaryQTPComposer::create());
-}
-
-int dx_destroy_binary_qtp_composer(void* binary_qtp_composer) {
-	dx::BinaryQTPComposer::destroy(static_cast<dx::BinaryQTPComposer*>(binary_qtp_composer));
-
-	return true;
-}
-
-int dx_set_composer_context(void* binary_qtp_composer, void* buffered_output_connection_context) {
-	if (binary_qtp_composer == nullptr) {
-		return false;
-	}
-
-	auto composer = static_cast<dx::BinaryQTPComposer*>(binary_qtp_composer);
-
-	composer->setContext(buffered_output_connection_context);
-
-	return true;
-}
-
-int dx_compose_empty_heartbeat(void* binary_qtp_composer) {
-	if (binary_qtp_composer == nullptr) {
-		return false;
-	}
-
-	auto composer = static_cast<dx::BinaryQTPComposer*>(binary_qtp_composer);
-
-	return composer->composeEmptyHeartbeatMessage();
-}
-
-int dx_compose_heartbeat(void* binary_qtp_composer, const void* heartbeat_payload) {
-	if (binary_qtp_composer == nullptr) {
-		return false;
-	}
-
-	if (heartbeat_payload == nullptr) {
-		return dx_compose_empty_heartbeat(binary_qtp_composer);
-	}
-
-	auto composer = static_cast<dx::BinaryQTPComposer*>(binary_qtp_composer);
-	auto heartbeatPayload = static_cast<const dx::HeartbeatPayload*>(heartbeat_payload);
-
-	return composer->composeHeartbeatMessage(*heartbeatPayload);
-}
-
-void* dx_get_binary_qtp_composer(dxf_connection_t connection) {
-	return dx_get_subsystem_data(connection, dx_ccs_binary_qtp_composer, nullptr);
-}

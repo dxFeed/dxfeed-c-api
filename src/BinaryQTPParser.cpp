@@ -21,7 +21,7 @@
 extern "C" {
 #endif
 
-#include "BinaryQTPParser.h"
+#include "BufferedInput.h"
 
 #ifdef __cplusplus
 }
@@ -34,6 +34,27 @@ namespace dx {
 
 void BinaryQTPParser::setCurrentTimeMark(int currentTimeMark) { currentTimeMark_ = currentTimeMark; }
 
-BinaryQTPParser::BinaryQTPParser(Connection *connection) : connection_{connection} {}
+BinaryQTPParser::BinaryQTPParser(Connection *connection)
+	: connection_{connection}, bufferedInputConnectionContext_{nullptr}, currentTimeMark_{0} {}
+
+void BinaryQTPParser::setContext(void *bufferedInputConnectionContext) {
+	bufferedInputConnectionContext_ = bufferedInputConnectionContext;
+}
+
+void BinaryQTPParser::parseHeartbeat() {
+	auto length = dx_get_in_buffer_limit(bufferedInputConnectionContext_) -
+		dx_get_in_buffer_position(bufferedInputConnectionContext_);
+
+	//skip empty heartbeat
+	if (length == 0) {
+		return;
+	}
+
+	auto payload = HeartbeatPayload();
+
+	if (payload.parseFrom(bufferedInputConnectionContext_)) {
+		connection_->processIncomingHeartbeatPayload(payload);
+	}
+}
 
 }  // namespace dx

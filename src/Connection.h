@@ -25,6 +25,12 @@
 extern "C" {
 #endif
 
+void* dx_get_connection_impl(dxf_connection_t connection);
+
+int dx_connection_create_outgoing_heartbeat(void* connection_impl);
+
+int dx_connection_process_incoming_heartbeat(void* connection_impl);
+
 #ifdef __cplusplus
 }
 #endif

@@ -41,13 +41,15 @@
 
 typedef int (*dx_socket_data_receiver_t) (dxf_connection_t connection, const void* buffer, int buffer_size);
 
-typedef struct {
+typedef struct dx_connection_context_data_t {
 	dx_socket_data_receiver_t receiver; /* a callback to pass the read data to */
 	dxf_conn_termination_notifier_t notifier; /* a callback to notify client the current connection is to be finished and reestablished */
 	dxf_conn_status_notifier_t conn_status_notifier; /* the callback to inform the client side that the connection status has changed */
 	dxf_socket_thread_creation_notifier_t stcn; /* a callback that's called on a socket thread creation */
 	dxf_socket_thread_destruction_notifier_t stdn; /* a callback that is called on a socket thread destruction */
 	void* notifier_user_data; /* the user data passed to the notifier callbacks */
+	dxf_conn_on_server_heartbeat_notifier_t on_server_heartbeat_notifier; /* a callback that is called when the new heartbeat arrives from a server contains the delta for RTT */
+	void* on_server_heartbeat_notifier_user_data;
 } dx_connection_context_data_t;
 
 /* -------------------------------------------------------------------------- */
@@ -144,5 +146,7 @@ int dx_protocol_configure_custom_auth(dxf_connection_t connection,
 									const char* authdata);
 
 int dx_get_current_connected_address(dxf_connection_t connection, OUT char** ppAddress);
+
+dx_connection_context_data_t* dx_get_connection_context_data(dxf_connection_t connection);
 
 #endif /* DX_NETWORK_H_INCLUDED */

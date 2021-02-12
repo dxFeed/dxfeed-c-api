@@ -254,6 +254,26 @@ DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_network) {
 		!dx_compare_threads(cur_thread, context->reader_thread);
 }
 
+int dx_set_on_server_heartbeat_notifier(dxf_connection_t connection, dxf_conn_on_server_heartbeat_notifier_t notifier,
+										void* user_data) {
+	int res = true;
+
+	dx_network_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
+
+	if (context == NULL) {
+		if (res) {
+			dx_set_error_code(dx_cec_connection_context_not_initialized);
+		}
+
+		return false;
+	}
+
+	context->context_data.on_server_heartbeat_notifier = notifier;
+	context->context_data.on_server_heartbeat_notifier_user_data = user_data;
+
+	return true;
+}
+
 /* -------------------------------------------------------------------------- */
 /*
  *	Common data
@@ -1276,10 +1296,8 @@ const dxf_char_t* dx_get_connection_status_string(dxf_connection_status_t status
 }
 
 void dx_connection_status_set(dxf_connection_t connection, dxf_connection_status_t status) {
-	dx_network_connection_context_t* context = NULL;
 	int res = true;
-
-	context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
+	dx_network_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
 
 	if (context == NULL) {
 		if (res) {
@@ -1591,4 +1609,16 @@ int dx_get_current_connected_address(dxf_connection_t connection, OUT char** ppA
 	}
 	*ppAddress = pAddress;
 	return true;
+}
+
+dx_connection_context_data_t* dx_get_connection_context_data(dxf_connection_t connection) {
+	int res = true;
+
+	dx_network_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
+
+	if (context == NULL) {
+		return NULL;
+	}
+
+	return &context->context_data;
 }

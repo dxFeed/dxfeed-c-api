@@ -19,17 +19,33 @@
 
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "DXPMessageData.h"
+
+#ifdef __cplusplus
+}
+#endif
+
 #include "HeartbeatPayload.hpp"
 
 namespace dx {
 
-// Not thread safe. bufferedOutputConnectionContext_ should be set and locked before any usage
-class BinaryQTPComposer {
-	void* bufferedOutputConnectionContext_;
+class Connection;
 
-	BinaryQTPComposer();
+// bufferedOutputConnectionContext_ should be set and locked before any usage of compose* or write* functions
+class BinaryQTPComposer {
+	Connection* connection_;
+	void* bufferedOutputConnectionContext_;
+	int totalLag_;
 
 protected:
+
+	int writeMessageHeader(dx_message_type_t messageType) const;
+
+	int finishComposingMessage() const;
 
 	int writeEmptyHeartbeatMessage() const;
 
@@ -37,15 +53,17 @@ protected:
 
 public:
 
-	static BinaryQTPComposer* create();
-
-	static void destroy(BinaryQTPComposer* composer);
+	explicit BinaryQTPComposer(Connection* connection);
 
 	void setContext(void* bufferedOutputConnectionContext);
 
 	int composeEmptyHeartbeatMessage() const;
 
 	int composeHeartbeatMessage(const HeartbeatPayload& heartbeatPayload) const;
+
+	void addComposingLag(int composingLagMark);
+
+	int getTotalLagAndClear();
 };
 
 }

@@ -13,7 +13,8 @@ set(POSTFIX "")
 set(PLATFORM_POSTFIX "")
 set(LIB_TLS ${CMAKE_CURRENT_SOURCE_DIR}/../lib/libressl)
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_C_STANDARD_REQUIRED on)
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED on)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -72,9 +73,7 @@ set(EXPORT_HEADERS
         )
 
 set(HEADER_FILES
-        BinaryQTPComposer.h
         BinaryQTPComposer.hpp
-        BinaryQTPParser.h
         BinaryQTPParser.hpp
         Candle.h
         ClientMessageProcessor.h

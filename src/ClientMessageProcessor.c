@@ -33,8 +33,8 @@
 #include "EventData.h"
 #include "ServerMessageProcessor.h"
 #include "TaskQueue.h"
+#include "Connection.h"
 #include "Version.h"
-#include "BinaryQTPComposer.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -812,9 +812,9 @@ int dx_send_heartbeat (dxf_connection_t connection, int task_mode) {
 		return dx_set_error_code(dx_cec_connection_context_not_initialized);
 	}
 
-	void* binary_qtp_composer = dx_get_binary_qtp_composer(connection);
+	void* connection_impl = dx_get_connection_impl(connection);
 
-	if (binary_qtp_composer == NULL) {
+	if (connection_impl == NULL) {
 		return dx_set_error_code(dx_cec_connection_context_not_initialized);
 	}
 
@@ -830,11 +830,7 @@ int dx_send_heartbeat (dxf_connection_t connection, int task_mode) {
 
 	dx_set_out_buffer(bocc, initial_buffer, initial_size);
 
-	if (!dx_set_composer_context(binary_qtp_composer, bocc)) {
-		return false;
-	}
-
-	if (!dx_compose_empty_heartbeat(binary_qtp_composer)) {
+	if (!dx_connection_create_outgoing_heartbeat(connection_impl)) {
 
 		dx_free(dx_get_out_buffer(bocc));
 		dx_unlock_buffered_output(bocc);
