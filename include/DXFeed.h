@@ -149,10 +149,28 @@ typedef void (*dxf_conn_status_notifier_t) (dxf_connection_t connection,
  *
  * @brief The callback type of a connection incoming heartbeat notification
  *
- * @details Called when a server heartbeat arrives and contains the delta for RTT calculating
- *  delta mark = current time mark - previous incoming heartbeat time mark
+ * @details Called when a server heartbeat arrives and contains non empty payload
+ *
+ * Parameters:
+ *  - connection      - The connection handle
+ *  - server_millis   - The server time in milliseconds
+ *  - server_lag_mark - The server lag time in microseconds
+ *  - connection_rtt  - The calculated connection RTT in microseconds
+ *  - user_data       - The user data passed to dxf_set_on_server_heartbeat_notifier
+ *
+ *  An example of implementation:
+ *
+ *  ```c
+ *  void on_server_heartbeat_notifier(dxf_connection_t connection, dxf_long_t server_millis, dxf_int_t server_lag_mark,
+ *      dxf_int_t connection_rtt, void* user_data)
+ *  {
+ *      fwprintf(stderr, L"\n##### Server time (UTC) = %" PRId64 " ms, Server lag = %d us, RTT = %d us #####\n",
+ *          server_millis, server_lag_mark, connection_rtt);
+ *  }
+ *  ```
  */
-typedef void (*dxf_conn_on_server_heartbeat_notifier_t) (dxf_connection_t connection, dxf_int_t connection_rtt,
+typedef void (*dxf_conn_on_server_heartbeat_notifier_t)(dxf_connection_t connection, dxf_long_t server_millis,
+														dxf_int_t server_lag_mark, dxf_int_t connection_rtt,
 														void* user_data);
 
 /* the low level callback types, required in case some thread-specific initialization must be performed
@@ -359,13 +377,11 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_custom(const char* address,
  *
  * @brief Sets a server heartbeat notifier's callback to the connection.
  *
- * @details This notifier will be invoked when the new heartbeat arrives from a server contains the delta for RTT
- *  calculating
- *  delta mark = current time mark - previous incoming heartbeat time mark
+ * @details This notifier will be invoked when the new heartbeat arrives from a server and contains non empty payload
  *
- * @param[in] connection  A handle of a previously created connection
- * @param[in] notifier    A listener callback function pointer
- * @param[in] user_data   Data to be passed to the callback function
+ * @param[in] connection  The handle of a previously created connection
+ * @param[in] notifier    The notifier callback function pointer
+ * @param[in] user_data   The data to be passed to the callback function
  *
  * @return {@link DXF_SUCCESS} on successful set of the heartbeat notifier's or {@link DXF_FAILURE} on error;
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;

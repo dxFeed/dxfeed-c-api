@@ -388,7 +388,7 @@ DXFEED_API ERRORCODE dxf_set_on_server_heartbeat_notifier_impl(dxf_connection_t 
 		return DXF_FAILURE;
 	}
 
-	return DXF_SUCCESS;
+	return dx_set_on_server_heartbeat_notifier(connection, notifier, user_data);
 }
 
 DXFEED_API ERRORCODE dxf_set_on_server_heartbeat_notifier(dxf_connection_t connection,

@@ -149,4 +149,7 @@ int dx_get_current_connected_address(dxf_connection_t connection, OUT char** ppA
 
 dx_connection_context_data_t* dx_get_connection_context_data(dxf_connection_t connection);
 
+int dx_set_on_server_heartbeat_notifier(dxf_connection_t connection, dxf_conn_on_server_heartbeat_notifier_t notifier,
+										void* user_data);
+
 #endif /* DX_NETWORK_H_INCLUDED */

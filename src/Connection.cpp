@@ -23,11 +23,11 @@ extern "C" {
 
 #include "Connection.h"
 
-#include "DXErrorCodes.h"
-#include "DXErrorHandling.h"
 #include "BufferedInput.h"
 #include "BufferedOutput.h"
 #include "ConnectionContextData.h"
+#include "DXErrorCodes.h"
+#include "DXErrorHandling.h"
 #include "DXNetwork.h"
 
 #ifdef __cplusplus
@@ -46,19 +46,22 @@ void Connection::processIncomingHeartbeatPayload(const HeartbeatPayload& heartbe
 
 		if (heartbeatPayload.hasDeltaMark()) {
 			connectionRttMark_ = TimeMarkUtil::signedDeltaMark(lastDeltaMark_ + heartbeatPayload.getDeltaMark());
-
-			if (connectionHandle_ != nullptr) {
-				auto connectionContextData = dx_get_connection_context_data(connectionHandle_);
-
-				connectionContextData->on_server_heartbeat_notifier(
-					connectionHandle_, connectionRttMark_,
-					connectionContextData->on_server_heartbeat_notifier_user_data);
-			}
 		}
 	}
 
 	incomingLagMark_ = heartbeatPayload.getLagMark() + connectionRttMark_;
 	parser_->setCurrentTimeMark(computeTimeMark(currentTimeMark));
+
+	if (connectionHandle_ != nullptr) {
+		auto connectionContextData = dx_get_connection_context_data(connectionHandle_);
+
+		if (connectionContextData->on_server_heartbeat_notifier != nullptr) {
+			connectionContextData->on_server_heartbeat_notifier(
+				connectionHandle_, static_cast<dxf_long_t>(heartbeatPayload.getTimeMillis()),
+				heartbeatPayload.getLagMark(), connectionRttMark_,
+				connectionContextData->on_server_heartbeat_notifier_user_data);
+		}
+	}
 }
 
 int Connection::computeTimeMark(int currentTimeMark) const {
@@ -114,7 +117,8 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_css_connection_impl) {
 		return dx_set_error_code(dx_cec_connection_context_not_initialized);
 	}
 
-	auto connectionImpl = new (std::nothrow) dx::Connection{connection, bufferedOutputConnectionContext, bufferedInputConnectionContext};
+	auto connectionImpl =
+		new (std::nothrow) dx::Connection{connection, bufferedOutputConnectionContext, bufferedInputConnectionContext};
 
 	if (!dx_set_subsystem_data(connection, dx_css_connection_impl, static_cast<void*>(connectionImpl))) {
 		delete connectionImpl;
@@ -127,8 +131,7 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_css_connection_impl) {
 
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_css_connection_impl) {
 	int res = true;
-	auto connectionImpl =
-		static_cast<dx::Connection*>(dx_get_subsystem_data(connection, dx_css_connection_impl, &res));
+	auto connectionImpl = static_cast<dx::Connection*>(dx_get_subsystem_data(connection, dx_css_connection_impl, &res));
 
 	if (connectionImpl == nullptr) {
 		return res;

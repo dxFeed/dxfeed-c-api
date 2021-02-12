@@ -125,11 +125,16 @@ void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
 
 dxf_const_string_t connection_status_to_string(dxf_connection_status_t status) {
 	switch (status) {
-		case dxf_cs_not_connected: return L"Not connected";
-		case dxf_cs_connected: return L"Connected";
-		case dxf_cs_login_required: return L"Login required";
-		case dxf_cs_authorized: return L"Authorized";
-		default: return L"";
+		case dxf_cs_not_connected:
+			return L"Not connected";
+		case dxf_cs_connected:
+			return L"Connected";
+		case dxf_cs_login_required:
+			return L"Login required";
+		case dxf_cs_authorized:
+			return L"Authorized";
+		default:
+			return L"";
 	}
 
 	return L"";
@@ -527,6 +532,12 @@ int atoi2(char* str, int* result) {
 	return true;
 }
 
+void on_server_heartbeat_notifier(dxf_connection_t connection, dxf_long_t server_millis, dxf_int_t server_lag_mark,
+								  dxf_int_t connection_rtt, void* user_data) {
+	fwprintf(stderr, L"\n##### Server time (UTC) = %" PRId64 " ms, Server lag = %d us, RTT = %d us #####\n",
+			 server_millis, server_lag_mark, connection_rtt);
+}
+
 /* -------------------------------------------------------------------------- */
 
 int main(int argc, char* argv[]) {
@@ -638,7 +649,7 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
-	//dxf_load_config_from_string("network.heartbeatTimeout = 11\n");
+	// dxf_load_config_from_string("network.heartbeatTimeout = 11\n");
 	dxf_initialize_logger_v2("command-line-api.log", true, true, true, log_data_transfer_flag);
 	wprintf(L"Command line sample started.\n");
 	wprintf(L"Connecting to host %hs...\n", dxfeed_host);
@@ -656,6 +667,8 @@ int main(int argc, char* argv[]) {
 		connection_result = dxf_create_connection(dxfeed_host, on_reader_thread_terminate, on_connection_status_changed,
 												  NULL, NULL, NULL, &connection);
 	}
+
+	dxf_set_on_server_heartbeat_notifier(connection, on_server_heartbeat_notifier, NULL);
 
 	if (connection_result == DXF_FAILURE) {
 		free_symbols(symbols, symbol_count);
