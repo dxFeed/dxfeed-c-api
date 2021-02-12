@@ -278,6 +278,8 @@ DXFEED_API ERRORCODE dxf_create_connection_impl (const char *address,
 	ccd.stcn = stcn;
 	ccd.stdn = stdn;
 	ccd.notifier_user_data = user_data;
+	ccd.on_server_heartbeat_notifier = NULL;
+	ccd.on_server_heartbeat_notifier_user_data = NULL;
 
 	if (!dx_bind_to_address(*connection, address, &ccd) ||
 	    !dx_send_protocol_description(*connection, false) ||
@@ -376,6 +378,23 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_custom (const char *address,
 
 	return dxf_create_connection_impl(address, authscheme, authdata, notifier, conn_status_notifier, stcn, stdn,
 	                                  user_data, OUT connection);
+}
+
+DXFEED_API ERRORCODE dxf_set_on_server_heartbeat_notifier_impl(dxf_connection_t connection,
+															 dxf_conn_on_server_heartbeat_notifier_t notifier,
+															 void* user_data) {
+	dx_perform_common_actions(DX_RESET_ERROR);
+	if (!dx_validate_connection_handle(connection, false)) {
+		return DXF_FAILURE;
+	}
+
+	return dx_set_on_server_heartbeat_notifier(connection, notifier, user_data);
+}
+
+DXFEED_API ERRORCODE dxf_set_on_server_heartbeat_notifier(dxf_connection_t connection,
+															 dxf_conn_on_server_heartbeat_notifier_t notifier,
+															 void* user_data) {
+	return dxf_set_on_server_heartbeat_notifier_impl(connection, notifier, user_data);
 }
 
 /* -------------------------------------------------------------------------- */

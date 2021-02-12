@@ -41,6 +41,7 @@
 #include "DXNetwork.h"
 #include "Snapshot.h"
 #include "DXProperties.h"
+#include "Connection.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -1461,6 +1462,16 @@ int dx_process_describe_protocol (dx_server_msg_proc_connection_context_t* conte
 	return dx_mutex_unlock(&(context->describe_protocol_guard));
 }
 
+int dx_process_heartbeat_message(dx_server_msg_proc_connection_context_t* context) {
+	void* connection_impl = dx_get_connection_impl(context->connection);
+
+	if (connection_impl == NULL) {
+		return dx_set_error_code(dx_cec_connection_context_not_initialized);
+	}
+
+	return dx_connection_process_incoming_heartbeat(connection_impl);
+}
+
 /* -------------------------------------------------------------------------- */
 /*
  *	High level message processor functions
@@ -1507,11 +1518,15 @@ int dx_process_message (dx_server_msg_proc_connection_context_t* context, dx_mes
 		}
 
 		break;
-	case MESSAGE_HEARTBEAT:
-		return dx_set_error_code_impl(dx_pec_server_message_not_supported, false);
 
-	case MESSAGE_TEXT_FORMAT_COMMENT:
-	case MESSAGE_TEXT_FORMAT_SPECIAL:
+	case MESSAGE_HEARTBEAT:
+		if (!dx_process_heartbeat_message(context)) {
+			return false;
+		}
+
+		break;
+
+	case MESSAGE_TEXT_FORMAT:
 	default:
 		/* ignoring and skipping these messages */
 		return dx_set_error_code(dx_pec_server_message_not_supported);

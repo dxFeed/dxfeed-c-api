@@ -18,15 +18,18 @@
  */
 
 #ifdef _WIN32
-#include <Windows.h>
+#	pragma warning(push)
+#	pragma warning(disable : 5105)
+#	include <Windows.h>
+#	pragma warning(pop)
 #else
 
-#include <unistd.h>
-#include <string.h>
-#include <wctype.h>
-#include <stdlib.h>
+#	include <unistd.h>
+#	include <string.h>
+#	include <wctype.h>
+#	include <stdlib.h>
 
-#define stricmp strcasecmp
+#	define stricmp strcasecmp
 #endif
 
 #include "DXFeed.h"

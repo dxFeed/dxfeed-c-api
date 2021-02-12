@@ -21,6 +21,17 @@
 #define BUFFERED_OUTPUT_H_INCLUDED
 
 #include "BufferedIOCommon.h"
+#include "DXThreads.h"
+
+typedef struct dx_buffered_output_connection_context_t {
+	dxf_byte_t* out_buffer;
+	int out_buffer_length;
+	int current_out_buffer_position;
+
+	dx_mutex_t guard;
+
+	int set_field_mask;
+} dx_buffered_output_connection_context_t;
 
 /* -------------------------------------------------------------------------- */
 /*

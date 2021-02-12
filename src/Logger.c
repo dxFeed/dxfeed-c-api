@@ -18,13 +18,16 @@
  */
 
 #ifdef _WIN32
-#include <Windows.h>
-#ifdef _DEBUG
-#include <DbgHelp.h>
-#endif
+#	pragma warning(push)
+#	pragma warning(disable : 5105)
+#	include <Windows.h>
+#	pragma warning(pop)
+#	ifdef _DEBUG
+#		include <DbgHelp.h>
+#	endif
 #else
-#include <pthread.h>
-#include <time.h>
+#	include <pthread.h>
+#	include <time.h>
 #endif
 
 #include <assert.h>

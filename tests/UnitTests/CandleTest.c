@@ -22,7 +22,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
+#pragma warning(push)
+#pragma warning(disable : 5105)
 #include <Windows.h>
+#pragma warning(pop)
+
 #include "Candle.h"
 #include "CandleTest.h"
 #include "DXAlgorithms.h"

@@ -18,7 +18,10 @@
  */
 
 #ifdef _WIN32
+#	pragma warning(push)
+#	pragma warning(disable : 5105)
 #	include <Windows.h>
+#	pragma warning(pop)
 #else
 #	include <stdlib.h>
 #	include <string.h>
@@ -125,11 +128,16 @@ void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
 
 dxf_const_string_t connection_status_to_string(dxf_connection_status_t status) {
 	switch (status) {
-		case dxf_cs_not_connected: return L"Not connected";
-		case dxf_cs_connected: return L"Connected";
-		case dxf_cs_login_required: return L"Login required";
-		case dxf_cs_authorized: return L"Authorized";
-		default: return L"";
+		case dxf_cs_not_connected:
+			return L"Not connected";
+		case dxf_cs_connected:
+			return L"Connected";
+		case dxf_cs_login_required:
+			return L"Login required";
+		case dxf_cs_authorized:
+			return L"Authorized";
+		default:
+			return L"";
 	}
 
 	return L"";
@@ -182,7 +190,7 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 			wprintf(L", exchange code=%c, market maker=%ls, price=%f, size=%d", orders[i].exchange_code,
 					orders[i].market_maker, orders[i].price, orders[i].size);
 			if (wcslen(orders[i].source) > 0) wprintf(L", source=%ls", orders[i].source);
-			wprintf(L", count=%d}\n", orders[i].count);
+			wprintf(L", count=%d, flags=0x%X}\n", orders[i].count, orders[i].event_flags);
 		}
 	}
 
@@ -237,10 +245,11 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 			wprintf(
 				L", exchange code=%c, price=%f, size=%i, bid price=%f, ask price=%f, "
 				L"exchange sale conditions=\'%ls\', is ETH trade=%ls, type=%i, buyer=\'%ls\', seller=\'%ls\', "
-				L"scope=%d}\n",
+				L"scope=%d, flags=0x%X, raw_flags=0x%X}\n",
 				tns[i].exchange_code, tns[i].price, tns[i].size, tns[i].bid_price, tns[i].ask_price,
 				tns[i].exchange_sale_conditions, tns[i].is_eth_trade ? L"True" : L"False", tns[i].type,
-				tns[i].buyer ? tns[i].buyer : L"<UNKNOWN>", tns[i].seller ? tns[i].seller : L"<UNKNOWN>", tns[i].scope);
+				tns[i].buyer ? tns[i].buyer : L"<UNKNOWN>", tns[i].seller ? tns[i].seller : L"<UNKNOWN>", tns[i].scope,
+				tns[i].event_flags, tns[i].raw_flags);
 		}
 	}
 
@@ -278,9 +287,10 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 			wprintf(L"time=");
 			print_timestamp(grks[i].time);
 			wprintf(L", index=%"LS(PRId64)L", greeks price=%f, volatility=%f, "
-				L"delta=%f, gamma=%f, theta=%f, rho=%f, vega=%f, index=0x%"LS(PRIX64)L"}\n",
+				L"delta=%f, gamma=%f, theta=%f, rho=%f, vega=%f, index=0x%"LS(PRIX64)L", flags=0x%X}\n",
 				grks[i].index, grks[i].price, grks[i].volatility,
-				grks[i].delta, grks[i].gamma, grks[i].theta, grks[i].rho, grks[i].vega, grks[i].index);
+				grks[i].delta, grks[i].gamma, grks[i].theta, grks[i].rho, grks[i].vega, grks[i].index,
+				grks[i].event_flags);
 		}
 	}
 
@@ -315,10 +325,10 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 		for (; i < data_count; ++i) {
 			wprintf(L"expiration=%d, index=%"LS(PRId64)L", volatility=%f, call volume=%f, put volume=%f, "
 				L"option volume=%f, put call ratio=%f, forward_price=%f, dividend=%f, interest=%f, "
-				L"index=0x%"LS(PRIX64)L"}\n",
+				L"index=0x%"LS(PRIX64)L", flags=0x%X}\n",
 				srs[i].expiration, srs[i].index, srs[i].volatility, srs[i].call_volume, srs[i].put_volume,
 				srs[i].option_volume, srs[i].put_call_ratio, srs[i].forward_price, srs[i].dividend, srs[i].interest,
-				srs[i].index);
+				srs[i].index, srs[i].event_flags);
 		}
 	}
 
@@ -525,6 +535,12 @@ int atoi2(char* str, int* result) {
 	return true;
 }
 
+void on_server_heartbeat_notifier(dxf_connection_t connection, dxf_long_t server_millis, dxf_int_t server_lag_mark,
+								  dxf_int_t connection_rtt, void* user_data) {
+	fwprintf(stderr, L"\n##### Server time (UTC) = %" PRId64 " ms, Server lag = %d us, RTT = %d us #####\n",
+			 server_millis, server_lag_mark, connection_rtt);
+}
+
 /* -------------------------------------------------------------------------- */
 
 int main(int argc, char* argv[]) {
@@ -636,7 +652,7 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
-	//dxf_load_config_from_string("network.heartbeatTimeout = 11\n");
+	// dxf_load_config_from_string("network.heartbeatTimeout = 11\n");
 	dxf_initialize_logger_v2("command-line-api.log", true, true, true, log_data_transfer_flag);
 	wprintf(L"Command line sample started.\n");
 	wprintf(L"Connecting to host %hs...\n", dxfeed_host);
@@ -654,6 +670,8 @@ int main(int argc, char* argv[]) {
 		connection_result = dxf_create_connection(dxfeed_host, on_reader_thread_terminate, on_connection_status_changed,
 												  NULL, NULL, NULL, &connection);
 	}
+
+	dxf_set_on_server_heartbeat_notifier(connection, on_server_heartbeat_notifier, NULL);
 
 	if (connection_result == DXF_FAILURE) {
 		free_symbols(symbols, symbol_count);

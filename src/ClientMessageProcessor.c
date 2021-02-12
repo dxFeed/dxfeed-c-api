@@ -33,6 +33,7 @@
 #include "EventData.h"
 #include "ServerMessageProcessor.h"
 #include "TaskQueue.h"
+#include "Connection.h"
 #include "Version.h"
 
 /* -------------------------------------------------------------------------- */
@@ -177,11 +178,7 @@ static int dx_compose_message_header (void* bocc, dx_message_type_t message_type
 
 	return true;
 }
-static int dx_compose_heartbeat (void* bocc) {
-	CHECKED_CALL_2(dx_write_byte, bocc, (dxf_byte_t)0); /* reserve one byte for message length */
 
-	return true;
-}
 /* -------------------------------------------------------------------------- */
 
 static int dx_move_message_data (void* bocc, int old_offset, int new_offset, int data_length) {
@@ -815,6 +812,12 @@ int dx_send_heartbeat (dxf_connection_t connection, int task_mode) {
 		return dx_set_error_code(dx_cec_connection_context_not_initialized);
 	}
 
+	void* connection_impl = dx_get_connection_impl(connection);
+
+	if (connection_impl == NULL) {
+		return dx_set_error_code(dx_cec_connection_context_not_initialized);
+	}
+
 	CHECKED_CALL(dx_lock_buffered_output, bocc);
 
 	initial_buffer = dx_malloc(initial_size);
@@ -827,7 +830,7 @@ int dx_send_heartbeat (dxf_connection_t connection, int task_mode) {
 
 	dx_set_out_buffer(bocc, initial_buffer, initial_size);
 
-	if (!dx_compose_heartbeat(bocc)) {
+	if (!dx_connection_create_outgoing_heartbeat(connection_impl)) {
 
 		dx_free(dx_get_out_buffer(bocc));
 		dx_unlock_buffered_output(bocc);

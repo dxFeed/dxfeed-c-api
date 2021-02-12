@@ -13,7 +13,8 @@ set(POSTFIX "")
 set(PLATFORM_POSTFIX "")
 set(LIB_TLS ${CMAKE_CURRENT_SOURCE_DIR}/../lib/libressl)
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_C_STANDARD_REQUIRED on)
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED on)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -72,8 +73,14 @@ set(EXPORT_HEADERS
         )
 
 set(HEADER_FILES
+        BinaryQTPComposer.hpp
+        BinaryQTPParser.hpp
         Candle.h
         ClientMessageProcessor.h
+        Configuration.h
+        Configuration.hpp
+        Connection.h
+        Connection.hpp
         ConnectionContextData.h
         DXAddressParser.h
         DXAlgorithms.h
@@ -87,8 +94,8 @@ set(HEADER_FILES
         EventManager.h
         EventSubscription.h
         EventSubscription.hpp
-        Configuration.h
-        Configuration.hpp
+        HeartbeatPayload.h
+        HeartbeatPayload.hpp
         Logger.h
         ObjectArray.h
         PriceLevelBook.h
@@ -99,6 +106,7 @@ set(HEADER_FILES
         ServerMessageProcessor.h
         Snapshot.h
         TaskQueue.h
+        TimeMarkUtil.hpp
         Version.h
         )
 
@@ -131,8 +139,12 @@ set(PARSER_TESTS
         )
 
 set(SOURCE_FILES
+        BinaryQTPComposer.cpp
+        BinaryQTPParser.cpp
         Candle.c
         ClientMessageProcessor.c
+        Configuration.cpp
+        Connection.cpp
         ConnectionContextData.c
         DXAddressParser.c
         DXAlgorithms.c
@@ -148,7 +160,7 @@ set(SOURCE_FILES
         EventData.c
         EventManager.c
         EventSubscription.cpp
-        Configuration.cpp
+        HeartbeatPayload.cpp
         Logger.c
         ObjectArray.c
         PriceLevelBook.c

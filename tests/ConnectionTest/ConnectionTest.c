@@ -27,10 +27,13 @@
 #include "DXFeed.h"
 
 #ifdef _WIN32
+#	pragma warning(push)
+#	pragma warning(disable : 5105)
 #	include <Windows.h>
+#	pragma warning(pop)
 void dxs_sleep(int milliseconds) { Sleep((DWORD)milliseconds); }
 #else
-#include <time.h>
+#	include <time.h>
 void dxs_sleep(int milliseconds) {
 	struct timespec ts;
 	ts.tv_sec = milliseconds / 1000;

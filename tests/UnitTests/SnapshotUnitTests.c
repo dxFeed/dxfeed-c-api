@@ -19,14 +19,18 @@
 
 #include <string.h>
 #include <stdio.h>
+
 #ifdef _WIN32
-#include <Windows.h>
+#	pragma warning(push)
+#	pragma warning(disable : 5105)
+#	include <Windows.h>
+#	pragma warning(pop)
 #else
-#include <unistd.h>
-#include <string.h>
-#include <wctype.h>
-#include <stdlib.h>
-#define stricmp strcasecmp
+#	include <unistd.h>
+#	include <string.h>
+#	include <wctype.h>
+#	include <stdlib.h>
+#	define stricmp strcasecmp
 #endif
 
 #include "ConnectionContextData.h"

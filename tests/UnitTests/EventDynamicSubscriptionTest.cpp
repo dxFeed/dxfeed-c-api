@@ -19,7 +19,12 @@
 
 #include <stdio.h>
 #include <time.h>
+
+#pragma warning(push)
+#pragma warning(disable : 5105)
 #include <Windows.h>
+#pragma warning(pop)
+
 #include "EventDynamicSubscriptionTest.h"
 #include "DXAlgorithms.h"
 #include "DXFeed.h"

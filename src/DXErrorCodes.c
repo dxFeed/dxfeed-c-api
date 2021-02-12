@@ -195,12 +195,10 @@ dx_error_level_t dx_get_error_level(dx_error_code_t code) {
 
 	switch (code) {
 		case dx_sec_connection_gracefully_closed:
-			result = dx_el_info;
-			break;
-
 		case dx_sec_blocking_call_interrupted:
 		case dx_bioec_buffer_underflow:
-			result = dx_el_warn;
+			result = dx_el_info;
+			break;
 
 		default:
 			result = dx_el_error;

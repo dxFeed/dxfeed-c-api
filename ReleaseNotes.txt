@@ -1,3 +1,35 @@
+Version 7.1.0
+* [DXFC-209] Implemented the heartbeat semantics with payload
+  - Added the new function `dxf_set_on_server_heartbeat_notifier(dxf_connection_t connection, dxf_conn_on_server_heartbeat_notifier_t notifier, void* user_data)`
+    that sets a server heartbeat notifier's callback to the connection.
+    This notifier will be invoked when the new heartbeat arrives from a server and contains non empty payload
+
+    Function parameters:
+      - connection - The handle of a previously created connection
+      - notifier   - The notifier callback function pointer
+      - user_data  - The data to be passed to the callback function
+
+  - Added the new callback type of a connection incoming heartbeat notification `dxf_conn_on_server_heartbeat_notifier_t`
+
+    Passed parameters:
+      - connection      - The connection handle
+      - server_millis   - The server time in milliseconds (from a heartbeat payload)
+      - server_lag_mark - The server lag time in microseconds (from a heartbeat payload)
+      - connection_rtt  - The calculated connection RTT in microseconds
+      - user_data       - The user data passed to dxf_set_on_server_heartbeat_notifier
+
+    An example of implementation:
+    ```c
+    void on_server_heartbeat_notifier(dxf_connection_t connection, dxf_long_t server_millis, dxf_int_t server_lag_mark,
+        dxf_int_t connection_rtt, void* user_data)
+    {
+        fwprintf(stderr, L"\n##### Server time (UTC) = %" PRId64 " ms, Server lag = %d us, RTT = %d us #####\n",
+            server_millis, server_lag_mark, connection_rtt);
+    }
+    ```
+
+  See usage example in the CommandLineSample.c
+
 Version 7.0.0
 * [DXFC-175] [Breaking changes] Extended the Trade and Profile events to support additional fields from QD records
   - the `_52_high_price` & `_52_low_price` `Profile` event fields were renamed to `high_52_week_price` &
