@@ -34,7 +34,7 @@
 namespace dx {
 
 class Connection {
-	static const int DELTA_MARK_UNKNOWN = std::numeric_limits<int>::max();
+	static const int DELTA_MARK_UNKNOWN = (std::numeric_limits<int>::max)();
 
 	dxf_connection_t connectionHandle_;
 	std::atomic<int> lastDeltaMark_;

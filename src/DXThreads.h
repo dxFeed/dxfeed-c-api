@@ -39,7 +39,10 @@ typedef struct {
 typedef void* (*dx_start_routine_t)(void*);
 #define DX_THREAD_RETVAL_NULL NULL
 #else /* !defined(_WIN32) || defined(USE_PTHREADS) */
-#	include <windows.h>
+#	pragma warning(push)
+#	pragma warning(disable : 5105)
+#	include <Windows.h>
+#	pragma warning(pop)
 #	define USE_WIN32_THREADS
 typedef HANDLE dx_thread_t;
 typedef DWORD dx_key_t;

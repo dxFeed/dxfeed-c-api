@@ -36,16 +36,16 @@
 /* -------------------------------------------------------------------------- */
 
 #ifdef _WIN32
-
-#include <windows.h>
+#	pragma warning(push)
+#	pragma warning(disable : 5105)
+#	include <Windows.h>
+#	pragma warning(pop)
 
 void dx_sleep (int milliseconds) {
 	Sleep((DWORD)milliseconds);
 }
-
 #else
-
-#include <time.h>
+#	include <time.h>
 
 void dx_sleep (int milliseconds) {
 	struct timespec ts;

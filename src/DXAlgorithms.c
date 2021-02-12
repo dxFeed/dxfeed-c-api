@@ -18,11 +18,14 @@
  */
 
 #ifdef _WIN32
-#include <Windows.h>
+#	pragma warning(push)
+#	pragma warning(disable : 5105)
+#	include <Windows.h>
+#	pragma warning(pop)
 #else
-#include <time.h>
-#include <stdlib.h>
-#include <wctype.h>
+#	include <time.h>
+#	include <stdlib.h>
+#	include <wctype.h>
 #endif /* _WIN32 */
 
 #include "DXAlgorithms.h"

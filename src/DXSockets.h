@@ -27,21 +27,25 @@
 #define DX_SOCKETS_H_INCLUDED
 
 #ifdef _WIN32
-	#include <WinSock2.h>
-	#include <WS2tcpip.h>
+#	pragma warning(push)
+#	pragma warning(disable : 5105)
+#	include <WinSock2.h>
+#	include <WS2tcpip.h>
+#	pragma warning(pop)
 
 	typedef SOCKET dx_socket_t;
 #else
-	#include <unistd.h>
-	#include <sys/types.h>
-	#include <sys/socket.h>
-	#include <netinet/in.h>
-	#include <netdb.h>
-	#include <errno.h>
+#	include <unistd.h>
+#	include <sys/types.h>
+#	include <sys/socket.h>
+#	include <netinet/in.h>
+#	include <netdb.h>
+#	include <errno.h>
 
-	#define INVALID_SOCKET -1
-	#define SOCKET_ERROR -1
-	typedef int dx_socket_t;
+#	define INVALID_SOCKET -1
+#	define SOCKET_ERROR -1
+
+typedef int dx_socket_t;
 #endif /* _WIN32 */
 
 #include "PrimitiveTypes.h"

@@ -20,7 +20,10 @@
 #ifndef TEST_HELPER_H_INCLUDED
 #define TEST_HELPER_H_INCLUDED
 
+#pragma warning(push)
+#pragma warning(disable : 5105)
 #include <Windows.h>
+#pragma warning(pop)
 #include <stdio.h>
 
 #include "DXFeed.h"

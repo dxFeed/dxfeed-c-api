@@ -22,7 +22,10 @@
  */
 
 #ifdef _WIN32
-#include <Windows.h>
+#	pragma warning(push)
+#	pragma warning(disable : 5105)
+#	include <Windows.h>
+#	pragma warning(pop)
 #endif
 
 #include "DXMemory.h"
