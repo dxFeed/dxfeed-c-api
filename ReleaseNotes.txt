@@ -13,8 +13,8 @@ Version 7.1.0
 
     Passed parameters:
       - connection      - The connection handle
-      - server_millis   - The server time in milliseconds (from a heartbeat payload)
-      - server_lag_mark - The server lag time in microseconds (from a heartbeat payload)
+      - server_millis   - The server time in milliseconds (from the incoming heartbeat payload)
+      - server_lag_mark - The server's messages composing lag time in microseconds (from the incoming heartbeat payload)
       - connection_rtt  - The calculated connection RTT in microseconds
       - user_data       - The user data passed to dxf_set_on_server_heartbeat_notifier
 

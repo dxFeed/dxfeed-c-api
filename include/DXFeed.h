@@ -153,8 +153,8 @@ typedef void (*dxf_conn_status_notifier_t) (dxf_connection_t connection,
  *
  * Parameters:
  *  - connection      - The connection handle
- *  - server_millis   - The server time in milliseconds
- *  - server_lag_mark - The server lag time in microseconds
+ *  - server_millis   - The server time in milliseconds (from the incoming heartbeat payload)
+ *  - server_lag_mark - The server's messages composing lag time in microseconds (from the incoming heartbeat payload)
  *  - connection_rtt  - The calculated connection RTT in microseconds
  *  - user_data       - The user data passed to dxf_set_on_server_heartbeat_notifier
  *
