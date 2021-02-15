@@ -17,16 +17,12 @@
  *
  */
 
-#ifdef __cplusplus
 extern "C" {
-#endif
 
 #include "BufferedInput.h"
 #include "BufferedOutput.h"
 
-#ifdef __cplusplus
 }
-#endif
 
 #include "HeartbeatPayload.hpp"
 

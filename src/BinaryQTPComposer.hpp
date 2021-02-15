@@ -19,15 +19,11 @@
 
 #pragma once
 
-#ifdef __cplusplus
 extern "C" {
-#endif
 
 #include "DXPMessageData.h"
 
-#ifdef __cplusplus
 }
-#endif
 
 #include "HeartbeatPayload.hpp"
 

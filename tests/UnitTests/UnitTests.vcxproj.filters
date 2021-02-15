@@ -173,6 +173,21 @@
     <ClCompile Include="..\..\src\EventSubscription.cpp">
       <Filter>Event subscription</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Configuration.cpp">
+      <Filter>Common\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\BinaryQTPComposer.cpp">
+      <Filter>Common\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\BinaryQTPParser.cpp">
+      <Filter>Common\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Connection.cpp">
+      <Filter>Common\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\HeartbeatPayload.cpp">
+      <Filter>Common\Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\DXAlgorithms.h">
@@ -275,6 +290,27 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\DXProperties.h">
+      <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\BinaryQTPComposer.hpp">
+      <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\BinaryQTPParser.hpp">
+      <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Connection.h">
+      <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Connection.hpp">
+      <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\HeartbeatPayload.hpp">
+      <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Configuration.h">
+      <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Configuration.hpp">
       <Filter>Common\Headers</Filter>
     </ClInclude>
   </ItemGroup>

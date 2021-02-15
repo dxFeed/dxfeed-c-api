@@ -17,9 +17,7 @@
  *
  */
 
-#ifdef __cplusplus
 extern "C" {
-#endif
 
 #include "Configuration.h"
 
@@ -32,9 +30,7 @@ extern "C" {
 #include "Logger.h"
 #include "SymbolCodec.h"
 
-#ifdef __cplusplus
 }
-#endif
 
 #include <boost/locale/encoding_utf.hpp>
 #include <string>

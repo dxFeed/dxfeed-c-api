@@ -17,9 +17,7 @@
  *
  */
 
-#ifdef __cplusplus
 extern "C" {
-#endif
 
 #include "Connection.h"
 
@@ -30,9 +28,7 @@ extern "C" {
 #include "DXErrorHandling.h"
 #include "DXNetwork.h"
 
-#ifdef __cplusplus
 }
-#endif
 
 #include "Connection.hpp"
 

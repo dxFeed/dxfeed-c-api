@@ -17,9 +17,7 @@
  *
  */
 
-#ifdef __cplusplus
 extern "C" {
-#endif
 
 #include "EventSubscription.h"
 
@@ -32,9 +30,7 @@ extern "C" {
 #include "Logger.h"
 #include "SymbolCodec.h"
 
-#ifdef __cplusplus
 }
-#endif
 
 #include <cmath>
 #include <functional>

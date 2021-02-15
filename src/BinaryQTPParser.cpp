@@ -17,15 +17,11 @@
  *
  */
 
-#ifdef __cplusplus
 extern "C" {
-#endif
 
 #include "BufferedInput.h"
 
-#ifdef __cplusplus
 }
-#endif
 
 #include "BinaryQTPParser.hpp"
 #include "Connection.hpp"

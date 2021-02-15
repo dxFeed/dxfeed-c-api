@@ -17,15 +17,11 @@
  *
  */
 
-#ifdef __cplusplus
 extern "C" {
-#endif
 
 #include "BufferedOutput.h"
 
-#ifdef __cplusplus
 }
-#endif
 
 #include <cstring>
 #include <new>
