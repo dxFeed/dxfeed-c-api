@@ -1,6 +1,6 @@
 ; The following line has the only difference between release and debug versions of DXFeed lib
 LIBRARY DXFeedd
-VERSION 7.0
+VERSION 7.1
 EXPORTS
     dxf_create_connection
     dxf_create_connection_auth_basic
@@ -64,3 +64,4 @@ EXPORTS
     dxf_load_config_from_wstring
     dxf_load_config_from_string
     dxf_load_config_from_file
+    dxf_set_on_server_heartbeat_notifier
