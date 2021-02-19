@@ -918,6 +918,7 @@ int dx_read_records (dx_server_msg_proc_connection_context_t* context,
 	dxf_byte_t read_byte;
 	dxf_short_t read_short;
 	dxf_int_t read_int;
+	dxf_long_t read_long;
 	dxf_char_t read_utf_char;
 	(void)read_utf_char;
 	dxf_double_t read_double;
@@ -940,7 +941,7 @@ int dx_read_records (dx_server_msg_proc_connection_context_t* context,
 
 	for (; i < record_digest->size; ++i) {
 		int serialization = record_digest->elements[i]->type & dx_fid_mask_serialization;
-		int presentation = record_digest->elements[i]->type & dx_fid_mask_presentation;
+		int representation = record_digest->elements[i]->type & dx_fid_mask_representation;
 
 		switch (serialization) {
 		case dx_fid_void:
@@ -952,7 +953,7 @@ int dx_read_records (dx_server_msg_proc_connection_context_t* context,
 		case dx_fid_byte:
 			CHECKED_CALL_2(dx_read_byte, context->bicc, &read_byte);
 
-			if (presentation == dx_fid_flag_decimal) {
+			if (representation == dx_fid_flag_decimal) {
 				CHECKED_CALL_2(dx_int_to_double, read_byte, &read_double);
 				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double);
 			} else {
@@ -973,7 +974,7 @@ int dx_read_records (dx_server_msg_proc_connection_context_t* context,
 			/* No special presentation bits are supported for UTF char */
 			CHECKED_CALL_2(dx_read_short, context->bicc, &read_short);
 
-			if (presentation == dx_fid_flag_decimal) {
+			if (representation == dx_fid_flag_decimal) {
 				CHECKED_CALL_2(dx_int_to_double, read_short, &read_double);
 				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double);
 			} else {
@@ -984,7 +985,7 @@ int dx_read_records (dx_server_msg_proc_connection_context_t* context,
 		case dx_fid_int:
 			CHECKED_CALL_2(dx_read_int, context->bicc, &read_int);
 
-			if (presentation == dx_fid_flag_decimal) {
+			if (representation == dx_fid_flag_decimal) {
 				CHECKED_CALL_2(dx_int_to_double, read_int, &read_double);
 				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double);
 			} else {
@@ -993,18 +994,24 @@ int dx_read_records (dx_server_msg_proc_connection_context_t* context,
 
 			break;
 		case dx_fid_compact_int:
-			CHECKED_CALL_2(dx_read_compact_int, context->bicc, &read_int);
+			if (representation == dx_fid_flag_long || representation == dx_fid_flag_time_millis) {
+				CHECKED_CALL_2(dx_read_compact_long, context->bicc, &read_long);
 
-			if (presentation == dx_fid_flag_decimal) {
-				CHECKED_CALL_2(dx_int_to_double, read_int, &read_double);
-				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double);
+				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_long);
 			} else {
-				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_int);
+				CHECKED_CALL_2(dx_read_compact_int, context->bicc, &read_int);
+
+				if (representation == dx_fid_flag_decimal) {
+					CHECKED_CALL_2(dx_int_to_double, read_int, &read_double);
+					CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double);
+				} else {
+					CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_int);
+				}
 			}
 
 			break;
 		case dx_fid_byte_array:
-			if (presentation == dx_fid_flag_string) {
+			if (representation == dx_fid_flag_string) {
 				/* Treat as UTF char array with length in bytes */
 				CHECKED_CALL_2(dx_read_utf_string, context->bicc, &read_string);
 

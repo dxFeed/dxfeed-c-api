@@ -136,11 +136,130 @@
  * @{s
  */
 
+/**
+ * Action enum for the Full Order Book (FOB) Orders. Action describes business meaning of the dxf_order_t event:
+ * whether order was added or replaced, partially or fully executed, etc.
+ */
+typedef enum dxf_order_action_t {
+	/**
+	 * Default enum value for orders that do not support "Full Order Book" and for backward compatibility -
+	 * action must be derived from other dxf_order_t fields.
+	 *
+	 * All Full Order Book related fields for this action will be empty.
+	 *
+	 * Integer value = 0
+	 */
+	dxf_oa_undefined = 0,
+
+	/**
+	 * New Order is added to Order Book.
+	 *
+	 * Full Order Book fields:
+	 * - \ref dxf_order_t.order_id - always present
+	 * - \ref dxf_order_t.aux_order_id - ID of the order replaced by this new order - if available.
+	 * - Trade fields will be empty
+	 *
+	 * Integer value = 1
+	 */
+	dxf_oa_new = 1,
+
+	/**
+	 * Order is modified and price-time-priority is not maintained (i.e. order has re-entered Order Book).
+	 * Order symbol and \ref dxf_order_t.side will remain the same.
+	 *
+	 * Full Order Book fields:
+	 * - \ref dxf_order_t.order_id - always present
+	 * - Trade fields will be empty
+	 *
+	 * Integer value = 2
+	 */
+	dxf_oa_replace = 2,
+
+	/**
+	 * Order is modified without changing its price-time-priority (usually due to partial cancel by user).
+	 * Order's \ref dxf_order_t.size will contain new updated size.
+	 *
+	 * Full Order Book fields:
+	 * - \ref dxf_order_t.order_id - always present
+	 * - Trade fields will be empty
+	 *
+	 * Integer value = 3
+	 */
+	dxf_oa_modify = 3,
+
+	/**
+	 * Order is fully canceled and removed from Order Book.
+	 * Order's \ref dxf_order_t.size will be equal to 0.
+	 *
+	 * Full Order Book fields:
+	 * - \ref dxf_order_t.order_id - always present
+	 * - \ref dxf_order_t.aux_order_id - ID of the new order replacing this order - if available.
+	 * - Trade fields will be empty
+	 *
+	 * Integer value = 4
+	 */
+	dxf_oa_delete = 4,
+
+	/**
+	 * Size is changed (usually reduced) due to partial order execution.
+	 * Order's \ref dxf_order_t.size will be updated to show current outstanding size.
+	 *
+	 * Full Order Book fields:
+	 * - \ref dxf_order_t.order_id - always present
+	 * - \ref dxf_order_t.aux_order_id - aggressor order ID, if available
+	 * - \ref dxf_order_t.trade_id - if available
+	 * - \ref dxf_order_t.trade_size and \ref dxf_order_t.trade_price - contain size and price of this execution
+	 *
+	 * Integer value = 5
+	 */
+	dxf_oa_partial = 5,
+
+	/**
+	 * Order is fully executed and removed from Order Book.
+	 * Order's \ref dxf_order_t.size will be equals to 0.
+	 *
+	 * Full Order Book fields:
+	 * - \ref dxf_order_t.order_id - always present
+	 * - \ref dxf_order_t.aux_order_id - aggressor order ID, if available
+	 * - \ref dxf_order_t.trade_id - if available
+	 * - \ref dxf_order_t.trade_size and \ref dxf_order_t.trade_price - contain size and price of this execution - always present
+	 *
+	 * Integer value = 6
+	 */
+	dxf_oa_execute = 6,
+
+	/**
+	 * Non-Book Trade - this Trade not refers to any entry in Order Book.
+	 * Order's \ref dxf_order_t.size and \ref dxf_order_t.price will be equals to 0.
+	 *
+	 * Full Order Book fields:
+	 * - \ref dxf_order_t.order_id - always empty
+	 * - \ref dxf_order_t.trade_id - if available
+	 * - \ref dxf_order_t.trade_size and \ref dxf_order_t.trade_price - contain size and price of this trade - always present
+	 *
+	 * Integer value = 7
+	 */
+	dxf_oa_trade = 7,
+
+	/**
+	 * Prior Trade/Order Execution bust.
+	 * Order's \ref dxf_order_t.size and \ref dxf_order_t.price will be equals to 0.
+	 *
+	 * Full Order Book fields:
+	 * - \ref dxf_order_t.order_id - always empty
+	 * - \ref dxf_order_t.trade_id - always present
+	 * - \ref dxf_order_t.trade_size and \ref dxf_order_t.trade_price - always empty
+	 *
+	 * Integer value = 8
+	 */
+	dxf_oa_bust = 8,
+} dxf_order_action_t;
+
 static DX_MAYBE_UNUSED dxf_const_string_t DXF_ORDER_AGGREGATE_BID_STR = L"AGGREGATE_BID";
 static DX_MAYBE_UNUSED dxf_const_string_t DXF_ORDER_AGGREGATE_ASK_STR = L"AGGREGATE_ASK";
 
 /// Scope of an order.
-typedef enum dxf_order_scope {
+typedef enum dxf_order_scope_t {
 	/// Represents best bid or best offer for the whole market. Integer value = 0
 	dxf_osc_composite = 0,
 	/// Represents best bid or best offer for a given exchange code. Integer value = 1
@@ -156,7 +275,7 @@ typedef enum dxf_order_scope {
 #define DXF_RECORD_SUFFIX_SIZE 5
 
 /// Side of an order or a trade.
-typedef enum dxf_order_side {
+typedef enum dxf_order_side_t {
 	/// Side is undefined, unknown or inapplicable. Integer value = 0
 	dxf_osd_undefined = 0,
 	/// Buy side (bid). Integer value = 1
@@ -166,32 +285,90 @@ typedef enum dxf_order_side {
 } dxf_order_side_t;
 
 /// Order
-typedef struct dxf_order {
-	/// Transactional event flags.
-	dxf_event_flags_t event_flags;
-	/// Unique per-symbol index of this order.
-	dxf_long_t index;
-	/// Time of this order. Time is measured in milliseconds between the current time and midnight, January 1, 1970 UTC.
-	dxf_long_t time;
-	/// Microseconds and nanoseconds part of time of this order.
-	dxf_int_t time_nanos;
-	/// Sequence number of this order to distinguish orders that have the same #time.
-	dxf_int_t sequence;
-	/// Price of this order.
-	dxf_double_t price;
-	/// Size of this order
-	dxf_int_t size;
-	/// Number of individual orders in this aggregate order.
-	dxf_int_t count;
-	/// Scope of this order
-	dxf_order_scope_t scope;
-	/// Side of this order
-	dxf_order_side_t side;
-	/// Exchange code of this order
-	dxf_char_t exchange_code;
+typedef struct dxf_order_t {
 	/// Source of this order
 	dxf_char_t source[DXF_RECORD_SUFFIX_SIZE];
-	/// Market maker or spread symbol of this order
+
+	/// Transactional event flags.
+	dxf_event_flags_t event_flags;
+
+	/// Unique per-symbol index of this order.
+	dxf_long_t index;
+
+	/// Time of this order. Time is measured in milliseconds between the current time and midnight, January 1, 1970 UTC.
+	dxf_long_t time;
+
+	/// Sequence number of this order to distinguish orders that have the same #time.
+	dxf_int_t sequence;
+
+	/// Microseconds and nanoseconds part of time of this order.
+	dxf_int_t time_nanos;
+
+	/// Order action if available, otherwise - dxf_oa_undefined. This field is a part of the FOB ("Full Order Book") support.
+	dxf_order_action_t action;
+
+	/// Time of the last \ref dxf_order.action if available, otherwise - 0. This field is a part of the FOB ("Full Order Book") support.
+	dxf_long_t action_time;
+
+	/**
+	 * Contains order ID if available, otherwise - 0. Some actions dxf_oa_trade, dxf_oa_bust have no order since they are not related
+	 * to any order in Order book. Contains 0 if
+	 *
+	 * This field is a part of the FOB ("Full Order Book") support.
+	 */
+	dxf_long_t order_id;
+
+	/**
+	 * Contains auxiliary order ID if available, otherwise - 0:
+	 * - in dxf_oa_new - ID of the order replaced by this new order
+	 * - in dxf_oa_delete - ID of the order that replaces this deleted order
+	 * - in dxf_oa_partial - ID of the aggressor order
+	 * - in dxf_oa_execute - ID of the aggressor order
+	 *
+	 * This field is a part of the FOB ("Full Order Book") support.
+	 */
+	dxf_long_t aux_order_id;
+
+	/// Price of this order.
+	dxf_double_t price;
+
+	/// Size of this order
+	dxf_int_t size;
+
+	/// Number of individual orders in this aggregate order.
+	dxf_int_t count;
+
+	/**
+	 * Contains trade (order execution) ID for events containing trade-related action if available, otherwise - 0.
+	 *
+	 * This field is a part of the FOB ("Full Order Book") support.
+	 */
+	dxf_long_t trade_id;
+
+	/**
+	 * Contains trade price for events containing trade-related action.
+	 *
+	 * This field is a part of the FOB ("Full Order Book") support.
+	 */
+	dxf_double_t trade_price;
+
+	/**
+	 * Contains trade size for events containing trade-related action.
+	 *
+	 * This field is a part of the FOB ("Full Order Book") support.
+	 */
+	dxf_double_t trade_size;
+
+	/// Exchange code of this order
+	dxf_char_t exchange_code;
+
+	/// Side of this order
+	dxf_order_side_t side;
+
+	/// Scope of this order
+	dxf_order_scope_t scope;
+
+	/// Market maker of this order or spread symbol of this spread order
 	union {
 		dxf_const_string_t market_maker;
 		dxf_const_string_t spread_symbol;
@@ -206,7 +383,7 @@ typedef struct dxf_order {
  */
 
 /// Direction of the price movement. For example tick direction for last trade price.
-typedef enum dxf_direction {
+typedef enum dxf_direction_t {
 	/// Direction is undefined, unknown or inapplicable. Integer value = 0
 	dxf_dir_undefined = 0,
 	/// Current price is lower than previous price. Integer value = 1
@@ -228,7 +405,7 @@ typedef enum dxf_direction {
  * volume and day turnover. It represents the most recent information that is available about the regular last trade on
  * the market at any given moment of time.
  */
-typedef struct dxf_trade {
+typedef struct dxf_trade_t {
 	/// Time of the last trade.
 	dxf_long_t time;
 	/// Sequence number of the last trade to distinguish trades that have the same #time.
@@ -303,7 +480,7 @@ typedef dxf_trade_t dxf_trade_eth_t;
  * represents the most recent information that is available about the best quote on the market at any given moment of
  * time.
  */
-typedef struct dxf_quote {
+typedef struct dxf_quote_t {
 	/// Time of the last bid or ask change
 	dxf_long_t time;
 	/// Sequence number of this quote to distinguish quotes that have the same #time.
@@ -342,7 +519,7 @@ typedef struct dxf_quote {
  */
 
 /// Type of the price value.
-typedef enum dxf_price_type {
+typedef enum dxf_price_type_t {
 	/// Regular price. Integer value = 0.
 	dxf_pt_regular = 0,
 	/// Indicative price (derived via math formula). Integer value = 1.

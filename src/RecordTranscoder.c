@@ -106,6 +106,21 @@ static const dxf_uint_t DX_PROFILE_FLAGS_SSR_MASK  = 0x3;
  */
 /* -------------------------------------------------------------------------- */
 
+/*
+ * Index field contains source identifier, optional exchange code and low-end index (virtual id or MMID).
+ * Index field has 2 formats depending on whether source is "special" (see OrderSource.isSpecialSourceId()).
+ * Note: both formats are IMPLEMENTATION DETAILS, they are subject to change without notice.
+ *   63..48   47..32   31..16   15..0
+ * +--------+--------+--------+--------+
+ * | Source |Exchange|      Index      |  <- "special" order sources (non-printable id with exchange)
+ * +--------+--------+--------+--------+
+ *   63..48   47..32   31..16   15..0
+ * +--------+--------+--------+--------+
+ * |     Source      |      Index      |  <- generic order sources (alphanumeric id without exchange)
+ * +--------+--------+--------+--------+
+ * Note: when modifying formats track usages of getIndex/setIndex, getSource/setSource and isSpecialSourceId
+ * methods in order to find and modify all code dependent on current formats.
+ */
 
 static const dxf_long_t DX_ORDER_SOURCE_COMPOSITE_BID = 1;
 static const dxf_long_t DX_ORDER_SOURCE_COMPOSITE_ASK = 2;
@@ -118,12 +133,23 @@ static const dxf_byte_t DX_ORDER_INDEX_SSRC_SHIFT = 48;
 static const dxf_byte_t DX_ORDER_INDEX_EXC_SHIFT  = 32;
 static const dxf_byte_t DX_ORDER_INDEX_TSRC_SHIFT = 32;
 
+/*
+ * Flags property has several significant bits that are packed into an integer in the following way:
+ *   31..15   14..11    10..4    3    2    1    0
+ * +--------+--------+--------+----+----+----+----+
+ * |        | Action |Exchange|  Side   |  Scope  |
+ * +--------+--------+--------+----+----+----+----+
+ */
+
 static const dxf_byte_t DX_ORDER_FLAGS_SCOPE_SHIFT    = 0;
 static const dxf_uint_t DX_ORDER_FLAGS_SCOPE_MASK     = 0x03;
 static const dxf_byte_t DX_ORDER_FLAGS_SIDE_SHIFT     = 2;
 static const dxf_uint_t DX_ORDER_FLAGS_SIDE_MASK      = 0x03;
 static const dxf_byte_t DX_ORDER_FLAGS_EXCHANGE_SHIFT = 4;
 static const dxf_uint_t DX_ORDER_FLAGS_EXCHANGE_MASK  = 0x7f;
+static const dxf_byte_t DX_ORDER_FLAGS_ACTION_SHIFT = 11;
+static const dxf_uint_t DX_ORDER_FLAGS_ACTION_MASK  = 0x0f;
+
 
 #define DX_ORDER_FROM_QUOTE_BID_INDEX(e) (((e) == 0 ? DX_ORDER_SOURCE_COMPOSITE_BID : DX_ORDER_SOURCE_REGIONAL_BID) << DX_ORDER_INDEX_SSRC_SHIFT) | (char_to_bits(e) << DX_ORDER_INDEX_EXC_SHIFT)
 #define DX_ORDER_FROM_QUOTE_ASK_INDEX(e) (((e) == 0 ? DX_ORDER_SOURCE_COMPOSITE_ASK : DX_ORDER_SOURCE_REGIONAL_ASK) << DX_ORDER_INDEX_SSRC_SHIFT) | (char_to_bits(e) << DX_ORDER_INDEX_EXC_SHIFT)
@@ -136,6 +162,7 @@ static const dxf_uint_t DX_ORDER_FLAGS_EXCHANGE_MASK  = 0x7f;
 #define DX_ORDER_GET_SCOPE(rec)    ((dxf_order_scope_t)(((rec)->flags >> DX_ORDER_FLAGS_SCOPE_SHIFT) & DX_ORDER_FLAGS_SCOPE_MASK))
 #define DX_ORDER_GET_SIDE(rec)     ((dxf_order_side_t)(((rec)->flags >> DX_ORDER_FLAGS_SIDE_SHIFT) & DX_ORDER_FLAGS_SIDE_MASK))
 #define DX_ORDER_GET_EXCHANGE(rec) ((dxf_char_t)(((rec)->flags >> DX_ORDER_FLAGS_EXCHANGE_SHIFT) & DX_ORDER_FLAGS_EXCHANGE_MASK))
+#define DX_ORDER_GET_ACTION(rec)   ((dxf_order_action_t)(((rec)->flags >> DX_ORDER_FLAGS_ACTION_SHIFT) & DX_ORDER_FLAGS_ACTION_MASK))
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -771,20 +798,31 @@ int RECORD_TRANSCODER_NAME(dx_order_t) (dx_record_transcoder_connection_context_
 		dx_order_t* cur_record = record_buffer + i;
 		dxf_order_t* cur_event = event_buffer + i;
 
+		dx_memset(cur_event->source, 0, sizeof(cur_event->source));
+		dx_copy_string_len(cur_event->source, suffix, dx_string_length(suffix));
+
 		cur_event->event_flags = event_params->flags;
 		cur_event->index = DX_ORDER_INDEX(cur_record, src);
 		cur_event->time = DX_TIME_SEQ_TO_MS(cur_record);
-		cur_event->time_nanos = cur_record->time_nanos;
 		cur_event->sequence = DX_SEQUENCE(cur_record);
+		cur_event->time_nanos = cur_record->time_nanos;
+
+		cur_event->action = DX_ORDER_GET_ACTION(cur_record);
+		cur_event->action_time = cur_record->action_time;
+		cur_event->order_id = cur_record->order_id;
+		cur_event->aux_order_id = cur_record->aux_order_id;
+
 		cur_event->price = cur_record->price;
 		cur_event->size = cur_record->size;
 		cur_event->count = cur_record->count;
-		cur_event->scope = DX_ORDER_GET_SCOPE(cur_record);
-		cur_event->side = DX_ORDER_GET_SIDE(cur_record);
-		cur_event->exchange_code = DX_ORDER_GET_EXCHANGE(cur_record);
 
-		dx_memset(cur_event->source, 0, sizeof(cur_event->source));
-		dx_copy_string_len(cur_event->source, suffix, dx_string_length(suffix));
+		cur_event->trade_id = cur_record->trade_id;
+		cur_event->trade_price = cur_record->trade_price;
+		cur_event->trade_size = cur_record->trade_size;
+
+		cur_event->exchange_code = DX_ORDER_GET_EXCHANGE(cur_record);
+		cur_event->side = DX_ORDER_GET_SIDE(cur_record);
+		cur_event->scope = DX_ORDER_GET_SCOPE(cur_record);
 
 		cur_event->market_maker = dx_decode_from_integer(cur_record->mmid);
 
@@ -924,20 +962,31 @@ int RECORD_TRANSCODER_NAME(dx_spread_order_t) (dx_record_transcoder_connection_c
 		dx_spread_order_t* cur_record = record_buffer + i;
 		dxf_order_t* cur_event = event_buffer + i;
 
+		dx_memset(cur_event->source, 0, sizeof(cur_event->source));
+		dx_copy_string_len(cur_event->source, suffix, dx_string_length(suffix));
+
 		cur_event->event_flags = event_params->flags;
 		cur_event->index = DX_ORDER_INDEX(cur_record, src);
 		cur_event->time = DX_TIME_SEQ_TO_MS(cur_record);
-		cur_event->time_nanos = cur_record->time_nanos;
 		cur_event->sequence = DX_SEQUENCE(cur_record);
+		cur_event->time_nanos = cur_record->time_nanos;
+
+		cur_event->action = DX_ORDER_GET_ACTION(cur_record);
+		cur_event->action_time = cur_record->action_time;
+		cur_event->order_id = cur_record->order_id;
+		cur_event->aux_order_id = cur_record->aux_order_id;
+
 		cur_event->price = cur_record->price;
 		cur_event->size = cur_record->size;
 		cur_event->count = cur_record->count;
-		cur_event->scope = DX_ORDER_GET_SCOPE(cur_record);
-		cur_event->side = DX_ORDER_GET_SIDE(cur_record);
-		cur_event->exchange_code = DX_ORDER_GET_EXCHANGE(cur_record);
 
-		dx_memset(cur_event->source, 0, sizeof(cur_event->source));
-		dx_copy_string_len(cur_event->source, suffix, dx_string_length(suffix));
+		cur_event->trade_id = cur_record->trade_id;
+		cur_event->trade_price = cur_record->trade_price;
+		cur_event->trade_size = cur_record->trade_size;
+
+		cur_event->exchange_code = DX_ORDER_GET_EXCHANGE(cur_record);
+		cur_event->side = DX_ORDER_GET_SIDE(cur_record);
+		cur_event->scope = DX_ORDER_GET_SCOPE(cur_record);
 
 		if (cur_record->spread_symbol != NULL) {
 			cur_event->spread_symbol = dx_create_string_src(cur_record->spread_symbol);
