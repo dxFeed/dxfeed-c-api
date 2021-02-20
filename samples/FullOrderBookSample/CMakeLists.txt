@@ -74,8 +74,6 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 
 add_executable(${PROJECT} ${SOURCE_FILES})
 
-set(ADDITIONAL_LIBRARIES "")
-
 target_link_libraries(${PROJECT} DXFeed ${ADDITIONAL_LIBRARIES})
 
 set_target_properties(${PROJECT}
