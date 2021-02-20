@@ -64,6 +64,10 @@ else ()
     set(CMAKE_C_FLAGS_DEBUG "-g -O0 -fPIC")
     set(CMAKE_C_FLAGS_RELEASE "-O2 -fPIC")
     add_definitions(-DUSE_PTHREADS)
+    set(ADDITIONAL_LIBRARIES
+            ${ADDITIONAL_LIBRARIES}
+            pthread
+            )
 endif (WIN32)
 
 source_group("Source Files" FILES ${SOURCE_FILES})
