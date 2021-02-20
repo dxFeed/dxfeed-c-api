@@ -253,6 +253,8 @@ typedef enum dxf_order_action_t {
 	 * Integer value = 8
 	 */
 	dxf_oa_bust = 8,
+
+	dxf_oa_last = dxf_oa_bust
 } dxf_order_action_t;
 
 static DX_MAYBE_UNUSED dxf_const_string_t DXF_ORDER_AGGREGATE_BID_STR = L"AGGREGATE_BID";

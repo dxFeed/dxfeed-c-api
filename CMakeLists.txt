@@ -36,13 +36,13 @@ add_subdirectory(thirdparty/toml11)
 #Note: add projects to build and package below
 add_subdirectory(src)
 
-add_subdirectory(tests/CommandLineSample)
-
-add_subdirectory(tests/CandleSample)
-add_subdirectory(tests/PriceLevelBookSample)
-add_subdirectory(tests/RegionalBookSample)
-add_subdirectory(tests/SnapshotConsoleSample)
-add_subdirectory(tests/IncSnapshotConsoleSample)
+add_subdirectory(samples/CandleSample)
+add_subdirectory(samples/CommandLineSample)
+add_subdirectory(samples/FullOrderBookSample)
+add_subdirectory(samples/PriceLevelBookSample)
+add_subdirectory(samples/RegionalBookSample)
+add_subdirectory(samples/SnapshotConsoleSample)
+add_subdirectory(samples/IncSnapshotConsoleSample)
 
 add_subdirectory(wrappers/cpp)
 

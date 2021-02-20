@@ -96,7 +96,7 @@ install(TARGETS ${PROJECT}
         DESTINATION "bin/${TARGET_PLATFORM}"
         )
 install(FILES ${SOURCE_FILES} ${PROJECT_FILES} ${BUILD_FILES}
-        DESTINATION "tests/${PROJECT}"
+        DESTINATION "samples/${PROJECT}"
         CONFIGURATIONS Release
         )
 set(CPACK_PACKAGE_VENDOR "Devexperts LLC")
