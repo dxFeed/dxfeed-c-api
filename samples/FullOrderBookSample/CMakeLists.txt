@@ -31,17 +31,12 @@ endif ()
 
 link_directories(${LIB_DXFEED_OUT_DIR})
 
-if (NOT WIN32)
-    if (NOT DISABLE_TLS)
-        link_directories(${LIB_TLS}/nix/${TARGET_PLATFORM})
-    endif (NOT DISABLE_TLS)
-endif (NOT WIN32)
-
 set(SOURCE_FILES
         FullOrderBookSample.c
         )
 
 set(ADDITIONAL_PROPERTIES "")
+set(ADDITIONAL_LIBRARIES "")
 
 if (WIN32)
     add_definitions(-D_CONSOLE -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE)
