@@ -1,5 +1,5 @@
 Version 7.2.0
-* All sample programs' code were moved to the `samples` directory
+* All sample programs were moved to the `samples` directory
 * [DXFC-212] Extended the Order event for Full Order Book
   - the `action`, `action_time`, `order_id`, `aux_order_id`, `trade_id`, `trade_price`, `trade_size` fields were added to the `dxf_order_t` structure
     See the `dxf_order_action_t` enum description (documentation) where it is indicated in which cases which fields will be filled.
