@@ -235,13 +235,11 @@ typedef void (*dxf_socket_thread_destruction_notifier_t) (dxf_connection_t conne
  *         Created connection is returned via OUT parameter ```connection```.
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure.
  */
-DXFEED_API ERRORCODE dxf_create_connection (const char* address,
-                                            dxf_conn_termination_notifier_t notifier,
-                                            dxf_conn_status_notifier_t conn_status_notifier,
-                                            dxf_socket_thread_creation_notifier_t stcn,
-                                            dxf_socket_thread_destruction_notifier_t stdn,
-                                            void* user_data,
-                                            OUT dxf_connection_t* connection);
+DXFEED_API ERRORCODE dxf_create_connection(const char* address, dxf_conn_termination_notifier_t notifier,
+										   dxf_conn_status_notifier_t conn_status_notifier,
+										   dxf_socket_thread_creation_notifier_t stcn,
+										   dxf_socket_thread_destruction_notifier_t stdn, void* user_data,
+										   OUT dxf_connection_t* connection);
 
 /**
  * @ingroup c-api-connection-functions
@@ -277,15 +275,12 @@ DXFEED_API ERRORCODE dxf_create_connection (const char* address,
  *
  * @warning The user and password data from argument have a higher priority than address credentials.
  */
-DXFEED_API ERRORCODE dxf_create_connection_auth_basic(const char* address,
-                                                      const char* user,
-                                                      const char* password,
-                                                      dxf_conn_termination_notifier_t notifier,
-                                                      dxf_conn_status_notifier_t conn_status_notifier,
-                                                      dxf_socket_thread_creation_notifier_t stcn,
-                                                      dxf_socket_thread_destruction_notifier_t stdn,
-                                                      void* user_data,
-                                                      OUT dxf_connection_t* connection);
+DXFEED_API ERRORCODE dxf_create_connection_auth_basic(const char* address, const char* user, const char* password,
+													  dxf_conn_termination_notifier_t notifier,
+													  dxf_conn_status_notifier_t conn_status_notifier,
+													  dxf_socket_thread_creation_notifier_t stcn,
+													  dxf_socket_thread_destruction_notifier_t stdn, void* user_data,
+													  OUT dxf_connection_t* connection);
 
 /**
  * @ingroup c-api-connection-functions
@@ -1357,12 +1352,31 @@ DXFEED_API ERRORCODE dxf_get_current_connection_status(dxf_connection_t connecti
  *
  * @brief Frees memory allocated in API functions from this module
  *
- * @details
- *
  * @param[in] pointer Pointer to memory allocated earlier in some API function from this module
  */
 DXFEED_API ERRORCODE dxf_free(void* pointer);
 
+/**
+ * @ingroup c-api-common
+ *
+ * @brief Returns a dxf_const_string_t name of the dxf_order_action_t enum value
+ *
+ * @details Don't free the pointer returned by this function
+ *
+ * @param[in] action Order action
+ */
+DXFEED_API dxf_const_string_t dxf_get_order_action_wstring_name(dxf_order_action_t action);
+
+/**
+ * @ingroup c-api-common
+ *
+ * @brief Returns a name of the dxf_order_action_t enum value
+ *
+ * @details Don't free the pointer returned by this function
+ *
+ * @param[in] action Order action
+ */
+DXFEED_API const char* dxf_get_order_action_string_name(dxf_order_action_t action);
 
 /**
  * @ingroup c-api-config

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0.0)
 
 cmake_policy(SET CMP0015 NEW)
 
-set(PROJECT CommandLineSample)
+set(PROJECT FullOrderBookSample)
 set(INCLUDE_DIR ../../include)
 set(TARGET_PLATFORM "x86" CACHE STRING "Target platform specification")
 set(PLATFORM_POSTFIX "")
@@ -19,7 +19,7 @@ set(LIB_DXFEED_OUT_DIR ${CMAKE_BINARY_DIR}/${LIB_DXFEED_PROJ})
 
 set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE INTERNAL "" FORCE)
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_C_STANDARD_REQUIRED on)
+set(CMAKE_CXX_STANDARD_REQUIRED on)
 
 project(${PROJECT})
 
@@ -31,17 +31,12 @@ endif ()
 
 link_directories(${LIB_DXFEED_OUT_DIR})
 
-if (NOT WIN32)
-    if (NOT DISABLE_TLS)
-        link_directories(${LIB_TLS}/nix/${TARGET_PLATFORM})
-    endif (NOT DISABLE_TLS)
-endif (NOT WIN32)
-
 set(SOURCE_FILES
-        CommandLineSample.c
+        FullOrderBookSample.c
         )
 
 set(ADDITIONAL_PROPERTIES "")
+set(ADDITIONAL_LIBRARIES "")
 
 if (WIN32)
     add_definitions(-D_CONSOLE -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE)
@@ -64,13 +59,15 @@ else ()
     set(CMAKE_C_FLAGS_DEBUG "-g -O0 -fPIC")
     set(CMAKE_C_FLAGS_RELEASE "-O2 -fPIC")
     add_definitions(-DUSE_PTHREADS)
+    set(ADDITIONAL_LIBRARIES
+            ${ADDITIONAL_LIBRARIES}
+            pthread
+            )
 endif (WIN32)
 
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 add_executable(${PROJECT} ${SOURCE_FILES})
-
-set(ADDITIONAL_LIBRARIES "")
 
 target_link_libraries(${PROJECT} DXFeed ${ADDITIONAL_LIBRARIES})
 
@@ -88,7 +85,6 @@ set(PROJECT_FILES
         ${PROJECT}.vcxproj.filters
         )
 set(BUILD_FILES
-        build.bat
         CMakeLists.txt
         )
 set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/DXFeedAllCPackConfig.cmake")
@@ -96,7 +92,7 @@ install(TARGETS ${PROJECT}
         DESTINATION "bin/${TARGET_PLATFORM}"
         )
 install(FILES ${SOURCE_FILES} ${PROJECT_FILES} ${BUILD_FILES}
-        DESTINATION "tests/${PROJECT}"
+        DESTINATION "samples/${PROJECT}"
         CONFIGURATIONS Release
         )
 set(CPACK_PACKAGE_VENDOR "Devexperts LLC")

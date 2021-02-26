@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0.0)
 
 cmake_policy(SET CMP0015 NEW)
 
-set(PROJECT CandleSample)
+set(PROJECT SnapshotConsoleSample)
 set(INCLUDE_DIR ../../include)
 set(TARGET_PLATFORM "x86" CACHE STRING "Target platform specification")
 set(PLATFORM_POSTFIX "")
@@ -19,7 +19,7 @@ set(LIB_DXFEED_OUT_DIR ${CMAKE_BINARY_DIR}/${LIB_DXFEED_PROJ})
 
 set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE INTERNAL "" FORCE)
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_C_STANDARD_REQUIRED on)
+set(CMAKE_CXX_STANDARD_REQUIRED on)
 
 project(${PROJECT})
 
@@ -38,7 +38,7 @@ if (NOT WIN32)
 endif (NOT WIN32)
 
 set(SOURCE_FILES
-        CandleSample.c
+        SnapshotConsoleSample.c
         )
 
 set(ADDITIONAL_PROPERTIES "")
@@ -96,7 +96,7 @@ install(TARGETS ${PROJECT}
         DESTINATION "bin/${TARGET_PLATFORM}"
         )
 install(FILES ${SOURCE_FILES} ${PROJECT_FILES} ${BUILD_FILES}
-        DESTINATION "tests/${PROJECT}"
+        DESTINATION "samples/${PROJECT}"
         CONFIGURATIONS Release
         )
 set(CPACK_PACKAGE_VENDOR "Devexperts LLC")

@@ -1522,3 +1522,53 @@ DXFEED_API ERRORCODE dxf_load_config_from_file(const char* file_name) {
 
 	return DXF_SUCCESS;
 }
+
+DXFEED_API dxf_const_string_t dxf_get_order_action_wstring_name(dxf_order_action_t action) {
+	switch (action) {
+		case dxf_oa_undefined:
+			return L"Undefined";
+		case dxf_oa_new:
+			return L"New";
+		case dxf_oa_replace:
+			return L"Replace";
+		case dxf_oa_modify:
+			return L"Modify";
+		case dxf_oa_delete:
+			return L"Delete";
+		case dxf_oa_partial:
+			return L"Partial";
+		case dxf_oa_execute:
+			return L"Execute";
+		case dxf_oa_trade:
+			return L"Trade";
+		case dxf_oa_bust:
+			return L"Bust";
+		default:
+			return L"Unknown";
+	}
+}
+
+DXFEED_API const char* dxf_get_order_action_string_name(dxf_order_action_t action) {
+	switch (action) {
+		case dxf_oa_undefined:
+			return "Undefined";
+		case dxf_oa_new:
+			return "New";
+		case dxf_oa_replace:
+			return "Replace";
+		case dxf_oa_modify:
+			return "Modify";
+		case dxf_oa_delete:
+			return "Delete";
+		case dxf_oa_partial:
+			return "Partial";
+		case dxf_oa_execute:
+			return "Execute";
+		case dxf_oa_trade:
+			return "Trade";
+		case dxf_oa_bust:
+			return "Bust";
+		default:
+			return "Unknown";
+	}
+}

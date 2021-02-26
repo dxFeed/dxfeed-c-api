@@ -4,6 +4,40 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DXFeed", "DXFeed.vcxproj", "{98DF2375-3C29-4806-A832-7C666F8BF54C}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CandleSample", "samples\CandleSample\CandleSample.vcxproj", "{E1C87477-6078-4BD2-9B2D-1E6C10F39CC3}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CommandLineSample", "samples\CommandLineSample\CommandLineSample.vcxproj", "{C396319B-1914-478A-8BD2-D98C97776458}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FullOrderBookSample", "samples\FullOrderBookSample\FullOrderBookSample.vcxproj", "{B4F200FB-4F73-4FAE-91CC-52D72DCB8B81}"
+	ProjectSection(ProjectDependencies) = postProject
+		{98DF2375-3C29-4806-A832-7C666F8BF54C} = {98DF2375-3C29-4806-A832-7C666F8BF54C}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IncSnapshotConsoleSample", "samples\IncSnapshotConsoleSample\IncSnapshotConsoleSample.vcxproj", "{70E09AD5-89E5-47E2-953B-860A53F1C1DC}"
+	ProjectSection(ProjectDependencies) = postProject
+		{98DF2375-3C29-4806-A832-7C666F8BF54C} = {98DF2375-3C29-4806-A832-7C666F8BF54C}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PriceLevelBookSample", "samples\PriceLevelBookSample\PriceLevelBookSample.vcxproj", "{BF2A8A6D-418E-4CD0-B41F-77B252CB31A4}"
+	ProjectSection(ProjectDependencies) = postProject
+		{98DF2375-3C29-4806-A832-7C666F8BF54C} = {98DF2375-3C29-4806-A832-7C666F8BF54C}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RegionalBookSample", "samples\RegionalBookSample\RegionalBookSample.vcxproj", "{8A14A0E2-B0BB-4300-B1C1-3D52327A42AF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{98DF2375-3C29-4806-A832-7C666F8BF54C} = {98DF2375-3C29-4806-A832-7C666F8BF54C}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SnapshotConsoleSample", "samples\SnapshotConsoleSample\SnapshotConsoleSample.vcxproj", "{87B6D457-CCA6-4D37-A42C-50EB7A45D5A8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{98DF2375-3C29-4806-A832-7C666F8BF54C} = {98DF2375-3C29-4806-A832-7C666F8BF54C}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DXFeedCppWrapperConnectionSample", "wrappers\cpp\samples\ConnectionSample\DXFeedCppWrapperConnectionSample.vcxproj", "{304F24BB-9348-4B1D-AA96-580BB6DE5578}"
+	ProjectSection(ProjectDependencies) = postProject
+		{98DF2375-3C29-4806-A832-7C666F8BF54C} = {98DF2375-3C29-4806-A832-7C666F8BF54C}
+	EndProjectSection
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ConnectionTest", "tests\ConnectionTest\ConnectionTest.vcxproj", "{7F344E89-5118-4D89-A5CF-A887DFCF7352}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UnitTests", "tests\UnitTests\UnitTests.vcxproj", "{2671AFA2-E2C2-4D75-ADE0-2B54D7D0DFF9}"
@@ -14,40 +48,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "APITest", "tests\APITest\AP
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LastEventTest", "tests\LastEventTest\LastEventTest.vcxproj", "{1279AD79-7991-4916-B111-78662932C7E2}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CommandLineSample", "tests\CommandLineSample\CommandLineSample.vcxproj", "{C396319B-1914-478A-8BD2-D98C97776458}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FullTest", "tests\FullTest\FullTest.vcxproj", "{9D6628D8-BD75-472D-A295-88CF818AD254}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "QuoteTableTest", "tests\QuoteTableTest\QuoteTableTest.vcxproj", "{EC676D2E-7CE6-443D-B7A2-420AB0C71548}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PerformanceTest", "tests\PerformanceTest\PerformanceTest.vcxproj", "{B78829A3-D7A6-44CC-B973-294BFF20B459}"
-	ProjectSection(ProjectDependencies) = postProject
-		{98DF2375-3C29-4806-A832-7C666F8BF54C} = {98DF2375-3C29-4806-A832-7C666F8BF54C}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CandleSample", "tests\CandleSample\CandleSample.vcxproj", "{E1C87477-6078-4BD2-9B2D-1E6C10F39CC3}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SnapshotConsoleSample", "tests\SnapshotConsoleSample\SnapshotConsoleSample.vcxproj", "{87B6D457-CCA6-4D37-A42C-50EB7A45D5A8}"
-	ProjectSection(ProjectDependencies) = postProject
-		{98DF2375-3C29-4806-A832-7C666F8BF54C} = {98DF2375-3C29-4806-A832-7C666F8BF54C}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PriceLevelBookSample", "tests\PriceLevelBookSample\PriceLevelBookSample.vcxproj", "{BF2A8A6D-418E-4CD0-B41F-77B252CB31A4}"
-	ProjectSection(ProjectDependencies) = postProject
-		{98DF2375-3C29-4806-A832-7C666F8BF54C} = {98DF2375-3C29-4806-A832-7C666F8BF54C}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RegionalBookSample", "tests\RegionalBookSample\RegionalBookSample.vcxproj", "{8A14A0E2-B0BB-4300-B1C1-3D52327A42AF}"
-	ProjectSection(ProjectDependencies) = postProject
-		{98DF2375-3C29-4806-A832-7C666F8BF54C} = {98DF2375-3C29-4806-A832-7C666F8BF54C}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IncSnapshotConsoleSample", "tests\IncSnapshotConsoleSample\IncSnapshotConsoleSample.vcxproj", "{70E09AD5-89E5-47E2-953B-860A53F1C1DC}"
-	ProjectSection(ProjectDependencies) = postProject
-		{98DF2375-3C29-4806-A832-7C666F8BF54C} = {98DF2375-3C29-4806-A832-7C666F8BF54C}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DXFeedCppWrapperConnectionSample", "wrappers\cpp\samples\ConnectionSample\DXFeedCppWrapperConnectionSample.vcxproj", "{304F24BB-9348-4B1D-AA96-580BB6DE5578}"
 	ProjectSection(ProjectDependencies) = postProject
 		{98DF2375-3C29-4806-A832-7C666F8BF54C} = {98DF2375-3C29-4806-A832-7C666F8BF54C}
 	EndProjectSection
@@ -176,6 +181,22 @@ Global
 		{C396319B-1914-478A-8BD2-D98C97776458}.ReleaseNoTLS|Win32.Build.0 = ReleaseNoTLS|Win32
 		{C396319B-1914-478A-8BD2-D98C97776458}.ReleaseNoTLS|x64.ActiveCfg = ReleaseNoTLS|x64
 		{C396319B-1914-478A-8BD2-D98C97776458}.ReleaseNoTLS|x64.Build.0 = ReleaseNoTLS|x64
+		{B4F200FB-4F73-4FAE-91CC-52D72DCB8B81}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B4F200FB-4F73-4FAE-91CC-52D72DCB8B81}.Debug|Win32.Build.0 = Debug|Win32
+		{B4F200FB-4F73-4FAE-91CC-52D72DCB8B81}.Debug|x64.ActiveCfg = Debug|x64
+		{B4F200FB-4F73-4FAE-91CC-52D72DCB8B81}.Debug|x64.Build.0 = Debug|x64
+		{B4F200FB-4F73-4FAE-91CC-52D72DCB8B81}.DebugNoTLS|Win32.ActiveCfg = DebugNoTLS|Win32
+		{B4F200FB-4F73-4FAE-91CC-52D72DCB8B81}.DebugNoTLS|Win32.Build.0 = DebugNoTLS|Win32
+		{B4F200FB-4F73-4FAE-91CC-52D72DCB8B81}.DebugNoTLS|x64.ActiveCfg = DebugNoTLS|x64
+		{B4F200FB-4F73-4FAE-91CC-52D72DCB8B81}.DebugNoTLS|x64.Build.0 = DebugNoTLS|x64
+		{B4F200FB-4F73-4FAE-91CC-52D72DCB8B81}.Release|Win32.ActiveCfg = Release|Win32
+		{B4F200FB-4F73-4FAE-91CC-52D72DCB8B81}.Release|Win32.Build.0 = Release|Win32
+		{B4F200FB-4F73-4FAE-91CC-52D72DCB8B81}.Release|x64.ActiveCfg = Release|x64
+		{B4F200FB-4F73-4FAE-91CC-52D72DCB8B81}.Release|x64.Build.0 = Release|x64
+		{B4F200FB-4F73-4FAE-91CC-52D72DCB8B81}.ReleaseNoTLS|Win32.ActiveCfg = ReleaseNoTLS|Win32
+		{B4F200FB-4F73-4FAE-91CC-52D72DCB8B81}.ReleaseNoTLS|Win32.Build.0 = ReleaseNoTLS|Win32
+		{B4F200FB-4F73-4FAE-91CC-52D72DCB8B81}.ReleaseNoTLS|x64.ActiveCfg = ReleaseNoTLS|x64
+		{B4F200FB-4F73-4FAE-91CC-52D72DCB8B81}.ReleaseNoTLS|x64.Build.0 = ReleaseNoTLS|x64
 		{9D6628D8-BD75-472D-A295-88CF818AD254}.Debug|Win32.ActiveCfg = Debug|Win32
 		{9D6628D8-BD75-472D-A295-88CF818AD254}.Debug|Win32.Build.0 = Debug|Win32
 		{9D6628D8-BD75-472D-A295-88CF818AD254}.Debug|x64.ActiveCfg = Debug|x64

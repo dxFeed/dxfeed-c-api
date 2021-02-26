@@ -161,10 +161,16 @@ typedef struct dx_order {
     dxf_int_t time;
     dxf_int_t time_nanos;
     dxf_int_t sequence;
+	dxf_long_t action_time;
+	dxf_long_t order_id;
+	dxf_long_t aux_order_id;
     dxf_double_t price;
     dxf_int_t size;
     dxf_int_t count;
     dxf_int_t flags;
+	dxf_long_t trade_id;
+	dxf_double_t trade_price;
+	dxf_double_t trade_size;
     dxf_int_t mmid;
 } dx_order_t;
 
@@ -174,10 +180,16 @@ typedef struct dx_spread_order {
     dxf_int_t time;
     dxf_int_t time_nanos;
     dxf_int_t sequence;
+	dxf_long_t action_time;
+	dxf_long_t order_id;
+	dxf_long_t aux_order_id;
     dxf_double_t price;
     dxf_int_t size;
     dxf_int_t count;
     dxf_int_t flags;
+	dxf_long_t trade_id;
+	dxf_double_t trade_price;
+	dxf_double_t trade_size;
     dxf_const_string_t spread_symbol;
 } dx_spread_order_t;
 
