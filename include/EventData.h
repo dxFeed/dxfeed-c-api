@@ -314,7 +314,7 @@ typedef struct dxf_order_t {
 
 	/**
 	 * Contains order ID if available, otherwise - 0. Some actions dxf_oa_trade, dxf_oa_bust have no order since they are not related
-	 * to any order in Order book. Contains 0 if
+	 * to any order in Order book.
 	 *
 	 * This field is a part of the FOB ("Full Order Book") support.
 	 */
