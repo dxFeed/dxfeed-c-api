@@ -141,9 +141,9 @@ SymbolData* SymbolData::create(dxf_const_string_t name) {
 	return res;
 }
 
-void SymbolData::storeLastSymbolEvent(dx_event_id_t eventId, dxf_const_event_data_t data, int dataCount) {
+void SymbolData::storeLastSymbolEvent(dx_event_id_t eventId, dxf_const_event_data_t data) {
 	dx_memcpy(this->lastEvents[eventId],
-			  dx_get_event_data_item(DX_EVENT_BIT_MASK(static_cast<unsigned>(eventId)), data, dataCount - 1),
+			  dx_get_event_data_item(DX_EVENT_BIT_MASK(static_cast<unsigned>(eventId)), data, 0),
 			  dx_get_event_data_struct_size(eventId));
 }
 
@@ -186,24 +186,24 @@ int SubscriptionData::closeEventSubscription(dxf_subscription_t subscriptionId, 
 		return dx_set_error_code(dx_esec_invalid_subscr_id);
 	}
 
-	auto subscr_data = static_cast<dx::SubscriptionData*>(subscriptionId);
+	auto subscriptionData = static_cast<dx::SubscriptionData*>(subscriptionId);
 	int res = true;
-	auto context = static_cast<dx::EventSubscriptionConnectionContext*>(subscr_data->connection_context);
+	auto context = static_cast<dx::EventSubscriptionConnectionContext*>(subscriptionData->connection_context);
 
-	context->process([&res, &subscr_data, remove_from_context](dx::EventSubscriptionConnectionContext* ctx) {
-		for (auto&& s : subscr_data->symbols) {
-			res = ctx->unsubscribeSymbol(s.second, subscr_data) && res;
+	context->process([&res, &subscriptionData, remove_from_context](dx::EventSubscriptionConnectionContext* ctx) {
+		for (auto&& s : subscriptionData->symbols) {
+			res = ctx->unsubscribeSymbol(s.second, subscriptionData) && res;
 		}
 
-		subscr_data->symbols.clear();
-		subscr_data->listeners.clear();
+		subscriptionData->symbols.clear();
+		subscriptionData->listeners.clear();
 
 		if (remove_from_context) {
-			ctx->removeSubscription(subscr_data);
+			ctx->removeSubscription(subscriptionData);
 		}
 	});
 
-	SubscriptionData::free(subscr_data);
+	SubscriptionData::free(subscriptionData);
 
 	return res;
 }
@@ -703,7 +703,7 @@ int dx_get_event_subscription_time(dxf_subscription_t subscr_id, OUT dxf_long_t*
 /* -------------------------------------------------------------------------- */
 
 static void dx_call_subscr_listeners(dx::SubscriptionData* subscr_data, unsigned event_bitmask,
-									 dxf_const_string_t symbol_name, dxf_const_event_data_t data, int data_count,
+									 dxf_const_string_t symbol_name, dxf_const_event_data_t data,
 									 const dxf_event_params_t* event_params) {
 	if (subscr_data == nullptr || subscr_data->symbols.find(symbol_name) == subscr_data->symbols.end()) {
 		return;
@@ -713,14 +713,14 @@ static void dx_call_subscr_listeners(dx::SubscriptionData* subscr_data, unsigned
 		switch (listener_context.getVersion()) {
 			case dx::EventListenerVersion::Default: {
 				auto listener = (dxf_event_listener_t)listener_context.getListener();
-				listener(event_bitmask, symbol_name, static_cast<dxf_event_data_t const*>(data), data_count,
+				listener(event_bitmask, symbol_name, static_cast<dxf_event_data_t const*>(data), 1,
 						 listener_context.getUserData());
 				break;
 			}
 
 			case dx::EventListenerVersion::V2: {
 				auto listener = (dxf_event_listener_v2_t)listener_context.getListener();
-				listener(event_bitmask, symbol_name, static_cast<dxf_event_data_t const*>(data), data_count,
+				listener(event_bitmask, symbol_name, static_cast<dxf_event_data_t const*>(data), 1,
 						 event_params, listener_context.getUserData());
 				break;
 			}
@@ -735,7 +735,7 @@ static void dx_call_subscr_listeners(dx::SubscriptionData* subscr_data, unsigned
 
 void pass_event_data_to_listeners(dx::EventSubscriptionConnectionContext* ctx, dx::SymbolData* symbol_data,
 								  dx_event_id_t event_id, dxf_const_string_t symbol_name, dxf_const_event_data_t data,
-								  int data_count, const dxf_event_params_t* event_params) {
+								  const dxf_event_params_t* event_params) {
 	symbol_data->refCount++;  // TODO replace by std::shared_ptr\std::weak_ptr
 	unsigned event_bitmask = DX_EVENT_BIT_MASK(static_cast<unsigned>(event_id));
 	auto subscriptions = symbol_data->subscriptions;  // number of subscriptions may be changed in the listeners
@@ -746,43 +746,21 @@ void pass_event_data_to_listeners(dx::EventSubscriptionConnectionContext* ctx, d
 			continue;
 		}
 
-		/* Check order source, it must be done by record ids, really! */
-		if (event_id == dx_eid_order && subscription_data->orderSource.size) {
-			/* We need to filter data in parts, unfortunately */
-			auto orders = (dxf_order_t*)data;
-			int start_index, end_index;
-			end_index = start_index = 0;
-			while (end_index != data_count) {
-				/* Skip all non-needed orders */
-				while (start_index < data_count) {
-					int found;
-					size_t index;
-					DX_ARRAY_SEARCH(subscription_data->orderSource.elements, 0, subscription_data->orderSource.size,
-									orders[start_index].source, DX_ORDER_SOURCE_COMPARATOR_NONSYM, false, found, index);
-					if (!found)
-						start_index++;
-					else
-						break;
-				}
-				if (start_index == data_count) break;
-				/* Count all suitable orders */
-				end_index = start_index;
-				while (end_index < data_count) {
-					int found;
-					size_t index;
-					DX_ARRAY_SEARCH(subscription_data->orderSource.elements, 0, subscription_data->orderSource.size,
-									orders[end_index].source, DX_ORDER_SOURCE_COMPARATOR_NONSYM, false, found, index);
-					if (found)
-						end_index++;
-					else
-						break;
-				}
+		// Check order source
+		// TODO: optimize
+		if (event_id == dx_eid_order && subscription_data->orderSource.size > 0) {
+			auto order = *static_cast<const dxf_order_t*>(data);
+			int found;
+			DX_MAYBE_UNUSED size_t index;
 
-				dx_call_subscr_listeners(subscription_data, event_bitmask, symbol_name, &orders[start_index],
-										 end_index - start_index, event_params);
+			DX_ARRAY_SEARCH(subscription_data->orderSource.elements, 0, subscription_data->orderSource.size,
+							order.source, DX_ORDER_SOURCE_COMPARATOR_NONSYM, false, found, index);
+
+			if (found) {
+				dx_call_subscr_listeners(subscription_data, event_bitmask, symbol_name, data, event_params);
 			}
 		} else {
-			dx_call_subscr_listeners(subscription_data, event_bitmask, symbol_name, data, data_count, event_params);
+			dx_call_subscr_listeners(subscription_data, event_bitmask, symbol_name, data, event_params);
 		}
 	}
 
@@ -794,7 +772,7 @@ void pass_event_data_to_listeners(dx::EventSubscriptionConnectionContext* ctx, d
 }
 
 int dx_process_event_data(dxf_connection_t connection, dx_event_id_t event_id, dxf_const_string_t symbol_name,
-						  dxf_const_event_data_t data, int data_count, const dxf_event_params_t* event_params) {
+						  dxf_const_event_data_t data, const dxf_event_params_t* event_params) {
 	int res;
 	auto context = static_cast<dx::EventSubscriptionConnectionContext*>(
 		dx_get_subsystem_data(connection, dx_ccs_event_subscription, &res));
@@ -812,22 +790,21 @@ int dx_process_event_data(dxf_connection_t connection, dx_event_id_t event_id, d
 	}
 
 	context->process(
-		[event_id, symbol_name, data, data_count, event_params](dx::EventSubscriptionConnectionContext* ctx) {
+		[event_id, symbol_name, data, event_params](dx::EventSubscriptionConnectionContext* ctx) {
 			dx::SymbolData* symbol_data = ctx->findSymbol(symbol_name);
 
 			/* symbol_data == nullptr is most likely a correct situation that occurred because the data is received very
 			soon after the symbol subscription has been annulled */
 			if (symbol_data != nullptr) {
-				symbol_data->storeLastSymbolEvent(event_id, data, data_count);
-				pass_event_data_to_listeners(ctx, symbol_data, event_id, symbol_name, data, data_count, event_params);
+				symbol_data->storeLastSymbolEvent(event_id, data);
+				pass_event_data_to_listeners(ctx, symbol_data, event_id, symbol_name, data, event_params);
 			}
 
 			dx::SymbolData* wildcard_symbol_data = ctx->findSymbol(L"*");
 
 			if (wildcard_symbol_data != nullptr) {
-				wildcard_symbol_data->storeLastSymbolEvent(event_id, data, data_count);
-				pass_event_data_to_listeners(ctx, wildcard_symbol_data, event_id, symbol_name, data, data_count,
-											 event_params);
+				wildcard_symbol_data->storeLastSymbolEvent(event_id, data);
+				pass_event_data_to_listeners(ctx, wildcard_symbol_data, event_id, symbol_name, data, event_params);
 			}
 		});
 

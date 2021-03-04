@@ -76,7 +76,7 @@ int dx_get_event_subscription_flags(dxf_subscription_t subscr_id, OUT dx_event_s
 int dx_set_event_subscription_flags(dxf_subscription_t subscr_id, dx_event_subscr_flag subscr_flags);
 int dx_get_event_subscription_time(dxf_subscription_t subscr_id, OUT dxf_long_t* time);
 int dx_process_event_data(dxf_connection_t connection, dx_event_id_t event_id, dxf_const_string_t symbol_name,
-						   dxf_const_event_data_t data, int data_count, const dxf_event_params_t* event_params);
+						   dxf_const_event_data_t data, const dxf_event_params_t* event_params);
 int dx_get_last_symbol_event(dxf_connection_t connection, dxf_const_string_t symbol_name, int event_type,
 							  OUT dxf_event_data_t* event_data);
 

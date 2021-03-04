@@ -17,31 +17,26 @@
  *
  */
 
+#include "ServerMessageProcessor.h"
+
+#include <limits.h>
 #include <stdio.h>
 #include <string.h>
-#include <limits.h>
 
-#include "DXFeed.h"
-
-#include "ServerMessageProcessor.h"
 #include "BufferedInput.h"
-#include "DXMemory.h"
-#include "SymbolCodec.h"
+#include "Connection.h"
+#include "ConnectionContextData.h"
+#include "DXAlgorithms.h"
+#include "DXErrorHandling.h"
+#include "DXNetwork.h"
 #include "DataStructures.h"
 #include "Decimal.h"
 #include "EventData.h"
-#include "RecordTranscoder.h"
-#include "RecordBuffers.h"
 #include "Logger.h"
-#include "DXAlgorithms.h"
-#include "ConnectionContextData.h"
-#include "DXErrorHandling.h"
-#include "DXThreads.h"
-#include "TaskQueue.h"
-#include "DXNetwork.h"
+#include "RecordBuffers.h"
+#include "RecordTranscoder.h"
 #include "Snapshot.h"
-#include "DXProperties.h"
-#include "Connection.h"
+#include "SymbolCodec.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -385,9 +380,6 @@ void dx_clear_record_digest (dx_record_digest_t* digest) {
 /* -------------------------------------------------------------------------- */
 
 void dx_clear_record_digests (dx_server_msg_proc_connection_context_t* context) {
-	dx_record_id_t i = 0;
-	dx_record_id_t count = 0;
-
 	if (!dx_mutex_lock(&(context->record_digests_guard))) {
 		return;
 	}
@@ -398,8 +390,8 @@ void dx_clear_record_digests (dx_server_msg_proc_connection_context_t* context) 
 		return;
 	}
 
-	count = (dx_record_id_t)context->record_digests.size;
-	for (; i < count; ++i) {
+	dx_record_id_t count = (dx_record_id_t)context->record_digests.size;
+	for (dx_record_id_t i = 0; i < count; ++i) {
 		dx_record_digest_t* record_digest = dx_get_record_digest(context, i);
 		if (record_digest == NULL)
 			continue;
@@ -584,7 +576,7 @@ int dx_legacy_send_msg_bitmask (OUT int* bitmask) {
 		int i = 0;
 
 		for (; i < s_msg_count; ++i) {
-			size_t msg_index = 0;
+			size_t msg_index;
 			int found = false;
 
 			DX_ARRAY_SEARCH(msg_roster, 0, roster_size, s_legacy_msg_list[i], DX_NUMERIC_COMPARATOR, false, found, msg_index);
@@ -627,7 +619,7 @@ int dx_legacy_recv_msg_bitmask (int* bitmask) {
 		int i = 0;
 
 		for (; i < s_msg_count; ++i) {
-			size_t msg_index = 0;
+			size_t msg_index;
 			int found = false;
 
 			DX_ARRAY_SEARCH(msg_roster, 0, roster_size, s_legacy_msg_list[i], DX_NUMERIC_COMPARATOR, false, found, msg_index);
@@ -903,9 +895,9 @@ int dx_read_qdtime_on_remove_event(dx_server_msg_proc_connection_context_t* cont
 	for (i = 0; i < record_info->field_count; ++i) {
 		dx_field_info_t field = record_info->fields[i];
 		if (field.time == dx_ft_first_time_int_field) {
-			CHECKED_SET_VALUE(field.setter, row, &high);
+			CHECKED_SET_VALUE(field.setter, row, &high)
 		} else if (field.time == dx_ft_second_time_int_field) {
-			CHECKED_SET_VALUE(field.setter, row, &low);
+			CHECKED_SET_VALUE(field.setter, row, &low)
 		}
 	}
 
@@ -955,9 +947,9 @@ int dx_read_records (dx_server_msg_proc_connection_context_t* context,
 
 			if (representation == dx_fid_flag_decimal) {
 				CHECKED_CALL_2(dx_int_to_double, read_byte, &read_double);
-				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double);
+				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double)
 			} else {
-				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_byte);
+				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_byte)
 			}
 
 			break;
@@ -967,7 +959,7 @@ int dx_read_records (dx_server_msg_proc_connection_context_t* context,
 
 			read_utf_char = read_int;
 
-			CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_int);
+			CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_utf_char)
 
 			break;
 		case dx_fid_short:
@@ -976,9 +968,9 @@ int dx_read_records (dx_server_msg_proc_connection_context_t* context,
 
 			if (representation == dx_fid_flag_decimal) {
 				CHECKED_CALL_2(dx_int_to_double, read_short, &read_double);
-				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double);
+				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double)
 			} else {
-				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_short);
+				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_short)
 			}
 
 			break;
@@ -987,9 +979,9 @@ int dx_read_records (dx_server_msg_proc_connection_context_t* context,
 
 			if (representation == dx_fid_flag_decimal) {
 				CHECKED_CALL_2(dx_int_to_double, read_int, &read_double);
-				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double);
+				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double)
 			} else {
-				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_int);
+				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_int)
 			}
 
 			break;
@@ -997,15 +989,15 @@ int dx_read_records (dx_server_msg_proc_connection_context_t* context,
 			if (representation == dx_fid_flag_long || representation == dx_fid_flag_time_millis) {
 				CHECKED_CALL_2(dx_read_compact_long, context->bicc, &read_long);
 
-				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_long);
+				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_long)
 			} else {
 				CHECKED_CALL_2(dx_read_compact_int, context->bicc, &read_int);
 
 				if (representation == dx_fid_flag_decimal) {
 					CHECKED_CALL_2(dx_int_to_double, read_int, &read_double);
-					CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double);
+					CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double)
 				} else {
-					CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_int);
+					CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_int)
 				}
 			}
 
@@ -1017,7 +1009,7 @@ int dx_read_records (dx_server_msg_proc_connection_context_t* context,
 
 				dx_store_string_buffer(context->rbcc, read_string);
 
-				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_string);
+				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_string)
 			} else {
 				CHECKED_CALL_2(dx_read_byte_array, context->bicc, &read_byte_array);
 
@@ -1028,7 +1020,7 @@ int dx_read_records (dx_server_msg_proc_connection_context_t* context,
 				Unsupported values in those bits are reserved and MUST be ignored.
 				such field SHOULD be treated as PLAIN.
 				*/
-				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_byte_array);
+				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_byte_array)
 			}
 
 			break;
@@ -1037,7 +1029,7 @@ int dx_read_records (dx_server_msg_proc_connection_context_t* context,
 
 			dx_store_string_buffer(context->rbcc, read_string);
 
-			CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_string);
+			CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_string)
 
 			break;
 		default:
@@ -1063,7 +1055,6 @@ dxf_time_int_field_t dx_get_time_int_field(void* dscc, dx_record_id_t record_id,
 	int i;
 	dxf_ulong_t high = 0;
 	dxf_ulong_t low = 0;
-	dxf_time_int_field_t time = 0;
 	const dx_record_item_t* record_info = dx_get_record_by_id(dscc, record_id);
 
 	if (record_info == NULL)
@@ -1072,16 +1063,14 @@ dxf_time_int_field_t dx_get_time_int_field(void* dscc, dx_record_id_t record_id,
 	for (i = 0; i < record_info->field_count; ++i) {
 		dx_field_info_t field = record_info->fields[i];
 		if (field.time == dx_ft_first_time_int_field) {
-			CHECKED_GET_VALUE(field.getter, record_buffer, &high);
+			CHECKED_GET_VALUE(field.getter, record_buffer, &high)
 		}
 		else if (field.time == dx_ft_second_time_int_field) {
-			CHECKED_GET_VALUE(field.getter, record_buffer, &low);
+			CHECKED_GET_VALUE(field.getter, record_buffer, &low)
 		}
 	}
 
-	time = (high << 32) | (low & 0xFFFFFFFF);
-
-	return time;
+	return (high << 32) | (low & 0xFFFFFFFF);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1097,7 +1086,6 @@ int dx_process_data_message (dx_server_msg_proc_connection_context_t* context) {
 		void* record_buffer = NULL;
 		dx_record_id_t record_id;
 		dxf_const_string_t suffix;
-		int record_count = 0;
 		const dx_record_item_t* record_info = NULL;
 		dx_record_digest_t* record_digest = NULL;
 		dx_record_params_t record_params;
@@ -1141,7 +1129,7 @@ int dx_process_data_message (dx_server_msg_proc_connection_context_t* context) {
 		if (record_info == NULL)
 			return false;
 
-		record_buffer = g_buffer_managers[record_info->info_id].record_getter(context->rbcc, record_count++);
+		record_buffer = g_buffer_managers[record_info->info_id].record_getter(context->rbcc, 0);
 		suffix = dx_string_length(record_info->suffix) > 0 ? record_info->suffix : NULL;
 
 		if (record_buffer == NULL) {
@@ -1169,9 +1157,10 @@ int dx_process_data_message (dx_server_msg_proc_connection_context_t* context) {
 		event_params.flags = record_params.flags;
 		event_params.time_int_field = record_params.time_int_field;
 		event_params.snapshot_key = dx_new_snapshot_key(record_info->info_id, record_params.symbol_name, suffix);
+		event_params.side = dxf_osd_undefined;
 
 		if (!dx_transcode_record_data(context->connection, &record_params, &event_params,
-			g_buffer_managers[record_info->info_id].record_buffer_getter(context->rbcc), record_count)) {
+			g_buffer_managers[record_info->info_id].record_buffer_getter(context->rbcc))) {
 
 			dx_free_buffers(context->rbcc);
 
@@ -1221,7 +1210,6 @@ int dx_process_describe_records (dx_server_msg_proc_connection_context_t* contex
 		dxf_int_t server_field_count;
 		const dx_record_item_t* record_info = NULL;
 		dx_record_digest_t* record_digest = NULL;
-		dx_record_id_t local_record_id = DX_RECORD_ID_INVALID;
 		dx_record_digest_t dummy = { NULL, 0, 0 };
 
 		CHECKED_CALL_2(dx_read_compact_int, context->bicc, &server_record_id);
@@ -1234,7 +1222,7 @@ int dx_process_describe_records (dx_server_msg_proc_connection_context_t* contex
 			return dx_set_error_code(dx_pec_record_info_corrupted);
 		}
 
-		local_record_id = dx_get_record_id_by_name(context->dscc, record_name);
+		dx_record_id_t local_record_id = dx_get_record_id_by_name(context->dscc, record_name);
 
 		dx_free(record_name);
 

@@ -41,7 +41,7 @@ struct SymbolData {
 
 	static SymbolData* create(dxf_const_string_t name);
 
-	void storeLastSymbolEvent(dx_event_id_t eventId, dxf_const_event_data_t data, int dataCount);
+	void storeLastSymbolEvent(dx_event_id_t eventId, dxf_const_event_data_t data);
 };
 
 enum class EventListenerVersion { Default = 1, V2 = 2 };
