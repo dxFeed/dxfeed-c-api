@@ -63,14 +63,8 @@ typedef struct {
 } dx_snapshot_records_array_t;
 
 typedef struct {
-	dxf_time_int_field_t* elements;
-	size_t size;
-	size_t capacity;
-} dx_snapshot_record_time_ints_t;
-
-typedef struct {
 	dxf_time_int_field_t time_int_field;
-	dxf_order_side_t side;
+	dxf_long_t index;
 } dx_snapshot_record_key_t;
 
 typedef struct {
@@ -89,8 +83,6 @@ typedef struct {
 	/* Store received records */
 	dx_snapshot_records_array_t records;
 	/* Store keys of snapshot records */
-	dx_snapshot_record_time_ints_t record_time_ints;
-
 	dx_snapshot_record_keys_t record_keys;
 	/* Stores a string for snapshot records */
 	dx_snapshot_record_buffers_t record_buffers;
@@ -248,7 +240,7 @@ int dx_snapshot_records_comparator2(dx_snapshot_record_key_t key1, dx_snapshot_r
 		return 1;
 	}
 
-	return key1.side < key2.side ? -1 : (key1.side > key2.side ? 1 : 0);
+	return key1.index < key2.index ? -1 : (key1.index > key2.index ? 1 : 0);
 }
 
 int dx_snapshot_insert_record(dx_snapshot_data_ptr_t snapshot_data, dx_snapshot_records_ptr_t recs,
@@ -355,6 +347,15 @@ int dx_snapshot_set_record(dx_snapshot_data_ptr_t snapshot_data, dx_snapshot_rec
 	return true;
 }
 
+dxf_long_t dx_get_order_index(dx_snapshot_data_ptr_t snapshot_data, const dxf_event_data_t event_data) {
+	if (snapshot_data->event_id == dx_eid_order &&
+		(snapshot_data->record_info_id == dx_rid_market_maker || snapshot_data->record_info_id == dx_rid_quote)) {
+		return ((dxf_order_t*)event_data)->index;
+	}
+
+	return 0;
+}
+
 int dx_snapshot_add_event_record(dx_snapshot_data_ptr_t snapshot_data,
 								dx_snapshot_records_ptr_t recs,
 								const dxf_event_params_t* event_params,
@@ -381,18 +382,8 @@ int dx_snapshot_add_event_record(dx_snapshot_data_ptr_t snapshot_data,
 		return false;
 	}
 
-	/* store time_int_field */
-	DX_ARRAY_INSERT(recs->record_time_ints, dxf_time_int_field_t,
-		event_params->time_int_field, position, dx_capacity_manager_halfer, failed);
-	if (failed) {
-		dx_string_array_free(string_buffer);
-		dx_free((void*)string_buffer);
-		dx_snapshot_delete_record(snapshot_data, recs, position);
-		return dx_set_error_code(dx_mec_insufficient_memory);
-	}
-
 	/* store key */
-	dx_snapshot_record_key_t key = {event_params->time_int_field, event_params->side};
+	dx_snapshot_record_key_t key = {event_params->time_int_field, dx_get_order_index(snapshot_data, event_data)};
 
 	DX_ARRAY_INSERT(recs->record_keys, dx_snapshot_record_key_t,
 					key, position, dx_capacity_manager_halfer, failed);
@@ -400,8 +391,6 @@ int dx_snapshot_add_event_record(dx_snapshot_data_ptr_t snapshot_data,
 		dx_string_array_free(string_buffer);
 		dx_free((void*)string_buffer);
 		dx_snapshot_delete_record(snapshot_data, recs, position);
-		DX_ARRAY_DELETE(recs->record_time_ints, dxf_time_int_field_t, position,
-						dx_capacity_manager_halfer, failed);
 		return dx_set_error_code(dx_mec_insufficient_memory);
 	}
 
@@ -412,8 +401,6 @@ int dx_snapshot_add_event_record(dx_snapshot_data_ptr_t snapshot_data,
 		dx_string_array_free(string_buffer);
 		dx_free((void*)string_buffer);
 		dx_snapshot_delete_record(snapshot_data, recs, position);
-		DX_ARRAY_DELETE(recs->record_time_ints, dxf_time_int_field_t, position,
-			dx_capacity_manager_halfer, failed);
 		DX_ARRAY_DELETE(recs->record_keys, dx_snapshot_record_key_t, position,
 						dx_capacity_manager_halfer, failed);
 		return dx_set_error_code(dx_mec_insufficient_memory);
@@ -424,7 +411,6 @@ int dx_snapshot_add_event_record(dx_snapshot_data_ptr_t snapshot_data,
 int dx_snapshot_clear_records_array(dx_snapshot_data_ptr_t snapshot_data, dx_snapshot_records_ptr_t recs) {
 	size_t i;
 	dx_snapshot_records_array_t* records;
-	dx_snapshot_record_time_ints_t* time_ints;
 	dx_snapshot_record_buffers_t* string_buffers;
 
 	if (snapshot_data == NULL || recs == NULL) {
@@ -438,13 +424,6 @@ int dx_snapshot_clear_records_array(dx_snapshot_data_ptr_t snapshot_data, dx_sna
 	records->elements = NULL;
 	records->size = 0;
 	records->capacity = 0;
-
-	/* free time_ints */
-	time_ints = &(recs->record_time_ints);
-	dx_free(time_ints->elements);
-	time_ints->elements = NULL;
-	time_ints->size = 0;
-	time_ints->capacity = 0;
 
 	/* free keys */
 	dx_snapshot_record_keys_t* keys = &(recs->record_keys);
@@ -480,10 +459,6 @@ int dx_snapshot_remove_event_record(dx_snapshot_data_ptr_t snapshot_data, dx_sna
 
 	if (!dx_snapshot_delete_record(snapshot_data, recs, position)) return false;
 
-	DX_ARRAY_DELETE(recs->record_time_ints, dxf_time_int_field_t, position, dx_capacity_manager_halfer, failed);
-
-	if (failed) return dx_set_error_code(dx_mec_insufficient_memory);
-
 	DX_ARRAY_DELETE(recs->record_keys, dx_snapshot_record_key_t, position, dx_capacity_manager_halfer, failed);
 
 	if (failed) return dx_set_error_code(dx_mec_insufficient_memory);
@@ -501,15 +476,13 @@ int dx_snapshot_remove_event_records(dx_snapshot_data_ptr_t snapshot_data, dx_sn
 		return dx_set_error_code(dx_ec_invalid_func_param_internal);
 	}
 
-	dx_snapshot_record_time_ints_t* time_ints = &(recs->record_time_ints);
 	dx_snapshot_record_keys_t* keys = &(recs->record_keys);
-	dx_snapshot_record_key_t key = {event_params->time_int_field, event_params->side};
+	dx_snapshot_record_key_t key = {event_params->time_int_field,
+									dx_get_order_index(snapshot_data, (const dxf_event_data_t)data)};
 
 	int found = false;
 	size_t index = 0;
 
-//		DX_ARRAY_BINARY_SEARCH(time_ints->elements, 0, time_ints->size, event_params->time_int_field,
-//			dx_snapshot_records_comparator, found, index);
 	DX_ARRAY_BINARY_SEARCH(keys->elements, 0, keys->size, key,
 						   dx_snapshot_records_comparator2, found, index);
 
@@ -560,15 +533,13 @@ int dx_snapshot_update_event_records(dx_snapshot_data_ptr_t snapshot_data, dx_sn
 		return dx_set_error_code(dx_ec_invalid_func_param_internal);
 	}
 
-	dx_snapshot_record_time_ints_t* time_ints = &(recs->record_time_ints);
 	dx_snapshot_record_keys_t* keys = &(recs->record_keys);
-	dx_snapshot_record_key_t key = {event_params->time_int_field, event_params->side};
+	dx_snapshot_record_key_t key = {event_params->time_int_field,
+									dx_get_order_index(snapshot_data, (const dxf_event_data_t)data)};
 
 	int found = false;
 	size_t index = 0;
 
-//		DX_ARRAY_BINARY_SEARCH(time_ints->elements, 0, time_ints->size, event_params->time_int_field,
-//			dx_snapshot_records_comparator, found, index);
 	DX_ARRAY_BINARY_SEARCH(keys->elements, 0, keys->size, key,
 						   dx_snapshot_records_comparator2, found, index);
 

@@ -549,12 +549,10 @@ int RECORD_TRANSCODER_NAME(dx_quote_t) (dx_record_transcoder_connection_context_
 	if ((event_params->flags & dxf_ef_snapshot_end) == dxf_ef_snapshot_end) {
 		bid_event_params.flags = bid_event_params.flags ^ dxf_ef_snapshot_end;
 	}
-	bid_event_params.side = dxf_osd_buy;
 
 	if ((event_params->flags & dxf_ef_snapshot_begin) == dxf_ef_snapshot_begin) {
 		ask_event_params.flags = ask_event_params.flags ^ dxf_ef_snapshot_begin;
 	}
-	ask_event_params.side = dxf_osd_sell;
 
 	if (!dx_transcode_quote_to_order_bid(context, record_params, &bid_event_params, (dx_quote_t*)record_buffer)) {
 		return false;
@@ -746,12 +744,10 @@ int RECORD_TRANSCODER_NAME(dx_market_maker_t) (dx_record_transcoder_connection_c
 	if ((event_params->flags & dxf_ef_snapshot_end) == dxf_ef_snapshot_end) {
 		bid_event_params.flags = bid_event_params.flags ^ dxf_ef_snapshot_end;
 	}
-	bid_event_params.side = dxf_osd_buy;
 
 	if ((event_params->flags & dxf_ef_snapshot_begin) == dxf_ef_snapshot_begin) {
 		ask_event_params.flags = ask_event_params.flags ^ dxf_ef_snapshot_begin;
 	}
-	ask_event_params.side = dxf_osd_sell;
 
 	if (!dx_transcode_market_maker_to_order_bid(context, record_params, &bid_event_params, (dx_market_maker_t*)record_buffer)) {
 		return false;

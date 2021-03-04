@@ -1157,7 +1157,6 @@ int dx_process_data_message (dx_server_msg_proc_connection_context_t* context) {
 		event_params.flags = record_params.flags;
 		event_params.time_int_field = record_params.time_int_field;
 		event_params.snapshot_key = dx_new_snapshot_key(record_info->info_id, record_params.symbol_name, suffix);
-		event_params.side = dxf_osd_undefined;
 
 		if (!dx_transcode_record_data(context->connection, &record_params, &event_params,
 			g_buffer_managers[record_info->info_id].record_buffer_getter(context->rbcc))) {

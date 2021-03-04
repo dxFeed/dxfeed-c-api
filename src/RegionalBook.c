@@ -268,17 +268,18 @@ static void dx_rb_book_update(dx_regional_book_t *book) {
 
 static void notify_regional_listeners(dx_regional_book_t *book, const dxf_quote_t *quotes, int count)
 {
-    size_t i = 0;
     if (!dx_mutex_lock(&book->guard)) {
         return;
-    }    
-    for (i = 0; i < book->listeners.size; ++i) {
+    }
+
+    for (size_t i = 0; i < book->listeners.size; ++i) {
         dx_rb_listener_context_t* ctx = &book->listeners.elements[i];
         if (ctx->version == dx_rblv_v2) {
 			dxf_regional_quote_listener_t listener = *(dxf_regional_quote_listener_t*)(&ctx->listener);
 			listener(book->symbol, quotes, count, ctx->user_data);
         }
     }
+
     dx_mutex_unlock(&book->guard);
 }
 
@@ -295,7 +296,6 @@ static void rb_event_listener(int event_type, dxf_const_string_t symbol_name,
 							const dxf_event_params_t* event_params, void* user_data) {
 	const dxf_quote_t *quote = (const dxf_quote_t *)data;
 	dx_regional_book_t *book = (dx_regional_book_t *)user_data;
-	int i = 0;
 
 	/* Check params */
 	if (event_type != DXF_ET_QUOTE) {
@@ -311,19 +311,19 @@ static void rb_event_listener(int event_type, dxf_const_string_t symbol_name,
     notify_regional_listeners(book, quote, data_count);
 
 	/* Ok, process data */
-	for (; i < data_count; i++) {
-		if (quote[i].ask_exchange_code >= 'A' && quote[i].ask_exchange_code <= 'Z') {
-			int idx = quote[i].ask_exchange_code - 'A';
-			book->regions[idx].ask.price = quote[i].ask_price;
-			book->regions[idx].ask.size = quote[i].ask_size;
-			book->regions[idx].ask.time = quote[i].ask_time;
-		}
-		if (quote[i].bid_exchange_code >= 'A' && quote[i].bid_exchange_code <= 'Z') {
-			int idx = quote[i].bid_exchange_code - 'A';
-			book->regions[idx].bid.price = quote[i].bid_price;
-			book->regions[idx].bid.size = quote[i].bid_size;
-			book->regions[idx].bid.time = quote[i].bid_time;
-		}
+	if (quote->ask_exchange_code >= 'A' && quote->ask_exchange_code <= 'Z') {
+		int idx = quote->ask_exchange_code - 'A';
+
+		book->regions[idx].ask.price = quote->ask_price;
+		book->regions[idx].ask.size = quote->ask_size;
+		book->regions[idx].ask.time = quote->ask_time;
+	}
+	if (quote->bid_exchange_code >= 'A' && quote->bid_exchange_code <= 'Z') {
+		int idx = quote->bid_exchange_code - 'A';
+
+		book->regions[idx].bid.price = quote->bid_price;
+		book->regions[idx].bid.size = quote->bid_size;
+		book->regions[idx].bid.time = quote->bid_time;
 	}
 
 	dx_rb_book_update(book);

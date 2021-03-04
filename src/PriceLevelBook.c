@@ -556,24 +556,30 @@ static int dx_plb_source_add_book(dx_plb_source_t *source, dx_price_level_book_t
 /* -------------------------------------------------------------------------- */
 
 static void dx_plb_source_reset_snapshot(dx_plb_source_t *source) {
-	size_t i = 0;
-	for (i = 0; i < source->snapshot.size; i++) {
+	for (size_t i = 0; i < source->snapshot.size; i++) {
 		dx_free(source->snapshot.elements[i]);
 		source->snapshot.elements[i] = NULL;
 	}
+
 	source->snapshot.size = 0;
 
 	dx_memset(source->bids.levels, 0, sizeof(source->bids.levels));
 	source->bids.count = 0;
-	for (i = 0; i < sizeof(source->bids.levels) / sizeof(source->bids.levels[0]); i++)
+
+	for (size_t i = 0; i < sizeof(source->bids.levels) / sizeof(source->bids.levels[0]); i++) {
 		source->bids.levels[i].price = NAN;
+	}
+
 	/* Clean up final book */
 	source->final_bids = source->bids;
 
 	dx_memset(source->asks.levels, 0, sizeof(source->asks.levels));
 	source->asks.count = 0;
-	for (i = 0; i < sizeof(source->asks.levels) / sizeof(source->asks.levels[0]); i++)
+
+	for (size_t i = 0; i < sizeof(source->asks.levels) / sizeof(source->asks.levels[0]); i++) {
 		source->asks.levels[i].price = NAN;
+	}
+
 	/* Clean up final book */
 	source->final_asks = source->asks;
 }
@@ -760,7 +766,7 @@ static void dx_plb_book_clear(dx_price_level_book_t *book) {
 
 /* -------------------------------------------------------------------------- */
 
-/* This functuions must be called with book guard taken */
+/* This functions must be called with book guard taken */
 static int dx_plb_book_update_one_side(dx_plb_price_level_side_t *dst, dx_plb_price_level_side_t **srcs, size_t src_count, double startValue) {
 	int changed = false;
 	size_t didx = 0;
@@ -838,17 +844,15 @@ static void dx_plb_book_update(dx_price_level_book_t *book, dx_plb_source_t *src
 /******************/
 
 /*
-This is called with subscription lock, so it is imposisble to delete source
+This is called with subscription lock, so it is imposible to delete source
 when this code is executing.
  */
 static void plb_event_listener(int event_type, dxf_const_string_t symbol_name,
 							const dxf_event_data_t* data, int data_count,
 							const dxf_event_params_t* event_params, void* user_data) {
-	const dxf_order_t *orders = (const dxf_order_t *)data;
+	const dxf_order_t *order = (const dxf_order_t *)data;
 	dx_plb_source_t *source = (dx_plb_source_t *)user_data;
 	dx_plb_source_consumer_t *c;
-	int i = 0;
-	int sb, se, rm, tx;
 
 	/* Check params */
 	if (event_type != DXF_ET_ORDER) {
@@ -861,67 +865,64 @@ static void plb_event_listener(int event_type, dxf_const_string_t symbol_name,
 		return;
 	}
 
-	sb = IS_FLAG_SET(event_params->flags, dxf_ef_snapshot_begin);
-	se = IS_FLAG_SET(event_params->flags, dxf_ef_snapshot_end) || IS_FLAG_SET(event_params->flags, dxf_ef_snapshot_snip);
-	tx = IS_FLAG_SET(event_params->flags, dxf_ef_tx_pending);
+	int sb = IS_FLAG_SET(event_params->flags, dxf_ef_snapshot_begin);
+	int se = IS_FLAG_SET(event_params->flags, dxf_ef_snapshot_end) || IS_FLAG_SET(event_params->flags, dxf_ef_snapshot_snip);
+	int tx = IS_FLAG_SET(event_params->flags, dxf_ef_tx_pending);
 
-	/* Ok, process data */
-	for (; i < data_count; i++) {
-		/* Special check */
-		if (wcscmp(source->source, orders[i].source)) {
-			continue;
+	/* Special check */
+	if (wcscmp(source->source, order->source) != 0) {
+		return;
+	}
+
+	int rm = IS_FLAG_SET(event_params->flags, dxf_ef_remove_event) || order->size == 0;
+
+	/* Ok, process this event */
+	if (sb) {
+		/* Clear snapshot */
+		dx_plb_source_reset_snapshot(source);
+		source->snapshot_status = dx_status_begin;
+	}
+	if (source->snapshot_status == dx_status_unknown) {
+		/* If we in unknown state, skip */
+		return;
+	}
+
+	/* Now process this order */
+	dx_plb_source_process_order(source, order, rm);
+
+	/* Set end-of-snapshot */
+	if (se) {
+		source->snapshot_status = dx_status_full;
+	}
+	if (tx && source->snapshot_status == dx_status_full) {
+		source->snapshot_status = dx_status_pending;
+	} else if (!tx && source->snapshot_status == dx_status_pending) {
+		source->snapshot_status = dx_status_full;
+	}
+
+	/* And call all consumers  if it is end of transaction */
+	if ((source->asks.updated || source->bids.updated) && source->snapshot_status == dx_status_full) {
+		if (source->bids.rebuild) {
+			dx_plb_source_rebuild_levels(&source->snapshot, &source->bids, dxf_osd_buy);
+		}
+		if (source->bids.updated) {
+			source->final_bids = source->bids;
 		}
 
-		rm = IS_FLAG_SET(event_params->flags, dxf_ef_remove_event) || orders[i].size == 0;
-
-		/* Ok, process this event */
-		if (sb) {
-			/* Clear snapshot */
-			dx_plb_source_reset_snapshot(source);
-			source->snapshot_status = dx_status_begin;
+		if (source->asks.rebuild) {
+			dx_plb_source_rebuild_levels(&source->snapshot, &source->asks, dxf_osd_sell);
 		}
-		if (source->snapshot_status == dx_status_unknown) {
-			/* If we in unknown state, skip */
-			continue;
+		if (source->asks.updated) {
+			source->final_asks = source->asks;
 		}
 
-		/* Now process this order */
-		dx_plb_source_process_order(source, &orders[i], rm);
-
-		/* Set end-of-snapshot */
-		if (se) {
-			source->snapshot_status = dx_status_full;
+		/* Lock guard to be sure that source list is intact */
+		if (!dx_mutex_lock(&source->guard))
+			return;
+		for (c = source->consumers; c != NULL; c = c->next) {
+			dx_plb_book_update(c->consumer, source);
 		}
-		if (tx && source->snapshot_status == dx_status_full) {
-			source->snapshot_status = dx_status_pending;
-		} else if (!tx && source->snapshot_status == dx_status_pending) {
-			source->snapshot_status = dx_status_full;
-		}
-
-		/* And call all consumers  if it is end of transaction */
-		if ((source->asks.updated || source->bids.updated) && source->snapshot_status == dx_status_full) {
-			if (source->bids.rebuild) {
-				dx_plb_source_rebuild_levels(&source->snapshot, &source->bids, dxf_osd_buy);
-			}
-			if (source->bids.updated) {
-				source->final_bids = source->bids;
-			}
-
-			if (source->asks.rebuild) {
-				dx_plb_source_rebuild_levels(&source->snapshot, &source->asks, dxf_osd_sell);
-			}
-			if (source->asks.updated) {
-				source->final_asks = source->asks;
-			}
-
-			/* Lock guard to be sure that source list is intact */
-			if (!dx_mutex_lock(&source->guard))
-				return;
-			for (c = source->consumers; c != NULL; c = c->next) {
-				dx_plb_book_update(c->consumer, source);
-			}
-			dx_mutex_unlock(&source->guard);
-		}
+		dx_mutex_unlock(&source->guard);
 	}
 }
 
@@ -936,7 +937,6 @@ dxf_price_level_book_t dx_create_price_level_book(dxf_connection_t connection,
 	dx_plb_connection_context_t *context = NULL;
 	dx_price_level_book_t *book = NULL;
 	dx_plb_source_t *source;
-	int i = 0;
 
 	context = dx_get_subsystem_data(connection, dx_ccs_price_level_book, &res);
 	if (context == NULL) {
@@ -991,7 +991,7 @@ dxf_price_level_book_t dx_create_price_level_book(dxf_connection_t connection,
 	CHECKED_CALL(dx_mutex_lock, &(context->guard));
 
 	/* Add or create sources */
-	for (i = 0; dx_all_order_sources[i] != NULL; i++) {
+	for (size_t i = 0; dx_all_order_sources[i] != NULL; i++) {
 		if ((srcflags & (1ULL << i)) == 0)
 			continue;
 

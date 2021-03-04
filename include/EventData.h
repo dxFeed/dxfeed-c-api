@@ -1110,8 +1110,6 @@ typedef struct dxf_event_params {
 	dxf_event_flags_t flags;
 	dxf_time_int_field_t time_int_field;
 	dxf_ulong_t snapshot_key;
-	/// Used by order snapshot collectors with order scope != dxf_osc_order
-  	dxf_order_side_t side;
 } dxf_event_params_t;
 
 /* -------------------------------------------------------------------------- */
