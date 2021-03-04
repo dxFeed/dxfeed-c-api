@@ -1121,11 +1121,64 @@ typedef struct dxf_event_params {
  */
 /* -------------------------------------------------------------------------- */
 
-/// Event listener prototype
+/**
+ * Event listener prototype
+ *
+ * Parameters:
+ * - event_type - Event type bit mask constructed from dx_event_id_t enum fields. See macro: \ref DXF_ET_TRADE, \ref DXF_ET_QUOTE ... \ref DXF_ET_CONFIGURATION
+ * - symbol_name - Event symbol (AAPL, IBM, etc)
+ * - data - Pointer to event data (should be casted to some specific event data structure, i.e. dxf_order_t, dxf_trade_t ...)
+ * - data_count **[deprecated]** - The number of events. Always equals to 1. **[Will be removed in 8.0.0 version]**
+ * - user_data - The user data passed to \ref dxf_attach_event_listener
+ *
+ *  An example of implementation:
+ *
+ *  ```c
+ *
+ *  void print_timestamp(dxf_long_t timestamp) {
+ *      wchar_t timefmt[80];
+ *
+ *      struct tm* timeinfo;
+ *      time_t tmpint = (time_t)(timestamp / 1000);
+ *      timeinfo = localtime(&tmpint);
+ *
+ *      wcsftime(timefmt, 80, L"%Y%m%d-%H%M%S", timeinfo);
+ *      wprintf(L"%ls", timefmt);
+ *  }
+ *
+ *  void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
+ *      void* user_data) {
+ *  {
+ *      wprintf(L"%ls{symbol=%ls, ", dx_event_type_to_string(event_type), symbol_name);
+ *
+ *      if (event_type == DXF_ET_QUOTE) {
+ *          dxf_quote_t* q = (dxf_quote_t*)data;
+ *
+ *          wprintf(L"bidTime=");
+ *          print_timestamp(q->bid_time);
+ *          wprintf(L" bidExchangeCode=%c, bidPrice=%f, bidSize=%i, ", q->bid_exchange_code, q->bid_price, q->bid_size);
+ *          wprintf(L"askTime=");
+ *          print_timestamp(q->ask_time);
+ *          wprintf(L" askExchangeCode=%c, askPrice=%f, askSize=%i, scope=%d}\n", q->ask_exchange_code, q->ask_price,
+ *                  q->ask_size, (int)q->scope);
+ *      }
+ *  }
+ *  ```
+ */
 typedef void (*dxf_event_listener_t)(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data,
 									 int data_count, void* user_data);
 
-/// Event listener prototype v2
+/**
+ * Event listener prototype v. 2
+ *
+ * Parameters:
+ * - event_type - Event type bit mask constructed from dx_event_id_t enum fields. See macro: \ref DXF_ET_TRADE, \ref DXF_ET_QUOTE ... \ref DXF_ET_CONFIGURATION
+ * - symbol_name - Event symbol (AAPL, IBM, etc)
+ * - data - Pointer to event data (should be casted to some specific event data structure, i.e. dxf_order_t, dxf_trade_t ...)
+ * - data_count **[deprecated]** - The number of events. Always equals to 1. **[Will be removed in 8.0.0 version]**
+ * - event_params - Some event parameters: event flags, snapshot key and time stored in 4 high or low bytes
+ * - user_data - The user data passed to \ref dxf_attach_event_listener_v2
+ */
 typedef void (*dxf_event_listener_v2_t)(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data,
 										int data_count, const dxf_event_params_t* event_params, void* user_data);
 

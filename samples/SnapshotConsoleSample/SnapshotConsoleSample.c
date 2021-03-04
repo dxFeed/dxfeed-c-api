@@ -203,7 +203,7 @@ void listener (const dxf_snapshot_data_ptr_t snapshot_data, void *user_data) {
 			        order.exchange_code, order.market_maker, order.price, order.size);
 			if (wcslen(order.source) > 0)
 				wprintf(L", source=%ls", order.source);
-			wprintf(L", count=%d}\n", order.count);
+			wprintf(L", count=%d, flags=0x%X}\n", order.count, order.event_flags);
 		}
 	} else if (snapshot_data->event_type == DXF_ET_CANDLE) {
 		dxf_candle_t *candle_records = (dxf_candle_t *) snapshot_data->records;

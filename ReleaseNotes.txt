@@ -4,6 +4,9 @@ Version 7.2.0
   - the `action`, `action_time`, `order_id`, `aux_order_id`, `trade_id`, `trade_price`, `trade_size` fields were added to the `dxf_order_t` structure
     See the `dxf_order_action_t` enum description (documentation) where it is indicated in which cases which fields will be filled.
   - the FullOrderBook sample was added.
+* [DXFC-211] Fixed a bug with broken construction of order snapshots (books), based on Quote (order scope = Composite|Regional) & MarketMaker (order scope = Aggregate) events
+* Improved the `dxf_event_listener_t` & `dxf_event_listener_t_v2` documentation
+* The `data_count` parameter of `dxf_event_listener_t` & `dxf_event_listener_t_v2` listeners has been deprecated (it always returns 1). It will be removed in 8.0.0 version
 
 Version 7.1.0
 * [DXFC-209] Implemented the heartbeat semantics with payload

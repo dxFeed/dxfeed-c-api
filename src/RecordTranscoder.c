@@ -244,6 +244,10 @@ typedef struct {
 	void* dscc;
 } dx_record_transcoder_connection_context_t;
 
+void dx_copy_event_params(const dxf_event_params_t* from, dxf_event_params_t* to) {
+	dx_memcpy(to, from, sizeof(dxf_event_params_t));
+}
+
 #define CTX(context) \
 	((dx_record_transcoder_connection_context_t*)context)
 
@@ -362,7 +366,7 @@ dxf_event_data_t dx_get_event_data_buffer(dx_record_transcoder_connection_contex
 typedef int (*dx_record_transcoder_t) (dx_record_transcoder_connection_context_t* context,
 										const dx_record_params_t* record_params,
 										const dxf_event_params_t* event_params,
-										void* record_buffer, int record_count);
+										void* record_buffer);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -373,13 +377,13 @@ typedef int (*dx_record_transcoder_t) (dx_record_transcoder_connection_context_t
 static int dx_trade_t_transcoder_impl(dx_record_transcoder_connection_context_t* context,
 	const dx_record_params_t* record_params,
 	const dxf_event_params_t* event_params,
-	dx_trade_t* record_buffer, int record_count, dx_event_id_t event_id)
+	dx_trade_t* record_buffer, dx_event_id_t event_id)
 {
 	if (event_id != dx_eid_trade && event_id != dx_eid_trade_eth) {
 		return dx_set_error_code(dx_ec_internal_assert_violation);
 	}
 
-	dxf_trade_t* event_buffer = (dxf_trade_t*) dx_get_event_data_buffer(context, event_id, record_count);
+	dxf_trade_t* event_buffer = (dxf_trade_t*) dx_get_event_data_buffer(context, event_id, 1);
 	dxf_char_t exchange_code = DX_EXCHANGE_FROM_RECORD(record_params);
 
 	if (event_buffer == NULL) {
@@ -389,39 +393,36 @@ static int dx_trade_t_transcoder_impl(dx_record_transcoder_connection_context_t*
 	if (!exchange_code)
 		dx_set_record_exchange_code(context->dscc, record_params->record_id, exchange_code);
 
-	for (int i = 0; i < record_count; ++i) {
-		dx_trade_t* cur_record = record_buffer + i;
-		dxf_trade_t* cur_event = event_buffer + i;
+	event_buffer->time = DX_TIME_SEQ_TO_MS(record_buffer);
+	event_buffer->sequence = DX_SEQUENCE(record_buffer);
+	event_buffer->time_nanos = record_buffer->time_nanos;
+	event_buffer->exchange_code = record_buffer->exchange_code ? record_buffer->exchange_code : exchange_code;
+	event_buffer->price = record_buffer->price;
+	event_buffer->size = record_buffer->size;
 
-		cur_event->time = DX_TIME_SEQ_TO_MS(cur_record);
-		cur_event->sequence = DX_SEQUENCE(cur_record);
-		cur_event->time_nanos = cur_record->time_nanos;
-		cur_event->exchange_code = cur_record->exchange_code ? cur_record->exchange_code : exchange_code;
-		cur_event->price = cur_record->price;
-		cur_event->size = cur_record->size;
-		if (event_id == dx_eid_trade) {
-			cur_event->tick = cur_record->tick;
-		}
-		cur_event->change = cur_record->change;
-		cur_event->day_id = cur_record->day_id;
-		cur_event->day_volume = cur_record->day_volume;
-		cur_event->day_turnover = cur_record->day_turnover;
-		cur_event->raw_flags = cur_record->flags;
-		cur_event->direction = DX_TRADE_GET_DIR(cur_record);
-		cur_event->is_eth = DX_TRADE_GET_ETH(cur_record);
-		cur_event->scope = (exchange_code == 0 ? dxf_osc_composite : dxf_osc_regional);
+	if (event_id == dx_eid_trade) {
+		event_buffer->tick = record_buffer->tick;
 	}
 
-	return dx_process_event_data(context->connection, event_id, record_params->symbol_name, event_buffer, record_count,
+	event_buffer->change = record_buffer->change;
+	event_buffer->day_id = record_buffer->day_id;
+	event_buffer->day_volume = record_buffer->day_volume;
+	event_buffer->day_turnover = record_buffer->day_turnover;
+	event_buffer->raw_flags = record_buffer->flags;
+	event_buffer->direction = DX_TRADE_GET_DIR(record_buffer);
+	event_buffer->is_eth = DX_TRADE_GET_ETH(record_buffer);
+	event_buffer->scope = (exchange_code == 0 ? dxf_osc_composite : dxf_osc_regional);
+
+	return dx_process_event_data(context->connection, event_id, record_params->symbol_name, event_buffer,
 								 event_params);
 }
 
 int RECORD_TRANSCODER_NAME(dx_trade_t) (dx_record_transcoder_connection_context_t* context,
 	const dx_record_params_t* record_params,
 	const dxf_event_params_t* event_params,
-	void* record_buffer, int record_count)
+	void* record_buffer)
 {
-	return dx_trade_t_transcoder_impl(context, record_params, event_params, (dx_trade_t*)record_buffer, record_count, dx_eid_trade);
+	return dx_trade_t_transcoder_impl(context, record_params, event_params, (dx_trade_t*)record_buffer, dx_eid_trade);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -429,39 +430,36 @@ int RECORD_TRANSCODER_NAME(dx_trade_t) (dx_record_transcoder_connection_context_
 int dx_transcode_quote_to_order_bid (dx_record_transcoder_connection_context_t* context,
 									const dx_record_params_t* record_params,
 									const dxf_event_params_t* event_params,
-									dx_quote_t* record_buffer, int record_count) {
-	dxf_order_t* event_buffer = (dxf_order_t*)dx_get_event_data_buffer(context, dx_eid_order, record_count);
+									dx_quote_t* record_buffer) {
+	dxf_order_t* event_buffer = (dxf_order_t*)dx_get_event_data_buffer(context, dx_eid_order, 1);
 	dxf_char_t exchange_code = DX_EXCHANGE_FROM_RECORD(record_params);
 
 	if (event_buffer == NULL) {
 		return false;
 	}
 
-	for (int i = 0; i < record_count; ++i) {
-		dx_quote_t* cur_record = record_buffer + i;
-		dxf_order_t* cur_event = event_buffer + i;
+	event_buffer->index = DX_ORDER_FROM_QUOTE_BID_INDEX(exchange_code);
+	event_buffer->time = DX_TIME_FIELD_TO_MS(record_buffer->bid_time);
 
-		cur_event->index = DX_ORDER_FROM_QUOTE_BID_INDEX(exchange_code);
-		cur_event->time = DX_TIME_FIELD_TO_MS(cur_record->bid_time);
-		if (cur_record->bid_time > cur_record->ask_time) {
-			cur_event->time += DX_SEQUENCE_TO_MS(cur_record);
-			cur_event->time_nanos = cur_record->time_nanos;
- 		} else {
-			cur_event->time_nanos = 0;
- 		}
-		cur_event->sequence = DX_SEQUENCE(cur_record);
-		cur_event->price = cur_record->bid_price;
-		cur_event->size = cur_record->bid_size;
-		cur_event->count = 0;
-		cur_event->scope = (exchange_code == 0 ? dxf_osc_composite : dxf_osc_regional);
-		cur_event->side = dxf_osd_buy;
-		cur_event->exchange_code = (exchange_code == 0 ? cur_record->bid_exchange_code : exchange_code);
-		dx_memset(cur_event->source, 0, sizeof(cur_event->source));
-		cur_event->market_maker = NULL;
+	if (record_buffer->bid_time > record_buffer->ask_time) {
+		event_buffer->time += DX_SEQUENCE_TO_MS(record_buffer);
+		event_buffer->time_nanos = record_buffer->time_nanos;
+	} else {
+		event_buffer->time_nanos = 0;
 	}
 
+	event_buffer->sequence = DX_SEQUENCE(record_buffer);
+	event_buffer->price = record_buffer->bid_price;
+	event_buffer->size = record_buffer->bid_size;
+	event_buffer->count = 0;
+	event_buffer->scope = (exchange_code == 0 ? dxf_osc_composite : dxf_osc_regional);
+	event_buffer->side = dxf_osd_buy;
+	event_buffer->exchange_code = (exchange_code == 0 ? record_buffer->bid_exchange_code : exchange_code);
+	dx_memset(event_buffer->source, 0, sizeof(event_buffer->source));
+	event_buffer->market_maker = NULL;
+
 	return dx_process_event_data(context->connection, dx_eid_order, record_params->symbol_name, event_buffer,
-								 record_count, event_params);
+								 event_params);
 }
 
 /* ---------------------------------- */
@@ -469,40 +467,37 @@ int dx_transcode_quote_to_order_bid (dx_record_transcoder_connection_context_t* 
 int dx_transcode_quote_to_order_ask (dx_record_transcoder_connection_context_t* context,
 									const dx_record_params_t* record_params,
 									const dxf_event_params_t* event_params,
-									dx_quote_t* record_buffer, int record_count) {
-	dxf_order_t* event_buffer = (dxf_order_t*)dx_get_event_data_buffer(context, dx_eid_order, record_count);
+									dx_quote_t* record_buffer) {
+	dxf_order_t* event_buffer = (dxf_order_t*)dx_get_event_data_buffer(context, dx_eid_order, 1);
 	dxf_char_t exchange_code = DX_EXCHANGE_FROM_RECORD(record_params);
 
 	if (event_buffer == NULL) {
 		return false;
 	}
 
-	for (int i = 0; i < record_count; ++i) {
-		dx_quote_t* cur_record = record_buffer + i;
-		dxf_order_t* cur_event = event_buffer + i;
+	event_buffer->event_flags = 0;
+	event_buffer->index = DX_ORDER_FROM_QUOTE_ASK_INDEX(exchange_code);
+	event_buffer->time = DX_TIME_FIELD_TO_MS(record_buffer->ask_time);
 
-		cur_event->event_flags = 0;
-		cur_event->index = DX_ORDER_FROM_QUOTE_ASK_INDEX(exchange_code);
-		cur_event->time = DX_TIME_FIELD_TO_MS(cur_record->ask_time);
-		if (cur_record->ask_time > cur_record->bid_time) {
-			cur_event->time += DX_SEQUENCE_TO_MS(cur_record);
-			cur_event->time_nanos = cur_record->time_nanos;
- 		} else {
-			cur_event->time_nanos = 0;
- 		}
-		cur_event->sequence = DX_SEQUENCE(cur_record);
-		cur_event->price = cur_record->ask_price;
-		cur_event->size = cur_record->ask_size;
-		cur_event->count = 0;
-		cur_event->scope = (exchange_code == 0 ? dxf_osc_composite : dxf_osc_regional);
-		cur_event->side = dxf_osd_sell;
-		cur_event->exchange_code = (exchange_code == 0 ? cur_record->ask_exchange_code : exchange_code);
-		dx_memset(cur_event->source, 0, sizeof(cur_event->source));
-		cur_event->market_maker = NULL;
+	if (record_buffer->ask_time > record_buffer->bid_time) {
+		event_buffer->time += DX_SEQUENCE_TO_MS(record_buffer);
+		event_buffer->time_nanos = record_buffer->time_nanos;
+	} else {
+		event_buffer->time_nanos = 0;
 	}
 
+	event_buffer->sequence = DX_SEQUENCE(record_buffer);
+	event_buffer->price = record_buffer->ask_price;
+	event_buffer->size = record_buffer->ask_size;
+	event_buffer->count = 0;
+	event_buffer->scope = (exchange_code == 0 ? dxf_osc_composite : dxf_osc_regional);
+	event_buffer->side = dxf_osd_sell;
+	event_buffer->exchange_code = (exchange_code == 0 ? record_buffer->ask_exchange_code : exchange_code);
+	dx_memset(event_buffer->source, 0, sizeof(event_buffer->source));
+	event_buffer->market_maker = NULL;
+
 	return dx_process_event_data(context->connection, dx_eid_order, record_params->symbol_name, event_buffer,
-								 record_count, event_params);
+								 event_params);
 }
 
 /* ---------------------------------- */
@@ -510,8 +505,8 @@ int dx_transcode_quote_to_order_ask (dx_record_transcoder_connection_context_t* 
 int dx_transcode_quote (dx_record_transcoder_connection_context_t* context,
 						const dx_record_params_t* record_params,
 						const dxf_event_params_t* event_params,
-						dx_quote_t* record_buffer, int record_count) {
-	dxf_quote_t* event_buffer = (dxf_quote_t*)dx_get_event_data_buffer(context, dx_eid_quote, record_count);
+						dx_quote_t* record_buffer) {
+	dxf_quote_t* event_buffer = (dxf_quote_t*)dx_get_event_data_buffer(context, dx_eid_quote, 1);
 	dxf_char_t exchange_code = DX_EXCHANGE_FROM_RECORD(record_params);
 
 	if (event_buffer == NULL) {
@@ -522,26 +517,21 @@ int dx_transcode_quote (dx_record_transcoder_connection_context_t* context,
 		dx_set_record_exchange_code(context->dscc, record_params->record_id, exchange_code);
 	}
 
-	for (int i = 0; i < record_count; ++i) {
-		dx_quote_t* cur_record = record_buffer + i;
-		dxf_quote_t* cur_event = event_buffer + i;
-
-		cur_event->time = DX_TIME_FIELD_TO_MS(cur_record->bid_time > cur_record->ask_time ? cur_record->bid_time : cur_record->ask_time) + DX_SEQUENCE_TO_MS(cur_record);
-		cur_event->sequence = DX_SEQUENCE(cur_record);
-		cur_event->time_nanos = cur_record->time_nanos;
-		cur_event->bid_time = DX_TIME_FIELD_TO_MS(cur_record->bid_time);
-		cur_event->bid_exchange_code = exchange_code ? exchange_code : cur_record->bid_exchange_code;
-		cur_event->bid_price = cur_record->bid_price;
-		cur_event->bid_size = cur_record->bid_size;
-		cur_event->ask_time = DX_TIME_FIELD_TO_MS(cur_record->ask_time);
-		cur_event->ask_exchange_code = exchange_code ? exchange_code : cur_record->ask_exchange_code;
-		cur_event->ask_price = cur_record->ask_price;
-		cur_event->ask_size = cur_record->ask_size;
-		cur_event->scope = (exchange_code == 0 ? dxf_osc_composite : dxf_osc_regional);
-	}
+	event_buffer->time = DX_TIME_FIELD_TO_MS(record_buffer->bid_time > record_buffer->ask_time ? record_buffer->bid_time : record_buffer->ask_time) + DX_SEQUENCE_TO_MS(record_buffer);
+	event_buffer->sequence = DX_SEQUENCE(record_buffer);
+	event_buffer->time_nanos = record_buffer->time_nanos;
+	event_buffer->bid_time = DX_TIME_FIELD_TO_MS(record_buffer->bid_time);
+	event_buffer->bid_exchange_code = exchange_code ? exchange_code : record_buffer->bid_exchange_code;
+	event_buffer->bid_price = record_buffer->bid_price;
+	event_buffer->bid_size = record_buffer->bid_size;
+	event_buffer->ask_time = DX_TIME_FIELD_TO_MS(record_buffer->ask_time);
+	event_buffer->ask_exchange_code = exchange_code ? exchange_code : record_buffer->ask_exchange_code;
+	event_buffer->ask_price = record_buffer->ask_price;
+	event_buffer->ask_size = record_buffer->ask_size;
+	event_buffer->scope = (exchange_code == 0 ? dxf_osc_composite : dxf_osc_regional);
 
 	return dx_process_event_data(context->connection, dx_eid_quote, record_params->symbol_name, event_buffer,
-								 record_count, event_params);
+								 event_params);
 }
 
 /* ---------------------------------- */
@@ -549,17 +539,30 @@ int dx_transcode_quote (dx_record_transcoder_connection_context_t* context,
 int RECORD_TRANSCODER_NAME(dx_quote_t) (dx_record_transcoder_connection_context_t* context,
 										const dx_record_params_t* record_params,
 										const dxf_event_params_t* event_params,
-										void* record_buffer, int record_count) {
+										void* record_buffer) {
+	dxf_event_params_t bid_event_params;
+	dxf_event_params_t ask_event_params;
 
-	if (!dx_transcode_quote_to_order_bid(context, record_params, event_params, (dx_quote_t*)record_buffer, record_count)) {
+	dx_copy_event_params(event_params, &bid_event_params);
+	dx_copy_event_params(event_params, &ask_event_params);
+
+	if ((event_params->flags & dxf_ef_snapshot_end) == dxf_ef_snapshot_end) {
+		bid_event_params.flags = bid_event_params.flags ^ dxf_ef_snapshot_end;
+	}
+
+	if ((event_params->flags & dxf_ef_snapshot_begin) == dxf_ef_snapshot_begin) {
+		ask_event_params.flags = ask_event_params.flags ^ dxf_ef_snapshot_begin;
+	}
+
+	if (!dx_transcode_quote_to_order_bid(context, record_params, &bid_event_params, (dx_quote_t*)record_buffer)) {
 		return false;
 	}
 
-	if (!dx_transcode_quote_to_order_ask(context, record_params, event_params, (dx_quote_t*)record_buffer, record_count)) {
+	if (!dx_transcode_quote_to_order_ask(context, record_params, &ask_event_params, (dx_quote_t*)record_buffer)) {
 		return false;
 	}
 
-	if (!dx_transcode_quote(context, record_params, event_params, (dx_quote_t*)record_buffer, record_count)) {
+	if (!dx_transcode_quote(context, record_params, event_params, (dx_quote_t*)record_buffer)) {
 		return false;
 	}
 
@@ -571,9 +574,9 @@ int RECORD_TRANSCODER_NAME(dx_quote_t) (dx_record_transcoder_connection_context_
 int RECORD_TRANSCODER_NAME(dx_summary_t) (dx_record_transcoder_connection_context_t* context,
 										const dx_record_params_t* record_params,
 										const dxf_event_params_t* event_params,
-										void* record_buff, int record_count) {
+										void* record_buff) {
 
-	dxf_summary_t* event_buffer = (dxf_summary_t*)dx_get_event_data_buffer(context, dx_eid_summary, record_count);
+	dxf_summary_t* event_buffer = (dxf_summary_t*)dx_get_event_data_buffer(context, dx_eid_summary, 1);
 	dxf_char_t exchange_code = DX_EXCHANGE_FROM_RECORD(record_params);
 
 	if (event_buffer == NULL) {
@@ -585,28 +588,24 @@ int RECORD_TRANSCODER_NAME(dx_summary_t) (dx_record_transcoder_connection_contex
 	}
 
 	dx_summary_t* record_buffer = (dx_summary_t*)record_buff;
-	for (int i = 0; i < record_count; ++i) {
-		dx_summary_t* cur_record = record_buffer + i;
-		dxf_summary_t* cur_event = event_buffer + i;
 
-		cur_event->day_id = cur_record->day_id;
-		cur_event->day_open_price = cur_record->day_open_price;
-		cur_event->day_high_price = cur_record->day_high_price;
-		cur_event->day_low_price = cur_record->day_low_price;
-		cur_event->day_close_price = cur_record->day_close_price;
-		cur_event->prev_day_id = cur_record->prev_day_id;
-		cur_event->prev_day_close_price = cur_record->prev_day_close_price;
-		cur_event->prev_day_volume = cur_record->prev_day_volume;
-		cur_event->open_interest = cur_record->open_interest;
-		cur_event->raw_flags = cur_record->flags;
-		cur_event->exchange_code = exchange_code;
-		cur_event->day_close_price_type = DX_SUMMARY_GET_DCPT(cur_record);
-		cur_event->prev_day_close_price_type = DX_SUMMARY_GET_PDCPT(cur_record);
-		cur_event->scope = (exchange_code == 0 ? dxf_osc_composite : dxf_osc_regional);
-	}
+	event_buffer->day_id = record_buffer->day_id;
+	event_buffer->day_open_price = record_buffer->day_open_price;
+	event_buffer->day_high_price = record_buffer->day_high_price;
+	event_buffer->day_low_price = record_buffer->day_low_price;
+	event_buffer->day_close_price = record_buffer->day_close_price;
+	event_buffer->prev_day_id = record_buffer->prev_day_id;
+	event_buffer->prev_day_close_price = record_buffer->prev_day_close_price;
+	event_buffer->prev_day_volume = record_buffer->prev_day_volume;
+	event_buffer->open_interest = record_buffer->open_interest;
+	event_buffer->raw_flags = record_buffer->flags;
+	event_buffer->exchange_code = exchange_code;
+	event_buffer->day_close_price_type = DX_SUMMARY_GET_DCPT(record_buffer);
+	event_buffer->prev_day_close_price_type = DX_SUMMARY_GET_PDCPT(record_buffer);
+	event_buffer->scope = (exchange_code == 0 ? dxf_osc_composite : dxf_osc_regional);
 
 	return dx_process_event_data(context->connection, dx_eid_summary, record_params->symbol_name, event_buffer,
-								 record_count, event_params);
+								 event_params);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -614,51 +613,47 @@ int RECORD_TRANSCODER_NAME(dx_summary_t) (dx_record_transcoder_connection_contex
 int RECORD_TRANSCODER_NAME(dx_profile_t) (dx_record_transcoder_connection_context_t* context,
 										const dx_record_params_t* record_params,
 										const dxf_event_params_t* event_params,
-										void* record_buff, int record_count) {
-	dxf_profile_t* event_buffer = (dxf_profile_t*)dx_get_event_data_buffer(context, dx_eid_profile, record_count);
+										void* record_buff) {
+	dxf_profile_t* event_buffer = (dxf_profile_t*)dx_get_event_data_buffer(context, dx_eid_profile, 1);
 
 	if (event_buffer == NULL) {
 		return false;
 	}
 
 	dx_profile_t* record_buffer = (dx_profile_t*)record_buff;
-	for (int i = 0; i < record_count; ++i) {
-		dx_profile_t* cur_record = record_buffer + i;
-		dxf_profile_t* cur_event = event_buffer + i;
 
-		cur_event->beta = cur_record->beta;
-		cur_event->eps = cur_record->eps;
-		cur_event->div_freq = cur_record->div_freq;
-		cur_event->exd_div_amount = cur_record->exd_div_amount;
-		cur_event->exd_div_date = cur_record->exd_div_date;
-		cur_event->high_52_week_price = cur_record->high_price_52;
-		cur_event->low_52_week_price = cur_record->low_price_52;
-		cur_event->shares = cur_record->shares;
-		cur_event->free_float = cur_record->free_float;
-		cur_event->high_limit_price = cur_record->high_limit_price;
-		cur_event->low_limit_price = cur_record->low_limit_price;
-		cur_event->halt_start_time = DX_TIME_FIELD_TO_MS(cur_record->halt_start_time);
-		cur_event->halt_end_time = DX_TIME_FIELD_TO_MS(cur_record->halt_end_time);
-		cur_event->raw_flags = cur_record->flags;
+	event_buffer->beta = record_buffer->beta;
+	event_buffer->eps = record_buffer->eps;
+	event_buffer->div_freq = record_buffer->div_freq;
+	event_buffer->exd_div_amount = record_buffer->exd_div_amount;
+	event_buffer->exd_div_date = record_buffer->exd_div_date;
+	event_buffer->high_52_week_price = record_buffer->high_price_52;
+	event_buffer->low_52_week_price = record_buffer->low_price_52;
+	event_buffer->shares = record_buffer->shares;
+	event_buffer->free_float = record_buffer->free_float;
+	event_buffer->high_limit_price = record_buffer->high_limit_price;
+	event_buffer->low_limit_price = record_buffer->low_limit_price;
+	event_buffer->halt_start_time = DX_TIME_FIELD_TO_MS(record_buffer->halt_start_time);
+	event_buffer->halt_end_time = DX_TIME_FIELD_TO_MS(record_buffer->halt_end_time);
+	event_buffer->raw_flags = record_buffer->flags;
 
-		if (cur_record->description != NULL) {
-			cur_event->description = dx_create_string_src(cur_record->description);
-			if (cur_event->description && !dx_store_string_buffer(context->rbcc, cur_event->description))
-				return false;
-		}
-
-		if (cur_record->status_reason != NULL) {
-			cur_event->status_reason = dx_create_string_src(cur_record->status_reason);
-			if (cur_event->status_reason && !dx_store_string_buffer(context->rbcc, cur_event->status_reason))
-				return false;
-		}
-
-		cur_event->trading_status = DX_PROFILE_GET_TS(cur_record);
-		cur_event->ssr = DX_PROFILE_GET_SSR(cur_record);
+	if (record_buffer->description != NULL) {
+		event_buffer->description = dx_create_string_src(record_buffer->description);
+		if (event_buffer->description && !dx_store_string_buffer(context->rbcc, event_buffer->description))
+			return false;
 	}
 
+	if (record_buffer->status_reason != NULL) {
+		event_buffer->status_reason = dx_create_string_src(record_buffer->status_reason);
+		if (event_buffer->status_reason && !dx_store_string_buffer(context->rbcc, event_buffer->status_reason))
+			return false;
+	}
+
+	event_buffer->trading_status = DX_PROFILE_GET_TS(record_buffer);
+	event_buffer->ssr = DX_PROFILE_GET_SSR(record_buffer);
+
 	return dx_process_event_data(context->connection, dx_eid_profile, record_params->symbol_name, event_buffer,
-								 record_count, event_params);
+								 event_params);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -666,39 +661,36 @@ int RECORD_TRANSCODER_NAME(dx_profile_t) (dx_record_transcoder_connection_contex
 int dx_transcode_market_maker_to_order_bid (dx_record_transcoder_connection_context_t* context,
 											const dx_record_params_t* record_params,
 											const dxf_event_params_t* event_params,
-											dx_market_maker_t* record_buffer, int record_count) {
-	dxf_order_t* event_buffer = (dxf_order_t*)dx_get_event_data_buffer(context, dx_eid_order, record_count);
+											dx_market_maker_t* record_buffer) {
+	dxf_order_t* event_buffer = (dxf_order_t*)dx_get_event_data_buffer(context, dx_eid_order, 1);
 
 	if (event_buffer == NULL) {
 		return false;
 	}
 
-	for (int i = 0; i < record_count; ++i) {
-		dx_market_maker_t* cur_record = record_buffer + i;
-		dxf_order_t* cur_event = event_buffer + i;
-		dxf_char_t exchange_code = (dxf_char_t)cur_record->mm_exchange;
-		dx_set_record_exchange_code(context->dscc, record_params->record_id, exchange_code);
+	dxf_char_t exchange_code = (dxf_char_t)record_buffer->mm_exchange;
+	dx_set_record_exchange_code(context->dscc, record_params->record_id, exchange_code);
 
-		cur_event->event_flags = event_params->flags;
-		cur_event->index = DX_ORDER_FORM_MM_BID_INDEX(cur_record);
-		cur_event->time = DX_TIME_FIELD_TO_MS(cur_record->mmbid_time);
-		cur_event->sequence = 0;
-		cur_event->price = cur_record->mmbid_price;
-		cur_event->size = cur_record->mmbid_size;
-		cur_event->count = cur_record->mmbid_count;
-		cur_event->scope = dxf_osc_aggregate;
-		cur_event->side = dxf_osd_buy;
-		cur_event->exchange_code = cur_record->mm_exchange;
-		dx_memset(cur_event->source, 0, sizeof(cur_event->source));
-		cur_event->market_maker = dx_decode_from_integer(cur_record->mm_id);
+	event_buffer->event_flags = event_params->flags;
+	event_buffer->index = DX_ORDER_FORM_MM_BID_INDEX(record_buffer);
+	event_buffer->time = DX_TIME_FIELD_TO_MS(record_buffer->mmbid_time);
+	event_buffer->sequence = 0;
+	event_buffer->price = record_buffer->mmbid_price;
+	event_buffer->size = record_buffer->mmbid_size;
+	event_buffer->count = record_buffer->mmbid_count;
+	event_buffer->scope = dxf_osc_aggregate;
+	event_buffer->side = dxf_osd_buy;
+	event_buffer->exchange_code = record_buffer->mm_exchange;
+	dx_memset(event_buffer->source, 0, sizeof(event_buffer->source));
+	event_buffer->market_maker = dx_decode_from_integer(record_buffer->mm_id);
 
-		if (!IS_FLAG_SET(record_params->flags, dxf_ef_remove_event) && (cur_event->market_maker == NULL || !dx_store_string_buffer(context->rbcc, cur_event->market_maker))) {
-			return false;
-		}
+	if (!IS_FLAG_SET(record_params->flags, dxf_ef_remove_event) &&
+		(event_buffer->market_maker == NULL || !dx_store_string_buffer(context->rbcc, event_buffer->market_maker))) {
+		return false;
 	}
 
 	return dx_process_event_data(context->connection, dx_eid_order, record_params->symbol_name, event_buffer,
-								 record_count, event_params);
+								 event_params);
 }
 
 /* ---------------------------------- */
@@ -706,39 +698,35 @@ int dx_transcode_market_maker_to_order_bid (dx_record_transcoder_connection_cont
 int dx_transcode_market_maker_to_order_ask (dx_record_transcoder_connection_context_t* context,
 											const dx_record_params_t* record_params,
 											const dxf_event_params_t* event_params,
-											dx_market_maker_t* record_buffer, int record_count) {
-	dxf_order_t* event_buffer = (dxf_order_t*)dx_get_event_data_buffer(context, dx_eid_order, record_count);
+											dx_market_maker_t* record_buffer) {
+	dxf_order_t* event_buffer = (dxf_order_t*)dx_get_event_data_buffer(context, dx_eid_order, 1);
 
 	if (event_buffer == NULL) {
 		return false;
 	}
 
-	for (int i = 0; i < record_count; ++i) {
-		dx_market_maker_t* cur_record = record_buffer + i;
-		dxf_order_t* cur_event = event_buffer + i;
-		dxf_char_t exchange_code = (dxf_char_t)cur_record->mm_exchange;
-		dx_set_record_exchange_code(context->dscc, record_params->record_id, exchange_code);
+	dxf_char_t exchange_code = (dxf_char_t)record_buffer->mm_exchange;
+	dx_set_record_exchange_code(context->dscc, record_params->record_id, exchange_code);
+	event_buffer->event_flags = event_params->flags;
+	event_buffer->index = DX_ORDER_FORM_MM_ASK_INDEX(record_buffer);
+	event_buffer->time = DX_TIME_FIELD_TO_MS(record_buffer->mmask_time);
+	event_buffer->sequence = 0;
+	event_buffer->price = record_buffer->mmask_price;
+	event_buffer->size = record_buffer->mmask_size;
+	event_buffer->count = record_buffer->mmask_count;
+	event_buffer->scope = dxf_osc_aggregate;
+	event_buffer->side = dxf_osd_sell;
+	event_buffer->exchange_code = record_buffer->mm_exchange;
+	dx_memset(event_buffer->source, 0, sizeof(event_buffer->source));
+	event_buffer->market_maker = dx_decode_from_integer(record_buffer->mm_id);
 
-		cur_event->event_flags = event_params->flags;
-		cur_event->index = DX_ORDER_FORM_MM_ASK_INDEX(cur_record);
-		cur_event->time = DX_TIME_FIELD_TO_MS(cur_record->mmask_time);
-		cur_event->sequence = 0;
-		cur_event->price = cur_record->mmask_price;
-		cur_event->size = cur_record->mmask_size;
-		cur_event->count = cur_record->mmask_count;
-		cur_event->scope = dxf_osc_aggregate;
-		cur_event->side = dxf_osd_sell;
-		cur_event->exchange_code = cur_record->mm_exchange;
-		dx_memset(cur_event->source, 0, sizeof(cur_event->source));
-		cur_event->market_maker = dx_decode_from_integer(cur_record->mm_id);
-
-		if (!IS_FLAG_SET(record_params->flags, dxf_ef_remove_event) && (cur_event->market_maker == NULL || !dx_store_string_buffer(context->rbcc, cur_event->market_maker))) {
-			return false;
-		}
+	if (!IS_FLAG_SET(record_params->flags, dxf_ef_remove_event) &&
+		(event_buffer->market_maker == NULL || !dx_store_string_buffer(context->rbcc, event_buffer->market_maker))) {
+		return false;
 	}
 
 	return dx_process_event_data(context->connection, dx_eid_order, record_params->symbol_name, event_buffer,
-								 record_count, event_params);
+								 event_params);
 }
 
 /* ---------------------------------- */
@@ -746,12 +734,26 @@ int dx_transcode_market_maker_to_order_ask (dx_record_transcoder_connection_cont
 int RECORD_TRANSCODER_NAME(dx_market_maker_t) (dx_record_transcoder_connection_context_t* context,
 												const dx_record_params_t* record_params,
 												const dxf_event_params_t* event_params,
-												void* record_buffer, int record_count) {
-	if (!dx_transcode_market_maker_to_order_bid(context, record_params, event_params, (dx_market_maker_t*)record_buffer, record_count)) {
+												void* record_buffer) {
+	dxf_event_params_t bid_event_params;
+	dxf_event_params_t ask_event_params;
+
+	dx_copy_event_params(event_params, &bid_event_params);
+	dx_copy_event_params(event_params, &ask_event_params);
+
+	if ((event_params->flags & dxf_ef_snapshot_end) == dxf_ef_snapshot_end) {
+		bid_event_params.flags = bid_event_params.flags ^ dxf_ef_snapshot_end;
+	}
+
+	if ((event_params->flags & dxf_ef_snapshot_begin) == dxf_ef_snapshot_begin) {
+		ask_event_params.flags = ask_event_params.flags ^ dxf_ef_snapshot_begin;
+	}
+
+	if (!dx_transcode_market_maker_to_order_bid(context, record_params, &bid_event_params, (dx_market_maker_t*)record_buffer)) {
 		return false;
 	}
 
-	if (!dx_transcode_market_maker_to_order_ask(context, record_params, event_params, (dx_market_maker_t*)record_buffer, record_count)) {
+	if (!dx_transcode_market_maker_to_order_ask(context, record_params, &ask_event_params, (dx_market_maker_t*)record_buffer)) {
 		return false;
 	}
 
@@ -784,8 +786,8 @@ dxf_long_t suffix_to_long(dxf_const_string_t suffix)
 int RECORD_TRANSCODER_NAME(dx_order_t) (dx_record_transcoder_connection_context_t* context,
 										const dx_record_params_t* record_params,
 										const dxf_event_params_t* event_params,
-										void* record_buff, int record_count) {
-	dxf_order_t* event_buffer = (dxf_order_t*)dx_get_event_data_buffer(context, dx_eid_order, record_count);
+										void* record_buff) {
+	dxf_order_t* event_buffer = (dxf_order_t*)dx_get_event_data_buffer(context, dx_eid_order, 1);
 	dxf_const_string_t suffix = record_params->suffix;
 	dxf_long_t src = suffix_to_long(suffix);
 
@@ -794,45 +796,41 @@ int RECORD_TRANSCODER_NAME(dx_order_t) (dx_record_transcoder_connection_context_
 	}
 
 	dx_order_t* record_buffer = (dx_order_t*)record_buff;
-	for (int i = 0; i < record_count; ++i) {
-		dx_order_t* cur_record = record_buffer + i;
-		dxf_order_t* cur_event = event_buffer + i;
 
-		dx_memset(cur_event->source, 0, sizeof(cur_event->source));
-		dx_copy_string_len(cur_event->source, suffix, dx_string_length(suffix));
+	dx_memset(event_buffer->source, 0, sizeof(event_buffer->source));
+	dx_copy_string_len(event_buffer->source, suffix, dx_string_length(suffix));
 
-		cur_event->event_flags = event_params->flags;
-		cur_event->index = DX_ORDER_INDEX(cur_record, src);
-		cur_event->time = DX_TIME_SEQ_TO_MS(cur_record);
-		cur_event->sequence = DX_SEQUENCE(cur_record);
-		cur_event->time_nanos = cur_record->time_nanos;
+	event_buffer->event_flags = event_params->flags;
+	event_buffer->index = DX_ORDER_INDEX(record_buffer, src);
+	event_buffer->time = DX_TIME_SEQ_TO_MS(record_buffer);
+	event_buffer->sequence = DX_SEQUENCE(record_buffer);
+	event_buffer->time_nanos = record_buffer->time_nanos;
 
-		cur_event->action = DX_ORDER_GET_ACTION(cur_record);
-		cur_event->action_time = cur_record->action_time;
-		cur_event->order_id = cur_record->order_id;
-		cur_event->aux_order_id = cur_record->aux_order_id;
+	event_buffer->action = DX_ORDER_GET_ACTION(record_buffer);
+	event_buffer->action_time = record_buffer->action_time;
+	event_buffer->order_id = record_buffer->order_id;
+	event_buffer->aux_order_id = record_buffer->aux_order_id;
 
-		cur_event->price = cur_record->price;
-		cur_event->size = cur_record->size;
-		cur_event->count = cur_record->count;
+	event_buffer->price = record_buffer->price;
+	event_buffer->size = record_buffer->size;
+	event_buffer->count = record_buffer->count;
 
-		cur_event->trade_id = cur_record->trade_id;
-		cur_event->trade_price = cur_record->trade_price;
-		cur_event->trade_size = cur_record->trade_size;
+	event_buffer->trade_id = record_buffer->trade_id;
+	event_buffer->trade_price = record_buffer->trade_price;
+	event_buffer->trade_size = record_buffer->trade_size;
 
-		cur_event->exchange_code = DX_ORDER_GET_EXCHANGE(cur_record);
-		cur_event->side = DX_ORDER_GET_SIDE(cur_record);
-		cur_event->scope = DX_ORDER_GET_SCOPE(cur_record);
+	event_buffer->exchange_code = DX_ORDER_GET_EXCHANGE(record_buffer);
+	event_buffer->side = DX_ORDER_GET_SIDE(record_buffer);
+	event_buffer->scope = DX_ORDER_GET_SCOPE(record_buffer);
 
-		cur_event->market_maker = dx_decode_from_integer(cur_record->mmid);
+	event_buffer->market_maker = dx_decode_from_integer(record_buffer->mmid);
 
-		if (cur_event->market_maker != NULL && !dx_store_string_buffer(context->rbcc, cur_event->market_maker)) {
-			return false;
-		}
+	if (event_buffer->market_maker != NULL && !dx_store_string_buffer(context->rbcc, event_buffer->market_maker)) {
+		return false;
 	}
 
 	return dx_process_event_data(context->connection, dx_eid_order, record_params->symbol_name, event_buffer,
-								 record_count, event_params);
+								 event_params);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -840,8 +838,8 @@ int RECORD_TRANSCODER_NAME(dx_order_t) (dx_record_transcoder_connection_context_
 int RECORD_TRANSCODER_NAME(dx_time_and_sale_t) (dx_record_transcoder_connection_context_t* context,
 												const dx_record_params_t* record_params,
 												const dxf_event_params_t* event_params,
-												void* record_buff, int record_count) {
-	dxf_time_and_sale_t* event_buffer = (dxf_time_and_sale_t*)dx_get_event_data_buffer(context, dx_eid_time_and_sale, record_count);
+												void* record_buff) {
+	dxf_time_and_sale_t* event_buffer = (dxf_time_and_sale_t*)dx_get_event_data_buffer(context, dx_eid_time_and_sale, 1);
 	dxf_char_t exchange_code = DX_EXCHANGE_FROM_RECORD(record_params);
 
 	if (event_buffer == NULL) {
@@ -849,51 +847,47 @@ int RECORD_TRANSCODER_NAME(dx_time_and_sale_t) (dx_record_transcoder_connection_
 	}
 
 	dx_time_and_sale_t* record_buffer = (dx_time_and_sale_t*)record_buff;
-	for (int i = 0; i < record_count; ++i) {
-		dx_time_and_sale_t* cur_record = record_buffer + i;
-		dxf_time_and_sale_t* cur_event = event_buffer + i;
 
-		cur_event->event_flags = event_params->flags;
-		cur_event->index = (int_to_bits(cur_record->time) << DX_TNS_INDEX_TIME_SHIFT) | int_to_bits(cur_record->sequence);
-		cur_event->time = DX_TIME_SEQ_TO_MS(cur_record);
-		cur_event->exchange_code = cur_record->exchange_code;
-		cur_event->price = cur_record->price;
-		cur_event->size = cur_record->size;
-		cur_event->bid_price = cur_record->bid_price;
-		cur_event->ask_price = cur_record->ask_price;
+	event_buffer->event_flags = event_params->flags;
+	event_buffer->index = (int_to_bits(record_buffer->time) << DX_TNS_INDEX_TIME_SHIFT) | int_to_bits(record_buffer->sequence);
+	event_buffer->time = DX_TIME_SEQ_TO_MS(record_buffer);
+	event_buffer->exchange_code = record_buffer->exchange_code;
+	event_buffer->price = record_buffer->price;
+	event_buffer->size = record_buffer->size;
+	event_buffer->bid_price = record_buffer->bid_price;
+	event_buffer->ask_price = record_buffer->ask_price;
 
-		cur_event->exchange_sale_conditions = dx_decode_from_integer(cur_record->exchange_sale_conditions);
-		if (cur_event->exchange_sale_conditions && !dx_store_string_buffer(context->rbcc, cur_event->exchange_sale_conditions)) {
-			return false;
-		}
-
-		cur_event->raw_flags = cur_record->flags;
-
-		if (cur_record->buyer != NULL) {
-			cur_event->buyer = dx_create_string_src(cur_record->buyer);
-			if (cur_event->buyer && !dx_store_string_buffer(context->rbcc, cur_event->buyer)) {
-				return false;
-			}
-		}
-
-		if (cur_record->seller != NULL) {
-			cur_event->seller = dx_create_string_src(cur_record->seller);
-			if (cur_event->seller && !dx_store_string_buffer(context->rbcc, cur_event->seller)) {
-				return false;
-			}
-		}
-
-		cur_event->side = DX_TNS_GET_SIDE(cur_record);
-		cur_event->type = DX_TNS_GET_TYPE(cur_record);
-		cur_event->is_valid_tick = DX_TNS_GET_VALID_TICK(cur_record);
-		cur_event->is_eth_trade = DX_TNS_GET_ETH(cur_record);
-		cur_event->trade_through_exempt = DX_TNS_GET_TTE(cur_record);
-		cur_event->is_spread_leg = DX_TNS_GET_SPREAD_LEG(cur_record);
-		cur_event->scope = (exchange_code == 0 ? dxf_osc_composite : dxf_osc_regional);
+	event_buffer->exchange_sale_conditions = dx_decode_from_integer(record_buffer->exchange_sale_conditions);
+	if (event_buffer->exchange_sale_conditions && !dx_store_string_buffer(context->rbcc, event_buffer->exchange_sale_conditions)) {
+		return false;
 	}
 
+	event_buffer->raw_flags = record_buffer->flags;
+
+	if (record_buffer->buyer != NULL) {
+		event_buffer->buyer = dx_create_string_src(record_buffer->buyer);
+		if (event_buffer->buyer && !dx_store_string_buffer(context->rbcc, event_buffer->buyer)) {
+			return false;
+		}
+	}
+
+	if (record_buffer->seller != NULL) {
+		event_buffer->seller = dx_create_string_src(record_buffer->seller);
+		if (event_buffer->seller && !dx_store_string_buffer(context->rbcc, event_buffer->seller)) {
+			return false;
+		}
+	}
+
+	event_buffer->side = DX_TNS_GET_SIDE(record_buffer);
+	event_buffer->type = DX_TNS_GET_TYPE(record_buffer);
+	event_buffer->is_valid_tick = DX_TNS_GET_VALID_TICK(record_buffer);
+	event_buffer->is_eth_trade = DX_TNS_GET_ETH(record_buffer);
+	event_buffer->trade_through_exempt = DX_TNS_GET_TTE(record_buffer);
+	event_buffer->is_spread_leg = DX_TNS_GET_SPREAD_LEG(record_buffer);
+	event_buffer->scope = (exchange_code == 0 ? dxf_osc_composite : dxf_osc_regional);
+
 	return dx_process_event_data(context->connection, dx_eid_time_and_sale, record_params->symbol_name, event_buffer,
-								 record_count, event_params);
+								 event_params);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -901,37 +895,33 @@ int RECORD_TRANSCODER_NAME(dx_time_and_sale_t) (dx_record_transcoder_connection_
 int RECORD_TRANSCODER_NAME(dx_candle_t) (dx_record_transcoder_connection_context_t* context,
 										const dx_record_params_t* record_params,
 										const dxf_event_params_t* event_params,
-										void* record_buff, int record_count) {
-	dxf_candle_t* event_buffer = (dxf_candle_t*)dx_get_event_data_buffer(context, dx_eid_candle, record_count);
+										void* record_buff) {
+	dxf_candle_t* event_buffer = (dxf_candle_t*)dx_get_event_data_buffer(context, dx_eid_candle, 1);
 
 	if (event_buffer == NULL) {
 		return false;
 	}
 
 	dx_candle_t* record_buffer = (dx_candle_t*)record_buff;
-	for (int i = 0; i < record_count; ++i) {
-		dx_candle_t* cur_record = record_buffer + i;
-		dxf_candle_t* cur_event = event_buffer + i;
 
-		cur_event->event_flags = event_params->flags;
-		cur_event->index = (int_to_bits(cur_record->time) << DX_CANDLE_INDEX_TIME_SHIFT) | int_to_bits(cur_record->sequence);
-		cur_event->time = DX_TIME_SEQ_TO_MS(cur_record);
-		cur_event->sequence = DX_SEQUENCE(cur_record);
-		cur_event->count = cur_record->count;
-		cur_event->open = cur_record->open;
-		cur_event->high = cur_record->high;
-		cur_event->low = cur_record->low;
-		cur_event->close = cur_record->close;
-		cur_event->volume = cur_record->volume;
-		cur_event->vwap = cur_record->vwap;
-		cur_event->bid_volume = cur_record->bid_volume;
-		cur_event->ask_volume = cur_record->ask_volume;
-		cur_event->open_interest = cur_record->open_interest;
-		cur_event->imp_volatility = cur_record->imp_volatility;
-	}
+	event_buffer->event_flags = event_params->flags;
+	event_buffer->index = (int_to_bits(record_buffer->time) << DX_CANDLE_INDEX_TIME_SHIFT) | int_to_bits(record_buffer->sequence);
+	event_buffer->time = DX_TIME_SEQ_TO_MS(record_buffer);
+	event_buffer->sequence = DX_SEQUENCE(record_buffer);
+	event_buffer->count = record_buffer->count;
+	event_buffer->open = record_buffer->open;
+	event_buffer->high = record_buffer->high;
+	event_buffer->low = record_buffer->low;
+	event_buffer->close = record_buffer->close;
+	event_buffer->volume = record_buffer->volume;
+	event_buffer->vwap = record_buffer->vwap;
+	event_buffer->bid_volume = record_buffer->bid_volume;
+	event_buffer->ask_volume = record_buffer->ask_volume;
+	event_buffer->open_interest = record_buffer->open_interest;
+	event_buffer->imp_volatility = record_buffer->imp_volatility;
 
 	return dx_process_event_data(context->connection, dx_eid_candle, record_params->symbol_name, event_buffer,
-								 record_count, event_params);
+								 event_params);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -939,8 +929,8 @@ int RECORD_TRANSCODER_NAME(dx_candle_t) (dx_record_transcoder_connection_context
 int RECORD_TRANSCODER_NAME(dx_trade_eth_t) (dx_record_transcoder_connection_context_t* context,
 											const dx_record_params_t* record_params,
 											const dxf_event_params_t* event_params,
-											void* record_buffer, int record_count) {
-	return dx_trade_t_transcoder_impl(context, record_params, event_params, (dx_trade_t*)record_buffer, record_count, dx_eid_trade_eth);
+											void* record_buffer) {
+	return dx_trade_t_transcoder_impl(context, record_params, event_params, (dx_trade_t*)record_buffer, dx_eid_trade_eth);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -948,8 +938,8 @@ int RECORD_TRANSCODER_NAME(dx_trade_eth_t) (dx_record_transcoder_connection_cont
 int RECORD_TRANSCODER_NAME(dx_spread_order_t) (dx_record_transcoder_connection_context_t* context,
 												const dx_record_params_t* record_params,
 												const dxf_event_params_t* event_params,
-												void* record_buff, int record_count) {
-	dxf_order_t* event_buffer = (dxf_order_t*)dx_get_event_data_buffer(context, dx_eid_order, record_count);
+												void* record_buff) {
+	dxf_order_t* event_buffer = (dxf_order_t*)dx_get_event_data_buffer(context, dx_eid_order, 1);
 	dxf_const_string_t suffix = record_params->suffix;
 	dxf_long_t src = suffix_to_long(suffix);
 
@@ -958,45 +948,41 @@ int RECORD_TRANSCODER_NAME(dx_spread_order_t) (dx_record_transcoder_connection_c
 	}
 
 	dx_spread_order_t* record_buffer = (dx_spread_order_t*)record_buff;
-	for (int i = 0; i < record_count; ++i) {
-		dx_spread_order_t* cur_record = record_buffer + i;
-		dxf_order_t* cur_event = event_buffer + i;
 
-		dx_memset(cur_event->source, 0, sizeof(cur_event->source));
-		dx_copy_string_len(cur_event->source, suffix, dx_string_length(suffix));
+	dx_memset(event_buffer->source, 0, sizeof(event_buffer->source));
+	dx_copy_string_len(event_buffer->source, suffix, dx_string_length(suffix));
 
-		cur_event->event_flags = event_params->flags;
-		cur_event->index = DX_ORDER_INDEX(cur_record, src);
-		cur_event->time = DX_TIME_SEQ_TO_MS(cur_record);
-		cur_event->sequence = DX_SEQUENCE(cur_record);
-		cur_event->time_nanos = cur_record->time_nanos;
+	event_buffer->event_flags = event_params->flags;
+	event_buffer->index = DX_ORDER_INDEX(record_buffer, src);
+	event_buffer->time = DX_TIME_SEQ_TO_MS(record_buffer);
+	event_buffer->sequence = DX_SEQUENCE(record_buffer);
+	event_buffer->time_nanos = record_buffer->time_nanos;
 
-		cur_event->action = DX_ORDER_GET_ACTION(cur_record);
-		cur_event->action_time = cur_record->action_time;
-		cur_event->order_id = cur_record->order_id;
-		cur_event->aux_order_id = cur_record->aux_order_id;
+	event_buffer->action = DX_ORDER_GET_ACTION(record_buffer);
+	event_buffer->action_time = record_buffer->action_time;
+	event_buffer->order_id = record_buffer->order_id;
+	event_buffer->aux_order_id = record_buffer->aux_order_id;
 
-		cur_event->price = cur_record->price;
-		cur_event->size = cur_record->size;
-		cur_event->count = cur_record->count;
+	event_buffer->price = record_buffer->price;
+	event_buffer->size = record_buffer->size;
+	event_buffer->count = record_buffer->count;
 
-		cur_event->trade_id = cur_record->trade_id;
-		cur_event->trade_price = cur_record->trade_price;
-		cur_event->trade_size = cur_record->trade_size;
+	event_buffer->trade_id = record_buffer->trade_id;
+	event_buffer->trade_price = record_buffer->trade_price;
+	event_buffer->trade_size = record_buffer->trade_size;
 
-		cur_event->exchange_code = DX_ORDER_GET_EXCHANGE(cur_record);
-		cur_event->side = DX_ORDER_GET_SIDE(cur_record);
-		cur_event->scope = DX_ORDER_GET_SCOPE(cur_record);
+	event_buffer->exchange_code = DX_ORDER_GET_EXCHANGE(record_buffer);
+	event_buffer->side = DX_ORDER_GET_SIDE(record_buffer);
+	event_buffer->scope = DX_ORDER_GET_SCOPE(record_buffer);
 
-		if (cur_record->spread_symbol != NULL) {
-			cur_event->spread_symbol = dx_create_string_src(cur_record->spread_symbol);
-			if (cur_event->spread_symbol && !dx_store_string_buffer(context->rbcc, cur_event->spread_symbol))
-				return false;
-		}
+	if (record_buffer->spread_symbol != NULL) {
+		event_buffer->spread_symbol = dx_create_string_src(record_buffer->spread_symbol);
+		if (event_buffer->spread_symbol && !dx_store_string_buffer(context->rbcc, event_buffer->spread_symbol))
+			return false;
 	}
 
 	return dx_process_event_data(context->connection, dx_eid_spread_order, record_params->symbol_name, event_buffer,
-								 record_count, event_params);
+								 event_params);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1004,32 +990,28 @@ int RECORD_TRANSCODER_NAME(dx_spread_order_t) (dx_record_transcoder_connection_c
 int RECORD_TRANSCODER_NAME(dx_greeks_t) (dx_record_transcoder_connection_context_t* context,
 										const dx_record_params_t* record_params,
 										const dxf_event_params_t* event_params,
-										void* record_buff, int record_count) {
-	dxf_greeks_t* event_buffer = (dxf_greeks_t*)dx_get_event_data_buffer(context, dx_eid_greeks, record_count);
+										void* record_buff) {
+	dxf_greeks_t* event_buffer = (dxf_greeks_t*)dx_get_event_data_buffer(context, dx_eid_greeks, 1);
 
 	if (event_buffer == NULL) {
 		return false;
 	}
 
 	dx_greeks_t* record_buffer = (dx_greeks_t*)record_buff;
-	for (int i = 0; i < record_count; ++i) {
-		dx_greeks_t* cur_record = record_buffer + i;
-		dxf_greeks_t* cur_event = event_buffer + i;
 
-		cur_event->event_flags = event_params->flags;
-		cur_event->index = (int_to_bits(cur_record->time) << DX_GREEKS_INDEX_TIME_SHIFT) | int_to_bits(cur_record->sequence);
-		cur_event->time = DX_TIME_SEQ_TO_MS(cur_record);
-		cur_event->price = cur_record->price;
-		cur_event->volatility = cur_record->volatility;
-		cur_event->delta = cur_record->delta;
-		cur_event->gamma = cur_record->gamma;
-		cur_event->theta = cur_record->theta;
-		cur_event->rho = cur_record->rho;
-		cur_event->vega = cur_record->vega;
-	}
+	event_buffer->event_flags = event_params->flags;
+	event_buffer->index = (int_to_bits(record_buffer->time) << DX_GREEKS_INDEX_TIME_SHIFT) | int_to_bits(record_buffer->sequence);
+	event_buffer->time = DX_TIME_SEQ_TO_MS(record_buffer);
+	event_buffer->price = record_buffer->price;
+	event_buffer->volatility = record_buffer->volatility;
+	event_buffer->delta = record_buffer->delta;
+	event_buffer->gamma = record_buffer->gamma;
+	event_buffer->theta = record_buffer->theta;
+	event_buffer->rho = record_buffer->rho;
+	event_buffer->vega = record_buffer->vega;
 
 	return dx_process_event_data(context->connection, dx_eid_greeks, record_params->symbol_name, event_buffer,
-								 record_count, event_params);
+								 event_params);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1037,16 +1019,13 @@ int RECORD_TRANSCODER_NAME(dx_greeks_t) (dx_record_transcoder_connection_context
 int RECORD_TRANSCODER_NAME(dx_theo_price_t) (dx_record_transcoder_connection_context_t* context,
 										const dx_record_params_t* record_params,
 										const dxf_event_params_t* event_params,
-										void* record_buffer, int record_count) {
+										void* record_buffer) {
 	dxf_theo_price_t* event_buffer = (dxf_theo_price_t*)record_buffer;
 
-	for (int i = 0; i < record_count; ++i) {
-		dxf_theo_price_t* cur_event = event_buffer + i;
-		cur_event->time = DX_TIME_FIELD_TO_MS(cur_event->time);
-	}
+	event_buffer->time = DX_TIME_FIELD_TO_MS(event_buffer->time);
 
 	return dx_process_event_data(context->connection, dx_eid_theo_price, record_params->symbol_name, event_buffer,
-								 record_count, event_params);
+								 event_params);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1054,8 +1033,8 @@ int RECORD_TRANSCODER_NAME(dx_theo_price_t) (dx_record_transcoder_connection_con
 int RECORD_TRANSCODER_NAME(dx_underlying_t) (dx_record_transcoder_connection_context_t* context,
 										const dx_record_params_t* record_params,
 										const dxf_event_params_t* event_params,
-										void* record_buff, int record_count) {
-	dxf_underlying_t* event_buffer = (dxf_underlying_t*)dx_get_event_data_buffer(context, dx_eid_underlying, record_count);
+										void* record_buff) {
+	dxf_underlying_t* event_buffer = (dxf_underlying_t*)dx_get_event_data_buffer(context, dx_eid_underlying, 1);
 
 	if (event_buffer == NULL) {
 		return false;
@@ -1063,60 +1042,51 @@ int RECORD_TRANSCODER_NAME(dx_underlying_t) (dx_record_transcoder_connection_con
 
 	dx_underlying_t* record_buffer = (dx_underlying_t*)record_buff;
 
-	for (int i = 0; i < record_count; ++i) {
-		dx_underlying_t* cur_record = record_buffer + i;
-		dxf_underlying_t* cur_event = event_buffer + i;
-
-		cur_event->volatility = cur_record->volatility;
-		cur_event->front_volatility = cur_record->front_volatility;
-		cur_event->back_volatility = cur_record->back_volatility;
-		cur_event->call_volume = cur_record->call_volume;
-		cur_event->put_volume = cur_record->put_volume;
-		cur_event->option_volume = isnan(cur_record->put_volume)
-		   ? cur_record->call_volume
-		   : isnan(cur_record->call_volume) ? cur_record->put_volume : cur_record->put_volume + cur_record->call_volume;
-		cur_event->put_call_ratio = cur_record->put_call_ratio;
-	}
+	event_buffer->volatility = record_buffer->volatility;
+	event_buffer->front_volatility = record_buffer->front_volatility;
+	event_buffer->back_volatility = record_buffer->back_volatility;
+	event_buffer->call_volume = record_buffer->call_volume;
+	event_buffer->put_volume = record_buffer->put_volume;
+	event_buffer->option_volume = isnan(record_buffer->put_volume)
+	   ? record_buffer->call_volume
+	   : isnan(record_buffer->call_volume) ? record_buffer->put_volume : (record_buffer->put_volume + record_buffer->call_volume);
+	event_buffer->put_call_ratio = record_buffer->put_call_ratio;
 
 	return dx_process_event_data(context->connection, dx_eid_underlying, record_params->symbol_name, event_buffer,
-								 record_count, event_params);
+								 event_params);
 }
 
 /* -------------------------------------------------------------------------- */
 
 int RECORD_TRANSCODER_NAME(dx_series_t)(dx_record_transcoder_connection_context_t* context,
 										const dx_record_params_t* record_params, const dxf_event_params_t* event_params,
-										void* record_buff, int record_count) {
-	dxf_series_t* event_buffer = (dxf_series_t*)dx_get_event_data_buffer(context, dx_eid_series, record_count);
+										void* record_buff) {
+	dxf_series_t* event_buffer = (dxf_series_t*)dx_get_event_data_buffer(context, dx_eid_series, 1);
 
 	if (event_buffer == NULL) {
 		return false;
 	}
 
 	dx_series_t* record_buffer = (dx_series_t*)record_buff;
-	for (int i = 0; i < record_count; ++i) {
-		dx_series_t* cur_record = record_buffer + i;
-		dxf_series_t* cur_event = event_buffer + i;
 
-		cur_event->event_flags = event_params->flags;
-		cur_event->index = cur_record->index;
-		cur_event->time = DX_TIME_SEQ_TO_MS(cur_record);
-		cur_event->sequence = DX_SEQUENCE(cur_record);
-		cur_event->expiration = cur_record->expiration;
-		cur_event->volatility = cur_record->volatility;
-		cur_event->call_volume = cur_record->call_volume;
-		cur_event->put_volume = cur_record->put_volume;
-		cur_event->option_volume = isnan(cur_record->put_volume)
-			? cur_record->call_volume
-			: isnan(cur_record->call_volume) ? cur_record->put_volume : cur_record->put_volume + cur_record->call_volume;
-		cur_event->put_call_ratio = cur_record->put_call_ratio;
-		cur_event->forward_price = cur_record->forward_price;
-		cur_event->dividend = cur_record->dividend;
-		cur_event->interest = cur_record->interest;
-	}
+	event_buffer->event_flags = event_params->flags;
+	event_buffer->index = record_buffer->index;
+	event_buffer->time = DX_TIME_SEQ_TO_MS(record_buffer);
+	event_buffer->sequence = DX_SEQUENCE(record_buffer);
+	event_buffer->expiration = record_buffer->expiration;
+	event_buffer->volatility = record_buffer->volatility;
+	event_buffer->call_volume = record_buffer->call_volume;
+	event_buffer->put_volume = record_buffer->put_volume;
+	event_buffer->option_volume = isnan(record_buffer->put_volume)
+		? record_buffer->call_volume
+		: isnan(record_buffer->call_volume) ? record_buffer->put_volume : record_buffer->put_volume + record_buffer->call_volume;
+	event_buffer->put_call_ratio = record_buffer->put_call_ratio;
+	event_buffer->forward_price = record_buffer->forward_price;
+	event_buffer->dividend = record_buffer->dividend;
+	event_buffer->interest = record_buffer->interest;
 
 	return dx_process_event_data(context->connection, dx_eid_series, record_params->symbol_name, event_buffer,
-								 record_count, event_params);
+								 event_params);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1124,28 +1094,24 @@ int RECORD_TRANSCODER_NAME(dx_series_t)(dx_record_transcoder_connection_context_
 int RECORD_TRANSCODER_NAME(dx_configuration_t) (dx_record_transcoder_connection_context_t* context,
 												const dx_record_params_t* record_params,
 												const dxf_event_params_t* event_params,
-												void* record_buff, int record_count) {
-	dxf_configuration_t* event_buffer = (dxf_configuration_t*)dx_get_event_data_buffer(context, dx_eid_configuration, record_count);
+												void* record_buff) {
+	dxf_configuration_t* event_buffer = (dxf_configuration_t*)dx_get_event_data_buffer(context, dx_eid_configuration, 1);
 
 	if (event_buffer == NULL) {
 		return false;
 	}
 
 	dx_configuration_t* record_buffer = (dx_configuration_t*)record_buff;
-	for (int i = 0; i < record_count; ++i) {
-		dx_configuration_t* cur_record = record_buffer + i;
-		dxf_configuration_t* cur_event = event_buffer + i;
 
-		cur_event->version = cur_record->version;
+	event_buffer->version = record_buffer->version;
 
-		if (!dx_configuration_deserialize_string(&(cur_record->object), &(cur_event->object)) ||
-			!dx_store_string_buffer(context->rbcc, cur_event->object)) {
-			return false;
-		}
+	if (!dx_configuration_deserialize_string(&(record_buffer->object), &(event_buffer->object)) ||
+		!dx_store_string_buffer(context->rbcc, event_buffer->object)) {
+		return false;
 	}
 
 	return dx_process_event_data(context->connection, dx_eid_configuration, record_params->symbol_name, event_buffer,
-								 record_count, event_params);
+								 event_params);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1177,7 +1143,7 @@ static const dx_record_transcoder_t g_record_transcoders[dx_rid_count] = {
 int dx_transcode_record_data (dxf_connection_t connection,
 							const dx_record_params_t* record_params,
 							const dxf_event_params_t* event_params,
-							void* record_buffer, int record_count) {
+							void* record_buffer) {
 	dx_record_transcoder_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_record_transcoder, NULL);
-	return g_record_transcoders[record_params->record_info_id](context, record_params, event_params, record_buffer, record_count);
+	return g_record_transcoders[record_params->record_info_id](context, record_params, event_params, record_buffer);
 }

@@ -24,6 +24,7 @@
 #include "DXTypes.h"
 #include "BufferedIOCommon.h"
 #include "DXPMessageData.h"
+#include "RecordData.h"
 
 /* -------------------------------------------------------------------------- */
 /*
