@@ -163,181 +163,154 @@ void print_timestamp(dxf_long_t timestamp) {
 
 void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
 			  void* user_data) {
-	dxf_int_t i = 0;
 	wprintf(L"%ls{symbol=%ls, ", dx_event_type_to_string(event_type), symbol_name);
 
 	if (event_type == DXF_ET_QUOTE) {
-		dxf_quote_t* quotes = (dxf_quote_t*)data;
+		dxf_quote_t* q = (dxf_quote_t*)data;
 
-		for (; i < data_count; ++i) {
-			wprintf(L"bidTime=");
-			print_timestamp(quotes[i].bid_time);
-			wprintf(L" bidExchangeCode=%c, bidPrice=%f, bidSize=%i, ", quotes[i].bid_exchange_code, quotes[i].bid_price,
-					quotes[i].bid_size);
-			wprintf(L"askTime=");
-			print_timestamp(quotes[i].ask_time);
-			wprintf(L" askExchangeCode=%c, askPrice=%f, askSize=%i, scope=%d}\n", quotes[i].ask_exchange_code,
-					quotes[i].ask_price, quotes[i].ask_size, (int)quotes[i].scope);
-		}
+		wprintf(L"bidTime=");
+		print_timestamp(q->bid_time);
+		wprintf(L" bidExchangeCode=%c, bidPrice=%f, bidSize=%i, ", q->bid_exchange_code, q->bid_price, q->bid_size);
+		wprintf(L"askTime=");
+		print_timestamp(q->ask_time);
+		wprintf(L" askExchangeCode=%c, askPrice=%f, askSize=%i, scope=%d}\n", q->ask_exchange_code, q->ask_price,
+				q->ask_size, (int)q->scope);
 	}
 
 	if (event_type == DXF_ET_ORDER) {
-		dxf_order_t* orders = (dxf_order_t*)data;
+		dxf_order_t* o = (dxf_order_t*)data;
 
-		for (; i < data_count; ++i) {
-			wprintf(L"index=0x%llX, side=%i, scope=%i, time=", orders[i].index, orders[i].side, orders[i].scope);
-			print_timestamp(orders[i].time);
-			wprintf(L", exchange code=%c, market maker=%ls, price=%f, size=%d", orders[i].exchange_code,
-					orders[i].market_maker, orders[i].price, orders[i].size);
-			if (wcslen(orders[i].source) > 0) wprintf(L", source=%ls", orders[i].source);
-			wprintf(L", count=%d, flags=0x%X}\n", orders[i].count, orders[i].event_flags);
-		}
+		wprintf(L"index=0x%llX, side=%i, scope=%i, time=", o->index, o->side, o->scope);
+		print_timestamp(o->time);
+		wprintf(L", exchange code=%c, market maker=%ls, price=%f, size=%d", o->exchange_code, o->market_maker,
+				o->price, o->size);
+
+		if (wcslen(o->source) > 0) wprintf(L", source=%ls", o->source);
+
+		wprintf(L", count=%d, flags=0x%X}\n", o->count, o->event_flags);
 	}
 
 	if (event_type == DXF_ET_TRADE) {
-		dxf_trade_t* trades = (dxf_trade_t*)data;
+		dxf_trade_t* tr = (dxf_trade_t*)data;
 
-		for (; i < data_count; ++i) {
-			print_timestamp(trades[i].time);
-			wprintf(
-				L", exchangeCode=%c, price=%f, size=%i, tick=%i, change=%f, day id=%d, day volume=%.0f, scope=%d}\n",
-				trades[i].exchange_code, trades[i].price, trades[i].size, trades[i].tick, trades[i].change,
-				trades[i].day_id, trades[i].day_volume, (int)trades[i].scope);
-		}
+		print_timestamp(tr->time);
+		wprintf(L", exchangeCode=%c, price=%f, size=%i, tick=%i, change=%f, day id=%d, day volume=%.0f, scope=%d}\n",
+				tr->exchange_code, tr->price, tr->size, tr->tick, tr->change, tr->day_id, tr->day_volume,
+				(int)tr->scope);
 	}
 
 	if (event_type == DXF_ET_SUMMARY) {
 		dxf_summary_t* s = (dxf_summary_t*)data;
 
-		for (; i < data_count; ++i) {
 			wprintf(
 				L"day id=%d, day open price=%f, day high price=%f, day low price=%f, day close price=%f, "
 				L"prev day id=%d, prev day close price=%f, open interest=%i, flags=0x%X, exchange=%c, "
 				L"day close price type=%i, prev day close price type=%i, scope=%d}\n",
-				s[i].day_id, s[i].day_open_price, s[i].day_high_price, s[i].day_low_price, s[i].day_close_price,
-				s[i].prev_day_id, s[i].prev_day_close_price, s[i].open_interest, s[i].raw_flags, s[i].exchange_code,
-				s[i].day_close_price_type, s[i].prev_day_close_price_type, s[i].scope);
-		}
+				s->day_id, s->day_open_price, s->day_high_price, s->day_low_price, s->day_close_price,
+				s->prev_day_id, s->prev_day_close_price, s->open_interest, s->raw_flags, s->exchange_code,
+				s->day_close_price_type, s->prev_day_close_price_type, s->scope);
 	}
 
 	if (event_type == DXF_ET_PROFILE) {
 		dxf_profile_t* p = (dxf_profile_t*)data;
 
-		for (; i < data_count; ++i) {
-			wprintf(
-				L"Beta=%f, eps=%f, div freq=%i, exd div amount=%f, exd div date=%i, 52 high price=%f, "
-				L"52 low price=%f, shares=%f, Description=%ls, flags=%i, status_reason=%ls, halt start time=",
-				p[i].beta, p[i].eps, p[i].div_freq, p[i].exd_div_amount, p[i].exd_div_date, p[i].high_52_week_price,
-				p[i].low_52_week_price, p[i].shares, p[i].description, p[i].raw_flags, p[i].status_reason);
-			print_timestamp(p[i].halt_start_time);
-			wprintf(L", halt end time=");
-			print_timestamp(p[i].halt_end_time);
-			wprintf(L", high limit price=%f, low limit price=%f}\n", p[i].high_limit_price, p[i].low_limit_price);
-		}
+		wprintf(
+			L"Beta=%f, eps=%f, div freq=%i, exd div amount=%f, exd div date=%i, 52 high price=%f, "
+			L"52 low price=%f, shares=%f, Description=%ls, flags=%i, status_reason=%ls, halt start time=",
+			p->beta, p->eps, p->div_freq, p->exd_div_amount, p->exd_div_date, p->high_52_week_price,
+			p->low_52_week_price, p->shares, p->description, p->raw_flags, p->status_reason);
+		print_timestamp(p->halt_start_time);
+		wprintf(L", halt end time=");
+		print_timestamp(p->halt_end_time);
+		wprintf(L", high limit price=%f, low limit price=%f}\n", p->high_limit_price, p->low_limit_price);
 	}
 
 	if (event_type == DXF_ET_TIME_AND_SALE) {
 		dxf_time_and_sale_t* tns = (dxf_time_and_sale_t*)data;
 
-		for (; i < data_count; ++i) {
-			wprintf(L"event id=%" LS(PRId64) L", time=", tns[i].index);
-			print_timestamp(tns[i].time);
-			wprintf(
-				L", exchange code=%c, price=%f, size=%i, bid price=%f, ask price=%f, "
-				L"exchange sale conditions=\'%ls\', is ETH trade=%ls, type=%i, buyer=\'%ls\', seller=\'%ls\', "
-				L"scope=%d, flags=0x%X, raw_flags=0x%X}\n",
-				tns[i].exchange_code, tns[i].price, tns[i].size, tns[i].bid_price, tns[i].ask_price,
-				tns[i].exchange_sale_conditions, tns[i].is_eth_trade ? L"True" : L"False", tns[i].type,
-				tns[i].buyer ? tns[i].buyer : L"<UNKNOWN>", tns[i].seller ? tns[i].seller : L"<UNKNOWN>", tns[i].scope,
-				tns[i].event_flags, tns[i].raw_flags);
-		}
+		wprintf(L"event id=%" LS(PRId64) L", time=", tns->index);
+		print_timestamp(tns->time);
+		wprintf(
+			L", exchange code=%c, price=%f, size=%i, bid price=%f, ask price=%f, "
+			L"exchange sale conditions=\'%ls\', is ETH trade=%ls, type=%i, buyer=\'%ls\', seller=\'%ls\', "
+			L"scope=%d, flags=0x%X, raw_flags=0x%X}\n",
+			tns->exchange_code, tns->price, tns->size, tns->bid_price, tns->ask_price,
+			tns->exchange_sale_conditions, tns->is_eth_trade ? L"True" : L"False", tns->type,
+			tns->buyer ? tns->buyer : L"<UNKNOWN>", tns->seller ? tns->seller : L"<UNKNOWN>", tns->scope,
+			tns->event_flags, tns->raw_flags);
 	}
 
 	if (event_type == DXF_ET_TRADE_ETH) {
 		dxf_trade_t* trades = (dxf_trade_t*)data;
 
-		for (; i < data_count; ++i) {
-			print_timestamp(trades[i].time);
-			wprintf(
-				L", exchangeCode=%c, flags=%d, price=%f, size=%i, change=%f, day id=%d, day volume=%.0f, scope=%d}\n",
-				trades[i].exchange_code, trades[i].raw_flags, trades[i].price, trades[i].size, trades[i].change,
-				trades[i].day_id, trades[i].day_volume, (int)trades[i].scope);
-		}
+		print_timestamp(trades->time);
+		wprintf(
+			L", exchangeCode=%c, flags=%d, price=%f, size=%i, change=%f, day id=%d, day volume=%.0f, scope=%d}\n",
+			trades->exchange_code, trades->raw_flags, trades->price, trades->size, trades->change,
+			trades->day_id, trades->day_volume, (int)trades->scope);
 	}
 
 	if (event_type == DXF_ET_SPREAD_ORDER) {
 		dxf_order_t* orders = (dxf_order_t*)data;
 
-		for (; i < data_count; ++i) {
-			wprintf(L"index=0x%llX, side=%i, scope=%i, time=", orders[i].index, orders[i].side, orders[i].scope);
-			print_timestamp(orders[i].time);
-			wprintf(
-				L", sequence=%i, exchange code=%c, price=%f, size=%d, source=%ls, "
-				L"count=%i, flags=%i, spread symbol=%ls}\n",
-				orders[i].sequence, orders[i].exchange_code, orders[i].price, orders[i].size,
-				wcslen(orders[i].source) > 0 ? orders[i].source : L"", orders[i].count, orders[i].event_flags,
-				wcslen(orders[i].spread_symbol) > 0 ? orders[i].spread_symbol : L"");
-		}
+		wprintf(L"index=0x%llX, side=%i, scope=%i, time=", orders->index, orders->side, orders->scope);
+		print_timestamp(orders->time);
+		wprintf(
+			L", sequence=%i, exchange code=%c, price=%f, size=%d, source=%ls, "
+			L"count=%i, flags=%i, spread symbol=%ls}\n",
+			orders->sequence, orders->exchange_code, orders->price, orders->size,
+			wcslen(orders->source) > 0 ? orders->source : L"", orders->count, orders->event_flags,
+			wcslen(orders->spread_symbol) > 0 ? orders->spread_symbol : L"");
 	}
 
 	if (event_type == DXF_ET_GREEKS) {
 		dxf_greeks_t* grks = (dxf_greeks_t*)data;
 
-		for (; i < data_count; ++i) {
-			wprintf(L"time=");
-			print_timestamp(grks[i].time);
-			wprintf(L", index=%"LS(PRId64)L", greeks price=%f, volatility=%f, "
-				L"delta=%f, gamma=%f, theta=%f, rho=%f, vega=%f, index=0x%"LS(PRIX64)L", flags=0x%X}\n",
-				grks[i].index, grks[i].price, grks[i].volatility,
-				grks[i].delta, grks[i].gamma, grks[i].theta, grks[i].rho, grks[i].vega, grks[i].index,
-				grks[i].event_flags);
-		}
+		wprintf(L"time=");
+		print_timestamp(grks->time);
+		wprintf(L", index=%"LS(PRId64)L", greeks price=%f, volatility=%f, "
+			L"delta=%f, gamma=%f, theta=%f, rho=%f, vega=%f, index=0x%"LS(PRIX64)L", flags=0x%X}\n",
+			grks->index, grks->price, grks->volatility,
+			grks->delta, grks->gamma, grks->theta, grks->rho, grks->vega, grks->index,
+			grks->event_flags);
 	}
 
 	if (event_type == DXF_ET_THEO_PRICE) {
 		dxf_theo_price_t* tp = (dxf_theo_price_t*)data;
 
-		for (; i < data_count; ++i) {
-			wprintf(L"theo time=");
-			print_timestamp(tp[i].time);
-			wprintf(
-				L", theo price=%f, theo underlying price=%f, theo delta=%f, "
-				L"theo gamma=%f, theo dividend=%f, theo_interest=%f}\n",
-				tp[i].price, tp[i].underlying_price, tp[i].delta, tp[i].gamma, tp[i].dividend, tp[i].interest);
-		}
+		wprintf(L"theo time=");
+		print_timestamp(tp->time);
+		wprintf(
+			L", theo price=%f, theo underlying price=%f, theo delta=%f, "
+			L"theo gamma=%f, theo dividend=%f, theo_interest=%f}\n",
+			tp->price, tp->underlying_price, tp->delta, tp->gamma, tp->dividend, tp->interest);
 	}
 
 	if (event_type == DXF_ET_UNDERLYING) {
 		dxf_underlying_t* u = (dxf_underlying_t*)data;
 
-		for (; i < data_count; ++i) {
-			wprintf(
-				L"volatility=%f, front volatility=%f, back volatility=%f, call volume=%f, put volume=%f, "
-				L"option volume=%f, put call ratio=%f}\n",
-				u[i].volatility, u[i].front_volatility, u[i].back_volatility, u[i].call_volume, u[i].put_volume,
-				u[i].option_volume, u[i].put_call_ratio);
-		}
+		wprintf(
+			L"volatility=%f, front volatility=%f, back volatility=%f, call volume=%f, put volume=%f, "
+			L"option volume=%f, put call ratio=%f}\n",
+			u->volatility, u->front_volatility, u->back_volatility, u->call_volume, u->put_volume,
+			u->option_volume, u->put_call_ratio);
 	}
 
 	if (event_type == DXF_ET_SERIES) {
 		dxf_series_t* srs = (dxf_series_t*)data;
 
-		for (; i < data_count; ++i) {
-			wprintf(L"expiration=%d, index=%"LS(PRId64)L", volatility=%f, call volume=%f, put volume=%f, "
-				L"option volume=%f, put call ratio=%f, forward_price=%f, dividend=%f, interest=%f, "
-				L"index=0x%"LS(PRIX64)L", flags=0x%X}\n",
-				srs[i].expiration, srs[i].index, srs[i].volatility, srs[i].call_volume, srs[i].put_volume,
-				srs[i].option_volume, srs[i].put_call_ratio, srs[i].forward_price, srs[i].dividend, srs[i].interest,
-				srs[i].index, srs[i].event_flags);
-		}
+		wprintf(L"expiration=%d, index=%"LS(PRId64)L", volatility=%f, call volume=%f, put volume=%f, "
+			L"option volume=%f, put call ratio=%f, forward_price=%f, dividend=%f, interest=%f, "
+			L"index=0x%"LS(PRIX64)L", flags=0x%X}\n",
+			srs->expiration, srs->index, srs->volatility, srs->call_volume, srs->put_volume,
+			srs->option_volume, srs->put_call_ratio, srs->forward_price, srs->dividend, srs->interest,
+			srs->index, srs->event_flags);
 	}
 
 	if (event_type == DXF_ET_CONFIGURATION) {
 		dxf_configuration_t* cnf = (dxf_configuration_t*)data;
 
-		for (; i < data_count; ++i) {
-			wprintf(L"object=%ls}\n", cnf[i].object);
-		}
+		wprintf(L"object=%ls}\n", cnf->object);
 	}
 }
 /* -------------------------------------------------------------------------- */
