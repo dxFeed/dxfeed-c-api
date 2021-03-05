@@ -59,31 +59,31 @@ typedef struct {
 } dx_snap_test_state_t;
 
 int play_events(dxf_connection_t connection, dxf_snapshot_t snapshot, dxf_order_t* events, size_t size) {
-	size_t i;
-	dxf_string_t symbol = dx_get_snapshot_symbol(snapshot);
-	for (i = 0; i < size; i++) {
+	dxf_const_string_t symbol = dx_get_snapshot_symbol(snapshot);
+	
+	for (size_t i = 0; i < size; i++) {
 		dxf_order_t order = events[i];
-		dxf_event_data_t event_data = (dxf_event_data_t)&order;
-		dxf_ulong_t snapshot_key = dx_new_snapshot_key(dx_rid_order, symbol, order.source);
+		const dxf_event_data_t event_data = (dxf_event_data_t)&order;
+		const dxf_ulong_t snapshot_key = dx_new_snapshot_key(dx_rid_order, symbol, order.source);
+		
 		// Note: use index as time_int_field for test only
 		dxf_event_params_t event_params = { order.event_flags, order.index, snapshot_key };
-		if (!dx_process_event_data(connection, dx_eid_order, symbol, event_data, 1, &event_params)) {
+		if (!dx_process_event_data(connection, dx_eid_order, symbol, event_data, &event_params)) {
 			return false;
 		}
 	}
+	
 	return true;
 }
 
 int snapshot_test_runner(dxf_order_t* events, size_t size, dxf_snapshot_listener_t listener, int expected_listener_call_count) {
-	dxf_connection_t connection;
-	dxf_subscription_t subscription;
-	dxf_snapshot_t snapshot;
-	dx_event_subscr_flag subscr_flags = dx_esf_time_series | dx_esf_single_record;
+	const dx_event_subscr_flag subscr_flags = dx_esf_time_series | dx_esf_single_record;
 	dxf_const_string_t symbol = SYMBOL_DEFAULT;
 	dx_snap_test_state_t state = { 0, true };
 
-	connection = dx_init_connection();
-	subscription = dx_create_event_subscription(connection, DXF_ET_ORDER, subscr_flags, TIME_DEFAULT);
+	dxf_connection_t connection = dx_init_connection();
+	dxf_subscription_t subscription =
+		dx_create_event_subscription(connection, DXF_ET_ORDER, subscr_flags, TIME_DEFAULT);
 
 	if (subscription == dx_invalid_subscription ||
 		!dx_init_symbol_codec()) {
@@ -94,7 +94,8 @@ int snapshot_test_runner(dxf_order_t* events, size_t size, dxf_snapshot_listener
 	dx_clear_order_source(subscription);
 	dx_add_order_source(subscription, SOURCE_DEFAULT);
 
-	snapshot = dx_create_snapshot(connection, subscription, dx_eid_order, dx_rid_order, symbol, SOURCE_DEFAULT, TIME_DEFAULT);
+	dxf_snapshot_t snapshot = dx_create_snapshot(connection, subscription, dx_eid_order, dx_rid_order, symbol,
+	                                             SOURCE_DEFAULT, TIME_DEFAULT);
 
 	if (snapshot == dx_invalid_snapshot ||
 		!dx_add_symbols(subscription, &symbol, 1) ||
@@ -132,21 +133,21 @@ int dx_compare_snapshots(const dxf_snapshot_data_ptr_t snapshot_data, dxf_order_
 /* -------------------------------------------------------------------------- */
 
 static dxf_order_t simple_test_data[] = {
-	{ dxf_ef_snapshot_begin, 0x4e54560000000006, 0,             0, 0, 0,      0,   0, dxf_osc_order, dxf_osd_buy,  0,    L"NTV", 0       },
-	{ 0,                     0x4e54560000000005, 1488551035000, 0, 0, 100.50, 100, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
-	{ 0,                     0x4e54560000000004, 1488551035010, 0, 0, 101.00, 101, 0, dxf_osc_order, dxf_osd_sell, L'Q', L"NTV", L"NSDQ" },
-	{ 0,                     0x4e54560000000003, 0,             0, 0, 0,      0,   0, dxf_osc_order, dxf_osd_buy,  0,    L"NTV", 0       },
-	{ 0,                     0x4e54560000000002, 1488551035020, 0, 0, 100.40, 102, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
-	{ 0,                     0x4e54560000000001, 1488551035030, 0, 0, 100.30, 103, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
-	{ dxf_ef_snapshot_end,   0x4e54560000000000, 1488551035040, 0, 0, 100.20, 104, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" }
+	{ L"NTV", dxf_ef_snapshot_begin, 0x4e54560000000006, 0,             0, 0, dxf_oa_undefined, 0, 0, 0, 0.0,    0,   0, 0, 0.0, 0.0, 0,    dxf_osd_buy,  dxf_osc_order, { 0 } },
+	{ L"NTV", 0,                     0x4e54560000000005, 1488551035000, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.50, 100, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order, { L"NSDQ" } },
+	{ L"NTV", 0,                     0x4e54560000000004, 1488551035010, 0, 0, dxf_oa_undefined, 0, 0, 0, 101.00, 101, 0, 0, 0.0, 0.0, L'Q', dxf_osd_sell, dxf_osc_order, { L"NSDQ" } },
+	{ L"NTV", 0,                     0x4e54560000000003, 0            , 0, 0, dxf_oa_undefined, 0, 0, 0, 0.0,    0,   0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order, { 0 } },
+	{ L"NTV", 0,                     0x4e54560000000002, 1488551035020, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.40, 102, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order, { L"NSDQ" } },
+	{ L"NTV", 0,                     0x4e54560000000001, 1488551035030, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.30, 103, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order, { L"NSDQ" } },
+	{ L"NTV", dxf_ef_snapshot_end,   0x4e54560000000000, 1488551035040, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.20, 104, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order, { L"NSDQ" } },
 };
 
 static dxf_order_t simple_test_snap_data[] = {
-	{ 0, 0x4e54560000000005, 1488551035000, 0, 0, 100.50, 100, 0, dxf_osc_order, dxf_osd_buy,  L'Q',  L"NTV", L"NSDQ" },
-	{ 0, 0x4e54560000000004, 1488551035010, 0, 0, 101.00, 101, 0, dxf_osc_order, dxf_osd_sell, L'Q',  L"NTV", L"NSDQ" },
-	{ 0, 0x4e54560000000002, 1488551035020, 0, 0, 100.40, 102, 0, dxf_osc_order, dxf_osd_buy,  L'Q',  L"NTV", L"NSDQ" },
-	{ 0, 0x4e54560000000001, 1488551035030, 0, 0, 100.30, 103, 0, dxf_osc_order, dxf_osd_buy,  L'Q',  L"NTV", L"NSDQ" },
-	{ 0, 0x4e54560000000000, 1488551035040, 0, 0, 100.20, 104, 0, dxf_osc_order, dxf_osd_buy,  L'Q',  L"NTV", L"NSDQ" }
+	{ L"NTV", 0,                     0x4e54560000000005, 1488551035000, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.50, 100, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order,{ L"NSDQ" } },
+	{ L"NTV", 0,                     0x4e54560000000004, 1488551035010, 0, 0, dxf_oa_undefined, 0, 0, 0, 101.00, 101, 0, 0, 0.0, 0.0, L'Q', dxf_osd_sell, dxf_osc_order,{ L"NSDQ" } },
+	{ L"NTV", 0,                     0x4e54560000000003, 0            , 0, 0, dxf_oa_undefined, 0, 0, 0, 0.0,    0,   0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order,{ 0 } },
+	{ L"NTV", 0,                     0x4e54560000000002, 1488551035020, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.40, 102, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order,{ L"NSDQ" } },
+	{ L"NTV", 0,                     0x4e54560000000001, 1488551035030, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.30, 103, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order,{ L"NSDQ" } },
 };
 
 static int simple_test_snap_size = SIZE_OF_ARRAY(simple_test_snap_data);
@@ -168,7 +169,7 @@ int snapshot_simple_test(void) {
 /* -------------------------------------------------------------------------- */
 
 static dxf_order_t empty_test_data[] = {
-	{ dxf_ef_remove_event | dxf_ef_snapshot_begin | dxf_ef_snapshot_end, 0x4e54560000000000, 1488551035040, 0, 0, 100.20, 104, 0, dxf_osc_order, dxf_osd_buy, L'Q', L"NTV", L"NSDQ" }
+	{ L"NTV", dxf_ef_remove_event | dxf_ef_snapshot_begin | dxf_ef_snapshot_end, 0x4e54560000000000, 1488551035040, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.20, 104, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order,{ L"NSDQ" } },
 };
 
 void empty_test_listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
@@ -189,23 +190,23 @@ int snapshot_empty_test(void) {
 
 static dxf_order_t update_test_data[] = {
 	// initial data
-	{ dxf_ef_snapshot_begin,                   0x4e54560000000004, 1488551035000, 0, 0, 100.50, 100,    0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
-	{ 0,                                       0x4e54560000000003, 1488551035010, 0, 0, 101.00, 101,    0, dxf_osc_order, dxf_osd_sell, L'Q', L"NTV", L"NSDQ" },
-	{ 0,                                       0x4e54560000000002, 1488551035020, 0, 0, 100.40, 102,    0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
-	{ 0,                                       0x4e54560000000001, 1488551035030, 0, 0, 100.30, 103,    0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
-	{ dxf_ef_snapshot_end,                     0x4e54560000000000, 1488551035040, 0, 0, 100.20, 104,    0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ L"NTV", dxf_ef_snapshot_begin, 0x4e54560000000004, 1488551035000, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.50, 100, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order,{ L"NSDQ" } },
+	{ L"NTV", 0,                     0x4e54560000000003, 1488551035010, 0, 0, dxf_oa_undefined, 0, 0, 0, 101.00, 101, 0, 0, 0.0, 0.0, L'Q', dxf_osd_sell, dxf_osc_order,{ L"NSDQ" } },
+	{ L"NTV", 0,                     0x4e54560000000002, 1488551035020, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.40, 102, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order,{ L"NSDQ" } },
+	{ L"NTV", 0,                     0x4e54560000000001, 1488551035030, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.30, 103, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order,{ L"NSDQ" } },
+	{ L"NTV", dxf_ef_snapshot_end,   0x4e54560000000000, 1488551035040, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.20, 104, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order,{ L"NSDQ" } },
 	// Update#1: one row update
-	{ 0,                                       0x4e54560000000002, 1488551035020, 0, 0, 100.40, 1000,   0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ L"NTV", 0,                     0x4e54560000000002, 1488551035020, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.40, 1000, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order,{ L"NSDQ" } },
 	// Update#2: one row remove via flags
-	{ dxf_ef_remove_event,                     0x4e54560000000002, 1488551035020, 0, 0, 100.40, 1001,   0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ L"NTV", dxf_ef_remove_event,             0x4e54560000000002, 1488551035020, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.40, 1001, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order,{ L"NSDQ" } },
 	// Update#3: one row remove via zero event
-	{ 0,                                       0x4e54560000000001, 0,             0, 0, 0.0,    0,      0, dxf_osc_order, dxf_osd_buy,  0,    L"NTV" },
+	{ L"NTV", 0,                     0x4e54560000000001, 0            , 0, 0, dxf_oa_undefined, 0, 0, 0, 0,         0, 0, 0, 0.0, 0.0,     0, dxf_osd_buy,  dxf_osc_order,{ 0 } },
 	// Update#4: complex update (inserting x 2, updating, removing, inserting)
-	{ dxf_ef_tx_pending,                       0x4e54560000000002, 1488551035020, 0, 0, 100.41, 1001,   0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
-	{ dxf_ef_tx_pending,                       0x4e54560000000005, 1488551035020, 0, 0, 100.42, 1002,   0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
-	{ dxf_ef_tx_pending,                       0x4e54560000000000, 1488551035040, 0, 0, 100.20, 100500, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
-	{ dxf_ef_tx_pending | dxf_ef_remove_event, 0x4e54560000000004, 1488551035000, 0, 0, 100.50, 100,    0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
-	{ 0,                                       0x4e54560000000010, 1488551035000, 0, 0, 100.60, 100,    0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" }
+	{ L"NTV", dxf_ef_tx_pending,                       0x4e54560000000002, 1488551035020, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.41, 1001,   0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order,{ L"NSDQ" } },
+	{ L"NTV", dxf_ef_tx_pending,                       0x4e54560000000005, 1488551035020, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.42, 1002,   0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order,{ L"NSDQ" } },
+	{ L"NTV", dxf_ef_tx_pending,                       0x4e54560000000000, 1488551035040, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.20, 100500, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order,{ L"NSDQ" } },
+	{ L"NTV", dxf_ef_tx_pending | dxf_ef_remove_event, 0x4e54560000000004, 1488551035000, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.50, 100,    0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order,{ L"NSDQ" } },
+	{ L"NTV", 0,                                       0x4e54560000000010, 1488551035000, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.60, 100,    0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order,{ L"NSDQ" } },
 };
 
 static dxf_order_t update_test_snap_1_data[] = {                
@@ -466,39 +467,41 @@ typedef struct {
  * Test
  */
 int snapshot_key_test(void) {
-	size_t record_index;
-	size_t symbol_index;
-	size_t source_index;
-	dxf_ulong_t key;
 	snapshot_key_array_t all_keys = DX_EMPTY_ARRAY;
-	int found = false;
-	int error = false;
+	int found;
+	int error;
 	size_t position = 0;
-	for (record_index = 0; record_index < g_record_info_ids_count; record_index++) {
-		for (symbol_index = 0; symbol_index < g_symbols_count; symbol_index++) {
-			for (source_index = 0; source_index < g_sources_count; source_index++) {
-				dx_record_info_id_t info_id = g_record_info_ids_list[record_index];
-				dxf_const_string_t symbol = g_symbols[symbol_index];
-				dxf_const_string_t source = g_sources_list[source_index];
-				key = dx_new_snapshot_key(info_id, symbol, source);
+	
+	for (size_t record_index = 0; record_index < g_record_info_ids_count; record_index++) {
+		for (size_t symbol_index = 0; symbol_index < g_symbols_count; symbol_index++) {
+			for (size_t source_index = 0; source_index < g_sources_count; source_index++) {
+				const dx_record_info_id_t info_id = g_record_info_ids_list[record_index];
+				const dxf_const_string_t symbol = g_symbols[symbol_index];
+				const dxf_const_string_t source = g_sources_list[source_index];
+				const dxf_ulong_t key = dx_new_snapshot_key(info_id, symbol, source);
+				
 				DX_ARRAY_BINARY_SEARCH(all_keys.elements, 0, all_keys.size, key, DX_NUMERIC_COMPARATOR, found, position);
+				
 				if (found) {
 					wprintf(L"Duplicate snapshot keys detected: %llu! Record id: %d, symbol:'%ls', source:'%ls'.\n", key, info_id, symbol, source);
 					PRINT_TEST_FAILED;
 					dx_free(all_keys.elements);
 					return false;
-				} else {
-					DX_ARRAY_INSERT(all_keys, dxf_ulong_t, key, position, dx_capacity_manager_halfer, error);
-					if (!dx_is_equal_int(false, error)) {
-						PRINT_TEST_FAILED_MESSAGE("Insert array error!");
-						dx_free(all_keys.elements);
-						return false;
-					}
+				}
+				
+				DX_ARRAY_INSERT(all_keys, dxf_ulong_t, key, position, dx_capacity_manager_halfer, error);
+				
+				if (!dx_is_equal_int(false, error)) {
+					PRINT_TEST_FAILED_MESSAGE("Insert array error!");
+					dx_free(all_keys.elements);
+					return false;
 				}
 			}
 		}
 	}
+	
 	dx_free(all_keys.elements);
+	
 	return true;
 }
 
@@ -514,32 +517,35 @@ typedef struct {
  * Test
  */
 int symbol_name_hasher_test(void) {
-	size_t symbol_index;
-	dxf_ulong_t hash;
-	hashs_array_t all_hashs = DX_EMPTY_ARRAY;
-	int found = false;
-	int error = false;
+	hashs_array_t hashes = DX_EMPTY_ARRAY;
+	int found;
+	int error;
 	size_t position = 0;
-	for (symbol_index = 0; symbol_index < g_symbols_count; symbol_index++) {
-		dxf_const_string_t symbol = g_symbols[symbol_index];
-		hash = dx_symbol_name_hasher(symbol);
-		DX_ARRAY_BINARY_SEARCH(all_hashs.elements, 0, all_hashs.size, hash, DX_NUMERIC_COMPARATOR, found, position);
+	
+	for (size_t symbol_index = 0; symbol_index < g_symbols_count; symbol_index++) {
+		const dxf_const_string_t symbol = g_symbols[symbol_index];
+		const dxf_ulong_t hash = dx_symbol_name_hasher(symbol);
+		
+		DX_ARRAY_BINARY_SEARCH(hashes.elements, 0, hashes.size, hash, DX_NUMERIC_COMPARATOR, found, position);
+		
 		if (found) {
-			wprintf(L"Duplicate hashs detected: %lu! symbol:'%ls'.\n", hash, symbol);
+			wprintf(L"Duplicate hashes detected: %lu! symbol:'%ls'.\n", hash, symbol);
 			PRINT_TEST_FAILED;
-			dx_free(all_hashs.elements);
+			dx_free(hashes.elements);
 			return false;
 		}
-		else {
-			DX_ARRAY_INSERT(all_hashs, dxf_int_t, hash, position, dx_capacity_manager_halfer, error);
-			if (!dx_is_equal_int(false, error)) {
-				PRINT_TEST_FAILED_MESSAGE("Insert array error!");
-				dx_free(all_hashs.elements);
-				return false;
-			}
+		
+		DX_ARRAY_INSERT(hashes, dxf_int_t, hash, position, dx_capacity_manager_halfer, error);
+		
+		if (!dx_is_equal_int(false, error)) {
+			PRINT_TEST_FAILED_MESSAGE("Insert array error!");
+			dx_free(hashes.elements);
+			return false;
 		}
 	}
-	dx_free(all_hashs.elements);
+	
+	dx_free(hashes.elements);
+	
 	return true;
 }
 
