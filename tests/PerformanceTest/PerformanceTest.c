@@ -163,17 +163,11 @@ int dxs_mutex_unlock(dxs_mutex_t* mutex) {
 #define LS(s)  LS2(s)
 #define LS2(s) L##s
 
-#ifndef true
-#	define true 1
-#	define false 0
-#endif
-
 const char dxfeed_host[] = "mddqa.in.devexperts.com:7400";
 // const char dxfeed_host[] = "demo.dxfeed.com:7300";
 
 #define TIMEOUT_TAG "-o"
 
-/* -------------------------------------------------------------------------- */
 static int is_listener_thread_terminated = false;
 static dxs_mutex_t listener_thread_guard;
 
@@ -185,8 +179,6 @@ int is_thread_terminate() {
 
 	return res;
 }
-
-/* -------------------------------------------------------------------------- */
 
 void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
 	(void)connection;
@@ -505,7 +497,6 @@ int main(int argc, char* argv[]) {
 		dxs_sleep(1000);
 	}
 
-	dxs_mutex_destroy(&listener_thread_guard);
 	wprintf(L"Disconnecting from host...\n");
 
 	if (!dxf_close_connection(connection)) {
@@ -520,6 +511,7 @@ int main(int argc, char* argv[]) {
 	wprintf(L"Disconnected\nConnection test completed\n");
 	wprintf(L"Received %i quotes in %i sec. %i quotes in 1 sec\n", quotes_counter, diff_time,
 			(int)(quotes_counter / diff_time));
+	dxs_mutex_destroy(&listener_thread_guard);
 
 	return 0;
 }

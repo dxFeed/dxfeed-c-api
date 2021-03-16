@@ -1,3 +1,8 @@
+Version 7.3.0
+* [DXFC-218] Improve theed SnapshotConsoleSample
+  - the `date` (-t) parameter was added
+  - the cross platform synchronization primitives were added
+
 Version 7.2.0
 * All sample programs were moved to the `samples` directory
 * [DXFC-212] Extended the Order event for Full Order Book

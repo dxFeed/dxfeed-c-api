@@ -18,36 +18,141 @@
  */
 
 #ifdef _WIN32
+#	ifndef _CRT_STDIO_ISO_WIDE_SPECIFIERS
+#		define _CRT_STDIO_ISO_WIDE_SPECIFIERS 1
+#	endif
+#endif
+
+#include <inttypes.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+#include "DXErrorCodes.h"
+#include "DXFeed.h"
+
+#ifndef __cplusplus
+#	ifndef true
+#		define true 1
+#	endif
+
+#	ifndef false
+#		define false 0
+#	endif
+#endif
+
+#if !defined(_WIN32) || defined(USE_PTHREADS)
+#	include "pthread.h"
+#	ifndef USE_PTHREADS
+#		define USE_PTHREADS
+#	endif
+typedef pthread_t dxs_thread_t;
+typedef pthread_key_t dxs_key_t;
+typedef struct {
+	pthread_mutex_t mutex;
+	pthread_mutexattr_t attr;
+} dxs_mutex_t;
+#else /* !defined(_WIN32) || defined(USE_PTHREADS) */
 #	pragma warning(push)
 #	pragma warning(disable : 5105)
 #	include <Windows.h>
 #	pragma warning(pop)
+#	define USE_WIN32_THREADS
+typedef HANDLE dxs_thread_t;
+typedef DWORD dxs_key_t;
+typedef LPCRITICAL_SECTION dxs_mutex_t;
+#endif /* !defined(_WIN32) || defined(USE_PTHREADS) */
+
+#ifdef _WIN32
+// To fix problem with MS implementation of swprintf
+#	define swprintf _snwprintf
+HANDLE g_out_console;
+
+void dxs_sleep(int milliseconds) { Sleep((DWORD)milliseconds); }
+
+int dxs_mutex_create(dxs_mutex_t* mutex) {
+	*mutex = calloc(1, sizeof(CRITICAL_SECTION));
+	InitializeCriticalSection(*mutex);
+	return true;
+}
+
+int dxs_mutex_destroy(dxs_mutex_t* mutex) {
+	DeleteCriticalSection(*mutex);
+	free(*mutex);
+	return true;
+}
+
+int dxs_mutex_lock(dxs_mutex_t* mutex) {
+	EnterCriticalSection(*mutex);
+	return true;
+}
+
+int dxs_mutex_unlock(dxs_mutex_t* mutex) {
+	LeaveCriticalSection(*mutex);
+	return true;
+}
 #else
+#	include "pthread.h"
 
-#	include <unistd.h>
-#	include <string.h>
-#	include <wctype.h>
-#	include <stdlib.h>
+void dxs_sleep(int milliseconds) {
+	struct timespec ts;
+	ts.tv_sec = milliseconds / 1000;
+	ts.tv_nsec = (milliseconds % 1000) * 1000000;
+	nanosleep(&ts, NULL);
+}
 
-#	define stricmp strcasecmp
-#endif
+int dxs_mutex_create(dxs_mutex_t* mutex) {
+	if (pthread_mutexattr_init(&mutex->attr) != 0) {
+		return false;
+	}
 
-#include "DXFeed.h"
-#include "DXErrorCodes.h"
-#include <time.h>
-#include <stdio.h>
-#include <inttypes.h>
+	if (pthread_mutexattr_settype(&mutex->attr, PTHREAD_MUTEX_RECURSIVE) != 0) {
+		return false;
+	}
+
+	if (pthread_mutex_init(&mutex->mutex, &mutex->attr) != 0) {
+		return false;
+	}
+
+	return true;
+}
+
+int dxs_mutex_destroy(dxs_mutex_t* mutex) {
+	if (pthread_mutex_destroy(&mutex->mutex) != 0) {
+		return false;
+	}
+
+	if (pthread_mutexattr_destroy(&mutex->attr) != 0) {
+		return false;
+	}
+
+	return true;
+}
+
+int dxs_mutex_lock(dxs_mutex_t* mutex) {
+	if (pthread_mutex_lock(&mutex->mutex) != 0) {
+		return false;
+	}
+
+	return true;
+}
+
+int dxs_mutex_unlock(dxs_mutex_t* mutex) {
+	if (pthread_mutex_unlock(&mutex->mutex) != 0) {
+		return false;
+	}
+
+	return true;
+}
+
+#endif	//_WIN32
 
 #define STRINGIFY(a) STR(a)
 #define STR(a) #a
 
 #define LS(s) LS2(s)
 #define LS2(s) L##s
-
-#ifndef true
-#	define true 1
-#	define false 0
-#endif
 
 //Prevents file names globbing (converting * to all files in the current dir)
 #ifdef __MINGW64_VERSION_MAJOR
@@ -64,49 +169,27 @@ int _CRT_glob = 0;
 #define TIMEOUT_TAG "-o"
 #define TIME_PARAM_SHORT_TAG "-t"
 
-/* -------------------------------------------------------------------------- */
-#ifdef _WIN32
 static int is_listener_thread_terminated = false;
-CRITICAL_SECTION listener_thread_guard;
+static dxs_mutex_t listener_thread_guard;
 
 int is_thread_terminate() {
 	int res;
-	EnterCriticalSection(&listener_thread_guard);
+	dxs_mutex_lock(&listener_thread_guard);
 	res = is_listener_thread_terminated;
-	LeaveCriticalSection(&listener_thread_guard);
+	dxs_mutex_unlock(&listener_thread_guard);
 
 	return res;
 }
-#else
-static volatile int is_listener_thread_terminated = false;
 
-int is_thread_terminate () {
-	int res;
-	res = is_listener_thread_terminated;
-	return res;
-}
-
-#endif
-
-
-/* -------------------------------------------------------------------------- */
-
-#ifdef _WIN32
 void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
-	EnterCriticalSection(&listener_thread_guard);
+	(void)connection;
+	char* host = (char*)user_data;
+	dxs_mutex_lock(&listener_thread_guard);
 	is_listener_thread_terminated = true;
-	LeaveCriticalSection(&listener_thread_guard);
+	dxs_mutex_unlock(&listener_thread_guard);
 
-	wprintf(L"\nTerminating listener thread\n");
+	wprintf(L"\nTerminating listener thread, host: %hs\n", host);
 }
-#else
-
-void on_reader_thread_terminate (dxf_connection_t connection, void *user_data) {
-	is_listener_thread_terminated = true;
-	wprintf(L"\nTerminating listener thread\n");
-}
-
-#endif
 
 void print_timestamp(dxf_long_t timestamp) {
 	wchar_t timefmt[80];
@@ -539,12 +622,10 @@ int main (int argc, char *argv[]) {
 	}
 
 	dxf_initialize_logger_v2("snapshot-console-api.log", true, true, true, log_data_transfer_flag);
+	dxs_mutex_create(&listener_thread_guard);
+
 	wprintf(L"Snapshot console sample started.\n");
 	wprintf(L"Connecting to host %hs...\n", dxfeed_host);
-
-#ifdef _WIN32
-	InitializeCriticalSection(&listener_thread_guard);
-#endif
 
 	ERRORCODE connection_result;
 	if (token != NULL && token[0] != '\0') {
@@ -617,11 +698,7 @@ int main (int argc, char *argv[]) {
 	wprintf(L"Subscribed\n");
 
 	while (!is_thread_terminate() && program_timeout--) {
-#ifdef _WIN32
-		Sleep(1000);
-#else
-		sleep(1);
-#endif
+		dxs_sleep(1000);
 	}
 
 	if (!dxf_close_snapshot(snapshot)) {
@@ -651,9 +728,7 @@ int main (int argc, char *argv[]) {
 
 	wprintf(L"Disconnected\n");
 
-#ifdef _WIN32
-	DeleteCriticalSection(&listener_thread_guard);
-#endif
+	dxs_mutex_destroy(&listener_thread_guard);
 
 	return 0;
 }
