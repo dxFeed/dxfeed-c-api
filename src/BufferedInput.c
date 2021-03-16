@@ -425,7 +425,7 @@ int dx_read_float (void* context, OUT dxf_float_t* value) {
 
 	CHECKED_CALL_2(dx_read_int, context, &int_val);
 
-	*value = (dxf_float_t)int_val;
+	*value = *((dxf_float_t*)(&int_val));
 
 	return true;
 }
@@ -437,7 +437,7 @@ int dx_read_double (void* context, OUT dxf_double_t* value) {
 
 	CHECKED_CALL_2(dx_read_long, context, &long_val);
 
-	*value = (dxf_double_t)long_val;
+	*value = *((dxf_double_t*)(&long_val));
 
 	return true;
 }
@@ -518,44 +518,52 @@ int dx_read_compact_int (void* context, OUT dxf_int_t* value) {
 		return dx_set_error_code(dx_ec_invalid_func_param_internal);
 	}
 
-	dxf_uint_t tmp_n;
+	dxf_uint_t temp_uint_byte;
+
 	/* The ((n << k) >> k) expression performs two's complement */
-	CHECKED_CALL_2(dx_read_unsigned_byte, context, &tmp_n);
-	n = (dxf_int_t)tmp_n;
+	CHECKED_CALL_2(dx_read_unsigned_byte, context, &temp_uint_byte);
+	n = (dxf_int_t)temp_uint_byte;
 
 	if (n < 0x80) {
-		*value = (n << 25u) >> 25u;
+		*value = (n << 25) >> 25;
 
 		return true;
 	}
 
 	if (n < 0xC0) {
-		dxf_uint_t m;
+		dxf_int_t m;
 
-		CHECKED_CALL_2(dx_read_unsigned_byte, context, &m);
+		CHECKED_CALL_2(dx_read_unsigned_byte, context, &temp_uint_byte);
+		m = (dxf_int_t)temp_uint_byte;
 
-		*value = (((n << 8u) | m) << 18u) >> 18u;
+		*value = (((n << 8) | m) << 18) >> 18;
 
 		return true;
 	}
 
 	if (n < 0xE0) {
-		dxf_uint_t m;
+		dxf_int_t m;
 
-		CHECKED_CALL_2(dx_read_unsigned_short, context, &m);
+		CHECKED_CALL_2(dx_read_unsigned_short, context, &temp_uint_byte);
+		m = (dxf_int_t)temp_uint_byte;
 
-		*value = (((n << 16u) | m) << 11u) >> 11u;
+		*value = (((n << 16) | m) << 11) >> 11;
 
 		return true;
 	}
 
 	if (n < 0xF0) {
-		dxf_uint_t tmp_byte_unsigned;
-		dxf_uint_t tmp_short_unsigned;
-		CHECKED_CALL_2(dx_read_unsigned_byte, context, &tmp_byte_unsigned);
-		CHECKED_CALL_2(dx_read_unsigned_short, context, &tmp_short_unsigned);
+		dxf_int_t tmp_byte;
+		dxf_int_t tmp_short;
+		dxf_uint_t temp_uint_short;
 
-		*value = (((n << 24u) | (tmp_byte_unsigned << 16u) | tmp_short_unsigned) << 4u) >> 4u;
+		CHECKED_CALL_2(dx_read_unsigned_byte, context, &temp_uint_byte);
+		CHECKED_CALL_2(dx_read_unsigned_short, context, &temp_uint_short);
+
+		tmp_byte = (dxf_int_t)temp_uint_byte;
+		tmp_short = (dxf_int_t)temp_uint_short;
+
+		*value = (((n << 24) | (tmp_byte << 16) | tmp_short) << 4) >> 4;
 
 		return true;
 	}
@@ -584,65 +592,79 @@ int dx_read_compact_long (void* context, OUT dxf_long_t* value) {
 		return dx_set_error_code(dx_ec_invalid_func_param_internal);
 	}
 
-	dxf_uint_t tmp_n;
+	dxf_uint_t temp_uint_byte;
+	dxf_uint_t temp_uint_short;
+
 	/* The ((n << k) >> k) expression performs two's complement */
-	CHECKED_CALL_2(dx_read_unsigned_byte, context, &tmp_n);
-	n = (dxf_int_t)tmp_n;
+	CHECKED_CALL_2(dx_read_unsigned_byte, context, &temp_uint_byte);
+	n = (dxf_int_t)temp_uint_byte;
 
 	if (n < 0x80) {
-		*value = (n << 25u) >> 25u;
+		*value = (n << 25) >> 25;
 
 		return true;
 	}
 
 	if (n < 0xC0) {
-		dxf_uint_t tmp_byte_unsigned;
-		CHECKED_CALL_2(dx_read_unsigned_byte, context, &tmp_byte_unsigned);
+		dxf_uint_t tmp_byte;
 
-		*value = (((n << 8u) | tmp_byte_unsigned) << 18u) >> 18u;
+		CHECKED_CALL_2(dx_read_unsigned_byte, context, &tmp_byte);
+
+		*value = (((n << 8) | tmp_byte) << 18) >> 18;
 
 		return true;
 	}
 
 	if (n < 0xE0) {
-		dxf_uint_t tmp_short_unsigned;
-		CHECKED_CALL_2(dx_read_unsigned_short, context, &tmp_short_unsigned);
+		dxf_int_t tmp_short;
 
-		*value = (((n << 16) | tmp_short_unsigned) << 11u) >> 11u;
+		CHECKED_CALL_2(dx_read_unsigned_short, context, &temp_uint_short);
+		tmp_short = (dxf_int_t)temp_uint_short;
+
+		*value = (((n << 16) | tmp_short) << 11) >> 11;
 
 		return true;
 	}
 
 	if (n < 0xF0) {
-		dxf_uint_t tmp_byte_unsigned;
-		dxf_uint_t tmp_short_unsigned;
-		CHECKED_CALL_2(dx_read_unsigned_byte, context, &tmp_byte_unsigned);
-		CHECKED_CALL_2(dx_read_unsigned_short, context, &tmp_short_unsigned);
+		dxf_int_t tmp_byte;
+		dxf_int_t tmp_short;
 
-		*value = (((n << 24u) | (tmp_byte_unsigned << 16u) | tmp_short_unsigned) << 4u) >> 4u;
+		CHECKED_CALL_2(dx_read_unsigned_byte, context, &temp_uint_byte);
+		CHECKED_CALL_2(dx_read_unsigned_short, context, &temp_uint_short);
+		tmp_byte = (dxf_int_t)temp_uint_byte;
+		tmp_short = (dxf_int_t)temp_uint_short;
+
+		*value = (((n << 24) | (tmp_byte << 16) | tmp_short) << 4) >> 4;
 
 		return true;
 	}
 
 	if (n < 0xF8) {
-		n = (n << 29u) >> 29u;
+		n = (n << 29) >> 29;
 	} else if (n < 0xFC) {
-		dxf_uint_t tmp_byte_unsigned;
-		CHECKED_CALL_2(dx_read_unsigned_byte, context, &tmp_byte_unsigned);
+		dxf_int_t tmp_byte;
 
-		n = (((n << 8u) | tmp_byte_unsigned) << 22u) >> 22u;
+		CHECKED_CALL_2(dx_read_unsigned_byte, context, &temp_uint_byte);
+		tmp_byte = (dxf_int_t)temp_uint_byte;
+
+		n = (((n << 8) | tmp_byte) << 22) >> 22;
 	} else if (n < 0xFE) {
-		dxf_uint_t tmp_short_unsigned;
-		CHECKED_CALL_2(dx_read_unsigned_short, context, &tmp_short_unsigned);
+		dxf_int_t tmp_short;
 
-		n = (((n << 16u) | tmp_short_unsigned) << 15u) >> 15u;
+		CHECKED_CALL_2(dx_read_unsigned_short, context, &temp_uint_short);
+		tmp_short = (dxf_int_t)temp_uint_short;
+
+		n = (((n << 16) | tmp_short) << 15) >> 15;
 	} else if (n < 0xFF) {
 		dxf_byte_t tmp_byte;
-		dxf_uint_t tmp_short_unsigned;
-		CHECKED_CALL_2(dx_read_byte, context, &tmp_byte);
-		CHECKED_CALL_2(dx_read_unsigned_short, context, &tmp_short_unsigned);
+		dxf_int_t tmp_short;
 
-		n = (tmp_byte << 16u) | tmp_short_unsigned;
+		CHECKED_CALL_2(dx_read_byte, context, &tmp_byte);
+		CHECKED_CALL_2(dx_read_unsigned_short, context, &temp_uint_short);
+		tmp_short = (dxf_int_t)temp_uint_short;
+
+		n = (tmp_byte << 16) | tmp_short;
 	} else {
 		CHECKED_CALL_2(dx_read_int, context, &n);
 	}
