@@ -22,6 +22,7 @@
 #include "PrimitiveTypes.h"
 #include "EventData.h"
 #include "DXTypes.h"
+#include "DXErrorCodes.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,6 +37,8 @@ int dx_load_config_from_file(const char* file_name);
 int dx_get_network_heartbeat_period(int default_heartbeat_period);
 
 int dx_get_network_heartbeat_timeout(int default_heartbeat_timeout);
+
+dx_log_level_t dx_get_minimum_logging_level(dx_log_level_t default_minimum_logging_level);
 
 #ifdef __cplusplus
 }

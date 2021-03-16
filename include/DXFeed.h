@@ -1393,6 +1393,7 @@ DXFEED_API const char* dxf_get_order_action_string_name(dxf_order_action_t actio
  * dxf_load_config_from_wstring(
  *     L"network.heartbeatPeriod = 10\n"
  *     L"network.heartbeatTimeout = 120\n"
+ *     L"logger.level = \"info\"\n"
  * );
  * ```
  *
@@ -1402,6 +1403,8 @@ DXFEED_API const char* dxf_get_order_action_string_name(dxf_order_action_t actio
  *     L"[network]\n"
  *     L"heartbeatPeriod = 10\n"
  *     L"heartbeatTimeout = 120\n"
+ *     L"[logger]\n"
+ *     L"level = \"info\"\n"
  * );
  * ```
  *
@@ -1427,6 +1430,7 @@ DXFEED_API ERRORCODE dxf_load_config_from_wstring(dxf_const_string_t config);
  * dxf_load_config_from_string(
  *     "network.heartbeatPeriod = 10\n"
  *     "network.heartbeatTimeout = 120\n"
+ *     "logger.level = \"info\"\n"
  * );
  * ```
  *
@@ -1436,6 +1440,8 @@ DXFEED_API ERRORCODE dxf_load_config_from_wstring(dxf_const_string_t config);
  *     "[network]\n"
  *     "heartbeatPeriod = 10\n"
  *     "heartbeatTimeout = 120\n"
+ *     "[logger]\n"
+ *     "level = \"info\"\n"
  * );
  * ```
  *

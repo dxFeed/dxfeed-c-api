@@ -139,6 +139,28 @@ inline Range trimCopy(const Range& range, const std::locale& locale = std::local
 
 }  // namespace algorithm
 
+inline std::string loggingLevelToString(dx_log_level_t level) {
+	switch (level) {
+		case dx_ll_trace: return "trace";
+		case dx_ll_debug: return "debug";
+		case dx_ll_info: return "info";
+		case dx_ll_warn: return "warn";
+		case dx_ll_error: return "error";
+	}
+
+	return "unknown";
+}
+
+inline dx_log_level_t stringToLoggingLevel(const std::string& s) {
+	if (algorithm::iEquals(s, std::string("trace"))) return dx_ll_trace;
+	if (algorithm::iEquals(s, std::string("debug"))) return dx_ll_debug;
+	if (algorithm::iEquals(s, std::string("info"))) return dx_ll_info;
+	if (algorithm::iEquals(s, std::string("warn"))) return dx_ll_warn;
+	if (algorithm::iEquals(s, std::string("error"))) return dx_ll_error;
+
+	return dx_ll_info;
+}
+
 struct Configuration : std::enable_shared_from_this<Configuration> {
 	enum class Type { None, String, File };
 
@@ -253,5 +275,9 @@ public:
 	}
 
 	bool getDump(bool defaultValue = false) const { return getProperty("", "dump", defaultValue); }
+
+	dx_log_level_t getMinimumLoggingLevel(dx_log_level_t defaultValue = dx_ll_info) const {
+		return stringToLoggingLevel(getProperty("logger", "level", loggingLevelToString(defaultValue)));
+	}
 };
 }  // namespace dx

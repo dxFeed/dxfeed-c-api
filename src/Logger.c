@@ -42,6 +42,7 @@
 #include "DXThreads.h"
 #include "Logger.h"
 #include "Version.h"
+#include "Configuration.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -56,6 +57,9 @@
 static dxf_const_string_t g_error_prefix = L"Error: ";
 static dxf_const_string_t g_warn_prefix = L"Warn: ";
 static dxf_const_string_t g_info_prefix = L"Info: ";
+static dxf_const_string_t g_debug_prefix = L"Debug: ";
+static dxf_const_string_t g_trace_prefix = L"Trace: ";
+static dx_log_level_t g_default_log_level = dx_ll_info;
 
 static int g_verbose_logger_mode;
 static int g_data_transfer_logger_mode;
@@ -89,6 +93,8 @@ dxf_string_t dx_get_current_time_buffer (void);
 
 #ifdef _DEBUG
 void dx_log_debug_message(const dxf_char_t *format, ...) {
+	if (dx_ll_debug < dx_get_minimum_logging_level(g_default_log_level)) return;
+
 	dxf_char_t message[256];
 	va_list ap;
 	swprintf(message, 255, L"[%08lx] ", (unsigned long)GetCurrentThreadId());
@@ -99,6 +105,8 @@ void dx_log_debug_message(const dxf_char_t *format, ...) {
 }
 
 void dx_vlog_debug_message(const dxf_char_t *format, va_list ap) {
+	if (dx_ll_debug < dx_get_minimum_logging_level(g_default_log_level)) return;
+
 	dxf_char_t message[256];
 	swprintf(message, 255, L"[%08lx] ", (unsigned long)GetCurrentThreadId());
 	vswprintf(&message[11], 244, format, ap);
@@ -165,6 +173,8 @@ dxf_const_string_t dx_get_current_time () {
 
 #ifdef _DEBUG
 void dx_log_debug_message(const dxf_char_t *format, ...) {
+	if (dx_ll_debug < dx_get_minimum_logging_level(g_default_log_level)) return;
+
 	dxf_char_t message[256];
 	va_list ap;
 	swprintf(message, 255, L"[%08lx] ", (unsigned long)pthread_getthreadid_np());
@@ -175,6 +185,8 @@ void dx_log_debug_message(const dxf_char_t *format, ...) {
 }
 
 void dx_vlog_debug_message(const dxf_char_t *format, va_list ap) {
+	if (dx_ll_debug < dx_get_minimum_logging_level(g_default_log_level)) return;
+
 	dxf_char_t message[256];
 	swprintf(message, 255, L"[%08lx] ", (unsigned long)pthread_getthreadid_np());
 	vswprintf(&message[11], 244, format, ap);
@@ -398,22 +410,34 @@ void dx_logging_error_by_code(int error_code) {
 	if (g_log_file == NULL) {
 		return;
 	}
+
+	dx_log_level_t log_level = dx_get_log_level(error_code);
+
+	if (log_level < dx_get_minimum_logging_level(g_default_log_level)) return;
+
 	dxf_const_string_t message = dx_get_error_description(error_code);
+
 	if (message == NULL) {
 		return;
 	}
 
-	dxf_const_string_t error_prefix = g_error_prefix;
+	dxf_const_string_t log_prefix = g_error_prefix;
 
-	switch (dx_get_error_level(error_code)) {
-		case dx_el_info:
-			error_prefix = g_info_prefix;
+	switch (dx_get_log_level(error_code)) {
+		case dx_ll_info:
+			log_prefix = g_info_prefix;
 			break;
-		case dx_el_warn:
-			error_prefix = g_warn_prefix;
+		case dx_ll_warn:
+			log_prefix = g_warn_prefix;
 			break;
-		case dx_el_error:
-			error_prefix = g_error_prefix;
+		case dx_ll_error:
+			log_prefix = g_error_prefix;
+			break;
+		case dx_ll_trace:
+			log_prefix = g_trace_prefix;
+			break;
+		case dx_ll_debug:
+			log_prefix = g_debug_prefix;
 			break;
 	}
 
@@ -424,7 +448,7 @@ void dx_logging_error_by_code(int error_code) {
 #else
 			 (unsigned long)pthread_getthreadid_np(),
 #endif
-			 error_prefix, message, error_code);
+			 log_prefix, message, error_code);
 	dx_flush_log();
 }
 
@@ -451,6 +475,8 @@ void dx_logging_verbose_info( const dxf_char_t* format, ... ) {
 	if (!g_verbose_logger_mode) {
 		return;
 	}
+
+	if (dx_ll_info < dx_get_minimum_logging_level(g_default_log_level)) return;
 
 	if (g_log_file == NULL || format == NULL) {
 		return;
@@ -484,6 +510,8 @@ void dx_logging_dbg_lock() {
 
 void dx_logging_dbg( const dxf_char_t* format, ... ) {
 #ifdef _DEBUG
+	if (dx_ll_debug < dx_get_minimum_logging_level(g_default_log_level)) return;
+
 	if (g_dbg_file == NULL || format == NULL) {
 		return;
 	}
@@ -509,6 +537,8 @@ static void *STACK[STACK_SIZE];
 void dx_logging_dbg_stack() {
 #ifdef _DEBUG
 #ifdef _WIN32
+	if (dx_ll_debug < dx_get_minimum_logging_level(g_default_log_level)) return;
+
 	USHORT frames;
 	SYMBOL_INFO *symbol = (SYMBOL_INFO *)&SYM_INFO[0];
 	HANDLE process;
@@ -565,6 +595,8 @@ void dx_logging_dbg_unlock(){
 /* -------------------------------------------------------------------------- */
 
 void dx_logging_info( const dxf_char_t* format, ... ) {
+	if (dx_ll_info < dx_get_minimum_logging_level(g_default_log_level)) return;
+
 	if (g_log_file == NULL || format == NULL) {
 		return;
 	}
