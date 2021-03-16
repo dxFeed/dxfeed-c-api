@@ -1,5 +1,5 @@
 Version 7.3.0
-* [DXFC-218] Improve theed SnapshotConsoleSample
+* [DXFC-218] Improved the SnapshotConsoleSample
   - the `date` (-t) parameter was added. Format: DD-MM-YYYY, default value: current date and time.
     Previously, without this parameter, the time was set equal to 0 (01-01-1970)!
   - the cross platform synchronization primitives were added
