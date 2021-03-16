@@ -34,11 +34,13 @@
 /* -------------------------------------------------------------------------- */
 
 /// Error level
-typedef enum {
-	dx_el_info = 0,
-	dx_el_warn = 1,
-	dx_el_error = 2
-} dx_error_level_t;
+typedef enum dx_log_level_t {
+	dx_ll_trace = -2,
+	dx_ll_debug = -1,
+	dx_ll_info = 0,
+	dx_ll_warn = 1,
+	dx_ll_error = 2
+} dx_log_level_t;
 
 /// Error code
 typedef enum {
@@ -230,6 +232,6 @@ dxf_const_string_t dx_get_error_description(dx_error_code_t code);
  *
  */
 /* -------------------------------------------------------------------------- */
-dx_error_level_t dx_get_error_level(dx_error_code_t code);
+dx_log_level_t dx_get_log_level(dx_error_code_t code);
 
 #endif /* DX_ERROR_CODES_H_INCLUDED */

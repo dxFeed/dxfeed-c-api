@@ -190,18 +190,18 @@ dxf_const_string_t dx_get_error_description (dx_error_code_t code) {
 	}
 }
 
-dx_error_level_t dx_get_error_level(dx_error_code_t code) {
-	dx_error_level_t result;
+dx_log_level_t dx_get_log_level(dx_error_code_t code) {
+	dx_log_level_t result;
 
 	switch (code) {
 		case dx_sec_connection_gracefully_closed:
 		case dx_sec_blocking_call_interrupted:
 		case dx_bioec_buffer_underflow:
-			result = dx_el_info;
+			result = dx_ll_info;
 			break;
 
 		default:
-			result = dx_el_error;
+			result = dx_ll_error;
 	}
 
 	return result;
