@@ -497,6 +497,7 @@ int main (int argc, char *argv[]) {
 			"  " LOG_DATA_TRANSFER_TAG "               - Enables the data transfer logging\n"
 			"  " TIMEOUT_TAG " <timeout>     - Sets the program timeout in seconds (default = 604800,\n"
 			"                     i.e a week)\n"
+			"Example: demo.dxfeed.com:7300 ORDER IBM NTV -t 01-01-1970 -o 30\n\n"
 		);
 
 		return 0;
