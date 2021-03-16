@@ -45,9 +45,8 @@
 #define LS2(s) L##s
 
 #ifndef true
-
-#define true 1
-#define false 0
+#	define true 1
+#	define false 0
 #endif
 
 //Prevents file names globbing (converting * to all files in the current dir)
@@ -63,6 +62,7 @@ int _CRT_glob = 0;
 #define TOKEN_PARAM_SHORT_TAG "-T"
 #define LOG_DATA_TRANSFER_TAG "-p"
 #define TIMEOUT_TAG "-o"
+#define TIME_PARAM_SHORT_TAG "-t"
 
 /* -------------------------------------------------------------------------- */
 #ifdef _WIN32
@@ -321,7 +321,51 @@ int atoi2 (char *str, int *result) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
+#define DATE_TIME_BUF_SIZE 4
+/*
+ * Parse date string in format 'DD-MM-YYYY'
+ */
+int parse_date(const char* date_str, struct tm* time_struct) {
+	size_t i;
+	size_t date_string_len = strlen(date_str);
+	int separator_count = 0;
+	char buf[DATE_TIME_BUF_SIZE + 1] = { 0 };
+	int mday = 0;
+	int month = 0;
+	int year = 0;
+
+	for (i = 0; i < date_string_len; i++) {
+		if (date_str[i] == '-') {
+			if (separator_count == 0) {
+				if (!atoi2(buf, &mday)) return false;
+			}
+			else if (separator_count == 1) {
+				if (!atoi2(buf, &month)) return false;
+			}
+			else
+				return false;
+			separator_count++;
+			memset(buf, 0, DATE_TIME_BUF_SIZE);
+			continue;
+		}
+
+		size_t buf_len = strlen(buf);
+		if (buf_len >= DATE_TIME_BUF_SIZE)
+			return false;
+		buf[buf_len] = date_str[i];
+	}
+
+	if (!atoi2(buf, &year)) return false;
+
+	if (mday == 0 || month == 0 || year == 0)
+		return false;
+
+	time_struct->tm_mday = mday;
+	time_struct->tm_mon = month - 1;
+	time_struct->tm_year = year - 1900;
+
+	return true;
+}
 
 int main (int argc, char *argv[]) {
 	dxf_connection_t connection;
@@ -331,25 +375,45 @@ int main (int argc, char *argv[]) {
 	dx_event_id_t event_id;
 	dxf_string_t base_symbol = NULL;
 	char *dxfeed_host = NULL;
+	time_t time_value = time(NULL);
+	struct tm time_struct;
+	struct tm* local_time = localtime(&time_value);
+
+	time_struct.tm_sec = 0;
+	time_struct.tm_min = 0;
+	time_struct.tm_hour = 0;
+	time_struct.tm_mday = local_time->tm_mday;
+	time_struct.tm_mon = local_time->tm_mon;
+	time_struct.tm_year = local_time->tm_year;
+	time_value = mktime(&time_struct);
 
 	if (argc < STATIC_PARAMS_COUNT) {
-		printf("DXFeed command line sample.\n"
-			"Usage: SnapshotConsoleSample <server address> <event type> <symbol> [order_source] "
-			"[" RECORDS_PRINT_LIMIT_SHORT_PARAM " <records_print_limit>] [" TOKEN_PARAM_SHORT_TAG " <token>] "
-			"[" LOG_DATA_TRANSFER_TAG "] [" TIMEOUT_TAG " <timeout>]\n"
-			"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
-			"  <event type>     - The event type, one of the following: ORDER, CANDLE, SPREAD_ORDER,\n"
-			"                     TIME_AND_SALE, GREEKS, SERIES\n"
+		printf(
+			"dxFeed snapshot command line sample\n"
+			"===================================\n"
+			"Demonstrates how to subscribe to historical data, get snapshots (time series)\n"
+			"of events and a full order book.\n"
+			"-------------------------------------------------------------------------------\n"
+			"Usage: SnapshotConsoleSample <server address> <event type> <symbol>\n"
+			"       [order_source] [" TIME_PARAM_SHORT_TAG " <DD-MM-YYYY>] "
+			"[" RECORDS_PRINT_LIMIT_SHORT_PARAM " <records_print_limit>] [" TOKEN_PARAM_SHORT_TAG " <token>]\n"
+			"       [" LOG_DATA_TRANSFER_TAG "] [" TIMEOUT_TAG " <timeout>]\n\n"
+			"  <server address> - The dxFeed server address, e.g. demo.dxfeed.com:7300\n"
+			"  <event type>     - The event type, one of the following: ORDER, CANDLE,\n"
+			"                     SPREAD_ORDER, TIME_AND_SALE, GREEKS, SERIES\n"
 			"  <symbol>         - The trade symbol, e.g. C, MSFT, YHOO, IBM\n"
-			"  [order_source]   - a) source for Order (also can be empty), e.g. NTV, BYX, BZX, DEA,\n"
-			"                        ISE, DEX, IST, ...\n"
-			"                     b) source for MarketMaker, one of following: AGGREGATE_BID or \n"
-			"                        AGGREGATE_ASK\n"
+			"  [order_source]   - a) source for Order (also can be empty), e.g. NTV, BYX,\n"
+			"                        BZX, DEA, ISE, DEX, IST, ...\n"
+			"                     b) source for MarketMaker, one of following: AGGREGATE_BID\n"
+			"                        or AGGREGATE_ASK\n"
+			"  " TIME_PARAM_SHORT_TAG " <DD-MM-YYYY>  - Time from which to receive data (default: current date and\n"
+			"                     time)\n"
 			"  " RECORDS_PRINT_LIMIT_SHORT_PARAM " <limit>       - The number of displayed records "
-			"(0 - unlimited, default: " STRINGIFY(DEFAULT_RECORDS_PRINT_LIMIT) ")\n"
+			"(0 - unlimited, default: " STRINGIFY(DEFAULT_RECORDS_PRINT_LIMIT)")\n"
 			"  " TOKEN_PARAM_SHORT_TAG " <token>       - The authorization token\n"
 			"  " LOG_DATA_TRANSFER_TAG "               - Enables the data transfer logging\n"
-			"  " TIMEOUT_TAG " <timeout>     - Sets the program timeout in seconds (default = 604800, i.e a week)\n"
+			"  " TIMEOUT_TAG " <timeout>     - Sets the program timeout in seconds (default = 604800,\n"
+			"                     i.e a week)\n"
 		);
 
 		return 0;
@@ -392,13 +456,29 @@ int main (int argc, char *argv[]) {
 		int token_is_set = false;
 		int order_source_is_set = false;
 		int program_timeout_is_set = false;
+		int time_is_set = false;
 
 		for (int i = STATIC_PARAMS_COUNT; i < argc; i++) {
-			if (records_print_limit_is_set == false && strcmp(argv[i], RECORDS_PRINT_LIMIT_SHORT_PARAM) == 0) {
+			if (time_is_set == false && strcmp(argv[i], TIME_PARAM_SHORT_TAG) == 0) {
+				if (i + 1 == argc) {
+					wprintf(L"Date argument error\n");
+					return 3;
+				}
+
+				i += 1;
+
+				if (!parse_date(argv[i], &time_struct)) {
+					wprintf(L"Date format error\n");
+					return 4;
+				}
+
+				time_value = mktime(&time_struct);
+				time_is_set = true;
+			} else if (records_print_limit_is_set == false && strcmp(argv[i], RECORDS_PRINT_LIMIT_SHORT_PARAM) == 0) {
 				if (i + 1 == argc) {
 					wprintf(L"The records print limit argument error\n");
 
-					return 3;
+					return 5;
 				}
 
 				int new_records_print_limit = -1;
@@ -406,7 +486,7 @@ int main (int argc, char *argv[]) {
 				if (!atoi2(argv[++i], &new_records_print_limit)) {
 					wprintf(L"The records print limit argument parsing error\n");
 
-					return 4;
+					return 6;
 				}
 
 				records_print_limit = new_records_print_limit;
@@ -415,7 +495,7 @@ int main (int argc, char *argv[]) {
 				if (i + 1 == argc) {
 					wprintf(L"The token argument error\n");
 
-					return 5;
+					return 7;
 				}
 
 				token = argv[++i];
@@ -426,7 +506,7 @@ int main (int argc, char *argv[]) {
 				if (i + 1 == argc) {
 					wprintf(L"The program timeout argument error\n");
 
-					return 6;
+					return 8;
 				}
 
 				int new_program_timeout = -1;
@@ -434,7 +514,7 @@ int main (int argc, char *argv[]) {
 				if (!atoi2(argv[++i], &new_program_timeout)) {
 					wprintf(L"The program timeout argument parsing error\n");
 
-					return 7;
+					return 9;
 				}
 
 				program_timeout = new_program_timeout;
@@ -446,7 +526,7 @@ int main (int argc, char *argv[]) {
 				if (string_len > MAX_SOURCE_SIZE) {
 					wprintf(L"Invalid order source param!\n");
 
-					return 8;
+					return 10;
 				}
 
 				char order_source[MAX_SOURCE_SIZE + 1] = {0};
@@ -480,48 +560,46 @@ int main (int argc, char *argv[]) {
 		free(base_symbol);
 		process_last_error();
 
-		return 10;
+		return 20;
 	}
 
 	wprintf(L"Connected\n");
 
 	if (event_id == dx_eid_candle) {
-		if (!dxf_create_candle_symbol_attributes(base_symbol,
-		                                         DXF_CANDLE_EXCHANGE_CODE_ATTRIBUTE_DEFAULT,
-		                                         DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT,
-		                                         dxf_ctpa_day, dxf_cpa_default, dxf_csa_default,
-		                                         dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT,
-		                                         &candle_attributes)) {
+		if (!dxf_create_candle_symbol_attributes(base_symbol, DXF_CANDLE_EXCHANGE_CODE_ATTRIBUTE_DEFAULT,
+												 DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT, dxf_ctpa_default,
+												 dxf_cpa_default, dxf_csa_default, dxf_caa_default,
+												 DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, &candle_attributes)) {
 			free(base_symbol);
 			process_last_error();
 			dxf_close_connection(connection);
 
-			return 20;
+			return 30;
 		}
 
-		if (!dxf_create_candle_snapshot(connection, candle_attributes, 0, &snapshot)) {
+		if (!dxf_create_candle_snapshot(connection, candle_attributes, time_value * 1000, &snapshot)) {
 			free(base_symbol);
 			process_last_error();
 			dxf_delete_candle_symbol_attributes(candle_attributes);
 			dxf_close_connection(connection);
 
-			return 21;
+			return 31;
 		}
 	} else if (event_id == dx_eid_order) {
-		if (!dxf_create_order_snapshot(connection, base_symbol, order_source_ptr, 0, &snapshot)) {
+		if (!dxf_create_order_snapshot(connection, base_symbol, order_source_ptr, time_value * 1000, &snapshot)) {
 			free(base_symbol);
 			process_last_error();
 			dxf_close_connection(connection);
 
-			return 22;
+			return 32;
 		}
 	} else {
-		if (!dxf_create_snapshot(connection, event_id, base_symbol, NULL, 0, &snapshot)) {
+		if (!dxf_create_snapshot(connection, event_id, base_symbol, NULL, time_value * 1000, &snapshot)) {
 			free(base_symbol);
 			process_last_error();
 			dxf_close_connection(connection);
 
-			return 23;
+			return 33;
 		}
 	}
 
@@ -533,7 +611,7 @@ int main (int argc, char *argv[]) {
 		if (candle_attributes != NULL) dxf_delete_candle_symbol_attributes(candle_attributes);
 		dxf_close_connection(connection);
 
-		return 24;
+		return 34;
 	};
 
 	wprintf(L"Subscribed\n");
@@ -551,7 +629,7 @@ int main (int argc, char *argv[]) {
 		if (candle_attributes != NULL) dxf_delete_candle_symbol_attributes(candle_attributes);
 		dxf_close_connection(connection);
 
-		return 25;
+		return 35;
 	}
 
 	if (candle_attributes != NULL) {
@@ -559,7 +637,7 @@ int main (int argc, char *argv[]) {
 			process_last_error();
 			dxf_close_connection(connection);
 
-			return 26;
+			return 36;
 		}
 	}
 
@@ -568,7 +646,7 @@ int main (int argc, char *argv[]) {
 	if (!dxf_close_connection(connection)) {
 		process_last_error();
 
-		return 11;
+		return 21;
 	}
 
 	wprintf(L"Disconnected\n");
