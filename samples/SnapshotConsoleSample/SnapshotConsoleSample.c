@@ -146,6 +146,8 @@ int dxs_mutex_unlock(dxs_mutex_t* mutex) {
 	return true;
 }
 
+#	define stricmp strcasecmp
+
 #endif	//_WIN32
 
 #define STRINGIFY(a) STR(a)
