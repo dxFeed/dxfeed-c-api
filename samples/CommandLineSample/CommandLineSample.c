@@ -644,8 +644,6 @@ int main(int argc, char* argv[]) {
 												  NULL, NULL, NULL, &connection);
 	}
 
-	dxf_set_on_server_heartbeat_notifier(connection, on_server_heartbeat_notifier, NULL);
-
 	if (connection_result == DXF_FAILURE) {
 		free_symbols(symbols, symbol_count);
 		process_last_error();
@@ -654,6 +652,8 @@ int main(int argc, char* argv[]) {
 	}
 
 	wprintf(L"Connected\n");
+
+	dxf_set_on_server_heartbeat_notifier(connection, on_server_heartbeat_notifier, NULL);
 
 	if (dump_file_name != NULL) {
 		if (!dxf_write_raw_data(connection, dump_file_name)) {

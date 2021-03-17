@@ -191,7 +191,9 @@ void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
 }
 
 /* -------------------------------------------------------------------------- */
-int quotes_counter = 0;
+int events_counter = 0;
+int server_lags_counter = 0;
+dxf_long_t server_lags_sum = 0;
 int doPrint = false;
 
 void print_timestamp(dxf_long_t timestamp) {
@@ -209,7 +211,7 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 	(void)user_data;
 	dxf_int_t i = 0;
 
-	++quotes_counter;
+	++events_counter;
 	if (!doPrint) return;
 	wprintf(L"%ls{symbol=%ls, ", dx_event_type_to_string(event_type), symbol_name);
 
@@ -365,6 +367,14 @@ int atoi2(char* str, int* result) {
 	return true;
 }
 
+void on_server_heartbeat_notifier(dxf_connection_t connection, dxf_long_t server_millis, dxf_int_t server_lag_mark,
+								  dxf_int_t connection_rtt, void* user_data) {
+	server_lags_counter++;
+	server_lags_sum += server_lag_mark;
+	fwprintf(stderr, L"\n##### Server time (UTC) = %" PRId64 " ms, Server lag = %d us, RTT = %d us #####\n",
+			 server_millis, server_lag_mark, connection_rtt);
+}
+
 /* -------------------------------------------------------------------------- */
 
 void print_usage() {
@@ -395,27 +405,27 @@ int main(int argc, char* argv[]) {
 		if (strcmp(argv[arg], "print") == 0) {
 			doPrint = true;
 			++arg;
-
-			if (argc > 3) {
-				if (strcmp(argv[arg], TIMEOUT_TAG) == 0) {
-					++arg;
-					int new_program_timeout = -1;
-
-					if (!atoi2(argv[arg], &new_program_timeout)) {
-						wprintf(L"The program timeout argument parsing error: \"%s %s\"\n\n", argv[arg - 1], argv[arg]);
-						print_usage();
-
-						return 1;
-					}
-
-					program_timeout = new_program_timeout;
-					++arg;
-				}
-			}
 		} else if (strcmp(argv[arg], "-h") == 0 || strcmp(argv[arg], "-?") == 0 || strcmp(argv[arg], "--help") == 0) {
 			print_usage();
 
 			return 0;
+		}
+
+		if (argc > 3) {
+			if (strcmp(argv[arg], TIMEOUT_TAG) == 0) {
+				++arg;
+				int new_program_timeout = -1;
+
+				if (!atoi2(argv[arg], &new_program_timeout)) {
+					wprintf(L"The program timeout argument parsing error: \"%s %s\"\n\n", argv[arg - 1], argv[arg]);
+					print_usage();
+
+					return 1;
+				}
+
+				program_timeout = new_program_timeout;
+				++arg;
+			}
 		}
 
 		for (size_t i = arg; i < argc; ++i) {
@@ -458,12 +468,15 @@ int main(int argc, char* argv[]) {
 
 		return 10;
 	}
+	dxf_set_on_server_heartbeat_notifier(connection, on_server_heartbeat_notifier, NULL);
 
 	wprintf(L"Connected\n");
 	time(&start);
 
+	int event_types = DXF_ET_TRADE | DXF_ET_QUOTE | DXF_ET_ORDER | DXF_ET_SUMMARY | DXF_ET_PROFILE;
+
 	if (!dxf_create_subscription(
-			connection, DXF_ET_TRADE | DXF_ET_QUOTE | DXF_ET_ORDER | DXF_ET_SUMMARY | DXF_ET_PROFILE, &subscription)) {
+			connection, event_types, &subscription)) {
 		process_last_error();
 		dxf_close_connection(connection);
 
@@ -509,8 +522,13 @@ int main(int argc, char* argv[]) {
 	diff_time = (int)difftime(end, start);
 
 	wprintf(L"Disconnected\nConnection test completed\n");
-	wprintf(L"Received %i quotes in %i sec. %i quotes in 1 sec\n", quotes_counter, diff_time,
-			(int)(quotes_counter / diff_time));
+
+	double events_speed = (double)events_counter / diff_time;
+	double average_server_lag = (double)server_lags_sum / server_lags_counter;
+
+	wprintf(L"Received %i events in %i sec. %0.2f events in 1 sec\n", events_counter, diff_time, events_speed);
+	wprintf(L"Average server lag (us) = %0.2f\n", average_server_lag);
+	wprintf(L"Average server lag by event (us/event) = %0.2f\n", average_server_lag / events_counter);
 	dxs_mutex_destroy(&listener_thread_guard);
 
 	return 0;
