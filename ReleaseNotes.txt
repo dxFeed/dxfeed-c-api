@@ -1,3 +1,6 @@
+Version 7.4.0
+* [Samples] Fixed the heartbeat notifier's setting. Added lag measurements to the performance test.
+
 Version 7.3.0
 * [DXFC-218] Improved the SnapshotConsoleSample
   - the `date` (-t) parameter was added. Format: DD-MM-YYYY, default value: current date and time.
