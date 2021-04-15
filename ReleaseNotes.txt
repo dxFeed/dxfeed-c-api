@@ -1,5 +1,5 @@
 Version 7.5.0
-* The new price level order source was added: iex.
+* [DXFC-223] The new price level order source was added: iex.
 
 Version 7.4.0
 * [Samples] Fixed the heartbeat notifier's setting. Added lag measurements to the performance test.
