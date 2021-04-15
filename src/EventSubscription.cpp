@@ -78,6 +78,7 @@ const dxf_const_string_t dx_all_order_sources[] = {
 	L"CFE",	  /// CBOE Futures Exchange.
 	L"C2OX",  /// CBOE Options C2 Exchange.
 	L"SMFE",  /// Small Exchange.
+	L"iex",   /// Investors exchange. Record for price level book.
 	nullptr};
 const size_t dx_all_order_sources_count = sizeof(dx_all_order_sources) / sizeof(dx_all_order_sources[0]) - 1;
 
