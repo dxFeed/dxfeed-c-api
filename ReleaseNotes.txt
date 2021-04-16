@@ -1,3 +1,6 @@
+Version 7.6.0
+* [DXFC-224] Fixed a bug with a race conditions occurred while reading files
+
 Version 7.5.0
 * [DXFC-223] The new price level order source was added: iex.
 

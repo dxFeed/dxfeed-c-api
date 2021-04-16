@@ -633,6 +633,42 @@ unsigned dx_socket_reader_wrapper(void* arg) {
 	return DX_THREAD_RETVAL_NULL;
 }
 
+#define WAIT_FOR_SUBSCRIPTION_TIMEOUT 1000
+#define WAIT_FOR_SUBSCRIPTION_SLEEP_PERIOD 100
+
+int dx_read_from_file(dx_network_connection_context_t* context, char *read_buf, int *number_of_bytes_read, int *eof) {
+	if (*number_of_bytes_read <= 0) {
+		int remaining = WAIT_FOR_SUBSCRIPTION_TIMEOUT;
+
+		while (remaining >= 0) {
+			if (dx_has_any_subscribed_symbol(context->connection)) {
+				break;
+			}
+
+			dx_sleep(WAIT_FOR_SUBSCRIPTION_SLEEP_PERIOD);
+			remaining -= WAIT_FOR_SUBSCRIPTION_SLEEP_PERIOD;
+		}
+
+		if (remaining < 0) {
+			*number_of_bytes_read = INVALID_DATA_SIZE;
+			*eof = true;
+
+			return false;
+		}
+	}
+
+	*number_of_bytes_read = (int)fread((void*)read_buf, sizeof(char), READ_CHUNK_SIZE, context->raw_dump_file);
+
+	if (feof(context->raw_dump_file)) {
+		*eof = true;
+	}
+
+	if (ferror(context->raw_dump_file)) {
+		dx_logging_error(L"Raw data file read error.");
+		*number_of_bytes_read = INVALID_DATA_SIZE;
+	}
+}
+
 /* -------------------------------------------------------------------------- */
 
 int dx_reestablish_connection(dx_network_connection_context_t* context);
@@ -643,6 +679,7 @@ void dx_socket_reader(dx_network_connection_context_t* context) {
 
 	char read_buf[READ_CHUNK_SIZE];
 	int number_of_bytes_read = 0;
+	int eof = 0;
 
 	context_data = &(context->context_data);
 
@@ -692,19 +729,7 @@ void dx_socket_reader(dx_network_connection_context_t* context) {
 		}
 
 		if (IS_FLAG_SET(context->set_fields_flags, DUMPING_RAW_DATA_FIELD_FLAG)) {
-			number_of_bytes_read = (int)fread((void*)read_buf, sizeof(char), READ_CHUNK_SIZE, context->raw_dump_file);
-
-			if (feof(context->raw_dump_file)) {
-				number_of_bytes_read = INVALID_DATA_SIZE;
-				context->set_fields_flags |= READER_THREAD_FIELD_FLAG;
-				dx_notify_conn_termination(context, &is_thread_idle);
-				context->reader_thread_termination_trigger = true;
-			}
-
-			if (ferror(context->raw_dump_file)) {
-				dx_logging_error(L"Raw data file read error.");
-				number_of_bytes_read = INVALID_DATA_SIZE;
-			}
+			dx_read_from_file(context, read_buf, &number_of_bytes_read, &eof);
 		} else {
 			atomic_write_time(&context->last_server_heartbeat, time(NULL));
 #ifdef DXFEED_CODEC_TLS_ENABLED
@@ -729,6 +754,13 @@ void dx_socket_reader(dx_network_connection_context_t* context) {
 		/* reporting the read data */
 		context->reader_thread_state =
 			context_data->receiver(context->connection, (const void*)read_buf, number_of_bytes_read);
+
+		if (IS_FLAG_SET(context->set_fields_flags, DUMPING_RAW_DATA_FIELD_FLAG) && eof) {
+			number_of_bytes_read = INVALID_DATA_SIZE;
+			context->set_fields_flags |= READER_THREAD_FIELD_FLAG;
+			dx_notify_conn_termination(context, &is_thread_idle);
+			context->reader_thread_termination_trigger = true;
+		}
 	}
 }
 

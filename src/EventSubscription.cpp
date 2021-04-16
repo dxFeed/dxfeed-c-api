@@ -308,6 +308,11 @@ EventSubscriptionConnectionContext::~EventSubscriptionConnectionContext() {
 		SubscriptionData::closeEventSubscription(static_cast<dxf_subscription_t>(subscriptionData), false);
 	}
 }
+bool EventSubscriptionConnectionContext::hasAnySymbol() {
+	return process([this](dx::EventSubscriptionConnectionContext* ctx) {
+		return !symbols.empty();
+	});
+}
 
 }  // namespace dx
 
@@ -940,4 +945,20 @@ void dx_clear_order_source(dxf_subscription_t subscr_id) {
 dx_order_source_array_ptr_t dx_get_order_source(dxf_subscription_t subscr_id) {
 	auto subscr_data = (dx::SubscriptionData*)subscr_id;
 	return &subscr_data->orderSource;
+}
+
+int dx_has_any_subscribed_symbol(dxf_connection_t connection) {
+	int res;
+	auto context = static_cast<dx::EventSubscriptionConnectionContext*>(
+		dx_get_subsystem_data(connection, dx_ccs_event_subscription, &res));
+
+	if (context == nullptr) {
+		if (res) {
+			dx_set_error_code(dx_cec_connection_context_not_initialized);
+		}
+
+		return false;
+	}
+
+	return context->hasAnySymbol();
 }
