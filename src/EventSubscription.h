@@ -90,6 +90,8 @@ dx_order_source_array_ptr_t dx_get_order_source(dxf_subscription_t subscr_id);
 /* Functions for working with symbols*/
 dxf_ulong_t dx_symbol_name_hasher(dxf_const_string_t symbol_name);
 
+int dx_has_any_subscribed_symbol(dxf_connection_t connection);
+
 #ifdef __cplusplus
 }
 #endif
