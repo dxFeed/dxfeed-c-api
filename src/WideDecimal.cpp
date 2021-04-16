@@ -94,6 +94,8 @@ inline static dxf_double_t toDouble(dxf_long_t wide) {
 }  // namespace WideDecimal
 }  // namespace dx
 
-int dx_wide_decimal_int_to_double(dxf_int_t integer, OUT dxf_double_t* decimal) {
-	*decimal = dx::WideDecimal::toDouble(integer);
+int dx_wide_decimal_long_to_double(dxf_long_t longValue, OUT dxf_double_t* decimal) {
+	*decimal = dx::WideDecimal::toDouble(longValue);
+
+	return true;
 }

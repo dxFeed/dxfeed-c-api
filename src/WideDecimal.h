@@ -27,7 +27,7 @@ extern "C" {
 #endif
 
 // Parse wide decimals stored as compact int
-int dx_wide_decimal_int_to_double(dxf_int_t integer, OUT dxf_double_t* decimal);
+int dx_wide_decimal_long_to_double(dxf_long_t longValue, OUT dxf_double_t* decimal);
 
 #ifdef __cplusplus
 }

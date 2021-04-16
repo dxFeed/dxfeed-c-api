@@ -31,6 +31,7 @@
 #include "DXNetwork.h"
 #include "DataStructures.h"
 #include "Decimal.h"
+#include "WideDecimal.h"
 #include "EventData.h"
 #include "Logger.h"
 #include "RecordBuffers.h"
@@ -948,6 +949,9 @@ int dx_read_records (dx_server_msg_proc_connection_context_t* context,
 			if (representation == dx_fid_flag_decimal) {
 				CHECKED_CALL_2(dx_decimal_int_to_double, read_byte, &read_double);
 				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double)
+			} else if (representation == dx_fid_wide_decimal) {
+				CHECKED_CALL_2(dx_wide_decimal_long_to_double, read_byte, &read_double);
+				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double)
 			} else {
 				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_byte)
 			}
@@ -969,6 +973,9 @@ int dx_read_records (dx_server_msg_proc_connection_context_t* context,
 			if (representation == dx_fid_flag_decimal) {
 				CHECKED_CALL_2(dx_decimal_int_to_double, read_short, &read_double);
 				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double)
+			} else if (representation == dx_fid_wide_decimal) {
+				CHECKED_CALL_2(dx_wide_decimal_long_to_double, read_short, &read_double);
+				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double)
 			} else {
 				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_short)
 			}
@@ -979,6 +986,9 @@ int dx_read_records (dx_server_msg_proc_connection_context_t* context,
 
 			if (representation == dx_fid_flag_decimal) {
 				CHECKED_CALL_2(dx_decimal_int_to_double, read_int, &read_double);
+				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double)
+			} else if (representation == dx_fid_wide_decimal) {
+				CHECKED_CALL_2(dx_wide_decimal_long_to_double, read_int, &read_double);
 				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double)
 			} else {
 				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_int)
@@ -995,6 +1005,9 @@ int dx_read_records (dx_server_msg_proc_connection_context_t* context,
 
 				if (representation == dx_fid_flag_decimal) {
 					CHECKED_CALL_2(dx_decimal_int_to_double, read_int, &read_double);
+					CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double)
+				} else if (representation == dx_fid_wide_decimal) {
+					CHECKED_CALL_2(dx_wide_decimal_long_to_double, read_int, &read_double);
 					CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double)
 				} else {
 					CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_int)
