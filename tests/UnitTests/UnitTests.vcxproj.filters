@@ -176,6 +176,9 @@
     <ClCompile Include="..\..\src\Configuration.cpp">
       <Filter>Common\Sources</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\WideDecimal.cpp">
+      <Filter>Common\Sources</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\BinaryQTPComposer.cpp">
       <Filter>Common\Sources</Filter>
     </ClCompile>
@@ -227,6 +230,9 @@
       <Filter>Parser\Headers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\SymbolCodec.h">
+      <Filter>Parser\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\WideDecimal.h">
       <Filter>Parser\Headers</Filter>
     </ClInclude>
     <ClInclude Include="EventDynamicSubscriptionTest.h">

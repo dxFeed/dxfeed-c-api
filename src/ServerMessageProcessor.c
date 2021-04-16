@@ -946,7 +946,7 @@ int dx_read_records (dx_server_msg_proc_connection_context_t* context,
 			CHECKED_CALL_2(dx_read_byte, context->bicc, &read_byte);
 
 			if (representation == dx_fid_flag_decimal) {
-				CHECKED_CALL_2(dx_int_to_double, read_byte, &read_double);
+				CHECKED_CALL_2(dx_decimal_int_to_double, read_byte, &read_double);
 				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double)
 			} else {
 				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_byte)
@@ -967,7 +967,7 @@ int dx_read_records (dx_server_msg_proc_connection_context_t* context,
 			CHECKED_CALL_2(dx_read_short, context->bicc, &read_short);
 
 			if (representation == dx_fid_flag_decimal) {
-				CHECKED_CALL_2(dx_int_to_double, read_short, &read_double);
+				CHECKED_CALL_2(dx_decimal_int_to_double, read_short, &read_double);
 				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double)
 			} else {
 				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_short)
@@ -978,7 +978,7 @@ int dx_read_records (dx_server_msg_proc_connection_context_t* context,
 			CHECKED_CALL_2(dx_read_int, context->bicc, &read_int);
 
 			if (representation == dx_fid_flag_decimal) {
-				CHECKED_CALL_2(dx_int_to_double, read_int, &read_double);
+				CHECKED_CALL_2(dx_decimal_int_to_double, read_int, &read_double);
 				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double)
 			} else {
 				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_int)
@@ -994,7 +994,7 @@ int dx_read_records (dx_server_msg_proc_connection_context_t* context,
 				CHECKED_CALL_2(dx_read_compact_int, context->bicc, &read_int);
 
 				if (representation == dx_fid_flag_decimal) {
-					CHECKED_CALL_2(dx_int_to_double, read_int, &read_double);
+					CHECKED_CALL_2(dx_decimal_int_to_double, read_int, &read_double);
 					CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double)
 				} else {
 					CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_int)

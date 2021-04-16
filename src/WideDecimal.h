@@ -17,12 +17,20 @@
  *
  */
 
-#ifndef DECIMAL_H
-#define DECIMAL_H
+#pragma once
 
+#include "PrimitiveTypes.h"
 #include "DXTypes.h"
 
-// Parse decimals stored as compact int
-int dx_decimal_int_to_double(dxf_int_t integer, OUT dxf_double_t* decimal);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#endif // DECIMAL_H
+// Parse wide decimals stored as compact int
+int dx_wide_decimal_int_to_double(dxf_int_t integer, OUT dxf_double_t* decimal);
+
+#ifdef __cplusplus
+}
+#endif
+
+

@@ -487,6 +487,24 @@
     <ClCompile Include="..\..\src\RecordTranscoder.c" />
     <ClCompile Include="..\..\src\ServerMessageProcessor.c" />
     <ClCompile Include="..\..\src\SymbolCodec.c" />
+    <ClCompile Include="..\..\src\WideDecimal.cpp">
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='ReleaseNoTLS|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='DebugNoTLS|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='ReleaseNoTLS|x64'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='DebugNoTLS|x64'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsCpp</CompileAs>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Sync</ExceptionHandling>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='ReleaseNoTLS|Win32'">Sync</ExceptionHandling>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='DebugNoTLS|Win32'">Sync</ExceptionHandling>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Sync</ExceptionHandling>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Sync</ExceptionHandling>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='ReleaseNoTLS|x64'">Sync</ExceptionHandling>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='DebugNoTLS|x64'">Sync</ExceptionHandling>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Sync</ExceptionHandling>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\BinaryQTPComposer.hpp" />
@@ -527,6 +545,7 @@
     <ClInclude Include="EventSubscriptionTest.h" />
     <ClInclude Include="..\..\src\Logger.h" />
     <ClInclude Include="..\..\src\SymbolCodec.h" />
+    <ClInclude Include="..\..\src\WideDecimal.h" />
     <ClInclude Include="TestHelper.h" />
     <ClInclude Include="OrderSourceConfigurationTest.h" />
     <ClInclude Include="SnapshotTests.h" />

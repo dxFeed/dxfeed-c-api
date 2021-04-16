@@ -107,6 +107,7 @@ set(HEADER_FILES
         TaskQueue.h
         TimeMarkUtil.hpp
         Version.h
+        WideDecimal.h
         )
 
 set(PARSER_HEADERS
@@ -169,6 +170,7 @@ set(SOURCE_FILES
         Snapshot.c
         TaskQueue.c
         Version.c
+        WideDecimal.cpp
         ${DEF_FILE})
 
 set(RESOURCE_FILES
