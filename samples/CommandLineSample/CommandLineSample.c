@@ -528,12 +528,15 @@ int main(int argc, char* argv[]) {
 	if (argc < STATIC_PARAMS_COUNT) {
 		printf(
 			"DXFeed command line sample.\n"
-			"Usage: CommandLineSample <server address> <event type> <symbol> "
+			"Usage: CommandLineSample <server address>|<path> <event type> <symbol> "
 			"[" DUMP_PARAM_LONG_TAG " | " DUMP_PARAM_SHORT_TAG " <filename>] [" TOKEN_PARAM_SHORT_TAG
 			" <token>] "
 			"[" SUBSCRIPTION_DATA_PARAM_TAG " <subscr_data>] [" LOG_DATA_TRANSFER_TAG "] [" TIMEOUT_TAG
 			" <timeout>] [" LOG_HEARTBEAT_TAG "]\n"
 			"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
+			"                     If you want to use file instead of server data just\n"
+			"                     write there path to file e.g. path\\to\\raw.bin\n"
+			"  <path>           - The path to `tape` file or raw dump\n"
 			"                     If you want to use file instead of server data just\n"
 			"                     write there path to file e.g. path\\to\\raw.bin\n"
 			"  <event type>     - The event type, any of the following: TRADE, QUOTE,\n"

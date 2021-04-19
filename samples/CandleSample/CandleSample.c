@@ -265,9 +265,10 @@ int main (int argc, char* argv[]) {
 	if (argc < STATIC_PARAMS_COUNT) {
 		printf(
 			"DXFeed candle console sample.\n"
-			"Usage: CandleSample <server address> <symbol> [" TIME_PARAM_SHORT_TAG " <DD-MM-YYYY>] "
+			"Usage: CandleSample <server address>|<path> <symbol> [" TIME_PARAM_SHORT_TAG " <DD-MM-YYYY>] "
 			"[" TOKEN_PARAM_SHORT_TAG " <token>] [" LOG_DATA_TRANSFER_TAG "] [" TIMEOUT_TAG	" <timeout>]\n"
 			"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
+			"  <path>           - The path to file with candle data (tape or Candle Web Service output)\n"
 			"  <symbol>         - The trade symbol, e.g. C, MSFT, YHOO, IBM\n"
 			"  " TIME_PARAM_SHORT_TAG
 			" <DD-MM-YYYY>  - The time which candle started\n"
