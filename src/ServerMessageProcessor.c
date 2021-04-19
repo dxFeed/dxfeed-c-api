@@ -31,6 +31,7 @@
 #include "DXNetwork.h"
 #include "DataStructures.h"
 #include "Decimal.h"
+#include "WideDecimal.h"
 #include "EventData.h"
 #include "Logger.h"
 #include "RecordBuffers.h"
@@ -66,6 +67,7 @@
 
 typedef struct {
 	int type;
+	int local_type; //
 	dx_record_field_setter_t setter;
 	dx_record_field_def_val_getter_t def_val_getter;
 } dx_field_digest_t, *dx_field_digest_ptr_t;
@@ -282,7 +284,6 @@ int dx_create_field_digest (dx_server_msg_proc_connection_context_t* context,
 	}
 
 	field_index = dx_find_record_field(record_info, field_name, field_type);
-
 	dx_free(field_name);
 
 	*field_digest = dx_calloc(1, sizeof(dx_field_digest_t));
@@ -298,6 +299,7 @@ int dx_create_field_digest (dx_server_msg_proc_connection_context_t* context,
 		if (!dx_get_record_server_support_state_value(context->record_server_support_states, record_id, &state)) {
 			return false;
 		}
+		(*field_digest)->local_type = record_info->fields[field_index].type;
 		*state |= INDEX_BITMASK(field_index);
 	}
 
@@ -934,6 +936,7 @@ int dx_read_records (dx_server_msg_proc_connection_context_t* context,
 	for (; i < record_digest->size; ++i) {
 		int serialization = record_digest->elements[i]->type & dx_fid_mask_serialization;
 		int representation = record_digest->elements[i]->type & dx_fid_mask_representation;
+		int local_representation = record_digest->elements[i]->local_type & dx_fid_mask_representation;
 
 		switch (serialization) {
 		case dx_fid_void:
@@ -946,7 +949,10 @@ int dx_read_records (dx_server_msg_proc_connection_context_t* context,
 			CHECKED_CALL_2(dx_read_byte, context->bicc, &read_byte);
 
 			if (representation == dx_fid_flag_decimal) {
-				CHECKED_CALL_2(dx_int_to_double, read_byte, &read_double);
+				CHECKED_CALL_2(dx_decimal_int_to_double, read_byte, &read_double);
+				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double)
+			} else if (representation == dx_fid_flag_wide_decimal) {
+				CHECKED_CALL_2(dx_wide_decimal_long_to_double, read_byte, &read_double);
 				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double)
 			} else {
 				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_byte)
@@ -967,7 +973,10 @@ int dx_read_records (dx_server_msg_proc_connection_context_t* context,
 			CHECKED_CALL_2(dx_read_short, context->bicc, &read_short);
 
 			if (representation == dx_fid_flag_decimal) {
-				CHECKED_CALL_2(dx_int_to_double, read_short, &read_double);
+				CHECKED_CALL_2(dx_decimal_int_to_double, read_short, &read_double);
+				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double)
+			} else if (representation == dx_fid_flag_wide_decimal) {
+				CHECKED_CALL_2(dx_wide_decimal_long_to_double, read_short, &read_double);
 				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double)
 			} else {
 				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_short)
@@ -978,7 +987,10 @@ int dx_read_records (dx_server_msg_proc_connection_context_t* context,
 			CHECKED_CALL_2(dx_read_int, context->bicc, &read_int);
 
 			if (representation == dx_fid_flag_decimal) {
-				CHECKED_CALL_2(dx_int_to_double, read_int, &read_double);
+				CHECKED_CALL_2(dx_decimal_int_to_double, read_int, &read_double);
+				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double)
+			} else if (representation == dx_fid_flag_wide_decimal) {
+				CHECKED_CALL_2(dx_wide_decimal_long_to_double, read_int, &read_double);
 				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double)
 			} else {
 				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_int)
@@ -988,13 +1000,22 @@ int dx_read_records (dx_server_msg_proc_connection_context_t* context,
 		case dx_fid_compact_int:
 			if (representation == dx_fid_flag_long || representation == dx_fid_flag_time_millis) {
 				CHECKED_CALL_2(dx_read_compact_long, context->bicc, &read_long);
-
 				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_long)
+			} else if (representation == dx_fid_flag_wide_decimal) {
+				CHECKED_CALL_2(dx_read_compact_long, context->bicc, &read_long);
+				CHECKED_CALL_2(dx_wide_decimal_long_to_double, read_long, &read_double);
+
+				if (local_representation == dx_fid_flag_decimal || local_representation == dx_fid_flag_wide_decimal) {
+					CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double)
+				} else {
+					read_int = (int)read_double;
+					CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_int)
+				}
 			} else {
 				CHECKED_CALL_2(dx_read_compact_int, context->bicc, &read_int);
 
 				if (representation == dx_fid_flag_decimal) {
-					CHECKED_CALL_2(dx_int_to_double, read_int, &read_double);
+					CHECKED_CALL_2(dx_decimal_int_to_double, read_int, &read_double);
 					CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double)
 				} else {
 					CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_int)

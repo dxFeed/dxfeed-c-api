@@ -51,6 +51,7 @@ set(COMMON_HEADERS
     ${LIB_DXFEED_SRC_DIR}/PrimitiveTypes.h
     ${LIB_DXFEED_SRC_DIR}/Snapshot.h
     ${LIB_DXFEED_SRC_DIR}/TaskQueue.h
+    ${LIB_DXFEED_SRC_DIR}/WideDecimal.h
     )
     
 set(COMMON_SOURCES
@@ -74,6 +75,7 @@ set(COMMON_SOURCES
     ${LIB_DXFEED_SRC_DIR}/Snapshot.c
     ${LIB_DXFEED_SRC_DIR}/TaskQueue.c
     ${LIB_DXFEED_SRC_DIR}/Win32.c
+    ${LIB_DXFEED_SRC_DIR}/WideDecimal.cpp
     )
     
 set(EVENT_SUBSCRIPTION_SOURCES

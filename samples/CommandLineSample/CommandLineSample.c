@@ -54,6 +54,7 @@
 #define SUBSCRIPTION_DATA_PARAM_TAG "-s"
 #define LOG_DATA_TRANSFER_TAG		"-p"
 #define TIMEOUT_TAG					"-o"
+#define LOG_HEARTBEAT_TAG		    "-b"
 
 // Prevents file names globbing (converting * to all files in the current dir)
 #ifdef __MINGW64_VERSION_MAJOR
@@ -527,12 +528,15 @@ int main(int argc, char* argv[]) {
 	if (argc < STATIC_PARAMS_COUNT) {
 		printf(
 			"DXFeed command line sample.\n"
-			"Usage: CommandLineSample <server address> <event type> <symbol> "
+			"Usage: CommandLineSample <server address>|<path> <event type> <symbol> "
 			"[" DUMP_PARAM_LONG_TAG " | " DUMP_PARAM_SHORT_TAG " <filename>] [" TOKEN_PARAM_SHORT_TAG
 			" <token>] "
 			"[" SUBSCRIPTION_DATA_PARAM_TAG " <subscr_data>] [" LOG_DATA_TRANSFER_TAG "] [" TIMEOUT_TAG
-			" <timeout>]\n"
+			" <timeout>] [" LOG_HEARTBEAT_TAG "]\n"
 			"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
+			"                     If you want to use file instead of server data just\n"
+			"                     write there path to file e.g. path\\to\\raw.bin\n"
+			"  <path>           - The path to `tape` file or raw dump\n"
 			"                     If you want to use file instead of server data just\n"
 			"                     write there path to file e.g. path\\to\\raw.bin\n"
 			"  <event type>     - The event type, any of the following: TRADE, QUOTE,\n"
@@ -550,7 +554,11 @@ int main(int argc, char* argv[]) {
 			"                     - Enables the data transfer logging\n"
 			"  " TIMEOUT_TAG
 			" <timeout>           - Sets the program timeout in seconds (default = 604800, i.e a week)\n"
-			"Example: CommandLineSample.exe demo.dxfeed.com:7300 TRADE,ORDER MSFT,IBM\n");
+			"  " LOG_HEARTBEAT_TAG
+			"                     - Enables the server's heartbeat logging to console\n"
+			"Examples:\n"
+			"    CommandLineSample.exe demo.dxfeed.com:7300 TRADE,ORDER MSFT,IBM\n"
+			"    CommandLineSample.exe ./tape_file TRADE,ORDER MSFT,IBM\n");
 
 		return 0;
 	}
@@ -566,6 +574,7 @@ int main(int argc, char* argv[]) {
 	char* subscr_data = NULL;
 	int log_data_transfer_flag = false;
 	int program_timeout = 604800;  // a week
+	int log_heartbeat_is_set = false;
 
 	if (argc > STATIC_PARAMS_COUNT) {
 		int dump_filename_is_set = false;
@@ -621,6 +630,8 @@ int main(int argc, char* argv[]) {
 
 				program_timeout = new_program_timeout;
 				program_timeout_is_set = true;
+			} else if (log_heartbeat_is_set == false && strcmp(argv[i], LOG_HEARTBEAT_TAG) == 0) {
+				log_heartbeat_is_set = true;
 			}
 		}
 	}
@@ -653,7 +664,9 @@ int main(int argc, char* argv[]) {
 
 	wprintf(L"Connected\n");
 
-	dxf_set_on_server_heartbeat_notifier(connection, on_server_heartbeat_notifier, NULL);
+	if (log_heartbeat_is_set) {
+		dxf_set_on_server_heartbeat_notifier(connection, on_server_heartbeat_notifier, NULL);
+	}
 
 	if (dump_file_name != NULL) {
 		if (!dxf_write_raw_data(connection, dump_file_name)) {

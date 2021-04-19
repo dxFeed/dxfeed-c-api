@@ -917,8 +917,8 @@ int RECORD_TRANSCODER_NAME(dx_candle_t) (dx_record_transcoder_connection_context
 	event_buffer->vwap = record_buffer->vwap;
 	event_buffer->bid_volume = record_buffer->bid_volume;
 	event_buffer->ask_volume = record_buffer->ask_volume;
-	event_buffer->open_interest = record_buffer->open_interest;
 	event_buffer->imp_volatility = record_buffer->imp_volatility;
+	event_buffer->open_interest = record_buffer->open_interest;
 
 	return dx_process_event_data(context->connection, dx_eid_candle, record_params->symbol_name, event_buffer,
 								 event_params);

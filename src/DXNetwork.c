@@ -667,6 +667,8 @@ int dx_read_from_file(dx_network_connection_context_t* context, char *read_buf, 
 		dx_logging_error(L"Raw data file read error.");
 		*number_of_bytes_read = INVALID_DATA_SIZE;
 	}
+
+	return true;
 }
 
 /* -------------------------------------------------------------------------- */

@@ -117,10 +117,10 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 		wprintf(L"time=");
 		print_timestamp(candles[i].time);
 		wprintf(L", sequence=%d, count=%f, open=%f, high=%f, low=%f, close=%f, volume=%f, "
-			L"VWAP=%f, bidVolume=%f, askVolume=%f}\n",
+			L"VWAP=%f, bidVolume=%f, askVolume=%f, impVolatility=%f, OpenInterest=%d}\n",
 			candles[i].sequence, candles[i].count, candles[i].open, candles[i].high,
 			candles[i].low, candles[i].close, candles[i].volume, candles[i].vwap,
-			candles[i].bid_volume, candles[i].ask_volume);
+			candles[i].bid_volume, candles[i].ask_volume, candles[i].imp_volatility, candles[i].open_interest);
 	}
 }
 /* -------------------------------------------------------------------------- */
@@ -265,15 +265,19 @@ int main (int argc, char* argv[]) {
 	if (argc < STATIC_PARAMS_COUNT) {
 		printf(
 			"DXFeed candle console sample.\n"
-			"Usage: CandleSample <server address> <symbol> [" TIME_PARAM_SHORT_TAG " <DD-MM-YYYY>] "
+			"Usage: CandleSample <server address>|<path> <symbol> [" TIME_PARAM_SHORT_TAG " <DD-MM-YYYY>] "
 			"[" TOKEN_PARAM_SHORT_TAG " <token>] [" LOG_DATA_TRANSFER_TAG "] [" TIMEOUT_TAG	" <timeout>]\n"
 			"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
+			"  <path>           - The path to file with candle data (tape or non zipped Candle Web Service output)\n"
 			"  <symbol>         - The trade symbol, e.g. C, MSFT, YHOO, IBM\n"
 			"  " TIME_PARAM_SHORT_TAG
 			" <DD-MM-YYYY>  - The time which candle started\n"
 			"  " TOKEN_PARAM_SHORT_TAG " <token>       - The authorization token\n"
 			"  " LOG_DATA_TRANSFER_TAG "               - Enables the packets logging\n"
 			"  " TIMEOUT_TAG " <timeout>     - Sets the program timeout in seconds (default = 604800, i.e a week)\n"
+			"Examples: \n"
+			"    %s demo.dxfeed.com:7300 AAPL&Q{=m}\n"
+			"    %s ./candledata_file AAPL&Q{=m}\n", argv[0], argv[0]
 			);
 
 		return 0;
