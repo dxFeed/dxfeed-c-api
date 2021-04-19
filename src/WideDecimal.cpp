@@ -97,9 +97,9 @@ struct WideDecimal {
 		static const std::size_t MAX_LEADING_ZEROES = std::size_t{6};	// valid range: [0, 143]
 
 		std::size_t maxStringLength =
-			18 + std::max(std::size_t{6}, std::max(std::size_t{2} + MAX_LEADING_ZEROES, MAX_TRAILING_ZEROES));
-		long scientificModulo;	// longPowers[MAX_TRAILING_ZEROES + 1] or std::numeric_limits<dxf_long_t>::max()
-		std::string zeroChars;	// aka "0.000000(0)"
+			18 + (std::max)(std::size_t{6}, (std::max)(std::size_t{2} + MAX_LEADING_ZEROES, MAX_TRAILING_ZEROES));
+		dxf_long_t scientificModulo;  // longPowers[MAX_TRAILING_ZEROES + 1] or std::numeric_limits<dxf_long_t>::max()
+		std::string zeroChars;		  // aka "0.000000(0)"
 
 		std::array<std::string, 4> nfString = {Double::NAN_STRING, Double::POSITIVE_INFINITY_STRING, Double::NAN_STRING,
 											   Double::NEGATIVE_INFINITY_STRING};
@@ -129,8 +129,9 @@ struct WideDecimal {
 				pow10 *= 10;
 			}
 
-			scientificModulo = (MAX_TRAILING_ZEROES + 1 <= EXACT_LONG_POWERS) ? longPowers[MAX_TRAILING_ZEROES + 1]
-																			  : std::numeric_limits<dxf_long_t>::max();
+			scientificModulo = (MAX_TRAILING_ZEROES + 1 <= EXACT_LONG_POWERS)
+				? longPowers[MAX_TRAILING_ZEROES + 1]
+				: (std::numeric_limits<dxf_long_t>::max)();
 			zeroChars = std::string(130, '0');
 			zeroChars[1] = '.';
 

@@ -61,7 +61,7 @@ typedef enum {
 	dx_fid_flag_sequence = 0x40,      // sequence in this integer fields (with top 10 bits representing millis)
 	dx_fid_flag_date = 0x50,          // day id in this integer field
 	dx_fid_flag_long = 0x60,          // plain long as two int fields
-	dx_fid_wide_decimal = 0x70,       // WideDecimal representation as long field
+	dx_fid_flag_wide_decimal = 0x70,  // WideDecimal representation as long field
 	dx_fid_flag_string = 0x80,        // String representation as byte array
 	dx_fid_flag_time_millis = 0x90,   // time in millis as long field
 	dx_fid_flag_time_nanos = 0xa0,    // Reserved for future use: time in nanos as long field

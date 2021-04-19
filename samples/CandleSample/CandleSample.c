@@ -117,7 +117,7 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 		wprintf(L"time=");
 		print_timestamp(candles[i].time);
 		wprintf(L", sequence=%d, count=%f, open=%f, high=%f, low=%f, close=%f, volume=%f, "
-			L"VWAP=%f, bidVolume=%f, askVolume=%f, impVolatility=%f, OpenInterest=%f}\n",
+			L"VWAP=%f, bidVolume=%f, askVolume=%f, impVolatility=%f, OpenInterest=%d}\n",
 			candles[i].sequence, candles[i].count, candles[i].open, candles[i].high,
 			candles[i].low, candles[i].close, candles[i].volume, candles[i].vwap,
 			candles[i].bid_volume, candles[i].ask_volume, candles[i].imp_volatility, candles[i].open_interest);
@@ -274,6 +274,9 @@ int main (int argc, char* argv[]) {
 			"  " TOKEN_PARAM_SHORT_TAG " <token>       - The authorization token\n"
 			"  " LOG_DATA_TRANSFER_TAG "               - Enables the packets logging\n"
 			"  " TIMEOUT_TAG " <timeout>     - Sets the program timeout in seconds (default = 604800, i.e a week)\n"
+			"Examples: \n"
+			"    %s demo.dxfeed.com:7300 AAPL&Q{=m}\n"
+			"    %s ./candledata_file AAPL&Q{=m}\n", argv[0], argv[0]
 			);
 
 		return 0;

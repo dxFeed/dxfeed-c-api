@@ -155,7 +155,7 @@ static const dx_field_info_t dx_fields_order[] = {
 	{ dx_fid_compact_int | dx_fid_flag_long,        L"TradeId",      DX_RECORD_FIELD_STDOPS(dx_order_t, trade_id),     dx_ft_common_field },
 	{ dx_fid_compact_int | dx_fid_flag_decimal,     L"TradePrice",   DX_RECORD_FIELD_STDOPS(dx_order_t, trade_price),  dx_ft_common_field },
 	{ dx_fid_compact_int | dx_fid_flag_decimal,     L"TradeSize",    DX_RECORD_FIELD_STDOPS(dx_order_t, trade_size),   dx_ft_common_field },
-    { dx_fid_compact_int,                           L"MMID",         DX_RECORD_FIELD_STDOPS(dx_order_t, mmid),         dx_ft_common_field },
+    { dx_fid_compact_int,                           L"MarketMaker",         DX_RECORD_FIELD_STDOPS(dx_order_t, mmid),         dx_ft_common_field },
 };
 
 /* -------------------------------------------------------------------------- */
@@ -170,9 +170,9 @@ static const dx_field_info_t dx_fields_time_and_sale[] = {
     { dx_fid_utf_char,                               L"Exchange",               DX_RECORD_FIELD_STDOPS(dx_time_and_sale_t, exchange_code),            dx_ft_common_field },
     { dx_fid_compact_int | dx_fid_flag_decimal,      L"Price",                  DX_RECORD_FIELD_STDOPS(dx_time_and_sale_t, price),                    dx_ft_common_field },
     { dx_fid_compact_int,                            L"Size",                   DX_RECORD_FIELD_STDOPS(dx_time_and_sale_t, size),                     dx_ft_common_field },
-    { dx_fid_compact_int | dx_fid_flag_decimal,      L"Bid.Price",              DX_RECORD_FIELD_STDOPS(dx_time_and_sale_t, bid_price),                dx_ft_common_field },
-    { dx_fid_compact_int | dx_fid_flag_decimal,      L"Ask.Price",              DX_RECORD_FIELD_STDOPS(dx_time_and_sale_t, ask_price),                dx_ft_common_field },
-    { dx_fid_compact_int,                            L"ExchangeSaleConditions", DX_RECORD_FIELD_STDOPS(dx_time_and_sale_t, exchange_sale_conditions), dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_decimal,      L"BidPrice",              DX_RECORD_FIELD_STDOPS(dx_time_and_sale_t, bid_price),                dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_decimal,      L"AskPrice",              DX_RECORD_FIELD_STDOPS(dx_time_and_sale_t, ask_price),                dx_ft_common_field },
+    { dx_fid_compact_int,                            L"SaleConditions", DX_RECORD_FIELD_STDOPS(dx_time_and_sale_t, exchange_sale_conditions), dx_ft_common_field },
     { dx_fid_compact_int,                            L"Flags",                  DX_RECORD_FIELD_STDOPS(dx_time_and_sale_t, flags),                    dx_ft_common_field },
     { dx_fid_utf_char_array,                         L"Buyer",                  DX_RECORD_FIELD_STDOPS(dx_time_and_sale_t, buyer),                    dx_ft_common_field },
     { dx_fid_utf_char_array,                         L"Seller",                 DX_RECORD_FIELD_STDOPS(dx_time_and_sale_t, seller),                   dx_ft_common_field }
