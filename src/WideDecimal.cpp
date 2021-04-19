@@ -101,10 +101,10 @@ struct WideDecimal {
 		dxf_long_t scientificModulo;  // longPowers[MAX_TRAILING_ZEROES + 1] or std::numeric_limits<dxf_long_t>::max()
 		std::string zeroChars;		  // aka "0.000000(0)"
 
-		std::array<std::string, 4> nfString = {Double::NAN_STRING, Double::POSITIVE_INFINITY_STRING, Double::NAN_STRING,
-											   Double::NEGATIVE_INFINITY_STRING};
-		std::array<dxf_double_t, 4> nfDouble = {Double::QUIET_NAN, Double::POSITIVE_INFINITY, Double::QUIET_NAN,
-												Double::NEGATIVE_INFINITY};
+		std::array<std::string, 4> nfString = {{Double::NAN_STRING, Double::POSITIVE_INFINITY_STRING, Double::NAN_STRING,
+											   Double::NEGATIVE_INFINITY_STRING}};
+		std::array<dxf_double_t, 4> nfDouble = {{Double::QUIET_NAN, Double::POSITIVE_INFINITY, Double::QUIET_NAN,
+												Double::NEGATIVE_INFINITY}};
 
 		std::array<dxf_long_t, EXACT_LONG_POWERS + 1> longPowers;
 		// LONG_MULTIPLIERS and LONG_DIVISORS are indexed by [rank] to compliment toLong computation
