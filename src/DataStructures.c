@@ -196,8 +196,8 @@ static const dx_field_info_t dx_fields_candle[] = {
     { dx_fid_compact_int | dx_fid_flag_decimal,      L"VWAP",          DX_RECORD_FIELD_STDOPS(dx_candle_t, vwap),           dx_ft_common_field },
     { dx_fid_compact_int | dx_fid_flag_decimal,      L"Bid.Volume",    DX_RECORD_FIELD_STDOPS(dx_candle_t, bid_volume),     dx_ft_common_field },
     { dx_fid_compact_int | dx_fid_flag_decimal,      L"Ask.Volume",    DX_RECORD_FIELD_STDOPS(dx_candle_t, ask_volume),     dx_ft_common_field },
-    { dx_fid_compact_int,                            L"OpenInterest",  DX_RECORD_FIELD_STDOPS(dx_candle_t, open_interest),  dx_ft_common_field },
-    { dx_fid_compact_int | dx_fid_flag_decimal,      L"ImpVolatility", DX_RECORD_FIELD_STDOPS(dx_candle_t, imp_volatility), dx_ft_common_field }
+    { dx_fid_compact_int | dx_fid_flag_decimal,      L"ImpVolatility", DX_RECORD_FIELD_STDOPS(dx_candle_t, imp_volatility), dx_ft_common_field },
+	{ dx_fid_compact_int | dx_fid_flag_decimal,      L"OpenInterest",  DX_RECORD_FIELD_STDOPS(dx_candle_t, open_interest),  dx_ft_common_field },
 };
 
 /* -------------------------------------------------------------------------- */

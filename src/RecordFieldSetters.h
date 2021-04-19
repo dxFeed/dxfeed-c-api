@@ -245,8 +245,8 @@ DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_candle_t, volume)
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_candle_t, vwap)
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_candle_t, bid_volume)
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_candle_t, ask_volume)
-DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_candle_t, open_interest)
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_candle_t, imp_volatility)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_candle_t, open_interest)
 
 /* -------------------------------------------------------------------------- */
 /*
