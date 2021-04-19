@@ -998,16 +998,16 @@ int dx_read_records (dx_server_msg_proc_connection_context_t* context,
 		case dx_fid_compact_int:
 			if (representation == dx_fid_flag_long || representation == dx_fid_flag_time_millis) {
 				CHECKED_CALL_2(dx_read_compact_long, context->bicc, &read_long);
-
 				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_long)
+			} else if (representation == dx_fid_wide_decimal) {
+				CHECKED_CALL_2(dx_read_compact_long, context->bicc, &read_long);
+				CHECKED_CALL_2(dx_wide_decimal_long_to_double, read_long, &read_double);
+				CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double)
 			} else {
 				CHECKED_CALL_2(dx_read_compact_int, context->bicc, &read_int);
 
 				if (representation == dx_fid_flag_decimal) {
 					CHECKED_CALL_2(dx_decimal_int_to_double, read_int, &read_double);
-					CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double)
-				} else if (representation == dx_fid_wide_decimal) {
-					CHECKED_CALL_2(dx_wide_decimal_long_to_double, read_int, &read_double);
 					CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double)
 				} else {
 					CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_int)
