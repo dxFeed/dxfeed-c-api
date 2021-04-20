@@ -10,7 +10,7 @@
 #     platform        - x86 or x64
 #     version         - version of application i.e. 1.2.6
 #     no-tls          - build without TLS support
-#     static          - build static library, samples and tests (without TLS support)
+#     static          - build the framework as a static library, static samples and tests (without TLS support)
 #
 # WARNING: you must set the next environment variables
 #     PACKAGE_WORK_DIR - the working directory where cpack result arhive will be stored and unpacked

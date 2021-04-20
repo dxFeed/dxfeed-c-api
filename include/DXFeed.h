@@ -775,7 +775,7 @@ DXFEED_API ERRORCODE dxf_get_last_error (OUT int* error_code, OUT dxf_const_stri
  * @brief Initializes the internal logger.
  *
  * @details Various actions and events, including the errors, are being logged
- *          throughout the library. They may be stored into the file.
+ *          throughout the framework. They may be stored into the file.
  *
  * @param[in] file_name          A full path to the file where the log is to be stored
  * @param[in] rewrite_file       A flag defining the file open mode; if it's nonzero then the log file will be rewritten
@@ -795,7 +795,7 @@ DXFEED_API ERRORCODE dxf_initialize_logger(const char* file_name, int rewrite_fi
  * @brief Initializes the internal logger with data transfer logging.
  *
  * @details Various actions and events, including the errors, are being logged
- *          throughout the library. They may be stored into the file.
+ *          throughout the framework. They may be stored into the file.
  *
  * @param[in] file_name          A full path to the file where the log is to be stored
  * @param[in] rewrite_file       A flag defining the file open mode; if it's nonzero then the log file will be rewritten

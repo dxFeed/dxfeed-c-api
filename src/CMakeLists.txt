@@ -5,7 +5,7 @@ cmake_policy(SET CMP0015 NEW)
 set(PROJECT DXFeed)
 set(INCLUDE_DIR ../include)
 set(TARGET_PLATFORM "x86" CACHE STRING "Target platform specification")
-set(APP_VERSION "" CACHE STRING "The version of library")
+set(APP_VERSION "" CACHE STRING "The version of framework")
 set(C_API_VERSION_MAJOR 0)
 set(C_API_VERSION_MINOR 0)
 set(C_API_VERSION_PATCH 0)
@@ -39,7 +39,7 @@ set(CMAKE_RELEASE_POSTFIX "${PLATFORM_POSTFIX}")
 
 project(${PROJECT})
 
-# If library version is not specified through parameters version from the source will be used
+# If framework version is not specified through parameters version from the source will be used
 if (NOT ${APP_VERSION} STREQUAL "")
 
     message(>>>>\ Application\ version\ original\ :\ ${APP_VERSION})

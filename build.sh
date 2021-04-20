@@ -10,7 +10,7 @@
 #     clean           - removes build directory
 #     rebuild         - performs clean and build
 #     no-tls          - build without TLS support
-#     static          - build static library, samples and tests (without TLS support)
+#     static          - build the framework as a static library, static samples and tests (without TLS support)
 # The default configuration is 'Release x64'.
 #
 # WARNING: you can set the next environment variables
@@ -26,7 +26,7 @@ print_usage() {
     echo "       clean           - removes build directory"
     echo "       rebuild         - performs clean and build"
     echo "       no-tls          - build without TLS support"
-    echo "       static          - build static library, samples and tests (without TLS support)"
+    echo "       static          - build the framework as a static library, static samples and tests (without TLS support)"
 }
 
 BUILD_DIR="$(pwd)/build"

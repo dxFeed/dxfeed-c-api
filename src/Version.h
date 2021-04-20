@@ -42,9 +42,9 @@
 #define DX_VER_ORIGINAL_FILENAME DX_VER_FILENAME ".dll"
 #define DX_VER_INTERNAL_FILENAME DX_VER_ORIGINAL_FILENAME 
 #define DX_VER_COMPANY_NAME      "Devexperts LLC"
-#define DX_VER_FILE_DESCRIPTION  "Dynamic-link library that provides a common application programming interface (API) to real-time, delayed and historical market data feeds."
+#define DX_VER_FILE_DESCRIPTION  "The framework that provides a common application programming interface (API) to real-time, delayed and historical market data feeds."
 #define DX_VER_LEGAL_COPYRIGHT   "Copyright (C) 2010-2021 Devexperts LLC"
-#define DX_VER_PRODUCT_NAME      "DXFeed C API"
+#define DX_VER_PRODUCT_NAME      "dxFeed C API"
 
 #define DX_LIBRARY_VERSION L"DXFeed.cpp v 7.5.0 (c) Devexperts LLC"
 

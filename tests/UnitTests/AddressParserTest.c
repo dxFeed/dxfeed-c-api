@@ -25,7 +25,7 @@
 /* To add TLS codec support for test add 'DXFEED_CODEC_TLS_ENABLED' string to
  * C/C++ compiller definition.
  *
- * Note: the DXFeed library also must support 'DXFEED_CODEC_TLS_ENABLED'
+ * Note: the dxFeed framework also must support 'DXFEED_CODEC_TLS_ENABLED'
  * definition to successful test passing.
  */
 #ifdef DXFEED_CODEC_TLS_ENABLED
@@ -37,7 +37,7 @@
 /* To add GZIP codec support for test add 'DXFEED_CODEC_GZIP_ENABLED' string to
  * C/C++ compiller definition.
  *
- * Note: the DXFeed library also must support 'DXFEED_CODEC_GZIP_ENABLED'
+ * Note: the dxFeed framework also must support 'DXFEED_CODEC_GZIP_ENABLED'
  * definition to successful test passing.
  */
 #ifdef DXFEED_CODEC_GZIP_ENABLED

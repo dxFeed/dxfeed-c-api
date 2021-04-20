@@ -3,6 +3,7 @@ Version 7.6.0
 * [DXFC-225] Added initial support for the WideDecimal type. This will allow reading data coming from CandleWebService
   or data recorded in `tape` format. The examples of usage added to CommandLineSample and CandleSample help output.
 * Now heartbeat logging in the CommandLineSample is optional. To enable, you must use the `-b` flag.
+* [DXFC-227] Improved the project brief in the doxygen documentation
 
 Version 7.5.0
 * [DXFC-223] The new price level order source was added: iex.

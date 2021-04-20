@@ -36,7 +36,7 @@
 #endif
 #endif /* _WIN32 */
 
-/* To add TLS codec support for library add 'DXFEED_CODEC_TLS_ENABLED' string
+/* To add TLS codec support for framework add 'DXFEED_CODEC_TLS_ENABLED' string
  * to C/C++ compiller definition.
  */
 #ifdef DXFEED_CODEC_TLS_ENABLED
@@ -45,7 +45,7 @@
 #define DX_CODEC_TLS_STATUS false
 #endif
 
-/* To add TLS codec support for library add 'DXFEED_CODEC_GZIP_ENABLED' string
+/* To add TLS codec support for framework add 'DXFEED_CODEC_GZIP_ENABLED' string
  * to C/C++ compiller definition.
  */
 #ifdef DXFEED_CODEC_GZIP_ENABLED

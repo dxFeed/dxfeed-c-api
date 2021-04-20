@@ -12,7 +12,7 @@
 #     rebuild                   - performs clean and build
 #     no-test                   - build testing will not be started
 #     no-tls                    - build without TLS support
-#     static                    - build static library, samples and tests (without TLS support)
+#     static                    - build the framework as a static library, static samples and tests (without TLS support)
 #
 # The operation order:
 #     1. Build sources in next configurations Debug x86, Release x86, 
@@ -34,7 +34,7 @@ print_usage() {
     echo "   rebuild                   - performs clean and build"
     echo "   no-test                   - build tests will not be started"
     echo "   no-tls                    - build without TLS support"
-    echo "   static                    - build static library, samples and tests (without TLS support)"
+    echo "   static                    - build the framework as a static library, static samples and tests (without TLS support)"
 }
 
 # Check cmake application in PATH

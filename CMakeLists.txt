@@ -6,7 +6,7 @@ cmake_policy(SET CMP0013 NEW)
 set(PROJECT DXFeedAll)
 
 option(DISABLE_TLS "Use ON value to disable TLS support" OFF)
-option(BUILD_STATIC_LIBS "Use ON value to build DXFeed as a static library" OFF)
+option(BUILD_STATIC_LIBS "Use ON value to build dxFeed framework as a static library" OFF)
 
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
