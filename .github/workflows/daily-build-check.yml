@@ -1,0 +1,135 @@
+on:
+  schedule:
+    - cron: '0 0 * * *'
+
+name: Daily Build Check
+
+env:
+  WIN_BUILDER_IMAGE: dxfeedcapi/builder:1809-4.5.2-2015
+  DOCS_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-docs
+  MAC_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-macosx
+  LINUX_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-linux
+  CENTOS_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-centos
+  WINDOWS_ARTIFACT_TEMPLATE: dxfeed-c-api-#VERSION#-windows
+  WINDOWS_BUILD_TEMPLATE: dxfeed-c-api-#VERSION#
+  WIN_SRC_DIR: "C:\\dxfeed-c-api"
+  RELEASE_PREFIX: "dxFeed C API "
+
+jobs:
+
+  # --------------------------- BUILD DOCUMENTATION
+  build_docs:
+    runs-on: ubuntu-latest
+    name: build documentation
+    steps:
+      - uses: actions/checkout@master
+      - name: Set env
+        run: |
+          echo RELEASE_VERSION=$(echo ${GITHUB_REF:10}) >> $GITHUB_ENV
+          echo ARTIFACT=$(echo ${DOCS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g" ) >> $GITHUB_ENV
+      - name: Check env
+        run: |
+          echo Artifact: ${{ env.ARTIFACT }}
+          echo Release : ${{ env.RELEASE_VERSION }}
+      - name: Build documentation
+        uses: ./.github/actions/doxygen
+        id: build-docs
+        with:
+          artifact: ${{ env.ARTIFACT }}
+          release: ${{ env.RELEASE_VERSION }}
+
+  # --------------------------- BUILD LINUX LIBRARY (WITH TLS SUPPORT)
+  build_linux_tls:
+    runs-on: ubuntu-latest
+    name: build linux (TLS)
+    steps:
+      - uses: actions/checkout@master
+      - name: Set env
+        run: |
+          echo RELEASE_VERSION=$(echo ${GITHUB_REF:10}) >> $GITHUB_ENV
+          echo ARTIFACT=$(echo ${LINUX_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g" ) >> $GITHUB_ENV
+      - name: Check env
+        run: |
+          echo Artifact: ${{ env.ARTIFACT }}
+          echo Release : ${{ env.RELEASE_VERSION }}
+      - name: Build linux library (TLS)
+        uses: ./.github/actions/linux
+        id: build-linux
+        with:
+          artifact: ${{ env.ARTIFACT }}
+          release:  ${{ env.RELEASE_VERSION }}
+
+  # --------------------------- BUILD OLD LINUX (CENTOS 7) LIBRARY (WITH TLS SUPPORT)
+  build_centos_tls:
+    runs-on: ubuntu-latest
+    name: build centos (TLS)
+    steps:
+      - uses: actions/checkout@master
+      - name: Set env
+        run: |
+          echo RELEASE_VERSION=$(echo ${GITHUB_REF:10}) >> $GITHUB_ENV
+          echo ARTIFACT=$(echo ${CENTOS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g" ) >> $GITHUB_ENV
+      - name: Check env
+        run: |
+          echo Artifact: ${{ env.ARTIFACT }}
+          echo Release : ${{ env.RELEASE_VERSION }}
+      - name: Build centos library (TLS)
+        uses: ./.github/actions/centos
+        id: build-centos
+        with:
+          artifact: ${{ env.ARTIFACT }}
+          release:  ${{ env.RELEASE_VERSION }}
+
+  # --------------------------- BUILD MACOSX LIBRARY (WITH TLS SUPPORT)
+  build_macos_tls:
+    runs-on: macos-latest
+    name: build macos (TLS)
+    steps:
+      - uses: actions/checkout@master
+      - name: Set env
+        run: |
+          echo RELEASE_VERSION=$(echo ${GITHUB_REF:10}) >> $GITHUB_ENV
+          echo ARTIFACT=$(echo ${MAC_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g" ) >> $GITHUB_ENV
+      - name: Check env
+        run: |
+          echo Artifact: ${{ env.ARTIFACT }}
+          echo Release : ${{ env.RELEASE_VERSION }}
+      - name: Prepare tools
+        run: |
+          brew install p7zip
+      - name: Build MacOSX library
+        run: |
+          ./make_package.sh ${{ env.RELEASE_VERSION }} no-test
+
+  # --------------------------- BUILD WINDOWS LIBRARY [ VS2015 ]
+  build_windows:
+    runs-on: windows-latest
+    name: build windows
+    steps:
+
+      - name: Free disk space for build image
+        run: |
+          docker rm $(docker ps -aq)
+          docker image rm $(docker image ls -q)
+
+      - uses: actions/checkout@master
+
+      - name: Set env
+        run: |
+          echo RELEASE_VERSION=$("$Env:GITHUB_REF".Substring(10)) | Add-Content -Path $env:GITHUB_ENV -Encoding utf8
+          echo ARTIFACT=$(echo $Env:WINDOWS_ARTIFACT_TEMPLATE | %{$_ -replace '#VERSION#', $("$Env:GITHUB_REF".Substring(10)) }) | Add-Content -Path $env:GITHUB_ENV -Encoding utf8
+          echo WB_ARTIFACT=$(echo $Env:WINDOWS_BUILD_TEMPLATE | %{$_ -replace '#VERSION#', $("$Env:GITHUB_REF".Substring(10)) }) | Add-Content -Path $env:GITHUB_ENV -Encoding utf8
+
+      - name: Check env
+        run: |
+          echo "RELEASE    : ${{ env.RELEASE_VERSION }}"
+          echo "ARTIFACT   : ${{ env.ARTIFACT }}"
+          echo "WB_ARTIFACT: ${{ env.WB_ARTIFACT }}"
+
+      - name: Pull build image
+        run: |
+          docker pull ${{ env.WIN_BUILDER_IMAGE }}
+
+      - name: Build windows (TLS)
+        run: |
+          docker run --rm -v "${pwd}:${{ env.WIN_SRC_DIR }}" -e SRCDIR="${{ env.WIN_SRC_DIR }}" -e FLAGS="rebuild no-test" -e RELEASE=${{ env.RELEASE_VERSION }} ${{ env.WIN_BUILDER_IMAGE }}
