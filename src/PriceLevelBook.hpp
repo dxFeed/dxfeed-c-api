@@ -19,21 +19,14 @@
 
 #pragma once
 
-#include "PrimitiveTypes.h"
-#include "EventData.h"
-#include "DXTypes.h"
+#include <mutex>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace dx {
 
-dxf_price_level_book_t dx_create_price_level_book(dxf_connection_t connection, dxf_const_string_t symbol,
-												  size_t srccount, dxf_ulong_t srcflags);
-int dx_close_price_level_book(dxf_price_level_book_t book);
-int dx_add_price_level_book_listener(dxf_price_level_book_t book, dxf_price_level_book_listener_t book_listener,
-									 void *user_data);
-int dx_remove_price_level_book_listener(dxf_price_level_book_t book, dxf_price_level_book_listener_t book_listener);
+struct PriceLevelBook {};
 
-#ifdef __cplusplus
 }
-#endif
