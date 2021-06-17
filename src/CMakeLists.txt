@@ -98,6 +98,7 @@ set(HEADER_FILES
         Logger.h
         ObjectArray.h
         PriceLevelBook.h
+        PriceLevelBook.hpp
         RegionalBook.h
         PrimitiveTypes.h
         resource.h
@@ -164,6 +165,7 @@ set(SOURCE_FILES
         Logger.c
         ObjectArray.c
         PriceLevelBook.c
+        PriceLevelBook.cpp
         RegionalBook.c
         RecordTranscoder.c
         ServerMessageProcessor.c

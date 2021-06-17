@@ -17,23 +17,29 @@
  *
  */
 
-#pragma once
-
-#include "PrimitiveTypes.h"
-#include "EventData.h"
-#include "DXTypes.h"
-
-#ifdef __cplusplus
 extern "C" {
-#endif
 
-dxf_price_level_book_t dx_create_price_level_book(dxf_connection_t connection, dxf_const_string_t symbol,
-												  size_t srccount, dxf_ulong_t srcflags);
-int dx_close_price_level_book(dxf_price_level_book_t book);
-int dx_add_price_level_book_listener(dxf_price_level_book_t book, dxf_price_level_book_listener_t book_listener,
-									 void *user_data);
-int dx_remove_price_level_book_listener(dxf_price_level_book_t book, dxf_price_level_book_listener_t book_listener);
+#include "PriceLevelBook.h"
 
-#ifdef __cplusplus
+#include "ConnectionContextData.h"
+#include "DXAlgorithms.h"
+#include "DXErrorCodes.h"
+#include "DXErrorHandling.h"
+#include "DXFeed.h"
+#include "DXThreads.h"
+#include "Logger.h"
+#include "SymbolCodec.h"
+
 }
-#endif
+
+#include <cmath>
+#include <functional>
+#include <mutex>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
+#include <vector>
+
+#include "PriceLevelBook.hpp"
+#include "Configuration.hpp"
