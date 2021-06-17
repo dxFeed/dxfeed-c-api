@@ -27,6 +27,15 @@
 
 namespace dx {
 
-struct PriceLevelBook {};
+struct PriceLevelBookConnectionContext {
+	dxf_connection_t connection;
+	std::recursive_mutex mutex{};
+
+};
+
+struct PriceLevelBook {
+	std::recursive_mutex mutex{};
+
+};
 
 }
