@@ -1,6 +1,7 @@
 on:
   schedule:
     - cron: '0 0 * * *'
+  workflow_dispatch:
 
 name: Daily Build Check
 
@@ -14,6 +15,7 @@ env:
   WINDOWS_BUILD_TEMPLATE: dxfeed-c-api-#VERSION#
   WIN_SRC_DIR: "C:\\dxfeed-c-api"
   RELEASE_PREFIX: "dxFeed C API "
+  BUILD_VERSION: master
 
 jobs:
 
@@ -25,8 +27,8 @@ jobs:
       - uses: actions/checkout@master
       - name: Set env
         run: |
-          echo RELEASE_VERSION=$(echo ${GITHUB_REF:10}) >> $GITHUB_ENV
-          echo ARTIFACT=$(echo ${DOCS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g" ) >> $GITHUB_ENV
+          echo RELEASE_VERSION=${BUILD_VERSION} >> $GITHUB_ENV
+          echo ARTIFACT=$(echo ${DOCS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/${BUILD_VERSION}/g") >> $GITHUB_ENV
       - name: Check env
         run: |
           echo Artifact: ${{ env.ARTIFACT }}
@@ -46,8 +48,8 @@ jobs:
       - uses: actions/checkout@master
       - name: Set env
         run: |
-          echo RELEASE_VERSION=$(echo ${GITHUB_REF:10}) >> $GITHUB_ENV
-          echo ARTIFACT=$(echo ${LINUX_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g" ) >> $GITHUB_ENV
+          echo RELEASE_VERSION=${BUILD_VERSION} >> $GITHUB_ENV
+          echo ARTIFACT=$(echo ${LINUX_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/${BUILD_VERSION}/g" ) >> $GITHUB_ENV
       - name: Check env
         run: |
           echo Artifact: ${{ env.ARTIFACT }}
@@ -67,8 +69,8 @@ jobs:
       - uses: actions/checkout@master
       - name: Set env
         run: |
-          echo RELEASE_VERSION=$(echo ${GITHUB_REF:10}) >> $GITHUB_ENV
-          echo ARTIFACT=$(echo ${CENTOS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g" ) >> $GITHUB_ENV
+          echo RELEASE_VERSION=${BUILD_VERSION} >> $GITHUB_ENV
+          echo ARTIFACT=$(echo ${CENTOS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/${BUILD_VERSION}/g" ) >> $GITHUB_ENV
       - name: Check env
         run: |
           echo Artifact: ${{ env.ARTIFACT }}
@@ -88,8 +90,8 @@ jobs:
       - uses: actions/checkout@master
       - name: Set env
         run: |
-          echo RELEASE_VERSION=$(echo ${GITHUB_REF:10}) >> $GITHUB_ENV
-          echo ARTIFACT=$(echo ${MAC_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g" ) >> $GITHUB_ENV
+          echo RELEASE_VERSION=${BUILD_VERSION} >> $GITHUB_ENV
+          echo ARTIFACT=$(echo ${MAC_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/${BUILD_VERSION}/g" ) >> $GITHUB_ENV
       - name: Check env
         run: |
           echo Artifact: ${{ env.ARTIFACT }}
@@ -116,9 +118,9 @@ jobs:
 
       - name: Set env
         run: |
-          echo RELEASE_VERSION=$("$Env:GITHUB_REF".Substring(10)) | Add-Content -Path $env:GITHUB_ENV -Encoding utf8
-          echo ARTIFACT=$(echo $Env:WINDOWS_ARTIFACT_TEMPLATE | %{$_ -replace '#VERSION#', $("$Env:GITHUB_REF".Substring(10)) }) | Add-Content -Path $env:GITHUB_ENV -Encoding utf8
-          echo WB_ARTIFACT=$(echo $Env:WINDOWS_BUILD_TEMPLATE | %{$_ -replace '#VERSION#', $("$Env:GITHUB_REF".Substring(10)) }) | Add-Content -Path $env:GITHUB_ENV -Encoding utf8
+          echo RELEASE_VERSION=$("$Env:BUILD_VERSION") | Add-Content -Path $env:GITHUB_ENV -Encoding utf8
+          echo ARTIFACT=$(echo $Env:WINDOWS_ARTIFACT_TEMPLATE | %{$_ -replace '#VERSION#', $Env:BUILD_VERSION }) | Add-Content -Path $env:GITHUB_ENV -Encoding utf8
+          echo WB_ARTIFACT=$(echo $Env:WINDOWS_BUILD_TEMPLATE | %{$_ -replace '#VERSION#', $Env:BUILD_VERSION }) | Add-Content -Path $env:GITHUB_ENV -Encoding utf8
 
       - name: Check env
         run: |
