@@ -1148,7 +1148,7 @@ DXFEED_API ERRORCODE dxf_attach_price_level_book_listener(dxf_price_level_book_t
 /**
  * @ingroup c-api-price-level-book
  *
- * @brief Detaches a listener from the snapshot.
+ * @brief Detaches a listener from the price level book.
  *
  * @details No error occurs if it's attempted to detach a listener which wasn't previously attached.
  *
