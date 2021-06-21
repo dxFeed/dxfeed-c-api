@@ -1134,7 +1134,7 @@ DXFEED_API ERRORCODE dxf_close_price_level_book(dxf_price_level_book_t book);
  * @details This callback will be invoked when price levels change.
  *          No error occurs if it's attempted to attach the same listener twice or more.
  *
- * @param[in] book          A handle of the book to which a listener is to be detached
+ * @param[in] book          A handle of the book to which a listener is to be attached
  * @param[in] book_listener A listener callback function pointer
  * @param[in] user_data     Data to be passed to the callback function
  *
