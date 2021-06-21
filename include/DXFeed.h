@@ -1098,10 +1098,10 @@ DXFEED_API ERRORCODE dxf_get_snapshot_symbol(dxf_snapshot_t snapshot, OUT dxf_st
  *
  * @param[in] connection A handle of a previously created connection which the subscription will be using
  * @param[in] symbol     The symbol to use
- * @param[in] sources    Order sources for Order, NULL-terminated list. Each element can be one of following:
+ * @param[in] sources    Order sources for Order, NULL-terminated list (last element should = NULL). Each element can be one of following:
  *                       "NTV", "ntv", "NFX", "ESPD", "XNFI", "ICE", "ISE", "DEA", "DEX", "BYX", "BZX", "BATE", "CHIX",
  *                       "CEUX", "BXTR", "IST", "BI20", "ABE", "FAIR", "GLBX", "glbx", "ERIS", "XEUR", "xeur", "CFE",
- *                       "C2OX", "SMFE"
+ *                       "C2OX", "SMFE". NULL-list means "all sources"
  * @param[out] book      A handle of the created price level book
  *
  * @return {@link DXF_SUCCESS} if price level book has been successfully created or {@link DXF_FAILURE} on error;
@@ -1111,6 +1111,30 @@ DXFEED_API ERRORCODE dxf_get_snapshot_symbol(dxf_snapshot_t snapshot, OUT dxf_st
 DXFEED_API ERRORCODE dxf_create_price_level_book(dxf_connection_t connection, 
                                                  dxf_const_string_t symbol, const char** sources,
                                                  OUT dxf_price_level_book_t* book);
+
+/**
+ * @ingroup c-api-price-level-book
+ *
+ * @brief Creates Price Level book with the specified parameters.
+ *
+ * @details
+ *
+ * @param[in] connection    A handle of a previously created connection which the subscription will be using
+ * @param[in] symbol        The symbol to use
+ * @param[in] sources       Order sources for Order. Each element can be one of following:
+ *                          "NTV", "ntv", "NFX", "ESPD", "XNFI", "ICE", "ISE", "DEA", "DEX", "BYX", "BZX", "BATE", "CHIX",
+ *                          "CEUX", "BXTR", "IST", "BI20", "ABE", "FAIR", "GLBX", "glbx", "ERIS", "XEUR", "xeur", "CFE",
+ *                          "C2OX", "SMFE". NULL-list means "all sources"
+ * @param[in] sources_count The number of sources. 0 means "all sources"
+ * @param[out] book         A handle of the created price level book
+ *
+ * @return {@link DXF_SUCCESS} if price level book has been successfully created or {@link DXF_FAILURE} on error;
+ *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
+ *         *price level book* itself is returned via out parameter
+ */
+DXFEED_API ERRORCODE dxf_create_price_level_book_v2(dxf_connection_t connection,
+													dxf_const_string_t symbol, const char** sources, int sources_count,
+												    OUT dxf_price_level_book_t* book);
 
 /**
  * @ingroup c-api-price-level-book
