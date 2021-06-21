@@ -1183,19 +1183,27 @@ DXFEED_API ERRORCODE dxf_get_snapshot_symbol (dxf_snapshot_t snapshot, OUT dxf_s
 	return DXF_SUCCESS;
 }
 
-/* -------------------------------------------------------------------------- */
+/**
+ * Returns number of sources
+ *
+ * @param sources The order sources
+ * @return the number of sources
+ */
+static inline int dx_get_sources_count(const char **sources) {
+	if (sources == NULL) {
+		return 0;
+	}
 
-DXFEED_API ERRORCODE dxf_create_price_level_book (dxf_connection_t connection,
-                                                  dxf_const_string_t symbol,
-                                                  const char **sources,
-                                                  OUT dxf_price_level_book_t *book) {
 	int i = 0;
-	int s = 0;
-	dxf_ulong_t srcflags = 0;
-	dxf_string_t wsrc;
-	size_t srccount = 0;
-	int found;
 
+	while (sources[i]) i++;
+
+	return i;
+}
+
+ERRORCODE dxf_create_price_level_book_impl(dxf_connection_t connection,
+									   dxf_const_string_t symbol, const char** sources, int sources_count_unchecked,
+									   OUT dxf_price_level_book_t *book) {
 	dx_perform_common_actions(DX_RESET_ERROR);
 	if (!dx_init_codec()) {
 		return DXF_FAILURE;
@@ -1211,44 +1219,70 @@ DXFEED_API ERRORCODE dxf_create_price_level_book (dxf_connection_t connection,
 		return DXF_FAILURE;
 	}
 
+	size_t sources_count = 0;
+	dxf_ulong_t sources_flags = 0;
+
 	/* Check sources */
-	if (sources == NULL) {
-		srcflags = ~0ULL;
-		srccount = dx_all_order_sources_count;
+	if (sources == NULL || sources_count_unchecked == 0) {
+		sources_count = dx_all_order_sources_count;
+		sources_flags = ~0ULL;
 	} else {
-		for (; sources[i]; i++) {
+		for (int i = 0; i < sources_count_unchecked; i++) {
 			if (!sources[i] || strlen(sources[i]) < 1 || strlen(sources[i]) > 4) {
 				dx_set_error_code(dx_ec_invalid_func_param);
+
 				return DXF_FAILURE;
 			}
-			wsrc = dx_ansi_to_unicode(sources[i]);
-			found = false;
-			for (s = 0; !found && dx_all_order_sources[s] != NULL; s++) {
-				if (!dx_compare_strings(wsrc, dx_all_order_sources[s])) {
+
+			dxf_string_t source_wide = dx_ansi_to_unicode(sources[i]);
+			int found = false;
+
+			for (int know_sources_index = 0; !found && dx_all_order_sources[know_sources_index] != NULL; know_sources_index++) {
+				if (!dx_compare_strings(source_wide, dx_all_order_sources[know_sources_index])) {
 					found = true;
-					if ((srcflags & (1ULL << s)) == 0)
-						srccount++;
-					srcflags |= (1ULL << s);
+					if ((sources_flags & (1ULL << know_sources_index)) == 0)
+						sources_count++;
+					sources_flags |= (1ULL << know_sources_index);
 				}
 			}
-			dx_free(wsrc);
+
+			dx_free(source_wide);
+
 			if (!found) {
 				dx_set_error_code(dx_ec_invalid_func_param);
+
 				return DXF_FAILURE;
 			}
 		}
 	}
-	if (srccount == 0) {
+
+	if (sources_count == 0) {
 		dx_set_error_code(dx_ec_invalid_func_param);
 		return DXF_FAILURE;
 	}
 
-	*book = dx_create_price_level_book(connection, symbol, srccount, srcflags);
+	*book = dx_create_price_level_book(connection, symbol, sources_count, sources_flags);
+
 	if (*book == NULL) {
 		return DXF_FAILURE;
 	}
 
 	return DXF_SUCCESS;
+}
+
+/* -------------------------------------------------------------------------- */
+
+DXFEED_API ERRORCODE dxf_create_price_level_book (dxf_connection_t connection,
+                                                  dxf_const_string_t symbol,
+                                                  const char **sources,
+                                                  OUT dxf_price_level_book_t *book) {
+	return dxf_create_price_level_book_impl(connection, symbol, sources, dx_get_sources_count(sources), book);
+}
+
+DXFEED_API ERRORCODE dxf_create_price_level_book_v2(dxf_connection_t connection,
+												 dxf_const_string_t symbol, const char** sources, int sources_count,
+												 OUT dxf_price_level_book_t* book) {
+	return dxf_create_price_level_book_impl(connection, symbol, sources, sources_count, book);
 }
 
 /* -------------------------------------------------------------------------- */

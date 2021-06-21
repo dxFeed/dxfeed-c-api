@@ -1,3 +1,7 @@
+Version 8.0.0
+* [DXFC-222] Added the new `dxf_create_price_level_book_v2` function with an easier way (for Python and .NET API) to
+  pass a list of sources (pair of parameters: `const char** sources` and `int sources_count`)
+
 Version 7.6.0
 * [DXFC-224] Fixed a bug with a race conditions occurred while reading files
 * [DXFC-225] Added initial support for the WideDecimal type. This will allow reading data coming from CandleWebService
