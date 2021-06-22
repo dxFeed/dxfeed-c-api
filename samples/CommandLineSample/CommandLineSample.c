@@ -171,10 +171,10 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 
 		wprintf(L"bidTime=");
 		print_timestamp(q->bid_time);
-		wprintf(L" bidExchangeCode=%c, bidPrice=%f, bidSize=%f, ", q->bid_exchange_code, q->bid_price, q->bid_size);
+		wprintf(L" bidExchangeCode=%c, bidPrice=%.10f, bidSize=%.10f, ", q->bid_exchange_code, q->bid_price, q->bid_size);
 		wprintf(L"askTime=");
 		print_timestamp(q->ask_time);
-		wprintf(L" askExchangeCode=%c, askPrice=%f, askSize=%f, scope=%d}\n", q->ask_exchange_code, q->ask_price,
+		wprintf(L" askExchangeCode=%c, askPrice=%.10f, askSize=%.10f, scope=%d}\n", q->ask_exchange_code, q->ask_price,
 				q->ask_size, (int)q->scope);
 	}
 
@@ -195,7 +195,7 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 		dxf_trade_t* tr = (dxf_trade_t*)data;
 
 		print_timestamp(tr->time);
-		wprintf(L", exchangeCode=%c, price=%f, size=%i, tick=%i, change=%f, day id=%d, day volume=%.0f, scope=%d}\n",
+		wprintf(L", exchangeCode=%c, price=%.10f, size=%.10f, tick=%i, change=%.10f, day id=%d, day volume=%.10f, scope=%d}\n",
 				tr->exchange_code, tr->price, tr->size, tr->tick, tr->change, tr->day_id, tr->day_volume,
 				(int)tr->scope);
 	}
@@ -246,7 +246,7 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 
 		print_timestamp(trades->time);
 		wprintf(
-			L", exchangeCode=%c, flags=%d, price=%f, size=%i, change=%f, day id=%d, day volume=%.0f, scope=%d}\n",
+			L", exchangeCode=%c, flags=%d, price=%.10f, size=%.10f, change=%.10f, day id=%d, day volume=%.10f, scope=%d}\n",
 			trades->exchange_code, trades->raw_flags, trades->price, trades->size, trades->change,
 			trades->day_id, trades->day_volume, (int)trades->scope);
 	}

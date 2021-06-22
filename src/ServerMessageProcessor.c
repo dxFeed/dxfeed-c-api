@@ -1016,9 +1016,20 @@ int dx_read_records (dx_server_msg_proc_connection_context_t* context,
 
 				if (representation == dx_fid_flag_decimal) {
 					CHECKED_CALL_2(dx_decimal_int_to_double, read_int, &read_double);
-					CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double)
+
+					if (local_representation == dx_fid_flag_decimal || local_representation == dx_fid_flag_wide_decimal) {
+						CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double)
+					} else {
+						read_int = (int)read_double;
+						CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_int)
+					}
 				} else {
-					CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_int)
+					if (local_representation == dx_fid_flag_decimal || local_representation == dx_fid_flag_wide_decimal) {
+						read_double = read_int;
+						CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_double)
+					} else {
+						CHECKED_SET_VALUE(record_digest->elements[i]->setter, record_buffer, &read_int)
+					}
 				}
 			}
 

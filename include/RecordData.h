@@ -81,7 +81,7 @@ typedef struct dx_trade {
     dxf_int_t time_nanos;
     dxf_char_t exchange_code;
     dxf_double_t price;
-    dxf_int_t size;
+	dxf_double_t size;
     dxf_int_t tick;
     dxf_double_t change;
 	dxf_dayid_t day_id;

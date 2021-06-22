@@ -419,7 +419,7 @@ typedef struct dxf_trade_t {
 	/// Price of the last trade
 	dxf_double_t price;
 	/// Size of the last trade as integer number (rounded toward zero)
-	dxf_int_t size;
+	dxf_double_t size;
 
 	/**
 	 * Trend indicator – in which direction price is moving. The values are: Up (Tick = 1), Down (Tick = 2),

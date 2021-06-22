@@ -213,11 +213,11 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 		for (; i < data_count; ++i) {
 			wprintf(L"bidTime=");
 			print_timestamp(quotes[i].bid_time);
-			wprintf(L" bidExchangeCode=%c, bidPrice=%f, bidSize=%i, ", quotes[i].bid_exchange_code, quotes[i].bid_price,
+			wprintf(L" bidExchangeCode=%c, bidPrice=%.10f, bidSize=%.10f, ", quotes[i].bid_exchange_code, quotes[i].bid_price,
 					quotes[i].bid_size);
 			wprintf(L"askTime=");
 			print_timestamp(quotes[i].ask_time);
-			wprintf(L" askExchangeCode=%c, askPrice=%f, askSize=%i, scope=%d}\n", quotes[i].ask_exchange_code,
+			wprintf(L" askExchangeCode=%c, askPrice=%.10f, askSize=%.10f, scope=%d}\n", quotes[i].ask_exchange_code,
 					quotes[i].ask_price, quotes[i].ask_size, (int)quotes[i].scope);
 		}
 	}
@@ -239,7 +239,7 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 
 		for (; i < data_count; ++i) {
 			print_timestamp(trades[i].time);
-			wprintf(L", exchangeCode=%c, price=%f, size=%i, tick=%i, change=%f, day id=%d, day volume=%.0f, scope=%d}\n",
+			wprintf(L", exchangeCode=%c, price=%.10f, size=%.10f, tick=%i, change=%.10f, day id=%d, day volume=%.10f, scope=%d}\n",
 					trades[i].exchange_code, trades[i].price, trades[i].size, trades[i].tick, trades[i].change,
 					trades[i].day_id, trades[i].day_volume, (int)trades[i].scope);
 		}

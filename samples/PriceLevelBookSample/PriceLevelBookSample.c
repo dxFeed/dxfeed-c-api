@@ -164,14 +164,14 @@ void listener(const dxf_price_level_book_data_ptr_t book_data, void* user_data) 
 	wprintf(L" %-7ls %-8ls %-15ls |  %-7ls %-8ls %-15ls\n", L"Ask", L"Size", L"Time", L"Bid", L"Size", L"Time");
 	for (; i < MAX(book_data->asks_count, book_data->bids_count); i++) {
 		if (i < book_data->asks_count) {
-			wprintf(L"$%-7.2f %-8lld ", book_data->asks[i].price, book_data->asks[i].size);
+			wprintf(L"$%-7.2f %-8.2f ", book_data->asks[i].price, book_data->asks[i].size);
 			print_timestamp(book_data->asks[i].time);
 		} else {
 			wprintf(L" %-7ls %-8ls %-15ls", L"", L"", L"");
 		}
 		wprintf(L" | ");
 		if (i < book_data->bids_count) {
-			wprintf(L"$%-7.2f %-8lld ", book_data->bids[i].price, book_data->bids[i].size);
+			wprintf(L"$%-7.2f %-8.2f ", book_data->bids[i].price, book_data->bids[i].size);
 			print_timestamp(book_data->bids[i].time);
 		}
 		wprintf(L"\n");
