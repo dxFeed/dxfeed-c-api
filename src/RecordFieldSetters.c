@@ -248,12 +248,12 @@ FIELD_STDOPS_BODIES(dx_market_maker_t, mm_exchange, dxf_char_t)
 FIELD_STDOPS_BODIES(dx_market_maker_t, mm_id, dxf_int_t)
 FIELD_STDOPS_BODIES(dx_market_maker_t, mmbid_time, dxf_int_t)
 FIELD_STDOPS_BODIES(dx_market_maker_t, mmbid_price, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_market_maker_t, mmbid_size, dxf_int_t)
-FIELD_STDOPS_BODIES(dx_market_maker_t, mmbid_count, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_market_maker_t, mmbid_size, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_market_maker_t, mmbid_count, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_market_maker_t, mmask_time, dxf_int_t)
 FIELD_STDOPS_BODIES(dx_market_maker_t, mmask_price, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_market_maker_t, mmask_size, dxf_int_t)
-FIELD_STDOPS_BODIES(dx_market_maker_t, mmask_count, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_market_maker_t, mmask_size, dxf_double_t)
+FIELD_STDOPS_BODIES(dx_market_maker_t, mmask_count, dxf_double_t)
 
 /* -------------------------------------------------------------------------- */
 /*

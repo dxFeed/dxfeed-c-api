@@ -122,16 +122,16 @@ static const dx_field_info_t dx_fields_profile[] = {
 /* -------------------------------------------------------------------------- */
 
 static const dx_field_info_t dx_fields_market_maker[] = {
-	{ dx_fid_utf_char,                          L"MMExchange",  DX_RECORD_FIELD_STDOPS(dx_market_maker_t, mm_exchange), dx_ft_first_time_int_field  },
-    { dx_fid_compact_int,                       L"MMID",        DX_RECORD_FIELD_STDOPS(dx_market_maker_t, mm_id),       dx_ft_second_time_int_field },
-    { dx_fid_compact_int,                       L"MMBid.Time",  DX_RECORD_FIELD_STDOPS(dx_market_maker_t, mmbid_time),  dx_ft_common_field },
-    { dx_fid_compact_int | dx_fid_flag_decimal, L"MMBid.Price", DX_RECORD_FIELD_STDOPS(dx_market_maker_t, mmbid_price), dx_ft_common_field },
-    { dx_fid_compact_int,                       L"MMBid.Size",  DX_RECORD_FIELD_STDOPS(dx_market_maker_t, mmbid_size),  dx_ft_common_field },
-    { dx_fid_compact_int,                       L"MMBid.Count", DX_RECORD_FIELD_STDOPS(dx_market_maker_t, mmbid_count), dx_ft_common_field },
-    { dx_fid_compact_int,                       L"MMAsk.Time",  DX_RECORD_FIELD_STDOPS(dx_market_maker_t, mmask_time),  dx_ft_common_field },
-    { dx_fid_compact_int | dx_fid_flag_decimal, L"MMAsk.Price", DX_RECORD_FIELD_STDOPS(dx_market_maker_t, mmask_price), dx_ft_common_field },
-    { dx_fid_compact_int,                       L"MMAsk.Size",  DX_RECORD_FIELD_STDOPS(dx_market_maker_t, mmask_size),  dx_ft_common_field },
-    { dx_fid_compact_int,                       L"MMAsk.Count", DX_RECORD_FIELD_STDOPS(dx_market_maker_t, mmask_count), dx_ft_common_field }
+	{ dx_fid_utf_char,                               L"MMExchange",  DX_RECORD_FIELD_STDOPS(dx_market_maker_t, mm_exchange), dx_ft_first_time_int_field  },
+    { dx_fid_compact_int,                            L"MMID",        DX_RECORD_FIELD_STDOPS(dx_market_maker_t, mm_id),       dx_ft_second_time_int_field },
+    { dx_fid_compact_int,                            L"MMBid.Time",  DX_RECORD_FIELD_STDOPS(dx_market_maker_t, mmbid_time),  dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_wide_decimal, L"MMBid.Price", DX_RECORD_FIELD_STDOPS(dx_market_maker_t, mmbid_price), dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_wide_decimal, L"MMBid.Size",  DX_RECORD_FIELD_STDOPS(dx_market_maker_t, mmbid_size),  dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_wide_decimal, L"MMBid.Count", DX_RECORD_FIELD_STDOPS(dx_market_maker_t, mmbid_count), dx_ft_common_field },
+    { dx_fid_compact_int,                            L"MMAsk.Time",  DX_RECORD_FIELD_STDOPS(dx_market_maker_t, mmask_time),  dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_wide_decimal, L"MMAsk.Price", DX_RECORD_FIELD_STDOPS(dx_market_maker_t, mmask_price), dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_wide_decimal, L"MMAsk.Size",  DX_RECORD_FIELD_STDOPS(dx_market_maker_t, mmask_size),  dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_wide_decimal, L"MMAsk.Count", DX_RECORD_FIELD_STDOPS(dx_market_maker_t, mmask_count), dx_ft_common_field }
 };
 
 /* -------------------------------------------------------------------------- */
