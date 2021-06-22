@@ -223,7 +223,7 @@ FIELD_STDOPS_BODIES(dx_summary_t, flags, dxf_int_t)
 
 FIELD_STDOPS_BODIES(dx_profile_t, beta, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_profile_t, eps, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_profile_t, div_freq, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_profile_t, div_freq, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_profile_t, exd_div_amount, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_profile_t, exd_div_date, dxf_dayid_t)
 FIELD_STDOPS_BODIES(dx_profile_t, high_price_52, dxf_double_t)

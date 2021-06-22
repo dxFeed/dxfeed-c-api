@@ -624,7 +624,7 @@ typedef struct dxf_profile {
 	/// Earnings per share (the company’s profits divided by the number of shares). The value comes directly from the annual quarterly accounting reports of companies. Available generally for stocks
 	dxf_double_t eps;
 	/// Frequency of cash dividends payments per year (calculated)
-	dxf_int_t div_freq;
+	dxf_double_t div_freq;
 	/// The amount of the last paid dividend
 	dxf_double_t exd_div_amount;
 	/// Date of the last dividend payment

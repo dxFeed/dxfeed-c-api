@@ -270,7 +270,7 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 
 		for (; i < data_count; ++i) {
 			wprintf(
-				L"Beta=%.10f, eps=%.10f, div freq=%i, exd div amount=%.10f, exd div date=%i, 52 high price=%.10f, "
+				L"Beta=%.10f, eps=%.10f, div freq=%.10f, exd div amount=%.10f, exd div date=%i, 52 high price=%.10f, "
 				L"52 low price=%.10f, shares=%.10f, Description=%ls, flags=%i, status_reason=%ls, halt start time=",
 				p[i].beta, p[i].eps, p[i].div_freq, p[i].exd_div_amount, p[i].exd_div_date, p[i].high_52_week_price,
 				p[i].low_52_week_price, p[i].shares, p[i].description, p[i].raw_flags, p[i].status_reason);

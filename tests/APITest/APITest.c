@@ -72,10 +72,10 @@ void first_listener(int event_type, dxf_const_string_t symbol_name, const dxf_ev
 
 		for (; i < data_count; ++i) {
 			wprintf(
-				L"bid time=%i, bid exchange code=%c, bid price=%f, bid size=%i; "
-				L"ask time=%i, ask exchange code=%c, ask price=%f, ask size=%i, scope=%d\n",
-				(int)quotes[i].bid_time, quotes[i].bid_exchange_code, quotes[i].bid_price, (int)quotes[i].bid_size,
-				(int)quotes[i].ask_time, quotes[i].ask_exchange_code, quotes[i].ask_price, (int)quotes[i].ask_size,
+				L"bid time=%i, bid exchange code=%c, bid price=%.10f, bid size=%.10f; "
+				L"ask time=%i, ask exchange code=%c, ask price=%.10f, ask size=%.10f, scope=%d\n",
+				(int)quotes[i].bid_time, quotes[i].bid_exchange_code, quotes[i].bid_price, quotes[i].bid_size,
+				(int)quotes[i].ask_time, quotes[i].ask_exchange_code, quotes[i].ask_price, quotes[i].ask_size,
 				(int)quotes[i].scope);
 		}
 	}
@@ -84,9 +84,9 @@ void first_listener(int event_type, dxf_const_string_t symbol_name, const dxf_ev
 		dxf_order_t* orders = (dxf_order_t*)data;
 
 		for (; i < data_count; ++i) {
-			wprintf(L"index=%i, side=%i, scope=%i, time=%i, exchange code=%c, market maker=%ls, price=%f, size=%i\n",
+			wprintf(L"index=%i, side=%i, scope=%i, time=%i, exchange code=%c, market maker=%ls, price=%.10f, size=%i\n",
 					(int)orders[i].index, (int)orders[i].side, (int)orders[i].scope, (int)orders[i].time,
-					orders[i].exchange_code, orders[i].market_maker, orders[i].price, (int)orders[i].size);
+					orders[i].exchange_code, orders[i].market_maker, orders[i].price, orders[i].size);
 		}
 	}
 
@@ -94,8 +94,8 @@ void first_listener(int event_type, dxf_const_string_t symbol_name, const dxf_ev
 		dxf_trade_t* trades = (dxf_trade_t*)data;
 
 		for (; i < data_count; ++i) {
-			wprintf(L"time=%i, exchange code=%c, price=%f, size=%i, tick=%d, change=%f, day id=%d, day volume=%f, scope=%d\n",
-					(int)trades[i].time, trades[i].exchange_code, trades[i].price, (int)trades[i].size, trades[i].tick,
+			wprintf(L"time=%i, exchange code=%c, price=%.10f, size=%.10f, tick=%d, change=%.10f, day id=%d, day volume=%.10f, scope=%d\n",
+					(int)trades[i].time, trades[i].exchange_code, trades[i].price, trades[i].size, trades[i].tick,
 					trades[i].change, trades[i].day_id, trades[i].day_volume, (int)trades[i].scope);
 		}
 	}
@@ -105,9 +105,9 @@ void first_listener(int event_type, dxf_const_string_t symbol_name, const dxf_ev
 
 		for (; i < data_count; ++i) {
 			wprintf(
-				L"day high price=%f, day low price=%f, day open price=%f, prev day close price=%f, open interest=%i\n",
+				L"day high price=%.10f, day low price=%.10f, day open price=%.10f, prev day close price=%.10f, open interest=%.10f\n",
 				s[i].day_high_price, s[i].day_low_price, s[i].day_open_price, s[i].prev_day_close_price,
-				(int)s[i].open_interest);
+				s[i].open_interest);
 		}
 	}
 
@@ -116,8 +116,8 @@ void first_listener(int event_type, dxf_const_string_t symbol_name, const dxf_ev
 
 		for (; i < data_count; ++i) {
 			wprintf(
-				L"Beta=%f, eps=%f, div freq=%i, exd div amount=%f, exd div date=%i, 52 high price=%f, "
-				L"52 low price=%f, shares=%f, Description=%ls, flags=%i, status_reason=%ls, halt start time=",
+				L"Beta=%.10f, eps=%.10f, div freq=%.10f, exd div amount=%.10f, exd div date=%i, 52 high price=%.10f, "
+				L"52 low price=%.10f, shares=%.10f, Description=%ls, flags=%i, status_reason=%ls, halt start time=",
 				p[i].beta, p[i].eps, p[i].div_freq, p[i].exd_div_amount, p[i].exd_div_date, p[i].high_52_week_price,
 				p[i].low_52_week_price, p[i].shares, p[i].description, p[i].raw_flags, p[i].status_reason);
 			print_timestamp(p[i].halt_start_time);
@@ -132,9 +132,9 @@ void first_listener(int event_type, dxf_const_string_t symbol_name, const dxf_ev
 
 		for (; i < data_count; ++i) {
 			wprintf(
-				L"event id=%lld, time=%lld, exchange code=%c, price=%f, size=%li, bid price=%f, ask price=%f, "
+				L"event id=%lld, time=%lld, exchange code=%c, price=%.10f, size=%li, bid price=%.10f, ask price=%.10f, "
 				L"exchange sale conditions=%ls, is ETH trade=%ls, type=%i\n",
-				tns[i].index, tns[i].time, tns[i].exchange_code, tns[i].price, (int)tns[i].size, tns[i].bid_price,
+				tns[i].index, tns[i].time, tns[i].exchange_code, tns[i].price, tns[i].size, tns[i].bid_price,
 				tns[i].ask_price, tns[i].exchange_sale_conditions, tns[i].is_eth_trade ? L"True" : L"False",
 				(int)tns[i].type);
 		}

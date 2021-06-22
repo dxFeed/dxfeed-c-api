@@ -216,7 +216,7 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 		dxf_profile_t* p = (dxf_profile_t*)data;
 
 		wprintf(
-			L"Beta=%f, eps=%.10f, div freq=%i, exd div amount=%.10f, exd div date=%i, 52 high price=%.10f, "
+			L"Beta=%f, eps=%.10f, div freq=%.10f, exd div amount=%.10f, exd div date=%i, 52 high price=%.10f, "
 			L"52 low price=%.10f, shares=%.10f, Description=%ls, flags=%i, status_reason=%ls, halt start time=",
 			p->beta, p->eps, p->div_freq, p->exd_div_amount, p->exd_div_date, p->high_52_week_price,
 			p->low_52_week_price, p->shares, p->description, p->raw_flags, p->status_reason);

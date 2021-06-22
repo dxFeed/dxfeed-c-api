@@ -125,7 +125,7 @@ typedef struct dx_summary {
 typedef struct dx_profile {
     dxf_double_t beta;
     dxf_double_t eps;
-    dxf_int_t div_freq;
+	dxf_double_t div_freq;
     dxf_double_t exd_div_amount;
     dxf_dayid_t exd_div_date;
     dxf_double_t high_price_52;
