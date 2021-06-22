@@ -44,6 +44,7 @@ EXPORTS
     dxf_detach_snapshot_inc_listener
     dxf_get_snapshot_symbol
     dxf_create_price_level_book
+    dxf_create_price_level_book_v2
     dxf_close_price_level_book
     dxf_attach_price_level_book_listener
     dxf_detach_price_level_book_listener
