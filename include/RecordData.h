@@ -165,8 +165,9 @@ typedef struct dx_order {
 	dxf_long_t order_id;
 	dxf_long_t aux_order_id;
     dxf_double_t price;
-    dxf_int_t size;
-    dxf_int_t count;
+	dxf_double_t size;
+	dxf_double_t executed_size;
+	dxf_double_t count;
     dxf_int_t flags;
 	dxf_long_t trade_id;
 	dxf_double_t trade_price;
@@ -184,8 +185,9 @@ typedef struct dx_spread_order {
 	dxf_long_t order_id;
 	dxf_long_t aux_order_id;
     dxf_double_t price;
-    dxf_int_t size;
-    dxf_int_t count;
+	dxf_double_t size;
+	dxf_double_t executed_size;
+	dxf_double_t count;
     dxf_int_t flags;
 	dxf_long_t trade_id;
 	dxf_double_t trade_price;

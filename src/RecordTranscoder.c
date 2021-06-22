@@ -813,6 +813,7 @@ int RECORD_TRANSCODER_NAME(dx_order_t) (dx_record_transcoder_connection_context_
 
 	event_buffer->price = record_buffer->price;
 	event_buffer->size = record_buffer->size;
+	event_buffer->executed_size = record_buffer->executed_size;
 	event_buffer->count = record_buffer->count;
 
 	event_buffer->trade_id = record_buffer->trade_id;
@@ -965,6 +966,7 @@ int RECORD_TRANSCODER_NAME(dx_spread_order_t) (dx_record_transcoder_connection_c
 
 	event_buffer->price = record_buffer->price;
 	event_buffer->size = record_buffer->size;
+	event_buffer->executed_size = record_buffer->executed_size;
 	event_buffer->count = record_buffer->count;
 
 	event_buffer->trade_id = record_buffer->trade_id;

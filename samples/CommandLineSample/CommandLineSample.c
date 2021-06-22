@@ -183,12 +183,12 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 
 		wprintf(L"index=0x%llX, side=%i, scope=%i, time=", o->index, o->side, o->scope);
 		print_timestamp(o->time);
-		wprintf(L", exchange code=%c, market maker=%ls, price=%.10f, size=%d", o->exchange_code, o->market_maker,
-				o->price, o->size);
+		wprintf(L", exchange code=%c, market maker=%ls, price=%.10f, size=%.10f, executed_size=%.10f", o->exchange_code, o->market_maker,
+				o->price, o->size, o->executed_size);
 
 		if (wcslen(o->source) > 0) wprintf(L", source=%ls", o->source);
 
-		wprintf(L", count=%d, flags=0x%X}\n", o->count, o->event_flags);
+		wprintf(L", count=%.10f, flags=0x%X}\n", o->count, o->event_flags);
 	}
 
 	if (event_type == DXF_ET_TRADE) {
@@ -242,26 +242,26 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 	}
 
 	if (event_type == DXF_ET_TRADE_ETH) {
-		dxf_trade_t* trades = (dxf_trade_t*)data;
+		dxf_trade_t* tr = (dxf_trade_t*)data;
 
-		print_timestamp(trades->time);
+		print_timestamp(tr->time);
 		wprintf(
 			L", exchangeCode=%c, flags=%d, price=%.10f, size=%.10f, change=%.10f, day id=%d, day volume=%.10f, scope=%d}\n",
-			trades->exchange_code, trades->raw_flags, trades->price, trades->size, trades->change,
-			trades->day_id, trades->day_volume, (int)trades->scope);
+			tr->exchange_code, tr->raw_flags, tr->price, tr->size, tr->change,
+			tr->day_id, tr->day_volume, (int)tr->scope);
 	}
 
 	if (event_type == DXF_ET_SPREAD_ORDER) {
-		dxf_order_t* orders = (dxf_order_t*)data;
+		dxf_order_t* o = (dxf_order_t*)data;
 
-		wprintf(L"index=0x%llX, side=%i, scope=%i, time=", orders->index, orders->side, orders->scope);
-		print_timestamp(orders->time);
+		wprintf(L"index=0x%llX, side=%i, scope=%i, time=", o->index, o->side, o->scope);
+		print_timestamp(o->time);
 		wprintf(
-			L", sequence=%i, exchange code=%c, price=%.10f, size=%d, source=%ls, "
-			L"count=%i, flags=%i, spread symbol=%ls}\n",
-			orders->sequence, orders->exchange_code, orders->price, orders->size,
-			wcslen(orders->source) > 0 ? orders->source : L"", orders->count, orders->event_flags,
-			wcslen(orders->spread_symbol) > 0 ? orders->spread_symbol : L"");
+			L", sequence=%i, exchange code=%c, price=%.10f, size=%.10f, executed size=%.10f, source=%ls, "
+			L"count=%.10f, flags=%i, spread symbol=%ls}\n",
+			o->sequence, o->exchange_code, o->price, o->size, o->executed_size,
+			wcslen(o->source) > 0 ? o->source : L"", o->count, o->event_flags,
+			wcslen(o->spread_symbol) > 0 ? o->spread_symbol : L"");
 	}
 
 	if (event_type == DXF_ET_GREEKS) {

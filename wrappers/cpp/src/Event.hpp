@@ -118,9 +118,11 @@ struct OrderBase {
 	/// Price of this order.
 	dxf_double_t price;
 	/// Size of this order
-	dxf_int_t size;
+	dxf_double_t size;
+	/// Executed size of this order
+	dxf_double_t executed_size;
 	/// Number of individual orders in this aggregate order.
-	dxf_int_t count;
+	dxf_double_t count;
 	/// Scope of this order
 	dxf_order_scope_t scope;
 	/// Side of this order
@@ -139,6 +141,7 @@ struct OrderBase {
 		  sequence{order.sequence},
 		  price{order.price},
 		  size{order.size},
+		  executed_size{order.executed_size},
 		  count{order.count},
 		  scope{order.scope},
 		  side{order.side},

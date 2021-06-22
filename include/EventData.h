@@ -335,10 +335,13 @@ typedef struct dxf_order_t {
 	dxf_double_t price;
 
 	/// Size of this order
-	dxf_int_t size;
+	dxf_double_t size;
+
+	/// Executed size of this order
+	dxf_double_t executed_size;
 
 	/// Number of individual orders in this aggregate order.
-	dxf_int_t count;
+	dxf_double_t count;
 
 	/**
 	 * Contains trade (order execution) ID for events containing trade-related action if available, otherwise - 0.
