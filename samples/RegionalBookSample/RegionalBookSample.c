@@ -184,13 +184,13 @@ void regional_listener(dxf_const_string_t symbol, const dxf_quote_t* quotes, int
         wprintf(L"Quote{symbol=%ls, ", symbol);
         wprintf(L"bidTime=");
         print_timestamp(quote->bid_time);
-        wprintf(L" bidExchangeCode=%c, bidPrice=%f, bidSize=%i, ",
+        wprintf(L" bidExchangeCode=%c, bidPrice=%f, bidSize=%f, ",
             quote->bid_exchange_code,
             quote->bid_price,
             quote->bid_size);
         wprintf(L"askTime=");
         print_timestamp(quote->ask_time);
-        wprintf(L" askExchangeCode=%c, askPrice=%f, askSize=%i, scope=%d}\n",
+        wprintf(L" askExchangeCode=%c, askPrice=%f, askSize=%f, scope=%d}\n",
             quote->ask_exchange_code,
             quote->ask_price,
             quote->ask_size, (int)quote->scope);

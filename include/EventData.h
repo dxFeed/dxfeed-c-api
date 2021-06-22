@@ -496,7 +496,7 @@ typedef struct dxf_quote_t {
 	/// Bid price
 	dxf_double_t bid_price;
 	/// Bid size
-	dxf_int_t bid_size;
+	dxf_double_t bid_size;
 	/// Time of the last ask change
 	dxf_long_t ask_time;
 	/// Ask exchange code
@@ -504,7 +504,7 @@ typedef struct dxf_quote_t {
 	/// Ask price
 	dxf_double_t ask_price;
 	/// Ask size
-	dxf_int_t ask_size;
+	dxf_double_t ask_size;
 	/**
 	 * Scope of this quote.
 	 *
@@ -1420,7 +1420,7 @@ typedef void (*dxf_snapshot_inc_listener_t)(const dxf_snapshot_data_ptr_t snapsh
 /// Price level element
 typedef struct dxf_price_level_element {
 	dxf_double_t price;
-	dxf_long_t size;
+	dxf_double_t size;
 	dxf_long_t time;
 } dxf_price_level_element_t;
 

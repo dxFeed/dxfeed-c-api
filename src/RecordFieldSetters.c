@@ -192,11 +192,11 @@ FIELD_STDOPS_BODIES(dx_quote_t, time_nanos, dxf_int_t)
 FIELD_STDOPS_BODIES(dx_quote_t, bid_time, dxf_int_t)
 FIELD_STDOPS_BODIES(dx_quote_t, bid_exchange_code, dxf_char_t)
 FIELD_STDOPS_BODIES(dx_quote_t, bid_price, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_quote_t, bid_size, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_quote_t, bid_size, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_quote_t, ask_time, dxf_int_t)
 FIELD_STDOPS_BODIES(dx_quote_t, ask_exchange_code, dxf_char_t)
 FIELD_STDOPS_BODIES(dx_quote_t, ask_price, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_quote_t, ask_size, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_quote_t, ask_size, dxf_double_t)
 
 /* -------------------------------------------------------------------------- */
 /*

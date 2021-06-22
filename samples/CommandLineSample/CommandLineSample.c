@@ -171,10 +171,10 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 
 		wprintf(L"bidTime=");
 		print_timestamp(q->bid_time);
-		wprintf(L" bidExchangeCode=%c, bidPrice=%f, bidSize=%i, ", q->bid_exchange_code, q->bid_price, q->bid_size);
+		wprintf(L" bidExchangeCode=%c, bidPrice=%f, bidSize=%f, ", q->bid_exchange_code, q->bid_price, q->bid_size);
 		wprintf(L"askTime=");
 		print_timestamp(q->ask_time);
-		wprintf(L" askExchangeCode=%c, askPrice=%f, askSize=%i, scope=%d}\n", q->ask_exchange_code, q->ask_price,
+		wprintf(L" askExchangeCode=%c, askPrice=%f, askSize=%f, scope=%d}\n", q->ask_exchange_code, q->ask_price,
 				q->ask_size, (int)q->scope);
 	}
 

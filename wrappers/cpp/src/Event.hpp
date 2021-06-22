@@ -51,7 +51,7 @@ struct Quote final {
 	/// Bid price
 	dxf_double_t bid_price{};
 	/// Bid size
-	dxf_int_t bid_size{};
+	dxf_double_t bid_size{};
 	/// Time of the last ask change
 	dxf_long_t ask_time{};
 	/// Ask exchange code
@@ -59,7 +59,7 @@ struct Quote final {
 	/// Ask price
 	dxf_double_t ask_price{};
 	/// Ask size
-	dxf_int_t ask_size{};
+	dxf_double_t ask_size{};
 	/**
 	 * Scope of this quote.
 	 *

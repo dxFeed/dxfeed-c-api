@@ -100,11 +100,11 @@ typedef struct dx_quote {
     dxf_int_t bid_time;
     dxf_char_t bid_exchange_code;
     dxf_double_t bid_price;
-    dxf_int_t bid_size;
+	dxf_double_t bid_size;
     dxf_int_t ask_time;
     dxf_char_t ask_exchange_code;
     dxf_double_t ask_price;
-    dxf_int_t ask_size;
+	dxf_double_t ask_size;
 } dx_quote_t;
 
 /// Summary
