@@ -237,7 +237,7 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 			wprintf(L"index=0x%" LS(PRIX64) L", side=%i, scope=%i, time=", orders[i].index, orders[i].side,
 					orders[i].scope);
 			print_timestamp(orders[i].time);
-			wprintf(L", exchange code=%c, market maker=%ls, price=%f, size=%i}\n", orders[i].exchange_code,
+			wprintf(L", exchange code=%c, market maker=%ls, price=%.10f, size=%i}\n", orders[i].exchange_code,
 					orders[i].market_maker, orders[i].price, orders[i].size);
 		}
 	}
@@ -259,7 +259,7 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 
 		for (; i < data_count; ++i) {
 			wprintf(
-				L"day high price=%f, day low price=%f, day open price=%f, prev day close price=%f, open interest=%i}\n",
+				L"day high price=%.10f, day low price=%.10f, day open price=%.10f, prev day close price=%.10f, open interest=%.10f}\n",
 				s[i].day_high_price, s[i].day_low_price, s[i].day_open_price, s[i].prev_day_close_price,
 				s[i].open_interest);
 		}
@@ -270,14 +270,14 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 
 		for (; i < data_count; ++i) {
 			wprintf(
-				L"Beta=%f, eps=%f, div freq=%i, exd div amount=%f, exd div date=%i, 52 high price=%f, "
-				L"52 low price=%f, shares=%f, Description=%ls, flags=%i, status_reason=%ls, halt start time=",
+				L"Beta=%.10f, eps=%.10f, div freq=%i, exd div amount=%.10f, exd div date=%i, 52 high price=%.10f, "
+				L"52 low price=%.10f, shares=%.10f, Description=%ls, flags=%i, status_reason=%ls, halt start time=",
 				p[i].beta, p[i].eps, p[i].div_freq, p[i].exd_div_amount, p[i].exd_div_date, p[i].high_52_week_price,
 				p[i].low_52_week_price, p[i].shares, p[i].description, p[i].raw_flags, p[i].status_reason);
 			print_timestamp(p[i].halt_start_time);
 			wprintf(L", halt end time=");
 			print_timestamp(p[i].halt_end_time);
-			wprintf(L", high limit price=%f, low limit price=%f}\n", p[i].high_limit_price, p[i].low_limit_price);
+			wprintf(L", high limit price=%.10f, low limit price=%.10f}\n", p[i].high_limit_price, p[i].low_limit_price);
 		}
 	}
 
@@ -285,7 +285,7 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 		dxf_time_and_sale_t* tns = (dxf_time_and_sale_t*)data;
 
 		for (; i < data_count; ++i) {
-			wprintf(L"event id=%"LS(PRId64)L", time=%"LS(PRId64)L", exchange code=%c, price=%f, size=%i, bid price=%f, ask price=%f, "
+			wprintf(L"event id=%"LS(PRId64)L", time=%"LS(PRId64)L", exchange code=%c, price=%.10f, size=%i, bid price=%.10f, ask price=%.10f, "
 				L"exchange sale conditions=%ls, is ETH trade=%ls, type=%i}\n",
 					tns[i].index, tns[i].time, tns[i].exchange_code, tns[i].price, tns[i].size,
 					tns[i].bid_price, tns[i].ask_price, tns[i].exchange_sale_conditions,

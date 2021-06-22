@@ -558,7 +558,7 @@ typedef struct dxf_summary {
 	/// Total volume traded for the previous day
 	dxf_double_t prev_day_volume;
 	/// Open interest of the symbol as the number of open contracts
-	dxf_int_t open_interest;
+	dxf_double_t open_interest;
 	/**
 	 * This field contains several individual flags encoded as an integer number the following way:
 	 *

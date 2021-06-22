@@ -78,16 +78,16 @@ static const dx_field_info_t dx_fields_quote[] = {
 /* -------------------------------------------------------------------------- */
 
 static const dx_field_info_t dx_fields_summary[] = {
-	{ dx_fid_compact_int | dx_fid_flag_date,    L"DayId",              DX_RECORD_FIELD_STDOPS(dx_summary_t, day_id),               dx_ft_common_field },
-    { dx_fid_compact_int | dx_fid_flag_decimal, L"DayOpen.Price",      DX_RECORD_FIELD_STDOPS(dx_summary_t, day_open_price),       dx_ft_common_field },
-    { dx_fid_compact_int | dx_fid_flag_decimal, L"DayHigh.Price",      DX_RECORD_FIELD_STDOPS(dx_summary_t, day_high_price),       dx_ft_common_field },
-    { dx_fid_compact_int | dx_fid_flag_decimal, L"DayLow.Price",       DX_RECORD_FIELD_STDOPS(dx_summary_t, day_low_price),        dx_ft_common_field },
-    { dx_fid_compact_int | dx_fid_flag_decimal, L"DayClose.Price",     DX_RECORD_FIELD_STDOPS(dx_summary_t, day_close_price),      dx_ft_common_field },
-    { dx_fid_compact_int | dx_fid_flag_date,    L"PrevDayId",          DX_RECORD_FIELD_STDOPS(dx_summary_t, prev_day_id),          dx_ft_common_field },
-    { dx_fid_compact_int | dx_fid_flag_decimal, L"PrevDayClose.Price", DX_RECORD_FIELD_STDOPS(dx_summary_t, prev_day_close_price), dx_ft_common_field },
-    { dx_fid_compact_int | dx_fid_flag_decimal, L"PrevDayVolume",      DX_RECORD_FIELD_STDOPS(dx_summary_t, prev_day_volume),      dx_ft_common_field },
-    { dx_fid_compact_int,                       L"OpenInterest",       DX_RECORD_FIELD_STDOPS(dx_summary_t, open_interest),        dx_ft_common_field },
-    { dx_fid_compact_int,                       L"Flags",              DX_RECORD_FIELD_STDOPS(dx_summary_t, flags),                dx_ft_common_field }
+	{ dx_fid_compact_int | dx_fid_flag_date,         L"DayId",              DX_RECORD_FIELD_STDOPS(dx_summary_t, day_id),               dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_wide_decimal, L"DayOpen.Price",      DX_RECORD_FIELD_STDOPS(dx_summary_t, day_open_price),       dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_wide_decimal, L"DayHigh.Price",      DX_RECORD_FIELD_STDOPS(dx_summary_t, day_high_price),       dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_wide_decimal, L"DayLow.Price",       DX_RECORD_FIELD_STDOPS(dx_summary_t, day_low_price),        dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_wide_decimal, L"DayClose.Price",     DX_RECORD_FIELD_STDOPS(dx_summary_t, day_close_price),      dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_date,         L"PrevDayId",          DX_RECORD_FIELD_STDOPS(dx_summary_t, prev_day_id),          dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_wide_decimal, L"PrevDayClose.Price", DX_RECORD_FIELD_STDOPS(dx_summary_t, prev_day_close_price), dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_wide_decimal, L"PrevDayVolume",      DX_RECORD_FIELD_STDOPS(dx_summary_t, prev_day_volume),      dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_wide_decimal, L"OpenInterest",       DX_RECORD_FIELD_STDOPS(dx_summary_t, open_interest),        dx_ft_common_field },
+    { dx_fid_compact_int,                            L"Flags",              DX_RECORD_FIELD_STDOPS(dx_summary_t, flags),                dx_ft_common_field }
 };
 
 /* -------------------------------------------------------------------------- */
