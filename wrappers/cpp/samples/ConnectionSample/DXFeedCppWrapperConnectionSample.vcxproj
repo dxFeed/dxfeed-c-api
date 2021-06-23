@@ -174,7 +174,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>FMT_HEADER_ONLY=1;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\include;$(SolutionDir)\wrappers\cpp\src;$(SolutionDir)\wrappers\cpp\thirdparty\args;$(SolutionDir)\wrappers\cpp\thirdparty\fmt\include;$(SolutionDir)\wrappers\cpp\thirdparty\optional-lite\include;$(SolutionDir)\wrappers\cpp\thirdparty\string-view-lite\include;$(SolutionDir)\wrappers\cpp\thirdparty\variant-lite\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\include;$(SolutionDir)\wrappers\cpp\src;$(SolutionDir)\wrappers\cpp\thirdparty\args;$(SolutionDir)\wrappers\cpp\thirdparty\fmt-8.0.0\include;$(SolutionDir)\wrappers\cpp\thirdparty\optional-lite\include;$(SolutionDir)\wrappers\cpp\thirdparty\string-view-lite\include;$(SolutionDir)\wrappers\cpp\thirdparty\variant-lite\include;</AdditionalIncludeDirectories>
       <CompileAs>CompileAsCpp</CompileAs>
     </ClCompile>
     <Link>
@@ -199,7 +199,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>FMT_HEADER_ONLY=1;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\include;$(SolutionDir)\wrappers\cpp\src;$(SolutionDir)\wrappers\cpp\thirdparty\args;$(SolutionDir)\wrappers\cpp\thirdparty\fmt\include;$(SolutionDir)\wrappers\cpp\thirdparty\optional-lite\include;$(SolutionDir)\wrappers\cpp\thirdparty\string-view-lite\include;$(SolutionDir)\wrappers\cpp\thirdparty\variant-lite\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\include;$(SolutionDir)\wrappers\cpp\src;$(SolutionDir)\wrappers\cpp\thirdparty\args;$(SolutionDir)\wrappers\cpp\thirdparty\fmt-8.0.0\include;$(SolutionDir)\wrappers\cpp\thirdparty\optional-lite\include;$(SolutionDir)\wrappers\cpp\thirdparty\string-view-lite\include;$(SolutionDir)\wrappers\cpp\thirdparty\variant-lite\include</AdditionalIncludeDirectories>
       <CompileAs>CompileAsCpp</CompileAs>
     </ClCompile>
     <Link>
@@ -249,7 +249,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>FMT_HEADER_ONLY=1;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\include;$(SolutionDir)\wrappers\cpp\src;$(SolutionDir)\wrappers\cpp\thirdparty\args;$(SolutionDir)\wrappers\cpp\thirdparty\fmt\include;$(SolutionDir)\wrappers\cpp\thirdparty\optional-lite\include;$(SolutionDir)\wrappers\cpp\thirdparty\string-view-lite\include;$(SolutionDir)\wrappers\cpp\thirdparty\variant-lite\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\include;$(SolutionDir)\wrappers\cpp\src;$(SolutionDir)\wrappers\cpp\thirdparty\args;$(SolutionDir)\wrappers\cpp\thirdparty\fmt-8.0.0\include;$(SolutionDir)\wrappers\cpp\thirdparty\optional-lite\include;$(SolutionDir)\wrappers\cpp\thirdparty\string-view-lite\include;$(SolutionDir)\wrappers\cpp\thirdparty\variant-lite\include</AdditionalIncludeDirectories>
       <CompileAs>CompileAsCpp</CompileAs>
     </ClCompile>
     <Link>

@@ -108,7 +108,7 @@ int event_subscription_test (void) {
 		}
 	}
 
-	if (!dx_process_event_data(connection, dx_eid_quote, L"SYMB", quote_event_data, 1, &empty_event_params)) {
+	if (!dx_process_event_data(connection, dx_eid_quote, L"SYMB", quote_event_data, &empty_event_params)) {
 		return false;
 	}
 
@@ -120,13 +120,13 @@ int event_subscription_test (void) {
 
 	// unknown symbol SYMZ must be rejected
 
-	if (!dx_process_event_data(connection, dx_eid_trade, L"SYMZ", trade_event_data, 1, &empty_event_params) ||
+	if (!dx_process_event_data(connection, dx_eid_trade, L"SYMZ", trade_event_data, &empty_event_params) ||
 		dx_compare_strings(last_symbol, L"SYMB") ||
 		visit_count > 2) {
 		return false;
 	}
 
-	if (!dx_process_event_data(connection, dx_eid_trade, L"SYMD", trade_event_data, 1, &empty_event_params)) {
+	if (!dx_process_event_data(connection, dx_eid_trade, L"SYMD", trade_event_data, &empty_event_params)) {
 		return false;
 	}
 
@@ -142,7 +142,7 @@ int event_subscription_test (void) {
 
 	// sub1 is no longer receiving SYMBs
 
-	if (!dx_process_event_data(connection, dx_eid_quote, L"SYMB", quote_event_data, 1, &empty_event_params)) {
+	if (!dx_process_event_data(connection, dx_eid_quote, L"SYMB", quote_event_data, &empty_event_params)) {
 		return false;
 	}
 
@@ -152,7 +152,7 @@ int event_subscription_test (void) {
 		return false;
 	}
 
-	if (!dx_process_event_data(connection, dx_eid_trade, L"SYMA", trade_event_data, 1, &empty_event_params)) {
+	if (!dx_process_event_data(connection, dx_eid_trade, L"SYMA", trade_event_data, &empty_event_params)) {
 		return false;
 	}
 
@@ -168,7 +168,7 @@ int event_subscription_test (void) {
 
 	// SYMB is still supported by sub2, but sub2 no longer has a listener
 
-	if (!dx_process_event_data(connection, dx_eid_quote, L"SYMB", quote_event_data, 1, &empty_event_params)) {
+	if (!dx_process_event_data(connection, dx_eid_quote, L"SYMB", quote_event_data, &empty_event_params)) {
 		return false;
 	}
 
