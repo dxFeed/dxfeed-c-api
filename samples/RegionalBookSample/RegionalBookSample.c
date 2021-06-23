@@ -237,6 +237,7 @@ int main(int argc, char* argv[]) {
 			"  " TOKEN_PARAM_SHORT_TAG " <token>       - The authorization token\n"
 			"  " LOG_DATA_TRANSFER_TAG "               - Enables the data transfer logging\n"
 			"  " TIMEOUT_TAG " <timeout>     - Sets the program timeout in seconds (default = 604800, i.e a week)\n"
+			"Example: RegionalBookSample demo.dxfeed.com:7300 IBM\n\n"
 			);
 		return 0;
 	}
