@@ -263,7 +263,7 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 	if (event_type == DXF_ET_TIME_AND_SALE) {
 		dxf_time_and_sale_t* tns = (dxf_time_and_sale_t*)data;
 
-		wprintf(L"event id=%"LS(PRId64)L", time=%"LS(PRId64)L", exchange code=%c, price=%.10f, size=%i, bid price=%.10f, ask price=%.10f, "
+		wprintf(L"event id=%"LS(PRId64)L", time=%"LS(PRId64)L", exchange code=%c, price=%.10f, size=%.10f, bid price=%.10f, ask price=%.10f, "
 					L"exchange sale conditions=\'%ls\', is ETH trade=%ls, type=%i}\n",
 					tns->index, tns->time, tns->exchange_code, tns->price, tns->size,
 					tns->bid_price, tns->ask_price, tns->exchange_sale_conditions,

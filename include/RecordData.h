@@ -201,7 +201,7 @@ typedef struct dx_time_and_sale {
     dxf_int_t sequence;
     dxf_char_t exchange_code;
     dxf_double_t price;
-    dxf_int_t size;
+	dxf_double_t size;
     dxf_double_t bid_price;
     dxf_double_t ask_price;
     dxf_int_t exchange_sale_conditions;

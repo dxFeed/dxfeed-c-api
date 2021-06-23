@@ -153,7 +153,7 @@ dxf_string_t ansi_to_unicode(const char* ansi_str) {
 	}
 
 	return wide_str;
-#else /* _WIN32 */
+#else  /* _WIN32 */
 	dxf_string_t wide_str = NULL;
 	size_t wide_size = mbstowcs(NULL, ansi_str, 0);	 // 0 is ignored
 
@@ -194,8 +194,8 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, int new_snapshot, voi
 			if (!DXF_IS_ORDER_REMOVAL(&order)) {
 				wprintf(L"   {index=0x%llX, side=%i, side=%i, time=", order.index, order.side, order.side);
 				print_timestamp(order.time);
-				wprintf(L", exchange code=%c, market maker=%ls, price=%.10f, size=%.10f, executed size=%.10f", order.exchange_code,
-						order.market_maker, order.price, order.size, order.executed_size);
+				wprintf(L", exchange code=%c, market maker=%ls, price=%.10f, size=%.10f, executed size=%.10f",
+						order.exchange_code, order.market_maker, order.price, order.size, order.executed_size);
 				if (wcslen(order.source) > 0) wprintf(L", source=%ls", order.source);
 				wprintf(L", count=%.10f}\n", order.count);
 			} else {
@@ -262,7 +262,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, int new_snapshot, voi
 			if (!DXF_IS_TIME_AND_SALE_REMOVAL(&tns)) {
 				wprintf(L"    {time=");
 				print_timestamp(tns.time);
-				wprintf(L", event id=%"LS(PRId64)L", exchange code=%c, price=%.10f, size=%i, bid price=%.10f, ask price=%.10f, "
+				wprintf(L", event id=%"LS(PRId64)L", exchange code=%c, price=%.10f, size=%.10f, bid price=%.10f, ask price=%.10f, "
 					L"exchange sale conditions=\'%ls\', is ETH trade=%ls, type=%i}\n",
 					tns.index, tns.exchange_code, tns.price, tns.size,
 					tns.bid_price, tns.ask_price, tns.exchange_sale_conditions,
@@ -483,12 +483,11 @@ int main(int argc, char* argv[]) {
 
 	ERRORCODE connection_result;
 	if (token != NULL && token[0] != '\0') {
-		connection_result =
-			dxf_create_connection_auth_bearer(dxfeed_host, token, on_reader_thread_terminate,
-											  NULL, NULL, NULL, NULL, &connection);
+		connection_result = dxf_create_connection_auth_bearer(dxfeed_host, token, on_reader_thread_terminate, NULL,
+															  NULL, NULL, NULL, &connection);
 	} else {
-		connection_result = dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL,
-												  NULL, NULL, NULL, &connection);
+		connection_result =
+			dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, NULL, &connection);
 	}
 
 	if (connection_result == DXF_FAILURE) {

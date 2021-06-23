@@ -421,7 +421,7 @@ typedef struct dxf_trade_t {
 	dxf_char_t exchange_code;
 	/// Price of the last trade
 	dxf_double_t price;
-	/// Size of the last trade as integer number (rounded toward zero)
+	/// Size of the last trade
 	dxf_double_t size;
 
 	/**
@@ -699,8 +699,8 @@ typedef struct dxf_time_and_sale {
 	dxf_char_t exchange_code;
 	/// Price of this time and sale event
 	dxf_double_t price;
-	/// Size of this time and sale event as integer number
-	dxf_int_t size;
+	/// Size of this time and sale event
+	dxf_double_t size;
 	/// The current bid price on the market when this time and sale event had occurred
 	dxf_double_t bid_price;
 	/// The current ask price on the market when this time and sale event had occurred

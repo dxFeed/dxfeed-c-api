@@ -101,8 +101,7 @@ void first_listener(int event_type, dxf_const_string_t symbol_name, const dxf_ev
 		wprintf(
 			L"day high price=%.10f, day low price=%.10f, day open price=%.10f, prev day close price=%.10f, open "
 			L"interest=%.10f\n",
-			s->day_high_price, s->day_low_price, s->day_open_price, s->prev_day_close_price,
-			s->open_interest);
+			s->day_high_price, s->day_low_price, s->day_open_price, s->prev_day_close_price, s->open_interest);
 	}
 
 	if (event_type == DXF_ET_PROFILE) {
@@ -123,11 +122,10 @@ void first_listener(int event_type, dxf_const_string_t symbol_name, const dxf_ev
 		dxf_time_and_sale_t* tns = (dxf_time_and_sale_t*)data;
 
 		wprintf(
-			L"event id=%lld, time=%lld, exchange code=%c, price=%.10f, size=%li, bid price=%.10f, ask price=%.10f, "
+			L"event id=%lld, time=%lld, exchange code=%c, price=%.10f, size=%.10f, bid price=%.10f, ask price=%.10f, "
 			L"exchange sale conditions=%ls, is ETH trade=%ls, type=%i\n",
-			tns->index, tns->time, tns->exchange_code, tns->price, tns->size, tns->bid_price,
-			tns->ask_price, tns->exchange_sale_conditions, tns->is_eth_trade ? L"True" : L"False",
-			(int)tns->type);
+			tns->index, tns->time, tns->exchange_code, tns->price, tns->size, tns->bid_price, tns->ask_price,
+			tns->exchange_sale_conditions, tns->is_eth_trade ? L"True" : L"False", (int)tns->type);
 	}
 }
 
