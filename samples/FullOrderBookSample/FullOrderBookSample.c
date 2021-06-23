@@ -289,10 +289,10 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void *user_data) {
 
 		wprintf(L"   {index=0x%llX, side=%i, scope=%i, time=", order.index, order.side, order.scope);
 		print_timestamp(order.time);
-		wprintf(L", exchange code=%c, market maker=%ls, price=%.10f, size=%.10f, executed size=%.10f", order.exchange_code, order.market_maker,
+		wprintf(L", exchange code=%c, market maker=%ls, price=%.15g, size=%.15g, executed size=%.15g", order.exchange_code, order.market_maker,
 				order.price, order.size, order.executed_size);
 		if (wcslen(order.source) > 0) wprintf(L", source=%ls", order.source);
-		wprintf(L", count=%.10f", order.count);
+		wprintf(L", count=%.15g", order.count);
 
 		if (order.action > dxf_oa_undefined && order.action <= dxf_oa_last) {
 			wprintf(L", action=%ls, action time=%" LS(PRId64) "", dxf_get_order_action_wstring_name(order.action),

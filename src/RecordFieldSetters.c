@@ -314,7 +314,7 @@ FIELD_STDOPS_BODIES(dx_candle_t, vwap, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_candle_t, bid_volume, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_candle_t, ask_volume, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_candle_t, imp_volatility, dxf_double_t)
-FIELD_STDOPS_BODIES(dx_candle_t, open_interest, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_candle_t, open_interest, dxf_double_t)
 
 /* -------------------------------------------------------------------------- */
 /*

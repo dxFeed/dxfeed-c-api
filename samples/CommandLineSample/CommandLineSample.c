@@ -171,11 +171,11 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 
 		wprintf(L"bidTime=");
 		print_timestamp(q->bid_time);
-		wprintf(L" bidExchangeCode=%c, bidPrice=%.10f, bidSize=%.10f, ", q->bid_exchange_code, q->bid_price,
+		wprintf(L" bidExchangeCode=%c, bidPrice=%.15g, bidSize=%.15g, ", q->bid_exchange_code, q->bid_price,
 				q->bid_size);
 		wprintf(L"askTime=");
 		print_timestamp(q->ask_time);
-		wprintf(L" askExchangeCode=%c, askPrice=%.10f, askSize=%.10f, scope=%d}\n", q->ask_exchange_code, q->ask_price,
+		wprintf(L" askExchangeCode=%c, askPrice=%.15g, askSize=%.15g, scope=%d}\n", q->ask_exchange_code, q->ask_price,
 				q->ask_size, (int)q->scope);
 	}
 
@@ -184,12 +184,12 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 
 		wprintf(L"index=0x%llX, side=%i, scope=%i, time=", o->index, o->side, o->scope);
 		print_timestamp(o->time);
-		wprintf(L", exchange code=%c, market maker=%ls, price=%.10f, size=%.10f, executed_size=%.10f", o->exchange_code,
+		wprintf(L", exchange code=%c, market maker=%ls, price=%.15g, size=%.15g, executed_size=%.15g", o->exchange_code,
 				o->market_maker, o->price, o->size, o->executed_size);
 
 		if (wcslen(o->source) > 0) wprintf(L", source=%ls", o->source);
 
-		wprintf(L", count=%.10f, flags=0x%X}\n", o->count, o->event_flags);
+		wprintf(L", count=%.15g, flags=0x%X}\n", o->count, o->event_flags);
 	}
 
 	if (event_type == DXF_ET_TRADE) {
@@ -197,7 +197,7 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 
 		print_timestamp(tr->time);
 		wprintf(
-			L", exchangeCode=%c, price=%.10f, size=%.10f, tick=%i, change=%.10f, day id=%d, day volume=%.10f, "
+			L", exchangeCode=%c, price=%.15g, size=%.15g, tick=%i, change=%.15g, day id=%d, day volume=%.15g, "
 			L"scope=%d}\n",
 			tr->exchange_code, tr->price, tr->size, tr->tick, tr->change, tr->day_id, tr->day_volume, (int)tr->scope);
 	}
@@ -206,8 +206,8 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 		dxf_summary_t* s = (dxf_summary_t*)data;
 
 		wprintf(
-			L"day id=%d, day open price=%.10f, day high price=%.10f, day low price=%.10f, day close price=%.10f, "
-			L"prev day id=%d, prev day close price=%.10f, open interest=%.10f, flags=0x%X, exchange=%c, "
+			L"day id=%d, day open price=%.15g, day high price=%.15g, day low price=%.15g, day close price=%.15g, "
+			L"prev day id=%d, prev day close price=%.15g, open interest=%.15g, flags=0x%X, exchange=%c, "
 			L"day close price type=%i, prev day close price type=%i, scope=%d}\n",
 			s->day_id, s->day_open_price, s->day_high_price, s->day_low_price, s->day_close_price, s->prev_day_id,
 			s->prev_day_close_price, s->open_interest, s->raw_flags, s->exchange_code, s->day_close_price_type,
@@ -218,14 +218,14 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 		dxf_profile_t* p = (dxf_profile_t*)data;
 
 		wprintf(
-			L"Beta=%f, eps=%.10f, div freq=%.10f, exd div amount=%.10f, exd div date=%i, 52 high price=%.10f, "
-			L"52 low price=%.10f, shares=%.10f, Description=%ls, flags=%i, status_reason=%ls, halt start time=",
+			L"Beta=%f, eps=%.15g, div freq=%.15g, exd div amount=%.15g, exd div date=%i, 52 high price=%.15g, "
+			L"52 low price=%.15g, shares=%.15g, Description=%ls, flags=%i, status_reason=%ls, halt start time=",
 			p->beta, p->eps, p->div_freq, p->exd_div_amount, p->exd_div_date, p->high_52_week_price,
 			p->low_52_week_price, p->shares, p->description, p->raw_flags, p->status_reason);
 		print_timestamp(p->halt_start_time);
 		wprintf(L", halt end time=");
 		print_timestamp(p->halt_end_time);
-		wprintf(L", high limit price=%.10f, low limit price=%.10f}\n", p->high_limit_price, p->low_limit_price);
+		wprintf(L", high limit price=%.15g, low limit price=%.15g}\n", p->high_limit_price, p->low_limit_price);
 	}
 
 	if (event_type == DXF_ET_TIME_AND_SALE) {
@@ -234,7 +234,7 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 		wprintf(L"event id=%" LS(PRId64) L", time=", tns->index);
 		print_timestamp(tns->time);
 		wprintf(
-			L", exchange code=%c, price=%.10f, size=%.10f, bid price=%.10f, ask price=%.10f, "
+			L", exchange code=%c, price=%.15g, size=%.15g, bid price=%.15g, ask price=%.15g, "
 			L"exchange sale conditions=\'%ls\', is ETH trade=%ls, type=%i, buyer=\'%ls\', seller=\'%ls\', "
 			L"scope=%d, flags=0x%X, raw_flags=0x%X}\n",
 			tns->exchange_code, tns->price, tns->size, tns->bid_price, tns->ask_price, tns->exchange_sale_conditions,
@@ -247,7 +247,7 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 
 		print_timestamp(tr->time);
 		wprintf(
-			L", exchangeCode=%c, flags=%d, price=%.10f, size=%.10f, change=%.10f, day id=%d, day volume=%.10f, "
+			L", exchangeCode=%c, flags=%d, price=%.15g, size=%.15g, change=%.15g, day id=%d, day volume=%.15g, "
 			L"scope=%d}\n",
 			tr->exchange_code, tr->raw_flags, tr->price, tr->size, tr->change, tr->day_id, tr->day_volume,
 			(int)tr->scope);
@@ -259,8 +259,8 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 		wprintf(L"index=0x%llX, side=%i, scope=%i, time=", o->index, o->side, o->scope);
 		print_timestamp(o->time);
 		wprintf(
-			L", sequence=%i, exchange code=%c, price=%.10f, size=%.10f, executed size=%.10f, source=%ls, "
-			L"count=%.10f, flags=%i, spread symbol=%ls}\n",
+			L", sequence=%i, exchange code=%c, price=%.15g, size=%.15g, executed size=%.15g, source=%ls, "
+			L"count=%.15g, flags=%i, spread symbol=%ls}\n",
 			o->sequence, o->exchange_code, o->price, o->size, o->executed_size, wcslen(o->source) > 0 ? o->source : L"",
 			o->count, o->event_flags, wcslen(o->spread_symbol) > 0 ? o->spread_symbol : L"");
 	}
@@ -270,8 +270,8 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 
 		wprintf(L"time=");
 		print_timestamp(grks->time);
-		wprintf(L", index=%"LS(PRId64)L", greeks price=%.10f, volatility=%f, "
-			L"delta=%.10f, gamma=%.10f, theta=%.10f, rho=%.10f, vega=%.10f, index=0x%"LS(PRIX64)L", flags=0x%X}\n",
+		wprintf(L", index=%"LS(PRId64)L", greeks price=%.15g, volatility=%f, "
+			L"delta=%.15g, gamma=%.15g, theta=%.15g, rho=%.15g, vega=%.15g, index=0x%"LS(PRIX64)L", flags=0x%X}\n",
 			grks->index, grks->price, grks->volatility,
 			grks->delta, grks->gamma, grks->theta, grks->rho, grks->vega, grks->index,
 			grks->event_flags);
@@ -283,8 +283,8 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 		wprintf(L"theo time=");
 		print_timestamp(tp->time);
 		wprintf(
-			L", theo price=%.10f, theo underlying price=%.10f, theo delta=%.10f, "
-			L"theo gamma=%.10f, theo dividend=%.10f, theo_interest=%.10f}\n",
+			L", theo price=%.15g, theo underlying price=%.15g, theo delta=%.15g, "
+			L"theo gamma=%.15g, theo dividend=%.15g, theo_interest=%.15g}\n",
 			tp->price, tp->underlying_price, tp->delta, tp->gamma, tp->dividend, tp->interest);
 	}
 
@@ -292,8 +292,8 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 		dxf_underlying_t* u = (dxf_underlying_t*)data;
 
 		wprintf(
-			L"volatility=%.10f, front volatility=%.10f, back volatility=%.10f, call volume=%.10f, put volume=%.10f, "
-			L"option volume=%.10f, put call ratio=%.10f}\n",
+			L"volatility=%.15g, front volatility=%.15g, back volatility=%.15g, call volume=%.15g, put volume=%.15g, "
+			L"option volume=%.15g, put call ratio=%.15g}\n",
 			u->volatility, u->front_volatility, u->back_volatility, u->call_volume, u->put_volume, u->option_volume,
 			u->put_call_ratio);
 	}
@@ -301,8 +301,8 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 	if (event_type == DXF_ET_SERIES) {
 		dxf_series_t* srs = (dxf_series_t*)data;
 
-		wprintf(L"expiration=%d, index=%"LS(PRId64)L", volatility=%.10f, call volume=%.10f, put volume=%.10f, "
-			L"option volume=%.10f, put call ratio=%.10f, forward_price=%.10f, dividend=%.10f, interest=%.10f, "
+		wprintf(L"expiration=%d, index=%"LS(PRId64)L", volatility=%.15g, call volume=%.15g, put volume=%.15g, "
+			L"option volume=%.15g, put call ratio=%.15g, forward_price=%.15g, dividend=%.15g, interest=%.15g, "
 			L"index=0x%"LS(PRIX64)L", flags=0x%X}\n",
 			srs->expiration, srs->index, srs->volatility, srs->call_volume, srs->put_volume,
 			srs->option_volume, srs->put_call_ratio, srs->forward_price, srs->dividend, srs->interest,

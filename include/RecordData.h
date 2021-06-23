@@ -223,7 +223,7 @@ typedef struct dx_candle {
     dxf_double_t vwap;
     dxf_double_t bid_volume;
     dxf_double_t ask_volume;
-    dxf_int_t open_interest;
+	dxf_double_t open_interest;
     dxf_double_t imp_volatility;
 } dx_candle_t;
 

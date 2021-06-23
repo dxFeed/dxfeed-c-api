@@ -794,7 +794,7 @@ typedef struct {
 	/// Ask volume in this candle
 	dxf_double_t ask_volume;
 	/// Open interest
-	dxf_int_t open_interest;
+	dxf_double_t open_interest;
 	/// Implied volatility
 	dxf_double_t imp_volatility;
 } dxf_candle_t;

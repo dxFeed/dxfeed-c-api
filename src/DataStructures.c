@@ -186,19 +186,19 @@ static const dx_field_info_t dx_fields_time_and_sale[] = {
 /* -------------------------------------------------------------------------- */
 
 static const dx_field_info_t dx_fields_candle[] = {
-	{ dx_fid_compact_int | dx_fid_flag_time_seconds, L"Time",          DX_RECORD_FIELD_STDOPS(dx_candle_t, time),           dx_ft_first_time_int_field  },
-    { dx_fid_compact_int | dx_fid_flag_sequence,     L"Sequence",      DX_RECORD_FIELD_STDOPS(dx_candle_t, sequence),       dx_ft_second_time_int_field },
-    { dx_fid_compact_int | dx_fid_flag_decimal,      L"Count",         DX_RECORD_FIELD_STDOPS(dx_candle_t, count),          dx_ft_common_field },
-    { dx_fid_compact_int | dx_fid_flag_decimal,      L"Open",          DX_RECORD_FIELD_STDOPS(dx_candle_t, open),           dx_ft_common_field },
-    { dx_fid_compact_int | dx_fid_flag_decimal,      L"High",          DX_RECORD_FIELD_STDOPS(dx_candle_t, high),           dx_ft_common_field },
-    { dx_fid_compact_int | dx_fid_flag_decimal,      L"Low",           DX_RECORD_FIELD_STDOPS(dx_candle_t, low),            dx_ft_common_field },
-    { dx_fid_compact_int | dx_fid_flag_decimal,      L"Close",         DX_RECORD_FIELD_STDOPS(dx_candle_t, close),          dx_ft_common_field },
-    { dx_fid_compact_int | dx_fid_flag_decimal,      L"Volume",        DX_RECORD_FIELD_STDOPS(dx_candle_t, volume),         dx_ft_common_field },
-    { dx_fid_compact_int | dx_fid_flag_decimal,      L"VWAP",          DX_RECORD_FIELD_STDOPS(dx_candle_t, vwap),           dx_ft_common_field },
-	{ dx_fid_compact_int | dx_fid_flag_decimal,      L"BidVolume",     DX_RECORD_FIELD_STDOPS(dx_candle_t, bid_volume),     dx_ft_common_field },
-	{ dx_fid_compact_int | dx_fid_flag_decimal,      L"AskVolume",     DX_RECORD_FIELD_STDOPS(dx_candle_t, ask_volume),     dx_ft_common_field },
-    { dx_fid_compact_int | dx_fid_flag_decimal,      L"ImpVolatility", DX_RECORD_FIELD_STDOPS(dx_candle_t, imp_volatility), dx_ft_common_field },
-	{ dx_fid_compact_int | dx_fid_flag_decimal,      L"OpenInterest",  DX_RECORD_FIELD_STDOPS(dx_candle_t, open_interest),  dx_ft_common_field },
+	{ dx_fid_compact_int | dx_fid_flag_time_seconds,      L"Time",          DX_RECORD_FIELD_STDOPS(dx_candle_t, time),           dx_ft_first_time_int_field  },
+    { dx_fid_compact_int | dx_fid_flag_sequence,          L"Sequence",      DX_RECORD_FIELD_STDOPS(dx_candle_t, sequence),       dx_ft_second_time_int_field },
+    { dx_fid_compact_int | dx_fid_flag_wide_decimal,      L"Count",         DX_RECORD_FIELD_STDOPS(dx_candle_t, count),          dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_wide_decimal,      L"Open",          DX_RECORD_FIELD_STDOPS(dx_candle_t, open),           dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_wide_decimal,      L"High",          DX_RECORD_FIELD_STDOPS(dx_candle_t, high),           dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_wide_decimal,      L"Low",           DX_RECORD_FIELD_STDOPS(dx_candle_t, low),            dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_wide_decimal,      L"Close",         DX_RECORD_FIELD_STDOPS(dx_candle_t, close),          dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_wide_decimal,      L"Volume",        DX_RECORD_FIELD_STDOPS(dx_candle_t, volume),         dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_wide_decimal,      L"VWAP",          DX_RECORD_FIELD_STDOPS(dx_candle_t, vwap),           dx_ft_common_field },
+	{ dx_fid_compact_int | dx_fid_flag_wide_decimal,      L"BidVolume",     DX_RECORD_FIELD_STDOPS(dx_candle_t, bid_volume),     dx_ft_common_field },
+	{ dx_fid_compact_int | dx_fid_flag_wide_decimal,      L"AskVolume",     DX_RECORD_FIELD_STDOPS(dx_candle_t, ask_volume),     dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_wide_decimal,      L"ImpVolatility", DX_RECORD_FIELD_STDOPS(dx_candle_t, imp_volatility), dx_ft_common_field },
+	{ dx_fid_compact_int | dx_fid_flag_wide_decimal,      L"OpenInterest",  DX_RECORD_FIELD_STDOPS(dx_candle_t, open_interest),  dx_ft_common_field },
 };
 
 /* -------------------------------------------------------------------------- */

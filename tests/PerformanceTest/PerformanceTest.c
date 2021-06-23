@@ -219,11 +219,11 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 
 		wprintf(L"bidTime=");
 		print_timestamp(q->bid_time);
-		wprintf(L" bidExchangeCode=%c, bidPrice=%.10f, bidSize=%.10f, ", q->bid_exchange_code, q->bid_price,
+		wprintf(L" bidExchangeCode=%c, bidPrice=%.15g, bidSize=%.15g, ", q->bid_exchange_code, q->bid_price,
 				q->bid_size);
 		wprintf(L"askTime=");
 		print_timestamp(q->ask_time);
-		wprintf(L" askExchangeCode=%c, askPrice=%.10f, askSize=%.10f, scope=%d}\n", q->ask_exchange_code, q->ask_price,
+		wprintf(L" askExchangeCode=%c, askPrice=%.15g, askSize=%.15g, scope=%d}\n", q->ask_exchange_code, q->ask_price,
 				q->ask_size, (int)q->scope);
 	}
 
@@ -232,7 +232,7 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 
 		wprintf(L"index=0x%" LS(PRIX64) L", side=%i, scope=%i, time=", o->index, o->side, o->scope);
 		print_timestamp(o->time);
-		wprintf(L", exchange code=%c, market maker=%ls, price=%.10f, size=%.10f, executed size=%.10f, count=%.10f}\n",
+		wprintf(L", exchange code=%c, market maker=%ls, price=%.15g, size=%.15g, executed size=%.15g, count=%.15g}\n",
 				o->exchange_code, o->market_maker, o->price, o->size, o->executed_size, o->count);
 	}
 
@@ -241,7 +241,7 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 
 		print_timestamp(tr->time);
 		wprintf(
-			L", exchangeCode=%c, price=%.10f, size=%.10f, tick=%i, change=%.10f, day id=%d, day volume=%.10f, "
+			L", exchangeCode=%c, price=%.15g, size=%.15g, tick=%i, change=%.15g, day id=%d, day volume=%.15g, "
 			L"scope=%d}\n",
 			tr->exchange_code, tr->price, tr->size, tr->tick, tr->change, tr->day_id, tr->day_volume, (int)tr->scope);
 	}
@@ -250,8 +250,8 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 		dxf_summary_t* s = (dxf_summary_t*)data;
 
 		wprintf(
-			L"day high price=%.10f, day low price=%.10f, day open price=%.10f, prev day close price=%.10f, open "
-			L"interest=%.10f}\n",
+			L"day high price=%.15g, day low price=%.15g, day open price=%.15g, prev day close price=%.15g, open "
+			L"interest=%.15g}\n",
 			s->day_high_price, s->day_low_price, s->day_open_price, s->prev_day_close_price, s->open_interest);
 	}
 
@@ -259,20 +259,20 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 		dxf_profile_t* p = (dxf_profile_t*)data;
 
 		wprintf(
-			L"Beta=%.10f, eps=%.10f, div freq=%.10f, exd div amount=%.10f, exd div date=%i, 52 high price=%.10f, "
-			L"52 low price=%.10f, shares=%.10f, Description=%ls, flags=%i, status_reason=%ls, halt start time=",
+			L"Beta=%.15g, eps=%.15g, div freq=%.15g, exd div amount=%.15g, exd div date=%i, 52 high price=%.15g, "
+			L"52 low price=%.15g, shares=%.15g, Description=%ls, flags=%i, status_reason=%ls, halt start time=",
 			p->beta, p->eps, p->div_freq, p->exd_div_amount, p->exd_div_date, p->high_52_week_price,
 			p->low_52_week_price, p->shares, p->description, p->raw_flags, p->status_reason);
 		print_timestamp(p->halt_start_time);
 		wprintf(L", halt end time=");
 		print_timestamp(p->halt_end_time);
-		wprintf(L", high limit price=%.10f, low limit price=%.10f}\n", p->high_limit_price, p->low_limit_price);
+		wprintf(L", high limit price=%.15g, low limit price=%.15g}\n", p->high_limit_price, p->low_limit_price);
 	}
 
 	if (event_type == DXF_ET_TIME_AND_SALE) {
 		dxf_time_and_sale_t* tns = (dxf_time_and_sale_t*)data;
 
-		wprintf(L"event id=%"LS(PRId64)L", time=%"LS(PRId64)L", exchange code=%c, price=%.10f, size=%.10f, bid price=%.10f, ask price=%.10f, "
+		wprintf(L"event id=%"LS(PRId64)L", time=%"LS(PRId64)L", exchange code=%c, price=%.15g, size=%.15g, bid price=%.15g, ask price=%.15g, "
 				L"exchange sale conditions=%ls, is ETH trade=%ls, type=%i}\n",
 					tns->index, tns->time, tns->exchange_code, tns->price, tns->size,
 					tns->bid_price, tns->ask_price, tns->exchange_sale_conditions,
