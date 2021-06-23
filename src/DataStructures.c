@@ -154,8 +154,8 @@ static const dx_field_info_t dx_fields_order[] = {
 	{ dx_fid_compact_int | dx_fid_flag_wide_decimal, L"Count",        DX_RECORD_FIELD_STDOPS(dx_order_t, count),        dx_ft_common_field },
     { dx_fid_compact_int,                            L"Flags",        DX_RECORD_FIELD_STDOPS(dx_order_t, flags),        dx_ft_common_field },
 	{ dx_fid_compact_int | dx_fid_flag_long,         L"TradeId",      DX_RECORD_FIELD_STDOPS(dx_order_t, trade_id),     dx_ft_common_field },
-	{ dx_fid_compact_int | dx_fid_flag_decimal,      L"TradePrice",   DX_RECORD_FIELD_STDOPS(dx_order_t, trade_price),  dx_ft_common_field },
-	{ dx_fid_compact_int | dx_fid_flag_decimal,      L"TradeSize",    DX_RECORD_FIELD_STDOPS(dx_order_t, trade_size),   dx_ft_common_field },
+	{ dx_fid_compact_int | dx_fid_flag_wide_decimal, L"TradePrice",   DX_RECORD_FIELD_STDOPS(dx_order_t, trade_price),  dx_ft_common_field },
+	{ dx_fid_compact_int | dx_fid_flag_wide_decimal, L"TradeSize",    DX_RECORD_FIELD_STDOPS(dx_order_t, trade_size),   dx_ft_common_field },
     { dx_fid_compact_int,                            L"MarketMaker",         DX_RECORD_FIELD_STDOPS(dx_order_t, mmid),         dx_ft_common_field },
 };
 
@@ -228,21 +228,22 @@ static const dx_field_info_t dx_fields_trade_eth[] = {
 /* -------------------------------------------------------------------------- */
 
 static const dx_field_info_t dx_fields_spread_order[] = {
-	{ dx_fid_compact_int,                           L"Index",        DX_RECORD_FIELD_STDOPS(dx_spread_order_t, index),         dx_ft_second_time_int_field },
-	{ dx_fid_compact_int,                           L"Time",         DX_RECORD_FIELD_STDOPS(dx_spread_order_t, time),          dx_ft_common_field },
-	{ dx_fid_compact_int,                           L"Sequence",     DX_RECORD_FIELD_STDOPS(dx_spread_order_t, sequence),      dx_ft_common_field },
-	{ dx_fid_compact_int,                           L"TimeNanoPart", DX_RECORD_FIELD_STDOPS(dx_spread_order_t, time_nanos),    dx_ft_common_field },
-	{ dx_fid_compact_int | dx_fid_flag_time_millis, L"ActionTime",   DX_RECORD_FIELD_STDOPS(dx_spread_order_t, action_time),   dx_ft_common_field },
-	{ dx_fid_compact_int | dx_fid_flag_long,        L"OrderId",      DX_RECORD_FIELD_STDOPS(dx_spread_order_t, order_id),      dx_ft_common_field },
-	{ dx_fid_compact_int | dx_fid_flag_long,        L"AuxOrderId",   DX_RECORD_FIELD_STDOPS(dx_spread_order_t, aux_order_id),  dx_ft_common_field },
-	{ dx_fid_compact_int | dx_fid_flag_decimal,     L"Price",        DX_RECORD_FIELD_STDOPS(dx_spread_order_t, price),         dx_ft_common_field },
-	{ dx_fid_compact_int,                           L"Size",         DX_RECORD_FIELD_STDOPS(dx_spread_order_t, size),          dx_ft_common_field },
-	{ dx_fid_compact_int,                           L"Count",        DX_RECORD_FIELD_STDOPS(dx_spread_order_t, count),         dx_ft_common_field },
-	{ dx_fid_compact_int,                           L"Flags",        DX_RECORD_FIELD_STDOPS(dx_spread_order_t, flags),         dx_ft_common_field },
-	{ dx_fid_compact_int | dx_fid_flag_long,        L"TradeId",      DX_RECORD_FIELD_STDOPS(dx_spread_order_t, trade_id),      dx_ft_common_field },
-	{ dx_fid_compact_int | dx_fid_flag_decimal,     L"TradePrice",   DX_RECORD_FIELD_STDOPS(dx_spread_order_t, trade_price),   dx_ft_common_field },
-	{ dx_fid_compact_int | dx_fid_flag_decimal,     L"TradeSize",    DX_RECORD_FIELD_STDOPS(dx_spread_order_t, trade_size),    dx_ft_common_field },
-    { dx_fid_utf_char_array,                        L"SpreadSymbol", DX_RECORD_FIELD_STDOPS(dx_spread_order_t, spread_symbol), dx_ft_common_field }
+	{ dx_fid_compact_int,                            L"Index",        DX_RECORD_FIELD_STDOPS(dx_spread_order_t, index),         dx_ft_second_time_int_field },
+	{ dx_fid_compact_int,                            L"Time",         DX_RECORD_FIELD_STDOPS(dx_spread_order_t, time),          dx_ft_common_field },
+	{ dx_fid_compact_int,                            L"Sequence",     DX_RECORD_FIELD_STDOPS(dx_spread_order_t, sequence),      dx_ft_common_field },
+	{ dx_fid_compact_int,                            L"TimeNanoPart", DX_RECORD_FIELD_STDOPS(dx_spread_order_t, time_nanos),    dx_ft_common_field },
+	{ dx_fid_compact_int | dx_fid_flag_time_millis,  L"ActionTime",   DX_RECORD_FIELD_STDOPS(dx_spread_order_t, action_time),   dx_ft_common_field },
+	{ dx_fid_compact_int | dx_fid_flag_long,         L"OrderId",      DX_RECORD_FIELD_STDOPS(dx_spread_order_t, order_id),      dx_ft_common_field },
+	{ dx_fid_compact_int | dx_fid_flag_long,         L"AuxOrderId",   DX_RECORD_FIELD_STDOPS(dx_spread_order_t, aux_order_id),  dx_ft_common_field },
+	{ dx_fid_compact_int | dx_fid_flag_wide_decimal, L"Price",        DX_RECORD_FIELD_STDOPS(dx_spread_order_t, price),         dx_ft_common_field },
+	{ dx_fid_compact_int | dx_fid_flag_wide_decimal, L"Size",         DX_RECORD_FIELD_STDOPS(dx_spread_order_t, size),          dx_ft_common_field },
+	{ dx_fid_compact_int | dx_fid_flag_wide_decimal, L"ExecutedSize", DX_RECORD_FIELD_STDOPS(dx_spread_order_t, executed_size), dx_ft_common_field },
+	{ dx_fid_compact_int | dx_fid_flag_wide_decimal, L"Count",        DX_RECORD_FIELD_STDOPS(dx_spread_order_t, count),         dx_ft_common_field },
+	{ dx_fid_compact_int,                            L"Flags",        DX_RECORD_FIELD_STDOPS(dx_spread_order_t, flags),         dx_ft_common_field },
+	{ dx_fid_compact_int | dx_fid_flag_long,         L"TradeId",      DX_RECORD_FIELD_STDOPS(dx_spread_order_t, trade_id),      dx_ft_common_field },
+	{ dx_fid_compact_int | dx_fid_flag_wide_decimal, L"TradePrice",   DX_RECORD_FIELD_STDOPS(dx_spread_order_t, trade_price),   dx_ft_common_field },
+	{ dx_fid_compact_int | dx_fid_flag_wide_decimal, L"TradeSize",    DX_RECORD_FIELD_STDOPS(dx_spread_order_t, trade_size),    dx_ft_common_field },
+    { dx_fid_utf_char_array,                         L"SpreadSymbol", DX_RECORD_FIELD_STDOPS(dx_spread_order_t, spread_symbol), dx_ft_common_field }
 };
 
 /* -------------------------------------------------------------------------- */
