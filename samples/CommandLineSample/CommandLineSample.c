@@ -184,8 +184,8 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 
 		wprintf(L"index=0x%llX, side=%i, scope=%i, time=", o->index, o->side, o->scope);
 		print_timestamp(o->time);
-		wprintf(L", exchange code=%c, market maker=%ls, price=%.15g, size=%.15g, executed_size=%.15g", o->exchange_code,
-				o->market_maker, o->price, o->size, o->executed_size);
+		wprintf(L", exchange code=%c, market maker=%ls, price=%.15g, size=%.15g", o->exchange_code,
+				o->market_maker, o->price, o->size);
 
 		if (wcslen(o->source) > 0) wprintf(L", source=%ls", o->source);
 
@@ -259,9 +259,9 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 		wprintf(L"index=0x%llX, side=%i, scope=%i, time=", o->index, o->side, o->scope);
 		print_timestamp(o->time);
 		wprintf(
-			L", sequence=%i, exchange code=%c, price=%.15g, size=%.15g, executed size=%.15g, source=%ls, "
+			L", sequence=%i, exchange code=%c, price=%.15g, size=%.15g, source=%ls, "
 			L"count=%.15g, flags=%i, spread symbol=%ls}\n",
-			o->sequence, o->exchange_code, o->price, o->size, o->executed_size, wcslen(o->source) > 0 ? o->source : L"",
+			o->sequence, o->exchange_code, o->price, o->size, wcslen(o->source) > 0 ? o->source : L"",
 			o->count, o->event_flags, wcslen(o->spread_symbol) > 0 ? o->spread_symbol : L"");
 	}
 

@@ -80,9 +80,9 @@ void first_listener(int event_type, dxf_const_string_t symbol_name, const dxf_ev
 
 		wprintf(
 			L"index=%i, side=%i, scope=%i, time=%i, exchange code=%c, market maker=%ls, price=%.15g, size=%.15g, "
-			L"executed size=%.15g, count=%.15g\n",
+			L"count=%.15g\n",
 			(int)o->index, (int)o->side, (int)o->scope, (int)o->time, o->exchange_code, o->market_maker, o->price,
-			o->size, o->executed_size, o->count);
+			o->size, o->count);
 	}
 
 	if (event_type == DXF_ET_TRADE) {

@@ -337,7 +337,7 @@ typedef struct dxf_order_t {
 	/// Size of this order
 	dxf_double_t size;
 
-	/// Executed size of this order
+	/// Executed size of this order. This field is a part of the FOB ("Full Order Book") support.
 	dxf_double_t executed_size;
 
 	/// Number of individual orders in this aggregate order.

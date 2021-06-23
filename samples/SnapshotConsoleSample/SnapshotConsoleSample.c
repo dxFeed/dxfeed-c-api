@@ -283,8 +283,8 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void *user_data) {
 
 			wprintf(L"   {index=0x%llX, side=%i, scope=%i, time=", order.index, order.side, order.scope);
 			print_timestamp(order.time);
-			wprintf(L", exchange code=%c, market maker=%ls, price=%.15g, size=%.15g, executed size=%.15g",
-					order.exchange_code, order.market_maker, order.price, order.size, order.executed_size);
+			wprintf(L", exchange code=%c, market maker=%ls, price=%.15g, size=%.15g",
+					order.exchange_code, order.market_maker, order.price, order.size);
 			if (wcslen(order.source) > 0) wprintf(L", source=%ls", order.source);
 			wprintf(L", count=%.15g, flags=0x%X}\n", order.count, order.event_flags);
 		}
@@ -319,9 +319,9 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void *user_data) {
 			wprintf(L"   {index=0x%llX, side=%i, scope=%i, time=", order.index, order.side, order.scope);
 			print_timestamp(order.time);
 			wprintf(
-				L", sequence=%i, exchange code=%c, price=%.15g, size=%.15g, executed size=%.15g, source=%ls, "
+				L", sequence=%i, exchange code=%c, price=%.15g, size=%.15g, source=%ls, "
 				L"count=%.15g, flags=%i, spread symbol=%ls}\n",
-				order.sequence, order.exchange_code, order.price, order.size, order.executed_size,
+				order.sequence, order.exchange_code, order.price, order.size,
 				wcslen(order.source) > 0 ? order.source : L"", order.count, order.event_flags,
 				wcslen(order.spread_symbol) > 0 ? order.spread_symbol : L"");
 		}

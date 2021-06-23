@@ -232,8 +232,8 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 
 		wprintf(L"index=0x%" LS(PRIX64) L", side=%i, scope=%i, time=", o->index, o->side, o->scope);
 		print_timestamp(o->time);
-		wprintf(L", exchange code=%c, market maker=%ls, price=%.15g, size=%.15g, executed size=%.15g, count=%.15g}\n",
-				o->exchange_code, o->market_maker, o->price, o->size, o->executed_size, o->count);
+		wprintf(L", exchange code=%c, market maker=%ls, price=%.15g, size=%.15g, count=%.15g}\n",
+				o->exchange_code, o->market_maker, o->price, o->size, o->count);
 	}
 
 	if (event_type == DXF_ET_TRADE) {
