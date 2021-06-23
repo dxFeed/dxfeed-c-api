@@ -255,13 +255,13 @@ static const dx_field_info_t dx_fields_spread_order[] = {
 static const dx_field_info_t dx_fields_greeks[] = {
 	{ dx_fid_compact_int | dx_fid_flag_time_seconds, L"Time",         DX_RECORD_FIELD_STDOPS(dx_greeks_t, time),       dx_ft_first_time_int_field  },
     { dx_fid_compact_int | dx_fid_flag_sequence,     L"Sequence",     DX_RECORD_FIELD_STDOPS(dx_greeks_t, sequence),   dx_ft_second_time_int_field },
-    { dx_fid_compact_int | dx_fid_flag_decimal,      L"Greeks.Price", DX_RECORD_FIELD_STDOPS(dx_greeks_t, price),      dx_ft_common_field },
-    { dx_fid_compact_int | dx_fid_flag_decimal,      L"Volatility",   DX_RECORD_FIELD_STDOPS(dx_greeks_t, volatility), dx_ft_common_field },
-    { dx_fid_compact_int | dx_fid_flag_decimal,      L"Delta",        DX_RECORD_FIELD_STDOPS(dx_greeks_t, delta),      dx_ft_common_field },
-    { dx_fid_compact_int | dx_fid_flag_decimal,      L"Gamma",        DX_RECORD_FIELD_STDOPS(dx_greeks_t, gamma),      dx_ft_common_field },
-    { dx_fid_compact_int | dx_fid_flag_decimal,      L"Theta",        DX_RECORD_FIELD_STDOPS(dx_greeks_t, theta),      dx_ft_common_field },
-    { dx_fid_compact_int | dx_fid_flag_decimal,      L"Rho",          DX_RECORD_FIELD_STDOPS(dx_greeks_t, rho),        dx_ft_common_field },
-    { dx_fid_compact_int | dx_fid_flag_decimal,      L"Vega",         DX_RECORD_FIELD_STDOPS(dx_greeks_t, vega),       dx_ft_common_field }
+    { dx_fid_compact_int | dx_fid_flag_wide_decimal, L"Greeks.Price", DX_RECORD_FIELD_STDOPS(dx_greeks_t, price),      dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_wide_decimal, L"Volatility",   DX_RECORD_FIELD_STDOPS(dx_greeks_t, volatility), dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_wide_decimal, L"Delta",        DX_RECORD_FIELD_STDOPS(dx_greeks_t, delta),      dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_wide_decimal, L"Gamma",        DX_RECORD_FIELD_STDOPS(dx_greeks_t, gamma),      dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_wide_decimal, L"Theta",        DX_RECORD_FIELD_STDOPS(dx_greeks_t, theta),      dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_wide_decimal, L"Rho",          DX_RECORD_FIELD_STDOPS(dx_greeks_t, rho),        dx_ft_common_field },
+    { dx_fid_compact_int | dx_fid_flag_wide_decimal, L"Vega",         DX_RECORD_FIELD_STDOPS(dx_greeks_t, vega),       dx_ft_common_field }
 };
 
 /* -------------------------------------------------------------------------- */
