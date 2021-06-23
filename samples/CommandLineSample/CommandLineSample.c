@@ -54,7 +54,7 @@
 #define SUBSCRIPTION_DATA_PARAM_TAG "-s"
 #define LOG_DATA_TRANSFER_TAG		"-p"
 #define TIMEOUT_TAG					"-o"
-#define LOG_HEARTBEAT_TAG		    "-b"
+#define LOG_HEARTBEAT_TAG			"-b"
 
 // Prevents file names globbing (converting * to all files in the current dir)
 #ifdef __MINGW64_VERSION_MAJOR
@@ -171,10 +171,11 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 
 		wprintf(L"bidTime=");
 		print_timestamp(q->bid_time);
-		wprintf(L" bidExchangeCode=%c, bidPrice=%f, bidSize=%i, ", q->bid_exchange_code, q->bid_price, q->bid_size);
+		wprintf(L" bidExchangeCode=%c, bidPrice=%.15g, bidSize=%.15g, ", q->bid_exchange_code, q->bid_price,
+				q->bid_size);
 		wprintf(L"askTime=");
 		print_timestamp(q->ask_time);
-		wprintf(L" askExchangeCode=%c, askPrice=%f, askSize=%i, scope=%d}\n", q->ask_exchange_code, q->ask_price,
+		wprintf(L" askExchangeCode=%c, askPrice=%.15g, askSize=%.15g, scope=%d}\n", q->ask_exchange_code, q->ask_price,
 				q->ask_size, (int)q->scope);
 	}
 
@@ -183,47 +184,48 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 
 		wprintf(L"index=0x%llX, side=%i, scope=%i, time=", o->index, o->side, o->scope);
 		print_timestamp(o->time);
-		wprintf(L", exchange code=%c, market maker=%ls, price=%f, size=%d", o->exchange_code, o->market_maker,
-				o->price, o->size);
+		wprintf(L", exchange code=%c, market maker=%ls, price=%.15g, size=%.15g", o->exchange_code,
+				o->market_maker, o->price, o->size);
 
 		if (wcslen(o->source) > 0) wprintf(L", source=%ls", o->source);
 
-		wprintf(L", count=%d, flags=0x%X}\n", o->count, o->event_flags);
+		wprintf(L", count=%.15g, flags=0x%X}\n", o->count, o->event_flags);
 	}
 
 	if (event_type == DXF_ET_TRADE) {
 		dxf_trade_t* tr = (dxf_trade_t*)data;
 
 		print_timestamp(tr->time);
-		wprintf(L", exchangeCode=%c, price=%f, size=%i, tick=%i, change=%f, day id=%d, day volume=%.0f, scope=%d}\n",
-				tr->exchange_code, tr->price, tr->size, tr->tick, tr->change, tr->day_id, tr->day_volume,
-				(int)tr->scope);
+		wprintf(
+			L", exchangeCode=%c, price=%.15g, size=%.15g, tick=%i, change=%.15g, day id=%d, day volume=%.15g, "
+			L"scope=%d}\n",
+			tr->exchange_code, tr->price, tr->size, tr->tick, tr->change, tr->day_id, tr->day_volume, (int)tr->scope);
 	}
 
 	if (event_type == DXF_ET_SUMMARY) {
 		dxf_summary_t* s = (dxf_summary_t*)data;
 
-			wprintf(
-				L"day id=%d, day open price=%f, day high price=%f, day low price=%f, day close price=%f, "
-				L"prev day id=%d, prev day close price=%f, open interest=%i, flags=0x%X, exchange=%c, "
-				L"day close price type=%i, prev day close price type=%i, scope=%d}\n",
-				s->day_id, s->day_open_price, s->day_high_price, s->day_low_price, s->day_close_price,
-				s->prev_day_id, s->prev_day_close_price, s->open_interest, s->raw_flags, s->exchange_code,
-				s->day_close_price_type, s->prev_day_close_price_type, s->scope);
+		wprintf(
+			L"day id=%d, day open price=%.15g, day high price=%.15g, day low price=%.15g, day close price=%.15g, "
+			L"prev day id=%d, prev day close price=%.15g, open interest=%.15g, flags=0x%X, exchange=%c, "
+			L"day close price type=%i, prev day close price type=%i, scope=%d}\n",
+			s->day_id, s->day_open_price, s->day_high_price, s->day_low_price, s->day_close_price, s->prev_day_id,
+			s->prev_day_close_price, s->open_interest, s->raw_flags, s->exchange_code, s->day_close_price_type,
+			s->prev_day_close_price_type, s->scope);
 	}
 
 	if (event_type == DXF_ET_PROFILE) {
 		dxf_profile_t* p = (dxf_profile_t*)data;
 
 		wprintf(
-			L"Beta=%f, eps=%f, div freq=%i, exd div amount=%f, exd div date=%i, 52 high price=%f, "
-			L"52 low price=%f, shares=%f, Description=%ls, flags=%i, status_reason=%ls, halt start time=",
+			L"Beta=%f, eps=%.15g, div freq=%.15g, exd div amount=%.15g, exd div date=%i, 52 high price=%.15g, "
+			L"52 low price=%.15g, shares=%.15g, Description=%ls, flags=%i, status_reason=%ls, halt start time=",
 			p->beta, p->eps, p->div_freq, p->exd_div_amount, p->exd_div_date, p->high_52_week_price,
 			p->low_52_week_price, p->shares, p->description, p->raw_flags, p->status_reason);
 		print_timestamp(p->halt_start_time);
 		wprintf(L", halt end time=");
 		print_timestamp(p->halt_end_time);
-		wprintf(L", high limit price=%f, low limit price=%f}\n", p->high_limit_price, p->low_limit_price);
+		wprintf(L", high limit price=%.15g, low limit price=%.15g}\n", p->high_limit_price, p->low_limit_price);
 	}
 
 	if (event_type == DXF_ET_TIME_AND_SALE) {
@@ -232,36 +234,35 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 		wprintf(L"event id=%" LS(PRId64) L", time=", tns->index);
 		print_timestamp(tns->time);
 		wprintf(
-			L", exchange code=%c, price=%f, size=%i, bid price=%f, ask price=%f, "
+			L", exchange code=%c, price=%.15g, size=%.15g, bid price=%.15g, ask price=%.15g, "
 			L"exchange sale conditions=\'%ls\', is ETH trade=%ls, type=%i, buyer=\'%ls\', seller=\'%ls\', "
 			L"scope=%d, flags=0x%X, raw_flags=0x%X}\n",
-			tns->exchange_code, tns->price, tns->size, tns->bid_price, tns->ask_price,
-			tns->exchange_sale_conditions, tns->is_eth_trade ? L"True" : L"False", tns->type,
-			tns->buyer ? tns->buyer : L"<UNKNOWN>", tns->seller ? tns->seller : L"<UNKNOWN>", tns->scope,
-			tns->event_flags, tns->raw_flags);
+			tns->exchange_code, tns->price, tns->size, tns->bid_price, tns->ask_price, tns->exchange_sale_conditions,
+			tns->is_eth_trade ? L"True" : L"False", tns->type, tns->buyer ? tns->buyer : L"<UNKNOWN>",
+			tns->seller ? tns->seller : L"<UNKNOWN>", tns->scope, tns->event_flags, tns->raw_flags);
 	}
 
 	if (event_type == DXF_ET_TRADE_ETH) {
-		dxf_trade_t* trades = (dxf_trade_t*)data;
+		dxf_trade_t* tr = (dxf_trade_t*)data;
 
-		print_timestamp(trades->time);
+		print_timestamp(tr->time);
 		wprintf(
-			L", exchangeCode=%c, flags=%d, price=%f, size=%i, change=%f, day id=%d, day volume=%.0f, scope=%d}\n",
-			trades->exchange_code, trades->raw_flags, trades->price, trades->size, trades->change,
-			trades->day_id, trades->day_volume, (int)trades->scope);
+			L", exchangeCode=%c, flags=%d, price=%.15g, size=%.15g, change=%.15g, day id=%d, day volume=%.15g, "
+			L"scope=%d}\n",
+			tr->exchange_code, tr->raw_flags, tr->price, tr->size, tr->change, tr->day_id, tr->day_volume,
+			(int)tr->scope);
 	}
 
 	if (event_type == DXF_ET_SPREAD_ORDER) {
-		dxf_order_t* orders = (dxf_order_t*)data;
+		dxf_order_t* o = (dxf_order_t*)data;
 
-		wprintf(L"index=0x%llX, side=%i, scope=%i, time=", orders->index, orders->side, orders->scope);
-		print_timestamp(orders->time);
+		wprintf(L"index=0x%llX, side=%i, scope=%i, time=", o->index, o->side, o->scope);
+		print_timestamp(o->time);
 		wprintf(
-			L", sequence=%i, exchange code=%c, price=%f, size=%d, source=%ls, "
-			L"count=%i, flags=%i, spread symbol=%ls}\n",
-			orders->sequence, orders->exchange_code, orders->price, orders->size,
-			wcslen(orders->source) > 0 ? orders->source : L"", orders->count, orders->event_flags,
-			wcslen(orders->spread_symbol) > 0 ? orders->spread_symbol : L"");
+			L", sequence=%i, exchange code=%c, price=%.15g, size=%.15g, source=%ls, "
+			L"count=%.15g, flags=%i, spread symbol=%ls}\n",
+			o->sequence, o->exchange_code, o->price, o->size, wcslen(o->source) > 0 ? o->source : L"",
+			o->count, o->event_flags, wcslen(o->spread_symbol) > 0 ? o->spread_symbol : L"");
 	}
 
 	if (event_type == DXF_ET_GREEKS) {
@@ -269,8 +270,8 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 
 		wprintf(L"time=");
 		print_timestamp(grks->time);
-		wprintf(L", index=%"LS(PRId64)L", greeks price=%f, volatility=%f, "
-			L"delta=%f, gamma=%f, theta=%f, rho=%f, vega=%f, index=0x%"LS(PRIX64)L", flags=0x%X}\n",
+		wprintf(L", index=%"LS(PRId64)L", greeks price=%.15g, volatility=%f, "
+			L"delta=%.15g, gamma=%.15g, theta=%.15g, rho=%.15g, vega=%.15g, index=0x%"LS(PRIX64)L", flags=0x%X}\n",
 			grks->index, grks->price, grks->volatility,
 			grks->delta, grks->gamma, grks->theta, grks->rho, grks->vega, grks->index,
 			grks->event_flags);
@@ -282,8 +283,8 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 		wprintf(L"theo time=");
 		print_timestamp(tp->time);
 		wprintf(
-			L", theo price=%f, theo underlying price=%f, theo delta=%f, "
-			L"theo gamma=%f, theo dividend=%f, theo_interest=%f}\n",
+			L", theo price=%.15g, theo underlying price=%.15g, theo delta=%.15g, "
+			L"theo gamma=%.15g, theo dividend=%.15g, theo_interest=%.15g}\n",
 			tp->price, tp->underlying_price, tp->delta, tp->gamma, tp->dividend, tp->interest);
 	}
 
@@ -291,17 +292,17 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 		dxf_underlying_t* u = (dxf_underlying_t*)data;
 
 		wprintf(
-			L"volatility=%f, front volatility=%f, back volatility=%f, call volume=%f, put volume=%f, "
-			L"option volume=%f, put call ratio=%f}\n",
-			u->volatility, u->front_volatility, u->back_volatility, u->call_volume, u->put_volume,
-			u->option_volume, u->put_call_ratio);
+			L"volatility=%.15g, front volatility=%.15g, back volatility=%.15g, call volume=%.15g, put volume=%.15g, "
+			L"option volume=%.15g, put call ratio=%.15g}\n",
+			u->volatility, u->front_volatility, u->back_volatility, u->call_volume, u->put_volume, u->option_volume,
+			u->put_call_ratio);
 	}
 
 	if (event_type == DXF_ET_SERIES) {
 		dxf_series_t* srs = (dxf_series_t*)data;
 
-		wprintf(L"expiration=%d, index=%"LS(PRId64)L", volatility=%f, call volume=%f, put volume=%f, "
-			L"option volume=%f, put call ratio=%f, forward_price=%f, dividend=%f, interest=%f, "
+		wprintf(L"expiration=%d, index=%"LS(PRId64)L", volatility=%.15g, call volume=%.15g, put volume=%.15g, "
+			L"option volume=%.15g, put call ratio=%.15g, forward_price=%.15g, dividend=%.15g, interest=%.15g, "
 			L"index=0x%"LS(PRIX64)L", flags=0x%X}\n",
 			srs->expiration, srs->index, srs->volatility, srs->call_volume, srs->put_volume,
 			srs->option_volume, srs->put_call_ratio, srs->forward_price, srs->dividend, srs->interest,
@@ -329,7 +330,7 @@ dxf_string_t ansi_to_unicode(const char* ansi_str, size_t len) {
 	}
 
 	return wide_str;
-#else /* _WIN32 */
+#else  /* _WIN32 */
 	dxf_string_t wide_str = NULL;
 	size_t wide_size = mbstowcs(NULL, ansi_str, len);  // len is ignored
 
@@ -532,7 +533,8 @@ int main(int argc, char* argv[]) {
 			"[" DUMP_PARAM_LONG_TAG " | " DUMP_PARAM_SHORT_TAG " <filename>] [" TOKEN_PARAM_SHORT_TAG
 			" <token>] "
 			"[" SUBSCRIPTION_DATA_PARAM_TAG " <subscr_data>] [" LOG_DATA_TRANSFER_TAG "] [" TIMEOUT_TAG
-			" <timeout>] [" LOG_HEARTBEAT_TAG "]\n"
+			" <timeout>] [" LOG_HEARTBEAT_TAG
+			"]\n"
 			"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
 			"                     If you want to use file instead of server data just\n"
 			"                     write there path to file e.g. path\\to\\raw.bin\n"

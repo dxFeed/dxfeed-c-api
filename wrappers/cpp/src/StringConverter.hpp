@@ -22,6 +22,11 @@
 #include <locale>
 #include <string>
 
+#ifdef _MSC_FULL_VER
+#	pragma warning( push )
+#	pragma warning( disable : 4244 )
+#endif
+
 struct StringConverter {
 	static std::string toString(const std::wstring &wstring) {
 		return std::string(wstring.begin(), wstring.end());
@@ -40,6 +45,10 @@ struct StringConverter {
 		return std::wstring(string.begin(), string.end());
 	}
 };
+
+#ifdef _MSC_FULL_VER
+#	pragma warning( pop )
+#endif
 
 
 

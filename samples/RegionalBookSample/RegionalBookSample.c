@@ -163,14 +163,14 @@ void listener(const dxf_price_level_book_data_ptr_t book_data, void* user_data) 
 	wprintf(L"%-7ls %-8ls %-15ls | %-7ls %-8ls %-15ls\n", L"Ask", L"Size", L"Time", L"Bid", L"Size", L"Time");
 	for (; i < MAX(book_data->asks_count, book_data->bids_count); i++) {
 		if (i < book_data->asks_count) {
-			wprintf(L"%-7.2f %-8lld ", book_data->asks[i].price, book_data->asks[i].size);
+			wprintf(L"%-7.2f %-8.2f ", book_data->asks[i].price, book_data->asks[i].size);
 			print_timestamp(book_data->asks[i].time);
 		} else {
 			wprintf(L"%-7ls %-8ls %-15ls", L"", L"", L"");
 		}
 		wprintf(L" | ");
 		if (i < book_data->bids_count) {
-			wprintf(L"%-7.2f %-8lld ", book_data->bids[i].price, book_data->bids[i].size);
+			wprintf(L"%-7.2f %-8.2f ", book_data->bids[i].price, book_data->bids[i].size);
 			print_timestamp(book_data->bids[i].time);
 		}
 		wprintf(L"\n");
@@ -184,13 +184,13 @@ void regional_listener(dxf_const_string_t symbol, const dxf_quote_t* quotes, int
         wprintf(L"Quote{symbol=%ls, ", symbol);
         wprintf(L"bidTime=");
         print_timestamp(quote->bid_time);
-        wprintf(L" bidExchangeCode=%c, bidPrice=%f, bidSize=%i, ",
+        wprintf(L" bidExchangeCode=%c, bidPrice=%f, bidSize=%f, ",
             quote->bid_exchange_code,
             quote->bid_price,
             quote->bid_size);
         wprintf(L"askTime=");
         print_timestamp(quote->ask_time);
-        wprintf(L" askExchangeCode=%c, askPrice=%f, askSize=%i, scope=%d}\n",
+        wprintf(L" askExchangeCode=%c, askPrice=%f, askSize=%f, scope=%d}\n",
             quote->ask_exchange_code,
             quote->ask_price,
             quote->ask_size, (int)quote->scope);
@@ -237,6 +237,7 @@ int main(int argc, char* argv[]) {
 			"  " TOKEN_PARAM_SHORT_TAG " <token>       - The authorization token\n"
 			"  " LOG_DATA_TRANSFER_TAG "               - Enables the data transfer logging\n"
 			"  " TIMEOUT_TAG " <timeout>     - Sets the program timeout in seconds (default = 604800, i.e a week)\n"
+			"Example: RegionalBookSample demo.dxfeed.com:7300 IBM\n\n"
 			);
 		return 0;
 	}

@@ -1,4 +1,10 @@
 Version 8.0.0
+* [DXFC-231] [Breaking changes] Converted the types and representations of certain event fields to store WideDecimal
+  - Fields that are now of type double: `dxf_order_t.size`, `dxf_order_t.count`, `dxf_trade_t.size`, `dxf_trade_eth_t.size`,
+    `dxf_quote_t.bid_size`, `dxf_quote_t.ask_size`, `dxf_summary_t.open_interest`, `dxf_profile_t.div_freq`,
+    `dxf_time_and_sale_t.size`, `dxf_candle_t.open_interest`
+  - Added field 'dxf_order_t.executed_size' (`dxf_double_t`) which is related to FOB support
+
 * [DXFC-222] Added the new `dxf_create_price_level_book_v2` function with an easier way (for Python and .NET API) to
   pass a list of sources (pair of parameters: `const char** sources` and `int sources_count`)
 

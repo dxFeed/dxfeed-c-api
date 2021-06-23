@@ -11,7 +11,7 @@ include_directories(../../include
     thirdparty/optional-lite/include
     thirdparty/string-view-lite/include
     thirdparty/variant-lite/include
-    thirdparty/fmt/include
+    thirdparty/fmt-8.0.0/include
     thirdparty/args
     )
 

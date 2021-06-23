@@ -81,7 +81,7 @@ typedef struct dx_trade {
     dxf_int_t time_nanos;
     dxf_char_t exchange_code;
     dxf_double_t price;
-    dxf_int_t size;
+	dxf_double_t size;
     dxf_int_t tick;
     dxf_double_t change;
 	dxf_dayid_t day_id;
@@ -100,11 +100,11 @@ typedef struct dx_quote {
     dxf_int_t bid_time;
     dxf_char_t bid_exchange_code;
     dxf_double_t bid_price;
-    dxf_int_t bid_size;
+	dxf_double_t bid_size;
     dxf_int_t ask_time;
     dxf_char_t ask_exchange_code;
     dxf_double_t ask_price;
-    dxf_int_t ask_size;
+	dxf_double_t ask_size;
 } dx_quote_t;
 
 /// Summary
@@ -117,7 +117,7 @@ typedef struct dx_summary {
     dxf_dayid_t prev_day_id;
     dxf_double_t prev_day_close_price;
     dxf_double_t prev_day_volume;
-    dxf_int_t open_interest;
+	dxf_double_t open_interest;
     dxf_int_t flags;
 } dx_summary_t;
 
@@ -125,7 +125,7 @@ typedef struct dx_summary {
 typedef struct dx_profile {
     dxf_double_t beta;
     dxf_double_t eps;
-    dxf_int_t div_freq;
+	dxf_double_t div_freq;
     dxf_double_t exd_div_amount;
     dxf_dayid_t exd_div_date;
     dxf_double_t high_price_52;
@@ -147,12 +147,12 @@ typedef struct dx_market_maker {
     dxf_int_t mm_id;
     dxf_int_t mmbid_time;
     dxf_double_t mmbid_price;
-    dxf_int_t mmbid_size;
-    dxf_int_t mmbid_count;
+	dxf_double_t mmbid_size;
+	dxf_double_t mmbid_count;
     dxf_int_t mmask_time;
     dxf_double_t mmask_price;
-    dxf_int_t mmask_size;
-    dxf_int_t mmask_count;
+	dxf_double_t mmask_size;
+	dxf_double_t mmask_count;
 } dx_market_maker_t;
 
 /// Order
@@ -165,8 +165,9 @@ typedef struct dx_order {
 	dxf_long_t order_id;
 	dxf_long_t aux_order_id;
     dxf_double_t price;
-    dxf_int_t size;
-    dxf_int_t count;
+	dxf_double_t size;
+	dxf_double_t executed_size;
+	dxf_double_t count;
     dxf_int_t flags;
 	dxf_long_t trade_id;
 	dxf_double_t trade_price;
@@ -184,8 +185,9 @@ typedef struct dx_spread_order {
 	dxf_long_t order_id;
 	dxf_long_t aux_order_id;
     dxf_double_t price;
-    dxf_int_t size;
-    dxf_int_t count;
+	dxf_double_t size;
+	dxf_double_t executed_size;
+	dxf_double_t count;
     dxf_int_t flags;
 	dxf_long_t trade_id;
 	dxf_double_t trade_price;
@@ -199,7 +201,7 @@ typedef struct dx_time_and_sale {
     dxf_int_t sequence;
     dxf_char_t exchange_code;
     dxf_double_t price;
-    dxf_int_t size;
+	dxf_double_t size;
     dxf_double_t bid_price;
     dxf_double_t ask_price;
     dxf_int_t exchange_sale_conditions;
@@ -221,7 +223,7 @@ typedef struct dx_candle {
     dxf_double_t vwap;
     dxf_double_t bid_volume;
     dxf_double_t ask_volume;
-    dxf_int_t open_interest;
+	dxf_double_t open_interest;
     dxf_double_t imp_volatility;
 } dx_candle_t;
 

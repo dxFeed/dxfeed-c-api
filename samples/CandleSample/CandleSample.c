@@ -116,8 +116,8 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 	for (; i < data_count; ++i) {
 		wprintf(L"time=");
 		print_timestamp(candles[i].time);
-		wprintf(L", sequence=%d, count=%f, open=%f, high=%f, low=%f, close=%f, volume=%f, "
-			L"VWAP=%f, bidVolume=%f, askVolume=%f, impVolatility=%f, OpenInterest=%d}\n",
+		wprintf(L", sequence=%d, count=%.15g, open=%.15g, high=%.15g, low=%.15g, close=%.15g, volume=%.15g, "
+			L"VWAP=%.15g, bidVolume=%.15g, askVolume=%.15g, impVolatility=%.15g, OpenInterest=%.15g}\n",
 			candles[i].sequence, candles[i].count, candles[i].open, candles[i].high,
 			candles[i].low, candles[i].close, candles[i].volume, candles[i].vwap,
 			candles[i].bid_volume, candles[i].ask_volume, candles[i].imp_volatility, candles[i].open_interest);

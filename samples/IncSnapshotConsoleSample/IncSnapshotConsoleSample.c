@@ -153,7 +153,7 @@ dxf_string_t ansi_to_unicode(const char* ansi_str) {
 	}
 
 	return wide_str;
-#else /* _WIN32 */
+#else  /* _WIN32 */
 	dxf_string_t wide_str = NULL;
 	size_t wide_size = mbstowcs(NULL, ansi_str, 0);	 // 0 is ignored
 
@@ -194,10 +194,10 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, int new_snapshot, voi
 			if (!DXF_IS_ORDER_REMOVAL(&order)) {
 				wprintf(L"   {index=0x%llX, side=%i, side=%i, time=", order.index, order.side, order.side);
 				print_timestamp(order.time);
-				wprintf(L", exchange code=%c, market maker=%ls, price=%f, size=%d", order.exchange_code,
+				wprintf(L", exchange code=%c, market maker=%ls, price=%.15g, size=%.15g", order.exchange_code,
 						order.market_maker, order.price, order.size);
 				if (wcslen(order.source) > 0) wprintf(L", source=%ls", order.source);
-				wprintf(L", count=%d}\n", order.count);
+				wprintf(L", count=%.15g}\n", order.count);
 			} else {
 				wprintf(L"   {index=0x%llX, REMOVAL}\n", order.index);
 			}
@@ -216,8 +216,8 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, int new_snapshot, voi
 				wprintf(L"    {time=");
 				print_timestamp(candle.time);
 				wprintf(
-					L", sequence=%d, count=%f, open=%f, high=%f, low=%f, close=%f, volume=%f, "
-					L"VWAP=%f, bidVolume=%f, askVolume=%f}\n",
+					L", sequence=%d, count=%.15g, open=%.15g, high=%.15g, low=%.15g, close=%.15g, volume=%.15g, "
+					L"VWAP=%.15g, bidVolume=%.15g, askVolume=%.15g}\n",
 					candle.sequence, candle.count, candle.open, candle.high, candle.low, candle.close, candle.volume,
 					candle.vwap, candle.bid_volume, candle.ask_volume);
 			} else {
@@ -240,8 +240,8 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, int new_snapshot, voi
 				wprintf(L"   {index=0x%llX, side=%i, scope=%i, time=", order.index, order.side, order.scope);
 				print_timestamp(order.time);
 				wprintf(
-					L", sequence=%i, exchange code=%c, price=%f, size=%d, source=%ls, "
-					L"count=%i, flags=%i, spread symbol=%ls}\n",
+					L", sequence=%i, exchange code=%c, price=%.15g, size=%.15g, source=%ls, "
+					L"count=%.15g, flags=%i, spread symbol=%ls}\n",
 					order.sequence, order.exchange_code, order.price, order.size,
 					wcslen(order.source) > 0 ? order.source : L"", order.count, order.event_flags,
 					wcslen(order.spread_symbol) > 0 ? order.spread_symbol : L"");
@@ -262,7 +262,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, int new_snapshot, voi
 			if (!DXF_IS_TIME_AND_SALE_REMOVAL(&tns)) {
 				wprintf(L"    {time=");
 				print_timestamp(tns.time);
-				wprintf(L", event id=%"LS(PRId64)L", exchange code=%c, price=%f, size=%i, bid price=%f, ask price=%f, "
+				wprintf(L", event id=%"LS(PRId64)L", exchange code=%c, price=%.15g, size=%.15g, bid price=%.15g, ask price=%.15g, "
 					L"exchange sale conditions=\'%ls\', is ETH trade=%ls, type=%i}\n",
 					tns.index, tns.exchange_code, tns.price, tns.size,
 					tns.bid_price, tns.ask_price, tns.exchange_sale_conditions,
@@ -286,8 +286,8 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, int new_snapshot, voi
 			if (!DXF_IS_GREEKS_REMOVAL(&grks)) {
 				wprintf(L"    {time=");
 				print_timestamp(grks.time);
-				wprintf(L", index=0x%"LS(PRIX64)L", greeks price=%f, volatility=%f, "
-					L"delta=%f, gamma=%f, theta=%f, rho=%f, vega=%f\n",
+				wprintf(L", index=0x%"LS(PRIX64)L", greeks price=%.15g, volatility=%.15g, "
+					L"delta=%.15g, gamma=%.15g, theta=%.15g, rho=%.15g, vega=%.15g\n",
 					grks.index, grks.price, grks.volatility, grks.delta,
 					grks.gamma, grks.theta, grks.rho, grks.vega);
 			} else {
@@ -306,8 +306,8 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, int new_snapshot, voi
 				break;
 			}
 			if (!DXF_IS_SERIES_REMOVAL(&srs)) {
-				wprintf(L"expiration=%d, index=0x%"LS(PRIX64)L", volatility=%f, call volume=%f, put volume=%f, "
-					L"option volume=%f, put call ratio=%f, forward_price=%f, dividend=%f, interest=%f}\n",
+				wprintf(L"expiration=%d, index=0x%"LS(PRIX64)L", volatility=%.15g, call volume=%.15g, put volume=%.15g, "
+					L"option volume=%.15g, put call ratio=%.15g, forward_price=%.15g, dividend=%.15g, interest=%.15g}\n",
 					srs.expiration, srs.index, srs.volatility, srs.call_volume, srs.put_volume, srs.option_volume,
 					srs.put_call_ratio, srs.forward_price, srs.dividend, srs.interest);
 			} else {
@@ -483,12 +483,11 @@ int main(int argc, char* argv[]) {
 
 	ERRORCODE connection_result;
 	if (token != NULL && token[0] != '\0') {
-		connection_result =
-			dxf_create_connection_auth_bearer(dxfeed_host, token, on_reader_thread_terminate,
-											  NULL, NULL, NULL, NULL, &connection);
+		connection_result = dxf_create_connection_auth_bearer(dxfeed_host, token, on_reader_thread_terminate, NULL,
+															  NULL, NULL, NULL, &connection);
 	} else {
-		connection_result = dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL,
-												  NULL, NULL, NULL, &connection);
+		connection_result =
+			dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, NULL, &connection);
 	}
 
 	if (connection_result == DXF_FAILURE) {

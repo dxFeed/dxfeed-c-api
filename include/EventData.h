@@ -335,10 +335,13 @@ typedef struct dxf_order_t {
 	dxf_double_t price;
 
 	/// Size of this order
-	dxf_int_t size;
+	dxf_double_t size;
+
+	/// Executed size of this order. This field is a part of the FOB ("Full Order Book") support.
+	dxf_double_t executed_size;
 
 	/// Number of individual orders in this aggregate order.
-	dxf_int_t count;
+	dxf_double_t count;
 
 	/**
 	 * Contains trade (order execution) ID for events containing trade-related action if available, otherwise - 0.
@@ -418,8 +421,8 @@ typedef struct dxf_trade_t {
 	dxf_char_t exchange_code;
 	/// Price of the last trade
 	dxf_double_t price;
-	/// Size of the last trade as integer number (rounded toward zero)
-	dxf_int_t size;
+	/// Size of the last trade
+	dxf_double_t size;
 
 	/**
 	 * Trend indicator – in which direction price is moving. The values are: Up (Tick = 1), Down (Tick = 2),
@@ -496,7 +499,7 @@ typedef struct dxf_quote_t {
 	/// Bid price
 	dxf_double_t bid_price;
 	/// Bid size
-	dxf_int_t bid_size;
+	dxf_double_t bid_size;
 	/// Time of the last ask change
 	dxf_long_t ask_time;
 	/// Ask exchange code
@@ -504,7 +507,7 @@ typedef struct dxf_quote_t {
 	/// Ask price
 	dxf_double_t ask_price;
 	/// Ask size
-	dxf_int_t ask_size;
+	dxf_double_t ask_size;
 	/**
 	 * Scope of this quote.
 	 *
@@ -558,7 +561,7 @@ typedef struct dxf_summary {
 	/// Total volume traded for the previous day
 	dxf_double_t prev_day_volume;
 	/// Open interest of the symbol as the number of open contracts
-	dxf_int_t open_interest;
+	dxf_double_t open_interest;
 	/**
 	 * This field contains several individual flags encoded as an integer number the following way:
 	 *
@@ -624,7 +627,7 @@ typedef struct dxf_profile {
 	/// Earnings per share (the company’s profits divided by the number of shares). The value comes directly from the annual quarterly accounting reports of companies. Available generally for stocks
 	dxf_double_t eps;
 	/// Frequency of cash dividends payments per year (calculated)
-	dxf_int_t div_freq;
+	dxf_double_t div_freq;
 	/// The amount of the last paid dividend
 	dxf_double_t exd_div_amount;
 	/// Date of the last dividend payment
@@ -696,8 +699,8 @@ typedef struct dxf_time_and_sale {
 	dxf_char_t exchange_code;
 	/// Price of this time and sale event
 	dxf_double_t price;
-	/// Size of this time and sale event as integer number
-	dxf_int_t size;
+	/// Size of this time and sale event
+	dxf_double_t size;
 	/// The current bid price on the market when this time and sale event had occurred
 	dxf_double_t bid_price;
 	/// The current ask price on the market when this time and sale event had occurred
@@ -791,7 +794,7 @@ typedef struct {
 	/// Ask volume in this candle
 	dxf_double_t ask_volume;
 	/// Open interest
-	dxf_int_t open_interest;
+	dxf_double_t open_interest;
 	/// Implied volatility
 	dxf_double_t imp_volatility;
 } dxf_candle_t;
@@ -1420,7 +1423,7 @@ typedef void (*dxf_snapshot_inc_listener_t)(const dxf_snapshot_data_ptr_t snapsh
 /// Price level element
 typedef struct dxf_price_level_element {
 	dxf_double_t price;
-	dxf_long_t size;
+	dxf_double_t size;
 	dxf_long_t time;
 } dxf_price_level_element_t;
 
