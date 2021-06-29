@@ -674,6 +674,12 @@ int dx_transcode_market_maker_to_order_bid (dx_record_transcoder_connection_cont
 	event_buffer->event_flags = event_params->flags;
 	event_buffer->index = DX_ORDER_FORM_MM_BID_INDEX(record_buffer);
 	event_buffer->time = DX_TIME_FIELD_TO_MS(record_buffer->mmbid_time);
+
+	if (IS_FLAG_SET(event_buffer->event_flags, dxf_ef_remove_event)) {
+		return dx_process_event_data(context->connection, dx_eid_order, record_params->symbol_name, event_buffer,
+									 event_params);
+	}
+
 	event_buffer->sequence = 0;
 	event_buffer->price = record_buffer->mmbid_price;
 	event_buffer->size = record_buffer->mmbid_size;
@@ -710,6 +716,12 @@ int dx_transcode_market_maker_to_order_ask (dx_record_transcoder_connection_cont
 	event_buffer->event_flags = event_params->flags;
 	event_buffer->index = DX_ORDER_FORM_MM_ASK_INDEX(record_buffer);
 	event_buffer->time = DX_TIME_FIELD_TO_MS(record_buffer->mmask_time);
+
+	if (IS_FLAG_SET(event_buffer->event_flags, dxf_ef_remove_event)) {
+		return dx_process_event_data(context->connection, dx_eid_order, record_params->symbol_name, event_buffer,
+									 event_params);
+	}
+
 	event_buffer->sequence = 0;
 	event_buffer->price = record_buffer->mmask_price;
 	event_buffer->size = record_buffer->mmask_size;
@@ -803,6 +815,12 @@ int RECORD_TRANSCODER_NAME(dx_order_t) (dx_record_transcoder_connection_context_
 	event_buffer->event_flags = event_params->flags;
 	event_buffer->index = DX_ORDER_INDEX(record_buffer, src);
 	event_buffer->time = DX_TIME_SEQ_TO_MS(record_buffer);
+
+	if (IS_FLAG_SET(event_buffer->event_flags, dxf_ef_remove_event)) {
+		return dx_process_event_data(context->connection, dx_eid_order, record_params->symbol_name, event_buffer,
+									 event_params);
+	}
+
 	event_buffer->sequence = DX_SEQUENCE(record_buffer);
 	event_buffer->time_nanos = record_buffer->time_nanos;
 
@@ -852,6 +870,12 @@ int RECORD_TRANSCODER_NAME(dx_time_and_sale_t) (dx_record_transcoder_connection_
 	event_buffer->event_flags = event_params->flags;
 	event_buffer->index = (int_to_bits(record_buffer->time) << DX_TNS_INDEX_TIME_SHIFT) | int_to_bits(record_buffer->sequence);
 	event_buffer->time = DX_TIME_SEQ_TO_MS(record_buffer);
+
+	if (IS_FLAG_SET(event_buffer->event_flags, dxf_ef_remove_event)) {
+		return dx_process_event_data(context->connection, dx_eid_time_and_sale, record_params->symbol_name, event_buffer,
+									 event_params);
+	}
+
 	event_buffer->exchange_code = record_buffer->exchange_code;
 	event_buffer->price = record_buffer->price;
 	event_buffer->size = record_buffer->size;
@@ -908,6 +932,12 @@ int RECORD_TRANSCODER_NAME(dx_candle_t) (dx_record_transcoder_connection_context
 	event_buffer->event_flags = event_params->flags;
 	event_buffer->index = (int_to_bits(record_buffer->time) << DX_CANDLE_INDEX_TIME_SHIFT) | int_to_bits(record_buffer->sequence);
 	event_buffer->time = DX_TIME_SEQ_TO_MS(record_buffer);
+
+	if (IS_FLAG_SET(event_buffer->event_flags, dxf_ef_remove_event)) {
+		return dx_process_event_data(context->connection, dx_eid_candle, record_params->symbol_name, event_buffer,
+									 event_params);
+	}
+
 	event_buffer->sequence = DX_SEQUENCE(record_buffer);
 	event_buffer->count = record_buffer->count;
 	event_buffer->open = record_buffer->open;
@@ -956,6 +986,12 @@ int RECORD_TRANSCODER_NAME(dx_spread_order_t) (dx_record_transcoder_connection_c
 	event_buffer->event_flags = event_params->flags;
 	event_buffer->index = DX_ORDER_INDEX(record_buffer, src);
 	event_buffer->time = DX_TIME_SEQ_TO_MS(record_buffer);
+
+	if (IS_FLAG_SET(event_buffer->event_flags, dxf_ef_remove_event)) {
+		return dx_process_event_data(context->connection, dx_eid_spread_order, record_params->symbol_name, event_buffer,
+									 event_params);
+	}
+
 	event_buffer->sequence = DX_SEQUENCE(record_buffer);
 	event_buffer->time_nanos = record_buffer->time_nanos;
 
@@ -1004,6 +1040,12 @@ int RECORD_TRANSCODER_NAME(dx_greeks_t) (dx_record_transcoder_connection_context
 	event_buffer->event_flags = event_params->flags;
 	event_buffer->index = (int_to_bits(record_buffer->time) << DX_GREEKS_INDEX_TIME_SHIFT) | int_to_bits(record_buffer->sequence);
 	event_buffer->time = DX_TIME_SEQ_TO_MS(record_buffer);
+
+	if (IS_FLAG_SET(event_buffer->event_flags, dxf_ef_remove_event)) {
+		return dx_process_event_data(context->connection, dx_eid_greeks, record_params->symbol_name, event_buffer,
+									 event_params);
+	}
+
 	event_buffer->price = record_buffer->price;
 	event_buffer->volatility = record_buffer->volatility;
 	event_buffer->delta = record_buffer->delta;
@@ -1074,6 +1116,12 @@ int RECORD_TRANSCODER_NAME(dx_series_t)(dx_record_transcoder_connection_context_
 	event_buffer->event_flags = event_params->flags;
 	event_buffer->index = record_buffer->index;
 	event_buffer->time = DX_TIME_SEQ_TO_MS(record_buffer);
+
+	if (IS_FLAG_SET(event_buffer->event_flags, dxf_ef_remove_event)) {
+		return dx_process_event_data(context->connection, dx_eid_series, record_params->symbol_name, event_buffer,
+									 event_params);
+	}
+
 	event_buffer->sequence = DX_SEQUENCE(record_buffer);
 	event_buffer->expiration = record_buffer->expiration;
 	event_buffer->volatility = record_buffer->volatility;

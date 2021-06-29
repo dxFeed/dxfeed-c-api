@@ -1,3 +1,6 @@
+Version 8.0.1
+* [DXFC-236] Fixed bug with random garbage data in event fields with TX_REMOVE flag.
+
 Version 8.0.0
 * [DXFC-231] [Breaking changes] Converted the types and representations of certain event fields to store WideDecimal
   - Fields that are now of type `double`: `dxf_order_t.size`, `dxf_order_t.count`, `dxf_trade_t.size`, `dxf_trade_eth_t.size`,
