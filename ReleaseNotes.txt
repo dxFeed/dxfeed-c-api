@@ -1,5 +1,5 @@
 Version 8.0.1
-* [DXFC-236] Fixed bug with random garbage data in event fields with TX_REMOVE flag.
+* [DXFC-236] Fixed the ancient glitch with random garbage data in fields of removed events' (TX_REMOVE flag = 1).
 
 Version 8.0.0
 * [DXFC-231] [Breaking changes] Converted the types and representations of certain event fields to store WideDecimal
