@@ -50,6 +50,12 @@ extern "C" {
  */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * @addtogroup event-data-structures-order-spread-order
+ * @{
+ */
+
+///Order sources
 const dxf_const_string_t dx_all_order_sources[] = {
 	L"NTV",	  /// NASDAQ Total View.
 	L"ntv",	  /// NASDAQ Total View. Record for price level book.
@@ -78,8 +84,13 @@ const dxf_const_string_t dx_all_order_sources[] = {
 	L"CFE",	  /// CBOE Futures Exchange.
 	L"C2OX",  /// CBOE Options C2 Exchange.
 	L"SMFE",  /// Small Exchange.
+	L"smfe",  /// Small Exchange. Record for price level book.
 	L"iex",   /// Investors exchange. Record for price level book.
+	L"MEMX",  /// Members Exchange.
+	L"memx",  /// Members Exchange. Record for price level book.
 	nullptr};
+///@}
+
 const size_t dx_all_order_sources_count = sizeof(dx_all_order_sources) / sizeof(dx_all_order_sources[0]) - 1;
 
 const size_t dx_all_regional_count = 26;
