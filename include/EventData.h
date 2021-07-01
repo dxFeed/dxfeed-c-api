@@ -133,7 +133,7 @@
 
 /**
  * @addtogroup event-data-structures-order-spread-order
- * @{s
+ * @{
  */
 
 /**
