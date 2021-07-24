@@ -6,7 +6,9 @@ set(PROJECT UnitTests2)
 
 add_subdirectory(Catch2)
 
-add_executable(${PROJECT} main.cpp)
+add_executable(${PROJECT} main.cpp ../../src/DXAddressParser.c ../../src/DXAlgorithms.c)
+
+target_include_directories(${PROJECT} PRIVATE ../../include ../../src)
 target_link_libraries(${PROJECT} Catch2::Catch2)
 
 include(CTest)
