@@ -29,7 +29,6 @@ extern "C" {
 #include "DXThreads.h"
 #include "Logger.h"
 #include "SymbolCodec.h"
-
 }
 
 #include <cmath>
@@ -41,8 +40,8 @@ extern "C" {
 #include <utility>
 #include <vector>
 
-#include "EventSubscription.hpp"
 #include "Configuration.hpp"
+#include "EventSubscription.hpp"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -55,7 +54,7 @@ extern "C" {
  * @{
  */
 
-///Order sources
+/// Order sources
 const dxf_const_string_t dx_all_order_sources[] = {
 	L"NTV",	  /// NASDAQ Total View.
 	L"ntv",	  /// NASDAQ Total View. Record for price level book.
@@ -85,7 +84,7 @@ const dxf_const_string_t dx_all_order_sources[] = {
 	L"C2OX",  /// CBOE Options C2 Exchange.
 	L"SMFE",  /// Small Exchange.
 	L"smfe",  /// Small Exchange. Record for price level book.
-	L"iex",   /// Investors exchange. Record for price level book.
+	L"iex",	  /// Investors exchange. Record for price level book.
 	L"MEMX",  /// Members Exchange.
 	L"memx",  /// Members Exchange. Record for price level book.
 	nullptr};
@@ -320,9 +319,7 @@ EventSubscriptionConnectionContext::~EventSubscriptionConnectionContext() {
 	}
 }
 bool EventSubscriptionConnectionContext::hasAnySymbol() {
-	return process([this](dx::EventSubscriptionConnectionContext* ctx) {
-		return !symbols.empty();
-	});
+	return process([this](dx::EventSubscriptionConnectionContext* ctx) { return !symbols.empty(); });
 }
 
 }  // namespace dx
@@ -440,9 +437,8 @@ int dx_close_event_subscription(dxf_subscription_t subscr_id) {
 	return dx::SubscriptionData::closeEventSubscription(subscr_id, true);
 }
 
-/* -------------------------------------------------------------------------- */
-
-int dx_add_symbols(dxf_subscription_t subscr_id, dxf_const_string_t* symbols, int symbol_count) {
+int dx_add_symbols_impl(dxf_subscription_t subscr_id, dxf_const_string_t* symbols, int symbol_count,
+						int* added_symbols_indices, int* added_symbols_count) {
 	auto subscr_data = static_cast<dx::SubscriptionData*>(subscr_id);
 
 	if (subscr_id == dx_invalid_subscription) {
@@ -451,7 +447,11 @@ int dx_add_symbols(dxf_subscription_t subscr_id, dxf_const_string_t* symbols, in
 
 	auto context = static_cast<dx::EventSubscriptionConnectionContext*>(subscr_data->connection_context);
 
-	return context->process([symbols, symbol_count, &subscr_data](dx::EventSubscriptionConnectionContext* ctx) {
+	return context->process([symbols, symbol_count, &subscr_data, added_symbols_indices, added_symbols_count](dx::EventSubscriptionConnectionContext* ctx) {
+		if (added_symbols_indices != nullptr && added_symbols_count != nullptr) {
+			*added_symbols_count = 0;
+		}
+
 		for (int cur_symbol_index = 0; cur_symbol_index < symbol_count; ++cur_symbol_index) {
 			if (dx_string_null_or_empty(symbols[cur_symbol_index])) {
 				continue;
@@ -470,11 +470,25 @@ int dx_add_symbols(dxf_subscription_t subscr_id, dxf_const_string_t* symbols, in
 				return false;
 			}
 
+			if (added_symbols_indices != nullptr && added_symbols_count != nullptr) {
+				added_symbols_indices[static_cast<std::size_t>(*added_symbols_count)] = cur_symbol_index;
+				(*added_symbols_count)++;
+			}
+
 			subscr_data->symbols[symbols[cur_symbol_index]] = symbol_data;
 		}
 
 		return true;
 	});
+}
+
+int dx_add_symbols_v2(dxf_subscription_t subscr_id, dxf_const_string_t* symbols, int symbol_count,
+					  int* added_symbols_indices, int* added_symbols_count) {
+	return dx_add_symbols_impl(subscr_id, symbols, symbol_count, added_symbols_indices, added_symbols_count);
+}
+
+int dx_add_symbols(dxf_subscription_t subscr_id, dxf_const_string_t* symbols, int symbol_count) {
+	return dx_add_symbols_impl(subscr_id, symbols, symbol_count, nullptr, nullptr);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -737,8 +751,8 @@ static void dx_call_subscr_listeners(dx::SubscriptionData* subscr_data, unsigned
 
 			case dx::EventListenerVersion::V2: {
 				auto listener = (dxf_event_listener_v2_t)listener_context.getListener();
-				listener(event_bitmask, symbol_name, static_cast<dxf_event_data_t const*>(data), 1,
-						 event_params, listener_context.getUserData());
+				listener(event_bitmask, symbol_name, static_cast<dxf_event_data_t const*>(data), 1, event_params,
+						 listener_context.getUserData());
 				break;
 			}
 
@@ -806,24 +820,23 @@ int dx_process_event_data(dxf_connection_t connection, dx_event_id_t event_id, d
 		return dx_set_error_code(dx_esec_invalid_event_type);
 	}
 
-	context->process(
-		[event_id, symbol_name, data, event_params](dx::EventSubscriptionConnectionContext* ctx) {
-			dx::SymbolData* symbol_data = ctx->findSymbol(symbol_name);
+	context->process([event_id, symbol_name, data, event_params](dx::EventSubscriptionConnectionContext* ctx) {
+		dx::SymbolData* symbol_data = ctx->findSymbol(symbol_name);
 
-			/* symbol_data == nullptr is most likely a correct situation that occurred because the data is received very
-			soon after the symbol subscription has been annulled */
-			if (symbol_data != nullptr) {
-				symbol_data->storeLastSymbolEvent(event_id, data);
-				pass_event_data_to_listeners(ctx, symbol_data, event_id, symbol_name, data, event_params);
-			}
+		/* symbol_data == nullptr is most likely a correct situation that occurred because the data is received very
+		soon after the symbol subscription has been annulled */
+		if (symbol_data != nullptr) {
+			symbol_data->storeLastSymbolEvent(event_id, data);
+			pass_event_data_to_listeners(ctx, symbol_data, event_id, symbol_name, data, event_params);
+		}
 
-			dx::SymbolData* wildcard_symbol_data = ctx->findSymbol(L"*");
+		dx::SymbolData* wildcard_symbol_data = ctx->findSymbol(L"*");
 
-			if (wildcard_symbol_data != nullptr) {
-				wildcard_symbol_data->storeLastSymbolEvent(event_id, data);
-				pass_event_data_to_listeners(ctx, wildcard_symbol_data, event_id, symbol_name, data, event_params);
-			}
-		});
+		if (wildcard_symbol_data != nullptr) {
+			wildcard_symbol_data->storeLastSymbolEvent(event_id, data);
+			pass_event_data_to_listeners(ctx, wildcard_symbol_data, event_id, symbol_name, data, event_params);
+		}
+	});
 
 	return true;
 }

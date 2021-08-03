@@ -18,6 +18,12 @@
  */
 
 #ifdef _WIN32
+#	ifndef _CRT_STDIO_ISO_WIDE_SPECIFIERS
+#		define _CRT_STDIO_ISO_WIDE_SPECIFIERS 1
+#	endif
+#endif
+
+#ifdef _WIN32
 #	pragma warning(push)
 #	pragma warning(disable : 5105)
 #	include <Windows.h>
@@ -37,14 +43,131 @@
 #include "DXErrorCodes.h"
 #include "DXFeed.h"
 
+#ifndef __cplusplus
+#	ifndef true
+#		define true 1
+#	endif
+
+#	ifndef false
+#		define false 0
+#	endif
+#endif
+
+#if !defined(_WIN32) || defined(USE_PTHREADS)
+#	include "pthread.h"
+#	ifndef USE_PTHREADS
+#		define USE_PTHREADS
+#	endif
+typedef pthread_t dxs_thread_t;
+typedef pthread_key_t dxs_key_t;
+typedef struct {
+	pthread_mutex_t mutex;
+	pthread_mutexattr_t attr;
+} dxs_mutex_t;
+#else /* !defined(_WIN32) || defined(USE_PTHREADS) */
+typedef HANDLE dxs_thread_t;
+typedef DWORD dxs_key_t;
+typedef LPCRITICAL_SECTION dxs_mutex_t;
+#endif /* !defined(_WIN32) || defined(USE_PTHREADS) */
+
+#ifdef _WIN32
+// To fix problem with MS implementation of swprintf
+#	define swprintf _snwprintf
+HANDLE g_out_console;
+
+void dxs_sleep(int milliseconds) { Sleep((DWORD)milliseconds); }
+
+int dxs_mutex_create(dxs_mutex_t* mutex) {
+	*mutex = calloc(1, sizeof(CRITICAL_SECTION));
+	InitializeCriticalSection(*mutex);
+	return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+int dxs_mutex_destroy(dxs_mutex_t* mutex) {
+	DeleteCriticalSection(*mutex);
+	free(*mutex);
+	return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+int dxs_mutex_lock(dxs_mutex_t* mutex) {
+	EnterCriticalSection(*mutex);
+	return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+int dxs_mutex_unlock(dxs_mutex_t* mutex) {
+	LeaveCriticalSection(*mutex);
+	return true;
+}
+#else
+#	include "pthread.h"
+
+void dxs_sleep(int milliseconds) {
+	struct timespec ts;
+	ts.tv_sec = milliseconds / 1000;
+	ts.tv_nsec = (milliseconds % 1000) * 1000000;
+	nanosleep(&ts, NULL);
+}
+
+int dxs_mutex_create(dxs_mutex_t* mutex) {
+	if (pthread_mutexattr_init(&mutex->attr) != 0) {
+		return false;
+	}
+
+	if (pthread_mutexattr_settype(&mutex->attr, PTHREAD_MUTEX_RECURSIVE) != 0) {
+		return false;
+	}
+
+	if (pthread_mutex_init(&mutex->mutex, &mutex->attr) != 0) {
+		return false;
+	}
+
+	return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+int dxs_mutex_destroy(dxs_mutex_t* mutex) {
+	if (pthread_mutex_destroy(&mutex->mutex) != 0) {
+		return false;
+	}
+
+	if (pthread_mutexattr_destroy(&mutex->attr) != 0) {
+		return false;
+	}
+
+	return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+int dxs_mutex_lock(dxs_mutex_t* mutex) {
+	if (pthread_mutex_lock(&mutex->mutex) != 0) {
+		return false;
+	}
+
+	return true;
+}
+
+/* -------------------------------------------------------------------------- */
+
+int dxs_mutex_unlock(dxs_mutex_t* mutex) {
+	if (pthread_mutex_unlock(&mutex->mutex) != 0) {
+		return false;
+	}
+
+	return true;
+}
+
+#endif	//_WIN32
+
 #define LS(s)  LS2(s)
 #define LS2(s) L##s
-
-#ifndef true
-
-#	define true 1
-#	define false 0
-#endif
 
 // plus the name of the executable
 #define STATIC_PARAMS_COUNT			4
@@ -61,29 +184,17 @@
 int _CRT_glob = 0;
 #endif
 
-/* -------------------------------------------------------------------------- */
-#ifdef _WIN32
 static int is_listener_thread_terminated = false;
-CRITICAL_SECTION listener_thread_guard;
+static dxs_mutex_t listener_thread_guard;
 
 int is_thread_terminate() {
 	int res;
-	EnterCriticalSection(&listener_thread_guard);
+	dxs_mutex_lock(&listener_thread_guard);
 	res = is_listener_thread_terminated;
-	LeaveCriticalSection(&listener_thread_guard);
+	dxs_mutex_unlock(&listener_thread_guard);
 
 	return res;
 }
-#else
-static volatile int is_listener_thread_terminated = false;
-int is_thread_terminate() {
-	int res;
-	res = is_listener_thread_terminated;
-	return res;
-}
-#endif
-
-/* -------------------------------------------------------------------------- */
 
 void process_last_error() {
 	int error_code = dx_ec_success;
@@ -108,24 +219,16 @@ void process_last_error() {
 	wprintf(L"An error occurred but the error subsystem failed to initialize\n");
 }
 
-/* -------------------------------------------------------------------------- */
-
-#ifdef _WIN32
 void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
-	EnterCriticalSection(&listener_thread_guard);
+	(void)connection;
+	(void)user_data;
+	dxs_mutex_lock(&listener_thread_guard);
 	is_listener_thread_terminated = true;
-	LeaveCriticalSection(&listener_thread_guard);
+	dxs_mutex_unlock(&listener_thread_guard);
 
 	wprintf(L"\nTerminating listener thread\n");
 	process_last_error();
 }
-#else
-void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
-	is_listener_thread_terminated = true;
-	wprintf(L"\nTerminating listener thread\n");
-	process_last_error();
-}
-#endif
 
 dxf_const_string_t connection_status_to_string(dxf_connection_status_t status) {
 	switch (status) {
@@ -410,7 +513,7 @@ int parse_event_types(char* types_string, OUT int* types_bitmask) {
 				is_found = true;
 			}
 		}
-		if (!is_found) wprintf(L"Invalid type parameter begining with:%hs\n", next_string);
+		if (!is_found) wprintf(L"Invalid type parameter starting with:%hs\n", next_string);
 		next_string += next_len;
 	}
 	return true;
@@ -643,9 +746,7 @@ int main(int argc, char* argv[]) {
 	wprintf(L"Command line sample started.\n");
 	wprintf(L"Connecting to host %hs...\n", dxfeed_host);
 
-#ifdef _WIN32
-	InitializeCriticalSection(&listener_thread_guard);
-#endif
+	dxs_mutex_create(&listener_thread_guard);
 
 	ERRORCODE connection_result;
 	if (token != NULL && token[0] != '\0') {
@@ -660,6 +761,7 @@ int main(int argc, char* argv[]) {
 	if (connection_result == DXF_FAILURE) {
 		free_symbols(symbols, symbol_count);
 		process_last_error();
+		dxs_mutex_destroy(&listener_thread_guard);
 
 		return 10;
 	}
@@ -675,6 +777,7 @@ int main(int argc, char* argv[]) {
 			free_symbols(symbols, symbol_count);
 			process_last_error();
 			dxf_close_connection(connection);
+			dxs_mutex_destroy(&listener_thread_guard);
 
 			return 20;
 		}
@@ -694,6 +797,7 @@ int main(int argc, char* argv[]) {
 		free_symbols(symbols, symbol_count);
 		process_last_error();
 		dxf_close_connection(connection);
+		dxs_mutex_destroy(&listener_thread_guard);
 
 		return 30;
 	}
@@ -703,6 +807,7 @@ int main(int argc, char* argv[]) {
 		process_last_error();
 		dxf_close_subscription(subscription);
 		dxf_close_connection(connection);
+		dxs_mutex_destroy(&listener_thread_guard);
 
 		return 31;
 	}
@@ -712,6 +817,7 @@ int main(int argc, char* argv[]) {
 		process_last_error();
 		dxf_close_subscription(subscription);
 		dxf_close_connection(connection);
+		dxs_mutex_destroy(&listener_thread_guard);
 
 		return 32;
 	}
@@ -720,17 +826,14 @@ int main(int argc, char* argv[]) {
 	free_symbols(symbols, symbol_count);
 
 	while (!is_thread_terminate() && program_timeout--) {
-#ifdef _WIN32
-		Sleep(1000);
-#else
-		sleep(1);
-#endif
+		dxs_sleep(1000);
 	}
 
 	wprintf(L"Unsubscribing...\n");
 
 	if (!dxf_close_subscription(subscription)) {
 		process_last_error();
+		dxs_mutex_destroy(&listener_thread_guard);
 
 		return 33;
 	}
@@ -739,15 +842,14 @@ int main(int argc, char* argv[]) {
 
 	if (!dxf_close_connection(connection)) {
 		process_last_error();
+		dxs_mutex_destroy(&listener_thread_guard);
 
 		return 12;
 	}
 
 	wprintf(L"Disconnected\n");
 
-#ifdef _WIN32
-	DeleteCriticalSection(&listener_thread_guard);
-#endif
+	dxs_mutex_destroy(&listener_thread_guard);
 
 	return 0;
 }

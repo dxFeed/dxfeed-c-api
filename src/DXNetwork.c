@@ -633,10 +633,10 @@ unsigned dx_socket_reader_wrapper(void* arg) {
 	return DX_THREAD_RETVAL_NULL;
 }
 
-#define WAIT_FOR_SUBSCRIPTION_TIMEOUT 1000
+#define WAIT_FOR_SUBSCRIPTION_TIMEOUT	   1000
 #define WAIT_FOR_SUBSCRIPTION_SLEEP_PERIOD 100
 
-int dx_read_from_file(dx_network_connection_context_t* context, char *read_buf, int *number_of_bytes_read, int *eof) {
+int dx_read_from_file(dx_network_connection_context_t* context, char* read_buf, int* number_of_bytes_read, int* eof) {
 	if (*number_of_bytes_read <= 0) {
 		int remaining = WAIT_FOR_SUBSCRIPTION_TIMEOUT;
 
@@ -1111,8 +1111,8 @@ int dx_connect_to_resolved_addresses(dx_network_connection_context_t* context) {
 static int dx_server_event_subscription_refresher(dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
 												  dxf_const_string_t* symbols, size_t symbol_count,
 												  unsigned event_types, dxf_uint_t subscr_flags, dxf_long_t time) {
-	return dx_subscribe_symbols_to_events(connection, order_source, symbols, symbol_count, event_types, false, false,
-										  subscr_flags, time);
+	return dx_subscribe_symbols_to_events(connection, order_source, symbols, symbol_count, NULL, 0, event_types, false,
+										  false, subscr_flags, time);
 }
 
 /* ---------------------------------- */

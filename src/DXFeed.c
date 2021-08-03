@@ -51,9 +51,9 @@ static dxf_const_string_t wildcard_symbol = L"*";
 /* -------------------------------------------------------------------------- */
 
 int dx_subscribe (dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
-                   dxf_const_string_t *symbols, size_t symbols_count, int event_types,
+                   dxf_const_string_t *symbols, size_t symbols_count, int* symbols_indices_to_subscribe, int symbols_indices_count, int event_types,
                    dxf_uint_t subscr_flags, dxf_long_t time) {
-	return dx_subscribe_symbols_to_events(connection, order_source, symbols, symbols_count,
+	return dx_subscribe_symbols_to_events(connection, order_source, symbols, symbols_count, symbols_indices_to_subscribe, symbols_indices_count,
 	                                      event_types, false, false, subscr_flags, time);
 }
 
@@ -62,7 +62,7 @@ int dx_subscribe (dxf_connection_t connection, dx_order_source_array_ptr_t order
 int dx_unsubscribe (dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
                      dxf_const_string_t *symbols, size_t symbols_count, int event_types,
                      dxf_uint_t subscr_flags, dxf_long_t time) {
-	return dx_subscribe_symbols_to_events(connection, order_source, symbols, symbols_count,
+	return dx_subscribe_symbols_to_events(connection, order_source, symbols, symbols_count, NULL, 0,
 	                                      event_types, true, false, subscr_flags, time);
 }
 
@@ -533,16 +533,29 @@ DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dxf_const
 
 	dxf_long_t time;
 
-	if (!dx_get_event_subscription_time(subscription, &time) ||
-	    !dx_add_symbols(subscription, subscr_symbols, subscr_symbol_count) ||
-	    !dx_load_events_for_subscription(connection, dx_get_order_source(subscription), (int)events, subscr_flags) ||
-	    !dx_send_record_description(connection, false) ||
-	    !dx_subscribe(connection, dx_get_order_source(subscription), subscr_symbols, subscr_symbol_count, (int)events,
-	                  subscr_flags, time)) {
+	int* added_symbols_indices = dx_calloc(subscr_symbol_count, sizeof(int));
+	int added_symbols_count = 0;
 
+	if (!dx_get_event_subscription_time(subscription, &time) ||
+	    !dx_add_symbols_v2(subscription, subscr_symbols, subscr_symbol_count, added_symbols_indices, &added_symbols_count)) {
+		dx_free(added_symbols_indices);
 		return DXF_FAILURE;
 	}
 
+	if (added_symbols_count == 0) {
+		dx_free(added_symbols_indices);
+		return DXF_SUCCESS;
+	}
+
+	if (!dx_load_events_for_subscription(connection, dx_get_order_source(subscription), (int)events, subscr_flags) ||
+	    !dx_send_record_description(connection, false) ||
+	    !dx_subscribe(connection, dx_get_order_source(subscription), subscr_symbols, subscr_symbol_count, added_symbols_indices, added_symbols_count, (int)events,
+	                  subscr_flags, time)) {
+		dx_free(added_symbols_indices);
+		return DXF_FAILURE;
+	}
+
+	dx_free(added_symbols_indices);
 	return DXF_SUCCESS;
 }
 
@@ -891,7 +904,7 @@ DXFEED_API ERRORCODE dxf_set_order_source (dxf_subscription_t subscription, cons
 	//subscribe to new order sources
 	if (!dx_load_events_for_subscription(connection, dx_get_order_source(subscription), (int)events, subscr_flags) ||
 	    !dx_send_record_description(connection, false) ||
-	    !dx_subscribe(connection, dx_get_order_source(subscription), symbols, symbol_count, (int)events, subscr_flags,
+	    !dx_subscribe(connection, dx_get_order_source(subscription), symbols, symbol_count, NULL, 0, (int)events, subscr_flags,
 	                  time)) {
 
 		return DXF_FAILURE;
@@ -941,7 +954,7 @@ DXFEED_API ERRORCODE dxf_add_order_source (dxf_subscription_t subscription, cons
 	    !dx_get_event_subscription_time(subscription, &time) ||
 	    !dx_load_events_for_subscription(connection, &new_source_array, (int)events, subscr_flags) ||
 	    !dx_send_record_description(connection, false) ||
-	    !dx_subscribe(connection, &new_source_array, symbols, symbol_count, (int)events, subscr_flags, time) ||
+	    !dx_subscribe(connection, &new_source_array, symbols, symbol_count, NULL, 0, (int)events, subscr_flags, time) ||
 	    !dx_add_order_source(subscription, elem.suffix)) {
 
 		dx_free(new_source_array.elements);
