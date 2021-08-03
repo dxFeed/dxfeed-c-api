@@ -42,6 +42,7 @@ set(SOURCE_FILES
         )
 
 set(ADDITIONAL_PROPERTIES "")
+set(ADDITIONAL_LIBRARIES "")
 
 if (WIN32)
     add_definitions(-D_CONSOLE -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE)
@@ -61,9 +62,14 @@ if (WIN32)
         message("Unknown compiler")
     endif ()
 else ()
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pedantic")
     set(CMAKE_C_FLAGS_DEBUG "-g -O0 -fPIC")
     set(CMAKE_C_FLAGS_RELEASE "-O2 -fPIC")
     add_definitions(-DUSE_PTHREADS)
+    set(ADDITIONAL_LIBRARIES
+            ${ADDITIONAL_LIBRARIES}
+            pthread
+            )
 endif (WIN32)
 
 source_group("Source Files" FILES ${SOURCE_FILES})
