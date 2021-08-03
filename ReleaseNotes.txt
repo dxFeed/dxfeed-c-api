@@ -1,6 +1,8 @@
 Version 8.1.0
+* [DXFC-251] Fixed a bug with receiving gap-filling data every time the user subscribed to symbols that he had already subscribed to earlier.
 * [DXFC-237] Added the new order sources: `MEMX` (Members Exchange' order source), `memx` (Members Exchange' price level source)
   and `smfe` (SmallEx' price level source)
+* Improved the SnapshotConsoleSample: the cross-platform synchronization primitives were added.
 
 Version 8.0.1
 * [DXFC-236] Fixed the ancient glitch with random garbage data in fields of removed events' (TX_REMOVE flag = 1).
