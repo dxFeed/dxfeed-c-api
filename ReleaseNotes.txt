@@ -1,8 +1,7 @@
 Version 8.2.0
-* [DXFC-252] Fixed bug with "freezing" the dxf_close_connection freezes if not called immediately after disconnecting the connection.
-  The `network.reestablishConnections` config property was added. This property describes a flag that allows to disable the connection
-  reestablishment mechanism. (default value = true )
-  An example of disabling:
+* [DXFC-252] Fixed bug with "freezing" the dxf_close_connection `function` if not called immediately after disconnecting the connection.  
+  The `network.reestablishConnections` config property was added. This property describes a flag that allows to disable the connection reestablishment mechanism. (default value = true).  
+  An example of disabling:  
   ```c
   dxf_load_config_from_wstring(L"network.reestablishConnections = false\n");
   ```
