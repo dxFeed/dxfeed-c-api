@@ -1,3 +1,12 @@
+Version 8.2.0
+* [DXFC-252] Fixed bug with "freezing" the dxf_close_connection freezes if not called immediately after disconnecting the connection.
+  The `network.reestablishConnections` config property was added. This property describes a flag that allows to disable the connection
+  reestablishment mechanism. (default value = true )
+  An example of disabling:
+  ```c
+  dxf_load_config_from_wstring(L"network.reestablishConnections = false\n");
+  ```
+
 Version 8.1.0
 * [DXFC-251] Fixed a bug with receiving gap-filling data every time the user subscribed to symbols that he had already subscribed to earlier.
 * [DXFC-237] Added the new order sources: `MEMX` (Members Exchange' order source), `memx` (Members Exchange' price level source)
@@ -33,7 +42,7 @@ Version 7.3.0
 * [DXFC-218] Improved the SnapshotConsoleSample
   - the `date` (-t) parameter was added. Format: DD-MM-YYYY, default value: current date and time.
     Previously, without this parameter, the time was set equal to 0 (01-01-1970)!
-  - the cross platform synchronization primitives were added
+  - the cross-platform synchronization primitives were added
 * [DXFC-219] Fixed a bug with broken parsing of negative values
 * [DXFC-202] Added the ability to filter log messages by level
   The `logger.level` config property was added. This property describes a minimum logging level.
@@ -64,7 +73,7 @@ Version 7.1.0
       - notifier   - The notifier callback function pointer
       - user_data  - The data to be passed to the callback function
 
-  - Added the new callback type of a connection incoming heartbeat notification `dxf_conn_on_server_heartbeat_notifier_t`
+  - Added the new callback type of connection incoming heartbeat notification `dxf_conn_on_server_heartbeat_notifier_t`
 
     Passed parameters:
       - connection      - The connection handle

@@ -409,6 +409,8 @@ DXFEED_API ERRORCODE dxf_close_connection (dxf_connection_t connection) {
 		return DXF_SUCCESS;
 	}
 
+	dx_set_is_closing(connection);
+
 	return (dx_deinit_connection(connection) ? DXF_SUCCESS : DXF_FAILURE);
 }
 

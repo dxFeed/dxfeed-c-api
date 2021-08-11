@@ -58,3 +58,7 @@ int dx_get_network_heartbeat_timeout(int default_heartbeat_timeout) {
 dx_log_level_t dx_get_minimum_logging_level(dx_log_level_t default_minimum_logging_level) {
 	return dx::Configuration::getInstance()->getMinimumLoggingLevel(default_minimum_logging_level);
 }
+
+int dx_get_network_reestablish_connections() {
+	return dx::Configuration::getInstance()->getNetworkReestablishConnections();
+}

@@ -137,6 +137,8 @@ typedef struct {
 	dx_mutex_t status_guard;
 
 	int set_fields_flags;
+
+	int is_closing;
 } dx_network_connection_context_t;
 
 #ifdef DXFEED_CODEC_TLS_ENABLED
@@ -175,6 +177,7 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_network) {
 	context->queue_thread_state = true;
 	context->heartbeat_period = dx_get_network_heartbeat_period(DEFAULT_HEARTBEAT_PERIOD);
 	context->heartbeat_timeout = dx_get_network_heartbeat_timeout(DEFAULT_HEARTBEAT_TIMEOUT);
+	context->is_closing = false;
 
 	if (!(dx_create_task_queue(&(context->tq)) && (context->set_fields_flags |= TASK_QUEUE_FIELD_FLAG)) ||
 		!(dx_mutex_create(&context->status_guard) && (context->set_fields_flags |= STATUS_GUARD_FLAG)) ||
@@ -540,6 +543,12 @@ unsigned dx_queue_executor(void* arg) {
 	for (;;) {
 		int queue_empty = true;
 
+		if (context->queue_thread_termination_trigger) {
+
+		  break;
+		}
+
+
 		const time_t last_server_heartbeat = atomic_read_time(&context->last_server_heartbeat);
 		if (last_server_heartbeat != 0 && difftime(time(NULL), last_server_heartbeat) >= context->heartbeat_timeout) {
 			dx_logging_info(L"No messages from server for at least %d seconds. Disconnecting...",
@@ -555,10 +564,6 @@ unsigned dx_queue_executor(void* arg) {
 			}
 			time(&context->next_heartbeat);
 			context->next_heartbeat += context->heartbeat_period;
-		}
-
-		if (context->queue_thread_termination_trigger) {
-			break;
 		}
 
 		if (!context->reader_thread_state || !context->queue_thread_state) {
@@ -701,8 +706,10 @@ void dx_socket_reader(dx_network_connection_context_t* context) {
 	 */
 	context->reader_thread_state = true;
 
+	int reestablish_connections = dx_get_network_reestablish_connections();
+
 	for (;;) {
-		if (context->reader_thread_termination_trigger) {
+		if (context->reader_thread_termination_trigger || context->is_closing) {
 			/* the thread is told to terminate */
 
 			break;
@@ -720,7 +727,7 @@ void dx_socket_reader(dx_network_connection_context_t* context) {
 		}
 
 		if (is_thread_idle) {
-			if (dx_reestablish_connection(context)) {
+			if (reestablish_connections == true && dx_reestablish_connection(context)) {
 				context->reader_thread_state = true;
 				is_thread_idle = false;
 			} else {
@@ -869,6 +876,10 @@ int dx_resolve_address(dx_network_connection_context_t* context) {
 	}
 
 	for (i = 0; i < addresses.size; ++i) {
+	  if (context->is_closing) {
+	    break;
+	  }
+
 		dx_addrinfo_ptr addr = NULL;
 		dx_addrinfo_ptr cur_addr = NULL;
 		dx_ext_address_t address;
@@ -1655,4 +1666,22 @@ dx_connection_context_data_t* dx_get_connection_context_data(dxf_connection_t co
 	}
 
 	return &context->context_data;
+}
+
+int dx_set_is_closing(dxf_connection_t connection) {
+  int res = true;
+
+  dx_network_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
+
+  if (context == NULL) {
+    if (res) {
+      dx_set_error_code(dx_cec_connection_context_not_initialized);
+    }
+
+    return false;
+  }
+
+  context->is_closing = true;
+
+  return res;
 }

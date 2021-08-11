@@ -194,6 +194,7 @@ public:
 		std::cerr << "dump = " << std::boolalpha << getDump() << std::endl;
 		std::cerr << "network.heartbeatPeriod = " << getNetworkHeartbeatPeriod() << std::endl;
 		std::cerr << "network.heartbeatTimeout = " << getNetworkHeartbeatTimeout() << std::endl << std::endl;
+		std::cerr << "network.reestablishConnections = " << getNetworkReestablishConnections() << std::endl << std::endl;
 	}
 
 	bool loadFromFile(const std::string& fileName) {
@@ -279,5 +280,7 @@ public:
 	dx_log_level_t getMinimumLoggingLevel(dx_log_level_t defaultValue = dx_ll_info) const {
 		return stringToLoggingLevel(getProperty("logger", "level", loggingLevelToString(defaultValue)));
 	}
+
+	bool getNetworkReestablishConnections(bool defaultValue = true) const { return getProperty("network", "reestablishConnections", defaultValue); }
 };
 }  // namespace dx
