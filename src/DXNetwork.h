@@ -152,4 +152,6 @@ dx_connection_context_data_t* dx_get_connection_context_data(dxf_connection_t co
 int dx_set_on_server_heartbeat_notifier(dxf_connection_t connection, dxf_conn_on_server_heartbeat_notifier_t notifier,
 										void* user_data);
 
+int dx_set_is_closing(dxf_connection_t connection);
+
 #endif /* DX_NETWORK_H_INCLUDED */

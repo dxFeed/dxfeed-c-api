@@ -5,5 +5,8 @@ network.heartbeatPeriod = 10
 #   (default value = 120 seconds)
 network.heartbeatTimeout = 120
 
+# A flag that allows to disable the connection reestablishment mechanism. (default value = true )
+network.reestablishConnections = true
+
 # Minimum logging level. Possible values: "error", "warn", "info", "debug", "trace". Default value = "info"
 logger.level = "info"
