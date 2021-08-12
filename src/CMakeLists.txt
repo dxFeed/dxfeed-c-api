@@ -399,7 +399,7 @@ install(DIRECTORY "${INCLUDE_DIR}" "../scripts" "../src" "../thirdparty"
         )
 install(FILES "../DXFeed.def" "../DXFeedd.def" "../DXFeed_64.def" "../DXFeedd_64.def"
         "../DXFeed.sln" "../DXFeed.vcxproj" "../DXFeed.vcxproj.filters"
-        "../CMakeLists.txt" "../build.bat" "../build.sh" "../make_package.bat" "../make_package.sh" "../ReleaseNotes.txt"
+        "../CMakeLists.txt" "../build.bat" "../build.sh" "../make_package.bat" "../make_package.sh" "../ReleaseNotes.txt" "../dxfeed-api-config.sample.toml"
         DESTINATION "."
         )
 
