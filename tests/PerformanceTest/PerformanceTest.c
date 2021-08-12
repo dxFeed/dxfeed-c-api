@@ -361,6 +361,33 @@ void on_server_heartbeat_notifier(dxf_connection_t connection, dxf_long_t server
 			 server_millis, server_lag_mark, connection_rtt);
 }
 
+dxf_string_t* ansi_to_unicode_symbols(char** symbols, size_t count) {
+	dxf_string_t* s = malloc(count * sizeof(dxf_string_t));
+
+	for (size_t i = 0; i < count; ++i) {
+		s[i] = ansi_to_unicode(symbols[i]);
+	}
+
+	return s;
+}
+
+void destroy_symbols(char** symbols, size_t count) {
+	for (size_t i = 0; i < count; ++i) {
+		free(symbols[i]);
+	}
+
+	free(symbols);
+}
+
+void destroy_unicode_symbols(dxf_string_t* symbols, size_t count) {
+	for (size_t i = 0; i < count; ++i) {
+		free(symbols[i]);
+	}
+
+	free(symbols);
+}
+
+
 /* -------------------------------------------------------------------------- */
 
 void print_usage() {
@@ -374,7 +401,7 @@ void print_usage() {
 }
 
 #define LINE_SIZE	4096
-#define SYMBOLS_MAX 100000
+#define SYMBOLS_MAX 10000000
 
 int main(int argc, char* argv[]) {
 	dxf_connection_t connection;
@@ -451,6 +478,7 @@ int main(int argc, char* argv[]) {
 	if (!dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, (void*)dxfeed_host,
 							   &connection)) {
 		process_last_error();
+		destroy_symbols(symbols, symbols_pos);
 
 		return 10;
 	}
@@ -464,6 +492,7 @@ int main(int argc, char* argv[]) {
 	if (!dxf_create_subscription(connection, event_types, &subscription)) {
 		process_last_error();
 		dxf_close_connection(connection);
+		destroy_symbols(symbols, symbols_pos);
 
 		return 20;
 	}
@@ -472,21 +501,27 @@ int main(int argc, char* argv[]) {
 		process_last_error();
 		dxf_close_subscription(subscription);
 		dxf_close_connection(connection);
+		destroy_symbols(symbols, symbols_pos);
 
 		return 21;
 	}
 
 	if (symbols_pos > 0) {
-		for (size_t i = 0; i < symbols_pos; ++i) {
-			wprintf(L"Subscribing to: %hs\n", symbols[i]);
-			if (!dxf_add_symbol(subscription, ansi_to_unicode(symbols[i]))) {
-				process_last_error();
-				dxf_close_subscription(subscription);
-				dxf_close_connection(connection);
+		dxf_string_t* s = ansi_to_unicode_symbols(symbols, symbols_pos);
 
-				return 22;
-			}
+		destroy_symbols(symbols, symbols_pos);
+
+		if (!dxf_add_symbols(subscription, (dxf_const_string_t*)s, symbols_pos)) {
+			process_last_error();
+			dxf_close_subscription(subscription);
+			dxf_close_connection(connection);
+
+			destroy_unicode_symbols(s, symbols_pos);
+
+			return 22;
 		}
+
+		destroy_unicode_symbols(s, symbols_pos);
 	}
 
 	wprintf(L"Subscribed\n");
