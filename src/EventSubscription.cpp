@@ -159,6 +159,14 @@ SymbolData* SymbolData::create(dxf_const_string_t name) {
 	return res;
 }
 
+SymbolData SymbolData::createDumb(const std::wstring& name) {
+	auto result = dx::SymbolData{};
+
+	result.name = name;
+
+	return result;
+}
+
 void SymbolData::storeLastSymbolEvent(dx_event_id_t eventId, dxf_const_event_data_t data) {
 	if (this->lastEvents != nullptr) {
 		dx_memcpy(this->lastEvents[eventId],
@@ -212,7 +220,7 @@ int SubscriptionData::closeEventSubscription(dxf_subscription_t subscriptionId, 
 
 	context->process([&res, &subscriptionData, remove_from_context](dx::EventSubscriptionConnectionContext* ctx) {
 		for (auto&& s : subscriptionData->symbols) {
-			res = ctx->unsubscribeSymbol(s.second, subscriptionData) && res;
+			res = ctx->unsubscribeSymbol(s, subscriptionData) && res;
 		}
 
 		subscriptionData->symbols.clear();
@@ -466,7 +474,8 @@ int dx_add_symbols_impl(dxf_subscription_t subscr_id, dxf_const_string_t* symbol
 				continue;
 			}
 
-			auto found = subscr_data->symbols.find(std::wstring(symbols[cur_symbol_index]));
+			auto dumb = dx::SymbolData::createDumb(symbols[cur_symbol_index]);
+			auto found = subscr_data->symbols.find(&dumb);
 
 			if (found != subscr_data->symbols.end()) {
 				/* symbol is already subscribed */
@@ -484,7 +493,7 @@ int dx_add_symbols_impl(dxf_subscription_t subscr_id, dxf_const_string_t* symbol
 				(*added_symbols_count)++;
 			}
 
-			subscr_data->symbols[symbols[cur_symbol_index]] = symbol_data;
+			subscr_data->symbols.insert(symbol_data);
 		}
 
 		return true;
@@ -517,14 +526,15 @@ int dx_remove_symbols(dxf_subscription_t subscr_id, dxf_const_string_t* symbols,
 				continue;
 			}
 
-			auto found = subscr_data->symbols.find(std::wstring(symbols[cur_symbol_index]));
+			auto dumb = dx::SymbolData::createDumb(symbols[cur_symbol_index]);
+			auto found = subscr_data->symbols.find(&dumb);
 
 			if (found == subscr_data->symbols.end()) {
 				/* symbol wasn't subscribed */
 				continue;
 			}
 
-			if (!ctx->unsubscribeSymbol(found->second, subscr_data)) {
+			if (!ctx->unsubscribeSymbol(*found, subscr_data)) {
 				return false;
 			}
 
@@ -676,7 +686,7 @@ int dx_get_event_subscription_symbols(dxf_subscription_t subscr_id, OUT dxf_cons
 
 	std::size_t i = 0;
 	for (auto&& s : subscr_data->symbols) {
-		subscr_data->symbolNames[i] = s.second->name.c_str();
+		subscr_data->symbolNames[i] = s->name.c_str();
 		i++;
 	}
 
@@ -745,7 +755,8 @@ int dx_get_event_subscription_time(dxf_subscription_t subscr_id, OUT dxf_long_t*
 static void dx_call_subscr_listeners(dx::SubscriptionData* subscr_data, unsigned event_bitmask,
 									 dxf_const_string_t symbol_name, dxf_const_event_data_t data,
 									 const dxf_event_params_t* event_params) {
-	if (subscr_data == nullptr || subscr_data->symbols.find(symbol_name) == subscr_data->symbols.end()) {
+	auto dumb = dx::SymbolData::createDumb(symbol_name);
+	if (subscr_data == nullptr || subscr_data->symbols.find(&dumb) == subscr_data->symbols.end()) {
 		return;
 	}
 
