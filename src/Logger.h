@@ -40,7 +40,7 @@ void dx_logging_error_by_code(int error_code);
 void dx_logging_info (const dxf_char_t* format, ...);
 void dx_logging_verbose_info (const dxf_char_t* format, ...);
 void dx_logging_verbose_gap (void);
-
+void dx_flush_log (void);
 void dx_logging_dbg_lock ();
 void dx_logging_dbg (const dxf_char_t* format, ...);
 void dx_logging_dbg_stack ();
