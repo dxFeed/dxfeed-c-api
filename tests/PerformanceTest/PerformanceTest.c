@@ -357,7 +357,7 @@ void on_server_heartbeat_notifier(dxf_connection_t connection, dxf_long_t server
 								  dxf_int_t connection_rtt, void* user_data) {
 	server_lags_counter++;
 	server_lags_sum += server_lag_mark;
-	fwprintf(stderr, L"\n##### Server time (UTC) = %" PRId64 " ms, Server lag = %d us, RTT = %d us #####\n",
+	fwprintf(stderr, L"\n##### Server time (UTC) = %" LS(PRId64) L" ms, Server lag = %d us, RTT = %d us #####\n",
 			 server_millis, server_lag_mark, connection_rtt);
 }
 
