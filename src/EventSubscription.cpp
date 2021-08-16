@@ -133,29 +133,38 @@ SymbolData* SymbolData::create(dxf_const_string_t name) {
 	}
 
 	res->name = std::wstring(name);
-	res->lastEvents = static_cast<dxf_event_data_t*>(dx_calloc(dx_eid_count, sizeof(dxf_event_data_t)));
-	res->lastEventsAccessed = static_cast<dxf_event_data_t*>(dx_calloc(dx_eid_count, sizeof(dxf_event_data_t)));
 
-	if (res->lastEvents == nullptr || res->lastEventsAccessed == nullptr) {
-		return cleanup(res);
-	}
+	// TODO: remove in 9.0.0
+	if (!Configuration::getInstance()->getSubscriptionsDisableLastEventStorage()) {
+		res->lastEvents = static_cast<dxf_event_data_t*>(dx_calloc(dx_eid_count, sizeof(dxf_event_data_t)));
+		res->lastEventsAccessed = static_cast<dxf_event_data_t*>(dx_calloc(dx_eid_count, sizeof(dxf_event_data_t)));
 
-	for (int i = dx_eid_begin; i < dx_eid_count; ++i) {
-		res->lastEvents[i] = dx_calloc(1, dx_get_event_data_struct_size(i));
-		res->lastEventsAccessed[i] = dx_calloc(1, dx_get_event_data_struct_size(i));
-
-		if (res->lastEvents[i] == nullptr || res->lastEventsAccessed[i] == nullptr) {
+		if (res->lastEvents == nullptr || res->lastEventsAccessed == nullptr) {
 			return cleanup(res);
 		}
+
+		for (int i = dx_eid_begin; i < dx_eid_count; ++i) {
+			res->lastEvents[i] = dx_calloc(1, dx_get_event_data_struct_size(i));
+			res->lastEventsAccessed[i] = dx_calloc(1, dx_get_event_data_struct_size(i));
+
+			if (res->lastEvents[i] == nullptr || res->lastEventsAccessed[i] == nullptr) {
+				return cleanup(res);
+			}
+		}
+	} else {
+		res->lastEvents = nullptr;
+		res->lastEventsAccessed = nullptr;
 	}
 
 	return res;
 }
 
 void SymbolData::storeLastSymbolEvent(dx_event_id_t eventId, dxf_const_event_data_t data) {
-	dx_memcpy(this->lastEvents[eventId],
-			  dx_get_event_data_item(DX_EVENT_BIT_MASK(static_cast<unsigned>(eventId)), data, 0),
-			  dx_get_event_data_struct_size(eventId));
+	if (this->lastEvents != nullptr) {
+		dx_memcpy(this->lastEvents[eventId],
+				  dx_get_event_data_item(DX_EVENT_BIT_MASK(static_cast<unsigned>(eventId)), data, 0),
+				  dx_get_event_data_struct_size(eventId));
+	}
 }
 
 ListenerContext::ListenerContext(ListenerPtr listener, EventListenerVersion version, void* userData) noexcept
@@ -878,9 +887,11 @@ int dx_get_last_symbol_event(dxf_connection_t connection, dxf_const_string_t sym
 			return dx_set_error_code(dx_esec_invalid_symbol_name);
 		}
 
-		dx_memcpy(symbol_data->lastEventsAccessed[event_id], symbol_data->lastEvents[event_id],
-				  dx_get_event_data_struct_size(event_id));
-		*event_data = symbol_data->lastEventsAccessed[event_id];
+		if (symbol_data->lastEventsAccessed != nullptr) {
+			dx_memcpy(symbol_data->lastEventsAccessed[event_id], symbol_data->lastEvents[event_id],
+					  dx_get_event_data_struct_size(event_id));
+			*event_data = symbol_data->lastEventsAccessed[event_id];
+		}
 
 		return true;
 	});

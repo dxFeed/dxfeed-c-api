@@ -62,3 +62,7 @@ dx_log_level_t dx_get_minimum_logging_level(dx_log_level_t default_minimum_loggi
 int dx_get_network_reestablish_connections() {
 	return dx::Configuration::getInstance()->getNetworkReestablishConnections();
 }
+
+int dx_get_subscriptions_disable_last_event_storage() {
+	return dx::Configuration::getInstance()->getSubscriptionsDisableLastEventStorage();
+}

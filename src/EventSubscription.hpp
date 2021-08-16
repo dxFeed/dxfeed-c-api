@@ -93,7 +93,7 @@ struct SubscriptionData {
 	unsigned event_types;
 	std::unordered_map<std::wstring, SymbolData*> symbols{};
 	std::unordered_set<ListenerContext> listeners{};
-	dx_order_source_array_t orderSource;
+	dx_order_source_array_t orderSource{};
 	dx_event_subscr_flag subscriptionFlags;
 	dxf_long_t time;
 
