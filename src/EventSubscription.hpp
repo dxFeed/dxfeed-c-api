@@ -121,7 +121,7 @@ struct SubscriptionData {
 class EventSubscriptionConnectionContext {
 	dxf_connection_t connectionHandle;
 	std::recursive_mutex mutex{};
-	std::unordered_map<std::wstring, SymbolData*> symbols{};
+	std::unordered_set<SymbolData*> symbols{};
 	std::unordered_set<SubscriptionData*> subscriptions{};
 
 public:

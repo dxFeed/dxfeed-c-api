@@ -37,8 +37,6 @@ extern "C" {
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
-#include <utility>
-#include <vector>
 
 #include "Configuration.hpp"
 #include "EventSubscription.hpp"
@@ -249,10 +247,13 @@ dxf_connection_t EventSubscriptionConnectionContext::getConnectionHandle() { ret
 
 std::unordered_set<SubscriptionData*> EventSubscriptionConnectionContext::getSubscriptions() { return subscriptions; }
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "LocalValueEscapesScope"
 SymbolData* EventSubscriptionConnectionContext::subscribeSymbol(dxf_const_string_t symbolName,
 																SubscriptionData* owner) {
 	SymbolData* res;
-	auto found = symbols.find(std::wstring(symbolName));
+	auto dumb = dx::SymbolData::createDumb(symbolName);
+	auto found = symbols.find(&dumb);
 
 	if (found == symbols.end()) {
 		res = SymbolData::create(symbolName);
@@ -261,9 +262,9 @@ SymbolData* EventSubscriptionConnectionContext::subscribeSymbol(dxf_const_string
 			return nullptr;
 		}
 
-		symbols[symbolName] = res;
+		symbols.insert(res);
 	} else {
-		res = found->second;
+		res = *found;
 	}
 
 	if (res->subscriptions.find(owner) != res->subscriptions.end()) {
@@ -275,9 +276,10 @@ SymbolData* EventSubscriptionConnectionContext::subscribeSymbol(dxf_const_string
 
 	return res;
 }
+#pragma clang diagnostic pop
 
 void EventSubscriptionConnectionContext::removeSymbolData(SymbolData* symbolData) {
-	auto found = symbols.find(std::wstring(symbolData->name));
+	auto found = symbols.find(symbolData);
 
 	if (found != symbols.end()) {
 		symbols.erase(found);
@@ -307,13 +309,14 @@ int EventSubscriptionConnectionContext::unsubscribeSymbol(SymbolData* symbolData
 }
 
 SymbolData* EventSubscriptionConnectionContext::findSymbol(dxf_const_string_t symbolName) {
-	auto found = symbols.find(std::wstring(symbolName));
+	auto dumb = dx::SymbolData::createDumb(symbolName);
+	auto found = symbols.find(&dumb);
 
 	if (found == symbols.end()) {
 		return nullptr;
 	}
 
-	return found->second;
+	return *found;
 }
 
 void EventSubscriptionConnectionContext::addSubscription(SubscriptionData* data) {
@@ -782,7 +785,7 @@ static void dx_call_subscr_listeners(dx::SubscriptionData* subscr_data, unsigned
 	}
 }
 
-#define DX_ORDER_SOURCE_COMPARATOR_NONSYM(l, r) (dx_compare_strings(l.suffix, r))
+#define DX_ORDER_SOURCE_COMPARATOR_NONSYM(l, r) (dx_compare_strings((l).suffix, (r)))
 
 void pass_event_data_to_listeners(dx::EventSubscriptionConnectionContext* ctx, dx::SymbolData* symbol_data,
 								  dx_event_id_t event_id, dxf_const_string_t symbol_name, dxf_const_event_data_t data,
@@ -953,7 +956,7 @@ int dx_process_connection_subscriptions(dxf_connection_t connection, dx_subscrip
 
 /* -------------------------------------------------------------------------- */
 
-#define DX_ORDER_SOURCE_COMPARATOR(l, r) (dx_compare_strings(l.suffix, r.suffix))
+#define DX_ORDER_SOURCE_COMPARATOR(l, r) (dx_compare_strings((l).suffix, (r).suffix))
 
 int dx_add_order_source(dxf_subscription_t subscr_id, dxf_const_string_t source) {
 	auto subscr_data = (dx::SubscriptionData*)subscr_id;
