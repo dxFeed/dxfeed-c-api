@@ -734,9 +734,9 @@ DXFEED_API ERRORCODE dxf_get_subscription_event_types(dxf_subscription_t subscri
  *
  * @brief Retrieves the last event data of the specified symbol and type for the connection.
  *
- * @deprecated Attention! This feature will be removed in version 9.0.0, Since this mechanism consumes a lot of RAM.
+ * @deprecated Attention! This feature will be removed in version 9.0.0, since this mechanism consumes a lot of RAM.
  * Please save the latest event by symbol and type to achieve this functionality.
- * The `subscriptions.disableLastEventStorage` configuration property was add.
+ * The `subscriptions.disableLastEventStorage` configuration property was added.
  * It allows to disable the last event storage mechanism. Default value = true. This property will be also removed in version 9.0.0 <br/>
  * How to enable:
  *   ```c

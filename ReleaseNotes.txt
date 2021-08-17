@@ -1,3 +1,13 @@
+Version 8.3.0
+* [DXFC-254] The amount of memory used to store the symbols required for a subscription has been reduced by several times.
+  [Deprecated] `dxf_get_last_event` is deprecated and will be removed in version 9.0.0, since this mechanism consumes a lot of RAM.
+  Please save the latest event by symbol and type to achieve this functionality. The `subscriptions.disableLastEventStorage` configuration property was added.
+  It allows to disable the last event storage mechanism. Default value = true. This property will be also removed in version 9.0.0.
+  How to enable the last event storage mechanism:
+  ```c
+  dxf_load_config_from_wstring(L"subscriptions.disableLastEventStorage = false\n");
+  ```
+
 Version 8.2.0
 * [DXFC-252] Fixed bug with "freezing" the dxf_close_connection `function` if not called immediately after disconnecting the connection.  
   The `network.reestablishConnections` config property was added. This property describes a flag that allows to disable the connection reestablishment mechanism. (default value = true).  
