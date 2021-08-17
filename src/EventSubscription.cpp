@@ -37,8 +37,6 @@ extern "C" {
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
-#include <utility>
-#include <vector>
 
 #include "Configuration.hpp"
 #include "EventSubscription.hpp"
@@ -133,29 +131,46 @@ SymbolData* SymbolData::create(dxf_const_string_t name) {
 	}
 
 	res->name = std::wstring(name);
-	res->lastEvents = static_cast<dxf_event_data_t*>(dx_calloc(dx_eid_count, sizeof(dxf_event_data_t)));
-	res->lastEventsAccessed = static_cast<dxf_event_data_t*>(dx_calloc(dx_eid_count, sizeof(dxf_event_data_t)));
 
-	if (res->lastEvents == nullptr || res->lastEventsAccessed == nullptr) {
-		return cleanup(res);
-	}
+	// TODO: remove in 9.0.0
+	if (!Configuration::getInstance()->getSubscriptionsDisableLastEventStorage()) {
+		res->lastEvents = static_cast<dxf_event_data_t*>(dx_calloc(dx_eid_count, sizeof(dxf_event_data_t)));
+		res->lastEventsAccessed = static_cast<dxf_event_data_t*>(dx_calloc(dx_eid_count, sizeof(dxf_event_data_t)));
 
-	for (int i = dx_eid_begin; i < dx_eid_count; ++i) {
-		res->lastEvents[i] = dx_calloc(1, dx_get_event_data_struct_size(i));
-		res->lastEventsAccessed[i] = dx_calloc(1, dx_get_event_data_struct_size(i));
-
-		if (res->lastEvents[i] == nullptr || res->lastEventsAccessed[i] == nullptr) {
+		if (res->lastEvents == nullptr || res->lastEventsAccessed == nullptr) {
 			return cleanup(res);
 		}
+
+		for (int i = dx_eid_begin; i < dx_eid_count; ++i) {
+			res->lastEvents[i] = dx_calloc(1, dx_get_event_data_struct_size(i));
+			res->lastEventsAccessed[i] = dx_calloc(1, dx_get_event_data_struct_size(i));
+
+			if (res->lastEvents[i] == nullptr || res->lastEventsAccessed[i] == nullptr) {
+				return cleanup(res);
+			}
+		}
+	} else {
+		res->lastEvents = nullptr;
+		res->lastEventsAccessed = nullptr;
 	}
 
 	return res;
 }
 
+SymbolData SymbolData::createDumb(const std::wstring& name) {
+	auto result = dx::SymbolData{};
+
+	result.name = name;
+
+	return result;
+}
+
 void SymbolData::storeLastSymbolEvent(dx_event_id_t eventId, dxf_const_event_data_t data) {
-	dx_memcpy(this->lastEvents[eventId],
-			  dx_get_event_data_item(DX_EVENT_BIT_MASK(static_cast<unsigned>(eventId)), data, 0),
-			  dx_get_event_data_struct_size(eventId));
+	if (this->lastEvents != nullptr) {
+		dx_memcpy(this->lastEvents[eventId],
+				  dx_get_event_data_item(DX_EVENT_BIT_MASK(static_cast<unsigned>(eventId)), data, 0),
+				  dx_get_event_data_struct_size(eventId));
+	}
 }
 
 ListenerContext::ListenerContext(ListenerPtr listener, EventListenerVersion version, void* userData) noexcept
@@ -203,7 +218,7 @@ int SubscriptionData::closeEventSubscription(dxf_subscription_t subscriptionId, 
 
 	context->process([&res, &subscriptionData, remove_from_context](dx::EventSubscriptionConnectionContext* ctx) {
 		for (auto&& s : subscriptionData->symbols) {
-			res = ctx->unsubscribeSymbol(s.second, subscriptionData) && res;
+			res = ctx->unsubscribeSymbol(s, subscriptionData) && res;
 		}
 
 		subscriptionData->symbols.clear();
@@ -232,10 +247,13 @@ dxf_connection_t EventSubscriptionConnectionContext::getConnectionHandle() { ret
 
 std::unordered_set<SubscriptionData*> EventSubscriptionConnectionContext::getSubscriptions() { return subscriptions; }
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "LocalValueEscapesScope"
 SymbolData* EventSubscriptionConnectionContext::subscribeSymbol(dxf_const_string_t symbolName,
 																SubscriptionData* owner) {
 	SymbolData* res;
-	auto found = symbols.find(std::wstring(symbolName));
+	auto dumb = dx::SymbolData::createDumb(symbolName);
+	auto found = symbols.find(&dumb);
 
 	if (found == symbols.end()) {
 		res = SymbolData::create(symbolName);
@@ -244,9 +262,9 @@ SymbolData* EventSubscriptionConnectionContext::subscribeSymbol(dxf_const_string
 			return nullptr;
 		}
 
-		symbols[symbolName] = res;
+		symbols.insert(res);
 	} else {
-		res = found->second;
+		res = *found;
 	}
 
 	if (res->subscriptions.find(owner) != res->subscriptions.end()) {
@@ -258,9 +276,10 @@ SymbolData* EventSubscriptionConnectionContext::subscribeSymbol(dxf_const_string
 
 	return res;
 }
+#pragma clang diagnostic pop
 
 void EventSubscriptionConnectionContext::removeSymbolData(SymbolData* symbolData) {
-	auto found = symbols.find(std::wstring(symbolData->name));
+	auto found = symbols.find(symbolData);
 
 	if (found != symbols.end()) {
 		symbols.erase(found);
@@ -290,13 +309,14 @@ int EventSubscriptionConnectionContext::unsubscribeSymbol(SymbolData* symbolData
 }
 
 SymbolData* EventSubscriptionConnectionContext::findSymbol(dxf_const_string_t symbolName) {
-	auto found = symbols.find(std::wstring(symbolName));
+	auto dumb = dx::SymbolData::createDumb(symbolName);
+	auto found = symbols.find(&dumb);
 
 	if (found == symbols.end()) {
 		return nullptr;
 	}
 
-	return found->second;
+	return *found;
 }
 
 void EventSubscriptionConnectionContext::addSubscription(SubscriptionData* data) {
@@ -457,7 +477,8 @@ int dx_add_symbols_impl(dxf_subscription_t subscr_id, dxf_const_string_t* symbol
 				continue;
 			}
 
-			auto found = subscr_data->symbols.find(std::wstring(symbols[cur_symbol_index]));
+			auto dumb = dx::SymbolData::createDumb(symbols[cur_symbol_index]);
+			auto found = subscr_data->symbols.find(&dumb);
 
 			if (found != subscr_data->symbols.end()) {
 				/* symbol is already subscribed */
@@ -475,7 +496,7 @@ int dx_add_symbols_impl(dxf_subscription_t subscr_id, dxf_const_string_t* symbol
 				(*added_symbols_count)++;
 			}
 
-			subscr_data->symbols[symbols[cur_symbol_index]] = symbol_data;
+			subscr_data->symbols.insert(symbol_data);
 		}
 
 		return true;
@@ -508,14 +529,15 @@ int dx_remove_symbols(dxf_subscription_t subscr_id, dxf_const_string_t* symbols,
 				continue;
 			}
 
-			auto found = subscr_data->symbols.find(std::wstring(symbols[cur_symbol_index]));
+			auto dumb = dx::SymbolData::createDumb(symbols[cur_symbol_index]);
+			auto found = subscr_data->symbols.find(&dumb);
 
 			if (found == subscr_data->symbols.end()) {
 				/* symbol wasn't subscribed */
 				continue;
 			}
 
-			if (!ctx->unsubscribeSymbol(found->second, subscr_data)) {
+			if (!ctx->unsubscribeSymbol(*found, subscr_data)) {
 				return false;
 			}
 
@@ -667,7 +689,7 @@ int dx_get_event_subscription_symbols(dxf_subscription_t subscr_id, OUT dxf_cons
 
 	std::size_t i = 0;
 	for (auto&& s : subscr_data->symbols) {
-		subscr_data->symbolNames[i] = s.second->name.c_str();
+		subscr_data->symbolNames[i] = s->name.c_str();
 		i++;
 	}
 
@@ -736,7 +758,8 @@ int dx_get_event_subscription_time(dxf_subscription_t subscr_id, OUT dxf_long_t*
 static void dx_call_subscr_listeners(dx::SubscriptionData* subscr_data, unsigned event_bitmask,
 									 dxf_const_string_t symbol_name, dxf_const_event_data_t data,
 									 const dxf_event_params_t* event_params) {
-	if (subscr_data == nullptr || subscr_data->symbols.find(symbol_name) == subscr_data->symbols.end()) {
+	auto dumb = dx::SymbolData::createDumb(symbol_name);
+	if (subscr_data == nullptr || subscr_data->symbols.find(&dumb) == subscr_data->symbols.end()) {
 		return;
 	}
 
@@ -762,7 +785,7 @@ static void dx_call_subscr_listeners(dx::SubscriptionData* subscr_data, unsigned
 	}
 }
 
-#define DX_ORDER_SOURCE_COMPARATOR_NONSYM(l, r) (dx_compare_strings(l.suffix, r))
+#define DX_ORDER_SOURCE_COMPARATOR_NONSYM(l, r) (dx_compare_strings((l).suffix, (r)))
 
 void pass_event_data_to_listeners(dx::EventSubscriptionConnectionContext* ctx, dx::SymbolData* symbol_data,
 								  dx_event_id_t event_id, dxf_const_string_t symbol_name, dxf_const_event_data_t data,
@@ -878,9 +901,11 @@ int dx_get_last_symbol_event(dxf_connection_t connection, dxf_const_string_t sym
 			return dx_set_error_code(dx_esec_invalid_symbol_name);
 		}
 
-		dx_memcpy(symbol_data->lastEventsAccessed[event_id], symbol_data->lastEvents[event_id],
-				  dx_get_event_data_struct_size(event_id));
-		*event_data = symbol_data->lastEventsAccessed[event_id];
+		if (symbol_data->lastEventsAccessed != nullptr) {
+			dx_memcpy(symbol_data->lastEventsAccessed[event_id], symbol_data->lastEvents[event_id],
+					  dx_get_event_data_struct_size(event_id));
+			*event_data = symbol_data->lastEventsAccessed[event_id];
+		}
 
 		return true;
 	});
@@ -931,7 +956,7 @@ int dx_process_connection_subscriptions(dxf_connection_t connection, dx_subscrip
 
 /* -------------------------------------------------------------------------- */
 
-#define DX_ORDER_SOURCE_COMPARATOR(l, r) (dx_compare_strings(l.suffix, r.suffix))
+#define DX_ORDER_SOURCE_COMPARATOR(l, r) (dx_compare_strings((l).suffix, (r).suffix))
 
 int dx_add_order_source(dxf_subscription_t subscr_id, dxf_const_string_t source) {
 	auto subscr_data = (dx::SubscriptionData*)subscr_id;

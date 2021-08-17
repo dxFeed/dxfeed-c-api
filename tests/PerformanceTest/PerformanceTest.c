@@ -163,8 +163,7 @@ int dxs_mutex_unlock(dxs_mutex_t* mutex) {
 #define LS(s)  LS2(s)
 #define LS2(s) L##s
 
-const char dxfeed_host[] = "mddqa.in.devexperts.com:7400";
-// const char dxfeed_host[] = "demo.dxfeed.com:7300";
+const char dxfeed_host[] = "(demo.dxfeed.com:7300)(mddqa.in.devexperts.com:7400)";
 
 #define TIMEOUT_TAG "-o"
 
@@ -357,7 +356,7 @@ void on_server_heartbeat_notifier(dxf_connection_t connection, dxf_long_t server
 								  dxf_int_t connection_rtt, void* user_data) {
 	server_lags_counter++;
 	server_lags_sum += server_lag_mark;
-	fwprintf(stderr, L"\n##### Server time (UTC) = %" PRId64 " ms, Server lag = %d us, RTT = %d us #####\n",
+	fwprintf(stderr, L"\n##### Server time (UTC) = %" LS(PRId64) L" ms, Server lag = %d us, RTT = %d us #####\n",
 			 server_millis, server_lag_mark, connection_rtt);
 }
 

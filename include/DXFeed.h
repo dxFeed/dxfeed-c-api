@@ -87,10 +87,10 @@
  * @brief Regional book functions
  */
 /**
-* @ingroup functions
-* @defgroup c-api-config Config
-* @brief Config functions
-*/
+ * @ingroup functions
+ * @defgroup c-api-config Config
+ * @brief Config functions
+ */
 
 #ifndef DXFEED_API_H_INCLUDED
 #define DXFEED_API_H_INCLUDED
@@ -130,7 +130,7 @@
  *
  * @details Called whenever connection to dxFeed servers terminates
  */
-typedef void (*dxf_conn_termination_notifier_t) (dxf_connection_t connection, void* user_data);
+typedef void (*dxf_conn_termination_notifier_t)(dxf_connection_t connection, void* user_data);
 
 /**
  * @ingroup callback-types
@@ -139,10 +139,8 @@ typedef void (*dxf_conn_termination_notifier_t) (dxf_connection_t connection, vo
  *
  * @details Called whenever connection status to dxFeed servers changes
  */
-typedef void (*dxf_conn_status_notifier_t) (dxf_connection_t connection,
-                                            dxf_connection_status_t old_status,
-                                            dxf_connection_status_t new_status,
-                                            void* user_data);
+typedef void (*dxf_conn_status_notifier_t)(dxf_connection_t connection, dxf_connection_status_t old_status,
+										   dxf_connection_status_t new_status, void* user_data);
 
 /**
  * @ingroup callback-types
@@ -183,7 +181,7 @@ typedef void (*dxf_conn_on_server_heartbeat_notifier_t)(dxf_connection_t connect
  *
  * @details Called whenever connection thread is being created
  */
-typedef int (*dxf_socket_thread_creation_notifier_t) (dxf_connection_t connection, void* user_data);
+typedef int (*dxf_socket_thread_creation_notifier_t)(dxf_connection_t connection, void* user_data);
 
 /**
  * @ingroup callback-types
@@ -193,12 +191,12 @@ typedef int (*dxf_socket_thread_creation_notifier_t) (dxf_connection_t connectio
  *
  * @details Called whenever connection thread is being terminated
  */
-typedef void (*dxf_socket_thread_destruction_notifier_t) (dxf_connection_t connection, void* user_data);
+typedef void (*dxf_socket_thread_destruction_notifier_t)(dxf_connection_t connection, void* user_data);
 
 /* -------------------------------------------------------------------------- */
 /*
  *	DXFeed C API functions
- 
+
  *  All functions return DXF_SUCCESS on success and DXF_FAILURE if some error
  *  has occurred. Use 'dxf_get_last_error' to retrieve the error code
  *  and description.
@@ -215,7 +213,8 @@ typedef void (*dxf_socket_thread_destruction_notifier_t) (dxf_connection_t conne
  * @param[in] address              Connection string
  *                                   - the single address: ```host:port``` or just ```host```
  *                                   - address with credentials: ```host:port[username=xxx,password=yyy]```
- *                                   - multiple addresses: ```(host1:port1)(host2)(host3:port3[username=xxx,password=yyy])```
+ *                                   - multiple addresses:
+ * ```(host1:port1)(host2)(host3:port3[username=xxx,password=yyy])```
  *                                   - the data from file: ```/path/to/file``` on *nix and ```drive:\path\to\file```
  *                                     on Windows
  * @param[in] notifier             The callback to inform the client side that the connection has stumbled upon and
@@ -251,7 +250,8 @@ DXFEED_API ERRORCODE dxf_create_connection(const char* address, dxf_conn_termina
  * @param[in] address              Connection string
  *                                   - the single address: ```host:port``` or just ```host```
  *                                   - address with credentials: ```host:port[username=xxx,password=yyy]```
- *                                   - multiple addresses: ```(host1:port1)(host2)(host3:port3[username=xxx,password=yyy])```
+ *                                   - multiple addresses:
+ * ```(host1:port1)(host2)(host3:port3[username=xxx,password=yyy])```
  *                                   - the data from file: ```/path/to/file``` on *nix and ```drive:\path\to\file```
  *                                     on Windows
  * @param[in] user                 The user name;
@@ -292,7 +292,8 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_basic(const char* address, const
  * @param[in] address              Connection string
  *                                   - the single address: "host:port" or just "host"
  *                                   - address with credentials: "host:port[username=xxx,password=yyy]"
- *                                   - multiple addresses: "(host1:port1)(host2)(host3:port3[username=xxx,password=yyy])"
+ *                                   - multiple addresses:
+ * "(host1:port1)(host2)(host3:port3[username=xxx,password=yyy])"
  *                                   - the data from file: "/path/to/file" on *nix and "drive:\path\to\file" on Windows
  * @param[in] token                The authorization token;
  * @param[in] notifier             The callback to inform the client side that the connection has stumbled upon and
@@ -314,14 +315,12 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_basic(const char* address, const
  *
  * @warning The token data from argument have a higher priority than address credentials
  */
-DXFEED_API ERRORCODE dxf_create_connection_auth_bearer(const char* address,
-                                                       const char* token,
-                                                       dxf_conn_termination_notifier_t notifier,
-                                                       dxf_conn_status_notifier_t conn_status_notifier,
-                                                       dxf_socket_thread_creation_notifier_t stcn,
-                                                       dxf_socket_thread_destruction_notifier_t stdn,
-                                                       void* user_data,
-                                                       OUT dxf_connection_t* connection);
+DXFEED_API ERRORCODE dxf_create_connection_auth_bearer(const char* address, const char* token,
+													   dxf_conn_termination_notifier_t notifier,
+													   dxf_conn_status_notifier_t conn_status_notifier,
+													   dxf_socket_thread_creation_notifier_t stcn,
+													   dxf_socket_thread_destruction_notifier_t stdn, void* user_data,
+													   OUT dxf_connection_t* connection);
 
 /**
  * @ingroup c-api-connection-functions
@@ -333,7 +332,8 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_bearer(const char* address,
  * @param[in] address              Connection string
  *                                   - the single address: ```host:port``` or just ```host```
  *                                   - address with credentials: ```host:port[username=xxx,password=yyy]```
- *                                   - multiple addresses: ```(host1:port1)(host2)(host3:port3[username=xxx,password=yyy])```
+ *                                   - multiple addresses:
+ ```(host1:port1)(host2)(host3:port3[username=xxx,password=yyy])```
  *                                   - the data from file: ```/path/to/file``` on *nix and ```drive:\path\to\file```
  *                                     on Windows
  * @param[in] authscheme           The authorization scheme
@@ -342,11 +342,11 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_bearer(const char* address,
  *                                 error and will go reconnecting
  * @param[in] conn_status_notifier The callback to inform the client side that the connection status has changed
  * @param[in] stcn                 The callback for informing the client side about the socket thread creation;
-                                   may be set to NULL if no specific action is required to perform on the client side
-                                   on a new thread creation
+								   may be set to NULL if no specific action is required to perform on the client side
+								   on a new thread creation
  * @param[in] stdn                 The callback for informing the client side about the socket thread destruction;
-                                   may be set to NULL if no specific action is required to perform on the client side
-                                   on a thread destruction;
+								   may be set to NULL if no specific action is required to perform on the client side
+								   on a thread destruction;
  * @param[in] user_data            The user defined value passed to the termination notifier callback along with the
  *                                 connection handle; may be set to whatever value;
  * @param[out] connection          The handle of the created connection.
@@ -357,15 +357,12 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_bearer(const char* address,
  *
  * @warning The authscheme and authdata from argument have a higher priority than address credentials.
  */
-DXFEED_API ERRORCODE dxf_create_connection_auth_custom(const char* address,
-                                                       const char* authscheme,
-                                                       const char* authdata,
-                                                       dxf_conn_termination_notifier_t notifier,
-                                                       dxf_conn_status_notifier_t conn_status_notifier,
-                                                       dxf_socket_thread_creation_notifier_t stcn,
-                                                       dxf_socket_thread_destruction_notifier_t stdn,
-                                                       void* user_data,
-                                                       OUT dxf_connection_t* connection);
+DXFEED_API ERRORCODE dxf_create_connection_auth_custom(const char* address, const char* authscheme,
+													   const char* authdata, dxf_conn_termination_notifier_t notifier,
+													   dxf_conn_status_notifier_t conn_status_notifier,
+													   dxf_socket_thread_creation_notifier_t stcn,
+													   dxf_socket_thread_destruction_notifier_t stdn, void* user_data,
+													   OUT dxf_connection_t* connection);
 
 /**
  * @ingroup c-api-connection-functions
@@ -397,7 +394,7 @@ DXFEED_API ERRORCODE dxf_set_on_server_heartbeat_notifier(dxf_connection_t conne
  * @return {@link DXF_SUCCESS} on successful connection closure or {@link DXF_FAILURE} on error;
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure.
  */
-DXFEED_API ERRORCODE dxf_close_connection (dxf_connection_t connection);
+DXFEED_API ERRORCODE dxf_close_connection(dxf_connection_t connection);
 
 /**
  * @ingroup c-api-basic-subscription-functions
@@ -415,8 +412,8 @@ DXFEED_API ERRORCODE dxf_close_connection (dxf_connection_t connection);
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
  *         a handle to newly created subscription is returned via ```subscription``` out parameter
  */
-DXFEED_API ERRORCODE dxf_create_subscription (dxf_connection_t connection, int event_types,
-                                              OUT dxf_subscription_t* subscription);
+DXFEED_API ERRORCODE dxf_create_subscription(dxf_connection_t connection, int event_types,
+											 OUT dxf_subscription_t* subscription);
 
 /**
  * @ingroup c-api-basic-subscription-functions
@@ -436,8 +433,8 @@ DXFEED_API ERRORCODE dxf_create_subscription (dxf_connection_t connection, int e
  *         a handle to newly created subscription is returned via ```subscription``` out parameter
  */
 DXFEED_API ERRORCODE dxf_create_subscription_with_flags(dxf_connection_t connection, int event_types,
-                                                        dx_event_subscr_flag subscr_flags,
-                                                        OUT dxf_subscription_t* subscription);
+														dx_event_subscr_flag subscr_flags,
+														OUT dxf_subscription_t* subscription);
 
 /**
  * @ingroup c-api-basic-subscription-functions
@@ -456,9 +453,8 @@ DXFEED_API ERRORCODE dxf_create_subscription_with_flags(dxf_connection_t connect
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
  *         a handle to newly created subscription is returned via ```subscription``` out parameter
  */
-DXFEED_API ERRORCODE dxf_create_subscription_timed(dxf_connection_t connection, int event_types, 
-                                                   dxf_long_t time,
-                                                   OUT dxf_subscription_t* subscription);
+DXFEED_API ERRORCODE dxf_create_subscription_timed(dxf_connection_t connection, int event_types, dxf_long_t time,
+												   OUT dxf_subscription_t* subscription);
 
 /**
  * @ingroup c-api-basic-subscription-functions
@@ -479,8 +475,8 @@ DXFEED_API ERRORCODE dxf_create_subscription_timed(dxf_connection_t connection, 
  *         a handle to newly created subscription is returned via ```subscription``` out parameter
  */
 DXFEED_API ERRORCODE dxf_create_subscription_timed_with_flags(dxf_connection_t connection, int event_types,
-                                                              dxf_long_t time, dx_event_subscr_flag subscr_flags,
-                                                              OUT dxf_subscription_t* subscription);
+															  dxf_long_t time, dx_event_subscr_flag subscr_flags,
+															  OUT dxf_subscription_t* subscription);
 
 /**
  * @ingroup c-api-basic-subscription-functions
@@ -494,7 +490,7 @@ DXFEED_API ERRORCODE dxf_create_subscription_timed_with_flags(dxf_connection_t c
  * @return {@link DXF_SUCCESS} on successful subscription closure or {@link DXF_FAILURE} on error;
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
  */
-DXFEED_API ERRORCODE dxf_close_subscription (dxf_subscription_t subscription);
+DXFEED_API ERRORCODE dxf_close_subscription(dxf_subscription_t subscription);
 
 /**
  * @ingroup c-api-symbol-subscription-functions
@@ -511,7 +507,7 @@ DXFEED_API ERRORCODE dxf_close_subscription (dxf_subscription_t subscription);
  * @return {@link DXF_SUCCESS} if the operation succeed or {@link DXF_FAILURE} if the operation fails. The error code
  * can be obtained using the function {@link dxf_get_last_error}
  */
-DXFEED_API ERRORCODE dxf_add_symbol (dxf_subscription_t subscription, dxf_const_string_t symbol);
+DXFEED_API ERRORCODE dxf_add_symbol(dxf_subscription_t subscription, dxf_const_string_t symbol);
 
 /**
  * @ingroup c-api-symbol-subscription-functions
@@ -531,7 +527,7 @@ DXFEED_API ERRORCODE dxf_add_symbol (dxf_subscription_t subscription, dxf_const_
  * @return {@link DXF_SUCCESS} if the operation succeed or {@link DXF_FAILURE} if the operation fails. The error code
  * can be obtained using the function {@link dxf_get_last_error}
  */
-DXFEED_API ERRORCODE dxf_add_symbols (dxf_subscription_t subscription, dxf_const_string_t* symbols, int symbol_count);
+DXFEED_API ERRORCODE dxf_add_symbols(dxf_subscription_t subscription, dxf_const_string_t* symbols, int symbol_count);
 
 /**
  * @ingroup c-api-symbol-subscription-functions
@@ -561,7 +557,8 @@ DXFEED_API ERRORCODE dxf_add_candle_symbol(dxf_subscription_t subscription, dxf_
  * @return  {@link DXF_SUCCESS} on successful symbol removal or {@link DXF_FAILURE} on error;
  *          {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
  */
-DXFEED_API ERRORCODE dxf_remove_candle_symbol(dxf_subscription_t subscription, dxf_candle_attributes_t candle_attributes);
+DXFEED_API ERRORCODE dxf_remove_candle_symbol(dxf_subscription_t subscription,
+											  dxf_candle_attributes_t candle_attributes);
 
 /**
  * @ingroup c-api-symbol-subscription-functions
@@ -578,7 +575,7 @@ DXFEED_API ERRORCODE dxf_remove_candle_symbol(dxf_subscription_t subscription, d
  * @return {@link DXF_SUCCESS} if the operation succeed or {@link DXF_FAILURE} if the operation fails. The error code
  *         can be obtained using the function {@link dxf_get_last_error}
  */
-DXFEED_API ERRORCODE dxf_remove_symbol (dxf_subscription_t subscription, dxf_const_string_t symbol);
+DXFEED_API ERRORCODE dxf_remove_symbol(dxf_subscription_t subscription, dxf_const_string_t symbol);
 
 /**
  * @ingroup c-api-symbol-subscription-functions
@@ -597,7 +594,7 @@ DXFEED_API ERRORCODE dxf_remove_symbol (dxf_subscription_t subscription, dxf_con
  * @return {@link DXF_SUCCESS} if the operation succeed or {@link DXF_FAILURE} if the operation fails. The error code
  *         can be obtained using the function {@link dxf_get_last_error}
  */
-DXFEED_API ERRORCODE dxf_remove_symbols (dxf_subscription_t subscription, dxf_const_string_t* symbols, int symbol_count);
+DXFEED_API ERRORCODE dxf_remove_symbols(dxf_subscription_t subscription, dxf_const_string_t* symbols, int symbol_count);
 
 /**
  * @ingroup c-api-symbol-subscription-functions
@@ -615,7 +612,8 @@ DXFEED_API ERRORCODE dxf_remove_symbols (dxf_subscription_t subscription, dxf_co
  * @return {@link DXF_SUCCESS} on successful symbols retrieval or {@link DXF_FAILURE} on error;
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
  */
-DXFEED_API ERRORCODE dxf_get_symbols (dxf_subscription_t subscription, OUT dxf_const_string_t** symbols, OUT int* symbol_count);
+DXFEED_API ERRORCODE dxf_get_symbols(dxf_subscription_t subscription, OUT dxf_const_string_t** symbols,
+									 OUT int* symbol_count);
 
 /**
  * @ingroup c-api-symbol-subscription-functions
@@ -632,7 +630,7 @@ DXFEED_API ERRORCODE dxf_get_symbols (dxf_subscription_t subscription, OUT dxf_c
  * @return {@link DXF_SUCCESS} if the operation succeed or {@link DXF_FAILURE} if the operation fails. The error code
  *         can be obtained using the function {@link dxf_get_last_error}
  */
-DXFEED_API ERRORCODE dxf_set_symbols (dxf_subscription_t subscription, dxf_const_string_t* symbols, int symbol_count);
+DXFEED_API ERRORCODE dxf_set_symbols(dxf_subscription_t subscription, dxf_const_string_t* symbols, int symbol_count);
 
 /**
  * @ingroup c-api-symbol-subscription-functions
@@ -646,7 +644,7 @@ DXFEED_API ERRORCODE dxf_set_symbols (dxf_subscription_t subscription, dxf_const
  * @return {@link DXF_SUCCESS} if the operation succeed or {@link DXF_FAILURE} if the operation fails. The error code
  *         can be obtained using the function {@link dxf_get_last_error}
  */
-DXFEED_API ERRORCODE dxf_clear_symbols (dxf_subscription_t subscription);
+DXFEED_API ERRORCODE dxf_clear_symbols(dxf_subscription_t subscription);
 
 /**
  * @ingroup c-api-event-listener-functions
@@ -663,8 +661,8 @@ DXFEED_API ERRORCODE dxf_clear_symbols (dxf_subscription_t subscription);
  * @return {@link DXF_SUCCESS} on successful event listener attachment or {@link DXF_FAILURE} on error;
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
  */
-DXFEED_API ERRORCODE dxf_attach_event_listener (dxf_subscription_t subscription, dxf_event_listener_t event_listener,
-                                                void* user_data);
+DXFEED_API ERRORCODE dxf_attach_event_listener(dxf_subscription_t subscription, dxf_event_listener_t event_listener,
+											   void* user_data);
 
 /**
  * @ingroup c-api-event-listener-functions
@@ -679,7 +677,7 @@ DXFEED_API ERRORCODE dxf_attach_event_listener (dxf_subscription_t subscription,
  * @return {@link DXF_SUCCESS} on successful event listener detachment or {@link DXF_FAILURE} on error;
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
  */
-DXFEED_API ERRORCODE dxf_detach_event_listener (dxf_subscription_t subscription, dxf_event_listener_t event_listener);
+DXFEED_API ERRORCODE dxf_detach_event_listener(dxf_subscription_t subscription, dxf_event_listener_t event_listener);
 
 /**
  * @ingroup c-api-event-listener-functions
@@ -697,9 +695,8 @@ DXFEED_API ERRORCODE dxf_detach_event_listener (dxf_subscription_t subscription,
  * @return {@link DXF_SUCCESS} on successful event listener attachment or {@link DXF_FAILURE} on error;
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
  */
-DXFEED_API ERRORCODE dxf_attach_event_listener_v2(dxf_subscription_t subscription, 
-                                                  dxf_event_listener_v2_t event_listener,
-                                                  void* user_data);
+DXFEED_API ERRORCODE dxf_attach_event_listener_v2(dxf_subscription_t subscription,
+												  dxf_event_listener_v2_t event_listener, void* user_data);
 
 /**
  * @ingroup c-api-event-listener-functions
@@ -714,8 +711,8 @@ DXFEED_API ERRORCODE dxf_attach_event_listener_v2(dxf_subscription_t subscriptio
  * @return {@link DXF_SUCCESS} on successful event listener detachment or {@link DXF_FAILURE} on error;
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
  */
-DXFEED_API ERRORCODE dxf_detach_event_listener_v2(dxf_subscription_t subscription, 
-                                                  dxf_event_listener_v2_t event_listener);
+DXFEED_API ERRORCODE dxf_detach_event_listener_v2(dxf_subscription_t subscription,
+												  dxf_event_listener_v2_t event_listener);
 
 /**
  * @ingroup c-api-event-listener-functions
@@ -730,14 +727,23 @@ DXFEED_API ERRORCODE dxf_detach_event_listener_v2(dxf_subscription_t subscriptio
  * @return {@link DXF_SUCCESS} on successful event types retrieval or {@link DXF_FAILURE} on error;
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
  */
-DXFEED_API ERRORCODE dxf_get_subscription_event_types (dxf_subscription_t subscription, OUT int* event_types);
+DXFEED_API ERRORCODE dxf_get_subscription_event_types(dxf_subscription_t subscription, OUT int* event_types);
 
 /**
  * @ingroup c-api-event-listener-functions
  *
  * @brief Retrieves the last event data of the specified symbol and type for the connection.
  *
- * @details
+ * @deprecated Attention! This feature will be removed in version 9.0.0, since this mechanism consumes a lot of RAM.
+ * Please save the latest event by symbol and type to achieve this functionality.
+ * The `subscriptions.disableLastEventStorage` configuration property was added.
+ * It allows to disable the last event storage mechanism. Default value = true. This property will be also removed in version 9.0.0 <br/>
+ * How to enable:
+ *   ```c
+ *   dxf_load_config_from_wstring(
+ *       L"subscriptions.disableLastEventStorage = false\n"
+ *   );
+ *   ```
  *
  * @param[in] connection  A handle of the connection whose data is to be retrieved
  * @param[in] event_type  An event type bitmask defining a single event type
@@ -748,8 +754,8 @@ DXFEED_API ERRORCODE dxf_get_subscription_event_types (dxf_subscription_t subscr
  * @return {@link DXF_SUCCESS} on successful event retrieval or {@link DXF_FAILURE} on error;
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
  */
-DXFEED_API ERRORCODE dxf_get_last_event (dxf_connection_t connection, int event_type, dxf_const_string_t symbol,
-                                         OUT dxf_event_data_t* event_data);
+DXFEED_API ERRORCODE dxf_get_last_event(dxf_connection_t connection, int event_type, dxf_const_string_t symbol,
+										OUT dxf_event_data_t* event_data);
 /**
  * @ingroup c-api-common
  *
@@ -767,7 +773,7 @@ DXFEED_API ERRORCODE dxf_get_last_event (dxf_connection_t connection, int event_
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
  *         @a error_code and @a error_descr are returned as output parameters of this function
  */
-DXFEED_API ERRORCODE dxf_get_last_error (OUT int* error_code, OUT dxf_const_string_t* error_descr);
+DXFEED_API ERRORCODE dxf_get_last_error(OUT int* error_code, OUT dxf_const_string_t* error_descr);
 
 /**
  * @ingroup c-api-common
@@ -787,7 +793,8 @@ DXFEED_API ERRORCODE dxf_get_last_error (OUT int* error_code, OUT dxf_const_stri
  * @return {@link DXF_SUCCESS} on successful logger initialization or {@link DXF_FAILURE} on error;
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
  */
-DXFEED_API ERRORCODE dxf_initialize_logger(const char* file_name, int rewrite_file, int show_timezone_info, int verbose);
+DXFEED_API ERRORCODE dxf_initialize_logger(const char* file_name, int rewrite_file, int show_timezone_info,
+										   int verbose);
 
 /**
  * @ingroup c-api-common
@@ -809,7 +816,8 @@ DXFEED_API ERRORCODE dxf_initialize_logger(const char* file_name, int rewrite_fi
  * @return {@link DXF_SUCCESS} on successful logger initialization or {@link DXF_FAILURE} on error;
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
  */
-DXFEED_API ERRORCODE dxf_initialize_logger_v2(const char* file_name, int rewrite_file, int show_timezone_info, int verbose, int log_data_transfer);
+DXFEED_API ERRORCODE dxf_initialize_logger_v2(const char* file_name, int rewrite_file, int show_timezone_info,
+											  int verbose, int log_data_transfer);
 
 /**
  * @ingroup c-api-orders
@@ -887,15 +895,11 @@ DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
  *         *candle_attributes* are returned via output parameter
  */
-DXFEED_API ERRORCODE dxf_create_candle_symbol_attributes(dxf_const_string_t base_symbol,
-                                                         dxf_char_t exchange_code,
-                                                         dxf_double_t period_value,
-                                                         dxf_candle_type_period_attribute_t period_type,
-                                                         dxf_candle_price_attribute_t price,
-                                                         dxf_candle_session_attribute_t session,
-                                                         dxf_candle_alignment_attribute_t alignment,
-                                                         dxf_double_t price_level,
-                                                         OUT dxf_candle_attributes_t* candle_attributes);
+DXFEED_API ERRORCODE
+dxf_create_candle_symbol_attributes(dxf_const_string_t base_symbol, dxf_char_t exchange_code, dxf_double_t period_value,
+									dxf_candle_type_period_attribute_t period_type, dxf_candle_price_attribute_t price,
+									dxf_candle_session_attribute_t session, dxf_candle_alignment_attribute_t alignment,
+									dxf_double_t price_level, OUT dxf_candle_attributes_t* candle_attributes);
 
 /**
  * @ingroup c-api-candle-attributes
@@ -939,9 +943,8 @@ DXFEED_API ERRORCODE dxf_delete_candle_symbol_attributes(dxf_candle_attributes_t
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
  *         newly created snapshot is return via *snapshot* output parameter
  */
-DXFEED_API ERRORCODE dxf_create_snapshot(dxf_connection_t connection, dx_event_id_t event_id,
-                                         dxf_const_string_t symbol, const char* source, 
-                                         dxf_long_t time, OUT dxf_snapshot_t* snapshot);
+DXFEED_API ERRORCODE dxf_create_snapshot(dxf_connection_t connection, dx_event_id_t event_id, dxf_const_string_t symbol,
+										 const char* source, dxf_long_t time, OUT dxf_snapshot_t* snapshot);
 
 /**
  * @ingroup c-api-snapshots
@@ -967,9 +970,8 @@ DXFEED_API ERRORCODE dxf_create_snapshot(dxf_connection_t connection, dx_event_i
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
  *         newly created snapshot is return via *snapshot* output parameter
  */
-DXFEED_API ERRORCODE dxf_create_order_snapshot(dxf_connection_t connection, 
-                                               dxf_const_string_t symbol, const char* source,
-                                               dxf_long_t time, OUT dxf_snapshot_t* snapshot);
+DXFEED_API ERRORCODE dxf_create_order_snapshot(dxf_connection_t connection, dxf_const_string_t symbol,
+											   const char* source, dxf_long_t time, OUT dxf_snapshot_t* snapshot);
 
 /**
  * @ingroup c-api-snapshots
@@ -987,9 +989,8 @@ DXFEED_API ERRORCODE dxf_create_order_snapshot(dxf_connection_t connection,
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
  *         newly created snapshot is return via *snapshot* output parameter
  */
-DXFEED_API ERRORCODE dxf_create_candle_snapshot(dxf_connection_t connection, 
-                                                dxf_candle_attributes_t candle_attributes, 
-                                                dxf_long_t time, OUT dxf_snapshot_t* snapshot);
+DXFEED_API ERRORCODE dxf_create_candle_snapshot(dxf_connection_t connection, dxf_candle_attributes_t candle_attributes,
+												dxf_long_t time, OUT dxf_snapshot_t* snapshot);
 
 /**
  * @ingroup c-api-snapshots
@@ -1020,9 +1021,8 @@ DXFEED_API ERRORCODE dxf_close_snapshot(dxf_snapshot_t snapshot);
  * @return {@link DXF_SUCCESS} if snapshot listener has been successfully attached or {@link DXF_FAILURE} on error;
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
  */
-DXFEED_API ERRORCODE dxf_attach_snapshot_listener(dxf_snapshot_t snapshot, 
-                                                  dxf_snapshot_listener_t snapshot_listener,
-                                                  void* user_data);
+DXFEED_API ERRORCODE dxf_attach_snapshot_listener(dxf_snapshot_t snapshot, dxf_snapshot_listener_t snapshot_listener,
+												  void* user_data);
 
 /**
  * @ingroup c-api-snapshots
@@ -1037,8 +1037,7 @@ DXFEED_API ERRORCODE dxf_attach_snapshot_listener(dxf_snapshot_t snapshot,
  * @return {@link DXF_SUCCESS} if snapshot listener has been successfully detached or {@link DXF_FAILURE} on error;
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
  */
-DXFEED_API ERRORCODE dxf_detach_snapshot_listener(dxf_snapshot_t snapshot, 
-                                                  dxf_snapshot_listener_t snapshot_listener);
+DXFEED_API ERRORCODE dxf_detach_snapshot_listener(dxf_snapshot_t snapshot, dxf_snapshot_listener_t snapshot_listener);
 
 /**
  * @ingroup c-api-snapshots
@@ -1055,9 +1054,8 @@ DXFEED_API ERRORCODE dxf_detach_snapshot_listener(dxf_snapshot_t snapshot,
  * @return {@link DXF_SUCCESS} if listener has been successfully attached or {@link DXF_FAILURE} on error;
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
  */
-DXFEED_API ERRORCODE dxf_attach_snapshot_inc_listener(dxf_snapshot_t snapshot, 
-                                                  dxf_snapshot_inc_listener_t snapshot_listener,
-                                                  void* user_data);
+DXFEED_API ERRORCODE dxf_attach_snapshot_inc_listener(dxf_snapshot_t snapshot,
+													  dxf_snapshot_inc_listener_t snapshot_listener, void* user_data);
 
 /**
  * @ingroup c-api-snapshots
@@ -1072,8 +1070,8 @@ DXFEED_API ERRORCODE dxf_attach_snapshot_inc_listener(dxf_snapshot_t snapshot,
  * @return {@link DXF_SUCCESS} if snapshot listener has been successfully detached or {@link DXF_FAILURE} on error;
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
  */
-DXFEED_API ERRORCODE dxf_detach_snapshot_inc_listener(dxf_snapshot_t snapshot, 
-                                                  dxf_snapshot_inc_listener_t snapshot_listener);
+DXFEED_API ERRORCODE dxf_detach_snapshot_inc_listener(dxf_snapshot_t snapshot,
+													  dxf_snapshot_inc_listener_t snapshot_listener);
 
 /**
  * @ingroup c-api-snapshots
@@ -1088,7 +1086,7 @@ DXFEED_API ERRORCODE dxf_detach_snapshot_inc_listener(dxf_snapshot_t snapshot,
  * @return {@link DXF_SUCCESS} if snapshot symbol has been successfully received or {@link DXF_FAILURE} on error;
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
  *         *symbol* itself is returned via out parameter
-*/
+ */
 DXFEED_API ERRORCODE dxf_get_snapshot_symbol(dxf_snapshot_t snapshot, OUT dxf_string_t* symbol);
 
 /**
@@ -1100,8 +1098,8 @@ DXFEED_API ERRORCODE dxf_get_snapshot_symbol(dxf_snapshot_t snapshot, OUT dxf_st
  *
  * @param[in] connection A handle of a previously created connection which the subscription will be using
  * @param[in] symbol     The symbol to use
- * @param[in] sources    Order sources for Order, NULL-terminated list (last element should = NULL). Each element can be one of following:
- *                       "NTV", "ntv", "NFX", "ESPD", "XNFI", "ICE", "ISE", "DEA", "DEX", "BYX", "BZX", "BATE", "CHIX",
+ * @param[in] sources    Order sources for Order, NULL-terminated list (last element should = NULL). Each element can be
+ * one of following: "NTV", "ntv", "NFX", "ESPD", "XNFI", "ICE", "ISE", "DEA", "DEX", "BYX", "BZX", "BATE", "CHIX",
  *                       "CEUX", "BXTR", "IST", "BI20", "ABE", "FAIR", "GLBX", "glbx", "ERIS", "XEUR", "xeur", "CFE",
  *                       "C2OX", "SMFE", "smfe", "iex", "MEMX", "memx". NULL-list means "all sources"
  * @param[out] book      A handle of the created price level book
@@ -1110,9 +1108,8 @@ DXFEED_API ERRORCODE dxf_get_snapshot_symbol(dxf_snapshot_t snapshot, OUT dxf_st
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
  *         *price level book* itself is returned via out parameter
  */
-DXFEED_API ERRORCODE dxf_create_price_level_book(dxf_connection_t connection, 
-                                                 dxf_const_string_t symbol, const char** sources,
-                                                 OUT dxf_price_level_book_t* book);
+DXFEED_API ERRORCODE dxf_create_price_level_book(dxf_connection_t connection, dxf_const_string_t symbol,
+												 const char** sources, OUT dxf_price_level_book_t* book);
 
 /**
  * @ingroup c-api-price-level-book
@@ -1124,9 +1121,9 @@ DXFEED_API ERRORCODE dxf_create_price_level_book(dxf_connection_t connection,
  * @param[in] connection    A handle of a previously created connection which the subscription will be using
  * @param[in] symbol        The symbol to use
  * @param[in] sources       Order sources for Order. Each element can be one of following:
- *                          "NTV", "ntv", "NFX", "ESPD", "XNFI", "ICE", "ISE", "DEA", "DEX", "BYX", "BZX", "BATE", "CHIX",
- *                          "CEUX", "BXTR", "IST", "BI20", "ABE", "FAIR", "GLBX", "glbx", "ERIS", "XEUR", "xeur", "CFE",
- *                          "C2OX", "SMFE", "smfe", "iex", "MEMX", "memx". NULL-list means "all sources"
+ *                          "NTV", "ntv", "NFX", "ESPD", "XNFI", "ICE", "ISE", "DEA", "DEX", "BYX", "BZX", "BATE",
+ * "CHIX", "CEUX", "BXTR", "IST", "BI20", "ABE", "FAIR", "GLBX", "glbx", "ERIS", "XEUR", "xeur", "CFE", "C2OX", "SMFE",
+ * "smfe", "iex", "MEMX", "memx". NULL-list means "all sources"
  * @param[in] sources_count The number of sources. 0 means "all sources"
  * @param[out] book         A handle of the created price level book
  *
@@ -1134,9 +1131,9 @@ DXFEED_API ERRORCODE dxf_create_price_level_book(dxf_connection_t connection,
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
  *         *price level book* itself is returned via out parameter
  */
-DXFEED_API ERRORCODE dxf_create_price_level_book_v2(dxf_connection_t connection,
-													dxf_const_string_t symbol, const char** sources, int sources_count,
-												    OUT dxf_price_level_book_t* book);
+DXFEED_API ERRORCODE dxf_create_price_level_book_v2(dxf_connection_t connection, dxf_const_string_t symbol,
+													const char** sources, int sources_count,
+													OUT dxf_price_level_book_t* book);
 
 /**
  * @ingroup c-api-price-level-book
@@ -1167,9 +1164,9 @@ DXFEED_API ERRORCODE dxf_close_price_level_book(dxf_price_level_book_t book);
  * @return {@link DXF_SUCCESS} if listener has been successfully attached or {@link DXF_FAILURE} on error;
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
  */
-DXFEED_API ERRORCODE dxf_attach_price_level_book_listener(dxf_price_level_book_t book, 
-                                                          dxf_price_level_book_listener_t book_listener,
-                                                          void* user_data);
+DXFEED_API ERRORCODE dxf_attach_price_level_book_listener(dxf_price_level_book_t book,
+														  dxf_price_level_book_listener_t book_listener,
+														  void* user_data);
 
 /**
  * @ingroup c-api-price-level-book
@@ -1184,8 +1181,8 @@ DXFEED_API ERRORCODE dxf_attach_price_level_book_listener(dxf_price_level_book_t
  * @return {@link DXF_SUCCESS} if listener has been successfully detached or {@link DXF_FAILURE} on error;
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
  */
-DXFEED_API ERRORCODE dxf_detach_price_level_book_listener(dxf_price_level_book_t book, 
-                                                          dxf_price_level_book_listener_t book_listener);
+DXFEED_API ERRORCODE dxf_detach_price_level_book_listener(dxf_price_level_book_t book,
+														  dxf_price_level_book_listener_t book_listener);
 
 /**
  * @ingroup c-api-regional-book
@@ -1202,9 +1199,8 @@ DXFEED_API ERRORCODE dxf_detach_price_level_book_listener(dxf_price_level_book_t
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
  *         *regional book* itself is returned via out parameter
  */
-DXFEED_API ERRORCODE dxf_create_regional_book(dxf_connection_t connection, 
-                                              dxf_const_string_t symbol,
-                                              OUT dxf_regional_book_t* book);
+DXFEED_API ERRORCODE dxf_create_regional_book(dxf_connection_t connection, dxf_const_string_t symbol,
+											  OUT dxf_regional_book_t* book);
 
 /**
  * @ingroup c-api-regional-book
@@ -1234,9 +1230,8 @@ DXFEED_API ERRORCODE dxf_close_regional_book(dxf_regional_book_t book);
  * @return {@link DXF_SUCCESS} if listener has been successfully attached or {@link DXF_FAILURE} on error;
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
  */
-DXFEED_API ERRORCODE dxf_attach_regional_book_listener(dxf_regional_book_t book, 
-                                                       dxf_price_level_book_listener_t book_listener,
-                                                       void* user_data);
+DXFEED_API ERRORCODE dxf_attach_regional_book_listener(dxf_regional_book_t book,
+													   dxf_price_level_book_listener_t book_listener, void* user_data);
 
 /**
  * @ingroup c-api-regional-book
@@ -1251,8 +1246,8 @@ DXFEED_API ERRORCODE dxf_attach_regional_book_listener(dxf_regional_book_t book,
  * @return {@link DXF_SUCCESS} if listener has been successfully detached or {@link DXF_FAILURE} on error;
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
  */
-DXFEED_API ERRORCODE dxf_detach_regional_book_listener(dxf_regional_book_t book, 
-                                                       dxf_price_level_book_listener_t book_listener);
+DXFEED_API ERRORCODE dxf_detach_regional_book_listener(dxf_regional_book_t book,
+													   dxf_price_level_book_listener_t book_listener);
 
 /**
  * @ingroup c-api-regional-book
@@ -1269,8 +1264,7 @@ DXFEED_API ERRORCODE dxf_detach_regional_book_listener(dxf_regional_book_t book,
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
  */
 DXFEED_API ERRORCODE dxf_attach_regional_book_listener_v2(dxf_regional_book_t book,
-                                                          dxf_regional_quote_listener_t listener,
-                                                          void* user_data);
+														  dxf_regional_quote_listener_t listener, void* user_data);
 
 /**
  * @ingroup c-api-regional-book
@@ -1286,7 +1280,7 @@ DXFEED_API ERRORCODE dxf_attach_regional_book_listener_v2(dxf_regional_book_t bo
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
  */
 DXFEED_API ERRORCODE dxf_detach_regional_book_listener_v2(dxf_regional_book_t book,
-                                                          dxf_regional_quote_listener_t listener);
+														  dxf_regional_quote_listener_t listener);
 
 /**
  * @ingroup c-api-common
@@ -1320,8 +1314,7 @@ DXFEED_API ERRORCODE dxf_write_raw_data(dxf_connection_t connection, const char*
  *         *properties* are returned via output parameter
  */
 DXFEED_API ERRORCODE dxf_get_connection_properties_snapshot(dxf_connection_t connection,
-                                                            OUT dxf_property_item_t** properties,
-                                                            OUT int* count);
+															OUT dxf_property_item_t** properties, OUT int* count);
 
 /**
  * @ingroup c-api-connection-functions
@@ -1349,7 +1342,8 @@ DXFEED_API ERRORCODE dxf_free_connection_properties_snapshot(dxf_property_item_t
  *          string with connected address can be free during reconnection.
  *
  * @param[in] connection A handle of a previously created connection
- * @param[out] address   Address of pointer to store address of the null-terminated string with current connected address
+ * @param[out] address   Address of pointer to store address of the null-terminated string with current connected
+ * address
  *
  * @return {@link DXF_SUCCESS} if address has been successfully received or {@link DXF_FAILURE} on error;
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
@@ -1371,7 +1365,8 @@ DXFEED_API ERRORCODE dxf_get_current_connected_address(dxf_connection_t connecti
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
  *         *status* itself is returned via out parameter
  */
-DXFEED_API ERRORCODE dxf_get_current_connection_status(dxf_connection_t connection, OUT dxf_connection_status_t* status);
+DXFEED_API ERRORCODE dxf_get_current_connection_status(dxf_connection_t connection,
+													   OUT dxf_connection_status_t* status);
 
 /**
  * @ingroup c-api-common
@@ -1407,8 +1402,9 @@ DXFEED_API const char* dxf_get_order_action_string_name(dxf_order_action_t actio
 /**
  * @ingroup c-api-config
  *
- * @brief Initializes the C-API configuration and loads a config (in TOML format) from a wide string (dxf_const_string_t)
- * For the successful application of the configuration, this function must be called before creating any connection
+ * @brief Initializes the C-API configuration and loads a config (in TOML format) from a wide string
+ * (dxf_const_string_t) For the successful application of the configuration, this function must be called before
+ * creating any connection
  *
  * @details The config file sample: [Sample](https://github.com/dxFeed/dxfeed-c-api/dxfeed-api-config.sample.toml)
  *

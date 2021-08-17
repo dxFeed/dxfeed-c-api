@@ -141,11 +141,16 @@ inline Range trimCopy(const Range& range, const std::locale& locale = std::local
 
 inline std::string loggingLevelToString(dx_log_level_t level) {
 	switch (level) {
-		case dx_ll_trace: return "trace";
-		case dx_ll_debug: return "debug";
-		case dx_ll_info: return "info";
-		case dx_ll_warn: return "warn";
-		case dx_ll_error: return "error";
+		case dx_ll_trace:
+			return "trace";
+		case dx_ll_debug:
+			return "debug";
+		case dx_ll_info:
+			return "info";
+		case dx_ll_warn:
+			return "warn";
+		case dx_ll_error:
+			return "error";
 	}
 
 	return "unknown";
@@ -193,8 +198,9 @@ public:
 		std::cerr << "Loaded defaults:\n";
 		std::cerr << "dump = " << std::boolalpha << getDump() << std::endl;
 		std::cerr << "network.heartbeatPeriod = " << getNetworkHeartbeatPeriod() << std::endl;
-		std::cerr << "network.heartbeatTimeout = " << getNetworkHeartbeatTimeout() << std::endl << std::endl;
-		std::cerr << "network.reestablishConnections = " << getNetworkReestablishConnections() << std::endl << std::endl;
+		std::cerr << "network.heartbeatTimeout = " << getNetworkHeartbeatTimeout() << std::endl;
+		std::cerr << "network.reestablishConnections = " << getNetworkReestablishConnections() << std::endl
+				  << std::endl;
 	}
 
 	bool loadFromFile(const std::string& fileName) {
@@ -281,6 +287,12 @@ public:
 		return stringToLoggingLevel(getProperty("logger", "level", loggingLevelToString(defaultValue)));
 	}
 
-	bool getNetworkReestablishConnections(bool defaultValue = true) const { return getProperty("network", "reestablishConnections", defaultValue); }
+	bool getNetworkReestablishConnections(bool defaultValue = true) const {
+		return getProperty("network", "reestablishConnections", defaultValue);
+	}
+
+	bool getSubscriptionsDisableLastEventStorage(bool defaultValue = true) const {
+		return getProperty("subscriptions", "disableLastEventStorage", defaultValue);
+	}
 };
 }  // namespace dx

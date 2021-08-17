@@ -274,7 +274,7 @@ int dx_init_current_time_key (void) {
 
 /* -------------------------------------------------------------------------- */
 
-static void dx_flush_log (void) {
+void dx_flush_log (void) {
 	if (g_log_file == NULL) {
 		return;
 	}
