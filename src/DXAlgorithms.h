@@ -524,6 +524,9 @@ static const dxf_long_t DX_TIME_SECOND = 1000L;
 int dx_millisecond_timestamp (void);
 int dx_millisecond_timestamp_diff (int newer, int older);
 
+void* dx_microsecond_timestamp(int sample, int get_freq);
+dxf_ulong_t dx_microsecond_timestamp_diff(int newer_sample, void* newer, int older_sample, void* older);
+
 /**
  * Returns correct number of seconds with proper handling negative values and overflows.
  * Idea is that number of milliseconds shall be within [0..999]

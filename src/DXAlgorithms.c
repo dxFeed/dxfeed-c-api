@@ -306,6 +306,65 @@ int dx_millisecond_timestamp_diff (int newer, int older) {
 	return (int)(res + (unsigned)newer - (unsigned)older);
 }
 
+void* dx_microsecond_timestamp(int sample, int get_freq) {
+#ifdef _WIN32
+	static LARGE_INTEGER StartingTime[256] = {0};
+	static LARGE_INTEGER Frequency[256] = {0};
+
+	if (sample >= 256) {
+		return NULL;
+	}
+
+	if (get_freq == true) {
+		return (void*)(&(Frequency[sample]));
+	}
+
+	QueryPerformanceFrequency(&(Frequency[sample]));
+	QueryPerformanceCounter(&(StartingTime[sample]));
+
+	return (void*)(&(StartingTime[sample]));
+#else
+	return NULL;
+#endif
+}
+
+dxf_ulong_t dx_microsecond_timestamp_diff(int newer_sample, void* newer, int older_sample, void* older) {
+#ifdef _WIN32
+	LARGE_INTEGER newer_value;
+	LARGE_INTEGER newer_freq;
+	LARGE_INTEGER older_value;
+	LARGE_INTEGER older_freq;
+
+	if (newer == NULL || older == NULL) {
+		return 0;
+	}
+
+	newer_value = *((LARGE_INTEGER*)newer);
+	newer_freq = *((LARGE_INTEGER*)dx_microsecond_timestamp(newer_sample, true));
+	older_value = *((LARGE_INTEGER*)older);
+	older_freq = *((LARGE_INTEGER*)dx_microsecond_timestamp(older_sample, true));
+
+	if (older_value.QuadPart > newer_value.QuadPart) {
+		LARGE_INTEGER temp = older_value;
+		older_value = newer_value;
+		newer_value = temp;
+		temp = older_freq;
+		older_freq = newer_freq;
+		newer_freq = temp;
+	}
+
+	LARGE_INTEGER elapsed;
+
+	elapsed.QuadPart = newer_value.QuadPart - older_value.QuadPart;
+	elapsed.QuadPart *= 1000000;
+	elapsed.QuadPart /= (newer_freq.QuadPart + older_freq.QuadPart) / 2;
+
+	return (dxf_ulong_t)elapsed.QuadPart;
+#else
+	return 0;
+#endif
+}
+
 /* -------------------------------------------------------------------------- */
 
 /**

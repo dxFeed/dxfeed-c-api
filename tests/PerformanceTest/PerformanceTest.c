@@ -163,8 +163,7 @@ int dxs_mutex_unlock(dxs_mutex_t* mutex) {
 #define LS(s)  LS2(s)
 #define LS2(s) L##s
 
-const char dxfeed_host[] = "mddqa.in.devexperts.com:7400";
-// const char dxfeed_host[] = "demo.dxfeed.com:7300";
+const char dxfeed_host[] = "(demo.dxfeed.com:7300)(mddqa.in.devexperts.com:7400)";
 
 #define TIMEOUT_TAG "-o"
 
