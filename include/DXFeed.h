@@ -1185,19 +1185,6 @@ DXFEED_API ERRORCODE dxf_detach_price_level_book_listener(dxf_price_level_book_t
 														  dxf_price_level_book_listener_t book_listener);
 
 /**
- * @ingroup c-api-price-level-book
- *
- * @brief Sets the symbols for the price level book.
- *
- * @param[in] book   The handle of the price level book for which the symbol will be set.
- * @param[in] symbol The symbol to be set.
- * @return {@link DXF_SUCCESS} if the operation succeed or {@link DXF_FAILURE} if the operation fails. The error code
- *         can be obtained using the function {@link dxf_get_last_error}
- */
-DXFEED_API ERRORCODE dxf_set_price_level_book_symbol(dxf_price_level_book_t book, dxf_const_string_t symbol);
-
-
-/**
  * @ingroup c-api-regional-book
  *
  * @brief Creates Regional book with the specified parameters.
