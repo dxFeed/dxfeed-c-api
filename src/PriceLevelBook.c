@@ -1044,10 +1044,75 @@ int dx_remove_price_level_book_listener(dxf_price_level_book_t book, dxf_price_l
 	return dx_mutex_unlock(&b->guard) && !error;
 }
 
+//TODO: finish
 int dx_set_price_level_book_sources(dxf_price_level_book_t book, size_t src_count, dxf_ulong_t src_flags) {
+	if (book == NULL) {
+		return false;
+	}
+
+	dx_price_level_book_t *b = (dx_price_level_book_t *)book;
+
+	CHECKED_CALL(dx_mutex_lock, &(b->guard));
+
+	dx_plb_connection_context_t *context = (dx_plb_connection_context_t *)b->context;
+	int res = true;
+
+
+	CHECKED_CALL(dx_mutex_unlock, &(b->guard));
 	return true;
 }
 
 int dx_set_price_level_book_symbol(dxf_price_level_book_t book, dxf_const_string_t symbol) {
+	if (book == NULL) {
+		return false;
+	}
+
+	dx_price_level_book_t *b = (dx_price_level_book_t *)book;
+
+	dx_plb_connection_context_t *context = (dx_plb_connection_context_t *)b->context;
+	int res = true;
+
+	CHECKED_CALL(dx_mutex_lock, &(context->guard));
+
+	dxf_string_t new_symbol = dx_create_string_src(symbol);
+	if (new_symbol == NULL) {
+		dx_set_error_code(dx_mec_insufficient_memory);
+		return false;
+	}
+
+	// remove\recreate symbol\sources
+
+	for (size_t i = 0; i < b->sources_count; i++) {
+		// We have src & the new symbol
+		dx_plb_source_t *source = dx_plb_ctx_find_source(context, new_symbol, b->sources[i]->source);
+
+		if (source == NULL) {
+			source = dx_plb_source_create(context->connection, symbol, dx_all_order_sources[i]);
+			if (source == NULL || !dx_plb_ctx_add_source(context, source)) {
+				dx_mutex_unlock(&context->guard);
+				return false;
+			}
+		}
+
+		dx_plb_source_remove_book(b->sources[i], b, i);
+
+		b->sources[i] = source;
+		b->src_bids[i] = &source->final_bids;
+		b->src_asks[i] = &source->final_asks;
+
+		if (!dx_plb_source_add_book(source, b, (int)i)) {
+			dx_plb_book_clear(book);
+			dx_plb_ctx_cleanup_sources(context);
+			dx_mutex_unlock(&context->guard);
+
+			return false;
+		}
+	}
+
+	b->symbol = new_symbol;
+	b->book.symbol = b->symbol;
+
+	CHECKED_CALL(dx_mutex_unlock, &(context->guard));
+
 	return true;
 }

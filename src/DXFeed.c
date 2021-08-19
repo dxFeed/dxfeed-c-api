@@ -1309,7 +1309,21 @@ DXFEED_API ERRORCODE dxf_detach_price_level_book_listener(dxf_price_level_book_t
 	return DXF_SUCCESS;
 }
 
-/* -------------------------------------------------------------------------- */
+DXFEED_API ERRORCODE dxf_set_price_level_book_symbol(dxf_price_level_book_t book, dxf_const_string_t symbol) {
+	dx_perform_common_actions(DX_RESET_ERROR);
+
+	if (book == NULL) {
+		dx_set_error_code(dx_ec_invalid_func_param);
+
+		return DXF_FAILURE;
+	}
+
+	if (!dx_set_price_level_book_symbol(book, symbol)) {
+		return DXF_FAILURE;
+	}
+
+	return DXF_SUCCESS;
+}
 
 DXFEED_API ERRORCODE dxf_create_regional_book(dxf_connection_t connection, dxf_const_string_t symbol,
 											  OUT dxf_regional_book_t *book) {
