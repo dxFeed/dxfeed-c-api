@@ -17,8 +17,7 @@
  *
  */
 
-#ifndef PRICELVELBOOK_H_INCLUDED
-#define PRICELVELBOOK_H_INCLUDED
+#pragma once
 
 #include "PrimitiveTypes.h"
 #include "EventData.h"
@@ -26,7 +25,7 @@
 
 dxf_price_level_book_t dx_create_price_level_book(dxf_connection_t connection,
 												dxf_const_string_t symbol,
-												size_t srccount, dxf_ulong_t srcflags);
+												size_t src_count, dxf_ulong_t src_flags);
 int dx_close_price_level_book(dxf_price_level_book_t book);
 int dx_add_price_level_book_listener(dxf_price_level_book_t book,
 									dxf_price_level_book_listener_t book_listener,
@@ -34,4 +33,6 @@ int dx_add_price_level_book_listener(dxf_price_level_book_t book,
 int dx_remove_price_level_book_listener(dxf_price_level_book_t book,
 										dxf_price_level_book_listener_t book_listener);
 
-#endif /* PRICELVELBOOK_H_INCLUDED */
+int dx_set_price_level_book_sources(dxf_price_level_book_t book, size_t src_count, dxf_ulong_t src_flags);
+
+int dx_set_price_level_book_symbol(dxf_price_level_book_t book, dxf_const_string_t symbol);

@@ -17,9 +17,12 @@
  *
  */
 
+#include "PriceLevelBook.h"
+
 #include <math.h>
 #include <string.h>
 
+#include "ClientMessageProcessor.h"
 #include "ConnectionContextData.h"
 #include "DXAlgorithms.h"
 #include "DXErrorCodes.h"
@@ -27,29 +30,22 @@
 #include "DXThreads.h"
 #include "EventManager.h"
 #include "EventSubscription.h"
-#include "ClientMessageProcessor.h"
 #include "Logger.h"
-#include "PriceLevelBook.h"
 
-#define MAX_PRICE_LEVELS	10
+#define MAX_PRICE_LEVELS 10
 
 struct dx_price_level_book;
 typedef struct dx_price_level_book dx_price_level_book_t;
 
-typedef enum {
-	dx_status_unknown = 0,
-	dx_status_begin,
-	dx_status_full,
-	dx_status_pending
-} dx_plb_status_t;
+typedef enum { dx_status_unknown = 0, dx_status_begin, dx_status_full, dx_status_pending } dx_plb_status_t;
 
 typedef struct {
 	dxf_price_level_book_listener_t listener;
-	void* user_data;
+	void *user_data;
 } dx_plb_listener_context_t;
 
 typedef struct {
-	dx_plb_listener_context_t* elements;
+	dx_plb_listener_context_t *elements;
 	size_t size;
 	size_t capacity;
 } dx_plb_listener_array_t;
@@ -64,7 +60,7 @@ typedef struct dx_plb_source_consumer {
 	struct dx_plb_source_consumer *next;
 
 	dx_price_level_book_t *consumer;
-	int sourceidx;
+	int source_idx;
 } dx_plb_source_consumer_t;
 
 typedef struct {
@@ -127,28 +123,27 @@ typedef struct {
 	dxf_int_t src_capacity;
 } dx_plb_connection_context_t;
 
-#define CTX(context) \
-	((dx_plb_connection_context_t*)context)
+#define CTX(context) ((dx_plb_connection_context_t *)(context))
 
 /************************/
 /* Forward declarations */
 /************************/
-static int dx_plb_clear_connection_context(dx_plb_connection_context_t* context);
+static int dx_plb_clear_connection_context(dx_plb_connection_context_t *context);
 static int dx_plb_source_clear(dx_plb_source_t *source, int force);
-static size_t dx_plb_source_find_pos(dx_plb_connection_context_t* context, dxf_const_string_t symbol, dxf_const_string_t src);
+static size_t dx_plb_source_find_pos(dx_plb_connection_context_t *context, dxf_const_string_t symbol,
+									 dxf_const_string_t src);
 static dxf_ulong_t dx_plb_source_hash(dxf_const_string_t symbol, dxf_const_string_t src);
 static int dx_plb_book_free(dx_price_level_book_t *book);
 
-static void plb_event_listener(int event_type, dxf_const_string_t symbol_name,
-	const dxf_event_data_t* data, int data_count,
-	const dxf_event_params_t* event_params, void* user_data);
+static void plb_event_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t *data,
+							   int data_count, const dxf_event_params_t *event_params, void *user_data);
 
 /********************************/
-/* Conection Context Management */
+/* Connection Context Management */
 /********************************/
 
 DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_price_level_book) {
-	dx_plb_connection_context_t* context = NULL;
+	dx_plb_connection_context_t *context = NULL;
 
 	CHECKED_CALL_2(dx_validate_connection_handle, connection, true);
 
@@ -184,7 +179,7 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_price_level_book) {
 
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_price_level_book) {
 	int res = true;
-	dx_plb_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_price_level_book, &res);
+	dx_plb_connection_context_t *context = dx_get_subsystem_data(connection, dx_ccs_price_level_book, &res);
 	if (context == NULL) {
 		return res;
 	}
@@ -193,13 +188,12 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_price_level_book) {
 }
 
 /* -------------------------------------------------------------------------- */
-static int dx_plb_clear_connection_context(dx_plb_connection_context_t* context) {
+static int dx_plb_clear_connection_context(dx_plb_connection_context_t *context) {
 	int res = true;
 	int i = 0;
 	if (context->sources != NULL) {
 		for (; i < context->src_size; i++) {
-			if (context->sources[i] != NULL)
-				res &= dx_plb_source_clear(context->sources[i], true);
+			if (context->sources[i] != NULL) res &= dx_plb_source_clear(context->sources[i], true);
 		}
 		dx_free(context->sources);
 	}
@@ -210,14 +204,12 @@ static int dx_plb_clear_connection_context(dx_plb_connection_context_t* context)
 
 /* -------------------------------------------------------------------------- */
 
-DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_price_level_book) {
-	return true;
-}
+DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_price_level_book) { return true; }
 
 /* -------------------------------------------------------------------------- */
 
 /* This function must be called with context guard taken */
-static int dx_plb_ctx_grow_sources_hashtable(dx_plb_connection_context_t* context) {
+static int dx_plb_ctx_grow_sources_hashtable(dx_plb_connection_context_t *context) {
 	dx_plb_source_t **newArray;
 	dx_plb_source_t **oldArray;
 	size_t oldSize;
@@ -247,7 +239,8 @@ static int dx_plb_ctx_grow_sources_hashtable(dx_plb_connection_context_t* contex
 /* -------------------------------------------------------------------------- */
 
 /* This function must be called with context guard taken */
-static dx_plb_source_t *dx_plb_ctx_find_source(dx_plb_connection_context_t* context, dxf_const_string_t symbol, dxf_const_string_t src) {
+static dx_plb_source_t *dx_plb_ctx_find_source(dx_plb_connection_context_t *context, dxf_const_string_t symbol,
+											   dxf_const_string_t src) {
 	size_t pos = dx_plb_source_find_pos(context, symbol, src);
 	return context->sources[pos];
 }
@@ -255,7 +248,7 @@ static dx_plb_source_t *dx_plb_ctx_find_source(dx_plb_connection_context_t* cont
 /* -------------------------------------------------------------------------- */
 
 /* This function must be called with context guard taken */
-static int dx_plb_ctx_add_source(dx_plb_connection_context_t* context, dx_plb_source_t *source) {
+static int dx_plb_ctx_add_source(dx_plb_connection_context_t *context, dx_plb_source_t *source) {
 	/* Resize hash table if it is half-full */
 	size_t pos = dx_plb_source_find_pos(context, source->symbol, source->source);
 	if (context->src_size > context->src_capacity / 2) {
@@ -272,7 +265,7 @@ static int dx_plb_ctx_add_source(dx_plb_connection_context_t* context, dx_plb_so
 /* -------------------------------------------------------------------------- */
 
 /* This function must be called with context guard taken */
-static int dx_plb_ctx_remove_source(dx_plb_connection_context_t* context, dx_plb_source_t *source) {
+static int dx_plb_ctx_remove_source(dx_plb_connection_context_t *context, dx_plb_source_t *source) {
 	size_t pos = dx_plb_source_find_pos(context, source->symbol, source->source);
 	size_t npos;
 	size_t tpos;
@@ -286,11 +279,10 @@ static int dx_plb_ctx_remove_source(dx_plb_connection_context_t* context, dx_plb
 	npos = pos;
 	while (true) {
 		npos = (npos + 1) % context->src_capacity;
-		if (context->sources[npos] == NULL)
-			break;
-		tpos = dx_plb_source_hash(context->sources[npos]->symbol, context->sources[npos]->source) % context->src_capacity;
-		if ((npos > pos && (tpos <= pos || tpos > npos))
-			|| (npos < pos && (tpos <= pos && tpos > npos))) {
+		if (context->sources[npos] == NULL) break;
+		tpos =
+			dx_plb_source_hash(context->sources[npos]->symbol, context->sources[npos]->source) % context->src_capacity;
+		if ((npos > pos && (tpos <= pos || tpos > npos)) || (npos < pos && (tpos <= pos && tpos > npos))) {
 			context->sources[pos] = context->sources[npos];
 			pos = npos;
 		}
@@ -303,7 +295,7 @@ static int dx_plb_ctx_remove_source(dx_plb_connection_context_t* context, dx_plb
 /* -------------------------------------------------------------------------- */
 
 /* This function must be called with context guard taken */
-static void dx_plb_ctx_cleanup_sources(dx_plb_connection_context_t* context) {
+static void dx_plb_ctx_cleanup_sources(dx_plb_connection_context_t *context) {
 	int i = 0;
 	dx_plb_source_t *source;
 	while (i < context->src_capacity) {
@@ -329,11 +321,11 @@ static inline int dx_plb_order_comparator(const dxf_order_t *o1, const dxf_order
 	return DX_NUMERIC_COMPARATOR(o1->index, o2->index);
 }
 
-static inline int dx_plb_pricelvel_comparator_ask(const dxf_price_level_element_t p1, dxf_price_level_element_t p2) {
+static inline int dx_plb_price_level_comparator_ask(const dxf_price_level_element_t p1, dxf_price_level_element_t p2) {
 	return DX_NUMERIC_COMPARATOR(p1.price, p2.price);
 }
 
-static inline int dx_plb_pricelvel_comparator_bid(const dxf_price_level_element_t p1, dxf_price_level_element_t p2) {
+static inline int dx_plb_price_level_comparator_bid(const dxf_price_level_element_t p1, dxf_price_level_element_t p2) {
 	return DX_NUMERIC_COMPARATOR(p2.price, p1.price);
 }
 
@@ -347,8 +339,7 @@ static inline int dx_plb_listener_comparator(dx_plb_listener_context_t e1, dx_pl
 
 /* This function should be called without source guard */
 static void dx_plb_source_free(dx_plb_source_t *source) {
-	if (source->subscription != NULL)
-		dxf_close_subscription(source->subscription);
+	if (source->subscription != NULL) dxf_close_subscription(source->subscription);
 	CHECKED_FREE(source->symbol);
 	FREE_ARRAY(source->snapshot.elements, source->snapshot.size);
 	dx_mutex_destroy(&source->guard);
@@ -370,7 +361,7 @@ static int dx_plb_source_clear(dx_plb_source_t *source, int force) {
 
 	/*
 	Close subscription. It will detach listener, under subscription lock,
-	so it is guarenteed, that listener with this source will not be run
+	so it is guaranteed, that listener with this source will not be run
 	*/
 	err = dxf_close_subscription(source->subscription);
 	source->subscription = NULL;
@@ -378,9 +369,8 @@ static int dx_plb_source_clear(dx_plb_source_t *source, int force) {
 	/* Free up all consumers, it is force exit */
 	for (c = source->consumers; c != NULL; c = n) {
 		n = c->next;
-		/* Free consumer only if we zeroth source of it, to avoid double-free */
-		if (c->sourceidx == 0)
-			res &= dx_plb_book_free(c->consumer);
+		/* Free consumer only if we have zeroth source of it, to avoid double-free */
+		if (c->source_idx == 0) res &= dx_plb_book_free(c->consumer);
 		dx_free(c);
 	}
 
@@ -392,7 +382,7 @@ static int dx_plb_source_clear(dx_plb_source_t *source, int force) {
 /* -------------------------------------------------------------------------- */
 
 /* This function should be called without source guard, but with context guard taken */
-static void dx_plb_source_cleanup(dx_plb_connection_context_t* context, dx_plb_source_t *source) {
+static void dx_plb_source_cleanup(dx_plb_connection_context_t *context, dx_plb_source_t *source) {
 	/* Adding of book to source is always under context taken, so we are safe here */
 	if (source->consumers != NULL) {
 		return;
@@ -413,14 +403,14 @@ static dxf_ulong_t dx_plb_source_hash(dxf_const_string_t symbol, dxf_const_strin
 /* -------------------------------------------------------------------------- */
 
 /* This function must be called with context guard taken */
-static size_t dx_plb_source_find_pos(dx_plb_connection_context_t* context, dxf_const_string_t symbol, dxf_const_string_t src) {
+static size_t dx_plb_source_find_pos(dx_plb_connection_context_t *context, dxf_const_string_t symbol,
+									 dxf_const_string_t src) {
 	dxf_ulong_t hash = dx_plb_source_hash(symbol, src);
 	size_t i = (size_t)(hash % context->src_capacity);
 	while (context->sources[i] != NULL) {
 		/* Check, do we find it? */
-		if (context->sources[i]->hash == hash
-			&& dx_compare_strings(context->sources[i]->symbol, symbol) == 0
-			&& dx_compare_strings(context->sources[i]->source, src) == 0)
+		if (context->sources[i]->hash == hash && dx_compare_strings(context->sources[i]->symbol, symbol) == 0 &&
+			dx_compare_strings(context->sources[i]->source, src) == 0)
 			return i;
 		i = (i + 1) % context->src_capacity;
 	}
@@ -429,8 +419,9 @@ static size_t dx_plb_source_find_pos(dx_plb_connection_context_t* context, dxf_c
 
 /* -------------------------------------------------------------------------- */
 
-static dx_plb_source_t *dx_plb_source_create(dxf_connection_t connection, dxf_const_string_t symbol, dxf_const_string_t src) {
-	const static dx_event_subscr_flag subscr_flags = dx_esf_single_record | dx_esf_time_series;
+static dx_plb_source_t *dx_plb_source_create(dxf_connection_t connection, dxf_const_string_t symbol,
+											 dxf_const_string_t src) {
+	const static dx_event_subscr_flag subscription_flags = dx_esf_single_record | dx_esf_time_series;
 	dx_plb_source_t *source = NULL;
 
 	/* Create new source */
@@ -460,13 +451,14 @@ static dx_plb_source_t *dx_plb_source_create(dxf_connection_t connection, dxf_co
 	source->snapshot.elements = dx_calloc(source->snapshot.capacity, sizeof(source->snapshot.elements[0]));
 
 	/* Prepare comparators */
-	source->bids.cmp = &dx_plb_pricelvel_comparator_bid;
-	source->asks.cmp = &dx_plb_pricelvel_comparator_ask;
+	source->bids.cmp = &dx_plb_price_level_comparator_bid;
+	source->asks.cmp = &dx_plb_price_level_comparator_ask;
 
 	source->snapshot_status = dx_status_full;
 
 	/* Create subscription */
-	if ((source->subscription = dx_create_event_subscription(connection, DXF_ET_ORDER, subscr_flags, 0)) == dx_invalid_subscription) {
+	if ((source->subscription = dx_create_event_subscription(connection, DXF_ET_ORDER, subscription_flags, 0)) ==
+		dx_invalid_subscription) {
 		dx_plb_source_free(source);
 		dx_set_error_code(dx_mec_insufficient_memory);
 		return NULL;
@@ -492,10 +484,11 @@ static dx_plb_source_t *dx_plb_source_create(dxf_connection_t connection, dxf_co
 	}
 
 	/* And make all these motions */
-	if (!dx_load_events_for_subscription(connection, dx_get_order_source(source->subscription), DXF_ET_ORDER, subscr_flags) ||
+	if (!dx_load_events_for_subscription(connection, dx_get_order_source(source->subscription), DXF_ET_ORDER,
+										 subscription_flags) ||
 		!dx_send_record_description(connection, false) ||
-		!dx_subscribe_symbols_to_events(connection, dx_get_order_source(source->subscription),
-			&symbol, 1, NULL, 0, DXF_ET_ORDER, false, false, subscr_flags, 0)) {
+		!dx_subscribe_symbols_to_events(connection, dx_get_order_source(source->subscription), &symbol, 1, NULL, 0,
+										DXF_ET_ORDER, false, false, subscription_flags, 0)) {
 		dx_plb_source_free(source);
 		return NULL;
 	}
@@ -514,8 +507,8 @@ static void dx_plb_source_remove_book(dx_plb_source_t *source, dx_price_level_bo
 	for (c = source->consumers; c != NULL; c = c->next) {
 		if (c->consumer == book) {
 			/* found, add checks */
-			if (c->sourceidx != idx) {
-				dx_logging_error(L"PLB Internal error: mixed up source indexies\n");
+			if (c->source_idx != idx) {
+				dx_logging_error(L"PLB Internal error: mixed up source indices\n");
 			}
 			(*p) = c->next;
 			dx_free(c);
@@ -530,7 +523,7 @@ static void dx_plb_source_remove_book(dx_plb_source_t *source, dx_price_level_bo
 }
 
 /* -------------------------------------------------------------------------- */
-/* This must be called without source guard takenm but with context guard taken (!) */
+/* This must be called without source guard taken but with context guard taken (!) */
 static int dx_plb_source_add_book(dx_plb_source_t *source, dx_price_level_book_t *book, int idx) {
 	dx_plb_source_consumer_t *c;
 
@@ -541,7 +534,7 @@ static int dx_plb_source_add_book(dx_plb_source_t *source, dx_price_level_book_t
 	}
 
 	c->consumer = book;
-	c->sourceidx = idx;
+	c->source_idx = idx;
 
 	if (!dx_mutex_lock(&source->guard)) {
 		dx_free(c);
@@ -589,10 +582,9 @@ static void dx_plb_source_reset_snapshot(dx_plb_source_t *source) {
 static void dx_plb_source_remove_order_from_levels(dx_plb_price_level_side_t *ob, const dxf_order_t *order) {
 	size_t pos;
 	int found;
-	dxf_price_level_element_t key = { order->price, 0, 0 };
+	dxf_price_level_element_t key = {order->price, 0, 0};
 	DX_ARRAY_BINARY_SEARCH(ob->levels, 0, ob->count, key, ob->cmp, found, pos);
-	if (!found)
-		return;
+	if (!found) return;
 	ob->levels[pos].size -= order->size;
 	ob->levels[pos].time = order->time;
 	/* If size is zero, we should rebuild whole order book (maybe, other zeroes was in same tx) */
@@ -605,21 +597,19 @@ static void dx_plb_source_remove_order_from_levels(dx_plb_price_level_side_t *ob
 static void dx_plb_source_add_order_to_levels(dx_plb_price_level_side_t *ob, const dxf_order_t *order) {
 	size_t pos;
 	int found;
-	dxf_price_level_element_t key = { order->price, 0, 0 };
+	dxf_price_level_element_t key = {order->price, 0, 0};
 	DX_ARRAY_BINARY_SEARCH(ob->levels, 0, ob->count, key, ob->cmp, found, pos);
 	if (found) {
 		ob->levels[pos].size += order->size;
 		ob->levels[pos].time = order->time;
 		ob->updated = true;
-	}
-	else if (pos < ob->count && ob->count == MAX_PRICE_LEVELS) {
+	} else if (pos < ob->count && ob->count == MAX_PRICE_LEVELS) {
 		dx_memmove(&ob->levels[pos + 1], &ob->levels[pos], sizeof(ob->levels[0]) * (ob->count - pos - 1));
 		ob->levels[pos].price = order->price;
 		ob->levels[pos].size = order->size;
 		ob->levels[pos].time = order->time;
 		ob->updated = true;
-	}
-	else if (ob->count < MAX_PRICE_LEVELS) {
+	} else if (ob->count < MAX_PRICE_LEVELS) {
 		/* Need to insert here */
 		if (pos < ob->count) {
 			dx_memmove(&ob->levels[pos + 1], &ob->levels[pos], sizeof(ob->levels[0]) * (ob->count - pos));
@@ -634,13 +624,13 @@ static void dx_plb_source_add_order_to_levels(dx_plb_price_level_side_t *ob, con
 
 /* -------------------------------------------------------------------------- */
 
-static void dx_plb_source_rebuild_levels(dx_plb_records_array_t *snapshot, dx_plb_price_level_side_t *ob, dxf_order_side_t side) {
+static void dx_plb_source_rebuild_levels(dx_plb_records_array_t *snapshot, dx_plb_price_level_side_t *ob,
+										 dxf_order_side_t side) {
 	size_t i = 0;
 	dx_memset(ob->levels, 0, sizeof(ob->levels));
 	ob->count = 0;
 	for (; i < snapshot->size; i++) {
-		if (snapshot->elements[i]->side != side || snapshot->elements[i]->size == 0)
-			continue;
+		if (snapshot->elements[i]->side != side || snapshot->elements[i]->size == 0) continue;
 		dx_plb_source_add_order_to_levels(ob, snapshot->elements[i]);
 	}
 	ob->rebuild = false;
@@ -665,13 +655,11 @@ static void dx_plb_source_process_order(dx_plb_source_t *source, const dxf_order
 			if (source->snapshot.elements[orderIdx]->index < order->index) {
 				top = orderIdx;
 				bottom = source->snapshot.size;
-			}
-			else {
+			} else {
 				top = 0;
 				bottom = orderIdx;
 			}
-		}
-		else {
+		} else {
 			top = 0;
 			bottom = source->snapshot.size;
 		}
@@ -683,15 +671,13 @@ static void dx_plb_source_process_order(dx_plb_source_t *source, const dxf_order
 		if (rm || order->size == 0) {
 			dx_plb_source_remove_order_from_levels(oo->side == dxf_osd_buy ? &source->bids : &source->asks, oo);
 			if (rm) {
-				DX_ARRAY_DELETE(source->snapshot, dxf_order_t*, orderIdx, dx_capacity_manager_halfer, error);
+				DX_ARRAY_DELETE(source->snapshot, dxf_order_t *, orderIdx, dx_capacity_manager_halfer, error);
 				dx_free(oo);
-			}
-			else {
+			} else {
 				dx_memset(oo, 0, sizeof(*oo));
 				oo->index = order->index;
 			}
-		}
-		else {
+		} else {
 			/* Update order */
 			/* Add first, to minimize chances to hit zero size */
 			dx_plb_source_add_order_to_levels(order->side == dxf_osd_buy ? &source->bids : &source->asks, order);
@@ -700,8 +686,7 @@ static void dx_plb_source_process_order(dx_plb_source_t *source, const dxf_order
 			/* And replace order */
 			*oo = *order;
 		}
-	}
-	else if (!rm && order->size != 0) {
+	} else if (!rm && order->size != 0) {
 		/* Not found: Add it */
 		oo = dx_calloc(1, sizeof(*oo));
 		if (oo == NULL) {
@@ -730,7 +715,7 @@ static int dx_plb_book_free(dx_price_level_book_t *book) {
 
 /* -------------------------------------------------------------------------- */
 
-/* This functuions must be called without guard */
+/* This functions must be called without guard */
 static void dx_plb_book_clear(dx_price_level_book_t *book) {
 	size_t i = 0;
 
@@ -760,14 +745,13 @@ static void dx_plb_book_clear(dx_price_level_book_t *book) {
 	}
 	/* Now nothing could call book methods, kill it */
 	dx_plb_book_free(book);
-
 }
-
 
 /* -------------------------------------------------------------------------- */
 
 /* This functions must be called with book guard taken */
-static int dx_plb_book_update_one_side(dx_plb_price_level_side_t *dst, dx_plb_price_level_side_t **srcs, size_t src_count, double startValue) {
+static int dx_plb_book_update_one_side(dx_plb_price_level_side_t *dst, dx_plb_price_level_side_t **srcs,
+									   size_t src_count, double startValue) {
 	int changed = false;
 	size_t didx = 0;
 	size_t *sidx = dx_calloc(src_count, sizeof(size_t));
@@ -789,14 +773,13 @@ static int dx_plb_book_update_one_side(dx_plb_price_level_side_t *dst, dx_plb_pr
 					best.size += srcs[i]->levels[sidx[i]].size;
 					best.time = MAX(best.time, srcs[i]->levels[sidx[i]].time);
 				} else if (cmp > 0) {
-					/* Best is "greater" than current, replace (it may be smaller, if comarator is reversed) */
+					/* Best is "greater" than current, replace (it may be smaller, if comparator is reversed) */
 					best = srcs[i]->levels[sidx[i]];
 				}
 			}
 		}
 		/* All sources are gone */
-		if (best.size == 0)
-			break;
+		if (best.size == 0) break;
 		if (memcmp(&dst->levels[didx], &best, sizeof(best)) != 0) {
 			dst->levels[didx] = best;
 			changed = true;
@@ -816,7 +799,7 @@ static int dx_plb_book_update_one_side(dx_plb_price_level_side_t *dst, dx_plb_pr
 
 /* -------------------------------------------------------------------------- */
 
-/* This functuions must be called without book guard */
+/* This functions must be called without book guard */
 static void dx_plb_book_update(dx_price_level_book_t *book, dx_plb_source_t *src) {
 	int changed = false;
 	size_t i = 0;
@@ -844,12 +827,11 @@ static void dx_plb_book_update(dx_price_level_book_t *book, dx_plb_source_t *src
 /******************/
 
 /*
-This is called with subscription lock, so it is imposible to delete source
+This is called with subscription lock, so it is impossible to delete source
 when this code is executing.
  */
-static void plb_event_listener(int event_type, dxf_const_string_t symbol_name,
-							const dxf_event_data_t* data, int data_count,
-							const dxf_event_params_t* event_params, void* user_data) {
+static void plb_event_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t *data,
+							   int data_count, const dxf_event_params_t *event_params, void *user_data) {
 	const dxf_order_t *order = (const dxf_order_t *)data;
 	dx_plb_source_t *source = (dx_plb_source_t *)user_data;
 	dx_plb_source_consumer_t *c;
@@ -866,7 +848,8 @@ static void plb_event_listener(int event_type, dxf_const_string_t symbol_name,
 	}
 
 	int sb = IS_FLAG_SET(event_params->flags, dxf_ef_snapshot_begin);
-	int se = IS_FLAG_SET(event_params->flags, dxf_ef_snapshot_end) || IS_FLAG_SET(event_params->flags, dxf_ef_snapshot_snip);
+	int se =
+		IS_FLAG_SET(event_params->flags, dxf_ef_snapshot_end) || IS_FLAG_SET(event_params->flags, dxf_ef_snapshot_snip);
 	int tx = IS_FLAG_SET(event_params->flags, dxf_ef_tx_pending);
 
 	/* Special check */
@@ -900,7 +883,7 @@ static void plb_event_listener(int event_type, dxf_const_string_t symbol_name,
 		source->snapshot_status = dx_status_full;
 	}
 
-	/* And call all consumers  if it is end of transaction */
+	/* And call all consumers  if it is the end of transaction */
 	if ((source->asks.updated || source->bids.updated) && source->snapshot_status == dx_status_full) {
 		if (source->bids.rebuild) {
 			dx_plb_source_rebuild_levels(&source->snapshot, &source->bids, dxf_osd_buy);
@@ -917,8 +900,7 @@ static void plb_event_listener(int event_type, dxf_const_string_t symbol_name,
 		}
 
 		/* Lock guard to be sure that source list is intact */
-		if (!dx_mutex_lock(&source->guard))
-			return;
+		if (!dx_mutex_lock(&source->guard)) return;
 		for (c = source->consumers; c != NULL; c = c->next) {
 			dx_plb_book_update(c->consumer, source);
 		}
@@ -930,20 +912,16 @@ static void plb_event_listener(int event_type, dxf_const_string_t symbol_name,
 /* API */
 /*******/
 
-dxf_price_level_book_t dx_create_price_level_book(dxf_connection_t connection,
-												dxf_const_string_t symbol,
-												size_t srccount, dxf_ulong_t srcflags) {
+dxf_price_level_book_t dx_create_price_level_book(dxf_connection_t connection, dxf_const_string_t symbol,
+												  size_t src_count, dxf_ulong_t src_flags) {
 	int res = true;
-	dx_plb_connection_context_t *context = NULL;
-	dx_price_level_book_t *book = NULL;
-	dx_plb_source_t *source;
 
-	context = dx_get_subsystem_data(connection, dx_ccs_price_level_book, &res);
+	dx_plb_connection_context_t *context = dx_get_subsystem_data(connection, dx_ccs_price_level_book, &res);
 	if (context == NULL) {
 		return NULL;
 	}
 
-	book = dx_calloc(1, sizeof(dx_price_level_book_t));
+	dx_price_level_book_t *book = dx_calloc(1, sizeof(dx_price_level_book_t));
 	if (book == NULL) {
 		dx_set_error_code(dx_mec_insufficient_memory);
 		return NULL;
@@ -954,8 +932,8 @@ dxf_price_level_book_t dx_create_price_level_book(dxf_connection_t connection,
 	}
 
 	book->context = context;
-	book->bids.cmp = &dx_plb_pricelvel_comparator_bid;
-	book->asks.cmp = &dx_plb_pricelvel_comparator_ask;
+	book->bids.cmp = &dx_plb_price_level_comparator_bid;
+	book->asks.cmp = &dx_plb_price_level_comparator_ask;
 
 	book->symbol = dx_create_string_src(symbol);
 	if (book->symbol == NULL) {
@@ -968,19 +946,19 @@ dxf_price_level_book_t dx_create_price_level_book(dxf_connection_t connection,
 	book->book.bids = &book->bids.levels[0];
 	book->book.asks = &book->asks.levels[0];
 
-	book->sources = dx_calloc(srccount, sizeof(book->sources[0]));
+	book->sources = dx_calloc(src_count, sizeof(book->sources[0]));
 	if (book->sources == NULL) {
 		dx_plb_book_free(book);
 		dx_set_error_code(dx_mec_insufficient_memory);
 		return NULL;
 	}
-	book->src_bids = dx_calloc(srccount, sizeof(book->src_bids[0]));
+	book->src_bids = dx_calloc(src_count, sizeof(book->src_bids[0]));
 	if (book->src_bids == NULL) {
 		dx_plb_book_free(book);
 		dx_set_error_code(dx_mec_insufficient_memory);
 		return NULL;
 	}
-	book->src_asks = dx_calloc(srccount, sizeof(book->src_asks[0]));
+	book->src_asks = dx_calloc(src_count, sizeof(book->src_asks[0]));
 	if (book->src_asks == NULL) {
 		dx_plb_book_free(book);
 		dx_set_error_code(dx_mec_insufficient_memory);
@@ -992,11 +970,10 @@ dxf_price_level_book_t dx_create_price_level_book(dxf_connection_t connection,
 
 	/* Add or create sources */
 	for (size_t i = 0; dx_all_order_sources[i] != NULL; i++) {
-		if ((srcflags & (1ULL << i)) == 0)
-			continue;
+		if ((src_flags & (1ULL << i)) == 0) continue;
 
 		/* We have src & symbol */
-		source = dx_plb_ctx_find_source(context, symbol, dx_all_order_sources[i]);
+		dx_plb_source_t *source = dx_plb_ctx_find_source(context, symbol, dx_all_order_sources[i]);
 		if (source == NULL) {
 			source = dx_plb_source_create(connection, symbol, dx_all_order_sources[i]);
 			if (source == NULL || !dx_plb_ctx_add_source(context, source)) {
@@ -1031,11 +1008,10 @@ int dx_close_price_level_book(dxf_price_level_book_t book) {
 	return true;
 }
 
-int dx_add_price_level_book_listener(dxf_price_level_book_t book,
-									dxf_price_level_book_listener_t book_listener,
-									void *user_data) {
+int dx_add_price_level_book_listener(dxf_price_level_book_t book, dxf_price_level_book_listener_t book_listener,
+									 void *user_data) {
 	dx_price_level_book_t *b = (dx_price_level_book_t *)book;
-	dx_plb_listener_context_t ctx = { book_listener, user_data };
+	dx_plb_listener_context_t ctx = {book_listener, user_data};
 	int found = false;
 	int error = false;
 	size_t idx;
@@ -1051,10 +1027,9 @@ int dx_add_price_level_book_listener(dxf_price_level_book_t book,
 	return dx_mutex_unlock(&b->guard) && !error;
 }
 
-int dx_remove_price_level_book_listener(dxf_price_level_book_t book,
-										dxf_price_level_book_listener_t book_listener) {
+int dx_remove_price_level_book_listener(dxf_price_level_book_t book, dxf_price_level_book_listener_t book_listener) {
 	dx_price_level_book_t *b = (dx_price_level_book_t *)book;
-	dx_plb_listener_context_t ctx = { book_listener, NULL };
+	dx_plb_listener_context_t ctx = {book_listener, NULL};
 	int found = false;
 	int error = false;
 	size_t idx;
@@ -1067,4 +1042,12 @@ int dx_remove_price_level_book_listener(dxf_price_level_book_t book,
 	CHECKED_CALL(dx_mutex_lock, &(b->guard));
 	DX_ARRAY_DELETE(b->listeners, dx_plb_listener_context_t, idx, dx_capacity_manager_halfer, error);
 	return dx_mutex_unlock(&b->guard) && !error;
+}
+
+int dx_set_price_level_book_sources(dxf_price_level_book_t book, size_t src_count, dxf_ulong_t src_flags) {
+	return true;
+}
+
+int dx_set_price_level_book_symbol(dxf_price_level_book_t book, dxf_const_string_t symbol) {
+	return true;
 }
