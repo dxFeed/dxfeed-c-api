@@ -29,7 +29,6 @@ namespace dx {
 
 struct SubscriptionData;
 
-//TODO: to std::shared_ptr
 struct SymbolData {
 	std::wstring name{};
 	int refCount;
@@ -43,8 +42,6 @@ struct SymbolData {
 	static SymbolData* create(dxf_const_string_t name);
 
 	void storeLastSymbolEvent(dx_event_id_t eventId, dxf_const_event_data_t data);
-
-	static SymbolData createDumb(const std::wstring& name);
 };
 
 enum class EventListenerVersion { Default = 1, V2 = 2 };
@@ -88,20 +85,13 @@ struct hash<dx::ListenerContext> {
 	}
 };
 
-template <>
-struct hash<dx::SymbolData*> {
-	std::size_t operator()(dx::SymbolData* symbolDataPtr) const noexcept {
-		return std::hash<std::wstring>{}(symbolDataPtr->name);
-	}
-};
-
 }  // namespace std
 
 namespace dx {
 
 struct SubscriptionData {
 	unsigned event_types;
-	std::unordered_set<SymbolData*> symbols{};
+	std::unordered_map<std::wstring, SymbolData*> symbols{};
 	std::unordered_set<ListenerContext> listeners{};
 	dx_order_source_array_t orderSource{};
 	dx_event_subscr_flag subscriptionFlags;
@@ -121,7 +111,7 @@ struct SubscriptionData {
 class EventSubscriptionConnectionContext {
 	dxf_connection_t connectionHandle;
 	std::recursive_mutex mutex{};
-	std::unordered_set<SymbolData*> symbols{};
+	std::unordered_map<std::wstring, SymbolData*> symbols{};
 	std::unordered_set<SubscriptionData*> subscriptions{};
 
 public:

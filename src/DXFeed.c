@@ -1309,8 +1309,6 @@ DXFEED_API ERRORCODE dxf_detach_price_level_book_listener(dxf_price_level_book_t
 	return DXF_SUCCESS;
 }
 
-/* -------------------------------------------------------------------------- */
-
 DXFEED_API ERRORCODE dxf_create_regional_book(dxf_connection_t connection, dxf_const_string_t symbol,
 											  OUT dxf_regional_book_t *book) {
 	dx_perform_common_actions(DX_RESET_ERROR);

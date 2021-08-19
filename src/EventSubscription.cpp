@@ -157,14 +157,6 @@ SymbolData* SymbolData::create(dxf_const_string_t name) {
 	return res;
 }
 
-SymbolData SymbolData::createDumb(const std::wstring& name) {
-	auto result = dx::SymbolData{};
-
-	result.name = name;
-
-	return result;
-}
-
 void SymbolData::storeLastSymbolEvent(dx_event_id_t eventId, dxf_const_event_data_t data) {
 	if (this->lastEvents != nullptr) {
 		dx_memcpy(this->lastEvents[eventId],
@@ -218,7 +210,7 @@ int SubscriptionData::closeEventSubscription(dxf_subscription_t subscriptionId, 
 
 	context->process([&res, &subscriptionData, remove_from_context](dx::EventSubscriptionConnectionContext* ctx) {
 		for (auto&& s : subscriptionData->symbols) {
-			res = ctx->unsubscribeSymbol(s, subscriptionData) && res;
+			res = ctx->unsubscribeSymbol(s.second, subscriptionData) && res;
 		}
 
 		subscriptionData->symbols.clear();
@@ -247,13 +239,10 @@ dxf_connection_t EventSubscriptionConnectionContext::getConnectionHandle() { ret
 
 std::unordered_set<SubscriptionData*> EventSubscriptionConnectionContext::getSubscriptions() { return subscriptions; }
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "LocalValueEscapesScope"
 SymbolData* EventSubscriptionConnectionContext::subscribeSymbol(dxf_const_string_t symbolName,
 																SubscriptionData* owner) {
 	SymbolData* res;
-	auto dumb = dx::SymbolData::createDumb(symbolName);
-	auto found = symbols.find(&dumb);
+	auto found = symbols.find(std::wstring(symbolName));
 
 	if (found == symbols.end()) {
 		res = SymbolData::create(symbolName);
@@ -262,9 +251,9 @@ SymbolData* EventSubscriptionConnectionContext::subscribeSymbol(dxf_const_string
 			return nullptr;
 		}
 
-		symbols.insert(res);
+		symbols[symbolName] = res;
 	} else {
-		res = *found;
+		res = found->second;
 	}
 
 	if (res->subscriptions.find(owner) != res->subscriptions.end()) {
@@ -276,10 +265,9 @@ SymbolData* EventSubscriptionConnectionContext::subscribeSymbol(dxf_const_string
 
 	return res;
 }
-#pragma clang diagnostic pop
 
 void EventSubscriptionConnectionContext::removeSymbolData(SymbolData* symbolData) {
-	auto found = symbols.find(symbolData);
+	auto found = symbols.find(std::wstring(symbolData->name));
 
 	if (found != symbols.end()) {
 		symbols.erase(found);
@@ -309,14 +297,13 @@ int EventSubscriptionConnectionContext::unsubscribeSymbol(SymbolData* symbolData
 }
 
 SymbolData* EventSubscriptionConnectionContext::findSymbol(dxf_const_string_t symbolName) {
-	auto dumb = dx::SymbolData::createDumb(symbolName);
-	auto found = symbols.find(&dumb);
+	auto found = symbols.find(std::wstring(symbolName));
 
 	if (found == symbols.end()) {
 		return nullptr;
 	}
 
-	return *found;
+	return found->second;
 }
 
 void EventSubscriptionConnectionContext::addSubscription(SubscriptionData* data) {
@@ -477,8 +464,7 @@ int dx_add_symbols_impl(dxf_subscription_t subscr_id, dxf_const_string_t* symbol
 				continue;
 			}
 
-			auto dumb = dx::SymbolData::createDumb(symbols[cur_symbol_index]);
-			auto found = subscr_data->symbols.find(&dumb);
+			auto found = subscr_data->symbols.find(std::wstring(symbols[cur_symbol_index]));
 
 			if (found != subscr_data->symbols.end()) {
 				/* symbol is already subscribed */
@@ -496,7 +482,7 @@ int dx_add_symbols_impl(dxf_subscription_t subscr_id, dxf_const_string_t* symbol
 				(*added_symbols_count)++;
 			}
 
-			subscr_data->symbols.insert(symbol_data);
+			subscr_data->symbols[symbols[cur_symbol_index]] = symbol_data;
 		}
 
 		return true;
@@ -529,15 +515,14 @@ int dx_remove_symbols(dxf_subscription_t subscr_id, dxf_const_string_t* symbols,
 				continue;
 			}
 
-			auto dumb = dx::SymbolData::createDumb(symbols[cur_symbol_index]);
-			auto found = subscr_data->symbols.find(&dumb);
+			auto found = subscr_data->symbols.find(std::wstring(symbols[cur_symbol_index]));
 
 			if (found == subscr_data->symbols.end()) {
 				/* symbol wasn't subscribed */
 				continue;
 			}
 
-			if (!ctx->unsubscribeSymbol(*found, subscr_data)) {
+			if (!ctx->unsubscribeSymbol(found->second, subscr_data)) {
 				return false;
 			}
 
@@ -689,7 +674,7 @@ int dx_get_event_subscription_symbols(dxf_subscription_t subscr_id, OUT dxf_cons
 
 	std::size_t i = 0;
 	for (auto&& s : subscr_data->symbols) {
-		subscr_data->symbolNames[i] = s->name.c_str();
+		subscr_data->symbolNames[i] = s.second->name.c_str();
 		i++;
 	}
 
@@ -758,8 +743,7 @@ int dx_get_event_subscription_time(dxf_subscription_t subscr_id, OUT dxf_long_t*
 static void dx_call_subscr_listeners(dx::SubscriptionData* subscr_data, unsigned event_bitmask,
 									 dxf_const_string_t symbol_name, dxf_const_event_data_t data,
 									 const dxf_event_params_t* event_params) {
-	auto dumb = dx::SymbolData::createDumb(symbol_name);
-	if (subscr_data == nullptr || subscr_data->symbols.find(&dumb) == subscr_data->symbols.end()) {
+	if (subscr_data == nullptr || subscr_data->symbols.find(symbol_name) == subscr_data->symbols.end()) {
 		return;
 	}
 
@@ -785,7 +769,7 @@ static void dx_call_subscr_listeners(dx::SubscriptionData* subscr_data, unsigned
 	}
 }
 
-#define DX_ORDER_SOURCE_COMPARATOR_NONSYM(l, r) (dx_compare_strings((l).suffix, (r)))
+#define DX_ORDER_SOURCE_COMPARATOR_NONSYM(l, r) (dx_compare_strings(l.suffix, r))
 
 void pass_event_data_to_listeners(dx::EventSubscriptionConnectionContext* ctx, dx::SymbolData* symbol_data,
 								  dx_event_id_t event_id, dxf_const_string_t symbol_name, dxf_const_event_data_t data,
@@ -956,7 +940,7 @@ int dx_process_connection_subscriptions(dxf_connection_t connection, dx_subscrip
 
 /* -------------------------------------------------------------------------- */
 
-#define DX_ORDER_SOURCE_COMPARATOR(l, r) (dx_compare_strings((l).suffix, (r).suffix))
+#define DX_ORDER_SOURCE_COMPARATOR(l, r) (dx_compare_strings(l.suffix, r.suffix))
 
 int dx_add_order_source(dxf_subscription_t subscr_id, dxf_const_string_t source) {
 	auto subscr_data = (dx::SubscriptionData*)subscr_id;
