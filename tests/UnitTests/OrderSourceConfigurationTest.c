@@ -1,6 +1,29 @@
+/*
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Initial Developer of the Original Code is Devexperts LLC.
+ * Portions created by the Initial Developer are Copyright (C) 2010
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *
+ */
+
 #ifdef _WIN32
-#include <Windows.h>
+#	pragma warning(push)
+#	pragma warning(disable : 5105)
+#	include <Windows.h>
+#	pragma warning(pop)
 #endif
+
 #include <time.h>
 #include <stdio.h>
 
@@ -72,7 +95,7 @@ void listener(int event_type, dxf_const_string_t symbol_name,
 	}
 }
 
-bool ost_wait_events(get_counter_function_t counter_function) {
+int ost_wait_events(get_counter_function_t counter_function) {
 	int timestamp = dx_millisecond_timestamp();
 	while (counter_function() == 0) {
 		if (is_thread_terminate(g_ost_listener_thread_data)) {
@@ -88,11 +111,11 @@ bool ost_wait_events(get_counter_function_t counter_function) {
 	return true;
 }
 
-bool ost_wait_multiple_events(get_counter_function_t* counter_functions, int function_number) {
+int ost_wait_multiple_events(get_counter_function_t* counter_functions, int function_number) {
 	int timestamp = dx_millisecond_timestamp();
 	while (true) {
 		int i;
-		bool res = true;
+		int res = true;
 		for (i = 0; i < function_number; i++) {
 			res &= counter_functions[i]() > 0;
 		}
@@ -111,7 +134,7 @@ bool ost_wait_multiple_events(get_counter_function_t* counter_functions, int fun
 	return true;
 }
 
-bool ost_wait_two_events(get_counter_function_t f1, get_counter_function_t f2) {
+int ost_wait_two_events(get_counter_function_t f1, get_counter_function_t f2) {
 	get_counter_function_t counters[] = { f1, f2 };
 	return ost_wait_multiple_events(counters, SIZE_OF_ARRAY(counters));
 }
@@ -122,7 +145,7 @@ bool ost_wait_two_events(get_counter_function_t f1, get_counter_function_t f2) {
  *
  * counter_data - event counter data object
  */
-static bool wait_all_events_received(event_counter_data_ptr_t counter_data) {
+static int wait_all_events_received(event_counter_data_ptr_t counter_data) {
 	int timestamp = dx_millisecond_timestamp();
 	int prev_value = 0;
 	int last_value = 0;
@@ -154,7 +177,7 @@ static bool wait_all_events_received(event_counter_data_ptr_t counter_data) {
  * - Adds a new source to current set: DEX
  * - Wait events with NTV and DEX sources and checks that count of DEA is zero.
  */
-bool mixed_order_source_test() {
+int mixed_order_source_test() {
 	dxf_connection_t connection = NULL;
 	dxf_subscription_t subscription = NULL;
 	dxf_const_string_t symbols[] = { { L"IBM" }, { L"MSFT" }, { L"YHOO" }, { L"C" }, { L"AAPL" } };
@@ -259,7 +282,7 @@ bool mixed_order_source_test() {
  * - Sets a new sources: DEX only
  * - Wait events with DEX sources and checks that count of NTV and DEA is zero.
  */
-bool set_order_source_test() {
+int set_order_source_test() {
 	dxf_connection_t connection = NULL;
 	dxf_subscription_t subscription = NULL;
 	dxf_const_string_t symbols[] = { { L"IBM" }, { L"MSFT" }, { L"YHOO" }, { L"C" }, { L"AAPL" } };
@@ -365,7 +388,7 @@ bool set_order_source_test() {
  * - Adds a new source to current set: DEA
  * - Wait events with NTV, DEX and DEA sources.
  */
-bool add_order_source_test() {
+int add_order_source_test() {
 	dxf_connection_t connection = NULL;
 	dxf_subscription_t subscription = NULL;
 	dxf_const_string_t symbols[] = { L"IBM", L"MSFT", L"YHOO", L"C", L"AAPL", L"XBT/USD" };
@@ -475,7 +498,7 @@ bool add_order_source_test() {
  * - Adds a new source to current set: DEX
  * - Wait events with NTV and DEX sources and checks that count of DEA is zero.
  */
-bool input_order_source_test() {
+int input_order_source_test() {
 	dxf_connection_t connection = NULL;
 	dxf_subscription_t subscription = NULL;
 	dxf_const_string_t symbols[] = { { L"IBM" },{ L"MSFT" },{ L"YHOO" },{ L"C" },{ L"AAPL" } };
@@ -521,8 +544,8 @@ bool input_order_source_test() {
 	return true;
 }
 
-bool order_source_configuration_test(void) {
-	bool res = true;
+int order_source_configuration_test(void) {
+	int res = true;
 
 	dxf_initialize_logger("log.log", true, true, true);
 

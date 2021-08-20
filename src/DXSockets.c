@@ -211,11 +211,10 @@ dx_error_code_t dx_eai_code_to_internal(int code) {
 /* -------------------------------------------------------------------------- */
 
 static const int g_name_resolution_attempt_count = 5;
-static const unsigned g_connect_timeout = 5; /* timeout in seconds */
 
 static int g_connection_count = 0;
 static dx_mutex_t g_count_guard;
-static bool g_count_guard_initialized = false;
+static int g_count_guard_initialized = false;
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -233,7 +232,7 @@ static bool g_count_guard_initialized = false;
  */
 /* ---------------------------------- */
 
-bool dx_init_socket_subsystem (void) {
+int dx_init_socket_subsystem (void) {
 	WORD wVersionRequested;
 	WSADATA wsaData;
 
@@ -257,7 +256,7 @@ bool dx_init_socket_subsystem (void) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_deinit_socket_subsystem (void) {
+int dx_deinit_socket_subsystem (void) {
 	if (WSACleanup() == SOCKET_ERROR) {
 		return dx_set_error_code(dx_wsa_error_code_to_internal(WSAGetLastError()));
 	}
@@ -271,7 +270,7 @@ bool dx_deinit_socket_subsystem (void) {
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_on_connection_created (void) {
+int dx_on_connection_created (void) {
 	if (!g_count_guard_initialized) {
 		CHECKED_CALL(dx_mutex_create, &g_count_guard);
 
@@ -297,7 +296,7 @@ bool dx_on_connection_created (void) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_on_connection_destroyed (void) {
+int dx_on_connection_destroyed (void) {
 	CHECKED_CALL(dx_mutex_lock, &g_count_guard);
 
 	if (g_connection_count > 0 && --g_connection_count == 0) {
@@ -331,7 +330,7 @@ dx_socket_t dx_socket (int family, int type, int protocol) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_connect (dx_socket_t s, const struct sockaddr* addr, socklen_t addrlen) {
+int dx_connect (dx_socket_t s, const struct sockaddr* addr, socklen_t addrlen) {
 	if (connect(s, addr, addrlen) == SOCKET_ERROR) {
 		return dx_set_error_code(dx_wsa_error_code_to_internal(WSAGetLastError()));
 	}
@@ -376,7 +375,7 @@ int dx_recv (dx_socket_t s, void* buffer, int buflen) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_close (dx_socket_t s) {
+int dx_close (dx_socket_t s) {
 	if (shutdown(s, SD_BOTH) == INVALID_SOCKET) {
 		return dx_set_error_code(dx_wsa_error_code_to_internal(WSAGetLastError()));
 	}
@@ -390,7 +389,7 @@ bool dx_close (dx_socket_t s) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_getaddrinfo (const char* nodename, const char* servname,
+int dx_getaddrinfo (const char* nodename, const char* servname,
 					const struct addrinfo* hints, struct addrinfo** res) {
 	int funres = 0;
 	int iter_count = 0;
@@ -426,13 +425,13 @@ void dx_freeaddrinfo (struct addrinfo* res) {
  */
 /* ---------------------------------- */
 
-bool dx_init_socket_subsystem (void) {
+int dx_init_socket_subsystem (void) {
 	return true;
 }
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_deinit_socket_subsystem (void) {
+int dx_deinit_socket_subsystem (void) {
 	return true;
 }
 
@@ -442,7 +441,7 @@ bool dx_deinit_socket_subsystem (void) {
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_on_connection_created (void) {
+int dx_on_connection_created (void) {
 	if (!g_count_guard_initialized) {
 		CHECKED_CALL(dx_mutex_create, &g_count_guard);
 
@@ -468,7 +467,7 @@ bool dx_on_connection_created (void) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_on_connection_destroyed (void) {
+int dx_on_connection_destroyed (void) {
 	CHECKED_CALL(dx_mutex_lock, &g_count_guard);
 
 	if (g_connection_count > 0 && --g_connection_count == 0) {
@@ -502,7 +501,7 @@ dx_socket_t dx_socket (int family, int type, int protocol) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_connect (dx_socket_t s, const struct sockaddr* addr, socklen_t addrlen) {
+int dx_connect (dx_socket_t s, const struct sockaddr* addr, socklen_t addrlen) {
 	if (connect(s, addr, addrlen) == SOCKET_ERROR) {
 		return dx_set_error_code(dx_errno_code_to_internal());
 	}
@@ -547,7 +546,7 @@ int dx_recv (dx_socket_t s, void* buffer, int buflen) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_close (dx_socket_t s) {
+int dx_close (dx_socket_t s) {
 	if (shutdown(s, SHUT_RDWR) == INVALID_SOCKET) {
 		return dx_set_error_code(dx_errno_code_to_internal());
 	}
@@ -561,7 +560,7 @@ bool dx_close (dx_socket_t s) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_getaddrinfo (const char* nodename, const char* servname,
+int dx_getaddrinfo (const char* nodename, const char* servname,
 					const struct addrinfo* hints, struct addrinfo** res) {
 	int funres = 0;
 	int iter_count = 0;

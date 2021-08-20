@@ -17,8 +17,7 @@
  *
  */
 
-#ifndef LOGGER_H
-#define LOGGER_H
+#pragma once
 
 #include "DXFeed.h"
 #include "PrimitiveTypes.h"
@@ -26,7 +25,7 @@
 #if defined(_WIN32) && defined(_DEBUG)
 void dx_log_debug_message(const dxf_char_t *format, ...);
 #else
-#define dx_log_debug_message(f, ...)
+#define dx_log_debug_message(...)
 #endif
 
 //typedef DXFEED_API enum dx_log_date_format {
@@ -41,7 +40,7 @@ void dx_logging_error_by_code(int error_code);
 void dx_logging_info (const dxf_char_t* format, ...);
 void dx_logging_verbose_info (const dxf_char_t* format, ...);
 void dx_logging_verbose_gap (void);
-
+void dx_flush_log (void);
 void dx_logging_dbg_lock ();
 void dx_logging_dbg (const dxf_char_t* format, ...);
 void dx_logging_dbg_stack ();
@@ -52,4 +51,25 @@ void dx_logging_dbg_unlock ();
 void dx_logging_last_error (void);
 void dx_logging_last_error_verbose (void);
 
-#endif // LOGGER_H
+/**
+ * Logs the data that was sent
+ *
+ * @param buffer       The buffer of data
+ * @param buffer_size  The buffer of data size
+ */
+void dx_logging_send_data(const void *buffer, int buffer_size);
+
+/**
+ * Logs the data that was received
+ *
+ * @param buffer       The buffer of data
+ * @param buffer_size  The buffer of data size
+ */
+void dx_logging_receive_data(const void *buffer, int buffer_size);
+
+/**
+ * Logs the description of a start sending data
+ *
+ * @param buffer_size The buffer of data size
+ */
+void dx_logging_send_data_start(int buffer_size);

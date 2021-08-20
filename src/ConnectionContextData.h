@@ -43,6 +43,7 @@ typedef enum {
 	dx_ccs_server_msg_processor,
 	dx_ccs_buffered_input,
 	dx_ccs_buffered_output,
+	dx_css_connection_impl,
 	dx_ccs_snapshot_subscription,
 	dx_ccs_price_level_book,
 	dx_ccs_regional_book,
@@ -50,7 +51,7 @@ typedef enum {
 	dx_ccs_count
 } dx_connection_context_subsystem_t;
 
-typedef bool (*dx_conn_ctx_subsys_manipulator_t) (dxf_connection_t connection);
+typedef int (*dx_conn_ctx_subsys_manipulator_t) (dxf_connection_t connection);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -62,19 +63,19 @@ typedef bool (*dx_conn_ctx_subsys_manipulator_t) (dxf_connection_t connection);
 	subsys_id##_init
 
 #define DX_CONNECTION_SUBSYS_INIT_PROTO(subsys_id) \
-	bool DX_CONNECTION_SUBSYS_INIT_NAME(subsys_id) (dxf_connection_t connection)
+	int DX_CONNECTION_SUBSYS_INIT_NAME(subsys_id) (dxf_connection_t connection)
 
 #define DX_CONNECTION_SUBSYS_DEINIT_NAME(subsys_id) \
 	subsys_id##_deinit
 
 #define DX_CONNECTION_SUBSYS_DEINIT_PROTO(subsys_id) \
-	bool DX_CONNECTION_SUBSYS_DEINIT_NAME(subsys_id) (dxf_connection_t connection)
+	int DX_CONNECTION_SUBSYS_DEINIT_NAME(subsys_id) (dxf_connection_t connection)
 
 #define DX_CONNECTION_SUBSYS_CHECK_NAME(subsys_id) \
 	subsys_id##_check
 
 #define DX_CONNECTION_SUBSYS_CHECK_PROTO(subsys_id) \
-	bool DX_CONNECTION_SUBSYS_CHECK_NAME(subsys_id) (dxf_connection_t connection)
+	int DX_CONNECTION_SUBSYS_CHECK_NAME(subsys_id) (dxf_connection_t connection)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -90,6 +91,7 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_record_buffers);
 DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_server_msg_processor);
 DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_buffered_input);
 DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_buffered_output);
+DX_CONNECTION_SUBSYS_INIT_PROTO(dx_css_connection_impl);
 DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_snapshot_subscription);
 DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_price_level_book);
 DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_regional_book);
@@ -101,6 +103,7 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_record_buffers);
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_server_msg_processor);
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_buffered_input);
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_buffered_output);
+DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_css_connection_impl);
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_snapshot_subscription);
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_price_level_book);
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_regional_book);
@@ -112,6 +115,7 @@ DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_record_buffers);
 DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_server_msg_processor);
 DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_buffered_input);
 DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_buffered_output);
+DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_css_connection_impl);
 DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_snapshot_subscription);
 DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_price_level_book);
 DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_regional_book);
@@ -123,10 +127,10 @@ DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_regional_book);
 /* -------------------------------------------------------------------------- */
 
 dxf_connection_t dx_init_connection (void);
-bool dx_deinit_connection (dxf_connection_t connection);
-bool dx_can_deinit_connection (dxf_connection_t connection);
-void* dx_get_subsystem_data (dxf_connection_t connection, dx_connection_context_subsystem_t subsystem, OUT bool* res);
-bool dx_set_subsystem_data (dxf_connection_t connection, dx_connection_context_subsystem_t subsystem, void* data);
-bool dx_validate_connection_handle (dxf_connection_t connection, bool is_internal);
+int dx_deinit_connection (dxf_connection_t connection);
+int dx_can_deinit_connection (dxf_connection_t connection);
+void* dx_get_subsystem_data (dxf_connection_t connection, dx_connection_context_subsystem_t subsystem, OUT int* res);
+int dx_set_subsystem_data (dxf_connection_t connection, dx_connection_context_subsystem_t subsystem, void* data);
+int dx_validate_connection_handle (dxf_connection_t connection, int is_internal);
 
 #endif /* CONNECTION_CONTEXT_DATA_H_INCLUDED */

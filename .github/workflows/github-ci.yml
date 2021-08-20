@@ -1,0 +1,388 @@
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+      - '[0-9]+.[0-9]+.[0-9]+-[a-zA-Z]+'
+      - '[a-zA-Z]+-[0-9]+.[0-9]+.[0-9]+'
+
+name: Build & Release
+
+env:
+  WIN_BUILDER_IMAGE: dxfeedcapi/builder:1809-4.5.2-2015
+  DOCS_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-docs
+  MAC_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-macosx
+  LINUX_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-linux
+  CENTOS_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-centos
+  WINDOWS_ARTIFACT_TEMPLATE: dxfeed-c-api-#VERSION#-windows
+  WINDOWS_BUILD_TEMPLATE: dxfeed-c-api-#VERSION#
+  WIN_SRC_DIR: "C:\\dxfeed-c-api"
+  RELEASE_PREFIX: "dxFeed C API "
+
+jobs:
+
+# --------------------------- BUILD DOCUMENTATION
+  build_docs:
+    runs-on: ubuntu-latest
+    name: build documentation
+    steps:
+      - uses: actions/checkout@master
+      - name: Set env
+        run: |
+          echo RELEASE_VERSION=$(echo ${GITHUB_REF:10}) >> $GITHUB_ENV
+          echo ARTIFACT=$(echo ${DOCS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g" ) >> $GITHUB_ENV
+      - name: Check env
+        run: |
+          echo Artifact: ${{ env.ARTIFACT }}
+          echo Release : ${{ env.RELEASE_VERSION }}
+      - name: Build documentation
+        uses: ./.github/actions/doxygen
+        id: build-docs
+        with:
+          artifact: ${{ env.ARTIFACT }}
+          release: ${{ env.RELEASE_VERSION }}
+      - uses: actions/upload-artifact@v1
+        with:
+          name: ${{ env.ARTIFACT }}.zip
+          path: artifact/${{ env.ARTIFACT }}.zip
+
+
+# --------------------------- BUILD LINUX LIBRARY (WITH TLS SUPPORT)
+  build_linux_tls:
+    runs-on: ubuntu-latest
+    name: build linux (TLS)
+    steps:
+      - uses: actions/checkout@master
+      - name: Set env
+        run: |
+          echo RELEASE_VERSION=$(echo ${GITHUB_REF:10}) >> $GITHUB_ENV
+          echo ARTIFACT=$(echo ${LINUX_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g" ) >> $GITHUB_ENV
+      - name: Check env
+        run: |
+          echo Artifact: ${{ env.ARTIFACT }}
+          echo Release : ${{ env.RELEASE_VERSION }}
+      - name: Build linux library (TLS)
+        uses: ./.github/actions/linux
+        id: build-linux
+        with:
+          artifact: ${{ env.ARTIFACT }}
+          release:  ${{ env.RELEASE_VERSION }}
+      - uses: actions/upload-artifact@v1
+        with:
+          name: ${{ env.ARTIFACT }}.zip
+          path: artifact/${{ env.ARTIFACT }}.zip
+
+
+# --------------------------- BUILD LINUX LIBRARY (WITHOUT TLS SUPPORT)
+  build_linux_no_tls:
+    runs-on: ubuntu-latest
+    name: build linux (no TLS)
+    steps:
+      - uses: actions/checkout@master
+      - name: Set env
+        run: |
+          echo RELEASE_VERSION=$(echo ${GITHUB_REF:10}) >> $GITHUB_ENV
+          echo ARTIFACT=$(echo ${LINUX_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g" ) >> $GITHUB_ENV
+      - name: Check env
+        run: |
+          echo Artifact: ${{ env.ARTIFACT }}
+          echo Release : ${{ env.RELEASE_VERSION }}
+      - name: Build linux library (no TLS)
+        uses: ./.github/actions/linux
+        id: build-linux-nt
+        with:
+          artifact: ${{ env.ARTIFACT }}
+          release:  ${{ env.RELEASE_VERSION }}
+          notls: true
+      - uses: actions/upload-artifact@v1
+        with:
+          name: ${{ env.ARTIFACT }}-no-tls.zip
+          path: artifact/${{ env.ARTIFACT }}-no-tls.zip
+
+
+# --------------------------- BUILD OLD LINUX (CENTOS 7) LIBRARY (WITH TLS SUPPORT)
+  build_centos_tls:
+    runs-on: ubuntu-latest
+    name: build centos (TLS)
+    steps:
+      - uses: actions/checkout@master
+      - name: Set env
+        run: |
+          echo RELEASE_VERSION=$(echo ${GITHUB_REF:10}) >> $GITHUB_ENV
+          echo ARTIFACT=$(echo ${CENTOS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g" ) >> $GITHUB_ENV
+      - name: Check env
+        run: |
+          echo Artifact: ${{ env.ARTIFACT }}
+          echo Release : ${{ env.RELEASE_VERSION }}
+      - name: Build centos library (TLS)
+        uses: ./.github/actions/centos
+        id: build-centos
+        with:
+          artifact: ${{ env.ARTIFACT }}
+          release:  ${{ env.RELEASE_VERSION }}
+      - uses: actions/upload-artifact@v1
+        with:
+          name: ${{ env.ARTIFACT }}.zip
+          path: artifact/${{ env.ARTIFACT }}.zip
+
+
+# --------------------------- BUILD OLD LINUX (CENTOS 7) LIBRARY (WITHOUT TLS SUPPORT)
+  build_centos_no_tls:
+    runs-on: ubuntu-latest
+    name: build centos (no TLS)
+    steps:
+      - uses: actions/checkout@master
+      - name: Set env
+        run: |
+          echo RELEASE_VERSION=$(echo ${GITHUB_REF:10}) >> $GITHUB_ENV
+          echo ARTIFACT=$(echo ${CENTOS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g" ) >> $GITHUB_ENV
+      - name: Check env
+        run: |
+          echo Artifact: ${{ env.ARTIFACT }}
+          echo Release : ${{ env.RELEASE_VERSION }}
+      - name: Build centos library (no TLS)
+        uses: ./.github/actions/centos
+        id: build-centos-nt
+        with:
+          artifact: ${{ env.ARTIFACT }}
+          release:  ${{ env.RELEASE_VERSION }}
+          notls: true
+      - uses: actions/upload-artifact@v1
+        with:
+          name: ${{ env.ARTIFACT }}-no-tls.zip
+          path: artifact/${{ env.ARTIFACT }}-no-tls.zip
+
+# --------------------------- BUILD MACOSX LIBRARY (WITH TLS SUPPORT)
+  build_macos_tls:
+    runs-on: macos-latest
+    name: build macos (TLS)
+    steps:
+      - uses: actions/checkout@master
+      - name: Set env
+        run: |
+          echo RELEASE_VERSION=$(echo ${GITHUB_REF:10}) >> $GITHUB_ENV
+          echo ARTIFACT=$(echo ${MAC_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g" ) >> $GITHUB_ENV
+      - name: Check env
+        run: |
+          echo Artifact: ${{ env.ARTIFACT }}
+          echo Release : ${{ env.RELEASE_VERSION }}
+      - name: Prepare tools
+        run: |
+          brew install p7zip
+      - name: Build MacOSX library (no TLS)
+        run: |
+          ./make_package.sh ${{ env.RELEASE_VERSION }} no-test
+      - name: Post build
+        run: |
+          ls ./build
+          mv build/dxfeed-c-api-${{ env.RELEASE_VERSION }}.zip build/${{ env.ARTIFACT }}.zip
+          ls ./build
+      - uses: actions/upload-artifact@v1
+        with:
+          name: ${{ env.ARTIFACT }}.zip
+          path: build/${{ env.ARTIFACT }}.zip
+
+
+# --------------------------- BUILD MACOSX LIBRARY (WITHOUT TLS SUPPORT)
+  build_macos_no_tls:
+    runs-on: macos-latest
+    name: build macos (no TLS)
+    steps:
+      - uses: actions/checkout@master
+      - name: Set env
+        run: |
+          echo RELEASE_VERSION=$(echo ${GITHUB_REF:10}) >> $GITHUB_ENV
+          echo ARTIFACT=$(echo ${MAC_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g" ) >> $GITHUB_ENV
+      - name: Check env
+        run: |
+          echo Artifact: ${{ env.ARTIFACT }}
+          echo Release : ${{ env.RELEASE_VERSION }}
+      - name: Prepare tools
+        run: |
+          brew install p7zip
+      - name: Build MacOSX library (no TLS)
+        run: |
+          ./make_package.sh ${{ env.RELEASE_VERSION }} no-test no-tls
+      - name: Post build
+        run: |
+          ls ./build
+          mv build/dxfeed-c-api-${{ env.RELEASE_VERSION }}-no-tls.zip build/${{ env.ARTIFACT }}-no-tls.zip
+          ls ./build
+      - uses: actions/upload-artifact@v1
+        with:
+          name: ${{ env.ARTIFACT }}-no-tls.zip
+          path: build/${{ env.ARTIFACT }}-no-tls.zip
+
+# --------------------------- BUILD WINDOWS LIBRARY [ VS2015 ]
+  build_windows:
+    runs-on: windows-latest
+    name: build windows
+    steps:
+
+      - name: Free disk space for build image
+        run: |
+          docker rm $(docker ps -aq)
+          docker image rm $(docker image ls -q)
+
+      - uses: actions/checkout@master
+
+      - name: Set env
+        run: |
+          echo RELEASE_VERSION=$("$Env:GITHUB_REF".Substring(10)) | Add-Content -Path $env:GITHUB_ENV -Encoding utf8
+          echo ARTIFACT=$(echo $Env:WINDOWS_ARTIFACT_TEMPLATE | %{$_ -replace '#VERSION#', $("$Env:GITHUB_REF".Substring(10)) }) | Add-Content -Path $env:GITHUB_ENV -Encoding utf8
+          echo WB_ARTIFACT=$(echo $Env:WINDOWS_BUILD_TEMPLATE | %{$_ -replace '#VERSION#', $("$Env:GITHUB_REF".Substring(10)) }) | Add-Content -Path $env:GITHUB_ENV -Encoding utf8
+
+      - name: Check env
+        run: |
+          echo "RELEASE    : ${{ env.RELEASE_VERSION }}"
+          echo "ARTIFACT   : ${{ env.ARTIFACT }}"
+          echo "WB_ARTIFACT: ${{ env.WB_ARTIFACT }}"
+
+      - name: Pull build image
+        run: |
+          docker pull ${{ env.WIN_BUILDER_IMAGE }}
+
+      - name: Make artifacts directory
+        run: |
+          mkdir artifact
+
+      - name: Build windows (no TLS)
+        run: |
+          docker run --rm -v "${pwd}:${{ env.WIN_SRC_DIR }}" -e SRCDIR="${{ env.WIN_SRC_DIR }}" -e FLAGS="rebuild no-test no-tls" -e RELEASE=${{ env.RELEASE_VERSION }} ${{ env.WIN_BUILDER_IMAGE }}
+
+      - name: Copy build artifact (windows no-tls)
+        run: |
+          cp build\${{ env.WB_ARTIFACT }}-no-tls.zip artifact\${{ env.ARTIFACT }}-no-tls.zip
+          ls artifact\
+
+      - name: Build windows (TLS)
+        run: |
+          docker run --rm -v "${pwd}:${{ env.WIN_SRC_DIR }}" -e SRCDIR="${{ env.WIN_SRC_DIR }}" -e FLAGS="rebuild no-test" -e RELEASE=${{ env.RELEASE_VERSION }} ${{ env.WIN_BUILDER_IMAGE }}
+
+      - name: Copy build artifact (windows)
+        run: |
+          cp build\${{ env.WB_ARTIFACT }}.zip artifact\${{ env.ARTIFACT }}.zip
+          ls artifact\
+
+      - name: Upload build artifact (no TLS)
+        uses: actions/upload-artifact@v1
+        with:
+          name: ${{ env.ARTIFACT }}-no-tls.zip
+          path: artifact/${{ env.ARTIFACT }}-no-tls.zip
+
+      - name: Upload build artifact (TLS)
+        uses: actions/upload-artifact@v1
+        with:
+          name: ${{ env.ARTIFACT }}.zip
+          path: artifact/${{ env.ARTIFACT }}.zip
+
+
+  # --------------------------- PUBLISH RELEASE
+  publish_release:
+    runs-on: ubuntu-latest
+    name: publish release
+    needs: [build_docs, build_linux_tls, build_linux_no_tls, build_centos_tls, build_centos_no_tls, build_macos_tls, build_macos_no_tls, build_windows]
+    steps:
+
+      - uses: actions/checkout@master
+
+      - name: Set env
+        run: |
+          echo RELEASE_VERSION=$(echo ${GITHUB_REF:10}) >> $GITHUB_ENV
+          echo DOC_ARTIFACT=$(echo ${DOCS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g").zip >> $GITHUB_ENV
+          echo LINUX_ARTIFACT=$(echo ${LINUX_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g").zip >> $GITHUB_ENV
+          echo LINUX_NO_TLS_ARTIFACT=$(echo ${LINUX_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g")-no-tls.zip >> $GITHUB_ENV
+          echo CENTOS_ARTIFACT=$(echo ${CENTOS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g").zip >> $GITHUB_ENV
+          echo CENTOS_NO_TLS_ARTIFACT=$(echo ${CENTOS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g")-no-tls.zip >> $GITHUB_ENV
+          echo WINDOWS_ARTIFACT=$(echo ${WINDOWS_ARTIFACT_TEMPLATE} | sed "s/#VERSION#/$(echo ${GITHUB_REF:10})/g").zip >> $GITHUB_ENV
+          echo WINDOWS_NO_TLS_ARTIFACT=$(echo ${WINDOWS_ARTIFACT_TEMPLATE} | sed "s/#VERSION#/$(echo ${GITHUB_REF:10})/g")-no-tls.zip >> $GITHUB_ENV
+          echo MAC_ARTIFACT=$(echo ${MAC_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g").zip >> $GITHUB_ENV
+          echo MAC_NO_TLS_ARTIFACT=$(echo ${MAC_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g")-no-tls.zip >> $GITHUB_ENV
+
+      - name: Check env
+        run: |
+          echo "Release : ${{ env.RELEASE_VERSION }}"
+          echo "Documentation Artifact: ${DOC_ARTIFACT}"
+          echo "Linux Artifact: ${{ env.LINUX_ARTIFACT }}"
+          echo "Linux (no TLS) Artifact: ${{ env.LINUX_NO_TLS_ARTIFACT }}"
+          echo "Centos Artifact: ${{ env.CENTOS_ARTIFACT }}"
+          echo "Centos (no TLS) Artifact: ${{ env.CENTOS_NO_TLS_ARTIFACT }}"
+          echo "Windows Artifact: ${{ env.WINDOWS_ARTIFACT }}"
+          echo "Windows (no TLS) Artifact: ${{ env.WINDOWS_NO_TLS_ARTIFACT }}"
+          echo "MacOSX Artifact: ${{ env.MAC_ARTIFACT }}"
+          echo "MacOSX (no TLS) Artifact: ${{ env.MAC_NO_TLS_ARTIFACT }}"
+
+      - name: Download documentation artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: ${{ env.DOC_ARTIFACT }}
+          path: downloads/
+
+      - name: Download linux artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: ${{ env.LINUX_ARTIFACT }}
+          path: downloads/
+
+      - name: Download linux-no-tls artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: ${{ env.LINUX_NO_TLS_ARTIFACT }}
+          path: downloads/
+
+      - name: Download centos artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: ${{ env.CENTOS_ARTIFACT }}
+          path: downloads/
+
+      - name: Download centos-no-tls artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: ${{ env.CENTOS_NO_TLS_ARTIFACT }}
+          path: downloads/
+
+      - name: Download windows artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: ${{ env.WINDOWS_ARTIFACT }}
+          path: downloads/
+
+      - name: Download windows-no-tls artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: ${{ env.WINDOWS_NO_TLS_ARTIFACT }}
+          path: downloads/
+
+      - name: Download macosx artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: ${{ env.MAC_ARTIFACT }}
+          path: downloads/
+
+      - name: Download macosx-no-tls artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: ${{ env.MAC_NO_TLS_ARTIFACT }}
+          path: downloads/
+
+      - name: Get release notes
+        uses: ./.github/actions/notes
+        id: notes
+        with:
+          file: ReleaseNotes.txt
+
+      - name: Print release notes
+        run: |
+          echo "=== Release notes ============="
+          echo '${{ steps.notes.outputs.data }}'
+
+      - name: Publish release
+        uses: ./.github/actions/publish
+        with:
+          args: downloads/
+          draft_regex: '[0-9]+.[0-9]+.[0-9]+-[a-zA-Z]+'
+          prerelease_regex: '[a-zA-Z]+-[0-9]+.[0-9]+.[0-9]+'
+          notes: '${{ steps.notes.outputs.data }}'
+        env:
+          RELEASE_PREFIX: ${{ env.RELEASE_PREFIX }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

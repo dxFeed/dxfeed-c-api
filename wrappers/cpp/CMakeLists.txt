@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.1)
+cmake_minimum_required(VERSION 3.0.0)
 
 cmake_policy(SET CMP0015 NEW)
 
@@ -11,7 +11,7 @@ include_directories(../../include
     thirdparty/optional-lite/include
     thirdparty/string-view-lite/include
     thirdparty/variant-lite/include
-    thirdparty/fmt/include
+    thirdparty/fmt-8.0.0/include
     thirdparty/args
     )
 
@@ -30,7 +30,7 @@ set(LIB_DXFEED_PROJ DXFeed)
 set(LIB_DXFEED_NAME ${LIB_DXFEED_PROJ})
 set(LIB_DXFEED_OUT_DIR ${CMAKE_BINARY_DIR}/${LIB_DXFEED_PROJ})
 
-set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE TYPE INTERNAL FORCE)
+set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE INTERNAL "" FORCE)
 
 add_subdirectory(src)
 add_subdirectory(samples)
@@ -41,7 +41,7 @@ set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/DXFeedAllCPackConfig.cmake")
 install(DIRECTORY thirdparty DESTINATION "wrappers/cpp" CONFIGURATIONS Release)
 install(FILES ${BUILD_FILES} DESTINATION "wrappers/cpp" CONFIGURATIONS Release)
 
-set(CPACK_PACKAGE_VENDOR "Devexperts")
+set(CPACK_PACKAGE_VENDOR "Devexperts LLC")
 set(CPACK_PACKAGE_NAME "${PROJECT}")
 set(CPACK_PACKAGE_VERSION "${APP_VERSION}")
 set(CPACK_PACKAGE_FILE_NAME "${PROJECT}-${APP_VERSION}-${TARGET_PLATFORM}")

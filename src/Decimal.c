@@ -18,6 +18,7 @@
  */
 
 #include "Decimal.h"
+#include "PrimitiveTypes.h"
 
 #include <math.h>
 #include <float.h>
@@ -25,14 +26,16 @@
 #define DX_POSITIVE_INFINITY DBL_MAX * 10
 
 static const dxf_int_t STANDARD_MANTISSA_SHIFT = 4;
-static const dxf_int_t FLAG_MASK = 0x7F;
-static const dxf_int_t M128_EXTRA = 6;
-static const dxf_int_t M128_FLAG = 0x60;  //M128_EXTRA << STANDARD_MANTISSA_SHIFT;
+static DX_MAYBE_UNUSED const dxf_int_t FLAG_MASK = 0x7F;
+static DX_MAYBE_UNUSED const dxf_int_t M128_EXTRA = 6;
+static DX_MAYBE_UNUSED const dxf_int_t M128_FLAG = 0x60;  //M128_EXTRA << STANDARD_MANTISSA_SHIFT;
 static const dxf_int_t EXTRA_PRECISION_MANTISSA_SHIFT = 7;
-static const dxf_long_t P7_M128_CONVERTER = 10000000;
+static DX_MAYBE_UNUSED const dxf_long_t P7_M128_CONVERTER = 10000000;
 static const dxf_int_t UNITY_POWER = 9;
 
-static const dxf_ulong_t __inf = 0x7f80000000000000;
+#ifndef MACOSX
+static DX_MAYBE_UNUSED const dxf_ulong_t DX_INF = 0x7f80000000000000;
+#endif
 
 static dxf_double_t MULTIPLIERS[] = {
 	DX_POSITIVE_INFINITY,
@@ -83,7 +86,7 @@ static const dxf_int_t EXTRA_PRECISION_DIVISORS[] = {
 	0, // for canonical negative infinity
 };
 
-bool dx_int_to_double (dxf_int_t integer, OUT dxf_double_t* decimal) {
+int dx_decimal_int_to_double(dxf_int_t integer, OUT dxf_double_t* decimal) {
 	dxf_int_t power = integer & 0x0F;
 	dxf_int_t mantissa ;
 

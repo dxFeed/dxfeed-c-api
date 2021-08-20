@@ -1,3 +1,22 @@
+/*
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Initial Developer of the Original Code is Devexperts LLC.
+ * Portions created by the Initial Developer are Copyright (C) 2010
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *
+ */
+
 #include "AddressParserTest.h"
 #include "DXAddressParser.h"
 #include "DXAlgorithms.h"
@@ -6,7 +25,7 @@
 /* To add TLS codec support for test add 'DXFEED_CODEC_TLS_ENABLED' string to
  * C/C++ compiller definition.
  *
- * Note: the DXFeed library also must support 'DXFEED_CODEC_TLS_ENABLED'
+ * Note: the dxFeed framework also must support 'DXFEED_CODEC_TLS_ENABLED'
  * definition to successful test passing.
  */
 #ifdef DXFEED_CODEC_TLS_ENABLED
@@ -18,7 +37,7 @@
 /* To add GZIP codec support for test add 'DXFEED_CODEC_GZIP_ENABLED' string to
  * C/C++ compiller definition.
  *
- * Note: the DXFeed library also must support 'DXFEED_CODEC_GZIP_ENABLED'
+ * Note: the dxFeed framework also must support 'DXFEED_CODEC_GZIP_ENABLED'
  * definition to successful test passing.
  */
 #ifdef DXFEED_CODEC_GZIP_ENABLED
@@ -30,7 +49,7 @@
 typedef struct {
 	const char* collection;
 	dx_address_array_t expected;
-	bool result;
+	int result;
 } dx_test_case_t;
 
 static dx_address_t addresses[] = {
@@ -122,25 +141,25 @@ static const size_t all_cases_count = SIZE_OF_ARRAY(all_cases);
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_is_equal_address(const dx_address_t* expected, const dx_address_t* actual) {
+static int dx_is_equal_address(const dx_address_t* expected, const dx_address_t* actual) {
 	DX_CHECK(dx_is_equal_ansi(expected->host, actual->host));
 	DX_CHECK(dx_is_equal_const_ansi(expected->port, actual->port));
 	DX_CHECK(dx_is_equal_ansi(expected->username, actual->username));
 	DX_CHECK(dx_is_equal_ansi(expected->password, actual->password));
 
-	DX_CHECK(dx_is_equal_bool(expected->tls.enabled, actual->tls.enabled));
+	DX_CHECK(dx_is_equal_int(expected->tls.enabled, actual->tls.enabled));
 	DX_CHECK(dx_is_equal_ansi(expected->tls.key_store, actual->tls.key_store));
 	DX_CHECK(dx_is_equal_ansi(expected->tls.key_store_password, actual->tls.key_store_password));
 	DX_CHECK(dx_is_equal_ansi(expected->tls.trust_store, actual->tls.trust_store));
 	DX_CHECK(dx_is_equal_ansi(expected->tls.trust_store_password, actual->tls.trust_store_password));
 
-	DX_CHECK(dx_is_equal_bool(expected->gzip.enabled, actual->gzip.enabled));
+	DX_CHECK(dx_is_equal_int(expected->gzip.enabled, actual->gzip.enabled));
 	return true;
 }
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_is_equal_address_array(const dx_address_array_t* expected, const dx_address_array_t* actual) {
+static int dx_is_equal_address_array(const dx_address_array_t* expected, const dx_address_array_t* actual) {
 	size_t i;
 	DX_CHECK(dx_is_equal_size_t(expected->size, actual->size));
 	for (i = 0; i < expected->size; i++) {
@@ -158,13 +177,13 @@ static bool dx_is_equal_address_array(const dx_address_array_t* expected, const 
  *
  * Expected: application shouldn't crash; all checks should be passed.
  */
-static bool get_addresses_from_collection_test(void) {
+static int get_addresses_from_collection_test(void) {
 	size_t i;
 	for (i = 0; i < all_cases_count; i++) {
 		dx_address_array_t actual = DX_EMPTY_ARRAY;
 		dx_test_case_t c = all_cases[i];
 		dx_pop_last_error();
-		DX_CHECK_MESSAGE(dx_is_equal_bool(c.result, dx_get_addresses_from_collection(c.collection, &actual)), c.collection);
+		DX_CHECK_MESSAGE(dx_is_equal_int(c.result, dx_get_addresses_from_collection(c.collection, &actual)), c.collection);
 		if (c.result)
 			DX_CHECK(dx_is_equal_address_array((const dx_address_array_t*)&c.expected, (const dx_address_array_t*)&actual));
 		dx_clear_address_array(&actual);
@@ -174,8 +193,8 @@ static bool get_addresses_from_collection_test(void) {
 
 /* -------------------------------------------------------------------------- */
 
-bool address_parser_all_tests(void) {
-	bool res = true;
+int address_parser_all_tests(void) {
+	int res = true;
 
 	if (!get_addresses_from_collection_test()) {
 

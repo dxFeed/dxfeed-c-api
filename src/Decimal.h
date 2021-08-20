@@ -20,9 +20,9 @@
 #ifndef DECIMAL_H
 #define DECIMAL_H
 
-#include "BufferedIOCommon.h"
+#include "DXTypes.h"
 
 // Parse decimals stored as compact int
-bool dx_int_to_double(dxf_int_t integer, OUT dxf_double_t* decimal);
+int dx_decimal_int_to_double(dxf_int_t integer, OUT dxf_double_t* decimal);
 
 #endif // DECIMAL_H

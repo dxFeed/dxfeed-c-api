@@ -27,7 +27,7 @@
     <Filter Include="Third Party">
       <UniqueIdentifier>{296e04cd-23b2-403b-963a-61af6e612744}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Third Party\pthreads">
+    <Filter Include="Third Party\toml11">
       <UniqueIdentifier>{6235c237-ec50-4fec-9ac7-3b5bac50ebe9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -66,9 +66,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\EventData.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\EventSubscription.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Logger.c">
@@ -143,6 +140,27 @@
     <ClCompile Include="src\Version.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\EventSubscription.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Configuration.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\BinaryQTPComposer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\BinaryQTPParser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Connection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HeartbeatPayload.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\WideDecimal.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="DXFeed.def">
@@ -187,6 +205,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\EventSubscription.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\EventSubscription.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Configuration.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Configuration.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Logger.h">
@@ -243,15 +270,6 @@
     <ClInclude Include="include\RecordData.h">
       <Filter>Export</Filter>
     </ClInclude>
-    <ClInclude Include="include\pthreads\pthread.h">
-      <Filter>Third Party\pthreads</Filter>
-    </ClInclude>
-    <ClInclude Include="include\pthreads\sched.h">
-      <Filter>Third Party\pthreads</Filter>
-    </ClInclude>
-    <ClInclude Include="include\pthreads\semaphore.h">
-      <Filter>Third Party\pthreads</Filter>
-    </ClInclude>
     <ClInclude Include="src\Version.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -283,6 +301,27 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\RegionalBook.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\toml11\toml.hpp">
+      <Filter>Third Party\toml11</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BinaryQTPComposer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BinaryQTPParser.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Connection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Connection.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\HeartbeatPayload.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\WideDecimal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

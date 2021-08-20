@@ -20,17 +20,19 @@
 #ifndef CLIENT_MESSAGE_SENDER_H_INCLUDED
 #define CLIENT_MESSAGE_SENDER_H_INCLUDED
 
-#include "PrimitiveTypes.h"
 #include "DXPMessageData.h"
+#include "EventData.h"
+#include "PrimitiveTypes.h"
 
-bool dx_load_events_for_subscription (dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
-										int event_types, dxf_uint_t subscr_flags);
-bool dx_subscribe_symbols_to_events (dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
-									dxf_const_string_t* symbols, size_t symbol_count, int event_types, bool unsubscribe,
-									bool task_mode, dxf_uint_t subscr_flags, dxf_long_t time);
+int dx_load_events_for_subscription(dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
+									int event_types, dxf_uint_t subscr_flags);
+int dx_subscribe_symbols_to_events(dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
+								   dxf_const_string_t* symbols, size_t symbol_count, int* symbols_indices_to_subscribe,
+								   int symbols_indices_count, int event_types, int unsubscribe, int task_mode,
+								   dxf_uint_t subscr_flags, dxf_long_t time);
 
-bool dx_send_record_description (dxf_connection_t connection, bool task_mode);
-bool dx_send_protocol_description (dxf_connection_t connection, bool task_mode);
-bool dx_send_heartbeat (dxf_connection_t connection, bool task_mode);
+int dx_send_record_description(dxf_connection_t connection, int task_mode);
+int dx_send_protocol_description(dxf_connection_t connection, int task_mode);
+int dx_send_heartbeat(dxf_connection_t connection, int task_mode);
 
 #endif /* CLIENT_MESSAGE_SENDER_H_INCLUDED */

@@ -1,13 +1,36 @@
+/*
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Initial Developer of the Original Code is Devexperts LLC.
+ * Portions created by the Initial Developer are Copyright (C) 2010
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *
+ */
+
 #include <string.h>
 #include <stdio.h>
+
 #ifdef _WIN32
-#include <Windows.h>
+#	pragma warning(push)
+#	pragma warning(disable : 5105)
+#	include <Windows.h>
+#	pragma warning(pop)
 #else
-#include <unistd.h>
-#include <string.h>
-#include <wctype.h>
-#include <stdlib.h>
-#define stricmp strcasecmp
+#	include <unistd.h>
+#	include <string.h>
+#	include <wctype.h>
+#	include <stdlib.h>
+#	define stricmp strcasecmp
 #endif
 
 #include "ConnectionContextData.h"
@@ -45,7 +68,7 @@ unsigned multiple_connection_routine(void* arg) {
 	subscription = dx_create_event_subscription(connection, data->event_types, 0, 0);
 	dx_add_symbols(subscription, g_symbol_list, g_symbol_size);
 	dx_send_record_description(connection, true);
-	dx_subscribe_symbols_to_events(connection, dx_get_order_source(subscription), g_symbol_list, g_symbol_size, data->event_types, false, true, 0, 0);
+	dx_subscribe_symbols_to_events(connection, dx_get_order_source(subscription), g_symbol_list, g_symbol_size, NULL, 0, data->event_types, false, true, 0, 0);
 #ifdef _WIN32
 	Sleep(2000);
 #else
@@ -59,7 +82,7 @@ unsigned multiple_connection_routine(void* arg) {
  * Simulates opening multiple connections simultaneously.
  * Expected: application shouldn't crash.
  */
-bool multiple_connection_test(void) {
+int multiple_connection_test(void) {
 	size_t i;
 	dx_thread_t thread_list[MULTIPLE_CONNECTION_THREAD_COUNT];
 	size_t thread_count = MULTIPLE_CONNECTION_THREAD_COUNT;
@@ -90,7 +113,7 @@ bool multiple_connection_test(void) {
  * Expected: application shouldn't crash; all attempts to create connection with invalid data
  *           should completes with error state.
  */
-bool invalid_connection_address_test(void) {
+int invalid_connection_address_test(void) {
 	const char* invalid_address = "demo.dxfeed.com::7300";
 	dxf_connection_t connection;
 
@@ -111,8 +134,8 @@ bool invalid_connection_address_test(void) {
 
 /* -------------------------------------------------------------------------- */
 
-bool connection_all_test(void) {
-	bool res = true;
+int connection_all_test(void) {
+	int res = true;
 
 	if (!multiple_connection_test() ||
 		!invalid_connection_address_test()) {

@@ -1,3 +1,22 @@
+/*
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Initial Developer of the Original Code is Devexperts LLC.
+ * Portions created by the Initial Developer are Copyright (C) 2010
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *
+ */
+
 #include <stdio.h>
 
 #include "AlgorithmsTest.h"
@@ -45,7 +64,7 @@ static void base64_free_context(base64_test_context* context) {
  *
  * Expected: application shouldn't crash; all checks should be passed.
  */
-static bool algorithms_base64_length_test(void) {
+static int algorithms_base64_length_test(void) {
 	size_t i;
 	for (i = 0; i < base64_cases_count; i++) {
 		size_t expected = strlen(base64_cases[i].encoded);
@@ -57,7 +76,7 @@ static bool algorithms_base64_length_test(void) {
 
 /* -------------------------------------------------------------------------- */
 
-static bool base64_run_case(const base64_test_case* test_case, base64_test_context* context) {
+static int base64_run_case(const base64_test_case* test_case, base64_test_context* context) {
 	size_t source_size = strlen(test_case->source);
 	int i;
 	for (i = 0; i < 2; i++) {
@@ -93,11 +112,11 @@ static bool base64_run_case(const base64_test_case* test_case, base64_test_conte
  *
  * Expected: application shouldn't crash; all checks should be passed.
  */
-static bool algorithms_base64_encode_decode_test(void) {
+static int algorithms_base64_encode_decode_test(void) {
 	size_t i;
 	base64_test_context context = { 0 };
 	for (i = 0; i < base64_cases_count; i++) {
-		bool res = base64_run_case((const base64_test_case*)&base64_cases[i], &context);
+		int res = base64_run_case((const base64_test_case*)&base64_cases[i], &context);
 		base64_free_context(&context);
 		DX_CHECK(res);
 	}
@@ -116,7 +135,7 @@ static dx_property_map_t source = { source_props_array, SIZE_OF_ARRAY(source_pro
 
 /* -------------------------------------------------------------------------- */
 
-static bool dx_is_equal_property_map(const dx_property_map_t* expected, const dx_property_map_t* actual) {
+static int dx_is_equal_property_map(const dx_property_map_t* expected, const dx_property_map_t* actual) {
 	size_t i;
 
 	DX_CHECK(dx_is_equal_size_t(expected->size, actual->size));
@@ -139,7 +158,7 @@ static bool dx_is_equal_property_map(const dx_property_map_t* expected, const dx
  *
  * Expected: application shouldn't crash; all checks should be passed.
  */
-bool properties_map_set_null_test(void) {
+int properties_map_set_null_test(void) {
 	dx_property_map_t props = { 0 };
 
 	DX_CHECK(dx_is_false(dx_property_map_set(&props, NULL, NULL)));
@@ -161,7 +180,7 @@ bool properties_map_set_null_test(void) {
  *
  * Expected: application shouldn't crash; all checks should be passed.
  */
-bool properties_map_set_empty_test(void) {
+int properties_map_set_empty_test(void) {
 	dx_property_map_t props = { 0 };
 
 	DX_CHECK(dx_is_false(dx_property_map_set(&props, L"", L"")));
@@ -184,7 +203,7 @@ bool properties_map_set_empty_test(void) {
  *
  * Expected: application shouldn't crash; all checks should be passed.
  */
-bool properties_map_get_all_test(void) {
+int properties_map_get_all_test(void) {
 	dx_property_map_t props = { 0 };
 	size_t i;
 	size_t size = source_props_size;
@@ -211,7 +230,7 @@ bool properties_map_get_all_test(void) {
  *
  * Expected: application shouldn't crash; all checks should be passed.
  */
-bool properties_map_set_change_test(void) {
+int properties_map_set_change_test(void) {
 	dx_property_map_t props = { 0 };
 	size_t i;
 	size_t size = source_props_size;
@@ -249,7 +268,7 @@ bool properties_map_set_change_test(void) {
  *
  * Expected: application shouldn't crash; all checks should be passed.
  */
-bool properties_map_set_many_test(void) {
+int properties_map_set_many_test(void) {
 	dx_property_map_t props = { 0 };
 	size_t i;
 	dx_property_item_t other_array[] = {
@@ -292,7 +311,7 @@ bool properties_map_set_many_test(void) {
  * Expected: application shouldn't crash; all checks should be passed; the
  * source properties set shouldn't modified.
  */
-bool properties_map_set_many_invalid_test(void) {
+int properties_map_set_many_invalid_test(void) {
 	dx_property_map_t props = { 0 };
 	size_t i;
 	dx_property_item_t other_array[] = {
@@ -327,7 +346,7 @@ bool properties_map_set_many_invalid_test(void) {
  *
  * Expected: application shouldn't crash; all checks should be passed;
  */
-bool properties_map_contains_test(void) {
+int properties_map_contains_test(void) {
 	dx_property_map_t props = { 0 };
 	size_t i;
 
@@ -366,7 +385,7 @@ bool properties_map_contains_test(void) {
  *
  * Expected: application shouldn't crash; all checks should be passed;
  */
-bool property_map_clone_test(void) {
+int property_map_clone_test(void) {
 	dx_property_map_t props = { 0 };
 	dx_property_map_t copy = { 0 };
 	size_t i;
@@ -403,7 +422,7 @@ bool property_map_clone_test(void) {
  *
  * Expected: application shouldn't crash; all checks should be passed;
  */
-bool property_map_try_get_value_test(void) {
+int property_map_try_get_value_test(void) {
 	dx_property_map_t props = { 0 };
 	size_t i;
 	dxf_const_string_t value;
@@ -424,8 +443,8 @@ bool property_map_try_get_value_test(void) {
 
 /* -------------------------------------------------------------------------- */
 
-bool algorithms_all_tests(void) {
-	bool res = true;
+int algorithms_all_tests(void) {
+	int res = true;
 
 	if (!algorithms_base64_length_test() ||
 		!algorithms_base64_encode_decode_test() ||

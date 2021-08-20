@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.1)
+cmake_minimum_required(VERSION 3.0.0)
 
 cmake_policy(SET CMP0015 NEW)
 
@@ -17,7 +17,7 @@ set(LIB_DXFEED_PROJ DXFeed)
 set(LIB_DXFEED_NAME ${LIB_DXFEED_PROJ})
 set(LIB_DXFEED_OUT_DIR ${CMAKE_BINARY_DIR}/${LIB_DXFEED_PROJ})
 
-set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE TYPE INTERNAL FORCE)
+set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE INTERNAL "" FORCE)
 
 project(${PROJECT}) 
 
@@ -51,6 +51,7 @@ set(COMMON_HEADERS
     ${LIB_DXFEED_SRC_DIR}/PrimitiveTypes.h
     ${LIB_DXFEED_SRC_DIR}/Snapshot.h
     ${LIB_DXFEED_SRC_DIR}/TaskQueue.h
+    ${LIB_DXFEED_SRC_DIR}/WideDecimal.h
     )
     
 set(COMMON_SOURCES
@@ -74,11 +75,13 @@ set(COMMON_SOURCES
     ${LIB_DXFEED_SRC_DIR}/Snapshot.c
     ${LIB_DXFEED_SRC_DIR}/TaskQueue.c
     ${LIB_DXFEED_SRC_DIR}/Win32.c
+    ${LIB_DXFEED_SRC_DIR}/WideDecimal.cpp
     )
     
 set(EVENT_SUBSCRIPTION_SOURCES
     ${LIB_DXFEED_SRC_DIR}/EventSubscription.h
-    ${LIB_DXFEED_SRC_DIR}/EventSubscription.c
+    ${LIB_DXFEED_SRC_DIR}/EventSubscription.hpp
+    ${LIB_DXFEED_SRC_DIR}/EventSubscription.cpp
     )
     
 set(HEADER_FILES
@@ -238,7 +241,7 @@ install(FILES ${HEADER_FILES} ${SOURCE_FILES} ${PROJECT_FILES} ${BUILD_FILES}
     DESTINATION "tests/${PROJECT}"
     CONFIGURATIONS Release
 )
-set(CPACK_PACKAGE_VENDOR "Devexperts")
+set(CPACK_PACKAGE_VENDOR "Devexperts LLC")
 set(CPACK_PACKAGE_NAME "${PROJECT}")
 set(CPACK_PACKAGE_VERSION "${APP_VERSION}")
 set(CPACK_PACKAGE_FILE_NAME "${PROJECT}-${APP_VERSION}-${TARGET_PLATFORM}")

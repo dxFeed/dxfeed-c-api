@@ -1,3 +1,22 @@
+/*
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Initial Developer of the Original Code is Devexperts LLC.
+ * Portions created by the Initial Developer are Copyright (C) 2010
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *
+ */
+
 #pragma once
 
 #include <memory>
@@ -15,7 +34,7 @@ struct Connection final : std::enable_shared_from_this<Connection> {
 
 private:
 
-	dxf_connection_t handle_;
+	dxf_connection_t handle_{};
 	std::vector<Subscription::Ptr> subscriptions_;
 
 	Connection() = default;
@@ -55,6 +74,16 @@ public:
 		subscriptions_.push_back(subscription);
 
 		return subscription;
+	}
+
+	Subscription::Ptr createSubscription(std::initializer_list<dx_event_id_t> eventIds) {
+		unsigned eventTypes = 0;
+
+		for (auto type : eventIds) {
+			eventTypes |= DX_EVENT_BIT_MASK(type);
+		}
+
+		return createSubscription(static_cast<int>(eventTypes));
 	}
 
 	~Connection() {

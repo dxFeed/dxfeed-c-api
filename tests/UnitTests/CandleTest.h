@@ -1,12 +1,31 @@
+/*
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Initial Developer of the Original Code is Devexperts LLC.
+ * Portions created by the Initial Developer are Copyright (C) 2010
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *
+ */
+
 #ifndef CANDLE_TEST_H_INCLUDED
 #define CANDLE_TEST_H_INCLUDED
 
 #include "PrimitiveTypes.h"
 
-bool candle_attributes_test(void);
-bool candle_subscription_test(void);
-bool candle_multiply_subscription_test(void);
-bool candle_symbol_test(void);
-bool candle_all_tests(void);
+int candle_attributes_test(void);
+int candle_subscription_test(void);
+int candle_multiply_subscription_test(void);
+int candle_symbol_test(void);
+int candle_all_tests(void);
 
 #endif /* CANDLE_TEST_H_INCLUDED */

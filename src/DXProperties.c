@@ -60,9 +60,9 @@ static inline int dx_property_item_comparator(dx_property_item_t item1, dx_prope
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_property_map_clone(const dx_property_map_t* src, dx_property_map_t* dest) {
+int dx_property_map_clone(const dx_property_map_t* src, dx_property_map_t* dest) {
 	size_t i;
-	bool failed = false;
+	int failed = false;
 	if (src == NULL || dest == NULL)
 		return dx_set_error_code(dx_ec_invalid_func_param);
 
@@ -88,9 +88,9 @@ dxf_string_t dx_create_empty_string() {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_property_map_set(dx_property_map_t* props, dxf_const_string_t key, dxf_const_string_t value) {
+int dx_property_map_set(dx_property_map_t* props, dxf_const_string_t key, dxf_const_string_t value) {
 	dx_property_item_t item = { (dxf_string_t)key, (dxf_string_t)value };
-	bool found;
+	int found;
 	size_t index;
 
 	if (props == NULL || key == NULL || value == NULL)
@@ -110,7 +110,7 @@ bool dx_property_map_set(dx_property_map_t* props, dxf_const_string_t key, dxf_c
 		item_ptr->value = value_copy;
 	} else {
 		dx_property_item_t new_item = { dx_create_string_src(key), dx_string_length(value) > 0 ? dx_create_string_src(value) : dx_create_empty_string() };
-		bool insertion_failed;
+		int insertion_failed;
 		if (new_item.key == NULL || new_item.value == NULL) {
 			dx_property_map_free_item((void*)&new_item);
 			return false;
@@ -127,7 +127,7 @@ bool dx_property_map_set(dx_property_map_t* props, dxf_const_string_t key, dxf_c
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_property_map_set_many(dx_property_map_t* props, const dx_property_map_t* other) {
+int dx_property_map_set_many(dx_property_map_t* props, const dx_property_map_t* other) {
 	size_t i;
 	dx_property_map_t temp = { 0 };
 
@@ -155,9 +155,9 @@ bool dx_property_map_set_many(dx_property_map_t* props, const dx_property_map_t*
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_property_map_contains(const dx_property_map_t* props, dxf_const_string_t key) {
+int dx_property_map_contains(const dx_property_map_t* props, dxf_const_string_t key) {
 	dx_property_item_t item = { (dxf_string_t)key, NULL };
-	bool found;
+	int found;
 	size_t index;
 
 	if (props == NULL)
@@ -173,11 +173,11 @@ bool dx_property_map_contains(const dx_property_map_t* props, dxf_const_string_t
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_property_map_try_get_value(const dx_property_map_t* props,
+int dx_property_map_try_get_value(const dx_property_map_t* props,
 	dxf_const_string_t key,
 	OUT dxf_const_string_t* value) {
 	dx_property_item_t item = { (dxf_string_t)key, NULL };
-	bool found;
+	int found;
 	size_t index;
 
 	if (props == NULL || key == NULL || value == NULL)

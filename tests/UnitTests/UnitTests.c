@@ -1,3 +1,21 @@
+/*
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Initial Developer of the Original Code is Devexperts LLC.
+ * Portions created by the Initial Developer are Copyright (C) 2010
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *
+ */
 
 #include <stdio.h>
 #include <string.h>
@@ -11,14 +29,14 @@
 #include "CandleTest.h"
 #include "SnapshotTests.h"
 
-typedef bool(*test_function_t)(void);
+typedef int(*test_function_t)(void);
 
 typedef struct {
 	const char* name;
 	test_function_t function;
 } test_function_data_t;
 
-const char* result_to_text (bool res) {
+const char* result_to_text (int res) {
 	if (res) {
 		return "OK";
 	} else {
@@ -49,10 +67,10 @@ void print_usage() {
 		printf("   %s\n", g_tests[i].name);
 }
 
-bool run_test(const char* test_name) {
+int run_test(const char* test_name) {
 	int i;
-	bool result = true;
-	bool test_complete = false;
+	int result = true;
+	int test_complete = false;
 	for (i = 0; i < TESTS_COUNT; i++) {
 		if (test_name == NULL || stricmp(test_name, g_tests[i].name) == 0) {
 			printf("\t%-35s:\r", g_tests[i].name);
@@ -70,7 +88,7 @@ bool run_test(const char* test_name) {
 
 int main (int argc, char* argv[]) {
 	int i;
-	bool result = true;
+	int result = true;
 
 	print_usage();
 

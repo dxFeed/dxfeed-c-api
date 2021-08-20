@@ -27,21 +27,25 @@
 #define DX_SOCKETS_H_INCLUDED
 
 #ifdef _WIN32
-	#include <WinSock2.h>
-	#include <WS2tcpip.h>
+#	pragma warning(push)
+#	pragma warning(disable : 5105)
+#	include <WinSock2.h>
+#	include <WS2tcpip.h>
+#	pragma warning(pop)
 
 	typedef SOCKET dx_socket_t;
 #else
-	#include <unistd.h>
-	#include <sys/types.h>
-	#include <sys/socket.h>
-	#include <netinet/in.h>
-	#include <netdb.h>
-	#include <errno.h>
+#	include <unistd.h>
+#	include <sys/types.h>
+#	include <sys/socket.h>
+#	include <netinet/in.h>
+#	include <netdb.h>
+#	include <errno.h>
 
-	#define INVALID_SOCKET -1
-	#define SOCKET_ERROR -1
-	typedef int dx_socket_t;
+#	define INVALID_SOCKET -1
+#	define SOCKET_ERROR -1
+
+typedef int dx_socket_t;
 #endif /* _WIN32 */
 
 #include "PrimitiveTypes.h"
@@ -54,8 +58,8 @@
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_on_connection_created (void);
-bool dx_on_connection_destroyed (void);
+int dx_on_connection_created (void);
+int dx_on_connection_destroyed (void);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -64,11 +68,11 @@ bool dx_on_connection_destroyed (void);
 /* -------------------------------------------------------------------------- */
 
 dx_socket_t dx_socket (int family, int type, int protocol);
-bool dx_connect (dx_socket_t s, const struct sockaddr* addr, socklen_t addrlen);
+int dx_connect (dx_socket_t s, const struct sockaddr* addr, socklen_t addrlen);
 int dx_send (dx_socket_t s, const void* buffer, int buflen);
 int dx_recv (dx_socket_t s, void* buffer, int buflen);
-bool dx_close (dx_socket_t s);
-bool dx_getaddrinfo (const char* nodename, const char* servname,
+int dx_close (dx_socket_t s);
+int dx_getaddrinfo (const char* nodename, const char* servname,
 					const struct addrinfo* hints, struct addrinfo** res);
 void dx_freeaddrinfo (struct addrinfo* res);
 

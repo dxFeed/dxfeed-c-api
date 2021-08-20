@@ -1,3 +1,22 @@
+/*
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Initial Developer of the Original Code is Devexperts LLC.
+ * Portions created by the Initial Developer are Copyright (C) 2010
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *
+ */
+
 #pragma once
 
 #include <memory>
@@ -10,13 +29,13 @@
 
 ///Not thread-safe subscription wrapper
 struct Subscription : std::enable_shared_from_this<Subscription> {
-	using Event = nonstd::variant<Greeks, Underlying, Quote>;
-	using ListenerType = std::function<void(std::string, std::vector<Event>)>;
+	using EventType = nonstd::variant<Greeks, Underlying, Quote>;
+	using ListenerType = std::function<void(const std::string&, const std::vector<EventType>&)>;
 	using Ptr = std::shared_ptr<Subscription>;
 
 private:
 
-	dxf_subscription_t handle_;
+	dxf_subscription_t handle_{};
 	ListenerType listener_;
 
 	Subscription() = default;
@@ -49,7 +68,7 @@ public:
 
 	static void
 	nativeEventsListener(int eventType, dxf_const_string_t symbolName, const dxf_event_data_t *data, int dataCount, void *userData) {
-		auto subscription = reinterpret_cast<Subscription *>(userData);
+		auto subscription = static_cast<Subscription *>(userData);
 		auto listener = subscription->getListener();
 
 		if (!listener) {
@@ -57,7 +76,7 @@ public:
 		}
 
 		std::string symbol = StringConverter::toString(std::wstring(symbolName));
-		std::vector<Event> events(static_cast<std::size_t>(dataCount));
+		std::vector<EventType> events(static_cast<std::size_t>(dataCount));
 
 		for (std::size_t i = 0; i < events.size(); i++) {
 			if (eventType == DXF_ET_GREEKS) {
@@ -88,7 +107,7 @@ public:
 
 		auto result = dxf_attach_event_listener(
 				handle_, &Subscription::nativeEventsListener,
-				reinterpret_cast<void *>(this));
+				static_cast<void *>(this));
 
 		if (result == DXF_SUCCESS) {
 			listener_ = listener;

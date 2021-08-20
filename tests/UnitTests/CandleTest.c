@@ -1,9 +1,33 @@
+/*
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Initial Developer of the Original Code is Devexperts LLC.
+ * Portions created by the Initial Developer are Copyright (C) 2010
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *
+ */
+
 #include <float.h>
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
+#pragma warning(push)
+#pragma warning(disable : 5105)
 #include <Windows.h>
+#pragma warning(pop)
+
 #include "Candle.h"
 #include "CandleTest.h"
 #include "DXAlgorithms.h"
@@ -15,6 +39,7 @@
 #define CANDLE_DEFAULT_SYMBOL L"AAPL"
 #define CANDLE_USER_EXCHANGE L'A'
 #define CANDLE_USER_PERIOD_VALUE 2
+#define CANDLE_USER_PRICE_LEVEL_VALUE 0.1
 
 #define CANDLE_IBM_SYMBOL L"IBM"
 
@@ -31,76 +56,84 @@ static const char dxfeed_host[] = "mddqa.in.devexperts.com:7400";
 
 candle_attribute_test_case_t g_candle_attribute_cases[] = {
 	{ CANDLE_DEFAULT_SYMBOL, DXF_CANDLE_EXCHANGE_CODE_ATTRIBUTE_DEFAULT, DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT,
-	dxf_ctpa_default, dxf_cpa_default, dxf_csa_default, dxf_caa_default, L"AAPL", __LINE__ },
+	dxf_ctpa_default, dxf_cpa_default, dxf_csa_default, dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, L"AAPL", __LINE__ },
+	{ CANDLE_DEFAULT_SYMBOL, DXF_CANDLE_EXCHANGE_CODE_ATTRIBUTE_DEFAULT, DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT,
+		dxf_ctpa_default, dxf_cpa_default, dxf_csa_default, dxf_caa_default, CANDLE_USER_PRICE_LEVEL_VALUE, L"AAPL{pl=0.1}", __LINE__ },
 	{ CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT,
-	dxf_ctpa_default, dxf_cpa_default, dxf_csa_default, dxf_caa_default, L"AAPL&A", __LINE__ },
+	dxf_ctpa_default, dxf_cpa_default, dxf_csa_default, dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, L"AAPL&A", __LINE__ },
 
 	{ CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT,
-	dxf_ctpa_second, dxf_cpa_default, dxf_csa_default, dxf_caa_default, L"AAPL&A{=s}", __LINE__ },
+	dxf_ctpa_second, dxf_cpa_default, dxf_csa_default, dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, L"AAPL&A{=s}", __LINE__ },
 	{ CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT,
-	dxf_ctpa_minute, dxf_cpa_default, dxf_csa_default, dxf_caa_default, L"AAPL&A{=m}", __LINE__ },
+	dxf_ctpa_minute, dxf_cpa_default, dxf_csa_default, dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, L"AAPL&A{=m}", __LINE__ },
 	{ CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT,
-	dxf_ctpa_hour, dxf_cpa_default, dxf_csa_default, dxf_caa_default, L"AAPL&A{=h}", __LINE__ },
+		dxf_ctpa_minute, dxf_cpa_default, dxf_csa_default, dxf_caa_default, CANDLE_USER_PRICE_LEVEL_VALUE, L"AAPL&A{=m,pl=0.1}", __LINE__ },
 	{ CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT,
-	dxf_ctpa_day, dxf_cpa_default, dxf_csa_default, dxf_caa_default, L"AAPL&A{=d}", __LINE__ },
+	dxf_ctpa_hour, dxf_cpa_default, dxf_csa_default, dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, L"AAPL&A{=h}", __LINE__ },
 	{ CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT,
-	dxf_ctpa_week, dxf_cpa_default, dxf_csa_default, dxf_caa_default, L"AAPL&A{=w}", __LINE__ },
+	dxf_ctpa_day, dxf_cpa_default, dxf_csa_default, dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, L"AAPL&A{=d}", __LINE__ },
 	{ CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT,
-	dxf_ctpa_month, dxf_cpa_default, dxf_csa_default, dxf_caa_default, L"AAPL&A{=mo}", __LINE__ },
+	dxf_ctpa_week, dxf_cpa_default, dxf_csa_default, dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, L"AAPL&A{=w}", __LINE__ },
 	{ CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT,
-	dxf_ctpa_optexp, dxf_cpa_default, dxf_csa_default, dxf_caa_default, L"AAPL&A{=o}", __LINE__ },
+	dxf_ctpa_month, dxf_cpa_default, dxf_csa_default, dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, L"AAPL&A{=mo}", __LINE__ },
 	{ CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT,
-	dxf_ctpa_year, dxf_cpa_default, dxf_csa_default, dxf_caa_default, L"AAPL&A{=y}", __LINE__ },
+	dxf_ctpa_optexp, dxf_cpa_default, dxf_csa_default, dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, L"AAPL&A{=o}", __LINE__ },
 	{ CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT,
-	dxf_ctpa_volume, dxf_cpa_default, dxf_csa_default, dxf_caa_default, L"AAPL&A{=v}", __LINE__ },
+	dxf_ctpa_year, dxf_cpa_default, dxf_csa_default, dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, L"AAPL&A{=y}", __LINE__ },
 	{ CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT,
-	dxf_ctpa_price, dxf_cpa_default, dxf_csa_default, dxf_caa_default, L"AAPL&A{=p}", __LINE__ },
+	dxf_ctpa_volume, dxf_cpa_default, dxf_csa_default, dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, L"AAPL&A{=v}", __LINE__ },
 	{ CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT,
-	dxf_ctpa_price_momentum, dxf_cpa_default, dxf_csa_default, dxf_caa_default, L"AAPL&A{=pm}", __LINE__ },
+	dxf_ctpa_price, dxf_cpa_default, dxf_csa_default, dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, L"AAPL&A{=p}", __LINE__ },
 	{ CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT,
-	dxf_ctpa_price_renko, dxf_cpa_default, dxf_csa_default, dxf_caa_default, L"AAPL&A{=pr}", __LINE__ },
+	dxf_ctpa_price_momentum, dxf_cpa_default, dxf_csa_default, dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, L"AAPL&A{=pm}", __LINE__ },
+	{ CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT,
+	dxf_ctpa_price_renko, dxf_cpa_default, dxf_csa_default, dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, L"AAPL&A{=pr}", __LINE__ },
 
 	{ CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, CANDLE_USER_PERIOD_VALUE,
-	dxf_ctpa_default, dxf_cpa_default, dxf_csa_default, dxf_caa_default, L"AAPL&A{=2t}", __LINE__ },
+	dxf_ctpa_default, dxf_cpa_default, dxf_csa_default, dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, L"AAPL&A{=2t}", __LINE__ },
 	{ CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, CANDLE_USER_PERIOD_VALUE,
-	dxf_ctpa_second, dxf_cpa_default, dxf_csa_default, dxf_caa_default, L"AAPL&A{=2s}", __LINE__ },
+	dxf_ctpa_second, dxf_cpa_default, dxf_csa_default, dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, L"AAPL&A{=2s}", __LINE__ },
 	{ CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, CANDLE_USER_PERIOD_VALUE,
-	dxf_ctpa_minute, dxf_cpa_default, dxf_csa_default, dxf_caa_default, L"AAPL&A{=2m}", __LINE__ },
+	dxf_ctpa_minute, dxf_cpa_default, dxf_csa_default, dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, L"AAPL&A{=2m}", __LINE__ },
 	{ CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, CANDLE_USER_PERIOD_VALUE,
-	dxf_ctpa_hour, dxf_cpa_default, dxf_csa_default, dxf_caa_default, L"AAPL&A{=2h}", __LINE__ },
+	dxf_ctpa_hour, dxf_cpa_default, dxf_csa_default, dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, L"AAPL&A{=2h}", __LINE__ },
 	{ CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, CANDLE_USER_PERIOD_VALUE,
-	dxf_ctpa_day, dxf_cpa_default, dxf_csa_default, dxf_caa_default, L"AAPL&A{=2d}", __LINE__ },
+	dxf_ctpa_day, dxf_cpa_default, dxf_csa_default, dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, L"AAPL&A{=2d}", __LINE__ },
 	{ CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, CANDLE_USER_PERIOD_VALUE,
-	dxf_ctpa_week, dxf_cpa_default, dxf_csa_default, dxf_caa_default, L"AAPL&A{=2w}", __LINE__ },
+	dxf_ctpa_week, dxf_cpa_default, dxf_csa_default, dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, L"AAPL&A{=2w}", __LINE__ },
 	{ CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, CANDLE_USER_PERIOD_VALUE,
-	dxf_ctpa_month, dxf_cpa_default, dxf_csa_default, dxf_caa_default, L"AAPL&A{=2mo}", __LINE__ },
+	dxf_ctpa_month, dxf_cpa_default, dxf_csa_default, dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, L"AAPL&A{=2mo}", __LINE__ },
 	{ CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, CANDLE_USER_PERIOD_VALUE,
-	dxf_ctpa_optexp, dxf_cpa_default, dxf_csa_default, dxf_caa_default, L"AAPL&A{=2o}", __LINE__ },
+	dxf_ctpa_optexp, dxf_cpa_default, dxf_csa_default, dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, L"AAPL&A{=2o}", __LINE__ },
 	{ CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, CANDLE_USER_PERIOD_VALUE,
-	dxf_ctpa_year, dxf_cpa_default, dxf_csa_default, dxf_caa_default, L"AAPL&A{=2y}", __LINE__ },
+	dxf_ctpa_year, dxf_cpa_default, dxf_csa_default, dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, L"AAPL&A{=2y}", __LINE__ },
 	{ CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, CANDLE_USER_PERIOD_VALUE,
-	dxf_ctpa_volume, dxf_cpa_default, dxf_csa_default, dxf_caa_default, L"AAPL&A{=2v}", __LINE__ },
+	dxf_ctpa_volume, dxf_cpa_default, dxf_csa_default, dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, L"AAPL&A{=2v}", __LINE__ },
 	{ CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, CANDLE_USER_PERIOD_VALUE,
-	dxf_ctpa_price, dxf_cpa_default, dxf_csa_default, dxf_caa_default, L"AAPL&A{=2p}", __LINE__ },
+	dxf_ctpa_price, dxf_cpa_default, dxf_csa_default, dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, L"AAPL&A{=2p}", __LINE__ },
 	{ CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, CANDLE_USER_PERIOD_VALUE,
-	dxf_ctpa_price_momentum, dxf_cpa_default, dxf_csa_default, dxf_caa_default, L"AAPL&A{=2pm}", __LINE__ },
+	dxf_ctpa_price_momentum, dxf_cpa_default, dxf_csa_default, dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, L"AAPL&A{=2pm}", __LINE__ },
 	{ CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, CANDLE_USER_PERIOD_VALUE,
-	dxf_ctpa_price_renko, dxf_cpa_default, dxf_csa_default, dxf_caa_default, L"AAPL&A{=2pr}", __LINE__ },
+	dxf_ctpa_price_renko, dxf_cpa_default, dxf_csa_default, dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, L"AAPL&A{=2pr}", __LINE__ },
 
 	{ CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, CANDLE_USER_PERIOD_VALUE,
-	dxf_ctpa_day, dxf_cpa_bid, dxf_csa_default, dxf_caa_default, L"AAPL&A{=2d,price=bid}", __LINE__ },
+	dxf_ctpa_day, dxf_cpa_bid, dxf_csa_default, dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, L"AAPL&A{=2d,price=bid}", __LINE__ },
 	{ CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, CANDLE_USER_PERIOD_VALUE,
-	dxf_ctpa_day, dxf_cpa_ask, dxf_csa_default, dxf_caa_default, L"AAPL&A{=2d,price=ask}", __LINE__ },
+	dxf_ctpa_day, dxf_cpa_ask, dxf_csa_default, dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, L"AAPL&A{=2d,price=ask}", __LINE__ },
 	{ CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, CANDLE_USER_PERIOD_VALUE,
-	dxf_ctpa_day, dxf_cpa_mark, dxf_csa_default, dxf_caa_default, L"AAPL&A{=2d,price=mark}", __LINE__ },
+	dxf_ctpa_day, dxf_cpa_mark, dxf_csa_default, dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, L"AAPL&A{=2d,price=mark}", __LINE__ },
 	{ CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, CANDLE_USER_PERIOD_VALUE,
-	dxf_ctpa_day, dxf_cpa_settlement, dxf_csa_default, dxf_caa_default, L"AAPL&A{=2d,price=s}", __LINE__ },
+	dxf_ctpa_day, dxf_cpa_settlement, dxf_csa_default, dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, L"AAPL&A{=2d,price=s}", __LINE__ },
+	{ CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, CANDLE_USER_PERIOD_VALUE,
+		dxf_ctpa_day, dxf_cpa_settlement, dxf_csa_default, dxf_caa_default, CANDLE_USER_PRICE_LEVEL_VALUE, L"AAPL&A{=2d,pl=0.1,price=s}", __LINE__ },
 
 	{ CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, CANDLE_USER_PERIOD_VALUE,
-	dxf_ctpa_day, dxf_cpa_mark, dxf_csa_regular, dxf_caa_default, L"AAPL&A{=2d,price=mark,tho=true}", __LINE__ },
+	dxf_ctpa_day, dxf_cpa_mark, dxf_csa_regular, dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, L"AAPL&A{=2d,price=mark,tho=true}", __LINE__ },
 
 	{ CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, CANDLE_USER_PERIOD_VALUE,
-	dxf_ctpa_day, dxf_cpa_mark, dxf_csa_regular, dxf_caa_session, L"AAPL&A{=2d,a=s,price=mark,tho=true}", __LINE__ }
+	dxf_ctpa_day, dxf_cpa_mark, dxf_csa_regular, dxf_caa_session, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, L"AAPL&A{=2d,a=s,price=mark,tho=true}", __LINE__ },
+	{ CANDLE_DEFAULT_SYMBOL, CANDLE_USER_EXCHANGE, CANDLE_USER_PERIOD_VALUE,
+			dxf_ctpa_day, dxf_cpa_mark, dxf_csa_regular, dxf_caa_session, CANDLE_USER_PRICE_LEVEL_VALUE, L"AAPL&A{=2d,a=s,pl=0.1,price=mark,tho=true}", __LINE__ }
 };
 
 static event_counter_data_t g_aapl_candle_event_counter_data;
@@ -166,12 +199,12 @@ void common_candle_listener(int event_type, dxf_const_string_t symbol_name, cons
 
 /* -------------------------------------------------------------------------- */
 
-bool add_symbol_to_existing_candle(dxf_subscription_t subscription, dxf_const_string_t symbol) {
+int add_symbol_to_existing_candle(dxf_subscription_t subscription, dxf_const_string_t symbol) {
 	dxf_candle_attributes_t candle_attributes = NULL;
 
 	if (!dxf_create_candle_symbol_attributes(symbol, DXF_CANDLE_EXCHANGE_CODE_ATTRIBUTE_DEFAULT,
 		DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT, dxf_ctpa_day,
-		dxf_cpa_mark, dxf_csa_default, dxf_caa_default, &candle_attributes)) {
+		dxf_cpa_mark, dxf_csa_default, dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, &candle_attributes)) {
 
 		process_last_error();
 		return false;
@@ -187,12 +220,12 @@ bool add_symbol_to_existing_candle(dxf_subscription_t subscription, dxf_const_st
 	return true;
 }
 
-bool remove_symbol_from_existing_candle(dxf_subscription_t subscription, dxf_const_string_t symbol) {
+int remove_symbol_from_existing_candle(dxf_subscription_t subscription, dxf_const_string_t symbol) {
 	dxf_candle_attributes_t candle_attributes = NULL;
 
 	if (!dxf_create_candle_symbol_attributes(symbol, DXF_CANDLE_EXCHANGE_CODE_ATTRIBUTE_DEFAULT,
 		DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT, dxf_ctpa_day,
-		dxf_cpa_mark, dxf_csa_default, dxf_caa_default, &candle_attributes)) {
+		dxf_cpa_mark, dxf_csa_default, dxf_caa_default, DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, &candle_attributes)) {
 
 		process_last_error();
 		return false;
@@ -208,7 +241,7 @@ bool remove_symbol_from_existing_candle(dxf_subscription_t subscription, dxf_con
 	return true;
 }
 
-bool create_candle_subscription(dxf_connection_t connection, dxf_const_string_t symbol,
+int create_candle_subscription(dxf_connection_t connection, dxf_const_string_t symbol,
 								dxf_event_listener_t event_listener,
 								OUT dxf_subscription_t* res_subscription) {
 	dxf_subscription_t subscription = NULL;
@@ -234,7 +267,7 @@ bool create_candle_subscription(dxf_connection_t connection, dxf_const_string_t 
 	return true;
 }
 
-bool wait_events(int (*get_counter_function)()) {
+int wait_events(int (*get_counter_function)()) {
 	int timestamp = dx_millisecond_timestamp();
 	while (get_counter_function() == 0) {
 		if (is_thread_terminate(g_ct_listener_thread_data)) {
@@ -265,17 +298,17 @@ int get_order_event_counter() {
 /* -------------------------------------------------------------------------- */
 
 /*Test*/
-bool candle_attributes_test(void) {
+int candle_attributes_test(void) {
 	int candle_attribute_cases_size = sizeof(g_candle_attribute_cases) / sizeof(g_candle_attribute_cases[0]);
 	int i;
 	for (i = 0; i < candle_attribute_cases_size; i++) {
 		dxf_candle_attributes_t attributes;
 		candle_attribute_test_case_t* params = &g_candle_attribute_cases[i];
 		dxf_string_t attributes_string = NULL;
-		bool res = true;
+		int res = true;
 		dxf_create_candle_symbol_attributes(params->symbol, params->exchange_code,
 			params->period_value, params->period_type, params->price, params->session,
-			params->alignment, &attributes);
+			params->alignment, params->price_level, &attributes);
 		if (!dx_candle_symbol_to_string(attributes, &attributes_string)) {
 			PRINT_TEST_FAILED;
 			process_last_error();
@@ -296,7 +329,7 @@ bool candle_attributes_test(void) {
 /* -------------------------------------------------------------------------- */
 
 /*Test*/
-bool candle_subscription_test(void) {
+int candle_subscription_test(void) {
 	dxf_connection_t connection = NULL;
 	dxf_subscription_t subscription = NULL;
 
@@ -351,7 +384,7 @@ bool candle_subscription_test(void) {
 }
 
 /*Test*/
-bool candle_multiply_subscription_test(void) {
+int candle_multiply_subscription_test(void) {
 	dxf_connection_t connection = NULL;
 	dxf_subscription_t aapl_candle_subscription = NULL;
 	dxf_subscription_t ibm_candle_subscription = NULL;
@@ -447,7 +480,7 @@ bool candle_multiply_subscription_test(void) {
 }
 
 /*Test*/
-bool candle_symbol_test(void) {
+int candle_symbol_test(void) {
 	dxf_connection_t connection = NULL;
 	dxf_subscription_t subscription = NULL;
 	dxf_const_string_t* symbols = NULL;
@@ -570,8 +603,8 @@ bool candle_symbol_test(void) {
 	return true;
 }
 
-bool candle_all_tests(void) {
-	bool res = true;
+int candle_all_tests(void) {
+	int res = true;
 
 	dxf_initialize_logger("log.log", true, true, true);
 

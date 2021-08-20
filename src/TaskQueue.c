@@ -53,8 +53,8 @@ typedef struct {
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_clear_task_queue_data (dx_task_queue_data_t* tqd) {
-	bool res = true;
+int dx_clear_task_queue_data (dx_task_queue_data_t* tqd) {
+	int res = true;
 
 	if (tqd == NULL) {
 		return true;
@@ -76,7 +76,7 @@ bool dx_clear_task_queue_data (dx_task_queue_data_t* tqd) {
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_create_task_queue (OUT dx_task_queue_t* tq) {
+int dx_create_task_queue (OUT dx_task_queue_t* tq) {
 	dx_task_queue_data_t* tqd = NULL;
 
 	if (tq == NULL) {
@@ -102,10 +102,10 @@ bool dx_create_task_queue (OUT dx_task_queue_t* tq) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_cleanup_task_queue (dx_task_queue_t tq) {
+int dx_cleanup_task_queue (dx_task_queue_t tq) {
 	dx_task_queue_data_t* tqd = tq;
 	size_t i = 0;
-	bool res = true;
+	int res = true;
 
 	if (tq == NULL) {
 		return dx_set_error_code(dx_ec_invalid_func_param_internal);
@@ -123,8 +123,8 @@ bool dx_cleanup_task_queue (dx_task_queue_t tq) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_destroy_task_queue (dx_task_queue_t tq) {
-	bool res = true;
+int dx_destroy_task_queue (dx_task_queue_t tq) {
+	int res = true;
 
 	if (tq == NULL) {
 		return dx_set_error_code(dx_ec_invalid_func_param_internal);
@@ -138,10 +138,10 @@ bool dx_destroy_task_queue (dx_task_queue_t tq) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_add_task_to_queue (dx_task_queue_t tq, dx_task_processor_t processor, void* data) {
+int dx_add_task_to_queue (dx_task_queue_t tq, dx_task_processor_t processor, void* data) {
 	dx_task_queue_data_t* tqd = tq;
 	dx_task_data_t task;
-	bool failed = false;
+	int failed = false;
 
 	if (tq == NULL || processor == NULL) {
 		return dx_set_error_code(dx_ec_invalid_func_param_internal);
@@ -166,10 +166,10 @@ bool dx_add_task_to_queue (dx_task_queue_t tq, dx_task_processor_t processor, vo
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_execute_task_queue (dx_task_queue_t tq) {
+int dx_execute_task_queue (dx_task_queue_t tq) {
 	dx_task_queue_data_t* tqd = tq;
 	size_t i = 0;
-	bool res = true;
+	int res = true;
 
 	if (tq == NULL) {
 		return dx_set_error_code(dx_ec_invalid_func_param_internal);
@@ -190,7 +190,7 @@ bool dx_execute_task_queue (dx_task_queue_t tq) {
 		res = IS_FLAG_SET(task_res, dx_tes_success) && res;
 
 		if (IS_FLAG_SET(task_res, dx_tes_pop_me)) {
-			bool failed = false;
+			int failed = false;
 
 			DX_ARRAY_DELETE(*tqd, dx_task_data_t, i, dx_capacity_manager_halfer, failed);
 
@@ -214,7 +214,7 @@ bool dx_execute_task_queue (dx_task_queue_t tq) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_is_queue_empty (dx_task_queue_t tq, OUT bool* res) {
+int dx_is_queue_empty (dx_task_queue_t tq, OUT int* res) {
 	dx_task_queue_data_t* tqd = tq;
 
 	if (tq == NULL || res == NULL) {

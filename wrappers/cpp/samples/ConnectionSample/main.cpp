@@ -1,3 +1,22 @@
+/*
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Initial Developer of the Original Code is Devexperts LLC.
+ * Portions created by the Initial Developer are Copyright (C) 2010
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *
+ */
+
 #include <iostream>
 #include <thread>
 #include <vector>
@@ -28,7 +47,7 @@ int main(int argc, char **argv) {
 
 	try {
 		parser.ParseCLI(argc, argv);
-	} catch (args::Help) {
+	} catch (const args::Help&) {
 		std::cout << parser;
 		return 0;
 	} catch (const args::ParseError &e) {
@@ -60,7 +79,7 @@ int main(int argc, char **argv) {
 		return 3;
 	}
 
-	std::cout << "Connected successfully!\n";
+	std::cout << "Connected\n";
 
 	auto subscription = connection->createSubscription(DXF_ET_GREEKS | DXF_ET_UNDERLYING | DXF_ET_QUOTE);
 
@@ -70,9 +89,43 @@ int main(int argc, char **argv) {
 		return 4;
 	}
 
-	std::cout << "Subscribed successfully!\n";
+	std::cout << "Subscribed\n";
 
-	for (auto symbol : symbols) {
+	auto result = subscription->attachListener([](const std::string& symbol, const std::vector<Subscription::EventType>& events) {
+	  struct CommonVisitor {
+		  std::string operator()(const Greeks& greeks) const {
+			  return greeks.toString();
+		  }
+
+		  std::string operator()(const Underlying& underlying) const {
+			  return underlying.toString();
+		  }
+
+		  std::string operator()(const Quote& quote) const {
+			  return quote.toString();
+		  }
+	  };
+
+	  CommonVisitor visitor;
+
+	  fmt::print("Symbol = {}:\n", symbol);
+
+	  for (const auto& e : events) {
+		  fmt::print("{}\n", nonstd::visit(visitor, e));
+	  }
+
+	  std::cout << "\n";
+	});
+
+	if (!result) {
+		std::cerr << "Error:" << Error::getLast() << "\n";
+
+		return 6;
+	}
+
+	std::cout << "Listener attached\n";
+
+	for (const auto& symbol : symbols) {
 		if (!subscription->addSymbol(symbol)) {
 			std::cerr << "Error:" << Error::getLast() << "\n";
 
@@ -80,41 +133,7 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	std::cout << "Symbols added successfully!\n";
-
-	auto result = subscription->attachListener([](std::string symbol, std::vector<Subscription::Event> events) {
-		struct CommonVisitor {
-			std::string operator()(Greeks greeks) const {
-				return greeks.toString();
-			}
-
-			std::string operator()(Underlying underlying) const {
-				return underlying.toString();
-			}
-
-			std::string operator()(Quote quote) const {
-				return quote.toString();
-			}
-		};
-
-		CommonVisitor visitor;
-
-		fmt::print("Symbol = {}:\n", symbol);
-
-		for (auto e : events) {
-			fmt::print("{}\n", nonstd::visit(visitor, e));
-		}
-
-		std::cout << "\n";
-	});
-
-	std::cout << "Listener attached successfully!\n";
-
-	if (!result) {
-		std::cerr << "Error:" << Error::getLast() << "\n";
-
-		return 6;
-	}
+	std::cout << "Added symbols\n";
 
 	std::this_thread::sleep_for(std::chrono::hours(1));
 

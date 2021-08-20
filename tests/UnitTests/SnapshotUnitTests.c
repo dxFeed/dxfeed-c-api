@@ -1,13 +1,36 @@
+/*
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Initial Developer of the Original Code is Devexperts LLC.
+ * Portions created by the Initial Developer are Copyright (C) 2010
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *
+ */
+
 #include <string.h>
 #include <stdio.h>
+
 #ifdef _WIN32
-#include <Windows.h>
+#	pragma warning(push)
+#	pragma warning(disable : 5105)
+#	include <Windows.h>
+#	pragma warning(pop)
 #else
-#include <unistd.h>
-#include <string.h>
-#include <wctype.h>
-#include <stdlib.h>
-#define stricmp strcasecmp
+#	include <unistd.h>
+#	include <string.h>
+#	include <wctype.h>
+#	include <stdlib.h>
+#	define stricmp strcasecmp
 #endif
 
 #include "ConnectionContextData.h"
@@ -32,36 +55,35 @@
 
 typedef struct {
 	int listener_call_counter;
-	bool result;
+	int result;
 } dx_snap_test_state_t;
 
-bool play_events(dxf_connection_t connection, dxf_snapshot_t snapshot, dxf_order_t* events, size_t size) {
-	size_t i;
-	dxf_string_t symbol = dx_get_snapshot_symbol(snapshot);
-	dxf_int_t symbol_code = dx_encode_symbol_name(symbol);
-	for (i = 0; i < size; i++) {
+int play_events(dxf_connection_t connection, dxf_snapshot_t snapshot, dxf_order_t* events, size_t size) {
+	dxf_const_string_t symbol = dx_get_snapshot_symbol(snapshot);
+	
+	for (size_t i = 0; i < size; i++) {
 		dxf_order_t order = events[i];
-		dxf_event_data_t event_data = (dxf_event_data_t)&order;
-		dxf_ulong_t snapshot_key = dx_new_snapshot_key(dx_rid_order, symbol, order.source);
+		const dxf_event_data_t event_data = (dxf_event_data_t)&order;
+		const dxf_ulong_t snapshot_key = dx_new_snapshot_key(dx_rid_order, symbol, order.source);
+		
 		// Note: use index as time_int_field for test only
 		dxf_event_params_t event_params = { order.event_flags, order.index, snapshot_key };
-		if (!dx_process_event_data(connection, dx_eid_order, symbol, symbol_code, event_data, 1, &event_params)) {
+		if (!dx_process_event_data(connection, dx_eid_order, symbol, event_data, &event_params)) {
 			return false;
 		}
 	}
+	
 	return true;
 }
 
-bool snapshot_test_runner(dxf_order_t* events, size_t size, dxf_snapshot_listener_t listener, int expected_listener_call_count) {
-	dxf_connection_t connection;
-	dxf_subscription_t subscription;
-	dxf_snapshot_t snapshot;
-	dx_event_subscr_flag subscr_flags = dx_esf_time_series | dx_esf_single_record;
+int snapshot_test_runner(dxf_order_t* events, size_t size, dxf_snapshot_listener_t listener, int expected_listener_call_count) {
+	const dx_event_subscr_flag subscr_flags = dx_esf_time_series | dx_esf_single_record;
 	dxf_const_string_t symbol = SYMBOL_DEFAULT;
 	dx_snap_test_state_t state = { 0, true };
 
-	connection = dx_init_connection();
-	subscription = dx_create_event_subscription(connection, DXF_ET_ORDER, subscr_flags, TIME_DEFAULT);
+	dxf_connection_t connection = dx_init_connection();
+	dxf_subscription_t subscription =
+		dx_create_event_subscription(connection, DXF_ET_ORDER, subscr_flags, TIME_DEFAULT);
 
 	if (subscription == dx_invalid_subscription ||
 		!dx_init_symbol_codec()) {
@@ -72,7 +94,8 @@ bool snapshot_test_runner(dxf_order_t* events, size_t size, dxf_snapshot_listene
 	dx_clear_order_source(subscription);
 	dx_add_order_source(subscription, SOURCE_DEFAULT);
 
-	snapshot = dx_create_snapshot(connection, subscription, dx_eid_order, dx_rid_order, symbol, SOURCE_DEFAULT, TIME_DEFAULT);
+	dxf_snapshot_t snapshot = dx_create_snapshot(connection, subscription, dx_eid_order, dx_rid_order, symbol,
+	                                             SOURCE_DEFAULT, TIME_DEFAULT);
 
 	if (snapshot == dx_invalid_snapshot ||
 		!dx_add_symbols(subscription, &symbol, 1) ||
@@ -92,9 +115,9 @@ bool snapshot_test_runner(dxf_order_t* events, size_t size, dxf_snapshot_listene
 }
 
 //Compare snapshots by index and size
-bool dx_compare_snapshots(const dxf_snapshot_data_ptr_t snapshot_data, dxf_order_t* test_snap_data, size_t test_snap_size) {
+int dx_compare_snapshots(const dxf_snapshot_data_ptr_t snapshot_data, dxf_order_t* test_snap_data, size_t test_snap_size) {
 	size_t i;
-	bool res = true;
+	int res = true;
 	dxf_order_t* order_records = (dxf_order_t*)snapshot_data->records;
 	if (!dx_is_equal_size_t(test_snap_size, snapshot_data->records_count)) {
 		return false;
@@ -102,7 +125,7 @@ bool dx_compare_snapshots(const dxf_snapshot_data_ptr_t snapshot_data, dxf_order
 	for (i = 0; i < snapshot_data->records_count; i++) {
 		dxf_order_t actual = order_records[i];
 		dxf_order_t expected = test_snap_data[i];
-		res &= dx_is_equal_dxf_ulong_t(expected.index, actual.index) && dx_is_equal_dxf_long_t(expected.size, actual.size);
+		res &= dx_is_equal_dxf_ulong_t(expected.index, actual.index) && dx_is_equal_double(expected.size, actual.size);
 	}
 	return res;
 }
@@ -110,21 +133,21 @@ bool dx_compare_snapshots(const dxf_snapshot_data_ptr_t snapshot_data, dxf_order
 /* -------------------------------------------------------------------------- */
 
 static dxf_order_t simple_test_data[] = {
-	{ dxf_ef_snapshot_begin, 0x4e54560000000006, 0,             0, 0, 0,      0,   0, dxf_osc_order, dxf_osd_buy,  0,    L"NTV", 0       },
-	{ 0,                     0x4e54560000000005, 1488551035000, 0, 0, 100.50, 100, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
-	{ 0,                     0x4e54560000000004, 1488551035010, 0, 0, 101.00, 101, 0, dxf_osc_order, dxf_osd_sell, L'Q', L"NTV", L"NSDQ" },
-	{ 0,                     0x4e54560000000003, 0,             0, 0, 0,      0,   0, dxf_osc_order, dxf_osd_buy,  0,    L"NTV", 0       },
-	{ 0,                     0x4e54560000000002, 1488551035020, 0, 0, 100.40, 102, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
-	{ 0,                     0x4e54560000000001, 1488551035030, 0, 0, 100.30, 103, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
-	{ dxf_ef_snapshot_end,   0x4e54560000000000, 1488551035040, 0, 0, 100.20, 104, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" }
+	{ L"NTV", dxf_ef_snapshot_begin, 0x4e54560000000006, 0,             0, 0, dxf_oa_undefined, 0, 0, 0, 0.0,    0,   0, 0, 0, 0.0, 0.0, 0,    dxf_osd_buy,  dxf_osc_order, { 0 } },
+	{ L"NTV", 0,                     0x4e54560000000005, 1488551035000, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.50, 100, 0, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order, { L"NSDQ" } },
+	{ L"NTV", 0,                     0x4e54560000000004, 1488551035010, 0, 0, dxf_oa_undefined, 0, 0, 0, 101.00, 101, 0, 0, 0, 0.0, 0.0, L'Q', dxf_osd_sell, dxf_osc_order, { L"NSDQ" } },
+	{ L"NTV", 0,                     0x4e54560000000003, 0            , 0, 0, dxf_oa_undefined, 0, 0, 0, 0.0,    0,   0, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order, { 0 } },
+	{ L"NTV", 0,                     0x4e54560000000002, 1488551035020, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.40, 102, 0, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order, { L"NSDQ" } },
+	{ L"NTV", 0,                     0x4e54560000000001, 1488551035030, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.30, 103, 0, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order, { L"NSDQ" } },
+	{ L"NTV", dxf_ef_snapshot_end,   0x4e54560000000000, 1488551035040, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.20, 104, 0, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order, { L"NSDQ" } },
 };
 
 static dxf_order_t simple_test_snap_data[] = {
-	{ 0, 0x4e54560000000005, 1488551035000, 0, 0, 100.50, 100, 0, dxf_osc_order, dxf_osd_buy,  L'Q',  L"NTV", L"NSDQ" },
-	{ 0, 0x4e54560000000004, 1488551035010, 0, 0, 101.00, 101, 0, dxf_osc_order, dxf_osd_sell, L'Q',  L"NTV", L"NSDQ" },
-	{ 0, 0x4e54560000000002, 1488551035020, 0, 0, 100.40, 102, 0, dxf_osc_order, dxf_osd_buy,  L'Q',  L"NTV", L"NSDQ" },
-	{ 0, 0x4e54560000000001, 1488551035030, 0, 0, 100.30, 103, 0, dxf_osc_order, dxf_osd_buy,  L'Q',  L"NTV", L"NSDQ" },
-	{ 0, 0x4e54560000000000, 1488551035040, 0, 0, 100.20, 104, 0, dxf_osc_order, dxf_osd_buy,  L'Q',  L"NTV", L"NSDQ" }
+	{ L"NTV", 0,                     0x4e54560000000005, 1488551035000, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.50, 100, 0, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order,{ L"NSDQ" } },
+	{ L"NTV", 0,                     0x4e54560000000004, 1488551035010, 0, 0, dxf_oa_undefined, 0, 0, 0, 101.00, 101, 0, 0, 0, 0.0, 0.0, L'Q', dxf_osd_sell, dxf_osc_order,{ L"NSDQ" } },
+	{ L"NTV", 0,                     0x4e54560000000003, 0            , 0, 0, dxf_oa_undefined, 0, 0, 0, 0.0,    0,   0, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order,{ 0 } },
+	{ L"NTV", 0,                     0x4e54560000000002, 1488551035020, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.40, 102, 0, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order,{ L"NSDQ" } },
+	{ L"NTV", 0,                     0x4e54560000000001, 1488551035030, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.30, 103, 0, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order,{ L"NSDQ" } },
 };
 
 static int simple_test_snap_size = SIZE_OF_ARRAY(simple_test_snap_data);
@@ -139,14 +162,14 @@ void simple_test_listener(const dxf_snapshot_data_ptr_t snapshot_data, void* use
  * Test
  * Simulates a simple receiving of snapshot data with two zero-events.
  */
-bool snapshot_simple_test(void) {
+int snapshot_simple_test(void) {
 	return snapshot_test_runner(simple_test_data, SIZE_OF_ARRAY(simple_test_data), simple_test_listener, 1);
 }
 
 /* -------------------------------------------------------------------------- */
 
 static dxf_order_t empty_test_data[] = {
-	{ dxf_ef_remove_event | dxf_ef_snapshot_begin | dxf_ef_snapshot_end, 0x4e54560000000000, 1488551035040, 0, 0, 100.20, 104, 0, dxf_osc_order, dxf_osd_buy, L'Q', L"NTV", L"NSDQ" }
+	{ L"NTV", dxf_ef_remove_event | dxf_ef_snapshot_begin | dxf_ef_snapshot_end, 0x4e54560000000000, 1488551035040, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.20, 104, 0, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order,{ L"NSDQ" } },
 };
 
 void empty_test_listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
@@ -159,7 +182,7 @@ void empty_test_listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user
  * Test
  * Simulates receiving of empty snapshot.
  */
-bool snapshot_empty_test(void) {
+int snapshot_empty_test(void) {
 	return snapshot_test_runner(empty_test_data, SIZE_OF_ARRAY(empty_test_data), empty_test_listener, 1);
 }
 
@@ -167,23 +190,23 @@ bool snapshot_empty_test(void) {
 
 static dxf_order_t update_test_data[] = {
 	// initial data
-	{ dxf_ef_snapshot_begin,                   0x4e54560000000004, 1488551035000, 0, 0, 100.50, 100,    0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
-	{ 0,                                       0x4e54560000000003, 1488551035010, 0, 0, 101.00, 101,    0, dxf_osc_order, dxf_osd_sell, L'Q', L"NTV", L"NSDQ" },
-	{ 0,                                       0x4e54560000000002, 1488551035020, 0, 0, 100.40, 102,    0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
-	{ 0,                                       0x4e54560000000001, 1488551035030, 0, 0, 100.30, 103,    0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
-	{ dxf_ef_snapshot_end,                     0x4e54560000000000, 1488551035040, 0, 0, 100.20, 104,    0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ L"NTV", dxf_ef_snapshot_begin, 0x4e54560000000004, 1488551035000, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.50, 100, 0, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order,{ L"NSDQ" } },
+	{ L"NTV", 0,                     0x4e54560000000003, 1488551035010, 0, 0, dxf_oa_undefined, 0, 0, 0, 101.00, 101, 0, 0, 0, 0.0, 0.0, L'Q', dxf_osd_sell, dxf_osc_order,{ L"NSDQ" } },
+	{ L"NTV", 0,                     0x4e54560000000002, 1488551035020, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.40, 102, 0, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order,{ L"NSDQ" } },
+	{ L"NTV", 0,                     0x4e54560000000001, 1488551035030, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.30, 103, 0, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order,{ L"NSDQ" } },
+	{ L"NTV", dxf_ef_snapshot_end,   0x4e54560000000000, 1488551035040, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.20, 104, 0, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order,{ L"NSDQ" } },
 	// Update#1: one row update
-	{ 0,                                       0x4e54560000000002, 1488551035020, 0, 0, 100.40, 1000,   0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ L"NTV", 0,                     0x4e54560000000002, 1488551035020, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.40, 1000, 0, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order,{ L"NSDQ" } },
 	// Update#2: one row remove via flags
-	{ dxf_ef_remove_event,                     0x4e54560000000002, 1488551035020, 0, 0, 100.40, 1001,   0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
+	{ L"NTV", dxf_ef_remove_event,             0x4e54560000000002, 1488551035020, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.40, 1001, 0, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order,{ L"NSDQ" } },
 	// Update#3: one row remove via zero event
-	{ 0,                                       0x4e54560000000001, 0,             0, 0, 0.0,    0,      0, dxf_osc_order, dxf_osd_buy,  0,    L"NTV" },
+	{ L"NTV", 0,                     0x4e54560000000001, 0            , 0, 0, dxf_oa_undefined, 0, 0, 0, 0,         0, 0, 0, 0, 0.0, 0.0,     0, dxf_osd_buy,  dxf_osc_order,{ 0 } },
 	// Update#4: complex update (inserting x 2, updating, removing, inserting)
-	{ dxf_ef_tx_pending,                       0x4e54560000000002, 1488551035020, 0, 0, 100.41, 1001,   0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
-	{ dxf_ef_tx_pending,                       0x4e54560000000005, 1488551035020, 0, 0, 100.42, 1002,   0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
-	{ dxf_ef_tx_pending,                       0x4e54560000000000, 1488551035040, 0, 0, 100.20, 100500, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
-	{ dxf_ef_tx_pending | dxf_ef_remove_event, 0x4e54560000000004, 1488551035000, 0, 0, 100.50, 100,    0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
-	{ 0,                                       0x4e54560000000010, 1488551035000, 0, 0, 100.60, 100,    0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" }
+	{ L"NTV", dxf_ef_tx_pending,                       0x4e54560000000002, 1488551035020, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.41, 1001,   0, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order,{ L"NSDQ" } },
+	{ L"NTV", dxf_ef_tx_pending,                       0x4e54560000000005, 1488551035020, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.42, 1002,   0, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order,{ L"NSDQ" } },
+	{ L"NTV", dxf_ef_tx_pending,                       0x4e54560000000000, 1488551035040, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.20, 100500, 0, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order,{ L"NSDQ" } },
+	{ L"NTV", dxf_ef_tx_pending | dxf_ef_remove_event, 0x4e54560000000004, 1488551035000, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.50, 100,    0, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order,{ L"NSDQ" } },
+	{ L"NTV", 0,                                       0x4e54560000000010, 1488551035000, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.60, 100,    0, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order,{ L"NSDQ" } },
 };
 
 static dxf_order_t update_test_snap_1_data[] = {                
@@ -248,7 +271,7 @@ void update_test_listener(const dxf_snapshot_data_ptr_t snapshot_data, void* use
  * Test
  * Simulates various variants of update.
  */
-bool snapshot_update_test(void) {
+int snapshot_update_test(void) {
 	return snapshot_test_runner(update_test_data, SIZE_OF_ARRAY(update_test_data), update_test_listener, 5);
 }
 
@@ -327,7 +350,7 @@ void bid_ask_test_listener(const dxf_snapshot_data_ptr_t snapshot_data, void* us
  * Simulates the changing max bid and min ask values via update. This test
  * checks correctness of the bid ask data after update.
  */
-bool snapshot_bid_ask_test(void) {
+int snapshot_bid_ask_test(void) {
 	return snapshot_test_runner(bid_ask_test_data, SIZE_OF_ARRAY(bid_ask_test_data), bid_ask_test_listener, 2);
 }
 
@@ -363,7 +386,7 @@ void duplicate_index_test_listener(const dxf_snapshot_data_ptr_t snapshot_data, 
  * Test
  * Simulates duplicated indexes in snapshot transmission.
  */
-bool snapshot_duplicate_index_test(void) {
+int snapshot_duplicate_index_test(void) {
 	return snapshot_test_runner(duplicate_index_test_data, SIZE_OF_ARRAY(duplicate_index_test_data), duplicate_index_test_listener, 1);
 }
 
@@ -398,7 +421,7 @@ void buildin_update_test_listener(const dxf_snapshot_data_ptr_t snapshot_data, v
  * Test
  * Simulates start of update before SNAPSHOT_END flag transmitted.
  */
-bool snapshot_buildin_update_test(void) {
+int snapshot_buildin_update_test(void) {
 	return snapshot_test_runner(buildin_update_test_data, SIZE_OF_ARRAY(buildin_update_test_data), buildin_update_test_listener, 1);
 }
 
@@ -443,40 +466,42 @@ typedef struct {
 /*
  * Test
  */
-bool snapshot_key_test(void) {
-	size_t record_index;
-	size_t symbol_index;
-	size_t source_index;
-	dxf_ulong_t key;
+int snapshot_key_test(void) {
 	snapshot_key_array_t all_keys = DX_EMPTY_ARRAY;
-	bool found = false;
-	bool error = false;
+	int found;
+	int error;
 	size_t position = 0;
-	for (record_index = 0; record_index < g_record_info_ids_count; record_index++) {
-		for (symbol_index = 0; symbol_index < g_symbols_count; symbol_index++) {
-			for (source_index = 0; source_index < g_sources_count; source_index++) {
-				dx_record_info_id_t info_id = g_record_info_ids_list[record_index];
-				dxf_const_string_t symbol = g_symbols[symbol_index];
-				dxf_const_string_t source = g_sources_list[source_index];
-				key = dx_new_snapshot_key(info_id, symbol, source);
+	
+	for (size_t record_index = 0; record_index < g_record_info_ids_count; record_index++) {
+		for (size_t symbol_index = 0; symbol_index < g_symbols_count; symbol_index++) {
+			for (size_t source_index = 0; source_index < g_sources_count; source_index++) {
+				const dx_record_info_id_t info_id = g_record_info_ids_list[record_index];
+				const dxf_const_string_t symbol = g_symbols[symbol_index];
+				const dxf_const_string_t source = g_sources_list[source_index];
+				const dxf_ulong_t key = dx_new_snapshot_key(info_id, symbol, source);
+				
 				DX_ARRAY_BINARY_SEARCH(all_keys.elements, 0, all_keys.size, key, DX_NUMERIC_COMPARATOR, found, position);
+				
 				if (found) {
 					wprintf(L"Duplicate snapshot keys detected: %llu! Record id: %d, symbol:'%ls', source:'%ls'.\n", key, info_id, symbol, source);
 					PRINT_TEST_FAILED;
 					dx_free(all_keys.elements);
 					return false;
-				} else {
-					DX_ARRAY_INSERT(all_keys, dxf_ulong_t, key, position, dx_capacity_manager_halfer, error);
-					if (!dx_is_equal_bool(false, error)) {
-						PRINT_TEST_FAILED_MESSAGE("Insert array error!");
-						dx_free(all_keys.elements);
-						return false;
-					}
+				}
+				
+				DX_ARRAY_INSERT(all_keys, dxf_ulong_t, key, position, dx_capacity_manager_halfer, error);
+				
+				if (!dx_is_equal_int(false, error)) {
+					PRINT_TEST_FAILED_MESSAGE("Insert array error!");
+					dx_free(all_keys.elements);
+					return false;
 				}
 			}
 		}
 	}
+	
 	dx_free(all_keys.elements);
+	
 	return true;
 }
 
@@ -491,40 +516,43 @@ typedef struct {
 /*
  * Test
  */
-bool symbol_name_hasher_test(void) {
-	size_t symbol_index;
-	dxf_int_t hash;
-	hashs_array_t all_hashs = DX_EMPTY_ARRAY;
-	bool found = false;
-	bool error = false;
+int symbol_name_hasher_test(void) {
+	hashs_array_t hashes = DX_EMPTY_ARRAY;
+	int found;
+	int error;
 	size_t position = 0;
-	for (symbol_index = 0; symbol_index < g_symbols_count; symbol_index++) {
-		dxf_const_string_t symbol = g_symbols[symbol_index];
-		hash = dx_symbol_name_hasher(symbol);
-		DX_ARRAY_BINARY_SEARCH(all_hashs.elements, 0, all_hashs.size, hash, DX_NUMERIC_COMPARATOR, found, position);
+	
+	for (size_t symbol_index = 0; symbol_index < g_symbols_count; symbol_index++) {
+		const dxf_const_string_t symbol = g_symbols[symbol_index];
+		const dxf_ulong_t hash = dx_symbol_name_hasher(symbol);
+		
+		DX_ARRAY_BINARY_SEARCH(hashes.elements, 0, hashes.size, hash, DX_NUMERIC_COMPARATOR, found, position);
+		
 		if (found) {
-			wprintf(L"Duplicate hashs detected: %d! symbol:'%ls'.\n", hash, symbol);
+			wprintf(L"Duplicate hashes detected: %lu! symbol:'%ls'.\n", hash, symbol);
 			PRINT_TEST_FAILED;
-			dx_free(all_hashs.elements);
+			dx_free(hashes.elements);
 			return false;
 		}
-		else {
-			DX_ARRAY_INSERT(all_hashs, dxf_int_t, hash, position, dx_capacity_manager_halfer, error);
-			if (!dx_is_equal_bool(false, error)) {
-				PRINT_TEST_FAILED_MESSAGE("Insert array error!");
-				dx_free(all_hashs.elements);
-				return false;
-			}
+		
+		DX_ARRAY_INSERT(hashes, dxf_int_t, hash, position, dx_capacity_manager_halfer, error);
+		
+		if (!dx_is_equal_int(false, error)) {
+			PRINT_TEST_FAILED_MESSAGE("Insert array error!");
+			dx_free(hashes.elements);
+			return false;
 		}
 	}
-	dx_free(all_hashs.elements);
+	
+	dx_free(hashes.elements);
+	
 	return true;
 }
 
 /* -------------------------------------------------------------------------- */
 
-bool snapshot_all_unit_test(void) {
-	bool res = true;
+int snapshot_all_unit_test(void) {
+	int res = true;
 
 	if (!snapshot_simple_test() ||
 		!snapshot_empty_test() ||

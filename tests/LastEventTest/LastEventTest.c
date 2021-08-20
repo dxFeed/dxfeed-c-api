@@ -1,46 +1,61 @@
+/*
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Initial Developer of the Original Code is Devexperts LLC.
+ * Portions created by the Initial Developer are Copyright (C) 2010
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *
+ */
 
-#include "DXFeed.h"
-#include "DXErrorCodes.h"
-#include "Logger.h"
-#include "DXMemory.h"
-#include "DXThreads.h"
-#include <stdio.h>
-#include <Windows.h>
+#ifdef _WIN32
+#	ifndef _CRT_STDIO_ISO_WIDE_SPECIFIERS
+#		define _CRT_STDIO_ISO_WIDE_SPECIFIERS 1
+#	endif
+#endif
 #include <math.h>
+#include <stdio.h>
+
+#include "DXErrorCodes.h"
+#include "DXFeed.h"
 #include "EventData.h"
+#include "Logger.h"
+
+#ifdef _WIN32
+#	pragma warning(push)
+#	pragma warning(disable : 5105)
+#	include <Windows.h>
+#	pragma warning(pop)
+void dxs_sleep(int milliseconds) { Sleep((DWORD)milliseconds); }
+#else
+#	include <time.h>
+void dxs_sleep(int milliseconds) {
+	struct timespec ts;
+	ts.tv_sec = milliseconds / 1000;
+	ts.tv_nsec = (milliseconds % 1000) * 1000000;
+	nanosleep(&ts, NULL);
+}
+#endif
 
 const char dxfeed_host[] = "demo.dxfeed.com:7300";
 
-static dxf_const_string_t g_symbols[] = { {L"IBM"}, {L"MSFT"}, {L"YHOO"}, {L"C"} };
-static const dxf_int_t g_symbols_size = sizeof (g_symbols) / sizeof (g_symbols[0]);
+static dxf_const_string_t g_symbols[] = {L"IBM", L"MSFT", L"YHOO", L"C"};
+static const dxf_int_t g_symbols_size = sizeof(g_symbols) / sizeof(g_symbols[0]);
 static const int g_event_type = DXF_ET_TRADE;
 static int g_iteration_count = 10;
 
 /* -------------------------------------------------------------------------- */
 
-dxf_const_string_t dx_event_type_to_string(int event_type){
-	switch (event_type){
-		case DXF_ET_TRADE: return L"Trade";
-		case DXF_ET_QUOTE: return L"Quote";
-		case DXF_ET_SUMMARY: return L"Summary";
-		case DXF_ET_PROFILE: return L"Profile";
-		case DXF_ET_ORDER: return L"Order";
-		case DXF_ET_TIME_AND_SALE: return L"Time&Sale";
-		case DXF_ET_CANDLE: return L"Candle";
-		case DXF_ET_TRADE_ETH: return L"TradeETH";
-		case DXF_ET_SPREAD_ORDER: return L"SpreadOrder";
-		case DXF_ET_GREEKS: return L"Greeks";
-		case DXF_ET_THEO_PRICE: return L"THEO_PRICE";
-		case DXF_ET_UNDERLYING: return L"Underlying";
-		case DXF_ET_SERIES: return L"Series";
-		case DXF_ET_CONFIGURATION: return L"Configuration";
-		default: return L"";
-	}
-}
-
-/* -------------------------------------------------------------------------- */
-
-void process_last_error () {
+void process_last_error() {
 	int error_code = dx_ec_success;
 	dxf_const_string_t error_descr = NULL;
 	int res;
@@ -49,28 +64,30 @@ void process_last_error () {
 
 	if (res == DXF_SUCCESS) {
 		if (error_code == dx_ec_success) {
-			printf("WTF - no error information is stored");
+			wprintf(L"No error information is stored");
 
 			return;
 		}
 
-		wprintf(L"Error occurred and successfully retrieved:\n"
+		wprintf(
+			L"Error occurred and successfully retrieved:\n"
 			L"error code = %d, description = \"%ls\"\n",
 			error_code, error_descr);
 		return;
 	}
 
-	printf("An error occurred but the error subsystem failed to initialize\n");
+	wprintf(L"An error occurred but the error subsystem failed to initialize\n");
 }
 
 /* -------------------------------------------------------------------------- */
 
-void listener(int event_type, dxf_const_string_t symbol_name,
-			const dxf_event_data_t* data, int data_count, void* user_data) {
+void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
+			  void* user_data) {
 	dxf_int_t i = 0;
 	dx_event_id_t eid = dx_eid_begin;
 
-	for (; (DX_EVENT_BIT_MASK(eid) & event_type) == 0; ++eid);
+	for (; (DX_EVENT_BIT_MASK(eid) & event_type) == 0; ++eid)
+		;
 
 	wprintf(L"First listener. Event: %ls Symbol: %ls\n", dx_event_type_to_string(event_type), symbol_name);
 
@@ -78,63 +95,66 @@ void listener(int event_type, dxf_const_string_t symbol_name,
 		dxf_trade_t* trades = (dxf_trade_t*)data;
 
 		for (; i < data_count; ++i) {
-			wprintf(L"time=%lld, exchange code=%C, price=%f, size=%ld, tick=%ld, change=%f, day volume=%f, scope=%d\n",
-					trades[i].time, trades[i].exchange_code, trades[i].price, trades[i].size, trades[i].tick, trades[i].change,
-				trades[i].day_volume, (int)trades[i].scope);
+			wprintf(L"time=%lld, exchange code=%C, price=%.15g, size=%.15g, tick=%ld, change=%.15g, day id=%d, day volume=%.15g, scope=%d\n",
+					trades[i].time, trades[i].exchange_code, trades[i].price, trades[i].size, trades[i].tick,
+					trades[i].change, trades[i].day_id, trades[i].day_volume, (int)trades[i].scope);
 		}
 	}
 }
 
-
 /* -------------------------------------------------------------------------- */
 
-int main (int argc, char* argv[]) {
+int main(int argc, char* argv[]) {
 	dxf_connection_t connection;
 	dxf_subscription_t subscription;
-	int i = 0;
-	bool test_result = true;
 
-	dxf_initialize_logger( "log.log", true, true, true );
+	dxf_initialize_logger("last-event-test-api.log", true, true, true);
 
 	wprintf(L"LastEvent test started.\n");
-	printf("Connecting to host %s...\n", dxfeed_host);
+	wprintf(L"Connecting to host %hs...\n", dxfeed_host);
 
 	if (!dxf_create_connection(dxfeed_host, NULL, NULL, NULL, NULL, NULL, &connection)) {
 		process_last_error();
-		return -1;
+
+		return 1;
 	}
 
-	wprintf(L"Connection successful!\n");
+	wprintf(L"Connected\n");
 
 	wprintf(L"Creating subscription to: Trade\n");
-	if (!dxf_create_subscription(connection, g_event_type, &subscription )) {
+	if (!dxf_create_subscription(connection, g_event_type, &subscription)) {
 		process_last_error();
+		dxf_close_connection(connection);
 
-		return -1;
+		return 10;
 	};
 
+	if (!dxf_attach_event_listener(subscription, listener, NULL)) {
+		process_last_error();
+		dxf_close_subscription(subscription);
+		dxf_close_connection(connection);
+
+		return 11;
+	};
+	wprintf(L"Listener has been attached\n");
+
 	wprintf(L"Adding symbols:");
-	for (i = 0; i < g_symbols_size; ++i) {
+	for (int i = 0; i < g_symbols_size; ++i) {
 		wprintf(L" %ls", g_symbols[i]);
 	}
 	wprintf(L"\n");
 
 	if (!dxf_add_symbols(subscription, g_symbols, g_symbols_size)) {
 		process_last_error();
+		dxf_close_subscription(subscription);
+		dxf_close_connection(connection);
 
-		return -1;
-	};
-
-	wprintf(L"Listener attached\n");
-	if (!dxf_attach_event_listener(subscription, listener, NULL)) {
-		process_last_error();
-
-		return -1;
+		return 12;
 	};
 
 	while (g_iteration_count--) {
 		wprintf(L"\nLast event data:");
-		for (i = 0; i < g_symbols_size; ++i) {
+		for (int i = 0; i < g_symbols_size; ++i) {
 			dxf_event_data_t data;
 			dxf_trade_t* trade;
 			if (!dxf_get_last_event(connection, g_event_type, g_symbols[i], &data)) {
@@ -144,31 +164,29 @@ int main (int argc, char* argv[]) {
 			if (data) {
 				trade = (dxf_trade_t*)data;
 
-				wprintf(L"\nSymbol: %ls; time=%lld, exchange code=%c, price=%f, size=%ld, tick=%ld, change=%f, day volume=%f, scope=%d\n",
-						g_symbols[i], trade->time, trade->exchange_code, trade->price, trade->size, trade->tick, trade->change,
-					trade->day_volume, (int)trade->scope);
-
+				wprintf(
+					L"\nSymbol: %ls; time=%lld, exchange code=%c, price=%.15g, size=%.15g, tick=%ld, change=%.15g, day id=%d, day "
+					L"volume=%.15g, scope=%d\n",
+					g_symbols[i], trade->time, trade->exchange_code, trade->price, trade->size, trade->tick,
+					trade->change, trade->day_id, trade->day_volume, (int)trade->scope);
 			}
 		}
 		wprintf(L"\n");
-		Sleep (5000);
+		dxs_sleep(5000);
 	}
 
-	wprintf(L"\n Test %ls \n", test_result ? L"complete successfully" : L"failed");
-
+	wprintf(L"\n Test complete\n");
 	wprintf(L"Disconnecting from host...\n");
 
 	if (!dxf_close_connection(connection)) {
 		process_last_error();
 
-		return -1;
+		return 2;
 	}
 
-	wprintf(L"Disconnect successful!\n"
-		L"Connection test completed successfully!\n");
+	wprintf(L"Disconnected\n");
 
-	Sleep(5000);
+	dxs_sleep(5000);
 
 	return 0;
 }
-

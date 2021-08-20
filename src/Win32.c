@@ -18,12 +18,15 @@
  */
 
 #ifdef _WIN32
-#include <windows.h>
+#	pragma warning(push)
+#	pragma warning(disable : 5105)
+#	include <Windows.h>
+#	pragma warning(pop)
 
-#include "DXMemory.h"
-#include "Logger.h"
-#include "DXAlgorithms.h"
-#include "DXThreads.h"
+#	include "DXMemory.h"
+#	include "Logger.h"
+#	include "DXAlgorithms.h"
+#	include "DXThreads.h"
 
 typedef struct dx_callback_tag {
 	void (*callback)(void*);

@@ -54,18 +54,22 @@ typedef enum {
 	dx_fid_utf_char_array = 10,
 	// ids 11-15 are reserved for future use as array of short, array of int, etc
 
-	dx_fid_flag_plain = 0x00,         // plain represenation
+	dx_fid_flag_int = 0x00,           // plain int as int field
 	dx_fid_flag_decimal = 0x10,       // decimal representation as int field
 	dx_fid_flag_short_string = 0x20,  // short (up to 4-character) string representation as int field
-	dx_fid_flag_time = 0x30,          // time in seconds in this integer field
+	dx_fid_flag_time_seconds = 0x30,  // time in seconds as integer field
 	dx_fid_flag_sequence = 0x40,      // sequence in this integer fields (with top 10 bits representing millis)
 	dx_fid_flag_date = 0x50,          // day id in this integer field
+	dx_fid_flag_long = 0x60,          // plain long as two int fields
+	dx_fid_flag_wide_decimal = 0x70,  // WideDecimal representation as long field
 	dx_fid_flag_string = 0x80,        // String representation as byte array
+	dx_fid_flag_time_millis = 0x90,   // time in millis as long field
+	dx_fid_flag_time_nanos = 0xa0,    // Reserved for future use: time in nanos as long field
 	dx_fid_flag_custom_object = 0xe0, // custom serialized object as byte array
 	dx_fid_flag_serial_object = 0xf0, // serialized object as byte array
 
 	dx_fid_mask_serialization = 0x0f,
-	dx_fid_mask_presentation = 0xf0
+	dx_fid_mask_representation = 0xf0
 } dx_field_id_t;
 
 /* -------------------------------------------------------------------------- */
@@ -118,7 +122,7 @@ typedef struct {
 /* -------------------------------------------------------------------------- */
 
 dx_record_id_t dx_get_record_id(void* context, dxf_int_t server_record_id);
-bool dx_assign_server_record_id(void* context, dx_record_id_t record_id, dxf_int_t server_record_id);
+int dx_assign_server_record_id(void* context, dx_record_id_t record_id, dxf_int_t server_record_id);
 
 /*
  * Returns pointer to record data.
@@ -130,13 +134,13 @@ bool dx_assign_server_record_id(void* context, dx_record_id_t record_id, dxf_int
  */
 const dx_record_item_t* dx_get_record_by_id(void* context, dx_record_id_t record_id);
 dx_record_id_t dx_get_record_id_by_name(void* context, dxf_const_string_t record_name);
-dx_record_id_t dx_get_next_unsubscribed_record_id(void* context, bool isUpdate);
+dx_record_id_t dx_get_next_unsubscribed_record_id(void* context, int isUpdate);
 void dx_drop_unsubscribe_counter(void* context);
 
 int dx_find_record_field(const dx_record_item_t* record_info, dxf_const_string_t field_name,
 						dxf_int_t field_type);
 dxf_char_t dx_get_record_exchange_code(void* context, dx_record_id_t record_id);
-bool dx_set_record_exchange_code(void* context, dx_record_id_t record_id, dxf_char_t exchange_code);
+int dx_set_record_exchange_code(void* context, dx_record_id_t record_id, dxf_char_t exchange_code);
 /*
  * Creates subscription time field according to record model. Function uses
  * dx_ft_first_time_int_field and dx_ft_second_time_int_field flags of the
@@ -149,11 +153,11 @@ bool dx_set_record_exchange_code(void* context, dx_record_id_t record_id, dxf_ch
  * value        - the result subscription time
  * return true if no errors occur otherwise returns false
  */
-bool dx_create_subscription_time(void* context, dx_record_id_t record_id,
+int dx_create_subscription_time(void* context, dx_record_id_t record_id,
 								dxf_long_t time, OUT dxf_long_t* value);
 
 dx_record_server_support_state_list_t* dx_get_record_server_support_states(void* context);
-bool dx_get_record_server_support_state_value(dx_record_server_support_state_list_t* states,
+int dx_get_record_server_support_state_value(dx_record_server_support_state_list_t* states,
 											dx_record_id_t record_id,
 											OUT dx_record_server_support_state_t **value);
 

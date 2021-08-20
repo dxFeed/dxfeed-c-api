@@ -18,6 +18,7 @@
  */
 
 #include <wctype.h>
+#include <math.h>
 
 #include "Candle.h"
 #include "DXFeed.h"
@@ -35,6 +36,7 @@ typedef struct {
 	dxf_candle_price_attribute_t price;
 	dxf_candle_session_attribute_t session;
 	dxf_candle_alignment_attribute_t alignment;
+	dxf_double_t price_level;
 } dx_candle_attributes_data_t;
 
 typedef struct {
@@ -84,6 +86,7 @@ DXFEED_API ERRORCODE dxf_create_candle_symbol_attributes(dxf_const_string_t base
 														dxf_candle_price_attribute_t price,
 														dxf_candle_session_attribute_t session,
 														dxf_candle_alignment_attribute_t alignment,
+														dxf_double_t price_level,
 														OUT dxf_candle_attributes_t* candle_attributes) {
 	dx_candle_attributes_data_t* attributes;
 	if (candle_attributes == NULL) {
@@ -114,6 +117,7 @@ DXFEED_API ERRORCODE dxf_create_candle_symbol_attributes(dxf_const_string_t base
 	attributes->period_value = period_value;
 	attributes->period_type = period_type;
 	attributes->alignment = alignment;
+	attributes->price_level = price_level;
 
 	*candle_attributes = attributes;
 	return DXF_SUCCESS;
@@ -131,10 +135,10 @@ DXFEED_API ERRORCODE dxf_delete_candle_symbol_attributes(dxf_candle_attributes_t
 	return DXF_SUCCESS;
 }
 
-bool dx_candle_symbol_to_string(dxf_candle_attributes_t _attr, OUT dxf_string_t* string) {
+int dx_candle_symbol_to_string(dxf_candle_attributes_t _attr, OUT dxf_string_t* string) {
 	dx_candle_attributes_data_t *attributes = _attr;
 	dxf_char_t buffer_str[1000];
-	bool put_comma = false;
+	int put_comma = false;
 
 	if (attributes == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param_internal);
@@ -153,7 +157,8 @@ bool dx_candle_symbol_to_string(dxf_candle_attributes_t _attr, OUT dxf_string_t*
 		attributes->period_type == dxf_ctpa_default &&
 		attributes->alignment == dxf_caa_default &&
 		attributes->price == dxf_cpa_default &&
-		attributes->session == dxf_csa_default) {
+		attributes->session == dxf_csa_default &&
+		isnan(attributes->price_level)) {
 
 		*string = dx_create_string_src(buffer_str);
 		if (*string == NULL) {
@@ -188,6 +193,16 @@ bool dx_candle_symbol_to_string(dxf_candle_attributes_t _attr, OUT dxf_string_t*
 		dx_concatenate_strings(buffer_str, g_candle_alignment[attributes->alignment]);
 
 		put_comma = true;
+	}
+
+	if (!isnan(attributes->price_level)) {
+		if (put_comma) {
+			dx_concatenate_strings(buffer_str, L",");
+		}
+		dx_concatenate_strings(buffer_str, L"pl=");
+		dxf_char_t tmpstr[100];
+		swprintf(tmpstr, 99, L"%g", attributes->price_level);
+		dx_concatenate_strings(buffer_str, tmpstr);
 	}
 
 	if (attributes->price != dxf_cpa_default) {

@@ -24,17 +24,19 @@
 #ifndef PRIMITIVE_TYPES_H_INCLUDED
 #define PRIMITIVE_TYPES_H_INCLUDED
 
-typedef int bool;
-
+#ifndef __cplusplus
 #define true 1
 #define false 0
+#endif
 
 #ifndef OUT
 #define OUT
 #endif // OUT
 
+#ifndef __cplusplus
 #ifndef NULL
 	#define NULL ((void*)0)
 #endif // NULL
+#endif
 
 #endif /* PRIMITIVE_TYPES_H_INCLUDED */

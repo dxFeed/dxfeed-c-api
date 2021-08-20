@@ -44,9 +44,9 @@ typedef struct {
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_transcode_record_data (dxf_connection_t connection,
+int dx_transcode_record_data (dxf_connection_t connection,
 							const dx_record_params_t* record_params,
 							const dxf_event_params_t* event_params,
-							void* record_buffer, int record_count);
+							void* record_buffer);
 
 #endif /* RECORD_TRANSCODER_H_INCLUDED */

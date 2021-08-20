@@ -24,6 +24,6 @@
 #include "DXTypes.h"
 #include "PrimitiveTypes.h"
 
-bool dx_candle_symbol_to_string(dxf_candle_attributes_t attributes, OUT dxf_string_t* string);
+int dx_candle_symbol_to_string(dxf_candle_attributes_t attributes, OUT dxf_string_t* string);
 
 #endif /* CANDLE_H_INCLUDED */

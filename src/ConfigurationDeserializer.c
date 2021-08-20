@@ -25,14 +25,14 @@
 
 typedef int dx_byte_array_pos_t;
 
-static const dxf_short_t STREAM_MAGIC = 0xACED;
+static const dxf_short_t STREAM_MAGIC = (dxf_short_t)0xACED;
 static const dxf_short_t STREAM_VERSION = 5;
 #define TC_NULL         0x70
 #define TC_STRING       0x74
 #define TC_LONGSTRING   0x7C
 
 #define READ_MULTIMBYTE_VALUE_BODY(multibyte_type, alias) \
-static bool read_##alias(dxf_byte_array_t* object, dx_byte_array_pos_t *pos, \
+static int read_##alias(dxf_byte_array_t* object, dx_byte_array_pos_t *pos, \
 						OUT multibyte_type *value) { \
 	dx_byte_array_pos_t last = *pos + sizeof(dxf_short_t); \
 	if (last >= object->size) \
@@ -47,7 +47,7 @@ static bool read_##alias(dxf_byte_array_t* object, dx_byte_array_pos_t *pos, \
 READ_MULTIMBYTE_VALUE_BODY(dxf_short_t, short)
 READ_MULTIMBYTE_VALUE_BODY(dxf_long_t, long)
 
-static bool read_byte(dxf_byte_array_t* object, dx_byte_array_pos_t *pos,
+static int read_byte(dxf_byte_array_t* object, dx_byte_array_pos_t *pos,
 					OUT dxf_byte_t *value) {
 	dx_byte_array_pos_t last = *pos + sizeof(dxf_byte_t);
 	if (last >= object->size)
@@ -56,7 +56,7 @@ static bool read_byte(dxf_byte_array_t* object, dx_byte_array_pos_t *pos,
 	return true;
 }
 
-static bool read_string(dxf_byte_array_t* object, dx_byte_array_pos_t *pos,
+static int read_string(dxf_byte_array_t* object, dx_byte_array_pos_t *pos,
 						size_t length, OUT dxf_string_t *value) {
 	char *buf = NULL;
 	buf = dx_calloc(length + 1, sizeof(char));
@@ -69,7 +69,7 @@ static bool read_string(dxf_byte_array_t* object, dx_byte_array_pos_t *pos,
 	return true;
 }
 
-bool dx_configuration_deserialize_string(dxf_byte_array_t* object,
+int dx_configuration_deserialize_string(dxf_byte_array_t* object,
 										OUT dxf_string_t* string) {
 	dx_byte_array_pos_t pos = 0;
 	dxf_short_t short_value;

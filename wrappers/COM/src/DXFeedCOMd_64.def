@@ -1,7 +1,0 @@
-LIBRARY DXFeedCOMd_64
-VERSION 5.8
-EXPORTS
-DllCanUnloadNow		PRIVATE
-DllGetClassObject	PRIVATE
-DllRegisterServer	PRIVATE
-DllUnregisterServer	PRIVATE

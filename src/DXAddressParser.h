@@ -24,7 +24,7 @@
 #include "PrimitiveTypes.h"
 
 typedef struct {
-	bool enabled;
+	int enabled;
 	char* key_store;
 	char* key_store_password;
 	char* trust_store;
@@ -32,7 +32,7 @@ typedef struct {
 } dx_codec_tls_t;
 
 typedef struct {
-	bool enabled;
+	int enabled;
 } dx_codec_gzip_t;
 
 typedef struct {
@@ -51,9 +51,9 @@ typedef struct {
 } dx_address_array_t;
 
 void dx_clear_address_array(dx_address_array_t* addresses);
-bool dx_codec_gzip_copy(const dx_codec_gzip_t* src, OUT dx_codec_gzip_t* dest);
-bool dx_codec_tls_copy(const dx_codec_tls_t* src, OUT dx_codec_tls_t* dest);
+int dx_codec_gzip_copy(const dx_codec_gzip_t* src, OUT dx_codec_gzip_t* dest);
+int dx_codec_tls_copy(const dx_codec_tls_t* src, OUT dx_codec_tls_t* dest);
 void dx_codec_tls_free(dx_codec_tls_t* tls);
-bool dx_get_addresses_from_collection(const char* collection, OUT dx_address_array_t* addresses);
+int dx_get_addresses_from_collection(const char* collection, OUT dx_address_array_t* addresses);
 
 #endif /* DX_ADDRESS_PARSER_H_INCLUDED */

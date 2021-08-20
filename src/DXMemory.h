@@ -26,18 +26,22 @@
 
 #include "DXTypes.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* -------------------------------------------------------------------------- */
 /*
  *	Memory function wrappers
  */
 /* -------------------------------------------------------------------------- */
 
-void* dx_malloc (size_t size);
-void* dx_calloc (size_t num, size_t size);
-void  dx_free (void* buf);
-void* dx_memcpy (void* destination, const void* source, size_t size);
-void* dx_memmove (void* destination, const void* source, size_t size);
-void* dx_memset (void* destination, int c, size_t size);
+void* dx_malloc(size_t size);
+void* dx_calloc(size_t num, size_t size);
+void dx_free(void* buf);
+void* dx_memcpy(void* destination, const void* source, size_t size);
+void* dx_memmove(void* destination, const void* source, size_t size);
+void* dx_memset(void* destination, int c, size_t size);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -48,7 +52,11 @@ void* dx_memset (void* destination, int c, size_t size);
  */
 /* -------------------------------------------------------------------------- */
 
-void* dx_calloc_no_ehm (size_t num, size_t size);
-void dx_free_no_ehm (void* buf);
+void* dx_calloc_no_ehm(size_t num, size_t size);
+void dx_free_no_ehm(void* buf);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* DX_MEMORY_H_INCLUDED */

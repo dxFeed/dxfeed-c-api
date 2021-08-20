@@ -1,3 +1,22 @@
+/*
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Initial Developer of the Original Code is Devexperts LLC.
+ * Portions created by the Initial Developer are Copyright (C) 2010
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *
+ */
+
 #include <stdio.h>
 #include "DXFeed.h"
 #include "DataStructures.h"
@@ -23,14 +42,13 @@ void dummy_listener(int event_type, dxf_const_string_t symbol_name,
 /*
  * Test
  */
-bool event_subscription_test (void) {
+int event_subscription_test (void) {
 	dxf_connection_t connection;
 	dxf_subscription_t sub1;
 	dxf_subscription_t sub2;
 	dxf_const_string_t large_symbol_set[] = { L"SYMA", L"SYMB", L"SYMC" };
 	dxf_const_string_t middle_symbol_set[] = { L"SYMB", L"SYMD" };
 	dxf_const_string_t small_symbol_set[] = { L"SYMB" };
-	dxf_int_t symbol_code;
 	dxf_event_params_t empty_event_params = { 0, 0, 0 };
 	dxf_quote_t quote_data = { 0, 0, 0, 0, 'A', 1.0, 1, 0, 'A', 2.0, 1, dxf_osc_regional };
 	const dxf_event_data_t quote_event_data = &quote_data;
@@ -90,9 +108,7 @@ bool event_subscription_test (void) {
 		}
 	}
 
-	symbol_code = dx_encode_symbol_name(L"SYMB");
-
-	if (!dx_process_event_data(connection, dx_eid_quote, L"SYMB", symbol_code, quote_event_data, 1, &empty_event_params)) {
+	if (!dx_process_event_data(connection, dx_eid_quote, L"SYMB", quote_event_data, &empty_event_params)) {
 		return false;
 	}
 
@@ -102,19 +118,15 @@ bool event_subscription_test (void) {
 		return false;
 	}
 
-	symbol_code = dx_encode_symbol_name(L"SYMZ");
-
 	// unknown symbol SYMZ must be rejected
 
-	if (!dx_process_event_data(connection, dx_eid_trade, L"SYMZ", symbol_code, trade_event_data, 1, &empty_event_params) ||
+	if (!dx_process_event_data(connection, dx_eid_trade, L"SYMZ", trade_event_data, &empty_event_params) ||
 		dx_compare_strings(last_symbol, L"SYMB") ||
 		visit_count > 2) {
 		return false;
 	}
 
-	symbol_code = dx_encode_symbol_name(L"SYMD");
-
-	if (!dx_process_event_data(connection, dx_eid_trade, L"SYMD", symbol_code, trade_event_data, 1, &empty_event_params)) {
+	if (!dx_process_event_data(connection, dx_eid_trade, L"SYMD", trade_event_data, &empty_event_params)) {
 		return false;
 	}
 
@@ -130,9 +142,7 @@ bool event_subscription_test (void) {
 
 	// sub1 is no longer receiving SYMBs
 
-	symbol_code = dx_encode_symbol_name(L"SYMB");
-
-	if (!dx_process_event_data(connection, dx_eid_quote, L"SYMB", symbol_code, quote_event_data, 1, &empty_event_params)) {
+	if (!dx_process_event_data(connection, dx_eid_quote, L"SYMB", quote_event_data, &empty_event_params)) {
 		return false;
 	}
 
@@ -142,9 +152,7 @@ bool event_subscription_test (void) {
 		return false;
 	}
 
-	symbol_code = dx_encode_symbol_name(L"SYMA");
-
-	if (!dx_process_event_data(connection, dx_eid_trade, L"SYMA", symbol_code, trade_event_data, 1, &empty_event_params)) {
+	if (!dx_process_event_data(connection, dx_eid_trade, L"SYMA", trade_event_data, &empty_event_params)) {
 		return false;
 	}
 
@@ -158,11 +166,9 @@ bool event_subscription_test (void) {
 		return false;
 	}
 
-	symbol_code = dx_encode_symbol_name(L"SYMB");
-
 	// SYMB is still supported by sub2, but sub2 no longer has a listener
 
-	if (!dx_process_event_data(connection, dx_eid_quote, L"SYMB", symbol_code, quote_event_data, 1, &empty_event_params)) {
+	if (!dx_process_event_data(connection, dx_eid_quote, L"SYMB", quote_event_data, &empty_event_params)) {
 		return false;
 	}
 
@@ -211,7 +217,7 @@ static subscription_time_struct_t g_subscr_time_structs_list[] = {
 };
 static size_t g_subscr_time_structs_count = SIZE_OF_ARRAY(g_subscr_time_structs_list);
 
-bool is_history_record(const dx_record_item_t* record_info) {
+int is_history_record(const dx_record_item_t* record_info) {
 	int i;
 	for (i = 0; i < record_info->field_count; ++i) {
 		dx_field_info_t field = record_info->fields[i];
@@ -233,7 +239,7 @@ bool is_history_record(const dx_record_item_t* record_info) {
  * etalon data from g_subscr_time_structs_list. If checking performs succesfully returns true,
  * otherwise returns false.
  */
-bool subscription_time_test(void) {
+int subscription_time_test(void) {
 	size_t i;
 	dxf_connection_t connection;
 	dx_record_id_t record_id;
@@ -276,9 +282,9 @@ bool subscription_time_test(void) {
 		}
 	}
 
-	if (!dx_is_equal_bool(false, dx_create_subscription_time(NULL, record_id, TIME_STAMP, OUT &subscription_time)) ||
-		!dx_is_equal_bool(false, dx_create_subscription_time(dscc, -1, TIME_STAMP, OUT &subscription_time)) ||
-		!dx_is_equal_bool(false, dx_create_subscription_time(dscc, record_id, TIME_STAMP, NULL))) {
+	if (!dx_is_equal_int(false, dx_create_subscription_time(NULL, record_id, TIME_STAMP, OUT &subscription_time)) ||
+		!dx_is_equal_int(false, dx_create_subscription_time(dscc, -1, TIME_STAMP, OUT &subscription_time)) ||
+		!dx_is_equal_int(false, dx_create_subscription_time(dscc, record_id, TIME_STAMP, NULL))) {
 		return false;
 	}
 
@@ -287,8 +293,8 @@ bool subscription_time_test(void) {
 
 /* -------------------------------------------------------------------------- */
 
-bool event_subscription_all_test(void) {
-	bool res = true;
+int event_subscription_all_test(void) {
+	int res = true;
 
 	if (!event_subscription_test() ||
 		!subscription_time_test()) {

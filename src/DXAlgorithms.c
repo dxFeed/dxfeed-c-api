@@ -18,11 +18,14 @@
  */
 
 #ifdef _WIN32
-#include <Windows.h>
+#	pragma warning(push)
+#	pragma warning(disable : 5105)
+#	include <Windows.h>
+#	pragma warning(pop)
 #else
-#include <time.h>
-#include <stdlib.h>
-#include <wctype.h>
+#	include <time.h>
+#	include <stdlib.h>
+#	include <wctype.h>
 #endif /* _WIN32 */
 
 #include "DXAlgorithms.h"
@@ -39,7 +42,7 @@
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_is_only_single_bit_set (int value) {
+int dx_is_only_single_bit_set (int value) {
 	return (value != 0 && (value & (value - 1)) == 0);
 }
 
@@ -52,7 +55,7 @@ bool dx_is_only_single_bit_set (int value) {
 static dxf_ulong_t dx_seed;
 
 static void dx_init_randomizer (void) {
-	static bool is_randomizer_initialized = false;
+	static int is_randomizer_initialized = false;
 
 	if (!is_randomizer_initialized) {
 		is_randomizer_initialized = true;
@@ -95,7 +98,7 @@ size_t dx_random_size(size_t max_value) {
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_capacity_manager_halfer (size_t new_size, size_t* capacity) {
+int dx_capacity_manager_halfer (size_t new_size, size_t* capacity) {
 	if (new_size > *capacity) {
 		*capacity = (size_t)((double)*capacity * 1.5) + 1;
 
@@ -194,7 +197,7 @@ size_t dx_string_length (dxf_const_string_t str) {
 	return wcslen(str);
 }
 
-bool dx_string_null_or_empty(dxf_const_string_t str) {
+int dx_string_null_or_empty(dxf_const_string_t str) {
 	return str == NULL || dx_string_length(str) == 0;
 }
 
@@ -233,8 +236,6 @@ dxf_string_t dx_ansi_to_unicode (const char* ansi_str) {
 #else /* _WIN32 */
 	mbstate_t state;
 	dxf_string_t wide_str = NULL;
-	// We trust it
-	size_t len = strlen(ansi_str);
 
 	memset(&state, 0, sizeof(state));
 	mbrlen(NULL, 0, &state);
@@ -305,6 +306,65 @@ int dx_millisecond_timestamp_diff (int newer, int older) {
 	return (int)(res + (unsigned)newer - (unsigned)older);
 }
 
+void* dx_microsecond_timestamp(int sample, int get_freq) {
+#ifdef _WIN32
+	static LARGE_INTEGER StartingTime[256] = {0};
+	static LARGE_INTEGER Frequency[256] = {0};
+
+	if (sample >= 256) {
+		return NULL;
+	}
+
+	if (get_freq == true) {
+		return (void*)(&(Frequency[sample]));
+	}
+
+	QueryPerformanceFrequency(&(Frequency[sample]));
+	QueryPerformanceCounter(&(StartingTime[sample]));
+
+	return (void*)(&(StartingTime[sample]));
+#else
+	return NULL;
+#endif
+}
+
+dxf_ulong_t dx_microsecond_timestamp_diff(int newer_sample, void* newer, int older_sample, void* older) {
+#ifdef _WIN32
+	LARGE_INTEGER newer_value;
+	LARGE_INTEGER newer_freq;
+	LARGE_INTEGER older_value;
+	LARGE_INTEGER older_freq;
+
+	if (newer == NULL || older == NULL) {
+		return 0;
+	}
+
+	newer_value = *((LARGE_INTEGER*)newer);
+	newer_freq = *((LARGE_INTEGER*)dx_microsecond_timestamp(newer_sample, true));
+	older_value = *((LARGE_INTEGER*)older);
+	older_freq = *((LARGE_INTEGER*)dx_microsecond_timestamp(older_sample, true));
+
+	if (older_value.QuadPart > newer_value.QuadPart) {
+		LARGE_INTEGER temp = older_value;
+		older_value = newer_value;
+		newer_value = temp;
+		temp = older_freq;
+		older_freq = newer_freq;
+		newer_freq = temp;
+	}
+
+	LARGE_INTEGER elapsed;
+
+	elapsed.QuadPart = newer_value.QuadPart - older_value.QuadPart;
+	elapsed.QuadPart *= 1000000;
+	elapsed.QuadPart /= (newer_freq.QuadPart + older_freq.QuadPart) / 2;
+
+	return (dxf_ulong_t)elapsed.QuadPart;
+#else
+	return 0;
+#endif
+}
+
 /* -------------------------------------------------------------------------- */
 
 /**
@@ -341,7 +401,7 @@ dxf_int_t dx_get_millis_from_time(dxf_long_t millis) {
 #define EQUALS     65
 #define INVALID    66
 
-bool dx_base64_encode(const char* in, size_t in_len, char* out, size_t out_len) {
+int dx_base64_encode(const char* in, size_t in_len, char* out, size_t out_len) {
 	const char base64chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 	const uint8_t *data = (const uint8_t *)in;
 	size_t resultIndex = 0;
@@ -429,14 +489,14 @@ static const unsigned char d[] = {
 	66,66,66,66,66,66
 };
 
-bool dx_base64_decode(const char* in, size_t in_len, char* out, size_t* out_len) {
+int dx_base64_decode(const char* in, size_t in_len, char* out, size_t* out_len) {
 	const char *end = in + in_len;
 	char iter = 0;
 	uint32_t buf = 0;
 	size_t len = 0;
 
 	while (in < end) {
-		unsigned char c = d[*in++];
+		unsigned char c = d[(unsigned char)(*in++)];
 
 		switch (c) {
 			case WHITESPACE:

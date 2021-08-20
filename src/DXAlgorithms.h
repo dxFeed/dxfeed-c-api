@@ -149,7 +149,7 @@
 	(1 << (index))
 
 #define IS_FLAG_SET(flags, flag) \
-	((flags & flag) != 0)
+	((flags & (flag)) != 0)
 
 #define UNSIGNED_TYPE_dxf_int_t \
 	dxf_uint_t
@@ -163,7 +163,7 @@
 #define UNSIGNED_RIGHT_SHIFT(value, offset, type) \
 	((type)((UNSIGNED_TYPE(type))value >> offset))
 
-bool dx_is_only_single_bit_set (int value);
+int dx_is_only_single_bit_set (int value);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -471,9 +471,11 @@ size_t dx_random_size(size_t max_value);
  */
 #define DX_NUMERIC_COMPARATOR(l, r) (((l)>(r)?1:((l)<(r)?-1:0)))
 
+#define DX_FORCED_NUMERIC_COMPARATOR(l, r) (((dxf_ulong_t)(l)>(dxf_ulong_t)(r)?1:((dxf_ulong_t)(l)<(dxf_ulong_t)(r)?-1:0)))
+
 /* -------------------------------------------------------------------------- */
 
-bool dx_capacity_manager_halfer (size_t new_size, size_t* capacity);
+int dx_capacity_manager_halfer (size_t new_size, size_t* capacity);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -494,7 +496,7 @@ dxf_string_t dx_create_string_src_len (dxf_const_string_t src, size_t len);
 dxf_string_t dx_copy_string (dxf_string_t dest, dxf_const_string_t src);
 dxf_string_t dx_copy_string_len(dxf_string_t dest, dxf_const_string_t src, size_t len);
 size_t dx_string_length(dxf_const_string_t str);
-bool dx_string_null_or_empty(dxf_const_string_t str);
+int dx_string_null_or_empty(dxf_const_string_t str);
 int dx_compare_strings (dxf_const_string_t s1, dxf_const_string_t s2);
 int dx_compare_strings_num (dxf_const_string_t s1, dxf_const_string_t s2, size_t num);
 dxf_char_t dx_toupper (dxf_char_t c);
@@ -522,6 +524,9 @@ static const dxf_long_t DX_TIME_SECOND = 1000L;
 int dx_millisecond_timestamp (void);
 int dx_millisecond_timestamp_diff (int newer, int older);
 
+void* dx_microsecond_timestamp(int sample, int get_freq);
+dxf_ulong_t dx_microsecond_timestamp_diff(int newer_sample, void* newer, int older_sample, void* older);
+
 /**
  * Returns correct number of seconds with proper handling negative values and overflows.
  * Idea is that number of milliseconds shall be within [0..999]
@@ -544,8 +549,8 @@ dxf_int_t dx_get_millis_from_time(dxf_long_t millis);
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_base64_encode(const char* in, size_t in_len, char* out, size_t out_len);
-bool dx_base64_decode(const char* in, size_t in_len, char* out, size_t *out_len);
+int dx_base64_encode(const char* in, size_t in_len, char* out, size_t out_len);
+int dx_base64_decode(const char* in, size_t in_len, char* out, size_t *out_len);
 size_t dx_base64_length(size_t in_len);
 
 #ifdef _WIN32
@@ -562,8 +567,6 @@ void atomic_write_time(time_t volatile * dest, time_t src);
 
 #else
 
-#warning "no fence, no atomic read/write for 64 bit variables on 32 bit platforms, additional synchronization is needed";
-
 long long atomic_read(long long* value);
 void atomic_write(long long* dest, long long src);
 long atomic_read32(long* value);
@@ -571,6 +574,6 @@ void atomic_write32(long* dest, long src);
 time_t atomic_read_time(time_t* value);
 void atomic_write_time(time_t* dest, time_t src);
 
-#endif
+#endif //_WIN32
 
 #endif /* DX_ALGORITHMS_H_INCLUDED */

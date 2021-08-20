@@ -21,6 +21,17 @@
 #define BUFFERED_OUTPUT_H_INCLUDED
 
 #include "BufferedIOCommon.h"
+#include "DXThreads.h"
+
+typedef struct dx_buffered_output_connection_context_t {
+	dxf_byte_t* out_buffer;
+	int out_buffer_length;
+	int current_out_buffer_position;
+
+	dx_mutex_t guard;
+
+	int set_field_mask;
+} dx_buffered_output_connection_context_t;
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -29,8 +40,8 @@
 /* -------------------------------------------------------------------------- */
 
 void* dx_get_buffered_output_connection_context (dxf_connection_t connection);
-bool dx_lock_buffered_output (void* context);
-bool dx_unlock_buffered_output (void* context);
+int dx_lock_buffered_output (void* context);
+int dx_unlock_buffered_output (void* context);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -49,7 +60,7 @@ void dx_set_out_buffer_position (void* context, int new_position);
  * This method reallocates buffer if needed and copies content of old buffer into new one.
  * This method also sets the limit to the capacity.
  */
-bool dx_ensure_capacity (void* context, int required_capacity);
+int dx_ensure_capacity (void* context, int required_capacity);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -57,17 +68,17 @@ bool dx_ensure_capacity (void* context, int required_capacity);
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_write_boolean (void* context, dxf_bool_t value);
-bool dx_write_byte (void* context, dxf_byte_t value);
-bool dx_write_short (void* context, dxf_short_t value);
-bool dx_write_char (void* context, dxf_char_t value);
-bool dx_write_int (void* context, dxf_int_t value);
-bool dx_write_long (void* context, dxf_long_t value);
-bool dx_write_float (void* context, dxf_float_t value);
-bool dx_write_double (void* context, dxf_double_t value);
-bool dx_write_byte_buffer (void* context, const dxf_char_t* value);
-bool dx_write_char_buffer  (void* context, const dxf_char_t* value);
-bool dx_write_utf (void* context, dxf_const_string_t value);
+int dx_write_boolean (void* context, dxf_bool_t value);
+int dx_write_byte (void* context, dxf_byte_t value);
+int dx_write_short (void* context, dxf_short_t value);
+int dx_write_char (void* context, dxf_char_t value);
+int dx_write_int (void* context, dxf_int_t value);
+int dx_write_long (void* context, dxf_long_t value);
+int dx_write_float (void* context, dxf_float_t value);
+int dx_write_double (void* context, dxf_double_t value);
+int dx_write_byte_buffer (void* context, const dxf_char_t* value);
+int dx_write_char_buffer  (void* context, const dxf_char_t* value);
+int dx_write_utf (void* context, dxf_const_string_t value);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -75,8 +86,8 @@ bool dx_write_utf (void* context, dxf_const_string_t value);
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_write_compact_int (void* context, dxf_int_t value);
-bool dx_write_compact_long (void* context, dxf_long_t value);
+int dx_write_compact_int (void* context, dxf_int_t value);
+int dx_write_compact_long (void* context, dxf_long_t value);
 
 /*
  * Writes an array of bytes in a compact encapsulation format.
@@ -85,7 +96,7 @@ bool dx_write_compact_long (void* context, dxf_long_t value);
  * @param  bytes - the byte array to be written
  * @param  size - the size of the byte array
  */
-bool dx_write_byte_array (void* context, const dxf_byte_t* buffer, int buffer_size);
+int dx_write_byte_array (void* context, const dxf_byte_t* buffer, int buffer_size);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -99,7 +110,7 @@ bool dx_write_byte_array (void* context, const dxf_byte_t* buffer, int buffer_si
  *
  * @param code_point the code point to be written
  */
-bool dx_write_utf_char (void* context, dxf_int_t code_point);
+int dx_write_utf_char (void* context, dxf_int_t code_point);
 
 /*
  * Writes a string in a UTF-8 format with compact encapsulation.
@@ -108,6 +119,6 @@ bool dx_write_utf_char (void* context, dxf_int_t code_point);
  *
  * @param value the string to be written
  */
-bool dx_write_utf_string (void* context, dxf_const_string_t value);
+int dx_write_utf_string (void* context, dxf_const_string_t value);
 
 #endif /* BUFFERED_OUTPUT_H_INCLUDED */

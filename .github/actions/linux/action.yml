@@ -1,0 +1,23 @@
+# action.yml
+name: 'LinuxBuild'
+description: 'build linux version of dxfeed-c-api library'
+inputs:
+  command:
+    description: 'build command'
+    required: true
+  release:
+    description: ''
+    required: true
+  artifact:
+    description: 'generated artifact prefix'
+    required: true
+  notls:
+    description: 'use "no-tls" flag in build command'
+    required: false
+    default: false
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+#  args:
+#    - ${{ inputs.who-to-greet }}

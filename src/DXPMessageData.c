@@ -60,10 +60,13 @@ static const int g_recv_msg_count = sizeof(g_recv_msg_roster) / sizeof(g_recv_ms
  */
 /* -------------------------------------------------------------------------- */
 
-bool dx_is_message_type_valid (int type) {
+int dx_is_message_type_valid (int type) {
 	return type == MESSAGE_HEARTBEAT ||
 		type == MESSAGE_DESCRIBE_PROTOCOL ||
 		type == MESSAGE_DESCRIBE_RECORDS ||
+		type == MESSAGE_DESCRIBE_RESERVED ||
+		type == MESSAGE_PART ||
+		type == MESSAGE_RAW_DATA ||
 		type == MESSAGE_TICKER_DATA ||
 		type == MESSAGE_TICKER_ADD_SUBSCRIPTION ||
 		type == MESSAGE_TICKER_REMOVE_SUBSCRIPTION ||
@@ -73,13 +76,12 @@ bool dx_is_message_type_valid (int type) {
 		type == MESSAGE_HISTORY_DATA ||
 		type == MESSAGE_HISTORY_ADD_SUBSCRIPTION ||
 		type == MESSAGE_HISTORY_REMOVE_SUBSCRIPTION ||
-		type == MESSAGE_TEXT_FORMAT_COMMENT ||
-		type == MESSAGE_TEXT_FORMAT_SPECIAL;
+		type == MESSAGE_TEXT_FORMAT;
 }
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_is_data_message (int type) {
+int dx_is_data_message (int type) {
 	return type == MESSAGE_TICKER_DATA ||
 		type == MESSAGE_STREAM_DATA ||
 		type == MESSAGE_HISTORY_DATA;
@@ -87,7 +89,7 @@ bool dx_is_data_message (int type) {
 
 /* -------------------------------------------------------------------------- */
 
-bool dx_is_subscription_message (int type) {
+int dx_is_subscription_message (int type) {
 	return type == MESSAGE_TICKER_ADD_SUBSCRIPTION ||
 		type == MESSAGE_TICKER_REMOVE_SUBSCRIPTION ||
 		type == MESSAGE_STREAM_ADD_SUBSCRIPTION ||

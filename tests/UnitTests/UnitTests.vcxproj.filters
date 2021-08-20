@@ -74,9 +74,6 @@
     <ClCompile Include="..\..\src\Win32.c">
       <Filter>Common\Sources</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\EventSubscription.c">
-      <Filter>Event subscription</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\BufferedInput.c">
       <Filter>Parser\Sources</Filter>
     </ClCompile>
@@ -173,6 +170,27 @@
     <ClCompile Include="..\..\src\Version.c">
       <Filter>Common\Sources</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\EventSubscription.cpp">
+      <Filter>Event subscription</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Configuration.cpp">
+      <Filter>Common\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\WideDecimal.cpp">
+      <Filter>Common\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\BinaryQTPComposer.cpp">
+      <Filter>Common\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\BinaryQTPParser.cpp">
+      <Filter>Common\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Connection.cpp">
+      <Filter>Common\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\HeartbeatPayload.cpp">
+      <Filter>Common\Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\DXAlgorithms.h">
@@ -202,6 +220,9 @@
     <ClInclude Include="..\..\src\EventSubscription.h">
       <Filter>Event subscription</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\EventSubscription.hpp">
+      <Filter>Event subscription</Filter>
+    </ClInclude>
     <ClInclude Include="EventSubscriptionTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -209,6 +230,9 @@
       <Filter>Parser\Headers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\SymbolCodec.h">
+      <Filter>Parser\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\WideDecimal.h">
       <Filter>Parser\Headers</Filter>
     </ClInclude>
     <ClInclude Include="EventDynamicSubscriptionTest.h">
@@ -272,6 +296,27 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\DXProperties.h">
+      <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\BinaryQTPComposer.hpp">
+      <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\BinaryQTPParser.hpp">
+      <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Connection.h">
+      <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Connection.hpp">
+      <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\HeartbeatPayload.hpp">
+      <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Configuration.h">
+      <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Configuration.hpp">
       <Filter>Common\Headers</Filter>
     </ClInclude>
   </ItemGroup>
