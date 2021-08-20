@@ -65,20 +65,16 @@ Find useful information in self-service dxFeed Knowledge Base, or .NET API frame
 
 ### Windows
 
-System requirements: [Visual C++ Redistributable 2015](https://www.microsoft.com/en-us/download/details.aspx?id=52685), [.NET Framework 4.5.2+](https://www.microsoft.com/en-us/download/details.aspx?id=30653), [Visual Studio](https://visualstudio.microsoft.com/vs/).
+System requirements: [Visual C++ Redistributable 2015](https://www.microsoft.com/en-us/download/details.aspx?id=52685), [Visual Studio](https://visualstudio.microsoft.com/vs/).
 
 
-1. Download the **[latest](https://github.com/dxFeed/dxfeed-net-api/releases/latest)** version of dxFeed .NET API (`dxfeed-net-api-x.x.x-windows.zip`).
+1. Download the **[latest](https://github.com/dxFeed/dxfeed-c-api/releases/latest)** version of dxFeed C API (`dxfeed-c-api-x.x.x-windows.zip`).
 2. Extract archive.
-3. Copy `dxf_api.dll`, `dxf_native.dll`, `DXFeed.dll`, `DXFeed_64.dll`, `DXFeedd.dll`, `DXFeedd_64.dll`, `libcrypto-41.dll`, `libcrypto-41_64.dll`, `libssl-43.dll`, `libssl-43_64.dll`, `libtls-15.dll`, `libtls-15_64.dll` to `\lib` folder of your Project.
+3. Copy `DXFeed.dll`, `DXFeed_64.dll`, `DXFeedd.dll`, `DXFeedd_64.dll`, `libcrypto-41.dll`, `libcrypto-41_64.dll`, `libssl-43.dll`, `libssl-43_64.dll`, `libtls-15.dll`, `libtls-15_64.dll` to `\lib` folder of your Project.
 4. Open Visual Studio.
-5. Open Solution Explorer 🠒 Project (`.csproj` file) 🠒 References 🠒 Add Reference 🠒 Browse 🠒 Add. Then choose `dxf_api.dll`, `dxf_native.dll` libraries to add them to your Project.
-6. Open Solution Explorer 🠒 Project (`.csproj` file) 🠒 Add 🠒 Existing Item 🠒 Add As Link. Then choose `DXFeed.dll`, `DXFeed_64.dll`, `DXFeedd.dll`, `DXFeedd_64.dll`, `libcrypto-41.dll`, `libcrypto-41_64.dll`, `libssl-43.dll`, `libssl-43_64.dll`, `libtls-15.dll`, `libtls-15_64.dll` libraries to add them to your Project.
-7. Add `using` directive in class (`.cs` file):
-```csharp
-using com.dxfeed.api;
-using com.dxfeed.native;
-```
+5. Open Solution Explorer 🠒 Project (`.vcxproj` file) 🠒 References 🠒 Add Reference 🠒 Browse 🠒 Add. Then choose `dxf_api.dll`, `dxf_native.dll` libraries to add them to your Project.
+6. Open Solution Explorer 🠒 Project (`.vcxproj` file) 🠒 Add 🠒 Existing Item 🠒 Add As Link. Then choose `DXFeed.dll`, `DXFeed_64.dll`, `DXFeedd.dll`, `DXFeedd_64.dll`, `libcrypto-41.dll`, `libcrypto-41_64.dll`, `libssl-43.dll`, `libssl-43_64.dll`, `libtls-15.dll`, `libtls-15_64.dll` libraries to add them to your Project.
+7. Add `using` directive in class (`.cs` file).
 8. Look through the **[usage](#usage)** section and code **[samples](#samples)**.
 
 ---
@@ -100,22 +96,22 @@ using com.dxfeed.native;
 
 | #		| EventType			| Short description																				|Examples of original feed events	|Interface	|
 | :----:|:------------------|:----------------------------------------------------------------------------------------------|:------|:----------|
-| 1		|[Trade](https://kb.dxfeed.com/en/data-model/qd-model-of-market-events.html#trade-19593)	 			|The price and size of the last trade during regular trading hours, an overall day volume and day turnover						|Trade (last sale), trade conditions change messages, volume setting events, index value 		|[IDxTrade](https://docs.dxfeed.com/net-api/interfacecom_1_1dxfeed_1_1api_1_1events_1_1IDxTrade.html)|
-| 2		| [TradeETH](https://kb.dxfeed.com/en/data-model/qd-model-of-market-events.html#tradeeth-19593)			|The price and size of the last trade during extended trading hours, and the extended trading hours day volume and day turnover					|Trade (last sale), trade conditions change messages, volume setting events		|[IDxTradeETH](https://docs.dxfeed.com/net-api/interfacecom_1_1dxfeed_1_1api_1_1events_1_1IDxTradeETH.html)|
-| 3		|[TimeAndSale](https://kb.dxfeed.com/en/data-model/qd-model-of-market-events.html#timeandsale-19593)		|The trade or other market event with price that provides information about trades in a continuous time slice (unlike Trade events, which are supposed to provide a snapshot of the current last trade)															|Trade, index value|[IDxTimeAndSale](https://docs.dxfeed.com/net-api/interfacecom_1_1dxfeed_1_1api_1_1events_1_1IDxTimeAndSale.html)|
-| 4		|[Quote](https://kb.dxfeed.com/en/data-model/qd-model-of-market-events.html#quote-19593)				|The best bid and ask prices and other fields that may change with each quote. It represents the most recent information that is available about the best quote on the market																	|BBO Quote (bid/ask), regional Quote (bid/ask) |[IDxQuote](https://docs.dxfeed.com/net-api/interfacecom_1_1dxfeed_1_1api_1_1events_1_1IDxQuote.html)|
-| 5		|[Order](https://kb.dxfeed.com/en/data-model/dxfeed-api-market-events.html#orders)				|Depending on the **`Scope`** flag it may be: composite BBO from the whole market **or** regional BBO from a particular exchange **or** aggregated information (e.g. *PLB - price level book*) **or** individual order (*FOD - full order depth*)																				|Regional Quote (bid/ask), depth (order books, price levels, market maker quotes), market depth|[IDxOrder](https://docs.dxfeed.com/net-api/interfacecom_1_1dxfeed_1_1api_1_1events_1_1IDxOrder.html)|
-| 6		|[SpreadOrder](https://kb.dxfeed.com/en/data-model/dxfeed-api-market-events.html#spreadorder)		|Multi-leg order															|Regional Quote (bid/ask), depth (order books, price levels, market maker quotes), market depth|[IDxSpreadOrder](https://docs.dxfeed.com/net-api/interfacecom_1_1dxfeed_1_1api_1_1events_1_1IDxSpreadOrder.html)||
-| 7		| Candle			|OHLCV candle																					|Charting aggregations|[IDxCandle](https://docs.dxfeed.com/net-api/interfacecom_1_1dxfeed_1_1api_1_1events_1_1IDxCandle.html)|
-| 8		|[Profile](https://kb.dxfeed.com/en/data-model/qd-model-of-market-events.html#profile-19593)			|The most recent information that is available about the traded security on the market																		|Instrument definition, trading halt/resume messages|[IDxProfile](https://docs.dxfeed.com/net-api/interfacecom_1_1dxfeed_1_1api_1_1events_1_1IDxProfile.html)|
-| 9		|[Summary](https://kb.dxfeed.com/en/data-model/qd-model-of-market-events.html#summary-19593)			|The most recent OHLC information about the trading session on the market														|OHLC setting events (trades, explicit hi/lo update messages, explicit summary messages)|[IDxSummary](https://docs.dxfeed.com/net-api/interfacecom_1_1dxfeed_1_1api_1_1events_1_1IDxSummary.html)|
-| 10	|[Greeks](https://kb.dxfeed.com/en/data-model/dxfeed-api-market-events.html#greeks)			|Differential values that show how the price of an option depends on other market parameters		|Greeks and Black-Scholes implied volatility|[IDxGreeks](https://docs.dxfeed.com/net-api/interfacecom_1_1dxfeed_1_1api_1_1events_1_1IDxGreeks.html)|
-| 11	|[TheoPrice](https://kb.dxfeed.com/en/data-model/dxfeed-api-market-events.html#theoprice)			|The theoretical option price					|Theoretical prices|[IDxTheoPrice](https://docs.dxfeed.com/net-api/interfacecom_1_1dxfeed_1_1api_1_1events_1_1IDxTheoPrice.html)|
-| 12	|[Underlying](https://kb.dxfeed.com/en/data-model/dxfeed-api-market-events.html#underlying)		|Calculated values that are available for an option underlying symbol based on the option prices on the market																|VIX methodology implied volatility, P/C ratios|[IDxUnderlying](https://docs.dxfeed.com/net-api/interfacecom_1_1dxfeed_1_1api_1_1events_1_1IDxUnderlying.html)||
-| 13	|[Series](https://kb.dxfeed.com/en/data-model/dxfeed-api-market-events.html#series)			|Properties of the underlying																	|VIX methodology implied volatility, P/C ratios|[IDxSeries](https://docs.dxfeed.com/net-api/interfacecom_1_1dxfeed_1_1api_1_1events_1_1IDxSeries.html)|
+| 1		|[Trade](https://kb.dxfeed.com/en/data-model/qd-model-of-market-events.html#trade-19593)	 			|The price and size of the last trade during regular trading hours, an overall day volume and day turnover						|Trade (last sale), trade conditions change messages, volume setting events, index value 		|[dxf_trade_t](https://docs.dxfeed.com/c-api/structdxf__trade__t.html)|
+| 2		| [TradeETH](https://kb.dxfeed.com/en/data-model/qd-model-of-market-events.html#tradeeth-19593)			|The price and size of the last trade during extended trading hours, and the extended trading hours day volume and day turnover					|Trade (last sale), trade conditions change messages, volume setting events		|[dxf_trade_t](https://docs.dxfeed.com/c-api/structdxf__trade__t.html)|
+| 3		|[TimeAndSale](https://kb.dxfeed.com/en/data-model/qd-model-of-market-events.html#timeandsale-19593)		|The trade or other market event with price that provides information about trades in a continuous time slice (unlike Trade events, which are supposed to provide a snapshot of the current last trade)															|Trade, index value|[dxf_time_and_sale_t](https://docs.dxfeed.com/c-api/structdxf__time__and__sale.html)|
+| 4		|[Quote](https://kb.dxfeed.com/en/data-model/qd-model-of-market-events.html#quote-19593)				|The best bid and ask prices and other fields that may change with each quote. It represents the most recent information that is available about the best quote on the market																	|BBO Quote (bid/ask), regional Quote (bid/ask) |[dxf_quote_t](https://docs.dxfeed.com/c-api/structdxf__quote__t.html)|
+| 5		|[Order](https://kb.dxfeed.com/en/data-model/dxfeed-api-market-events.html#orders)				|Depending on the **`scope`** flag it may be: composite BBO from the whole market **or** regional BBO from a particular exchange **or** aggregated information (e.g. *PLB - price level book*) **or** individual order (*FOD - full order depth*)																				|Regional Quote (bid/ask), depth (order books, price levels, market maker quotes), market depth|[dxf_order_t](https://docs.dxfeed.com/c-api/structdxf__order__t.html)|
+| 6		|[SpreadOrder](https://kb.dxfeed.com/en/data-model/dxfeed-api-market-events.html#spreadorder)		|Multi-leg order															|Regional Quote (bid/ask), depth (order books, price levels, market maker quotes), market depth|[dxf_order_t](https://docs.dxfeed.com/c-api/structdxf__order__t.html)||
+| 7		| Candle			|OHLCV candle																					|Charting aggregations|[dxf_candle_t](https://docs.dxfeed.com/c-api/structdxf__candle__t.html)|
+| 8		|[Profile](https://kb.dxfeed.com/en/data-model/qd-model-of-market-events.html#profile-19593)			|The most recent information that is available about the traded security on the market																		|Instrument definition, trading halt/resume messages|[dxf_profile_t](https://docs.dxfeed.com/c-api/structdxf__profile.html)|
+| 9		|[Summary](https://kb.dxfeed.com/en/data-model/qd-model-of-market-events.html#summary-19593)			|The most recent OHLC information about the trading session on the market														|OHLC setting events (trades, explicit hi/lo update messages, explicit summary messages)|[dxf_summary_t](https://docs.dxfeed.com/c-api/structdxf__summary.html)|
+| 10	|[Greeks](https://kb.dxfeed.com/en/data-model/dxfeed-api-market-events.html#greeks)			|Differential values that show how the price of an option depends on other market parameters		|Greeks and Black-Scholes implied volatility|[dxf_greeks_t](https://docs.dxfeed.com/c-api/structdxf__greeks.html)|
+| 11	|[TheoPrice](https://kb.dxfeed.com/en/data-model/dxfeed-api-market-events.html#theoprice)			|The theoretical option price					|Theoretical prices|[dx_theo_price_t](https://docs.dxfeed.com/c-api/structdx__theo__price.html)|
+| 12	|[Underlying](https://kb.dxfeed.com/en/data-model/dxfeed-api-market-events.html#underlying)		|Calculated values that are available for an option underlying symbol based on the option prices on the market																|VIX methodology implied volatility, P/C ratios|[dxf_underlying_t](https://docs.dxfeed.com/c-api/structdxf__underlying.html)||
+| 13	|[Series](https://kb.dxfeed.com/en/data-model/dxfeed-api-market-events.html#series)			|Properties of the underlying																	|VIX methodology implied volatility, P/C ratios|[dxf_series_t](https://docs.dxfeed.com/c-api/structdxf__series.html)|
 
 
-|:information_source: CODE SAMPLE:  take a look at `EventType` usage in  [dxf_events_sample](https://github.com/dxFeed/dxfeed-net-api/tree/master/samples/dxf_events_sample), [dxf_candle_sample](https://github.com/dxFeed/dxfeed-net-api/tree/master/samples/dxf_candle_sample)|
+|:information_source: CODE SAMPLE:  take a look at `event_type` usage in  [CommandLineSample](https://github.com/dxFeed/dxfeed-c-api/blob/master/samples/CommandLineSample/CommandLineSample.c#L791)|
 | --- |
 
 |:white_check_mark: READ MORE: [Events to be published for different feed types, feed types and events matrix](https://kb.dxfeed.com/en/data-model/model-of-event-publishing.html#events-to-be-published-for-different-feed-types)|
@@ -124,7 +120,7 @@ using com.dxfeed.native;
 ---
 #### Contracts
 
-There are three types of delivery contracts: **`Ticker`**, **`Stream`** and **`History`**. You can set up the contract type by **[EventSubscriptionFlag](https://docs.dxfeed.com/net-api/namespacecom_1_1dxfeed_1_1api_1_1data.html#a5e593e65b38494fc19218527ea9eb4ac)** as a parameter of **[NativeConnection](https://docs.dxfeed.com/net-api/classcom_1_1dxfeed_1_1native_1_1NativeConnection.html)**.
+There are three types of delivery contracts: **`Ticker`**, **`Stream`** and **`History`**. You can set up the contract type by **[dx_event_subscr_flag](https://docs.dxfeed.com/c-api/group__event-data-structures-event-subscription-stuff.html#gae8e76cef31f87fb8cce2c50fd02986d5)** as a parameter of **[dxf_create_subscription_with_flags](https://docs.dxfeed.com/c-api/group__c-api-basic-subscription-functions.html#ga72d2af657437fb51a803daf55b4bbaf3)**.
   
 ##### Ticker
 The main task of this contract is to reliably deliver the latest value for an event (for example, for the last trade of the selected symbol). Queued older events could be conflated to conserve bandwidth and resources.
@@ -135,7 +131,7 @@ A stream contract guaranteedly delivers a stream of events without conflation.
 ##### History
 History contract first delivers a snapshot (set of previous events) for the specified time range (subject to limitations). After the snapshot is transmitted, the history contract delivers a stream of events.
 
-|:information_source: NOTE: if **[EventSubscriptionFlag](https://docs.dxfeed.com/net-api/namespacecom_1_1dxfeed_1_1api_1_1data.html#a5e593e65b38494fc19218527ea9eb4ac)** is not set, the default contract type will be enabled.|
+|:information_source: NOTE: if **[dx_event_subscr_flag](https://docs.dxfeed.com/c-api/group__event-data-structures-event-subscription-stuff.html#gae8e76cef31f87fb8cce2c50fd02986d5)** is not set, the default contract type will be enabled.|
 | --- |
 
 Default contracts for events:
@@ -152,7 +148,7 @@ Default contracts for events:
 |Underlying			|					|			|	
 
 
-|:information_source: CODE SAMPLE: take a look at `EventSubscriptionFlag` usage in [dxf_client](https://github.com/dxFeed/dxfeed-net-api/blob/master/dxf_client/Program.cs#L309)|
+|:information_source: CODE SAMPLE: take a look at `dx_event_subscr_flag` usage in [CommandLineSample](https://github.com/dxFeed/dxfeed-c-api/blob/master/samples/CommandLineSample/CommandLineSample.c#L786)|
 | --- |
 
 |:white_check_mark: READ MORE: [Event delivery contracts](https://kb.dxfeed.com/en/data-model/model-of-event-publishing.html#event-delivery-contracts)|
@@ -165,8 +161,8 @@ Default contracts for events:
 
 |#		|Subscription type			| Description			| Code sample	|
 |:-----:|:------------------|:------------------|:----------|
-|1|[CreateSubscription](https://docs.dxfeed.com/net-api/classcom_1_1dxfeed_1_1native_1_1NativeConnection.html#a3d6ec48184c5ca089cd1b8df2addbba0)					|Creates subscription to an event 					|[dxf_events_sample](https://github.com/dxFeed/dxfeed-net-api/tree/master/samples/dxf_events_sample)				|
-|2|[CreateSnapshotSubscription](https://docs.dxfeed.com/net-api/classcom_1_1dxfeed_1_1native_1_1NativeConnection.html#a7daf40732ea72fd061139ce74fe0889c)			|Creates a snapshot subscription				|[dxf_snapshot_sample](https://github.com/dxFeed/dxfeed-net-api/tree/master/samples/dxf_snapshot_sample)			|
+|1|[dxf_create_subscription](https://docs.dxfeed.com/c-api/group__c-api-basic-subscription-functions.html#ga94011b154c8836ff9a1d9018939f89cf)					|Creates subscription to an event 					|[dxf_events_sample](https://github.com/dxFeed/dxfeed-net-api/tree/master/samples/dxf_events_sample)				|
+|2|[dxf_create_snapshot](https://docs.dxfeed.com/c-api/group__c-api-snapshots.html#gaa3469159e760af9b1c58fa80b5de5630)			|Creates a snapshot subscription				|[dxf_snapshot_sample](https://github.com/dxFeed/dxfeed-net-api/tree/master/samples/dxf_snapshot_sample)			|
 |3|[CreateIncOrderSnapshotSubscription](https://docs.dxfeed.com/net-api/classcom_1_1dxfeed_1_1native_1_1NativeConnection.html#ad34451234590a5727fea7284ff24f5b4) |Creates the new native subscription to Order snapshot with incremental updates 		|[dxf_inc_order_snapshot_sample](https://github.com/dxFeed/dxfeed-net-api/tree/master/samples/dxf_inc_order_snapshot_sample)|
 |4|[CreatePriceLevelBook](https://docs.dxfeed.com/net-api/classcom_1_1dxfeed_1_1native_1_1NativeConnection.html#a836f311b5f0ea07dbeb40a49d34f7dfb) |Creates the new price level book (10 levels) for the specified symbol and sources 		|[dxf_price_level_book_sample](https://github.com/dxFeed/dxfeed-net-api/tree/master/samples/dxf_price_level_book_sample)|
 |5|[CreateRegionalBook](https://docs.dxfeed.com/net-api/classcom_1_1dxfeed_1_1native_1_1NativeConnection.html#a9548fc1f0ad480a4e1259366d30afdeb) |Creates a regional price level book (10 levels) 		|[dxf_regional_book_sample](https://github.com/dxFeed/dxfeed-net-api/tree/master/samples/dxf_regional_book_sample)|
