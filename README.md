@@ -1,8 +1,9 @@
-#  ![logo1][]![logo2][] dxFeed C API 
+#  ![logo1][]![logo2][]![logo3][] dxFeed C API 
 
 
 [logo1]: docs/img/dxfeed_logo.png
-[logo2]: docs/img/cpp_logo.png
+[logo2]: docs/img/c_logo.png
+[logo3]: docs/img/cpp_logo.png
 
 
 This package provides access to **[dxFeed](https://www.dxfeed.com/)** market data.
