@@ -595,7 +595,7 @@ int parse_symbols(char* symbols_string, OUT dxf_string_t** symbols, OUT int* sym
 }
 ```
 
-```csharp
+```cpp
 void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count, void* user_data) {
 	wprintf(L"%ls{symbol=%ls, ", dx_event_type_to_string(event_type), symbol_name);
 
@@ -611,8 +611,7 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 ```
 
 
-```csharp
-
+```cpp
 int main()
 {
 	dxf_connection_t connection;
