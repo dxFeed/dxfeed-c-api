@@ -166,8 +166,8 @@ Default contracts for events (*in most cases*):
 
 #### Listiner attachement
 
-|#		|Method				|Handle			|Callback listener 		| Code sample|
-|:-----:|:------------------|:--------------------------|:------------------|:-----------|
+|#		|Method				|Handle			|Callback listener 		|
+|:-----:|:------------------|:--------------------------|:------------------|
 |1|[dxf_attach_event_listener](https://docs.dxfeed.com/c-api/group__c-api-event-listener-functions.html#gab1fbf4332e2d48d7be81e1360f24d3ce)					|[dxf_subscription_t](https://docs.dxfeed.com/c-api/DXTypes_8h.html#a38b7d04b0d74a4bd070cf2e991b396fc)|[dxf_event_listener_t](https://docs.dxfeed.com/c-api/group__event-data-structures-event-subscription-stuff.html#gac8bcb70cd4c8857f286f4be65e9522c6)					|[CommandLineSample](https://github.com/dxFeed/dxfeed-c-api/blob/master/samples/CommandLineSample/CommandLineSample.c#L805)				|
 |2|[dxf_attach_snapshot_listener](https://docs.dxfeed.com/c-api/group__c-api-snapshots.html#gaefbb7eadd35487a1e076dd7d3e20cd1e)|[dxf_snapshot_t](https://docs.dxfeed.com/c-api/DXTypes_8h.html#a93805d1b84e366f3654ac2f889edf74e)|[dxf_snapshot_listener_t](https://docs.dxfeed.com/c-api/group__c-api-snapshots.html#ga6a855f3cc13129a3a7df7669e504d7de)				|[SnapshotConsoleSample](https://github.com/dxFeed/dxfeed-c-api/blob/master/samples/SnapshotConsoleSample/SnapshotConsoleSample.c#L685)		|
 |3|[dxf_attach_price_level_book_listener](https://docs.dxfeed.com/c-api/group__c-api-price-level-book.html#ga7b9909bae236e8638e79f3b054d49278) |[dxf_price_level_book_t](https://docs.dxfeed.com/c-api/DXTypes_8h.html#a0129dd405921e4752f1f1a4cd20ee6cb)|[dxf_price_level_book_listener_t](https://docs.dxfeed.com/c-api/group__c-api-price-level-book.html#ga0bb93d79baa953f829ff9b4d2791c87b) 		|[PriceLevelBookSample](https://github.com/dxFeed/dxfeed-c-api/blob/master/samples/PriceLevelBookSample/PriceLevelBookSample.c#L344)|
@@ -177,7 +177,7 @@ Default contracts for events (*in most cases*):
 
 #### Order sources
 
-Order source in most cases identifies source of **`Order`** and **`SpreadOrder`** events. You can set Order source in subscription creation method (e.g. **`order_source_ptr`** in **[dxf_create_order_snapshot](https://github.com/dxFeed/dxfeed-c-api/blob/master/samples/SnapshotConsoleSample/SnapshotConsoleSample.c#L666)**) or by **[dxf_set_order_source()](https://docs.dxfeed.com/c-api/group__c-api-orders.html#gaf83819db83afb12e6691cd73be91b2ea)**. Several supported sources are listed below. Please find the full list **[here](https://kb.dxfeed.com/en/data-model/qd-model-of-market-events.html#UUID-858ebdb1-0127-8577-162a-860e97bfe408_para-idm53255963764388)**.
+Order source in most cases identifies source of **`Order`** and **`SpreadOrder`** events. You can set Order source in subscription creation method (e.g. **`order_source_ptr`** in **[dxf_create_order_snapshot()](https://github.com/dxFeed/dxfeed-c-api/blob/master/samples/SnapshotConsoleSample/SnapshotConsoleSample.c#L666)**) or by **[dxf_set_order_source()](https://docs.dxfeed.com/c-api/group__c-api-orders.html#gaf83819db83afb12e6691cd73be91b2ea)**. Several supported sources are listed below. Please find the full list **[here](https://kb.dxfeed.com/en/data-model/qd-model-of-market-events.html#UUID-858ebdb1-0127-8577-162a-860e97bfe408_para-idm53255963764388)**.
 
 *Aggregated*:
 
