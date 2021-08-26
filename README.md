@@ -35,7 +35,7 @@ This package provides access to **[dxFeed](https://www.dxfeed.com/)** market dat
 
 
 ## Documentation
-Find useful information in self-service dxFeed Knowledge Base, or .NET API framework documentation:
+Find useful information in self-service dxFeed Knowledge Base, or C API framework documentation:
 
 - [dxFeed Knowledge Base](https://kb.dxfeed.com/index.html?lang=en)
   * [Getting started](https://kb.dxfeed.com/en/getting-started.html)
