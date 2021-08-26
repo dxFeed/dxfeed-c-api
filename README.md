@@ -5,7 +5,7 @@
 This package provides access to **[dxFeed](https://www.dxfeed.com/)** market data.
 
 [![Release](https://img.shields.io/github/v/release/dxFeed/dxfeed-c-api)](https://github.com/dxFeed/dxfeed-c-api/releases/latest)
-[![License](https://img.shields.io/badge/license-MPL--2.0-orange)](https://github.com/dxFeed/dxfeed-net-api/blob/master/LICENSE)
+[![License](https://img.shields.io/badge/license-MPL--2.0-orange)](https://github.com/dxFeed/dxfeed-c-api/blob/master/LICENSE)
 [![Downloads](https://img.shields.io/github/downloads/dxFeed/dxfeed-c-api/total)](https://github.com/dxFeed/dxfeed-c-api/releases/latest)
 
 
@@ -46,13 +46,11 @@ Find useful information in self-service dxFeed Knowledge Base, or .NET API frame
   * [Exchange codes](https://kb.dxfeed.com/en/data-model/exchange-codes.html)
   * [Order sources](https://kb.dxfeed.com/en/data-model/qd-model-of-market-events.html#UUID-858ebdb1-0127-8577-162a-860e97bfe408_para-idm53255963764388)
   * [Order book reconstruction](https://kb.dxfeed.com/en/data-model/dxfeed-order-book-reconstruction.html)
-  * [Incremental updates](https://kb.dxfeed.com/en/data-services/real-time-data-services/-net-api-incremental-updates.html)
-  * [IPF live updates](https://kb.dxfeed.com/en/data-services/real-time-data-services/ipf-live-updates.html#-net-api)
   * [Symbol guide](https://downloads.dxfeed.com/specifications/dxFeed-Symbol-Guide.pdf)
-- [dxFeed .NET API framework Documentation](https://docs.dxfeed.com/net-api/index.html?_ga=2.192331050.1892162722.1627897412-849088511.1627377760)
-  * [Order scopes](https://docs.dxfeed.com/net-api/namespacecom_1_1dxfeed_1_1api_1_1data.html#ac2ccba635376abd940e96dd7e2664470)
-  * [Event flags](https://docs.dxfeed.com/net-api/namespacecom_1_1dxfeed_1_1api_1_1data.html#af7e07c19db7804bc4727483f0c59fe4d)
-  * [Subscriptions](https://docs.dxfeed.com/net-api/classcom_1_1dxfeed_1_1native_1_1NativeConnection.html#ad34451234590a5727fea7284ff24f5b4)
+- [dxFeed С API framework Documentation](https://docs.dxfeed.com/c-api/index.html?_ga=2.205912859.947963636.1629966027-849088511.1627377760)
+  * [Order scopes](https://docs.dxfeed.com/c-api/group__event-data-structures-order-spread-order.html#ga78939b26eeb8eb1798e348451db90093)
+  * [Event flags](https://docs.dxfeed.com/c-api/group__event-data-structures-event-subscription-stuff.html#ga3b406a7d463b6cc5fc2e14f33990b103)
+  * [Subscriptions](https://docs.dxfeed.com/c-api/group__c-api-basic-subscription-functions.html)
 
 
 
@@ -228,7 +226,7 @@ Order source in most cases identifies source of **`Order`** and **`SpreadOrder`*
 
 #### Create connection
 
-```csharp
+```cpp
 //connection handler declaration
 dxf_connection_t connection;
 //creating connection result declaration
@@ -241,7 +239,7 @@ connection_result = dxf_create_connection(dxfeed_host, on_reader_thread_terminat
 
 #### Create subscription
 
-```csharp
+```cpp
 //subscription handler declaration
 dxf_subscription_t subscription;
 //creating subscription result declaration
@@ -254,7 +252,7 @@ subscription_result = dxf_create_subscription(connection, event_type, &subscript
 
 #### Setting up contract type
 
-```csharp
+```cpp
 //creating subscription handler with Ticker contract
 subscription_result = dxf_create_subscription_with_flags(connection, event_type, dx_esf_force_ticker, &subscription);
 ```
@@ -263,7 +261,7 @@ subscription_result = dxf_create_subscription_with_flags(connection, event_type,
 
 #### Setting up symbol
 
-```csharp
+```cpp
 //adding array of symbols
 dxf_add_symbols(subscription, (dxf_const_string_t*)symbols, symbol_count)
 ```
@@ -272,7 +270,7 @@ dxf_add_symbols(subscription, (dxf_const_string_t*)symbols, symbol_count)
 
 #### Setting up Order source
 
-```csharp
+```cpp
 //setting Nasdaq TotalView FOD source
 dxf_set_order_source(subscription, "NTV")
 ```
@@ -282,418 +280,41 @@ dxf_set_order_source(subscription, "NTV")
 #### Quote subscription
 
 ```cpp
-#ifdef _WIN32
-#	pragma warning(push)
-#	pragma warning(disable : 5105)
-#	include <Windows.h>
-#	pragma warning(pop)
-#else
-#	include <stdlib.h>
-#	include <string.h>
-#	include <unistd.h>
-#	include <wctype.h>
-#	define stricmp strcasecmp
-#endif
-
-#include <inttypes.h>
 #include <stdio.h>
 #include <time.h>
-
-#include "DXErrorCodes.h"
 #include "DXFeed.h"
-
-#ifndef __cplusplus
-#	ifndef true
-#		define true 1
-#	endif
-
-#	ifndef false
-#		define false 0
-#	endif
-#endif
-
-#if !defined(_WIN32) || defined(USE_PTHREADS)
-#	include "pthread.h"
-#	ifndef USE_PTHREADS
-#		define USE_PTHREADS
-#	endif
-typedef pthread_t dxs_thread_t;
-typedef pthread_key_t dxs_key_t;
-typedef struct {
-	pthread_mutex_t mutex;
-	pthread_mutexattr_t attr;
-} dxs_mutex_t;
-#else /* !defined(_WIN32) || defined(USE_PTHREADS) */
-typedef HANDLE dxs_thread_t;
-typedef DWORD dxs_key_t;
-typedef LPCRITICAL_SECTION dxs_mutex_t;
-#endif /* !defined(_WIN32) || defined(USE_PTHREADS) */
-
-
-#ifdef _WIN32
-// To fix problem with MS implementation of swprintf
-#	define swprintf _snwprintf
-HANDLE g_out_console;
-
-void dxs_sleep(int milliseconds) { Sleep((DWORD)milliseconds); }
-
-int dxs_mutex_create(dxs_mutex_t* mutex) {
-	*mutex = calloc(1, sizeof(CRITICAL_SECTION));
-	InitializeCriticalSection(*mutex);
-	return true;
-}
-
-int dxs_mutex_destroy(dxs_mutex_t* mutex) {
-	DeleteCriticalSection(*mutex);
-	free(*mutex);
-	return true;
-}
-
-int dxs_mutex_lock(dxs_mutex_t* mutex) {
-	EnterCriticalSection(*mutex);
-	return true;
-}
-
-int dxs_mutex_unlock(dxs_mutex_t* mutex) {
-	LeaveCriticalSection(*mutex);
-	return true;
-}
-#else
-#	include "pthread.h"
-
-void dxs_sleep(int milliseconds) {
-	struct timespec ts;
-	ts.tv_sec = milliseconds / 1000;
-	ts.tv_nsec = (milliseconds % 1000) * 1000000;
-	nanosleep(&ts, NULL);
-}
-
-int dxs_mutex_create(dxs_mutex_t* mutex) {
-	if (pthread_mutexattr_init(&mutex->attr) != 0) {
-		return false;
-	}
-
-	if (pthread_mutexattr_settype(&mutex->attr, PTHREAD_MUTEX_RECURSIVE) != 0) {
-		return false;
-	}
-
-	if (pthread_mutex_init(&mutex->mutex, &mutex->attr) != 0) {
-		return false;
-	}
-
-	return true;
-}
-
-int dxs_mutex_destroy(dxs_mutex_t* mutex) {
-	if (pthread_mutex_destroy(&mutex->mutex) != 0) {
-		return false;
-	}
-
-	if (pthread_mutexattr_destroy(&mutex->attr) != 0) {
-		return false;
-	}
-
-	return true;
-}
-
-int dxs_mutex_lock(dxs_mutex_t* mutex) {
-	if (pthread_mutex_lock(&mutex->mutex) != 0) {
-		return false;
-	}
-
-	return true;
-}
-
-int dxs_mutex_unlock(dxs_mutex_t* mutex) {
-	if (pthread_mutex_unlock(&mutex->mutex) != 0) {
-		return false;
-	}
-
-	return true;
-}
-
-#endif	//_WIN32
-
-static int is_listener_thread_terminated = false;
-static dxs_mutex_t listener_thread_guard;
-
-void process_last_error() {
-	int error_code = dx_ec_success;
-	dxf_const_string_t error_descr = NULL;
-	int res;
-
-	res = dxf_get_last_error(&error_code, &error_descr);
-
-	if (res == DXF_SUCCESS) {
-		if (error_code == dx_ec_success) {
-			wprintf(L"No error information is stored");
-			return;
-		}
-
-		wprintf(
-			L"Error occurred and successfully retrieved:\n"
-			L"error code = %d, description = \"%ls\"\n",
-			error_code, error_descr);
-		return;
-	}
-
-	wprintf(L"An error occurred but the error subsystem failed to initialize\n");
-}
-
-int is_thread_terminate() {
-	int res;
-	dxs_mutex_lock(&listener_thread_guard);
-	res = is_listener_thread_terminated;
-	dxs_mutex_unlock(&listener_thread_guard);
-
-	return res;
-}
-
-void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
-	(void)connection;
-	(void)user_data;
-	dxs_mutex_lock(&listener_thread_guard);
-	is_listener_thread_terminated = true;
-	dxs_mutex_unlock(&listener_thread_guard);
-
-	wprintf(L"\nTerminating listener thread\n");
-	process_last_error();
-}
-
-dxf_const_string_t connection_status_to_string(dxf_connection_status_t status) {
-	switch (status) {
-		case dxf_cs_not_connected:
-			return L"Not connected";
-		case dxf_cs_connected:
-			return L"Connected";
-		case dxf_cs_login_required:
-			return L"Login required";
-		case dxf_cs_authorized:
-			return L"Authorized";
-		default:
-			return L"";
-	}
-
-	return L"";
-}
-
-void on_connection_status_changed(dxf_connection_t connection, dxf_connection_status_t old_status, dxf_connection_status_t new_status, void* user_data) {
-	wprintf(L"The connection status has been changed: %ls -> %ls\n", connection_status_to_string(old_status), connection_status_to_string(new_status));
-}
-
 void print_timestamp(dxf_long_t timestamp) {
 	wchar_t timefmt[80];
-
 	struct tm* timeinfo;
 	time_t tmpint = (time_t)(timestamp / 1000);
 	timeinfo = localtime(&tmpint);
 	wcsftime(timefmt, 80, L"%Y%m%d-%H%M%S", timeinfo);
 	wprintf(L"%ls", timefmt);
 }
-
-dxf_string_t ansi_to_unicode(const char* ansi_str, size_t len) {
-#ifdef _WIN32
-	dxf_string_t wide_str = NULL;
-
-	// get required size
-	int wide_size = MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, ansi_str, (int)len, wide_str, 0);
-
-	if (wide_size > 0) {
-		wide_str = calloc(wide_size + 1, sizeof(dxf_char_t));
-		MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, ansi_str, (int)len, wide_str, wide_size);
-	}
-
-	return wide_str;
-#else  /* _WIN32 */
-	dxf_string_t wide_str = NULL;
-	size_t wide_size = mbstowcs(NULL, ansi_str, len);  // len is ignored
-
-	if (wide_size > 0 && wide_size != (size_t)-1) {
-		wide_str = calloc(len + 1, sizeof(dxf_char_t));
-		mbstowcs(wide_str, ansi_str, len);
-	}
-
-	return wide_str;
-#endif /* _WIN32 */
-}
-
-int get_next_substring(OUT char** substring_start, OUT size_t* substring_length) {
-	char* string = *substring_start;
-	char* sep_pos;
-	if (strlen(string) == 0) return false;
-	// remove separators from begin of string
-	while ((sep_pos = strchr(string, ',')) == string) {
-		string++;
-		if (strlen(string) == 0) return false;
-	}
-	if (sep_pos == NULL)
-		*substring_length = strlen(string);
-	else
-		*substring_length = sep_pos - string;
-	*substring_start = string;
-	return true;
-}
-
-void free_symbols(dxf_string_t* symbols, int symbol_count) {
-	int i;
-	if (symbols == NULL) return;
-	for (i = 0; i < symbol_count; i++) {
-		free(symbols[i]);
-	}
-	free(symbols);
-}
-
-int parse_symbols(char* symbols_string, OUT dxf_string_t** symbols, OUT int* symbol_count) {
-	int count = 0;
-	char* next_string = symbols_string;
-	size_t next_len = 0;
-	dxf_string_t* symbol_array = NULL;
-	if (symbols_string == NULL || symbols == NULL || symbol_count == NULL) {
-		wprintf(L"Invalid input parameter.\n");
-		return false;
-	}
-	while (get_next_substring(&next_string, &next_len)) {
-		dxf_string_t symbol = ansi_to_unicode(next_string, next_len);
-
-		if (symbol == NULL) {
-			free_symbols(symbol_array, count);
-			return false;
-		}
-
-		if (symbol_array == NULL) {
-			symbol_array = calloc(count + 1, sizeof(dxf_string_t));
-			if (symbol_array == NULL) {
-				free(symbol);
-				return false;
-			}
-			symbol_array[count] = symbol;
-		} else {
-			dxf_string_t* temp = calloc(count + 1, sizeof(dxf_string_t));
-			if (temp == NULL) {
-				free_symbols(symbol_array, count);
-				free(symbol);
-				return false;
-			}
-			memcpy(temp, symbol_array, count * sizeof(dxf_string_t));
-			temp[count] = symbol;
-			free(symbol_array);
-			symbol_array = temp;
-		}
-
-		count++;
-		next_string += next_len;
-	}
-
-	*symbols = symbol_array;
-	*symbol_count = count;
-
-	return true;
-}
-```
-
-```cpp
-void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count, void* user_data) {
-	wprintf(L"%ls{symbol=%ls, ", dx_event_type_to_string(event_type), symbol_name);
-
+void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
+			  void* user_data) {
+	wprintf(L"%Quote{symbol=%ls, ", symbol_name);
 	dxf_quote_t* q = (dxf_quote_t*)data;
-
 	wprintf(L"bidTime=");
 	print_timestamp(q->bid_time);
-	wprintf(L" bidExchangeCode=%c, bidPrice=%.15g, bidSize=%.15g, ", q->bid_exchange_code, q->bid_price, q->bid_size);
+	wprintf(L" bidExchangeCode=%c, bidPrice=%f, bidSize=%i, ", q->bid_exchange_code, q->bid_price, q->bid_size);
 	wprintf(L"askTime=");
 	print_timestamp(q->ask_time);
-	wprintf(L" askExchangeCode=%c, askPrice=%.15g, askSize=%.15g, scope=%d}\n", q->ask_exchange_code, q->ask_price, q->ask_size, (int)q->scope);
+	wprintf(L" askExchangeCode=%c, askPrice=%f, askSize=%i, scope=%d}\n", q->ask_exchange_code, q->ask_price,
+			q->ask_size, (int)q->scope);
 }
-```
-
-
-```cpp
-int main()
-{
-	dxf_connection_t connection;
-	dxf_subscription_t subscription;
-   	dxf_string_t* symbols = NULL;
-	int symbol_count = 0;
-	int program_timeout = 604800;
-
-	if (!parse_symbols("AAPL", &symbols, &symbol_count)) return -1;
-
-	dxs_mutex_create(&listener_thread_guard);
-
-	ERRORCODE connection_result;
-	connection_result = dxf_create_connection("demo.dxfeed.com:7300", on_reader_thread_terminate, on_connection_status_changed, NULL, NULL, NULL, &connection);
-
-	if (connection_result == DXF_FAILURE) {
-		free_symbols(symbols, symbol_count);
-		process_last_error();
-		dxs_mutex_destroy(&listener_thread_guard);
-
-		return 10;
-	}
-
-	wprintf(L"Connected\n");
-
-	ERRORCODE subscription_result;
-	subscription_result = dxf_create_subscription(connection, DXF_ET_QUOTE, &subscription);
-
-	if (subscription_result == DXF_FAILURE) {
-		free_symbols(symbols, symbol_count);
-		process_last_error();
-		dxf_close_connection(connection);
-		dxs_mutex_destroy(&listener_thread_guard);
-
-		return 30;
-	}
-	
-	if (!dxf_attach_event_listener(subscription, listener, NULL)) {
-		free_symbols(symbols, symbol_count);
-		process_last_error();
-		dxf_close_subscription(subscription);
-		dxf_close_connection(connection);
-		dxs_mutex_destroy(&listener_thread_guard);
-
-		return 31;
-	}
-
-	if (!dxf_add_symbols(subscription, (dxf_const_string_t*)symbols, symbol_count)) {
-		free_symbols(symbols, symbol_count);
-		process_last_error();
-		dxf_close_subscription(subscription);
-		dxf_close_connection(connection);
-		dxs_mutex_destroy(&listener_thread_guard);
-
-		return 32;
-	}
-
-	wprintf(L"Subscribed\n");
-	free_symbols(symbols, symbol_count);
-
-	while (!is_thread_terminate() && program_timeout--) {
-		dxs_sleep(1000);
-	}
-
-	wprintf(L"Unsubscribing...\n");
-
-	if (!dxf_close_subscription(subscription)) {
-		process_last_error();
-		dxs_mutex_destroy(&listener_thread_guard);
-
-		return 33;
-	}
-
-	wprintf(L"Disconnecting from host...\n");
-
-	if (!dxf_close_connection(connection)) {
-		process_last_error();
-		dxs_mutex_destroy(&listener_thread_guard);
-
-		return 12;
-	}
-
-	wprintf(L"Disconnected\n");
-
-	dxs_mutex_destroy(&listener_thread_guard);
-
+int main(int argc, char* argv[]) {
+	dxf_connection_t con;
+	dxf_subscription_t sub;
+	dxf_create_connection("demo.dxfeed.com:7300", NULL, NULL, NULL, NULL, NULL, &con);
+	dxf_create_subscription(con, DXF_ET_QUOTE, &sub);
+	dxf_const_string_t symbols2[] = {L"AAPL"};
+	dxf_attach_event_listener(sub, listener, NULL);
+	dxf_add_symbols(sub, symbols2, sizeof(symbols2) / sizeof(symbols2[0]));
+	wprintf(L"Press enter to stop\n");
+	getchar();
+	dxf_close_subscription(sub);
+	dxf_close_connection(con);
 	return 0;
 }
 ```
@@ -703,17 +324,13 @@ int main()
 **Output:**
 
 ```
-The connection status has been changed: Not connected -> Connected
-Connected
-Subscribed
-The connection status has been changed: Connected -> Authorized
-Quote{symbol=AAPL, bidTime=20210825-164753 bidExchangeCode=A, bidPrice=149.56, bidSize=0, askTime=20210825-164810 askExchangeCode=A, askPrice=149.58, askSize=0, scope=1}
-Quote{symbol=AAPL, bidTime=20210825-164834 bidExchangeCode=B, bidPrice=149.22, bidSize=1, askTime=20210825-164820 askExchangeCode=B, askPrice=149.76, askSize=1, scope=1}
-Quote{symbol=AAPL, bidTime=20210825-164032 bidExchangeCode=C, bidPrice=142.31, bidSize=1, askTime=20210825-164500 askExchangeCode=C, askPrice=157.14, askSize=1, scope=1}
-Quote{symbol=AAPL, bidTime=20170704-054404 bidExchangeCode=D, bidPrice=646.49, bidSize=0, askTime=20170704-054404 askExchangeCode=D, askPrice=653.37, askSize=0, scope=1}
-Quote{symbol=AAPL, bidTime=20210825-164834 bidExchangeCode=H, bidPrice=149.44, bidSize=1, askTime=20210825-164834 askExchangeCode=H, askPrice=149.47, askSize=1, scope=1}
+Quote{symbol=AAPL, bidTime=20210826-174935 bidExchangeCode=A, bidPrice=148.020000, bidSize=0, askTime=20210826-174936 askExchangeCode=A, askPrice=148.050000, askSize=0, scope=1}
+Quote{symbol=AAPL, bidTime=20210826-174901 bidExchangeCode=B, bidPrice=147.710000, bidSize=0, askTime=20210826-174916 askExchangeCode=B, askPrice=148.280000, askSize=0, scope=1}
+Quote{symbol=AAPL, bidTime=20210826-174901 bidExchangeCode=C, bidPrice=147.740000, bidSize=0, askTime=20210826-174901 askExchangeCode=C, askPrice=148.210000, askSize=0, scope=1}
+Quote{symbol=AAPL, bidTime=20170704-054404 bidExchangeCode=D, bidPrice=646.490000, bidSize=0, askTime=20170704-054404 askExchangeCode=D, askPrice=653.370000, askSize=0, scope=1}
+Quote{symbol=AAPL, bidTime=20210826-174930 bidExchangeCode=H, bidPrice=147.560000, bidSize=0, askTime=20210826-174933 askExchangeCode=H, askPrice=148.200000, askSize=0, scope=1}
 Quote{symbol=AAPL, bidTime=19700101-030000 bidExchangeCode=I, bidPrice=nan, bidSize=0, askTime=19700101-030000 askExchangeCode=I, askPrice=nan, askSize=0, scope=1}
-Quote{symbol=AAPL, bidTime=20210825-164827 bidExchangeCode=J, bidPrice=149, bidSize=1, askTime=20210825-164834 askExchangeCode=J, askPrice=149.47, askSize=1, scope=1}
+Quote{symbol=AAPL, bidTime=20210826-174935 bidExchangeCode=J, bidPrice=147.890000, bidSize=0, askTime=20210826-174935 askExchangeCode=J, askPrice=148.220000, askSize=0, scope=1}
 ```
 
 ---
