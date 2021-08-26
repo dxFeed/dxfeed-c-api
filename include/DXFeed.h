@@ -1256,7 +1256,7 @@ DXFEED_API ERRORCODE dxf_detach_regional_book_listener(dxf_regional_book_t book,
  *
  * @details This callback will be invoked when new regional quotes are received.
  *
- * @param[in] book      A handle of the book to which a listener is to be detached
+ * @param[in] book      A handle of the book to which a listener is to be attached
  * @param[in] listener  A listener callback function pointer
  * @param[in] user_data Data to be passed to the callback function
  *
