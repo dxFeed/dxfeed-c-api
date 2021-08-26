@@ -83,7 +83,7 @@ System requirements: [Visual C++ Redistributable 2015](https://www.microsoft.com
 
 #### Event types
 
-| #		| EventType			| Short description																				|Examples of original feed events	|Interface	|
+| #		| EventType			| Short description																				|Examples of original feed events	|Struct	|
 | :----:|:------------------|:----------------------------------------------------------------------------------------------|:------|:----------|
 | 1		|[Trade](https://kb.dxfeed.com/en/data-model/qd-model-of-market-events.html#trade-19593)	 			|The price and size of the last trade during regular trading hours, an overall day volume and day turnover						|Trade (last sale), trade conditions change messages, volume setting events, index value 		|[dxf_trade_t](https://docs.dxfeed.com/c-api/structdxf__trade__t.html)|
 | 2		| [TradeETH](https://kb.dxfeed.com/en/data-model/qd-model-of-market-events.html#tradeeth-19593)			|The price and size of the last trade during extended trading hours, and the extended trading hours day volume and day turnover					|Trade (last sale), trade conditions change messages, volume setting events		|[dxf_trade_t](https://docs.dxfeed.com/c-api/structdxf__trade__t.html)|
