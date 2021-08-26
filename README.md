@@ -1,4 +1,5 @@
 #  ![logo1][]![logo2][]![logo3][] dxFeed C API 
+#  ![](docs/img/dxfeed_logo.png)![](docs/img/c_logo.png)![](docs/img/cpp_logo.png) dxFeed C API 
 
 
 [logo1]: docs/img/dxfeed_logo.png
