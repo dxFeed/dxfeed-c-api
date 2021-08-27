@@ -1,4 +1,4 @@
-#  ![](docs/img/dxfeed_logo.png)![](docs/img/c_logo.png)![](docs/img/cpp_logo.png) dxFeed C API 
+#  ![](docs/img/dxfeed_c_logo.svg)
 
 
 
