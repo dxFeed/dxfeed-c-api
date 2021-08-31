@@ -175,7 +175,7 @@ Order source in most cases identifies source of **`Order`** and **`SpreadOrder`*
 
 *Aggregated*:
 
-* AGGREGATE_ASK, AGGREGATE_BID - Ask, Bid side of an aggregate order book (futures depth and Nasdaq Level II).
+* AGGREGATE_ASK, AGGREGATE_BID - Ask, Bid side of an aggregate order book (futures depth and Nasdaq Level II)
 
   ---
  *Full order depth*:
