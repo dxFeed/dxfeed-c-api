@@ -158,7 +158,7 @@ Default contracts for events (*in most cases*):
 
 ---
 
-#### Listiner attachement
+#### Listener attachement
 
 |#		|Method				|Handle			|Callback listener 		|
 |:-----:|:------------------|:--------------------------|:------------------|
@@ -175,43 +175,43 @@ Order source in most cases identifies source of **`Order`** and **`SpreadOrder`*
 
 *Aggregated*:
 
-* AGGREGATE_ASK, AGGREGATE_BID - Ask, Bid side of an aggregate order book (futures depth and Nasdaq Level II).
+ AGGREGATE_ASK, AGGREGATE_BID - Ask, Bid side of an aggregate order book (futures depth and Nasdaq Level II).
 
   ---
  *Full order depth*:
    
-  * BATE - Cboe EU BXE (BATE).
-  * BYX - Cboe BYX.
-  * BZX - Cboe BZX.
-  * BXTR - Cboe EU SI (Systematic Internaliser).
-  * BI20 - BIST Top20 Orders (Level2+).
- * CHIX - Cboe EU CXE (Chi-X).
- * CEUX - Cboe EU DXE.
-  * CFE - Cboe CFE.
-  * C2OX - Cboe C2.
-  * DEA - Cboe EDGA.
-  * DEX - Cboe EDGX.
-  * ERIS - ErisX.
-  * ESPD - Nasdaq E-speed.
-  * FAIR - FairX.
-  * GLBX - Globex.
-  * ICE - ICE Futures US/EU.
-   * IST - Borsa Istanbul.
-   * MEMX - Members Exchange.
-  * NTV - Nasdaq TotalView.
-  * NFX - Nasdaq NFX.
-* SMFE - SmallEx.
- * XNFI - Nasdaq NFI.
- * XEUR - Eurex.
+ BATE - Cboe EU BXE (BATE).
+ BYX - Cboe BYX.
+ BZX - Cboe BZX.
+ BXTR - Cboe EU SI (Systematic Internaliser).
+ BI20 - BIST Top20 Orders (Level2+).
+ CHIX - Cboe EU CXE (Chi-X).
+ CEUX - Cboe EU DXE.
+ CFE - Cboe CFE.
+ C2OX - Cboe C2.
+ DEA - Cboe EDGA.
+ DEX - Cboe EDGX.
+ ERIS - ErisX.
+ ESPD - Nasdaq E-speed.
+ FAIR - FairX.
+ GLBX - Globex.
+ ICE - ICE Futures US/EU.
+ IST - Borsa Istanbul.
+ MEMX - Members Exchange.
+ NTV - Nasdaq TotalView.
+ NFX - Nasdaq NFX.
+ SMFE - SmallEx.
+ XNFI - Nasdaq NFI.
+ XEUR - Eurex.
  ---
 *Price level book*:
  
-  * glbx - CME Globex.
-  * iex - IEX.
-  * memx - Members Exchange.
-  * ntv - Nasdaq TotalView.
-  * smfe - SmallEx.
-  * xeur - Eurex.
+ glbx - CME Globex.
+ iex - IEX.
+ memx - Members Exchange.
+ ntv - Nasdaq TotalView.
+ smfe - SmallEx.
+ xeur - Eurex.
     
 
 | :information_source: CODE SAMPLE: take a look at `order_sources_ptr` usage in  [PriceLevelBookSample](https://github.com/dxFeed/dxfeed-c-api/blob/master/samples/PriceLevelBookSample/PriceLevelBookSample.c#L334)|
