@@ -39,6 +39,7 @@
 #include <inttypes.h>
 #include <stdio.h>
 #include <time.h>
+#include <stddef.h>
 
 #include "DXErrorCodes.h"
 #include "DXFeed.h"
