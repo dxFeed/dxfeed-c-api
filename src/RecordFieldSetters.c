@@ -286,6 +286,7 @@ FIELD_STDOPS_BODIES(dx_order_t, mmid, dxf_int_t)
 
 FIELD_STDOPS_BODIES(dx_time_and_sale_t, time, dxf_int_t)
 FIELD_STDOPS_BODIES(dx_time_and_sale_t, sequence, dxf_int_t)
+FIELD_STDOPS_BODIES(dx_time_and_sale_t, time_nanos, dxf_int_t)
 FIELD_STDOPS_BODIES(dx_time_and_sale_t, exchange_code, dxf_char_t)
 FIELD_STDOPS_BODIES(dx_time_and_sale_t, price, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_time_and_sale_t, size, dxf_double_t)

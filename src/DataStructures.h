@@ -69,7 +69,20 @@ typedef enum {
 	dx_fid_flag_serial_object = 0xf0, // serialized object as byte array
 
 	dx_fid_mask_serialization = 0x0f,
-	dx_fid_mask_representation = 0xf0
+	dx_fid_mask_representation = 0xf0,
+
+	dx_fid_flag_wide_decimal_by_compact_int = dx_fid_compact_int | dx_fid_flag_wide_decimal,
+	dx_fid_flag_wd_by_ci = dx_fid_flag_wide_decimal_by_compact_int,
+	dx_fid_flag_date_by_compact_int = dx_fid_compact_int | dx_fid_flag_date,
+	dx_fid_flag_date_by_ci = dx_fid_flag_date_by_compact_int,
+	dx_fid_flag_time_seconds_by_compact_int = dx_fid_compact_int | dx_fid_flag_time_seconds,
+	dx_fid_flag_sec_by_ci = dx_fid_flag_time_seconds_by_compact_int,
+	dx_fid_flag_time_millis_by_compact_int = dx_fid_compact_int | dx_fid_flag_time_millis,
+	dx_fid_flag_millis_by_ci = dx_fid_flag_time_millis_by_compact_int,
+	dx_fid_flag_long_by_compact_int = dx_fid_compact_int | dx_fid_flag_long,
+	dx_fid_flag_long_by_ci = dx_fid_flag_long_by_compact_int,
+	dx_fid_flag_sequence_by_compact_int = dx_fid_compact_int | dx_fid_flag_sequence,
+	dx_fid_flag_seq_by_ci = dx_fid_flag_sequence_by_compact_int,
 } dx_field_id_t;
 
 /* -------------------------------------------------------------------------- */
@@ -84,7 +97,9 @@ typedef enum {
 
 typedef struct {
 	int type;
-	dxf_const_string_t name;
+	dxf_const_string_t field_name;
+	dxf_const_string_t field_property_name;
+	dxf_const_string_t event_property_name;
 	dx_record_field_setter_t setter;
 	dx_record_field_def_val_getter_t def_val_getter;
 	dx_record_field_getter_t getter;

@@ -219,6 +219,7 @@ DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_order_t, mmid)
 
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_time_and_sale_t, time)
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_time_and_sale_t, sequence)
+DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_time_and_sale_t, time_nanos)
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_time_and_sale_t, exchange_code)
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_time_and_sale_t, price)
 DX_RECORD_FIELD_STDOPS_PROTOTYPES(dx_time_and_sale_t, size)
