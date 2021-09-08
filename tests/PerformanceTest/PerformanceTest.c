@@ -24,6 +24,7 @@
 #endif
 
 #include <inttypes.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -67,7 +68,6 @@ typedef LPCRITICAL_SECTION dxs_mutex_t;
 #ifdef _WIN32
 // To fix problem with MS implementation of swprintf
 #	define swprintf _snwprintf
-HANDLE g_out_console;
 
 void dxs_sleep(int milliseconds) { Sleep((DWORD)milliseconds); }
 
@@ -231,8 +231,8 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 
 		wprintf(L"index=0x%" LS(PRIX64) L", side=%i, scope=%i, time=", o->index, o->side, o->scope);
 		print_timestamp(o->time);
-		wprintf(L", exchange code=%c, market maker=%ls, price=%.15g, size=%.15g, count=%.15g}\n",
-				o->exchange_code, o->market_maker, o->price, o->size, o->count);
+		wprintf(L", exchange code=%c, market maker=%ls, price=%.15g, size=%.15g, count=%.15g}\n", o->exchange_code,
+				o->market_maker, o->price, o->size, o->count);
 	}
 
 	if (event_type == DXF_ET_TRADE) {
@@ -385,7 +385,6 @@ void destroy_unicode_symbols(dxf_string_t* symbols, size_t count) {
 
 	free(symbols);
 }
-
 
 /* -------------------------------------------------------------------------- */
 

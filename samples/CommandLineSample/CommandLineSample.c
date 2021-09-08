@@ -37,9 +37,9 @@
 #endif
 
 #include <inttypes.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <time.h>
-#include <stddef.h>
 
 #include "DXErrorCodes.h"
 #include "DXFeed.h"
@@ -65,7 +65,7 @@ typedef struct {
 	pthread_mutex_t mutex;
 	pthread_mutexattr_t attr;
 } dxs_mutex_t;
-#else /* !defined(_WIN32) || defined(USE_PTHREADS) */
+#else  /* !defined(_WIN32) || defined(USE_PTHREADS) */
 typedef HANDLE dxs_thread_t;
 typedef DWORD dxs_key_t;
 typedef LPCRITICAL_SECTION dxs_mutex_t;
@@ -74,7 +74,6 @@ typedef LPCRITICAL_SECTION dxs_mutex_t;
 #ifdef _WIN32
 // To fix problem with MS implementation of swprintf
 #	define swprintf _snwprintf
-HANDLE g_out_console;
 
 void dxs_sleep(int milliseconds) { Sleep((DWORD)milliseconds); }
 
@@ -288,8 +287,8 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 
 		wprintf(L"index=0x%llX, side=%i, scope=%i, time=", o->index, o->side, o->scope);
 		print_timestamp(o->time);
-		wprintf(L", exchange code=%c, market maker=%ls, price=%.15g, size=%.15g", o->exchange_code,
-				o->market_maker, o->price, o->size);
+		wprintf(L", exchange code=%c, market maker=%ls, price=%.15g, size=%.15g", o->exchange_code, o->market_maker,
+				o->price, o->size);
 
 		if (wcslen(o->source) > 0) wprintf(L", source=%ls", o->source);
 
@@ -365,8 +364,8 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 		wprintf(
 			L", sequence=%i, exchange code=%c, price=%.15g, size=%.15g, source=%ls, "
 			L"count=%.15g, flags=%i, spread symbol=%ls}\n",
-			o->sequence, o->exchange_code, o->price, o->size, wcslen(o->source) > 0 ? o->source : L"",
-			o->count, o->event_flags, wcslen(o->spread_symbol) > 0 ? o->spread_symbol : L"");
+			o->sequence, o->exchange_code, o->price, o->size, wcslen(o->source) > 0 ? o->source : L"", o->count,
+			o->event_flags, wcslen(o->spread_symbol) > 0 ? o->spread_symbol : L"");
 	}
 
 	if (event_type == DXF_ET_GREEKS) {

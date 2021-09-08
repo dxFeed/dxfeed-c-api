@@ -23,10 +23,12 @@
 #	endif
 #endif
 
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <wctype.h>
 #include <string.h>
+#include <wctype.h>
+
 #include "DXErrorCodes.h"
 #include "DXFeed.h"
 #include "Logger.h"
@@ -37,7 +39,6 @@ typedef struct {
 	int Y;
 } COORD;
 #endif
-
 
 #if !defined(_WIN32) || defined(USE_PTHREADS)
 #	include "pthread.h"
@@ -156,8 +157,6 @@ int dxs_mutex_unlock(dxs_mutex_t* mutex) {
 }
 
 #endif	//_WIN32
-
-
 
 static char dxfeed_host_default[] = "demo.dxfeed.com:7300";
 // const char dxfeed_host[] = "localhost:5678";
@@ -312,7 +311,8 @@ void trade_listener(int event_type, dxf_const_string_t symbol_name, const dxf_ev
 	event_info[dx_eid_trade].total_data_count[ind] += data_count;
 
 	coord.Y += ind + 1;
-	swprintf(buf, DXT_BUF_LEN, L"%5ls: %6d/%6d", symbol_name, data_count, event_info[dx_eid_trade].total_data_count[ind]);
+	swprintf(buf, DXT_BUF_LEN, L"%5ls: %6d/%6d", symbol_name, data_count,
+			 event_info[dx_eid_trade].total_data_count[ind]);
 	print_at(coord, buf);
 }
 
@@ -507,7 +507,8 @@ void trade_eth_listener(int event_type, dxf_const_string_t symbol_name, const dx
 	event_info[dx_eid_trade_eth].total_data_count[ind] += data_count;
 
 	coord.Y += ind + 1;
-	swprintf(buf, DXT_BUF_LEN, L"%5ls: %6d/%6d", symbol_name, data_count, event_info[dx_eid_trade_eth].total_data_count[ind]);
+	swprintf(buf, DXT_BUF_LEN, L"%5ls: %6d/%6d", symbol_name, data_count,
+			 event_info[dx_eid_trade_eth].total_data_count[ind]);
 	print_at(coord, buf);
 }
 
@@ -911,7 +912,8 @@ int atoi2(char* str, int* result) {
 }
 
 void print_usage() {
-	wprintf(L"Usage: FullTest [<host>] [<timeout>] [-h|--help|-?]\n"
+	wprintf(
+		L"Usage: FullTest [<host>] [<timeout>] [-h|--help|-?]\n"
 		L"  <host>       - dxfeed host (default: demo.dxfeed.com:7300)\n"
 		L"  <timeout>    - timeout in seconds (default: 10000)\n"
 		L"  -h|--help|-? - print usage\n\n");
