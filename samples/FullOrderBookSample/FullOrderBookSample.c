@@ -51,6 +51,7 @@ typedef LPCRITICAL_SECTION dxs_mutex_t;
 #endif /* !defined(_WIN32) || defined(USE_PTHREADS) */
 
 #include <inttypes.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <time.h>
 
@@ -71,11 +72,10 @@ typedef LPCRITICAL_SECTION dxs_mutex_t;
 #ifdef _WIN32
 // To fix problem with MS implementation of swprintf
 #	define swprintf _snwprintf
-HANDLE g_out_console;
 
 void dxs_sleep(int milliseconds) { Sleep((DWORD)milliseconds); }
 
-int dxs_mutex_create(dxs_mutex_t* mutex) {
+int dxs_mutex_create(dxs_mutex_t *mutex) {
 	*mutex = calloc(1, sizeof(CRITICAL_SECTION));
 	InitializeCriticalSection(*mutex);
 	return true;
@@ -83,7 +83,7 @@ int dxs_mutex_create(dxs_mutex_t* mutex) {
 
 /* -------------------------------------------------------------------------- */
 
-int dxs_mutex_destroy(dxs_mutex_t* mutex) {
+int dxs_mutex_destroy(dxs_mutex_t *mutex) {
 	DeleteCriticalSection(*mutex);
 	free(*mutex);
 	return true;
@@ -91,14 +91,14 @@ int dxs_mutex_destroy(dxs_mutex_t* mutex) {
 
 /* -------------------------------------------------------------------------- */
 
-int dxs_mutex_lock(dxs_mutex_t* mutex) {
+int dxs_mutex_lock(dxs_mutex_t *mutex) {
 	EnterCriticalSection(*mutex);
 	return true;
 }
 
 /* -------------------------------------------------------------------------- */
 
-int dxs_mutex_unlock(dxs_mutex_t* mutex) {
+int dxs_mutex_unlock(dxs_mutex_t *mutex) {
 	LeaveCriticalSection(*mutex);
 	return true;
 }
@@ -112,7 +112,7 @@ void dxs_sleep(int milliseconds) {
 	nanosleep(&ts, NULL);
 }
 
-int dxs_mutex_create(dxs_mutex_t* mutex) {
+int dxs_mutex_create(dxs_mutex_t *mutex) {
 	if (pthread_mutexattr_init(&mutex->attr) != 0) {
 		return false;
 	}
@@ -130,7 +130,7 @@ int dxs_mutex_create(dxs_mutex_t* mutex) {
 
 /* -------------------------------------------------------------------------- */
 
-int dxs_mutex_destroy(dxs_mutex_t* mutex) {
+int dxs_mutex_destroy(dxs_mutex_t *mutex) {
 	if (pthread_mutex_destroy(&mutex->mutex) != 0) {
 		return false;
 	}
@@ -144,7 +144,7 @@ int dxs_mutex_destroy(dxs_mutex_t* mutex) {
 
 /* -------------------------------------------------------------------------- */
 
-int dxs_mutex_lock(dxs_mutex_t* mutex) {
+int dxs_mutex_lock(dxs_mutex_t *mutex) {
 	if (pthread_mutex_lock(&mutex->mutex) != 0) {
 		return false;
 	}
@@ -154,7 +154,7 @@ int dxs_mutex_lock(dxs_mutex_t* mutex) {
 
 /* -------------------------------------------------------------------------- */
 
-int dxs_mutex_unlock(dxs_mutex_t* mutex) {
+int dxs_mutex_unlock(dxs_mutex_t *mutex) {
 	if (pthread_mutex_unlock(&mutex->mutex) != 0) {
 		return false;
 	}
@@ -250,7 +250,7 @@ dxf_string_t ansi_to_unicode(const char *ansi_str) {
 	}
 
 	return wide_str;
-#else /* _WIN32 */
+#else  /* _WIN32 */
 	dxf_string_t wide_str = NULL;
 	size_t wide_size = mbstowcs(NULL, ansi_str, 0);	 // 0 is ignored
 
@@ -289,8 +289,8 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void *user_data) {
 
 		wprintf(L"   {index=0x%llX, side=%i, scope=%i, time=", order.index, order.side, order.scope);
 		print_timestamp(order.time);
-		wprintf(L", exchange code=%c, market maker=%ls, price=%.15g, size=%.15g, executed size=%.15g", order.exchange_code, order.market_maker,
-				order.price, order.size, order.executed_size);
+		wprintf(L", exchange code=%c, market maker=%ls, price=%.15g, size=%.15g, executed size=%.15g",
+				order.exchange_code, order.market_maker, order.price, order.size, order.executed_size);
 		if (wcslen(order.source) > 0) wprintf(L", source=%ls", order.source);
 		wprintf(L", count=%.15g", order.count);
 
@@ -450,8 +450,8 @@ int main(int argc, char *argv[]) {
 
 	ERRORCODE connection_result;
 	if (token != NULL && token[0] != '\0') {
-		connection_result = dxf_create_connection_auth_bearer(host, token, on_reader_thread_terminate, NULL,
-															  NULL, NULL, NULL, &connection);
+		connection_result = dxf_create_connection_auth_bearer(host, token, on_reader_thread_terminate, NULL, NULL, NULL,
+															  NULL, &connection);
 	} else {
 		connection_result =
 			dxf_create_connection(host, on_reader_thread_terminate, NULL, NULL, NULL, NULL, &connection);

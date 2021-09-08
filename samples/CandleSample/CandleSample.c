@@ -30,22 +30,24 @@
 #	define stricmp strcasecmp
 #endif
 
-#include "DXFeed.h"
-#include "DXErrorCodes.h"
-#include <time.h>
+#include <stddef.h>
 #include <stdio.h>
+#include <time.h>
+
+#include "DXErrorCodes.h"
+#include "DXFeed.h"
 
 #define true 1
 #define false 0
 
 // plus the name of the executable
-#define STATIC_PARAMS_COUNT 3
-#define TIME_PARAM_SHORT_TAG "-t"
+#define STATIC_PARAMS_COUNT	  3
+#define TIME_PARAM_SHORT_TAG  "-t"
 #define TOKEN_PARAM_SHORT_TAG "-T"
 #define LOG_DATA_TRANSFER_TAG "-p"
-#define TIMEOUT_TAG "-o"
+#define TIMEOUT_TAG			  "-o"
 
-//Prevents file names globbing (converting * to all files in the current dir)
+// Prevents file names globbing (converting * to all files in the current dir)
 #ifdef __MINGW64_VERSION_MAJOR
 int _CRT_glob = 0;
 #endif
@@ -71,7 +73,6 @@ int is_thread_terminate() {
 	return res;
 }
 #endif
-
 
 /* -------------------------------------------------------------------------- */
 
@@ -102,30 +103,30 @@ void print_timestamp(dxf_long_t timestamp) {
 
 /* -------------------------------------------------------------------------- */
 
-void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data,
-			int data_count, void* user_data) {
+void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
+			  void* user_data) {
 	dxf_int_t i = 0;
 	dxf_candle_t* candles = NULL;
 
 	wprintf(L"%ls{symbol=%ls, ", dx_event_type_to_string(event_type), symbol_name);
 
-	if (event_type != DXF_ET_CANDLE)
-		return;
+	if (event_type != DXF_ET_CANDLE) return;
 	candles = (dxf_candle_t*)data;
 
 	for (; i < data_count; ++i) {
 		wprintf(L"time=");
 		print_timestamp(candles[i].time);
-		wprintf(L", sequence=%d, count=%.15g, open=%.15g, high=%.15g, low=%.15g, close=%.15g, volume=%.15g, "
+		wprintf(
+			L", sequence=%d, count=%.15g, open=%.15g, high=%.15g, low=%.15g, close=%.15g, volume=%.15g, "
 			L"VWAP=%.15g, bidVolume=%.15g, askVolume=%.15g, impVolatility=%.15g, OpenInterest=%.15g}\n",
-			candles[i].sequence, candles[i].count, candles[i].open, candles[i].high,
-			candles[i].low, candles[i].close, candles[i].volume, candles[i].vwap,
-			candles[i].bid_volume, candles[i].ask_volume, candles[i].imp_volatility, candles[i].open_interest);
+			candles[i].sequence, candles[i].count, candles[i].open, candles[i].high, candles[i].low, candles[i].close,
+			candles[i].volume, candles[i].vwap, candles[i].bid_volume, candles[i].ask_volume, candles[i].imp_volatility,
+			candles[i].open_interest);
 	}
 }
 /* -------------------------------------------------------------------------- */
 
-void process_last_error () {
+void process_last_error() {
 	int error_code = dx_ec_success;
 	dxf_const_string_t error_descr = NULL;
 	int res;
@@ -138,7 +139,8 @@ void process_last_error () {
 			return;
 		}
 
-		wprintf(L"Error occurred and successfully retrieved:\n"
+		wprintf(
+			L"Error occurred and successfully retrieved:\n"
 			L"error code = %d, description = \"%ls\"\n",
 			error_code, error_descr);
 		return;
@@ -148,7 +150,7 @@ void process_last_error () {
 }
 
 /* -------------------------------------------------------------------------- */
-dxf_string_t ansi_to_unicode (const char* ansi_str) {
+dxf_string_t ansi_to_unicode(const char* ansi_str) {
 #ifdef _WIN32
 	size_t len = strlen(ansi_str);
 	dxf_string_t wide_str = NULL;
@@ -162,9 +164,9 @@ dxf_string_t ansi_to_unicode (const char* ansi_str) {
 	}
 
 	return wide_str;
-#else /* _WIN32 */
+#else  /* _WIN32 */
 	dxf_string_t wide_str = NULL;
-	size_t wide_size = mbstowcs(NULL, ansi_str, 0); // 0 is ignored
+	size_t wide_size = mbstowcs(NULL, ansi_str, 0);	 // 0 is ignored
 
 	if (wide_size > 0 && wide_size != (size_t)-1) {
 		wide_str = calloc(wide_size + 1, sizeof(dxf_char_t));
@@ -175,7 +177,7 @@ dxf_string_t ansi_to_unicode (const char* ansi_str) {
 #endif /* _WIN32 */
 }
 
-int atoi2(char *str, int *result) {
+int atoi2(char* str, int* result) {
 	if (str == NULL || str[0] == '\0' || result == NULL) {
 		return false;
 	}
@@ -205,7 +207,7 @@ int parse_date(const char* date_str, struct tm* time_struct) {
 	size_t i;
 	size_t date_string_len = strlen(date_str);
 	int separator_count = 0;
-	char buf[DATE_TIME_BUF_SIZE + 1] = { 0 };
+	char buf[DATE_TIME_BUF_SIZE + 1] = {0};
 	int mday = 0;
 	int month = 0;
 	int year = 0;
@@ -214,11 +216,9 @@ int parse_date(const char* date_str, struct tm* time_struct) {
 		if (date_str[i] == '-') {
 			if (separator_count == 0) {
 				if (!atoi2(buf, &mday)) return false;
-			}
-			else if (separator_count == 1) {
+			} else if (separator_count == 1) {
 				if (!atoi2(buf, &month)) return false;
-			}
-			else
+			} else
 				return false;
 			separator_count++;
 			memset(buf, 0, DATE_TIME_BUF_SIZE);
@@ -226,15 +226,13 @@ int parse_date(const char* date_str, struct tm* time_struct) {
 		}
 
 		size_t buf_len = strlen(buf);
-		if (buf_len >= DATE_TIME_BUF_SIZE)
-			return false;
+		if (buf_len >= DATE_TIME_BUF_SIZE) return false;
 		buf[buf_len] = date_str[i];
 	}
 
 	if (!atoi2(buf, &year)) return false;
 
-	if (mday == 0 || month == 0 || year == 0)
-		return false;
+	if (mday == 0 || month == 0 || year == 0) return false;
 
 	time_struct->tm_mday = mday;
 	time_struct->tm_mon = month - 1;
@@ -243,7 +241,7 @@ int parse_date(const char* date_str, struct tm* time_struct) {
 	return true;
 }
 
-int main (int argc, char* argv[]) {
+int main(int argc, char* argv[]) {
 	dxf_connection_t connection;
 	dxf_subscription_t subscription;
 	int event_type = DXF_ET_CANDLE;
@@ -265,20 +263,25 @@ int main (int argc, char* argv[]) {
 	if (argc < STATIC_PARAMS_COUNT) {
 		printf(
 			"DXFeed candle console sample.\n"
-			"Usage: CandleSample <server address>|<path> <symbol> [" TIME_PARAM_SHORT_TAG " <DD-MM-YYYY>] "
-			"[" TOKEN_PARAM_SHORT_TAG " <token>] [" LOG_DATA_TRANSFER_TAG "] [" TIMEOUT_TAG	" <timeout>]\n"
+			"Usage: CandleSample <server address>|<path> <symbol> [" TIME_PARAM_SHORT_TAG
+			" <DD-MM-YYYY>] "
+			"[" TOKEN_PARAM_SHORT_TAG " <token>] [" LOG_DATA_TRANSFER_TAG "] [" TIMEOUT_TAG
+			" <timeout>]\n"
 			"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
 			"  <path>           - The path to file with candle data (tape or non zipped Candle Web Service output)\n"
 			"  <symbol>         - The trade symbol, e.g. C, MSFT, YHOO, IBM\n"
 			"  " TIME_PARAM_SHORT_TAG
 			" <DD-MM-YYYY>  - The time which candle started\n"
-			"  " TOKEN_PARAM_SHORT_TAG " <token>       - The authorization token\n"
-			"  " LOG_DATA_TRANSFER_TAG "               - Enables the packets logging\n"
-			"  " TIMEOUT_TAG " <timeout>     - Sets the program timeout in seconds (default = 604800, i.e a week)\n"
+			"  " TOKEN_PARAM_SHORT_TAG
+			" <token>       - The authorization token\n"
+			"  " LOG_DATA_TRANSFER_TAG
+			"               - Enables the packets logging\n"
+			"  " TIMEOUT_TAG
+			" <timeout>     - Sets the program timeout in seconds (default = 604800, i.e a week)\n"
 			"Examples: \n"
 			"    %s demo.dxfeed.com:7300 AAPL&Q{=m}\n"
-			"    %s ./candledata_file AAPL&Q{=m}\n", argv[0], argv[0]
-			);
+			"    %s ./candledata_file AAPL&Q{=m}\n",
+			argv[0], argv[0]);
 
 		return 0;
 	}
@@ -292,7 +295,7 @@ int main (int argc, char* argv[]) {
 
 	char* token = NULL;
 	int log_data_transfer_flag = false;
-	int program_timeout = 604800; // a week
+	int program_timeout = 604800;  // a week
 
 	if (argc > STATIC_PARAMS_COUNT) {
 		int time_is_set = false;
@@ -353,7 +356,8 @@ int main (int argc, char* argv[]) {
 #endif
 
 	if (token != NULL && token[0] != '\0') {
-		if (!dxf_create_connection_auth_bearer(dxfeed_host, token, on_reader_thread_terminate, NULL, NULL, NULL, NULL, &connection)) {
+		if (!dxf_create_connection_auth_bearer(dxfeed_host, token, on_reader_thread_terminate, NULL, NULL, NULL, NULL,
+											   &connection)) {
 			process_last_error();
 			free(symbol);
 
@@ -368,7 +372,7 @@ int main (int argc, char* argv[]) {
 
 	wprintf(L"Connected\n");
 
-	//Note: The docs requires time as unix time in milliseconds. So convert time_value to milliseconds timestamp.
+	// Note: The docs requires time as unix time in milliseconds. So convert time_value to milliseconds timestamp.
 	if (!dxf_create_subscription_timed(connection, event_type, time_value * 1000, &subscription)) {
 		free(symbol);
 		process_last_error();
@@ -387,9 +391,9 @@ int main (int argc, char* argv[]) {
 	}
 
 	if (!dxf_create_candle_symbol_attributes(symbol, DXF_CANDLE_EXCHANGE_CODE_ATTRIBUTE_DEFAULT,
-											DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT, dxf_ctpa_default,
-											dxf_cpa_default, dxf_csa_default, dxf_caa_default,
-											DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, &candle_attributes)) {
+											 DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT, dxf_ctpa_default,
+											 dxf_cpa_default, dxf_csa_default, dxf_caa_default,
+											 DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT, &candle_attributes)) {
 		free(symbol);
 		process_last_error();
 		dxf_close_subscription(subscription);

@@ -339,7 +339,7 @@ int dx_subscribe_symbols_to_events_task(void* data, int command) {
 /* -------------------------------------------------------------------------- */
 
 static int dx_write_record_field(void* bocc, const dx_field_info_t* field) {
-	CHECKED_CALL_2(dx_write_utf_string, bocc, field->name);
+	CHECKED_CALL_2(dx_write_utf_string, bocc, field->field_name);
 	CHECKED_CALL_2(dx_write_compact_int, bocc, field->type);
 
 	return true;

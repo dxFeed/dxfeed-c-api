@@ -58,7 +58,6 @@ typedef LPCRITICAL_SECTION dxs_mutex_t;
 #ifdef _WIN32
 // To fix problem with MS implementation of swprintf
 #	define swprintf _snwprintf
-HANDLE g_out_console;
 
 void dxs_sleep(int milliseconds) { Sleep((DWORD)milliseconds); }
 

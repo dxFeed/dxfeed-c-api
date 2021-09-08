@@ -23,6 +23,7 @@
 #	endif
 #endif
 
+#include <stddef.h>
 #include <stdio.h>
 #include <time.h>
 

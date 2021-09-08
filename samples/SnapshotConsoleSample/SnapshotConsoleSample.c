@@ -24,6 +24,7 @@
 #endif
 
 #include <inttypes.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -67,7 +68,6 @@ typedef LPCRITICAL_SECTION dxs_mutex_t;
 #ifdef _WIN32
 // To fix problem with MS implementation of swprintf
 #	define swprintf _snwprintf
-HANDLE g_out_console;
 
 void dxs_sleep(int milliseconds) { Sleep((DWORD)milliseconds); }
 
@@ -283,8 +283,8 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void *user_data) {
 
 			wprintf(L"   {index=0x%llX, side=%i, scope=%i, time=", order.index, order.side, order.scope);
 			print_timestamp(order.time);
-			wprintf(L", exchange code=%c, market maker=%ls, price=%.15g, size=%.15g",
-					order.exchange_code, order.market_maker, order.price, order.size);
+			wprintf(L", exchange code=%c, market maker=%ls, price=%.15g, size=%.15g", order.exchange_code,
+					order.market_maker, order.price, order.size);
 			if (wcslen(order.source) > 0) wprintf(L", source=%ls", order.source);
 			wprintf(L", count=%.15g, flags=0x%X}\n", order.count, order.event_flags);
 		}
