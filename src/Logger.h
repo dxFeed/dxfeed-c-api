@@ -21,35 +21,37 @@
 
 #include "DXFeed.h"
 #include "PrimitiveTypes.h"
+#include "DXErrorCodes.h"
 
 #if defined(_WIN32) && defined(_DEBUG)
 void dx_log_debug_message(const dxf_char_t *format, ...);
 #else
-#define dx_log_debug_message(...)
+#	define dx_log_debug_message(...)
 #endif
 
-//typedef DXFEED_API enum dx_log_date_format {
-//    dx_ltf_DD_MM_YYYY = 0,
-//    dx_ltf_MM_DD_YYYY,
-//    dx_ltf_DD_MMMM_YYYY,
-//    dx_ltf_MMMM_DD_YYYY,
-//} dx_log_date_format_t;
+// typedef DXFEED_API enum dx_log_date_format {
+//     dx_ltf_DD_MM_YYYY = 0,
+//     dx_ltf_MM_DD_YYYY,
+//     dx_ltf_DD_MMMM_YYYY,
+//     dx_ltf_MMMM_DD_YYYY,
+// } dx_log_date_format_t;
 
-void dx_logging_error (dxf_const_string_t message);
+void dx_logging_error(dxf_const_string_t message);
+dxf_const_string_t dx_get_log_level_prefix(dx_log_level_t log_level);
 void dx_logging_error_by_code(int error_code);
-void dx_logging_info (const dxf_char_t* format, ...);
-void dx_logging_verbose_info (const dxf_char_t* format, ...);
-void dx_logging_verbose_gap (void);
-void dx_flush_log (void);
-void dx_logging_dbg_lock ();
-void dx_logging_dbg (const dxf_char_t* format, ...);
-void dx_logging_dbg_stack ();
-const char *dx_logging_dbg_sym (void *addr);
-void dx_logging_dbg_flush ();
-void dx_logging_dbg_unlock ();
+void dx_logging_info(const dxf_char_t *format, ...);
+void dx_logging_verbose(dx_log_level_t log_level, const dxf_char_t *format, ...);
+void dx_logging_verbose_gap(void);
+void dx_flush_log(void);
+void dx_logging_dbg_lock();
+void dx_logging_dbg(const dxf_char_t *format, ...);
+void dx_logging_dbg_stack();
+const char *dx_logging_dbg_sym(void *addr);
+void dx_logging_dbg_flush();
+void dx_logging_dbg_unlock();
 
-void dx_logging_last_error (void);
-void dx_logging_last_error_verbose (void);
+void dx_logging_last_error(void);
+void dx_logging_last_error_verbose(void);
 
 /**
  * Logs the data that was sent

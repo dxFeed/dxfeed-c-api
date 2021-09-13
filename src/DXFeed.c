@@ -287,7 +287,7 @@ DXFEED_API ERRORCODE dxf_create_connection_impl(const char *address, const char 
 		return DXF_FAILURE;
 	}
 
-	dx_logging_verbose_info(L"Return connection at %p", *connection);
+	dx_logging_verbose(dx_ll_info, L"Return connection at %p", *connection);
 	return DXF_SUCCESS;
 }
 
@@ -298,8 +298,14 @@ DXFEED_API ERRORCODE dxf_create_connection(const char *address, dxf_conn_termina
 										   dxf_socket_thread_creation_notifier_t stcn,
 										   dxf_socket_thread_destruction_notifier_t stdn, void *user_data,
 										   OUT dxf_connection_t *connection) {
-	return dxf_create_connection_impl(address, NULL, NULL, notifier, conn_status_notifier, stcn, stdn, user_data,
-									  OUT connection);
+	dx_logging_verbose(dx_ll_debug, L"dxf_create_connection(address = '%hs', ...)", address);
+
+	ERRORCODE result = dxf_create_connection_impl(address, NULL, NULL, notifier, conn_status_notifier, stcn, stdn,
+												  user_data, OUT connection);
+
+	dx_logging_verbose(dx_ll_debug, L"dxf_create_connection(address = '%hs', ...) -> %d", address, result);
+
+	return result;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -310,22 +316,38 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_basic(const char *address, const
 													  dxf_socket_thread_creation_notifier_t stcn,
 													  dxf_socket_thread_destruction_notifier_t stdn, void *user_data,
 													  OUT dxf_connection_t *connection) {
-	ERRORCODE res;
+	dx_logging_verbose(dx_ll_debug, L"dxf_create_connection_auth_basic(address = '%hs', user = '%hs'...)", address,
+					   user);
+
 	char *base64_buf;
 
 	if (user == NULL || password == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
+		dx_logging_verbose(dx_ll_debug,
+						   L"dxf_create_connection_auth_basic(address = '%hs', user = '%hs'...) -> %d, 'The login or "
+						   L"password is NULL'",
+						   address, user, DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
 
 	base64_buf = dx_protocol_get_basic_auth_data(user, password);
-	if (base64_buf == NULL) return DXF_FAILURE;
+	if (base64_buf == NULL) {
+		dx_logging_verbose(dx_ll_debug,
+						   L"dxf_create_connection_auth_basic(address = '%hs', user = '%hs'...) -> %d, 'Error creating "
+						   L"base64 basic authentication pair'",
+						   address, user, DXF_FAILURE);
 
-	res = dxf_create_connection_auth_custom(address, DX_AUTH_BASIC_KEY, base64_buf, notifier, conn_status_notifier,
-											stcn, stdn, user_data, connection);
+		return DXF_FAILURE;
+	}
+
+	ERRORCODE res = dxf_create_connection_auth_custom(address, DX_AUTH_BASIC_KEY, base64_buf, notifier,
+													  conn_status_notifier, stcn, stdn, user_data, connection);
 
 	dx_free(base64_buf);
+
+	dx_logging_verbose(dx_ll_debug, L"dxf_create_connection_auth_basic(address = '%hs', user = '%hs'...) -> %d",
+					   address, user, res);
 	return res;
 }
 
@@ -337,14 +359,25 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_bearer(const char *address, cons
 													   dxf_socket_thread_creation_notifier_t stcn,
 													   dxf_socket_thread_destruction_notifier_t stdn, void *user_data,
 													   OUT dxf_connection_t *connection) {
+	dx_logging_verbose(dx_ll_debug, L"dxf_create_connection_auth_bearer(address = '%hs', token = '%hs'...)", address,
+					   token);
+
 	if (token == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
+		dx_logging_verbose(
+			dx_ll_debug,
+			L"dxf_create_connection_auth_bearer(address = '%hs', token = '%hs'...) -> %d, 'The token is NULL'", address,
+			token, DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
 
-	return dxf_create_connection_auth_custom(address, DX_AUTH_BEARER_KEY, token, notifier, conn_status_notifier, stcn,
-											 stdn, user_data, connection);
+	ERRORCODE res = dxf_create_connection_auth_custom(address, DX_AUTH_BEARER_KEY, token, notifier,
+													  conn_status_notifier, stcn, stdn, user_data, connection);
+	dx_logging_verbose(dx_ll_debug, L"dxf_create_connection_auth_bearer(address = '%hs', token = '%hs'...) -> %d",
+					   address, token, res);
+
+	return res;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -355,14 +388,26 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_custom(const char *address, cons
 													   dxf_socket_thread_creation_notifier_t stcn,
 													   dxf_socket_thread_destruction_notifier_t stdn, void *user_data,
 													   OUT dxf_connection_t *connection) {
+	dx_logging_verbose(dx_ll_debug, L"dxf_create_connection_auth_custom(address = '%hs', auth scheme = '%hs'...)",
+					   address, authscheme);
+
 	if (authscheme == NULL || authdata == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
 
+		dx_set_error_code(dx_ec_invalid_func_param);
+		dx_logging_verbose(dx_ll_debug,
+						   L"dxf_create_connection_auth_custom(address = '%hs', auth scheme = '%hs'...) -> %d, 'The "
+						   L"auth scheme or auth data is NULL'",
+						   address, authscheme, DXF_FAILURE);
 		return DXF_FAILURE;
 	}
 
-	return dxf_create_connection_impl(address, authscheme, authdata, notifier, conn_status_notifier, stcn, stdn,
-									  user_data, OUT connection);
+	ERRORCODE res = dxf_create_connection_impl(address, authscheme, authdata, notifier, conn_status_notifier, stcn,
+											   stdn, user_data, OUT connection);
+	dx_logging_verbose(dx_ll_debug, L"dxf_create_connection_auth_custom(address = '%hs', auth scheme = '%hs'...) -> %d, %p",
+					   address, authscheme, res, connection);
+
+	return res;
 }
 
 DXFEED_API ERRORCODE dxf_set_on_server_heartbeat_notifier_impl(dxf_connection_t connection,
@@ -379,24 +424,38 @@ DXFEED_API ERRORCODE dxf_set_on_server_heartbeat_notifier_impl(dxf_connection_t 
 DXFEED_API ERRORCODE dxf_set_on_server_heartbeat_notifier(dxf_connection_t connection,
 														  dxf_conn_on_server_heartbeat_notifier_t notifier,
 														  void *user_data) {
-	return dxf_set_on_server_heartbeat_notifier_impl(connection, notifier, user_data);
+	dx_logging_verbose(dx_ll_debug, L"dxf_set_on_server_heartbeat_notifier(con = %p...)", connection);
+
+	ERRORCODE res = dxf_set_on_server_heartbeat_notifier_impl(connection, notifier, user_data);
+
+	dx_logging_verbose(dx_ll_debug, L"dxf_set_on_server_heartbeat_notifier(con = %p...) -> %d", connection, res);
+
+	return res;
 }
 
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_close_connection(dxf_connection_t connection) {
+	dx_logging_verbose(dx_ll_debug, L"dxf_close_connection(con = %p)", connection);
+
 	if (!dx_validate_connection_handle(connection, false)) {
+		dx_logging_verbose(dx_ll_debug, L"dxf_close_connection(con = %p) -> %d", connection, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
 
 	if (!dx_can_deinit_connection(connection)) {
 		dx_queue_connection_for_close(connection);
+		dx_logging_verbose(dx_ll_debug, L"dxf_close_connection(con = %p) -> %d", connection, DXF_SUCCESS);
+
 		return DXF_SUCCESS;
 	}
 
 	dx_set_is_closing(connection);
+	int res = dx_deinit_connection(connection);
+	dx_logging_verbose(dx_ll_debug, L"dxf_close_connection(con = %p) -> %d", connection, (res ? DXF_SUCCESS : DXF_FAILURE));
 
-	return (dx_deinit_connection(connection) ? DXF_SUCCESS : DXF_FAILURE);
+	return (res ? DXF_SUCCESS : DXF_FAILURE);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -428,13 +487,19 @@ ERRORCODE dxf_create_subscription_impl(dxf_connection_t connection, int event_ty
 
 DXFEED_API ERRORCODE dxf_create_subscription(dxf_connection_t connection, int event_types,
 											 OUT dxf_subscription_t *subscription) {
-	return dxf_create_subscription_impl(connection, event_types, dx_esf_default, DEFAULT_SUBSCRIPTION_TIME,
+	dx_logging_verbose(dx_ll_debug, L"dxf_create_subscription(con = %p, event types = 0x%X ...)", connection);
+
+	ERRORCODE res = dxf_create_subscription_impl(connection, event_types, dx_esf_default, DEFAULT_SUBSCRIPTION_TIME,
 										subscription);
+	dx_logging_verbose(dx_ll_debug, L"dxf_create_subscription(con = %p, event types = 0x%X ...) -> %d, %p", connection, res, subscription);
+
+	return res;
 }
 
 DXFEED_API ERRORCODE dxf_create_subscription_with_flags(dxf_connection_t connection, int event_types,
 														dx_event_subscr_flag subscr_flags,
 														OUT dxf_subscription_t *subscription) {
+	dx_logging_verbose(dx_ll_debug, L"dxf_create_subscription(con = %p, event types = 0x%X ...)", connection);
 	return dxf_create_subscription_impl(connection, event_types, subscr_flags, DEFAULT_SUBSCRIPTION_TIME, subscription);
 }
 
