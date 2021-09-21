@@ -747,7 +747,7 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
-	dxf_load_config_from_string("logger.level = \"trace\"\n");
+	// dxf_load_config_from_string("network.heartbeatTimeout = 11\n");
 	dxf_initialize_logger_v2("command-line-api.log", true, true, true, log_data_transfer_flag);
 	wprintf(L"Command line sample started.\n");
 	wprintf(L"Connecting to host %hs...\n", dxfeed_host);
