@@ -1625,8 +1625,7 @@ int dx_get_current_connected_address(dxf_connection_t connection, OUT char** ppA
 		return false;
 	}
 	CHECKED_CALL(dx_mutex_lock, &pContext->socket_guard);
-	if (pContext->addr_context.cur_addr_index < 0 ||
-		pContext->addr_context.cur_addr_index >= pContext->addr_context.size) {
+	if (pContext->addr_context.cur_addr_index >= pContext->addr_context.size) {
 		dx_mutex_unlock(&pContext->socket_guard);
 		return true;
 	}

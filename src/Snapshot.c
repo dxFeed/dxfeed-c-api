@@ -450,7 +450,7 @@ int dx_snapshot_remove_event_record(dx_snapshot_data_ptr_t snapshot_data, dx_sna
 									size_t position) {
 	int failed = false;
 
-	if (snapshot_data == NULL || recs == NULL || position < 0 || position >= recs->records.size) {
+	if (snapshot_data == NULL || recs == NULL || position >= recs->records.size) {
 		return dx_set_error_code(dx_ec_invalid_func_param_internal);
 	}
 
@@ -502,7 +502,7 @@ int dx_snapshot_replace_record(dx_snapshot_data_ptr_t snapshot_data, dx_snapshot
 	dxf_event_data_t new_obj = NULL;
 	int status;
 
-	if (snapshot_data == NULL || recs == NULL || position < 0 || position >= recs->records.size) {
+	if (snapshot_data == NULL || recs == NULL || position >= recs->records.size) {
 		return dx_set_error_code(dx_ec_invalid_func_param_internal);
 	}
 

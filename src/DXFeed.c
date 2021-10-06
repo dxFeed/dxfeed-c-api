@@ -528,14 +528,14 @@ DXFEED_API ERRORCODE dxf_create_subscription_with_flags(dxf_connection_t connect
 DXFEED_API ERRORCODE dxf_create_subscription_timed(dxf_connection_t connection, int event_types, dxf_long_t time,
 												   OUT dxf_subscription_t *subscription) {
 	dx_logging_verbose(dx_ll_debug,
-					   L"dxf_create_subscription_timed(con = %p, event types = 0x%X, time = " LS(PRId64) L" ...)",
+					   L"dxf_create_subscription_timed(con = %p, event types = 0x%X, time = %" LS(PRId64) L" ...)",
 					   connection, event_types, time);
 
 	ERRORCODE res = dxf_create_subscription_impl(connection, event_types, dx_esf_time_series, time, subscription);
 
 	dx_logging_verbose(
 		dx_ll_debug,
-		L"dxf_create_subscription_timed(con = %p, event types = 0x%X, time = " LS(PRId64) L" ...) -> %d, %p",
+		L"dxf_create_subscription_timed(con = %p, event types = 0x%X, time = %" LS(PRId64) L" ...) -> %d, %p",
 		connection, event_types, time, res, (subscription != NULL) ? *subscription : NULL);
 
 	return res;
@@ -553,7 +553,7 @@ DXFEED_API ERRORCODE dxf_create_subscription_timed_with_flags(dxf_connection_t c
 		dxf_create_subscription_impl(connection, event_types, dx_esf_time_series | subscr_flags, time, subscription);
 
 	dx_logging_verbose(dx_ll_debug,
-					   L"dxf_create_subscription_timed_with_flags(con = %p, event types = 0x%X, time = " LS(
+					   L"dxf_create_subscription_timed_with_flags(con = %p, event types = 0x%X, time = %" LS(
 						   PRId64) L", subscr flags = 0x%X ...) -> %d, %p",
 					   connection, event_types, time, subscr_flags, res, (subscription != NULL) ? *subscription : NULL);
 

@@ -156,7 +156,7 @@ dxf_const_string_t dx_get_current_time () {
 													ltm.tm_hour, ltm.tm_min, ltm.tm_sec,
 													0);
 	if (g_show_timezone) {
-		swprintf(time_buffer + CURRENT_TIME_STR_TIME_OFFSET, 7, L" GMT%+.2d", ltm.tm_gmtoff / 3600);
+		swprintf(time_buffer + CURRENT_TIME_STR_TIME_OFFSET, 7, L" GMT%+.2ld", ltm.tm_gmtoff / 3600);
 	}
 
 	return time_buffer;
