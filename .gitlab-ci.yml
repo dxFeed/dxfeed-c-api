@@ -1,0 +1,37 @@
+centos:
+  image: 'dxfeedcapi/dx-builder-linux:centos-6.10'
+  script:
+    - chmod +x ./make_ci.sh
+    - chmod +x ./make_package.sh
+    - chmod +x ./build.sh
+    - chmod +x ./scripts/check_build.sh
+    - chmod +x ./scripts/combine_package.sh
+    - chmod +x ./scripts/run_test.sh
+    - mkdir artifacts
+    - scl enable devtoolset-2 bash
+    - source /opt/rh/devtoolset-2/enable
+    - ./make_ci.sh rebuild no-test no-tls
+    - cp ./build/dxfeed-c-api*.zip ./artifacts
+    - ./make_ci.sh rebuild no-test
+    - cp ./build/dxfeed-c-api*.zip ./artifacts
+  artifacts:
+    paths:
+      - ./artifacts/dxfeed-c-api*.zip
+
+debian:
+  image: 'dxfeedcapi/dx-builder-linux:debian-9'
+  script:
+    - chmod +x ./make_ci.sh
+    - chmod +x ./make_package.sh
+    - chmod +x ./build.sh
+    - chmod +x ./scripts/check_build.sh
+    - chmod +x ./scripts/combine_package.sh
+    - chmod +x ./scripts/run_test.sh
+    - mkdir artifacts
+    - ./make_ci.sh rebuild no-test no-tls
+    - cp ./build/dxfeed-c-api*.zip ./artifacts
+    - ./make_ci.sh rebuild no-test
+    - cp ./build/dxfeed-c-api*.zip ./artifacts
+  artifacts:
+    paths:
+      - ./artifacts/dxfeed-c-api*.zip
