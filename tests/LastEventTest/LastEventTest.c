@@ -22,7 +22,8 @@
 #		define _CRT_STDIO_ISO_WIDE_SPECIFIERS 1
 #	endif
 #endif
-#include <math.h>
+
+#include <stddef.h>
 #include <stdio.h>
 
 #include "DXErrorCodes.h"
@@ -95,9 +96,11 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 		dxf_trade_t* trades = (dxf_trade_t*)data;
 
 		for (; i < data_count; ++i) {
-			wprintf(L"time=%lld, exchange code=%C, price=%.15g, size=%.15g, tick=%ld, change=%.15g, day id=%d, day volume=%.15g, scope=%d\n",
-					trades[i].time, trades[i].exchange_code, trades[i].price, trades[i].size, trades[i].tick,
-					trades[i].change, trades[i].day_id, trades[i].day_volume, (int)trades[i].scope);
+			wprintf(
+				L"time=%lld, exchange code=%C, price=%.15g, size=%.15g, tick=%ld, change=%.15g, day id=%d, day "
+				L"volume=%.15g, scope=%d\n",
+				trades[i].time, trades[i].exchange_code, trades[i].price, trades[i].size, trades[i].tick,
+				trades[i].change, trades[i].day_id, trades[i].day_volume, (int)trades[i].scope);
 		}
 	}
 }
@@ -165,7 +168,8 @@ int main(int argc, char* argv[]) {
 				trade = (dxf_trade_t*)data;
 
 				wprintf(
-					L"\nSymbol: %ls; time=%lld, exchange code=%c, price=%.15g, size=%.15g, tick=%ld, change=%.15g, day id=%d, day "
+					L"\nSymbol: %ls; time=%lld, exchange code=%c, price=%.15g, size=%.15g, tick=%ld, change=%.15g, day "
+					L"id=%d, day "
 					L"volume=%.15g, scope=%d\n",
 					g_symbols[i], trade->time, trade->exchange_code, trade->price, trade->size, trade->tick,
 					trade->change, trade->day_id, trade->day_volume, (int)trade->scope);

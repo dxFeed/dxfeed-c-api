@@ -30,10 +30,12 @@
 #	define stricmp strcasecmp
 #endif
 
-#include "DXFeed.h"
-#include "DXErrorCodes.h"
+#include <stddef.h>
 #include <stdio.h>
 #include <time.h>
+
+#include "DXErrorCodes.h"
+#include "DXFeed.h"
 
 #define true 1
 #define false 0
@@ -41,12 +43,12 @@
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 
 // plus the name of the executable
-#define STATIC_PARAMS_COUNT 3
+#define STATIC_PARAMS_COUNT	  3
 #define TOKEN_PARAM_SHORT_TAG "-T"
 #define LOG_DATA_TRANSFER_TAG "-p"
-#define TIMEOUT_TAG "-o"
+#define TIMEOUT_TAG			  "-o"
 
-//Prevents file names globbing (converting * to all files in the current dir)
+// Prevents file names globbing (converting * to all files in the current dir)
 #ifdef __MINGW64_VERSION_MAJOR
 int _CRT_glob = 0;
 #endif
@@ -72,7 +74,6 @@ int is_thread_terminate() {
 	return res;
 }
 #endif
-
 
 /* -------------------------------------------------------------------------- */
 
@@ -116,7 +117,8 @@ void process_last_error() {
 			return;
 		}
 
-		wprintf(L"Error occurred and successfully retrieved:\n"
+		wprintf(
+			L"Error occurred and successfully retrieved:\n"
 			L"error code = %d, description = \"%ls\"\n",
 			error_code, error_descr);
 		return;
@@ -141,9 +143,9 @@ dxf_string_t ansi_to_unicode(const char* ansi_str) {
 	}
 
 	return wide_str;
-#else /* _WIN32 */
+#else  /* _WIN32 */
 	dxf_string_t wide_str = NULL;
-	size_t wide_size = mbstowcs(NULL, ansi_str, 0); // 0 is ignored
+	size_t wide_size = mbstowcs(NULL, ansi_str, 0);	 // 0 is ignored
 
 	if (wide_size > 0 && wide_size != (size_t)-1) {
 		wide_str = calloc(wide_size + 1, sizeof(dxf_char_t));
@@ -178,23 +180,19 @@ void listener(const dxf_price_level_book_data_ptr_t book_data, void* user_data) 
 }
 
 void regional_listener(dxf_const_string_t symbol, const dxf_quote_t* quotes, int count, void* user_data) {
-    int i = 0;
-    for (; i < count; ++i) {
-        const dxf_quote_t* quote = quotes + i;
-        wprintf(L"Quote{symbol=%ls, ", symbol);
-        wprintf(L"bidTime=");
-        print_timestamp(quote->bid_time);
-        wprintf(L" bidExchangeCode=%c, bidPrice=%f, bidSize=%f, ",
-            quote->bid_exchange_code,
-            quote->bid_price,
-            quote->bid_size);
-        wprintf(L"askTime=");
-        print_timestamp(quote->ask_time);
-        wprintf(L" askExchangeCode=%c, askPrice=%f, askSize=%f, scope=%d}\n",
-            quote->ask_exchange_code,
-            quote->ask_price,
-            quote->ask_size, (int)quote->scope);
-    }
+	int i = 0;
+	for (; i < count; ++i) {
+		const dxf_quote_t* quote = quotes + i;
+		wprintf(L"Quote{symbol=%ls, ", symbol);
+		wprintf(L"bidTime=");
+		print_timestamp(quote->bid_time);
+		wprintf(L" bidExchangeCode=%c, bidPrice=%f, bidSize=%f, ", quote->bid_exchange_code, quote->bid_price,
+				quote->bid_size);
+		wprintf(L"askTime=");
+		print_timestamp(quote->ask_time);
+		wprintf(L" askExchangeCode=%c, askPrice=%f, askSize=%f, scope=%d}\n", quote->ask_exchange_code,
+				quote->ask_price, quote->ask_size, (int)quote->scope);
+	}
 }
 
 int atoi2(char* str, int* result) {
@@ -229,16 +227,21 @@ int main(int argc, char* argv[]) {
 	char* dxfeed_host = NULL;
 
 	if (argc < STATIC_PARAMS_COUNT) {
-		printf("DXFeed Regional Book command line sample.\n"
-			"Usage: RegionalBookSample <server address> <symbol> [" TOKEN_PARAM_SHORT_TAG " <token>] "
-			"[" LOG_DATA_TRANSFER_TAG "] [" TIMEOUT_TAG " <timeout>]\n"
+		printf(
+			"DXFeed Regional Book command line sample.\n"
+			"Usage: RegionalBookSample <server address> <symbol> [" TOKEN_PARAM_SHORT_TAG
+			" <token>] "
+			"[" LOG_DATA_TRANSFER_TAG "] [" TIMEOUT_TAG
+			" <timeout>]\n"
 			"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
 			"  <symbol>         - The trade symbol, e.g. C, MSFT, YHOO, IBM\n"
-			"  " TOKEN_PARAM_SHORT_TAG " <token>       - The authorization token\n"
-			"  " LOG_DATA_TRANSFER_TAG "               - Enables the data transfer logging\n"
-			"  " TIMEOUT_TAG " <timeout>     - Sets the program timeout in seconds (default = 604800, i.e a week)\n"
-			"Example: RegionalBookSample demo.dxfeed.com:7300 IBM\n\n"
-			);
+			"  " TOKEN_PARAM_SHORT_TAG
+			" <token>       - The authorization token\n"
+			"  " LOG_DATA_TRANSFER_TAG
+			"               - Enables the data transfer logging\n"
+			"  " TIMEOUT_TAG
+			" <timeout>     - Sets the program timeout in seconds (default = 604800, i.e a week)\n"
+			"Example: RegionalBookSample demo.dxfeed.com:7300 IBM\n\n");
 		return 0;
 	}
 
@@ -250,7 +253,7 @@ int main(int argc, char* argv[]) {
 
 	char* token = NULL;
 	int log_data_transfer_flag = false;
-	int program_timeout = 604800; // a week
+	int program_timeout = 604800;  // a week
 
 	if (argc > STATIC_PARAMS_COUNT) {
 		int token_is_set = false;
@@ -301,12 +304,11 @@ int main(int argc, char* argv[]) {
 
 	ERRORCODE connection_result;
 	if (token != NULL && token[0] != '\0') {
-		connection_result =
-			dxf_create_connection_auth_bearer(dxfeed_host, token, on_reader_thread_terminate,
-											  NULL, NULL, NULL, NULL, &connection);
+		connection_result = dxf_create_connection_auth_bearer(dxfeed_host, token, on_reader_thread_terminate, NULL,
+															  NULL, NULL, NULL, &connection);
 	} else {
-		connection_result = dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL,
-												  NULL, NULL, NULL, &connection);
+		connection_result =
+			dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, NULL, &connection);
 	}
 
 	if (connection_result == DXF_FAILURE) {
@@ -336,13 +338,13 @@ int main(int argc, char* argv[]) {
 		return 21;
 	}
 
-    if (!dxf_attach_regional_book_listener_v2(book, &regional_listener, NULL)) {
+	if (!dxf_attach_regional_book_listener_v2(book, &regional_listener, NULL)) {
 		process_last_error();
 		dxf_close_regional_book(book);
 		dxf_close_connection(connection);
 
-        return 22;
-    }
+		return 22;
+	}
 
 	wprintf(L"Subscribed\n");
 
@@ -375,4 +377,3 @@ int main(int argc, char* argv[]) {
 
 	return 0;
 }
-

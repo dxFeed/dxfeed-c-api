@@ -1,3 +1,12 @@
+Version 8.4.1
+* [DXFC-261] Fixed a bug related to leaking socket handles
+* [samples] Added `-r` parameter to CommandLineSample to enable connection reestablishment mechanism.
+* Added debug logging for some main API functions
+
+Version 8.4.0
+* [DXFC-260] Fixed names of event fields for reading candledata.
+* [samples] Added header for enabling NULL macros.
+
 Version 8.3.0
 * [DXFC-254] The amount of memory used to store the symbols required for a subscription has been reduced by several times.
   [Deprecated] `dxf_get_last_event` is deprecated and will be removed in version 9.0.0, since this mechanism consumes a lot of RAM.

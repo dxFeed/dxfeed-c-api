@@ -1356,7 +1356,7 @@ void dx_connection_status_set(dxf_connection_t connection, dxf_connection_status
 
 	dx_mutex_lock(&(context->status_guard));
 	old_status = context->status;
-	dx_logging_verbose_info(L"Connection status changed %d (%ls) -> %d (%ls)", old_status,
+	dx_logging_verbose(dx_ll_info, L"Connection status changed %d (%ls) -> %d (%ls)", old_status,
 							dx_get_connection_status_string(old_status), status,
 							dx_get_connection_status_string(status));
 
@@ -1625,8 +1625,7 @@ int dx_get_current_connected_address(dxf_connection_t connection, OUT char** ppA
 		return false;
 	}
 	CHECKED_CALL(dx_mutex_lock, &pContext->socket_guard);
-	if (pContext->addr_context.cur_addr_index < 0 ||
-		pContext->addr_context.cur_addr_index >= pContext->addr_context.size) {
+	if (pContext->addr_context.cur_addr_index >= pContext->addr_context.size) {
 		dx_mutex_unlock(&pContext->socket_guard);
 		return true;
 	}

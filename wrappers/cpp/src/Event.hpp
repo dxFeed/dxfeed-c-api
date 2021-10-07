@@ -69,7 +69,7 @@ struct Quote final {
 
 	Quote() = default;
 
-	explicit Quote(std::string symbol, dxf_quote_t quote)
+	explicit Quote(std::string symbol, const dxf_quote_t &quote)
 		: symbol{std::move(symbol)},
 		  time{quote.time},
 		  sequence{quote.sequence},
@@ -132,7 +132,7 @@ struct OrderBase {
 	/// Source of this order
 	std::string source;
 
-	explicit OrderBase(std::string symbol, dxf_order_t order)
+	explicit OrderBase(std::string symbol, const dxf_order_t &order)
 		: symbol{std::move(symbol)},
 		  event_flags{order.event_flags},
 		  index{order.index},
@@ -172,7 +172,7 @@ struct Greeks final {
 
 	Greeks() = default;
 
-	explicit Greeks(std::string symbol, dxf_greeks_t greeks)
+	explicit Greeks(std::string symbol, const dxf_greeks_t &greeks)
 		: symbol{std::move(symbol)},
 		  event_flags{greeks.event_flags},
 		  index{greeks.index},
@@ -227,7 +227,7 @@ struct Underlying final {
 
 	Underlying() = default;
 
-	explicit Underlying(std::string symbol, dxf_underlying_t underlying)
+	explicit Underlying(std::string symbol, const dxf_underlying_t &underlying)
 		: symbol{std::move(symbol)},
 		  volatility{underlying.volatility},
 		  front_volatility{underlying.front_volatility},

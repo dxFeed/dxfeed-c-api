@@ -21,6 +21,7 @@
 #	define _CRT_STDIO_ISO_WIDE_SPECIFIERS 1
 #endif
 
+#include <stddef.h>
 #include <stdio.h>
 
 #include "DXErrorCodes.h"
@@ -87,7 +88,7 @@ int main(int argc, char* argv[]) {
 
 	wprintf(L"Connected\n");
 
-	dxs_sleep(121000);  // 2m01s
+	dxs_sleep(121000);	// 2m01s
 
 	wprintf(L"Disconnecting from host...\n");
 
@@ -97,8 +98,7 @@ int main(int argc, char* argv[]) {
 		return 2;
 	}
 
-	wprintf(
-		L"Disconnected\nConnection test completed\n");
+	wprintf(L"Disconnected\nConnection test completed\n");
 
 	return 0;
 }

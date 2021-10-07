@@ -365,7 +365,7 @@ int dx_write_char_buffer (void* context, const dxf_char_t* value) {
 
 int dx_write_utf (void* context, dxf_const_string_t value) {
 	size_t strlen = dx_string_length(value);
-	dxf_short_t utflen = 0;
+	dxf_int_t utflen = 0;
 	size_t i = 0;
 
 	for (; i < strlen; ++i) {
@@ -384,7 +384,7 @@ int dx_write_utf (void* context, dxf_const_string_t value) {
 		return dx_set_error_code(dx_utfec_bad_utf_data_format);
 	}
 
-	CHECKED_CALL_2(dx_write_short, context, utflen);
+	CHECKED_CALL_2(dx_write_short, context, (dxf_short_t)utflen);
 
 	for (i = 0; i < strlen; ++i) {
 		dxf_char_t c;

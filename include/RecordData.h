@@ -199,6 +199,7 @@ typedef struct dx_spread_order {
 typedef struct dx_time_and_sale {
     dxf_int_t time;
     dxf_int_t sequence;
+	dxf_int_t time_nanos;
     dxf_char_t exchange_code;
     dxf_double_t price;
 	dxf_double_t size;

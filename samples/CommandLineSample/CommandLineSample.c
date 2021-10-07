@@ -37,6 +37,7 @@
 #endif
 
 #include <inttypes.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <time.h>
 
@@ -64,7 +65,7 @@ typedef struct {
 	pthread_mutex_t mutex;
 	pthread_mutexattr_t attr;
 } dxs_mutex_t;
-#else /* !defined(_WIN32) || defined(USE_PTHREADS) */
+#else  /* !defined(_WIN32) || defined(USE_PTHREADS) */
 typedef HANDLE dxs_thread_t;
 typedef DWORD dxs_key_t;
 typedef LPCRITICAL_SECTION dxs_mutex_t;
@@ -73,7 +74,6 @@ typedef LPCRITICAL_SECTION dxs_mutex_t;
 #ifdef _WIN32
 // To fix problem with MS implementation of swprintf
 #	define swprintf _snwprintf
-HANDLE g_out_console;
 
 void dxs_sleep(int milliseconds) { Sleep((DWORD)milliseconds); }
 
@@ -178,6 +178,7 @@ int dxs_mutex_unlock(dxs_mutex_t* mutex) {
 #define LOG_DATA_TRANSFER_TAG		"-p"
 #define TIMEOUT_TAG					"-o"
 #define LOG_HEARTBEAT_TAG			"-b"
+#define RECONNECT_TAG			    "-r"
 
 // Prevents file names globbing (converting * to all files in the current dir)
 #ifdef __MINGW64_VERSION_MAJOR
@@ -287,8 +288,8 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 
 		wprintf(L"index=0x%llX, side=%i, scope=%i, time=", o->index, o->side, o->scope);
 		print_timestamp(o->time);
-		wprintf(L", exchange code=%c, market maker=%ls, price=%.15g, size=%.15g", o->exchange_code,
-				o->market_maker, o->price, o->size);
+		wprintf(L", exchange code=%c, market maker=%ls, price=%.15g, size=%.15g", o->exchange_code, o->market_maker,
+				o->price, o->size);
 
 		if (wcslen(o->source) > 0) wprintf(L", source=%ls", o->source);
 
@@ -364,8 +365,8 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 		wprintf(
 			L", sequence=%i, exchange code=%c, price=%.15g, size=%.15g, source=%ls, "
 			L"count=%.15g, flags=%i, spread symbol=%ls}\n",
-			o->sequence, o->exchange_code, o->price, o->size, wcslen(o->source) > 0 ? o->source : L"",
-			o->count, o->event_flags, wcslen(o->spread_symbol) > 0 ? o->spread_symbol : L"");
+			o->sequence, o->exchange_code, o->price, o->size, wcslen(o->source) > 0 ? o->source : L"", o->count,
+			o->event_flags, wcslen(o->spread_symbol) > 0 ? o->spread_symbol : L"");
 	}
 
 	if (event_type == DXF_ET_GREEKS) {
@@ -637,7 +638,7 @@ int main(int argc, char* argv[]) {
 			" <token>] "
 			"[" SUBSCRIPTION_DATA_PARAM_TAG " <subscr_data>] [" LOG_DATA_TRANSFER_TAG "] [" TIMEOUT_TAG
 			" <timeout>] [" LOG_HEARTBEAT_TAG
-			"]\n"
+			"] [" RECONNECT_TAG "]\n"
 			"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
 			"                     If you want to use file instead of server data just\n"
 			"                     write there path to file e.g. path\\to\\raw.bin\n"
@@ -661,6 +662,8 @@ int main(int argc, char* argv[]) {
 			" <timeout>           - Sets the program timeout in seconds (default = 604800, i.e a week)\n"
 			"  " LOG_HEARTBEAT_TAG
 			"                     - Enables the server's heartbeat logging to console\n"
+			"  " RECONNECT_TAG
+			"                     - Enables the reconnection\n"
 			"Examples:\n"
 			"    CommandLineSample.exe demo.dxfeed.com:7300 TRADE,ORDER MSFT,IBM\n"
 			"    CommandLineSample.exe ./tape_file TRADE,ORDER MSFT,IBM\n");
@@ -680,6 +683,7 @@ int main(int argc, char* argv[]) {
 	int log_data_transfer_flag = false;
 	int program_timeout = 604800;  // a week
 	int log_heartbeat_is_set = false;
+	int reconnect_is_set = false;
 
 	if (argc > STATIC_PARAMS_COUNT) {
 		int dump_filename_is_set = false;
@@ -737,6 +741,8 @@ int main(int argc, char* argv[]) {
 				program_timeout_is_set = true;
 			} else if (log_heartbeat_is_set == false && strcmp(argv[i], LOG_HEARTBEAT_TAG) == 0) {
 				log_heartbeat_is_set = true;
+			} else if (reconnect_is_set == false && strcmp(argv[i], RECONNECT_TAG) == 0) {
+				reconnect_is_set = true;
 			}
 		}
 	}
@@ -825,7 +831,11 @@ int main(int argc, char* argv[]) {
 	wprintf(L"Subscribed\n");
 	free_symbols(symbols, symbol_count);
 
-	while (!is_thread_terminate() && program_timeout--) {
+	while (program_timeout--) {
+		if (!reconnect_is_set && is_thread_terminate()) {
+			break;
+		}
+
 		dxs_sleep(1000);
 	}
 

@@ -30,10 +30,12 @@
 #	define stricmp strcasecmp
 #endif
 
-#include "DXFeed.h"
-#include "DXErrorCodes.h"
+#include <stddef.h>
 #include <stdio.h>
 #include <time.h>
+
+#include "DXErrorCodes.h"
+#include "DXFeed.h"
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 
@@ -41,14 +43,14 @@
 #define false 0
 
 // plus the name of the executable
-#define STATIC_PARAMS_COUNT 3
+#define STATIC_PARAMS_COUNT	  3
 #define TOKEN_PARAM_SHORT_TAG "-T"
 #define LOG_DATA_TRANSFER_TAG "-p"
-#define TIMEOUT_TAG "-o"
-#define MAX_SOURCE_SIZE 42
-#define MAX_SOURCES 10
+#define TIMEOUT_TAG			  "-o"
+#define MAX_SOURCE_SIZE		  42
+#define MAX_SOURCES			  10
 
-//Prevents file names globbing (converting * to all files in the current dir)
+// Prevents file names globbing (converting * to all files in the current dir)
 #ifdef __MINGW64_VERSION_MAJOR
 int _CRT_glob = 0;
 #endif
@@ -117,7 +119,8 @@ void process_last_error() {
 			return;
 		}
 
-		wprintf(L"Error occurred and successfully retrieved:\n"
+		wprintf(
+			L"Error occurred and successfully retrieved:\n"
 			L"error code = %d, description = \"%ls\"\n",
 			error_code, error_descr);
 		return;
@@ -142,9 +145,9 @@ dxf_string_t ansi_to_unicode(const char* ansi_str) {
 	}
 
 	return wide_str;
-#else /* _WIN32 */
+#else  /* _WIN32 */
 	dxf_string_t wide_str = NULL;
-	size_t wide_size = mbstowcs(NULL, ansi_str, 0); // 0 is ignored
+	size_t wide_size = mbstowcs(NULL, ansi_str, 0);	 // 0 is ignored
 
 	if (wide_size > 0 && wide_size != (size_t)-1) {
 		wide_str = calloc(wide_size + 1, sizeof(dxf_char_t));
@@ -202,7 +205,7 @@ int atoi2(char* str, int* result) {
 
 /* -------------------------------------------------------------------------- */
 
-static const char *default_sources[] = { "BZX", "DEX", NULL };
+static const char* default_sources[] = {"BZX", "DEX", NULL};
 
 /* -------------------------------------------------------------------------- */
 
@@ -213,18 +216,23 @@ int main(int argc, char* argv[]) {
 	char* dxfeed_host = NULL;
 
 	if (argc < STATIC_PARAMS_COUNT) {
-		printf("DXFeed Price Level Book command line sample.\n"
-			"Usage: PriceLevelBookSample <server address> <symbol> [order_source] [" TOKEN_PARAM_SHORT_TAG " <token>] "
-			"[" LOG_DATA_TRANSFER_TAG "] [" TIMEOUT_TAG " <timeout>]\n"
+		printf(
+			"DXFeed Price Level Book command line sample.\n"
+			"Usage: PriceLevelBookSample <server address> <symbol> [order_source] [" TOKEN_PARAM_SHORT_TAG
+			" <token>] "
+			"[" LOG_DATA_TRANSFER_TAG "] [" TIMEOUT_TAG
+			" <timeout>]\n"
 			"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
 			"  <symbol>         - The trade symbol, e.g. C, MSFT, YHOO, IBM\n"
 			"  [order_source]   - One or more order sources, e.g.. NTV, BYX, BZX, DEA,\n"
 			"                     ISE, DEX, IST. Default is BZX DEX\n"
-			"  " TOKEN_PARAM_SHORT_TAG " <token>       - The authorization token\n"
-			"  " LOG_DATA_TRANSFER_TAG "               - Enables the data transfer logging\n"
-			"  " TIMEOUT_TAG " <timeout>     - Sets the program timeout in seconds (default = 604800, i.e a week)\n"
-			"Example: PriceLevelBookSample demo.dxfeed.com:7300 IBM NTV,DEX\n\n"
-			);
+			"  " TOKEN_PARAM_SHORT_TAG
+			" <token>       - The authorization token\n"
+			"  " LOG_DATA_TRANSFER_TAG
+			"               - Enables the data transfer logging\n"
+			"  " TIMEOUT_TAG
+			" <timeout>     - Sets the program timeout in seconds (default = 604800, i.e a week)\n"
+			"Example: PriceLevelBookSample demo.dxfeed.com:7300 IBM NTV,DEX\n\n");
 		return 0;
 	}
 
@@ -234,13 +242,13 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 
-	const char **order_sources_ptr = NULL;
-	char order_source[MAX_SOURCE_SIZE + 1] = { 0 };
+	const char** order_sources_ptr = NULL;
+	char order_source[MAX_SOURCE_SIZE + 1] = {0};
 	const char* order_sources[MAX_SOURCES + 1] = {NULL};
 	char* token = NULL;
 	int order_source_is_set = false;
 	int log_data_transfer_flag = false;
-	int program_timeout = 604800; // a week
+	int program_timeout = 604800;  // a week
 
 	if (argc > STATIC_PARAMS_COUNT) {
 		int token_is_set = false;
@@ -314,12 +322,11 @@ int main(int argc, char* argv[]) {
 
 	ERRORCODE connection_result;
 	if (token != NULL && token[0] != '\0') {
-		connection_result =
-			dxf_create_connection_auth_bearer(dxfeed_host, token, on_reader_thread_terminate,
-											  NULL, NULL, NULL, NULL, &connection);
+		connection_result = dxf_create_connection_auth_bearer(dxfeed_host, token, on_reader_thread_terminate, NULL,
+															  NULL, NULL, NULL, &connection);
 	} else {
-		connection_result = dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL,
-												  NULL, NULL, NULL, &connection);
+		connection_result =
+			dxf_create_connection(dxfeed_host, on_reader_thread_terminate, NULL, NULL, NULL, NULL, &connection);
 	}
 
 	if (connection_result == DXF_FAILURE) {
@@ -382,4 +389,3 @@ int main(int argc, char* argv[]) {
 
 	return 0;
 }
-

@@ -156,7 +156,7 @@ dxf_const_string_t dx_get_current_time () {
 													ltm.tm_hour, ltm.tm_min, ltm.tm_sec,
 													0);
 	if (g_show_timezone) {
-		swprintf(time_buffer + CURRENT_TIME_STR_TIME_OFFSET, 7, L" GMT%+.2d", ltm.tm_gmtoff / 3600);
+		swprintf(time_buffer + CURRENT_TIME_STR_TIME_OFFSET, 7, L" GMT%+.2ld", ltm.tm_gmtoff / 3600);
 	}
 
 	return time_buffer;
@@ -406,6 +406,23 @@ void dx_logging_error (dxf_const_string_t message ) {
 	dx_flush_log();
 }
 
+dxf_const_string_t dx_get_log_level_prefix(dx_log_level_t log_level) {
+	switch (log_level) {
+		case dx_ll_info:
+			return g_info_prefix;
+		case dx_ll_warn:
+			return g_warn_prefix;
+		case dx_ll_error:
+			return g_error_prefix;
+		case dx_ll_trace:
+			return g_trace_prefix;
+		case dx_ll_debug:
+			return g_debug_prefix;
+	}
+
+	return g_info_prefix;
+}
+
 void dx_logging_error_by_code(int error_code) {
 	if (g_log_file == NULL) {
 		return;
@@ -421,25 +438,7 @@ void dx_logging_error_by_code(int error_code) {
 		return;
 	}
 
-	dxf_const_string_t log_prefix = g_error_prefix;
-
-	switch (dx_get_log_level(error_code)) {
-		case dx_ll_info:
-			log_prefix = g_info_prefix;
-			break;
-		case dx_ll_warn:
-			log_prefix = g_warn_prefix;
-			break;
-		case dx_ll_error:
-			log_prefix = g_error_prefix;
-			break;
-		case dx_ll_trace:
-			log_prefix = g_trace_prefix;
-			break;
-		case dx_ll_debug:
-			log_prefix = g_debug_prefix;
-			break;
-	}
+	dxf_const_string_t log_prefix = dx_get_log_level_prefix(dx_get_log_level(error_code));
 
 	dx_log_debug_message(L"%ls (%d)", message, error_code);
 	fwprintf(g_log_file, L"\n%ls [%08lx] %ls%ls (%d)", dx_get_current_time(),
@@ -469,14 +468,13 @@ void dx_logging_last_error_verbose (void) {
 	dx_flush_log();
 }
 
-/* -------------------------------------------------------------------------- */
 
-void dx_logging_verbose_info( const dxf_char_t* format, ... ) {
+void dx_logging_verbose(dx_log_level_t log_level, const dxf_char_t* format, ... ) {
 	if (!g_verbose_logger_mode) {
 		return;
 	}
 
-	if (dx_ll_info < dx_get_minimum_logging_level(g_default_log_level)) return;
+	if (log_level < dx_get_minimum_logging_level(g_default_log_level)) return;
 
 	if (g_log_file == NULL || format == NULL) {
 		return;
@@ -484,11 +482,11 @@ void dx_logging_verbose_info( const dxf_char_t* format, ... ) {
 
 	fwprintf(g_log_file, L"\n%ls [%08lx] %ls ", dx_get_current_time(),
 #ifdef _WIN32
-	(unsigned long)GetCurrentThreadId(),
+			 (unsigned long)GetCurrentThreadId(),
 #else
-	(unsigned long)pthread_getthreadid_np(),
+			 (unsigned long)pthread_getthreadid_np(),
 #endif
-	g_info_prefix);
+			 dx_get_log_level_prefix(log_level));
 	{
 		va_list ap;
 		va_start(ap, format);
@@ -498,7 +496,6 @@ void dx_logging_verbose_info( const dxf_char_t* format, ... ) {
 	}
 	dx_flush_log();
 }
-/* -------------------------------------------------------------------------- */
 
 void dx_logging_dbg_lock() {
 #ifdef _DEBUG
