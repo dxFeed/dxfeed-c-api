@@ -545,7 +545,7 @@ DXFEED_API ERRORCODE dxf_create_subscription_timed_with_flags(dxf_connection_t c
 															  dxf_long_t time, dx_event_subscr_flag subscr_flags,
 															  OUT dxf_subscription_t *subscription) {
 	dx_logging_verbose(dx_ll_debug,
-					   L"dxf_create_subscription_timed_with_flags(con = %p, event types = 0x%X, time = " LS(
+					   L"dxf_create_subscription_timed_with_flags(con = %p, event types = 0x%X, time = %" LS(
 						   PRId64) L", subscr flags = 0x%X ...)",
 					   connection, event_types, time, subscr_flags);
 
