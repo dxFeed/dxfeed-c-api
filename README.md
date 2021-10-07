@@ -7,6 +7,7 @@ This package provides access to **[dxFeed](https://www.dxfeed.com/)** market dat
 [![Release](https://img.shields.io/github/v/release/dxFeed/dxfeed-c-api)](https://github.com/dxFeed/dxfeed-c-api/releases/latest)
 [![License](https://img.shields.io/badge/license-MPL--2.0-orange)](https://github.com/dxFeed/dxfeed-c-api/blob/master/LICENSE)
 [![Downloads](https://img.shields.io/github/downloads/dxFeed/dxfeed-c-api/total)](https://github.com/dxFeed/dxfeed-c-api/releases/latest)
+[![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/dxFeed/dxfeed-c-api.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/dxFeed/dxfeed-c-api/context:cpp)
 
 
 ## Table of Сontents
