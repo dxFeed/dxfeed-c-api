@@ -198,6 +198,12 @@ typedef enum {
 	dx_csdec_protocol_error = 103,
 	dx_csdec_unsupported_version = 104,
 
+	/* configuration loading error codes */
+
+	dx_cfgec_empty_config_string = 105,
+	dx_cfgec_empty_config_file_name = 106,
+	dx_cfgec_toml_parser_error = 107,
+
 	/* miscellaneous error codes */
 
 	/* error code count */
