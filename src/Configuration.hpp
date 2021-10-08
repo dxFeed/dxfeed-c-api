@@ -30,6 +30,11 @@
 #include <toml.hpp>
 #include <unordered_map>
 
+extern "C" {
+#include "DXErrorCodes.h"
+#include "DXErrorHandling.h"
+}
+
 namespace dx {
 namespace algorithm {
 namespace detail {
@@ -206,7 +211,13 @@ public:
 	bool loadFromFile(const std::string& fileName) {
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
 
-		if (loaded_ || algorithm::trimCopy(fileName).empty()) {
+		if (loaded_) {
+			return true;
+		}
+
+		if (algorithm::trimCopy(fileName).empty()) {
+			dx_set_error_code(dx_cfgec_empty_config_file_name);
+
 			return false;
 		}
 
@@ -222,7 +233,8 @@ public:
 
 			return true;
 		} catch (const std::exception& e) {
-			std::cerr << "dxFeed::API::Configuration.loadFromFile: Error: " << e.what() << "\n";
+			dx_set_error_code(dx_cfgec_toml_parser_error);
+			dx_logging_verbose(dx_ll_warn, L"dxFeed::API::Configuration.loadFromFile: %hs", e.what());
 			loaded_ = false;
 		}
 
@@ -232,7 +244,13 @@ public:
 	bool loadFromString(const std::string& config) {
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
 
-		if (loaded_ || algorithm::trimCopy(config).empty()) {
+		if (loaded_) {
+			return true;
+		}
+
+		if (algorithm::trimCopy(config).empty()) {
+			dx_set_error_code(dx_cfgec_empty_config_string);
+
 			return false;
 		}
 
@@ -250,7 +268,8 @@ public:
 
 			return true;
 		} catch (const std::exception& e) {
-			std::cerr << "dxFeed::API::Configuration.loadFromString: Error: " << e.what() << "\n";
+			dx_set_error_code(dx_cfgec_toml_parser_error);
+			dx_logging_verbose(dx_ll_warn, L"dxFeed::API::Configuration.loadFromString: %hs", e.what());
 			loaded_ = false;
 		}
 

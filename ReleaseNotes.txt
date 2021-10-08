@@ -1,3 +1,11 @@
+Version 8.5.0
+* [DXFC-274] The repeated call to load the configuration from a file or line does not return errors and does not raise any exceptions.
+  Also added error codes for some situations when reading configurations:
+  - dx_cfgec_empty_config_string = 105
+  - dx_cfgec_empty_config_file_name = 106
+  - dx_cfgec_toml_parser_error = 107
+  When logging, dx_cfgec_toml_parser_error will be accompanied by more detailed information about the parsing error.
+
 Version 8.4.1
 * [DXFC-261] Fixed a bug related to leaking socket handles
 * [samples] Added `-r` parameter to CommandLineSample to enable connection reestablishment mechanism.
