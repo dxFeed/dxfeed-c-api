@@ -6,6 +6,11 @@ Version 8.5.0
   - dx_cfgec_toml_parser_error = 107
   When logging, dx_cfgec_toml_parser_error will be accompanied by more detailed information about the parsing error.
 * Fixed some minor bugs after adding LGTM and CodeQL checks
+* The win sockets version is set to 2.2.*
+* [Attention] Some architectural issues have been discovered that impose restrictions on the use of connection objects.
+  It is not recommended to use multiple connections in parallel in the same process. This applies to structures\objects created with
+  `dxf_create_connection`, `dxf_create_connection_auth_basic`, `dxf_create_connection_auth_bearer`, `dxf_create_connection_auth_custom`.
+  This limitation will be lifted after API design changes.
 
 Version 8.4.1
 * [DXFC-261] Fixed a bug related to leaking socket handles

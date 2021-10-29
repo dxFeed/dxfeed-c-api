@@ -238,13 +238,13 @@ int dx_init_socket_subsystem(void) {
 	WORD wVersionRequested;
 	WSADATA wsaData;
 
-	wVersionRequested = MAKEWORD(2, 0);
+	wVersionRequested = MAKEWORD(2, 2);
 
 	if (WSAStartup(wVersionRequested, &wsaData) != 0) {
 		return dx_set_error_code(dx_sec_socket_subsystem_init_failed);
 	}
 
-	if (LOBYTE(wsaData.wVersion) != 2 || HIBYTE(wsaData.wVersion) != 0) {
+	if (LOBYTE(wsaData.wVersion) != 2 || HIBYTE(wsaData.wVersion) != 2) {
 		dx_set_error_code(dx_sec_socket_subsystem_incompatible_version);
 
 		WSACleanup();
