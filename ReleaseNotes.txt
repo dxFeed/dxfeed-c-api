@@ -1,3 +1,6 @@
+Version 8.5.1
+* [DXFC-276] Fixed a bug with broken wildcard subscription
+
 Version 8.5.0
 * [DXFC-274] The repeated call to load the configuration from a file or line does not return errors and does not raise any exceptions.
   Also added error codes for some situations when reading configurations:

@@ -743,7 +743,7 @@ int dx_get_event_subscription_time(dxf_subscription_t subscr_id, OUT dxf_long_t*
 static void dx_call_subscr_listeners(dx::SubscriptionData* subscr_data, unsigned event_bitmask,
 									 dxf_const_string_t symbol_name, dxf_const_event_data_t data,
 									 const dxf_event_params_t* event_params) {
-	if (subscr_data == nullptr || subscr_data->symbols.find(symbol_name) == subscr_data->symbols.end()) {
+	if (subscr_data == nullptr) {
 		return;
 	}
 
