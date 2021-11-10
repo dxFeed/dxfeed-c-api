@@ -589,27 +589,27 @@ DXFEED_API ERRORCODE dxf_add_symbol(dxf_subscription_t subscription, dxf_const_s
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_add_symbols(dxf_subscription_t subscription, dxf_const_string_t *symbols, int symbol_count) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_add_symbols(sub = %p, symbols = '%ls'[%d]...)", subscription,
-					   (symbols == NULL) ? L"NULL" : (symbol_count > 0 ? symbols[0] : L""), symbol_count);
-
 	dx_perform_common_actions(DX_RESET_ERROR);
+
+	dx_logging_verbose(dx_ll_debug, L"dxf_add_symbols(sub = %p, symbols[%d] = '%ls'...)", subscription, symbol_count,
+					   (symbols == NULL) ? L"NULL" : (symbol_count > 0 ? symbols[0] : L""));
 
 	if (subscription == dx_invalid_subscription || symbols == NULL || symbol_count < 0) {
 		dx_set_error_code(dx_ec_invalid_func_param);
 
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_add_symbols(sub = %p, symbols = '%ls'[%d]...) -> %d, 'The subscription is invalid or "
+						   L"dxf_add_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'The subscription is invalid or "
 						   L"symbols is NULL or symbols count < 0'",
-						   subscription, (symbols == NULL) ? L"NULL" : (symbol_count > 0 ? symbols[0] : L""),
-						   symbol_count, DXF_FAILURE);
+						   subscription, symbol_count,
+						   (symbols == NULL) ? L"NULL" : (symbol_count > 0 ? symbols[0] : L""), DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
 
 	if (symbol_count == 0) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_add_symbols(sub = %p, symbols = '%ls'[%d]...) -> %d, 'The symbols count == 0'",
-						   subscription, L"", symbol_count, DXF_SUCCESS);
+						   L"dxf_add_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'The symbols count == 0'",
+						   subscription, symbol_count, L"", DXF_SUCCESS);
 		return DXF_SUCCESS;
 	}
 
@@ -621,17 +621,17 @@ DXFEED_API ERRORCODE dxf_add_symbols(dxf_subscription_t subscription, dxf_const_
 		!dx_get_event_subscription_event_types(subscription, &events) ||
 		!dx_get_event_subscription_flags(subscription, &subscr_flags)) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_add_symbols(sub = %p, symbols = '%ls'[%d]...) -> %d, 'Unable to get connection "
+						   L"dxf_add_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'Unable to get connection "
 						   L"information or event types or subscription flags'",
-						   subscription, symbols[0], symbol_count, DXF_FAILURE);
+						   subscription, symbol_count, symbols[0], DXF_FAILURE);
 		return DXF_FAILURE;
 	}
 
 	if (IS_FLAG_SET(subscr_flags, dx_esf_wildcard)) {
 		dx_logging_verbose(
 			dx_ll_debug,
-			L"dxf_add_symbols(sub = %p, symbols = '%ls'[%d]...) -> %d, 'Already subscribed to the wildcard (*)'",
-			subscription, symbols[0], symbol_count, DXF_SUCCESS);
+			L"dxf_add_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'Already subscribed to the wildcard (*)'",
+			subscription, symbol_count, symbols[0], DXF_SUCCESS);
 		return DXF_SUCCESS;
 	}
 
@@ -649,9 +649,9 @@ DXFEED_API ERRORCODE dxf_add_symbols(dxf_subscription_t subscription, dxf_const_
 
 		if (!dxf_clear_symbols(subscription)) {
 			dx_logging_verbose(dx_ll_debug,
-							   L"dxf_add_symbols(sub = %p, symbols = '%ls'[%d]...) -> %d, 'Tried unsuccessfully to "
+							   L"dxf_add_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'Tried unsuccessfully to "
 							   L"clear symbols to subscribe to wildcard (*) '",
-							   subscription, symbols[0], symbol_count, DXF_FAILURE);
+							   subscription, symbol_count, symbols[0], DXF_FAILURE);
 
 			return DXF_FAILURE;
 		}
@@ -669,18 +669,18 @@ DXFEED_API ERRORCODE dxf_add_symbols(dxf_subscription_t subscription, dxf_const_
 						   &added_symbols_count)) {
 		dx_free(added_symbols_indices);
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_add_symbols(sub = %p, symbols = '%ls'[%d]...) -> %d, 'Unsuccessfully attempted to add "
+						   L"dxf_add_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'Unsuccessfully attempted to add "
 						   L"symbols to the subscription'",
-						   subscription, symbols[0], symbol_count, DXF_FAILURE);
+						   subscription, symbol_count, symbols[0], DXF_FAILURE);
 		return DXF_FAILURE;
 	}
 
 	if (added_symbols_count == 0) {
 		dx_free(added_symbols_indices);
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_add_symbols(sub = %p, symbols = '%ls'[%d]...) -> %d, 'The added symbols are already "
+						   L"dxf_add_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'The added symbols are already "
 						   L"in the subscription'",
-						   subscription, symbols[0], symbol_count, DXF_SUCCESS);
+						   subscription, symbol_count, symbols[0], DXF_SUCCESS);
 		return DXF_SUCCESS;
 	}
 
@@ -691,14 +691,15 @@ DXFEED_API ERRORCODE dxf_add_symbols(dxf_subscription_t subscription, dxf_const_
 		dx_free(added_symbols_indices);
 		dx_logging_verbose(
 			dx_ll_debug,
-			L"dxf_add_symbols(sub = %p, symbols = '%ls'[%d]...) -> %d, 'Tried unsuccessfully to subscribe to symbols'",
-			subscription, symbols[0], symbol_count, DXF_FAILURE);
+			L"dxf_add_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'Tried unsuccessfully to subscribe to symbols'",
+			subscription, symbol_count, symbols[0], DXF_FAILURE);
 		return DXF_FAILURE;
 	}
 
 	dx_free(added_symbols_indices);
-	dx_logging_verbose(dx_ll_debug, L"dxf_add_symbols(sub = %p, symbols = '%ls'[%d]...) -> %d", subscription,
-					   symbols[0], symbol_count, DXF_SUCCESS);
+	dx_logging_verbose(dx_ll_debug, L"dxf_add_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d", subscription,
+					   symbol_count, symbols[0], DXF_SUCCESS);
+
 	return DXF_SUCCESS;
 }
 
@@ -718,19 +719,19 @@ DXFEED_API ERRORCODE dxf_remove_symbol(dxf_subscription_t subscription, dxf_cons
 
 DXFEED_API ERRORCODE dxf_remove_symbols(dxf_subscription_t subscription, dxf_const_string_t *symbols,
 										int symbol_count) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_remove_symbols(sub = %p, symbols = '%ls'[%d]...)", subscription,
-					   (symbols == NULL) ? L"NULL" : (symbol_count > 0 ? symbols[0] : L""), symbol_count);
-
 	dx_perform_common_actions(DX_RESET_ERROR);
+
+	dx_logging_verbose(dx_ll_debug, L"dxf_remove_symbols(sub = %p, symbols[%d] = '%ls'...)", subscription, symbol_count,
+					   (symbols == NULL) ? L"NULL" : (symbol_count > 0 ? symbols[0] : L""));
 
 	if (subscription == dx_invalid_subscription || symbols == NULL || symbol_count < 0) {
 		dx_set_error_code(dx_ec_invalid_func_param);
 
 		dx_logging_verbose(
 			dx_ll_debug,
-			L"dxf_remove_symbols(sub = %p, symbols = '%ls'[%d]...) -> %d, 'The subscription is invalid or "
+			L"dxf_remove_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'The subscription is invalid or "
 			L"symbols is NULL or symbols count < 0'",
-			subscription, (symbols == NULL) ? L"NULL" : (symbol_count > 0 ? symbols[0] : L""), symbol_count,
+			subscription, symbol_count, (symbols == NULL) ? L"NULL" : (symbol_count > 0 ? symbols[0] : L""),
 			DXF_FAILURE);
 
 		return DXF_FAILURE;
@@ -741,8 +742,8 @@ DXFEED_API ERRORCODE dxf_remove_symbols(dxf_subscription_t subscription, dxf_con
 	if (!dx_get_event_subscription_symbols_count(subscription, &current_symbol_count)) {
 		dx_logging_verbose(
 			dx_ll_debug,
-			L"dxf_remove_symbols(sub = %p, symbols = '%ls'[%d]...) -> %d, 'Unable to get current symbols count'",
-			subscription, symbols[0], symbol_count, DXF_FAILURE);
+			L"dxf_remove_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'Unable to get current symbols count'",
+			subscription, symbol_count, symbols[0], DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
@@ -751,8 +752,8 @@ DXFEED_API ERRORCODE dxf_remove_symbols(dxf_subscription_t subscription, dxf_con
 	// Let's use a simple check to remove symbols so that we don't use a flag for each subscription.
 	if (current_symbol_count == 0u) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_remove_symbols(sub = %p, symbols = '%ls'[%d]...) -> %d, 'Current symbols count == 0'",
-						   subscription, L"", symbol_count, DXF_SUCCESS);
+						   L"dxf_remove_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'Current symbols count == 0'",
+						   subscription, symbol_count, L"", DXF_SUCCESS);
 
 		return DXF_SUCCESS;
 	}
@@ -766,9 +767,9 @@ DXFEED_API ERRORCODE dxf_remove_symbols(dxf_subscription_t subscription, dxf_con
 	if (found_wildcard) {
 		dx_logging_verbose(
 			dx_ll_debug,
-			L"dxf_remove_symbols(sub = %p, symbols = '%ls'[%d]...) -> %d, 'An attempt to unsubscribe from "
+			L"dxf_remove_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'An attempt to unsubscribe from "
 			L"a wildcard (*), unsubscribing from all symbols. '",
-			subscription, symbols[0], symbol_count, DXF_SUCCESS);
+			subscription, symbol_count, symbols[0], DXF_SUCCESS);
 
 		return dxf_clear_symbols(subscription);
 	}
@@ -781,18 +782,18 @@ DXFEED_API ERRORCODE dxf_remove_symbols(dxf_subscription_t subscription, dxf_con
 		!dx_get_event_subscription_event_types(subscription, &events) ||
 		!dx_get_event_subscription_flags(subscription, &subscr_flags)) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_remove_symbols(sub = %p, symbols = '%ls'[%d]...) -> %d, 'Unable to get connection "
+						   L"dxf_remove_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'Unable to get connection "
 						   L"information or event types or subscription flags'",
-						   subscription, symbols[0], symbol_count, DXF_FAILURE);
+						   subscription, symbol_count, symbols[0], DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
 
 	if (IS_FLAG_SET(subscr_flags, dx_esf_wildcard)) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_remove_symbols(sub = %p, symbols = '%ls'[%d]...) -> %d, 'An attempt to unsubscribe "
+						   L"dxf_remove_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'An attempt to unsubscribe "
 						   L"from symbols, despite the fact that there is a subscription to a wildcard. Skipped.'",
-						   subscription, symbols[0], symbol_count, DXF_SUCCESS);
+						   subscription, symbol_count, symbols[0], DXF_SUCCESS);
 
 		return DXF_SUCCESS;
 	}
@@ -804,12 +805,15 @@ DXFEED_API ERRORCODE dxf_remove_symbols(dxf_subscription_t subscription, dxf_con
 						time) ||
 		!dx_remove_symbols(subscription, symbols, symbol_count)) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_remove_symbols(sub = %p, symbols = '%ls'[%d]...) -> %d, 'Tried unsuccessfully to "
+						   L"dxf_remove_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'Tried unsuccessfully to "
 						   L"unsubscribe from symbols'",
-						   subscription, symbols[0], symbol_count, DXF_FAILURE);
+						   subscription, symbol_count, symbols[0], DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
+
+	dx_logging_verbose(dx_ll_debug, L"dxf_remove_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d", subscription,
+					   symbol_count, symbols[0], DXF_SUCCESS);
 
 	return DXF_SUCCESS;
 }
@@ -818,19 +822,38 @@ DXFEED_API ERRORCODE dxf_remove_symbols(dxf_subscription_t subscription, dxf_con
 
 DXFEED_API ERRORCODE dxf_get_symbols(dxf_subscription_t subscription, OUT dxf_const_string_t **symbols,
 									 OUT int *symbol_count) {
-	size_t symbols_size = 0;
 	dx_perform_common_actions(DX_RESET_ERROR);
+
+	dx_logging_verbose(dx_ll_debug, L"dxf_get_symbols(sub = %p, symbols = %p, count = %p)", subscription, symbols,
+					   symbol_count);
 
 	if (subscription == dx_invalid_subscription || symbols == NULL || symbol_count == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
 
+		dx_logging_verbose(dx_ll_debug,
+						   L"dxf_get_symbols(sub = %p, symbols = %p, count = %p) -> %d, 'Tried unsuccessfully to "
+						   L"retrieve the subscription symbols'",
+						   subscription, symbols, symbol_count, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
 
+	size_t symbols_size = 0;
+
 	if (!dx_get_event_subscription_symbols(subscription, symbols, &symbols_size)) {
+		dx_logging_verbose(dx_ll_debug,
+						   L"dxf_get_symbols(sub = %p, symbols = %p, count = %p) -> %d, 'The subscription is invalid "
+						   L"or symbols is NULL or symbols count is NULL'",
+						   subscription, symbols, symbol_count, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
+
 	*symbol_count = (int)symbols_size;
+
+	dx_logging_verbose(dx_ll_debug, L"dxf_get_symbols(sub = %p, symbols = %p, count = %p {*count = %d}) -> %d",
+					   subscription, symbols, symbol_count, *symbol_count, DXF_SUCCESS);
+
 	return DXF_SUCCESS;
 }
 
@@ -839,16 +862,33 @@ DXFEED_API ERRORCODE dxf_get_symbols(dxf_subscription_t subscription, OUT dxf_co
 DXFEED_API ERRORCODE dxf_set_symbols(dxf_subscription_t subscription, dxf_const_string_t *symbols, int symbol_count) {
 	dx_perform_common_actions(DX_RESET_ERROR);
 
+	dx_logging_verbose(dx_ll_debug, L"dxf_set_symbols(sub = %p, symbols[%d] = '%ls'...)", subscription, symbol_count,
+					   (symbols == NULL) ? L"NULL" : (symbol_count > 0 ? symbols[0] : L""));
+
 	if (subscription == dx_invalid_subscription || symbols == NULL || symbol_count < 0) {
 		dx_set_error_code(dx_ec_invalid_func_param);
+
+		dx_logging_verbose(dx_ll_debug,
+						   L"dxf_set_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'The subscription is invalid or "
+						   L"symbols is NULL or symbols count < 0'",
+						   subscription, symbol_count,
+						   (symbols == NULL) ? L"NULL" : (symbol_count > 0 ? symbols[0] : L""), DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
 
 	if (dxf_clear_symbols(subscription) == DXF_FAILURE ||
 		dxf_add_symbols(subscription, symbols, symbol_count) == DXF_FAILURE) {
+		dx_logging_verbose(
+			dx_ll_debug,
+			L"dxf_set_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'Tried unsuccessfully to clear and add symbols'",
+			subscription, symbol_count, symbols[0], DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
+
+	dx_logging_verbose(dx_ll_debug, L"dxf_set_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d", subscription,
+					   symbol_count, symbols[0], DXF_SUCCESS);
 
 	return DXF_SUCCESS;
 }
@@ -864,10 +904,14 @@ DXFEED_API ERRORCODE dxf_clear_symbols(dxf_subscription_t subscription) {
 	dx_event_subscr_flag subscr_flags;
 	dxf_long_t time;
 
+	dx_logging_verbose(dx_ll_debug, L"dxf_clear_symbols(sub = %p)", subscription);
+
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (subscription == dx_invalid_subscription) {
 		dx_set_error_code(dx_ec_invalid_func_param);
+		dx_logging_verbose(dx_ll_debug, L"dxf_clear_symbols(sub = %p) -> %d, 'The subscription is invalid'",
+						   subscription, DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
@@ -880,6 +924,9 @@ DXFEED_API ERRORCODE dxf_clear_symbols(dxf_subscription_t subscription) {
 		!dx_unsubscribe(connection, dx_get_order_source(subscription), symbols, symbol_count, (int)events, subscr_flags,
 						time) ||
 		!dx_remove_symbols(subscription, symbols, symbol_count)) {
+		dx_logging_verbose(dx_ll_debug, L"dxf_clear_symbols(sub = %p) -> %d, 'Tried unsuccessfully to remove symbols'",
+						   subscription, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
 
@@ -887,9 +934,16 @@ DXFEED_API ERRORCODE dxf_clear_symbols(dxf_subscription_t subscription) {
 		subscr_flags ^= dx_esf_wildcard;
 
 		if (!dx_set_event_subscription_flags(subscription, subscr_flags)) {
+			dx_logging_verbose(
+				dx_ll_debug,
+				L"dxf_clear_symbols(sub = %p) -> %d, 'Tried unsuccessfully to unset wildcard subscription flag'",
+				subscription, DXF_FAILURE);
+
 			return DXF_FAILURE;
 		}
 	}
+
+	dx_logging_verbose(dx_ll_debug, L"dxf_clear_symbols(sub = %p) -> %d", subscription, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
 }
