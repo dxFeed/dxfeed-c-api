@@ -1031,7 +1031,7 @@ DXFEED_API ERRORCODE dxf_attach_snapshot_listener(dxf_snapshot_t snapshot, dxf_s
  *
  * @details No error occurs if it's attempted to detach a listener which wasn't previously attached.
  *
- * @param[in] snapshot          A handle of the snapshot to which a listener is to be detached
+ * @param[in] snapshot          A handle of a snapshot from which the listener should be detached.
  * @param[in] snapshot_listener A listener callback function pointer
  *
  * @return {@link DXF_SUCCESS} if snapshot listener has been successfully detached or {@link DXF_FAILURE} on error;
@@ -1064,7 +1064,7 @@ DXFEED_API ERRORCODE dxf_attach_snapshot_inc_listener(dxf_snapshot_t snapshot,
  *
  * @details No error occurs if it's attempted to detach a listener which wasn't previously attached.
  *
- * @param[in] snapshot          A handle of the snapshot to which a listener is to be detached
+ * @param[in] snapshot          A handle of a snapshot from which the listener should be detached.
  * @param[in] snapshot_listener A listener callback function pointer
  *
  * @return {@link DXF_SUCCESS} if snapshot listener has been successfully detached or {@link DXF_FAILURE} on error;

@@ -573,11 +573,11 @@ DXFEED_API ERRORCODE dxf_close_subscription(dxf_subscription_t subscription) {
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_add_symbol(dxf_subscription_t subscription, dxf_const_string_t symbol) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_add_symbol(sub = %p, symbol = '%ls')", subscription, symbol);
+	dx_logging_verbose(dx_ll_debug, L"dxf_add_symbol(sub = %p, symbol = '%ls')", subscription, (symbol == NULL) ? L"NULL" : symbol);
 
 	ERRORCODE res = dxf_add_symbols(subscription, &symbol, 1);
 
-	dx_logging_verbose(dx_ll_debug, L"dxf_add_symbol(sub = %p, symbol = '%ls') -> %d", subscription, symbol, res);
+	dx_logging_verbose(dx_ll_debug, L"dxf_add_symbol(sub = %p, symbol = '%ls') -> %d", subscription, (symbol == NULL) ? L"NULL" : symbol, res);
 
 	return res;
 }
@@ -952,17 +952,33 @@ DXFEED_API ERRORCODE dxf_clear_symbols(dxf_subscription_t subscription) {
 
 DXFEED_API ERRORCODE dxf_attach_event_listener(dxf_subscription_t subscription, dxf_event_listener_t event_listener,
 											   void *user_data) {
+	dx_logging_verbose(dx_ll_debug, L"dxf_attach_event_listener(sub = %p, listener = %p, user_data = %p)", subscription,
+					   event_listener, user_data);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (subscription == dx_invalid_subscription || event_listener == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
+		dx_logging_verbose(
+			dx_ll_debug,
+			L"dxf_attach_event_listener(sub = %p, listener = %p, user_data = %p) -> %d, 'The subscription is "
+			L"invalid or listener is NULL'",
+			subscription, event_listener, user_data, DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
 
 	if (!dx_add_listener(subscription, event_listener, user_data)) {
+		dx_logging_verbose(
+			dx_ll_debug,
+			L"dxf_attach_event_listener(sub = %p, listener = %p, user_data = %p) -> %d, 'Tried unsuccessfully "
+			L"to attach the listener'",
+			subscription, event_listener, user_data, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
+
+	dx_logging_verbose(dx_ll_debug, L"dxf_attach_event_listener(sub = %p, listener = %p, user_data = %p) -> %d",
+					   subscription, event_listener, user_data, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
 }
@@ -970,17 +986,31 @@ DXFEED_API ERRORCODE dxf_attach_event_listener(dxf_subscription_t subscription, 
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_detach_event_listener(dxf_subscription_t subscription, dxf_event_listener_t event_listener) {
+	dx_logging_verbose(dx_ll_debug, L"dxf_detach_event_listener(sub = %p, listener = %p)", subscription,
+					   event_listener);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (subscription == dx_invalid_subscription || event_listener == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
+		dx_logging_verbose(dx_ll_debug,
+						   L"dxf_detach_event_listener(sub = %p, listener = %p) -> %d, 'The subscription is "
+						   L"invalid or listener is NULL'",
+						   subscription, event_listener, DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
 
 	if (!dx_remove_listener(subscription, event_listener)) {
+		dx_logging_verbose(
+			dx_ll_debug,
+			L"dxf_detach_event_listener(sub = %p, listener = %p) -> %d, 'Tried unsuccessfully to detach the listener'",
+			subscription, event_listener, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
+
+	dx_logging_verbose(dx_ll_debug, L"dxf_detach_event_listener(sub = %p, listener = %p) -> %d", subscription,
+					   event_listener, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
 }
@@ -989,17 +1019,32 @@ DXFEED_API ERRORCODE dxf_detach_event_listener(dxf_subscription_t subscription, 
 
 DXFEED_API ERRORCODE dxf_attach_event_listener_v2(dxf_subscription_t subscription,
 												  dxf_event_listener_v2_t event_listener, void *user_data) {
+	dx_logging_verbose(dx_ll_debug, L"dxf_attach_event_listener_v2(sub = %p, listener = %p, user_data = %p)",
+					   subscription, event_listener, user_data);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (subscription == dx_invalid_subscription || event_listener == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
+		dx_logging_verbose(dx_ll_debug,
+						   L"dxf_attach_event_listener_v2(sub = %p, listener = %p) -> %d, 'The subscription is "
+						   L"invalid or listener is NULL'",
+						   subscription, event_listener, DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
 
 	if (!dx_add_listener_v2(subscription, event_listener, user_data)) {
+		dx_logging_verbose(
+			dx_ll_debug,
+			L"dxf_attach_event_listener_v2(sub = %p, listener = %p, user_data = %p) -> %d, 'Tried unsuccessfully "
+			L"to attach the listener'",
+			subscription, event_listener, user_data, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
+
+	dx_logging_verbose(dx_ll_debug, L"dxf_attach_event_listener_v2(sub = %p, listener = %p, user_data = %p) -> %d",
+					   subscription, event_listener, user_data, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
 }
@@ -1008,17 +1053,31 @@ DXFEED_API ERRORCODE dxf_attach_event_listener_v2(dxf_subscription_t subscriptio
 
 DXFEED_API ERRORCODE dxf_detach_event_listener_v2(dxf_subscription_t subscription,
 												  dxf_event_listener_v2_t event_listener) {
+	dx_logging_verbose(dx_ll_debug, L"dxf_detach_event_listener_v2(sub = %p, listener = %p)", subscription,
+					   event_listener);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (subscription == dx_invalid_subscription || event_listener == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
+		dx_logging_verbose(dx_ll_debug,
+						   L"dxf_detach_event_listener_v2(sub = %p, listener = %p) -> %d, 'The subscription is "
+						   L"invalid or listener is NULL'",
+						   subscription, event_listener, DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
 
 	if (!dx_remove_listener_v2(subscription, event_listener)) {
+		dx_logging_verbose(dx_ll_debug,
+						   L"dxf_detach_event_listener_v2(sub = %p, listener = %p) -> %d, 'Tried unsuccessfully to "
+						   L"detach the listener'",
+						   subscription, event_listener, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
+
+	dx_logging_verbose(dx_ll_debug, L"dxf_detach_event_listener_v2(sub = %p, listener = %p) -> %d", subscription,
+					   event_listener, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
 }
@@ -1026,10 +1085,16 @@ DXFEED_API ERRORCODE dxf_detach_event_listener_v2(dxf_subscription_t subscriptio
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_get_subscription_event_types(dxf_subscription_t subscription, OUT int *event_types) {
+	dx_logging_verbose(dx_ll_debug, L"dxf_get_subscription_event_types(sub = %p, event_types = %p)", subscription,
+					   event_types);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (subscription == dx_invalid_subscription || event_types == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
+		dx_logging_verbose(dx_ll_debug,
+						   L"dxf_get_subscription_event_types(sub = %p, event_types = %p) -> %d, 'The subscription is "
+						   L"invalid or event_types is NULL'",
+						   subscription, event_types, DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
@@ -1037,10 +1102,18 @@ DXFEED_API ERRORCODE dxf_get_subscription_event_types(dxf_subscription_t subscri
 	unsigned tmp_event_types;
 
 	if (!dx_get_event_subscription_event_types(subscription, &tmp_event_types)) {
+		dx_logging_verbose(dx_ll_debug,
+						   L"dxf_get_subscription_event_types(sub = %p, event_types = %p) -> %d, 'Tried unsuccessfully "
+						   L"to retrieve the event types'",
+						   subscription, event_types, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
 
 	*event_types = (int)tmp_event_types;
+
+	dx_logging_verbose(dx_ll_debug, L"dxf_get_subscription_event_types(sub = %p, event_types = %p) -> %d, 0x%0X",
+					   subscription, event_types, DXF_SUCCESS, *event_types);
 
 	return DXF_SUCCESS;
 }
@@ -1049,21 +1122,41 @@ DXFEED_API ERRORCODE dxf_get_subscription_event_types(dxf_subscription_t subscri
 
 DXFEED_API ERRORCODE dxf_get_last_event(dxf_connection_t connection, int event_type, dxf_const_string_t symbol,
 										OUT dxf_event_data_t *data) {
+	dx_logging_verbose(dx_ll_debug, L"dxf_get_last_event(con = %p, event_type = %d, symbol = '%ls', event data = %p)",
+					   connection, event_type, symbol, data);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (!dx_validate_connection_handle(connection, false)) {
+		dx_logging_verbose(dx_ll_debug,
+						   L"dxf_get_last_event(con = %p, event_type = %d, symbol = '%ls', event data = %p) -> %d, "
+						   L"'Invalid connection handle'",
+						   connection, event_type, symbol, data, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
 
 	if (data == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
+		dx_logging_verbose(dx_ll_debug,
+						   L"dxf_get_last_event(con = %p, event_type = %d, symbol = '%ls', event data = %p) -> %d, 'The "
+						   L"event data ptr is NULL'",
+						   connection, event_type, symbol, data, DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
 
 	if (!dx_get_last_symbol_event(connection, symbol, event_type, data)) {
+		dx_logging_verbose(dx_ll_debug,
+						   L"dxf_get_last_event(con = %p, event_type = %d, symbol = '%ls', event data = %p) -> %d, 'Tried "
+						   L"unsuccessfully to retrieve the event data'",
+						   connection, event_type, symbol, data, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
+
+	dx_logging_verbose(dx_ll_debug,
+					   L"dxf_get_last_event(con = %p, event_type = %d, symbol = '%ls', event data = %p) -> %d", connection,
+					   event_type, symbol, data, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
 }
@@ -1071,8 +1164,13 @@ DXFEED_API ERRORCODE dxf_get_last_event(dxf_connection_t connection, int event_t
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_get_last_error(OUT int *error_code, OUT dxf_const_string_t *error_descr) {
+	dx_logging_verbose(dx_ll_debug, L"dxf_get_last_error(error_code = %p, error_descr = %p)", error_code, error_descr);
+
 	if (error_code == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
+		dx_logging_verbose(dx_ll_debug,
+						   L"dxf_get_last_error(error_code = %p, error_descr = %p) -> %d, 'The error code ptr is NULL'",
+						   error_code, error_descr, DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
@@ -1082,8 +1180,17 @@ DXFEED_API ERRORCODE dxf_get_last_error(OUT int *error_code, OUT dxf_const_strin
 			*error_descr = dx_get_error_description(*error_code);
 		}
 
+		dx_logging_verbose(dx_ll_debug, L"dxf_get_last_error(error_code = %p, error_descr = %p) -> %d, %d, '%ls'",
+						   error_code, error_descr, *error_code, (error_descr == NULL) ? L"NULL" : *error_descr,
+						   DXF_SUCCESS);
+
 		return DXF_SUCCESS;
 	}
+
+	dx_logging_verbose(dx_ll_debug,
+					   L"dxf_get_last_error(error_code = %p, error_descr = %p) -> %d, 'Tried unsuccessfully to "
+					   L"retrieve the error code & description'",
+					   error_code, error_descr, DXF_FAILURE);
 
 	return DXF_FAILURE;
 }
@@ -1091,27 +1198,31 @@ DXFEED_API ERRORCODE dxf_get_last_error(OUT int *error_code, OUT dxf_const_strin
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_set_order_source(dxf_subscription_t subscription, const char *source) {
-	dxf_connection_t connection;
-	dxf_string_t str;
-	dxf_const_string_t *symbols;
-	size_t symbol_count;
-	unsigned events;
-	dx_event_subscr_flag subscr_flags;
-	dxf_long_t time;
-	size_t source_len;
-
+	dx_logging_verbose(dx_ll_debug, L"dxf_set_order_source(sub = %p, source = '%hs')", subscription, (source == NULL) ? "NULL" : source);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (subscription == dx_invalid_subscription) {
 		dx_set_error_code(dx_ec_invalid_func_param);
+		dx_logging_verbose(dx_ll_debug, L"dxf_set_order_source(sub = %p, source = '%hs') -> %d, 'The subscription is invalid'", subscription, (source == NULL) ? "NULL" : source, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
 
-	source_len = source == NULL ? 0 : strlen(source);
+	size_t source_len = source == NULL ? 0 : strlen(source);
+
 	if (source_len == 0 || source_len >= DXF_RECORD_SUFFIX_SIZE) {
 		dx_set_error_code(dx_ec_invalid_func_param);
+		dx_logging_verbose(dx_ll_debug, L"dxf_set_order_source(sub = %p, source = '%hs') -> %d, 'The source is invalid'", subscription, (source == NULL) ? "NULL" : source, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
+
+	dxf_connection_t connection = NULL;
+	dxf_const_string_t *symbols = NULL;
+	size_t symbol_count = 0;
+	unsigned events = 0;
+	dx_event_subscr_flag subscr_flags = dx_esf_default;
+	dxf_long_t time = 0;
 
 	// unsubscribe from old order sources
 	if (!dx_get_subscription_connection(subscription, &connection) ||
@@ -1121,6 +1232,8 @@ DXFEED_API ERRORCODE dxf_set_order_source(dxf_subscription_t subscription, const
 		!dx_get_event_subscription_time(subscription, &time) ||
 		!dx_unsubscribe(connection, dx_get_order_source(subscription), symbols, symbol_count, (int)events, subscr_flags,
 						time)) {
+		dx_logging_verbose(dx_ll_debug, L"dxf_set_order_source(sub = %p, source = '%hs') -> %d, 'Tried unsuccessfully to unsubscribe from the old order sources'", subscription, source, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
 
@@ -1129,11 +1242,15 @@ DXFEED_API ERRORCODE dxf_set_order_source(dxf_subscription_t subscription, const
 	// remove old sources
 	dx_clear_order_source(subscription);
 	// add new source
-	str = dx_ansi_to_unicode(source);
+	dxf_string_t str = dx_ansi_to_unicode(source);
+
 	if (!dx_add_order_source(subscription, str)) {
 		dx_free(str);
+		dx_logging_verbose(dx_ll_debug, L"dxf_set_order_source(sub = %p, source = '%hs') -> %d, 'Error while adding the new order source'", subscription, source, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
+
 	dx_free(str);
 
 	// subscribe to new order sources
@@ -1141,44 +1258,61 @@ DXFEED_API ERRORCODE dxf_set_order_source(dxf_subscription_t subscription, const
 		!dx_send_record_description(connection, false) ||
 		!dx_subscribe(connection, dx_get_order_source(subscription), symbols, symbol_count, NULL, 0, (int)events,
 					  subscr_flags, time)) {
+		dx_logging_verbose(dx_ll_debug, L"dxf_set_order_source(sub = %p, source = '%hs') -> %d, 'Tried unsuccessfully to subscribe to the new order source'", subscription, source, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
+
+	dx_logging_verbose(dx_ll_debug, L"dxf_set_order_source(sub = %p, source = '%hs') -> %d", subscription, source, DXF_SUCCESS);
+
 	return DXF_SUCCESS;
 }
 
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const char *source) {
-	dxf_connection_t connection;
-	dxf_string_t wide_source = NULL;
-	size_t source_len;
-	dx_suffix_t elem = {{0}};
-	dx_order_source_array_t new_source_array = {NULL, 0, 0};
-	dxf_const_string_t *symbols;
-	size_t symbol_count;
-	unsigned events;
-	dx_event_subscr_flag subscr_flags;
-	dxf_long_t time;
-	int failed = false;
-
+	dx_logging_verbose(dx_ll_debug, L"dxf_add_order_source(sub = %p, source = '%hs')", subscription, (source == NULL) ? "NULL" : source);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (subscription == dx_invalid_subscription) {
 		dx_set_error_code(dx_ec_invalid_func_param);
+		dx_logging_verbose(dx_ll_debug, L"dxf_add_order_source(sub = %p, source = '%hs') -> %d, 'The subscription is invalid'", subscription, (source == NULL) ? "NULL" : source, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
 
-	source_len = source == NULL ? 0 : strlen(source);
+	size_t source_len = source == NULL ? 0 : strlen(source);
+
 	if (source_len == 0 || source_len >= DXF_RECORD_SUFFIX_SIZE) {
 		dx_set_error_code(dx_ec_invalid_func_param);
+		dx_logging_verbose(dx_ll_debug, L"dxf_add_order_source(sub = %p, source = '%hs') -> %d, 'The source is invalid'", subscription, (source == NULL) ? "NULL" : source, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
 
-	wide_source = dx_ansi_to_unicode(source);
+	dxf_string_t wide_source = dx_ansi_to_unicode(source);
+	dx_suffix_t elem = {{0}};
+
 	dx_copy_string_len(elem.suffix, wide_source, source_len);
 	dx_free(wide_source);
+
+	dx_order_source_array_t new_source_array = {NULL, 0, 0};
+	int failed = false;
+
 	DX_ARRAY_INSERT(new_source_array, dx_suffix_t, elem, new_source_array.size, dx_capacity_manager_halfer, failed);
-	if (failed) return DXF_FAILURE;
+
+	if (failed) {
+		dx_logging_verbose(dx_ll_debug, L"dxf_add_order_source(sub = %p, source = '%hs') -> %d, 'Error while inserting the order source into the array'", subscription, source, DXF_FAILURE);
+
+		return DXF_FAILURE;
+	}
+
+	dxf_connection_t connection = NULL;
+	dxf_const_string_t *symbols = NULL;
+	size_t symbol_count = 0;
+	unsigned events = 0;
+	dx_event_subscr_flag subscr_flags = dx_esf_default;
+	dxf_long_t time = 0;
 
 	if (!dx_get_subscription_connection(subscription, &connection) ||
 		!dx_get_event_subscription_symbols(subscription, &symbols, &symbol_count) ||
@@ -1190,17 +1324,21 @@ DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const
 		!dx_subscribe(connection, &new_source_array, symbols, symbol_count, NULL, 0, (int)events, subscr_flags, time) ||
 		!dx_add_order_source(subscription, elem.suffix)) {
 		dx_free(new_source_array.elements);
+		dx_logging_verbose(dx_ll_debug, L"dxf_add_order_source(sub = %p, source = '%hs') -> %d, 'Tried unsuccessfully to subscribe to the order source and to add it'", subscription, source, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
 
 	dx_free(new_source_array.elements);
+	dx_logging_verbose(dx_ll_debug, L"dxf_add_order_source(sub = %p, source = '%hs') -> %d", subscription, source, DXF_SUCCESS);
+
 	return DXF_SUCCESS;
 }
 
 /* -------------------------------------------------------------------------- */
 
-ERRORCODE dxf_create_snapshot_impl(dxf_connection_t connection, dx_event_id_t event_id, dxf_const_string_t symbol,
-								   dxf_const_string_t source, dxf_long_t time, OUT dxf_snapshot_t *snapshot) {
+ERRORCODE dx_create_snapshot_impl(dxf_connection_t connection, dx_event_id_t event_id, dxf_const_string_t symbol,
+								  dxf_const_string_t source, dxf_long_t time, OUT dxf_snapshot_t *snapshot) {
 	dxf_subscription_t subscription = NULL;
 	dx_record_info_id_t record_info_id;
 	dxf_const_string_t order_source_value = NULL;
@@ -1276,11 +1414,20 @@ ERRORCODE dxf_create_snapshot_impl(dxf_connection_t connection, dx_event_id_t ev
 
 DXFEED_API ERRORCODE dxf_create_snapshot(dxf_connection_t connection, dx_event_id_t event_id, dxf_const_string_t symbol,
 										 const char *source, dxf_long_t time, OUT dxf_snapshot_t *snapshot) {
-	dxf_string_t source_str = NULL;
-	ERRORCODE res;
-	if (source != NULL) source_str = dx_ansi_to_unicode(source);
-	res = dxf_create_snapshot_impl(connection, event_id, symbol, source_str, time, snapshot);
+	dx_logging_verbose(dx_ll_debug,
+					   L"dxf_create_snapshot(con = %p, event id = 0x%X, symbol = '%ls', source = '%hs', time = %" LS(PRId64) L", snapshot = %p)",
+					   connection, event_id, (symbol == NULL) ? L"NULL" : symbol, (source == NULL) ? "NULL" : source, time, snapshot);
+
+	dxf_string_t source_str = (source != NULL) ? dx_ansi_to_unicode(source) : NULL;
+
+	ERRORCODE res = dx_create_snapshot_impl(connection, event_id, symbol, source_str, time, snapshot);
+
 	dx_free(source_str);
+
+	dx_logging_verbose(dx_ll_debug,
+					   L"dxf_create_snapshot(con = %p, event id = 0x%X, symbol = '%ls', source = '%hs', time = %" LS(PRId64) L", snapshot = %p) -> %d, %p",
+					   connection, event_id, (symbol == NULL) ? L"NULL" : symbol, (source == NULL) ? "NULL" : source, time, snapshot, res, (snapshot == NULL) ? NULL : *snapshot);
+
 	return res;
 }
 
@@ -1288,23 +1435,45 @@ DXFEED_API ERRORCODE dxf_create_snapshot(dxf_connection_t connection, dx_event_i
 
 DXFEED_API ERRORCODE dxf_create_order_snapshot(dxf_connection_t connection, dxf_const_string_t symbol,
 											   const char *source, dxf_long_t time, OUT dxf_snapshot_t *snapshot) {
-	return dxf_create_snapshot(connection, dx_eid_order, symbol, source, time, snapshot);
+	dx_logging_verbose(dx_ll_debug,
+					   L"dxf_create_order_snapshot(con = %p, symbol = '%ls', source = '%hs', time = %" LS(PRId64) L", snapshot = %p)",
+					   connection, (symbol == NULL) ? L"NULL" : symbol, (source == NULL) ? "NULL" : source, time, snapshot);
+
+	ERRORCODE res = dxf_create_snapshot(connection, dx_eid_order, symbol, source, time, snapshot);
+
+	dx_logging_verbose(dx_ll_debug,
+					   L"dxf_create_order_snapshot(con = %p, symbol = '%ls', source = '%hs', time = %" LS(PRId64) L", snapshot = %p) -> %d, %p",
+					   connection, (symbol == NULL) ? L"NULL" : symbol, (source == NULL) ? "NULL" : source, time, snapshot, res, (snapshot == NULL) ? NULL : *snapshot);
+
+	return res;
 }
 
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_create_candle_snapshot(dxf_connection_t connection, dxf_candle_attributes_t candle_attributes,
 												dxf_long_t time, OUT dxf_snapshot_t *snapshot) {
+	dx_logging_verbose(dx_ll_debug,
+					   L"dxf_create_candle_snapshot(con = %p, candle attr = %p, time = %" LS(PRId64) L", snapshot = %p)",
+					   connection, candle_attributes, time, snapshot);
+
 	ERRORCODE res;
 	dxf_string_t candle_symbol = NULL;
 
 	if (!dx_candle_symbol_to_string(candle_attributes, &candle_symbol)) {
+		dx_logging_verbose(dx_ll_debug,
+						   L"dxf_create_candle_snapshot(con = %p, candle attr = %p, time = %" LS(PRId64) L", snapshot = %p) -> %d, 'Error while converting the candle attributes to a candle symbol'",
+						   connection, candle_attributes, time, snapshot, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
 
-	res = dxf_create_snapshot_impl(connection, dx_eid_candle, candle_symbol, NULL, time, snapshot);
+	res = dx_create_snapshot_impl(connection, dx_eid_candle, candle_symbol, NULL, time, snapshot);
 
 	dx_free(candle_symbol);
+
+	dx_logging_verbose(dx_ll_debug,
+					   L"dxf_create_candle_snapshot(con = %p, candle attr = %p, time = %" LS(PRId64) L", snapshot = %p) -> %d, %p",
+					   connection, candle_attributes, time, snapshot, res, (snapshot == NULL) ? NULL : *snapshot);
 
 	return res;
 }
@@ -1312,19 +1481,27 @@ DXFEED_API ERRORCODE dxf_create_candle_snapshot(dxf_connection_t connection, dxf
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_close_snapshot(dxf_snapshot_t snapshot) {
+	dx_logging_verbose(dx_ll_debug, L"dxf_close_snapshot(snapshot = %p)", snapshot);
+
 	dxf_subscription_t subscription = NULL;
 
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (snapshot == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
+		dx_logging_verbose(dx_ll_debug, L"dxf_close_snapshot(snapshot = %p) -> %d, 'Invalid snapshot'", snapshot, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
 
 	if (!dx_get_snapshot_subscription(snapshot, &subscription) || !dxf_close_subscription(subscription) ||
 		!dx_close_snapshot(snapshot)) {
+		dx_logging_verbose(dx_ll_debug, L"dxf_close_snapshot(snapshot = %p) -> %d, 'Tried unsuccessfully to close the snapshot'", snapshot, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
+
+	dx_logging_verbose(dx_ll_debug, L"dxf_close_snapshot(snapshot = %p) -> %d", snapshot, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
 }
@@ -1333,16 +1510,23 @@ DXFEED_API ERRORCODE dxf_close_snapshot(dxf_snapshot_t snapshot) {
 
 DXFEED_API ERRORCODE dxf_attach_snapshot_listener(dxf_snapshot_t snapshot, dxf_snapshot_listener_t snapshot_listener,
 												  void *user_data) {
+	dx_logging_verbose(dx_ll_debug, L"dxf_attach_snapshot_listener(snapshot = %p, listener = %p, user data = %p)", snapshot, snapshot_listener, user_data);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (snapshot == dx_invalid_snapshot || snapshot_listener == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
+		dx_logging_verbose(dx_ll_debug, L"dxf_attach_snapshot_listener(snapshot = %p, listener = %p, user data = %p) -> %d, 'Invalid snapshot or the listener is NULL'", snapshot, snapshot_listener, user_data, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
 
 	if (!dx_add_snapshot_listener(snapshot, snapshot_listener, user_data)) {
+		dx_logging_verbose(dx_ll_debug, L"dxf_attach_snapshot_listener(snapshot = %p, listener = %p, user data = %p) -> %d, 'Tried unsuccessfully to add the snapshot listener'", snapshot, snapshot_listener, user_data, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
+
+	dx_logging_verbose(dx_ll_debug, L"dxf_attach_snapshot_listener(snapshot = %p, listener = %p, user data = %p) -> %d", snapshot, snapshot_listener, user_data, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
 }
@@ -1350,17 +1534,23 @@ DXFEED_API ERRORCODE dxf_attach_snapshot_listener(dxf_snapshot_t snapshot, dxf_s
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_detach_snapshot_listener(dxf_snapshot_t snapshot, dxf_snapshot_listener_t snapshot_listener) {
+	dx_logging_verbose(dx_ll_debug, L"dxf_detach_snapshot_listener(snapshot = %p, listener = %p)", snapshot, snapshot_listener);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (snapshot == dx_invalid_subscription || snapshot_listener == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
+		dx_logging_verbose(dx_ll_debug, L"dxf_detach_snapshot_listener(snapshot = %p, listener = %p) -> %d, 'Invalid snapshot or the listener is NULL'", snapshot, snapshot_listener, DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
 
 	if (!dx_remove_snapshot_listener(snapshot, snapshot_listener)) {
+		dx_logging_verbose(dx_ll_debug, L"dxf_detach_snapshot_listener(snapshot = %p, listener = %p) -> %d, 'Tried unsuccessfully to remove the snapshot listener'", snapshot, snapshot_listener, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
+
+	dx_logging_verbose(dx_ll_debug, L"dxf_detach_snapshot_listener(snapshot = %p, listener = %p) -> %d", snapshot, snapshot_listener, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
 }
@@ -1369,16 +1559,23 @@ DXFEED_API ERRORCODE dxf_detach_snapshot_listener(dxf_snapshot_t snapshot, dxf_s
 
 DXFEED_API ERRORCODE dxf_attach_snapshot_inc_listener(dxf_snapshot_t snapshot,
 													  dxf_snapshot_inc_listener_t snapshot_listener, void *user_data) {
+	dx_logging_verbose(dx_ll_debug, L"dxf_attach_snapshot_inc_listener(snapshot = %p, listener = %p, user data = %p)", snapshot, snapshot_listener, user_data);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (snapshot == dx_invalid_snapshot || snapshot_listener == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
+		dx_logging_verbose(dx_ll_debug, L"dxf_attach_snapshot_inc_listener(snapshot = %p, listener = %p, user data = %p) -> %d, 'Invalid snapshot or the listener is NULL'", snapshot, snapshot_listener, user_data, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
 
 	if (!dx_add_snapshot_inc_listener(snapshot, snapshot_listener, user_data)) {
+		dx_logging_verbose(dx_ll_debug, L"dxf_attach_snapshot_inc_listener(snapshot = %p, listener = %p, user data = %p) -> %d, 'Tried unsuccessfully to add the snapshot listener'", snapshot, snapshot_listener, user_data, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
+
+	dx_logging_verbose(dx_ll_debug, L"dxf_attach_snapshot_inc_listener(snapshot = %p, listener = %p, user data = %p) -> %d", snapshot, snapshot_listener, user_data, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
 }
@@ -1387,17 +1584,23 @@ DXFEED_API ERRORCODE dxf_attach_snapshot_inc_listener(dxf_snapshot_t snapshot,
 
 DXFEED_API ERRORCODE dxf_detach_snapshot_inc_listener(dxf_snapshot_t snapshot,
 													  dxf_snapshot_inc_listener_t snapshot_listener) {
+	dx_logging_verbose(dx_ll_debug, L"dxf_detach_snapshot_inc_listener(snapshot = %p, listener = %p)", snapshot, snapshot_listener);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (snapshot == dx_invalid_subscription || snapshot_listener == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
+		dx_logging_verbose(dx_ll_debug, L"dxf_detach_snapshot_inc_listener(snapshot = %p, listener = %p) -> %d, 'Invalid snapshot or the listener is NULL'", snapshot, snapshot_listener, DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
 
 	if (!dx_remove_snapshot_inc_listener(snapshot, snapshot_listener)) {
+		dx_logging_verbose(dx_ll_debug, L"dxf_detach_snapshot_inc_listener(snapshot = %p, listener = %p) -> %d, 'Tried unsuccessfully to remove the snapshot listener'", snapshot, snapshot_listener, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
+
+	dx_logging_verbose(dx_ll_debug, L"dxf_detach_snapshot_inc_listener(snapshot = %p, listener = %p) -> %d", snapshot, snapshot_listener, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
 }
@@ -1405,14 +1608,24 @@ DXFEED_API ERRORCODE dxf_detach_snapshot_inc_listener(dxf_snapshot_t snapshot,
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_get_snapshot_symbol(dxf_snapshot_t snapshot, OUT dxf_string_t *symbol) {
+	dx_logging_verbose(dx_ll_debug,
+					   L"dxf_get_snapshot_symbol(snapshot = %p, symbol ptr = %p)", snapshot, symbol);
+
 	dx_perform_common_actions(DX_RESET_ERROR);
 
-	if (snapshot == dx_invalid_subscription) {
+	if (snapshot == dx_invalid_subscription || symbol == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
+		dx_logging_verbose(dx_ll_debug,
+						   L"dxf_get_snapshot_symbol(snapshot = %p, symbol ptr = %p) -> %d, 'Invalid snapshot or symbol ptr'", snapshot, symbol, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
 
 	*symbol = dx_get_snapshot_symbol(snapshot);
+
+	dx_logging_verbose(dx_ll_debug,
+					   L"dxf_get_snapshot_symbol(snapshot = %p, symbol ptr = %p) -> %d, '%ls'", snapshot, symbol, DXF_SUCCESS, (*symbol == NULL) ? L"NULL" : *symbol);
+
 	return DXF_SUCCESS;
 }
 
@@ -1434,7 +1647,7 @@ static inline int dx_get_sources_count(const char **sources) {
 	return i;
 }
 
-ERRORCODE dxf_create_price_level_book_impl(dxf_connection_t connection, dxf_const_string_t symbol, const char **sources,
+ERRORCODE dx_create_price_level_book_impl(dxf_connection_t connection, dxf_const_string_t symbol, const char **sources,
 										   int sources_count_unchecked, OUT dxf_price_level_book_t *book) {
 	dx_perform_common_actions(DX_RESET_ERROR);
 	if (!dx_init_codec()) {
@@ -1506,27 +1719,57 @@ ERRORCODE dxf_create_price_level_book_impl(dxf_connection_t connection, dxf_cons
 
 DXFEED_API ERRORCODE dxf_create_price_level_book(dxf_connection_t connection, dxf_const_string_t symbol,
 												 const char **sources, OUT dxf_price_level_book_t *book) {
-	return dxf_create_price_level_book_impl(connection, symbol, sources, dx_get_sources_count(sources), book);
+	int sources_count = dx_get_sources_count(sources);
+
+	dx_logging_verbose(dx_ll_debug,
+					   L"dxf_create_price_level_book(con = %p, symbol = '%ls', sources[%d] = '%hs'..., book = %p)",
+					   connection, (symbol == NULL) ? L"NULL" : symbol, sources_count, (sources == NULL) ? "NULL" : (sources_count > 0 ? sources[0] : ""), book);
+
+	ERRORCODE res = dx_create_price_level_book_impl(connection, symbol, sources, sources_count, book);
+
+	dx_logging_verbose(dx_ll_debug,
+					   L"dxf_create_price_level_book(con = %p, symbol = '%ls', sources[%d] = '%hs'..., book = %p) -> %d, %p",
+					   connection, (symbol == NULL) ? L"NULL" : symbol, sources_count, (sources == NULL) ? "NULL" : (sources_count > 0 ? sources[0] : ""), book, res, (book == NULL) ? NULL : *book);
+
+	return res;
 }
 
 DXFEED_API ERRORCODE dxf_create_price_level_book_v2(dxf_connection_t connection, dxf_const_string_t symbol,
 													const char **sources, int sources_count,
 													OUT dxf_price_level_book_t *book) {
-	return dxf_create_price_level_book_impl(connection, symbol, sources, sources_count, book);
+	dx_logging_verbose(dx_ll_debug,
+					   L"dxf_create_price_level_book_v2(con = %p, symbol = '%ls', sources[%d] = '%hs'..., book = %p)",
+					   connection, (symbol == NULL) ? L"NULL" : symbol, sources_count, (sources == NULL) ? "NULL" : (sources_count > 0 ? sources[0] : ""), book);
+
+	ERRORCODE res = dx_create_price_level_book_impl(connection, symbol, sources, sources_count, book);
+
+	dx_logging_verbose(dx_ll_debug,
+					   L"dxf_create_price_level_book_v2(con = %p, symbol = '%ls', sources[%d] = '%hs'..., book = %p) -> %d, %p",
+					   connection, (symbol == NULL) ? L"NULL" : symbol, sources_count, (sources == NULL) ? "NULL" : (sources_count > 0 ? sources[0] : ""), book, res, (book == NULL) ? NULL : *book);
+
+	return res;
 }
 
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_close_price_level_book(dxf_price_level_book_t book) {
+	dx_logging_verbose(dx_ll_debug, L"dxf_close_price_level_book(book = %p)", book);
+
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (book == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
+		dx_logging_verbose(dx_ll_debug, L"dxf_close_price_level_book(book = %p) -> %d, 'Invalid PLB'", book, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
 	if (!dx_close_price_level_book(book)) {
+		dx_logging_verbose(dx_ll_debug, L"dxf_close_price_level_book(book = %p) -> %d, 'Error while closing the PLB'", book, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
+
+	dx_logging_verbose(dx_ll_debug, L"dxf_close_price_level_book(book = %p) -> %d", book, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
 }
@@ -1536,16 +1779,23 @@ DXFEED_API ERRORCODE dxf_close_price_level_book(dxf_price_level_book_t book) {
 DXFEED_API ERRORCODE dxf_attach_price_level_book_listener(dxf_price_level_book_t book,
 														  dxf_price_level_book_listener_t book_listener,
 														  void *user_data) {
+	dx_logging_verbose(dx_ll_debug, L"dxf_attach_price_level_book_listener(book = %p, listener = %p, user data = %p)", book, book_listener, user_data);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (book == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
+		dx_logging_verbose(dx_ll_debug, L"dxf_attach_price_level_book_listener(book = %p, listener = %p, user data = %p) -> %d, 'Invalid PLB'", book, book_listener, user_data, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
 
 	if (!dx_add_price_level_book_listener(book, book_listener, user_data)) {
+		dx_logging_verbose(dx_ll_debug, L"dxf_attach_price_level_book_listener(book = %p, listener = %p, user data = %p) -> %d, 'Error while adding the PLB listener'", book, book_listener, user_data, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
+
+	dx_logging_verbose(dx_ll_debug, L"dxf_attach_price_level_book_listener(book = %p, listener = %p, user data = %p) -> %d", book, book_listener, user_data, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
 }
@@ -1554,42 +1804,62 @@ DXFEED_API ERRORCODE dxf_attach_price_level_book_listener(dxf_price_level_book_t
 
 DXFEED_API ERRORCODE dxf_detach_price_level_book_listener(dxf_price_level_book_t book,
 														  dxf_price_level_book_listener_t book_listener) {
+	dx_logging_verbose(dx_ll_debug, L"dxf_detach_price_level_book_listener(book = %p, listener = %p)", book, book_listener);
+
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (book == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
+		dx_logging_verbose(dx_ll_debug, L"dxf_detach_price_level_book_listener(book = %p, listener = %p) -> %d, 'Invalid PLB'", book, book_listener, DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
 
 	if (!dx_remove_price_level_book_listener(book, book_listener)) {
+		dx_logging_verbose(dx_ll_debug, L"dxf_detach_price_level_book_listener(book = %p, listener = %p) -> %d, 'Error while removing the PLB listener'", book, book_listener, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
+
+	dx_logging_verbose(dx_ll_debug, L"dxf_detach_price_level_book_listener(book = %p, listener = %p) -> %d", book, book_listener, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
 }
 
 DXFEED_API ERRORCODE dxf_create_regional_book(dxf_connection_t connection, dxf_const_string_t symbol,
 											  OUT dxf_regional_book_t *book) {
+	dx_logging_verbose(dx_ll_debug, L"dxf_create_regional_book(con = %p, symbol = '%ls', book ptr = %p)", connection, (symbol == NULL) ? L"NULL" : symbol, book);
 	dx_perform_common_actions(DX_RESET_ERROR);
+
 	if (!dx_init_codec()) {
+		dx_logging_verbose(dx_ll_debug, L"dxf_create_regional_book(con = %p, symbol = '%ls', book ptr = %p) -> %d, 'Error while initializing a symbol codec'", connection, (symbol == NULL) ? L"NULL" : symbol, book, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
 
 	if (book == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
+		dx_logging_verbose(dx_ll_debug, L"dxf_create_regional_book(con = %p, symbol = '%ls', book ptr = %p) -> %d, 'Invalid regional book ptr'", connection, (symbol == NULL) ? L"NULL" : symbol, book, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
 
 	if (symbol == NULL || dx_string_length(symbol) == 0) {
 		dx_set_error_code(dx_ssec_invalid_symbol);
+		dx_logging_verbose(dx_ll_debug, L"dxf_create_regional_book(con = %p, symbol = '%ls', book ptr = %p) -> %d, 'Invalid symbol'", connection, (symbol == NULL) ? L"NULL" : symbol, book, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
 
 	*book = dx_create_regional_book(connection, symbol);
+
 	if (*book == NULL) {
+		dx_logging_verbose(dx_ll_debug, L"dxf_create_regional_book(con = %p, symbol = '%ls', book ptr = %p) -> %d, 'Tried unsuccessfully to create regional book'", connection, symbol, book, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
+
+	dx_logging_verbose(dx_ll_debug, L"dxf_create_regional_book(con = %p, symbol = '%ls', book ptr = %p) -> %d, %p", connection, symbol, book, DXF_SUCCESS, *book);
 
 	return DXF_SUCCESS;
 }
@@ -1597,15 +1867,23 @@ DXFEED_API ERRORCODE dxf_create_regional_book(dxf_connection_t connection, dxf_c
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_close_regional_book(dxf_regional_book_t book) {
+	dx_logging_verbose(dx_ll_debug, L"dxf_close_regional_book(book = %p)", book);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (book == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
+		dx_logging_verbose(dx_ll_debug, L"dxf_close_regional_book(book = %p) -> %d, 'Invalid regional book'", book, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
+
 	if (!dx_close_regional_book(book)) {
+		dx_logging_verbose(dx_ll_debug, L"dxf_close_regional_book(book = %p) -> %d, 'Tried unsuccessfully to close regional book'", book, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
+
+	dx_logging_verbose(dx_ll_debug, L"dxf_close_regional_book(book = %p) -> %d", book, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
 }
@@ -1614,16 +1892,23 @@ DXFEED_API ERRORCODE dxf_close_regional_book(dxf_regional_book_t book) {
 
 DXFEED_API ERRORCODE dxf_attach_regional_book_listener(dxf_regional_book_t book,
 													   dxf_price_level_book_listener_t book_listener, void *user_data) {
+	dx_logging_verbose(dx_ll_debug, L"dxf_attach_regional_book_listener(book = %p, listener = %p, user data = %p)", book, book_listener, user_data);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (book == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
+		dx_logging_verbose(dx_ll_debug, L"dxf_attach_regional_book_listener(book = %p, listener = %p, user data = %p) -> %d, 'Invalid regional book'", book, book_listener, user_data, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
 
 	if (!dx_add_regional_book_listener(book, book_listener, user_data)) {
+		dx_logging_verbose(dx_ll_debug, L"dxf_attach_regional_book_listener(book = %p, listener = %p, user data = %p) -> %d, 'Error while adding the regional book listener'", book, book_listener, user_data, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
+
+	dx_logging_verbose(dx_ll_debug, L"dxf_attach_regional_book_listener(book = %p, listener = %p, user data = %p) -> %d", book, book_listener, user_data, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
 }
@@ -1632,17 +1917,23 @@ DXFEED_API ERRORCODE dxf_attach_regional_book_listener(dxf_regional_book_t book,
 
 DXFEED_API ERRORCODE dxf_detach_regional_book_listener(dxf_regional_book_t book,
 													   dxf_price_level_book_listener_t book_listener) {
+	dx_logging_verbose(dx_ll_debug, L"dxf_detach_regional_book_listener(book = %p, listener = %p)", book, book_listener);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (book == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
+		dx_logging_verbose(dx_ll_debug, L"dxf_detach_regional_book_listener(book = %p, listener = %p) -> %d, 'Invalid regional book'", book, book_listener, DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
 
 	if (!dx_remove_regional_book_listener(book, book_listener)) {
+		dx_logging_verbose(dx_ll_debug, L"dxf_detach_regional_book_listener(book = %p, listener = %p) -> %d, 'Error while removing the regional book listener'", book, book_listener, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
+
+	dx_logging_verbose(dx_ll_debug, L"dxf_attach_regional_book_listener(book = %p, listener = %p) -> %d", book, book_listener, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
 }
@@ -1651,16 +1942,23 @@ DXFEED_API ERRORCODE dxf_detach_regional_book_listener(dxf_regional_book_t book,
 
 DXFEED_API ERRORCODE dxf_attach_regional_book_listener_v2(dxf_regional_book_t book,
 														  dxf_regional_quote_listener_t listener, void *user_data) {
+	dx_logging_verbose(dx_ll_debug, L"dxf_attach_regional_book_listener_v2(book = %p, listener = %p, user data = %p)", book, listener, user_data);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (book == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
+		dx_logging_verbose(dx_ll_debug, L"dxf_attach_regional_book_listener_v2(book = %p, listener = %p, user data = %p) -> %d, 'Invalid regional book'", book, listener, user_data, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
 
 	if (!dx_add_regional_book_listener_v2(book, listener, user_data)) {
+		dx_logging_verbose(dx_ll_debug, L"dxf_attach_regional_book_listener_v2(book = %p, listener = %p, user data = %p) -> %d, 'Error while adding the regional book listener'", book, listener, user_data, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
+
+	dx_logging_verbose(dx_ll_debug, L"dxf_attach_regional_book_listener_v2(book = %p, listener = %p, user data = %p) -> %d", book, listener, user_data, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
 }
@@ -1669,17 +1967,23 @@ DXFEED_API ERRORCODE dxf_attach_regional_book_listener_v2(dxf_regional_book_t bo
 
 DXFEED_API ERRORCODE dxf_detach_regional_book_listener_v2(dxf_regional_book_t book,
 														  dxf_regional_quote_listener_t listener) {
+	dx_logging_verbose(dx_ll_debug, L"dxf_detach_regional_book_listener_v2(book = %p, listener = %p)", book, listener);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (book == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
+		dx_logging_verbose(dx_ll_debug, L"dxf_detach_regional_book_listener_v2(book = %p, listener = %p) -> %d, 'Invalid regional book'", book, listener, DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
 
 	if (!dx_remove_regional_book_listener_v2(book, listener)) {
+		dx_logging_verbose(dx_ll_debug, L"dxf_detach_regional_book_listener_v2(book = %p, listener = %p) -> %d, 'Error while removing the regional book listener'", book, listener, DXF_FAILURE);
+
 		return DXF_FAILURE;
 	}
+
+	dx_logging_verbose(dx_ll_debug, L"dxf_detach_regional_book_listener_v2(book = %p, listener = %p) -> %d", book, listener, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
 }
