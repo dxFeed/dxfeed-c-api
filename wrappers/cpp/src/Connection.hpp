@@ -90,6 +90,3 @@ public:
 		dxf_close_connection(handle_);
 	}
 };
-
-
-
