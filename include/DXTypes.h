@@ -31,6 +31,19 @@
 #	define DX_MAYBE_UNUSED
 #endif
 
+#ifndef __cplusplus
+#if __STDC_VERSION__ >= 201112L && !_MSC_VER
+#	define DX_THREAD_LOCAL _Thread_local
+#elif defined(__GNUC__)
+#	define DX_THREAD_LOCAL __thread
+#elif defined(_WIN32)
+#	define DX_THREAD_LOCAL __declspec(thread)
+#else
+#	warning No known thread-local storage specifier
+#	define DX_THREAD_LOCAL
+#endif
+#endif
+
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #	ifdef DXFEED_EXPORTS
 #		define DXFEED_API __declspec(dllexport)
