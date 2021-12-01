@@ -164,4 +164,3 @@ bool HeartbeatPayload::composeTo(void* bufferedOutputConnectionContext) const {
 }
 
 }  // namespace dx
-

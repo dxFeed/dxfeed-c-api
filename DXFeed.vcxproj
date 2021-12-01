@@ -520,7 +520,6 @@
     <ClCompile Include="src\RecordBuffers.c" />
     <ClCompile Include="src\RecordFieldSetters.c" />
     <ClCompile Include="src\SymbolCodec.c" />
-    <ClCompile Include="src\TestParser.c" />
     <ClCompile Include="src\WideDecimal.cpp">
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsCpp</CompileAs>
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='ReleaseNoTLS|x64'">CompileAsCpp</CompileAs>

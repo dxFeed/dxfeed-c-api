@@ -32,5 +32,3 @@ int dx_wide_decimal_long_to_double(dxf_long_t longValue, OUT dxf_double_t* decim
 #ifdef __cplusplus
 }
 #endif
-
-

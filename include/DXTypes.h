@@ -31,6 +31,19 @@
 #	define DX_MAYBE_UNUSED
 #endif
 
+#ifndef __cplusplus
+#	if _MSC_VER && !__INTEL_COMPILER
+#		define DX_THREAD_LOCAL __declspec(thread)
+#	elif __STDC_VERSION__ >= 201112L &&                                                                          \
+		((defined(__GNUC__) && (__GNUC__ > 4 || (__GNU__ == 4 && __GNUC_MINOR__ >= 9))) ||                        \
+		 (defined(__clang_major__) && (__clang_major__ > 3 || (__clang_major__ == 3 && __clang_minor__ >= 3))) || \
+		 (defined(__INTEL_COMPILER) && __INTEL_COMPILER >= 1600))
+#		define DX_THREAD_LOCAL _Thread_local
+#	else
+#		define DX_THREAD_LOCAL __thread
+#	endif
+#endif
+
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #	ifdef DXFEED_EXPORTS
 #		define DXFEED_API __declspec(dllexport)

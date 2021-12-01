@@ -1,3 +1,6 @@
+Version 8.5.2
+* Fixed a potential bug with flags that were not in thread local storage
+
 Version 8.5.1
 * [DXFC-276] Fixed a bug with broken wildcard subscription
 

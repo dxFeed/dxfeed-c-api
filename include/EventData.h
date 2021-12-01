@@ -1284,8 +1284,6 @@ typedef enum dx_event_subscr_flag_t {
 	dx_esf_force_stream = 0x40u,
 	/// (0x80) Used for forcing subscription to history data
 	dx_esf_force_history = 0x80u,
-
-	dx_esf_force_enum_unsigned = UINT_MAX
 } dx_event_subscr_flag;
 
 /// Suffix
