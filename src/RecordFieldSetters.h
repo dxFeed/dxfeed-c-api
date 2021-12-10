@@ -25,6 +25,8 @@
 #ifndef RECORD_FIELD_SETTERS_H_INCLUDED
 #define RECORD_FIELD_SETTERS_H_INCLUDED
 
+#include "DXFeed.h"
+
 /* -------------------------------------------------------------------------- */
 /*
  *	Generic setter prototype

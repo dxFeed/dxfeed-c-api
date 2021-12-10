@@ -686,7 +686,32 @@ dxf_ulong_t dx_new_snapshot_key(dx_record_info_id_t record_info_id, dxf_const_st
 }
 
 int dx_snapshots_comparator(dx_snapshot_data_ptr_t s1, dx_snapshot_data_ptr_t s2) {
-	return DX_NUMERIC_COMPARATOR(s1->key, s2->key);
+	if (s1 == s2) return 0;
+	if (s1 == NULL) return -1;
+	if (s2 == NULL) return 1;
+	if (s1->key < s2->key) return -1;
+	if (s1->key > s2->key) return 1;
+
+	if (s1->event_id < s2->event_id) return -1;
+	if (s1->event_id > s2->event_id) return 1;
+
+	if (s1->order_source == NULL && s2->order_source != NULL) return -1;
+	if (s2->order_source == NULL && s1->order_source != NULL) return 1;
+
+	//!NULL
+	if (s1->order_source != s2->order_source) {
+		int order_sources_cmp_result = wcscmp(s1->order_source, s2->order_source);
+
+		if (order_sources_cmp_result < 0) return -1;
+		if (order_sources_cmp_result > 0) return 1;
+	}
+
+	int symbols_cmp_result = wcscmp(s1->symbol, s2->symbol);
+
+	if (symbols_cmp_result < 0) return -1;
+	if (symbols_cmp_result > 0) return 1;
+
+	return 0;
 }
 
 void dx_clear_snapshot_listener_array(dx_snapshot_listener_array_t* listeners) {

@@ -21,11 +21,11 @@
  *	Implementation of the record field setters
  */
 
-#include "DXFeed.h"
-
 #include "RecordFieldSetters.h"
-#include "EventData.h"
+
+#include "DXFeed.h"
 #include "DataStructures.h"
+#include "EventData.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -33,8 +33,8 @@
  */
 /* -------------------------------------------------------------------------- */
 
-#define FIELD_SETTER_BODY(struct_name, field_name, field_type) \
-	DX_RECORD_FIELD_SETTER_PROTOTYPE(struct_name, field_name) { \
+#define FIELD_SETTER_BODY(struct_name, field_name, field_type)    \
+	DX_RECORD_FIELD_SETTER_PROTOTYPE(struct_name, field_name) {   \
 		((struct_name*)object)->field_name = *(field_type*)field; \
 	}
 
@@ -44,8 +44,8 @@
  */
 /* -------------------------------------------------------------------------- */
 
-#define FIELD_GETTER_BODY(struct_name, field_name, field_type) \
-	DX_RECORD_FIELD_GETTER_PROTOTYPE(struct_name, field_name) { \
+#define FIELD_GETTER_BODY(struct_name, field_name, field_type)    \
+	DX_RECORD_FIELD_GETTER_PROTOTYPE(struct_name, field_name) {   \
 		*(field_type*)field = ((struct_name*)object)->field_name; \
 	}
 
@@ -55,18 +55,16 @@
  */
 /* -------------------------------------------------------------------------- */
 
-#define GENERIC_VALUE_GETTER_NAME(field_type) \
-	generic_##field_type##_value_getter
+#define GENERIC_VALUE_GETTER_NAME(field_type) generic_##field_type##_value_getter
 
-#define GENERIC_VALUE_GETTER_NAME_PROTO(field_type) \
-	const void* GENERIC_VALUE_GETTER_NAME(field_type) (void)
+#define GENERIC_VALUE_GETTER_NAME_PROTO(field_type) const void* GENERIC_VALUE_GETTER_NAME(field_type)(void)
 
-#define FIELD_DEF_VAL_BODY(struct_name, field_name, field_type) \
+#define FIELD_DEF_VAL_BODY(struct_name, field_name, field_type)  \
 	DX_RECORD_FIELD_DEF_VAL_PROTOTYPE(struct_name, field_name) { \
-		/* so far all the default values are generic and are \
-		the same for all the fields of the same type */ \
-		\
-		return GENERIC_VALUE_GETTER_NAME(field_type)(); \
+		/* so far all the default values are generic and are     \
+		the same for all the fields of the same type */          \
+                                                                 \
+		return GENERIC_VALUE_GETTER_NAME(field_type)();          \
 	}
 
 /* -------------------------------------------------------------------------- */
@@ -75,20 +73,19 @@
  */
 /* -------------------------------------------------------------------------- */
 
-#define RECORD_EXCHANGE_CODE_GETTER_NAME(record_id) \
-	record_id##_exchange_code_getter
+#define RECORD_EXCHANGE_CODE_GETTER_NAME(record_id) record_id##_exchange_code_getter
 
-#define RECORD_EXCHANGE_CODE_GETTER_BODY(record_id) \
-	const void* RECORD_EXCHANGE_CODE_GETTER_NAME(record_id) (void* dscc) { \
-		int is_initialized = false; \
-		static dxf_char_t exchange_code = 0; \
-		\
-		if (!is_initialized) { \
+#define RECORD_EXCHANGE_CODE_GETTER_BODY(record_id)                       \
+	const void* RECORD_EXCHANGE_CODE_GETTER_NAME(record_id)(void* dscc) { \
+		static DX_THREAD_LOCAL int is_initialized = false;                \
+		static DX_THREAD_LOCAL dxf_char_t exchange_code = 0;              \
+                                                                          \
+		if (!is_initialized) {                                            \
 			exchange_code = dx_get_record_exchange_code(dscc, record_id); \
-			is_initialized = true; \
-		} \
-		\
-		return &exchange_code; \
+			is_initialized = true;                                        \
+		}                                                                 \
+                                                                          \
+		return &exchange_code;                                            \
 	}
 
 /* -------------------------------------------------------------------------- */
@@ -98,7 +95,7 @@
 /* -------------------------------------------------------------------------- */
 
 GENERIC_VALUE_GETTER_NAME_PROTO(dxf_char_t) {
-	static dxf_char_t c = 0;
+	static DX_THREAD_LOCAL dxf_char_t c = 0;
 
 	return &c;
 }
@@ -106,7 +103,7 @@ GENERIC_VALUE_GETTER_NAME_PROTO(dxf_char_t) {
 /* -------------------------------------------------------------------------- */
 
 GENERIC_VALUE_GETTER_NAME_PROTO(dxf_int_t) {
-	static dxf_int_t i = 0;
+	static DX_THREAD_LOCAL dxf_int_t i = 0;
 
 	return &i;
 }
@@ -114,7 +111,7 @@ GENERIC_VALUE_GETTER_NAME_PROTO(dxf_int_t) {
 /* -------------------------------------------------------------------------- */
 
 GENERIC_VALUE_GETTER_NAME_PROTO(dxf_long_t) {
-	static dxf_long_t l = 0;
+	static DX_THREAD_LOCAL dxf_long_t l = 0;
 
 	return &l;
 }
@@ -122,7 +119,7 @@ GENERIC_VALUE_GETTER_NAME_PROTO(dxf_long_t) {
 /* -------------------------------------------------------------------------- */
 
 GENERIC_VALUE_GETTER_NAME_PROTO(dxf_double_t) {
-	static dxf_double_t d = 0;
+	static DX_THREAD_LOCAL dxf_double_t d = 0;
 
 	return &d;
 }
@@ -130,7 +127,7 @@ GENERIC_VALUE_GETTER_NAME_PROTO(dxf_double_t) {
 /* -------------------------------------------------------------------------- */
 
 GENERIC_VALUE_GETTER_NAME_PROTO(dxf_dayid_t) {
-	static dxf_dayid_t d_id = 0;
+	static DX_THREAD_LOCAL dxf_dayid_t d_id = 0;
 
 	return &d_id;
 }
@@ -138,7 +135,7 @@ GENERIC_VALUE_GETTER_NAME_PROTO(dxf_dayid_t) {
 /* -------------------------------------------------------------------------- */
 
 GENERIC_VALUE_GETTER_NAME_PROTO(dxf_const_string_t) {
-	static dxf_const_string_t s = L"<Default>";
+	static DX_THREAD_LOCAL dxf_const_string_t s = L"<Default>";
 
 	return &s;
 }
@@ -146,7 +143,7 @@ GENERIC_VALUE_GETTER_NAME_PROTO(dxf_const_string_t) {
 /* -------------------------------------------------------------------------- */
 
 GENERIC_VALUE_GETTER_NAME_PROTO(dxf_byte_array_t) {
-	static dxf_byte_array_t cba = { NULL, 0, 0 };
+	static DX_THREAD_LOCAL dxf_byte_array_t cba = {NULL, 0, 0};
 
 	return &cba;
 }
@@ -157,10 +154,9 @@ GENERIC_VALUE_GETTER_NAME_PROTO(dxf_byte_array_t) {
  */
 /* -------------------------------------------------------------------------- */
 #define FIELD_STDOPS_BODIES(struct_name, field_name, field_type) \
-    FIELD_SETTER_BODY(struct_name, field_name, field_type)       \
-    FIELD_DEF_VAL_BODY(struct_name, field_name, field_type)      \
-    FIELD_GETTER_BODY(struct_name, field_name, field_type)
-
+	FIELD_SETTER_BODY(struct_name, field_name, field_type)       \
+	FIELD_DEF_VAL_BODY(struct_name, field_name, field_type)      \
+	FIELD_GETTER_BODY(struct_name, field_name, field_type)
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -242,7 +238,7 @@ FIELD_STDOPS_BODIES(dx_profile_t, status_reason, dxf_const_string_t)
 /*
  *	Market maker field setters/getters implementation
  */
- /* -------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------- */
 
 FIELD_STDOPS_BODIES(dx_market_maker_t, mm_exchange, dxf_char_t)
 FIELD_STDOPS_BODIES(dx_market_maker_t, mm_id, dxf_int_t)
@@ -259,7 +255,7 @@ FIELD_STDOPS_BODIES(dx_market_maker_t, mmask_count, dxf_double_t)
 /*
  *	Order field setters/getters implementation
  */
- /* -------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------- */
 
 FIELD_STDOPS_BODIES(dx_order_t, index, dxf_int_t)
 FIELD_STDOPS_BODIES(dx_order_t, time, dxf_int_t)
@@ -282,7 +278,7 @@ FIELD_STDOPS_BODIES(dx_order_t, mmid, dxf_int_t)
 /*
  *	Time and Sale field setters/getters implementation
  */
- /* -------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------- */
 
 FIELD_STDOPS_BODIES(dx_time_and_sale_t, time, dxf_int_t)
 FIELD_STDOPS_BODIES(dx_time_and_sale_t, sequence, dxf_int_t)
@@ -362,9 +358,9 @@ FIELD_STDOPS_BODIES(dx_greeks_t, vega, dxf_double_t)
  */
 /* -------------------------------------------------------------------------- */
 
-FIELD_SETTER_BODY  (dx_theo_price_t, time, dxf_int_t)
-FIELD_DEF_VAL_BODY (dx_theo_price_t, time, dxf_int_t)
-FIELD_GETTER_BODY  (dx_theo_price_t, time, dxf_long_t)
+FIELD_SETTER_BODY(dx_theo_price_t, time, dxf_int_t)
+FIELD_DEF_VAL_BODY(dx_theo_price_t, time, dxf_int_t)
+FIELD_GETTER_BODY(dx_theo_price_t, time, dxf_long_t)
 FIELD_STDOPS_BODIES(dx_theo_price_t, price, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_theo_price_t, underlying_price, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_theo_price_t, delta, dxf_double_t)
