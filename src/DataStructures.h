@@ -140,6 +140,13 @@ dx_record_id_t dx_get_record_id(void* context, dxf_int_t server_record_id);
 int dx_assign_server_record_id(void* context, dx_record_id_t record_id, dxf_int_t server_record_id);
 
 /*
+ * Need to lock before calling dx_get_record_by_id and 
+ * when working with dx_record_item_t*.
+ */
+void dx_lock_records_list(void* context);
+void dx_unlock_records_list(void* context);
+
+/*
  * Returns pointer to record data.
  * Don't modify any field of struct and don't free this resources.
  *
