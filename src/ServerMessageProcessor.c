@@ -1123,9 +1123,12 @@ int dx_process_data_message (dx_server_msg_proc_connection_context_t* context) {
 		dx_record_params_t record_params;
 		dxf_event_params_t event_params;
 
+		dx_lock_records_list(context->dscc);		
 		CHECKED_CALL_1(dx_read_symbol, context);
 
 		if (context->last_symbol == NULL && !dx_decode_symbol_name(context->last_cipher, (dxf_const_string_t*)&context->last_symbol)) {
+			dx_unlock_records_list(context->dscc);
+
 			return false;
 		}
 
@@ -1133,6 +1136,7 @@ int dx_process_data_message (dx_server_msg_proc_connection_context_t* context) {
 		{
 			if (!dx_read_compact_int(context->bicc, &server_record_id)) {
 				dx_free_buffers(context->rbcc);
+				dx_unlock_records_list(context->dscc);
 
 				return false;
 			}
@@ -1143,29 +1147,38 @@ int dx_process_data_message (dx_server_msg_proc_connection_context_t* context) {
 		if (record_id < 0) {
 			dx_free_buffers(context->rbcc);
 			dx_logging_info(L"Not supported record from server (id=%d)", server_record_id);
+			dx_unlock_records_list(context->dscc);
+			
 			return dx_set_error_code(dx_pec_record_not_supported);
 		}
 
 		record_digest = dx_get_record_digest(context, record_id);
 		if (record_digest == NULL) {
 			dx_free_buffers(context->rbcc);
+			dx_unlock_records_list(context->dscc);
+
 			return dx_set_error_code(dx_ec_invalid_func_param_internal);
 		}
 		if (!record_digest->in_sync_with_server) {
 			dx_free_buffers(context->rbcc);
+			dx_unlock_records_list(context->dscc);
 
 			return dx_set_error_code(dx_pec_record_description_not_received);
 		}
 
 		record_info = dx_get_record_by_id(context->dscc, record_id);
-		if (record_info == NULL)
+		if (record_info == NULL) {
+			dx_unlock_records_list(context->dscc);
+
 			return false;
+		}
 
 		record_buffer = g_buffer_managers[record_info->info_id].record_getter(context->rbcc, 0);
 		suffix = dx_string_length(record_info->suffix) > 0 ? record_info->suffix : NULL;
 
 		if (record_buffer == NULL) {
 			dx_free_buffers(context->rbcc);
+			dx_unlock_records_list(context->dscc);
 
 			return false;
 		}
@@ -1173,6 +1186,7 @@ int dx_process_data_message (dx_server_msg_proc_connection_context_t* context) {
 
 		if (!dx_read_records(context, record_id, record_buffer)) {
 			dx_free_buffers(context->rbcc);
+			dx_unlock_records_list(context->dscc);
 
 			return false;
 		}
@@ -1194,11 +1208,13 @@ int dx_process_data_message (dx_server_msg_proc_connection_context_t* context) {
 			g_buffer_managers[record_info->info_id].record_buffer_getter(context->rbcc))) {
 
 			dx_free_buffers(context->rbcc);
+			dx_unlock_records_list(context->dscc);
 
 			return false;
 		}
 
 		dx_free_buffers(context->rbcc);
+		dx_unlock_records_list(context->dscc);
 	}
 
 	return true;
@@ -1253,6 +1269,7 @@ int dx_process_describe_records (dx_server_msg_proc_connection_context_t* contex
 			return dx_set_error_code(dx_pec_record_info_corrupted);
 		}
 
+		dx_lock_records_list(context->dscc);
 		dx_record_id_t local_record_id = dx_get_record_id_by_name(context->dscc, record_name);
 
 		dx_free(record_name);
@@ -1263,13 +1280,18 @@ int dx_process_describe_records (dx_server_msg_proc_connection_context_t* contex
 			CHECKED_CALL_3(dx_assign_server_record_id, context->dscc, local_record_id, server_record_id);
 
 			record_info = dx_get_record_by_id(context->dscc, local_record_id);
-			if (record_info == NULL)
+			if (record_info == NULL) {
+				dx_unlock_records_list(context->dscc);
+
 				return false;
+			}
 
 			record_digest = dx_get_record_digest(context, local_record_id);
-			if (record_digest == NULL || record_digest->size < 0)
-				return dx_set_error_code(dx_ec_invalid_func_param_internal);
+			if (record_digest == NULL || record_digest->size < 0) {
+				dx_unlock_records_list(context->dscc);
 
+				return dx_set_error_code(dx_ec_invalid_func_param_internal);
+			}
 			if (record_digest->elements != NULL) {
 				dx_clear_record_digest(record_digest);
 			}
@@ -1277,11 +1299,14 @@ int dx_process_describe_records (dx_server_msg_proc_connection_context_t* contex
 			/* a generous memory allocation, to allow the maximum possible amount of pointers to be stored,
 			but the overhead is insignificant */
 			if ((record_digest->elements = dx_calloc(server_field_count + record_info->field_count, sizeof(dx_field_digest_ptr_t))) == NULL) {
+				dx_unlock_records_list(context->dscc);
+				
 				return false;
 			}
 		}
 
 		CHECKED_CALL_5(dx_fill_record_digest, context, local_record_id, record_info, server_field_count, record_digest);
+		dx_unlock_records_list(context->dscc);
 	}
 
 	return true;
