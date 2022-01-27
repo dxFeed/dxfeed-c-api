@@ -134,10 +134,6 @@ set(PARSER_SOURCES
         SymbolCodec.c
         )
 
-set(PARSER_TESTS
-        TestParser.c
-        )
-
 set(SOURCE_FILES
         BinaryQTPComposer.cpp
         BinaryQTPParser.cpp
@@ -186,7 +182,6 @@ set(ALL_HEADERS
 set(ALL_SOURCES
         ${SOURCE_FILES}
         ${PARSER_SOURCES}
-        ${PARSER_TESTS}
         ${RESOURCE_FILES}
         )
 
@@ -314,7 +309,6 @@ source_group("Export" FILES ${EXPORT_HEADERS})
 source_group("Header Files" FILES ${HEADER_FILES})
 source_group("Parser\\Headers" FILES ${PARSER_HEADERS})
 source_group("Parser\\Sources" FILES ${PARSER_SOURCES})
-source_group("Parser\\Test" FILES ${PARSER_TESTS})
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 if (BUILD_STATIC_LIBS)

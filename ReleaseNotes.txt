@@ -1,3 +1,28 @@
+Version 8.5.3
+* [DXFC-137] Fixed a bug where it was not possible to create a snapshot due to a collision of snapshot keys.
+* Fixed a bug with debug logging of the `dxf_get_last_error` function.
+* Fixed a potential bug when static data of record field setters  were not in thread local storage.
+
+Version 8.5.2
+* Fixed a potential bug with flags that were not in thread local storage
+
+Version 8.5.1
+* [DXFC-276] Fixed a bug with broken wildcard subscription
+
+Version 8.5.0
+* [DXFC-274] The repeated call to load the configuration from a file or line does not return errors and does not raise any exceptions.
+  Also added error codes for some situations when reading configurations:
+  - dx_cfgec_empty_config_string = 105
+  - dx_cfgec_empty_config_file_name = 106
+  - dx_cfgec_toml_parser_error = 107
+  When logging, dx_cfgec_toml_parser_error will be accompanied by more detailed information about the parsing error.
+* Fixed some minor bugs after adding LGTM and CodeQL checks
+* The win sockets version is set to 2.2.*
+* [Attention] Some architectural issues have been discovered that impose restrictions on the use of connection objects.
+  It is not recommended to use multiple connections in parallel in the same process. This applies to structures\objects created with
+  `dxf_create_connection`, `dxf_create_connection_auth_basic`, `dxf_create_connection_auth_bearer`, `dxf_create_connection_auth_custom`.
+  This limitation will be lifted after API design changes.
+
 Version 8.4.1
 * [DXFC-261] Fixed a bug related to leaking socket handles
 * [samples] Added `-r` parameter to CommandLineSample to enable connection reestablishment mechanism.

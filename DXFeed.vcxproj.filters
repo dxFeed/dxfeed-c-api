@@ -107,9 +107,6 @@
     <ClCompile Include="src\SymbolCodec.c">
       <Filter>Parser\Sources</Filter>
     </ClCompile>
-    <ClCompile Include="src\TestParser.c">
-      <Filter>Parser\Test</Filter>
-    </ClCompile>
     <ClCompile Include="src\Candle.c">
       <Filter>Source Files</Filter>
     </ClCompile>

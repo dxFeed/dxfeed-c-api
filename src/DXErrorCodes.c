@@ -184,6 +184,10 @@ dxf_const_string_t dx_get_error_description (dx_error_code_t code) {
 	case dx_csdec_protocol_error: return L"Unexpected token is reached or data is damaged";
 	case dx_csdec_unsupported_version: return L"Current stream version of protocol is not supported";
 
+	case dx_cfgec_empty_config_string: return L"Empty config string";
+	case dx_cfgec_empty_config_file_name: return L"Empty config file name";
+	case dx_cfgec_toml_parser_error: return L"TOML parser error";
+
 	/* miscellaneous error codes */
 
 	default: return L"Invalid error code";

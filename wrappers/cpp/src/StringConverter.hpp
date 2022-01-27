@@ -49,6 +49,3 @@ struct StringConverter {
 #ifdef _MSC_FULL_VER
 #	pragma warning( pop )
 #endif
-
-
-

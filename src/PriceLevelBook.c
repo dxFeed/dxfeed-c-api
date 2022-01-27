@@ -1043,4 +1043,3 @@ int dx_remove_price_level_book_listener(dxf_price_level_book_t book, dxf_price_l
 	DX_ARRAY_DELETE(b->listeners, dx_plb_listener_context_t, idx, dx_capacity_manager_halfer, error);
 	return dx_mutex_unlock(&b->guard) && !error;
 }
-

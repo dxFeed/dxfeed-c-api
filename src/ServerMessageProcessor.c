@@ -555,7 +555,7 @@ int dx_is_message_supported_by_server (dxf_connection_t connection, dx_message_t
 /* -------------------------------------------------------------------------- */
 
 int dx_legacy_send_msg_bitmask (OUT int* bitmask) {
-	static int s_legacy_msg_list[] = {
+	static DX_THREAD_LOCAL const int s_legacy_msg_list[] = {
 		MESSAGE_TICKER_ADD_SUBSCRIPTION,
 		MESSAGE_TICKER_REMOVE_SUBSCRIPTION,
 
@@ -565,8 +565,8 @@ int dx_legacy_send_msg_bitmask (OUT int* bitmask) {
 		MESSAGE_HISTORY_ADD_SUBSCRIPTION,
 		MESSAGE_HISTORY_REMOVE_SUBSCRIPTION
 	};
-	static int s_msg_count = sizeof(s_legacy_msg_list) / sizeof(s_legacy_msg_list[0]);
-	static int s_msg_bitmask = 0;
+	static DX_THREAD_LOCAL const int s_msg_count = sizeof(s_legacy_msg_list) / sizeof(s_legacy_msg_list[0]);
+	static DX_THREAD_LOCAL int s_msg_bitmask = 0;
 
 	if (bitmask == NULL) {
 		return dx_set_error_code(dx_ec_invalid_func_param_internal);
@@ -601,15 +601,15 @@ int dx_legacy_send_msg_bitmask (OUT int* bitmask) {
 /* -------------------------------------------------------------------------- */
 
 int dx_legacy_recv_msg_bitmask (int* bitmask) {
-	static int s_legacy_msg_list[] = {
+	static DX_THREAD_LOCAL const int s_legacy_msg_list[] = {
 		MESSAGE_TICKER_DATA,
 
 		MESSAGE_STREAM_DATA,
 
 		MESSAGE_HISTORY_DATA
 	};
-	static int s_msg_count = sizeof(s_legacy_msg_list) / sizeof(s_legacy_msg_list[0]);
-	static int s_msg_bitmask = 0;
+	static DX_THREAD_LOCAL const int s_msg_count = sizeof(s_legacy_msg_list) / sizeof(s_legacy_msg_list[0]);
+	static DX_THREAD_LOCAL int s_msg_bitmask = 0;
 
 	if (bitmask == NULL) {
 		return dx_set_error_code(dx_ec_invalid_func_param_internal);

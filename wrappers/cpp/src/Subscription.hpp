@@ -21,6 +21,7 @@
 
 #include <memory>
 #include <vector>
+#include <functional>
 #include <DXFeed.h>
 #include <nonstd/string_view.hpp>
 #include <nonstd/variant.hpp>
@@ -128,6 +129,3 @@ public:
 		return listener_;
 	}
 };
-
-
-
