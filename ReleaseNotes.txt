@@ -1,3 +1,6 @@
+Version 8.6.0
+* [DXFC-297] Improved the handling of transaction flags and signs of transaction flags.
+
 Version 8.5.3
 * [DXFC-137] Fixed a bug where it was not possible to create a snapshot due to a collision of snapshot keys.
 * Fixed a bug with debug logging of the `dxf_get_last_error` function.

@@ -637,7 +637,9 @@ static void dx_plb_source_rebuild_levels(dx_plb_records_array_t *snapshot, dx_pl
 	ob->updated = true;
 }
 
-/* -------------------------------------------------------------------------- */
+static int dx_has_size(const dxf_order_t *order) {
+	return !(order->size == 0 || isnan(order->size));
+}
 
 static void dx_plb_source_process_order(dx_plb_source_t *source, const dxf_order_t *order, int rm) {
 	size_t orderIdx;
@@ -668,7 +670,7 @@ static void dx_plb_source_process_order(dx_plb_source_t *source, const dxf_order
 	if (found) {
 		oo = source->snapshot.elements[orderIdx];
 		/* It is removal or update? */
-		if (rm || order->size == 0) {
+		if (rm || !dx_has_size(order)) {
 			dx_plb_source_remove_order_from_levels(oo->side == dxf_osd_buy ? &source->bids : &source->asks, oo);
 			if (rm) {
 				DX_ARRAY_DELETE(source->snapshot, dxf_order_t *, orderIdx, dx_capacity_manager_halfer, error);
@@ -822,10 +824,6 @@ static void dx_plb_book_update(dx_price_level_book_t *book, dx_plb_source_t *src
 	}
 }
 
-/******************/
-/* EVENT LISTENER */
-/******************/
-
 /*
 This is called with subscription lock, so it is impossible to delete source
 when this code is executing.
@@ -857,7 +855,7 @@ static void plb_event_listener(int event_type, dxf_const_string_t symbol_name, c
 		return;
 	}
 
-	int rm = IS_FLAG_SET(event_params->flags, dxf_ef_remove_event) || order->size == 0;
+	int rm = IS_FLAG_SET(event_params->flags, dxf_ef_remove_event) || !dx_has_size(order);
 
 	/* Ok, process this event */
 	if (sb) {

@@ -243,6 +243,35 @@ int dx_snapshot_records_comparator2(dx_snapshot_record_key_t key1, dx_snapshot_r
 	return key1.index < key2.index ? -1 : (key1.index > key2.index ? 1 : 0);
 }
 
+int dx_set_event_flags(dxf_event_data_t* event_data, size_t index, dx_event_id_t event_id, dxf_event_flags_t event_flags) {
+	switch (event_id) {
+		case dx_eid_order: case dx_eid_spread_order:
+			((dxf_order_t*)event_data)[index].event_flags = event_flags;
+
+			break;
+		case dx_eid_candle:
+			((dxf_candle_t*)event_data)[index].event_flags = event_flags;
+
+			break;
+		case dx_eid_time_and_sale:
+			((dxf_time_and_sale_t*)event_data)[index].event_flags = event_flags;
+
+			break;
+		case dx_eid_greeks:
+			((dxf_greeks_t*)event_data)[index].event_flags = event_flags;
+
+			break;
+		case dx_eid_series:
+			((dxf_series_t*)event_data)[index].event_flags = event_flags;
+
+			break;
+		default:
+			return dx_set_error_code(dx_ssec_invalid_event_id);
+	}
+
+	return true;
+}
+
 int dx_snapshot_insert_record(dx_snapshot_data_ptr_t snapshot_data, dx_snapshot_records_ptr_t recs,
 								dxf_event_data_t obj, const size_t position) {
 	int failed = false;
@@ -527,8 +556,21 @@ int dx_snapshot_replace_record(dx_snapshot_data_ptr_t snapshot_data, dx_snapshot
 	return status;
 }
 
+static int dx_has_size(dx_event_id_t event_id, const dxf_event_data_t* event_data) {
+	if (event_id != dx_eid_order && event_id != dx_eid_spread_order)
+		return true;
+
+	const dxf_order_t* order = (const dxf_order_t*)event_data;
+
+	return !(order->size == 0 || isnan(order->size));
+}
+
+// Updates the snapshot event records.
+// Adds a REMOVE event flag for last tx records
+// Clears the event flags for snapshot entries.
 int dx_snapshot_update_event_records(dx_snapshot_data_ptr_t snapshot_data, dx_snapshot_records_ptr_t recs,
-									const dxf_event_data_t* data, const dxf_event_params_t* event_params) {
+									 const dxf_event_data_t* data, const dxf_event_params_t* event_params,
+									 int is_last_tx_records) {
 	if (snapshot_data == NULL || recs == NULL) {
 		return dx_set_error_code(dx_ec_invalid_func_param_internal);
 	}
@@ -552,6 +594,16 @@ int dx_snapshot_update_event_records(dx_snapshot_data_ptr_t snapshot_data, dx_sn
 		if (!dx_snapshot_add_event_record(snapshot_data, recs, event_params, (const dxf_event_data_t)(data), index)) {
 			return false;
 		}
+	}
+
+	if (is_last_tx_records) {
+		// Explicitly set the REMOVE flag for events without a specified size.
+		if (!dx_has_size(snapshot_data->event_id, data)) {
+			dx_set_event_flags(recs->records.elements, index, snapshot_data->event_id, dxf_ef_remove_event);
+		}
+	} else {
+		// Otherwise, clear the flags
+		dx_set_event_flags(recs->records.elements, index, snapshot_data->event_id, 0);
 	}
 
 	return true;
@@ -592,13 +644,6 @@ int dx_is_snapshot_event(const dx_snapshot_data_ptr_t snapshot_data, const dxf_e
 	return snapshot_data->key == event_params->snapshot_key;
 }
 
-
-int dx_is_zero_event(dx_event_id_t event_id, const dxf_event_data_t* event_data) {
-	if (event_id != dx_eid_order)
-		return false;
-	return ((dxf_order_t*)event_data)->size == 0;
-}
-
 void event_listener(int event_type, dxf_const_string_t symbol_name,
 					const dxf_event_data_t* data, int data_count,
 					const dxf_event_params_t* event_params, void* user_data) {
@@ -613,7 +658,7 @@ void event_listener(int event_type, dxf_const_string_t symbol_name,
 		return;
 	}
 
-	int rm = IS_FLAG_SET(event_params->flags, dxf_ef_remove_event) || dx_is_zero_event(snapshot_data->event_id, data);
+	int rm = IS_FLAG_SET(event_params->flags, dxf_ef_remove_event) || !dx_has_size(snapshot_data->event_id, data);
 
 	/* Ok, process this event */
 	if (sb) {
@@ -623,6 +668,7 @@ void event_listener(int event_type, dxf_const_string_t symbol_name,
 		snapshot_data->status = dx_status_begin;
 		snapshot_data->full_snapshot_published = false;
 	}
+
 	if (snapshot_data->status == dx_status_unknown) {
 		/* If we in unknown state, skip */
 		return;
@@ -632,11 +678,11 @@ void event_listener(int event_type, dxf_const_string_t symbol_name,
 	if (rm) {
 		dx_snapshot_remove_event_records(snapshot_data, &snapshot_data->snapshot_records, data, event_params);
 	} else {
-		dx_snapshot_update_event_records(snapshot_data, &snapshot_data->snapshot_records, data, event_params);
+		dx_snapshot_update_event_records(snapshot_data, &snapshot_data->snapshot_records, data, event_params, false);
 	}
 	/* Add to the current tx, if it is pending transaction, may be only with one event, add even "rm" event */
 	if (snapshot_data->has_inc_listeners && snapshot_data->full_snapshot_published) {
-		dx_snapshot_update_event_records(snapshot_data, &snapshot_data->last_tx_records, data, event_params);
+		dx_snapshot_update_event_records(snapshot_data, &snapshot_data->last_tx_records, data, event_params, true);
 	}
 
 	/* Set end-of-snapshot */

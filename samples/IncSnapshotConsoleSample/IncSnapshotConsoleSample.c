@@ -198,7 +198,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, int new_snapshot, voi
 				wprintf(L", exchange code=%c, market maker=%ls, price=%.15g, size=%.15g", order.exchange_code,
 						order.market_maker, order.price, order.size);
 				if (wcslen(order.source) > 0) wprintf(L", source=%ls", order.source);
-				wprintf(L", count=%.15g}\n", order.count);
+				wprintf(L", count=%.15g, flags=0x%X}\n", order.count, order.event_flags);
 			} else {
 				wprintf(L"   {index=0x%llX, REMOVAL}\n", order.index);
 			}
@@ -218,9 +218,9 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, int new_snapshot, voi
 				print_timestamp(candle.time);
 				wprintf(
 					L", sequence=%d, count=%.15g, open=%.15g, high=%.15g, low=%.15g, close=%.15g, volume=%.15g, "
-					L"VWAP=%.15g, bidVolume=%.15g, askVolume=%.15g}\n",
+					L"VWAP=%.15g, bidVolume=%.15g, askVolume=%.15g, flags=0x%X}\n",
 					candle.sequence, candle.count, candle.open, candle.high, candle.low, candle.close, candle.volume,
-					candle.vwap, candle.bid_volume, candle.ask_volume);
+					candle.vwap, candle.bid_volume, candle.ask_volume, candle.event_flags);
 			} else {
 				wprintf(L"    {time=");
 				print_timestamp(candle.time);
@@ -242,7 +242,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, int new_snapshot, voi
 				print_timestamp(order.time);
 				wprintf(
 					L", sequence=%i, exchange code=%c, price=%.15g, size=%.15g, source=%ls, "
-					L"count=%.15g, flags=%i, spread symbol=%ls}\n",
+					L"count=%.15g, flags=0x%X, spread symbol=%ls}\n",
 					order.sequence, order.exchange_code, order.price, order.size,
 					wcslen(order.source) > 0 ? order.source : L"", order.count, order.event_flags,
 					wcslen(order.spread_symbol) > 0 ? order.spread_symbol : L"");
@@ -264,10 +264,10 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, int new_snapshot, voi
 				wprintf(L"    {time=");
 				print_timestamp(tns.time);
 				wprintf(L", event id=%"LS(PRId64)L", exchange code=%c, price=%.15g, size=%.15g, bid price=%.15g, ask price=%.15g, "
-					L"exchange sale conditions=\'%ls\', is ETH trade=%ls, type=%i}\n",
+					L"exchange sale conditions=\'%ls\', is ETH trade=%ls, type=%i, flags=0x%X}\n",
 					tns.index, tns.exchange_code, tns.price, tns.size,
 					tns.bid_price, tns.ask_price, tns.exchange_sale_conditions,
-					tns.is_eth_trade ? L"True" : L"False", tns.type);
+					tns.is_eth_trade ? L"True" : L"False", tns.type, tns.event_flags);
 			} else {
 				wprintf(L"    {time=");
 				print_timestamp(tns.time);
@@ -288,9 +288,9 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, int new_snapshot, voi
 				wprintf(L"    {time=");
 				print_timestamp(grks.time);
 				wprintf(L", index=0x%"LS(PRIX64)L", greeks price=%.15g, volatility=%.15g, "
-					L"delta=%.15g, gamma=%.15g, theta=%.15g, rho=%.15g, vega=%.15g\n",
+					L"delta=%.15g, gamma=%.15g, theta=%.15g, rho=%.15g, vega=%.15g, flags=0x%X}\n",
 					grks.index, grks.price, grks.volatility, grks.delta,
-					grks.gamma, grks.theta, grks.rho, grks.vega);
+					grks.gamma, grks.theta, grks.rho, grks.vega, grks.event_flags);
 			} else {
 				wprintf(L"    {time=");
 				print_timestamp(grks.time);
@@ -308,9 +308,9 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, int new_snapshot, voi
 			}
 			if (!DXF_IS_SERIES_REMOVAL(&srs)) {
 				wprintf(L"expiration=%d, index=0x%"LS(PRIX64)L", volatility=%.15g, call volume=%.15g, put volume=%.15g, "
-					L"option volume=%.15g, put call ratio=%.15g, forward_price=%.15g, dividend=%.15g, interest=%.15g}\n",
+					L"option volume=%.15g, put call ratio=%.15g, forward_price=%.15g, dividend=%.15g, interest=%.15g, flags=0x%X}\n",
 					srs.expiration, srs.index, srs.volatility, srs.call_volume, srs.put_volume, srs.option_volume,
-					srs.put_call_ratio, srs.forward_price, srs.dividend, srs.interest);
+					srs.put_call_ratio, srs.forward_price, srs.dividend, srs.interest, srs.event_flags);
 			} else {
 				wprintf(L"    {expiration=%d, index=0x%" LS(PRIX64) L", REMOVAL}\n", srs.expiration, srs.index);
 			}
