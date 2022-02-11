@@ -122,12 +122,12 @@ static const dxf_uint_t DX_PROFILE_FLAGS_SSR_MASK  = 0x3;
  * methods in order to find and modify all code dependent on current formats.
  */
 
-static const dxf_long_t DX_ORDER_SOURCE_COMPOSITE_BID = 1;
-static const dxf_long_t DX_ORDER_SOURCE_COMPOSITE_ASK = 2;
-static const dxf_long_t DX_ORDER_SOURCE_REGIONAL_BID  = 3;
-static const dxf_long_t DX_ORDER_SOURCE_REGIONAL_ASK  = 4;
-static const dxf_long_t DX_ORDER_SOURCE_AGGREGATE_BID = 5;
-static const dxf_long_t DX_ORDER_SOURCE_AGGREGATE_ASK = 6;
+static const dxf_long_t DX_ORDER_SOURCE_COMPOSITE_BID = dxf_sos_COMPOSITE_BID;
+static const dxf_long_t DX_ORDER_SOURCE_COMPOSITE_ASK = dxf_sos_COMPOSITE_ASK;
+static const dxf_long_t DX_ORDER_SOURCE_REGIONAL_BID  = dxf_sos_REGIONAL_BID;
+static const dxf_long_t DX_ORDER_SOURCE_REGIONAL_ASK  = dxf_sos_REGIONAL_ASK;
+static const dxf_long_t DX_ORDER_SOURCE_AGGREGATE_BID = dxf_sos_AGGREGATE_BID;
+static const dxf_long_t DX_ORDER_SOURCE_AGGREGATE_ASK = dxf_sos_AGGREGATE_ASK;
 
 static const dxf_byte_t DX_ORDER_INDEX_SSRC_SHIFT = 48;
 static const dxf_byte_t DX_ORDER_INDEX_EXC_SHIFT  = 32;
@@ -456,6 +456,10 @@ int dx_transcode_quote_to_order_bid (dx_record_transcoder_connection_context_t* 
 	event_buffer->side = dxf_osd_buy;
 	event_buffer->exchange_code = (exchange_code == 0 ? record_buffer->bid_exchange_code : exchange_code);
 	dx_memset(event_buffer->source, 0, sizeof(event_buffer->source));
+
+	dxf_const_string_t source = dx_all_special_order_sources[exchange_code == 0 ? dxf_sos_COMPOSITE_BID : dxf_sos_REGIONAL_BID];
+
+	dx_copy_string_len(event_buffer->source, source, dx_string_length(source));
 	event_buffer->market_maker = NULL;
 
 	return dx_process_event_data(context->connection, dx_eid_order, record_params->symbol_name, event_buffer,
@@ -494,6 +498,10 @@ int dx_transcode_quote_to_order_ask (dx_record_transcoder_connection_context_t* 
 	event_buffer->side = dxf_osd_sell;
 	event_buffer->exchange_code = (exchange_code == 0 ? record_buffer->ask_exchange_code : exchange_code);
 	dx_memset(event_buffer->source, 0, sizeof(event_buffer->source));
+
+	dxf_const_string_t source = dx_all_special_order_sources[exchange_code == 0 ? dxf_sos_COMPOSITE_ASK : dxf_sos_REGIONAL_ASK];
+
+	dx_copy_string_len(event_buffer->source, source, dx_string_length(source));
 	event_buffer->market_maker = NULL;
 
 	return dx_process_event_data(context->connection, dx_eid_order, record_params->symbol_name, event_buffer,
@@ -688,6 +696,10 @@ int dx_transcode_market_maker_to_order_bid (dx_record_transcoder_connection_cont
 	event_buffer->side = dxf_osd_buy;
 	event_buffer->exchange_code = record_buffer->mm_exchange;
 	dx_memset(event_buffer->source, 0, sizeof(event_buffer->source));
+
+	dxf_const_string_t source = dx_all_special_order_sources[dxf_sos_AGGREGATE_BID];
+
+	dx_copy_string_len(event_buffer->source, source, dx_string_length(source));
 	event_buffer->market_maker = dx_decode_from_integer(record_buffer->mm_id);
 
 	if (!IS_FLAG_SET(record_params->flags, dxf_ef_remove_event) &&
@@ -730,6 +742,10 @@ int dx_transcode_market_maker_to_order_ask (dx_record_transcoder_connection_cont
 	event_buffer->side = dxf_osd_sell;
 	event_buffer->exchange_code = record_buffer->mm_exchange;
 	dx_memset(event_buffer->source, 0, sizeof(event_buffer->source));
+
+	dxf_const_string_t source = dx_all_special_order_sources[dxf_sos_AGGREGATE_ASK];
+
+	dx_copy_string_len(event_buffer->source, source, dx_string_length(source));
 	event_buffer->market_maker = dx_decode_from_integer(record_buffer->mm_id);
 
 	if (!IS_FLAG_SET(record_params->flags, dxf_ef_remove_event) &&

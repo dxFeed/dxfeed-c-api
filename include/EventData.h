@@ -274,7 +274,7 @@ typedef enum dxf_order_scope_t {
 } dxf_order_scope_t;
 
 /// The length of record suffix including the terminating null character
-#define DXF_RECORD_SUFFIX_SIZE 5
+#define DXF_RECORD_SUFFIX_SIZE (16 + 1)
 
 /// Side of an order or a trade.
 typedef enum dxf_order_side_t {

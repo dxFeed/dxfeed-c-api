@@ -86,9 +86,71 @@ const dxf_const_string_t dx_all_order_sources[] = {
 	L"MEMX",  /// Members Exchange.
 	L"memx",  /// Members Exchange. Record for price level book.
 	nullptr};
+
+const dxf_const_string_t dx_all_special_order_sources[] = {
+	L"DEFAULT",	 /// back compatibility with Java API
+
+	/**
+	 * Bid side of a composite Quote. It is a synthetic source. The subscription on composite Quote event is observed
+	 * when this source is subscribed to.
+	 */
+	L"COMPOSITE_BID",
+
+	/**
+	 * Ask side of a composite Quote. It is a synthetic source. The subscription on composite Quote event is observed
+	 * when this source is subscribed to.
+	 */
+	L"COMPOSITE_ASK",
+
+	/**
+	 * Bid side of a regional Quote. It is a synthetic source. The subscription on regional Quote event is observed
+	 * when this source is subscribed to.
+	 */
+	L"REGIONAL_BID",
+
+	/**
+	 * Ask side of a composite Quote. It is a synthetic source. The subscription on regional Quote event is observed
+	 * when this source is subscribed to.
+	 */
+	L"REGIONAL_ASK",
+
+	/**
+	 * Bid side of an aggregate order book (futures depth and NASDAQ Level II). It is a synthetic source. This source
+	 * cannot be directly published via dxFeed API, but otherwise it is fully operational.
+	 */
+	L"AGGREGATE_BID",
+
+	/**
+	 * Ask side of an aggregate order book (futures depth and NASDAQ Level II). It is a synthetic source. This source
+	 * cannot be directly published via dxFeed API, but otherwise it is fully operational.
+	 */
+	L"AGGREGATE_ASK",
+
+	L"EMPTY",  // back compatibility with .NET API
+
+	/**
+	 * Bid and ask sides of a composite Quote. It is a synthetic source. The subscription on composite Quote event is
+	 * observed when this source is subscribed to.
+	 */
+	L"COMPOSITE",
+
+	/**
+	 * Bid and ask sides of a regional Quote. It is a synthetic source. The subscription on regional Quote event is
+	 * observed when this source is subscribed to.
+	 */
+	L"REGIONAL",
+
+	/**
+	 * Bid side of an aggregate order book (futures depth and NASDAQ Level II). It is a synthetic source. This source
+	 * cannot be directly published via dxFeed API, but otherwise it is fully operational.
+	 */
+	L"AGGREGATE", nullptr};
 ///@}
 
 const size_t dx_all_order_sources_count = sizeof(dx_all_order_sources) / sizeof(dx_all_order_sources[0]) - 1;
+
+const size_t dx_all_special_order_sources_count =
+	sizeof(dx_all_special_order_sources) / sizeof(dx_all_special_order_sources[0]) - 1;
 
 const size_t dx_all_regional_count = 26;
 
@@ -194,7 +256,7 @@ void SubscriptionData::free(SubscriptionData* subscriptionData) {
 	/* no element freeing is performed because this array only stores the pointers to the strings allocated somewhere
 	 * else */
 	subscriptionData->symbolNames.clear();
-	subscriptionData->clearOrderSource();
+	subscriptionData->clearRawOrderSources();
 
 	delete subscriptionData;
 }
@@ -225,11 +287,28 @@ int SubscriptionData::closeEventSubscription(dxf_subscription_t subscriptionId, 
 
 	return res;
 }
-void SubscriptionData::clearOrderSource() {
-	dx_free(orderSource.elements);
-	orderSource.elements = nullptr;
-	orderSource.size = 0;
-	orderSource.capacity = 0;
+
+void SubscriptionData::fillRawOrderSources() {
+	for (auto&& source : orderSources) {
+		dx_suffix_t new_source = {};
+
+		dx_copy_string_len(new_source.suffix, source.c_str(), DXF_RECORD_SUFFIX_SIZE);
+
+		int failed = false;
+		DX_ARRAY_INSERT(rawOrderSources, dx_suffix_t, new_source, rawOrderSources.size, dx_capacity_manager_halfer,
+						failed);
+
+		if (failed) {
+			return;
+		}
+	}
+}
+
+void SubscriptionData::clearRawOrderSources() {
+	dx_free(rawOrderSources.elements);
+	rawOrderSources.elements = nullptr;
+	rawOrderSources.size = 0;
+	rawOrderSources.capacity = 0;
 }
 
 EventSubscriptionConnectionContext::EventSubscriptionConnectionContext(dxf_connection_t connectionHandle)
@@ -422,12 +501,14 @@ dxf_subscription_t dx_create_event_subscription(dxf_connection_t connection, uns
 	subscr_data->time = time;
 
 	res = true;
-	int i = 0;
 	if (event_types & DXF_ET_ORDER) {
-		for (; dx_all_order_sources[i]; i++) {
+		for (int i = 0; dx_all_order_sources[i]; i++) {
 			res = res && dx_add_order_source(subscr_data, dx_all_order_sources[i]);
 		}
-		res = res && dx_add_order_source(subscr_data, L"");	 // Used by MM
+
+		res = res && dx_add_order_source(subscr_data, dx_all_special_order_sources[dxf_sos_AGGREGATE]);
+		res = res && dx_add_order_source(subscr_data, dx_all_special_order_sources[dxf_sos_REGIONAL]);
+		res = res && dx_add_order_source(subscr_data, dx_all_special_order_sources[dxf_sos_COMPOSITE]);
 	}
 
 	if (!res) {
@@ -454,7 +535,8 @@ int dx_add_symbols_impl(dxf_subscription_t subscr_id, dxf_const_string_t* symbol
 
 	auto context = static_cast<dx::EventSubscriptionConnectionContext*>(subscr_data->connection_context);
 
-	return context->process([symbols, symbol_count, &subscr_data, added_symbols_indices, added_symbols_count](dx::EventSubscriptionConnectionContext* ctx) {
+	return context->process([symbols, symbol_count, &subscr_data, added_symbols_indices,
+							 added_symbols_count](dx::EventSubscriptionConnectionContext* ctx) {
 		if (added_symbols_indices != nullptr && added_symbols_count != nullptr) {
 			*added_symbols_count = 0;
 		}
@@ -769,35 +851,44 @@ static void dx_call_subscr_listeners(dx::SubscriptionData* subscr_data, unsigned
 	}
 }
 
-#define DX_ORDER_SOURCE_COMPARATOR_NONSYM(l, r) (dx_compare_strings(l.suffix, r))
-
 void pass_event_data_to_listeners(dx::EventSubscriptionConnectionContext* ctx, dx::SymbolData* symbol_data,
 								  dx_event_id_t event_id, dxf_const_string_t symbol_name, dxf_const_event_data_t data,
 								  const dxf_event_params_t* event_params) {
 	symbol_data->refCount++;  // TODO replace by std::shared_ptr\std::weak_ptr
 	unsigned event_bitmask = DX_EVENT_BIT_MASK(static_cast<unsigned>(event_id));
-	auto subscriptions = symbol_data->subscriptions;  // number of subscriptions may be changed in the listeners
+	const auto& subscriptions = symbol_data->subscriptions;	 // number of subscriptions may be changed in the listeners
 
-	for (auto&& subscription_data : subscriptions) {
+	for (auto* subscription_data : subscriptions) {
 		if (!(subscription_data->event_types &
 			  event_bitmask)) { /* subscription doesn't want this specific event type */
 			continue;
 		}
 
+		auto call = false;
 		// Check order source
-		// TODO: optimize
-		if (event_id == dx_eid_order && subscription_data->orderSource.size > 0) {
+		if (event_id == dx_eid_order && subscription_data->rawOrderSources.size > 0) {
 			auto order = *static_cast<const dxf_order_t*>(data);
-			int found;
-			DX_MAYBE_UNUSED size_t index;
+			auto sourceStr = std::wstring(order.source);
 
-			DX_ARRAY_SEARCH(subscription_data->orderSource.elements, 0, subscription_data->orderSource.size,
-							order.source, DX_ORDER_SOURCE_COMPARATOR_NONSYM, false, found, index);
+			call = subscription_data->orderSources.find(sourceStr) != subscription_data->orderSources.end();
 
-			if (found) {
-				dx_call_subscr_listeners(subscription_data, event_bitmask, symbol_name, data, event_params);
+			if (!call) {
+				if (sourceStr == dx_all_special_order_sources[dxf_sos_AGGREGATE_ASK] || sourceStr == dx_all_special_order_sources[dxf_sos_AGGREGATE_BID]) {
+					call = subscription_data->orderSources.find(dx_all_special_order_sources[dxf_sos_AGGREGATE]) !=
+							subscription_data->orderSources.end();
+				} else if (sourceStr == dx_all_special_order_sources[dxf_sos_COMPOSITE_ASK] || sourceStr == dx_all_special_order_sources[dxf_sos_COMPOSITE_BID]) {
+					call = subscription_data->orderSources.find(dx_all_special_order_sources[dxf_sos_COMPOSITE]) !=
+							subscription_data->orderSources.end();
+				} else if (sourceStr == dx_all_special_order_sources[dxf_sos_REGIONAL_ASK] || sourceStr == dx_all_special_order_sources[dxf_sos_REGIONAL_BID]) {
+					call = subscription_data->orderSources.find(dx_all_special_order_sources[dxf_sos_REGIONAL]) !=
+							subscription_data->orderSources.end();
+				}
 			}
 		} else {
+			call = true;
+		}
+
+		if (call) {
 			dx_call_subscr_listeners(subscription_data, event_bitmask, symbol_name, data, event_params);
 		}
 	}
@@ -924,7 +1015,7 @@ int dx_process_connection_subscriptions(dxf_connection_t connection, dx_subscrip
 				!dx_get_event_subscription_event_types(subscription_data, &event_types) ||
 				!dx_get_event_subscription_flags(subscription_data, &subscr_flags) ||
 				!dx_get_event_subscription_time(subscription_data, &time) ||
-				!processor(connection, dx_get_order_source(subscription_data), symbols, symbol_count, event_types,
+				!processor(connection, dx_get_order_sources(subscription_data), symbols, symbol_count, event_types,
 						   subscr_flags, time)) {
 				return false;
 			}
@@ -940,44 +1031,34 @@ int dx_process_connection_subscriptions(dxf_connection_t connection, dx_subscrip
 
 /* -------------------------------------------------------------------------- */
 
-#define DX_ORDER_SOURCE_COMPARATOR(l, r) (dx_compare_strings(l.suffix, r.suffix))
-
 int dx_add_order_source(dxf_subscription_t subscr_id, dxf_const_string_t source) {
-	auto subscr_data = (dx::SubscriptionData*)subscr_id;
+	auto subscriptionData = static_cast<dx::SubscriptionData*>(subscr_id);
 
-	int failed = false;
-	dx_suffix_t new_source;
-	int found;
-	size_t index = 0;
-	dx_copy_string_len(new_source.suffix, source, DXF_RECORD_SUFFIX_SIZE);
-	if (subscr_data->orderSource.elements == nullptr) {
-		DX_ARRAY_INSERT(subscr_data->orderSource, dx_suffix_t, new_source, index, dx_capacity_manager_halfer, failed);
-	} else {
-		DX_ARRAY_SEARCH(subscr_data->orderSource.elements, 0, subscr_data->orderSource.size, new_source,
-						DX_ORDER_SOURCE_COMPARATOR, false, found, index);
-		if (!found)
-			DX_ARRAY_INSERT(subscr_data->orderSource, dx_suffix_t, new_source, index, dx_capacity_manager_halfer,
-							failed);
-	}
-	if (failed) {
-		return dx_set_error_code(dx_sec_not_enough_memory);
-	}
+	subscriptionData->orderSources.emplace(source);
+
 	return true;
 }
 
 /* -------------------------------------------------------------------------- */
 
-void dx_clear_order_source(dxf_subscription_t subscr_id) {
+void dx_clear_order_sources(dxf_subscription_t subscr_id) {
 	if (subscr_id == nullptr) {
 		return;
 	}
 
-	static_cast<dx::SubscriptionData*>(subscr_id)->clearOrderSource();
+	auto subscriptionData = static_cast<dx::SubscriptionData*>(subscr_id);
+
+	subscriptionData->orderSources.clear();
+	subscriptionData->clearRawOrderSources();
 }
 
-dx_order_source_array_ptr_t dx_get_order_source(dxf_subscription_t subscr_id) {
-	auto subscr_data = (dx::SubscriptionData*)subscr_id;
-	return &subscr_data->orderSource;
+dx_order_source_array_ptr_t dx_get_order_sources(dxf_subscription_t subscr_id) {
+	auto subscriptionData = static_cast<dx::SubscriptionData*>(subscr_id);
+
+	subscriptionData->clearRawOrderSources();
+	subscriptionData->fillRawOrderSources();
+
+	return &subscriptionData->rawOrderSources;
 }
 
 int dx_has_any_subscribed_symbol(dxf_connection_t connection) {
