@@ -1358,7 +1358,7 @@ typedef struct dx_event_subscription_param_list {
  * @brief Returns the list of subscription params. Fills records list according to event_id.
  *
  * @param[in]  connection    Connection handle
- * @param[in]  order_source  Order source
+ * @param[in]  order_sources Order sources
  * @param[in]  event_id      Event id
  * @param[in]  subscr_flags  Subscription flags
  * @param[out] params        Subscription params
