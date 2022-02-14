@@ -103,6 +103,7 @@ int dx_process_connection_subscriptions(dxf_connection_t connection, dx_subscrip
 /* Functions for working with order source */
 int dx_add_order_source(dxf_subscription_t subscr_id, dxf_const_string_t source);
 void dx_clear_order_sources(dxf_subscription_t subscr_id);
+// Returns non-special order sources.
 dx_order_source_array_ptr_t dx_get_order_sources(dxf_subscription_t subscr_id);
 
 /* Functions for working with symbols*/

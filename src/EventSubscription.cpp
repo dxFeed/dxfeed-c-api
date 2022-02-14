@@ -64,27 +64,27 @@ const dxf_const_string_t dx_all_order_sources[] = {
 	L"DEA",	  /// Direct-Edge EDGA Exchange.
 	L"DEX",	  /// Direct-Edge EDGX Exchange.
 	L"BYX",	  /// Bats BYX Exchange.
-	L"BZX",	  /// Bats BZX Exchange.
-	L"BATE",  /// Bats Europe BXE Exchange.
-	L"CHIX",  /// Bats Europe CXE Exchange.
-	L"CEUX",  /// Bats Europe DXE Exchange.
-	L"BXTR",  /// Bats Europe TRF.
-	L"IST",	  /// Borsa Istanbul Exchange.
-	L"BI20",  /// Borsa Istanbul Exchange. Record for particular top 20 order book.
-	L"ABE",	  /// ABE (abe.io) exchange.
-	L"FAIR",  /// FAIR (FairX) exchange.
-	L"GLBX",  /// CME Globex.
-	L"glbx",  /// CME Globex. Record for price level book.
-	L"ERIS",  /// Eris Exchange group of companies.
-	L"XEUR",  /// Eurex Exchange.
-	L"xeur",  /// Eurex Exchange. Record for price level book.
-	L"CFE",	  /// CBOE Futures Exchange.
-	L"C2OX",  /// CBOE Options C2 Exchange.
-	L"SMFE",  /// Small Exchange.
-	L"smfe",  /// Small Exchange. Record for price level book.
-	L"iex",	  /// Investors exchange. Record for price level book.
-	L"MEMX",  /// Members Exchange.
-	L"memx",  /// Members Exchange. Record for price level book.
+	L"BZX",  /// Bats BZX Exchange.
+	L"BATE", /// Bats Europe BXE Exchange.
+	L"CHIX", /// Bats Europe CXE Exchange.
+	L"CEUX", /// Bats Europe DXE Exchange.
+	L"BXTR", /// Bats Europe TRF.
+	L"IST",  /// Borsa Istanbul Exchange.
+	L"BI20", /// Borsa Istanbul Exchange. Record for particular top 20 order book.
+	L"ABE",  /// ABE (abe.io) exchange.
+	L"FAIR", /// FAIR (FairX) exchange.
+	L"GLBX", /// CME Globex.
+	L"glbx", /// CME Globex. Record for price level book.
+	L"ERIS", /// Eris Exchange group of companies.
+	L"XEUR", /// Eurex Exchange.
+	L"xeur", /// Eurex Exchange. Record for price level book.
+	L"CFE",  /// CBOE Futures Exchange.
+	L"C2OX", /// CBOE Options C2 Exchange.
+	L"SMFE", /// Small Exchange.
+	L"smfe", /// Small Exchange. Record for price level book.
+	L"iex",  /// Investors exchange. Record for price level book.
+	L"MEMX", /// Members Exchange.
+	L"memx", /// Members Exchange. Record for price level book.
 	nullptr};
 
 const dxf_const_string_t dx_all_special_order_sources[] = {
@@ -290,6 +290,10 @@ int SubscriptionData::closeEventSubscription(dxf_subscription_t subscriptionId, 
 
 void SubscriptionData::fillRawOrderSources() {
 	for (auto&& source : orderSources) {
+		if (EventSubscriptionConnectionContext::specialOrderSources.count(source) > 0) {
+			continue;
+		}
+
 		dx_suffix_t new_source = {};
 
 		dx_copy_string_len(new_source.suffix, source.c_str(), DXF_RECORD_SUFFIX_SIZE);
@@ -310,6 +314,9 @@ void SubscriptionData::clearRawOrderSources() {
 	rawOrderSources.size = 0;
 	rawOrderSources.capacity = 0;
 }
+
+const std::unordered_set<std::wstring> EventSubscriptionConnectionContext::specialOrderSources{
+	std::begin(dx_all_special_order_sources), std::begin(dx_all_special_order_sources) + dx_all_special_order_sources_count};
 
 EventSubscriptionConnectionContext::EventSubscriptionConnectionContext(dxf_connection_t connectionHandle)
 	: connectionHandle{connectionHandle}, mutex{}, symbols{}, subscriptions{} {}

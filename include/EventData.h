@@ -1365,7 +1365,7 @@ typedef struct dx_event_subscription_param_list {
  *
  * @warning You need to call dx_free(params.elements) to free resources.
  */
-size_t dx_get_event_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
+size_t dx_get_event_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_sources,
 										dx_event_id_t event_id, dx_event_subscr_flag subscr_flags,
 										OUT dx_event_subscription_param_list_t* params);
 

@@ -106,7 +106,9 @@ struct SubscriptionData {
 
 	static int closeEventSubscription(dxf_subscription_t subscriptionId, bool removeFromContext);
 
+	//Fills the non-special order sources array.
 	void fillRawOrderSources();
+
 	void clearRawOrderSources();
 };
 
@@ -115,8 +117,9 @@ class EventSubscriptionConnectionContext {
 	std::recursive_mutex mutex{};
 	std::unordered_map<std::wstring, SymbolData*> symbols{};
 	std::unordered_set<SubscriptionData*> subscriptions{};
-
 public:
+	static const std::unordered_set<std::wstring> specialOrderSources;
+
 	explicit EventSubscriptionConnectionContext(dxf_connection_t connectionHandle);
 
 	dxf_connection_t getConnectionHandle();
