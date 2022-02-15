@@ -682,6 +682,12 @@ int dx_transcode_market_maker_to_order_bid (dx_record_transcoder_connection_cont
 	event_buffer->event_flags = event_params->flags;
 	event_buffer->index = DX_ORDER_FORM_MM_BID_INDEX(record_buffer);
 	event_buffer->time = DX_TIME_FIELD_TO_MS(record_buffer->mmbid_time);
+	event_buffer->scope = dxf_osc_aggregate;
+	dx_memset(event_buffer->source, 0, sizeof(event_buffer->source));
+
+	dxf_const_string_t source = dx_all_special_order_sources[dxf_sos_AGGREGATE_BID];
+
+	dx_copy_string_len(event_buffer->source, source, dx_string_length(source));
 
 	if (IS_FLAG_SET(event_buffer->event_flags, dxf_ef_remove_event)) {
 		return dx_process_event_data(context->connection, dx_eid_order, record_params->symbol_name, event_buffer,
@@ -692,14 +698,9 @@ int dx_transcode_market_maker_to_order_bid (dx_record_transcoder_connection_cont
 	event_buffer->price = record_buffer->mmbid_price;
 	event_buffer->size = record_buffer->mmbid_size;
 	event_buffer->count = record_buffer->mmbid_count;
-	event_buffer->scope = dxf_osc_aggregate;
 	event_buffer->side = dxf_osd_buy;
 	event_buffer->exchange_code = record_buffer->mm_exchange;
-	dx_memset(event_buffer->source, 0, sizeof(event_buffer->source));
 
-	dxf_const_string_t source = dx_all_special_order_sources[dxf_sos_AGGREGATE_BID];
-
-	dx_copy_string_len(event_buffer->source, source, dx_string_length(source));
 	event_buffer->market_maker = dx_decode_from_integer(record_buffer->mm_id);
 
 	if (!IS_FLAG_SET(record_params->flags, dxf_ef_remove_event) &&
@@ -728,6 +729,12 @@ int dx_transcode_market_maker_to_order_ask (dx_record_transcoder_connection_cont
 	event_buffer->event_flags = event_params->flags;
 	event_buffer->index = DX_ORDER_FORM_MM_ASK_INDEX(record_buffer);
 	event_buffer->time = DX_TIME_FIELD_TO_MS(record_buffer->mmask_time);
+	event_buffer->scope = dxf_osc_aggregate;
+	dx_memset(event_buffer->source, 0, sizeof(event_buffer->source));
+
+	dxf_const_string_t source = dx_all_special_order_sources[dxf_sos_AGGREGATE_ASK];
+
+	dx_copy_string_len(event_buffer->source, source, dx_string_length(source));
 
 	if (IS_FLAG_SET(event_buffer->event_flags, dxf_ef_remove_event)) {
 		return dx_process_event_data(context->connection, dx_eid_order, record_params->symbol_name, event_buffer,
@@ -738,14 +745,8 @@ int dx_transcode_market_maker_to_order_ask (dx_record_transcoder_connection_cont
 	event_buffer->price = record_buffer->mmask_price;
 	event_buffer->size = record_buffer->mmask_size;
 	event_buffer->count = record_buffer->mmask_count;
-	event_buffer->scope = dxf_osc_aggregate;
 	event_buffer->side = dxf_osd_sell;
 	event_buffer->exchange_code = record_buffer->mm_exchange;
-	dx_memset(event_buffer->source, 0, sizeof(event_buffer->source));
-
-	dxf_const_string_t source = dx_all_special_order_sources[dxf_sos_AGGREGATE_ASK];
-
-	dx_copy_string_len(event_buffer->source, source, dx_string_length(source));
 	event_buffer->market_maker = dx_decode_from_integer(record_buffer->mm_id);
 
 	if (!IS_FLAG_SET(record_params->flags, dxf_ef_remove_event) &&
