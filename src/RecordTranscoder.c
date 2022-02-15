@@ -832,6 +832,7 @@ int RECORD_TRANSCODER_NAME(dx_order_t) (dx_record_transcoder_connection_context_
 	event_buffer->event_flags = event_params->flags;
 	event_buffer->index = DX_ORDER_INDEX(record_buffer, src);
 	event_buffer->time = DX_TIME_SEQ_TO_MS(record_buffer);
+	event_buffer->scope = DX_ORDER_GET_SCOPE(record_buffer);
 
 	if (IS_FLAG_SET(event_buffer->event_flags, dxf_ef_remove_event)) {
 		return dx_process_event_data(context->connection, dx_eid_order, record_params->symbol_name, event_buffer,
@@ -857,7 +858,6 @@ int RECORD_TRANSCODER_NAME(dx_order_t) (dx_record_transcoder_connection_context_
 
 	event_buffer->exchange_code = DX_ORDER_GET_EXCHANGE(record_buffer);
 	event_buffer->side = DX_ORDER_GET_SIDE(record_buffer);
-	event_buffer->scope = DX_ORDER_GET_SCOPE(record_buffer);
 
 	event_buffer->market_maker = dx_decode_from_integer(record_buffer->mmid);
 
