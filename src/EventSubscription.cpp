@@ -873,7 +873,7 @@ void pass_event_data_to_listeners(dx::EventSubscriptionConnectionContext* ctx, d
 
 		auto call = false;
 		// Check order source
-		if (event_id == dx_eid_order && subscription_data->rawOrderSources.size > 0) {
+		if (event_id == dx_eid_order && !subscription_data->orderSources.empty()) {
 			auto order = *static_cast<const dxf_order_t*>(data);
 			auto sourceStr = std::wstring(order.source);
 
