@@ -33,7 +33,23 @@ extern const dxf_subscription_t dx_invalid_subscription;
 
 extern const dxf_const_string_t dx_all_order_sources[];
 extern const size_t dx_all_order_sources_count;
+extern const dxf_const_string_t dx_all_special_order_sources[];
+extern const size_t dx_all_special_order_sources_count;
 extern const size_t dx_all_regional_count;
+
+typedef enum dxf_special_order_source_t {
+	dxf_sos_DEFAULT = 0,
+	dxf_sos_COMPOSITE_BID = 1,
+	dxf_sos_COMPOSITE_ASK = 2,
+	dxf_sos_REGIONAL_BID = 3,
+	dxf_sos_REGIONAL_ASK = 4,
+	dxf_sos_AGGREGATE_BID = 5,
+	dxf_sos_AGGREGATE_ASK = 6,
+	dxf_sos_EMPTY = 7,
+	dxf_sos_COMPOSITE = 8,
+	dxf_sos_REGIONAL = 9,
+	dxf_sos_AGGREGATE = 10,
+} dxf_special_order_source_t;
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -86,8 +102,9 @@ int dx_process_connection_subscriptions(dxf_connection_t connection, dx_subscrip
 
 /* Functions for working with order source */
 int dx_add_order_source(dxf_subscription_t subscr_id, dxf_const_string_t source);
-void dx_clear_order_source(dxf_subscription_t subscr_id);
-dx_order_source_array_ptr_t dx_get_order_source(dxf_subscription_t subscr_id);
+void dx_clear_order_sources(dxf_subscription_t subscr_id);
+// Returns non-special order sources.
+dx_order_source_array_ptr_t dx_get_order_sources(dxf_subscription_t subscr_id);
 
 /* Functions for working with symbols*/
 dxf_ulong_t dx_symbol_name_hasher(dxf_const_string_t symbol_name);

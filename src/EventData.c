@@ -146,7 +146,7 @@ dx_subscription_type_t dx_infer_subscription_type(dx_event_subscr_flag subscr_fl
 	return subscription_type;
 }
 
-int dx_get_single_order_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
+int dx_get_single_order_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_sources,
 											 dx_event_subscr_flag subscr_flags,
 											OUT dx_event_subscription_param_list_t* param_list) {
 	dxf_char_t order_name_buf[ORDER_TMPL_LEN + DXF_RECORD_SUFFIX_SIZE] = { 0 };
@@ -160,14 +160,14 @@ int dx_get_single_order_subscription_params(dxf_connection_t connection, dx_orde
 	if (IS_FLAG_SET(subscr_flags, dx_esf_sr_market_maker_order)) {
 		CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"MarketMaker", subscription_type);
 	} else {
-		if (order_source->size > 1) {
+		if (order_sources->size > 1) {
 			return false;
 		}
-		if (order_source->size == 0) {
+		if (order_sources->size == 0) {
 			CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Order", subscription_type);
 		} else {
 			dx_copy_string(order_name_buf, g_order_tmpl);
-			dx_copy_string_len(&order_name_buf[ORDER_TMPL_LEN], order_source->elements[0].suffix, DXF_RECORD_SUFFIX_SIZE);
+			dx_copy_string_len(&order_name_buf[ORDER_TMPL_LEN], order_sources->elements[0].suffix, DXF_RECORD_SUFFIX_SIZE);
 			CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, order_name_buf, subscription_type);
 		}
 	}
@@ -194,7 +194,7 @@ int dx_get_quote_subscription_params(dxf_connection_t connection, dx_event_subsc
 	return true;
 }
 
-int dx_get_order_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
+int dx_get_order_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_sources,
 									dx_event_subscr_flag subscr_flags,
 									OUT dx_event_subscription_param_list_t* param_list) {
 	dxf_char_t ch = L'A';
@@ -203,7 +203,7 @@ int dx_get_order_subscription_params(dxf_connection_t connection, dx_order_sourc
 	size_t i;
 
 	if (IS_FLAG_SET(subscr_flags, dx_esf_single_record)) {
-		return dx_get_single_order_subscription_params(connection, order_source, subscr_flags, param_list);
+		return dx_get_single_order_subscription_params(connection, order_sources, subscr_flags, param_list);
 	}
 
 	CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Quote", dx_infer_subscription_type(subscr_flags, dx_st_ticker));
@@ -211,8 +211,8 @@ int dx_get_order_subscription_params(dxf_connection_t connection, dx_order_sourc
 	CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, L"Order", dx_infer_subscription_type(subscr_flags, dx_st_history));
 
 	dx_copy_string(order_name_buf, g_order_tmpl);
-	for (i = 0; i < order_source->size; ++i) {
-		dx_copy_string_len(&order_name_buf[ORDER_TMPL_LEN], order_source->elements[i].suffix, DXF_RECORD_SUFFIX_SIZE);
+	for (i = 0; i < order_sources->size; ++i) {
+		dx_copy_string_len(&order_name_buf[ORDER_TMPL_LEN], order_sources->elements[i].suffix, DXF_RECORD_SUFFIX_SIZE);
 		CHECKED_CALL_4(dx_add_subscription_param_to_list, connection, param_list, order_name_buf, dx_infer_subscription_type(subscr_flags, dx_st_history));
 	}
 
@@ -346,7 +346,7 @@ int dx_get_configuration_subscription_params(dxf_connection_t connection, dx_eve
  *
  * You need to call dx_free(params.elements) to free resources.
  */
-size_t dx_get_event_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source, dx_event_id_t event_id,
+size_t dx_get_event_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_sources, dx_event_id_t event_id,
 										dx_event_subscr_flag subscr_flags, OUT dx_event_subscription_param_list_t* params) {
 	int result = true;
 	dx_event_subscription_param_list_t param_list = { NULL, 0, 0 };
@@ -365,7 +365,7 @@ size_t dx_get_event_subscription_params(dxf_connection_t connection, dx_order_so
 		result = dx_get_profile_subscription_params(connection, subscr_flags, &param_list);
 		break;
 	case dx_eid_order:
-		result = dx_get_order_subscription_params(connection, order_source, subscr_flags, &param_list);
+		result = dx_get_order_subscription_params(connection, order_sources, subscr_flags, &param_list);
 		break;
 	case dx_eid_time_and_sale:
 		result = dx_get_time_and_sale_subscription_params(connection, subscr_flags, &param_list);

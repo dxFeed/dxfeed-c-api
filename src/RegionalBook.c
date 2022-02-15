@@ -404,9 +404,9 @@ dxf_regional_book_t dx_create_regional_book(dxf_connection_t connection,
 	}
 
 	/* And make all these motions */
-	if (!dx_load_events_for_subscription(connection, dx_get_order_source(book->subscription), DXF_ET_QUOTE, dx_esf_quotes_regional) ||
+	if (!dx_load_events_for_subscription(connection, dx_get_order_sources(book->subscription), DXF_ET_QUOTE, dx_esf_quotes_regional) ||
 		!dx_send_record_description(connection, false) ||
-		!dx_subscribe_symbols_to_events(connection, dx_get_order_source(book->subscription),
+		!dx_subscribe_symbols_to_events(connection, dx_get_order_sources(book->subscription),
 			&symbol, 1, NULL, 0, DXF_ET_QUOTE, false, false, dx_esf_quotes_regional, 0)) {
 		dx_rb_book_free(book);
 		return NULL;

@@ -93,7 +93,8 @@ struct SubscriptionData {
 	unsigned event_types;
 	std::unordered_map<std::wstring, SymbolData*> symbols{};
 	std::unordered_set<ListenerContext> listeners{};
-	dx_order_source_array_t orderSource{};
+	std::unordered_set<std::wstring> orderSources{};
+	dx_order_source_array_t rawOrderSources{};
 	dx_event_subscr_flag subscriptionFlags;
 	dxf_long_t time;
 
@@ -105,7 +106,10 @@ struct SubscriptionData {
 
 	static int closeEventSubscription(dxf_subscription_t subscriptionId, bool removeFromContext);
 
-	void clearOrderSource();
+	//Fills the non-special order sources array.
+	void fillRawOrderSources();
+
+	void clearRawOrderSources();
 };
 
 class EventSubscriptionConnectionContext {
@@ -113,8 +117,9 @@ class EventSubscriptionConnectionContext {
 	std::recursive_mutex mutex{};
 	std::unordered_map<std::wstring, SymbolData*> symbols{};
 	std::unordered_set<SubscriptionData*> subscriptions{};
-
 public:
+	static const std::unordered_set<std::wstring> specialOrderSources;
+
 	explicit EventSubscriptionConnectionContext(dxf_connection_t connectionHandle);
 
 	dxf_connection_t getConnectionHandle();

@@ -392,13 +392,13 @@ int dx_describe_records_sender_task(void* data, int command) {
 }
 
 /* -------------------------------------------------------------------------- */
-int dx_load_events_for_subscription(dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
+int dx_load_events_for_subscription(dxf_connection_t connection, dx_order_source_array_ptr_t order_sources,
 									int event_types, dxf_uint_t subscr_flags) {
 	dx_event_id_t eid = dx_eid_begin;
 	for (; eid < dx_eid_count; ++eid) {
 		if (event_types & DX_EVENT_BIT_MASK(eid)) {
 			dx_event_subscription_param_list_t subscr_params;
-			dx_get_event_subscription_params(connection, order_source, eid, subscr_flags, &subscr_params);
+			dx_get_event_subscription_params(connection, order_sources, eid, subscr_flags, &subscr_params);
 			dx_free(subscr_params.elements);
 		}
 	}

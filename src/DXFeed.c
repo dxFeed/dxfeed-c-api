@@ -214,7 +214,7 @@ ERRORCODE dx_close_subscription(dxf_subscription_t subscription, int resetError)
 		!dx_get_event_subscription_symbols(subscription, &symbols, &symbol_count) ||
 		!dx_get_event_subscription_flags(subscription, &subscr_flags) ||
 		!dx_get_event_subscription_time(subscription, &time) ||
-		!dx_unsubscribe(connection, dx_get_order_source(subscription), symbols, symbol_count, (int)events, subscr_flags,
+		!dx_unsubscribe(connection, dx_get_order_sources(subscription), symbols, symbol_count, (int)events, subscr_flags,
 						time) ||
 		!dx_close_event_subscription(subscription)) {
 		return DXF_FAILURE;
@@ -686,9 +686,9 @@ DXFEED_API ERRORCODE dxf_add_symbols(dxf_subscription_t subscription, dxf_const_
 		return DXF_SUCCESS;
 	}
 
-	if (!dx_load_events_for_subscription(connection, dx_get_order_source(subscription), (int)events, subscr_flags) ||
+	if (!dx_load_events_for_subscription(connection, dx_get_order_sources(subscription), (int)events, subscr_flags) ||
 		!dx_send_record_description(connection, false) ||
-		!dx_subscribe(connection, dx_get_order_source(subscription), subscr_symbols, subscr_symbol_count,
+		!dx_subscribe(connection, dx_get_order_sources(subscription), subscr_symbols, subscr_symbol_count,
 					  added_symbols_indices, added_symbols_count, (int)events, subscr_flags, time)) {
 		dx_free(added_symbols_indices);
 		dx_logging_verbose(
@@ -803,7 +803,7 @@ DXFEED_API ERRORCODE dxf_remove_symbols(dxf_subscription_t subscription, dxf_con
 	dxf_long_t time;
 
 	if (!dx_get_event_subscription_time(subscription, &time) ||
-		!dx_unsubscribe(connection, dx_get_order_source(subscription), symbols, symbol_count, (int)events, subscr_flags,
+		!dx_unsubscribe(connection, dx_get_order_sources(subscription), symbols, symbol_count, (int)events, subscr_flags,
 						time) ||
 		!dx_remove_symbols(subscription, symbols, symbol_count)) {
 		dx_logging_verbose(dx_ll_debug,
@@ -923,7 +923,7 @@ DXFEED_API ERRORCODE dxf_clear_symbols(dxf_subscription_t subscription) {
 		!dx_get_event_subscription_event_types(subscription, &events) ||
 		!dx_get_event_subscription_flags(subscription, &subscr_flags) ||
 		!dx_get_event_subscription_time(subscription, &time) ||
-		!dx_unsubscribe(connection, dx_get_order_source(subscription), symbols, symbol_count, (int)events, subscr_flags,
+		!dx_unsubscribe(connection, dx_get_order_sources(subscription), symbols, symbol_count, (int)events, subscr_flags,
 						time) ||
 		!dx_remove_symbols(subscription, symbols, symbol_count)) {
 		dx_logging_verbose(dx_ll_debug, L"dxf_clear_symbols(sub = %p) -> %d, 'Tried unsuccessfully to remove symbols'",
@@ -1239,7 +1239,7 @@ DXFEED_API ERRORCODE dxf_set_order_source(dxf_subscription_t subscription, const
 		!dx_get_event_subscription_event_types(subscription, &events) ||
 		!dx_get_event_subscription_flags(subscription, &subscr_flags) ||
 		!dx_get_event_subscription_time(subscription, &time) ||
-		!dx_unsubscribe(connection, dx_get_order_source(subscription), symbols, symbol_count, (int)events, subscr_flags,
+		!dx_unsubscribe(connection, dx_get_order_sources(subscription), symbols, symbol_count, (int)events, subscr_flags,
 						time)) {
 		dx_logging_verbose(dx_ll_debug,
 						   L"dxf_set_order_source(sub = %p, source = '%hs') -> %d, 'Tried unsuccessfully to "
@@ -1252,7 +1252,7 @@ DXFEED_API ERRORCODE dxf_set_order_source(dxf_subscription_t subscription, const
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	// remove old sources
-	dx_clear_order_source(subscription);
+	dx_clear_order_sources(subscription);
 	// add new source
 	dxf_string_t str = dx_ansi_to_unicode(source);
 
@@ -1269,9 +1269,9 @@ DXFEED_API ERRORCODE dxf_set_order_source(dxf_subscription_t subscription, const
 	dx_free(str);
 
 	// subscribe to new order sources
-	if (!dx_load_events_for_subscription(connection, dx_get_order_source(subscription), (int)events, subscr_flags) ||
+	if (!dx_load_events_for_subscription(connection, dx_get_order_sources(subscription), (int)events, subscr_flags) ||
 		!dx_send_record_description(connection, false) ||
-		!dx_subscribe(connection, dx_get_order_source(subscription), symbols, symbol_count, NULL, 0, (int)events,
+		!dx_subscribe(connection, dx_get_order_sources(subscription), symbols, symbol_count, NULL, 0, (int)events,
 					  subscr_flags, time)) {
 		dx_logging_verbose(dx_ll_debug,
 						   L"dxf_set_order_source(sub = %p, source = '%hs') -> %d, 'Tried unsuccessfully to subscribe "
@@ -1372,7 +1372,7 @@ ERRORCODE dx_create_snapshot_impl(dxf_connection_t connection, dx_event_id_t eve
 								  dxf_const_string_t source, dxf_long_t time, OUT dxf_snapshot_t *snapshot) {
 	dxf_subscription_t subscription = NULL;
 	dx_record_info_id_t record_info_id;
-	dxf_const_string_t order_source_value = NULL;
+	dxf_const_string_t source_value = NULL;
 	ERRORCODE error_code;
 	int event_types = DX_EVENT_BIT_MASK(event_id);
 	size_t source_len = (source == NULL ? 0 : dx_string_length(source));
@@ -1385,9 +1385,13 @@ ERRORCODE dx_create_snapshot_impl(dxf_connection_t connection, dx_event_id_t eve
 			 dx_compare_strings(source, DXF_ORDER_AGGREGATE_ASK_STR) == 0)) {
 			record_info_id = dx_rid_market_maker;
 			subscr_flags |= dx_esf_sr_market_maker_order;
+			source_value = dx_all_special_order_sources[dxf_sos_AGGREGATE];
 		} else {
 			record_info_id = dx_rid_order;
-			if (source_len > 0) order_source_value = source;
+
+			if (source_len > 0) {
+				source_value = source;
+			}
 		}
 	} else if (event_id == dx_eid_candle) {
 		record_info_id = dx_rid_candle;
@@ -1418,13 +1422,17 @@ ERRORCODE dx_create_snapshot_impl(dxf_connection_t connection, dx_event_id_t eve
 
 	error_code = dxf_create_subscription_impl(connection, event_types, subscr_flags, time, &subscription);
 	if (error_code == DXF_FAILURE) return error_code;
-	if (record_info_id == dx_rid_order) {
-		dx_clear_order_source(subscription);
-		if (order_source_value != NULL) dx_add_order_source(subscription, order_source_value);
+
+	if (record_info_id == dx_rid_order || record_info_id == dx_rid_market_maker) {
+		dx_clear_order_sources(subscription);
+
+		if (source_value != NULL) {
+			dx_add_order_source(subscription, source_value);
+		}
 	}
 
 	*snapshot =
-		dx_create_snapshot(connection, subscription, event_id, record_info_id, symbol, order_source_value, time);
+		dx_create_snapshot(connection, subscription, event_id, record_info_id, symbol, (record_info_id == dx_rid_order) ? source_value : NULL, time);
 	if (*snapshot == dx_invalid_snapshot) {
 		dx_close_subscription(subscription, DX_KEEP_ERROR);
 		return DXF_FAILURE;

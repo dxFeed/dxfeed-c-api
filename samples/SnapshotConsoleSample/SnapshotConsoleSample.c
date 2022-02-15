@@ -530,13 +530,13 @@ int main(int argc, char *argv[]) {
 	char *token = NULL;
 	int log_data_transfer_flag = false;
 	int program_timeout = 604800;  // a week
+	int time_is_set = false;
 
 	if (argc > STATIC_PARAMS_COUNT) {
 		int records_print_limit_is_set = false;
 		int token_is_set = false;
 		int order_source_is_set = false;
 		int program_timeout_is_set = false;
-		int time_is_set = false;
 
 		for (int i = STATIC_PARAMS_COUNT; i < argc; i++) {
 			if (time_is_set == false && strcmp(argv[i], TIME_PARAM_SHORT_TAG) == 0) {
@@ -654,7 +654,7 @@ int main(int argc, char *argv[]) {
 			return 30;
 		}
 
-		if (!dxf_create_candle_snapshot(connection, candle_attributes, time_value * 1000, &snapshot)) {
+		if (!dxf_create_candle_snapshot(connection, candle_attributes, time_is_set ? time_value * 1000 : 0, &snapshot)) {
 			free(base_symbol);
 			process_last_error();
 			dxf_delete_candle_symbol_attributes(candle_attributes);
@@ -663,7 +663,7 @@ int main(int argc, char *argv[]) {
 			return 31;
 		}
 	} else if (event_id == dx_eid_order) {
-		if (!dxf_create_order_snapshot(connection, base_symbol, order_source_ptr, time_value * 1000, &snapshot)) {
+		if (!dxf_create_order_snapshot(connection, base_symbol, order_source_ptr, 0, &snapshot)) {
 			free(base_symbol);
 			process_last_error();
 			dxf_close_connection(connection);
@@ -671,7 +671,7 @@ int main(int argc, char *argv[]) {
 			return 32;
 		}
 	} else {
-		if (!dxf_create_snapshot(connection, event_id, base_symbol, NULL, time_value * 1000, &snapshot)) {
+		if (!dxf_create_snapshot(connection, event_id, base_symbol, NULL, time_is_set ? time_value * 1000 : 0, &snapshot)) {
 			free(base_symbol);
 			process_last_error();
 			dxf_close_connection(connection);

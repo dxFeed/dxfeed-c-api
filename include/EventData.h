@@ -274,7 +274,7 @@ typedef enum dxf_order_scope_t {
 } dxf_order_scope_t;
 
 /// The length of record suffix including the terminating null character
-#define DXF_RECORD_SUFFIX_SIZE 5
+#define DXF_RECORD_SUFFIX_SIZE (16 + 1)
 
 /// Side of an order or a trade.
 typedef enum dxf_order_side_t {
@@ -1358,14 +1358,14 @@ typedef struct dx_event_subscription_param_list {
  * @brief Returns the list of subscription params. Fills records list according to event_id.
  *
  * @param[in]  connection    Connection handle
- * @param[in]  order_source  Order source
+ * @param[in]  order_sources Order sources
  * @param[in]  event_id      Event id
  * @param[in]  subscr_flags  Subscription flags
  * @param[out] params        Subscription params
  *
  * @warning You need to call dx_free(params.elements) to free resources.
  */
-size_t dx_get_event_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
+size_t dx_get_event_subscription_params(dxf_connection_t connection, dx_order_source_array_ptr_t order_sources,
 										dx_event_id_t event_id, dx_event_subscr_flag subscr_flags,
 										OUT dx_event_subscription_param_list_t* params);
 
