@@ -47,5 +47,5 @@ int dx_set_price_level_book_listeners_v2(dxf_price_level_book_v2_t book,
 										 dxf_price_level_book_listener_t on_book_update_handler,
 										 dxf_price_level_book_inc_listener_t on_incremental_change_handler,
 										 void* user_data) {
-
+	return true;
 }
