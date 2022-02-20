@@ -433,9 +433,9 @@ public:
 		}
 	}
 
-	static std::unique_ptr<PriceLevelBook> create(dxf_connection_t connection, const std::string& symbol,
+	static PriceLevelBook* create(dxf_connection_t connection, const std::string& symbol,
 												  const std::string& source, std::size_t levelsNumber) {
-		auto plb = std::unique_ptr<PriceLevelBook>(new PriceLevelBook(symbol, source, levelsNumber));
+		auto plb = new PriceLevelBook(symbol, source, levelsNumber);
 		auto wSymbol = StringConverter::utf8ToWString(symbol);
 		dxf_snapshot_t snapshot = nullptr;
 
@@ -446,7 +446,7 @@ public:
 			[](const dxf_snapshot_data_ptr_t snapshot_data, int new_snapshot, void* user_data) {
 				static_cast<PriceLevelBook*>(user_data)->processSnapshotData(snapshot_data, new_snapshot);
 			},
-			plb.get());
+			plb);
 		plb->isValid_ = true;
 
 		return plb;
