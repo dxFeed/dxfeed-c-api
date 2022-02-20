@@ -20,26 +20,13 @@
 #pragma once
 
 #include <string>
-
-#ifdef _MSC_FULL_VER
-#pragma warning(push)
-#pragma warning(disable : 4244)
-#endif
-
-#include <codecvt>
-#include <locale>
+#include <boost/locale/encoding_utf.hpp>
 
 namespace dx {
 
 struct StringConverter {
-	static std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> wstringConvert;
-
 	static std::wstring utf8ToWString(const std::string &utf8) noexcept {
-		try {
-			return wstringConvert.from_bytes(utf8);
-		} catch (...) {
-			return {};
-		}
+		return boost::locale::conv::utf_to_utf<wchar_t>(utf8);
 	}
 
 	static std::wstring utf8ToWString(const char *utf8) noexcept {
@@ -47,11 +34,7 @@ struct StringConverter {
 			return {};
 		}
 
-		try {
-			return wstringConvert.from_bytes(utf8);
-		} catch (...) {
-			return {};
-		}
+		return boost::locale::conv::utf_to_utf<wchar_t>(utf8);
 	}
 
 	static wchar_t utf8ToWChar(char c) noexcept {
@@ -63,11 +46,7 @@ struct StringConverter {
 	}
 
 	static std::string wStringToUtf8(const std::wstring &utf16) noexcept {
-		try {
-			return wstringConvert.to_bytes(utf16);
-		} catch (...) {
-			return {};
-		}
+		return boost::locale::conv::utf_to_utf<char>(utf16);
 	}
 
 	static std::string wStringToUtf8(const wchar_t *utf16) noexcept {
@@ -75,11 +54,7 @@ struct StringConverter {
 			return {};
 		}
 
-		try {
-			return wstringConvert.to_bytes(utf16);
-		} catch (...) {
-			return {};
-		}
+		return boost::locale::conv::utf_to_utf<char>(utf16);
 	}
 
 	static char wCharToUtf8(wchar_t c) noexcept {
@@ -91,10 +66,4 @@ struct StringConverter {
 	}
 };
 
-std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> StringConverter::wstringConvert{};
-
 }
-
-#ifdef _MSC_FULL_VER
-#pragma warning(pop)
-#endif

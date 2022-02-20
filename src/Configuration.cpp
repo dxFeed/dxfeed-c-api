@@ -32,13 +32,11 @@ extern "C" {
 
 }
 
-#include <boost/locale/encoding_utf.hpp>
-#include <string>
-
+#include "StringConverter.hpp"
 #include "Configuration.hpp"
 
 int dx_load_config_from_wstring(dxf_const_string_t config) {
-	return dx::Configuration::getInstance()->loadFromString(boost::locale::conv::utf_to_utf<char>(config));
+	return dx::Configuration::getInstance()->loadFromString(dx::StringConverter::wStringToUtf8(config));
 }
 
 int dx_load_config_from_string(const char* config) { return dx::Configuration::getInstance()->loadFromString(config); }
