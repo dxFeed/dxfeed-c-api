@@ -25,20 +25,17 @@ extern "C" {
 }
 
 #include <algorithm>
-#include <boost/multi_index/identity.hpp>
-#include <boost/multi_index/member.hpp>
-#include <boost/multi_index/ordered_index.hpp>
-#include <boost/multi_index/random_access_index.hpp>
-#include <boost/multi_index_container.hpp>
 #include <cassert>
 #include <cmath>
 #include <deque>
 #include <functional>
+#include <iterator>
 #include <limits>
 #include <memory>
 #include <mutex>
 #include <set>
 #include <string>
+#include <type_traits>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -46,11 +43,12 @@ extern "C" {
 #include "StringConverter.hpp"
 
 namespace dx {
+static constexpr double NaN = std::numeric_limits<double>::quiet_NaN();
 
 struct OrderData {
 	dxf_long_t index = 0;
-	double price = std::numeric_limits<double>::quiet_NaN();
-	double size = std::numeric_limits<double>::quiet_NaN();
+	double price = NaN;
+	double size = NaN;
 	dxf_long_t time = 0;
 	dxf_order_side_t side = dxf_osd_undefined;
 
@@ -62,14 +60,16 @@ struct OrderData {
 };
 
 struct PriceLevel {
-	double price = std::numeric_limits<double>::quiet_NaN();
-	double size = std::numeric_limits<double>::quiet_NaN();
+	double price = NaN;
+	double size = NaN;
 	std::int64_t time = 0;
 
 	PriceLevel() = default;
 
 	PriceLevel(double newPrice, double newSize, std::int64_t newTime)
 		: price{newPrice}, size{newSize}, time{newTime} {};
+
+	[[nodiscard]] bool isValid() const { return !std::isnan(price); }
 
 	friend bool operator<(const PriceLevel& a, const PriceLevel& b) {
 		if (std::isnan(b.price)) return true;
@@ -79,40 +79,80 @@ struct PriceLevel {
 	}
 };
 
+struct AskPriceLevel : PriceLevel {
+	AskPriceLevel() = default;
+
+	explicit AskPriceLevel(const PriceLevel& priceLevel) : PriceLevel{priceLevel} {}
+
+	AskPriceLevel(double newPrice, double newSize, std::int64_t newTime)
+		: PriceLevel{newPrice, newSize, newTime} {};
+
+	friend bool operator<(const AskPriceLevel& a, const AskPriceLevel& b) {
+		if (std::isnan(b.price)) return true;
+		if (std::isnan(a.price)) return false;
+
+		return a.price < b.price;
+	}
+};
+
+struct BidPriceLevel : PriceLevel {
+	BidPriceLevel() = default;
+
+	explicit BidPriceLevel(const PriceLevel& priceLevel) : PriceLevel{priceLevel} {}
+
+	BidPriceLevel(double newPrice, double newSize, std::int64_t newTime)
+		: PriceLevel{newPrice, newSize, newTime} {};
+
+	friend bool operator<(const BidPriceLevel& a, const BidPriceLevel& b) {
+		if (std::isnan(b.price)) return false;
+		if (std::isnan(a.price)) return true;
+
+		return a.price > b.price;
+	}
+};
+
 struct PriceLevelChanges {
-	std::vector<PriceLevel> asks{};
-	std::vector<PriceLevel> bids{};
+	std::vector<AskPriceLevel> asks{};
+	std::vector<BidPriceLevel> bids{};
 
 	PriceLevelChanges() = default;
 
-	PriceLevelChanges(std::vector<PriceLevel> newAsks, std::vector<PriceLevel> newBids)
+	PriceLevelChanges(std::vector<AskPriceLevel> newAsks, std::vector<BidPriceLevel> newBids)
 		: asks{std::move(newAsks)}, bids{std::move(newBids)} {}
+
+	[[nodiscard]] bool isEmpty() const { return asks.empty() && bids.empty(); }
 };
 
 struct PriceLevelChangesSet {
+	PriceLevelChanges removals{};
 	PriceLevelChanges additions{};
 	PriceLevelChanges updates{};
-	PriceLevelChanges removals{};
 
 	PriceLevelChangesSet() = default;
 
-	PriceLevelChangesSet(PriceLevelChanges newAdditions, PriceLevelChanges newUpdates, PriceLevelChanges newRemovals)
-		: additions{std::move(newAdditions)}, updates{std::move(newUpdates)}, removals{std::move(newRemovals)} {}
+	PriceLevelChangesSet(PriceLevelChanges newRemovals, PriceLevelChanges newAdditions, PriceLevelChanges newUpdates)
+		: removals{std::move(newRemovals)}, additions{std::move(newAdditions)}, updates{std::move(newUpdates)} {}
+
+	[[nodiscard]] bool isEmpty() const { return removals.isEmpty() && additions.isEmpty() && updates.isEmpty(); }
 };
 
-namespace bmi = boost::multi_index;
-
-using PriceLevelContainer = bmi::multi_index_container<
-	PriceLevel,
-	bmi::indexed_by<bmi::random_access<>, bmi::ordered_unique<bmi::member<PriceLevel, double, &PriceLevel::price>>>>;
+using PriceLevelContainer = std::set<PriceLevel>;
 
 class PriceLevelBook final {
 	dxf_snapshot_t snapshot_;
 	std::string symbol_;
 	std::string source_;
 	std::size_t levelsNumber_;
-	PriceLevelContainer asks_;
-	PriceLevelContainer bids_;
+
+	/*
+     * Since we are working with std::set, which does not imply random access, we have to keep the iterators lastAsk,
+     * lastBid for the case with a limit on the number of PLs. These iterators, as well as the look-ahead functions, are
+     * used to find out if we are performing operations on PL within the range given to the user.
+	 */
+	std::set<AskPriceLevel> asks_;
+	std::set<AskPriceLevel>::iterator lastAsk_;
+	std::set<BidPriceLevel> bids_;
+	std::set<BidPriceLevel>::iterator lastBid_;
 	std::unordered_map<dxf_long_t, OrderData> orderDataSnapshot_;
 	bool isValid_;
 	std::mutex mutex_;
@@ -135,7 +175,9 @@ class PriceLevelBook final {
 		  source_{std::move(source)},
 		  levelsNumber_{levelsNumber},
 		  asks_{},
+		  lastAsk_{asks_.end()},
 		  bids_{},
+		  lastBid_{bids_.end()},
 		  orderDataSnapshot_{},
 		  isValid_{false},
 		  mutex_{} {}
@@ -167,8 +209,7 @@ class PriceLevelBook final {
 			updatesSide.insert(priceLevelChange);
 		};
 
-		auto processOrderRemoval = [&bidUpdates, &askUpdates](const dxf_order_t& order,
-															  const OrderData& foundOrderData) {
+		auto processOrderRemoval = [&bidUpdates, &askUpdates](const dxf_order_t& order, const OrderData& foundOrderData) {
 			auto& updatesSide = foundOrderData.side == dxf_osd_buy ? bidUpdates : askUpdates;
 			auto priceLevelChange = PriceLevel{foundOrderData.price, -foundOrderData.size, order.time};
 			auto foundPriceLevel = updatesSide.find(priceLevelChange);
@@ -194,8 +235,7 @@ class PriceLevelBook final {
 				}
 
 				processOrderAddition(order);
-				orderDataSnapshot_[order.index] =
-					OrderData{order.index, order.price, order.size, order.time, order.side};
+				orderDataSnapshot_[order.index] = OrderData{order.index, order.price, order.size, order.time, order.side};
 			} else {
 				const auto& foundOrderData = foundOrderDataIt->second;
 
@@ -203,7 +243,7 @@ class PriceLevelBook final {
 					processOrderRemoval(order, foundOrderData);
 					orderDataSnapshot_.erase(foundOrderData.index);
 				} else {
-					if (order.side != foundOrderData.side) {
+					if (order.side != foundOrderData.side || !areEqualPrices(order.price, foundOrderData.price)) {
 						processOrderRemoval(order, foundOrderData);
 					}
 
@@ -214,178 +254,245 @@ class PriceLevelBook final {
 			}
 		}
 
-		return {std::vector<PriceLevel>{askUpdates.begin(), askUpdates.end()},
-				std::vector<PriceLevel>{bidUpdates.rbegin(), bidUpdates.rend()}};
+		return {std::vector<AskPriceLevel>{askUpdates.begin(), askUpdates.end()},
+				std::vector<BidPriceLevel>{bidUpdates.rbegin(), bidUpdates.rend()}};
+	}
+
+	// TODO: C++14 lambda
+	template <typename PriceLevelUpdateSide, typename PriceLevelStorageSide, typename PriceLevelChangesSide>
+	static void generatePriceLevelChanges(const PriceLevelUpdateSide& priceLevelUpdateSide,
+										  const PriceLevelStorageSide& priceLevelStorageSide,
+										  PriceLevelChangesSide& additions, PriceLevelChangesSide& removals,
+										  PriceLevelChangesSide& updates) {
+		auto found = priceLevelStorageSide.find(priceLevelUpdateSide);
+
+		if (found == priceLevelStorageSide.end()) {
+			additions.push_back(priceLevelUpdateSide);
+		} else {
+			auto newPriceLevelChange = *found;
+
+			newPriceLevelChange.size += priceLevelUpdateSide.size;
+			newPriceLevelChange.time = priceLevelUpdateSide.time;
+
+			if (isZeroPriceLevel(newPriceLevelChange)) {
+				removals.push_back(*found);
+			} else {
+				updates.push_back(newPriceLevelChange);
+			}
+		}
+	}
+
+	template <typename PriceLevelRemovalSide, typename PriceLevelStorageSide, typename PriceLevelChangesSideSet,
+			  typename LastElementIter>
+	static void processSideRemoval(const PriceLevelRemovalSide& priceLevelRemovalSide,
+								   PriceLevelStorageSide& priceLevelStorageSide, PriceLevelChangesSideSet& removals,
+								   PriceLevelChangesSideSet& additions, LastElementIter& lastElementIter,
+								   std::size_t levelsNumber) {
+		if (priceLevelStorageSide.empty()) return;
+
+		auto found = priceLevelStorageSide.find(priceLevelRemovalSide);
+
+		if (levelsNumber == 0) {
+			removals.insert(priceLevelRemovalSide);
+			priceLevelStorageSide.erase(found);
+			lastElementIter = priceLevelStorageSide.end();
+
+			return;
+		}
+
+		auto removed = false;
+
+		// Determine what will be the removal given the number of price levels.
+		if (priceLevelStorageSide.size() <= levelsNumber || priceLevelRemovalSide < *std::next(lastElementIter)) {
+			removals.insert(priceLevelRemovalSide);
+			removed = true;
+		}
+
+		// Determine what will be the shift in price levels after removal.
+		if (removed && priceLevelStorageSide.size() > levelsNumber) {
+			additions.insert(*std::next(lastElementIter));
+		}
+
+		// Determine the adjusted last price (NaN -- end)
+		typename std::decay<decltype(*lastElementIter)>::type newLastPL{};
+
+		if (removed) {                                                      // removal <= last
+			if (std::next(lastElementIter) != priceLevelStorageSide.end()) {  // there is another PL after last
+				newLastPL = *std::next(lastElementIter);
+			} else {
+				if (priceLevelRemovalSide < *lastElementIter) {
+					newLastPL = *lastElementIter;
+				} else if (lastElementIter != priceLevelStorageSide.begin()) {
+					newLastPL = *std::prev(lastElementIter);
+				}
+			}
+		} else {
+			newLastPL = *lastElementIter;
+		}
+
+		priceLevelStorageSide.erase(found);
+
+		if (!newLastPL.isValid()) {
+			lastElementIter = priceLevelStorageSide.end();
+		} else {
+			lastElementIter = priceLevelStorageSide.find(newLastPL);
+		}
+	}
+
+	template <typename PriceLevelAdditionSide, typename PriceLevelStorageSide, typename PriceLevelChangesSideSet,
+			  typename LastElementIter>
+	static void processSideAddition(const PriceLevelAdditionSide& priceLevelAdditionSide,
+									PriceLevelStorageSide& priceLevelStorageSide, PriceLevelChangesSideSet& additions,
+									PriceLevelChangesSideSet& removals, LastElementIter& lastElementIter,
+									std::size_t levelsNumber) {
+		if (levelsNumber == 0) {
+			additions.insert(priceLevelAdditionSide);
+			priceLevelStorageSide.insert(priceLevelAdditionSide);
+			lastElementIter = priceLevelStorageSide.end();
+
+			return;
+		}
+
+		auto added = false;
+
+		// We determine what will be the addition of the price level, taking into account the possible quantity.
+		if (priceLevelStorageSide.size() < levelsNumber || priceLevelAdditionSide < *lastElementIter) {
+			additions.insert(priceLevelAdditionSide);
+			added = true;
+		}
+
+		// We determine what will be the shift after adding
+		if (added && priceLevelStorageSide.size() >= levelsNumber) {
+			const auto& toRemove = *lastElementIter;
+
+			// We take into account the possibility that the previously added price level will be deleted.
+			if (additions.count(toRemove) > 0) {
+				additions.erase(toRemove);
+			} else {
+				removals.insert(toRemove);
+			}
+		}
+
+		// Determine the adjusted last price (NaN -- end)
+		typename std::decay<decltype(*lastElementIter)>::type newLastPL = *lastElementIter;
+
+		if (added) {
+			newLastPL = priceLevelAdditionSide;
+
+			if (lastElementIter != priceLevelStorageSide.end() && priceLevelAdditionSide < *lastElementIter) {
+				if (priceLevelStorageSide.size() < levelsNumber) {
+					newLastPL = *lastElementIter;
+				} else if (lastElementIter != priceLevelStorageSide.begin() &&
+						   priceLevelAdditionSide < *std::prev(lastElementIter)) {
+					newLastPL = *std::prev(lastElementIter);
+				}
+			}
+		}
+
+		priceLevelStorageSide.insert(priceLevelAdditionSide);
+
+		if (!newLastPL.isValid()) {
+			lastElementIter = priceLevelStorageSide.end();
+		} else {
+			lastElementIter = priceLevelStorageSide.find(newLastPL);
+		}
+	}
+
+	template <typename PriceLevelUpdateSide, typename PriceLevelStorageSide, typename PriceLevelChangesSideSet,
+			  typename LastElementIter>
+	static void processSideUpdate(const PriceLevelUpdateSide& priceLevelUpdateSide,
+								  PriceLevelStorageSide& priceLevelStorageSide, PriceLevelChangesSideSet& updates,
+								  LastElementIter& lastElementIter, std::size_t levelsNumber) {
+		if (levelsNumber == 0) {
+			priceLevelStorageSide.erase(priceLevelUpdateSide);
+			priceLevelStorageSide.insert(priceLevelUpdateSide);
+			updates.insert(priceLevelUpdateSide);
+			lastElementIter = priceLevelStorageSide.end();
+
+			return;
+		}
+
+		if (priceLevelStorageSide.count(priceLevelUpdateSide) > 0) {
+			updates.insert(priceLevelUpdateSide);
+		}
+
+		typename std::decay<decltype(*lastElementIter)>::type newLastPL{};
+
+		if (lastElementIter != priceLevelStorageSide.end()) {
+			newLastPL = *lastElementIter;
+		}
+
+		priceLevelStorageSide.erase(priceLevelUpdateSide);
+		priceLevelStorageSide.insert(priceLevelUpdateSide);
+
+		if (!newLastPL.isValid()) {
+			lastElementIter = priceLevelStorageSide.end();
+		} else {
+			lastElementIter = priceLevelStorageSide.find(newLastPL);
+		}
 	}
 
 	// TODO: price levels number
 	PriceLevelChangesSet applyUpdates(const PriceLevelChanges& priceLevelUpdates) {
 		PriceLevelChanges additions{};
-		PriceLevelChanges updates{};
 		PriceLevelChanges removals{};
+		PriceLevelChanges updates{};
 
 		// We generate lists of additions, updates, removals
-		for (const auto& updateAsk : priceLevelUpdates.asks) {
-			auto found = std::lower_bound(asks_.begin(), asks_.end(), updateAsk);
-
-			if (found == asks_.end() || !areEqualPrices(found->price, updateAsk.price)) {
-				additions.asks.push_back(updateAsk);
-			} else {
-				auto newPriceLevelChange = *found;
-
-				newPriceLevelChange.size += updateAsk.size;
-				newPriceLevelChange.time = updateAsk.time;
-
-				if (isZeroPriceLevel(newPriceLevelChange)) {
-					removals.asks.push_back(*found);
-				} else {
-					updates.asks.push_back(newPriceLevelChange);
-				}
-			}
+		for (const auto& askUpdate : priceLevelUpdates.asks) {
+			generatePriceLevelChanges(askUpdate, asks_, additions.asks, removals.asks, updates.asks);
 		}
 
-		for (const auto& updateBid : priceLevelUpdates.bids) {
-			auto found = std::lower_bound(bids_.begin(), bids_.end(), updateBid);
-
-			if (found == bids_.end() || !areEqualPrices(found->price, updateBid.price)) {
-				additions.bids.push_back(updateBid);
-			} else {
-				auto newPriceLevelChange = *found;
-
-				newPriceLevelChange.size += updateBid.size;
-				newPriceLevelChange.time = updateBid.time;
-
-				if (isZeroPriceLevel(newPriceLevelChange)) {
-					removals.bids.push_back(*found);
-				} else {
-					updates.bids.push_back(newPriceLevelChange);
-				}
-			}
+		for (const auto& bidUpdate : priceLevelUpdates.bids) {
+			generatePriceLevelChanges(bidUpdate, bids_, additions.bids, removals.bids, updates.bids);
 		}
 
-		std::set<PriceLevel> askRemovals{};
-		std::set<PriceLevel> bidRemovals{};
-		std::set<PriceLevel> askAdditions{};
-		std::set<PriceLevel> bidAdditions{};
-		std::set<PriceLevel> askUpdates{};
-		std::set<PriceLevel> bidUpdates{};
+		std::set<AskPriceLevel> askRemovals{};
+		std::set<BidPriceLevel> bidRemovals{};
+		std::set<AskPriceLevel> askAdditions{};
+		std::set<BidPriceLevel> bidAdditions{};
+		std::set<AskPriceLevel> askUpdates{};
+		std::set<BidPriceLevel> bidUpdates{};
 
+		// O(R)
 		for (const auto& askRemoval : removals.asks) {
-			if (asks_.empty()) continue;
-
-			// Determine what will be the removal given the number of price levels.
-			if (levelsNumber_ == 0 || asks_.size() <= levelsNumber_ || askRemoval.price < asks_[levelsNumber_].price) {
-				askRemovals.insert(askRemoval);
-			}
-
-			// Determine what will be the shift in price levels after removal.
-			if (levelsNumber_ != 0 && asks_.size() > levelsNumber_ && askRemoval.price < asks_[levelsNumber_].price) {
-				askAdditions.insert(asks_[levelsNumber_]);
-			}
-
-			// remove price level by price
-			asks_.get<1>().erase(askRemoval.price);
+			processSideRemoval(askRemoval, asks_, askRemovals, askAdditions, lastAsk_, levelsNumber_);
 		}
 
 		for (const auto& askAddition : additions.asks) {
-			// We determine what will be the addition of the price level, taking into account the possible quantity.
-			if (levelsNumber_ == 0 || asks_.size() < levelsNumber_ ||
-				askAddition.price < asks_[levelsNumber_ - 1].price) {
-				askAdditions.insert(askAddition);
-			}
-
-			// We determine what will be the shift after adding
-			if (levelsNumber_ != 0 && asks_.size() >= levelsNumber_ &&
-				askAddition.price < asks_[levelsNumber_ - 1].price) {
-				const auto& toRemove = asks_[levelsNumber_ - 1];
-
-				// We take into account the possibility that the previously added price level will be deleted.
-				if (askAdditions.count(toRemove) > 0) {
-					askAdditions.erase(toRemove);
-				} else {
-					askRemovals.insert(toRemove);
-				}
-			}
-
-			asks_.get<1>().insert(askAddition);
+			processSideAddition(askAddition, asks_, askAdditions, askRemovals, lastAsk_, levelsNumber_);
 		}
 
 		for (const auto& askUpdate : updates.asks) {
-			if (levelsNumber_ == 0 || asks_.get<1>().count(askUpdate.price) > 0) {
-				askUpdates.insert(askUpdate);
-			}
-
-			asks_.get<1>().erase(askUpdate.price);
-			asks_.get<1>().insert(askUpdate);
+			processSideUpdate(askUpdate, asks_, askUpdates, lastAsk_, levelsNumber_);
 		}
 
 		for (const auto& bidRemoval : removals.bids) {
-			if (bids_.empty()) continue;
-
-			// Determine what will be the removal given the number of price levels.
-			if (levelsNumber_ == 0 || bids_.size() <= levelsNumber_ ||
-				bidRemoval.price > bids_[bids_.size() - 1 - levelsNumber_].price) {
-				bidRemovals.insert(bidRemoval);
-			}
-
-			// Determine what will be the shift in price levels after removal.
-			if (levelsNumber_ != 0 && bids_.size() > levelsNumber_ &&
-				bidRemoval.price > bids_[bids_.size() - 1 - levelsNumber_].price) {
-				bidAdditions.insert(bids_[bids_.size() - 1 - levelsNumber_]);
-			}
-
-			// remove price level by price
-			bids_.get<1>().erase(bidRemoval.price);
+			processSideRemoval(bidRemoval, bids_, bidRemovals, bidAdditions, lastBid_, levelsNumber_);
 		}
 
 		for (const auto& bidAddition : additions.bids) {
-			// We determine what will be the addition of the price level, taking into account the possible quantity.
-			if (levelsNumber_ == 0 || bids_.size() < levelsNumber_ ||
-				bidAddition.price > bids_[bids_.size() - levelsNumber_].price) {
-				bidAdditions.insert(bidAddition);
-			}
-
-			// We determine what will be the shift after adding
-			if (levelsNumber_ != 0 && bids_.size() >= levelsNumber_ &&
-				bidAddition.price > bids_[bids_.size() - levelsNumber_].price) {
-				const auto& toRemove = bids_[bids_.size() - levelsNumber_];
-
-				// We take into account the possibility that the previously added price level will be deleted.
-				if (bidAdditions.count(toRemove) > 0) {
-					bidAdditions.erase(toRemove);
-				} else {
-					bidRemovals.insert(toRemove);
-				}
-			}
-
-			bids_.get<1>().insert(bidAddition);
+			processSideAddition(bidAddition, bids_, bidAdditions, bidRemovals, lastBid_, levelsNumber_);
 		}
 
 		for (const auto& bidUpdate : updates.bids) {
-			if (levelsNumber_ == 0 || bids_.get<1>().count(bidUpdate.price) > 0) {
-				bidUpdates.insert(bidUpdate);
-			}
-
-			bids_.get<1>().erase(bidUpdate.price);
-			bids_.get<1>().insert(bidUpdate);
+			processSideUpdate(bidUpdate, bids_, bidUpdates, lastBid_, levelsNumber_);
 		}
 
-		return {PriceLevelChanges{std::vector<PriceLevel>{askAdditions.begin(), askAdditions.end()},
-								  std::vector<PriceLevel>{bidAdditions.rbegin(), bidAdditions.rend()}},
-				PriceLevelChanges{std::vector<PriceLevel>{askUpdates.begin(), askUpdates.end()},
-								  std::vector<PriceLevel>{bidUpdates.rbegin(), bidUpdates.rend()}},
-				PriceLevelChanges{std::vector<PriceLevel>{askRemovals.begin(), askRemovals.end()},
-								  std::vector<PriceLevel>{bidRemovals.rbegin(), bidRemovals.rend()}}};
+		return {PriceLevelChanges{std::vector<AskPriceLevel>{askRemovals.begin(), askRemovals.end()},
+								  std::vector<BidPriceLevel>{bidRemovals.begin(), bidRemovals.end()}},
+				PriceLevelChanges{std::vector<AskPriceLevel>{askAdditions.begin(), askAdditions.end()},
+								  std::vector<BidPriceLevel>{bidAdditions.begin(), bidAdditions.end()}},
+				PriceLevelChanges{std::vector<AskPriceLevel>{askUpdates.begin(), askUpdates.end()},
+								  std::vector<BidPriceLevel>{bidUpdates.begin(), bidUpdates.end()}}};
 	}
 
-	[[nodiscard]] std::vector<PriceLevel> getAsks() const {
-		return {asks_.begin(),
-				(levelsNumber_ == 0 || asks_.size() <= levelsNumber_) ? asks_.end() : asks_.begin() + levelsNumber_};
+	[[nodiscard]] std::vector<AskPriceLevel> getAsks() const {
+		return {asks_.begin(), lastAsk_ == asks_.end() ? lastAsk_ : std::next(lastAsk_)};
 	}
 
-	[[nodiscard]] std::vector<PriceLevel> getBids() const {
-		return {bids_.rbegin(),
-				(levelsNumber_ == 0 || bids_.size() <= levelsNumber_) ? bids_.rend() : bids_.rbegin() + levelsNumber_};
+	[[nodiscard]] std::vector<BidPriceLevel> getBids() const {
+		return {bids_.begin(), lastBid_ == bids_.end() ? lastBid_ : std::next(lastBid_)};
 	}
 
 public:
@@ -416,7 +523,7 @@ public:
 			if (onNewBook_) {
 				onNewBook_(PriceLevelChanges{getAsks(), getBids()});
 			}
-		} else {
+		} else if (!resultingChangesSet.isEmpty()) {
 			if (onIncrementalChange_) {
 				onIncrementalChange_(resultingChangesSet);
 			}
@@ -433,8 +540,8 @@ public:
 		}
 	}
 
-	static PriceLevelBook* create(dxf_connection_t connection, const std::string& symbol,
-												  const std::string& source, std::size_t levelsNumber) {
+	static PriceLevelBook* create(dxf_connection_t connection, const std::string& symbol, const std::string& source,
+								  std::size_t levelsNumber) {
 		auto plb = new PriceLevelBook(symbol, source, levelsNumber);
 		auto wSymbol = StringConverter::utf8ToWString(symbol);
 		dxf_snapshot_t snapshot = nullptr;
