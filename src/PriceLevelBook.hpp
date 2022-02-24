@@ -1,6 +1,6 @@
 /*
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -136,8 +136,6 @@ struct PriceLevelChangesSet {
 
 	[[nodiscard]] bool isEmpty() const { return removals.isEmpty() && additions.isEmpty() && updates.isEmpty(); }
 };
-
-using PriceLevelContainer = std::set<PriceLevel>;
 
 class PriceLevelBook final {
 	dxf_snapshot_t snapshot_;
@@ -501,6 +499,14 @@ class PriceLevelBook final {
 		return {bids_.begin(), lastBid_ == bids_.end() ? lastBid_ : std::next(lastBid_)};
 	}
 
+	void clear() {
+		asks_.clear();
+		lastAsk_ = asks_.end();
+		bids_.clear();
+		lastBid_ = bids_.end();
+		orderDataSnapshot_.clear();
+	}
+
 public:
 	// TODO: move to another thread
 	void processSnapshotData(const dxf_snapshot_data_ptr_t snapshotData, int newSnapshot) {
@@ -509,9 +515,7 @@ public:
 		auto newSnap = newSnapshot != 0;
 
 		if (newSnap) {
-			asks_.clear();
-			bids_.clear();
-			orderDataSnapshot_.clear();
+			clear();
 		}
 
 		if (snapshotData->records_count == 0) {

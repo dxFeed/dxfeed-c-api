@@ -1457,6 +1457,9 @@ typedef void (*dxf_price_level_book_listener_t)(const dxf_price_level_book_data_
  *
  * @brief Incremental Price Level listener prototype
  *
+ * @details It is recommended to process incremental changes in the following order: removals, additions, updates.
+ * This is also because updates may apply to added price levels.
+ *
  *  @param[in] removals  Pointer to the incremental data to be removed from the PLB. The bids and asks are sorted by
  *                       price, best bid (with largest price) and best ask (with smallest price) are first elements of
  *                       corresponding arrays.

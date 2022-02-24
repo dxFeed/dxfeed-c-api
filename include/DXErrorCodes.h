@@ -204,6 +204,11 @@ typedef enum {
 	dx_cfgec_empty_config_file_name = 106,
 	dx_cfgec_toml_parser_error = 107,
 
+	dx_plbec_invalid_symbol = 108,
+	dx_plbec_invalid_source = 109,
+	dx_plbec_invalid_book_ptr = 110,
+	dx_plbec_invalid_book_handle = 111,
+
 	/* miscellaneous error codes */
 
 	/* error code count */

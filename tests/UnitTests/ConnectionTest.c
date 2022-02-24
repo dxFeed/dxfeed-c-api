@@ -68,7 +68,7 @@ unsigned multiple_connection_routine(void* arg) {
 	subscription = dx_create_event_subscription(connection, data->event_types, 0, 0);
 	dx_add_symbols(subscription, g_symbol_list, g_symbol_size);
 	dx_send_record_description(connection, true);
-	dx_subscribe_symbols_to_events(connection, dx_get_order_source(subscription), g_symbol_list, g_symbol_size, NULL, 0, data->event_types, false, true, 0, 0);
+	dx_subscribe_symbols_to_events(connection, dx_get_order_sources(subscription), g_symbol_list, g_symbol_size, NULL, 0, data->event_types, false, true, 0, 0);
 #ifdef _WIN32
 	Sleep(2000);
 #else

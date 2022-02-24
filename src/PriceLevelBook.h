@@ -40,9 +40,9 @@ dxf_price_level_book_v2_t dx_create_price_level_book_v2(dxf_connection_t connect
 int dx_close_price_level_book_v2(dxf_price_level_book_v2_t book);
 
 int dx_set_price_level_book_listeners_v2(dxf_price_level_book_v2_t book,
-										 dxf_price_level_book_listener_t on_new_book_handler,
-										 dxf_price_level_book_listener_t on_book_update_handler,
-										 dxf_price_level_book_inc_listener_t on_incremental_change_handler,
+										 dxf_price_level_book_listener_t on_new_book_listener,
+										 dxf_price_level_book_listener_t on_book_update_listener,
+										 dxf_price_level_book_inc_listener_t on_incremental_change_listener,
 										 void *user_data);
 
 #ifdef __cplusplus
