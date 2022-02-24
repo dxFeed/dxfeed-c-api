@@ -5,14 +5,10 @@ on:
 name: Build
 
 env:
-  WIN_BUILDER_IMAGE: dxfeedcapi/builder:1809-4.5.2-2015
   DOCS_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-docs
   MAC_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-macosx
   LINUX_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-linux
   CENTOS_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-centos
-  WINDOWS_ARTIFACT_TEMPLATE: dxfeed-c-api-#VERSION#-windows
-  WINDOWS_BUILD_TEMPLATE: dxfeed-c-api-#VERSION#
-  WIN_SRC_DIR: "C:\\dxfeed-c-api"
   RELEASE_PREFIX: "dxFeed C API "
   BUILD_VERSION: 0.0.0-pr
 
@@ -178,40 +174,3 @@ jobs:
           ls ./build
           mv build/dxfeed-c-api-${{ env.RELEASE_VERSION }}-no-tls.zip build/${{ env.ARTIFACT }}-no-tls.zip
           ls ./build
-
-# --------------------------- BUILD WINDOWS LIBRARY [ VS2015 ]
-  build_windows:
-    runs-on: windows-latest
-    name: build windows
-    steps:
-
-      - name: Set env
-        run: |
-          echo RELEASE_VERSION=$("$Env:BUILD_VERSION") | Add-Content -Path $env:GITHUB_ENV -Encoding utf8
-          echo ARTIFACT=$(echo $Env:WINDOWS_ARTIFACT_TEMPLATE | %{$_ -replace '#VERSION#', $Env:BUILD_VERSION }) | Add-Content -Path $env:GITHUB_ENV -Encoding utf8
-          echo WB_ARTIFACT=$(echo $Env:WINDOWS_BUILD_TEMPLATE | %{$_ -replace '#VERSION#', $Env:BUILD_VERSION }) | Add-Content -Path $env:GITHUB_ENV -Encoding utf8
-
-      - name: Check env
-        run: |
-          echo "RELEASE    : ${{ env.RELEASE_VERSION }}"
-          echo "ARTIFACT   : ${{ env.ARTIFACT }}"
-          echo "WB_ARTIFACT: ${{ env.WB_ARTIFACT }}"
-
-      - uses: actions/checkout@main
-
-      - name: Free disk space for build image
-        run: |
-          docker rm $(docker ps -aq)
-          docker image rm $(docker image ls -q)
-
-      - name: Pull build image
-        run: |
-          docker pull ${{ env.WIN_BUILDER_IMAGE }}
-
-      - name: Build windows (no TLS)
-        run: |
-          docker run --rm -v "${pwd}:${{ env.WIN_SRC_DIR }}" -e SRCDIR="${{ env.WIN_SRC_DIR }}" -e FLAGS="rebuild no-test no-tls" -e RELEASE=${{ env.RELEASE_VERSION }} ${{ env.WIN_BUILDER_IMAGE }}
-
-      - name: Build windows (TLS)
-        run: |
-          docker run --rm -v "${pwd}:${{ env.WIN_SRC_DIR }}" -e SRCDIR="${{ env.WIN_SRC_DIR }}" -e FLAGS="rebuild no-test" -e RELEASE=${{ env.RELEASE_VERSION }} ${{ env.WIN_BUILDER_IMAGE }}

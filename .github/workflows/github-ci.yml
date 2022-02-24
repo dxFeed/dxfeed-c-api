@@ -8,14 +8,10 @@ on:
 name: Build & Release
 
 env:
-  WIN_BUILDER_IMAGE: dxfeedcapi/builder:1809-4.5.2-2015
   DOCS_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-docs
   MAC_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-macosx
   LINUX_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-linux
   CENTOS_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-centos
-  WINDOWS_ARTIFACT_TEMPLATE: dxfeed-c-api-#VERSION#-windows
-  WINDOWS_BUILD_TEMPLATE: dxfeed-c-api-#VERSION#
-  WIN_SRC_DIR: "C:\\dxfeed-c-api"
   RELEASE_PREFIX: "dxFeed C API "
 
 jobs:
@@ -212,75 +208,12 @@ jobs:
           name: ${{ env.ARTIFACT }}-no-tls.zip
           path: build/${{ env.ARTIFACT }}-no-tls.zip
 
-# --------------------------- BUILD WINDOWS LIBRARY [ VS2015 ]
-  build_windows:
-    runs-on: windows-latest
-    name: build windows
-    steps:
-
-      - name: Free disk space for build image
-        run: |
-          docker rm $(docker ps -aq)
-          docker image rm $(docker image ls -q)
-
-      - uses: actions/checkout@master
-
-      - name: Set env
-        run: |
-          echo RELEASE_VERSION=$("$Env:GITHUB_REF".Substring(10)) | Add-Content -Path $env:GITHUB_ENV -Encoding utf8
-          echo ARTIFACT=$(echo $Env:WINDOWS_ARTIFACT_TEMPLATE | %{$_ -replace '#VERSION#', $("$Env:GITHUB_REF".Substring(10)) }) | Add-Content -Path $env:GITHUB_ENV -Encoding utf8
-          echo WB_ARTIFACT=$(echo $Env:WINDOWS_BUILD_TEMPLATE | %{$_ -replace '#VERSION#', $("$Env:GITHUB_REF".Substring(10)) }) | Add-Content -Path $env:GITHUB_ENV -Encoding utf8
-
-      - name: Check env
-        run: |
-          echo "RELEASE    : ${{ env.RELEASE_VERSION }}"
-          echo "ARTIFACT   : ${{ env.ARTIFACT }}"
-          echo "WB_ARTIFACT: ${{ env.WB_ARTIFACT }}"
-
-      - name: Pull build image
-        run: |
-          docker pull ${{ env.WIN_BUILDER_IMAGE }}
-
-      - name: Make artifacts directory
-        run: |
-          mkdir artifact
-
-      - name: Build windows (no TLS)
-        run: |
-          docker run --rm -v "${pwd}:${{ env.WIN_SRC_DIR }}" -e SRCDIR="${{ env.WIN_SRC_DIR }}" -e FLAGS="rebuild no-test no-tls" -e RELEASE=${{ env.RELEASE_VERSION }} ${{ env.WIN_BUILDER_IMAGE }}
-
-      - name: Copy build artifact (windows no-tls)
-        run: |
-          cp build\${{ env.WB_ARTIFACT }}-no-tls.zip artifact\${{ env.ARTIFACT }}-no-tls.zip
-          ls artifact\
-
-      - name: Build windows (TLS)
-        run: |
-          docker run --rm -v "${pwd}:${{ env.WIN_SRC_DIR }}" -e SRCDIR="${{ env.WIN_SRC_DIR }}" -e FLAGS="rebuild no-test" -e RELEASE=${{ env.RELEASE_VERSION }} ${{ env.WIN_BUILDER_IMAGE }}
-
-      - name: Copy build artifact (windows)
-        run: |
-          cp build\${{ env.WB_ARTIFACT }}.zip artifact\${{ env.ARTIFACT }}.zip
-          ls artifact\
-
-      - name: Upload build artifact (no TLS)
-        uses: actions/upload-artifact@v1
-        with:
-          name: ${{ env.ARTIFACT }}-no-tls.zip
-          path: artifact/${{ env.ARTIFACT }}-no-tls.zip
-
-      - name: Upload build artifact (TLS)
-        uses: actions/upload-artifact@v1
-        with:
-          name: ${{ env.ARTIFACT }}.zip
-          path: artifact/${{ env.ARTIFACT }}.zip
-
 
   # --------------------------- PUBLISH RELEASE
   publish_release:
     runs-on: ubuntu-latest
     name: publish release
-    needs: [build_docs, build_linux_tls, build_linux_no_tls, build_centos_tls, build_centos_no_tls, build_macos_tls, build_macos_no_tls, build_windows]
+    needs: [build_docs, build_linux_tls, build_linux_no_tls, build_centos_tls, build_centos_no_tls, build_macos_tls, build_macos_no_tls]
     steps:
 
       - uses: actions/checkout@master
@@ -293,8 +226,6 @@ jobs:
           echo LINUX_NO_TLS_ARTIFACT=$(echo ${LINUX_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g")-no-tls.zip >> $GITHUB_ENV
           echo CENTOS_ARTIFACT=$(echo ${CENTOS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g").zip >> $GITHUB_ENV
           echo CENTOS_NO_TLS_ARTIFACT=$(echo ${CENTOS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g")-no-tls.zip >> $GITHUB_ENV
-          echo WINDOWS_ARTIFACT=$(echo ${WINDOWS_ARTIFACT_TEMPLATE} | sed "s/#VERSION#/$(echo ${GITHUB_REF:10})/g").zip >> $GITHUB_ENV
-          echo WINDOWS_NO_TLS_ARTIFACT=$(echo ${WINDOWS_ARTIFACT_TEMPLATE} | sed "s/#VERSION#/$(echo ${GITHUB_REF:10})/g")-no-tls.zip >> $GITHUB_ENV
           echo MAC_ARTIFACT=$(echo ${MAC_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g").zip >> $GITHUB_ENV
           echo MAC_NO_TLS_ARTIFACT=$(echo ${MAC_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g")-no-tls.zip >> $GITHUB_ENV
 
@@ -339,18 +270,6 @@ jobs:
         uses: actions/download-artifact@v1
         with:
           name: ${{ env.CENTOS_NO_TLS_ARTIFACT }}
-          path: downloads/
-
-      - name: Download windows artifact
-        uses: actions/download-artifact@v1
-        with:
-          name: ${{ env.WINDOWS_ARTIFACT }}
-          path: downloads/
-
-      - name: Download windows-no-tls artifact
-        uses: actions/download-artifact@v1
-        with:
-          name: ${{ env.WINDOWS_NO_TLS_ARTIFACT }}
           path: downloads/
 
       - name: Download macosx artifact
