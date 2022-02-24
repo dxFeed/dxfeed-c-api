@@ -2027,7 +2027,8 @@ DXFEED_API ERRORCODE dxf_set_price_level_book_listeners_v2(
 	dxf_price_level_book_listener_t on_book_update_listener,
 	dxf_price_level_book_inc_listener_t on_incremental_change_listener, void *user_data) {
 	dx_logging_verbose(dx_ll_debug,
-					   L"dxf_set_price_level_book_listeners_v2(book = %p, new = %p, update = %p, inc = %p)", book);
+					   L"dxf_set_price_level_book_listeners_v2(book = %p, new = %p, update = %p, inc = %p)", book,
+					   on_new_book_listener, on_book_update_listener, on_incremental_change_listener);
 
 	dx_perform_common_actions(DX_RESET_ERROR);
 
@@ -2036,7 +2037,7 @@ DXFEED_API ERRORCODE dxf_set_price_level_book_listeners_v2(
 
 	dx_logging_verbose(dx_ll_debug,
 					   L"dxf_set_price_level_book_listeners_v2(book = %p, new = %p, update = %p, inc = %p) -> %d", book,
-					   res);
+					   on_new_book_listener, on_book_update_listener, on_incremental_change_listener, res);
 
 	return res;
 }
