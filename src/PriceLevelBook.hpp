@@ -377,18 +377,23 @@ class PriceLevelBook final {
 			}
 		}
 
+
 		// Determine the adjusted last price (NaN -- end)
-		typename std::decay<decltype(*lastElementIter)>::type newLastPL = *lastElementIter;
+		typename std::decay<decltype(*lastElementIter)>::type newLastPL = priceLevelAdditionSide;
 
-		if (added) {
-			newLastPL = priceLevelAdditionSide;
+		if (lastElementIter != priceLevelStorageSide.end()) {
+			newLastPL = *lastElementIter;
 
-			if (lastElementIter != priceLevelStorageSide.end() && priceLevelAdditionSide < *lastElementIter) {
-				if (priceLevelStorageSide.size() < levelsNumber) {
-					newLastPL = *lastElementIter;
-				} else if (lastElementIter != priceLevelStorageSide.begin() &&
-						   priceLevelAdditionSide < *std::prev(lastElementIter)) {
-					newLastPL = *std::prev(lastElementIter);
+			if (added) {
+				newLastPL = priceLevelAdditionSide;
+
+				if (priceLevelAdditionSide < *lastElementIter) {
+					if (priceLevelStorageSide.size() < levelsNumber) {
+						newLastPL = *lastElementIter;
+					} else if (lastElementIter != priceLevelStorageSide.begin() &&
+							   priceLevelAdditionSide < *std::prev(lastElementIter)) {
+						newLastPL = *std::prev(lastElementIter);
+					}
 				}
 			}
 		}
