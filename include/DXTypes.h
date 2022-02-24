@@ -79,6 +79,7 @@ typedef void* dxf_snapshot_t;
 
 /// Price level book
 typedef void* dxf_price_level_book_t;
+typedef void* dxf_price_level_book_v2_t;
 
 /// Regional book
 typedef void* dxf_regional_book_t;

@@ -188,6 +188,11 @@ dxf_const_string_t dx_get_error_description (dx_error_code_t code) {
 	case dx_cfgec_empty_config_file_name: return L"Empty config file name";
 	case dx_cfgec_toml_parser_error: return L"TOML parser error";
 
+	case dx_plbec_invalid_symbol: return L"PLB: invalid symbol parameter";
+	case dx_plbec_invalid_source: return L"PLB: invalid source parameter";
+	case dx_plbec_invalid_book_ptr: return L"PLB: invalid book pointer parameter";
+	case dx_plbec_invalid_book_handle: return L"PLB: invalid book handle";
+
 	/* miscellaneous error codes */
 
 	default: return L"Invalid error code";

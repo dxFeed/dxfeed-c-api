@@ -504,6 +504,24 @@
     </ClCompile>
     <ClCompile Include="src\Logger.c" />
     <ClCompile Include="src\PriceLevelBook.c" />
+    <ClCompile Include="src\PriceLevelBook.cpp">
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='ReleaseNoTLS|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='DebugNoTLS|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='ReleaseNoTLS|x64'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='DebugNoTLS|x64'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsCpp</CompileAs>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Sync</ExceptionHandling>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='ReleaseNoTLS|Win32'">Sync</ExceptionHandling>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='DebugNoTLS|Win32'">Sync</ExceptionHandling>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Sync</ExceptionHandling>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Sync</ExceptionHandling>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='ReleaseNoTLS|x64'">Sync</ExceptionHandling>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='DebugNoTLS|x64'">Sync</ExceptionHandling>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Sync</ExceptionHandling>
+    </ClCompile>
     <ClCompile Include="src\RegionalBook.c" />
     <ClCompile Include="src\RecordTranscoder.c" />
     <ClCompile Include="src\ServerMessageProcessor.c" />
@@ -557,6 +575,7 @@
     <ClInclude Include="src\DXProperties.h" />
     <ClInclude Include="src\HeartbeatPayload.hpp" />
     <ClInclude Include="src\PriceLevelBook.h" />
+    <ClInclude Include="src\PriceLevelBook.hpp" />
     <ClInclude Include="src\RegionalBook.h" />
     <ClInclude Include="src\resource.h" />
     <ClInclude Include="src\Candle.h" />
@@ -579,6 +598,7 @@
     <ClInclude Include="src\RecordTranscoder.h" />
     <ClInclude Include="src\ServerMessageProcessor.h" />
     <ClInclude Include="src\Snapshot.h" />
+    <ClInclude Include="src\StringConverter.hpp" />
     <ClInclude Include="src\ObjectArray.h" />
     <ClInclude Include="src\TaskQueue.h" />
     <ClInclude Include="src\BufferedInput.h" />

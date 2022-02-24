@@ -2,6 +2,21 @@ Version 8.6.0
 * [DXFC-297] Improved the handling of transaction flags and signs of transaction flags.
 * [DXFC-295] Fixed a bug with incorrect filtering of orders based on MM and Quotes.
 * Fixed wrong `time` parameter processing in the SnapshotConsoleSample.
+* [DXFC-298] Added new PLB (Price Level Book) building mechanism. Added the ability to specify the number of the price levels.
+  Added the ability to subscribe to incremental price level updates.
+  API changes:
+    - Added new handle type for PLB - dxf_price_level_book_v2_t
+    - Added new listener type:
+      `typedef void (*dxf_price_level_book_inc_listener_t)(dxf_price_level_book_const_data_ptr_t removals, dxf_price_level_book_const_data_ptr_t additions, dxf_price_level_book_const_data_ptr_t updates, void* user_data);`
+      Incremental changes of removals, additions and updates of price levels are passed to this type of listener.
+    - Added the new function to create PLB:
+      `dxf_create_price_level_book_v3(dxf_connection_t connection, dxf_const_string_t symbol, const char* source, int levels_number, OUT dxf_price_level_book_v2_t* book)`
+      You can specify only one order source (including AGGREGATE_ASK or AGGREGATE_BID), you can specify the number of levels.
+    - Added the new functions to close PLB and set listeners:
+      `dxf_close_price_level_book_v2(dxf_price_level_book_v2_t book)`
+      `dxf_set_price_level_book_listeners_v2(dxf_price_level_book_v2_t book, dxf_price_level_book_listener_t on_new_book_listener, dxf_price_level_book_listener_t on_book_update_listener, dxf_price_level_book_inc_listener_t on_incremental_change_listener, void* user_data);`
+  Added a new sample: PriceLevelBookSample2.
+  See documentation.
 
 Version 8.5.3
 * [DXFC-137] Fixed a bug where it was not possible to create a snapshot due to a collision of snapshot keys.

@@ -19,16 +19,32 @@
 
 #pragma once
 
-#include "PrimitiveTypes.h"
-#include "EventData.h"
 #include "DXTypes.h"
+#include "EventData.h"
+#include "PrimitiveTypes.h"
 
-dxf_price_level_book_t dx_create_price_level_book(dxf_connection_t connection,
-												dxf_const_string_t symbol,
-												size_t src_count, dxf_ulong_t src_flags);
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+dxf_price_level_book_t dx_create_price_level_book(dxf_connection_t connection, dxf_const_string_t symbol,
+												  size_t src_count, dxf_ulong_t src_flags);
 int dx_close_price_level_book(dxf_price_level_book_t book);
-int dx_add_price_level_book_listener(dxf_price_level_book_t book,
-									dxf_price_level_book_listener_t book_listener,
-									void *user_data);
-int dx_remove_price_level_book_listener(dxf_price_level_book_t book,
-										dxf_price_level_book_listener_t book_listener);
+int dx_add_price_level_book_listener(dxf_price_level_book_t book, dxf_price_level_book_listener_t book_listener,
+									 void *user_data);
+int dx_remove_price_level_book_listener(dxf_price_level_book_t book, dxf_price_level_book_listener_t book_listener);
+
+dxf_price_level_book_v2_t dx_create_price_level_book_v2(dxf_connection_t connection, dxf_const_string_t symbol,
+														const char* source, int levels_number);
+
+int dx_close_price_level_book_v2(dxf_price_level_book_v2_t book);
+
+int dx_set_price_level_book_listeners_v2(dxf_price_level_book_v2_t book,
+										 dxf_price_level_book_listener_t on_new_book_listener,
+										 dxf_price_level_book_listener_t on_book_update_listener,
+										 dxf_price_level_book_inc_listener_t on_incremental_change_listener,
+										 void *user_data);
+
+#ifdef __cplusplus
+}
+#endif

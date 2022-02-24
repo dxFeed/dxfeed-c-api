@@ -125,6 +125,9 @@
     <ClCompile Include="src\PriceLevelBook.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\PriceLevelBook.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="src\DXAddressParser.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -225,6 +228,9 @@
     <ClInclude Include="src\ServerMessageProcessor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\StringConverter.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="src\TaskQueue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -289,6 +295,9 @@
       <Filter>Parser\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\PriceLevelBook.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PriceLevelBook.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\DXAddressParser.h">

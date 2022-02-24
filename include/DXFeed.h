@@ -1,6 +1,6 @@
 /*
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -1183,6 +1183,65 @@ DXFEED_API ERRORCODE dxf_attach_price_level_book_listener(dxf_price_level_book_t
  */
 DXFEED_API ERRORCODE dxf_detach_price_level_book_listener(dxf_price_level_book_t book,
 														  dxf_price_level_book_listener_t book_listener);
+
+
+/**
+ * @ingroup c-api-price-level-book
+ *
+ * @brief Creates Price Level book (v2) with the specified parameters.
+ *
+ * @details
+ *
+ * @param[in] connection    A handle of a previously created connection which the subscription will be using
+ * @param[in] symbol        The symbol to use
+ * @param[in] source        Order source for Order (AAPL, NTV etc) or MarketMaker (AGGREGATE_ASK or AGGREGATE_BID)
+ * @param[in] levels_number The PLB levels number (0 - all levels)
+ * @param[out] book         A handle of the created price level book
+ *
+ * @return {@link DXF_SUCCESS} if price level book has been successfully created or {@link DXF_FAILURE} on error;
+ *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
+ *         *price level book* itself is returned via out parameter
+ */
+DXFEED_API ERRORCODE dxf_create_price_level_book_v3(dxf_connection_t connection, dxf_const_string_t symbol,
+													const char* source, int levels_number,
+													OUT dxf_price_level_book_v2_t* book);
+
+/**
+ * @ingroup c-api-price-level-book
+ *
+ * @brief Closes a price level book (v2).
+ *
+ * @details All the data associated with it will be freed.
+ *
+ * @param book A handle of the price level book to close
+ *
+ * @return {@link DXF_SUCCESS} if price level book has been successfully closed or {@link DXF_FAILURE} on error;
+ *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
+ */
+DXFEED_API ERRORCODE dxf_close_price_level_book_v2(dxf_price_level_book_v2_t book);
+
+/**
+ * @ingroup c-api-price-level-book
+ *
+ * @brief Sets the listener callbacks to the PLB.
+ *
+ * @param book                           The handle of the PLB
+ * @param on_new_book_listener           The listener that will be called when a new book is created (for example,
+ *                                       when trading starts)
+ * @param on_book_update_listener        The listener that will be called when the book is updated. In this case, all
+ *                                       price levels will be passed (taking into account the maximum number of price
+ *                                       levels)
+ * @param on_incremental_change_listener The listener that will be called on incremental updates. All deletions,
+ *                                       additions, and level updates will be passed.
+ * @param user_data                      User data to be passed to listeners.
+ *
+ * @return {@link DXF_SUCCESS} if callbacks have been successfully set or {@link DXF_FAILURE} on error;
+ *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
+ */
+DXFEED_API ERRORCODE dxf_set_price_level_book_listeners_v2(
+	dxf_price_level_book_v2_t book, dxf_price_level_book_listener_t on_new_book_listener,
+	dxf_price_level_book_listener_t on_book_update_listener,
+	dxf_price_level_book_inc_listener_t on_incremental_change_listener, void* user_data);
 
 /**
  * @ingroup c-api-regional-book

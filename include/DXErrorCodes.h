@@ -1,6 +1,6 @@
 /*
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -203,6 +203,11 @@ typedef enum {
 	dx_cfgec_empty_config_string = 105,
 	dx_cfgec_empty_config_file_name = 106,
 	dx_cfgec_toml_parser_error = 107,
+
+	dx_plbec_invalid_symbol = 108,
+	dx_plbec_invalid_source = 109,
+	dx_plbec_invalid_book_ptr = 110,
+	dx_plbec_invalid_book_handle = 111,
 
 	/* miscellaneous error codes */
 
