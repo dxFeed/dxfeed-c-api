@@ -2,11 +2,12 @@ Version 8.6.0
 * [DXFC-297] Improved the handling of transaction flags and signs of transaction flags.
 * [DXFC-295] Fixed a bug with incorrect filtering of orders based on MM and Quotes.
 * Fixed wrong `time` parameter processing in the SnapshotConsoleSample.
-* [DXFC-298] Added new PLB (Price Level Book) building mechanism. Added the ability to specify the number of the price levels.
+* [DXFC-298] Added the new PLB (Price Level Book) building mechanism.
+  Added the ability to specify the number of the price levels.
   Added the ability to subscribe to incremental price level updates.
   API changes:
-    - Added new handle type for PLB - dxf_price_level_book_v2_t
-    - Added new listener type:
+    - Added the new handle type for PLB - dxf_price_level_book_v2_t
+    - Added the new listener type:
       `typedef void (*dxf_price_level_book_inc_listener_t)(dxf_price_level_book_const_data_ptr_t removals, dxf_price_level_book_const_data_ptr_t additions, dxf_price_level_book_const_data_ptr_t updates, void* user_data);`
       Incremental changes of removals, additions and updates of price levels are passed to this type of listener.
     - Added the new function to create PLB:

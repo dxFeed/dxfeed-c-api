@@ -1,6 +1,6 @@
 /*
 * The contents of this file are subject to the Mozilla Public License Version
-* 1.1 (the "License"); you may not use this file except in compliance with
+* 2.0 (the "License"); you may not use this file except in compliance with
 * the License. You may obtain a copy of the License at
 * http://www.mozilla.org/MPL/
 *
@@ -27,8 +27,8 @@
 #define DX_TO_STRING(x) DX_STRINGIFY(x)
 
 #define DX_VERSION_MAJOR 8
-#define DX_VERSION_MINOR 5
-#define DX_VERSION_PATCH 3
+#define DX_VERSION_MINOR 6
+#define DX_VERSION_PATCH 0
 
 #define DX_VER_FILE_VERSION         DX_VERSION_MAJOR, DX_VERSION_MINOR, DX_VERSION_PATCH
 #define DX_VER_FILE_VERSION_STR     DX_TO_STRING(DX_VERSION_MAJOR.DX_VERSION_MINOR.DX_VERSION_PATCH)
@@ -46,7 +46,7 @@
 #define DX_VER_LEGAL_COPYRIGHT   "Copyright (C) 2010-2021 Devexperts LLC"
 #define DX_VER_PRODUCT_NAME      "dxFeed C API framework"
 
-#define DX_LIBRARY_VERSION L"DXFeed.cpp v 8.5.3 (c) Devexperts LLC"
+#define DX_LIBRARY_VERSION L"DXFeed.cpp v 8.6.0 (c) Devexperts LLC"
 
 extern dxf_const_string_t DX_LIBRARY_OPTIONS;
 

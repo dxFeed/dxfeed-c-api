@@ -1,6 +1,6 @@
 ; The following line has the only difference between release and debug versions of DXFeed lib
 LIBRARY DXFeedd_64
-VERSION 8.5
+VERSION 8.6
 EXPORTS
     dxf_create_connection
     dxf_create_connection_auth_basic
