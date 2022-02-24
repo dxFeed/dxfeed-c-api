@@ -43,9 +43,45 @@ int dx_close_price_level_book_v2(dxf_price_level_book_v2_t book) {
 }
 
 int dx_set_price_level_book_listeners_v2(dxf_price_level_book_v2_t book,
-										 dxf_price_level_book_listener_t on_new_book_handler,
-										 dxf_price_level_book_listener_t on_book_update_handler,
-										 dxf_price_level_book_inc_listener_t on_incremental_change_handler,
-										 void* user_data) {
+										 dxf_price_level_book_listener_t onNewBookHandler,
+										 dxf_price_level_book_listener_t onBookUpdateHandler,
+										 dxf_price_level_book_inc_listener_t onIncrementalChangeHandler,
+										 void* userData) {
+	if (book == nullptr) return false;
+
+	auto* plb = static_cast<dx::PriceLevelBook*>(book);
+
+	if (userData) {
+		plb->setUserData(userData);
+	}
+
+	if (onNewBookHandler != nullptr) {
+		plb->setOnNewBook([onNewBookHandler](const dx::PriceLevelChanges& changes, void* userData) {
+			auto bundle = dx::PriceLevelBookDataBundle::create(changes);
+
+			onNewBookHandler(&bundle.priceLevelBookData, userData);
+		});
+	}
+
+	if (onBookUpdateHandler != nullptr) {
+		plb->setOnBookUpdate([onBookUpdateHandler](const dx::PriceLevelChanges& changes, void* userData) {
+			auto bundle = dx::PriceLevelBookDataBundle::create(changes);
+
+			onBookUpdateHandler(&bundle.priceLevelBookData, userData);
+		});
+	}
+
+	if (onIncrementalChangeHandler != nullptr) {
+		plb->setOnIncrementalChange(
+			[onIncrementalChangeHandler](const dx::PriceLevelChangesSet& changesSet, void* userData) {
+				auto removalsBundle = dx::PriceLevelBookDataBundle::create(changesSet.removals);
+				auto additionsBundle = dx::PriceLevelBookDataBundle::create(changesSet.additions);
+				auto updatesBundle = dx::PriceLevelBookDataBundle::create(changesSet.updates);
+
+				onIncrementalChangeHandler(&removalsBundle.priceLevelBookData, &additionsBundle.priceLevelBookData,
+										   &updatesBundle.priceLevelBookData, userData);
+			});
+	}
+
 	return true;
 }

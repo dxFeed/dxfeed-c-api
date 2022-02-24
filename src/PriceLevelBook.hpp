@@ -22,6 +22,8 @@
 extern "C" {
 
 #include "DXFeed.h"
+#include "EventData.h"
+
 }
 
 #include <algorithm>
@@ -84,8 +86,7 @@ struct AskPriceLevel : PriceLevel {
 
 	explicit AskPriceLevel(const PriceLevel& priceLevel) : PriceLevel{priceLevel} {}
 
-	AskPriceLevel(double newPrice, double newSize, std::int64_t newTime)
-		: PriceLevel{newPrice, newSize, newTime} {};
+	AskPriceLevel(double newPrice, double newSize, std::int64_t newTime) : PriceLevel{newPrice, newSize, newTime} {};
 
 	friend bool operator<(const AskPriceLevel& a, const AskPriceLevel& b) {
 		if (std::isnan(b.price)) return true;
@@ -100,8 +101,7 @@ struct BidPriceLevel : PriceLevel {
 
 	explicit BidPriceLevel(const PriceLevel& priceLevel) : PriceLevel{priceLevel} {}
 
-	BidPriceLevel(double newPrice, double newSize, std::int64_t newTime)
-		: PriceLevel{newPrice, newSize, newTime} {};
+	BidPriceLevel(double newPrice, double newSize, std::int64_t newTime) : PriceLevel{newPrice, newSize, newTime} {};
 
 	friend bool operator<(const BidPriceLevel& a, const BidPriceLevel& b) {
 		if (std::isnan(b.price)) return false;
@@ -112,13 +112,14 @@ struct BidPriceLevel : PriceLevel {
 };
 
 struct PriceLevelChanges {
+	std::string symbol{};
 	std::vector<AskPriceLevel> asks{};
 	std::vector<BidPriceLevel> bids{};
 
 	PriceLevelChanges() = default;
 
-	PriceLevelChanges(std::vector<AskPriceLevel> newAsks, std::vector<BidPriceLevel> newBids)
-		: asks{std::move(newAsks)}, bids{std::move(newBids)} {}
+	PriceLevelChanges(std::string newSymbol, std::vector<AskPriceLevel> newAsks, std::vector<BidPriceLevel> newBids)
+		: symbol{std::move(newSymbol)}, asks{std::move(newAsks)}, bids{std::move(newBids)} {}
 
 	[[nodiscard]] bool isEmpty() const { return asks.empty() && bids.empty(); }
 };
@@ -145,9 +146,9 @@ class PriceLevelBook final {
 	std::size_t levelsNumber_;
 
 	/*
-     * Since we are working with std::set, which does not imply random access, we have to keep the iterators lastAsk,
-     * lastBid for the case with a limit on the number of PLs. These iterators, as well as the look-ahead functions, are
-     * used to find out if we are performing operations on PL within the range given to the user.
+	 * Since we are working with std::set, which does not imply random access, we have to keep the iterators lastAsk,
+	 * lastBid for the case with a limit on the number of PLs. These iterators, as well as the look-ahead functions, are
+	 * used to find out if we are performing operations on PL within the range given to the user.
 	 */
 	std::set<AskPriceLevel> asks_;
 	std::set<AskPriceLevel>::iterator lastAsk_;
@@ -157,9 +158,11 @@ class PriceLevelBook final {
 	bool isValid_;
 	std::mutex mutex_;
 
-	std::function<void(const PriceLevelChanges&)> onNewBook_;
-	std::function<void(const PriceLevelChanges&)> onBookUpdate_;
-	std::function<void(const PriceLevelChangesSet&)> onIncrementalChange_;
+	std::function<void(const PriceLevelChanges&, void*)> onNewBook_;
+	std::function<void(const PriceLevelChanges&, void*)> onBookUpdate_;
+	std::function<void(const PriceLevelChangesSet&, void*)> onIncrementalChange_;
+
+	void* userData_;
 
 	static bool isZeroPriceLevel(const PriceLevel& pl) {
 		return std::abs(pl.size) < std::numeric_limits<double>::epsilon();
@@ -180,7 +183,8 @@ class PriceLevelBook final {
 		  lastBid_{bids_.end()},
 		  orderDataSnapshot_{},
 		  isValid_{false},
-		  mutex_{} {}
+		  mutex_{},
+		  userData_{nullptr} {}
 
 	// Process the tx\snapshot data, converts it to PL changes. Also, changes the orderDataSnapshot_
 	PriceLevelChanges convertToUpdates(const dxf_snapshot_data_ptr_t snapshotData) {
@@ -209,7 +213,8 @@ class PriceLevelBook final {
 			updatesSide.insert(priceLevelChange);
 		};
 
-		auto processOrderRemoval = [&bidUpdates, &askUpdates](const dxf_order_t& order, const OrderData& foundOrderData) {
+		auto processOrderRemoval = [&bidUpdates, &askUpdates](const dxf_order_t& order,
+															  const OrderData& foundOrderData) {
 			auto& updatesSide = foundOrderData.side == dxf_osd_buy ? bidUpdates : askUpdates;
 			auto priceLevelChange = PriceLevel{foundOrderData.price, -foundOrderData.size, order.time};
 			auto foundPriceLevel = updatesSide.find(priceLevelChange);
@@ -235,7 +240,8 @@ class PriceLevelBook final {
 				}
 
 				processOrderAddition(order);
-				orderDataSnapshot_[order.index] = OrderData{order.index, order.price, order.size, order.time, order.side};
+				orderDataSnapshot_[order.index] =
+					OrderData{order.index, order.price, order.size, order.time, order.side};
 			} else {
 				const auto& foundOrderData = foundOrderDataIt->second;
 
@@ -254,7 +260,7 @@ class PriceLevelBook final {
 			}
 		}
 
-		return {std::vector<AskPriceLevel>{askUpdates.begin(), askUpdates.end()},
+		return {symbol_, std::vector<AskPriceLevel>{askUpdates.begin(), askUpdates.end()},
 				std::vector<BidPriceLevel>{bidUpdates.rbegin(), bidUpdates.rend()}};
 	}
 
@@ -316,7 +322,7 @@ class PriceLevelBook final {
 		// Determine the adjusted last price (NaN -- end)
 		typename std::decay<decltype(*lastElementIter)>::type newLastPL{};
 
-		if (removed) {                                                      // removal <= last
+		if (removed) {														  // removal <= last
 			if (std::next(lastElementIter) != priceLevelStorageSide.end()) {  // there is another PL after last
 				newLastPL = *std::next(lastElementIter);
 			} else {
@@ -479,11 +485,11 @@ class PriceLevelBook final {
 			processSideUpdate(bidUpdate, bids_, bidUpdates, lastBid_, levelsNumber_);
 		}
 
-		return {PriceLevelChanges{std::vector<AskPriceLevel>{askRemovals.begin(), askRemovals.end()},
+		return {PriceLevelChanges{symbol_, std::vector<AskPriceLevel>{askRemovals.begin(), askRemovals.end()},
 								  std::vector<BidPriceLevel>{bidRemovals.begin(), bidRemovals.end()}},
-				PriceLevelChanges{std::vector<AskPriceLevel>{askAdditions.begin(), askAdditions.end()},
+				PriceLevelChanges{symbol_, std::vector<AskPriceLevel>{askAdditions.begin(), askAdditions.end()},
 								  std::vector<BidPriceLevel>{bidAdditions.begin(), bidAdditions.end()}},
-				PriceLevelChanges{std::vector<AskPriceLevel>{askUpdates.begin(), askUpdates.end()},
+				PriceLevelChanges{symbol_, std::vector<AskPriceLevel>{askUpdates.begin(), askUpdates.end()},
 								  std::vector<BidPriceLevel>{bidUpdates.begin(), bidUpdates.end()}}};
 	}
 
@@ -510,7 +516,7 @@ public:
 
 		if (snapshotData->records_count == 0) {
 			if (newSnap && onNewBook_) {
-				onNewBook_({});
+				onNewBook_({}, userData_);
 			}
 
 			return;
@@ -521,15 +527,15 @@ public:
 
 		if (newSnap) {
 			if (onNewBook_) {
-				onNewBook_(PriceLevelChanges{getAsks(), getBids()});
+				onNewBook_(PriceLevelChanges{symbol_, getAsks(), getBids()}, userData_);
 			}
 		} else if (!resultingChangesSet.isEmpty()) {
 			if (onIncrementalChange_) {
-				onIncrementalChange_(resultingChangesSet);
+				onIncrementalChange_(resultingChangesSet, userData_);
 			}
 
 			if (onBookUpdate_) {
-				onBookUpdate_(PriceLevelChanges{getAsks(), getBids()});
+				onBookUpdate_(PriceLevelChanges{symbol_, getAsks(), getBids()}, userData_);
 			}
 		}
 	}
@@ -559,16 +565,61 @@ public:
 		return plb;
 	}
 
-	void setOnNewBook(std::function<void(const PriceLevelChanges&)> onNewBookHandler) {
+	void setUserData(void* newUserData) {
+		std::lock_guard<std::mutex> lk(mutex_);
+		userData_ = newUserData;
+	}
+
+	void setOnNewBook(std::function<void(const PriceLevelChanges&, void*)> onNewBookHandler) {
+		std::lock_guard<std::mutex> lk(mutex_);
 		onNewBook_ = std::move(onNewBookHandler);
 	}
 
-	void setOnBookUpdate(std::function<void(const PriceLevelChanges&)> onBookUpdateHandler) {
+	void setOnBookUpdate(std::function<void(const PriceLevelChanges&, void*)> onBookUpdateHandler) {
+		std::lock_guard<std::mutex> lk(mutex_);
 		onBookUpdate_ = std::move(onBookUpdateHandler);
 	}
 
-	void setOnIncrementalChange(std::function<void(const PriceLevelChangesSet&)> onIncrementalChangeHandler) {
+	void setOnIncrementalChange(std::function<void(const PriceLevelChangesSet&, void*)> onIncrementalChangeHandler) {
+		std::lock_guard<std::mutex> lk(mutex_);
 		onIncrementalChange_ = std::move(onIncrementalChangeHandler);
+	}
+};
+
+struct PriceLevelBookDataBundle {
+	std::wstring wSymbol{};
+	dxf_price_level_book_data_t priceLevelBookData{};
+	std::vector<dxf_price_level_element> asks{};
+	std::vector<dxf_price_level_element> bids{};
+
+	static PriceLevelBookDataBundle create(const dx::PriceLevelChanges& changes) {
+		PriceLevelBookDataBundle bundle{};
+
+		bundle.wSymbol = dx::StringConverter::utf8ToWString(changes.symbol);
+
+		if (!changes.asks.empty()) {
+			bundle.asks.reserve(changes.asks.size());
+
+			for (const auto& ask : changes.asks) {
+				bundle.asks.push_back({ask.price, ask.size, ask.time});
+			}
+		}
+
+		if (!changes.bids.empty()) {
+			bundle.bids.reserve(changes.bids.size());
+
+			for (const auto& bid : changes.bids) {
+				bundle.bids.push_back({bid.price, bid.size, bid.time});
+			}
+		}
+
+		bundle.priceLevelBookData.symbol = bundle.wSymbol.c_str();
+		bundle.priceLevelBookData.bids_count = bundle.bids.size();
+		bundle.priceLevelBookData.bids = bundle.bids.data();
+		bundle.priceLevelBookData.asks_count = bundle.asks.size();
+		bundle.priceLevelBookData.asks = bundle.asks.data();
+
+		return bundle;
 	}
 };
 

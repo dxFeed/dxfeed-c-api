@@ -1457,20 +1457,20 @@ typedef void (*dxf_price_level_book_listener_t)(const dxf_price_level_book_data_
  *
  * @brief Incremental Price Level listener prototype
  *
+ *  @param[in] removals  Pointer to the incremental data to be removed from the PLB. The bids and asks are sorted by
+ *                       price, best bid (with largest price) and best ask (with smallest price) are first elements of
+ *                       corresponding arrays.
  *  @param[in] additions Pointer to the incremental data to be added to the PLB. The bids and asks are sorted by price,
  *                       best bid (with largest price) and best ask (with smallest price) are first elements of
  *                       corresponding arrays.
  *  @param[in] updates   Pointer to the incremental data to be updated in the PLB. The bids and asks are sorted by
  *                       price, best bid (with largest price) and best ask (with smallest price) are first elements of
  *                       corresponding arrays.
- *  @param[in] removals  Pointer to the incremental data to be removed from the PLB. The bids and asks are sorted by
- *                       price, best bid (with largest price) and best ask (with smallest price) are first elements of
- *                       corresponding arrays.
  *  @param[in] user_data Pointer to user struct, use NULL by default
  */
-typedef void (*dxf_price_level_book_inc_listener_t)(dxf_price_level_book_const_data_ptr_t additions,
-													dxf_price_level_book_const_data_ptr_t updates,
-													dxf_price_level_book_const_data_ptr_t removals, void* user_data);
+typedef void (*dxf_price_level_book_inc_listener_t)(dxf_price_level_book_const_data_ptr_t removals,
+													dxf_price_level_book_const_data_ptr_t additions,
+													dxf_price_level_book_const_data_ptr_t updates, void* user_data);
 
 /**
  * @ingroup c-api-regional-book
