@@ -382,19 +382,15 @@ class PriceLevelBook final {
 		typename std::decay<decltype(*lastElementIter)>::type newLastPL = priceLevelAdditionSide;
 
 		if (lastElementIter != priceLevelStorageSide.end()) {
-			newLastPL = *lastElementIter;
-
-			if (added) {
-				newLastPL = priceLevelAdditionSide;
-
-				if (priceLevelAdditionSide < *lastElementIter) {
-					if (priceLevelStorageSide.size() < levelsNumber) {
-						newLastPL = *lastElementIter;
-					} else if (lastElementIter != priceLevelStorageSide.begin() &&
-							   priceLevelAdditionSide < *std::prev(lastElementIter)) {
-						newLastPL = *std::prev(lastElementIter);
-					}
+			if (priceLevelAdditionSide < *lastElementIter) {
+				if (priceLevelStorageSide.size() < levelsNumber) {
+					newLastPL = *lastElementIter;
+				} else if (lastElementIter != priceLevelStorageSide.begin() &&
+						   priceLevelAdditionSide < *std::prev(lastElementIter)) {
+					newLastPL = *std::prev(lastElementIter);
 				}
+			} else if (priceLevelStorageSide.size() >= levelsNumber) {
+				newLastPL = *lastElementIter;
 			}
 		}
 
