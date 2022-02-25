@@ -441,7 +441,6 @@ class PriceLevelBook final {
 		}
 	}
 
-	// TODO: price levels number
 	PriceLevelChangesSet applyUpdates(const PriceLevelChanges& priceLevelUpdates) {
 		PriceLevelChanges additions{};
 		PriceLevelChanges removals{};
@@ -465,6 +464,7 @@ class PriceLevelBook final {
 
 		// O(R)
 		for (const auto& askRemoval : removals.asks) {
+			// * O(log(N))
 			processSideRemoval(askRemoval, asks_, askRemovals, askAdditions, lastAsk_, levelsNumber_);
 		}
 
