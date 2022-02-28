@@ -59,7 +59,7 @@ int dx_set_price_level_book_listeners_v2(dxf_price_level_book_v2_t book,
 
 	if (onNewBookHandler != nullptr) {
 		plb->setOnNewBook([onNewBookHandler](const dx::PriceLevelChanges& changes, void* userData) {
-			auto bundle = dx::PriceLevelBookDataBundle::create(changes);
+			dx::PriceLevelBookDataBundle bundle{changes};
 
 			onNewBookHandler(&bundle.priceLevelBookData, userData);
 		});
@@ -67,7 +67,7 @@ int dx_set_price_level_book_listeners_v2(dxf_price_level_book_v2_t book,
 
 	if (onBookUpdateHandler != nullptr) {
 		plb->setOnBookUpdate([onBookUpdateHandler](const dx::PriceLevelChanges& changes, void* userData) {
-			auto bundle = dx::PriceLevelBookDataBundle::create(changes);
+			dx::PriceLevelBookDataBundle bundle{changes};
 
 			onBookUpdateHandler(&bundle.priceLevelBookData, userData);
 		});
@@ -76,9 +76,9 @@ int dx_set_price_level_book_listeners_v2(dxf_price_level_book_v2_t book,
 	if (onIncrementalChangeHandler != nullptr) {
 		plb->setOnIncrementalChange(
 			[onIncrementalChangeHandler](const dx::PriceLevelChangesSet& changesSet, void* userData) {
-				auto removalsBundle = dx::PriceLevelBookDataBundle::create(changesSet.removals);
-				auto additionsBundle = dx::PriceLevelBookDataBundle::create(changesSet.additions);
-				auto updatesBundle = dx::PriceLevelBookDataBundle::create(changesSet.updates);
+				dx::PriceLevelBookDataBundle removalsBundle{changesSet.removals};
+				dx::PriceLevelBookDataBundle additionsBundle{changesSet.additions};
+				dx::PriceLevelBookDataBundle updatesBundle{changesSet.updates};
 
 				onIncrementalChangeHandler(&removalsBundle.priceLevelBookData, &additionsBundle.priceLevelBookData,
 										   &updatesBundle.priceLevelBookData, userData);

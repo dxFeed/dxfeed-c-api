@@ -23,7 +23,6 @@ extern "C" {
 
 #include "DXFeed.h"
 #include "EventData.h"
-
 }
 
 #include <algorithm>
@@ -377,7 +376,6 @@ class PriceLevelBook final {
 			}
 		}
 
-
 		// Determine the adjusted last price (NaN -- end)
 		typename std::decay<decltype(*lastElementIter)>::type newLastPL = priceLevelAdditionSide;
 
@@ -597,34 +595,36 @@ struct PriceLevelBookDataBundle {
 	std::vector<dxf_price_level_element> asks{};
 	std::vector<dxf_price_level_element> bids{};
 
-	static PriceLevelBookDataBundle create(const dx::PriceLevelChanges& changes) {
-		PriceLevelBookDataBundle bundle{};
+	PriceLevelBookDataBundle() = delete;
+	PriceLevelBookDataBundle(const PriceLevelBookDataBundle&) = delete;
+	PriceLevelBookDataBundle(PriceLevelBookDataBundle&&) = delete;
+	PriceLevelBookDataBundle& operator= (const PriceLevelBookDataBundle&) = delete;
+	PriceLevelBookDataBundle&& operator= (PriceLevelBookDataBundle&&) = delete;
 
-		bundle.wSymbol = dx::StringConverter::utf8ToWString(changes.symbol);
+	explicit PriceLevelBookDataBundle(const dx::PriceLevelChanges& changes) {
+		wSymbol = dx::StringConverter::utf8ToWString(changes.symbol);
 
 		if (!changes.asks.empty()) {
-			bundle.asks.reserve(changes.asks.size());
+			asks.reserve(changes.asks.size());
 
 			for (const auto& ask : changes.asks) {
-				bundle.asks.push_back({ask.price, ask.size, ask.time});
+				asks.push_back({ask.price, ask.size, ask.time});
 			}
 		}
 
 		if (!changes.bids.empty()) {
-			bundle.bids.reserve(changes.bids.size());
+			bids.reserve(changes.bids.size());
 
 			for (const auto& bid : changes.bids) {
-				bundle.bids.push_back({bid.price, bid.size, bid.time});
+				bids.push_back({bid.price, bid.size, bid.time});
 			}
 		}
 
-		bundle.priceLevelBookData.symbol = bundle.wSymbol.c_str();
-		bundle.priceLevelBookData.bids_count = bundle.bids.size();
-		bundle.priceLevelBookData.bids = bundle.bids.data();
-		bundle.priceLevelBookData.asks_count = bundle.asks.size();
-		bundle.priceLevelBookData.asks = bundle.asks.data();
-
-		return bundle;
+		priceLevelBookData.symbol = wSymbol.c_str();
+		priceLevelBookData.bids_count = bids.size();
+		priceLevelBookData.bids = bids.data();
+		priceLevelBookData.asks_count = asks.size();
+		priceLevelBookData.asks = asks.data();
 	}
 };
 
