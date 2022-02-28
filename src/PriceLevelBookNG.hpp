@@ -165,8 +165,8 @@ class PriceLevelBook final {
 		return std::abs(pl.size) < std::numeric_limits<double>::epsilon();
 	};
 
-	static bool areEqualPrices(double price1, double price2) {
-		return std::abs(price1 - price2) < std::numeric_limits<double>::epsilon();
+	static bool areEqual(double d1, double d2, double epsilon = std::numeric_limits<double>::epsilon()) {
+		return std::abs(d1 - d2) < std::numeric_limits<double>::epsilon();
 	}
 
 	PriceLevelBook(std::string symbol, std::string source, std::size_t levelsNumber = 0)
@@ -246,10 +246,12 @@ class PriceLevelBook final {
 					processOrderRemoval(order, foundOrderData);
 					orderDataSnapshot_.erase(foundOrderData.index);
 				} else {
-					if (order.side != foundOrderData.side || !areEqualPrices(order.price, foundOrderData.price)) {
-						processOrderRemoval(order, foundOrderData);
+					if (order.side == foundOrderData.side && areEqual(order.price, foundOrderData.price) &&
+						areEqual(order.size, foundOrderData.size)) {
+						continue;
 					}
 
+					processOrderRemoval(order, foundOrderData);
 					processOrderAddition(order);
 					orderDataSnapshot_[foundOrderData.index] =
 						OrderData{order.index, order.price, order.size, order.time, order.side};
