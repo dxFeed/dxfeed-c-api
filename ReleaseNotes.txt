@@ -1,3 +1,6 @@
+Version 8.6.1
+* Fixed the sln-based projects build.
+
 Version 8.6.0
 * [DXFC-297] Improved the handling of transaction flags and signs of transaction flags.
 * [DXFC-295] Fixed a bug with incorrect filtering of orders based on MM and Quotes.

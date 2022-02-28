@@ -19,15 +19,17 @@
 
 extern "C" {
 
-#include "PriceLevelBook.h"
+#include "PriceLevelBookNG.h"
 }
 
-#include "PriceLevelBook.hpp"
+#include "PriceLevelBookNG.hpp"
+
+extern "C" {
 
 dxf_price_level_book_v2_t dx_create_price_level_book_v2(dxf_connection_t connection, dxf_const_string_t symbol,
-														const char* source, int levelsNumber) {
+														const char* source, int levels_number) {
 	auto plb = dx::PriceLevelBook::create(connection, dx::StringConverter::wStringToUtf8(symbol), std::string(source),
-										  levelsNumber < 0 ? 0 : static_cast<std::size_t>(levelsNumber));
+										  levels_number < 0 ? 0 : static_cast<std::size_t>(levels_number));
 
 	return static_cast<dxf_price_level_book_v2_t>(plb);
 }
@@ -84,4 +86,5 @@ int dx_set_price_level_book_listeners_v2(dxf_price_level_book_v2_t book,
 	}
 
 	return true;
+}
 }

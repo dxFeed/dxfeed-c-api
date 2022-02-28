@@ -36,6 +36,7 @@
 #include "EventSubscription.h"
 #include "Logger.h"
 #include "PriceLevelBook.h"
+#include "PriceLevelBookNG.h"
 #include "RegionalBook.h"
 #include "ServerMessageProcessor.h"
 #include "Snapshot.h"
