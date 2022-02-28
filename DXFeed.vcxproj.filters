@@ -125,7 +125,7 @@
     <ClCompile Include="src\PriceLevelBook.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\PriceLevelBook.cpp">
+    <ClCompile Include="src\PriceLevelBookNG.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\DXAddressParser.c">
@@ -297,7 +297,10 @@
     <ClInclude Include="src\PriceLevelBook.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\PriceLevelBook.hpp">
+    <ClInclude Include="src\PriceLevelBookNG.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PriceLevelBookNG.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\DXAddressParser.h">
