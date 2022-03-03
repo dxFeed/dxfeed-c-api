@@ -799,7 +799,7 @@ int dx_get_record_server_support_state_value(dx_record_server_support_state_list
 
 /* Functions for working with records list */
 
-int dx_add_record_to_list(dxf_connection_t connection, dx_record_item_t record, dx_record_id_t index) {
+int dx_add_record_to_list(dxf_connection_t connection, const dx_record_item_t* record, dx_record_id_t index) {
 	int failed = false;
 	dx_record_item_t new_record;
 	dx_record_server_support_state_t new_state;
@@ -812,12 +812,12 @@ int dx_add_record_to_list(dxf_connection_t connection, dx_record_item_t record, 
 	}
 
 	/* Update records list */
-	new_record.name = dx_create_string_src(record.name);
-	new_record.field_count = record.field_count;
-	new_record.fields = record.fields;
-	new_record.info_id = record.info_id;
-	dx_memcpy(new_record.suffix, record.suffix, sizeof(record.suffix));
-	new_record.exchange_code = record.exchange_code;
+	new_record.name = dx_create_string_src(record->name);
+	new_record.field_count = record->field_count;
+	new_record.fields = record->fields;
+	new_record.info_id = record->info_id;
+	dx_memcpy(new_record.suffix, record->suffix, sizeof(record->suffix));
+	new_record.exchange_code = record->exchange_code;
 
 	DX_ARRAY_INSERT(dscc->records_list, dx_record_item_t, new_record, index, dx_capacity_manager_halfer, failed);
 
@@ -964,13 +964,13 @@ dx_record_id_t dx_add_or_get_record_id(dxf_connection_t connection, dxf_const_st
 
 	if (dscc->records_list.elements == NULL) {
 		index = 0;
-		result = dx_add_record_to_list(connection, record, index);
+		result = dx_add_record_to_list(connection, &record, index);
 	} else {
 		size_t search_res;
 		DX_ARRAY_SEARCH(dscc->records_list.elements, 0, dscc->records_list.size, record, DX_RECORDS_COMPARATOR, false, found, search_res);
 		index = (dx_record_id_t)search_res;
 		if (!found) {
-			result = dx_add_record_to_list(connection, record, index);
+			result = dx_add_record_to_list(connection, &record, index);
 		}
 	}
 
