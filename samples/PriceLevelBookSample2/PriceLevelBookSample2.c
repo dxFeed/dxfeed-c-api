@@ -162,7 +162,7 @@ dxf_string_t ansi_to_unicode(const char* ansi_str) {
 
 void listener(const dxf_price_level_book_data_ptr_t book_data, void* user_data) {
 	size_t i = 0;
-	wprintf(L"\nNew Price Level Order Book for %ls:\n", book_data->symbol);
+	wprintf(L"\nNew Price Level Order Book for %ls#%hs:\n", book_data->symbol, user_data == NULL ? "" : (char*)user_data);
 	/* Time is 4 + 2 + 2 + 1 + 2 + 2 + 2 = 15 */
 	wprintf(L" %-15ls %-8ls %-15ls |  %-15ls %-8ls %-15ls\n", L"Ask", L"Size", L"Time", L"Bid", L"Size", L"Time");
 	for (; i < MAX(book_data->asks_count, book_data->bids_count); i++) {
@@ -183,7 +183,7 @@ void listener(const dxf_price_level_book_data_ptr_t book_data, void* user_data) 
 
 void listener2(const dxf_price_level_book_data_ptr_t book_data, void* user_data) {
 	size_t i = 0;
-	wprintf(L"\nThe Update of Price Level Order Book for %ls:\n", book_data->symbol);
+	wprintf(L"\nThe Update of Price Level Order Book for %ls#%hs:\n", book_data->symbol, user_data == NULL ? "" : (char*)user_data);
 	/* Time is 4 + 2 + 2 + 1 + 2 + 2 + 2 = 15 */
 	wprintf(L" %-15ls %-8ls %-15ls |  %-15ls %-8ls %-15ls\n", L"Ask", L"Size", L"Time", L"Bid", L"Size", L"Time");
 	for (; i < MAX(book_data->asks_count, book_data->bids_count); i++) {
@@ -205,7 +205,7 @@ void listener2(const dxf_price_level_book_data_ptr_t book_data, void* user_data)
 void inc_listener(dxf_price_level_book_const_data_ptr_t removals,
 				  dxf_price_level_book_const_data_ptr_t additions,
 				  dxf_price_level_book_const_data_ptr_t updates, void* user_data) {
-	wprintf(L"\nIncremental Update for The Price Level Order Book for %ls:\n", removals->symbol);
+	wprintf(L"\nIncremental Update for The Price Level Order Book for %ls#%hs:\n", removals->symbol, user_data == NULL ? "" : (char*)user_data);
 	if (removals->asks_count != 0 || removals->bids_count != 0) {
 		wprintf(L"\nREMOVALS:\n");
 		/* Time is 4 + 2 + 2 + 1 + 2 + 2 + 2 = 15 */
@@ -412,7 +412,7 @@ int main(int argc, char* argv[]) {
 
 	free(base_symbol);
 
-	if (!dxf_set_price_level_book_listeners_v2(book, &listener, &listener2, &inc_listener, NULL)) {
+	if (!dxf_set_price_level_book_listeners_v2(book, &listener, &listener2, &inc_listener, order_source)) {
 		process_last_error();
 		dxf_close_price_level_book_v2(book);
 		dxf_close_connection(connection);

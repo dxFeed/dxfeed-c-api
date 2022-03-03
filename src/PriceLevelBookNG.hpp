@@ -420,8 +420,10 @@ class PriceLevelBook final {
 			return;
 		}
 
-		if (priceLevelStorageSide.count(priceLevelUpdateSide) > 0) {
-			updates.insert(priceLevelUpdateSide);
+		if (priceLevelStorageSide.size() <= levelsNumber || priceLevelUpdateSide < *std::next(lastElementIter)) {
+			if (priceLevelStorageSide.count(priceLevelUpdateSide) > 0) {
+				updates.insert(priceLevelUpdateSide);
+			}
 		}
 
 		typename std::decay<decltype(*lastElementIter)>::type newLastPL{};
