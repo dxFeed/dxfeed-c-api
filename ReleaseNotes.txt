@@ -1,3 +1,6 @@
+Version 8.6.2
+* [DXFC-327] Fixed a bug where the timestamp = 0 was set for the price level when processing a removed order.
+
 Version 8.6.1
 * Fixed the sln-based projects build.
 * Fixed possible symbol corruption

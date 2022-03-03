@@ -40,6 +40,7 @@ extern "C" {
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include <chrono>
 
 #include "StringConverter.hpp"
 
@@ -213,7 +214,9 @@ class PriceLevelBook final {
 		auto processOrderRemoval = [&bidUpdates, &askUpdates](const dxf_order_t& order,
 															  const OrderData& foundOrderData) {
 			auto& updatesSide = foundOrderData.side == dxf_osd_buy ? bidUpdates : askUpdates;
-			auto priceLevelChange = PriceLevel{foundOrderData.price, -foundOrderData.size, order.time};
+			auto now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+						   .count();
+			auto priceLevelChange = PriceLevel{foundOrderData.price, -foundOrderData.size, now};
 			auto foundPriceLevel = updatesSide.find(priceLevelChange);
 
 			if (foundPriceLevel != updatesSide.end()) {
