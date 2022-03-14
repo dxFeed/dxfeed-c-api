@@ -1,3 +1,6 @@
+Version 8.6.3
+* [DXFC-331] Fixed a bug when deleting a PriceLevelBook object caused crashes.
+
 Version 8.6.2
 * [DXFC-327] Fixed a bug where the timestamp = 0 was set for the price level when processing a removed order.
 * [DXFC-328] Fixed a bug where UPDATE lists with non-existent price levels sometimes appear in PLB incremental updates.
