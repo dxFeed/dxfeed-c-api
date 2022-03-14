@@ -550,12 +550,7 @@ public:
 
 	~PriceLevelBook() {
 		if (isValid_) {
-			try {
-				//std::lock_guard<std::recursive_mutex> lk(mutex_);
-				dxf_close_snapshot(snapshot_);
-			} catch(...) {
-
-			}
+			dxf_close_snapshot(snapshot_);
 		}
 	}
 
