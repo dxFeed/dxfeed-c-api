@@ -140,7 +140,6 @@ struct PriceLevelChangesSet {
 class PriceLevelBook final {
 	dxf_snapshot_t snapshot_;
 	std::string symbol_;
-	std::string source_;
 	std::size_t levelsNumber_;
 
 	/*
@@ -154,7 +153,7 @@ class PriceLevelBook final {
 	std::set<BidPriceLevel>::iterator lastBid_;
 	std::unordered_map<dxf_long_t, OrderData> orderDataSnapshot_;
 	bool isValid_;
-	std::mutex mutex_;
+	std::recursive_mutex mutex_;
 
 	std::function<void(const PriceLevelChanges&, void*)> onNewBook_;
 	std::function<void(const PriceLevelChanges&, void*)> onBookUpdate_;
@@ -170,10 +169,9 @@ class PriceLevelBook final {
 		return std::abs(d1 - d2) < std::numeric_limits<double>::epsilon();
 	}
 
-	PriceLevelBook(std::string symbol, std::string source, std::size_t levelsNumber = 0)
+	PriceLevelBook(std::string symbol, std::size_t levelsNumber = 0)
 		: snapshot_{nullptr},
 		  symbol_{std::move(symbol)},
-		  source_{std::move(source)},
 		  levelsNumber_{levelsNumber},
 		  asks_{},
 		  lastAsk_{asks_.end()},
@@ -516,7 +514,7 @@ class PriceLevelBook final {
 public:
 	// TODO: move to another thread
 	void processSnapshotData(const dxf_snapshot_data_ptr_t snapshotData, int newSnapshot) {
-		std::lock_guard<std::mutex> lk(mutex_);
+		std::lock_guard<std::recursive_mutex> lk(mutex_);
 
 		auto newSnap = newSnapshot != 0;
 
@@ -552,13 +550,18 @@ public:
 
 	~PriceLevelBook() {
 		if (isValid_) {
-			dxf_close_price_level_book(snapshot_);
+			try {
+				std::lock_guard<std::recursive_mutex> lk(mutex_);
+				dxf_close_snapshot(snapshot_);
+			} catch(...) {
+
+			}
 		}
 	}
 
 	static PriceLevelBook* create(dxf_connection_t connection, const std::string& symbol, const std::string& source,
 								  std::size_t levelsNumber) {
-		auto plb = new PriceLevelBook(symbol, source, levelsNumber);
+		auto plb = new PriceLevelBook(symbol, levelsNumber);
 		auto wSymbol = StringConverter::utf8ToWString(symbol);
 		dxf_snapshot_t snapshot = nullptr;
 
@@ -576,22 +579,22 @@ public:
 	}
 
 	void setUserData(void* newUserData) {
-		std::lock_guard<std::mutex> lk(mutex_);
+		std::lock_guard<std::recursive_mutex> lk(mutex_);
 		userData_ = newUserData;
 	}
 
 	void setOnNewBook(std::function<void(const PriceLevelChanges&, void*)> onNewBookHandler) {
-		std::lock_guard<std::mutex> lk(mutex_);
+		std::lock_guard<std::recursive_mutex> lk(mutex_);
 		onNewBook_ = std::move(onNewBookHandler);
 	}
 
 	void setOnBookUpdate(std::function<void(const PriceLevelChanges&, void*)> onBookUpdateHandler) {
-		std::lock_guard<std::mutex> lk(mutex_);
+		std::lock_guard<std::recursive_mutex> lk(mutex_);
 		onBookUpdate_ = std::move(onBookUpdateHandler);
 	}
 
 	void setOnIncrementalChange(std::function<void(const PriceLevelChangesSet&, void*)> onIncrementalChangeHandler) {
-		std::lock_guard<std::mutex> lk(mutex_);
+		std::lock_guard<std::recursive_mutex> lk(mutex_);
 		onIncrementalChange_ = std::move(onIncrementalChangeHandler);
 	}
 };
