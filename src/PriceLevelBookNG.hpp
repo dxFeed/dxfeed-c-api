@@ -27,6 +27,7 @@ extern "C" {
 
 #include <algorithm>
 #include <cassert>
+#include <chrono>
 #include <cmath>
 #include <deque>
 #include <functional>
@@ -40,7 +41,6 @@ extern "C" {
 #include <unordered_map>
 #include <utility>
 #include <vector>
-#include <chrono>
 
 #include "StringConverter.hpp"
 
@@ -212,7 +212,8 @@ class PriceLevelBook final {
 		auto processOrderRemoval = [&bidUpdates, &askUpdates](const dxf_order_t& order,
 															  const OrderData& foundOrderData) {
 			auto& updatesSide = foundOrderData.side == dxf_osd_buy ? bidUpdates : askUpdates;
-			auto now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+			auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
+						   std::chrono::system_clock::now().time_since_epoch())
 						   .count();
 			auto priceLevelChange = PriceLevel{foundOrderData.price, -foundOrderData.size, now};
 			auto foundPriceLevel = updatesSide.find(priceLevelChange);
@@ -569,13 +570,12 @@ public:
 		plb->snapshot_ = snapshot;
 
 		if (!dxf_attach_snapshot_inc_listener(
-			snapshot,
-			[](const dxf_snapshot_data_ptr_t snapshot_data, int new_snapshot, void* user_data) {
-				static_cast<PriceLevelBook*>(user_data)->processSnapshotData(snapshot_data, new_snapshot);
-			},
-			plb)) {
+				snapshot,
+				[](const dxf_snapshot_data_ptr_t snapshot_data, int new_snapshot, void* user_data) {
+					static_cast<PriceLevelBook*>(user_data)->processSnapshotData(snapshot_data, new_snapshot);
+				},
+				plb)) {
 			dxf_close_snapshot(snapshot);
-
 			delete plb;
 
 			return nullptr;
@@ -616,8 +616,8 @@ struct PriceLevelBookDataBundle {
 	PriceLevelBookDataBundle() = delete;
 	PriceLevelBookDataBundle(const PriceLevelBookDataBundle&) = delete;
 	PriceLevelBookDataBundle(PriceLevelBookDataBundle&&) = delete;
-	PriceLevelBookDataBundle& operator= (const PriceLevelBookDataBundle&) = delete;
-	PriceLevelBookDataBundle&& operator= (PriceLevelBookDataBundle&&) = delete;
+	PriceLevelBookDataBundle& operator=(const PriceLevelBookDataBundle&) = delete;
+	PriceLevelBookDataBundle&& operator=(PriceLevelBookDataBundle&&) = delete;
 
 	explicit PriceLevelBookDataBundle(const dx::PriceLevelChanges& changes) {
 		wSymbol = dx::StringConverter::utf8ToWString(changes.symbol);
