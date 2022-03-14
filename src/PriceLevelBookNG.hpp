@@ -169,7 +169,7 @@ class PriceLevelBook final {
 		return std::abs(d1 - d2) < std::numeric_limits<double>::epsilon();
 	}
 
-	PriceLevelBook(std::string symbol, std::size_t levelsNumber = 0)
+	explicit PriceLevelBook(std::string symbol, std::size_t levelsNumber = 0)
 		: snapshot_{nullptr},
 		  symbol_{std::move(symbol)},
 		  levelsNumber_{levelsNumber},
@@ -551,7 +551,7 @@ public:
 	~PriceLevelBook() {
 		if (isValid_) {
 			try {
-				std::lock_guard<std::recursive_mutex> lk(mutex_);
+				//std::lock_guard<std::recursive_mutex> lk(mutex_);
 				dxf_close_snapshot(snapshot_);
 			} catch(...) {
 
@@ -565,14 +565,27 @@ public:
 		auto wSymbol = StringConverter::utf8ToWString(symbol);
 		dxf_snapshot_t snapshot = nullptr;
 
-		dxf_create_order_snapshot(connection, wSymbol.c_str(), source.c_str(), 0, &snapshot);
+		if (!dxf_create_order_snapshot(connection, wSymbol.c_str(), source.c_str(), 0, &snapshot)) {
+			delete plb;
 
-		dxf_attach_snapshot_inc_listener(
+			return nullptr;
+		}
+
+		plb->snapshot_ = snapshot;
+
+		if (!dxf_attach_snapshot_inc_listener(
 			snapshot,
 			[](const dxf_snapshot_data_ptr_t snapshot_data, int new_snapshot, void* user_data) {
 				static_cast<PriceLevelBook*>(user_data)->processSnapshotData(snapshot_data, new_snapshot);
 			},
-			plb);
+			plb)) {
+			dxf_close_snapshot(snapshot);
+
+			delete plb;
+
+			return nullptr;
+		}
+
 		plb->isValid_ = true;
 
 		return plb;

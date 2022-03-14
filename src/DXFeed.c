@@ -1990,6 +1990,15 @@ DXFEED_API ERRORCODE dxf_create_price_level_book_v3(dxf_connection_t connection,
 
 	*book = dx_create_price_level_book_v2(connection, symbol, source, levels_number);
 
+	if (book == NULL) {
+		dx_logging_verbose(dx_ll_debug,
+						   L"dxf_create_price_level_book_v3(con = %p, symbol = '%ls', source = '%hs', levels_number = %d, "
+						   L"book = %p) -> %d, %p",
+						   connection, symbol, source, levels_number, book, DXF_FAILURE, *book);
+
+		return DXF_FAILURE;
+	}
+
 	dx_logging_verbose(dx_ll_debug,
 					   L"dxf_create_price_level_book_v3(con = %p, symbol = '%ls', source = '%hs', levels_number = %d, "
 					   L"book = %p) -> %d, %p",
@@ -2017,7 +2026,7 @@ DXFEED_API ERRORCODE dxf_close_price_level_book_v2(dxf_price_level_book_v2_t boo
 		return DXF_FAILURE;
 	}
 
-	dx_logging_verbose(dx_ll_debug, L"dxf_close_price_level_book_v2(book = %p) -> %d, 'Invalid PLB'", book,
+	dx_logging_verbose(dx_ll_debug, L"dxf_close_price_level_book_v2(book = %p) -> %d", book,
 					   DXF_SUCCESS);
 
 	return DXF_SUCCESS;
