@@ -27,6 +27,7 @@ extern "C" {
 
 #include <algorithm>
 #include <cassert>
+#include <chrono>
 #include <cmath>
 #include <deque>
 #include <functional>
@@ -40,7 +41,6 @@ extern "C" {
 #include <unordered_map>
 #include <utility>
 #include <vector>
-#include <chrono>
 
 #include "StringConverter.hpp"
 
@@ -140,7 +140,6 @@ struct PriceLevelChangesSet {
 class PriceLevelBook final {
 	dxf_snapshot_t snapshot_;
 	std::string symbol_;
-	std::string source_;
 	std::size_t levelsNumber_;
 
 	/*
@@ -154,7 +153,7 @@ class PriceLevelBook final {
 	std::set<BidPriceLevel>::iterator lastBid_;
 	std::unordered_map<dxf_long_t, OrderData> orderDataSnapshot_;
 	bool isValid_;
-	std::mutex mutex_;
+	std::recursive_mutex mutex_;
 
 	std::function<void(const PriceLevelChanges&, void*)> onNewBook_;
 	std::function<void(const PriceLevelChanges&, void*)> onBookUpdate_;
@@ -170,10 +169,9 @@ class PriceLevelBook final {
 		return std::abs(d1 - d2) < std::numeric_limits<double>::epsilon();
 	}
 
-	PriceLevelBook(std::string symbol, std::string source, std::size_t levelsNumber = 0)
+	explicit PriceLevelBook(std::string symbol, std::size_t levelsNumber = 0)
 		: snapshot_{nullptr},
 		  symbol_{std::move(symbol)},
-		  source_{std::move(source)},
 		  levelsNumber_{levelsNumber},
 		  asks_{},
 		  lastAsk_{asks_.end()},
@@ -214,7 +212,8 @@ class PriceLevelBook final {
 		auto processOrderRemoval = [&bidUpdates, &askUpdates](const dxf_order_t& order,
 															  const OrderData& foundOrderData) {
 			auto& updatesSide = foundOrderData.side == dxf_osd_buy ? bidUpdates : askUpdates;
-			auto now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+			auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
+						   std::chrono::system_clock::now().time_since_epoch())
 						   .count();
 			auto priceLevelChange = PriceLevel{foundOrderData.price, -foundOrderData.size, now};
 			auto foundPriceLevel = updatesSide.find(priceLevelChange);
@@ -516,7 +515,7 @@ class PriceLevelBook final {
 public:
 	// TODO: move to another thread
 	void processSnapshotData(const dxf_snapshot_data_ptr_t snapshotData, int newSnapshot) {
-		std::lock_guard<std::mutex> lk(mutex_);
+		std::lock_guard<std::recursive_mutex> lk(mutex_);
 
 		auto newSnap = newSnapshot != 0;
 
@@ -552,46 +551,58 @@ public:
 
 	~PriceLevelBook() {
 		if (isValid_) {
-			dxf_close_price_level_book(snapshot_);
+			dxf_close_snapshot(snapshot_);
 		}
 	}
 
 	static PriceLevelBook* create(dxf_connection_t connection, const std::string& symbol, const std::string& source,
 								  std::size_t levelsNumber) {
-		auto plb = new PriceLevelBook(symbol, source, levelsNumber);
+		auto plb = new PriceLevelBook(symbol, levelsNumber);
 		auto wSymbol = StringConverter::utf8ToWString(symbol);
 		dxf_snapshot_t snapshot = nullptr;
 
-		dxf_create_order_snapshot(connection, wSymbol.c_str(), source.c_str(), 0, &snapshot);
+		if (!dxf_create_order_snapshot(connection, wSymbol.c_str(), source.c_str(), 0, &snapshot)) {
+			delete plb;
 
-		dxf_attach_snapshot_inc_listener(
-			snapshot,
-			[](const dxf_snapshot_data_ptr_t snapshot_data, int new_snapshot, void* user_data) {
-				static_cast<PriceLevelBook*>(user_data)->processSnapshotData(snapshot_data, new_snapshot);
-			},
-			plb);
+			return nullptr;
+		}
+
+		plb->snapshot_ = snapshot;
+
+		if (!dxf_attach_snapshot_inc_listener(
+				snapshot,
+				[](const dxf_snapshot_data_ptr_t snapshot_data, int new_snapshot, void* user_data) {
+					static_cast<PriceLevelBook*>(user_data)->processSnapshotData(snapshot_data, new_snapshot);
+				},
+				plb)) {
+			dxf_close_snapshot(snapshot);
+			delete plb;
+
+			return nullptr;
+		}
+
 		plb->isValid_ = true;
 
 		return plb;
 	}
 
 	void setUserData(void* newUserData) {
-		std::lock_guard<std::mutex> lk(mutex_);
+		std::lock_guard<std::recursive_mutex> lk(mutex_);
 		userData_ = newUserData;
 	}
 
 	void setOnNewBook(std::function<void(const PriceLevelChanges&, void*)> onNewBookHandler) {
-		std::lock_guard<std::mutex> lk(mutex_);
+		std::lock_guard<std::recursive_mutex> lk(mutex_);
 		onNewBook_ = std::move(onNewBookHandler);
 	}
 
 	void setOnBookUpdate(std::function<void(const PriceLevelChanges&, void*)> onBookUpdateHandler) {
-		std::lock_guard<std::mutex> lk(mutex_);
+		std::lock_guard<std::recursive_mutex> lk(mutex_);
 		onBookUpdate_ = std::move(onBookUpdateHandler);
 	}
 
 	void setOnIncrementalChange(std::function<void(const PriceLevelChangesSet&, void*)> onIncrementalChangeHandler) {
-		std::lock_guard<std::mutex> lk(mutex_);
+		std::lock_guard<std::recursive_mutex> lk(mutex_);
 		onIncrementalChange_ = std::move(onIncrementalChangeHandler);
 	}
 };
@@ -605,8 +616,8 @@ struct PriceLevelBookDataBundle {
 	PriceLevelBookDataBundle() = delete;
 	PriceLevelBookDataBundle(const PriceLevelBookDataBundle&) = delete;
 	PriceLevelBookDataBundle(PriceLevelBookDataBundle&&) = delete;
-	PriceLevelBookDataBundle& operator= (const PriceLevelBookDataBundle&) = delete;
-	PriceLevelBookDataBundle&& operator= (PriceLevelBookDataBundle&&) = delete;
+	PriceLevelBookDataBundle& operator=(const PriceLevelBookDataBundle&) = delete;
+	PriceLevelBookDataBundle&& operator=(PriceLevelBookDataBundle&&) = delete;
 
 	explicit PriceLevelBookDataBundle(const dx::PriceLevelChanges& changes) {
 		wSymbol = dx::StringConverter::utf8ToWString(changes.symbol);
