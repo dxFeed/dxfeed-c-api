@@ -10,8 +10,9 @@ This package provides access to **[dxFeed](https://www.dxfeed.com/)** market dat
 [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/dxFeed/dxfeed-c-api.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/dxFeed/dxfeed-c-api/context:cpp)
 
 
-## Table of Сontents
+## Table of Contents
 - [Documentation](#documentation)
+- [Dependencies](#dependencies)
 - [How to build](#how-to-build)
   * [Windows](#windows)
   * [Linux](#linux)
@@ -54,7 +55,19 @@ Find useful information in self-service dxFeed Knowledge Base, or C API framewor
   * [Subscriptions](https://docs.dxfeed.com/c-api/group__c-api-basic-subscription-functions.html)
 
 
+## Dependencies
 
+- API
+  - Boost.Locale.EncodingUtf (1.75)
+  - [TOML11](https://github.com/ToruNiina/toml11) (3.6.0)
+- Tests
+  - [Catch2](https://github.com/catchorg/Catch2) (2.13.8)
+- C++ Wrappers
+  - [Args](https://github.com/Taywee/args) (6.2.2)
+  - [fmt](https://github.com/fmtlib/fmt) (8.0.0)
+  - [optional-lite](https://github.com/martinmoene/optional-lite) (3.1.1)
+  - [string-view-lite](https://github.com/martinmoene/string-view-lite) (1.1.0)
+  - [variant-lite](https://github.com/martinmoene/variant-lite) (1.1.0)
 
 
 

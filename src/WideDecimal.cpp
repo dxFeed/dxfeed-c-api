@@ -17,27 +17,68 @@
  *
  */
 
+#include "WideDecimal.h"
+
 #include <array>
 #include <cassert>
-#include <iostream>
 #include <limits>
 #include <string>
 #include <type_traits>
 
-extern "C" {
-
-#include "BufferedInput.h"
-#include "BufferedOutput.h"
-#include "Connection.h"
-#include "ConnectionContextData.h"
-#include "DXErrorCodes.h"
-#include "DXErrorHandling.h"
-#include "DXNetwork.h"
-}
-
-#include "WideDecimal.h"
-
 namespace dx {
+
+template <typename T>
+struct RightShift {
+	using U = typename std::make_unsigned<T>::type;
+
+	struct Consts {
+		struct SignificantBits {
+			std::array<U, sizeof(U)> data;
+
+			SignificantBits() : data{} {
+				size_t i = 0;
+
+				data[i] = U(1) << (sizeof(U) - 1);
+
+				while (++i < data.size()) {
+					data[i] = (data[i - 1] >> U(1)) | data[i - 1];
+				}
+			}
+
+			/// Returns a mask with the required number of significant bits for the specified shift
+			/// \param shift The shift
+			/// \return The mask
+			const U& operator[](std::size_t shift) const {
+				assert(shift > 0);
+
+				return data[shift - 1];
+			}
+		};
+
+		SignificantBits significantBits;
+
+		Consts() : significantBits{} {}
+	};
+
+	static const Consts consts;
+
+	inline static T apply(T value, dxf_int_t shift) {
+		if (shift <= 0) {
+			return value;
+		}
+
+		if (value < 0) {
+			return static_cast<T>((static_cast<U>(value) >> shift) |
+								  consts.significantBits[shift]);
+
+		} else if (value > 0) {
+			return value >> shift;
+		}
+
+		return 0;
+	}
+};
+
 template <typename T>
 inline constexpr int signum(T x, std::false_type is_signed) {
 	return T(0) < x;
@@ -101,10 +142,10 @@ struct WideDecimal {
 		dxf_long_t scientificModulo;  // longPowers[MAX_TRAILING_ZEROES + 1] or std::numeric_limits<dxf_long_t>::max()
 		std::string zeroChars;		  // aka "0.000000(0)"
 
-		std::array<std::string, 4> nfString = {{Double::NAN_STRING, Double::POSITIVE_INFINITY_STRING, Double::NAN_STRING,
-											   Double::NEGATIVE_INFINITY_STRING}};
-		std::array<dxf_double_t, 4> nfDouble = {{Double::QUIET_NAN, Double::POSITIVE_INFINITY, Double::QUIET_NAN,
-												Double::NEGATIVE_INFINITY}};
+		std::array<std::string, 4> nfString = {{Double::NAN_STRING, Double::POSITIVE_INFINITY_STRING,
+												Double::NAN_STRING, Double::NEGATIVE_INFINITY_STRING}};
+		std::array<dxf_double_t, 4> nfDouble = {
+			{Double::QUIET_NAN, Double::POSITIVE_INFINITY, Double::QUIET_NAN, Double::NEGATIVE_INFINITY}};
 
 		std::array<dxf_long_t, EXACT_LONG_POWERS + 1> longPowers;
 		// LONG_MULTIPLIERS and LONG_DIVISORS are indexed by [rank] to compliment toLong computation
@@ -156,7 +197,7 @@ struct WideDecimal {
 
 		if (rank > Consts::BIAS) {
 			// fractional number with possible zero fraction and more trailing zeroes
-			if (rank - Consts::BIAS <= Consts::EXACT_LONG_POWERS) {
+			if (rank - Consts::BIAS <= static_cast<int>(Consts::EXACT_LONG_POWERS)) {
 				dxf_long_t pow10 = consts.longPowers[rank - Consts::BIAS];
 				dxf_long_t result = significand / pow10;
 
@@ -166,8 +207,8 @@ struct WideDecimal {
 			}
 		} else {
 			// integer number with possible trailing zeroes
-			if (Consts::BIAS - rank <= Consts::EXACT_LONG_POWERS &&
-				Consts::BIAS - rank <= Consts::MAX_TRAILING_ZEROES) {
+			if (Consts::BIAS - rank <= static_cast<int>(Consts::EXACT_LONG_POWERS) &&
+				Consts::BIAS - rank <= static_cast<int>(Consts::MAX_TRAILING_ZEROES)) {
 				dxf_long_t pow10 = consts.longPowers[Consts::BIAS - rank];
 				dxf_long_t result = significand * pow10;
 
@@ -203,12 +244,12 @@ struct WideDecimal {
 				return result.insert(dotPosition, ".");
 			}
 
-			if (firstDigit - dotPosition <= Consts::MAX_LEADING_ZEROES) {
+			if (firstDigit - dotPosition <= static_cast<dxf_long_t>(Consts::MAX_LEADING_ZEROES)) {
 				return result.insert(firstDigit, consts.zeroChars, 0, 2 + (firstDigit - dotPosition));
 			}
 		} else {
 			// integer number
-			if (Consts::BIAS - rank <= Consts::MAX_TRAILING_ZEROES) {
+			if (Consts::BIAS - rank <= static_cast<int>(Consts::MAX_TRAILING_ZEROES)) {
 				return result.append(consts.zeroChars, 2, Consts::BIAS - rank);
 			}
 		}
@@ -225,7 +266,7 @@ struct WideDecimal {
 	}
 
 	inline static std::string toString(dxf_long_t wide) {
-		dxf_long_t significand = wide / 256;
+		dxf_long_t significand = RightShift<dxf_long_t>::apply(wide, 8);
 		dxf_int_t rank = static_cast<dxf_int_t>(wide) & 0xFF;
 
 		if (rank == 0) {
@@ -253,20 +294,20 @@ struct WideDecimal {
 	}
 
 	inline static dxf_double_t toDouble(dxf_long_t wide) {
-		dxf_long_t significand = wide / 256;
+		dxf_long_t significand = RightShift<dxf_long_t>::apply(wide, 8);
 		dxf_int_t rank = static_cast<dxf_int_t>(wide) & 0xFF;
 
 		// if both significand and rank coefficient can be exactly represented as double values -
 		// perform a single double multiply or divide to compute properly rounded result
 		if (significand <= Consts::MAX_DOUBLE_SIGNIFICAND && -significand <= Consts::MAX_DOUBLE_SIGNIFICAND) {
 			if (rank > Consts::BIAS) {
-				if (rank <= Consts::BIAS + Consts::EXACT_DOUBLE_POWERS) {
+				if (rank <= Consts::BIAS + static_cast<int>(Consts::EXACT_DOUBLE_POWERS)) {
 					return static_cast<dxf_double_t>(significand) / consts.divisors[rank];
 				}
 			} else if (rank == Consts::BIAS) {
 				return static_cast<dxf_double_t>(significand);
 			} else {
-				if (rank >= Consts::BIAS - Consts::EXACT_DOUBLE_POWERS) {
+				if (rank >= Consts::BIAS - static_cast<int>(Consts::EXACT_DOUBLE_POWERS)) {
 					return static_cast<dxf_double_t>(significand) * consts.multipliers[rank];
 				}
 
@@ -296,6 +337,13 @@ const std::size_t WideDecimal::Consts::MAX_TRAILING_ZEROES;
 const std::size_t WideDecimal::Consts::MAX_LEADING_ZEROES;
 
 const WideDecimal::Consts WideDecimal::consts = WideDecimal::Consts();
+
+template <>
+const RightShift<dxf_long_t>::Consts RightShift<dxf_long_t>::consts = RightShift<dxf_long_t>::Consts();
+
+template <>
+const RightShift<dxf_int_t>::Consts RightShift<dxf_int_t>::consts = RightShift<dxf_int_t>::Consts();
+
 }  // namespace dx
 
 int dx_wide_decimal_long_to_double(dxf_long_t longValue, OUT dxf_double_t* decimal) {

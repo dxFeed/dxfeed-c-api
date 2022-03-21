@@ -7,6 +7,8 @@ set(PROJECT DXFeedAll)
 
 option(DISABLE_TLS "Use ON value to disable TLS support" OFF)
 option(BUILD_STATIC_LIBS "Use ON value to build dxFeed framework as a static library" OFF)
+option(DXFC_BUILD_INTEGRATION_TESTS "" OFF)
+option(DXFC_BUILD_UNIT_TESTS "" OFF)
 
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
@@ -18,7 +20,7 @@ link_directories(${CMAKE_BINARY_DIR})
 
 if (WIN32 OR MACOS)
     set(BUILD_STATIC_LIBS OFF)
-endif()
+endif ()
 
 if (BUILD_STATIC_LIBS)
     set(DISABLE_TLS ON)
@@ -47,14 +49,22 @@ add_subdirectory(samples/IncSnapshotConsoleSample)
 
 add_subdirectory(wrappers/cpp)
 
-add_subdirectory(tests/FullTest)
-
-add_subdirectory(tests/APITest)
-add_subdirectory(tests/ConnectionTest)
 add_subdirectory(tests/PerformanceTest)
-add_subdirectory(tests/LastEventTest)
-add_subdirectory(tests/QuoteTableTest)
-add_subdirectory(tests/SampleTest)
+
+if (DXFC_BUILD_INTEGRATION_TESTS)
+    add_subdirectory(tests/FullTest)
+
+    add_subdirectory(tests/APITest)
+    add_subdirectory(tests/ConnectionTest)
+    add_subdirectory(tests/LastEventTest)
+    add_subdirectory(tests/QuoteTableTest)
+    add_subdirectory(tests/SampleTest)
+endif ()
+
+if (DXFC_BUILD_UNIT_TESTS)
+    include(CTest)
+    add_subdirectory(tests/UnitTests2)
+endif ()
 
 set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/DXFeedAllCPackConfig.cmake")
 set(CPACK_PACKAGE_VENDOR "Devexperts LLC")
