@@ -618,6 +618,7 @@
     <ClInclude Include="thirdparty\toml11\toml.hpp" />
     <ClInclude Include="src\Version.h" />
     <ClInclude Include="src\WideDecimal.h" />
+    <ClInclude Include="src\WideDecimal.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\DXFeed.rc" />

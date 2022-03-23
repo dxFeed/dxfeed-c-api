@@ -111,6 +111,7 @@ set(HEADER_FILES
         TimeMarkUtil.hpp
         Version.h
         WideDecimal.h
+        WideDecimal.hpp
         )
 
 set(PARSER_HEADERS
