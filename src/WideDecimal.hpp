@@ -24,17 +24,14 @@
 #include <limits>
 #include <string>
 #include <type_traits>
+#include <cstring>
 
-#ifdef __cplusplus
 extern "C" {
-#endif
 
 #include "DXTypes.h"
 #include "PrimitiveTypes.h"
 
-#ifdef __cplusplus
 }
-#endif
 
 namespace dx {
 
@@ -44,12 +41,12 @@ struct RightShift {
 
 	struct Consts {
 		struct SignificantBits {
-			std::array<U, sizeof(U)> data;
+			std::array<U, sizeof(U) * 8> data;
 
 			constexpr SignificantBits() : data{} {
 				size_t i = 0;
 
-				data[i] = U(1) << (sizeof(U) - 1);
+				data[i] = U(1) << (sizeof(U) * 8 - 1);
 
 				while (++i < data.size()) {
 					data[i] = (data[i - 1] >> U(1)) | data[i - 1];
@@ -132,18 +129,48 @@ struct Double {
 	static const double POSITIVE_INFINITY;
 	static const double NEGATIVE_INFINITY;
 	static const double QUIET_NAN;
+
+	static const dxf_long_t EXP_BIT_MASK;
+	static const dxf_long_t SIGNIF_BIT_MASK;
+
 	double value;
 
-	inline static dxf_int_t compare(double v1, double v2) {
-		if (v1 < v2) {
-			return -1;
+	inline static dxf_long_t toRawBits(double value) {
+		dxf_long_t bits{};
+
+		std::memcpy(&bits, &value, sizeof(bits));
+
+		return bits;
+	}
+
+	inline static dxf_long_t toLongBits(double value) {
+		dxf_long_t result = toRawBits(value);
+
+		// Check for NaN based on values of bit fields, maximum
+		// exponent and nonzero significand.
+		if (((result & EXP_BIT_MASK) == EXP_BIT_MASK) && (result & SIGNIF_BIT_MASK) != 0L) {
+			result = 0x7ff8000000000000LL;
 		}
 
-		if (v2 < v1) {
-			return 1;
+		return result;
+	}
+
+	inline static dxf_int_t compare(double d1, double d2) {
+		if (d1 < d2) {
+			return -1;	// Neither val is NaN, thisVal is smaller
 		}
 
-		return 0;
+		if (d1 > d2) {
+			return 1;  // Neither val is NaN, thisVal is larger
+		}
+
+		// Cannot use doubleToRawLongBits because of possibility of NaNs.
+		dxf_long_t thisBits = toLongBits(d1);
+		dxf_long_t anotherBits = toLongBits(d2);
+
+		return (thisBits == anotherBits ? 0 :		// Values are equal
+					(thisBits < anotherBits ? -1 :	// (-0.0, 0.0) or (!NaN, NaN)
+						 1));						// (0.0, -0.0) or (NaN, !NaN)
 	}
 
 	static Double parseDouble(const std::string& str) { return {std::stod(str)}; }
@@ -304,7 +331,7 @@ struct WideDecimal {
 		dxf_int_t rank = static_cast<dxf_int_t>(wide) & 0xFF;
 
 		if (rank == 0) {
-			return Consts::NF_STRING[signum(significand) & 3];
+			return Consts::NF_STRING[dx::signum(significand) & 3];
 		}
 
 		if (significand == 0) {
@@ -346,7 +373,7 @@ struct WideDecimal {
 				}
 
 				if (rank == 0) {
-					return Consts::NF_DOUBLE[signum(significand) & 3];
+					return Consts::NF_DOUBLE[dx::signum(significand) & 3];
 				}
 			}
 		}
@@ -367,16 +394,15 @@ struct WideDecimal {
 
 	inline static dxf_long_t composeWide(dxf_long_t significand, dxf_int_t scale) {
 		// check exceedingly large scales to avoid rank overflows
-		if (scale > 255 + Consts::EXACT_LONG_POWERS - Consts::BIAS) {
-			return Consts::BIAS;
+		if (scale > static_cast<dxf_int_t>(255) + static_cast<dxf_int_t>(Consts::EXACT_LONG_POWERS) -
+				static_cast<dxf_int_t>(Consts::BIAS)) {
+			return static_cast<dxf_long_t>(Consts::BIAS);
 		}
 
 		return composeNonFitting(significand, scale + Consts::BIAS, Consts::BIAS);
 	}
 
-	inline static bool isNaN(dxf_long_t wide) {
-		return wide == 0;
-	}
+	inline static bool isNaN(dxf_long_t wide) { return wide == 0; }
 
 	inline static dxf_int_t compare(dxf_long_t w1, dxf_long_t w2) {
 		if (w1 == w2) {
@@ -384,7 +410,7 @@ struct WideDecimal {
 		}
 
 		if ((w1 ^ w2) < 0) {
-			return w1 > w2 ? 1 : -1;	 // different signs, non-negative (including NaN) is greater
+			return w1 > w2 ? 1 : -1;  // different signs, non-negative (including NaN) is greater
 		}
 
 		dxf_int_t r1 = static_cast<dxf_int_t>(w1) & 0xFF;
@@ -393,7 +419,7 @@ struct WideDecimal {
 		if (r1 > 0 && r2 > 0) {
 			// fast path: for standard decimals (most frequent) use integer-only arithmetic
 			if (r1 == r2) {
-				return w1 > w2 ? 1 : -1;	// note: exact decimal equality is checked above
+				return w1 > w2 ? 1 : -1;  // note: exact decimal equality is checked above
 			}
 
 			dxf_long_t s1 = rightShift(w1, 8);
@@ -437,8 +463,8 @@ struct WideDecimal {
 
 private:
 	inline static dxf_long_t composeFitting(dxf_long_t significand, dxf_int_t rank, dxf_int_t targetRank) {
-		assert(MIN_SIGNIFICAND <= significand && significand <= MAX_SIGNIFICAND && 1 <= rank && rank <= 255 &&
-			   1 <= targetRank && targetRank <= 255);
+		assert(Consts::MIN_SIGNIFICAND <= significand && significand <= Consts::MAX_SIGNIFICAND && 1 <= rank &&
+			   rank <= 255 && 1 <= targetRank && targetRank <= 255);
 
 		// check for ZERO to avoid looping and getting de-normalized ZERO
 		if (significand == 0) {

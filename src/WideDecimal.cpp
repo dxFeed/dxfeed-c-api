@@ -30,6 +30,9 @@ const double Double::POSITIVE_INFINITY = std::numeric_limits<dxf_double_t>::infi
 const double Double::NEGATIVE_INFINITY = -std::numeric_limits<dxf_double_t>::infinity();
 const double Double::QUIET_NAN = std::numeric_limits<dxf_double_t>::quiet_NaN();
 
+const dxf_long_t Double::EXP_BIT_MASK = 9218868437227405312LL;
+const dxf_long_t Double::SIGNIF_BIT_MASK = 4503599627370495LL;
+
 const dxf_long_t WideDecimal::Consts::NaN;
 const dxf_long_t WideDecimal::Consts::POSITIVE_INFINITY;
 const dxf_long_t WideDecimal::Consts::NEGATIVE_INFINITY;

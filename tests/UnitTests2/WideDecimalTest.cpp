@@ -8,6 +8,12 @@ inline static dxf_long_t MAX_SIGNIFICAND = dx::rightShift(std::numeric_limits<dx
 inline static dxf_int_t MAX_RANK = 255;
 }  // namespace WideDecimalTest
 
+TEST_CASE("Test right shifts", "[WideDecimal]") {
+	REQUIRE(dx::rightShift(dxf_long_t(-256), 8) == dxf_long_t(-1));
+	REQUIRE(dx::rightShift(dxf_long_t(1), 8) == dxf_long_t(0));
+	REQUIRE(dx::rightShift(dxf_long_t(0x8000000000000080), 8) == dxf_long_t(0xFF80000000000000));
+}
+
 TEST_CASE("Test signs", "[WideDecimal]") {
 	for (dxf_long_t significand = 0; significand <= WideDecimalTest::MAX_SIGNIFICAND;
 		 significand += significand / 2 + 1) {
@@ -28,18 +34,18 @@ inline static void checkWide(const std::string& expected, dxf_long_t significand
 	INFO("Expected = '" << expected << "', significand = " << significand << ", exponent = " << exponent
 						<< ": expectedDouble = " << expectedDouble << ", rawWide = " << rawWide << ", theWide = " << theWide);
 	REQUIRE(0 == dx::WideDecimal::compare(rawWide, theWide));
-	REQUIRE(expectedDouble == dx::WideDecimal::toDouble(rawWide));
-	REQUIRE(expectedDouble == dx::WideDecimal::toDouble(theWide));
+	REQUIRE(dx::Double::compare(expectedDouble, dx::WideDecimal::toDouble(rawWide)) == 0);
+	REQUIRE(dx::Double::compare(expectedDouble, dx::WideDecimal::toDouble(theWide)) == 0);
 	REQUIRE(expected == dx::WideDecimal::toString(rawWide));
 	REQUIRE(expected == dx::WideDecimal::toString(theWide));
 }
 
 TEST_CASE("Test wide", "[WideDecimal]") {
-//	checkWide("NaN", 0, 128);
-//	checkWide("Infinity", 1, 128);
-//	checkWide("Infinity", 123456, 128);
-//	checkWide("-Infinity", -1, 128);
-//	checkWide("-Infinity", -123456, 128);
+	checkWide("NaN", 0, 128);
+	checkWide("Infinity", 1, 128);
+	checkWide("Infinity", 123456, 128);
+	checkWide("-Infinity", -1, 128);
+	checkWide("-Infinity", -123456, 128);
 	checkWide("0", 0, 0);
 	checkWide("0", 0, -10);
 	checkWide("0", 0, 10);
