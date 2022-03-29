@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     name: build and run tests
     steps:
-      - name Test
+      - name: Test
         run: |
           mkdir build-test
           cd build-test
