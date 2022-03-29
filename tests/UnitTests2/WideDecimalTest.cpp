@@ -12,10 +12,10 @@ inline static dxf_int_t MAX_RANK = 255;
 }  // namespace WideDecimalTest
 
 TEST_CASE("Test right shifts", "[WideDecimal]") {
-	REQUIRE(dx::rightShift(-256LL, 8) == -1LL);
-	REQUIRE(dx::rightShift(1LL, 8) == 0LL);
-	REQUIRE(dx::rightShift(0x8000000000000080LL, 8) == 0xFF80000000000000LL);
-	REQUIRE(dx::rightShift(0x8000000000000000LL, 8) == 0xFF80000000000000LL);
+	REQUIRE(dx::rightShift(static_cast<dxf_long_t>(-256LL), 8) == static_cast<dxf_long_t>(-1LL));
+	REQUIRE(dx::rightShift(static_cast<dxf_long_t>(1LL), 8) == 0LL);
+	REQUIRE(dx::rightShift(static_cast<dxf_long_t>(0x8000000000000080LL), 8) == static_cast<dxf_long_t>(0xFF80000000000000LL));
+	REQUIRE(dx::rightShift(static_cast<dxf_long_t>(0x8000000000000000LL), 8) == static_cast<dxf_long_t>(0xFF80000000000000LL));
 }
 
 TEST_CASE("Test signs", "[WideDecimal]") {

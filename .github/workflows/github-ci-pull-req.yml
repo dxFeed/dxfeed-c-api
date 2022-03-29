@@ -24,7 +24,9 @@ jobs:
           cd build-test
           cmake -DCMAKE_BUILD_TYPE=Release -DDISABLE_TLS=ON -DTARGET_PLATFORM=x64 -DDXFC_BUILD_UNIT_TESTS=ON ..
           cmake --build . --config Release
-          ctest -C Release  
+          ctest -C Release
+        env:
+          CTEST_OUTPUT_ON_FAILURE: True
 
   # --------------------------- BUILD DOCUMENTATION
   build_docs:
