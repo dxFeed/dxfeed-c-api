@@ -7,7 +7,7 @@ set(PROJECT DXFeedAll)
 
 option(DISABLE_TLS "Use ON value to disable TLS support" OFF)
 option(BUILD_STATIC_LIBS "Use ON value to build dxFeed framework as a static library" OFF)
-option(DXFC_BUILD_INTEGRATION_TESTS "" OFF)
+option(DXFC_BUILD_INTEGRATION_TESTS "" ON)
 option(DXFC_BUILD_UNIT_TESTS "" OFF)
 
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
@@ -38,32 +38,32 @@ add_subdirectory(thirdparty/toml11)
 #Note: add projects to build and package below
 add_subdirectory(src)
 
-add_subdirectory(samples/CandleSample)
-add_subdirectory(samples/CommandLineSample)
-add_subdirectory(samples/FullOrderBookSample)
-add_subdirectory(samples/PriceLevelBookSample)
-add_subdirectory(samples/PriceLevelBookSample2)
-add_subdirectory(samples/RegionalBookSample)
-add_subdirectory(samples/SnapshotConsoleSample)
-add_subdirectory(samples/IncSnapshotConsoleSample)
-
-add_subdirectory(wrappers/cpp)
-
-add_subdirectory(tests/PerformanceTest)
-
-if (DXFC_BUILD_INTEGRATION_TESTS)
-    add_subdirectory(tests/FullTest)
-
-    add_subdirectory(tests/APITest)
-    add_subdirectory(tests/ConnectionTest)
-    add_subdirectory(tests/LastEventTest)
-    add_subdirectory(tests/QuoteTableTest)
-    add_subdirectory(tests/SampleTest)
-endif ()
-
 if (DXFC_BUILD_UNIT_TESTS)
     include(CTest)
     add_subdirectory(tests/UnitTests2)
+else ()
+    add_subdirectory(samples/CandleSample)
+    add_subdirectory(samples/CommandLineSample)
+    add_subdirectory(samples/FullOrderBookSample)
+    add_subdirectory(samples/PriceLevelBookSample)
+    add_subdirectory(samples/PriceLevelBookSample2)
+    add_subdirectory(samples/RegionalBookSample)
+    add_subdirectory(samples/SnapshotConsoleSample)
+    add_subdirectory(samples/IncSnapshotConsoleSample)
+
+    add_subdirectory(wrappers/cpp)
+
+    add_subdirectory(tests/PerformanceTest)
+
+    if (DXFC_BUILD_INTEGRATION_TESTS)
+        add_subdirectory(tests/FullTest)
+
+        add_subdirectory(tests/APITest)
+        add_subdirectory(tests/ConnectionTest)
+        add_subdirectory(tests/LastEventTest)
+        add_subdirectory(tests/QuoteTableTest)
+        add_subdirectory(tests/SampleTest)
+    endif ()
 endif ()
 
 set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/DXFeedAllCPackConfig.cmake")

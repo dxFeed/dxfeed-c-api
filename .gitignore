@@ -5,6 +5,7 @@
 /**/*.user
 /**/*.aps
 /**/build
+/**/build-test
 /*.ncb
 /*.sdf
 /*.opensdf
