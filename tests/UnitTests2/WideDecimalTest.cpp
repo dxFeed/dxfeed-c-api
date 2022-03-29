@@ -1,5 +1,4 @@
 #include <WideDecimal.hpp>
-#include <WideDecimal.cpp>
 #include <catch2/catch.hpp>
 
 #include <string>
