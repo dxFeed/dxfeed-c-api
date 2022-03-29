@@ -187,8 +187,9 @@ struct WideDecimal {
 		static const dxf_long_t NEGATIVE_INFINITY = -0x100;
 
 		static const dxf_long_t MAX_DOUBLE_SIGNIFICAND = (1LL << 53) - 1;
-		static const dxf_long_t MAX_SIGNIFICAND;
+	    static const dxf_long_t MAX_DOUBLE_VALUE = 1LL << 51;
 		static const dxf_long_t MIN_SIGNIFICAND;
+		static const dxf_long_t MAX_SIGNIFICAND;
 		static const dxf_int_t BIAS = 128;
 
 		static const dxf_long_t ZERO = BIAS;							 // canonical zero with zero scale
@@ -221,7 +222,9 @@ struct WideDecimal {
 		std::array<dxf_double_t, 256> multipliers;
 		std::array<dxf_double_t, 256> divisors;
 
-		Consts() : multipliers{}, divisors{} {
+		std::array<dxf_double_t, 256> maxDoubles;
+
+		Consts() : multipliers{}, divisors{}, maxDoubles{} {
 			dxf_long_t pow10 = 1;
 
 			for (std::size_t i = 0; i <= EXACT_LONG_POWERS; i++) {
@@ -248,6 +251,9 @@ struct WideDecimal {
 			for (std::size_t rank = 1; rank < divisors.size(); rank++) {
 				divisors[rank] = Double::parseDouble("1E" + std::to_string(static_cast<dxf_int_t>(rank) - BIAS));
 			}
+
+			for (std::size_t rank = 0; rank < maxDoubles.size(); rank++)
+				maxDoubles[rank] = MAX_DOUBLE_VALUE * multipliers[rank];
 		}
 	};
 
@@ -394,7 +400,7 @@ struct WideDecimal {
 
 	inline static dxf_long_t composeWide(dxf_long_t significand, dxf_int_t scale) {
 		// check exceedingly large scales to avoid rank overflows
-		if (scale > static_cast<dxf_int_t>(255) + static_cast<dxf_int_t>(Consts::EXACT_LONG_POWERS) -
+		if (scale > 255 + static_cast<dxf_int_t>(Consts::EXACT_LONG_POWERS) -
 				static_cast<dxf_int_t>(Consts::BIAS)) {
 			return static_cast<dxf_long_t>(Consts::BIAS);
 		}
@@ -459,6 +465,63 @@ struct WideDecimal {
 
 		// slow path: for non-standard decimals (specials and extra precision) use floating arithmetic
 		return Double::compare(toDouble(w1), toDouble(w2));
+	}
+
+	inline static dxf_long_t composeWide(double value) {
+		return value >= 0 ? composeNonNegative(value, Consts::BIAS) :
+			value < 0 ? neg(composeNonNegative(-value, Consts::BIAS)) :
+					  Consts::NaN;
+	}
+
+	inline static dxf_long_t sum(dxf_long_t w1, dxf_long_t w2) {
+		dxf_int_t r1 = static_cast<dxf_int_t>(w1) & 0xFF;
+		dxf_int_t r2 = static_cast<dxf_int_t>(w2) & 0xFF;
+
+		if (r1 > 0 && r2 > 0) {
+			// fast path: for standard decimals (most frequent) use integer-only arithmetic
+			dxf_long_t s1 = rightShift(w1, 8);
+			dxf_long_t s2 = rightShift(w2, 8);
+
+			if (s1 == 0) {
+				return w2;
+			}
+
+			if (s2 == 0) {
+				return w1;
+			}
+
+			if (r1 == r2) {
+				return composeNonFitting(s1 + s2, r1, r1);
+			}
+
+			if (r1 > r2) {
+				if (r1 - r2 <= Consts::EXACT_LONG_POWERS) {
+					dxf_long_t pow10 = consts.longPowers[r1 - r2];
+					dxf_long_t scaled = s2 * pow10;
+					dxf_long_t result = s1 + scaled;
+
+					if (scaled / pow10 == s2 && ((s1 ^ result) & (scaled ^ result)) >= 0) {
+						return composeNonFitting(result, r1, r1);
+					}
+				}
+			} else {
+				if (r2 - r1 <= Consts::EXACT_LONG_POWERS) {
+					dxf_long_t pow10 = consts.longPowers[r2 - r1];
+					dxf_long_t scaled = s1 * pow10;
+					dxf_long_t result = scaled + s2;
+
+					if (scaled / pow10 == s1 && ((scaled ^ result) & (s2 ^ result)) >= 0) {
+						return composeNonFitting(result, r2, r2);
+					}
+				}
+			}
+		}
+		if (isNaN(w1) || isNaN(w2)) {
+			return Consts::NaN;
+		}
+
+		// slow path: for non-standard decimals (specials and extra precision) use floating arithmetic
+		return composeWide(toDouble(w1) + toDouble(w2));
 	}
 
 private:
@@ -537,6 +600,32 @@ private:
 			significand = div10(significand, consts.longPowers[reduction]);
 			rank -= reduction;
 		}
+
+		return composeFitting(significand, rank, targetRank);
+	}
+
+	inline static dxf_int_t findRank(double value) {
+		dxf_int_t rank = value > consts.maxDoubles[128] ? 0 : 128;
+
+		rank += value > consts.maxDoubles[rank + 64] ? 0 : 64;
+		rank += value > consts.maxDoubles[rank + 32] ? 0 : 32;
+		rank += value > consts.maxDoubles[rank + 16] ? 0 : 16;
+		rank += value > consts.maxDoubles[rank + 8] ? 0 : 8;
+		rank += value > consts.maxDoubles[rank + 4] ? 0 : 4;
+		rank += value > consts.maxDoubles[rank + 2] ? 0 : 2;
+		rank += value > consts.maxDoubles[rank + 1] ? 0 : 1;
+
+		return rank;
+	}
+
+	inline static dxf_long_t composeNonNegative(double value, dxf_int_t targetRank) {
+		assert(value >= 0);
+
+		dxf_int_t rank = findRank(value);
+		if (rank <= 0)
+			return Consts::POSITIVE_INFINITY;
+
+		auto significand = static_cast<dxf_long_t>(value * consts.divisors[rank] + 0.5);
 
 		return composeFitting(significand, rank, targetRank);
 	}

@@ -2,6 +2,9 @@
 #include <catch2/catch.hpp>
 #include <limits>
 #include <string>
+#include <cmath>
+#include <ctime>
+#include <cstdlib>
 
 namespace WideDecimalTest {
 inline static dxf_long_t MAX_SIGNIFICAND = dx::rightShift(std::numeric_limits<dxf_long_t>::max(), 8);
@@ -9,9 +12,10 @@ inline static dxf_int_t MAX_RANK = 255;
 }  // namespace WideDecimalTest
 
 TEST_CASE("Test right shifts", "[WideDecimal]") {
-	REQUIRE(dx::rightShift(dxf_long_t(-256), 8) == dxf_long_t(-1));
-	REQUIRE(dx::rightShift(dxf_long_t(1), 8) == dxf_long_t(0));
-	REQUIRE(dx::rightShift(dxf_long_t(0x8000000000000080), 8) == dxf_long_t(0xFF80000000000000));
+	REQUIRE(dx::rightShift(-256LL, 8) == -1LL);
+	REQUIRE(dx::rightShift(1LL, 8) == 0LL);
+	REQUIRE(dx::rightShift(0x8000000000000080LL, 8) == 0xFF80000000000000LL);
+	REQUIRE(dx::rightShift(0x8000000000000000LL, 8) == 0xFF80000000000000LL);
 }
 
 TEST_CASE("Test signs", "[WideDecimal]") {
@@ -20,6 +24,7 @@ TEST_CASE("Test signs", "[WideDecimal]") {
 		for (dxf_int_t rank = 0; rank <= WideDecimalTest::MAX_RANK; rank += 16) {
 			dxf_long_t rawWide = (significand << 8) | (rank & static_cast<dxf_int_t>(0xFF));
 			dxf_long_t rawNeg = (-significand << 8) | (rank & static_cast<dxf_int_t>(0xFF));
+
 			REQUIRE(rawWide == dx::WideDecimal::abs(rawWide));
 			REQUIRE(rawNeg == dx::WideDecimal::neg(rawWide));
 		}
@@ -28,7 +33,7 @@ TEST_CASE("Test signs", "[WideDecimal]") {
 
 inline static void checkWide(const std::string& expected, dxf_long_t significand, dxf_int_t exponent) {
 	double expectedDouble = dx::Double::parseDouble(expected);
-	dxf_long_t rawWide = (significand << 8) | ((128 - exponent) & 0xFF);
+	dxf_long_t rawWide = (significand << 8) | ((128LL - static_cast<dxf_long_t>(exponent)) & 0xFF);
 	dxf_long_t theWide = dx::WideDecimal::composeWide(significand, -exponent);
 
 	INFO("Expected = '" << expected << "', significand = " << significand << ", exponent = " << exponent
@@ -64,4 +69,28 @@ TEST_CASE("Test wide", "[WideDecimal]") {
 	checkWide("1.23456E-8", 123456, -13);
 	checkWide("1.23456E-9", 123456, -14);
 	checkWide("1.23456E-10", 123456, -15);
+}
+
+inline static double generate() {
+	dxf_long_t pa = static_cast<dxf_long_t>(std::pow(10, std::rand() % 12));
+
+	return std::floor(std::rand() % pa) / pa;
+}
+
+TEST_CASE("Test random", "[WideDecimal]") {
+	std::srand(std::time(nullptr));
+
+	for (int i = 0; i < 10000; i++) {
+		double a = generate();
+		double b = generate();
+		dxf_long_t wa = dx::WideDecimal::composeWide(a);
+		dxf_long_t wb = dx::WideDecimal::composeWide(b);
+
+		REQUIRE(0 == dx::Double::compare(a, dx::WideDecimal::toDouble(wa)));
+		REQUIRE(0 == dx::Double::compare(b, dx::WideDecimal::toDouble(wb)));
+		REQUIRE(dx::Double::compare(a, b) == dx::WideDecimal::compare(wa, wb));
+
+		auto sum = a + b;
+		REQUIRE(std::abs(sum - dx::WideDecimal::toDouble(dx::WideDecimal::sum(wa, wb))) <= 1e-15);
+	}
 }
