@@ -15,7 +15,9 @@ TEST_CASE("Test right shifts", "[WideDecimal]") {
 	REQUIRE(dx::rightShift(static_cast<dxf_long_t>(-256LL), 8) == static_cast<dxf_long_t>(-1LL));
 	REQUIRE(dx::rightShift(static_cast<dxf_long_t>(1LL), 8) == 0LL);
 	REQUIRE(dx::rightShift(static_cast<dxf_long_t>(0x8000000000000080LL), 8) == static_cast<dxf_long_t>(0xFF80000000000000LL));
+	REQUIRE(dx::rightShift(-9223372036854775680LL, 8) == -36028797018963968LL);
 	REQUIRE(dx::rightShift(static_cast<dxf_long_t>(0x8000000000000000LL), 8) == static_cast<dxf_long_t>(0xFF80000000000000LL));
+	REQUIRE(dx::WideDecimal::Consts::MIN_SIGNIFICAND < dx::WideDecimal::Consts::MAX_SIGNIFICAND);
 }
 
 TEST_CASE("Test signs", "[WideDecimal]") {
