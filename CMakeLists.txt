@@ -36,12 +36,13 @@ endif (BUILD_STATIC_LIBS)
 add_subdirectory(thirdparty/toml11)
 
 #Note: add projects to build and package below
-add_subdirectory(src)
 
 if (DXFC_BUILD_UNIT_TESTS)
     include(CTest)
     add_subdirectory(tests/UnitTests2)
 else ()
+    add_subdirectory(src)
+
     add_subdirectory(samples/CandleSample)
     add_subdirectory(samples/CommandLineSample)
     add_subdirectory(samples/FullOrderBookSample)

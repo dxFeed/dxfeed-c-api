@@ -1,4 +1,5 @@
 #include <WideDecimal.hpp>
+#include <WideDecimal.cpp>
 #include <catch2/catch.hpp>
 #include <limits>
 #include <string>
@@ -7,7 +8,7 @@
 #include <cstdlib>
 
 namespace WideDecimalTest {
-inline static dxf_long_t MAX_SIGNIFICAND = dx::rightShift(std::numeric_limits<dxf_long_t>::max(), 8);
+inline static dxf_long_t MAX_SIGNIFICAND = dx::WideDecimal::Consts::MAX_SIGNIFICAND;
 inline static dxf_int_t MAX_RANK = 255;
 }  // namespace WideDecimalTest
 
