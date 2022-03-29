@@ -7,7 +7,7 @@
 #include <cstdlib>
 
 namespace WideDecimalTest {
-inline static dxf_long_t MAX_SIGNIFICAND = 36028797018963967LL;
+inline static dxf_long_t MAX_SIGNIFICAND = dx::rightShift(std::numeric_limits<dxf_long_t>::max(), 8);
 inline static dxf_int_t MAX_RANK = 255;
 }  // namespace WideDecimalTest
 
