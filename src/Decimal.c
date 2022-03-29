@@ -19,6 +19,7 @@
 
 #include "Decimal.h"
 #include "PrimitiveTypes.h"
+#include "WideDecimal.h"
 
 #include <math.h>
 #include <float.h>
@@ -88,20 +89,20 @@ static const dxf_int_t EXTRA_PRECISION_DIVISORS[] = {
 
 int dx_decimal_int_to_double(dxf_int_t integer, OUT dxf_double_t* decimal) {
 	dxf_int_t power = integer & 0x0F;
-	dxf_int_t mantissa ;
+	dxf_int_t mantissa = dx_right_shift_int(integer, STANDARD_MANTISSA_SHIFT);
 
 	if (power == 0) {
 		// extra precision and special cases
-		dxf_int_t divisor = EXTRA_PRECISION_DIVISORS[((integer >> STANDARD_MANTISSA_SHIFT) & 0x07)];
+		dxf_int_t divisor = EXTRA_PRECISION_DIVISORS[mantissa & 0x07];
 
 		if (divisor != 0) {
 			// mantissa in highest 25 bits for supported extra precision formats
-			*decimal  = (dxf_double_t)(integer >> EXTRA_PRECISION_MANTISSA_SHIFT) / divisor;
+			*decimal  = (dxf_double_t)(dx_right_shift_int(integer, EXTRA_PRECISION_MANTISSA_SHIFT)) / divisor;
+
 			return true;
 		}
 	}
 
-	mantissa = (integer >> STANDARD_MANTISSA_SHIFT);
 	*decimal = power <= UNITY_POWER ? mantissa * MULTIPLIERS[power] : mantissa / DIVISORS[power];
 
 	return true;

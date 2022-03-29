@@ -76,3 +76,7 @@ int dx_wide_decimal_long_to_double(dxf_long_t longValue, OUT dxf_double_t* decim
 
 	return true;
 }
+
+dxf_int_t dx_right_shift_int(dxf_int_t int_value, dxf_int_t shift) {
+	return dx::rightShift(int_value, shift);
+}
