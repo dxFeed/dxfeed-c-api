@@ -19,10 +19,12 @@ jobs:
     steps:
       - name: Test
         run: |
+          ls
           mkdir build-test
           cd build-test
           cmake -DCMAKE_BUILD_TYPE=Release -DDISABLE_TLS=ON -DTARGET_PLATFORM=x64 -DDXFC_BUILD_UNIT_TESTS=ON ..
           cmake --build . --config Release
+          ls
           ctest -C Release  
 
   # --------------------------- BUILD DOCUMENTATION
