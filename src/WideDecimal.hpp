@@ -43,7 +43,7 @@ struct RightShift {
 		struct SignificantBits {
 			std::array<U, sizeof(U) * 8> data;
 
-			constexpr SignificantBits() : data{} {
+			SignificantBits() : data{} {
 				size_t i = 0;
 
 				data[i] = U(1) << (sizeof(U) * 8 - 1);
@@ -70,7 +70,7 @@ struct RightShift {
 
 	static const Consts consts;
 
-	inline static constexpr T apply(T value, dxf_int_t shift) {
+	inline static T apply(T value, dxf_int_t shift) {
 		if (shift <= 0) {
 			return value;
 		}

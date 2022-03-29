@@ -13,8 +13,19 @@ env:
   BUILD_VERSION: 0.0.0-pr
 
 jobs:
+  tests:
+    runs-on: ubuntu-latest
+    name: build and run tests
+    steps:
+      - name Test
+        run: |
+          mkdir build-test
+          cd build-test
+          cmake -DCMAKE_BUILD_TYPE=Release -DDISABLE_TLS=ON -DTARGET_PLATFORM=x64 -DDXFC_BUILD_UNIT_TESTS=ON ..
+          cmake --build . --config Release
+          ctest -C Release  
 
-# --------------------------- BUILD DOCUMENTATION
+  # --------------------------- BUILD DOCUMENTATION
   build_docs:
     runs-on: ubuntu-latest
     name: build documentation

@@ -1,3 +1,6 @@
+Version 8.7.0
+* [DXFC-334] Fixed a bug with precision error when converting WideDecimal to Double
+
 Version 8.6.3
 * [DXFC-331] Fixed a bug when deleting a PriceLevelBook object caused crashes.
 

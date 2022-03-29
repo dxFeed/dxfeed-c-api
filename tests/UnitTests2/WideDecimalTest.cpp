@@ -78,7 +78,7 @@ inline static double generate() {
 }
 
 TEST_CASE("Test random", "[WideDecimal]") {
-	std::srand(std::time(nullptr));
+	std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
 	for (int i = 0; i < 10000; i++) {
 		double a = generate();
