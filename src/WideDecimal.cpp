@@ -60,11 +60,8 @@ const std::array<dxf_long_t, 4> WideDecimal::Consts::NF_WIDE = {
 	{WideDecimal::Consts::NaN, WideDecimal::Consts::POSITIVE_INFINITY, WideDecimal::Consts::NaN,
 	 WideDecimal::Consts::NEGATIVE_INFINITY}};
 
-template <>
-const RightShift<dxf_long_t>::Consts RightShift<dxf_long_t>::consts{};
-
-template <>
-const RightShift<dxf_int_t>::Consts RightShift<dxf_int_t>::consts{};
+template <typename T>
+const typename RightShift<T>::Consts RightShift<T>::consts{};
 
 const WideDecimal::Consts WideDecimal::consts{};
 }  // namespace dx

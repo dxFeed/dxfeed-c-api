@@ -1,7 +1,7 @@
 #include <WideDecimal.hpp>
 #include <WideDecimal.cpp>
 #include <catch2/catch.hpp>
-#include <limits>
+
 #include <string>
 #include <cmath>
 #include <ctime>
