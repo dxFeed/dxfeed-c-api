@@ -333,6 +333,9 @@
     <ClInclude Include="src\WideDecimal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\WideDecimal.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\DXFeed.rc" />

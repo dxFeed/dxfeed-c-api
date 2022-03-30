@@ -10,12 +10,14 @@ This package provides access to **[dxFeed](https://www.dxfeed.com/)** market dat
 [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/dxFeed/dxfeed-c-api.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/dxFeed/dxfeed-c-api/context:cpp)
 
 
-## Table of Сontents
+## Table of Contents
 - [Documentation](#documentation)
+- [Dependencies](#dependencies)
 - [How to build](#how-to-build)
   * [Windows](#windows)
   * [Linux](#linux)
   * [macOS](#macos)
+  * [Android Termux](#android-termux)
 - [Key features](#key-features)
   * [Event types](#event-types)
   * [Contracts](#contracts)
@@ -54,7 +56,19 @@ Find useful information in self-service dxFeed Knowledge Base, or C API framewor
   * [Subscriptions](https://docs.dxfeed.com/c-api/group__c-api-basic-subscription-functions.html)
 
 
+## Dependencies
 
+- API
+  - Boost.Locale.EncodingUtf (1.75)
+  - [TOML11](https://github.com/ToruNiina/toml11) (3.6.0)
+- Tests
+  - [Catch2](https://github.com/catchorg/Catch2) (2.13.8)
+- C++ Wrappers
+  - [Args](https://github.com/Taywee/args) (6.2.2)
+  - [fmt](https://github.com/fmtlib/fmt) (8.0.0)
+  - [optional-lite](https://github.com/martinmoene/optional-lite) (3.1.1)
+  - [string-view-lite](https://github.com/martinmoene/string-view-lite) (1.1.0)
+  - [variant-lite](https://github.com/martinmoene/variant-lite) (1.1.0)
 
 
 
@@ -62,22 +76,63 @@ Find useful information in self-service dxFeed Knowledge Base, or C API framewor
 
 ### Windows
 
-System requirements: [Visual C++ Redistributable 2015](https://www.microsoft.com/en-us/download/details.aspx?id=52685), [Visual Studio](https://visualstudio.microsoft.com/vs/).
+System requirements (for the libressl): [Visual C++ Redistributable 2015](https://www.microsoft.com/en-us/download/details.aspx?id=52685), [Visual Studio](https://visualstudio.microsoft.com/vs/).
 
+Prerequisites: `git`, `cmake`, `ninja` or `make`, `clang` (mingw or VS) or `gcc` (mingw) or `visual studio`
 
-*Coming soon*
+```console
+git clone https://github.com/dxFeed/dxfeed-c-api.git
+cd dxfeed-c-api
+mkdir build
+cd build
+cmake -DCMAKE_BUILD_TYPE=Release -DDISABLE_TLS=ON -DTARGET_PLATFORM=x64 ..
+cmake --build . --config Release
+```
 
 ---
 
 ### Linux
-*Coming soon*
+
+Prerequisites: `git`, `cmake`, `ninja` or `make`, `clang` or `gcc` 
+
+```console
+git clone https://github.com/dxFeed/dxfeed-c-api.git
+cd dxfeed-c-api
+mkdir build
+cd build
+cmake -DCMAKE_BUILD_TYPE=Release -DDISABLE_TLS=ON -DTARGET_PLATFORM=x64 ..
+cmake --build . --config Release
+```
 
 ---
 
 
 ### macOS
 
-*Coming soon*
+Prerequisites: `git`, `cmake`, `ninja` or `make`, `clang`
+
+```console
+git clone https://github.com/dxFeed/dxfeed-c-api.git
+cd dxfeed-c-api
+mkdir build
+cd build
+cmake -DCMAKE_BUILD_TYPE=Release -DDISABLE_TLS=ON -DTARGET_PLATFORM=x64 ..
+cmake --build . --config Release
+```
+---
+
+### Android Termux
+
+Prerequisites: `git`, `cmake`, `ninja`, `clang`
+
+```console
+git clone https://github.com/dxFeed/dxfeed-c-api.git
+cd dxfeed-c-api
+mkdir build
+cd build
+cmake -DCMAKE_BUILD_TYPE=Release -DDISABLE_TLS=ON -DTARGET_PLATFORM=x64 ..
+cmake --build . --config Release
+```
 
 
 ## Key features
@@ -186,8 +241,8 @@ Order source in most cases identifies source of **`Order`** and **`SpreadOrder`*
   * BZX - Cboe BZX
   * BXTR - Cboe EU SI (Systematic Internaliser)
   * BI20 - BIST Top20 Orders (Level2+)
- * CHIX - Cboe EU CXE (Chi-X)
- * CEUX - Cboe EU DXE
+  * CHIX - Cboe EU CXE (Chi-X)
+  * CEUX - Cboe EU DXE
   * CFE - Cboe CFE
   * C2OX - Cboe C2
   * DEA - Cboe EDGA
@@ -197,13 +252,13 @@ Order source in most cases identifies source of **`Order`** and **`SpreadOrder`*
   * FAIR - FairX
   * GLBX - Globex
   * ICE - ICE Futures US/EU
-   * IST - Borsa Istanbul
-   * MEMX - Members Exchange
+  * IST - Borsa Istanbul
+  * MEMX - Members Exchange
   * NTV - Nasdaq TotalView
   * NFX - Nasdaq NFX
-* SMFE - SmallEx
- * XNFI - Nasdaq NFI
- * XEUR - Eurex
+  * SMFE - SmallEx
+  * XNFI - Nasdaq NFI
+  * XEUR - Eurex
  ---
 *Price level book*:
  

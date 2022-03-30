@@ -52,6 +52,7 @@ set(COMMON_HEADERS
     ${LIB_DXFEED_SRC_DIR}/Snapshot.h
     ${LIB_DXFEED_SRC_DIR}/TaskQueue.h
     ${LIB_DXFEED_SRC_DIR}/WideDecimal.h
+    ${LIB_DXFEED_SRC_DIR}/WideDecimal.hpp
     )
     
 set(COMMON_SOURCES
