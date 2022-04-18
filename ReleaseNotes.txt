@@ -1,4 +1,5 @@
 Version 8.7.0
+* [DXFC-334] Fixed a bug with precision error when converting WideDecimal to Double
 * [DXFC-329]
 
 Version 8.6.3

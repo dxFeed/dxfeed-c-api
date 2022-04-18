@@ -546,6 +546,7 @@
     <ClInclude Include="..\..\src\Logger.h" />
     <ClInclude Include="..\..\src\SymbolCodec.h" />
     <ClInclude Include="..\..\src\WideDecimal.h" />
+    <ClInclude Include="..\..\src\WideDecimal.hpp" />
     <ClInclude Include="TestHelper.h" />
     <ClInclude Include="OrderSourceConfigurationTest.h" />
     <ClInclude Include="SnapshotTests.h" />

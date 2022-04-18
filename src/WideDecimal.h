@@ -19,15 +19,17 @@
 
 #pragma once
 
-#include "PrimitiveTypes.h"
-#include "DXTypes.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#include "PrimitiveTypes.h"
+#include "DXTypes.h"
+
 // Parse wide decimals stored as compact int
 int dx_wide_decimal_long_to_double(dxf_long_t longValue, OUT dxf_double_t* decimal);
+
+dxf_int_t dx_right_shift_int(dxf_int_t int_value, dxf_int_t shift);
 
 #ifdef __cplusplus
 }

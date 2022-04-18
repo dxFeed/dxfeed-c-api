@@ -111,6 +111,7 @@ set(HEADER_FILES
         TimeMarkUtil.hpp
         Version.h
         WideDecimal.h
+        WideDecimal.hpp
         )
 
 set(PARSER_HEADERS
@@ -321,7 +322,9 @@ else ()
     add_library(${PROJECT} SHARED ${ALL_HEADERS} ${ALL_SOURCES})
 endif ()
 
-target_link_libraries(${PROJECT} PRIVATE ${ADDITIONAL_LIBRARIES})
+add_subdirectory(Snapshot)
+
+target_link_libraries(${PROJECT} PRIVATE ${ADDITIONAL_LIBRARIES} DXFC_Snapshot)
 
 if (WIN32)
     set_target_properties(${PROJECT} PROPERTIES PREFIX "")
