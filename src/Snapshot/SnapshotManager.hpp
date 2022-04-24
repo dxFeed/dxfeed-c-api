@@ -3,10 +3,39 @@
 #include <functional>
 #include <memory>
 #include <unordered_map>
+#include "../../wrappers/cpp/thirdparty/variant-lite/include/nonstd/variant.hpp"
+#include "../../wrappers/cpp/thirdparty/optional-lite/include/nonstd/optional.hpp"
 
 namespace dx {
 
+template <typename RecordIdType, typename SymbolType, typename SourceType, typename TimestampType>
+struct SnapshotKey {
+	RecordIdType recordId;
+	SymbolType symbol;
+	nonstd::optional<SourceType> source;
+	nonstd::optional<TimestampType> fromTime;
+};
+
+//TODO std::hash
+
+template <typename IndexType, typename TimestampType>
+struct EventKey {
+	nonstd::optional<IndexType> index;
+	nonstd::optional<TimestampType> time;
+};
+
+template <typename SnapshotKey, typename EventKey, typename... EventTypes>
 struct Snapshot {
+	using EventType = nonstd::variant<EventTypes...>;
+
+private:
+
+	SnapshotKey key_;
+	std::unordered_map<EventKey, EventType> events_;
+
+public:
+
+	explicit Snapshot() = default;
 
 };
 
@@ -30,6 +59,8 @@ struct SnapshotManager {
 
 		return instances[connectionId];
 	}
+
+
 };
 
 }
