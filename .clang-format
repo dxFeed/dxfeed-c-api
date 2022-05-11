@@ -1,6 +1,6 @@
 ﻿---
 BasedOnStyle: Google
-AlignConsecutiveMacros: true
+AlignConsecutiveMacros: Consecutive
 AlignOperands: false
 AlignTrailingComments: true
 ColumnLimit: 120

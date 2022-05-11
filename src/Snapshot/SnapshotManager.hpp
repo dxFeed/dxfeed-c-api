@@ -2,9 +2,11 @@
 
 #include <functional>
 #include <memory>
+#include <type_traits>
 #include <unordered_map>
-#include "../../wrappers/cpp/thirdparty/variant-lite/include/nonstd/variant.hpp"
+
 #include "../../wrappers/cpp/thirdparty/optional-lite/include/nonstd/optional.hpp"
+#include "../../wrappers/cpp/thirdparty/variant-lite/include/nonstd/variant.hpp"
 
 namespace dx {
 
@@ -16,7 +18,7 @@ struct SnapshotKey {
 	nonstd::optional<TimestampType> fromTime;
 };
 
-//TODO std::hash
+// TODO std::hash
 
 template <typename IndexType, typename TimestampType>
 struct EventKey {
@@ -29,17 +31,33 @@ struct Snapshot {
 	using EventType = nonstd::variant<EventTypes...>;
 
 private:
-
 	SnapshotKey key_;
 	std::unordered_map<EventKey, EventType> events_;
 
 public:
-
 	explicit Snapshot() = default;
-
 };
 
+template <typename Event>
+struct IsTimeSeriesEvent : std::false_type {
+};
+
+template <typename Event>
+struct IsIndexedEvent : std::false_type {
+};
+
+struct TimeSeriesEventSnapshot {
+};
+
+struct IndexedEventSnapshot {};
+
+/**
+ * Creates, manages and accesses snapshots.
+ * Creates, manages and accesses static SnapshotManager instances.
+ * Thread safe.
+ */
 struct SnapshotManager {
+	using SnapshotType = nonstd::variant<TimeSeriesEventSnapshot, IndexedEventSnapshot>;
 	using ConnectionId = std::size_t;
 
 	static std::unordered_map<ConnectionId, std::shared_ptr<SnapshotManager>> instances;
@@ -60,7 +78,17 @@ struct SnapshotManager {
 		return instances[connectionId];
 	}
 
+	template <typename EventType, typename Symbol, typename Source>
+	typename std::enable_if<!IsTimeSeriesEvent<EventType>::value && IsIndexedEvent<EventType>::value, IndexedEventSnapshot>::type
+	getSnapshot(EventType&& eventType, Symbol&& symbol, Source&& source) {
+		return {};
+	}
 
+	template <typename EventType, typename Symbol, typename Source, typename Timestamp>
+	typename std::enable_if<IsTimeSeriesEvent<EventType>::value, TimeSeriesEventSnapshot>::type
+	getSnapshot(EventType&& eventType, Symbol&& symbol, Source&& source, Timestamp&& timestamp) {
+		return {};
+	}
 };
 
-}
+}  // namespace dx
