@@ -39,7 +39,9 @@ typedef enum dx_log_level_t {
 	dx_ll_debug = -1,
 	dx_ll_info = 0,
 	dx_ll_warn = 1,
-	dx_ll_error = 2
+	dx_ll_error = 2,
+	dx_ll_critical = 3,
+	dx_ll_off = 4
 } dx_log_level_t;
 
 /// Error code

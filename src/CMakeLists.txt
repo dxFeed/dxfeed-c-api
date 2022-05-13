@@ -96,6 +96,8 @@ set(HEADER_FILES
         EventSubscription.hpp
         HeartbeatPayload.hpp
         Logger.h
+        Logger/Logger.hpp
+        Logger/LoggerNG.h
         ObjectArray.h
         PriceLevelBook.h
         PriceLevelBookNG.h
@@ -162,6 +164,7 @@ set(SOURCE_FILES
         EventSubscription.cpp
         HeartbeatPayload.cpp
         Logger.c
+        Logger/Logger.cpp
         ObjectArray.c
         PriceLevelBook.c
         PriceLevelBookNG.cpp

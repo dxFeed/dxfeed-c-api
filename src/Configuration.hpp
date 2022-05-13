@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include <cstdlib>
 #include <iostream>
 #include <iterator>
 #include <locale>
@@ -33,6 +34,7 @@
 extern "C" {
 #include "DXErrorCodes.h"
 #include "DXErrorHandling.h"
+#include "Logger.h"
 }
 
 namespace dx {
@@ -173,6 +175,7 @@ inline dx_log_level_t stringToLoggingLevel(const std::string& s) {
 
 struct Configuration : std::enable_shared_from_this<Configuration> {
 	enum class Type { None, String, File };
+	static constexpr const char* PATH_TO_CONFIG_ENV = "DXFC_CONFIG_PATH";
 
 private:
 	Type type_;
@@ -182,6 +185,33 @@ private:
 	toml::value properties_;
 
 	Configuration() : type_{Type::None}, config_{}, mutex_{}, properties_{} {}
+
+	bool loadFromFileImpl(const std::string& fileName) {
+		if (algorithm::trimCopy(fileName).empty()) {
+			dx_set_error_code(dx_cfgec_empty_config_file_name);
+
+			return false;
+		}
+
+		try {
+			properties_ = toml::parse(fileName);
+			loaded_ = true;
+			type_ = Type::File;
+			config_ = fileName;
+
+			if (getDump()) {
+				dump();
+			}
+
+			return true;
+		} catch (const std::exception& e) {
+			dx_set_error_code(dx_cfgec_toml_parser_error);
+			dx_logging_verbose(dx_ll_warn, L"dxFeed::API::Configuration.loadFromFile: %hs", e.what());
+			loaded_ = false;
+		}
+
+		return false;
+	}
 
 public:
 	static std::shared_ptr<Configuration> getInstance() {
@@ -208,6 +238,24 @@ public:
 				  << std::endl;
 	}
 
+	bool load() {
+		std::lock_guard<std::recursive_mutex> lock(mutex_);
+
+		if (loaded_) {
+			return true;
+		}
+
+		auto path = std::getenv(PATH_TO_CONFIG_ENV);
+
+		if (path == nullptr) {
+			dx_set_error_code(dx_cfgec_empty_config_file_name);
+
+			return false;
+		}
+
+		return loadFromFileImpl(path);
+	}
+
 	bool loadFromFile(const std::string& fileName) {
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
 
@@ -215,30 +263,7 @@ public:
 			return true;
 		}
 
-		if (algorithm::trimCopy(fileName).empty()) {
-			dx_set_error_code(dx_cfgec_empty_config_file_name);
-
-			return false;
-		}
-
-		try {
-			properties_ = toml::parse(fileName);
-			loaded_ = true;
-			type_ = Type::File;
-			config_ = fileName;
-
-			if (getDump()) {
-				dump();
-			}
-
-			return true;
-		} catch (const std::exception& e) {
-			dx_set_error_code(dx_cfgec_toml_parser_error);
-			dx_logging_verbose(dx_ll_warn, L"dxFeed::API::Configuration.loadFromFile: %hs", e.what());
-			loaded_ = false;
-		}
-
-		return false;
+		return loadFromFileImpl(fileName);
 	}
 
 	bool loadFromString(const std::string& config) {
@@ -312,6 +337,16 @@ public:
 
 	bool getSubscriptionsDisableLastEventStorage(bool defaultValue = true) const {
 		return getProperty("subscriptions", "disableLastEventStorage", defaultValue);
+	}
+
+	std::string getLoggerFileName() const { return getProperty("logger", "fileName", std::string("dxfc.log")); }
+
+	int getLoggerRotatingMaxFileSize(int defaultValue = 5242880) const {
+		return getProperty("logger.rotating", "maxFileSize", defaultValue);
+	}
+
+	int getLoggerRotatingMaxFiles(int defaultValue = 3) const {
+		return getProperty("logger.rotating", "maxFiles", defaultValue);
 	}
 };
 }  // namespace dx
