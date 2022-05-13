@@ -26,6 +26,7 @@
 #include "EventSubscription.h"
 #include "Logger.h"
 #include "Snapshot.h"
+#include "Logger/LoggerNG.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -819,6 +820,10 @@ dxf_snapshot_t dx_create_snapshot(dxf_connection_t connection,
 								dxf_const_string_t symbol,
 								dxf_const_string_t order_source,
 								dxf_long_t time) {
+	dxf_log(dx_ll_info,
+			L"dx_create_snapshot(con = %p, sub = %p, event = '%ls', rid = %d, symbol = %ls, source = %ls, time = %d)",
+			connection, subscription, dxf_event_id_to_wstring(event_id), record_info_id, symbol, order_source, time);
+
 	dx_snapshot_subscription_connection_context_t* context = NULL;
 	dx_snapshot_data_t *snapshot_data = NULL;
 	int failed = false;
@@ -894,7 +899,15 @@ dxf_snapshot_t dx_create_snapshot(dxf_connection_t connection,
 		snapshot_data = dx_invalid_snapshot;
 	}
 
-	return (dx_mutex_unlock(&(context->guard)) ? (dxf_snapshot_t)snapshot_data : dx_invalid_snapshot);
+	dxf_snapshot_t result = dx_invalid_snapshot;
+
+	if (dx_mutex_unlock(&(context->guard))) {
+		result = (dxf_snapshot_t)snapshot_data;
+	}
+
+	dxf_log(dx_ll_info, L"dx_create_snapshot() -> %p", result);
+
+	return result;
 }
 
 int dx_close_snapshot(dxf_snapshot_t snapshot) {
