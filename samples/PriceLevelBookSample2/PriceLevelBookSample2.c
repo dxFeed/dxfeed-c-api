@@ -383,7 +383,12 @@ int main(int argc, char* argv[]) {
 #endif
 
 	dxf_connection_t connection;
-	dxf_price_level_book_v2_t book;
+
+	int count = 4;
+	dxf_price_level_book_v2_t books[4];
+	dxf_const_string_t symbols[4] = {L"AAPL", L"IBM", L"TSLA", L"AMZN"};
+	const char* sources[4] = {"NTV", "NTV", "NTV", "NTV"};
+
 	ERRORCODE connection_result;
 	if (token != NULL && token[0] != '\0') {
 		connection_result = dxf_create_connection_auth_bearer(dxfeed_host, token, on_reader_thread_terminate, NULL,
@@ -402,22 +407,26 @@ int main(int argc, char* argv[]) {
 
 	wprintf(L"Connected\n");
 
-	if (!dxf_create_price_level_book_v3(connection, base_symbol, order_source, levels_number, &book)) {
-		free(base_symbol);
-		process_last_error();
-		dxf_close_connection(connection);
+	for (int i = 0; i < count; i++) {
+		if (!dxf_create_price_level_book_v3(connection, symbols[i], sources[i], levels_number, &books[i])) {
+			free(base_symbol);
+			process_last_error();
+			dxf_close_connection(connection);
 
-		return 20;
+			return 20;
+		}
 	}
 
 	free(base_symbol);
 
-	if (!dxf_set_price_level_book_listeners_v2(book, &listener, &listener2, &inc_listener, order_source)) {
-		process_last_error();
-		dxf_close_price_level_book_v2(book);
-		dxf_close_connection(connection);
+	for (int i = 0; i < count; i++) {
+		if (!dxf_set_price_level_book_listeners_v2(books[i], &listener, &listener2, &inc_listener, order_source)) {
+			process_last_error();
+			dxf_close_price_level_book_v2(books[i]);
+			dxf_close_connection(connection);
 
-		return 21;
+			return 21;
+		}
 	}
 
 	wprintf(L"Subscribed\n");
@@ -430,11 +439,13 @@ int main(int argc, char* argv[]) {
 #endif
 	}
 
-	if (!dxf_close_price_level_book_v2(book)) {
-		process_last_error();
-		dxf_close_connection(connection);
+	for (int i = 0; i < count; i++) {
+		if (!dxf_close_price_level_book_v2(books[i])) {
+			process_last_error();
+			dxf_close_connection(connection);
 
-		return 22;
+			return 22;
+		}
 	}
 
 	wprintf(L"Disconnecting from host...\n");
