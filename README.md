@@ -61,6 +61,7 @@ Find useful information in self-service dxFeed Knowledge Base, or C API framewor
 - API
   - Boost.Locale.EncodingUtf (1.75)
   - [TOML11](https://github.com/ToruNiina/toml11) (3.6.0)
+  - [spdlog](https://github.com/gabime/spdlog) (1.10.0)
 - Tests
   - [Catch2](https://github.com/catchorg/Catch2) (2.13.8)
 - C++ Wrappers
