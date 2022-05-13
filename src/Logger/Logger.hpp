@@ -36,9 +36,6 @@ namespace dx {
 using LoggerPtr = std::shared_ptr<spdlog::logger>;
 
 struct LoggerFactory {
-	static constexpr const char* NULL_LOGGER_NAME = "Null";
-	static constexpr const char* DXF_LOGGER_NAME = "dxf::Logger";
-
 	static spdlog::level::level_enum dxLogLevelToLevel(dx_log_level_t level) {
 		const std::unordered_map<dx_log_level_t, spdlog::level::level_enum> converter = {
 			{dx_ll_trace, spdlog::level::trace}, {dx_ll_debug, spdlog::level::debug},
@@ -56,6 +53,7 @@ struct LoggerFactory {
 	}
 
 	static LoggerPtr getLogger(bool test = false) {
+		static const auto DXF_LOGGER_NAME = "dxf::Logger";
 		static bool initialized = false;
 
 		if (initialized) {
@@ -64,7 +62,6 @@ struct LoggerFactory {
 
 		auto consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
 
-		spdlog::create<spdlog::sinks::null_sink_mt>(NULL_LOGGER_NAME);
 		std::shared_ptr<spdlog::logger> logger;
 
 		std::vector<spdlog::sink_ptr> sinks;

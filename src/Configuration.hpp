@@ -39,6 +39,22 @@ extern "C" {
 
 namespace dx {
 namespace algorithm {
+
+inline std::vector<std::string> splitString(const std::string& s, const std::string& delimiter) {
+	std::size_t startPos = 0, endPos;
+	std::vector<std::string> res;
+
+	while ((endPos = s.find(delimiter, startPos)) != std::string::npos) {
+		auto token = s.substr(startPos, endPos - startPos);
+		startPos = endPos + delimiter.length();
+		res.push_back(token);
+	}
+
+	res.push_back(s.substr(startPos));
+
+	return res;
+}
+
 namespace detail {
 
 class IsIEqual {
@@ -230,12 +246,17 @@ public:
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
 
 		std::cerr << "\nC-API Configuration:\n" << toml::format(properties_, 120) << std::endl;
-		std::cerr << "Loaded defaults:\n";
+		std::cerr << "Loaded parameters:\n";
 		std::cerr << "dump = " << std::boolalpha << getDump() << std::endl;
 		std::cerr << "network.heartbeatPeriod = " << getNetworkHeartbeatPeriod() << std::endl;
 		std::cerr << "network.heartbeatTimeout = " << getNetworkHeartbeatTimeout() << std::endl;
-		std::cerr << "network.reestablishConnections = " << getNetworkReestablishConnections() << std::endl
-				  << std::endl;
+		std::cerr << "network.reestablishConnections = " << getNetworkReestablishConnections() << std::endl;
+		std::cerr << "subscriptions.disableLastEventStorage = " << getSubscriptionsDisableLastEventStorage() << std::endl;
+		std::cerr << "logger.level = " << getMinimumLoggingLevel() << std::endl;
+		std::cerr << "logger.fileName = " << getLoggerFileName() << std::endl;
+		std::cerr << "logger.rotating.maxFileSize = " << getLoggerRotatingMaxFileSize() << std::endl;
+		std::cerr << "logger.rotating.maxFiles = " << getLoggerRotatingMaxFiles() << std::endl;
+		std::cerr << std::endl;
 	}
 
 	bool load() {
@@ -310,8 +331,21 @@ public:
 		}
 
 		try {
-			return toml::find_or((groupName.empty()) ? properties_ : toml::find(properties_, groupName), fieldName,
-								 defaultValue);
+			if (groupName.empty()) {
+				return toml::find_or(properties_, fieldName, defaultValue);
+			}
+
+			auto split = algorithm::splitString(groupName, ".");
+
+			toml::value group = properties_;
+
+			for (const auto& groupNamePart : split) {
+				auto temp = group[groupNamePart];
+
+				group = std::move(temp);
+			}
+
+			return toml::find_or(group, fieldName, defaultValue);
 		} catch (const std::exception&) {
 			return defaultValue;
 		}

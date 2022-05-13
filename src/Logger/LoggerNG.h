@@ -26,7 +26,9 @@
 extern "C" {
 #endif
 
-void dxf_log(dx_log_level_t log_level, dxf_const_string_t string);
+void dxf_logs(dx_log_level_t log_level, dxf_const_string_t string);
+void dxf_log(dx_log_level_t log_level, dxf_const_string_t format, ...);
+dxf_const_string_t dxf_event_id_to_wstring(dx_event_id_t event_id);
 
 #ifdef __cplusplus
 }
