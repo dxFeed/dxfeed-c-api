@@ -43,6 +43,7 @@ extern "C" {
 #include <vector>
 
 #include "StringConverter.hpp"
+#include "Logger/Logger.hpp"
 
 namespace dx {
 static constexpr double NaN = std::numeric_limits<double>::quiet_NaN();
@@ -140,6 +141,7 @@ struct PriceLevelChangesSet {
 class PriceLevelBook final {
 	dxf_snapshot_t snapshot_;
 	std::string symbol_;
+	std::string source_;
 	std::size_t levelsNumber_;
 
 	/*
@@ -169,9 +171,10 @@ class PriceLevelBook final {
 		return std::abs(d1 - d2) < std::numeric_limits<double>::epsilon();
 	}
 
-	explicit PriceLevelBook(std::string symbol, std::size_t levelsNumber = 0)
+	explicit PriceLevelBook(std::string symbol, std::string source, std::size_t levelsNumber = 0)
 		: snapshot_{nullptr},
 		  symbol_{std::move(symbol)},
+		  source_{std::move(source)},
 		  levelsNumber_{levelsNumber},
 		  asks_{},
 		  lastAsk_{asks_.end()},
@@ -525,25 +528,31 @@ public:
 
 		if (snapshotData->records_count == 0) {
 			if (newSnap && onNewBook_) {
+				LoggerFactory::getLogger()->info("PLB::processSnapshotData::newBook: symbol = '{}', source = '{}'", symbol_, source_);
 				onNewBook_({}, userData_);
 			}
 
 			return;
 		}
 
+		LoggerFactory::getLogger()->info("PLB::processSnapshotData::convertRecordDataToUpdates: symbol = '{}', source = '{}', recordsCount = {}", symbol_, source_, snapshotData->records_count);
 		auto updates = convertToUpdates(snapshotData);
+		LoggerFactory::getLogger()->info("PLB::processSnapshotData::applyUpdates: symbol = '{}', source = '{}', recordsCount = {}", symbol_, source_, snapshotData->records_count);
 		auto resultingChangesSet = applyUpdates(updates);
 
 		if (newSnap) {
 			if (onNewBook_) {
+				LoggerFactory::getLogger()->info("PLB::processSnapshotData::newBook: symbol = '{}', source = '{}', recordsCount = {}", symbol_, source_, snapshotData->records_count);
 				onNewBook_(PriceLevelChanges{symbol_, getAsks(), getBids()}, userData_);
 			}
 		} else if (!resultingChangesSet.isEmpty()) {
 			if (onIncrementalChange_) {
+				LoggerFactory::getLogger()->info("PLB::processSnapshotData::incrementalChange: symbol = '{}', source = '{}', recordsCount = {}", symbol_, source_, snapshotData->records_count);
 				onIncrementalChange_(resultingChangesSet, userData_);
 			}
 
 			if (onBookUpdate_) {
+				LoggerFactory::getLogger()->info("PLB::processSnapshotData::BookUpdate: symbol = '{}', source = '{}', recordsCount = {}", symbol_, source_, snapshotData->records_count);
 				onBookUpdate_(PriceLevelChanges{symbol_, getAsks(), getBids()}, userData_);
 			}
 		}
@@ -557,7 +566,7 @@ public:
 
 	static PriceLevelBook* create(dxf_connection_t connection, const std::string& symbol, const std::string& source,
 								  std::size_t levelsNumber) {
-		auto plb = new PriceLevelBook(symbol, levelsNumber);
+		auto plb = new PriceLevelBook(symbol, source, levelsNumber);
 		auto wSymbol = StringConverter::utf8ToWString(symbol);
 		dxf_snapshot_t snapshot = nullptr;
 

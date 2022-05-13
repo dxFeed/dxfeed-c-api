@@ -81,7 +81,7 @@ struct LoggerFactory {
 				auto fileName = cfg->getLoggerFileName();
 				auto maxFileSize = cfg->getLoggerRotatingMaxFileSize();
 				auto maxFiles = cfg->getLoggerRotatingMaxFiles();
-				auto fileSink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(fileName, maxFileSize, maxFiles);
+				auto fileSink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(fileName, maxFileSize, maxFiles, true);
 
 				sinks.push_back(fileSink);
 				logger = std::make_shared<spdlog::logger>(DXF_LOGGER_NAME, sinks.begin(), sinks.end());
