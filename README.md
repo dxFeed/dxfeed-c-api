@@ -59,16 +59,19 @@ Find useful information in self-service dxFeed Knowledge Base, or C API framewor
 ## Dependencies
 
 - API
-  - Boost.Locale.EncodingUtf (1.75)
+  - Boost.Locale.EncodingUtf (1.79)
+  - Boost.MultiIndex (1.79)
   - [TOML11](https://github.com/ToruNiina/toml11) (3.6.0)
+  - [optional-lite](https://github.com/martinmoene/optional-lite) (3.5.0)
+  - [variant-lite](https://github.com/martinmoene/variant-lite) (2.0.0)
 - Tests
   - [Catch2](https://github.com/catchorg/Catch2) (2.13.8)
 - C++ Wrappers
-  - [Args](https://github.com/Taywee/args) (6.2.2)
-  - [fmt](https://github.com/fmtlib/fmt) (8.0.0)
-  - [optional-lite](https://github.com/martinmoene/optional-lite) (3.1.1)
-  - [string-view-lite](https://github.com/martinmoene/string-view-lite) (1.1.0)
-  - [variant-lite](https://github.com/martinmoene/variant-lite) (1.1.0)
+  - [Args](https://github.com/Taywee/args) (6.3.0)
+  - [fmt](https://github.com/fmtlib/fmt) (8.1.1)
+  - [optional-lite](https://github.com/martinmoene/optional-lite) (3.5.0)
+  - [string-view-lite](https://github.com/martinmoene/string-view-lite) (1.6.0)
+  - [variant-lite](https://github.com/martinmoene/variant-lite) (2.0.0)
 
 
 

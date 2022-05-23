@@ -23,8 +23,8 @@
 #include <vector>
 #include <functional>
 #include <DXFeed.h>
-#include <nonstd/string_view.hpp>
-#include <nonstd/variant.hpp>
+#include <string_view.hpp>
+#include <variant.hpp>
 #include "StringConverter.hpp"
 #include "Event.hpp"
 

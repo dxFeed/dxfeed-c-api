@@ -62,7 +62,7 @@ if (NOT ${APP_VERSION} STREQUAL "")
     configure_file("${PROJECT_SOURCE_DIR}/${PROJECT}${POSTFIX}.def.in" "${PROJECT_SOURCE_DIR}/${DEF_FILE}")
 endif ()
 
-include_directories(${INCLUDE_DIR} ../thirdparty/toml11 ../thirdparty/boost-1_75)
+include_directories(${INCLUDE_DIR} ../thirdparty/toml11 ../thirdparty/boost-1_79)
 
 set(EXPORT_HEADERS
         ${INCLUDE_DIR}/DXErrorCodes.h
