@@ -83,13 +83,15 @@ public:
 	}
 
 	std::shared_ptr<Snapshot> create(const ConnectionKey& connectionKey, const SnapshotKey& snapshotKey) {
-
+		//TODO: create snapshot or SnapshotSubscriber-s.
 
 		return nullptr;
 	}
 
 	bool remove(const SnapshotKey& snapshotKey) {
 		std::lock_guard<std::mutex> guard(snapshotsMutex);
+
+		//TODO: unsubscribe SnapshotSubscriber-s (by key params) and delete the snapshot if there are no more subscribers left
 
 		return 0 != snapshots.erase(snapshotKey);
 	}
