@@ -22,8 +22,8 @@
 #include <memory>
 #include <vector>
 
-#include <nonstd/optional.hpp>
-#include <nonstd/string_view.hpp>
+#include <optional.hpp>
+#include <string_view.hpp>
 
 #include <DXFeed.h>
 #include "Subscription.hpp"

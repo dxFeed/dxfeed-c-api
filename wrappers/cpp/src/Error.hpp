@@ -21,7 +21,7 @@
 
 #include <DXFeed.h>
 #include <string>
-#include <nonstd/string_view.hpp>
+#include <string_view.hpp>
 #include <fmt/format.h>
 #include "StringConverter.hpp"
 
