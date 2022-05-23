@@ -24,19 +24,16 @@ extern "C" {
 #include <EventData.h>
 }
 
-#include <memory>
-#include <optional.hpp>
-#include <unordered_map>
-#include <string>
 #include <cstdint>
-#include <mutex>
 #include <functional>
+#include <memory>
+#include <mutex>
+#include <optional.hpp>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace dx {
-
-struct Snapshot {
-
-};
 
 struct SnapshotKey {
 	dx_event_id_t eventId;
@@ -56,16 +53,20 @@ struct SnapshotSubscriber {
 	std::function<void(const SnapshotChanges&, void*)> onIncrementalChange_;
 };
 
+struct Snapshot {
+	std::vector<SnapshotSubscriber> subscribers;
+	std::mutex subscribersMutex;
+
+};
+
 template <typename ConnectionKey = dxf_connection_t>
 struct SnapshotManager {
 private:
-
 	static std::unordered_map<ConnectionKey, std::shared_ptr<SnapshotManager>> managers;
 	std::unordered_map<SnapshotKey, std::shared_ptr<Snapshot>> snapshots;
 	std::mutex snapshotsMutex;
 
 public:
-
 	static std::shared_ptr<SnapshotManager> getInstance(const ConnectionKey& connectionKey) {
 		auto found = managers.find(connectionKey);
 
@@ -94,8 +95,19 @@ public:
 		return found->second;
 	}
 
-	std::shared_ptr<Snapshot> create(const ConnectionKey& connectionKey, const SnapshotKey& snapshotKey) {
-		//TODO: create snapshot or SnapshotSubscriber-s.
+	std::shared_ptr<Snapshot> create(const ConnectionKey& connectionKey, const SnapshotKey& snapshotKey,
+									 void* userData) {
+		// TODO: create snapshot or SnapshotSubscriber-s.
+
+		std::lock_guard<std::mutex> guard(snapshotsMutex);
+
+		auto found = snapshots.find(snapshotKey);
+
+		if (found == snapshots.end()) {
+			return nullptr;
+		}
+
+		return found->second;
 
 		return nullptr;
 	}
@@ -103,7 +115,8 @@ public:
 	bool remove(const SnapshotKey& snapshotKey) {
 		std::lock_guard<std::mutex> guard(snapshotsMutex);
 
-		//TODO: unsubscribe SnapshotSubscriber-s (by key params) and delete the snapshot if there are no more subscribers left
+		// TODO: unsubscribe SnapshotSubscriber-s (by key params) and delete the snapshot if there are no more
+		// subscribers left
 
 		return 0 != snapshots.erase(snapshotKey);
 	}
