@@ -62,7 +62,7 @@ if (NOT ${APP_VERSION} STREQUAL "")
     configure_file("${PROJECT_SOURCE_DIR}/${PROJECT}${POSTFIX}.def.in" "${PROJECT_SOURCE_DIR}/${DEF_FILE}")
 endif ()
 
-include_directories(${INCLUDE_DIR} ../thirdparty/toml11 ../thirdparty/boost-1_79)
+include_directories(${INCLUDE_DIR} ../thirdparty/toml11 ../thirdparty/boost-1_79 ../thirdparty/optional-lite-3.5.0 ../thirdparty/variant-lite-2.0.0)
 
 set(EXPORT_HEADERS
         ${INCLUDE_DIR}/DXErrorCodes.h
@@ -106,6 +106,8 @@ set(HEADER_FILES
         RecordTranscoder.h
         ServerMessageProcessor.h
         Snapshot.h
+        Snapshot/Snapshot.h
+        Snapshot/Snapshot.hpp
         StringConverter.hpp
         TaskQueue.h
         TimeMarkUtil.hpp
@@ -169,6 +171,7 @@ set(SOURCE_FILES
         RecordTranscoder.c
         ServerMessageProcessor.c
         Snapshot.c
+        Snapshot/Snapshot.cpp
         TaskQueue.c
         Version.c
         WideDecimal.cpp
