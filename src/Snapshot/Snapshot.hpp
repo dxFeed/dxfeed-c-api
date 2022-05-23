@@ -30,6 +30,7 @@ extern "C" {
 #include <string>
 #include <cstdint>
 #include <mutex>
+#include <functional>
 
 namespace dx {
 
@@ -42,6 +43,17 @@ struct SnapshotKey {
 	std::string symbol;
 	nonstd::optional<std::string> source;
 	nonstd::optional<std::int64_t> time;
+};
+
+struct SnapshotChanges {};
+
+struct SnapshotSubscriber {
+	SnapshotKey filter;
+	void* userData;
+
+	std::function<void(const SnapshotChanges&, void*)> onNewSnapshot_;
+	std::function<void(const SnapshotChanges&, void*)> onSnapshotUpdate_;
+	std::function<void(const SnapshotChanges&, void*)> onIncrementalChange_;
 };
 
 template <typename ConnectionKey = dxf_connection_t>
