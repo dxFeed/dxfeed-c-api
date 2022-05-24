@@ -68,12 +68,14 @@ inline std::size_t hashCombine(std::size_t seed, Ts&&... vs) {
 
 }  // namespace dx
 
+namespace std {
 template <>
-struct std::hash<dx::SnapshotKey> {
+struct hash<dx::SnapshotKey> {
 	std::size_t operator()(const dx::SnapshotKey& key) const noexcept {
 		return dx::hashCombine(static_cast<std::size_t>(key.eventId), key.symbol, key.source, key.time);
 	}
 };
+}  // namespace std
 
 namespace dx {
 
