@@ -26,6 +26,9 @@ extern "C" {
 extern "C" {
 ERRORCODE dx_create_snapshot_v2(dxf_connection_t connection, dx_event_id_t event_id, dxf_const_string_t symbol,
 								const char *source, dxf_long_t time, OUT dxf_snapshot_t *snapshot) {
+
+	auto m = dx::SnapshotManager<dxf_connection_t>::getInstance(connection);
+
 	return DXF_SUCCESS;
 }
 }

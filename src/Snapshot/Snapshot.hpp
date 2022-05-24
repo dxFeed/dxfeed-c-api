@@ -30,7 +30,9 @@ extern "C" {
 #include <mutex>
 #include <optional.hpp>
 #include <string>
+#include <type_traits>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace dx {
@@ -41,6 +43,39 @@ struct SnapshotKey {
 	nonstd::optional<std::string> source;
 	nonstd::optional<std::int64_t> time;
 };
+
+inline void hashCombineInPlace(std::size_t& seed) {}
+
+template <typename T>
+inline void hashCombineInPlace(std::size_t& seed, T&& v) {
+	using U = typename std::decay<T>::type;
+
+	seed ^= (std::hash<U>{}(std::forward<T>(v)) + 0x9e3779b9 + (seed << 6) + (seed >> 2));
+}
+
+template <typename T, typename... Ts>
+inline void hashCombineInPlace(std::size_t& seed, T&& v, Ts&&... vs) {
+	hashCombineInPlace(seed, std::forward<T>(v));
+	hashCombineInPlace(seed, std::forward<Ts>(vs)...);
+}
+
+template <typename... Ts>
+inline std::size_t hashCombine(std::size_t seed, Ts&&... vs) {
+	hashCombineInPlace(seed, std::forward<Ts>(vs)...);
+
+	return seed;
+}
+
+}  // namespace dx
+
+template <>
+struct std::hash<dx::SnapshotKey> {
+	std::size_t operator()(const dx::SnapshotKey& key) const noexcept {
+		return dx::hashCombine(static_cast<std::size_t>(key.eventId), key.symbol, key.source, key.time);
+	}
+};
+
+namespace dx {
 
 struct SnapshotChanges {};
 
@@ -57,6 +92,7 @@ struct Snapshot {
 	std::vector<SnapshotSubscriber> subscribers;
 	std::mutex subscribersMutex;
 
+	explicit Snapshot() : subscribers{}, subscribersMutex{} {}
 };
 
 template <typename ConnectionKey = dxf_connection_t>
@@ -66,6 +102,8 @@ private:
 	std::unordered_map<SnapshotKey, std::shared_ptr<Snapshot>> snapshots;
 	std::mutex snapshotsMutex;
 
+	explicit SnapshotManager() : snapshots{}, snapshotsMutex{} {}
+
 public:
 	static std::shared_ptr<SnapshotManager> getInstance(const ConnectionKey& connectionKey) {
 		auto found = managers.find(connectionKey);
@@ -74,7 +112,8 @@ public:
 			return found->second;
 		}
 
-		auto inserted = managers.emplace(connectionKey, std::make_shared<SnapshotManager>());
+		auto inserted = managers.emplace(
+			connectionKey, std::shared_ptr<SnapshotManager<ConnectionKey>>(new SnapshotManager<ConnectionKey>{}));
 
 		if (inserted.second) {
 			return inserted.first->second;
@@ -121,5 +160,9 @@ public:
 		return 0 != snapshots.erase(snapshotKey);
 	}
 };
+
+template <typename ConnectionKey>
+std::unordered_map<ConnectionKey, std::shared_ptr<SnapshotManager<ConnectionKey>>>
+	SnapshotManager<ConnectionKey>::managers{};
 
 }  // namespace dx
