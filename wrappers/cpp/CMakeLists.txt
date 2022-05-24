@@ -38,7 +38,6 @@ add_subdirectory(samples)
 set(BUILD_FILES CMakeLists.txt)
 set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/DXFeedAllCPackConfig.cmake")
 
-install(DIRECTORY thirdparty DESTINATION "wrappers/cpp" CONFIGURATIONS Release)
 install(FILES ${BUILD_FILES} DESTINATION "wrappers/cpp" CONFIGURATIONS Release)
 
 set(CPACK_PACKAGE_VENDOR "Devexperts LLC")
