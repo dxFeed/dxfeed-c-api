@@ -1,14 +1,16 @@
 #pragma once
 
 namespace dx {
+using Id = long long;
+
 template <typename T>
 class IdGenerator {
-	static long long id;
+	static Id id;
 
 public:
-	static long long get() { return id++; }
+	static Id get() { return id++; }
 };
 
 template <typename T>
-long long IdGenerator<T>::id{0};
+Id IdGenerator<T>::id{0};
 }  // namespace dx

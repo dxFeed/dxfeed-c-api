@@ -85,15 +85,83 @@ struct hash<dx::SnapshotKey> {
 
 namespace dx {
 
-struct SnapshotChanges {};
+struct SnapshotChanges {
+	SnapshotKey snapshotKey;
 
-struct SnapshotSubscriber {
-	SnapshotKey filter;
-	void* userData;
+	SnapshotChanges() = default;
 
-	std::function<void(const SnapshotChanges&, void*)> onNewSnapshot_;
-	std::function<void(const SnapshotChanges&, void*)> onSnapshotUpdate_;
-	std::function<void(const SnapshotChanges&, void*)> onIncrementalChange_;
+	SnapshotChanges(SnapshotKey newSnapshotKey) : snapshotKey{std::move(newSnapshotKey)} {}
+
+	[[nodiscard]] bool isEmpty() const { return true; }
+};
+
+struct SnapshotChangesSet {
+	SnapshotChanges removals{};
+	SnapshotChanges additions{};
+	SnapshotChanges updates{};
+
+	SnapshotChangesSet() = default;
+
+	SnapshotChangesSet(SnapshotChanges newRemovals, SnapshotChanges newAdditions, SnapshotChanges newUpdates)
+		: removals{std::move(newRemovals)}, additions{std::move(newAdditions)}, updates{std::move(newUpdates)} {}
+
+	[[nodiscard]] bool isEmpty() const { return removals.isEmpty() && additions.isEmpty() && updates.isEmpty(); }
+};
+
+class SnapshotSubscriber {
+	SnapshotKey filter_;
+	void* userData_;
+	mutable std::recursive_mutex mutex_;
+
+	std::function<void(const SnapshotChanges&, void*)> onNewSnapshot_{};
+	std::function<void(const SnapshotChanges&, void*)> onSnapshotUpdate_{};
+	std::function<void(const SnapshotChangesSet&, void*)> onIncrementalChange_{};
+
+public:
+	SnapshotSubscriber(const SnapshotKey& filter, void* userData) : filter_{filter}, userData_{userData}, mutex_{} {}
+
+	SnapshotSubscriber(const SnapshotSubscriber& sub) : mutex_() {
+		filter_ = sub.filter_;
+		userData_ = sub.userData_;
+		onNewSnapshot_ = sub.onNewSnapshot_;
+		onSnapshotUpdate_ = sub.onSnapshotUpdate_;
+		onIncrementalChange_ = sub.onIncrementalChange_;
+	}
+
+	SnapshotSubscriber& operator=(const SnapshotSubscriber& sub) {
+		if (this == &sub) {
+			return *this;
+		}
+
+		filter_ = sub.filter_;
+		userData_ = sub.userData_;
+		onNewSnapshot_ = sub.onNewSnapshot_;
+		onSnapshotUpdate_ = sub.onSnapshotUpdate_;
+		onIncrementalChange_ = sub.onIncrementalChange_;
+
+		return *this;
+	}
+
+	void setOnNewSnapshot(std::function<void(const SnapshotChanges&, void*)> onNewSnapshotHandler) {
+		std::lock_guard<std::recursive_mutex> guard{mutex_};
+		onNewSnapshot_ = std::move(onNewSnapshotHandler);
+	}
+
+	void setOnSnapshotUpdate(std::function<void(const SnapshotChanges&, void*)> onSnapshotUpdateHandler) {
+		std::lock_guard<std::recursive_mutex> guard{mutex_};
+		onSnapshotUpdate_ = std::move(onSnapshotUpdateHandler);
+	}
+
+	void setOnIncrementalChange(std::function<void(const SnapshotChangesSet&, void*)> onIncrementalChangeHandler) {
+		std::lock_guard<std::recursive_mutex> guard{mutex_};
+		onIncrementalChange_ = std::move(onIncrementalChangeHandler);
+	}
+
+	SnapshotKey getFilter() const {
+		std::lock_guard<std::recursive_mutex> guard{mutex_};
+
+		return filter_;
+	}
 };
 
 struct Snapshot {
@@ -113,12 +181,16 @@ struct SnapshotManager {
 private:
 	static std::unordered_map<ConnectionKey, std::shared_ptr<SnapshotManager>> managers;
 	std::unordered_map<SnapshotKey, std::shared_ptr<IndexedEventsSnapshot>> indexedEventsSnapshots;
+	std::unordered_map<Id, std::shared_ptr<IndexedEventsSnapshot>> indexedEventsSnapshotsById;
+	std::unordered_map<SnapshotKey, Id> indexedEventsSnapshotKeyToId;
 	std::mutex indexedEventsSnapshotsMutex;
 	std::unordered_map<SnapshotKey, std::shared_ptr<TimeSeriesEventsSnapshot>> timeSeriesEventsSnapshots;
 	std::mutex timeSeriesEventsSnapshotsMutex;
 
 	explicit SnapshotManager()
 		: indexedEventsSnapshots{},
+		  indexedEventsSnapshotsById{},
+		  indexedEventsSnapshotKeyToId{},
 		  indexedEventsSnapshotsMutex{},
 		  timeSeriesEventsSnapshots{},
 		  timeSeriesEventsSnapshotsMutex{} {}
@@ -136,8 +208,7 @@ public:
 			return found->second;
 		}
 
-		auto inserted = managers.emplace(
-			connectionKey, std::shared_ptr<SnapshotManager>(new SnapshotManager{}));
+		auto inserted = managers.emplace(connectionKey, std::shared_ptr<SnapshotManager>(new SnapshotManager{}));
 
 		if (inserted.second) {
 			return inserted.first->second;
@@ -151,27 +222,11 @@ public:
 		return nullptr;
 	}
 
-	//
-	//	template <typename T>
-	//	std::shared_ptr<T> create(const ConnectionKey&, const SnapshotKey&, void*) {
-	//		return nullptr;
-	//	}
-	//
-	//	template <>
-	//	std::shared_ptr<IndexedEventsSnapshot> create(const ConnectionKey& connectionKey, const SnapshotKey&
-	// snapshotKey, 									 void* userData) {
-	//		// TODO: create snapshot or SnapshotSubscriber-s.
-	//
-	//		std::lock_guard<std::mutex> guard(indexedEventsSnapshotsMutex);
-	//
-	//		auto snapshot = getImpl(snapshotKey);
-	//
-	//		if (!snapshot) {
-	//		}
-	//
-	//		return nullptr;
-	//	}
-	//
+	template <typename T>
+	std::pair<std::shared_ptr<T>, Id> create(const ConnectionKey&, const SnapshotKey&, void*) {
+		return {nullptr, -1};
+	}
+
 	//	bool remove(const SnapshotKey& snapshotKey) {
 	//		std::lock_guard<std::mutex> guard(IndexedEventsSnapshot);
 	//
@@ -182,8 +237,7 @@ public:
 	//	}
 };
 
-std::unordered_map<SnapshotManager::ConnectionKey, std::shared_ptr<SnapshotManager>>
-	SnapshotManager::managers{};
+std::unordered_map<SnapshotManager::ConnectionKey, std::shared_ptr<SnapshotManager>> SnapshotManager::managers{};
 
 template <>
 std::shared_ptr<IndexedEventsSnapshot> SnapshotManager::getImpl(const SnapshotKey& snapshotKey) {
@@ -221,5 +275,27 @@ std::shared_ptr<TimeSeriesEventsSnapshot> SnapshotManager::get(const SnapshotKey
 	return getImpl<TimeSeriesEventsSnapshot>(snapshotKey);
 }
 
+template <>
+std::pair<std::shared_ptr<IndexedEventsSnapshot>, Id> SnapshotManager::create(const ConnectionKey& connectionKey,
+																			  const SnapshotKey& snapshotKey,
+																			  void* userData) {
+	// TODO: create snapshot or SnapshotSubscriber-s.
+	std::lock_guard<std::mutex> guard(indexedEventsSnapshotsMutex);
+
+	auto snapshot = getImpl<IndexedEventsSnapshot>(snapshotKey);
+
+	if (snapshot) {
+		SnapshotSubscriber subscriber{snapshotKey, userData};
+		snapshot->subscribers.emplace_back(subscriber);
+
+		return {snapshot, indexedEventsSnapshotKeyToId[snapshotKey]};
+	}
+
+	auto inserted = indexedEventsSnapshots.emplace(snapshotKey,
+												   std::shared_ptr<IndexedEventsSnapshot>(new IndexedEventsSnapshot{}));
+	auto id = IdGenerator<IndexedEventsSnapshot>::get();
+
+	return {inserted.first->second, id};
+}
 
 }  // namespace dx
