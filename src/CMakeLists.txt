@@ -95,6 +95,7 @@ set(HEADER_FILES
         EventSubscription.h
         EventSubscription.hpp
         HeartbeatPayload.hpp
+        IdGenerator.hpp
         Logger.h
         ObjectArray.h
         PriceLevelBook.h

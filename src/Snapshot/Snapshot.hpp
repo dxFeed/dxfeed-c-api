@@ -35,6 +35,8 @@ extern "C" {
 #include <utility>
 #include <vector>
 
+#include "../IdGenerator.hpp"
+
 namespace dx {
 
 struct SnapshotKey {
@@ -42,6 +44,10 @@ struct SnapshotKey {
 	std::string symbol;
 	nonstd::optional<std::string> source;
 	nonstd::optional<std::int64_t> time;
+
+	bool operator==(const SnapshotKey& other) const {
+		return eventId == other.eventId && symbol == other.symbol && source == other.source && time == other.time;
+	}
 };
 
 inline void hashCombineInPlace(std::size_t& seed) {}
@@ -97,14 +103,30 @@ struct Snapshot {
 	explicit Snapshot() : subscribers{}, subscribersMutex{} {}
 };
 
-template <typename ConnectionKey = dxf_connection_t>
+struct IndexedEventsSnapshot : Snapshot {};
+
+struct TimeSeriesEventsSnapshot : Snapshot {};
+
 struct SnapshotManager {
+	using ConnectionKey = dxf_connection_t;
+
 private:
 	static std::unordered_map<ConnectionKey, std::shared_ptr<SnapshotManager>> managers;
-	std::unordered_map<SnapshotKey, std::shared_ptr<Snapshot>> snapshots;
-	std::mutex snapshotsMutex;
+	std::unordered_map<SnapshotKey, std::shared_ptr<IndexedEventsSnapshot>> indexedEventsSnapshots;
+	std::mutex indexedEventsSnapshotsMutex;
+	std::unordered_map<SnapshotKey, std::shared_ptr<TimeSeriesEventsSnapshot>> timeSeriesEventsSnapshots;
+	std::mutex timeSeriesEventsSnapshotsMutex;
 
-	explicit SnapshotManager() : snapshots{}, snapshotsMutex{} {}
+	explicit SnapshotManager()
+		: indexedEventsSnapshots{},
+		  indexedEventsSnapshotsMutex{},
+		  timeSeriesEventsSnapshots{},
+		  timeSeriesEventsSnapshotsMutex{} {}
+
+	template <typename T>
+	std::shared_ptr<T> getImpl(const SnapshotKey&) {
+		return nullptr;
+	}
 
 public:
 	static std::shared_ptr<SnapshotManager> getInstance(const ConnectionKey& connectionKey) {
@@ -115,7 +137,7 @@ public:
 		}
 
 		auto inserted = managers.emplace(
-			connectionKey, std::shared_ptr<SnapshotManager<ConnectionKey>>(new SnapshotManager<ConnectionKey>{}));
+			connectionKey, std::shared_ptr<SnapshotManager>(new SnapshotManager{}));
 
 		if (inserted.second) {
 			return inserted.first->second;
@@ -124,47 +146,80 @@ public:
 		return managers[connectionKey];
 	}
 
-	std::shared_ptr<Snapshot> get(const SnapshotKey& snapshotKey) {
-		std::lock_guard<std::mutex> guard(snapshotsMutex);
-
-		auto found = snapshots.find(snapshotKey);
-
-		if (found == snapshots.end()) {
-			return nullptr;
-		}
-
-		return found->second;
-	}
-
-	std::shared_ptr<Snapshot> create(const ConnectionKey& connectionKey, const SnapshotKey& snapshotKey,
-									 void* userData) {
-		// TODO: create snapshot or SnapshotSubscriber-s.
-
-		std::lock_guard<std::mutex> guard(snapshotsMutex);
-
-		auto found = snapshots.find(snapshotKey);
-
-		if (found == snapshots.end()) {
-			return nullptr;
-		}
-
-		return found->second;
-
+	template <typename T>
+	std::shared_ptr<T> get(const SnapshotKey&) {
 		return nullptr;
 	}
 
-	bool remove(const SnapshotKey& snapshotKey) {
-		std::lock_guard<std::mutex> guard(snapshotsMutex);
-
-		// TODO: unsubscribe SnapshotSubscriber-s (by key params) and delete the snapshot if there are no more
-		// subscribers left
-
-		return 0 != snapshots.erase(snapshotKey);
-	}
+	//
+	//	template <typename T>
+	//	std::shared_ptr<T> create(const ConnectionKey&, const SnapshotKey&, void*) {
+	//		return nullptr;
+	//	}
+	//
+	//	template <>
+	//	std::shared_ptr<IndexedEventsSnapshot> create(const ConnectionKey& connectionKey, const SnapshotKey&
+	// snapshotKey, 									 void* userData) {
+	//		// TODO: create snapshot or SnapshotSubscriber-s.
+	//
+	//		std::lock_guard<std::mutex> guard(indexedEventsSnapshotsMutex);
+	//
+	//		auto snapshot = getImpl(snapshotKey);
+	//
+	//		if (!snapshot) {
+	//		}
+	//
+	//		return nullptr;
+	//	}
+	//
+	//	bool remove(const SnapshotKey& snapshotKey) {
+	//		std::lock_guard<std::mutex> guard(IndexedEventsSnapshot);
+	//
+	//		// TODO: unsubscribe SnapshotSubscriber-s (by key params) and delete the snapshot if there are no more
+	//		// subscribers left
+	//
+	//		return 0 != snapshots.erase(snapshotKey);
+	//	}
 };
 
-template <typename ConnectionKey>
-std::unordered_map<ConnectionKey, std::shared_ptr<SnapshotManager<ConnectionKey>>>
-	SnapshotManager<ConnectionKey>::managers{};
+std::unordered_map<SnapshotManager::ConnectionKey, std::shared_ptr<SnapshotManager>>
+	SnapshotManager::managers{};
+
+template <>
+std::shared_ptr<IndexedEventsSnapshot> SnapshotManager::getImpl(const SnapshotKey& snapshotKey) {
+	auto found = indexedEventsSnapshots.find(snapshotKey);
+
+	if (found == indexedEventsSnapshots.end()) {
+		return nullptr;
+	}
+
+	return found->second;
+}
+
+template <>
+std::shared_ptr<TimeSeriesEventsSnapshot> SnapshotManager::getImpl(const SnapshotKey& snapshotKey) {
+	auto found = timeSeriesEventsSnapshots.find(snapshotKey);
+
+	if (found == timeSeriesEventsSnapshots.end()) {
+		return nullptr;
+	}
+
+	return found->second;
+}
+
+template <>
+std::shared_ptr<IndexedEventsSnapshot> SnapshotManager::get(const SnapshotKey& snapshotKey) {
+	std::lock_guard<std::mutex> guard(indexedEventsSnapshotsMutex);
+
+	return getImpl<IndexedEventsSnapshot>(snapshotKey);
+}
+
+template <>
+std::shared_ptr<TimeSeriesEventsSnapshot> SnapshotManager::get(const SnapshotKey& snapshotKey) {
+	std::lock_guard<std::mutex> guard(timeSeriesEventsSnapshotsMutex);
+
+	return getImpl<TimeSeriesEventsSnapshot>(snapshotKey);
+}
+
 
 }  // namespace dx
