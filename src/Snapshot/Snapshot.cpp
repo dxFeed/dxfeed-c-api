@@ -28,7 +28,7 @@ ERRORCODE dx_create_snapshot_v2(dxf_connection_t connection, dx_event_id_t event
 								const char *source, dxf_long_t time, OUT dxf_snapshot_t *snapshot) {
 
 	auto m = dx::SnapshotManager::getInstance(connection);
-	auto r = dx::IdGenerator<dx::SnapshotSubscriber>::get();
+	auto r = dx::IdGenerator<dx::SnapshotSubscriber<dx::Snapshot::ReferenceId>>::get();
 
 	return DXF_SUCCESS;
 }

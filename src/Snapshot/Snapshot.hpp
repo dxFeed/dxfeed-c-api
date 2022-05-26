@@ -108,7 +108,11 @@ struct SnapshotChangesSet {
 	[[nodiscard]] bool isEmpty() const { return removals.isEmpty() && additions.isEmpty() && updates.isEmpty(); }
 };
 
+struct Snapshot;
+
+template <typename ReferenceId>
 class SnapshotSubscriber {
+	ReferenceId referenceId_;
 	SnapshotKey filter_;
 	void* userData_;
 	mutable std::recursive_mutex mutex_;
@@ -118,7 +122,8 @@ class SnapshotSubscriber {
 	std::function<void(const SnapshotChangesSet&, void*)> onIncrementalChange_{};
 
 public:
-	SnapshotSubscriber(const SnapshotKey& filter, void* userData) : filter_{filter}, userData_{userData}, mutex_{} {}
+	SnapshotSubscriber(ReferenceId referenceId, const SnapshotKey& filter, void* userData)
+		: referenceId_{referenceId}, filter_{filter}, userData_{userData}, mutex_{} {}
 
 	SnapshotSubscriber(const SnapshotSubscriber& sub) : mutex_() {
 		filter_ = sub.filter_;
@@ -165,7 +170,8 @@ public:
 };
 
 struct Snapshot {
-	std::vector<SnapshotSubscriber> subscribers;
+	using ReferenceId = Id;
+	std::vector<SnapshotSubscriber<ReferenceId>> subscribers;
 	std::mutex subscribersMutex;
 
 	explicit Snapshot() : subscribers{}, subscribersMutex{} {}
@@ -181,16 +187,14 @@ struct SnapshotManager {
 private:
 	static std::unordered_map<ConnectionKey, std::shared_ptr<SnapshotManager>> managers;
 	std::unordered_map<SnapshotKey, std::shared_ptr<IndexedEventsSnapshot>> indexedEventsSnapshots;
-	std::unordered_map<Id, std::shared_ptr<IndexedEventsSnapshot>> indexedEventsSnapshotsById;
-	std::unordered_map<SnapshotKey, Id> indexedEventsSnapshotKeyToId;
+	std::unordered_map<Snapshot::ReferenceId, std::shared_ptr<IndexedEventsSnapshot>> indexedEventsSnapshotsByRefId;
 	std::mutex indexedEventsSnapshotsMutex;
 	std::unordered_map<SnapshotKey, std::shared_ptr<TimeSeriesEventsSnapshot>> timeSeriesEventsSnapshots;
 	std::mutex timeSeriesEventsSnapshotsMutex;
 
 	explicit SnapshotManager()
 		: indexedEventsSnapshots{},
-		  indexedEventsSnapshotsById{},
-		  indexedEventsSnapshotKeyToId{},
+		  indexedEventsSnapshotsByRefId{},
 		  indexedEventsSnapshotsMutex{},
 		  timeSeriesEventsSnapshots{},
 		  timeSeriesEventsSnapshotsMutex{} {}
@@ -283,17 +287,18 @@ std::pair<std::shared_ptr<IndexedEventsSnapshot>, Id> SnapshotManager::create(co
 	std::lock_guard<std::mutex> guard(indexedEventsSnapshotsMutex);
 
 	auto snapshot = getImpl<IndexedEventsSnapshot>(snapshotKey);
+	auto id = IdGenerator<IndexedEventsSnapshot>::get();
+	SnapshotSubscriber<Snapshot::ReferenceId> subscriber{id, snapshotKey, userData};
 
 	if (snapshot) {
-		SnapshotSubscriber subscriber{snapshotKey, userData};
 		snapshot->subscribers.emplace_back(subscriber);
+		indexedEventsSnapshotsByRefId.emplace(id, snapshot);
 
-		return {snapshot, indexedEventsSnapshotKeyToId[snapshotKey]};
+		return {snapshot, id};
 	}
 
 	auto inserted = indexedEventsSnapshots.emplace(snapshotKey,
 												   std::shared_ptr<IndexedEventsSnapshot>(new IndexedEventsSnapshot{}));
-	auto id = IdGenerator<IndexedEventsSnapshot>::get();
 
 	return {inserted.first->second, id};
 }
