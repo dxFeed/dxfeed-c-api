@@ -115,7 +115,6 @@
  * @brief Event Subscription Stuff
  */
 
-
 #ifndef EVENT_DATA_H_INCLUDED
 #define EVENT_DATA_H_INCLUDED
 
@@ -222,7 +221,8 @@ typedef enum dxf_order_action_t {
 	 * - \ref dxf_order_t.order_id - always present
 	 * - \ref dxf_order_t.aux_order_id - aggressor order ID, if available
 	 * - \ref dxf_order_t.trade_id - if available
-	 * - \ref dxf_order_t.trade_size and \ref dxf_order_t.trade_price - contain size and price of this execution - always present
+	 * - \ref dxf_order_t.trade_size and \ref dxf_order_t.trade_price - contain size and price of this execution -
+	 * always present
 	 *
 	 * Integer value = 6
 	 */
@@ -235,7 +235,8 @@ typedef enum dxf_order_action_t {
 	 * Full Order Book fields:
 	 * - \ref dxf_order_t.order_id - always empty
 	 * - \ref dxf_order_t.trade_id - if available
-	 * - \ref dxf_order_t.trade_size and \ref dxf_order_t.trade_price - contain size and price of this trade - always present
+	 * - \ref dxf_order_t.trade_size and \ref dxf_order_t.trade_price - contain size and price of this trade - always
+	 * present
 	 *
 	 * Integer value = 7
 	 */
@@ -306,15 +307,17 @@ typedef struct dxf_order_t {
 	/// Microseconds and nanoseconds part of time of this order.
 	dxf_int_t time_nanos;
 
-	/// Order action if available, otherwise - dxf_oa_undefined. This field is a part of the FOB ("Full Order Book") support.
+	/// Order action if available, otherwise - dxf_oa_undefined. This field is a part of the FOB ("Full Order Book")
+	/// support.
 	dxf_order_action_t action;
 
-	/// Time of the last \ref dxf_order.action if available, otherwise - 0. This field is a part of the FOB ("Full Order Book") support.
+	/// Time of the last \ref dxf_order.action if available, otherwise - 0. This field is a part of the FOB ("Full Order
+	/// Book") support.
 	dxf_long_t action_time;
 
 	/**
-	 * Contains order ID if available, otherwise - 0. Some actions dxf_oa_trade, dxf_oa_bust have no order since they are not related
-	 * to any order in Order book.
+	 * Contains order ID if available, otherwise - 0. Some actions dxf_oa_trade, dxf_oa_bust have no order since they
+	 * are not related to any order in Order book.
 	 *
 	 * This field is a part of the FOB ("Full Order Book") support.
 	 */
@@ -437,8 +440,8 @@ typedef struct dxf_trade_t {
 	 * Value equals price minus dxf_summary_t#prev_day_close_price
 	 */
 	dxf_double_t change;
-	/// Identifier of the day that this `trade` or `trade_eth` represents. Identifier of the day is the number of days passed since
-	/// January 1, 1970.
+	/// Identifier of the day that this `trade` or `trade_eth` represents. Identifier of the day is the number of days
+	/// passed since January 1, 1970.
 	dxf_dayid_t day_id;
 	/// Total volume traded for a day
 	dxf_double_t day_volume;
@@ -446,10 +449,10 @@ typedef struct dxf_trade_t {
 	dxf_double_t day_turnover;
 	/**
 	 * This field contains several individual flags encoded as an integer number the following way:
-     * <table>
-     * <tr><th>31...4</th><th>3</th><th>2</th><th>1</th><th>0</th></tr>
-     * <tr><td></td><td colspan="3">Direction</td><td>ETH</td></tr>
-     * </table>
+	 * <table>
+	 * <tr><th>31...4</th><th>3</th><th>2</th><th>1</th><th>0</th></tr>
+	 * <tr><td></td><td colspan="3">Direction</td><td>ETH</td></tr>
+	 * </table>
 	 *
 	 * 1. Tick Direction (#dxf_direction_t)
 	 * 2. ETH (extendedTradingHours) - flag that determines current trading session: extended or regular (0 - regular
@@ -564,10 +567,10 @@ typedef struct dxf_summary {
 	dxf_double_t open_interest;
 	/**
 	 * This field contains several individual flags encoded as an integer number the following way:
-     * <table>
-     * <tr><th>31...4</th><th>3</th><th>2</th><th>1</th><th>0</th></tr>
-     * <tr><td></td><td colspan="2">Close</td><td colspan="2">PrevClose</td></tr>
-     * </table>
+	 * <table>
+	 * <tr><th>31...4</th><th>3</th><th>2</th><th>1</th><th>0</th></tr>
+	 * <tr><td></td><td colspan="2">Close</td><td colspan="2">PrevClose</td></tr>
+	 * </table>
 	 *
 	 * 1. Close (dayClosePriceType) - parameter that shows if the closing price is final #dxf_price_type_t
 	 * 2. PrevClose (prevDayClosePriceType) - parameter that shows if the closing price of the previous day is final
@@ -622,9 +625,11 @@ typedef enum dxf_short_sale_restriction {
  * information that is available about the traded security on the market at any given moment of time.
  */
 typedef struct dxf_profile {
-	/// The correlation coefficient of the instrument to the S&P500 index (calculated, or received from other data providers)
+	/// The correlation coefficient of the instrument to the S&P500 index (calculated, or received from other data
+	/// providers)
 	dxf_double_t beta;
-	/// Earnings per share (the company’s profits divided by the number of shares). The value comes directly from the annual quarterly accounting reports of companies. Available generally for stocks
+	/// Earnings per share (the company’s profits divided by the number of shares). The value comes directly from the
+	/// annual quarterly accounting reports of companies. Available generally for stocks
 	dxf_double_t eps;
 	/// Frequency of cash dividends payments per year (calculated)
 	dxf_double_t div_freq;
@@ -705,14 +710,16 @@ typedef struct dxf_time_and_sale {
 	dxf_double_t bid_price;
 	/// The current ask price on the market when this time and sale event had occurred
 	dxf_double_t ask_price;
-	/// Sale conditions provided for this event by data feed. [TimeAndSale Sale Conditions](https://kb.dxfeed.com/display/DS/TimeAndSale+Sale+Conditions)
+	/// Sale conditions provided for this event by data feed. [TimeAndSale Sale
+	/// Conditions](https://kb.dxfeed.com/display/DS/TimeAndSale+Sale+Conditions)
 	dxf_const_string_t exchange_sale_conditions;
 	/**
 	 * This field contains several individual flags encoded as an integer number the following way:
-     * <table>
-     * <tr><th>31...16</th><th>15...8</th><th>7</th><th>6</th><th>5</th><th>4</th><th>3</th><th>2</th><th>1</th><th>0</th></tr>
-     * <tr><td></td><td>TTE</td><td></td><td colspan="2">Side</td><td>SL</td><td>ETH</td><td>VT</td><td colspan="2">Type</td></tr>
-     * </table>
+	 * <table>
+	 * <tr><th>31...16</th><th>15...8</th><th>7</th><th>6</th><th>5</th><th>4</th><th>3</th><th>2</th><th>1</th><th>0</th></tr>
+	 * <tr><td></td><td>TTE</td><td></td><td colspan="2">Side</td><td>SL</td><td>ETH</td><td>VT</td><td
+	 * colspan="2">Type</td></tr>
+	 * </table>
 	 *
 	 * 1. TradeThroughExempt (TTE) - is a transaction concluded by exempting from compliance with some rule. The value
 	 *    is encoded by the letter.
@@ -949,11 +956,11 @@ typedef struct dxf_configuration {
 /// Composite "exchange code" of a candle, i.e. empty string
 #define DXF_CANDLE_EXCHANGE_CODE_COMPOSITE_ATTRIBUTE L'\0'
 /// Default exchange code of a candle, i.e. empty string
-#define DXF_CANDLE_EXCHANGE_CODE_ATTRIBUTE_DEFAULT	 DXF_CANDLE_EXCHANGE_CODE_COMPOSITE_ATTRIBUTE
+#define DXF_CANDLE_EXCHANGE_CODE_ATTRIBUTE_DEFAULT DXF_CANDLE_EXCHANGE_CODE_COMPOSITE_ATTRIBUTE
 /// Default period attribute value of a candle (1.0)
-#define DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT	 1.0
+#define DXF_CANDLE_PERIOD_VALUE_ATTRIBUTE_DEFAULT 1.0
 /// Default price level attribute value of a candle (NaN)
-#define DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT	 (NAN)
+#define DXF_CANDLE_PRICE_LEVEL_ATTRIBUTE_DEFAULT (NAN)
 
 /// Candle price attribute. Defines price that is used to build the candles. `price=<value>`
 typedef enum dxf_candle_price_attribute {
@@ -1021,7 +1028,7 @@ typedef enum dxf_candle_type_period_attribute {
 	 *
 	 * `=<amount>p`
 	 */
-	 dxf_ctpa_price,
+	dxf_ctpa_price,
 
 	/**
 	 * Certain price change, calculated according to the following rules:
@@ -1078,19 +1085,23 @@ typedef enum dxf_candle_alignment_attribute {
 // Event subscription stuff
 /* -------------------------------------------------------------------------- */
 
-/// Event flag. [EventFlags description](https://kb.dxfeed.com/display/DS/QD+Model+of+Market+Events#QDModelofMarketEvents-EventFlagsfield)
+/// Event flag. [EventFlags
+/// description](https://kb.dxfeed.com/display/DS/QD+Model+of+Market+Events#QDModelofMarketEvents-EventFlagsfield)
 typedef enum dxf_event_flag_t {
-	/// (0x01) TX_PENDING indicates a pending transactional update. When TX_PENDING is 1, it means that an ongoing transaction
+	/// (0x01) TX_PENDING indicates a pending transactional update. When TX_PENDING is 1, it means that an ongoing
+	/// transaction
 	/// update, that spans multiple events, is in process
 	dxf_ef_tx_pending = 0x01,
 	/// (0x02) REMOVE_EVENT indicates that the event with the corresponding index has to be removed
 	dxf_ef_remove_event = 0x02,
-	/// (0x04) SNAPSHOT_BEGIN indicates when the loading of a snapshot starts. Snapshot load starts on new subscription and
+	/// (0x04) SNAPSHOT_BEGIN indicates when the loading of a snapshot starts. Snapshot load starts on new subscription
+	/// and
 	/// the first indexed event that arrives for each exchange code (in the case of a regional record) on a new
 	/// subscription may have SNAPSHOT_BEGIN set to true. It means that an ongoing snapshot consisting of multiple
 	/// events is incoming
 	dxf_ef_snapshot_begin = 0x04,
-	/// (0x08) SNAPSHOT_END or (0x10) SNAPSHOT_SNIP indicates the end of a snapshot. The difference between SNAPSHOT_END and
+	/// (0x08) SNAPSHOT_END or (0x10) SNAPSHOT_SNIP indicates the end of a snapshot. The difference between SNAPSHOT_END
+	/// and
 	/// SNAPSHOT_SNIP is the following: SNAPSHOT_END indicates that the data source sent all the data pertaining to
 	/// the subscription for the corresponding indexed event, while SNAPSHOT_SNIP indicates that some limit on the
 	/// amount of data was reached and while there still might be more data available, it will not be provided
@@ -1128,9 +1139,11 @@ typedef struct dxf_event_params {
  * Event listener prototype
  *
  * Parameters:
- * - event_type - Event type bit mask constructed from dx_event_id_t enum fields. See macro: \ref DXF_ET_TRADE, \ref DXF_ET_QUOTE ... \ref DXF_ET_CONFIGURATION
+ * - event_type - Event type bit mask constructed from dx_event_id_t enum fields. See macro: \ref DXF_ET_TRADE, \ref
+ * DXF_ET_QUOTE ... \ref DXF_ET_CONFIGURATION
  * - symbol_name - Event symbol (AAPL, IBM, etc)
- * - data - Pointer to event data (should be casted to some specific event data structure, i.e. dxf_order_t, dxf_trade_t ...)
+ * - data - Pointer to event data (should be casted to some specific event data structure, i.e. dxf_order_t, dxf_trade_t
+ * ...)
  * - data_count **[deprecated]** - The number of events. Always equals to 1. **[Will be removed in 8.0.0 version]**
  * - user_data - The user data passed to \ref dxf_attach_event_listener
  *
@@ -1175,9 +1188,11 @@ typedef void (*dxf_event_listener_t)(int event_type, dxf_const_string_t symbol_n
  * Event listener prototype v. 2
  *
  * Parameters:
- * - event_type - Event type bit mask constructed from dx_event_id_t enum fields. See macro: \ref DXF_ET_TRADE, \ref DXF_ET_QUOTE ... \ref DXF_ET_CONFIGURATION
+ * - event_type - Event type bit mask constructed from dx_event_id_t enum fields. See macro: \ref DXF_ET_TRADE, \ref
+ * DXF_ET_QUOTE ... \ref DXF_ET_CONFIGURATION
  * - symbol_name - Event symbol (AAPL, IBM, etc)
- * - data - Pointer to event data (should be casted to some specific event data structure, i.e. dxf_order_t, dxf_trade_t ...)
+ * - data - Pointer to event data (should be casted to some specific event data structure, i.e. dxf_order_t, dxf_trade_t
+ * ...)
  * - data_count **[deprecated]** - The number of events. Always equals to 1. **[Will be removed in 8.0.0 version]**
  * - event_params - Some event parameters: event flags, snapshot key and time stored in 4 high or low bytes
  * - user_data - The user data passed to \ref dxf_attach_event_listener_v2
@@ -1384,6 +1399,18 @@ typedef struct dxf_snapshot_data {
 	const dxf_event_data_t* records;
 } dxf_snapshot_data_t, *dxf_snapshot_data_ptr_t;
 
+typedef struct dxf_snapshot_data_v2 {
+	int event_type;
+	dxf_const_string_t symbol;
+	dxf_const_string_t source;
+	dxf_long_t from_time;
+
+	size_t records_count;
+	const dxf_event_data_t* records;
+} dxf_snapshot_data_v2_t, *dxf_snapshot_data_v2_ptr_t;
+
+typedef const dxf_snapshot_data_v2_t* dxf_const_snapshot_data_v2_ptr_t;
+
 /* -------------------------------------------------------------------------- */
 /**
  * @ingroup c-api-snapshots
@@ -1396,10 +1423,18 @@ typedef struct dxf_snapshot_data {
 /* -------------------------------------------------------------------------- */
 typedef void (*dxf_snapshot_listener_t)(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data);
 
+typedef void (*dxf_snapshot_listener_v2_t)(dxf_const_snapshot_data_v2_ptr_t snapshot_data, void* user_data);
+
+typedef void (*dxf_snapshot_inc_listener_v2_t)(dxf_const_snapshot_data_v2_ptr_t removals,
+											   dxf_const_snapshot_data_v2_ptr_t additions,
+											   dxf_const_snapshot_data_v2_ptr_t updates, void* user_data);
+
 /* -------------------------------------------------------------------------- */
-#define DXF_IS_CANDLE_REMOVAL(c)		(((c)->event_flags & dxf_ef_remove_event) != 0)
-#define DXF_IS_ORDER_REMOVAL(o)			((((o)->event_flags & dxf_ef_remove_event) != 0) || ((o)->size == 0) || (isnan((o)->size)))
-#define DXF_IS_SPREAD_ORDER_REMOVAL(o)	((((o)->event_flags & dxf_ef_remove_event) != 0) || ((o)->size == 0) || (isnan((o)->size)))
+#define DXF_IS_CANDLE_REMOVAL(c) (((c)->event_flags & dxf_ef_remove_event) != 0)
+#define DXF_IS_ORDER_REMOVAL(o) \
+	((((o)->event_flags & dxf_ef_remove_event) != 0) || ((o)->size == 0) || (isnan((o)->size)))
+#define DXF_IS_SPREAD_ORDER_REMOVAL(o) \
+	((((o)->event_flags & dxf_ef_remove_event) != 0) || ((o)->size == 0) || (isnan((o)->size)))
 #define DXF_IS_TIME_AND_SALE_REMOVAL(t) (((t)->event_flags & dxf_ef_remove_event) != 0)
 #define DXF_IS_GREEKS_REMOVAL(g)		(((g)->event_flags & dxf_ef_remove_event) != 0)
 #define DXF_IS_SERIES_REMOVAL(s)		(((s)->event_flags & dxf_ef_remove_event) != 0)

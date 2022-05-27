@@ -28,8 +28,12 @@
 extern "C" {
 #endif
 
-ERRORCODE dx_create_snapshot_v2(dxf_connection_t connection, dx_event_id_t event_id, dxf_const_string_t symbol,
-								const char *source, dxf_long_t time, OUT dxf_snapshot_t *snapshot);
+dxf_snapshot_v2_t dx_create_snapshot_v2(dxf_connection_t connection, dx_event_id_t event_id, dxf_const_string_t symbol,
+										const char* source, dxf_long_t time);
+
+int dx_set_snapshot_listeners_v2(dxf_snapshot_v2_t snapshot, dxf_snapshot_listener_v2_t on_new_snapshot_listener,
+								 dxf_snapshot_listener_v2_t on_snapshot_update_listener,
+								 dxf_snapshot_inc_listener_v2_t on_incremental_change_listener, void* userData);
 
 #ifdef __cplusplus
 }

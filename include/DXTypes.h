@@ -76,6 +76,7 @@ typedef void* dxf_candle_attributes_t;
 
 /// Snapshot
 typedef void* dxf_snapshot_t;
+typedef long long dxf_snapshot_v2_t;
 
 /// Price level book
 typedef void* dxf_price_level_book_t;

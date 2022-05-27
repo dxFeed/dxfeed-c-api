@@ -171,6 +171,8 @@ public:
 
 struct Snapshot {
 	using ReferenceId = Id;
+	static const Id INVALID_REFERENCE_ID = -1;
+
 	std::vector<SnapshotSubscriber<ReferenceId>> subscribers;
 	std::mutex subscribersMutex;
 
