@@ -206,6 +206,8 @@ private:
 	std::unordered_map<Snapshot::ReferenceId, std::shared_ptr<IndexedEventsSnapshot>> indexedEventsSnapshotsByRefId;
 	std::mutex indexedEventsSnapshotsMutex;
 	std::unordered_map<SnapshotKey, std::shared_ptr<TimeSeriesEventsSnapshot>> timeSeriesEventsSnapshots;
+	std::unordered_map<Snapshot::ReferenceId, std::shared_ptr<TimeSeriesEventsSnapshot>>
+		timeSeriesEventsSnapshotsByRefId;
 	std::mutex timeSeriesEventsSnapshotsMutex;
 
 	explicit SnapshotManager()
@@ -213,6 +215,7 @@ private:
 		  indexedEventsSnapshotsByRefId{},
 		  indexedEventsSnapshotsMutex{},
 		  timeSeriesEventsSnapshots{},
+		  timeSeriesEventsSnapshotsByRefId{},
 		  timeSeriesEventsSnapshotsMutex{} {}
 
 	template <typename T>
@@ -299,11 +302,10 @@ template <>
 std::pair<std::shared_ptr<IndexedEventsSnapshot>, Id> SnapshotManager::create(const ConnectionKey& connectionKey,
 																			  const SnapshotKey& snapshotKey,
 																			  void* userData) {
-	// TODO: create snapshot or SnapshotSubscriber-s.
 	std::lock_guard<std::mutex> guard(indexedEventsSnapshotsMutex);
 
 	auto snapshot = getImpl<IndexedEventsSnapshot>(snapshotKey);
-	auto id = IdGenerator<IndexedEventsSnapshot>::get();
+	auto id = IdGenerator<Snapshot>::get();
 	SnapshotSubscriber<Snapshot::ReferenceId> subscriber{id, snapshotKey, userData};
 
 	if (snapshot) {
@@ -315,6 +317,29 @@ std::pair<std::shared_ptr<IndexedEventsSnapshot>, Id> SnapshotManager::create(co
 
 	auto inserted = indexedEventsSnapshots.emplace(snapshotKey,
 												   std::shared_ptr<IndexedEventsSnapshot>(new IndexedEventsSnapshot{}));
+
+	return {inserted.first->second, id};
+}
+
+template <>
+std::pair<std::shared_ptr<TimeSeriesEventsSnapshot>, Id> SnapshotManager::create(const ConnectionKey& connectionKey,
+																				 const SnapshotKey& snapshotKey,
+																				 void* userData) {
+	std::lock_guard<std::mutex> guard(timeSeriesEventsSnapshotsMutex);
+
+	auto snapshot = getImpl<TimeSeriesEventsSnapshot>(snapshotKey);
+	auto id = IdGenerator<Snapshot>::get();
+	SnapshotSubscriber<Snapshot::ReferenceId> subscriber{id, snapshotKey, userData};
+
+	if (snapshot) {
+		snapshot->subscribers.emplace_back(subscriber);
+		timeSeriesEventsSnapshotsByRefId.emplace(id, snapshot);
+
+		return {snapshot, id};
+	}
+
+	auto inserted = timeSeriesEventsSnapshots.emplace(
+		snapshotKey, std::shared_ptr<TimeSeriesEventsSnapshot>(new TimeSeriesEventsSnapshot{}));
 
 	return {inserted.first->second, id};
 }
