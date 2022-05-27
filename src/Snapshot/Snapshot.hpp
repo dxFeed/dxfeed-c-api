@@ -39,15 +39,28 @@ extern "C" {
 
 namespace dx {
 
-struct SnapshotKey {
-	dx_event_id_t eventId;
-	std::string symbol;
-	nonstd::optional<std::string> source;
-	nonstd::optional<std::int64_t> time;
+class SnapshotKey {
+	dx_event_id_t eventId_;
+	std::string symbol_;
+	nonstd::optional<std::string> source_;
+	nonstd::optional<std::int64_t> time_;
+
+public:
+	SnapshotKey() : eventId_(static_cast<dx_event_id_t>(-1)), symbol_(), source_(), time_() {}
+
+	SnapshotKey(dx_event_id_t eventId, std::string symbol, nonstd::optional<std::string> source,
+				nonstd::optional<std::int64_t> time)
+		: eventId_(eventId), symbol_(std::move(symbol)), source_(std::move(source)), time_(std::move(time)) {}
 
 	bool operator==(const SnapshotKey& other) const {
-		return eventId == other.eventId && symbol == other.symbol && source == other.source && time == other.time;
+		return eventId_ == other.eventId_ && symbol_ == other.symbol_ && source_ == other.source_ &&
+			time_ == other.time_;
 	}
+
+	dx_event_id getEventId() const { return eventId_; }
+	const std::string& getSymbol() const { return symbol_; }
+	const nonstd::optional<std::string>& getSource() const { return source_; }
+	const nonstd::optional<std::int64_t>& getTime() const { return time_; }
 };
 
 inline void hashCombineInPlace(std::size_t& seed) {}
@@ -78,7 +91,8 @@ namespace std {
 template <>
 struct hash<dx::SnapshotKey> {
 	std::size_t operator()(const dx::SnapshotKey& key) const noexcept {
-		return dx::hashCombine(static_cast<std::size_t>(key.eventId), key.symbol, key.source, key.time);
+		return dx::hashCombine(static_cast<std::size_t>(key.getEventId()), key.getSymbol(), key.getSource(),
+							   key.getTime());
 	}
 };
 }  // namespace std
@@ -92,7 +106,7 @@ struct SnapshotChanges {
 
 	SnapshotChanges(SnapshotKey newSnapshotKey) : snapshotKey{std::move(newSnapshotKey)} {}
 
-	[[nodiscard]] bool isEmpty() const { return true; }
+	bool isEmpty() const { return true; }
 };
 
 struct SnapshotChangesSet {
@@ -105,7 +119,7 @@ struct SnapshotChangesSet {
 	SnapshotChangesSet(SnapshotChanges newRemovals, SnapshotChanges newAdditions, SnapshotChanges newUpdates)
 		: removals{std::move(newRemovals)}, additions{std::move(newAdditions)}, updates{std::move(newUpdates)} {}
 
-	[[nodiscard]] bool isEmpty() const { return removals.isEmpty() && additions.isEmpty() && updates.isEmpty(); }
+	bool isEmpty() const { return removals.isEmpty() && additions.isEmpty() && updates.isEmpty(); }
 };
 
 struct Snapshot;
@@ -123,7 +137,7 @@ class SnapshotSubscriber {
 
 public:
 	SnapshotSubscriber(ReferenceId referenceId, const SnapshotKey& filter, void* userData)
-		: referenceId_{referenceId}, filter_{filter}, userData_{userData}, mutex_{} {}
+		: referenceId_{referenceId}, filter_(filter), userData_{userData}, mutex_() {}
 
 	SnapshotSubscriber(const SnapshotSubscriber& sub) : mutex_() {
 		filter_ = sub.filter_;

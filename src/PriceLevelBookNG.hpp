@@ -71,7 +71,7 @@ struct PriceLevel {
 	PriceLevel(double newPrice, double newSize, std::int64_t newTime)
 		: price{newPrice}, size{newSize}, time{newTime} {};
 
-	[[nodiscard]] bool isValid() const { return !std::isnan(price); }
+	bool isValid() const { return !std::isnan(price); }
 
 	friend bool operator<(const PriceLevel& a, const PriceLevel& b) {
 		if (std::isnan(b.price)) return true;
@@ -121,7 +121,7 @@ struct PriceLevelChanges {
 	PriceLevelChanges(std::string newSymbol, std::vector<AskPriceLevel> newAsks, std::vector<BidPriceLevel> newBids)
 		: symbol{std::move(newSymbol)}, asks{std::move(newAsks)}, bids{std::move(newBids)} {}
 
-	[[nodiscard]] bool isEmpty() const { return asks.empty() && bids.empty(); }
+	bool isEmpty() const { return asks.empty() && bids.empty(); }
 };
 
 struct PriceLevelChangesSet {
@@ -134,7 +134,7 @@ struct PriceLevelChangesSet {
 	PriceLevelChangesSet(PriceLevelChanges newRemovals, PriceLevelChanges newAdditions, PriceLevelChanges newUpdates)
 		: removals{std::move(newRemovals)}, additions{std::move(newAdditions)}, updates{std::move(newUpdates)} {}
 
-	[[nodiscard]] bool isEmpty() const { return removals.isEmpty() && additions.isEmpty() && updates.isEmpty(); }
+	bool isEmpty() const { return removals.isEmpty() && additions.isEmpty() && updates.isEmpty(); }
 };
 
 class PriceLevelBook final {
@@ -496,11 +496,11 @@ class PriceLevelBook final {
 								  std::vector<BidPriceLevel>{bidUpdates.begin(), bidUpdates.end()}}};
 	}
 
-	[[nodiscard]] std::vector<AskPriceLevel> getAsks() const {
+	std::vector<AskPriceLevel> getAsks() const {
 		return {asks_.begin(), lastAsk_ == asks_.end() ? lastAsk_ : std::next(lastAsk_)};
 	}
 
-	[[nodiscard]] std::vector<BidPriceLevel> getBids() const {
+	std::vector<BidPriceLevel> getBids() const {
 		return {bids_.begin(), lastBid_ == bids_.end() ? lastBid_ : std::next(lastBid_)};
 	}
 
