@@ -24,6 +24,7 @@ extern "C" {
 #include <EventData.h>
 }
 
+#include <atomic>
 #include <cstdint>
 #include <functional>
 #include <memory>
@@ -126,37 +127,46 @@ struct Snapshot;
 
 template <typename ReferenceId>
 class SnapshotSubscriber {
-	ReferenceId referenceId_;
+	std::atomic<ReferenceId> referenceId_;
 	SnapshotKey filter_;
 	void* userData_;
 	mutable std::recursive_mutex mutex_;
+	std::atomic<bool> isValid_;
 
 	std::function<void(const SnapshotChanges&, void*)> onNewSnapshot_{};
 	std::function<void(const SnapshotChanges&, void*)> onSnapshotUpdate_{};
 	std::function<void(const SnapshotChangesSet&, void*)> onIncrementalChange_{};
 
 public:
-	SnapshotSubscriber(ReferenceId referenceId, const SnapshotKey& filter, void* userData)
-		: referenceId_{referenceId}, filter_(filter), userData_{userData}, mutex_() {}
+	SnapshotSubscriber(ReferenceId referenceId, SnapshotKey filter, void* userData)
+		: referenceId_{referenceId}, filter_(std::move(filter)), userData_{userData}, mutex_(), isValid_(true) {}
 
-	SnapshotSubscriber(const SnapshotSubscriber& sub) : mutex_() {
-		filter_ = sub.filter_;
-		userData_ = sub.userData_;
-		onNewSnapshot_ = sub.onNewSnapshot_;
-		onSnapshotUpdate_ = sub.onSnapshotUpdate_;
-		onIncrementalChange_ = sub.onIncrementalChange_;
+	SnapshotSubscriber(SnapshotSubscriber&& sub) noexcept : mutex_() {
+		referenceId_ = sub.referenceId_;
+		sub.referenceId_ = ReferenceId(-1);
+		filter_ = std::move(sub.filter_);
+		userData_ = std::move(sub.userData_);
+		onNewSnapshot_ = std::move(sub.onNewSnapshot_);
+		onSnapshotUpdate_ = std::move(sub.onSnapshotUpdate_);
+		onIncrementalChange_ = std::move(sub.onIncrementalChange_);
+		isValid_ = sub.isValid_;
+		sub.isValid_ = false;
 	}
 
-	SnapshotSubscriber& operator=(const SnapshotSubscriber& sub) {
+	SnapshotSubscriber& operator=(SnapshotSubscriber&& sub) noexcept {
 		if (this == &sub) {
 			return *this;
 		}
 
-		filter_ = sub.filter_;
-		userData_ = sub.userData_;
-		onNewSnapshot_ = sub.onNewSnapshot_;
-		onSnapshotUpdate_ = sub.onSnapshotUpdate_;
-		onIncrementalChange_ = sub.onIncrementalChange_;
+		referenceId_ = sub.referenceId_;
+		sub.referenceId_ = ReferenceId(-1);
+		filter_ = std::move(sub.filter_);
+		userData_ = std::move(sub.userData_);
+		onNewSnapshot_ = std::move(sub.onNewSnapshot_);
+		onSnapshotUpdate_ = std::move(sub.onSnapshotUpdate_);
+		onIncrementalChange_ = std::move(sub.onIncrementalChange_);
+		isValid_ = sub.isValid_;
+		sub.isValid_ = false;
 
 		return *this;
 	}
@@ -176,26 +186,44 @@ public:
 		onIncrementalChange_ = std::move(onIncrementalChangeHandler);
 	}
 
+	ReferenceId getReferenceId() const { return referenceId_; }
+
 	SnapshotKey getFilter() const {
 		std::lock_guard<std::recursive_mutex> guard{mutex_};
 
 		return filter_;
 	}
+
+	bool isValid() { return isValid_; }
 };
 
 struct Snapshot {
 	using ReferenceId = Id;
-	static const Id INVALID_REFERENCE_ID = -1;
+	static const Id INVALID_REFERENCE_ID;
 
-	std::vector<SnapshotSubscriber<ReferenceId>> subscribers;
-	std::mutex subscribersMutex;
+protected:
+	std::unordered_map<ReferenceId, std::shared_ptr<SnapshotSubscriber<ReferenceId>>> subscribers_;
+	std::mutex subscribersMutex_;
 
-	explicit Snapshot() : subscribers{}, subscribersMutex{} {}
+public:
+	explicit Snapshot() : subscribers_{}, subscribersMutex_{} {}
+
+	bool addSubscriber(const std::shared_ptr<SnapshotSubscriber<ReferenceId>>& subscriber) {
+		std::lock_guard<std::mutex> guard{subscribersMutex_};
+
+		if (!subscriber || !subscriber->isValid() || subscribers_.count(subscriber->getReferenceId()) > 0) {
+			return false;
+		}
+
+		return subscribers_.emplace(subscriber->getReferenceId(), subscriber).second;
+	}
 };
 
-struct IndexedEventsSnapshot : Snapshot {};
+const Id Snapshot::INVALID_REFERENCE_ID = -1;
 
-struct TimeSeriesEventsSnapshot : Snapshot {};
+struct IndexedEventsSnapshot : public Snapshot {};
+
+struct TimeSeriesEventsSnapshot : public Snapshot {};
 
 struct SnapshotManager {
 	using ConnectionKey = dxf_connection_t;
@@ -306,13 +334,16 @@ std::pair<std::shared_ptr<IndexedEventsSnapshot>, Id> SnapshotManager::create(co
 
 	auto snapshot = getImpl<IndexedEventsSnapshot>(snapshotKey);
 	auto id = IdGenerator<Snapshot>::get();
-	SnapshotSubscriber<Snapshot::ReferenceId> subscriber{id, snapshotKey, userData};
 
 	if (snapshot) {
-		snapshot->subscribers.emplace_back(subscriber);
-		indexedEventsSnapshotsByRefId.emplace(id, snapshot);
+		if (snapshot->addSubscriber(std::shared_ptr<SnapshotSubscriber<Snapshot::ReferenceId>>(
+				new SnapshotSubscriber<Snapshot::ReferenceId>(id, snapshotKey, userData)))) {
+			indexedEventsSnapshotsByRefId.emplace(id, snapshot);
 
-		return {snapshot, id};
+			return {snapshot, id};
+		} else {
+			return {nullptr, Snapshot::INVALID_REFERENCE_ID};
+		}
 	}
 
 	auto inserted = indexedEventsSnapshots.emplace(snapshotKey,
@@ -332,10 +363,14 @@ std::pair<std::shared_ptr<TimeSeriesEventsSnapshot>, Id> SnapshotManager::create
 	SnapshotSubscriber<Snapshot::ReferenceId> subscriber{id, snapshotKey, userData};
 
 	if (snapshot) {
-		snapshot->subscribers.emplace_back(subscriber);
-		timeSeriesEventsSnapshotsByRefId.emplace(id, snapshot);
+		if (snapshot->addSubscriber(std::shared_ptr<SnapshotSubscriber<Snapshot::ReferenceId>>(
+				new SnapshotSubscriber<Snapshot::ReferenceId>(id, snapshotKey, userData)))) {
+			timeSeriesEventsSnapshotsByRefId.emplace(id, snapshot);
 
-		return {snapshot, id};
+			return {snapshot, id};
+		} else {
+			return {nullptr, Snapshot::INVALID_REFERENCE_ID};
+		}
 	}
 
 	auto inserted = timeSeriesEventsSnapshots.emplace(
