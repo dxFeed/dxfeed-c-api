@@ -100,6 +100,9 @@ struct hash<dx::SnapshotKey> {
 
 namespace dx {
 
+using SnapshotRefId = Id;
+const SnapshotRefId INVALID_SNAPSHOT_REFERENCE_ID = SnapshotRefId{-1};
+
 struct SnapshotChanges {
 	SnapshotKey snapshotKey;
 
@@ -125,31 +128,35 @@ struct SnapshotChangesSet {
 
 struct Snapshot;
 
-template <typename ReferenceId>
-class SnapshotSubscriber {
-	std::atomic<ReferenceId> referenceId_;
+struct  SnapshotSubscriber {
+	using SnapshotHandler = std::function<void(const SnapshotChanges&, void*)>;
+	using IncrementalSnapshotHandler = std::function<void(const SnapshotChangesSet&, void*)>;
+
+private:
+
+	std::atomic<SnapshotRefId> referenceId_;
 	SnapshotKey filter_;
 	void* userData_;
 	mutable std::recursive_mutex mutex_;
 	std::atomic<bool> isValid_;
 
-	std::function<void(const SnapshotChanges&, void*)> onNewSnapshot_{};
-	std::function<void(const SnapshotChanges&, void*)> onSnapshotUpdate_{};
-	std::function<void(const SnapshotChangesSet&, void*)> onIncrementalChange_{};
+	SnapshotHandler onNewSnapshot_{};
+	SnapshotHandler onSnapshotUpdate_{};
+	IncrementalSnapshotHandler onIncrementalChange_{};
 
 public:
-	SnapshotSubscriber(ReferenceId referenceId, SnapshotKey filter, void* userData)
+	SnapshotSubscriber(SnapshotRefId referenceId, SnapshotKey filter, void* userData)
 		: referenceId_{referenceId}, filter_(std::move(filter)), userData_{userData}, mutex_(), isValid_(true) {}
 
 	SnapshotSubscriber(SnapshotSubscriber&& sub) noexcept : mutex_() {
-		referenceId_ = sub.referenceId_;
-		sub.referenceId_ = ReferenceId(-1);
+		referenceId_ = sub.referenceId_.load();
+		sub.referenceId_ = INVALID_SNAPSHOT_REFERENCE_ID;
 		filter_ = std::move(sub.filter_);
-		userData_ = std::move(sub.userData_);
+		userData_ = sub.userData_;
 		onNewSnapshot_ = std::move(sub.onNewSnapshot_);
 		onSnapshotUpdate_ = std::move(sub.onSnapshotUpdate_);
 		onIncrementalChange_ = std::move(sub.onIncrementalChange_);
-		isValid_ = sub.isValid_;
+		isValid_ = sub.isValid_.load();
 		sub.isValid_ = false;
 	}
 
@@ -158,14 +165,14 @@ public:
 			return *this;
 		}
 
-		referenceId_ = sub.referenceId_;
-		sub.referenceId_ = ReferenceId(-1);
+		referenceId_ = sub.referenceId_.load();
+		sub.referenceId_ = INVALID_SNAPSHOT_REFERENCE_ID;
 		filter_ = std::move(sub.filter_);
-		userData_ = std::move(sub.userData_);
+		userData_ = sub.userData_;
 		onNewSnapshot_ = std::move(sub.onNewSnapshot_);
 		onSnapshotUpdate_ = std::move(sub.onSnapshotUpdate_);
 		onIncrementalChange_ = std::move(sub.onIncrementalChange_);
-		isValid_ = sub.isValid_;
+		isValid_ = sub.isValid_.load();
 		sub.isValid_ = false;
 
 		return *this;
@@ -186,7 +193,7 @@ public:
 		onIncrementalChange_ = std::move(onIncrementalChangeHandler);
 	}
 
-	ReferenceId getReferenceId() const { return referenceId_; }
+	SnapshotRefId getReferenceId() const { return referenceId_; }
 
 	SnapshotKey getFilter() const {
 		std::lock_guard<std::recursive_mutex> guard{mutex_};
@@ -198,17 +205,14 @@ public:
 };
 
 struct Snapshot {
-	using ReferenceId = Id;
-	static const Id INVALID_REFERENCE_ID;
-
 protected:
-	std::unordered_map<ReferenceId, std::shared_ptr<SnapshotSubscriber<ReferenceId>>> subscribers_;
+	std::unordered_map<SnapshotRefId, std::shared_ptr<SnapshotSubscriber>> subscribers_;
 	std::mutex subscribersMutex_;
 
 public:
 	explicit Snapshot() : subscribers_{}, subscribersMutex_{} {}
 
-	bool addSubscriber(const std::shared_ptr<SnapshotSubscriber<ReferenceId>>& subscriber) {
+	bool addSubscriber(const std::shared_ptr<SnapshotSubscriber>& subscriber) {
 		std::lock_guard<std::mutex> guard{subscribersMutex_};
 
 		if (!subscriber || !subscriber->isValid() || subscribers_.count(subscriber->getReferenceId()) > 0) {
@@ -218,8 +222,6 @@ public:
 		return subscribers_.emplace(subscriber->getReferenceId(), subscriber).second;
 	}
 };
-
-const Id Snapshot::INVALID_REFERENCE_ID = -1;
 
 struct IndexedEventsSnapshot : public Snapshot {};
 
@@ -231,10 +233,10 @@ struct SnapshotManager {
 private:
 	static std::unordered_map<ConnectionKey, std::shared_ptr<SnapshotManager>> managers;
 	std::unordered_map<SnapshotKey, std::shared_ptr<IndexedEventsSnapshot>> indexedEventsSnapshots;
-	std::unordered_map<Snapshot::ReferenceId, std::shared_ptr<IndexedEventsSnapshot>> indexedEventsSnapshotsByRefId;
+	std::unordered_map<SnapshotRefId, std::shared_ptr<IndexedEventsSnapshot>> indexedEventsSnapshotsByRefId;
 	std::mutex indexedEventsSnapshotsMutex;
 	std::unordered_map<SnapshotKey, std::shared_ptr<TimeSeriesEventsSnapshot>> timeSeriesEventsSnapshots;
-	std::unordered_map<Snapshot::ReferenceId, std::shared_ptr<TimeSeriesEventsSnapshot>>
+	std::unordered_map<SnapshotRefId, std::shared_ptr<TimeSeriesEventsSnapshot>>
 		timeSeriesEventsSnapshotsByRefId;
 	std::mutex timeSeriesEventsSnapshotsMutex;
 
@@ -336,13 +338,13 @@ std::pair<std::shared_ptr<IndexedEventsSnapshot>, Id> SnapshotManager::create(co
 	auto id = IdGenerator<Snapshot>::get();
 
 	if (snapshot) {
-		if (snapshot->addSubscriber(std::shared_ptr<SnapshotSubscriber<Snapshot::ReferenceId>>(
-				new SnapshotSubscriber<Snapshot::ReferenceId>(id, snapshotKey, userData)))) {
+		if (snapshot->addSubscriber(std::shared_ptr<SnapshotSubscriber>(
+				new SnapshotSubscriber(id, snapshotKey, userData)))) {
 			indexedEventsSnapshotsByRefId.emplace(id, snapshot);
 
 			return {snapshot, id};
 		} else {
-			return {nullptr, Snapshot::INVALID_REFERENCE_ID};
+			return {nullptr, INVALID_SNAPSHOT_REFERENCE_ID};
 		}
 	}
 
@@ -360,16 +362,15 @@ std::pair<std::shared_ptr<TimeSeriesEventsSnapshot>, Id> SnapshotManager::create
 
 	auto snapshot = getImpl<TimeSeriesEventsSnapshot>(snapshotKey);
 	auto id = IdGenerator<Snapshot>::get();
-	SnapshotSubscriber<Snapshot::ReferenceId> subscriber{id, snapshotKey, userData};
 
 	if (snapshot) {
-		if (snapshot->addSubscriber(std::shared_ptr<SnapshotSubscriber<Snapshot::ReferenceId>>(
-				new SnapshotSubscriber<Snapshot::ReferenceId>(id, snapshotKey, userData)))) {
+		if (snapshot->addSubscriber(std::shared_ptr<SnapshotSubscriber>(
+				new SnapshotSubscriber(id, snapshotKey, userData)))) {
 			timeSeriesEventsSnapshotsByRefId.emplace(id, snapshot);
 
 			return {snapshot, id};
 		} else {
-			return {nullptr, Snapshot::INVALID_REFERENCE_ID};
+			return {nullptr, INVALID_SNAPSHOT_REFERENCE_ID};
 		}
 	}
 
