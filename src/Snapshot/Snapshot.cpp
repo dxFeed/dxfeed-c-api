@@ -21,23 +21,37 @@ extern "C" {
 #include "Snapshot.h"
 }
 
+#include "../StringConverter.hpp"
 #include "Snapshot.hpp"
 
 extern "C" {
 dxf_snapshot_v2_t dx_create_snapshot_v2(dxf_connection_t connection, dx_event_id_t event_id, dxf_const_string_t symbol,
-								const char *source, dxf_long_t time) {
-
+										const char* source, dxf_long_t time, void* userData) {
 	auto m = dx::SnapshotManager::getInstance(connection);
-	auto r = dx::IdGenerator<dx::SnapshotSubscriber>::get();
+
+	// IndexedEvent
+	if (dx_eid_order == event_id || dx_eid_spread_order == event_id || dx_eid_series == event_id) {
+		if (time > 0) {
+			return dx::INVALID_SNAPSHOT_REFERENCE_ID;
+		}
+
+		auto s = m->create<dx::IndexedEventsSnapshot>(
+			connection,
+			dx::SnapshotKey(event_id, dx::StringConverter::wStringToUtf8(symbol), std::string(source), nonstd::nullopt),
+			userData);
+
+		return s.second;
+	} else if (dx_eid_candle == event_id || dx_eid_greeks == event_id || dx_eid_theo_price == event_id ||
+			   dx_eid_time_and_sale == event_id || dx_eid_underlying == event_id) {	 // TODO: TimeSeriesEvent
+		return dx::INVALID_SNAPSHOT_REFERENCE_ID;
+	}
 
 	return dx::INVALID_SNAPSHOT_REFERENCE_ID;
 }
 
 int dx_set_snapshot_listeners_v2(dxf_snapshot_v2_t snapshot, dxf_snapshot_listener_v2_t on_new_snapshot_listener,
 								 dxf_snapshot_listener_v2_t on_snapshot_update_listener,
-								 dxf_snapshot_inc_listener_v2_t on_incremental_change_listener, void* userData) {
-
+								 dxf_snapshot_inc_listener_v2_t on_incremental_change_listener) {
 	return true;
 }
-
 }

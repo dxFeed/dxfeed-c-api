@@ -36,6 +36,8 @@ extern "C" {
 #include <utility>
 #include <variant.hpp>
 #include <vector>
+#include <unordered_set>
+#include <initializer_list>
 
 #include "../IdGenerator.hpp"
 
@@ -314,7 +316,7 @@ public:
 		return {nullptr, INVALID_SNAPSHOT_REFERENCE_ID};
 	}
 
-	void setOnNewSnapshotHandler(SnapshotRefId snapshotRefId,
+	bool setOnNewSnapshotHandler(SnapshotRefId snapshotRefId,
 								 SnapshotSubscriber::SnapshotHandler onNewSnapshotHandler) {
 		std::lock_guard<std::mutex> guard{subscribersMutex};
 
@@ -322,10 +324,14 @@ public:
 
 		if (found != subscribers.end()) {
 			found->second->setOnNewSnapshotHandler(std::move(onNewSnapshotHandler));
+
+			return true;
 		}
+
+		return false;
 	}
 
-	void setOnSnapshotUpdateHandler(SnapshotRefId snapshotRefId,
+	 bool setOnSnapshotUpdateHandler(SnapshotRefId snapshotRefId,
 									SnapshotSubscriber::SnapshotHandler onSnapshotUpdateHandler) {
 		std::lock_guard<std::mutex> guard{subscribersMutex};
 
@@ -333,10 +339,14 @@ public:
 
 		if (found != subscribers.end()) {
 			found->second->setOnSnapshotUpdateHandler(std::move(onSnapshotUpdateHandler));
+
+			return true;
 		}
+
+		return false;
 	}
 
-	void setOnIncrementalChangeHandler(SnapshotRefId snapshotRefId,
+	bool setOnIncrementalChangeHandler(SnapshotRefId snapshotRefId,
 									   SnapshotSubscriber::IncrementalSnapshotHandler onIncrementalChangeHandler) {
 		std::lock_guard<std::mutex> guard{subscribersMutex};
 
@@ -344,7 +354,11 @@ public:
 
 		if (found != subscribers.end()) {
 			found->second->setOnIncrementalChangeHandler(std::move(onIncrementalChangeHandler));
+
+			return true;
 		}
+
+		return false;
 	}
 
 	//	bool remove(const SnapshotKey& snapshotKey) {
