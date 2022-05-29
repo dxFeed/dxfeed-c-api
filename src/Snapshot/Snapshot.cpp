@@ -28,9 +28,9 @@ dxf_snapshot_v2_t dx_create_snapshot_v2(dxf_connection_t connection, dx_event_id
 								const char *source, dxf_long_t time) {
 
 	auto m = dx::SnapshotManager::getInstance(connection);
-	auto r = dx::IdGenerator<dx::SnapshotSubscriber<dx::Snapshot::ReferenceId>>::get();
+	auto r = dx::IdGenerator<dx::SnapshotSubscriber>::get();
 
-	return dx::Snapshot::INVALID_REFERENCE_ID;
+	return dx::INVALID_SNAPSHOT_REFERENCE_ID;
 }
 
 int dx_set_snapshot_listeners_v2(dxf_snapshot_v2_t snapshot, dxf_snapshot_listener_v2_t on_new_snapshot_listener,

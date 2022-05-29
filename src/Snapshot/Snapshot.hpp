@@ -34,6 +34,7 @@ extern "C" {
 #include <type_traits>
 #include <unordered_map>
 #include <utility>
+#include <variant.hpp>
 #include <vector>
 
 #include "../IdGenerator.hpp"
@@ -128,12 +129,11 @@ struct SnapshotChangesSet {
 
 struct Snapshot;
 
-struct  SnapshotSubscriber {
+struct SnapshotSubscriber {
 	using SnapshotHandler = std::function<void(const SnapshotChanges&, void*)>;
 	using IncrementalSnapshotHandler = std::function<void(const SnapshotChangesSet&, void*)>;
 
 private:
-
 	std::atomic<SnapshotRefId> referenceId_;
 	SnapshotKey filter_;
 	void* userData_;
@@ -229,6 +229,8 @@ struct TimeSeriesEventsSnapshot : public Snapshot {};
 
 struct SnapshotManager {
 	using ConnectionKey = dxf_connection_t;
+	using CommonSnapshotPtr =
+		nonstd::variant<std::shared_ptr<IndexedEventsSnapshot>, std::shared_ptr<TimeSeriesEventsSnapshot>, nullptr_t>;
 
 private:
 	static std::unordered_map<ConnectionKey, std::shared_ptr<SnapshotManager>> managers;
@@ -236,8 +238,7 @@ private:
 	std::unordered_map<SnapshotRefId, std::shared_ptr<IndexedEventsSnapshot>> indexedEventsSnapshotsByRefId;
 	std::mutex indexedEventsSnapshotsMutex;
 	std::unordered_map<SnapshotKey, std::shared_ptr<TimeSeriesEventsSnapshot>> timeSeriesEventsSnapshots;
-	std::unordered_map<SnapshotRefId, std::shared_ptr<TimeSeriesEventsSnapshot>>
-		timeSeriesEventsSnapshotsByRefId;
+	std::unordered_map<SnapshotRefId, std::shared_ptr<TimeSeriesEventsSnapshot>> timeSeriesEventsSnapshotsByRefId;
 	std::mutex timeSeriesEventsSnapshotsMutex;
 
 	explicit SnapshotManager()
@@ -253,7 +254,16 @@ private:
 		return nullptr;
 	}
 
+	template <typename T>
+	std::shared_ptr<T> getImpl(SnapshotRefId snapshotRefId) {
+		return nullptr;
+	}
+
 public:
+
+	/// Returns the SnapshotManager instance by a connection key or creates the new one and returns it.
+	/// \param connectionKey The connection key (i.e. the pointer to connection context structure)
+	/// \return The SnapshotManager instance.
 	static std::shared_ptr<SnapshotManager> getInstance(const ConnectionKey& connectionKey) {
 		auto found = managers.find(connectionKey);
 
@@ -270,14 +280,25 @@ public:
 		return managers[connectionKey];
 	}
 
+	/// Returns a pointer to the snapshot instance by the snapshot key (an event id, a symbol, an optional source, an optional `timeFrom`)
+	/// \tparam T The Snapshot type (IndexedEventsSnapshot or TimeSeriesEventsSnapshot)
+	/// \return A shared pointer to the snapshot instance or std::shared_ptr{nullptr}
 	template <typename T>
 	std::shared_ptr<T> get(const SnapshotKey&) {
 		return nullptr;
 	}
 
+	/// Returns a pointer to the snapshot instance (indexed or time series) by the snapshot reference id (1 to 1 for a SnapshotSubscriber)
+	/// \param snapshotRefId The snapshot reference id
+	/// \return A shared pointer to the snapshot instance or nullptr
+	CommonSnapshotPtr get(SnapshotRefId snapshotRefId);
+
+	/// Creates the new snapshot instance and the new SnapshotSubscriber instance or adds new SnapshotSubscriber instance to the existing snapshot.
+	/// \tparam T The Snapshot type (IndexedEventsSnapshot or TimeSeriesEventsSnapshot)
+	/// \return The pair of shared pointer to the snapshot instance and reference id to the snapshot (1 to 1 for a SnapshotSubscriber)
 	template <typename T>
-	std::pair<std::shared_ptr<T>, Id> create(const ConnectionKey&, const SnapshotKey&, void*) {
-		return {nullptr, -1};
+	std::pair<std::shared_ptr<T>, SnapshotRefId> create(const ConnectionKey&, const SnapshotKey&, void*) {
+		return {nullptr, INVALID_SNAPSHOT_REFERENCE_ID};
 	}
 
 	//	bool remove(const SnapshotKey& snapshotKey) {
@@ -315,6 +336,28 @@ std::shared_ptr<TimeSeriesEventsSnapshot> SnapshotManager::getImpl(const Snapsho
 }
 
 template <>
+std::shared_ptr<IndexedEventsSnapshot> SnapshotManager::getImpl(SnapshotRefId snapshotRefId) {
+	auto found = indexedEventsSnapshotsByRefId.find(snapshotRefId);
+
+	if (found == indexedEventsSnapshotsByRefId.end()) {
+		return nullptr;
+	}
+
+	return found->second;
+}
+
+template <>
+std::shared_ptr<TimeSeriesEventsSnapshot> SnapshotManager::getImpl(SnapshotRefId snapshotRefId) {
+	auto found = timeSeriesEventsSnapshotsByRefId.find(snapshotRefId);
+
+	if (found == timeSeriesEventsSnapshotsByRefId.end()) {
+		return nullptr;
+	}
+
+	return found->second;
+}
+
+template <>
 std::shared_ptr<IndexedEventsSnapshot> SnapshotManager::get(const SnapshotKey& snapshotKey) {
 	std::lock_guard<std::mutex> guard(indexedEventsSnapshotsMutex);
 
@@ -328,6 +371,29 @@ std::shared_ptr<TimeSeriesEventsSnapshot> SnapshotManager::get(const SnapshotKey
 	return getImpl<TimeSeriesEventsSnapshot>(snapshotKey);
 }
 
+SnapshotManager::CommonSnapshotPtr SnapshotManager::get(SnapshotRefId snapshotRefId) {
+	{
+		std::lock_guard<std::mutex> guard(indexedEventsSnapshotsMutex);
+
+		auto snapshot = getImpl<IndexedEventsSnapshot>(snapshotRefId);
+
+		if (snapshot) {
+			return snapshot;
+		}
+	}
+	{
+		std::lock_guard<std::mutex> guard(timeSeriesEventsSnapshotsMutex);
+
+		auto snapshot = getImpl<TimeSeriesEventsSnapshot>(snapshotRefId);
+
+		if (snapshot) {
+			return snapshot;
+		}
+	}
+
+	return nullptr;
+}
+
 template <>
 std::pair<std::shared_ptr<IndexedEventsSnapshot>, Id> SnapshotManager::create(const ConnectionKey& connectionKey,
 																			  const SnapshotKey& snapshotKey,
@@ -338,8 +404,8 @@ std::pair<std::shared_ptr<IndexedEventsSnapshot>, Id> SnapshotManager::create(co
 	auto id = IdGenerator<Snapshot>::get();
 
 	if (snapshot) {
-		if (snapshot->addSubscriber(std::shared_ptr<SnapshotSubscriber>(
-				new SnapshotSubscriber(id, snapshotKey, userData)))) {
+		if (snapshot->addSubscriber(
+				std::shared_ptr<SnapshotSubscriber>(new SnapshotSubscriber(id, snapshotKey, userData)))) {
 			indexedEventsSnapshotsByRefId.emplace(id, snapshot);
 
 			return {snapshot, id};
@@ -364,8 +430,8 @@ std::pair<std::shared_ptr<TimeSeriesEventsSnapshot>, Id> SnapshotManager::create
 	auto id = IdGenerator<Snapshot>::get();
 
 	if (snapshot) {
-		if (snapshot->addSubscriber(std::shared_ptr<SnapshotSubscriber>(
-				new SnapshotSubscriber(id, snapshotKey, userData)))) {
+		if (snapshot->addSubscriber(
+				std::shared_ptr<SnapshotSubscriber>(new SnapshotSubscriber(id, snapshotKey, userData)))) {
 			timeSeriesEventsSnapshotsByRefId.emplace(id, snapshot);
 
 			return {snapshot, id};
