@@ -49,9 +49,15 @@ dxf_snapshot_v2_t dx_create_snapshot_v2(dxf_connection_t connection, dx_event_id
 	return dx::INVALID_SNAPSHOT_REFERENCE_ID;
 }
 
-int dx_set_snapshot_listeners_v2(dxf_snapshot_v2_t snapshot, dxf_snapshot_listener_v2_t on_new_snapshot_listener,
+int dx_set_snapshot_listeners_v2(dxf_connection_t connection, dxf_snapshot_v2_t snapshot, dxf_snapshot_listener_v2_t on_new_snapshot_listener,
 								 dxf_snapshot_listener_v2_t on_snapshot_update_listener,
 								 dxf_snapshot_inc_listener_v2_t on_incremental_change_listener) {
+
 	return true;
 }
+
+void dx_close_snapshot_v2(dxf_connection_t connection, dxf_snapshot_v2_t snapshot) {
+	dx::SnapshotManager::getInstance(connection)->close(snapshot);
+}
+
 }

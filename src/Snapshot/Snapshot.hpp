@@ -211,7 +211,7 @@ struct SnapshotManager;
 struct Snapshot {
 protected:
 	std::unordered_map<SnapshotRefId, std::shared_ptr<SnapshotSubscriber>> subscribers_;
-	std::mutex subscribersMutex_;
+	mutable std::mutex subscribersMutex_;
 
 	friend SnapshotManager;
 
@@ -225,13 +225,31 @@ protected:
 		return subscribers_.emplace(subscriber->getReferenceId(), subscriber).second;
 	}
 
+	bool removeSubscriber(SnapshotRefId snapshotRefId) {
+		std::lock_guard<std::mutex> guard{subscribersMutex_};
+
+		return subscribers_.erase(snapshotRefId) > 0;
+	}
+
 public:
 	explicit Snapshot() : subscribers_{}, subscribersMutex_{} {}
+
+	bool hasSubscriptions() const {
+		std::lock_guard<std::mutex> guard{subscribersMutex_};
+
+		return !subscribers_.empty();
+	}
+
+	virtual ~Snapshot() = default;
 };
 
-struct IndexedEventsSnapshot : public Snapshot {};
+struct IndexedEventsSnapshot final: public Snapshot {
 
-struct TimeSeriesEventsSnapshot : public Snapshot {};
+};
+
+struct TimeSeriesEventsSnapshot final: public Snapshot {
+
+};
 
 struct SnapshotManager {
 	using ConnectionKey = dxf_connection_t;
@@ -272,6 +290,28 @@ private:
 	template <typename T>
 	std::shared_ptr<T> getImpl(SnapshotRefId) {
 		return nullptr;
+	}
+
+	bool closeImpl(SnapshotRefId snapshotRefId, CommonSnapshotPtr snapshotPtr) {
+		// TODO: overloaded "idiom" + generic lambda
+		struct CloseImplVisitor {
+			SnapshotRefId snapshotRefId;
+
+			bool operator()(std::shared_ptr<IndexedEventsSnapshot> indexedEventsSnapshotPtr) const {
+				return false;
+			}
+
+			bool operator()(std::shared_ptr<TimeSeriesEventsSnapshot> timeSeriesEventsSnapshotPtr) const {
+				return false;
+			}
+
+			bool operator()(nullptr_t) const {
+				//TODO: warning
+				return true;
+			}
+		};
+
+		return nonstd::visit(CloseImplVisitor{snapshotRefId}, snapshotPtr);
 	}
 
 public:
@@ -361,14 +401,11 @@ public:
 		return false;
 	}
 
-	//	bool remove(const SnapshotKey& snapshotKey) {
-	//		std::lock_guard<std::mutex> guard(IndexedEventsSnapshot);
-	//
-	//		// TODO: unsubscribe SnapshotSubscriber-s (by key params) and delete the snapshot if there are no more
-	//		// subscribers left
-	//
-	//		return 0 != snapshots.erase(snapshotKey);
-	//	}
+	bool close(SnapshotRefId snapshotRefId) {
+		auto snapshotPtr = get(snapshotRefId);
+
+		return closeImpl(snapshotRefId, snapshotPtr);
+	}
 };
 
 std::unordered_map<SnapshotManager::ConnectionKey, std::shared_ptr<SnapshotManager>> SnapshotManager::managers{};
