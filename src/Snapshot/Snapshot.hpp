@@ -244,6 +244,8 @@ public:
 };
 
 struct IndexedEventsSnapshot final: public Snapshot {
+	using EventType = nonstd::variant<dxf_order_t /*order + spread order*/, dxf_series_t>;
+
 
 };
 
