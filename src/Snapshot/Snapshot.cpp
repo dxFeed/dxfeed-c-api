@@ -35,7 +35,7 @@ dxf_snapshot_v2_t dx_create_snapshot_v2(dxf_connection_t connection, dx_event_id
 			return dx::INVALID_SNAPSHOT_REFERENCE_ID;
 		}
 
-		auto s = m->create<dx::IndexedEventsSnapshot>(
+		auto s = m->create<dx::OnlyIndexedEventsSnapshot>(
 			connection,
 			dx::SnapshotKey(event_id, dx::StringConverter::wStringToUtf8(symbol), std::string(source), nonstd::nullopt),
 			userData);
