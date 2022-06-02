@@ -96,7 +96,7 @@ namespace std {
 template <>
 struct hash<dx::SnapshotKey> {
 	std::size_t operator()(const dx::SnapshotKey& key) const noexcept {
-		return dx::hashCombine(static_cast<std::size_t>(key.getEventId()), key.getSymbol(), key.getSource(), key.getFromTime());
+		return dx::hashCombine(key.getEventId(), key.getSymbol(), key.getSource(), key.getFromTime());
 	}
 };
 }  // namespace std

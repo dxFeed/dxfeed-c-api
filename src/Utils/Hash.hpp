@@ -21,6 +21,7 @@
 
 #include <utility>
 #include <cstddef>
+#include <functional>
 
 namespace dx {
 
