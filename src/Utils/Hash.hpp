@@ -22,6 +22,7 @@
 #include <utility>
 #include <cstddef>
 #include <functional>
+#include <type_traits>
 
 namespace dx {
 
