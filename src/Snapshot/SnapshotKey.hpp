@@ -96,7 +96,11 @@ namespace std {
 template <>
 struct hash<dx::SnapshotKey> {
 	std::size_t operator()(const dx::SnapshotKey& key) const noexcept {
-		return dx::hashCombine(key.getEventId(), key.getSymbol(), key.getSource(), key.getFromTime());
+		/* static_cast<std::size_t>(key.getEventId()) -- Workaround for old
+		 * compilers "error: invalid use of incomplete type 'struct std::hash<dx_event_id>'" bug
+		 */
+		return dx::hashCombine(static_cast<std::size_t>(key.getEventId()), key.getSymbol(), key.getSource(),
+							   key.getFromTime());
 	}
 };
 }  // namespace std
