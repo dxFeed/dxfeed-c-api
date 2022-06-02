@@ -27,17 +27,17 @@ extern "C" {
 #include <atomic>
 #include <cstdint>
 #include <functional>
+#include <initializer_list>
 #include <memory>
 #include <mutex>
 #include <optional.hpp>
 #include <string>
 #include <type_traits>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <variant.hpp>
 #include <vector>
-#include <unordered_set>
-#include <initializer_list>
 
 #include "../IdGenerator.hpp"
 #include "../Utils/Hash.hpp"
@@ -190,35 +190,32 @@ struct OnlyIndexedEventKey {
 	dxf_long_t time;
 };
 
-}
+}  // namespace dx
 
 namespace std {
 template <>
 struct hash<dx::OnlyIndexedEventKey> {
 	std::size_t operator()(const dx::OnlyIndexedEventKey& key) const noexcept {
-		return dx::hashCombine(static_cast<std::size_t>(key.index), key.time);
+		return dx::hashCombine(key.index, key.time);
 	}
 };
 }  // namespace std
 
 namespace dx {
 
-struct OnlyIndexedEventsSnapshot final: public Snapshot {
+struct OnlyIndexedEventsSnapshot final : public Snapshot {
 	using EventType = nonstd::variant<dxf_order_t /*order + spread order*/, dxf_series_t>;
 
 	SnapshotKey key;
 	std::unordered_map<OnlyIndexedEventKey, EventType> events;
-
 };
 
-struct TimeSeriesEventsSnapshot final: public Snapshot {
-
-};
+struct TimeSeriesEventsSnapshot final : public Snapshot {};
 
 struct SnapshotManager {
 	using ConnectionKey = dxf_connection_t;
-	using CommonSnapshotPtr =
-		nonstd::variant<std::shared_ptr<OnlyIndexedEventsSnapshot>, std::shared_ptr<TimeSeriesEventsSnapshot>, nullptr_t>;
+	using CommonSnapshotPtr = nonstd::variant<std::shared_ptr<OnlyIndexedEventsSnapshot>,
+											  std::shared_ptr<TimeSeriesEventsSnapshot>, nullptr_t>;
 
 private:
 	static std::unordered_map<ConnectionKey, std::shared_ptr<SnapshotManager>> managers_;
@@ -261,16 +258,14 @@ private:
 		struct CloseImplVisitor {
 			SnapshotRefId snapshotRefId;
 
-			bool operator()(std::shared_ptr<OnlyIndexedEventsSnapshot> indexedEventsSnapshotPtr) const {
-				return false;
-			}
+			bool operator()(std::shared_ptr<OnlyIndexedEventsSnapshot> indexedEventsSnapshotPtr) const { return false; }
 
 			bool operator()(std::shared_ptr<TimeSeriesEventsSnapshot> timeSeriesEventsSnapshotPtr) const {
 				return false;
 			}
 
 			bool operator()(nullptr_t) const {
-				//TODO: warning
+				// TODO: warning
 				return true;
 			}
 		};
@@ -335,7 +330,7 @@ public:
 		return false;
 	}
 
-	 bool setOnSnapshotUpdateHandler(SnapshotRefId snapshotRefId,
+	bool setOnSnapshotUpdateHandler(SnapshotRefId snapshotRefId,
 									SnapshotSubscriber::SnapshotHandler onSnapshotUpdateHandler) {
 		std::lock_guard<std::mutex> guard{subscribersMutex_};
 
@@ -457,8 +452,8 @@ SnapshotManager::CommonSnapshotPtr SnapshotManager::get(SnapshotRefId snapshotRe
 
 template <>
 std::pair<std::shared_ptr<OnlyIndexedEventsSnapshot>, Id> SnapshotManager::create(const ConnectionKey& connectionKey,
-																			  const SnapshotKey& snapshotKey,
-																			  void* userData) {
+																				  const SnapshotKey& snapshotKey,
+																				  void* userData) {
 	std::lock_guard<std::mutex> guard(indexedEventsSnapshotsMutex_);
 
 	auto snapshot = getImpl<OnlyIndexedEventsSnapshot>(snapshotKey);
@@ -480,8 +475,8 @@ std::pair<std::shared_ptr<OnlyIndexedEventsSnapshot>, Id> SnapshotManager::creat
 		}
 	}
 
-	auto inserted = indexedEventsSnapshots_.emplace(snapshotKey,
-												   std::shared_ptr<OnlyIndexedEventsSnapshot>(new OnlyIndexedEventsSnapshot{}));
+	auto inserted = indexedEventsSnapshots_.emplace(
+		snapshotKey, std::shared_ptr<OnlyIndexedEventsSnapshot>(new OnlyIndexedEventsSnapshot{}));
 
 	return {inserted.first->second, id};
 }
