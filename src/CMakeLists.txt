@@ -96,6 +96,7 @@ set(HEADER_FILES
         EventSubscription.hpp
         HeartbeatPayload.hpp
         IdGenerator.hpp
+        Utils/Hash.hpp
         Logger.h
         ObjectArray.h
         PriceLevelBook.h
@@ -109,6 +110,7 @@ set(HEADER_FILES
         Snapshot.h
         Snapshot/Snapshot.h
         Snapshot/Snapshot.hpp
+        Snapshot/SnapshotKey.hpp
         StringConverter.hpp
         TaskQueue.h
         TimeMarkUtil.hpp
