@@ -27,11 +27,9 @@
  * @brief dxFeed C API errors declarations
  */
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Error codes
  */
-/* -------------------------------------------------------------------------- */
 
 /// Error level
 typedef enum dx_log_level_t {
@@ -217,7 +215,6 @@ typedef enum {
 	dx_ec_count
 } dx_error_code_t;
 
-/* -------------------------------------------------------------------------- */
 /**
  * @ingroup c-api-common
  *
@@ -228,10 +225,8 @@ typedef enum {
  * @returns Error description string
  *
  */
-/* -------------------------------------------------------------------------- */
 dxf_const_string_t dx_get_error_description(dx_error_code_t code);
 
-/* -------------------------------------------------------------------------- */
 /**
  * @ingroup c-api-common
  *
@@ -242,7 +237,6 @@ dxf_const_string_t dx_get_error_description(dx_error_code_t code);
  * @returns Error level
  *
  */
-/* -------------------------------------------------------------------------- */
 dx_log_level_t dx_get_log_level(dx_error_code_t code);
 
 #endif /* DX_ERROR_CODES_H_INCLUDED */

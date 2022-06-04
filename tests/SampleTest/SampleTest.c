@@ -67,22 +67,16 @@ int dxs_mutex_create(dxs_mutex_t* mutex) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dxs_mutex_destroy(dxs_mutex_t* mutex) {
 	DeleteCriticalSection(*mutex);
 	free(*mutex);
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dxs_mutex_lock(dxs_mutex_t* mutex) {
 	EnterCriticalSection(*mutex);
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dxs_mutex_unlock(dxs_mutex_t* mutex) {
 	LeaveCriticalSection(*mutex);
@@ -114,8 +108,6 @@ int dxs_mutex_create(dxs_mutex_t* mutex) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dxs_mutex_destroy(dxs_mutex_t* mutex) {
 	if (pthread_mutex_destroy(&mutex->mutex) != 0) {
 		return false;
@@ -128,8 +120,6 @@ int dxs_mutex_destroy(dxs_mutex_t* mutex) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dxs_mutex_lock(dxs_mutex_t* mutex) {
 	if (pthread_mutex_lock(&mutex->mutex) != 0) {
 		return false;
@@ -137,8 +127,6 @@ int dxs_mutex_lock(dxs_mutex_t* mutex) {
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dxs_mutex_unlock(dxs_mutex_t* mutex) {
 	if (pthread_mutex_unlock(&mutex->mutex) != 0) {
@@ -162,7 +150,6 @@ int dxs_mutex_unlock(dxs_mutex_t* mutex) {
 // const char dxfeed_host[] = "mddqa.in.devexperts.com:7400";
 const char dxfeed_host[] = "demo.dxfeed.com:7300";
 
-/* -------------------------------------------------------------------------- */
 static int is_listener_thread_terminated = false;
 static dxs_mutex_t listener_thread_guard;
 
@@ -175,8 +162,6 @@ int is_thread_terminate() {
 	return res;
 }
 
-/* -------------------------------------------------------------------------- */
-
 void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
 	char* host = (char*)user_data;
 	dxs_mutex_lock(&listener_thread_guard);
@@ -185,8 +170,6 @@ void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
 
 	wprintf(L"\nTerminating listener thread, host: %hs\n", host);
 }
-
-/* -------------------------------------------------------------------------- */
 
 void print_timestamp(dxf_long_t timestamp) {
 	wchar_t timefmt[80];
@@ -197,7 +180,6 @@ void print_timestamp(dxf_long_t timestamp) {
 	wcsftime(timefmt, 80, L"%Y%m%d-%H%M%S", timeinfo);
 	wprintf(L"%ls", timefmt);
 }
-/* -------------------------------------------------------------------------- */
 
 void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
 			  void* user_data) {
@@ -268,7 +250,6 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 					tns->is_eth_trade ? L"True" : L"False", tns->type);
 	}
 }
-/* -------------------------------------------------------------------------- */
 
 void process_last_error() {
 	int error_code = dx_ec_success;
@@ -293,8 +274,6 @@ void process_last_error() {
 
 	wprintf(L"An error occurred but the error subsystem failed to initialize\n");
 }
-
-/* -------------------------------------------------------------------------- */
 
 int main(int argc, char* argv[]) {
 	dxf_connection_t connection;

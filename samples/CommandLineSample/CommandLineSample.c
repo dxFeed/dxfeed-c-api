@@ -83,22 +83,16 @@ int dxs_mutex_create(dxs_mutex_t* mutex) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dxs_mutex_destroy(dxs_mutex_t* mutex) {
 	DeleteCriticalSection(*mutex);
 	free(*mutex);
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dxs_mutex_lock(dxs_mutex_t* mutex) {
 	EnterCriticalSection(*mutex);
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dxs_mutex_unlock(dxs_mutex_t* mutex) {
 	LeaveCriticalSection(*mutex);
@@ -130,8 +124,6 @@ int dxs_mutex_create(dxs_mutex_t* mutex) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dxs_mutex_destroy(dxs_mutex_t* mutex) {
 	if (pthread_mutex_destroy(&mutex->mutex) != 0) {
 		return false;
@@ -144,8 +136,6 @@ int dxs_mutex_destroy(dxs_mutex_t* mutex) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dxs_mutex_lock(dxs_mutex_t* mutex) {
 	if (pthread_mutex_lock(&mutex->mutex) != 0) {
 		return false;
@@ -153,8 +143,6 @@ int dxs_mutex_lock(dxs_mutex_t* mutex) {
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dxs_mutex_unlock(dxs_mutex_t* mutex) {
 	if (pthread_mutex_unlock(&mutex->mutex) != 0) {
@@ -264,7 +252,6 @@ void print_timestamp(dxf_long_t timestamp) {
 	wcsftime(timefmt, 80, L"%Y%m%d-%H%M%S", timeinfo);
 	wprintf(L"%ls", timefmt);
 }
-/* -------------------------------------------------------------------------- */
 
 void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
 			  void* user_data) {
@@ -419,7 +406,6 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 		wprintf(L"object=%ls}\n", cnf->object);
 	}
 }
-/* -------------------------------------------------------------------------- */
 
 dxf_string_t ansi_to_unicode(const char* ansi_str, size_t len) {
 #ifdef _WIN32
@@ -446,8 +432,6 @@ dxf_string_t ansi_to_unicode(const char* ansi_str, size_t len) {
 	return wide_str;
 #endif /* _WIN32 */
 }
-
-/* -------------------------------------------------------------------------- */
 
 typedef struct {
 	int type;
@@ -619,8 +603,6 @@ void on_server_heartbeat_notifier(dxf_connection_t connection, dxf_long_t server
 	fwprintf(stderr, L"\n##### Server time (UTC) = %" PRId64 " ms, Server lag = %d us, RTT = %d us #####\n",
 			 server_millis, server_lag_mark, connection_rtt);
 }
-
-/* -------------------------------------------------------------------------- */
 
 int main(int argc, char* argv[]) {
 	dxf_connection_t connection;

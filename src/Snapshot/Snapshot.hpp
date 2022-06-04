@@ -451,6 +451,9 @@ SnapshotManager::CommonSnapshotPtr SnapshotManager::get(SnapshotRefId snapshotRe
 }
 
 template <>
+Id IdGenerator<Snapshot>::id{0};
+
+template <>
 std::pair<std::shared_ptr<OnlyIndexedEventsSnapshot>, Id> SnapshotManager::create(const ConnectionKey& connectionKey,
 																				  const SnapshotKey& snapshotKey,
 																				  void* userData) {

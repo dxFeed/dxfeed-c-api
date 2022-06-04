@@ -25,11 +25,9 @@
 #include "DXThreads.h"
 #include "Logger.h"
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Socket error code functions
  */
-/* -------------------------------------------------------------------------- */
 
 #ifdef _WIN32
 dx_error_code_t dx_wsa_error_code_to_internal(int wsa_code) {
@@ -206,11 +204,9 @@ dx_error_code_t dx_eai_code_to_internal(int code) {
 
 #endif
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Cross-implementation data
  */
-/* -------------------------------------------------------------------------- */
 
 static const int g_name_resolution_attempt_count = 5;
 
@@ -218,21 +214,17 @@ static int g_connection_count = 0;
 static dx_mutex_t g_count_guard;
 static int g_count_guard_initialized = false;
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Socket function wrappers
 
  *  Win32 implementation
  */
-/* -------------------------------------------------------------------------- */
 
 #ifdef _WIN32
 
-/* ---------------------------------- */
 /*
  *	Auxiliary stuff
  */
-/* ---------------------------------- */
 
 int dx_init_socket_subsystem(void) {
 	WORD wVersionRequested;
@@ -255,8 +247,6 @@ int dx_init_socket_subsystem(void) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_deinit_socket_subsystem(void) {
 	if (WSACleanup() == SOCKET_ERROR) {
 		return dx_set_error_code(dx_wsa_error_code_to_internal(WSAGetLastError()));
@@ -265,11 +255,9 @@ int dx_deinit_socket_subsystem(void) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Socket subsystem initialization implementation
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_on_connection_created(void) {
 	if (!g_count_guard_initialized) {
@@ -295,8 +283,6 @@ int dx_on_connection_created(void) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_on_connection_destroyed(void) {
 	CHECKED_CALL(dx_mutex_lock, &g_count_guard);
 
@@ -313,11 +299,9 @@ int dx_on_connection_destroyed(void) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	DX socket API implementation
  */
-/* -------------------------------------------------------------------------- */
 
 dx_socket_t dx_socket (int family, int type, int protocol) {
 	dx_socket_t s = INVALID_SOCKET;
@@ -329,8 +313,6 @@ dx_socket_t dx_socket (int family, int type, int protocol) {
 	return s;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_connect(dx_socket_t s, const struct sockaddr* addr, socklen_t addrlen) {
 	if (connect(s, addr, addrlen) == SOCKET_ERROR) {
 		return dx_set_error_code(dx_wsa_error_code_to_internal(WSAGetLastError()));
@@ -338,8 +320,6 @@ int dx_connect(dx_socket_t s, const struct sockaddr* addr, socklen_t addrlen) {
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_send(dx_socket_t s, const void* buffer, int buflen) {
 	int res = send(s, (const char*)buffer, buflen, 0);
@@ -352,8 +332,6 @@ int dx_send(dx_socket_t s, const void* buffer, int buflen) {
 
 	return res;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_recv(dx_socket_t s, void* buffer, int buflen) {
 	int res = recv(s, (char*)buffer, buflen, 0);
@@ -374,8 +352,6 @@ int dx_recv(dx_socket_t s, void* buffer, int buflen) {
 	return INVALID_DATA_SIZE;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_close(dx_socket_t s) {
 	if (shutdown(s, SD_BOTH) == INVALID_SOCKET) {
 		closesocket(s);
@@ -389,8 +365,6 @@ int dx_close(dx_socket_t s) {
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_getaddrinfo (const char* nodename, const char* servname,
 					const struct addrinfo* hints, struct addrinfo** res) {
@@ -414,29 +388,21 @@ int dx_getaddrinfo (const char* nodename, const char* servname,
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 void dx_freeaddrinfo(struct addrinfo* res) { freeaddrinfo(res); }
 
 #else
 
-/* ---------------------------------- */
 /*
  *	Auxiliary stuff
  */
-/* ---------------------------------- */
 
 int dx_init_socket_subsystem(void) { return true; }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_deinit_socket_subsystem(void) { return true; }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Socket subsystem initialization implementation
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_on_connection_created(void) {
 	if (!g_count_guard_initialized) {
@@ -462,8 +428,6 @@ int dx_on_connection_created(void) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_on_connection_destroyed(void) {
 	CHECKED_CALL(dx_mutex_lock, &g_count_guard);
 
@@ -480,11 +444,9 @@ int dx_on_connection_destroyed(void) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	DX socket API implementation
  */
-/* -------------------------------------------------------------------------- */
 
 dx_socket_t dx_socket(int family, int type, int protocol) {
 	dx_socket_t s = INVALID_SOCKET;
@@ -496,8 +458,6 @@ dx_socket_t dx_socket(int family, int type, int protocol) {
 	return s;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_connect(dx_socket_t s, const struct sockaddr* addr, socklen_t addrlen) {
 	if (connect(s, addr, addrlen) == SOCKET_ERROR) {
 		return dx_set_error_code(dx_errno_code_to_internal());
@@ -505,8 +465,6 @@ int dx_connect(dx_socket_t s, const struct sockaddr* addr, socklen_t addrlen) {
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_send(dx_socket_t s, const void* buffer, int buflen) {
 	int res = send(s, (const char*)buffer, buflen, 0);
@@ -519,8 +477,6 @@ int dx_send(dx_socket_t s, const void* buffer, int buflen) {
 
 	return res;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_recv(dx_socket_t s, void* buffer, int buflen) {
 	int res = recv(s, (char*)buffer, buflen, 0);
@@ -541,8 +497,6 @@ int dx_recv(dx_socket_t s, void* buffer, int buflen) {
 	return INVALID_DATA_SIZE;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_close(dx_socket_t s) {
 	if (shutdown(s, SHUT_RDWR) == INVALID_SOCKET) {
 		close(s);
@@ -556,8 +510,6 @@ int dx_close(dx_socket_t s) {
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_getaddrinfo(const char* nodename, const char* servname, const struct addrinfo* hints, struct addrinfo** res) {
 	int funres = 0;
@@ -579,8 +531,6 @@ int dx_getaddrinfo(const char* nodename, const char* servname, const struct addr
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 void dx_freeaddrinfo(struct addrinfo* res) { freeaddrinfo(res); }
 

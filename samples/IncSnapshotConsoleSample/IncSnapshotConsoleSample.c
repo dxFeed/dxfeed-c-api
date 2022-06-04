@@ -64,7 +64,6 @@
 int _CRT_glob = 0;
 #endif
 
-/* -------------------------------------------------------------------------- */
 #ifdef _WIN32
 static int is_listener_thread_terminated = false;
 CRITICAL_SECTION listener_thread_guard;
@@ -85,8 +84,6 @@ int is_thread_terminate() {
 	return res;
 }
 #endif
-
-/* -------------------------------------------------------------------------- */
 
 #ifdef _WIN32
 void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
@@ -113,8 +110,6 @@ void print_timestamp(dxf_long_t timestamp) {
 	wprintf(L"%ls", timefmt);
 }
 
-/* -------------------------------------------------------------------------- */
-
 void process_last_error() {
 	int error_code = dx_ec_success;
 	dxf_const_string_t error_descr = NULL;
@@ -137,8 +132,6 @@ void process_last_error() {
 
 	wprintf(L"An error occurred but the error subsystem failed to initialize\n");
 }
-
-/* -------------------------------------------------------------------------- */
 
 dxf_string_t ansi_to_unicode(const char* ansi_str) {
 #ifdef _WIN32
@@ -167,8 +160,6 @@ dxf_string_t ansi_to_unicode(const char* ansi_str) {
 #endif /* _WIN32 */
 }
 
-/* -------------------------------------------------------------------------- */
-
 void listener(const dxf_snapshot_data_ptr_t snapshot_data, int new_snapshot, void* user_data) {
 	size_t i;
 	size_t records_count = snapshot_data->records_count;
@@ -187,7 +178,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, int new_snapshot, voi
 		for (i = 0; i < records_count; ++i) {
 			dxf_order_t order = order_records[i];
 
-			if (records_print_limit > 0 && i >= records_print_limit) {
+			if (records_print_limit > 0 && i >= (size_t)records_print_limit) {
 				wprintf(L"   { ... %zu records left ...}\n", records_count - i);
 				break;
 			}
@@ -208,7 +199,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, int new_snapshot, voi
 		for (i = 0; i < snapshot_data->records_count; ++i) {
 			dxf_candle_t candle = candle_records[i];
 
-			if (records_print_limit > 0 && i >= records_print_limit) {
+			if (records_print_limit > 0 && i >= (size_t)records_print_limit) {
 				wprintf(L"   { ... %zu records left ...}\n", records_count - i);
 				break;
 			}
@@ -232,7 +223,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, int new_snapshot, voi
 		for (i = 0; i < records_count; ++i) {
 			dxf_order_t order = order_records[i];
 
-			if (records_print_limit > 0 && i >= records_print_limit) {
+			if (records_print_limit > 0 && i >= (size_t)records_print_limit) {
 				wprintf(L"   { ... %zu records left ...}\n", records_count - i);
 				break;
 			}
@@ -255,7 +246,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, int new_snapshot, voi
 		for (i = 0; i < snapshot_data->records_count; ++i) {
 			dxf_time_and_sale_t tns = time_and_sale_records[i];
 
-			if (records_print_limit > 0 && i >= records_print_limit) {
+			if (records_print_limit > 0 && i >= (size_t)records_print_limit) {
 				wprintf(L"   { ... %zu records left ...}\n", records_count - i);
 				break;
 			}
@@ -279,7 +270,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, int new_snapshot, voi
 		for (i = 0; i < snapshot_data->records_count; ++i) {
 			dxf_greeks_t grks = greeks_records[i];
 
-			if (records_print_limit > 0 && i >= records_print_limit) {
+			if (records_print_limit > 0 && i >= (size_t)records_print_limit) {
 				wprintf(L"   { ... %zu records left ...}\n", records_count - i);
 				break;
 			}
@@ -302,7 +293,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, int new_snapshot, voi
 		for (i = 0; i < snapshot_data->records_count; ++i) {
 			dxf_series_t srs = series_records[i];
 
-			if (records_print_limit > 0 && i >= records_print_limit) {
+			if (records_print_limit > 0 && i >= (size_t)records_print_limit) {
 				wprintf(L"   { ... %zu records left ...}\n", records_count - i);
 				break;
 			}
@@ -339,8 +330,6 @@ int atoi2(char* str, int* result) {
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int main(int argc, char* argv[]) {
 	dxf_connection_t connection;

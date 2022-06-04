@@ -38,11 +38,9 @@ typedef struct {
 	dxf_time_int_field_t time_int_field;
 } dx_record_params_t;
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Interface functions
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_transcode_record_data (dxf_connection_t connection,
 							const dx_record_params_t* record_params,

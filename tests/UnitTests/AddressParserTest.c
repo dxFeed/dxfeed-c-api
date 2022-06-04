@@ -139,8 +139,6 @@ static dx_test_case_t all_cases[] = {
 };
 static const size_t all_cases_count = SIZE_OF_ARRAY(all_cases);
 
-/* -------------------------------------------------------------------------- */
-
 static int dx_is_equal_address(const dx_address_t* expected, const dx_address_t* actual) {
 	DX_CHECK(dx_is_equal_ansi(expected->host, actual->host));
 	DX_CHECK(dx_is_equal_const_ansi(expected->port, actual->port));
@@ -157,8 +155,6 @@ static int dx_is_equal_address(const dx_address_t* expected, const dx_address_t*
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 static int dx_is_equal_address_array(const dx_address_array_t* expected, const dx_address_array_t* actual) {
 	size_t i;
 	DX_CHECK(dx_is_equal_size_t(expected->size, actual->size));
@@ -167,8 +163,6 @@ static int dx_is_equal_address_array(const dx_address_array_t* expected, const d
 	}
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 /*
  * Test
@@ -190,8 +184,6 @@ static int get_addresses_from_collection_test(void) {
 	}
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int address_parser_all_tests(void) {
 	int res = true;

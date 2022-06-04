@@ -31,11 +31,9 @@
 
 #define DX_RECORD_FIELD_STDOPS(r, f) DX_RECORD_FIELD_SETTER_NAME(r, f), DX_RECORD_FIELD_DEF_VAL_NAME(r, f), DX_RECORD_FIELD_GETTER_NAME(r, f)
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Trade data fields
  */
-/* -------------------------------------------------------------------------- */
 
 static const dx_field_info_t dx_fields_trade[] = {
 	{ dx_fid_compact_int,     L"Last.Time",         NULL, NULL,            DX_RECORD_FIELD_STDOPS(dx_trade_t, time),          dx_ft_common_field },
@@ -52,11 +50,9 @@ static const dx_field_info_t dx_fields_trade[] = {
 	{ dx_fid_compact_int,     L"Last.Flags",        NULL, L"Flags",        DX_RECORD_FIELD_STDOPS(dx_trade_t, flags),         dx_ft_common_field },
 };
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Quote data fields
  */
-/* -------------------------------------------------------------------------- */
 
 static const dx_field_info_t dx_fields_quote[] = {
 	{ dx_fid_compact_int,   L"Sequence",     NULL, NULL,               DX_RECORD_FIELD_STDOPS(dx_quote_t, sequence),          dx_ft_common_field },
@@ -71,11 +67,9 @@ static const dx_field_info_t dx_fields_quote[] = {
 	{ dx_fid_flag_wd_by_ci, L"Ask.Size",     NULL, L"AskSize",         DX_RECORD_FIELD_STDOPS(dx_quote_t, ask_size),          dx_ft_common_field }
 };
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Summary data fields
  */
-/* -------------------------------------------------------------------------- */
 
 static const dx_field_info_t dx_fields_summary[] = {
 	{ dx_fid_flag_date_by_ci, L"DayId",              NULL, L"DayId",             DX_RECORD_FIELD_STDOPS(dx_summary_t, day_id),               dx_ft_common_field },
@@ -90,11 +84,9 @@ static const dx_field_info_t dx_fields_summary[] = {
     { dx_fid_compact_int,     L"Flags",              NULL, L"Flags",             DX_RECORD_FIELD_STDOPS(dx_summary_t, flags),                dx_ft_common_field }
 };
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Profile data fields
  */
-/* -------------------------------------------------------------------------- */
 
 static const dx_field_info_t dx_fields_profile[] = {
 	{ dx_fid_flag_wd_by_ci,   L"Beta",            NULL,           NULL,               DX_RECORD_FIELD_STDOPS(dx_profile_t, beta),             dx_ft_common_field },
@@ -115,11 +107,9 @@ static const dx_field_info_t dx_fields_profile[] = {
     { dx_fid_utf_char_array,  L"StatusReason",    NULL,           L"StatusReason",    DX_RECORD_FIELD_STDOPS(dx_profile_t, status_reason),    dx_ft_common_field }
 };
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Market maker data fields
  */
-/* -------------------------------------------------------------------------- */
 
 static const dx_field_info_t dx_fields_market_maker[] = {
 	{ dx_fid_utf_char,      L"MMExchange",  NULL, L"ExchangeCode", DX_RECORD_FIELD_STDOPS(dx_market_maker_t, mm_exchange), dx_ft_first_time_int_field  },
@@ -134,11 +124,9 @@ static const dx_field_info_t dx_fields_market_maker[] = {
     { dx_fid_flag_wd_by_ci, L"MMAsk.Count", NULL, L"AskCount",     DX_RECORD_FIELD_STDOPS(dx_market_maker_t, mmask_count), dx_ft_common_field }
 };
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Order data fields
  */
-/* -------------------------------------------------------------------------- */
 
 static const dx_field_info_t dx_fields_order[] = {
 	{ dx_fid_compact_int,       L"Index",        NULL, L"Index",        DX_RECORD_FIELD_STDOPS(dx_order_t, index),         dx_ft_second_time_int_field },
@@ -159,11 +147,9 @@ static const dx_field_info_t dx_fields_order[] = {
     { dx_fid_compact_int,       L"MMID",         NULL, L"MarketMaker",  DX_RECORD_FIELD_STDOPS(dx_order_t, mmid),          dx_ft_common_field },
 };
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Time and Sale data fields
  */
-/* -------------------------------------------------------------------------- */
 
 static const dx_field_info_t dx_fields_time_and_sale[] = {
 	{ dx_fid_flag_sec_by_ci, L"Time",                   NULL,              NULL,                      DX_RECORD_FIELD_STDOPS(dx_time_and_sale_t, time),                     dx_ft_first_time_int_field  },
@@ -180,11 +166,9 @@ static const dx_field_info_t dx_fields_time_and_sale[] = {
     { dx_fid_utf_char_array, L"Seller",                 NULL,              L"Seller",                 DX_RECORD_FIELD_STDOPS(dx_time_and_sale_t, seller),                   dx_ft_common_field }
 };
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Candle data fields
  */
-/* -------------------------------------------------------------------------- */
 
 static const dx_field_info_t dx_fields_candle[] = {
 	{ dx_fid_flag_sec_by_ci, L"Time",          NULL, NULL,         DX_RECORD_FIELD_STDOPS(dx_candle_t, time),           dx_ft_first_time_int_field  },
@@ -202,11 +186,9 @@ static const dx_field_info_t dx_fields_candle[] = {
 	{ dx_fid_flag_wd_by_ci,  L"OpenInterest",  NULL, NULL,         DX_RECORD_FIELD_STDOPS(dx_candle_t, open_interest),  dx_ft_common_field },
 };
 
-/* -------------------------------------------------------------------------- */
 /*
  *	TradeETH data fields
  */
-/* -------------------------------------------------------------------------- */
 
 static const dx_field_info_t dx_fields_trade_eth[] = {
 	{ dx_fid_compact_int,     L"ETHLast.Time",      NULL, NULL,            DX_RECORD_FIELD_STDOPS(dx_trade_t, time),          dx_ft_common_field },
@@ -222,11 +204,9 @@ static const dx_field_info_t dx_fields_trade_eth[] = {
 	{ dx_fid_compact_int,     L"ETHLast.Flags",     NULL, L"Flags",        DX_RECORD_FIELD_STDOPS(dx_trade_t, flags),         dx_ft_common_field },
 };
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Spread Order data fields
  */
-/* -------------------------------------------------------------------------- */
 
 static const dx_field_info_t dx_fields_spread_order[] = {
 	{ dx_fid_compact_int,       L"Index",        NULL, L"Index",        DX_RECORD_FIELD_STDOPS(dx_spread_order_t, index),         dx_ft_second_time_int_field },
@@ -247,11 +227,9 @@ static const dx_field_info_t dx_fields_spread_order[] = {
     { dx_fid_utf_char_array,    L"SpreadSymbol", NULL, L"SpreadSymbol", DX_RECORD_FIELD_STDOPS(dx_spread_order_t, spread_symbol), dx_ft_common_field }
 };
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Greeks data fields
  */
-/* -------------------------------------------------------------------------- */
 
 static const dx_field_info_t dx_fields_greeks[] = {
 	{ dx_fid_flag_sec_by_ci, L"Time",         NULL, NULL,     DX_RECORD_FIELD_STDOPS(dx_greeks_t, time),       dx_ft_first_time_int_field  },
@@ -265,11 +243,9 @@ static const dx_field_info_t dx_fields_greeks[] = {
     { dx_fid_flag_wd_by_ci,  L"Vega",         NULL, NULL,     DX_RECORD_FIELD_STDOPS(dx_greeks_t, vega),       dx_ft_common_field }
 };
 
-/* -------------------------------------------------------------------------- */
 /*
  *	TheoPrice data fields
  */
-/* -------------------------------------------------------------------------- */
 
 static const dx_field_info_t dx_fields_theo_price[] = {
 	{ dx_fid_flag_sec_by_ci, L"Theo.Time",            NULL, L"Time",            DX_RECORD_FIELD_STDOPS(dx_theo_price_t, time),             dx_ft_common_field },
@@ -281,11 +257,9 @@ static const dx_field_info_t dx_fields_theo_price[] = {
     { dx_fid_flag_wd_by_ci,  L"Theo.Interest",        NULL, L"Interest",        DX_RECORD_FIELD_STDOPS(dx_theo_price_t, interest),         dx_ft_common_field }
 };
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Underlying data fields
  */
-/* -------------------------------------------------------------------------- */
 
 static const dx_field_info_t dx_fields_underlying[] = {
 	{ dx_fid_flag_wd_by_ci, L"Volatility",      NULL, NULL, DX_RECORD_FIELD_STDOPS(dx_underlying_t, volatility),       dx_ft_common_field },
@@ -296,11 +270,9 @@ static const dx_field_info_t dx_fields_underlying[] = {
     { dx_fid_flag_wd_by_ci, L"PutCallRatio",    NULL, NULL, DX_RECORD_FIELD_STDOPS(dx_underlying_t, put_call_ratio),   dx_ft_common_field }
 };
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Series data fields
  */
-/* -------------------------------------------------------------------------- */
 
 static const dx_field_info_t dx_fields_series[] = {
     { dx_fid_compact_int,    L"Index",        NULL, NULL, DX_RECORD_FIELD_STDOPS(dx_series_t, index),          dx_ft_second_time_int_field },
@@ -316,22 +288,18 @@ static const dx_field_info_t dx_fields_series[] = {
     { dx_fid_flag_wd_by_ci,  L"Interest",     NULL, NULL, DX_RECORD_FIELD_STDOPS(dx_series_t, interest),       dx_ft_common_field }
 };
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Configuration data fields
  */
-/* -------------------------------------------------------------------------- */
 
 static const dx_field_info_t dx_fields_configuration[] = {
 	{ dx_fid_compact_int,                            L"Version",       NULL,             L"Version",              DX_RECORD_FIELD_STDOPS(dx_configuration_t, version), dx_ft_common_field },
 	{ dx_fid_byte_array | dx_fid_flag_serial_object, L"Configuration", L"Configuration", L"MarshalledAttachment", DX_RECORD_FIELD_STDOPS(dx_configuration_t, object),  dx_ft_common_field }
 };
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Records
  */
-/* -------------------------------------------------------------------------- */
 
 static const dx_record_info_t g_record_info[dx_rid_count] = {
 	{ L"Trade", sizeof(dx_fields_trade) / sizeof(dx_fields_trade[0]), dx_fields_trade },
@@ -351,11 +319,9 @@ static const dx_record_info_t g_record_info[dx_rid_count] = {
 	{ L"Configuration", sizeof(dx_fields_configuration) / sizeof(dx_fields_configuration[0]), dx_fields_configuration }
 };
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Data structures connection context
  */
-/* -------------------------------------------------------------------------- */
 
 #define RECORD_ID_VECTOR_SIZE   1000
 
@@ -400,8 +366,6 @@ typedef struct {
 
 #define CTX(context) \
 	((dx_data_structures_connection_context_t*)context)
-
-/* -------------------------------------------------------------------------- */
 
 void dx_clear_record_server_support_states(dx_data_structures_connection_context_t* context) {
 	dx_record_server_support_state_list_t *states = NULL;
@@ -483,8 +447,6 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_data_structures) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_data_structures) {
 	int res = true;
 	dx_data_structures_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_data_structures, &res);
@@ -499,27 +461,21 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_data_structures) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_data_structures) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Connection context functions implementation
  */
-/* -------------------------------------------------------------------------- */
 
 void* dx_get_data_structures_connection_context (dxf_connection_t connection) {
 	return dx_get_subsystem_data(connection, dx_ccs_data_structures, NULL);
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Record functions implementation
  */
-/* -------------------------------------------------------------------------- */
 
 #define RECORD_ID_PAIR_COMPARATOR(left, right) \
 	DX_NUMERIC_COMPARATOR((left).server_record_id, (right).server_record_id)
@@ -545,8 +501,6 @@ dx_record_id_t dx_get_record_id(void* context, dxf_int_t server_record_id) {
 		return record_id_map->id_map.elements[(dx_record_id_t)idx].local_record_id;
 	}
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_assign_server_record_id(void* context, dx_record_id_t record_id, dxf_int_t server_record_id) {
 	dx_server_local_record_id_map_t* record_id_map = &(CTX(context)->record_id_map);
@@ -580,8 +534,6 @@ int dx_assign_server_record_id(void* context, dx_record_id_t record_id, dxf_int_
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_validate_record_id(void* context, dx_record_id_t record_id) {
 	dx_record_list_t* records_list = &(CTX(context)->records_list);
 	if (record_id < 0 || record_id >= (dx_record_id_t)records_list->size) {
@@ -589,8 +541,6 @@ int dx_validate_record_id(void* context, dx_record_id_t record_id) {
 	}
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 /*
  * Returns pointer to record data.
@@ -614,8 +564,6 @@ const dx_record_item_t* dx_get_record_by_id(void* context, dx_record_id_t record
 	return value;
 }
 
-/* -------------------------------------------------------------------------- */
-
 dx_record_id_t dx_get_record_id_by_name(void* context, dxf_const_string_t record_name) {
 	dx_record_id_t record_id;
 	dx_data_structures_connection_context_t* dscc = CTX(context);
@@ -635,8 +583,6 @@ dx_record_id_t dx_get_record_id_by_name(void* context, dxf_const_string_t record
 	return DX_RECORD_ID_INVALID;
 }
 
-/* -------------------------------------------------------------------------- */
-
 dx_record_id_t dx_get_next_unsubscribed_record_id(void* context, int isUpdate) {
 	dx_record_id_t record_id = DX_RECORD_ID_INVALID;
 	dx_data_structures_connection_context_t* dscc = CTX(context);
@@ -655,8 +601,6 @@ dx_record_id_t dx_get_next_unsubscribed_record_id(void* context, int isUpdate) {
 	return record_id;
 }
 
-/* -------------------------------------------------------------------------- */
-
 void dx_drop_unsubscribe_counter(void* context) {
 	dx_data_structures_connection_context_t* dscc = CTX(context);
 	dx_record_list_t* records_list = &(dscc->records_list);
@@ -667,8 +611,6 @@ void dx_drop_unsubscribe_counter(void* context) {
 
 	dx_mutex_unlock(&dscc->guard_records_list);
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_find_record_field(const dx_record_item_t* record_info, dxf_const_string_t field_name, dxf_int_t field_type) {
 	int cur_field_index = 0;
@@ -687,8 +629,6 @@ int dx_find_record_field(const dx_record_item_t* record_info, dxf_const_string_t
 
 	return INVALID_INDEX;
 }
-
-/* -------------------------------------------------------------------------- */
 
 dxf_char_t dx_get_record_exchange_code(void* context, dx_record_id_t record_id) {
 	dx_data_structures_connection_context_t* dscc = CTX(context);
@@ -721,8 +661,6 @@ int dx_set_record_exchange_code(void* context, dx_record_id_t record_id,
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 /*
  * Creates subscription time field according to record model. Function uses
@@ -780,8 +718,6 @@ int dx_create_subscription_time(void* context, dx_record_id_t record_id,
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 dx_record_server_support_state_list_t* dx_get_record_server_support_states(void* context) {
 	return &(CTX(context)->record_server_support_states);
 }
@@ -794,8 +730,6 @@ int dx_get_record_server_support_state_value(dx_record_server_support_state_list
 	*value = &(states->elements[record_id]);
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 /* Functions for working with records list */
 

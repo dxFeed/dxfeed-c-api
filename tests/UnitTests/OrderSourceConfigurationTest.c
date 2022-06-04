@@ -58,8 +58,6 @@ int ost_get_dex_counter() { return get_event_counter(g_dex_counter); }
 int ost_get_dea_counter() { return get_event_counter(g_dea_counter); }
 get_counter_function_t g_all_counters[] = { ost_get_ntv_counter, ost_get_dex_counter, ost_get_dea_counter };
 
-/* -------------------------------------------------------------------------- */
-
 static void close_data(dxf_connection_t connection, dxf_subscription_t subscription,
 					dxf_event_listener_t listener) {
 	if (!dxf_detach_event_listener(subscription, listener))
@@ -70,15 +68,11 @@ static void close_data(dxf_connection_t connection, dxf_subscription_t subscript
 		process_last_error();
 }
 
-/* -------------------------------------------------------------------------- */
-
 void order_source_tests_on_thread_terminate(dxf_connection_t connection, void* user_data) {
 	if (g_ost_listener_thread_data == NULL)
 		return;
 	on_reader_thread_terminate(g_ost_listener_thread_data, connection, user_data);
 }
-
-/* -------------------------------------------------------------------------- */
 
 void listener(int event_type, dxf_const_string_t symbol_name,
 			const dxf_event_data_t* data, int data_count, void* user_data) {

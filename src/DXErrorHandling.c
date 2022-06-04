@@ -34,18 +34,14 @@
 #include "DXThreads.h"
 #include "DXMemory.h"
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Thread-specific stuff
  */
-/* -------------------------------------------------------------------------- */
 
 static int g_initialization_attempted = false;
 static dx_key_t g_last_error_data_key;
 
 static dx_error_code_t g_master_thread_last_error_code = dx_ec_success;
-
-/* -------------------------------------------------------------------------- */
 
 static void dx_key_data_destructor (void* data) {
 	if (data != &g_master_thread_last_error_code && data != NULL) {
@@ -60,11 +56,9 @@ static void dx_key_remover(void *data) {
 	}
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Internal error handling helpers
  */
-/* -------------------------------------------------------------------------- */
 
 dx_error_function_result_t dx_check_error_code (dx_error_code_t error_code) {
 	if (error_code < 0 || error_code >= dx_ec_count) {
@@ -74,11 +68,9 @@ dx_error_function_result_t dx_check_error_code (dx_error_code_t error_code) {
 	return dx_efr_success;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Error manipulation functions implementation
  */
-/* -------------------------------------------------------------------------- */
 
 dx_error_function_result_t dx_set_last_error(dx_error_code_t error_code) {
 	return dx_set_last_error_impl(error_code, true);
@@ -123,8 +115,6 @@ dx_error_function_result_t dx_set_last_error_impl(dx_error_code_t error_code, in
 	return dx_efr_success;
 }
 
-/* -------------------------------------------------------------------------- */
-
 dx_error_function_result_t dx_get_last_error (int* error_code) {
 	dx_error_code_t* error_data = NULL;
 
@@ -155,13 +145,9 @@ dx_error_function_result_t dx_get_last_error (int* error_code) {
 	return dx_efr_success;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_pop_last_error () {
 	return (dx_set_last_error(dx_ec_success) == dx_efr_success);
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_init_error_subsystem (void) {
 	dx_error_code_t* error_data = NULL;
@@ -209,11 +195,9 @@ int dx_init_error_subsystem (void) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Convenient helper functions implementation
  */
-/* -------------------------------------------------------------------------- */
 
 dx_error_code_t dx_get_error_code (void) {
 	int code;
@@ -224,8 +208,6 @@ dx_error_code_t dx_get_error_code (void) {
 		return code;
 	}
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_set_error_code (dx_error_code_t code) {
 	return dx_set_error_code_impl(code, true);

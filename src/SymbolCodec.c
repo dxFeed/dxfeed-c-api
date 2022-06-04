@@ -29,11 +29,9 @@
 
 #include <limits.h>
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Penta codec data
  */
-/* -------------------------------------------------------------------------- */
 
 #define PENTA_LENGTH 128
 
@@ -54,11 +52,9 @@ static dxf_char_t g_penta_characters[1024];
 
 dxf_int_t g_wildcard_cipher;
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Helper functions
  */
-/* -------------------------------------------------------------------------- */
 
 void dx_init_penta (dxf_int_t c, dxf_int_t penta, dxf_int_t penta_length) {
 	g_penta_characters[penta] = (dxf_char_t)c;
@@ -66,7 +62,6 @@ void dx_init_penta (dxf_int_t c, dxf_int_t penta, dxf_int_t penta_length) {
 	g_penta_lengths[c] = penta_length;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  * Encodes penta into cipher. Shall return 0 if encoding impossible.
  * The specified penta must be valid (no more than 35 bits).
@@ -88,7 +83,6 @@ dxf_int_t dx_encode_penta (dxf_long_t penta, dxf_int_t penta_length) {
 	return 0;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  * Converts penta into string.
  * The specified penta must be valid (no more than 35 bits).
@@ -125,7 +119,6 @@ dxf_const_string_t dx_penta_to_string (dxf_long_t penta) {
 	return buffer;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  * Decodes cipher into penta code. The specified cipher must not be 0.
  * The returning penta code must be valid (no more than 35 bits).
@@ -155,11 +148,9 @@ int dx_decode_cipher (dxf_int_t cipher, OUT dxf_long_t* res) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Symbol codec functions implementation
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_init_symbol_codec (void) {
 	dxf_int_t i = PENTA_LENGTH;
@@ -196,13 +187,9 @@ int dx_init_symbol_codec (void) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 dxf_int_t dx_get_codec_valid_cipher (void) {
 	return 0xC0000000;
 }
-
-/* -------------------------------------------------------------------------- */
 
 dxf_int_t dx_encode_symbol_name (dxf_const_string_t symbol) {
 	dxf_long_t penta = 0;
@@ -241,8 +228,6 @@ dxf_int_t dx_encode_symbol_name (dxf_const_string_t symbol) {
 	return dx_encode_penta(penta, penta_length);
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_decode_symbol_name (dxf_int_t cipher, OUT dxf_const_string_t* symbol) {
 	dxf_long_t penta;
 	dxf_const_string_t str;
@@ -266,7 +251,6 @@ int dx_decode_symbol_name (dxf_int_t cipher, OUT dxf_const_string_t* symbol) {
 	return true;
 
 }
-/* -------------------------------------------------------------------------- */
 
 int dx_codec_read_symbol (void* bicc, dxf_char_t* buffer, int buffer_length, OUT dxf_string_t* result,
 						OUT dxf_int_t* cipher_result, OUT dxf_event_flags_t* flags,
@@ -439,8 +423,6 @@ int dx_codec_read_symbol (void* bicc, dxf_char_t* buffer, int buffer_length, OUT
 	}
 	return false;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_codec_write_symbol (void* bocc, dxf_int_t cipher, dxf_const_string_t symbol) {
 	if (cipher != 0) {

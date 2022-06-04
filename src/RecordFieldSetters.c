@@ -27,33 +27,27 @@
 #include "DataStructures.h"
 #include "EventData.h"
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Setter body macro
  */
-/* -------------------------------------------------------------------------- */
 
 #define FIELD_SETTER_BODY(struct_name, field_name, field_type)    \
 	DX_RECORD_FIELD_SETTER_PROTOTYPE(struct_name, field_name) {   \
 		((struct_name*)object)->field_name = *(field_type*)field; \
 	}
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Getter body macro
  */
-/* -------------------------------------------------------------------------- */
 
 #define FIELD_GETTER_BODY(struct_name, field_name, field_type)    \
 	DX_RECORD_FIELD_GETTER_PROTOTYPE(struct_name, field_name) {   \
 		*(field_type*)field = ((struct_name*)object)->field_name; \
 	}
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Default value getter functions
  */
-/* -------------------------------------------------------------------------- */
 
 #define GENERIC_VALUE_GETTER_NAME(field_type) generic_##field_type##_value_getter
 
@@ -67,11 +61,9 @@
 		return GENERIC_VALUE_GETTER_NAME(field_type)();          \
 	}
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Some less-than-generic value getters macros
  */
-/* -------------------------------------------------------------------------- */
 
 #define RECORD_EXCHANGE_CODE_GETTER_NAME(record_id) record_id##_exchange_code_getter
 
@@ -88,11 +80,9 @@
 		return &exchange_code;                                            \
 	}
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Generic value getters implementation
  */
-/* -------------------------------------------------------------------------- */
 
 GENERIC_VALUE_GETTER_NAME_PROTO(dxf_char_t) {
 	static DX_THREAD_LOCAL dxf_char_t c = 0;
@@ -100,15 +90,11 @@ GENERIC_VALUE_GETTER_NAME_PROTO(dxf_char_t) {
 	return &c;
 }
 
-/* -------------------------------------------------------------------------- */
-
 GENERIC_VALUE_GETTER_NAME_PROTO(dxf_int_t) {
 	static DX_THREAD_LOCAL dxf_int_t i = 0;
 
 	return &i;
 }
-
-/* -------------------------------------------------------------------------- */
 
 GENERIC_VALUE_GETTER_NAME_PROTO(dxf_long_t) {
 	static DX_THREAD_LOCAL dxf_long_t l = 0;
@@ -116,15 +102,11 @@ GENERIC_VALUE_GETTER_NAME_PROTO(dxf_long_t) {
 	return &l;
 }
 
-/* -------------------------------------------------------------------------- */
-
 GENERIC_VALUE_GETTER_NAME_PROTO(dxf_double_t) {
 	static DX_THREAD_LOCAL dxf_double_t d = 0;
 
 	return &d;
 }
-
-/* -------------------------------------------------------------------------- */
 
 GENERIC_VALUE_GETTER_NAME_PROTO(dxf_dayid_t) {
 	static DX_THREAD_LOCAL dxf_dayid_t d_id = 0;
@@ -132,15 +114,11 @@ GENERIC_VALUE_GETTER_NAME_PROTO(dxf_dayid_t) {
 	return &d_id;
 }
 
-/* -------------------------------------------------------------------------- */
-
 GENERIC_VALUE_GETTER_NAME_PROTO(dxf_const_string_t) {
 	static DX_THREAD_LOCAL dxf_const_string_t s = L"<Default>";
 
 	return &s;
 }
-
-/* -------------------------------------------------------------------------- */
 
 GENERIC_VALUE_GETTER_NAME_PROTO(dxf_byte_array_t) {
 	static DX_THREAD_LOCAL dxf_byte_array_t cba = {NULL, 0, 0};
@@ -148,21 +126,17 @@ GENERIC_VALUE_GETTER_NAME_PROTO(dxf_byte_array_t) {
 	return &cba;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Standard operations macros
  */
-/* -------------------------------------------------------------------------- */
 #define FIELD_STDOPS_BODIES(struct_name, field_name, field_type) \
 	FIELD_SETTER_BODY(struct_name, field_name, field_type)       \
 	FIELD_DEF_VAL_BODY(struct_name, field_name, field_type)      \
 	FIELD_GETTER_BODY(struct_name, field_name, field_type)
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Trade field setters/getters implementation
  */
-/* -------------------------------------------------------------------------- */
 
 FIELD_STDOPS_BODIES(dx_trade_t, time, dxf_int_t)
 FIELD_STDOPS_BODIES(dx_trade_t, sequence, dxf_int_t)
@@ -177,11 +151,9 @@ FIELD_STDOPS_BODIES(dx_trade_t, day_volume, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_trade_t, day_turnover, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_trade_t, flags, dxf_int_t)
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Quote field setters/getters implementation
  */
-/* -------------------------------------------------------------------------- */
 
 FIELD_STDOPS_BODIES(dx_quote_t, sequence, dxf_int_t)
 FIELD_STDOPS_BODIES(dx_quote_t, time_nanos, dxf_int_t)
@@ -194,11 +166,9 @@ FIELD_STDOPS_BODIES(dx_quote_t, ask_exchange_code, dxf_char_t)
 FIELD_STDOPS_BODIES(dx_quote_t, ask_price, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_quote_t, ask_size, dxf_double_t)
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Summary field setters/getters implementation
  */
-/* -------------------------------------------------------------------------- */
 
 FIELD_STDOPS_BODIES(dx_summary_t, day_id, dxf_dayid_t)
 FIELD_STDOPS_BODIES(dx_summary_t, day_open_price, dxf_double_t)
@@ -211,11 +181,9 @@ FIELD_STDOPS_BODIES(dx_summary_t, prev_day_volume, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_summary_t, open_interest, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_summary_t, flags, dxf_int_t)
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Profile field setter implementation
  */
-/* -------------------------------------------------------------------------- */
 
 FIELD_STDOPS_BODIES(dx_profile_t, beta, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_profile_t, eps, dxf_double_t)
@@ -234,11 +202,9 @@ FIELD_STDOPS_BODIES(dx_profile_t, flags, dxf_int_t)
 FIELD_STDOPS_BODIES(dx_profile_t, description, dxf_const_string_t)
 FIELD_STDOPS_BODIES(dx_profile_t, status_reason, dxf_const_string_t)
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Market maker field setters/getters implementation
  */
-/* -------------------------------------------------------------------------- */
 
 FIELD_STDOPS_BODIES(dx_market_maker_t, mm_exchange, dxf_char_t)
 FIELD_STDOPS_BODIES(dx_market_maker_t, mm_id, dxf_int_t)
@@ -251,11 +217,9 @@ FIELD_STDOPS_BODIES(dx_market_maker_t, mmask_price, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_market_maker_t, mmask_size, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_market_maker_t, mmask_count, dxf_double_t)
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Order field setters/getters implementation
  */
-/* -------------------------------------------------------------------------- */
 
 FIELD_STDOPS_BODIES(dx_order_t, index, dxf_int_t)
 FIELD_STDOPS_BODIES(dx_order_t, time, dxf_int_t)
@@ -274,11 +238,9 @@ FIELD_STDOPS_BODIES(dx_order_t, trade_price, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_order_t, trade_size, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_order_t, mmid, dxf_int_t)
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Time and Sale field setters/getters implementation
  */
-/* -------------------------------------------------------------------------- */
 
 FIELD_STDOPS_BODIES(dx_time_and_sale_t, time, dxf_int_t)
 FIELD_STDOPS_BODIES(dx_time_and_sale_t, sequence, dxf_int_t)
@@ -293,11 +255,9 @@ FIELD_STDOPS_BODIES(dx_time_and_sale_t, flags, dxf_int_t)
 FIELD_STDOPS_BODIES(dx_time_and_sale_t, buyer, dxf_const_string_t)
 FIELD_STDOPS_BODIES(dx_time_and_sale_t, seller, dxf_const_string_t)
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Candle field setters/getters implementation
  */
-/* -------------------------------------------------------------------------- */
 
 FIELD_STDOPS_BODIES(dx_candle_t, time, dxf_int_t)
 FIELD_STDOPS_BODIES(dx_candle_t, sequence, dxf_int_t)
@@ -313,11 +273,9 @@ FIELD_STDOPS_BODIES(dx_candle_t, ask_volume, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_candle_t, imp_volatility, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_candle_t, open_interest, dxf_double_t)
 
-/* -------------------------------------------------------------------------- */
 /*
  *	SpreadOrder field setters/getters implementation
  */
-/* -------------------------------------------------------------------------- */
 
 FIELD_STDOPS_BODIES(dx_spread_order_t, index, dxf_int_t)
 FIELD_STDOPS_BODIES(dx_spread_order_t, time, dxf_int_t)
@@ -336,11 +294,9 @@ FIELD_STDOPS_BODIES(dx_spread_order_t, trade_price, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_spread_order_t, trade_size, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_spread_order_t, spread_symbol, dxf_const_string_t)
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Greeks field setters/getters implementation
  */
-/* -------------------------------------------------------------------------- */
 
 FIELD_STDOPS_BODIES(dx_greeks_t, time, dxf_int_t)
 FIELD_STDOPS_BODIES(dx_greeks_t, sequence, dxf_int_t)
@@ -352,11 +308,9 @@ FIELD_STDOPS_BODIES(dx_greeks_t, theta, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_greeks_t, rho, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_greeks_t, vega, dxf_double_t)
 
-/* -------------------------------------------------------------------------- */
 /*
  *	TheoPrice field setters/getters implementation
  */
-/* -------------------------------------------------------------------------- */
 
 FIELD_SETTER_BODY(dx_theo_price_t, time, dxf_int_t)
 FIELD_DEF_VAL_BODY(dx_theo_price_t, time, dxf_int_t)
@@ -368,11 +322,9 @@ FIELD_STDOPS_BODIES(dx_theo_price_t, gamma, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_theo_price_t, dividend, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_theo_price_t, interest, dxf_double_t)
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Underlying field setters/getters implementation
  */
-/* -------------------------------------------------------------------------- */
 
 FIELD_STDOPS_BODIES(dx_underlying_t, volatility, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_underlying_t, front_volatility, dxf_double_t)
@@ -381,11 +333,9 @@ FIELD_STDOPS_BODIES(dx_underlying_t, call_volume, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_underlying_t, put_volume, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_underlying_t, put_call_ratio, dxf_double_t)
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Series field setters/getters implementation
  */
-/* -------------------------------------------------------------------------- */
 
 FIELD_STDOPS_BODIES(dx_series_t, index, dxf_int_t)
 FIELD_STDOPS_BODIES(dx_series_t, time, dxf_int_t)
@@ -399,16 +349,12 @@ FIELD_STDOPS_BODIES(dx_series_t, forward_price, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_series_t, dividend, dxf_double_t)
 FIELD_STDOPS_BODIES(dx_series_t, interest, dxf_double_t)
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Configuration field setters/getters implementation
  */
-/* -------------------------------------------------------------------------- */
 
 FIELD_STDOPS_BODIES(dx_configuration_t, version, dxf_int_t)
 FIELD_STDOPS_BODIES(dx_configuration_t, object, dxf_byte_array_t)
-
-/* -------------------------------------------------------------------------- */
 
 RECORD_EXCHANGE_CODE_GETTER_BODY(dx_rid_trade)
 RECORD_EXCHANGE_CODE_GETTER_BODY(dx_rid_quote)

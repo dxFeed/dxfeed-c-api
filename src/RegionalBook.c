@@ -122,8 +122,6 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_regional_book) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_regional_book) {
 	int res = true;
 	dx_rb_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_regional_book, &res);
@@ -134,15 +132,12 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_regional_book) {
 	return res;
 }
 
-/* -------------------------------------------------------------------------- */
 static int dx_rb_clear_connection_context(dx_rb_connection_context_t* context) {
 	int res = true;
 	res &= dx_mutex_destroy(&(context->guard));
 	dx_free(context);
 	return res;
 }
-
-/* -------------------------------------------------------------------------- */
 
 DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_regional_book) {
 	return true;
@@ -170,8 +165,6 @@ static int dx_rb_book_free(dx_regional_book_t *book) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 /* This functuions must be called without guard */
 static void dx_rb_book_clear(dx_regional_book_t *book) {
 	/* Kill subscription */
@@ -182,9 +175,7 @@ static void dx_rb_book_clear(dx_regional_book_t *book) {
 
 }
 
-/* -------------------------------------------------------------------------- */
-
-/* This functuions must be called with book guard taken */
+/* This functions must be called with book guard taken */
 static int dx_rb_book_update_one_side(dxf_price_level_element_t *dst, size_t *dst_count, dx_regional_book_t *book, int isBid, double startValue) {
 	int changed = false;
 	size_t didx = 0;
@@ -239,9 +230,7 @@ static int dx_rb_book_update_one_side(dxf_price_level_element_t *dst, size_t *ds
 	return changed;
 }
 
-/* -------------------------------------------------------------------------- */
-
-/* This functuions must be called without book guard */
+/* This functions must be called without book guard */
 static void dx_rb_book_update(dx_regional_book_t *book) {
 	int changed = false;
 	size_t i = 0;

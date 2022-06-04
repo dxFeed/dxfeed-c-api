@@ -22,19 +22,15 @@
 
 #include "BufferedIOCommon.h"
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Connection context functions
  */
-/* -------------------------------------------------------------------------- */
 
 void* dx_get_buffered_input_connection_context (dxf_connection_t connection);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Buffer manipulators
  */
-/* -------------------------------------------------------------------------- */
 
 dxf_byte_t* dx_get_in_buffer (void* context);
 int dx_get_in_buffer_length (void* context);
@@ -44,11 +40,9 @@ void dx_set_in_buffer_position (void* context, int new_position);
 int dx_get_in_buffer_limit (void* context);
 void dx_set_in_buffer_limit (void* context, int new_limit);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Read operations
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_read_boolean (void* context, OUT dxf_bool_t* value);
 int dx_read_byte (void* context, OUT dxf_byte_t* value);
@@ -65,11 +59,9 @@ int dx_read_line (void* context, OUT dxf_string_t* value);
 int dx_read_utf (void* context, OUT dxf_string_t* value);
  */
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Compact read operations
  */
-/* -------------------------------------------------------------------------- */
 
 /*
  * Reads an dx_int_t value in a compact format.
@@ -98,11 +90,9 @@ int dx_read_compact_long (void* context, OUT dxf_long_t* value);
  */
 int dx_read_byte_array (void* context, OUT dxf_byte_array_t* value);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	UTF read operations
  */
-/* -------------------------------------------------------------------------- */
 
 /*
  * Reads Unicode code point in a UTF-8 format.

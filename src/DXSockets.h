@@ -52,20 +52,16 @@ typedef int dx_socket_t;
 
 #define INVALID_DATA_SIZE (-1)
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Socket subsystem initialization
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_on_connection_created (void);
 int dx_on_connection_destroyed (void);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Socket function wrappers
  */
-/* -------------------------------------------------------------------------- */
 
 dx_socket_t dx_socket (int family, int type, int protocol);
 int dx_connect (dx_socket_t s, const struct sockaddr* addr, socklen_t addrlen);

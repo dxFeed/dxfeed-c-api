@@ -33,8 +33,6 @@
 
 #define SIZE_OF_ARRAY(static_array) sizeof(static_array) / sizeof(static_array[0])
 
-/* -------------------------------------------------------------------------- */
-
 typedef struct {
 	dxf_const_string_t symbol;
 	dxf_char_t exchange_code;
@@ -49,8 +47,6 @@ typedef struct {
 	int line;
 } candle_attribute_test_case_t;
 
-/* -------------------------------------------------------------------------- */
-
 typedef void* dxf_listener_thread_data_t;
 
 void init_listener_thread_data(OUT dxf_listener_thread_data_t* data);
@@ -58,16 +54,12 @@ void free_listener_thread_data(dxf_listener_thread_data_t data);
 int is_thread_terminate(dxf_listener_thread_data_t data);
 void on_reader_thread_terminate(dxf_listener_thread_data_t data, dxf_connection_t connection, void* user_data);
 void reset_thread_terminate(dxf_listener_thread_data_t data);
-
-/* -------------------------------------------------------------------------- */
-
 void process_last_error();
 int create_event_subscription(dxf_connection_t connection, int event_type,
 							dxf_const_string_t symbol,
 							dxf_event_listener_t event_listener,
 							OUT dxf_subscription_t* res_subscription);
 
-/* -------------------------------------------------------------------------- */
 /* Event counter data */
 typedef struct {
 	const char *counter_name;
@@ -84,8 +76,6 @@ void inc_event_counter(event_counter_data_ptr_t counter_data);
 dxf_uint_t get_event_counter(event_counter_data_ptr_t counter_data);
 void drop_event_counter(event_counter_data_ptr_t counter_data);
 const char *get_event_counter_name(event_counter_data_ptr_t counter_data);
-
-/* -------------------------------------------------------------------------- */
 
 #define PRINT_TEST_FAILED printf("%s failed! File: %s, line: %d\n", __FUNCTION__, __FILE__, __LINE__);
 #define PRINT_TEST_FAILED_MESSAGE(message) printf("%s failed! File: %s, line: %d\nMessage:%s\n", __FUNCTION__, __FILE__, __LINE__, message);

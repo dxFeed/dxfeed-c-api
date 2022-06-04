@@ -43,8 +43,6 @@ static dxf_const_string_t g_symbols[] = { { L"IBM" }, { L"AAPL" }, { L"XBT/USD" 
 
 dxf_listener_thread_data_t g_listener_thread_data;
 
-/* -------------------------------------------------------------------------- */
-
 static dxf_uint_t g_trade_event_counter = 0;
 CRITICAL_SECTION g_trade_counter_guard;
 static dxf_uint_t g_order_event_counter = 0;
@@ -70,8 +68,6 @@ void drop_order_counter() {
 	LeaveCriticalSection(&g_order_counter_guard);
 }
 
-/* -------------------------------------------------------------------------- */
-
 void inc_trade_counter() {
 	EnterCriticalSection(&g_trade_counter_guard);
 	g_trade_event_counter++;
@@ -92,8 +88,6 @@ void drop_trade_counter() {
 	LeaveCriticalSection(&g_trade_counter_guard);
 }
 
-/* -------------------------------------------------------------------------- */
-
 void print_timestamp(dxf_long_t timestamp){
 	char timefmt[80];
 
@@ -103,7 +97,6 @@ void print_timestamp(dxf_long_t timestamp){
 	strftime(timefmt, 80, "%Y%m%d-%H%M%S", timeinfo);
 	printf("%s", timefmt);
 }
-/* -------------------------------------------------------------------------- */
 
 static dxf_uint_t buf_hash(const unsigned char *buf, int size) {
 	dxf_uint_t hash = 0;
@@ -117,8 +110,6 @@ static dxf_uint_t buf_hash(const unsigned char *buf, int size) {
 
 	return hash;
 }
-
-/* -------------------------------------------------------------------------- */
 
 typedef struct {
 	int event_type;
@@ -189,8 +180,6 @@ void set_event_listener_data(int event_type, dxf_const_string_t symbol_name,
 	LeaveCriticalSection(&(listener_data->guard));
 }
 
-/* -------------------------------------------------------------------------- */
-
 void trade_listener(int event_type, dxf_const_string_t symbol_name,
 					const dxf_event_data_t* data, int data_count, void* user_data) {
 	inc_trade_counter();
@@ -200,8 +189,6 @@ void order_listener(int event_type, dxf_const_string_t symbol_name,
 					const dxf_event_data_t* data, int data_count, void* user_data) {
 	inc_order_counter();
 }
-
-/* -------------------------------------------------------------------------- */
 
 void order_event_copy_listener(int event_type, dxf_const_string_t symbol_name,
 							const dxf_event_data_t* data, int data_count, void* user_data) {
@@ -217,8 +204,6 @@ void order_event_copy_listener_v2(int event_type, dxf_const_string_t symbol_name
 		return;
 	set_event_listener_data(event_type, symbol_name, params, data, data_count, user_data, sizeof(dxf_order_t), &order_data_v2);
 }
-
-/* -------------------------------------------------------------------------- */
 
 int subscribe_to_event(dxf_connection_t connection, dxf_subscription_t* subscription,
 						int event_type, dxf_event_listener_t event_listener, void* user_data) {
@@ -243,15 +228,11 @@ int subscribe_to_event(dxf_connection_t connection, dxf_subscription_t* subscrip
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 void on_thread_terminate(dxf_connection_t connection, void* user_data) {
 	if (g_listener_thread_data == NULL)
 		return;
 	on_reader_thread_terminate(g_listener_thread_data, connection, user_data);
 }
-
-/* -------------------------------------------------------------------------- */
 
 /*Test*/
 int event_dynamic_subscription_test(void) {

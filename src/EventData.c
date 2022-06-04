@@ -24,11 +24,9 @@
 #include "EventSubscription.h"
 #include "DataStructures.h"
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Various common data
  */
-/* -------------------------------------------------------------------------- */
 
 static const int g_event_data_sizes[dx_eid_count] = {
 	sizeof(dxf_trade_t),
@@ -62,11 +60,9 @@ static const dxf_char_t g_time_and_sale_tmpl[] = L"TimeAndSale&";
 #define TRADE_ETH_TMPL_LEN STRLEN(g_trade_eth_tmpl)
 #define TIME_AND_SALE_TMPL_LEN STRLEN(g_time_and_sale_tmpl)
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Event functions implementation
  */
-/* -------------------------------------------------------------------------- */
 
 DXFEED_API dxf_const_string_t dx_event_type_to_string (int event_type) {
 	switch (event_type) {
@@ -88,13 +84,9 @@ DXFEED_API dxf_const_string_t dx_event_type_to_string (int event_type) {
 	}
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_get_event_data_struct_size (int event_id) {
 	return g_event_data_sizes[(dx_event_id_t)event_id];
 }
-
-/* -------------------------------------------------------------------------- */
 
 dx_event_id_t dx_get_event_id_by_bitmask (int event_bitmask) {
 	dx_event_id_t event_id = dx_eid_begin;
@@ -108,11 +100,9 @@ dx_event_id_t dx_get_event_id_by_bitmask (int event_bitmask) {
 	return event_id;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Event subscription implementation
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_add_subscription_param_to_list(dxf_connection_t connection, dx_event_subscription_param_list_t* param_list,
 										dxf_const_string_t record_name, dx_subscription_type_t subscription_type) {
@@ -407,11 +397,9 @@ size_t dx_get_event_subscription_params(dxf_connection_t connection, dx_order_so
 	return param_list.size;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Event data navigation
  */
-/* -------------------------------------------------------------------------- */
 
 typedef dxf_const_event_data_t (*dx_event_data_navigator) (dxf_const_event_data_t data, size_t index);
 #define EVENT_DATA_NAVIGATOR_NAME(struct_name) \
@@ -453,8 +441,6 @@ static const dx_event_data_navigator g_event_data_navigators[dx_eid_count] = {
 	EVENT_DATA_NAVIGATOR_NAME(dxf_series_t),
 	EVENT_DATA_NAVIGATOR_NAME(dxf_configuration_t)
 };
-
-/* -------------------------------------------------------------------------- */
 
 dxf_const_event_data_t dx_get_event_data_item (int event_mask, dxf_const_event_data_t data, size_t index) {
 	return g_event_data_navigators[dx_get_event_id_by_bitmask(event_mask)](data, index);

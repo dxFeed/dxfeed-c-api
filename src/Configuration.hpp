@@ -27,7 +27,14 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+
+#if defined(_MSC_VER)
+#	pragma warning(push)
+#	pragma warning(disable : 4503)
+#endif
+
 #include <toml.hpp>
+
 #include <unordered_map>
 
 extern "C" {
@@ -315,3 +322,7 @@ public:
 	}
 };
 }  // namespace dx
+
+#if defined(_MSC_VER)
+#	pragma warning(pop)
+#endif

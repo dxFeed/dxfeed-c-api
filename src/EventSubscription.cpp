@@ -41,11 +41,9 @@ extern "C" {
 #include "Configuration.hpp"
 #include "EventSubscription.hpp"
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Internal data structures and objects
  */
-/* -------------------------------------------------------------------------- */
 
 /**
  * @addtogroup event-data-structures-order-spread-order
@@ -417,8 +415,6 @@ bool EventSubscriptionConnectionContext::hasAnySymbol() {
 
 }  // namespace dx
 
-/* -------------------------------------------------------------------------- */
-
 DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_event_subscription) {
 	CHECKED_CALL_2(dx_validate_connection_handle, connection, true);
 
@@ -432,8 +428,6 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_event_subscription) {
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_event_subscription) {
 	int res = true;
@@ -449,25 +443,19 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_event_subscription) {
 	return res;
 }
 
-/* -------------------------------------------------------------------------- */
-
 DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_event_subscription) { return true; }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Helper functions
  */
-/* -------------------------------------------------------------------------- */
 
 dxf_ulong_t dx_symbol_name_hasher(dxf_const_string_t symbol_name) {
 	return static_cast<dxf_ulong_t>(std::hash<std::wstring>{}(symbol_name));
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Subscription functions implementation
  */
-/* -------------------------------------------------------------------------- */
 
 const dxf_subscription_t dx_invalid_subscription = (dxf_subscription_t) nullptr;
 
@@ -587,8 +575,6 @@ int dx_add_symbols(dxf_subscription_t subscr_id, dxf_const_string_t* symbols, in
 	return dx_add_symbols_impl(subscr_id, symbols, symbol_count, nullptr, nullptr);
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_remove_symbols(dxf_subscription_t subscr_id, dxf_const_string_t* symbols, size_t symbol_count) {
 	auto subscr_data = static_cast<dx::SubscriptionData*>(subscr_id);
 
@@ -622,8 +608,6 @@ int dx_remove_symbols(dxf_subscription_t subscr_id, dxf_const_string_t* symbols,
 	});
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_add_listener_impl(dxf_subscription_t subscr_id, dx::ListenerContext::ListenerPtr listener,
 						 dx::EventListenerVersion version, void* user_data) {
 	if (subscr_id == dx_invalid_subscription) {
@@ -647,21 +631,15 @@ int dx_add_listener_impl(dxf_subscription_t subscr_id, dx::ListenerContext::List
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_add_listener(dxf_subscription_t subscr_id, dxf_event_listener_t listener, void* user_data) {
 	return dx_add_listener_impl(subscr_id, (dx::ListenerContext::ListenerPtr)listener,
 								dx::EventListenerVersion::Default, user_data);
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_add_listener_v2(dxf_subscription_t subscr_id, dxf_event_listener_v2_t listener, void* user_data) {
 	return dx_add_listener_impl(subscr_id, (dx::ListenerContext::ListenerPtr)listener, dx::EventListenerVersion::V2,
 								user_data);
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_remove_listener_impl(dxf_subscription_t subscr_id, dx::ListenerContext::ListenerPtr listener) {
 	if (subscr_id == dx_invalid_subscription) {
@@ -689,13 +667,9 @@ int dx_remove_listener(dxf_subscription_t subscr_id, dxf_event_listener_t listen
 	return dx_remove_listener_impl(subscr_id, (dx::ListenerContext::ListenerPtr)listener);
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_remove_listener_v2(dxf_subscription_t subscr_id, dxf_event_listener_v2_t listener) {
 	return dx_remove_listener_impl(subscr_id, (dx::ListenerContext::ListenerPtr)listener);
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_get_subscription_connection(dxf_subscription_t subscr_id, OUT dxf_connection_t* connection) {
 	auto subscr_data = static_cast<dx::SubscriptionData*>(subscr_id);
@@ -713,8 +687,6 @@ int dx_get_subscription_connection(dxf_subscription_t subscr_id, OUT dxf_connect
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_get_event_subscription_event_types(dxf_subscription_t subscr_id, OUT unsigned* event_types) {
 	auto subscr_data = static_cast<dx::SubscriptionData*>(subscr_id);
@@ -773,8 +745,6 @@ int dx_get_event_subscription_symbols(dxf_subscription_t subscr_id, OUT dxf_cons
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_get_event_subscription_flags(dxf_subscription_t subscr_id, OUT dx_event_subscr_flag* subscr_flags) {
 	auto subscr_data = static_cast<dx::SubscriptionData*>(subscr_id);
 
@@ -790,8 +760,6 @@ int dx_get_event_subscription_flags(dxf_subscription_t subscr_id, OUT dx_event_s
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_set_event_subscription_flags(dxf_subscription_t subscr_id, dx_event_subscr_flag subscr_flags) {
 	auto subscr_data = static_cast<dx::SubscriptionData*>(subscr_id);
@@ -809,8 +777,6 @@ int dx_set_event_subscription_flags(dxf_subscription_t subscr_id, dx_event_subsc
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_get_event_subscription_time(dxf_subscription_t subscr_id, OUT dxf_long_t* time) {
 	auto subscr_data = static_cast<dx::SubscriptionData*>(subscr_id);
 
@@ -826,8 +792,6 @@ int dx_get_event_subscription_time(dxf_subscription_t subscr_id, OUT dxf_long_t*
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 static void dx_call_subscr_listeners(dx::SubscriptionData* subscr_data, unsigned event_bitmask,
 									 dxf_const_string_t symbol_name, dxf_const_event_data_t data,
@@ -946,7 +910,6 @@ int dx_process_event_data(dxf_connection_t connection, dx_event_id_t event_id, d
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	event type is a one-bit mask here
  */
@@ -993,8 +956,6 @@ int dx_get_last_symbol_event(dxf_connection_t connection, dxf_const_string_t sym
 	});
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_process_connection_subscriptions(dxf_connection_t connection, dx_subscription_processor_t processor) {
 	int res;
 	auto context = static_cast<dx::EventSubscriptionConnectionContext*>(
@@ -1032,11 +993,7 @@ int dx_process_connection_subscriptions(dxf_connection_t connection, dx_subscrip
 	});
 }
 
-/* -------------------------------------------------------------------------- */
-
 /* Functions for working with order source */
-
-/* -------------------------------------------------------------------------- */
 
 int dx_add_order_source(dxf_subscription_t subscr_id, dxf_const_string_t source) {
 	auto subscriptionData = static_cast<dx::SubscriptionData*>(subscr_id);
@@ -1045,8 +1002,6 @@ int dx_add_order_source(dxf_subscription_t subscr_id, dxf_const_string_t source)
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 void dx_clear_order_sources(dxf_subscription_t subscr_id) {
 	if (subscr_id == nullptr) {

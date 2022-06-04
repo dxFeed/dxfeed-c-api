@@ -36,21 +36,17 @@
 #include <string.h>
 #include <limits.h>
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Bit operations implementation
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_is_only_single_bit_set (int value) {
 	return (value != 0 && (value & (value - 1)) == 0);
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Random number generation functions implementation
  */
-/* -------------------------------------------------------------------------- */
 
 static dxf_ulong_t dx_seed;
 
@@ -65,23 +61,17 @@ static void dx_init_randomizer (void) {
 	}
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_random_integer (int max_value) {
 	dx_init_randomizer();
 
 	return (int)((long long)max_value * (unsigned int)rand() / RAND_MAX);
 }
 
-/* -------------------------------------------------------------------------- */
-
 double dx_random_double (double max_value) {
 	dx_init_randomizer();
 
 	return max_value / RAND_MAX * rand();
 }
-
-/* -------------------------------------------------------------------------- */
 
 size_t dx_random_size(size_t max_value) {
 	dx_init_randomizer();
@@ -92,11 +82,9 @@ size_t dx_random_size(size_t max_value) {
 	return (size_t)(max_value * ((double)(dx_seed * UINT64_C(2685821657736338717)) / ULLONG_MAX));
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Array functions implementation
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_capacity_manager_halfer (size_t new_size, size_t* capacity) {
 	if (new_size > *capacity) {
@@ -114,35 +102,25 @@ int dx_capacity_manager_halfer (size_t new_size, size_t* capacity) {
 	return false;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	String functions implementation
  */
-/* -------------------------------------------------------------------------- */
 
 dxf_string_t dx_create_string (size_t size) {
 	return (dxf_string_t)dx_calloc(size + 1, sizeof(dxf_char_t));
 }
 
-/* -------------------------------------------------------------------------- */
-
 dxf_string_t dx_create_string_src (dxf_const_string_t src) {
 	return dx_create_string_src_len(src, dx_string_length(src));
 }
-
-/* -------------------------------------------------------------------------- */
 
 char* dx_ansi_create_string(size_t size) {
 	return (char*)dx_calloc(size + 1, sizeof(char));
 }
 
-/* -------------------------------------------------------------------------- */
-
 char* dx_ansi_create_string_src(const char* src) {
 	return dx_ansi_create_string_src_len(src, strlen(src));
 }
-
-/* -------------------------------------------------------------------------- */
 
 char* dx_ansi_create_string_src_len(const char* src, size_t len) {
 	char* res = NULL;
@@ -167,8 +145,6 @@ size_t dx_ansi_string_length(const char* str) {
 	return strlen(str);
 }
 
-/* -------------------------------------------------------------------------- */
-
 dxf_string_t dx_create_string_src_len(dxf_const_string_t src, size_t len) {
 	dxf_string_t res = dx_create_string(len);
 
@@ -179,19 +155,13 @@ dxf_string_t dx_create_string_src_len(dxf_const_string_t src, size_t len) {
 	return dx_copy_string_len(res, src, len);
 }
 
-/* -------------------------------------------------------------------------- */
-
 dxf_string_t dx_copy_string (dxf_string_t dest, dxf_const_string_t src) {
 	return wcscpy(dest, src);
 }
 
-/* -------------------------------------------------------------------------- */
-
 dxf_string_t dx_copy_string_len (dxf_string_t dest, dxf_const_string_t src, size_t len) {
 	return wcsncpy(dest, src, len);
 }
-
-/* -------------------------------------------------------------------------- */
 
 size_t dx_string_length (dxf_const_string_t str) {
 	return wcslen(str);
@@ -201,8 +171,6 @@ int dx_string_null_or_empty(dxf_const_string_t str) {
 	return str == NULL || dx_string_length(str) == 0;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_compare_strings (dxf_const_string_t s1, dxf_const_string_t s2) {
 	return wcscmp(s1, s2);
 }
@@ -211,13 +179,9 @@ int dx_compare_strings_num(dxf_const_string_t s1, dxf_const_string_t s2, size_t 
 	return wcsncmp(s1, s2, num);
 }
 
-/* -------------------------------------------------------------------------- */
-
 dxf_char_t dx_toupper (dxf_char_t c) {
 	return towupper(c);
 }
-
-/* -------------------------------------------------------------------------- */
 
 dxf_string_t dx_ansi_to_unicode (const char* ansi_str) {
 #ifdef _WIN32
@@ -254,8 +218,6 @@ dxf_string_t dx_ansi_to_unicode (const char* ansi_str) {
 #endif /* _WIN32 */
 }
 
-/* -------------------------------------------------------------------------- */
-
 dxf_string_t dx_decode_from_integer (dxf_long_t code) {
 	dxf_char_t decoded[8] = { 0 };
 	int offset = 0;
@@ -277,11 +239,9 @@ dxf_string_t dx_concatenate_strings(dxf_string_t dest, dxf_const_string_t src) {
 	return wcscat(dest, src);
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Time functions implementation
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_millisecond_timestamp (void) {
 
@@ -293,8 +253,6 @@ int dx_millisecond_timestamp (void) {
 	return (int)(ts.tv_sec * 1000 + ts.tv_sec / 1000000);
 #endif
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_millisecond_timestamp_diff (int newer, int older) {
 	long long res = 0;
@@ -365,8 +323,6 @@ dxf_ulong_t dx_microsecond_timestamp_diff(int newer_sample, void* newer, int old
 #endif
 }
 
-/* -------------------------------------------------------------------------- */
-
 /**
  * Returns correct number of seconds with proper handling negative values and overflows.
  * Idea is that number of milliseconds shall be within [0..999]
@@ -377,8 +333,6 @@ dxf_int_t dx_get_seconds_from_time(dxf_long_t millis) {
 	return millis >= 0 ? (dxf_int_t)MIN(millis / DX_TIME_SECOND, INT_MAX) :
 		(dxf_int_t)MAX((millis + 1) / DX_TIME_SECOND - 1, INT_MIN);
 }
-
-/* -------------------------------------------------------------------------- */
 
 /**
  * Returns correct number of milliseconds with proper handling negative values.
@@ -391,11 +345,9 @@ dxf_int_t dx_get_millis_from_time(dxf_long_t millis) {
 	return r >= 0 ? r : r + (dxf_int_t)DX_TIME_SECOND;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Base64 encoding operations implementation
  */
-/* -------------------------------------------------------------------------- */
 
 #define WHITESPACE 64
 #define EQUALS     65

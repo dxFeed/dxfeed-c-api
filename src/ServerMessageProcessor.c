@@ -39,11 +39,9 @@
 #include "Snapshot.h"
 #include "SymbolCodec.h"
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Common data
  */
-/* -------------------------------------------------------------------------- */
 
 #define SYMBOL_BUFFER_LEN 2048
 
@@ -59,11 +57,9 @@
 #define DX_RECV_PROPERTY_AUTH L"authentication"
 #define DX_RECV_PROPERTY_LOGIN_REQUIRED L"LOGIN "
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Client-server data overlapping structures and stuff
  */
-/* -------------------------------------------------------------------------- */
 
 typedef struct {
 	int type;
@@ -84,11 +80,9 @@ typedef struct {
 	size_t capacity;
 } dx_record_digest_list_t;
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Message support data
  */
-/* -------------------------------------------------------------------------- */
 
 typedef enum {
 	dx_dps_not_sent,
@@ -97,11 +91,9 @@ typedef enum {
 	dx_dps_pending
 } dx_describe_protocol_status_t;
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Server message processor connection context
  */
-/* -------------------------------------------------------------------------- */
 
 typedef struct {
 	dxf_connection_t connection;
@@ -137,8 +129,6 @@ typedef struct {
 	/* Contains received properties from server */
 	dx_property_map_t recv_props;
 } dx_server_msg_proc_connection_context_t;
-
-/* -------------------------------------------------------------------------- */
 
 void dx_init_record_digests_list(dx_record_digest_list_t* record_digests) {
 	if (record_digests == NULL)
@@ -209,8 +199,6 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_server_msg_processor) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 void dx_clear_record_digests (dx_server_msg_proc_connection_context_t* context);
 
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_server_msg_processor) {
@@ -232,17 +220,13 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_server_msg_processor) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_server_msg_processor) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Field digest functions
  */
-/* -------------------------------------------------------------------------- */
 
 dx_record_digest_t* dx_get_record_digest(dx_server_msg_proc_connection_context_t* context, dx_record_id_t record_id) {
 	dx_record_digest_list_t* record_digests = NULL;
@@ -306,8 +290,6 @@ int dx_create_field_digest (dx_server_msg_proc_connection_context_t* context,
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_digest_unsupported_fields (dx_server_msg_proc_connection_context_t* context,
 								dx_record_id_t record_id, const dx_record_item_t* record_info) {
 	dx_record_digest_t* record_digest = NULL;
@@ -351,8 +333,6 @@ int dx_digest_unsupported_fields (dx_server_msg_proc_connection_context_t* conte
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 void dx_init_record_digest(dx_record_digest_t* digest) {
 	if (digest == NULL)
 		return;
@@ -360,8 +340,6 @@ void dx_init_record_digest(dx_record_digest_t* digest) {
 	digest->size = 0;
 	digest->in_sync_with_server = false;
 }
-
-/* -------------------------------------------------------------------------- */
 
 void dx_clear_record_digest (dx_record_digest_t* digest) {
 	int i = 0;
@@ -378,8 +356,6 @@ void dx_clear_record_digest (dx_record_digest_t* digest) {
 
 	dx_init_record_digest(digest);
 }
-
-/* -------------------------------------------------------------------------- */
 
 void dx_clear_record_digests (dx_server_msg_proc_connection_context_t* context) {
 	if (!dx_mutex_lock(&(context->record_digests_guard))) {
@@ -405,8 +381,6 @@ void dx_clear_record_digests (dx_server_msg_proc_connection_context_t* context) 
 	dx_mutex_unlock(&(context->record_digests_guard));
 }
 
-/* -------------------------------------------------------------------------- */
-
 void dx_init_record_digests(dx_server_msg_proc_connection_context_t* context) {
 	dx_record_id_t i;
 	dx_record_id_t count = dx_get_records_list_count(context->dscc);
@@ -415,11 +389,9 @@ void dx_init_record_digests(dx_server_msg_proc_connection_context_t* context) {
 	}
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Server synchronization functions implementation
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_clear_server_info (dxf_connection_t connection) {
 	int res = true;
@@ -459,11 +431,9 @@ int dx_clear_server_info (dxf_connection_t connection) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Message support functions
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_lock_describe_protocol_processing (dxf_connection_t connection, int lock) {
 	int res = true;
@@ -484,8 +454,6 @@ int dx_lock_describe_protocol_processing (dxf_connection_t connection, int lock)
 	}
 }
 
-/* -------------------------------------------------------------------------- */
-
 static int dx_get_msg_support_state (int msg, const int* roster, size_t count, int bitmask) {
 	size_t idx;
 	int found = false;
@@ -502,8 +470,6 @@ static int dx_get_msg_support_state (int msg, const int* roster, size_t count, i
 
 	return false;
 }
-
-/* ---------------------------------- */
 
 int dx_is_message_supported_by_server (dxf_connection_t connection, dx_message_type_t msg, int lock_required,
 										OUT dx_message_support_status_t* status) {
@@ -552,8 +518,6 @@ int dx_is_message_supported_by_server (dxf_connection_t connection, dx_message_t
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_legacy_send_msg_bitmask (OUT int* bitmask) {
 	static DX_THREAD_LOCAL const int s_legacy_msg_list[] = {
 		MESSAGE_TICKER_ADD_SUBSCRIPTION,
@@ -598,8 +562,6 @@ int dx_legacy_send_msg_bitmask (OUT int* bitmask) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_legacy_recv_msg_bitmask (int* bitmask) {
 	static DX_THREAD_LOCAL const int s_legacy_msg_list[] = {
 		MESSAGE_TICKER_DATA,
@@ -640,8 +602,6 @@ int dx_legacy_recv_msg_bitmask (int* bitmask) {
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_describe_protocol_timeout_countdown_task (void* data, int command) {
 	/*
@@ -719,8 +679,6 @@ int dx_describe_protocol_timeout_countdown_task (void* data, int command) {
 	return res;
 }
 
-/* ---------------------------------- */
-
 int dx_describe_protocol_sent (dxf_connection_t connection) {
 	int res = true;
 	dx_server_msg_proc_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_server_msg_processor, &res);
@@ -779,11 +737,9 @@ int dx_describe_protocol_sent (dxf_connection_t connection) {
 	return dx_mutex_unlock(&(context->describe_protocol_guard)) && res;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *  Server message processor helpers
  */
-/* -------------------------------------------------------------------------- */
 
 static int dx_read_message_type (dx_server_msg_proc_connection_context_t* context, OUT dx_message_type_t* value) {
 	dxf_long_t type;
@@ -804,8 +760,6 @@ static int dx_read_message_type (dx_server_msg_proc_connection_context_t* contex
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 static int dx_read_message_length_and_set_buffer_limit (dx_server_msg_proc_connection_context_t* context) {
 	dxf_long_t message_length;
@@ -829,8 +783,6 @@ static int dx_read_message_length_and_set_buffer_limit (dx_server_msg_proc_conne
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 static int dx_read_symbol (dx_server_msg_proc_connection_context_t* context) {
 	dxf_int_t r;
@@ -870,8 +822,6 @@ static int dx_read_symbol (dx_server_msg_proc_connection_context_t* context) {
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 #define CHECKED_SET_VALUE(setter, buffer, value) \
 	if (setter != NULL) { \
@@ -1076,8 +1026,6 @@ int dx_read_records (dx_server_msg_proc_connection_context_t* context,
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 #define CHECKED_GET_VALUE(getter, buffer, value) \
 	if (getter != NULL) { \
 		getter(buffer, value); \
@@ -1104,8 +1052,6 @@ dxf_time_int_field_t dx_get_time_int_field(void* dscc, dx_record_id_t record_id,
 
 	return (high << 32) | (low & 0xFFFFFFFF);
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_process_data_message (dx_server_msg_proc_connection_context_t* context) {
 	context->last_cipher = 0;
@@ -1170,7 +1116,6 @@ int dx_process_data_message (dx_server_msg_proc_connection_context_t* context) {
 			return false;
 		}
 
-
 		if (!dx_read_records(context, record_id, record_buffer)) {
 			dx_free_buffers(context->rbcc);
 
@@ -1204,8 +1149,6 @@ int dx_process_data_message (dx_server_msg_proc_connection_context_t* context) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_fill_record_digest(dx_server_msg_proc_connection_context_t* context, dx_record_id_t rid, const dx_record_item_t* record_info,
 						dxf_int_t field_count, OUT dx_record_digest_t* record_digest) {
 	int i = 0;
@@ -1231,8 +1174,6 @@ int dx_fill_record_digest(dx_server_msg_proc_connection_context_t* context, dx_r
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_process_describe_records (dx_server_msg_proc_connection_context_t* context) {
 	while (dx_get_in_buffer_position(context->bicc) < dx_get_in_buffer_limit(context->bicc)) {
@@ -1287,11 +1228,9 @@ int dx_process_describe_records (dx_server_msg_proc_connection_context_t* contex
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Describe protocol functions
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_read_describe_protocol_properties (dx_server_msg_proc_connection_context_t* context) {
 	dxf_string_t key;
@@ -1320,11 +1259,7 @@ int dx_read_describe_protocol_properties (dx_server_msg_proc_connection_context_
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 typedef void (*dx_message_type_processor_t)(dx_server_msg_proc_connection_context_t* context, int message_id, dxf_string_t message_name);
-
-/* ---------------------------------- */
 
 static void dx_process_server_send_message_type (dx_server_msg_proc_connection_context_t* context, int message_id, dxf_string_t message_name) {
 	size_t msg_index;
@@ -1349,8 +1284,6 @@ static void dx_process_server_send_message_type (dx_server_msg_proc_connection_c
 
 	context->recv_msgs_bitmask |= INDEX_BITMASK(msg_index);
 }
-
-/* ---------------------------------- */
 
 static void dx_process_server_recv_message_type (dx_server_msg_proc_connection_context_t* context, int message_id, dxf_string_t message_name) {
 	size_t msg_index;
@@ -1377,8 +1310,6 @@ static void dx_process_server_recv_message_type (dx_server_msg_proc_connection_c
 
 	context->send_msgs_bitmask |= INDEX_BITMASK(msg_index);
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_read_describe_protocol_message_list (dx_server_msg_proc_connection_context_t* context, dx_message_type_processor_t processor) {
 	dxf_int_t count;
@@ -1407,8 +1338,6 @@ int dx_read_describe_protocol_message_list (dx_server_msg_proc_connection_contex
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_process_describe_protocol (dx_server_msg_proc_connection_context_t* context) {
 	dxf_int_t magic;
@@ -1498,11 +1427,9 @@ int dx_process_heartbeat_message(dx_server_msg_proc_connection_context_t* contex
 	return dx_connection_process_incoming_heartbeat(connection_impl);
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	High level message processor functions
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_process_message (dx_server_msg_proc_connection_context_t* context, dx_message_type_t message_type) {
 	if (dx_is_data_message(message_type)) {
@@ -1561,8 +1488,6 @@ int dx_process_message (dx_server_msg_proc_connection_context_t* context, dx_mes
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_append_new_data (dx_server_msg_proc_connection_context_t* context,
 						const dxf_byte_t* new_buffer, dxf_int_t new_buffer_size) {
 	if (context->buffer_size != context->buffer_pos) {
@@ -1605,11 +1530,9 @@ int dx_append_new_data (dx_server_msg_proc_connection_context_t* context,
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Main functions
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_process_server_data (dxf_connection_t connection, const dxf_byte_t* data_buffer, int data_buffer_size) {
 	int process_result = true;
@@ -1732,11 +1655,9 @@ int dx_process_server_data (dxf_connection_t connection, const dxf_byte_t* data_
 	return process_result;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Low level socket data receiver implementation
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_socket_data_receiver (dxf_connection_t connection, const void* buffer, int buffer_size) {
 	int conn_ctx_res = true;
@@ -1754,11 +1675,9 @@ int dx_socket_data_receiver (dxf_connection_t connection, const void* buffer, in
 	return dx_process_server_data(connection, buffer, buffer_size);
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Records digest management
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_add_record_digest_to_list(dxf_connection_t connection, dx_record_id_t index) {
 	int failed = false;
@@ -1786,11 +1705,9 @@ int dx_add_record_digest_to_list(dxf_connection_t connection, dx_record_id_t ind
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Start dumping incoming raw data into specific file
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_add_raw_dump_file(dxf_connection_t connection, const char * raw_file_name)
 {

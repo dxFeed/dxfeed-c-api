@@ -32,11 +32,9 @@
 #include "DXErrorHandling.h"
 #include "ConfigurationDeserializer.h"
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Common fiddling macros and constants
  */
-/* -------------------------------------------------------------------------- */
 
 static const dxf_uint_t DX_SEQUENCE_MASK     = 0x3FFFFFU;
 static const dxf_byte_t DX_SEQUENCE_MS_SHIFT = 22;
@@ -63,11 +61,9 @@ dxf_ulong_t char_to_bits(dxf_char_t value)
 	return res >> leading_zero_bits;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Trade flags constants
  */
-/* -------------------------------------------------------------------------- */
 static const dxf_uint_t DX_TRADE_FLAGS_ETH       = 1;
 static const dxf_byte_t DX_TRADE_FLAGS_DIR_SHIFT = 1;
 static const dxf_uint_t DX_TRADE_FLAGS_DIR_MASK  = 0x7;
@@ -75,11 +71,9 @@ static const dxf_uint_t DX_TRADE_FLAGS_DIR_MASK  = 0x7;
 #define DX_TRADE_GET_DIR(rec) ((dxf_direction_t)(((rec)->flags >> DX_TRADE_FLAGS_DIR_SHIFT) & DX_TRADE_FLAGS_DIR_MASK))
 #define DX_TRADE_GET_ETH(rec) (((rec)->flags & DX_TRADE_FLAGS_ETH) == DX_TRADE_FLAGS_ETH)
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Summary flags constants
  */
-/* -------------------------------------------------------------------------- */
 static const dxf_byte_t DX_SUMMARY_FLAGS_DCPT_SHIFT  = 2;
 static const dxf_byte_t DX_SUMMARY_FLAGS_PDCPT_SHIFT = 0;
 static const dxf_uint_t DX_SUMMARY_FLAGS_CPT_MASK    = 0x3;
@@ -87,11 +81,9 @@ static const dxf_uint_t DX_SUMMARY_FLAGS_CPT_MASK    = 0x3;
 #define DX_SUMMARY_GET_DCPT(rec)  ((dxf_price_type_t)(((rec)->flags >> DX_SUMMARY_FLAGS_DCPT_SHIFT) & DX_SUMMARY_FLAGS_CPT_MASK))
 #define DX_SUMMARY_GET_PDCPT(rec) ((dxf_price_type_t)(((rec)->flags >> DX_SUMMARY_FLAGS_PDCPT_SHIFT) & DX_SUMMARY_FLAGS_CPT_MASK))
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Profile flags constants
  */
-/* -------------------------------------------------------------------------- */
 static const dxf_byte_t DX_PROFILE_FLAGS_TS_SHIFT  = 0;
 static const dxf_uint_t DX_PROFILE_FLAGS_TS_MASK   = 0x3;
 static const dxf_byte_t DX_PROFILE_FLAGS_SSR_SHIFT = 2;
@@ -100,11 +92,9 @@ static const dxf_uint_t DX_PROFILE_FLAGS_SSR_MASK  = 0x3;
 #define DX_PROFILE_GET_TS(rec)  ((dxf_trading_status_t)(((rec)->flags >> DX_PROFILE_FLAGS_TS_SHIFT) & DX_PROFILE_FLAGS_TS_MASK))
 #define DX_PROFILE_GET_SSR(rec) ((dxf_short_sale_restriction_t)(((rec)->flags >> DX_PROFILE_FLAGS_SSR_SHIFT) & DX_PROFILE_FLAGS_SSR_MASK))
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Order index calculation constants
  */
-/* -------------------------------------------------------------------------- */
 
 /*
  * Index field contains source identifier, optional exchange code and low-end index (virtual id or MMID).
@@ -164,11 +154,9 @@ static const dxf_uint_t DX_ORDER_FLAGS_ACTION_MASK  = 0x0f;
 #define DX_ORDER_GET_EXCHANGE(rec) ((dxf_char_t)(((rec)->flags >> DX_ORDER_FLAGS_EXCHANGE_SHIFT) & DX_ORDER_FLAGS_EXCHANGE_MASK))
 #define DX_ORDER_GET_ACTION(rec)   ((dxf_order_action_t)(((rec)->flags >> DX_ORDER_FLAGS_ACTION_SHIFT) & DX_ORDER_FLAGS_ACTION_MASK))
 
-/* -------------------------------------------------------------------------- */
 /*
  *	TimeAndSale calculation constants
  */
-/* -------------------------------------------------------------------------- */
 static const dxf_byte_t DX_TNS_FLAGS_TYPE_SHIFT = 0;
 static const dxf_uint_t DX_TNS_FLAGS_TYPE_MASK  = 0x3;
 static const dxf_uint_t DX_TNS_FLAGS_VALID_TICK = 0x4;
@@ -188,32 +176,24 @@ static const dxf_byte_t DX_TNS_INDEX_TIME_SHIFT = 32;
 #define DX_TNS_GET_SIDE(rec)       ((dxf_order_side_t)(((rec)->flags >> DX_TNS_FLAGS_SIDE_SHIFT) & DX_TNS_FLAGS_SIDE_MASK))
 #define DX_TNS_GET_TTE(rec)        ((dxf_char_t)(((rec)->flags >> DX_TNS_FLAGS_TTE_SHIFT) & DX_TNS_FLAGS_TTE_MASK))
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Candle calculation constants
  */
-/* -------------------------------------------------------------------------- */
 static const dxf_byte_t DX_CANDLE_INDEX_TIME_SHIFT = 32;
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Candle calculation constants
  */
-/* -------------------------------------------------------------------------- */
 static const dxf_byte_t DX_GREEKS_INDEX_TIME_SHIFT = 32;
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Series calculation constants
  */
-/* -------------------------------------------------------------------------- */
 //static const dxf_byte_t DX_SERIES_INDEX_TIME_SHIFT = 32;
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Record transcoder connection context
  */
-/* -------------------------------------------------------------------------- */
 
 /* Must be synchronized with dx_event_id_t */
 const size_t dx_event_sizes[] = {
@@ -251,8 +231,6 @@ void dx_copy_event_params(const dxf_event_params_t* from, dxf_event_params_t* to
 #define CTX(context) \
 	((dx_record_transcoder_connection_context_t*)context)
 
-/* -------------------------------------------------------------------------- */
-
 DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_record_transcoder) {
 	dx_record_transcoder_connection_context_t* context = NULL;
 
@@ -287,8 +265,6 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_record_transcoder) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_record_transcoder) {
 	int res = true;
 	dx_record_transcoder_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_record_transcoder, &res);
@@ -307,20 +283,16 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_record_transcoder) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_record_transcoder) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Event data buffer functions
 
  *  some transcoders require separate data structures to be allocated and filled
  *  based on the record data they receive
  */
-/* -------------------------------------------------------------------------- */
 
 void* dx_initialize_event_data_buffer(int count, size_t struct_size,
 									OUT void** buffer_data, OUT int* buffer_count) {
@@ -354,11 +326,9 @@ dxf_event_data_t dx_get_event_data_buffer(dx_record_transcoder_connection_contex
 			(void**)&(context->event_buffers[event_id].buffer), &(context->event_buffers[event_id].count));
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Record transcoder macros and prototypes
  */
-/* -------------------------------------------------------------------------- */
 
 #define RECORD_TRANSCODER_NAME(struct_name) \
 	struct_name##_transcoder
@@ -368,11 +338,9 @@ typedef int (*dx_record_transcoder_t) (dx_record_transcoder_connection_context_t
 										const dxf_event_params_t* event_params,
 										void* record_buffer);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Record transcoders implementation
  */
-/* -------------------------------------------------------------------------- */
 
 static int dx_trade_t_transcoder_impl(dx_record_transcoder_connection_context_t* context,
 	const dx_record_params_t* record_params,
@@ -425,8 +393,6 @@ int RECORD_TRANSCODER_NAME(dx_trade_t) (dx_record_transcoder_connection_context_
 	return dx_trade_t_transcoder_impl(context, record_params, event_params, (dx_trade_t*)record_buffer, dx_eid_trade);
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_transcode_quote_to_order_bid (dx_record_transcoder_connection_context_t* context,
 									const dx_record_params_t* record_params,
 									const dxf_event_params_t* event_params,
@@ -465,8 +431,6 @@ int dx_transcode_quote_to_order_bid (dx_record_transcoder_connection_context_t* 
 	return dx_process_event_data(context->connection, dx_eid_order, record_params->symbol_name, event_buffer,
 								 event_params);
 }
-
-/* ---------------------------------- */
 
 int dx_transcode_quote_to_order_ask (dx_record_transcoder_connection_context_t* context,
 									const dx_record_params_t* record_params,
@@ -508,8 +472,6 @@ int dx_transcode_quote_to_order_ask (dx_record_transcoder_connection_context_t* 
 								 event_params);
 }
 
-/* ---------------------------------- */
-
 int dx_transcode_quote (dx_record_transcoder_connection_context_t* context,
 						const dx_record_params_t* record_params,
 						const dxf_event_params_t* event_params,
@@ -541,8 +503,6 @@ int dx_transcode_quote (dx_record_transcoder_connection_context_t* context,
 	return dx_process_event_data(context->connection, dx_eid_quote, record_params->symbol_name, event_buffer,
 								 event_params);
 }
-
-/* ---------------------------------- */
 
 int RECORD_TRANSCODER_NAME(dx_quote_t) (dx_record_transcoder_connection_context_t* context,
 										const dx_record_params_t* record_params,
@@ -576,8 +536,6 @@ int RECORD_TRANSCODER_NAME(dx_quote_t) (dx_record_transcoder_connection_context_
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int RECORD_TRANSCODER_NAME(dx_summary_t) (dx_record_transcoder_connection_context_t* context,
 										const dx_record_params_t* record_params,
@@ -615,8 +573,6 @@ int RECORD_TRANSCODER_NAME(dx_summary_t) (dx_record_transcoder_connection_contex
 	return dx_process_event_data(context->connection, dx_eid_summary, record_params->symbol_name, event_buffer,
 								 event_params);
 }
-
-/* -------------------------------------------------------------------------- */
 
 int RECORD_TRANSCODER_NAME(dx_profile_t) (dx_record_transcoder_connection_context_t* context,
 										const dx_record_params_t* record_params,
@@ -664,8 +620,6 @@ int RECORD_TRANSCODER_NAME(dx_profile_t) (dx_record_transcoder_connection_contex
 								 event_params);
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_transcode_market_maker_to_order_bid (dx_record_transcoder_connection_context_t* context,
 											const dx_record_params_t* record_params,
 											const dxf_event_params_t* event_params,
@@ -712,8 +666,6 @@ int dx_transcode_market_maker_to_order_bid (dx_record_transcoder_connection_cont
 								 event_params);
 }
 
-/* ---------------------------------- */
-
 int dx_transcode_market_maker_to_order_ask (dx_record_transcoder_connection_context_t* context,
 											const dx_record_params_t* record_params,
 											const dxf_event_params_t* event_params,
@@ -758,8 +710,6 @@ int dx_transcode_market_maker_to_order_ask (dx_record_transcoder_connection_cont
 								 event_params);
 }
 
-/* ---------------------------------- */
-
 int RECORD_TRANSCODER_NAME(dx_market_maker_t) (dx_record_transcoder_connection_context_t* context,
 												const dx_record_params_t* record_params,
 												const dxf_event_params_t* event_params,
@@ -788,8 +738,6 @@ int RECORD_TRANSCODER_NAME(dx_market_maker_t) (dx_record_transcoder_connection_c
 
 	return true;
 }
-
-/* ---------------------------------- */
 
 #define MAX_SUFFIX_LEN_FOR_INDEX 4
 
@@ -868,8 +816,6 @@ int RECORD_TRANSCODER_NAME(dx_order_t) (dx_record_transcoder_connection_context_
 								 event_params);
 }
 
-/* -------------------------------------------------------------------------- */
-
 int RECORD_TRANSCODER_NAME(dx_time_and_sale_t) (dx_record_transcoder_connection_context_t* context,
 												const dx_record_params_t* record_params,
 												const dxf_event_params_t* event_params,
@@ -931,8 +877,6 @@ int RECORD_TRANSCODER_NAME(dx_time_and_sale_t) (dx_record_transcoder_connection_
 								 event_params);
 }
 
-/* -------------------------------------------------------------------------- */
-
 int RECORD_TRANSCODER_NAME(dx_candle_t) (dx_record_transcoder_connection_context_t* context,
 										const dx_record_params_t* record_params,
 										const dxf_event_params_t* event_params,
@@ -971,16 +915,12 @@ int RECORD_TRANSCODER_NAME(dx_candle_t) (dx_record_transcoder_connection_context
 								 event_params);
 }
 
-/* -------------------------------------------------------------------------- */
-
 int RECORD_TRANSCODER_NAME(dx_trade_eth_t) (dx_record_transcoder_connection_context_t* context,
 											const dx_record_params_t* record_params,
 											const dxf_event_params_t* event_params,
 											void* record_buffer) {
 	return dx_trade_t_transcoder_impl(context, record_params, event_params, (dx_trade_t*)record_buffer, dx_eid_trade_eth);
 }
-
-/* -------------------------------------------------------------------------- */
 
 int RECORD_TRANSCODER_NAME(dx_spread_order_t) (dx_record_transcoder_connection_context_t* context,
 												const dx_record_params_t* record_params,
@@ -1039,8 +979,6 @@ int RECORD_TRANSCODER_NAME(dx_spread_order_t) (dx_record_transcoder_connection_c
 								 event_params);
 }
 
-/* -------------------------------------------------------------------------- */
-
 int RECORD_TRANSCODER_NAME(dx_greeks_t) (dx_record_transcoder_connection_context_t* context,
 										const dx_record_params_t* record_params,
 										const dxf_event_params_t* event_params,
@@ -1074,8 +1012,6 @@ int RECORD_TRANSCODER_NAME(dx_greeks_t) (dx_record_transcoder_connection_context
 								 event_params);
 }
 
-/* -------------------------------------------------------------------------- */
-
 int RECORD_TRANSCODER_NAME(dx_theo_price_t) (dx_record_transcoder_connection_context_t* context,
 										const dx_record_params_t* record_params,
 										const dxf_event_params_t* event_params,
@@ -1087,8 +1023,6 @@ int RECORD_TRANSCODER_NAME(dx_theo_price_t) (dx_record_transcoder_connection_con
 	return dx_process_event_data(context->connection, dx_eid_theo_price, record_params->symbol_name, event_buffer,
 								 event_params);
 }
-
-/* -------------------------------------------------------------------------- */
 
 int RECORD_TRANSCODER_NAME(dx_underlying_t) (dx_record_transcoder_connection_context_t* context,
 										const dx_record_params_t* record_params,
@@ -1115,8 +1049,6 @@ int RECORD_TRANSCODER_NAME(dx_underlying_t) (dx_record_transcoder_connection_con
 	return dx_process_event_data(context->connection, dx_eid_underlying, record_params->symbol_name, event_buffer,
 								 event_params);
 }
-
-/* -------------------------------------------------------------------------- */
 
 int RECORD_TRANSCODER_NAME(dx_series_t)(dx_record_transcoder_connection_context_t* context,
 										const dx_record_params_t* record_params, const dxf_event_params_t* event_params,
@@ -1155,8 +1087,6 @@ int RECORD_TRANSCODER_NAME(dx_series_t)(dx_record_transcoder_connection_context_
 								 event_params);
 }
 
-/* -------------------------------------------------------------------------- */
-
 int RECORD_TRANSCODER_NAME(dx_configuration_t) (dx_record_transcoder_connection_context_t* context,
 												const dx_record_params_t* record_params,
 												const dxf_event_params_t* event_params,
@@ -1180,11 +1110,9 @@ int RECORD_TRANSCODER_NAME(dx_configuration_t) (dx_record_transcoder_connection_
 								 event_params);
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Interface functions implementation
  */
-/* -------------------------------------------------------------------------- */
 
 static const dx_record_transcoder_t g_record_transcoders[dx_rid_count] = {
 	RECORD_TRANSCODER_NAME(dx_trade_t),
@@ -1203,8 +1131,6 @@ static const dx_record_transcoder_t g_record_transcoders[dx_rid_count] = {
 	RECORD_TRANSCODER_NAME(dx_series_t),
 	RECORD_TRANSCODER_NAME(dx_configuration_t)
 };
-
-/* -------------------------------------------------------------------------- */
 
 int dx_transcode_record_data (dxf_connection_t connection,
 							const dx_record_params_t* record_params,

@@ -77,22 +77,16 @@ int dxs_mutex_create(dxs_mutex_t* mutex) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dxs_mutex_destroy(dxs_mutex_t* mutex) {
 	DeleteCriticalSection(*mutex);
 	free(*mutex);
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dxs_mutex_lock(dxs_mutex_t* mutex) {
 	EnterCriticalSection(*mutex);
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dxs_mutex_unlock(dxs_mutex_t* mutex) {
 	LeaveCriticalSection(*mutex);
@@ -124,8 +118,6 @@ int dxs_mutex_create(dxs_mutex_t* mutex) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dxs_mutex_destroy(dxs_mutex_t* mutex) {
 	if (pthread_mutex_destroy(&mutex->mutex) != 0) {
 		return false;
@@ -138,8 +130,6 @@ int dxs_mutex_destroy(dxs_mutex_t* mutex) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dxs_mutex_lock(dxs_mutex_t* mutex) {
 	if (pthread_mutex_lock(&mutex->mutex) != 0) {
 		return false;
@@ -147,8 +137,6 @@ int dxs_mutex_lock(dxs_mutex_t* mutex) {
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dxs_mutex_unlock(dxs_mutex_t* mutex) {
 	if (pthread_mutex_unlock(&mutex->mutex) != 0) {
@@ -189,7 +177,6 @@ void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
 	wprintf(L"\nTerminating listener thread, host: %hs\n", host);
 }
 
-/* -------------------------------------------------------------------------- */
 int events_counter = 0;
 int server_lags_counter = 0;
 dxf_long_t server_lags_sum = 0;
@@ -278,7 +265,6 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 					tns->is_eth_trade ? L"True" : L"False", tns->type);
 	}
 }
-/* -------------------------------------------------------------------------- */
 
 void process_last_error() {
 	int error_code = dx_ec_success;
@@ -386,8 +372,6 @@ void destroy_unicode_symbols(dxf_string_t* symbols, size_t count) {
 	free(symbols);
 }
 
-/* -------------------------------------------------------------------------- */
-
 void print_usage() {
 	wprintf(L"Usage: PerformanceTest [print] [" LS(TIMEOUT_TAG)
 		   L" <timeout>] [<IPF file> ... <IPF file>] [-h|--help|-?]\n"
@@ -439,7 +423,7 @@ int main(int argc, char* argv[]) {
 			}
 		}
 
-		for (size_t i = arg; i < argc; ++i) {
+		for (size_t i = arg; i < (size_t)argc; ++i) {
 			FILE* file;
 			file = fopen(argv[i], "rt");
 			if (file == NULL) {

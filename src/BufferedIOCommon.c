@@ -21,11 +21,9 @@
 #include "DXErrorHandling.h"
 #include "DXMemory.h"
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Common Unicode data
  */
-/* -------------------------------------------------------------------------- */
 
 /*
  * The minimum value of a Unicode high-surrogate code unit in the
@@ -65,11 +63,9 @@ static const dxf_int_t MIN_SUPPLEMENTARY_CODE_POINT = 0x010000;
  */
 static dxf_int_t MAX_CODE_POINT = 0x10ffff;
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Auxiliary Unicode functions
  */
-/* -------------------------------------------------------------------------- */
 
 void dx_code_point_to_surrogates (dxf_int_t code_point, dxf_string_t dest_buffer, int dest_buffer_pos) {
 	dxf_int_t offset = code_point - MIN_SUPPLEMENTARY_CODE_POINT;
@@ -78,29 +74,21 @@ void dx_code_point_to_surrogates (dxf_int_t code_point, dxf_string_t dest_buffer
 	dest_buffer[dest_buffer_pos] = (dxf_char_t)((offset >> 10) + MIN_HIGH_SURROGATE);
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Common Unicode functions implementation
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_is_high_surrogate (dxf_char_t value) {
 	return value >= MIN_HIGH_SURROGATE && value <= MAX_HIGH_SURROGATE;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_is_low_surrogate (dxf_char_t value) {
 	return value >= MIN_LOW_SURROGATE && value <= MAX_LOW_SURROGATE;
 }
 
-/* -------------------------------------------------------------------------- */
-
 dxf_int_t dx_surrogates_to_code_point (dxf_char_t high, dxf_char_t low) {
 	return ((high - MIN_HIGH_SURROGATE) << 10) + (low - MIN_LOW_SURROGATE) + MIN_SUPPLEMENTARY_CODE_POINT;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_code_point_to_utf16_chars (dxf_int_t code_point, dxf_string_t dest_buffer, int dest_buffer_pos, int dest_buffer_length, OUT int* result) {
 	if (code_point < 0 || code_point > MAX_CODE_POINT || dest_buffer == NULL || result == NULL) {
@@ -128,11 +116,9 @@ int dx_code_point_to_utf16_chars (dxf_int_t code_point, dxf_string_t dest_buffer
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Common compact API functions implementation
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_get_compact_size (dxf_long_t value) {
 	if (value >= 0) {

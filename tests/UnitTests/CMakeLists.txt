@@ -214,12 +214,14 @@ add_dependencies(${PROJECT} ${LIB_DXFEED_PROJ})
 
 if (MSVC)
     if (NOT DISABLE_TLS)
+        set(DX_CAPI_BINARY_PATH ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE})
+
         ADD_CUSTOM_COMMAND(
             TARGET ${PROJECT}
             POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/${TARGET_PLATFORM}/libtls-15${PLATFORM_POSTFIX}.dll ${CMAKE_BINARY_DIR}/$(Configuration)
-            COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/${TARGET_PLATFORM}/libssl-43${PLATFORM_POSTFIX}.dll ${CMAKE_BINARY_DIR}/$(Configuration)
-            COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/${TARGET_PLATFORM}/libcrypto-41${PLATFORM_POSTFIX}.dll ${CMAKE_BINARY_DIR}/$(Configuration)
+            COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/${TARGET_PLATFORM}/libtls-15${PLATFORM_POSTFIX}.dll ${DX_CAPI_BINARY_PATH}
+            COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/${TARGET_PLATFORM}/libssl-43${PLATFORM_POSTFIX}.dll ${DX_CAPI_BINARY_PATH}
+            COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/${TARGET_PLATFORM}/libcrypto-41${PLATFORM_POSTFIX}.dll ${DX_CAPI_BINARY_PATH}
         )
     endif (NOT DISABLE_TLS)
 endif (MSVC)

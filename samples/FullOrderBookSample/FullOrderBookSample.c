@@ -81,22 +81,16 @@ int dxs_mutex_create(dxs_mutex_t *mutex) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dxs_mutex_destroy(dxs_mutex_t *mutex) {
 	DeleteCriticalSection(*mutex);
 	free(*mutex);
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dxs_mutex_lock(dxs_mutex_t *mutex) {
 	EnterCriticalSection(*mutex);
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dxs_mutex_unlock(dxs_mutex_t *mutex) {
 	LeaveCriticalSection(*mutex);
@@ -128,8 +122,6 @@ int dxs_mutex_create(dxs_mutex_t *mutex) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dxs_mutex_destroy(dxs_mutex_t *mutex) {
 	if (pthread_mutex_destroy(&mutex->mutex) != 0) {
 		return false;
@@ -142,8 +134,6 @@ int dxs_mutex_destroy(dxs_mutex_t *mutex) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dxs_mutex_lock(dxs_mutex_t *mutex) {
 	if (pthread_mutex_lock(&mutex->mutex) != 0) {
 		return false;
@@ -151,8 +141,6 @@ int dxs_mutex_lock(dxs_mutex_t *mutex) {
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dxs_mutex_unlock(dxs_mutex_t *mutex) {
 	if (pthread_mutex_unlock(&mutex->mutex) != 0) {
@@ -209,8 +197,6 @@ void print_timestamp(dxf_long_t timestamp) {
 	wprintf(L"%ls", timefmt);
 }
 
-/* -------------------------------------------------------------------------- */
-
 void process_last_error() {
 	int error_code = dx_ec_success;
 	dxf_const_string_t error_descr = NULL;
@@ -233,8 +219,6 @@ void process_last_error() {
 
 	wprintf(L"An error occurred but the error subsystem failed to initialize\n");
 }
-
-/* -------------------------------------------------------------------------- */
 
 dxf_string_t ansi_to_unicode(const char *ansi_str) {
 #ifdef _WIN32
@@ -263,8 +247,6 @@ dxf_string_t ansi_to_unicode(const char *ansi_str) {
 #endif /* _WIN32 */
 }
 
-/* -------------------------------------------------------------------------- */
-
 void listener(const dxf_snapshot_data_ptr_t snapshot_data, void *user_data) {
 	size_t i;
 	size_t records_count = snapshot_data->records_count;
@@ -279,10 +261,10 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void *user_data) {
 
 	dxf_order_t *order_records = (dxf_order_t *)snapshot_data->records;
 
-	for (i = 0; i < records_count; ++i) {
+	for (i = 0; i < (size_t)records_count; ++i) {
 		dxf_order_t order = order_records[i];
 
-		if (records_print_limit > 0 && i >= records_print_limit) {
+		if (records_print_limit > 0 && i >= (size_t)records_print_limit) {
 			wprintf(L"   { ... %zu records left ...}\n", records_count - i);
 			break;
 		}
@@ -327,8 +309,6 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void *user_data) {
 	}
 }
 
-/* -------------------------------------------------------------------------- */
-
 int atoi2(char *str, int *result) {
 	if (str == NULL || str[0] == '\0' || result == NULL) {
 		return false;
@@ -350,8 +330,6 @@ int atoi2(char *str, int *result) {
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int main(int argc, char *argv[]) {
 	if (argc < STATIC_PARAMS_COUNT) {

@@ -41,17 +41,12 @@ dxf_const_string_t dx_get_log_level_prefix(dx_log_level_t log_level);
 void dx_logging_error_by_code(int error_code);
 void dx_logging_info(const dxf_char_t *format, ...);
 void dx_logging_verbose(dx_log_level_t log_level, const dxf_char_t *format, ...);
-void dx_logging_verbose_gap(void);
 void dx_flush_log(void);
 void dx_logging_dbg_lock();
 void dx_logging_dbg(const dxf_char_t *format, ...);
-void dx_logging_dbg_stack();
-const char *dx_logging_dbg_sym(void *addr);
-void dx_logging_dbg_flush();
 void dx_logging_dbg_unlock();
 
 void dx_logging_last_error(void);
-void dx_logging_last_error_verbose(void);
 
 /**
  * Logs the data that was sent

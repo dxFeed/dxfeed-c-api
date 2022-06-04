@@ -175,8 +175,6 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_price_level_book) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_price_level_book) {
 	int res = true;
 	dx_plb_connection_context_t *context = dx_get_subsystem_data(connection, dx_ccs_price_level_book, &res);
@@ -187,7 +185,6 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_price_level_book) {
 	return res;
 }
 
-/* -------------------------------------------------------------------------- */
 static int dx_plb_clear_connection_context(dx_plb_connection_context_t *context) {
 	int res = true;
 	int i = 0;
@@ -202,11 +199,7 @@ static int dx_plb_clear_connection_context(dx_plb_connection_context_t *context)
 	return res;
 }
 
-/* -------------------------------------------------------------------------- */
-
 DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_price_level_book) { return true; }
-
-/* -------------------------------------------------------------------------- */
 
 /* This function must be called with context guard taken */
 static int dx_plb_ctx_grow_sources_hashtable(dx_plb_connection_context_t *context) {
@@ -236,16 +229,12 @@ static int dx_plb_ctx_grow_sources_hashtable(dx_plb_connection_context_t *contex
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 /* This function must be called with context guard taken */
 static dx_plb_source_t *dx_plb_ctx_find_source(dx_plb_connection_context_t *context, dxf_const_string_t symbol,
 											   dxf_const_string_t src) {
 	size_t pos = dx_plb_source_find_pos(context, symbol, src);
 	return context->sources[pos];
 }
-
-/* -------------------------------------------------------------------------- */
 
 /* This function must be called with context guard taken */
 static int dx_plb_ctx_add_source(dx_plb_connection_context_t *context, dx_plb_source_t *source) {
@@ -261,8 +250,6 @@ static int dx_plb_ctx_add_source(dx_plb_connection_context_t *context, dx_plb_so
 	context->src_size++;
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 /* This function must be called with context guard taken */
 static int dx_plb_ctx_remove_source(dx_plb_connection_context_t *context, dx_plb_source_t *source) {
@@ -291,8 +278,6 @@ static int dx_plb_ctx_remove_source(dx_plb_connection_context_t *context, dx_plb
 	context->src_size--;
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 /* This function must be called with context guard taken */
 static void dx_plb_ctx_cleanup_sources(dx_plb_connection_context_t *context) {
@@ -346,8 +331,6 @@ static void dx_plb_source_free(dx_plb_source_t *source) {
 	CHECKED_FREE(source);
 }
 
-/* -------------------------------------------------------------------------- */
-
 /* This function should be called without source guard */
 static int dx_plb_source_clear(dx_plb_source_t *source, int force) {
 	ERRORCODE err = DXF_SUCCESS;
@@ -379,8 +362,6 @@ static int dx_plb_source_clear(dx_plb_source_t *source, int force) {
 	return res && err == DXF_SUCCESS;
 }
 
-/* -------------------------------------------------------------------------- */
-
 /* This function should be called without source guard, but with context guard taken */
 static void dx_plb_source_cleanup(dx_plb_connection_context_t *context, dx_plb_source_t *source) {
 	/* Adding of book to source is always under context taken, so we are safe here */
@@ -392,15 +373,11 @@ static void dx_plb_source_cleanup(dx_plb_connection_context_t *context, dx_plb_s
 	dx_plb_source_clear(source, false);
 }
 
-/* -------------------------------------------------------------------------- */
-
 static dxf_ulong_t dx_plb_source_hash(dxf_const_string_t symbol, dxf_const_string_t src) {
 	dxf_ulong_t h1 = dx_symbol_name_hasher(symbol);
 	dxf_ulong_t h2 = dx_symbol_name_hasher(src);
 	return ((dxf_ulong_t)h1) << 32u | (dxf_ulong_t)h2;
 }
-
-/* -------------------------------------------------------------------------- */
 
 /* This function must be called with context guard taken */
 static size_t dx_plb_source_find_pos(dx_plb_connection_context_t *context, dxf_const_string_t symbol,
@@ -416,8 +393,6 @@ static size_t dx_plb_source_find_pos(dx_plb_connection_context_t *context, dxf_c
 	}
 	return i;
 }
-
-/* -------------------------------------------------------------------------- */
 
 static dx_plb_source_t *dx_plb_source_create(dxf_connection_t connection, dxf_const_string_t symbol,
 											 dxf_const_string_t src) {
@@ -496,7 +471,6 @@ static dx_plb_source_t *dx_plb_source_create(dxf_connection_t connection, dxf_co
 	return source;
 }
 
-/* -------------------------------------------------------------------------- */
 /* This must be called without source guard taken */
 static void dx_plb_source_remove_book(dx_plb_source_t *source, dx_price_level_book_t *book, size_t idx) {
 	dx_plb_source_consumer_t *c, **p;
@@ -522,7 +496,6 @@ static void dx_plb_source_remove_book(dx_plb_source_t *source, dx_price_level_bo
 	dx_logging_error(L"PLB Internal error: can not find consumer for source\n");
 }
 
-/* -------------------------------------------------------------------------- */
 /* This must be called without source guard taken but with context guard taken (!) */
 static int dx_plb_source_add_book(dx_plb_source_t *source, dx_price_level_book_t *book, int idx) {
 	dx_plb_source_consumer_t *c;
@@ -545,8 +518,6 @@ static int dx_plb_source_add_book(dx_plb_source_t *source, dx_price_level_book_t
 	dx_mutex_unlock(&source->guard);
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 static void dx_plb_source_reset_snapshot(dx_plb_source_t *source) {
 	for (size_t i = 0; i < source->snapshot.size; i++) {
@@ -577,8 +548,6 @@ static void dx_plb_source_reset_snapshot(dx_plb_source_t *source) {
 	source->final_asks = source->asks;
 }
 
-/* -------------------------------------------------------------------------- */
-
 static void dx_plb_source_remove_order_from_levels(dx_plb_price_level_side_t *ob, const dxf_order_t *order) {
 	size_t pos;
 	int found;
@@ -591,8 +560,6 @@ static void dx_plb_source_remove_order_from_levels(dx_plb_price_level_side_t *ob
 	ob->rebuild |= ob->levels[pos].size <= 0;
 	ob->updated = true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 static void dx_plb_source_add_order_to_levels(dx_plb_price_level_side_t *ob, const dxf_order_t *order) {
 	size_t pos;
@@ -621,8 +588,6 @@ static void dx_plb_source_add_order_to_levels(dx_plb_price_level_side_t *ob, con
 		ob->updated = true;
 	}
 }
-
-/* -------------------------------------------------------------------------- */
 
 static void dx_plb_source_rebuild_levels(dx_plb_records_array_t *snapshot, dx_plb_price_level_side_t *ob,
 										 dxf_order_side_t side) {
@@ -715,8 +680,6 @@ static int dx_plb_book_free(dx_price_level_book_t *book) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 /* This functions must be called without guard */
 static void dx_plb_book_clear(dx_price_level_book_t *book) {
 	size_t i = 0;
@@ -748,8 +711,6 @@ static void dx_plb_book_clear(dx_price_level_book_t *book) {
 	/* Now nothing could call book methods, kill it */
 	dx_plb_book_free(book);
 }
-
-/* -------------------------------------------------------------------------- */
 
 /* This functions must be called with book guard taken */
 static int dx_plb_book_update_one_side(dx_plb_price_level_side_t *dst, dx_plb_price_level_side_t **srcs,
@@ -798,8 +759,6 @@ static int dx_plb_book_update_one_side(dx_plb_price_level_side_t *dst, dx_plb_pr
 	dx_free(sidx);
 	return changed;
 }
-
-/* -------------------------------------------------------------------------- */
 
 /* This functions must be called without book guard */
 static void dx_plb_book_update(dx_price_level_book_t *book, dx_plb_source_t *src) {

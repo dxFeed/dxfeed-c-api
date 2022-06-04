@@ -54,26 +54,22 @@ typedef unsigned (*dx_start_routine_t)(void*);
 
 #include "PrimitiveTypes.h"
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Callbacks management
  */
-/* -------------------------------------------------------------------------- */
+
 void dx_register_thread_constructor(void (*constructor)(void*), void *arg);
 void dx_register_thread_destructor(void (*destructor)(void*), void *arg);
 void dx_register_process_destructor(void (*destructor)(void*), void *arg);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Auxiliary functions
  */
-/* -------------------------------------------------------------------------- */
 
 void dx_sleep (int milliseconds);
 void dx_mark_thread_master (void);
 int dx_is_thread_master (void);
 
-/* -------------------------------------------------------------------------- */
 /*
  *  below are the wrappers for the used POSIX thread functions that incorporate
  *  the error handling.
@@ -81,7 +77,6 @@ int dx_is_thread_master (void);
  *  some special error codes, in that case the wrapper implementation must be
  *  customized as well.
  */
-/* -------------------------------------------------------------------------- */
 
 #if !defined(_WIN32)
 int dx_thread_create (dx_thread_t* thread_id, const pthread_attr_t* attr,
@@ -103,14 +98,12 @@ int dx_mutex_destroy (dx_mutex_t* mutex);
 int dx_mutex_lock (dx_mutex_t* mutex);
 int dx_mutex_unlock (dx_mutex_t* mutex);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	The thread function wrappers that do not invoke internal error
  *  handling mechanism.
  *  Such functions are used when the internal error handling mechanism
  *  cannot be trusted, e.g. within the error subsystem initialization routines.
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_set_thread_data_no_ehm (dx_key_t key, const void* data);
 

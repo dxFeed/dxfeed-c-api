@@ -25,11 +25,9 @@
 #include "DXAlgorithms.h"
 #include "Logger.h"
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Various data
  */
-/* -------------------------------------------------------------------------- */
 
 static const dx_conn_ctx_subsys_manipulator_t g_initializer_queue[dx_ccs_count] = {
 	DX_CONNECTION_SUBSYS_INIT_NAME(dx_ccs_network),
@@ -75,21 +73,18 @@ static const dx_conn_ctx_subsys_manipulator_t g_check_queue[dx_ccs_count] = {
 	DX_CONNECTION_SUBSYS_CHECK_NAME(dx_ccs_price_level_book),
 	DX_CONNECTION_SUBSYS_CHECK_NAME(dx_ccs_regional_book)
 };
-/* -------------------------------------------------------------------------- */
+
 /*
  *	Various types
  */
-/* -------------------------------------------------------------------------- */
 
 typedef struct {
 	void* subsystem_data[dx_ccs_count];
 } dx_connection_data_collection_t;
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Main functions implementation
  */
-/* -------------------------------------------------------------------------- */
 
 dxf_connection_t dx_init_connection (void) {
 	dx_connection_data_collection_t* res = dx_calloc(1, sizeof(dx_connection_data_collection_t));
@@ -109,8 +104,6 @@ dxf_connection_t dx_init_connection (void) {
 	return (dxf_connection_t)res;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_deinit_connection (dxf_connection_t connection) {
 	int i = dx_ccs_begin;
 	int res = true;
@@ -124,8 +117,6 @@ int dx_deinit_connection (dxf_connection_t connection) {
 	return res;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_can_deinit_connection (dxf_connection_t connection) {
 	int i = dx_ccs_begin;
 
@@ -137,8 +128,6 @@ int dx_can_deinit_connection (dxf_connection_t connection) {
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 void* dx_get_subsystem_data (dxf_connection_t connection, dx_connection_context_subsystem_t subsystem, OUT int* res) {
 	if (connection == NULL) {
@@ -160,8 +149,6 @@ void* dx_get_subsystem_data (dxf_connection_t connection, dx_connection_context_
 	return ((dx_connection_data_collection_t*)connection)->subsystem_data[subsystem];
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_set_subsystem_data (dxf_connection_t connection, dx_connection_context_subsystem_t subsystem, void* data) {
 	if (connection == NULL) {
 		dx_set_last_error(dx_cec_invalid_connection_handle_internal);
@@ -179,8 +166,6 @@ int dx_set_subsystem_data (dxf_connection_t connection, dx_connection_context_su
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_validate_connection_handle (dxf_connection_t connection, int is_internal) {
 	if (connection == NULL) {

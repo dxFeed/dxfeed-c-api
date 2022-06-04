@@ -308,11 +308,11 @@ struct WideDecimal {
 			dxf_long_t dotPosition = static_cast<dxf_long_t>(result.length()) - (rank - Consts::BIAS);
 
 			if (dotPosition > firstDigit) {
-				return result.insert(dotPosition, ".");
+				return result.insert(static_cast<std::size_t>(dotPosition), ".");
 			}
 
 			if (firstDigit - dotPosition <= static_cast<dxf_long_t>(Consts::MAX_LEADING_ZEROES)) {
-				return result.insert(firstDigit, consts.zeroChars, 0, 2 + (firstDigit - dotPosition));
+				return result.insert(static_cast<std::size_t>(firstDigit), consts.zeroChars, 0, static_cast<std::size_t>(2 + (firstDigit - dotPosition)));
 			}
 		} else {
 			// integer number
@@ -324,7 +324,7 @@ struct WideDecimal {
 		dxf_long_t digits = static_cast<dxf_long_t>(result.length()) - firstDigit;
 
 		if (digits != 1) {
-			result.insert(firstDigit + 1, ".");
+			result.insert(static_cast<std::size_t>(firstDigit) + 1, ".");
 		}
 
 		result += Consts::EXPONENT_CHAR;

@@ -947,11 +947,9 @@ typedef struct dxf_configuration {
  * @{
  */
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Event candle attributes
  */
-/* -------------------------------------------------------------------------- */
 
 /// Composite "exchange code" of a candle, i.e. empty string
 #define DXF_CANDLE_EXCHANGE_CODE_COMPOSITE_ATTRIBUTE L'\0'
@@ -1081,9 +1079,7 @@ typedef enum dxf_candle_alignment_attribute {
  * @{
  */
 
-/* -------------------------------------------------------------------------- */
 // Event subscription stuff
-/* -------------------------------------------------------------------------- */
 
 /// Event flag. [EventFlags
 /// description](https://kb.dxfeed.com/display/DS/QD+Model+of+Market+Events#QDModelofMarketEvents-EventFlagsfield)
@@ -1126,14 +1122,12 @@ typedef struct dxf_event_params {
 	dxf_ulong_t snapshot_key;
 } dxf_event_params_t;
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Event listener prototype
 
  *  event type here is a one-bit mask, not an integer
  *  from dx_eid_begin to dx_eid_count
  */
-/* -------------------------------------------------------------------------- */
 
 /**
  * Event listener prototype
@@ -1384,11 +1378,9 @@ size_t dx_get_event_subscription_params(dxf_connection_t connection, dx_order_so
 										dx_event_id_t event_id, dx_event_subscr_flag subscr_flags,
 										OUT dx_event_subscription_param_list_t* params);
 
-/* -------------------------------------------------------------------------- */
 /*
  *  Snapshot data structs
  */
-/* -------------------------------------------------------------------------- */
 
 /// Snapshot
 typedef struct dxf_snapshot_data {
@@ -1411,7 +1403,6 @@ typedef struct dxf_snapshot_data_v2 {
 
 typedef const dxf_snapshot_data_v2_t* dxf_const_snapshot_data_v2_ptr_t;
 
-/* -------------------------------------------------------------------------- */
 /**
  * @ingroup c-api-snapshots
  *
@@ -1420,7 +1411,6 @@ typedef const dxf_snapshot_data_v2_t* dxf_const_snapshot_data_v2_ptr_t;
  * @param[in] snapshot_data Pointer to the received snapshot data
  * @param[in] user_data     Pointer to user struct, use NULL by default
  */
-/* -------------------------------------------------------------------------- */
 typedef void (*dxf_snapshot_listener_t)(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data);
 
 typedef void (*dxf_snapshot_listener_v2_t)(dxf_const_snapshot_data_v2_ptr_t snapshot_data, void* user_data);
@@ -1429,7 +1419,6 @@ typedef void (*dxf_snapshot_inc_listener_v2_t)(dxf_const_snapshot_data_v2_ptr_t 
 											   dxf_const_snapshot_data_v2_ptr_t additions,
 											   dxf_const_snapshot_data_v2_ptr_t updates, void* user_data);
 
-/* -------------------------------------------------------------------------- */
 #define DXF_IS_CANDLE_REMOVAL(c) (((c)->event_flags & dxf_ef_remove_event) != 0)
 #define DXF_IS_ORDER_REMOVAL(o) \
 	((((o)->event_flags & dxf_ef_remove_event) != 0) || ((o)->size == 0) || (isnan((o)->size)))
@@ -1448,11 +1437,9 @@ typedef void (*dxf_snapshot_inc_listener_v2_t)(dxf_const_snapshot_data_v2_ptr_t 
 typedef void (*dxf_snapshot_inc_listener_t)(const dxf_snapshot_data_ptr_t snapshot_data, int new_snapshot,
 											void* user_data);
 
-/* -------------------------------------------------------------------------- */
 /*
  *  Price Level data structs
  */
-/* -------------------------------------------------------------------------- */
 /// Price level element
 typedef struct dxf_price_level_element {
 	dxf_double_t price;
@@ -1521,9 +1508,7 @@ typedef void (*dxf_price_level_book_inc_listener_t)(dxf_price_level_book_const_d
 typedef void (*dxf_regional_quote_listener_t)(dxf_const_string_t symbol, const dxf_quote_t* quotes, int count,
 											  void* user_data);
 
-/* -------------------------------------------------------------------------- */
 // Event data navigation functions
-/* -------------------------------------------------------------------------- */
 
 #ifdef __cplusplus
 extern "C"
@@ -1541,9 +1526,7 @@ extern "C"
 	dxf_const_event_data_t
 	dx_get_event_data_item(int event_mask, dxf_const_event_data_t data, size_t index);
 
-/* -------------------------------------------------------------------------- */
 // Various event functions
-/* -------------------------------------------------------------------------- */
 
 /**
  * @ingroup c-api-event-listener-functions

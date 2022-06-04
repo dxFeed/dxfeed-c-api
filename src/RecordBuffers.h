@@ -28,28 +28,22 @@
 #include "PrimitiveTypes.h"
 #include "EventData.h"
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Connection context functions
  */
-/* -------------------------------------------------------------------------- */
 
 void* dx_get_record_buffers_connection_context (dxf_connection_t connection);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Buffer manager functions prototypes
  */
-/* -------------------------------------------------------------------------- */
 
 typedef void* (*dx_get_record_ptr_t)(void* context, int record_index);
 typedef void* (*dx_get_record_buffer_ptr_t)(void* context);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Buffer manager collection
  */
-/* -------------------------------------------------------------------------- */
 
 typedef struct {
 	dx_get_record_ptr_t record_getter;
@@ -58,11 +52,9 @@ typedef struct {
 
 extern const dx_buffer_manager_collection_t g_buffer_managers[dx_rid_count];
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Auxiliary memory management functions
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_store_string_buffer (void* context, dxf_const_string_t buf);
 int dx_store_byte_array_buffer(void* context, dxf_byte_array_t buf);

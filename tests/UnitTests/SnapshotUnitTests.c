@@ -51,8 +51,6 @@
 #define dxf_osd_sell 1
 #define dxf_osc_order 3
 
-/* -------------------------------------------------------------------------- */
-
 typedef struct {
 	int listener_call_counter;
 	int result;
@@ -130,8 +128,6 @@ int dx_compare_snapshots(const dxf_snapshot_data_ptr_t snapshot_data, dxf_order_
 	return res;
 }
 
-/* -------------------------------------------------------------------------- */
-
 static dxf_order_t simple_test_data[] = {
 	{ L"NTV", dxf_ef_snapshot_begin, 0x4e54560000000006, 0,             0, 0, dxf_oa_undefined, 0, 0, 0, 0.0,    0,   0, 0, 0, 0.0, 0.0, 0,    dxf_osd_buy,  dxf_osc_order, { 0 } },
 	{ L"NTV", 0,                     0x4e54560000000005, 1488551035000, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.50, 100, 0, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order, { L"NSDQ" } },
@@ -166,8 +162,6 @@ int snapshot_simple_test(void) {
 	return snapshot_test_runner(simple_test_data, SIZE_OF_ARRAY(simple_test_data), simple_test_listener, 1);
 }
 
-/* -------------------------------------------------------------------------- */
-
 static dxf_order_t empty_test_data[] = {
 	{ L"NTV", dxf_ef_remove_event | dxf_ef_snapshot_begin | dxf_ef_snapshot_end, 0x4e54560000000000, 1488551035040, 0, 0, dxf_oa_undefined, 0, 0, 0, 100.20, 104, 0, 0, 0, 0.0, 0.0, L'Q', dxf_osd_buy,  dxf_osc_order,{ L"NSDQ" } },
 };
@@ -185,8 +179,6 @@ void empty_test_listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user
 int snapshot_empty_test(void) {
 	return snapshot_test_runner(empty_test_data, SIZE_OF_ARRAY(empty_test_data), empty_test_listener, 1);
 }
-
-/* -------------------------------------------------------------------------- */
 
 static dxf_order_t update_test_data[] = {
 	// initial data
@@ -275,8 +267,6 @@ int snapshot_update_test(void) {
 	return snapshot_test_runner(update_test_data, SIZE_OF_ARRAY(update_test_data), update_test_listener, 5);
 }
 
-/* -------------------------------------------------------------------------- */
-
 static dxf_order_t bid_ask_test_data[] = {
 	// initial data
 	{ dxf_ef_snapshot_begin, 0x4e54560000000005, 1488551035000, 0, 0, 100.50, 100, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
@@ -354,8 +344,6 @@ int snapshot_bid_ask_test(void) {
 	return snapshot_test_runner(bid_ask_test_data, SIZE_OF_ARRAY(bid_ask_test_data), bid_ask_test_listener, 2);
 }
 
-/* -------------------------------------------------------------------------- */
-
 static dxf_order_t duplicate_index_test_data[] = {
 	{ dxf_ef_snapshot_begin, 0x4e54560000000005, 1488551035000, 0, 0, 100.50, 100, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
 	{ 0,                     0x4e54560000000004, 1488551035010, 0, 0, 101.00, 101, 0, dxf_osc_order, dxf_osd_sell, L'Q', L"NTV", L"NSDQ" },
@@ -390,8 +378,6 @@ int snapshot_duplicate_index_test(void) {
 	return snapshot_test_runner(duplicate_index_test_data, SIZE_OF_ARRAY(duplicate_index_test_data), duplicate_index_test_listener, 1);
 }
 
-/* -------------------------------------------------------------------------- */
-
 static dxf_order_t buildin_update_test_data[] = {
 	{ dxf_ef_snapshot_begin,                                         0x4e54560000000005, 1488551035000, 0, 0, 100.50, 100, 0, dxf_osc_order, dxf_osd_buy,  L'Q', L"NTV", L"NSDQ" },
 	{ 0,                                                             0x4e54560000000004, 1488551035010, 0, 0, 101.00, 101, 0, dxf_osc_order, dxf_osd_sell, L'Q', L"NTV", L"NSDQ" },
@@ -424,8 +410,6 @@ void buildin_update_test_listener(const dxf_snapshot_data_ptr_t snapshot_data, v
 int snapshot_buildin_update_test(void) {
 	return snapshot_test_runner(buildin_update_test_data, SIZE_OF_ARRAY(buildin_update_test_data), buildin_update_test_listener, 1);
 }
-
-/* -------------------------------------------------------------------------- */
 
 static dx_record_info_id_t g_record_info_ids_list[] = {
 	dx_rid_order, dx_rid_time_and_sale, dx_rid_candle,
@@ -505,8 +489,6 @@ int snapshot_key_test(void) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 typedef struct {
 	dxf_int_t* elements;
 	size_t size;
@@ -548,8 +530,6 @@ int symbol_name_hasher_test(void) {
 	
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int snapshot_all_unit_test(void) {
 	int res = true;

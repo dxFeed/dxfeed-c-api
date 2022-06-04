@@ -695,8 +695,6 @@ int snapshot_multiply_subscription_test(void) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 static dxf_uint_t g_event_subscription_counter = 0;
 CRITICAL_SECTION g_event_subscription_counter_guard;
 
@@ -753,8 +751,6 @@ int check_event_subscription_test() {
 
 	return dx_ge_dxf_uint_t(get_event_subscription_counter(), 1);
 }
-
-/* -------------------------------------------------------------------------- */
 
 /*Test*/
 int snapshot_subscription_and_events_test(void) {

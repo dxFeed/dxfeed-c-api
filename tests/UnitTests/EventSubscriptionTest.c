@@ -187,8 +187,6 @@ int event_subscription_test (void) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 #define NON_HISTORY_RECORD_TIME -1
 //UTC2017-03-28T07:28:06.123
 #define TIME_STAMP 0x15B13D08BEB
@@ -290,8 +288,6 @@ int subscription_time_test(void) {
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int event_subscription_all_test(void) {
 	int res = true;

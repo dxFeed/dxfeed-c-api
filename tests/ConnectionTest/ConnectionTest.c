@@ -45,8 +45,6 @@ void dxs_sleep(int milliseconds) {
 
 const char dxfeed_host[] = "demo.dxfeed.com:7300";
 
-/* -------------------------------------------------------------------------- */
-
 void process_last_error() {
 	int error_code = dx_ec_success;
 	dxf_const_string_t error_descr = NULL;
@@ -70,8 +68,6 @@ void process_last_error() {
 
 	wprintf(L"An error occurred but the error subsystem failed to initialize\n");
 }
-
-/* -------------------------------------------------------------------------- */
 
 int main(int argc, char* argv[]) {
 	dxf_connection_t connection;

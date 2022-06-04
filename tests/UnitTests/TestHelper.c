@@ -107,8 +107,6 @@ void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
 }
 #endif
 
-/* -------------------------------------------------------------------------- */
-
 void process_last_error() {
 	int error_code = dx_ec_success;
 	dxf_const_string_t error_descr = NULL;
@@ -130,8 +128,6 @@ void process_last_error() {
 
 	wprintf(L"An error occurred but the error subsystem failed to initialize\n");
 }
-
-/* -------------------------------------------------------------------------- */
 
 int create_event_subscription(dxf_connection_t connection, int event_type,
 							dxf_const_string_t symbol,
@@ -159,8 +155,6 @@ int create_event_subscription(dxf_connection_t connection, int event_type,
 	*res_subscription = subscription;
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 /* Event counter functions */
 
@@ -207,8 +201,6 @@ const char *get_event_counter_name(event_counter_data_ptr_t counter_data) {
 	LeaveCriticalSection(&counter_data->event_counter_guard);
 	return value;
 }
-
-/* -------------------------------------------------------------------------- */
 
 #define DX_TOLLERANCE 0.000001
 

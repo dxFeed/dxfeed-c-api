@@ -17,7 +17,9 @@
  *
  */
 
+extern "C" {
 #include "WideDecimal.h"
+}
 
 #include "WideDecimal.hpp"
 
@@ -60,12 +62,17 @@ const std::array<dxf_long_t, 4> WideDecimal::Consts::NF_WIDE = {
 	{WideDecimal::Consts::NaN, WideDecimal::Consts::POSITIVE_INFINITY, WideDecimal::Consts::NaN,
 	 WideDecimal::Consts::NEGATIVE_INFINITY}};
 
-template <typename T>
-const typename RightShift<T>::Consts RightShift<T>::consts{};
-
 const WideDecimal::Consts WideDecimal::consts{};
+
+template <>
+const typename RightShift<dxf_long_t>::Consts RightShift<dxf_long_t>::consts{};
+
+template <>
+const typename RightShift<dxf_int_t>::Consts RightShift<dxf_int_t>::consts{};
+
 }  // namespace dx
 
+extern "C" {
 int dx_wide_decimal_long_to_double(dxf_long_t longValue, OUT dxf_double_t* decimal) {
 	*decimal = dx::WideDecimal::toDouble(longValue);
 
@@ -73,5 +80,6 @@ int dx_wide_decimal_long_to_double(dxf_long_t longValue, OUT dxf_double_t* decim
 }
 
 dxf_int_t dx_right_shift_int(dxf_int_t int_value, dxf_int_t shift) {
-	return dx::rightShift(int_value, shift);
+	return dx::rightShift<dxf_int_t>(int_value, shift);
+}
 }

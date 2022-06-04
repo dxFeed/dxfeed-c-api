@@ -30,11 +30,9 @@
 extern "C" {
 #endif
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Memory function wrappers
  */
-/* -------------------------------------------------------------------------- */
 
 void* dx_malloc(size_t size);
 void* dx_calloc(size_t num, size_t size);
@@ -43,14 +41,12 @@ void* dx_memcpy(void* destination, const void* source, size_t size);
 void* dx_memmove(void* destination, const void* source, size_t size);
 void* dx_memset(void* destination, int c, size_t size);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Memory function wrappers without error handling mechanism
 
  *  May be useful when the internal error handling mechanism cannot be relied
  *  upon, e.g. within its initialization.
  */
-/* -------------------------------------------------------------------------- */
 
 void* dx_calloc_no_ehm(size_t num, size_t size);
 void dx_free_no_ehm(void* buf);

@@ -53,7 +53,6 @@
 int _CRT_glob = 0;
 #endif
 
-/* -------------------------------------------------------------------------- */
 #ifdef _WIN32
 static int is_listener_thread_terminated = false;
 CRITICAL_SECTION listener_thread_guard;
@@ -74,8 +73,6 @@ int is_thread_terminate() {
 	return res;
 }
 #endif
-
-/* -------------------------------------------------------------------------- */
 
 #ifdef _WIN32
 void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
@@ -102,8 +99,6 @@ void print_timestamp(dxf_long_t timestamp) {
 	wprintf(L"%ls", timefmt);
 }
 
-/* -------------------------------------------------------------------------- */
-
 void process_last_error() {
 	int error_code = dx_ec_success;
 	dxf_const_string_t error_descr = NULL;
@@ -126,8 +121,6 @@ void process_last_error() {
 
 	wprintf(L"An error occurred but the error subsystem failed to initialize\n");
 }
-
-/* -------------------------------------------------------------------------- */
 
 dxf_string_t ansi_to_unicode(const char* ansi_str) {
 #ifdef _WIN32
@@ -155,8 +148,6 @@ dxf_string_t ansi_to_unicode(const char* ansi_str) {
 	return wide_str;
 #endif /* _WIN32 */
 }
-
-/* -------------------------------------------------------------------------- */
 
 void listener(const dxf_price_level_book_data_ptr_t book_data, void* user_data) {
 	size_t i = 0;
@@ -216,8 +207,6 @@ int atoi2(char* str, int* result) {
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int main(int argc, char* argv[]) {
 	dxf_connection_t connection;

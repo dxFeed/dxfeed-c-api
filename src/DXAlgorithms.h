@@ -28,19 +28,15 @@
 #include "PrimitiveTypes.h"
 #include "DXMemory.h"
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Generic values
  */
-/* -------------------------------------------------------------------------- */
 
 #define INVALID_INDEX   (-1)
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Generic operations
  */
-/* -------------------------------------------------------------------------- */
 
 #define DX_SWAP(type, e1, e2) \
 	do { \
@@ -109,11 +105,9 @@
 		} \
 	} while (false)
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Memory operations
  */
-/* -------------------------------------------------------------------------- */
 
 #define CHECKED_FREE(ptr) \
 	do { \
@@ -139,11 +133,9 @@
 		dx_free((void*)array_ptr); \
 	} while (false)
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Bit operations
  */
-/* -------------------------------------------------------------------------- */
 
 #define INDEX_BITMASK(index) \
 	(1 << (index))
@@ -165,21 +157,17 @@
 
 int dx_is_only_single_bit_set (int value);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Random number generation functions
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_random_integer (int max_value);
 double dx_random_double (double max_value);
 size_t dx_random_size(size_t max_value);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Array constats
  */
-/* -------------------------------------------------------------------------- */
 
 /*
  *  Sets the empty array value.
@@ -191,14 +179,12 @@ size_t dx_random_size(size_t max_value);
  */
 #define DX_EMPTY_ARRAY { NULL, 0, 0 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Array operations and functions
 
  *  A set of operations implementing various array algorithms: search,
  *  insertion, deletion etc
  */
-/* -------------------------------------------------------------------------- */
 
 /*
  *	Binary search
@@ -244,7 +230,6 @@ size_t dx_random_size(size_t max_value);
 		} \
 	} while (false)
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Search
 
@@ -284,7 +269,6 @@ size_t dx_random_size(size_t max_value);
 		} \
 	} while (false)
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Insertion
 
@@ -345,7 +329,6 @@ size_t dx_random_size(size_t max_value);
 		++((array_obj).size); \
 	} while (false)
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Deletion
 
@@ -404,7 +387,6 @@ size_t dx_random_size(size_t max_value);
 		--((array_obj).size); \
 	} while (false)
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Shuffle
  *  Shuffles the array elements in a random order.
@@ -425,7 +407,6 @@ size_t dx_random_size(size_t max_value);
 		} \
 	} while (false)
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Reservation
 
@@ -465,7 +446,6 @@ size_t dx_random_size(size_t max_value);
 		(array_obj).size = reserve_size; \
 	} while (false)
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Functions and predicates used in array operations
  */
@@ -473,15 +453,11 @@ size_t dx_random_size(size_t max_value);
 
 #define DX_FORCED_NUMERIC_COMPARATOR(l, r) (((dxf_ulong_t)(l)>(dxf_ulong_t)(r)?1:((dxf_ulong_t)(l)<(dxf_ulong_t)(r)?-1:0)))
 
-/* -------------------------------------------------------------------------- */
-
 int dx_capacity_manager_halfer (size_t new_size, size_t* capacity);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	String functions
  */
-/* -------------------------------------------------------------------------- */
 
 dxf_string_t dx_create_string (size_t size);
 dxf_string_t dx_create_string_src (dxf_const_string_t src);
@@ -504,22 +480,18 @@ dxf_string_t dx_ansi_to_unicode (const char* ansi_str);
 dxf_string_t dx_decode_from_integer (dxf_long_t code);
 dxf_string_t dx_concatenate_strings(dxf_string_t dest, dxf_const_string_t src);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Time constants
  */
-/* -------------------------------------------------------------------------- */
 
 /**
  * Number of milliseconds in a second.
  */
 static const dxf_long_t DX_TIME_SECOND = 1000L;
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Time functions
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_millisecond_timestamp (void);
 int dx_millisecond_timestamp_diff (int newer, int older);
@@ -543,11 +515,9 @@ dxf_int_t dx_get_seconds_from_time(dxf_long_t millis);
  */
 dxf_int_t dx_get_millis_from_time(dxf_long_t millis);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Base64 encoding operations implementation
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_base64_encode(const char* in, size_t in_len, char* out, size_t out_len);
 int dx_base64_decode(const char* in, size_t in_len, char* out, size_t *out_len);

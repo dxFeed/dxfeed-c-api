@@ -19,11 +19,9 @@
 
 #include "DXErrorCodes.h"
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Message description functions implementation
  */
-/* -------------------------------------------------------------------------- */
 
 dxf_const_string_t dx_get_error_description (dx_error_code_t code) {
 	switch (code) {

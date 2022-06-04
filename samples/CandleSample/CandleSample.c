@@ -52,7 +52,6 @@
 int _CRT_glob = 0;
 #endif
 
-/* -------------------------------------------------------------------------- */
 #ifdef _WIN32
 static int is_listener_thread_terminated = false;
 CRITICAL_SECTION listener_thread_guard;
@@ -73,8 +72,6 @@ int is_thread_terminate() {
 	return res;
 }
 #endif
-
-/* -------------------------------------------------------------------------- */
 
 #ifdef _WIN32
 void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
@@ -101,8 +98,6 @@ void print_timestamp(dxf_long_t timestamp) {
 	wprintf(L"%ls", timefmt);
 }
 
-/* -------------------------------------------------------------------------- */
-
 void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
 			  void* user_data) {
 	dxf_int_t i = 0;
@@ -124,7 +119,6 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 			candles[i].open_interest);
 	}
 }
-/* -------------------------------------------------------------------------- */
 
 void process_last_error() {
 	int error_code = dx_ec_success;
@@ -149,7 +143,6 @@ void process_last_error() {
 	wprintf(L"An error occurred but the error subsystem failed to initialize\n");
 }
 
-/* -------------------------------------------------------------------------- */
 dxf_string_t ansi_to_unicode(const char* ansi_str) {
 #ifdef _WIN32
 	size_t len = strlen(ansi_str);

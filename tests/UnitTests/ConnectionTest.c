@@ -132,8 +132,6 @@ int invalid_connection_address_test(void) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int connection_all_test(void) {
 	int res = true;
 

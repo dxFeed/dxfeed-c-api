@@ -54,8 +54,6 @@ static const dxf_int_t g_symbols_size = sizeof(g_symbols) / sizeof(g_symbols[0])
 static const int g_event_type = DXF_ET_TRADE;
 static int g_iteration_count = 10;
 
-/* -------------------------------------------------------------------------- */
-
 void process_last_error() {
 	int error_code = dx_ec_success;
 	dxf_const_string_t error_descr = NULL;
@@ -80,8 +78,6 @@ void process_last_error() {
 	wprintf(L"An error occurred but the error subsystem failed to initialize\n");
 }
 
-/* -------------------------------------------------------------------------- */
-
 void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
 			  void* user_data) {
 	dxf_int_t i = 0;
@@ -104,8 +100,6 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 		}
 	}
 }
-
-/* -------------------------------------------------------------------------- */
 
 int main(int argc, char* argv[]) {
 	dxf_connection_t connection;

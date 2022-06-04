@@ -26,19 +26,15 @@
 #include "DXPMessageData.h"
 #include "RecordData.h"
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Server synchronization functions
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_clear_server_info (dxf_connection_t connection);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Describe protocol and message support functions
  */
-/* -------------------------------------------------------------------------- */
 
 typedef enum {
 	dx_mss_supported,
@@ -52,27 +48,21 @@ int dx_is_message_supported_by_server (dxf_connection_t connection, dx_message_t
 										OUT dx_message_support_status_t* status);
 int dx_describe_protocol_sent (dxf_connection_t connection);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Low level network data receiver
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_socket_data_receiver (dxf_connection_t connection, const void* buffer, int buffer_size);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Records digest management
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_add_record_digest_to_list(dxf_connection_t connection, dx_record_id_t index);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Start dumping incoming raw data into specific file
  */
-/* -------------------------------------------------------------------------- */
 int dx_add_raw_dump_file(dxf_connection_t connection, const char* raw_file_name);
 
 #endif /* SERVER_MESSAGE_PROCESSOR_H_INCLUDED */
