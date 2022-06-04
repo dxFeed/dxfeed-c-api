@@ -111,7 +111,6 @@ set(HEADER_FILES
         Snapshot/Snapshot.h
         Snapshot/Snapshot.hpp
         Snapshot/SnapshotKey.hpp
-        Snapshot/SnapshotChanges.hpp
         StringConverter.hpp
         TaskQueue.h
         TimeMarkUtil.hpp
@@ -342,7 +341,7 @@ elseif (MACOSX)
 endif ()
 
 if (NOT DISABLE_TLS)
-    set(DX_CAPI_BINARY_PATH ${CMAKE_BINARY_DIR})
+    set(DX_CAPI_BINARY_PATH ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE})
 
     if (WIN32)
         ADD_CUSTOM_COMMAND(
