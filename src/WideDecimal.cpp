@@ -64,12 +64,6 @@ const std::array<dxf_long_t, 4> WideDecimal::Consts::NF_WIDE = {
 
 const WideDecimal::Consts WideDecimal::consts{};
 
-template <>
-const typename RightShift<dxf_long_t>::Consts RightShift<dxf_long_t>::consts{};
-
-template <>
-const typename RightShift<dxf_int_t>::Consts RightShift<dxf_int_t>::consts{};
-
 }  // namespace dx
 
 extern "C" {

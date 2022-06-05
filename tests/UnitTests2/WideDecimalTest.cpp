@@ -5,14 +5,7 @@
 #include <type_traits>
 #include <string>
 
-template <>
-const typename dx::RightShift<dxf_long_t>::Consts dx::RightShift<dxf_long_t>::consts{};
-
-template <>
-const typename dx::RightShift<dxf_int_t>::Consts dx::RightShift<dxf_int_t>::consts{};
-
 namespace WideDecimalTest {
-inline static dxf_long_t MAX_SIGNIFICAND = dx::WideDecimal::Consts::MAX_SIGNIFICAND;
 inline static dxf_int_t MAX_RANK = 255;
 }  // namespace WideDecimalTest
 
@@ -28,7 +21,7 @@ TEST_CASE("Test right shifts", "[WideDecimal]") {
 }
 
 TEST_CASE("Test signs", "[WideDecimal]") {
-	for (dxf_long_t significand = 0; significand <= WideDecimalTest::MAX_SIGNIFICAND;
+	for (dxf_long_t significand = 0; significand <= dx::WideDecimal::Consts::MAX_SIGNIFICAND;
 		 significand += significand / 2 + 1) {
 		for (dxf_int_t rank = 0; rank <= WideDecimalTest::MAX_RANK; rank += 16) {
 			dxf_long_t rawWide = (significand << 8) | (rank & static_cast<dxf_int_t>(0xFF));

@@ -631,4 +631,7 @@ private:
 	}
 };
 
+template <typename T>
+const typename RightShift<T>::Consts RightShift<T>::consts{};
+
 }  // namespace dx
