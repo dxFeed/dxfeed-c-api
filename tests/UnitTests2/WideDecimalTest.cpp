@@ -5,6 +5,12 @@
 #include <type_traits>
 #include <string>
 
+template <>
+const typename dx::RightShift<dxf_long_t>::Consts dx::RightShift<dxf_long_t>::consts{};
+
+template <>
+const typename dx::RightShift<dxf_int_t>::Consts dx::RightShift<dxf_int_t>::consts{};
+
 namespace WideDecimalTest {
 inline static dxf_long_t MAX_SIGNIFICAND = dx::WideDecimal::Consts::MAX_SIGNIFICAND;
 inline static dxf_int_t MAX_RANK = 255;
