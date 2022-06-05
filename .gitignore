@@ -24,4 +24,5 @@ cmake-build-release*/**
 /docs/dxfeed*/
 **/*.swp
 CMakeSettings.json
+linux-build/**
 

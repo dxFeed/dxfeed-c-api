@@ -6,7 +6,7 @@
 #include <string>
 
 namespace WideDecimalTest {
-inline static dxf_int_t MAX_RANK = 255;
+const dxf_int_t MAX_RANK = 255;
 }  // namespace WideDecimalTest
 
 TEST_CASE("Test right shifts", "[WideDecimal]") {
