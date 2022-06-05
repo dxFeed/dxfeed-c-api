@@ -1,3 +1,1 @@
-//
-// Created by anatoly.kalin on 6/5/2022.
-//
+#include <catch2/catch.hpp>
