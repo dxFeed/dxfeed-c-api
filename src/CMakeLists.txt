@@ -111,6 +111,7 @@ set(HEADER_FILES
         Snapshot/Snapshot.h
         Snapshot/Snapshot.hpp
         Snapshot/SnapshotKey.hpp
+        Snapshot/SnapshotChanges.hpp
         StringConverter.hpp
         TaskQueue.h
         TimeMarkUtil.hpp

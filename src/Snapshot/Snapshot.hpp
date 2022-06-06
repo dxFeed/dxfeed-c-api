@@ -42,36 +42,13 @@ extern "C" {
 #include "../IdGenerator.hpp"
 #include "../Utils/Hash.hpp"
 #include "SnapshotKey.hpp"
+#include "SnapshotChanges.hpp"
 
 namespace dx {
 
 using SnapshotRefId = Id;
 const SnapshotRefId INVALID_SNAPSHOT_REFERENCE_ID = SnapshotRefId{-1};
 
-struct SnapshotChanges {
-	SnapshotKey snapshotKey;
-
-	SnapshotChanges() = default;
-
-	SnapshotChanges(SnapshotKey newSnapshotKey) : snapshotKey{std::move(newSnapshotKey)} {}
-
-	bool isEmpty() const { return true; }
-};
-
-struct SnapshotChangesSet {
-	SnapshotChanges removals{};
-	SnapshotChanges additions{};
-	SnapshotChanges updates{};
-
-	SnapshotChangesSet() = default;
-
-	SnapshotChangesSet(SnapshotChanges newRemovals, SnapshotChanges newAdditions, SnapshotChanges newUpdates)
-		: removals{std::move(newRemovals)}, additions{std::move(newAdditions)}, updates{std::move(newUpdates)} {}
-
-	bool isEmpty() const { return removals.isEmpty() && additions.isEmpty() && updates.isEmpty(); }
-};
-
-struct Snapshot;
 
 struct SnapshotSubscriber {
 	using SnapshotHandler = std::function<void(const SnapshotChanges&, void*)>;
