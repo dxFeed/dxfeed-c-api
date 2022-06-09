@@ -39,6 +39,7 @@ extern "C" {
 #include <variant.hpp>
 #include <vector>
 
+#include "../EventSubscription.h"
 #include "../IdGenerator.hpp"
 #include "../Utils/Hash.hpp"
 #include "SnapshotChanges.hpp"
@@ -287,13 +288,15 @@ struct hash<dx::OnlyIndexedEventKey> {
 
 namespace dx {
 
-struct OnlyIndexedEventsSnapshot final : public Snapshot {
+struct OnlyIndexedEventsSnapshot final : public Snapshot,
+										 public std::enable_shared_from_this<OnlyIndexedEventsSnapshot> {
 	using EventType = nonstd::variant<dxf_order_t /*order + spread order*/, dxf_series_t>;
 
 private:
 	SnapshotKey key_;
 	std::unordered_map<OnlyIndexedEventKey, EventType> events_;
 	dxf_subscription_t sub_;
+	std::atomic_bool isValid_;
 
 	struct SubscriptionParams {
 		dx_record_info_id_t recordInfoId;
@@ -331,14 +334,46 @@ private:
 		return {recordInfoId, subscriptionFlags, resultSource};
 	}
 
-public:
+	static void eventsListener(int eventType, dxf_const_string_t symbol, const dxf_event_data_t* data, int dataCount,
+							   const dxf_event_params_t* eventParams, void* userData) {}
 
 	OnlyIndexedEventsSnapshot(dxf_connection_t connection, SnapshotKey key)
-		: key_(std::move(key)), events_(), sub_{nullptr} {
-		dx_event_subscr_flag subscriptionFlags{};
+		: key_(std::move(key)), events_(), sub_{nullptr}, isValid_{false} {}
 
-		auto subscriptionParams = collectSubscriptionParams(key_);
-		//TODO: constructing method with checking of parameters.
+	~OnlyIndexedEventsSnapshot() override {
+		if (isValid_) {
+			dxf_close_subscription(sub_);
+		}
+	}
+
+public:
+	static std::shared_ptr<OnlyIndexedEventsSnapshot> create(dxf_connection_t connection, SnapshotKey key) {
+		auto snapshot = new OnlyIndexedEventsSnapshot(connection, std::move(key));
+
+		auto subscriptionParams = collectSubscriptionParams(snapshot->key_);
+
+		if (subscriptionParams.recordInfoId == dx_rid_invalid) {
+			return nullptr;
+		}
+
+		auto eventType = DX_EVENT_BIT_MASK(snapshot->key_.getEventId());
+		auto sub = dx_create_event_subscription(connection, eventType, subscriptionParams.subscriptionFlags, 0);
+
+		if (subscriptionParams.recordInfoId == dx_rid_order || subscriptionParams.recordInfoId == dx_rid_market_maker) {
+			dx_clear_order_sources(sub);
+
+			if (!subscriptionParams.source.empty()) {
+				auto SourceWideString = StringConverter::utf8ToWString(subscriptionParams.source);
+				dx_add_order_source(sub, SourceWideString.c_str());
+			}
+		}
+
+		dx_add_listener_v2(sub, &eventsListener, reinterpret_cast<void*>(snapshot));
+
+		snapshot->sub_ = sub;
+		snapshot->isValid_ = true;
+
+		return snapshot->shared_from_this();
 	}
 };
 
@@ -609,9 +644,13 @@ std::pair<std::shared_ptr<OnlyIndexedEventsSnapshot>, Id> SnapshotManager::creat
 		}
 	}
 
-	auto inserted = indexedEventsSnapshots_.emplace(
-		snapshotKey,
-		std::shared_ptr<OnlyIndexedEventsSnapshot>(new OnlyIndexedEventsSnapshot(connectionKey, snapshotKey)));
+	auto newSnapshot = OnlyIndexedEventsSnapshot::create(connectionKey, snapshotKey);
+
+	if (!newSnapshot) {
+		return {nullptr, INVALID_SNAPSHOT_REFERENCE_ID};
+	}
+
+	auto inserted = indexedEventsSnapshots_.emplace(snapshotKey, newSnapshot);
 
 	return {inserted.first->second, id};
 }
