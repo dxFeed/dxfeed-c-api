@@ -47,6 +47,85 @@ extern "C" {
 
 namespace dx {
 
+struct UnknownEventType {};
+
+template <dx_event_id_t eventId>
+struct EventIdToType {
+	using type = UnknownEventType;
+};
+
+#define DX_SNAPSHOT_EVENT_ID_TO_TYPE_HELPER(eventId, eventType) \
+	template <>                                                \
+	struct EventIdToType<eventId> {                            \
+		using type = eventType;                                \
+	}
+
+DX_SNAPSHOT_EVENT_ID_TO_TYPE_HELPER(dx_eid_trade, dxf_trade_t);
+DX_SNAPSHOT_EVENT_ID_TO_TYPE_HELPER(dx_eid_quote, dxf_quote_t);
+DX_SNAPSHOT_EVENT_ID_TO_TYPE_HELPER(dx_eid_summary, dxf_summary_t);
+DX_SNAPSHOT_EVENT_ID_TO_TYPE_HELPER(dx_eid_profile, dxf_profile_t);
+DX_SNAPSHOT_EVENT_ID_TO_TYPE_HELPER(dx_eid_order, dxf_order_t);
+DX_SNAPSHOT_EVENT_ID_TO_TYPE_HELPER(dx_eid_time_and_sale, dxf_time_and_sale_t);
+DX_SNAPSHOT_EVENT_ID_TO_TYPE_HELPER(dx_eid_candle, dxf_candle_t);
+DX_SNAPSHOT_EVENT_ID_TO_TYPE_HELPER(dx_eid_trade_eth, dxf_trade_eth_t);
+DX_SNAPSHOT_EVENT_ID_TO_TYPE_HELPER(dx_eid_spread_order, dxf_order_t);
+DX_SNAPSHOT_EVENT_ID_TO_TYPE_HELPER(dx_eid_greeks, dxf_greeks_t);
+DX_SNAPSHOT_EVENT_ID_TO_TYPE_HELPER(dx_eid_theo_price, dxf_theo_price_t);
+DX_SNAPSHOT_EVENT_ID_TO_TYPE_HELPER(dx_eid_underlying, dxf_underlying_t);
+DX_SNAPSHOT_EVENT_ID_TO_TYPE_HELPER(dx_eid_series, dxf_series_t);
+DX_SNAPSHOT_EVENT_ID_TO_TYPE_HELPER(dx_eid_configuration, dxf_configuration_t);
+
+#undef DX_SNAPSHOT_EVENT_ID_TO_TYPE_HELPER
+
+namespace detail {
+inline static constexpr unsigned eventIdToBitmask(dx_event_id_t eventId) {
+	return 1u << static_cast<unsigned>(eventId);
+}
+
+inline static constexpr bool isOnlyIndexedEvent(dx_event_id_t eventId) {
+	return dx_eid_order == eventId || dx_eid_spread_order == eventId || dx_eid_series == eventId;
+}
+
+inline static constexpr bool isTimeSeriesEvent(dx_event_id_t eventId) {
+	return dx_eid_candle == eventId || dx_eid_greeks == eventId || dx_eid_theo_price == eventId ||
+		dx_eid_time_and_sale == eventId || dx_eid_underlying == eventId;
+}
+
+inline static dx_event_id_t bitmaskToEventId(unsigned bitmask) {
+#define DX_DETAIL_BITMASK_TO_EVENT_ID_CASE(eventId) \
+	case eventIdToBitmask(eventId):                 \
+		return eventId
+	switch (bitmask) {
+		DX_DETAIL_BITMASK_TO_EVENT_ID_CASE(dx_eid_trade);
+		DX_DETAIL_BITMASK_TO_EVENT_ID_CASE(dx_eid_quote);
+		DX_DETAIL_BITMASK_TO_EVENT_ID_CASE(dx_eid_summary);
+		DX_DETAIL_BITMASK_TO_EVENT_ID_CASE(dx_eid_profile);
+		DX_DETAIL_BITMASK_TO_EVENT_ID_CASE(dx_eid_order);
+		DX_DETAIL_BITMASK_TO_EVENT_ID_CASE(dx_eid_time_and_sale);
+		DX_DETAIL_BITMASK_TO_EVENT_ID_CASE(dx_eid_candle);
+		DX_DETAIL_BITMASK_TO_EVENT_ID_CASE(dx_eid_trade_eth);
+		DX_DETAIL_BITMASK_TO_EVENT_ID_CASE(dx_eid_spread_order);
+		DX_DETAIL_BITMASK_TO_EVENT_ID_CASE(dx_eid_greeks);
+		DX_DETAIL_BITMASK_TO_EVENT_ID_CASE(dx_eid_theo_price);
+		DX_DETAIL_BITMASK_TO_EVENT_ID_CASE(dx_eid_underlying);
+		DX_DETAIL_BITMASK_TO_EVENT_ID_CASE(dx_eid_series);
+		DX_DETAIL_BITMASK_TO_EVENT_ID_CASE(dx_eid_configuration);
+		default:
+			return dx_eid_invalid;
+	}
+#undef DX_DETAIL_BITMASK_TO_EVENT_ID_CASE
+}
+
+inline static constexpr bool isOnlyIndexedEvent(unsigned eventIdBitmask) {
+	return isOnlyIndexedEvent(bitmaskToEventId(eventIdBitmask));
+}
+
+inline static constexpr bool isTimeSeriesEvent(unsigned eventIdBitmask) {
+	return isTimeSeriesEvent(bitmaskToEventId(eventIdBitmask));
+}
+
+}  // namespace detail
+
 using SnapshotRefId = Id;
 const SnapshotRefId INVALID_SNAPSHOT_REFERENCE_ID = SnapshotRefId{-1};
 using ConnectionKey = dxf_connection_t;
@@ -295,6 +374,7 @@ struct OnlyIndexedEventsSnapshot final : public Snapshot,
 private:
 	SnapshotKey key_;
 	std::unordered_map<OnlyIndexedEventKey, EventType> events_;
+	std::unordered_map<OnlyIndexedEventKey, EventType> transaction_;
 	dxf_subscription_t sub_;
 	std::atomic_bool isValid_;
 
@@ -334,11 +414,28 @@ private:
 		return {recordInfoId, subscriptionFlags, resultSource};
 	}
 
-	static void eventsListener(int eventType, dxf_const_string_t symbol, const dxf_event_data_t* data, int dataCount,
-							   const dxf_event_params_t* eventParams, void* userData) {}
+	static void eventsListener(int eventBitMask, dxf_const_string_t symbol, const dxf_event_data_t* data, int dataCount,
+							   const dxf_event_params_t* eventParams, void* userData) {
+		if (dataCount < 1) {
+			return;
+		}
+
+		auto eventId = detail::bitmaskToEventId(eventBitMask);
+
+		if (eventId == dx_eid_invalid) {
+			return;
+		}
+
+		auto snapshot = reinterpret_cast<OnlyIndexedEventsSnapshot*>(userData);
+
+		//TODO: Snapshot logic
+
+		if (snapshot->hasSubscriptions()) {
+		}
+	}
 
 	OnlyIndexedEventsSnapshot(dxf_connection_t connection, SnapshotKey key)
-		: key_(std::move(key)), events_(), sub_{nullptr}, isValid_{false} {}
+		: key_(std::move(key)), events_(), transaction_(), sub_{nullptr}, isValid_{false} {}
 
 	~OnlyIndexedEventsSnapshot() override {
 		if (isValid_) {

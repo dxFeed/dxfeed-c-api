@@ -29,8 +29,7 @@ dxf_snapshot_v2_t dx_create_snapshot_v2(dxf_connection_t connection, dx_event_id
 										const char* source, dxf_long_t time, void* userData) {
 	auto m = dx::SnapshotManager::getInstance(connection);
 
-	// IndexedEvent
-	if (dx_eid_order == event_id || dx_eid_spread_order == event_id || dx_eid_series == event_id) {
+	if (dx::detail::isOnlyIndexedEvent(event_id)) {
 		if (time > 0) {
 			return dx::INVALID_SNAPSHOT_REFERENCE_ID;
 		}
@@ -41,8 +40,7 @@ dxf_snapshot_v2_t dx_create_snapshot_v2(dxf_connection_t connection, dx_event_id
 			userData);
 
 		return s.second;
-	} else if (dx_eid_candle == event_id || dx_eid_greeks == event_id || dx_eid_theo_price == event_id ||
-			   dx_eid_time_and_sale == event_id || dx_eid_underlying == event_id) {	 // TODO: TimeSeriesEvent
+	} else if (dx::detail::isTimeSeriesEvent(event_id)) {	 // TODO: TimeSeriesEvent
 		return dx::INVALID_SNAPSHOT_REFERENCE_ID;
 	}
 
