@@ -22,6 +22,7 @@
 extern "C" {
 #include <DXFeed.h>
 #include <EventData.h>
+
 #include "../EventSubscription.h"
 }
 
@@ -129,114 +130,6 @@ inline static bool isTimeSeriesEvent(unsigned eventIdBitmask) {
 using SnapshotRefId = Id;
 const SnapshotRefId INVALID_SNAPSHOT_REFERENCE_ID = SnapshotRefId{-1};
 using ConnectionKey = dxf_connection_t;
-
-constexpr const char* ALL_ORDER_SOURCES[] = {
-	"NTV",	 /// NASDAQ Total View.
-	"ntv",	 /// NASDAQ Total View. Record for price level book.
-	"NFX",	 /// NASDAQ Futures Exchange.
-	"ESPD",	 /// NASDAQ eSpeed.
-	"XNFI",	 /// NASDAQ Fixed Income.
-	"ICE",	 /// Intercontinental Exchange.
-	"ISE",	 /// International Securities Exchange.
-	"DEA",	 /// Direct-Edge EDGA Exchange.
-	"DEX",	 /// Direct-Edge EDGX Exchange.
-	"BYX",	 /// Bats BYX Exchange.
-	"BZX",	 /// Bats BZX Exchange.
-	"BATE",	 /// Bats Europe BXE Exchange.
-	"CHIX",	 /// Bats Europe CXE Exchange.
-	"CEUX",	 /// Bats Europe DXE Exchange.
-	"BXTR",	 /// Bats Europe TRF.
-	"IST",	 /// Borsa Istanbul Exchange.
-	"BI20",	 /// Borsa Istanbul Exchange. Record for particular top 20 order book.
-	"ABE",	 /// ABE (abe.io) exchange.
-	"FAIR",	 /// FAIR (FairX) exchange.
-	"GLBX",	 /// CME Globex.
-	"glbx",	 /// CME Globex. Record for price level book.
-	"ERIS",	 /// Eris Exchange group of companies.
-	"XEUR",	 /// Eurex Exchange.
-	"xeur",	 /// Eurex Exchange. Record for price level book.
-	"CFE",	 /// CBOE Futures Exchange.
-	"C2OX",	 /// CBOE Options C2 Exchange.
-	"SMFE",	 /// Small Exchange.
-	"smfe",	 /// Small Exchange. Record for price level book.
-	"iex",	 /// Investors exchange. Record for price level book.
-	"MEMX",	 /// Members Exchange.
-	"memx",	 /// Members Exchange. Record for price level book.
-};
-
-constexpr const char* ALL_SPECIAL_ORDER_SOURCES[] = {
-	"DEFAULT",	// back compatibility with Java API
-
-	/*
-	 * Bid side of a composite Quote. It is a synthetic source. The subscription on composite Quote event is observed
-	 * when this source is subscribed to.
-	 */
-	"COMPOSITE_BID",
-
-	/*
-	 * Ask side of a composite Quote. It is a synthetic source. The subscription on composite Quote event is observed
-	 * when this source is subscribed to.
-	 */
-	"COMPOSITE_ASK",
-
-	/*
-	 * Bid side of a regional Quote. It is a synthetic source. The subscription on regional Quote event is observed
-	 * when this source is subscribed to.
-	 */
-	"REGIONAL_BID",
-
-	/*
-	 * Ask side of a composite Quote. It is a synthetic source. The subscription on regional Quote event is observed
-	 * when this source is subscribed to.
-	 */
-	"REGIONAL_ASK",
-
-	/**
-	 * Bid side of an aggregate order book (futures depth and NASDAQ Level II). It is a synthetic source. This source
-	 * cannot be directly published via dxFeed API, but otherwise it is fully operational.
-	 */
-	"AGGREGATE_BID",
-
-	/*
-	 * Ask side of an aggregate order book (futures depth and NASDAQ Level II). It is a synthetic source. This source
-	 * cannot be directly published via dxFeed API, but otherwise it is fully operational.
-	 */
-	"AGGREGATE_ASK",
-
-	"EMPTY",  // back compatibility with .NET API
-
-	/*
-	 * Bid and ask sides of a composite Quote. It is a synthetic source. The subscription on composite Quote event is
-	 * observed when this source is subscribed to.
-	 */
-	"COMPOSITE",
-
-	/*
-	 * Bid and ask sides of a regional Quote. It is a synthetic source. The subscription on regional Quote event is
-	 * observed when this source is subscribed to.
-	 */
-	"REGIONAL",
-
-	/*
-	 * Bid side of an aggregate order book (futures depth and NASDAQ Level II). It is a synthetic source. This source
-	 * cannot be directly published via dxFeed API, but otherwise it is fully operational.
-	 */
-	"AGGREGATE"
-};
-
-enum class SpecialOrderSource : int {
-	DEFAULT = 0,
-	COMPOSITE_BID = 1,
-	COMPOSITE_ASK = 2,
-	REGIONAL_BID = 3,
-	REGIONAL_ASK = 4,
-	AGGREGATE_BID = 5,
-	AGGREGATE_ASK = 6,
-	EMPTY = 7,
-	COMPOSITE = 8,
-	REGIONAL = 9,
-	AGGREGATE = 10,
-};
 
 struct SnapshotSubscriber {
 	using SnapshotHandler = std::function<void(const SnapshotChanges&, void*)>;
@@ -390,18 +283,20 @@ private:
 	inline static SubscriptionParams collectSubscriptionParams(const SnapshotKey& key) {
 		const auto& eventId = key.getEventId();
 		const auto& source = key.getSource().value_or(std::string{});
+		const auto& sourceWide = StringConverter::utf8ToWString(source);
 
 		dx_record_info_id_t recordInfoId = dx_rid_invalid;
 		dx_event_subscr_flag subscriptionFlags = dx_esf_default;
 		std::string resultSource{};
 
 		if (eventId == dx_eid_order) {
-			if (source == ALL_SPECIAL_ORDER_SOURCES[static_cast<int>(SpecialOrderSource::AGGREGATE)] ||
-				source == ALL_SPECIAL_ORDER_SOURCES[static_cast<int>(SpecialOrderSource::AGGREGATE_ASK)] ||
-				source == ALL_SPECIAL_ORDER_SOURCES[static_cast<int>(SpecialOrderSource::AGGREGATE_BID)]) {
+			if (sourceWide == dx_all_special_order_sources[static_cast<std::size_t>(dxf_sos_AGGREGATE)] ||
+				sourceWide == dx_all_special_order_sources[static_cast<std::size_t>(dxf_sos_AGGREGATE_ASK)] ||
+				sourceWide == dx_all_special_order_sources[static_cast<std::size_t>(dxf_sos_AGGREGATE_BID)]) {
 				recordInfoId = dx_rid_market_maker;
 				subscriptionFlags = static_cast<dx_event_subscr_flag>(subscriptionFlags | dx_esf_sr_market_maker_order);
-				resultSource = ALL_SPECIAL_ORDER_SOURCES[static_cast<int>(SpecialOrderSource::AGGREGATE)];
+				resultSource = StringConverter::wStringToUtf8(
+					dx_all_special_order_sources[static_cast<std::size_t>(dxf_sos_AGGREGATE)]);
 			} else {
 				recordInfoId = dx_rid_order;
 				resultSource = source;
