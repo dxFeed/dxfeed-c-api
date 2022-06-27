@@ -165,27 +165,27 @@ constexpr const char* ALL_ORDER_SOURCES[] = {
 };
 
 constexpr const char* ALL_SPECIAL_ORDER_SOURCES[] = {
-	"DEFAULT",	/// back compatibility with Java API
+	"DEFAULT",	// back compatibility with Java API
 
-	/**
+	/*
 	 * Bid side of a composite Quote. It is a synthetic source. The subscription on composite Quote event is observed
 	 * when this source is subscribed to.
 	 */
 	"COMPOSITE_BID",
 
-	/**
+	/*
 	 * Ask side of a composite Quote. It is a synthetic source. The subscription on composite Quote event is observed
 	 * when this source is subscribed to.
 	 */
 	"COMPOSITE_ASK",
 
-	/**
+	/*
 	 * Bid side of a regional Quote. It is a synthetic source. The subscription on regional Quote event is observed
 	 * when this source is subscribed to.
 	 */
 	"REGIONAL_BID",
 
-	/**
+	/*
 	 * Ask side of a composite Quote. It is a synthetic source. The subscription on regional Quote event is observed
 	 * when this source is subscribed to.
 	 */
@@ -197,7 +197,7 @@ constexpr const char* ALL_SPECIAL_ORDER_SOURCES[] = {
 	 */
 	"AGGREGATE_BID",
 
-	/**
+	/*
 	 * Ask side of an aggregate order book (futures depth and NASDAQ Level II). It is a synthetic source. This source
 	 * cannot be directly published via dxFeed API, but otherwise it is fully operational.
 	 */
@@ -205,23 +205,24 @@ constexpr const char* ALL_SPECIAL_ORDER_SOURCES[] = {
 
 	"EMPTY",  // back compatibility with .NET API
 
-	/**
+	/*
 	 * Bid and ask sides of a composite Quote. It is a synthetic source. The subscription on composite Quote event is
 	 * observed when this source is subscribed to.
 	 */
 	"COMPOSITE",
 
-	/**
+	/*
 	 * Bid and ask sides of a regional Quote. It is a synthetic source. The subscription on regional Quote event is
 	 * observed when this source is subscribed to.
 	 */
 	"REGIONAL",
 
-	/**
+	/*
 	 * Bid side of an aggregate order book (futures depth and NASDAQ Level II). It is a synthetic source. This source
 	 * cannot be directly published via dxFeed API, but otherwise it is fully operational.
 	 */
-	"AGGREGATE"};
+	"AGGREGATE"
+};
 
 enum class SpecialOrderSource : int {
 	DEFAULT = 0,
