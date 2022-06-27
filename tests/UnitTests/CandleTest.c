@@ -23,10 +23,14 @@
 #include <stdio.h>
 #include <string.h>
 
-#pragma warning(push)
-#pragma warning(disable : 5105)
-#include <Windows.h>
-#pragma warning(pop)
+#	if !defined(__MINGW32__)
+#		pragma warning(push)
+#		pragma warning(disable : 5105)
+#	endif
+#	include <Windows.h>
+#	if !defined(__MINGW32__)
+#		pragma warning(pop)
+#	endif
 
 #include "Candle.h"
 #include "CandleTest.h"

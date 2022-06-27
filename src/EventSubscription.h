@@ -67,7 +67,8 @@ extern "C" {
 
 /* returns dx_invalid_subscription on error */
 dxf_subscription_t dx_create_event_subscription(dxf_connection_t connection, unsigned event_types,
-												dx_event_subscr_flag subscr_flags, dxf_long_t time);
+												dx_event_subscr_flag subscr_flags, dxf_long_t time,
+												int add_all_sources);
 int dx_close_event_subscription(dxf_subscription_t subscr_id);
 int dx_add_symbols(dxf_subscription_t subscr_id, dxf_const_string_t* symbols, int symbol_count);
 // Adds symbols to the subscription and counts the number of unique added symbols that will be sent to the server for

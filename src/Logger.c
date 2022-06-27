@@ -18,10 +18,14 @@
  */
 
 #ifdef _WIN32
-#	pragma warning(push)
-#	pragma warning(disable : 5105)
+#	if !defined(__MINGW32__)
+#		pragma warning(push)
+#		pragma warning(disable : 5105)
+#	endif
 #	include <Windows.h>
-#	pragma warning(pop)
+#	if !defined(__MINGW32__)
+#		pragma warning(pop)
+#	endif
 #else
 #	include <pthread.h>
 #	include <time.h>

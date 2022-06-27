@@ -22,6 +22,7 @@
 extern "C" {
 #include <DXFeed.h>
 #include <EventData.h>
+#include "../EventSubscription.h"
 }
 
 #include <atomic>
@@ -39,7 +40,6 @@ extern "C" {
 #include <variant.hpp>
 #include <vector>
 
-#include "../EventSubscription.h"
 #include "../IdGenerator.hpp"
 #include "../Utils/Hash.hpp"
 #include "SnapshotChanges.hpp"
@@ -55,9 +55,9 @@ struct EventIdToType {
 };
 
 #define DX_SNAPSHOT_EVENT_ID_TO_TYPE_HELPER(eventId, eventType) \
-	template <>                                                \
-	struct EventIdToType<eventId> {                            \
-		using type = eventType;                                \
+	template <>                                                 \
+	struct EventIdToType<eventId> {                             \
+		using type = eventType;                                 \
 	}
 
 DX_SNAPSHOT_EVENT_ID_TO_TYPE_HELPER(dx_eid_trade, dxf_trade_t);
@@ -116,11 +116,11 @@ inline static dx_event_id_t bitmaskToEventId(unsigned bitmask) {
 #undef DX_DETAIL_BITMASK_TO_EVENT_ID_CASE
 }
 
-inline static constexpr bool isOnlyIndexedEvent(unsigned eventIdBitmask) {
+inline static bool isOnlyIndexedEvent(unsigned eventIdBitmask) {
 	return isOnlyIndexedEvent(bitmaskToEventId(eventIdBitmask));
 }
 
-inline static constexpr bool isTimeSeriesEvent(unsigned eventIdBitmask) {
+inline static bool isTimeSeriesEvent(unsigned eventIdBitmask) {
 	return isTimeSeriesEvent(bitmaskToEventId(eventIdBitmask));
 }
 
@@ -375,7 +375,9 @@ private:
 	SnapshotKey key_;
 	std::unordered_map<OnlyIndexedEventKey, EventType> events_;
 	std::unordered_map<OnlyIndexedEventKey, EventType> transaction_;
+	dxf_connection_t con_;
 	dxf_subscription_t sub_;
+	dxf_event_listener_v2_t listener_;
 	std::atomic_bool isValid_;
 
 	struct SubscriptionParams {
@@ -414,8 +416,8 @@ private:
 		return {recordInfoId, subscriptionFlags, resultSource};
 	}
 
-	static void eventsListener(int eventBitMask, dxf_const_string_t symbol, const dxf_event_data_t* data, int dataCount,
-							   const dxf_event_params_t* eventParams, void* userData) {
+	void handleEventsData(int eventBitMask, dxf_const_string_t symbol, const dxf_event_data_t* data, int dataCount,
+						  const dxf_event_params_t* eventParams) {
 		if (dataCount < 1) {
 			return;
 		}
@@ -426,25 +428,37 @@ private:
 			return;
 		}
 
-		auto snapshot = reinterpret_cast<OnlyIndexedEventsSnapshot*>(userData);
+		// TODO: Snapshot logic
 
-		//TODO: Snapshot logic
-
-		if (snapshot->hasSubscriptions()) {
+		if (hasSubscriptions()) {
 		}
 	}
 
 	OnlyIndexedEventsSnapshot(dxf_connection_t connection, SnapshotKey key)
-		: key_(std::move(key)), events_(), transaction_(), sub_{nullptr}, isValid_{false} {}
+		: key_(std::move(key)),
+		  events_(),
+		  transaction_(),
+		  con_{connection},
+		  sub_{nullptr},
+		  listener_{nullptr},
+		  isValid_{false} {}
 
 	~OnlyIndexedEventsSnapshot() override {
 		if (isValid_) {
+			if (listener_) {
+				dxf_detach_event_listener_v2(sub_, listener_);
+			}
+
 			dxf_close_subscription(sub_);
 		}
 	}
 
 public:
 	static std::shared_ptr<OnlyIndexedEventsSnapshot> create(dxf_connection_t connection, SnapshotKey key) {
+		if (connection == nullptr) {
+			return nullptr;
+		}
+
 		auto snapshot = new OnlyIndexedEventsSnapshot(connection, std::move(key));
 
 		auto subscriptionParams = collectSubscriptionParams(snapshot->key_);
@@ -454,20 +468,39 @@ public:
 		}
 
 		auto eventType = DX_EVENT_BIT_MASK(snapshot->key_.getEventId());
-		auto sub = dx_create_event_subscription(connection, eventType, subscriptionParams.subscriptionFlags, 0);
+		auto sub = dx_create_event_subscription(connection, eventType, subscriptionParams.subscriptionFlags, 0, 0);
 
-		if (subscriptionParams.recordInfoId == dx_rid_order || subscriptionParams.recordInfoId == dx_rid_market_maker) {
-			dx_clear_order_sources(sub);
-
-			if (!subscriptionParams.source.empty()) {
-				auto SourceWideString = StringConverter::utf8ToWString(subscriptionParams.source);
-				dx_add_order_source(sub, SourceWideString.c_str());
-			}
+		if (sub == dx_invalid_subscription) {
+			return nullptr;
 		}
 
-		dx_add_listener_v2(sub, &eventsListener, reinterpret_cast<void*>(snapshot));
+		if ((subscriptionParams.recordInfoId == dx_rid_order ||
+			 subscriptionParams.recordInfoId == dx_rid_market_maker) &&
+			!subscriptionParams.source.empty()) {
+			auto sourceWideString = StringConverter::utf8ToWString(subscriptionParams.source);
+
+			dx_add_order_source(sub, sourceWideString.c_str());
+		}
+
+		auto listener = [](int eventBitMask, dxf_const_string_t symbol, const dxf_event_data_t* data, int dataCount,
+						   const dxf_event_params_t* eventParams, void* userData) {
+			auto snapshot = reinterpret_cast<OnlyIndexedEventsSnapshot*>(userData);
+
+			snapshot->handleEventsData(eventBitMask, symbol, data, dataCount, eventParams);
+		};
+
+		dx_add_listener_v2(sub, listener, reinterpret_cast<void*>(snapshot));
+
+		auto symbolWideString = StringConverter::utf8ToWString(key.getSymbol());
+		auto addSymbolResult = dxf_add_symbol(sub, symbolWideString.c_str());
+
+		if (addSymbolResult == DXF_FAILURE) {
+			dxf_detach_event_listener_v2(sub, listener);
+			dxf_close_subscription(sub);
+		}
 
 		snapshot->sub_ = sub;
+		snapshot->listener_ = listener;
 		snapshot->isValid_ = true;
 
 		return snapshot->shared_from_this();

@@ -451,7 +451,7 @@ ERRORCODE dxf_create_subscription_impl(dxf_connection_t connection, int event_ty
 		return DXF_FAILURE;
 	}
 
-	if ((*subscription = dx_create_event_subscription(connection, event_types, subscr_flags, time)) ==
+	if ((*subscription = dx_create_event_subscription(connection, event_types, subscr_flags, time, 0)) ==
 		dx_invalid_subscription) {
 		return DXF_FAILURE;
 	}

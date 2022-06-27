@@ -432,7 +432,7 @@ static dx_plb_source_t *dx_plb_source_create(dxf_connection_t connection, dxf_co
 	source->snapshot_status = dx_status_full;
 
 	/* Create subscription */
-	if ((source->subscription = dx_create_event_subscription(connection, DXF_ET_ORDER, subscription_flags, 0)) ==
+	if ((source->subscription = dx_create_event_subscription(connection, DXF_ET_ORDER, subscription_flags, 0, 0)) ==
 		dx_invalid_subscription) {
 		dx_plb_source_free(source);
 		dx_set_error_code(dx_mec_insufficient_memory);
@@ -446,7 +446,6 @@ static dx_plb_source_t *dx_plb_source_create(dxf_connection_t connection, dxf_co
 	}
 
 	/* Set source */
-	dx_clear_order_sources(source->subscription);
 	if (!dx_add_order_source(source->subscription, source->source)) {
 		dx_plb_source_free(source);
 		return NULL;

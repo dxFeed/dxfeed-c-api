@@ -24,10 +24,14 @@
 #endif
 
 #ifdef _WIN32
-#	pragma warning(push)
-#	pragma warning(disable : 5105)
+#	if !defined(__MINGW32__)
+#		pragma warning(push)
+#		pragma warning(disable : 5105)
+#	endif
 #	include <Windows.h>
-#	pragma warning(pop)
+#	if !defined(__MINGW32__)
+#		pragma warning(pop)
+#	endif
 #else
 #	include <stdlib.h>
 #	include <string.h>
@@ -166,7 +170,7 @@ int dxs_mutex_unlock(dxs_mutex_t* mutex) {
 #define LOG_DATA_TRANSFER_TAG		"-p"
 #define TIMEOUT_TAG					"-o"
 #define LOG_HEARTBEAT_TAG			"-b"
-#define RECONNECT_TAG			    "-r"
+#define RECONNECT_TAG				"-r"
 
 // Prevents file names globbing (converting * to all files in the current dir)
 #ifdef __MINGW64_VERSION_MAJOR
@@ -619,8 +623,8 @@ int main(int argc, char* argv[]) {
 			"[" DUMP_PARAM_LONG_TAG " | " DUMP_PARAM_SHORT_TAG " <filename>] [" TOKEN_PARAM_SHORT_TAG
 			" <token>] "
 			"[" SUBSCRIPTION_DATA_PARAM_TAG " <subscr_data>] [" LOG_DATA_TRANSFER_TAG "] [" TIMEOUT_TAG
-			" <timeout>] [" LOG_HEARTBEAT_TAG
-			"] [" RECONNECT_TAG "]\n"
+			" <timeout>] [" LOG_HEARTBEAT_TAG "] [" RECONNECT_TAG
+			"]\n"
 			"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
 			"                     If you want to use file instead of server data just\n"
 			"                     write there path to file e.g. path\\to\\raw.bin\n"
@@ -730,7 +734,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	dxf_initialize_logger_v2("command-line-api.log", true, true, true, log_data_transfer_flag);
-	//dxf_load_config_from_string("network.heartbeatTimeout = 11\n");
+	// dxf_load_config_from_string("network.heartbeatTimeout = 11\n");
 
 	wprintf(L"Command line sample started.\n");
 	wprintf(L"Connecting to host %hs...\n", dxfeed_host);

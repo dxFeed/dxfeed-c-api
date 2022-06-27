@@ -18,10 +18,14 @@
  */
 
 #ifdef _WIN32
-#	pragma warning(push)
-#	pragma warning(disable : 5105)
+#	if !defined(__MINGW32__)
+#		pragma warning(push)
+#		pragma warning(disable : 5105)
+#	endif
 #	include <Windows.h>
-#	pragma warning(pop)
+#	if !defined(__MINGW32__)
+#		pragma warning(pop)
+#	endif
 #else
 #	include <unistd.h>
 #	include <string.h>
@@ -37,7 +41,7 @@
 #include "DXErrorCodes.h"
 #include "DXFeed.h"
 
-#define true 1
+#define true  1
 #define false 0
 
 // plus the name of the executable

@@ -20,26 +20,30 @@
 #include <stdio.h>
 #include <time.h>
 
-#pragma warning(push)
-#pragma warning(disable : 5105)
+#if !defined(__MINGW32__)
+#	pragma warning(push)
+#	pragma warning(disable : 5105)
+#endif
 #include <Windows.h>
-#pragma warning(pop)
+#if !defined(__MINGW32__)
+#	pragma warning(pop)
+#endif
 
-#include "EventDynamicSubscriptionTest.h"
 #include "DXAlgorithms.h"
-#include "DXFeed.h"
 #include "DXErrorCodes.h"
+#include "DXFeed.h"
+#include "EventDynamicSubscriptionTest.h"
 #include "Logger.h"
 #include "TestHelper.h"
 
-//Timeout in milliseconds for waiting some events is 2 minutes.
-#define EVENTS_TIMEOUT 120000
+// Timeout in milliseconds for waiting some events is 2 minutes.
+#define EVENTS_TIMEOUT		   120000
 #define EVENTS_LOOP_SLEEP_TIME 100
 
 const char dxfeed_host[] = "mddqa.in.devexperts.com:7400";
 
 #define SYMBOLS_COUNT 4
-static dxf_const_string_t g_symbols[] = { { L"IBM" }, { L"AAPL" }, { L"XBT/USD" }, { L"C" } };
+static dxf_const_string_t g_symbols[] = {{L"IBM"}, {L"AAPL"}, {L"XBT/USD"}, {L"C"}};
 
 dxf_listener_thread_data_t g_listener_thread_data;
 
@@ -88,17 +92,17 @@ void drop_trade_counter() {
 	LeaveCriticalSection(&g_trade_counter_guard);
 }
 
-void print_timestamp(dxf_long_t timestamp){
+void print_timestamp(dxf_long_t timestamp) {
 	char timefmt[80];
 
-	struct tm * timeinfo;
+	struct tm* timeinfo;
 	time_t tmpint = (int)(timestamp / 1000);
 	timeinfo = localtime(&tmpint);
 	strftime(timefmt, 80, "%Y%m%d-%H%M%S", timeinfo);
 	printf("%s", timefmt);
 }
 
-static dxf_uint_t buf_hash(const unsigned char *buf, int size) {
+static dxf_uint_t buf_hash(const unsigned char* buf, int size) {
 	dxf_uint_t hash = 0;
 	dxf_int_t c;
 	int i;
@@ -117,7 +121,7 @@ typedef struct {
 	dxf_event_params_t* params;
 	dxf_uint_t obj_hash;
 	int data_count;
-	void *user_data;
+	void* user_data;
 
 	int is_received;
 	CRITICAL_SECTION guard;
@@ -160,10 +164,9 @@ int is_received_event_listener_data(event_listener_data_t* listener_data) {
 	return is_received;
 }
 
-void set_event_listener_data(int event_type, dxf_const_string_t symbol_name,
-							const dxf_event_params_t* params, const dxf_event_data_t* data,
-							int data_count, void* user_data, int event_size,
-							event_listener_data_t* listener_data) {
+void set_event_listener_data(int event_type, dxf_const_string_t symbol_name, const dxf_event_params_t* params,
+							 const dxf_event_data_t* data, int data_count, void* user_data, int event_size,
+							 event_listener_data_t* listener_data) {
 	EnterCriticalSection(&(listener_data->guard));
 	reset_event_listener_data(listener_data);
 	listener_data->event_type = event_type;
@@ -180,33 +183,32 @@ void set_event_listener_data(int event_type, dxf_const_string_t symbol_name,
 	LeaveCriticalSection(&(listener_data->guard));
 }
 
-void trade_listener(int event_type, dxf_const_string_t symbol_name,
-					const dxf_event_data_t* data, int data_count, void* user_data) {
+void trade_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
+					void* user_data) {
 	inc_trade_counter();
 }
 
-void order_listener(int event_type, dxf_const_string_t symbol_name,
-					const dxf_event_data_t* data, int data_count, void* user_data) {
+void order_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
+					void* user_data) {
 	inc_order_counter();
 }
 
-void order_event_copy_listener(int event_type, dxf_const_string_t symbol_name,
-							const dxf_event_data_t* data, int data_count, void* user_data) {
-	if (order_data.is_received)
-		return;
-	set_event_listener_data(event_type, symbol_name, NULL, data, data_count, user_data, sizeof(dxf_order_t), &order_data);
+void order_event_copy_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data,
+							   int data_count, void* user_data) {
+	if (order_data.is_received) return;
+	set_event_listener_data(event_type, symbol_name, NULL, data, data_count, user_data, sizeof(dxf_order_t),
+							&order_data);
 }
 
-void order_event_copy_listener_v2(int event_type, dxf_const_string_t symbol_name,
-								const dxf_event_data_t* data, int data_count,
-								const dxf_event_params_t* params, void* user_data) {
-	if (order_data_v2.is_received)
-		return;
-	set_event_listener_data(event_type, symbol_name, params, data, data_count, user_data, sizeof(dxf_order_t), &order_data_v2);
+void order_event_copy_listener_v2(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data,
+								  int data_count, const dxf_event_params_t* params, void* user_data) {
+	if (order_data_v2.is_received) return;
+	set_event_listener_data(event_type, symbol_name, params, data, data_count, user_data, sizeof(dxf_order_t),
+							&order_data_v2);
 }
 
-int subscribe_to_event(dxf_connection_t connection, dxf_subscription_t* subscription,
-						int event_type, dxf_event_listener_t event_listener, void* user_data) {
+int subscribe_to_event(dxf_connection_t connection, dxf_subscription_t* subscription, int event_type,
+					   dxf_event_listener_t event_listener, void* user_data) {
 	if (!dxf_create_subscription(connection, event_type, subscription)) {
 		process_last_error();
 
@@ -229,8 +231,7 @@ int subscribe_to_event(dxf_connection_t connection, dxf_subscription_t* subscrip
 }
 
 void on_thread_terminate(dxf_connection_t connection, void* user_data) {
-	if (g_listener_thread_data == NULL)
-		return;
+	if (g_listener_thread_data == NULL) return;
 	on_reader_thread_terminate(g_listener_thread_data, connection, user_data);
 }
 
@@ -249,13 +250,13 @@ int event_dynamic_subscription_test(void) {
 		return false;
 	}
 
-	//Subscribe on trade events
+	// Subscribe on trade events
 	if (!subscribe_to_event(connection, &trade_subscription, DXF_ET_TRADE, trade_listener, NULL)) {
 		dxf_close_connection(connection);
 		return false;
 	}
 
-	//Wait trade events
+	// Wait trade events
 	timestamp = dx_millisecond_timestamp();
 	while (get_trade_counter() == 0) {
 		if (is_thread_terminate(g_listener_thread_data)) {
@@ -275,7 +276,7 @@ int event_dynamic_subscription_test(void) {
 		Sleep(EVENTS_LOOP_SLEEP_TIME);
 	}
 
-	//Subscribe on order events
+	// Subscribe on order events
 	if (!subscribe_to_event(connection, &order_subscription, DXF_ET_ORDER, order_listener, NULL)) {
 		dxf_close_subscription(trade_subscription);
 		dxf_close_connection(connection);
@@ -286,7 +287,7 @@ int event_dynamic_subscription_test(void) {
 	drop_order_counter();
 	drop_trade_counter();
 
-	//Check trade and order events
+	// Check trade and order events
 	timestamp = dx_millisecond_timestamp();
 	while (get_trade_counter() == 0 || get_order_counter() == 0) {
 		if (is_thread_terminate(g_listener_thread_data)) {
@@ -308,12 +309,12 @@ int event_dynamic_subscription_test(void) {
 		Sleep(EVENTS_LOOP_SLEEP_TIME);
 	}
 
-	//Unsubscribe trade events
+	// Unsubscribe trade events
 	dxf_detach_event_listener(trade_subscription, trade_listener);
 	drop_order_counter();
 	drop_trade_counter();
 
-	//Check order events
+	// Check order events
 	while (loop_counter--) {
 		if (is_thread_terminate(g_listener_thread_data)) {
 			dxf_close_subscription(trade_subscription);
@@ -365,7 +366,7 @@ int listener_v2_test(void) {
 
 	drop_order_counter();
 
-	//Subscribe on order events
+	// Subscribe on order events
 	if (!subscribe_to_event(connection, &order_subscription, DXF_ET_ORDER, order_event_copy_listener, &user_data)) {
 		dxf_close_connection(connection);
 		PRINT_TEST_FAILED;
@@ -379,7 +380,7 @@ int listener_v2_test(void) {
 		return false;
 	};
 
-	//Wait order events
+	// Wait order events
 	timestamp = dx_millisecond_timestamp();
 	while (!is_received_event_listener_data(&order_data) || !is_received_event_listener_data(&order_data_v2)) {
 		if (is_thread_terminate(g_listener_thread_data)) {
@@ -403,9 +404,7 @@ int listener_v2_test(void) {
 		!dx_is_equal_dxf_const_string_t(order_data.symbol, order_data_v2.symbol) ||
 		!dx_is_equal_dxf_uint_t(order_data.obj_hash, order_data_v2.obj_hash) ||
 		!dx_is_equal_int(order_data.data_count, order_data_v2.data_count) ||
-		!dx_is_equal_ptr(order_data.user_data, order_data_v2.user_data) ||
-		!dx_is_not_null(order_data_v2.params)) {
-
+		!dx_is_equal_ptr(order_data.user_data, order_data_v2.user_data) || !dx_is_not_null(order_data_v2.params)) {
 		res = false;
 	}
 
@@ -435,8 +434,7 @@ int event_dynamic_subscription_all_test(void) {
 	init_event_listener_data(&order_data);
 	init_event_listener_data(&order_data_v2);
 
-	if (!event_dynamic_subscription_test() ||
-		!listener_v2_test()) {
+	if (!event_dynamic_subscription_test() || !listener_v2_test()) {
 		res = false;
 	}
 

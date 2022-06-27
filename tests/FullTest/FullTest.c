@@ -52,10 +52,14 @@ typedef struct {
 	pthread_mutexattr_t attr;
 } dxs_mutex_t;
 #else /* !defined(_WIN32) || defined(USE_PTHREADS) */
-#	pragma warning(push)
-#	pragma warning(disable : 5105)
+#	if !defined(__MINGW32__)
+#		pragma warning(push)
+#		pragma warning(disable : 5105)
+#	endif
 #	include <Windows.h>
-#	pragma warning(pop)
+#	if !defined(__MINGW32__)
+#		pragma warning(pop)
+#	endif
 #	define USE_WIN32_THREADS
 typedef HANDLE dxs_thread_t;
 typedef DWORD dxs_key_t;

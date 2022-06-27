@@ -18,10 +18,14 @@
  */
 
 #ifdef _WIN32
-#	pragma warning(push)
-#	pragma warning(disable : 5105)
+#	if !defined(__MINGW32__)
+#		pragma warning(push)
+#		pragma warning(disable : 5105)
+#	endif
 #	include <Windows.h>
-#	pragma warning(pop)
+#	if !defined(__MINGW32__)
+#		pragma warning(pop)
+#	endif
 #else
 
 #	include <unistd.h>
@@ -65,7 +69,7 @@ typedef LPCRITICAL_SECTION dxs_mutex_t;
 #define LS2(s) L##s
 
 #ifndef true
-#	define true 1
+#	define true  1
 #	define false 0
 #endif
 

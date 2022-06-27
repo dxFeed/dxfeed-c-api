@@ -62,27 +62,27 @@ const dxf_const_string_t dx_all_order_sources[] = {
 	L"DEA",	  /// Direct-Edge EDGA Exchange.
 	L"DEX",	  /// Direct-Edge EDGX Exchange.
 	L"BYX",	  /// Bats BYX Exchange.
-	L"BZX",  /// Bats BZX Exchange.
-	L"BATE", /// Bats Europe BXE Exchange.
-	L"CHIX", /// Bats Europe CXE Exchange.
-	L"CEUX", /// Bats Europe DXE Exchange.
-	L"BXTR", /// Bats Europe TRF.
-	L"IST",  /// Borsa Istanbul Exchange.
-	L"BI20", /// Borsa Istanbul Exchange. Record for particular top 20 order book.
-	L"ABE",  /// ABE (abe.io) exchange.
-	L"FAIR", /// FAIR (FairX) exchange.
-	L"GLBX", /// CME Globex.
-	L"glbx", /// CME Globex. Record for price level book.
-	L"ERIS", /// Eris Exchange group of companies.
-	L"XEUR", /// Eurex Exchange.
-	L"xeur", /// Eurex Exchange. Record for price level book.
-	L"CFE",  /// CBOE Futures Exchange.
-	L"C2OX", /// CBOE Options C2 Exchange.
-	L"SMFE", /// Small Exchange.
-	L"smfe", /// Small Exchange. Record for price level book.
-	L"iex",  /// Investors exchange. Record for price level book.
-	L"MEMX", /// Members Exchange.
-	L"memx", /// Members Exchange. Record for price level book.
+	L"BZX",	  /// Bats BZX Exchange.
+	L"BATE",  /// Bats Europe BXE Exchange.
+	L"CHIX",  /// Bats Europe CXE Exchange.
+	L"CEUX",  /// Bats Europe DXE Exchange.
+	L"BXTR",  /// Bats Europe TRF.
+	L"IST",	  /// Borsa Istanbul Exchange.
+	L"BI20",  /// Borsa Istanbul Exchange. Record for particular top 20 order book.
+	L"ABE",	  /// ABE (abe.io) exchange.
+	L"FAIR",  /// FAIR (FairX) exchange.
+	L"GLBX",  /// CME Globex.
+	L"glbx",  /// CME Globex. Record for price level book.
+	L"ERIS",  /// Eris Exchange group of companies.
+	L"XEUR",  /// Eurex Exchange.
+	L"xeur",  /// Eurex Exchange. Record for price level book.
+	L"CFE",	  /// CBOE Futures Exchange.
+	L"C2OX",  /// CBOE Options C2 Exchange.
+	L"SMFE",  /// Small Exchange.
+	L"smfe",  /// Small Exchange. Record for price level book.
+	L"iex",	  /// Investors exchange. Record for price level book.
+	L"MEMX",  /// Members Exchange.
+	L"memx",  /// Members Exchange. Record for price level book.
 	nullptr};
 
 const dxf_const_string_t dx_all_special_order_sources[] = {
@@ -314,7 +314,8 @@ void SubscriptionData::clearRawOrderSources() {
 }
 
 const std::unordered_set<std::wstring> EventSubscriptionConnectionContext::specialOrderSources{
-	std::begin(dx_all_special_order_sources), std::begin(dx_all_special_order_sources) + dx_all_special_order_sources_count};
+	std::begin(dx_all_special_order_sources),
+	std::begin(dx_all_special_order_sources) + dx_all_special_order_sources_count};
 
 EventSubscriptionConnectionContext::EventSubscriptionConnectionContext(dxf_connection_t connectionHandle)
 	: connectionHandle{connectionHandle}, mutex{}, symbols{}, subscriptions{} {}
@@ -460,7 +461,8 @@ dxf_ulong_t dx_symbol_name_hasher(dxf_const_string_t symbol_name) {
 const dxf_subscription_t dx_invalid_subscription = (dxf_subscription_t) nullptr;
 
 dxf_subscription_t dx_create_event_subscription(dxf_connection_t connection, unsigned event_types,
-												dx_event_subscr_flag subscr_flags, dxf_long_t time) {
+												dx_event_subscr_flag subscr_flags, dxf_long_t time,
+												int add_all_sources) {
 	if (!dx_validate_connection_handle(connection, false)) {
 		return dx_invalid_subscription;
 	}
@@ -496,7 +498,7 @@ dxf_subscription_t dx_create_event_subscription(dxf_connection_t connection, uns
 	subscr_data->time = time;
 
 	res = true;
-	if (event_types & DXF_ET_ORDER) {
+	if ((event_types & DXF_ET_ORDER) == DXF_ET_ORDER && add_all_sources != 0) {
 		for (int i = 0; dx_all_order_sources[i]; i++) {
 			res = res && dx_add_order_source(subscr_data, dx_all_order_sources[i]);
 		}
@@ -844,15 +846,18 @@ void pass_event_data_to_listeners(dx::EventSubscriptionConnectionContext* ctx, d
 			call = subscription_data->orderSources.find(sourceStr) != subscription_data->orderSources.end();
 
 			if (!call) {
-				if (sourceStr == dx_all_special_order_sources[dxf_sos_AGGREGATE_ASK] || sourceStr == dx_all_special_order_sources[dxf_sos_AGGREGATE_BID]) {
+				if (sourceStr == dx_all_special_order_sources[dxf_sos_AGGREGATE_ASK] ||
+					sourceStr == dx_all_special_order_sources[dxf_sos_AGGREGATE_BID]) {
 					call = subscription_data->orderSources.find(dx_all_special_order_sources[dxf_sos_AGGREGATE]) !=
-							subscription_data->orderSources.end();
-				} else if (sourceStr == dx_all_special_order_sources[dxf_sos_COMPOSITE_ASK] || sourceStr == dx_all_special_order_sources[dxf_sos_COMPOSITE_BID]) {
+						subscription_data->orderSources.end();
+				} else if (sourceStr == dx_all_special_order_sources[dxf_sos_COMPOSITE_ASK] ||
+						   sourceStr == dx_all_special_order_sources[dxf_sos_COMPOSITE_BID]) {
 					call = subscription_data->orderSources.find(dx_all_special_order_sources[dxf_sos_COMPOSITE]) !=
-							subscription_data->orderSources.end();
-				} else if (sourceStr == dx_all_special_order_sources[dxf_sos_REGIONAL_ASK] || sourceStr == dx_all_special_order_sources[dxf_sos_REGIONAL_BID]) {
+						subscription_data->orderSources.end();
+				} else if (sourceStr == dx_all_special_order_sources[dxf_sos_REGIONAL_ASK] ||
+						   sourceStr == dx_all_special_order_sources[dxf_sos_REGIONAL_BID]) {
 					call = subscription_data->orderSources.find(dx_all_special_order_sources[dxf_sos_REGIONAL]) !=
-							subscription_data->orderSources.end();
+						subscription_data->orderSources.end();
 				}
 			}
 		} else {

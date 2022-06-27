@@ -374,7 +374,7 @@ dxf_regional_book_t dx_create_regional_book(dxf_connection_t connection,
 	}
 
 	/* Create subscription which we need, for needed regions */
-	if ((book->subscription = dx_create_event_subscription(connection, DXF_ET_QUOTE, dx_esf_quotes_regional, 0)) == dx_invalid_subscription) {
+	if ((book->subscription = dx_create_event_subscription(connection, DXF_ET_QUOTE, dx_esf_quotes_regional, 0, 0)) == dx_invalid_subscription) {
 		dx_rb_book_free(book);
 		dx_set_error_code(dx_mec_insufficient_memory);
 		return NULL;

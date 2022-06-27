@@ -37,19 +37,23 @@ typedef struct {
 	pthread_mutexattr_t attr;
 } dx_mutex_t;
 typedef void* (*dx_start_routine_t)(void*);
-#define DX_THREAD_RETVAL_NULL NULL
+#	define DX_THREAD_RETVAL_NULL NULL
 #else /* !defined(_WIN32) || defined(USE_PTHREADS) */
-#	pragma warning(push)
-#	pragma warning(disable : 5105)
+#	if !defined(__MINGW32__)
+#		pragma warning(push)
+#		pragma warning(disable : 5105)
+#	endif
 #	include <Windows.h>
-#	pragma warning(pop)
+#	if !defined(__MINGW32__)
+#		pragma warning(pop)
+#	endif
 #	define USE_WIN32_THREADS
 typedef HANDLE dx_thread_t;
 typedef DWORD dx_key_t;
 typedef LPCRITICAL_SECTION dx_mutex_t;
-//typedef void pthread_attr_t;
+// typedef void pthread_attr_t;
 typedef unsigned (*dx_start_routine_t)(void*);
-#define DX_THREAD_RETVAL_NULL 0
+#	define DX_THREAD_RETVAL_NULL 0
 #endif /* !defined(_WIN32) || defined(USE_PTHREADS) */
 
 #include "PrimitiveTypes.h"
@@ -58,17 +62,17 @@ typedef unsigned (*dx_start_routine_t)(void*);
  *	Callbacks management
  */
 
-void dx_register_thread_constructor(void (*constructor)(void*), void *arg);
-void dx_register_thread_destructor(void (*destructor)(void*), void *arg);
-void dx_register_process_destructor(void (*destructor)(void*), void *arg);
+void dx_register_thread_constructor(void (*constructor)(void*), void* arg);
+void dx_register_thread_destructor(void (*destructor)(void*), void* arg);
+void dx_register_process_destructor(void (*destructor)(void*), void* arg);
 
 /*
  *	Auxiliary functions
  */
 
-void dx_sleep (int milliseconds);
-void dx_mark_thread_master (void);
-int dx_is_thread_master (void);
+void dx_sleep(int milliseconds);
+void dx_mark_thread_master(void);
+int dx_is_thread_master(void);
 
 /*
  *  below are the wrappers for the used POSIX thread functions that incorporate
@@ -79,24 +83,22 @@ int dx_is_thread_master (void);
  */
 
 #if !defined(_WIN32)
-int dx_thread_create (dx_thread_t* thread_id, const pthread_attr_t* attr,
-					dx_start_routine_t start_routine, void *arg);
+int dx_thread_create(dx_thread_t* thread_id, const pthread_attr_t* attr, dx_start_routine_t start_routine, void* arg);
 #else
-int dx_thread_create (dx_thread_t* thread_id, const void* attr,
-					   dx_start_routine_t start_routine, void *arg);
+int dx_thread_create(dx_thread_t* thread_id, const void* attr, dx_start_routine_t start_routine, void* arg);
 #endif
-int dx_wait_for_thread (dx_thread_t thread_id, void **value_ptr);
-int dx_close_thread_handle (dx_thread_t thread_id);
-int dx_thread_data_key_create (dx_key_t* key, void (*destructor)(void*));
-int dx_thread_data_key_destroy (dx_key_t key);
-int dx_set_thread_data (dx_key_t key, const void* data);
-void* dx_get_thread_data (dx_key_t key);
-dx_thread_t dx_get_thread_id ();
-int dx_compare_threads (dx_thread_t t1, dx_thread_t t2);
-int dx_mutex_create (dx_mutex_t* mutex);
-int dx_mutex_destroy (dx_mutex_t* mutex);
-int dx_mutex_lock (dx_mutex_t* mutex);
-int dx_mutex_unlock (dx_mutex_t* mutex);
+int dx_wait_for_thread(dx_thread_t thread_id, void** value_ptr);
+int dx_close_thread_handle(dx_thread_t thread_id);
+int dx_thread_data_key_create(dx_key_t* key, void (*destructor)(void*));
+int dx_thread_data_key_destroy(dx_key_t key);
+int dx_set_thread_data(dx_key_t key, const void* data);
+void* dx_get_thread_data(dx_key_t key);
+dx_thread_t dx_get_thread_id();
+int dx_compare_threads(dx_thread_t t1, dx_thread_t t2);
+int dx_mutex_create(dx_mutex_t* mutex);
+int dx_mutex_destroy(dx_mutex_t* mutex);
+int dx_mutex_lock(dx_mutex_t* mutex);
+int dx_mutex_unlock(dx_mutex_t* mutex);
 
 /*
  *	The thread function wrappers that do not invoke internal error
@@ -105,6 +107,6 @@ int dx_mutex_unlock (dx_mutex_t* mutex);
  *  cannot be trusted, e.g. within the error subsystem initialization routines.
  */
 
-int dx_set_thread_data_no_ehm (dx_key_t key, const void* data);
+int dx_set_thread_data_no_ehm(dx_key_t key, const void* data);
 
 #endif /* THREADS_H_INCLUDED */

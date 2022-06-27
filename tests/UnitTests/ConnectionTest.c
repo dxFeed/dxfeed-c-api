@@ -17,14 +17,18 @@
  *
  */
 
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 
 #ifdef _WIN32
-#	pragma warning(push)
-#	pragma warning(disable : 5105)
+#	if !defined(__MINGW32__)
+#		pragma warning(push)
+#		pragma warning(disable : 5105)
+#	endif
 #	include <Windows.h>
-#	pragma warning(pop)
+#	if !defined(__MINGW32__)
+#		pragma warning(pop)
+#	endif
 #else
 #	include <unistd.h>
 #	include <string.h>
@@ -33,23 +37,23 @@
 #	define stricmp strcasecmp
 #endif
 
+#include "ClientMessageProcessor.h"
 #include "ConnectionContextData.h"
 #include "ConnectionTest.h"
 #include "DXAlgorithms.h"
 #include "DXFeed.h"
+#include "DXMemory.h"
+#include "DXThreads.h"
 #include "DXTypes.h"
 #include "EventSubscription.h"
 #include "SymbolCodec.h"
 #include "TestHelper.h"
-#include "DXThreads.h"
-#include "DXMemory.h"
-#include "ClientMessageProcessor.h"
 
 #define MULTIPLE_CONNECTION_THREAD_COUNT 10
 
-static dxf_const_string_t g_symbol_list[] = { L"SYMA", L"SYMB", L"SYMC" };
+static dxf_const_string_t g_symbol_list[] = {L"SYMA", L"SYMB", L"SYMC"};
 static int g_symbol_size = sizeof(g_symbol_list) / sizeof(g_symbol_list[0]);
-static int g_event_case_list[] = { DXF_ET_TRADE, DXF_ET_QUOTE, DXF_ET_SUMMARY, DXF_ET_PROFILE };
+static int g_event_case_list[] = {DXF_ET_TRADE, DXF_ET_QUOTE, DXF_ET_SUMMARY, DXF_ET_PROFILE};
 static int g_event_case_size = sizeof(g_event_case_list) / sizeof(g_event_case_list[0]);
 
 typedef struct {
@@ -68,7 +72,8 @@ unsigned multiple_connection_routine(void* arg) {
 	subscription = dx_create_event_subscription(connection, data->event_types, 0, 0);
 	dx_add_symbols(subscription, g_symbol_list, g_symbol_size);
 	dx_send_record_description(connection, true);
-	dx_subscribe_symbols_to_events(connection, dx_get_order_sources(subscription), g_symbol_list, g_symbol_size, NULL, 0, data->event_types, false, true, 0, 0);
+	dx_subscribe_symbols_to_events(connection, dx_get_order_sources(subscription), g_symbol_list, g_symbol_size, NULL,
+								   0, data->event_types, false, true, 0, 0);
 #ifdef _WIN32
 	Sleep(2000);
 #else
@@ -87,7 +92,7 @@ int multiple_connection_test(void) {
 	dx_thread_t thread_list[MULTIPLE_CONNECTION_THREAD_COUNT];
 	size_t thread_count = MULTIPLE_CONNECTION_THREAD_COUNT;
 	multiple_connection_data_t* connections = dx_calloc(thread_count, sizeof(multiple_connection_data_t));
-	dxf_const_string_t symbol_set[] = { L"SYMA", L"SYMB", L"SYMC" };
+	dxf_const_string_t symbol_set[] = {L"SYMA", L"SYMB", L"SYMC"};
 	for (i = 0; i < thread_count; i++) {
 		multiple_connection_data_t* connection_data = connections + i;
 		connection_data->event_types = g_event_case_list[dx_random_integer(g_event_case_size - 1)];
@@ -117,16 +122,21 @@ int invalid_connection_address_test(void) {
 	const char* invalid_address = "demo.dxfeed.com::7300";
 	dxf_connection_t connection;
 
-	//invalid connection handler
-	DX_CHECK(dx_is_equal_ERRORCODE(DXF_FAILURE, dxf_create_connection("demo.dxfeed.com:7300", NULL, NULL, NULL, NULL, NULL, NULL)));
-	//invalid address
-	DX_CHECK(dx_is_equal_ERRORCODE(DXF_FAILURE, dxf_create_connection(invalid_address, NULL, NULL, NULL, NULL, NULL, &connection)));
+	// invalid connection handler
+	DX_CHECK(dx_is_equal_ERRORCODE(DXF_FAILURE,
+								   dxf_create_connection("demo.dxfeed.com:7300", NULL, NULL, NULL, NULL, NULL, NULL)));
+	// invalid address
+	DX_CHECK(dx_is_equal_ERRORCODE(DXF_FAILURE,
+								   dxf_create_connection(invalid_address, NULL, NULL, NULL, NULL, NULL, &connection)));
 	DX_CHECK(dx_is_equal_ptr(NULL, connection));
-	DX_CHECK(dx_is_equal_ERRORCODE(DXF_FAILURE, dxf_create_connection("no-port", NULL, NULL, NULL, NULL, NULL, &connection)));
+	DX_CHECK(dx_is_equal_ERRORCODE(DXF_FAILURE,
+								   dxf_create_connection("no-port", NULL, NULL, NULL, NULL, NULL, &connection)));
 	DX_CHECK(dx_is_equal_ptr(NULL, connection));
-	DX_CHECK(dx_is_equal_ERRORCODE(DXF_FAILURE, dxf_create_connection(":123", NULL, NULL, NULL, NULL, NULL, &connection)));
+	DX_CHECK(
+		dx_is_equal_ERRORCODE(DXF_FAILURE, dxf_create_connection(":123", NULL, NULL, NULL, NULL, NULL, &connection)));
 	DX_CHECK(dx_is_equal_ptr(NULL, connection));
-	DX_CHECK(dx_is_equal_ERRORCODE(DXF_FAILURE, dxf_create_connection("a:123", NULL, NULL, NULL, NULL, NULL, &connection)));
+	DX_CHECK(
+		dx_is_equal_ERRORCODE(DXF_FAILURE, dxf_create_connection("a:123", NULL, NULL, NULL, NULL, NULL, &connection)));
 	DX_CHECK(dx_is_equal_ptr(NULL, connection));
 
 	return true;
@@ -135,9 +145,7 @@ int invalid_connection_address_test(void) {
 int connection_all_test(void) {
 	int res = true;
 
-	if (!multiple_connection_test() ||
-		!invalid_connection_address_test()) {
-
+	if (!multiple_connection_test() || !invalid_connection_address_test()) {
 		res = false;
 	}
 	return res;
