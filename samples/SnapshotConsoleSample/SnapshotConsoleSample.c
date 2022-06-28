@@ -273,8 +273,8 @@ dxf_string_t ansi_to_unicode(const char *ansi_str) {
 /* -------------------------------------------------------------------------- */
 
 void print_order_snapshot(dxf_snapshot_data_ptr_t snapshot_data, dxf_int_t records_print_limit) {
-	int i = 0;
-	int records_count = snapshot_data->records_count;
+	size_t i = 0;
+	size_t records_count = snapshot_data->records_count;
 	dxf_order_t *order_records = (dxf_order_t *)snapshot_data->records;
 	for (i = 0; i < records_count; ++i) {
 		dxf_order_t order = order_records[i];
@@ -294,8 +294,8 @@ void print_order_snapshot(dxf_snapshot_data_ptr_t snapshot_data, dxf_int_t recor
 }
 
 void print_candle_snapshot(dxf_snapshot_data_ptr_t snapshot_data, dxf_int_t records_print_limit) {
-	int i = 0;
-	int records_count = snapshot_data->records_count;
+	size_t i = 0;
+	size_t records_count = snapshot_data->records_count;
 	dxf_candle_t *candle_records = (dxf_candle_t *)snapshot_data->records;
 	wprintf(L"Snapshot %ls{symbol=%ls, records_count=%zu}\n", dx_event_type_to_string(snapshot_data->event_type),
 			snapshot_data->symbol, records_count);
@@ -318,8 +318,8 @@ void print_candle_snapshot(dxf_snapshot_data_ptr_t snapshot_data, dxf_int_t reco
 }
 
 void print_spread_order_snapshot(dxf_snapshot_data_ptr_t snapshot_data, dxf_int_t records_print_limit) {
-	int i = 0;
-	int records_count = snapshot_data->records_count;
+	size_t i = 0;
+	size_t records_count = snapshot_data->records_count;
 	dxf_order_t *order_records = (dxf_order_t *)snapshot_data->records;
 	for (i = 0; i < records_count; ++i) {
 		dxf_order_t order = order_records[i];
@@ -340,8 +340,8 @@ void print_spread_order_snapshot(dxf_snapshot_data_ptr_t snapshot_data, dxf_int_
 }
 
 void print_time_and_sale_snapshot(dxf_snapshot_data_ptr_t snapshot_data, dxf_int_t records_print_limit) {
-	int i = 0;
-	int records_count = snapshot_data->records_count;
+	size_t i = 0;
+	size_t records_count = snapshot_data->records_count;
 	dxf_time_and_sale_t *time_and_sale_records = (dxf_time_and_sale_t *)snapshot_data->records;
 	wprintf(L"Snapshot %ls{symbol=%ls, records_count=%zu}\n", dx_event_type_to_string(snapshot_data->event_type),
 			snapshot_data->symbol, records_count);
@@ -365,8 +365,8 @@ void print_time_and_sale_snapshot(dxf_snapshot_data_ptr_t snapshot_data, dxf_int
 }
 
 void print_greeks_snapshot(dxf_snapshot_data_ptr_t snapshot_data, dxf_int_t records_print_limit) {
-	int i = 0;
-	int records_count = snapshot_data->records_count;
+	size_t i = 0;
+	size_t records_count = snapshot_data->records_count;
 	dxf_greeks_t *greeks_records = (dxf_greeks_t *)snapshot_data->records;
 	for (i = 0; i < snapshot_data->records_count; ++i) {
 		dxf_greeks_t grks = greeks_records[i];
@@ -386,8 +386,8 @@ void print_greeks_snapshot(dxf_snapshot_data_ptr_t snapshot_data, dxf_int_t reco
 }
 
 void print_series_snapshot(dxf_snapshot_data_ptr_t snapshot_data, dxf_int_t records_print_limit) {
-	int i = 0;
-	int records_count = snapshot_data->records_count;
+	size_t i = 0;
+	size_t records_count = snapshot_data->records_count;
 	dxf_series_t *series_records = (dxf_series_t *)snapshot_data->records;
 	for (i = 0; i < snapshot_data->records_count; ++i) {
 		dxf_series_t srs = series_records[i];
