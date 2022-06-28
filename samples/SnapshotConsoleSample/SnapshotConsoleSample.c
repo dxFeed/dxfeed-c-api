@@ -436,7 +436,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void *user_data) {
 			if (records[0].time >= to_time) {
 				for (i = 0; i < snapshot_data->records_count; ++i) {
 					if (records[i].time <= to_time) {
-						filtered_records.records = records + i;
+						filtered_records.records = (dxf_event_data_t *)(records + i);
 						filtered_records.records_count = snapshot_data->records_count - i;
 						break;
 					}
@@ -456,7 +456,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void *user_data) {
 			if (records[0].time >= to_time) {
 				for (i = 0; i < snapshot_data->records_count; ++i) {
 					if (records[i].time <= to_time) {
-						filtered_records.records = records + i;
+						filtered_records.records = (dxf_event_data_t *)(records + i);
 						filtered_records.records_count = snapshot_data->records_count - i;
 						break;
 					}
@@ -474,7 +474,7 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void *user_data) {
 			if (records[0].time >= to_time) {
 				for (i = 0; i < snapshot_data->records_count; ++i) {
 					if (records[i].time <= to_time) {
-						filtered_records.records = records + i;
+						filtered_records.records = (dxf_event_data_t *)(records + i);
 						filtered_records.records_count = snapshot_data->records_count - i;
 						break;
 					}
