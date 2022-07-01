@@ -169,7 +169,8 @@ int _CRT_glob = 0;
 #define TOKEN_PARAM_SHORT_TAG			"-T"
 #define LOG_DATA_TRANSFER_TAG			"-p"
 #define TIMEOUT_TAG						"-o"
-#define TIME_PARAM_SHORT_TAG			"-t"
+#define FROM_TIME_PARAM_SHORT_TAG		"-from-time"
+#define TO_TIME_PARAM_SHORT_TAG			"-to-time"
 
 static int is_listener_thread_terminated = false;
 static dxs_mutex_t listener_thread_guard;
@@ -181,6 +182,12 @@ int is_thread_terminate() {
 	dxs_mutex_unlock(&listener_thread_guard);
 
 	return res;
+}
+
+void close_program() {
+	dxs_mutex_lock(&listener_thread_guard);
+	is_listener_thread_terminated = true;
+	dxs_mutex_unlock(&listener_thread_guard);
 }
 
 void on_reader_thread_terminate(dxf_connection_t connection, void *user_data) {
@@ -202,6 +209,12 @@ void print_timestamp(dxf_long_t timestamp) {
 	wcsftime(timefmt, 80, L"%Y%m%d-%H%M%S", timeinfo);
 	wprintf(L"%ls", timefmt);
 }
+
+typedef struct {
+	dxf_int_t records_print_limit;
+	dxf_long_t to_time;
+	dxf_snapshot_t snapshot;
+} listener_arg_t;
 
 /* -------------------------------------------------------------------------- */
 
@@ -259,124 +272,221 @@ dxf_string_t ansi_to_unicode(const char *ansi_str) {
 
 /* -------------------------------------------------------------------------- */
 
-void listener(const dxf_snapshot_data_ptr_t snapshot_data, void *user_data) {
-	size_t i;
+void print_order_snapshot(dxf_snapshot_data_ptr_t snapshot_data, dxf_int_t records_print_limit) {
+	size_t i = 0;
 	size_t records_count = snapshot_data->records_count;
-	int records_print_limit = DEFAULT_RECORDS_PRINT_LIMIT;
+	dxf_order_t *order_records = (dxf_order_t *)snapshot_data->records;
+	for (i = 0; i < records_count; ++i) {
+		dxf_order_t order = order_records[i];
 
-	if (user_data) {
-		records_print_limit = *(int *)user_data;
+		if (records_print_limit > 0 && i >= records_print_limit) {
+			wprintf(L"   { ... %zu records left ...}\n", records_count - i);
+			break;
+		}
+
+		wprintf(L"   {index=0x%llX, side=%i, scope=%i, time=", order.index, order.side, order.scope);
+		print_timestamp(order.time);
+		wprintf(L", exchange code=%c, market maker=%ls, price=%.15g, size=%.15g", order.exchange_code,
+				order.market_maker, order.price, order.size);
+		if (wcslen(order.source) > 0) wprintf(L", source=%ls", order.source);
+		wprintf(L", count=%.15g, flags=0x%X}\n", order.count, order.event_flags);
 	}
+}
 
+void print_candle_snapshot(dxf_snapshot_data_ptr_t snapshot_data, dxf_int_t records_print_limit) {
+	size_t i = 0;
+	size_t records_count = snapshot_data->records_count;
+	dxf_candle_t *candle_records = (dxf_candle_t *)snapshot_data->records;
 	wprintf(L"Snapshot %ls{symbol=%ls, records_count=%zu}\n", dx_event_type_to_string(snapshot_data->event_type),
 			snapshot_data->symbol, records_count);
+	for (i = 0; i < snapshot_data->records_count; ++i) {
+		dxf_candle_t candle = candle_records[i];
 
-	if (snapshot_data->event_type == DXF_ET_ORDER) {
-		dxf_order_t *order_records = (dxf_order_t *)snapshot_data->records;
-		for (i = 0; i < records_count; ++i) {
-			dxf_order_t order = order_records[i];
-
-			if (records_print_limit > 0 && i >= records_print_limit) {
-				wprintf(L"   { ... %zu records left ...}\n", records_count - i);
-				break;
-			}
-
-			wprintf(L"   {index=0x%llX, side=%i, scope=%i, time=", order.index, order.side, order.scope);
-			print_timestamp(order.time);
-			wprintf(L", exchange code=%c, market maker=%ls, price=%.15g, size=%.15g", order.exchange_code,
-					order.market_maker, order.price, order.size);
-			if (wcslen(order.source) > 0) wprintf(L", source=%ls", order.source);
-			wprintf(L", count=%.15g, flags=0x%X}\n", order.count, order.event_flags);
+		if (records_print_limit > 0 && i >= records_print_limit) {
+			wprintf(L"   { ... %zu records left ...}\n", records_count - i);
+			break;
 		}
-	} else if (snapshot_data->event_type == DXF_ET_CANDLE) {
-		dxf_candle_t *candle_records = (dxf_candle_t *)snapshot_data->records;
-		for (i = 0; i < snapshot_data->records_count; ++i) {
-			dxf_candle_t candle = candle_records[i];
 
-			if (records_print_limit > 0 && i >= records_print_limit) {
-				wprintf(L"   { ... %zu records left ...}\n", records_count - i);
-				break;
-			}
+		wprintf(L"   {time=");
+		print_timestamp(candle.time);
+		wprintf(
+			L", sequence=%d, count=%.15g, open=%.15g, high=%.15g, low=%.15g, close=%.15g, volume=%.15g, "
+			L"VWAP=%.15g, bidVolume=%.15g, askVolume=%.15g, flags=0x%X}\n",
+			candle.sequence, candle.count, candle.open, candle.high, candle.low, candle.close, candle.volume,
+			candle.vwap, candle.bid_volume, candle.ask_volume, candle.event_flags);
+	}
+}
 
-			wprintf(L"   {time=");
-			print_timestamp(candle.time);
-			wprintf(
-				L", sequence=%d, count=%.15g, open=%.15g, high=%.15g, low=%.15g, close=%.15g, volume=%.15g, "
-				L"VWAP=%.15g, bidVolume=%.15g, askVolume=%.15g, flags=0x%X}\n",
-				candle.sequence, candle.count, candle.open, candle.high, candle.low, candle.close, candle.volume,
-				candle.vwap, candle.bid_volume, candle.ask_volume, candle.event_flags);
+void print_spread_order_snapshot(dxf_snapshot_data_ptr_t snapshot_data, dxf_int_t records_print_limit) {
+	size_t i = 0;
+	size_t records_count = snapshot_data->records_count;
+	dxf_order_t *order_records = (dxf_order_t *)snapshot_data->records;
+	for (i = 0; i < records_count; ++i) {
+		dxf_order_t order = order_records[i];
+
+		if (records_print_limit > 0 && i >= records_print_limit) {
+			wprintf(L"   { ... %zu records left ...}\n", records_count - i);
+			break;
 		}
-	} else if (snapshot_data->event_type == DXF_ET_SPREAD_ORDER) {
-		dxf_order_t *order_records = (dxf_order_t *)snapshot_data->records;
-		for (i = 0; i < records_count; ++i) {
-			dxf_order_t order = order_records[i];
 
-			if (records_print_limit > 0 && i >= records_print_limit) {
-				wprintf(L"   { ... %zu records left ...}\n", records_count - i);
-				break;
-			}
+		wprintf(L"   {index=0x%llX, side=%i, scope=%i, time=", order.index, order.side, order.scope);
+		print_timestamp(order.time);
+		wprintf(
+			L", sequence=%i, exchange code=%c, price=%.15g, size=%.15g, source=%ls, "
+			L"count=%.15g, flags=0x%X, spread symbol=%ls}\n",
+			order.sequence, order.exchange_code, order.price, order.size, wcslen(order.source) > 0 ? order.source : L"",
+			order.count, order.event_flags, wcslen(order.spread_symbol) > 0 ? order.spread_symbol : L"");
+	}
+}
 
-			wprintf(L"   {index=0x%llX, side=%i, scope=%i, time=", order.index, order.side, order.scope);
-			print_timestamp(order.time);
-			wprintf(
-				L", sequence=%i, exchange code=%c, price=%.15g, size=%.15g, source=%ls, "
-				L"count=%.15g, flags=0x%X, spread symbol=%ls}\n",
-				order.sequence, order.exchange_code, order.price, order.size,
-				wcslen(order.source) > 0 ? order.source : L"", order.count, order.event_flags,
-				wcslen(order.spread_symbol) > 0 ? order.spread_symbol : L"");
+void print_time_and_sale_snapshot(dxf_snapshot_data_ptr_t snapshot_data, dxf_int_t records_print_limit) {
+	size_t i = 0;
+	size_t records_count = snapshot_data->records_count;
+	dxf_time_and_sale_t *time_and_sale_records = (dxf_time_and_sale_t *)snapshot_data->records;
+	wprintf(L"Snapshot %ls{symbol=%ls, records_count=%zu}\n", dx_event_type_to_string(snapshot_data->event_type),
+			snapshot_data->symbol, records_count);
+	for (i = 0; i < snapshot_data->records_count; ++i) {
+		dxf_time_and_sale_t tns = time_and_sale_records[i];
+
+		if (records_print_limit > 0 && i >= records_print_limit) {
+			wprintf(L"   { ... %zu records left ...}\n", records_count - i);
+			break;
 		}
-	} else if (snapshot_data->event_type == DXF_ET_TIME_AND_SALE) {
-		dxf_time_and_sale_t *time_and_sale_records = (dxf_time_and_sale_t *)snapshot_data->records;
-		for (i = 0; i < snapshot_data->records_count; ++i) {
-			dxf_time_and_sale_t tns = time_and_sale_records[i];
 
-			if (records_print_limit > 0 && i >= records_print_limit) {
-				wprintf(L"   { ... %zu records left ...}\n", records_count - i);
-				break;
-			}
-
-			wprintf(L"   {event id=%"LS(PRId64)L", time=%"LS(
+		wprintf(L"   {time=");
+		print_timestamp(tns.time);
+		wprintf(L"   {event id=%"LS(PRId64)L", time=%"LS(
 					        PRId64)L", exchange code=%c, price=%.15g, size=%.15g, bid price=%.15g, ask price=%.15g, "
 			        L"exchange sale conditions=\'%ls\', is ETH trade=%ls, type=%i, flags=0x%X}\n",
 			        tns.index, tns.time, tns.exchange_code, tns.price, tns.size,
 			        tns.bid_price, tns.ask_price, tns.exchange_sale_conditions,
 			        tns.is_eth_trade ? L"True" : L"False", tns.type, tns.event_flags);
+	}
+}
+
+void print_greeks_snapshot(dxf_snapshot_data_ptr_t snapshot_data, dxf_int_t records_print_limit) {
+	size_t i = 0;
+	size_t records_count = snapshot_data->records_count;
+	dxf_greeks_t *greeks_records = (dxf_greeks_t *)snapshot_data->records;
+	for (i = 0; i < snapshot_data->records_count; ++i) {
+		dxf_greeks_t grks = greeks_records[i];
+
+		if (records_print_limit > 0 && i >= records_print_limit) {
+			wprintf(L"   { ... %zu records left ...}\n", records_count - i);
+			break;
 		}
-	} else if (snapshot_data->event_type == DXF_ET_GREEKS) {
-		dxf_greeks_t *greeks_records = (dxf_greeks_t *)snapshot_data->records;
-		for (i = 0; i < snapshot_data->records_count; ++i) {
-			dxf_greeks_t grks = greeks_records[i];
 
-			if (records_print_limit > 0 && i >= records_print_limit) {
-				wprintf(L"   { ... %zu records left ...}\n", records_count - i);
-				break;
-			}
-
-			wprintf(L"   {time=");
-			print_timestamp(grks.time);
-			wprintf(L", index=0x%"LS(PRIX64)L", greeks price=%.15g, volatility=%.15g, "
+		wprintf(L"   {time=");
+		print_timestamp(grks.time);
+		wprintf(L", index=0x%"LS(PRIX64)L", greeks price=%.15g, volatility=%.15g, "
 			        L"delta=%.15g, gamma=%.15g, theta=%.15g, rho=%.15g, vega=%.15g, flags=0x%X}\n",
 			        grks.index, grks.price, grks.volatility, grks.delta,
 			        grks.gamma, grks.theta, grks.rho, grks.vega, grks.event_flags);
+	}
+}
+
+void print_series_snapshot(dxf_snapshot_data_ptr_t snapshot_data, dxf_int_t records_print_limit) {
+	size_t i = 0;
+	size_t records_count = snapshot_data->records_count;
+	dxf_series_t *series_records = (dxf_series_t *)snapshot_data->records;
+	for (i = 0; i < snapshot_data->records_count; ++i) {
+		dxf_series_t srs = series_records[i];
+
+		if (records_print_limit > 0 && i >= records_print_limit) {
+			wprintf(L"   { ... %zu records left ...}\n", records_count - i);
+			break;
+		}
+		wprintf(L"   {index=%" LS(PRId64) L", time=", srs.index);
+		print_timestamp(srs.time);
+		wprintf(
+			L", sequence=%i, expiration=%d, volatility=%.15g, call volume=%.15g, put volume=%.15g, "
+			L"option volume=%.15g, put call ratio=%.15g, forward_price=%.15g, dividend=%.15g, interest=%.15g, "
+			L"index=0x%" LS(PRIX64) L", flags=0x%X}\n",
+			srs.sequence, srs.expiration, srs.volatility, srs.call_volume, srs.put_volume, srs.option_volume,
+			srs.put_call_ratio, srs.forward_price, srs.dividend, srs.interest, srs.index, srs.event_flags);
+	}
+}
+
+void listener(const dxf_snapshot_data_ptr_t snapshot_data, void *user_data) {
+	size_t i;
+	dxf_int_t records_print_limit = DEFAULT_RECORDS_PRINT_LIMIT;
+	dxf_long_t to_time = -1;
+	dxf_snapshot_t snapshot = NULL;
+
+	if (user_data) {
+		listener_arg_t *listener_args = ((listener_arg_t *)user_data);
+		to_time = listener_args->to_time;
+		records_print_limit = listener_args->records_print_limit;
+		snapshot = listener_args->snapshot;
+	}
+
+	dxf_snapshot_data_t filtered_records = {
+		.event_type = snapshot_data->event_type,
+		.symbol = snapshot_data->symbol,
+		.records = NULL,
+		.records_count = 0,
+	};
+
+	if (snapshot_data->event_type == DXF_ET_ORDER) {
+		print_order_snapshot(snapshot_data, records_print_limit);
+	} else if (snapshot_data->event_type == DXF_ET_CANDLE) {
+		if (to_time != -1) {
+			dxf_candle_t *records = (dxf_candle_t *)snapshot_data->records;
+			if (records[0].time >= to_time) {
+				for (i = 0; i < snapshot_data->records_count; ++i) {
+					if (records[i].time <= to_time) {
+						filtered_records.records = (dxf_event_data_t *)(records + i);
+						filtered_records.records_count = snapshot_data->records_count - i;
+						break;
+					}
+				}
+				print_candle_snapshot(&filtered_records, records_print_limit);
+				dxf_detach_snapshot_listener(snapshot, listener);
+				close_program();
+			}
+		} else {
+			print_candle_snapshot(snapshot_data, records_print_limit);
+		}
+	} else if (snapshot_data->event_type == DXF_ET_SPREAD_ORDER) {
+		print_spread_order_snapshot(snapshot_data, records_print_limit);
+	} else if (snapshot_data->event_type == DXF_ET_TIME_AND_SALE) {
+		if (to_time != -1) {
+			dxf_time_and_sale_t *records = (dxf_time_and_sale_t *)snapshot_data->records;
+			if (records[0].time >= to_time) {
+				for (i = 0; i < snapshot_data->records_count; ++i) {
+					if (records[i].time <= to_time) {
+						filtered_records.records = (dxf_event_data_t *)(records + i);
+						filtered_records.records_count = snapshot_data->records_count - i;
+						break;
+					}
+				}
+				print_time_and_sale_snapshot(&filtered_records, records_print_limit);
+				dxf_detach_snapshot_listener(snapshot, listener);
+				close_program();
+			}
+		} else {
+			print_time_and_sale_snapshot(snapshot_data, records_print_limit);
+		}
+	} else if (snapshot_data->event_type == DXF_ET_GREEKS) {
+		if (to_time != -1) {
+			dxf_greeks_t *records = (dxf_greeks_t *)snapshot_data->records;
+			if (records[0].time >= to_time) {
+				for (i = 0; i < snapshot_data->records_count; ++i) {
+					if (records[i].time <= to_time) {
+						filtered_records.records = (dxf_event_data_t *)(records + i);
+						filtered_records.records_count = snapshot_data->records_count - i;
+						break;
+					}
+				}
+				print_greeks_snapshot(&filtered_records, records_print_limit);
+				dxf_detach_snapshot_listener(snapshot, listener);
+				close_program();
+			}
+		} else {
+			print_greeks_snapshot(snapshot_data, records_print_limit);
 		}
 	} else if (snapshot_data->event_type == DXF_ET_SERIES) {
-		dxf_series_t *series_records = (dxf_series_t *)snapshot_data->records;
-		for (i = 0; i < snapshot_data->records_count; ++i) {
-			dxf_series_t srs = series_records[i];
-
-			if (records_print_limit > 0 && i >= records_print_limit) {
-				wprintf(L"   { ... %zu records left ...}\n", records_count - i);
-				break;
-			}
-			wprintf(L"   {index=%" LS(PRId64) L", time=", srs.index);
-			print_timestamp(srs.time);
-			wprintf(
-				L", sequence=%i, expiration=%d, volatility=%.15g, call volume=%.15g, put volume=%.15g, "
-				L"option volume=%.15g, put call ratio=%.15g, forward_price=%.15g, dividend=%.15g, interest=%.15g, "
-				L"index=0x%" LS(PRIX64) L", flags=0x%X}\n",
-				srs.sequence, srs.expiration, srs.volatility, srs.call_volume, srs.put_volume, srs.option_volume,
-				srs.put_call_ratio, srs.forward_price, srs.dividend, srs.interest, srs.index, srs.event_flags);
-		}
+		print_series_snapshot(snapshot_data, records_print_limit);
 	}
 }
 
@@ -404,45 +514,28 @@ int atoi2(char *str, int *result) {
 	return true;
 }
 
-#define DATE_TIME_BUF_SIZE 4
 /*
- * Parse date string in format 'DD-MM-YYYY'
+ * Parse date string in format 'DD-MM-YYYYTHH:mm:ss'
  */
 int parse_date(const char *date_str, struct tm *time_struct) {
-	size_t i;
-	size_t date_string_len = strlen(date_str);
-	int separator_count = 0;
-	char buf[DATE_TIME_BUF_SIZE + 1] = {0};
 	int mday = 0;
 	int month = 0;
 	int year = 0;
+	int hour = 0;
+	int minute = 0;
+	int seconds = 0;
 
-	for (i = 0; i < date_string_len; i++) {
-		if (date_str[i] == '-') {
-			if (separator_count == 0) {
-				if (!atoi2(buf, &mday)) return false;
-			} else if (separator_count == 1) {
-				if (!atoi2(buf, &month)) return false;
-			} else
-				return false;
-			separator_count++;
-			memset(buf, 0, DATE_TIME_BUF_SIZE);
-			continue;
-		}
-
-		size_t buf_len = strlen(buf);
-		if (buf_len >= DATE_TIME_BUF_SIZE) return false;
-		buf[buf_len] = date_str[i];
+	int count_arg = sscanf(date_str, "%d-%d-%dT%d:%d:%d", &mday, &month, &year, &hour, &minute, &seconds);
+	if (count_arg != 6) {
+		return false;
 	}
-
-	if (!atoi2(buf, &year)) return false;
-
-	if (mday == 0 || month == 0 || year == 0) return false;
 
 	time_struct->tm_mday = mday;
 	time_struct->tm_mon = month - 1;
 	time_struct->tm_year = year - 1900;
-
+	time_struct->tm_hour = hour;
+	time_struct->tm_min = minute;
+	time_struct->tm_sec = seconds;
 	return true;
 }
 
@@ -454,9 +547,10 @@ int main(int argc, char *argv[]) {
 	dx_event_id_t event_id;
 	dxf_string_t base_symbol = NULL;
 	char *dxfeed_host = NULL;
-	time_t time_value = time(NULL);
+	time_t from_time_value = time(NULL);
+	time_t to_time_value = time(NULL);
 	struct tm time_struct;
-	struct tm *local_time = localtime(&time_value);
+	struct tm *local_time = localtime(&from_time_value);
 
 	time_struct.tm_sec = 0;
 	time_struct.tm_min = 0;
@@ -464,7 +558,7 @@ int main(int argc, char *argv[]) {
 	time_struct.tm_mday = local_time->tm_mday;
 	time_struct.tm_mon = local_time->tm_mon;
 	time_struct.tm_year = local_time->tm_year;
-	time_value = mktime(&time_struct);
+	from_time_value = mktime(&time_struct);
 
 	if (argc < STATIC_PARAMS_COUNT) {
 		printf(
@@ -474,8 +568,8 @@ int main(int argc, char *argv[]) {
 			"of events and a full order book.\n"
 			"-------------------------------------------------------------------------------\n"
 			"Usage: SnapshotConsoleSample <server address> <event type> <symbol>\n"
-			"       [order_source] [" TIME_PARAM_SHORT_TAG " <DD-MM-YYYY>] "
-			"[" RECORDS_PRINT_LIMIT_SHORT_PARAM " <records_print_limit>] [" TOKEN_PARAM_SHORT_TAG " <token>]\n"
+			"       [order_source] [" FROM_TIME_PARAM_SHORT_TAG " <DD-MM-YYYYTHH:mm:ss>] [" TO_TIME_PARAM_SHORT_TAG " <DD-MM-YYYYTHH:mm:ss>]" 
+			" [" RECORDS_PRINT_LIMIT_SHORT_PARAM " <records_print_limit>] [" TOKEN_PARAM_SHORT_TAG " <token>]\n"
 			"       [" LOG_DATA_TRANSFER_TAG "] [" TIMEOUT_TAG " <timeout>]\n\n"
 			"  <server address> - The dxFeed server address, e.g. demo.dxfeed.com:7300\n"
 			"  <event type>     - The event type, one of the following: ORDER, CANDLE,\n"
@@ -485,15 +579,17 @@ int main(int argc, char *argv[]) {
 			"                        BZX, DEA, ISE, DEX, IST, ...\n"
 			"                     b) source for MarketMaker, one of following: AGGREGATE_BID\n"
 			"                        or AGGREGATE_ASK\n"
-			"  " TIME_PARAM_SHORT_TAG " <DD-MM-YYYY>  - Time from which to receive data (default: current date and\n"
-			"                     time)\n"
+			"  " FROM_TIME_PARAM_SHORT_TAG " <DD-MM-YYYYTHH:mm:ss>  - Time from which to receive data (default: current date and time)\n"			
+			"  " TO_TIME_PARAM_SHORT_TAG "   <DD-MM-YYYYTHH:mm:ss>  - Time to which to receive data (default: infinity, exist only for CANDLE, TIME_AND_SALE and GREEKS)\n"
 			"  " RECORDS_PRINT_LIMIT_SHORT_PARAM " <limit>       - The number of displayed records "
 			"(0 - unlimited, default: " STRINGIFY(DEFAULT_RECORDS_PRINT_LIMIT)")\n"
 			"  " TOKEN_PARAM_SHORT_TAG " <token>       - The authorization token\n"
 			"  " LOG_DATA_TRANSFER_TAG "               - Enables the data transfer logging\n"
 			"  " TIMEOUT_TAG " <timeout>     - Sets the program timeout in seconds (default = 604800,\n"
-			"                     i.e a week)\n"
-			"Example: demo.dxfeed.com:7300 ORDER IBM NTV -t 01-01-1970 -o 30\n\n"
+			"                     i.e a week)\n\n"
+			"Notes: Do not use \"from-time\" and \"to-time\" args for the following market events: Order, Spread Order, Series.\n"
+			"Example: demo.dxfeed.com:7300 ORDER IBM NTV -o 30\n"
+			"Example: demo.dxfeed.com:7300 CANDLE AAPL{=d} -from-time 20-06-2022T00:00:00 -to-time 27-06-2022T00:00:00 -o 30\n\n"
 		);
 
 		return 0;
@@ -530,7 +626,8 @@ int main(int argc, char *argv[]) {
 	char *token = NULL;
 	int log_data_transfer_flag = false;
 	int program_timeout = 604800;  // a week
-	int time_is_set = false;
+	int from_time_is_set = false;
+	int to_time_is_set = false;
 
 	if (argc > STATIC_PARAMS_COUNT) {
 		int records_print_limit_is_set = false;
@@ -539,7 +636,7 @@ int main(int argc, char *argv[]) {
 		int program_timeout_is_set = false;
 
 		for (int i = STATIC_PARAMS_COUNT; i < argc; i++) {
-			if (time_is_set == false && strcmp(argv[i], TIME_PARAM_SHORT_TAG) == 0) {
+			if (from_time_is_set == false && strcmp(argv[i], FROM_TIME_PARAM_SHORT_TAG) == 0) {
 				if (i + 1 == argc) {
 					wprintf(L"Date argument error\n");
 					return 3;
@@ -552,8 +649,23 @@ int main(int argc, char *argv[]) {
 					return 4;
 				}
 
-				time_value = mktime(&time_struct);
-				time_is_set = true;
+				from_time_value = mktime(&time_struct);
+				from_time_is_set = true;
+			} else if (to_time_is_set == false && strcmp(argv[i], TO_TIME_PARAM_SHORT_TAG) == 0) {
+				if (i + 1 == argc) {
+					wprintf(L"Date argument error\n");
+					return 3;
+				}
+
+				i += 1;
+
+				if (!parse_date(argv[i], &time_struct)) {
+					wprintf(L"Date format error\n");
+					return 4;
+				}
+
+				to_time_value = mktime(&time_struct);
+				to_time_is_set = true;
 			} else if (records_print_limit_is_set == false && strcmp(argv[i], RECORDS_PRINT_LIMIT_SHORT_PARAM) == 0) {
 				if (i + 1 == argc) {
 					wprintf(L"The records print limit argument error\n");
@@ -654,7 +766,8 @@ int main(int argc, char *argv[]) {
 			return 30;
 		}
 
-		if (!dxf_create_candle_snapshot(connection, candle_attributes, time_is_set ? time_value * 1000 : 0, &snapshot)) {
+		if (!dxf_create_candle_snapshot(connection, candle_attributes, from_time_is_set ? from_time_value * 1000 : 0,
+										&snapshot)) {
 			free(base_symbol);
 			process_last_error();
 			dxf_delete_candle_symbol_attributes(candle_attributes);
@@ -671,7 +784,12 @@ int main(int argc, char *argv[]) {
 			return 32;
 		}
 	} else {
-		if (!dxf_create_snapshot(connection, event_id, base_symbol, NULL, time_is_set ? time_value * 1000 : 0, &snapshot)) {
+		// For indexed only events (Order, Spread Order, Series), cannot use a non-zero from_time argument.
+		if (event_id == dx_eid_order || event_id == dx_eid_spread_order || event_id == dx_eid_series) {
+			from_time_value = 0;
+		}
+		if (!dxf_create_snapshot(connection, event_id, base_symbol, NULL, from_time_is_set ? from_time_value * 1000 : 0,
+								 &snapshot)) {
 			free(base_symbol);
 			process_last_error();
 			dxf_close_connection(connection);
@@ -682,7 +800,13 @@ int main(int argc, char *argv[]) {
 
 	free(base_symbol);
 
-	if (!dxf_attach_snapshot_listener(snapshot, listener, (void *)&records_print_limit)) {
+	listener_arg_t listener_arg = {
+		.records_print_limit = records_print_limit,
+		.to_time = to_time_is_set ? to_time_value * 1000 : -1,
+		.snapshot = snapshot
+	};
+
+	if (!dxf_attach_snapshot_listener(snapshot, listener, (void *)&listener_arg)) {
 		process_last_error();
 		dxf_close_snapshot(snapshot);
 		if (candle_attributes != NULL) dxf_delete_candle_symbol_attributes(candle_attributes);
