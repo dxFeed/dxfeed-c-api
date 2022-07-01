@@ -20,6 +20,7 @@
 #include "BufferedInput.h"
 
 #include <limits.h>
+#include <string.h>
 
 #include "ConnectionContextData.h"
 #include "DXAlgorithms.h"
