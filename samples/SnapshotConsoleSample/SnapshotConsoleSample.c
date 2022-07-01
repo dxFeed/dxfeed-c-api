@@ -409,7 +409,6 @@ void print_series_snapshot(dxf_snapshot_data_ptr_t snapshot_data, dxf_int_t reco
 
 void listener(const dxf_snapshot_data_ptr_t snapshot_data, void *user_data) {
 	size_t i;
-	size_t records_count = snapshot_data->records_count;
 	dxf_int_t records_print_limit = DEFAULT_RECORDS_PRINT_LIMIT;
 	dxf_long_t to_time = -1;
 	dxf_snapshot_t snapshot = NULL;
