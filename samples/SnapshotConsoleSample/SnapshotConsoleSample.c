@@ -220,8 +220,6 @@ typedef struct {
 	dxf_snapshot_t snapshot;
 } listener_arg_t;
 
-/* -------------------------------------------------------------------------- */
-
 void process_last_error() {
 	int error_code = dx_ec_success;
 	dxf_const_string_t error_descr = NULL;
@@ -375,8 +373,8 @@ void print_greeks_snapshot(dxf_snapshot_data_ptr_t snapshot_data, dxf_int_t reco
 			wprintf(L"   { ... %zu records left ...}\n", records_count - i);
 			break;
 		}
-
-		wprintf(L"   {time=");
+    
+    wprintf(L"   {time=");
 		print_timestamp(grks.time);
 		wprintf(L", index=0x%"LS(PRIX64)L", greeks price=%.15g, volatility=%.15g, "
 			        L"delta=%.15g, gamma=%.15g, theta=%.15g, rho=%.15g, vega=%.15g, flags=0x%X}\n",
@@ -419,8 +417,8 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void *user_data) {
 		records_print_limit = listener_args->records_print_limit;
 		snapshot = listener_args->snapshot;
 	}
-
-	dxf_snapshot_data_t filtered_records = {
+  
+  dxf_snapshot_data_t filtered_records = {
 		.event_type = snapshot_data->event_type,
 		.symbol = snapshot_data->symbol,
 		.records = NULL,
