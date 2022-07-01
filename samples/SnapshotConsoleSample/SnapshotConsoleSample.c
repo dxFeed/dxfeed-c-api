@@ -784,6 +784,10 @@ int main(int argc, char *argv[]) {
 			return 32;
 		}
 	} else {
+		// For indexed only events (Order, Spread Order, Series), cannot use a non-zero from_time argument.
+		if (event_id == dx_eid_order || event_id == dx_eid_spread_order || event_id == dx_eid_series) {
+			from_time_value = 0;
+		}
 		if (!dxf_create_snapshot(connection, event_id, base_symbol, NULL, from_time_is_set ? from_time_value * 1000 : 0,
 								 &snapshot)) {
 			free(base_symbol);
