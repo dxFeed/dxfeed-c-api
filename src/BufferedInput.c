@@ -360,8 +360,7 @@ int dx_read_float(void* context, OUT dxf_float_t* value) {
 	dxf_int_t int_val;
 
 	CHECKED_CALL_2(dx_read_int, context, &int_val);
-
-	*value = *((dxf_float_t*)(&int_val));
+	memcpy(value, &int_val, sizeof(dxf_float_t));
 
 	return true;
 }
@@ -370,8 +369,7 @@ int dx_read_double(void* context, OUT dxf_double_t* value) {
 	dxf_long_t long_val;
 
 	CHECKED_CALL_2(dx_read_long, context, &long_val);
-
-	*value = *((dxf_double_t*)(&long_val));
+	memcpy(value, &long_val, sizeof(dxf_double_t));
 
 	return true;
 }
