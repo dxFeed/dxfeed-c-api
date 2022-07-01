@@ -515,7 +515,7 @@ int atoi2(char *str, int *result) {
 }
 
 /*
- * Parse date string in format 'DD-MM-YYYY'
+ * Parse date string in format 'DD-MM-YYYYTHH:mm:ss'
  */
 int parse_date(const char *date_str, struct tm *time_struct) {
 	int mday = 0;
@@ -568,8 +568,8 @@ int main(int argc, char *argv[]) {
 			"of events and a full order book.\n"
 			"-------------------------------------------------------------------------------\n"
 			"Usage: SnapshotConsoleSample <server address> <event type> <symbol>\n"
-			"       [order_source] [" FROM_TIME_PARAM_SHORT_TAG " <DD-MM-YYYY>] [" TO_TIME_PARAM_SHORT_TAG " <DD-MM-YYYY>]" 
-			"[" RECORDS_PRINT_LIMIT_SHORT_PARAM " <records_print_limit>] [" TOKEN_PARAM_SHORT_TAG " <token>]\n"
+			"       [order_source] [" FROM_TIME_PARAM_SHORT_TAG " <DD-MM-YYYYTHH:mm:ss>] [" TO_TIME_PARAM_SHORT_TAG " <DD-MM-YYYYTHH:mm:ss>]" 
+			" [" RECORDS_PRINT_LIMIT_SHORT_PARAM " <records_print_limit>] [" TOKEN_PARAM_SHORT_TAG " <token>]\n"
 			"       [" LOG_DATA_TRANSFER_TAG "] [" TIMEOUT_TAG " <timeout>]\n\n"
 			"  <server address> - The dxFeed server address, e.g. demo.dxfeed.com:7300\n"
 			"  <event type>     - The event type, one of the following: ORDER, CANDLE,\n"
@@ -579,15 +579,16 @@ int main(int argc, char *argv[]) {
 			"                        BZX, DEA, ISE, DEX, IST, ...\n"
 			"                     b) source for MarketMaker, one of following: AGGREGATE_BID\n"
 			"                        or AGGREGATE_ASK\n"
-			"  " FROM_TIME_PARAM_SHORT_TAG " <DD-MM-YYYYTHH:mm:ss>  - Time from which to receive data (default: current date and time\n"			
+			"  " FROM_TIME_PARAM_SHORT_TAG " <DD-MM-YYYYTHH:mm:ss>  - Time from which to receive data (default: current date and time)\n"			
 			"  " TO_TIME_PARAM_SHORT_TAG "   <DD-MM-YYYYTHH:mm:ss>  - Time to which to receive data (default: infinity, exist only for CANDLE, TIME_AND_SALE and GREEKS)\n"
 			"  " RECORDS_PRINT_LIMIT_SHORT_PARAM " <limit>       - The number of displayed records "
 			"(0 - unlimited, default: " STRINGIFY(DEFAULT_RECORDS_PRINT_LIMIT)")\n"
 			"  " TOKEN_PARAM_SHORT_TAG " <token>       - The authorization token\n"
 			"  " LOG_DATA_TRANSFER_TAG "               - Enables the data transfer logging\n"
 			"  " TIMEOUT_TAG " <timeout>     - Sets the program timeout in seconds (default = 604800,\n"
-			"                     i.e a week)\n"
-			"Example: demo.dxfeed.com:7300 ORDER IBM NTV -from-time 01-01-1970T00:00:00 -o 30\n\n"
+			"                     i.e a week)\n\n"
+			"Notes: Do not use \"from-time\" and \"to-time\" args for the following market events: Order, Spread Order, Series.\n"
+			"Example: demo.dxfeed.com:7300 ORDER IBM NTV -o 30\n"
 			"Example: demo.dxfeed.com:7300 CANDLE AAPL{=d} -from-time 20-06-2022T00:00:00 -to-time 27-06-2022T00:00:00 -o 30\n\n"
 		);
 
