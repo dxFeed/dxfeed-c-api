@@ -399,6 +399,7 @@ public:
 		snapshot->listener_ = listener;
 		snapshot->isValid_ = true;
 
+		//FIXME: bug. See: https://en.cppreference.com/w/cpp/memory/enable_shared_from_this
 		return snapshot->shared_from_this();
 	}
 };
