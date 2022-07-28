@@ -18,32 +18,37 @@
  */
 
 #ifdef _WIN32
-#	pragma warning(push)
-#	pragma warning(disable : 5105)
+#	if !defined(__MINGW32__)
+#		pragma warning(push)
+#		pragma warning(disable : 5105)
+#	endif
 #	include <Windows.h>
-#	pragma warning(pop)
+#	if !defined(__MINGW32__)
+#		pragma warning(pop)
+#	endif
 #endif
 
-#include <time.h>
-#include <stdio.h>
-
 #include "OrderSourceConfigurationTest.h"
-#include "DXTypes.h"
-#include "DXFeed.h"
-#include "DXErrorCodes.h"
-#include "EventData.h"
+
+#include <stdio.h>
+#include <time.h>
+
 #include "DXAlgorithms.h"
+#include "DXErrorCodes.h"
+#include "DXFeed.h"
+#include "DXTypes.h"
+#include "EventData.h"
 #include "TestHelper.h"
 
-//Timeout in milliseconds for waiting some events is 3 minutes.
-#define EVENTS_TIMEOUT 180000
+// Timeout in milliseconds for waiting some events is 3 minutes.
+#define EVENTS_TIMEOUT		   180000
 #define EVENTS_LOOP_SLEEP_TIME 100
-//The maximum milliseconds interval of expecting between two events
+// The maximum milliseconds interval of expecting between two events
 #define WAIT_EVENTS_INTERVAL 200
 
 #define DXFEED_HOST "mddqa.in.devexperts.com:7400"
 
-typedef int(*get_counter_function_t)();
+typedef int (*get_counter_function_t)();
 
 dxf_listener_thread_data_t g_ost_listener_thread_data = NULL;
 event_counter_data_t counter_data_ntv;
@@ -56,32 +61,21 @@ event_counter_data_ptr_t g_dea_counter = &counter_data_dea;
 int ost_get_ntv_counter() { return get_event_counter(g_ntv_counter); }
 int ost_get_dex_counter() { return get_event_counter(g_dex_counter); }
 int ost_get_dea_counter() { return get_event_counter(g_dea_counter); }
-get_counter_function_t g_all_counters[] = { ost_get_ntv_counter, ost_get_dex_counter, ost_get_dea_counter };
+get_counter_function_t g_all_counters[] = {ost_get_ntv_counter, ost_get_dex_counter, ost_get_dea_counter};
 
-/* -------------------------------------------------------------------------- */
-
-static void close_data(dxf_connection_t connection, dxf_subscription_t subscription,
-					dxf_event_listener_t listener) {
-	if (!dxf_detach_event_listener(subscription, listener))
-		process_last_error();
-	if (!dxf_close_subscription(subscription))
-		process_last_error();
-	if (!dxf_close_connection(connection))
-		process_last_error();
+static void close_data(dxf_connection_t connection, dxf_subscription_t subscription, dxf_event_listener_t listener) {
+	if (!dxf_detach_event_listener(subscription, listener)) process_last_error();
+	if (!dxf_close_subscription(subscription)) process_last_error();
+	if (!dxf_close_connection(connection)) process_last_error();
 }
 
-/* -------------------------------------------------------------------------- */
-
 void order_source_tests_on_thread_terminate(dxf_connection_t connection, void* user_data) {
-	if (g_ost_listener_thread_data == NULL)
-		return;
+	if (g_ost_listener_thread_data == NULL) return;
 	on_reader_thread_terminate(g_ost_listener_thread_data, connection, user_data);
 }
 
-/* -------------------------------------------------------------------------- */
-
-void listener(int event_type, dxf_const_string_t symbol_name,
-			const dxf_event_data_t* data, int data_count, void* user_data) {
+void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
+			  void* user_data) {
 	dxf_int_t i = 0;
 	dxf_order_t* orders = (dxf_order_t*)data;
 
@@ -119,8 +113,7 @@ int ost_wait_multiple_events(get_counter_function_t* counter_functions, int func
 		for (i = 0; i < function_number; i++) {
 			res &= counter_functions[i]() > 0;
 		}
-		if (res)
-			return true;
+		if (res) return true;
 		if (is_thread_terminate(g_ost_listener_thread_data)) {
 			printf("Test failed: thread was terminated!\n");
 			return false;
@@ -135,7 +128,7 @@ int ost_wait_multiple_events(get_counter_function_t* counter_functions, int func
 }
 
 int ost_wait_two_events(get_counter_function_t f1, get_counter_function_t f2) {
-	get_counter_function_t counters[] = { f1, f2 };
+	get_counter_function_t counters[] = {f1, f2};
 	return ost_wait_multiple_events(counters, SIZE_OF_ARRAY(counters));
 }
 
@@ -156,7 +149,8 @@ static int wait_all_events_received(event_counter_data_ptr_t counter_data) {
 			return false;
 		}
 		if (dx_millisecond_timestamp_diff(dx_millisecond_timestamp(), timestamp) > EVENTS_TIMEOUT) {
-			printf("Test failed: timeout is elapsed! Interval of waiting "
+			printf(
+				"Test failed: timeout is elapsed! Interval of waiting "
 				"'%s' events possible too much...",
 				get_event_counter_name(counter_data));
 			return false;
@@ -180,18 +174,18 @@ static int wait_all_events_received(event_counter_data_ptr_t counter_data) {
 int mixed_order_source_test() {
 	dxf_connection_t connection = NULL;
 	dxf_subscription_t subscription = NULL;
-	dxf_const_string_t symbols[] = { { L"IBM" }, { L"MSFT" }, { L"YHOO" }, { L"C" }, { L"AAPL" } };
+	dxf_const_string_t symbols[] = {{L"IBM"}, {L"MSFT"}, {L"YHOO"}, {L"C"}, {L"AAPL"}};
 	dxf_int_t symbol_count = sizeof(symbols) / sizeof(symbols[0]);
 
 	drop_event_counter(g_ntv_counter);
 	drop_event_counter(g_dex_counter);
 	drop_event_counter(g_dea_counter);
 
-	if (!dxf_create_connection(DXFEED_HOST, order_source_tests_on_thread_terminate, NULL, NULL, NULL, NULL, &connection) ||
+	if (!dxf_create_connection(DXFEED_HOST, order_source_tests_on_thread_terminate, NULL, NULL, NULL, NULL,
+							   &connection) ||
 		!dxf_create_subscription(connection, DXF_ET_ORDER, &subscription) ||
 		!dxf_add_symbols(subscription, symbols, symbol_count) ||
 		!dxf_attach_event_listener(subscription, listener, NULL)) {
-
 		process_last_error();
 		return false;
 	}
@@ -208,10 +202,8 @@ int mixed_order_source_test() {
 		close_data(connection, subscription, listener);
 		return false;
 	}
-	if (!wait_all_events_received(g_ntv_counter) ||
-		!wait_all_events_received(g_dex_counter) ||
+	if (!wait_all_events_received(g_ntv_counter) || !wait_all_events_received(g_dex_counter) ||
 		!wait_all_events_received(g_dea_counter)) {
-
 		PRINT_TEST_FAILED;
 		close_data(connection, subscription, listener);
 		return false;
@@ -219,15 +211,14 @@ int mixed_order_source_test() {
 	drop_event_counter(g_ntv_counter);
 	drop_event_counter(g_dex_counter);
 	drop_event_counter(g_dea_counter);
-	if (!ost_wait_events(ost_get_ntv_counter) ||
-		!dx_is_equal_int(0, ost_get_dex_counter()) ||
+	if (!ost_wait_events(ost_get_ntv_counter) || !dx_is_equal_int(0, ost_get_dex_counter()) ||
 		!dx_is_equal_int(0, ost_get_dea_counter())) {
-
-		printf("at %s, line: %d\n"
-				"    Expected: ntv=%5s, dex=%5s, dea=%5s; \n"
-				"    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n",
-				__FUNCTION__, __LINE__, ">0", "0", "0",
-				ost_get_ntv_counter(), ost_get_dex_counter(), ost_get_dea_counter());
+		printf(
+			"at %s, line: %d\n"
+			"    Expected: ntv=%5s, dex=%5s, dea=%5s; \n"
+			"    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n",
+			__FUNCTION__, __LINE__, ">0", "0", "0", ost_get_ntv_counter(), ost_get_dex_counter(),
+			ost_get_dea_counter());
 		close_data(connection, subscription, listener);
 		return false;
 	}
@@ -238,10 +229,8 @@ int mixed_order_source_test() {
 		close_data(connection, subscription, listener);
 		return false;
 	}
-	if (!wait_all_events_received(g_ntv_counter) ||
-		!wait_all_events_received(g_dex_counter) ||
+	if (!wait_all_events_received(g_ntv_counter) || !wait_all_events_received(g_dex_counter) ||
 		!wait_all_events_received(g_dea_counter)) {
-
 		PRINT_TEST_FAILED;
 		close_data(connection, subscription, listener);
 		return false;
@@ -249,22 +238,19 @@ int mixed_order_source_test() {
 	drop_event_counter(g_ntv_counter);
 	drop_event_counter(g_dex_counter);
 	drop_event_counter(g_dea_counter);
-	if (!ost_wait_two_events(ost_get_ntv_counter, ost_get_dex_counter) ||
-		!dx_is_equal_int(0, ost_get_dea_counter())) {
-
-		printf("at %s, line: %d\n"
-				"    Expected: ntv=%5s, dex=%5s, dea=%5s; \n"
-				"    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n",
-				__FUNCTION__, __LINE__, ">0", ">0", "0",
-				ost_get_ntv_counter(), ost_get_dex_counter(), ost_get_dea_counter());
+	if (!ost_wait_two_events(ost_get_ntv_counter, ost_get_dex_counter) || !dx_is_equal_int(0, ost_get_dea_counter())) {
+		printf(
+			"at %s, line: %d\n"
+			"    Expected: ntv=%5s, dex=%5s, dea=%5s; \n"
+			"    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n",
+			__FUNCTION__, __LINE__, ">0", ">0", "0", ost_get_ntv_counter(), ost_get_dex_counter(),
+			ost_get_dea_counter());
 		close_data(connection, subscription, listener);
 		return false;
 	}
 
-	if (!dxf_detach_event_listener(subscription, listener) ||
-		!dxf_close_subscription(subscription) ||
+	if (!dxf_detach_event_listener(subscription, listener) || !dxf_close_subscription(subscription) ||
 		!dxf_close_connection(connection)) {
-
 		process_last_error();
 		return false;
 	}
@@ -285,18 +271,18 @@ int mixed_order_source_test() {
 int set_order_source_test() {
 	dxf_connection_t connection = NULL;
 	dxf_subscription_t subscription = NULL;
-	dxf_const_string_t symbols[] = { { L"IBM" }, { L"MSFT" }, { L"YHOO" }, { L"C" }, { L"AAPL" } };
+	dxf_const_string_t symbols[] = {{L"IBM"}, {L"MSFT"}, {L"YHOO"}, {L"C"}, {L"AAPL"}};
 	dxf_int_t symbol_count = sizeof(symbols) / sizeof(symbols[0]);
 
 	drop_event_counter(g_ntv_counter);
 	drop_event_counter(g_dex_counter);
 	drop_event_counter(g_dea_counter);
 
-	if (!dxf_create_connection(DXFEED_HOST, order_source_tests_on_thread_terminate, NULL, NULL, NULL, NULL, &connection) ||
+	if (!dxf_create_connection(DXFEED_HOST, order_source_tests_on_thread_terminate, NULL, NULL, NULL, NULL,
+							   &connection) ||
 		!dxf_create_subscription(connection, DXF_ET_ORDER, &subscription) ||
 		!dxf_add_symbols(subscription, symbols, symbol_count) ||
 		!dxf_attach_event_listener(subscription, listener, NULL)) {
-
 		process_last_error();
 		return false;
 	}
@@ -313,10 +299,8 @@ int set_order_source_test() {
 		close_data(connection, subscription, listener);
 		return false;
 	}
-	if (!wait_all_events_received(g_ntv_counter) ||
-		!wait_all_events_received(g_dex_counter) ||
+	if (!wait_all_events_received(g_ntv_counter) || !wait_all_events_received(g_dex_counter) ||
 		!wait_all_events_received(g_dea_counter)) {
-
 		PRINT_TEST_FAILED;
 		close_data(connection, subscription, listener);
 		return false;
@@ -324,15 +308,14 @@ int set_order_source_test() {
 	drop_event_counter(g_ntv_counter);
 	drop_event_counter(g_dex_counter);
 	drop_event_counter(g_dea_counter);
-	if (!ost_wait_events(ost_get_ntv_counter) ||
-		!dx_is_equal_int(0, ost_get_dex_counter()) ||
+	if (!ost_wait_events(ost_get_ntv_counter) || !dx_is_equal_int(0, ost_get_dex_counter()) ||
 		!dx_is_equal_int(0, ost_get_dea_counter())) {
-
-		printf("at %s, line: %d\n"
-				"    Expected: ntv=%5s, dex=%5s, dea=%5s; \n"
-				"    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n",
-				__FUNCTION__, __LINE__, ">0", "0", "0",
-				ost_get_ntv_counter(), ost_get_dex_counter(), ost_get_dea_counter());
+		printf(
+			"at %s, line: %d\n"
+			"    Expected: ntv=%5s, dex=%5s, dea=%5s; \n"
+			"    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n",
+			__FUNCTION__, __LINE__, ">0", "0", "0", ost_get_ntv_counter(), ost_get_dex_counter(),
+			ost_get_dea_counter());
 		close_data(connection, subscription, listener);
 		return false;
 	}
@@ -343,10 +326,8 @@ int set_order_source_test() {
 		close_data(connection, subscription, listener);
 		return false;
 	}
-	if (!wait_all_events_received(g_ntv_counter) ||
-		!wait_all_events_received(g_dex_counter) ||
+	if (!wait_all_events_received(g_ntv_counter) || !wait_all_events_received(g_dex_counter) ||
 		!wait_all_events_received(g_dea_counter)) {
-
 		PRINT_TEST_FAILED;
 		close_data(connection, subscription, listener);
 		return false;
@@ -354,23 +335,20 @@ int set_order_source_test() {
 	drop_event_counter(g_ntv_counter);
 	drop_event_counter(g_dex_counter);
 	drop_event_counter(g_dea_counter);
-	if (!ost_wait_events(ost_get_dex_counter) ||
-		!dx_is_equal_int(0, ost_get_ntv_counter()) ||
+	if (!ost_wait_events(ost_get_dex_counter) || !dx_is_equal_int(0, ost_get_ntv_counter()) ||
 		!dx_is_equal_int(0, ost_get_dea_counter())) {
-
-		printf("at %s, line: %d\n"
-				"    Expected: ntv=%5s, dex=%5s, dea=%5s; \n"
-				"    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n",
-				__FUNCTION__, __LINE__, "0", ">0", "0",
-				ost_get_ntv_counter(), ost_get_dex_counter(), ost_get_dea_counter());
+		printf(
+			"at %s, line: %d\n"
+			"    Expected: ntv=%5s, dex=%5s, dea=%5s; \n"
+			"    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n",
+			__FUNCTION__, __LINE__, "0", ">0", "0", ost_get_ntv_counter(), ost_get_dex_counter(),
+			ost_get_dea_counter());
 		close_data(connection, subscription, listener);
 		return false;
 	}
 
-	if (!dxf_detach_event_listener(subscription, listener) ||
-		!dxf_close_subscription(subscription) ||
+	if (!dxf_detach_event_listener(subscription, listener) || !dxf_close_subscription(subscription) ||
 		!dxf_close_connection(connection)) {
-
 		process_last_error();
 		return false;
 	}
@@ -391,32 +369,30 @@ int set_order_source_test() {
 int add_order_source_test() {
 	dxf_connection_t connection = NULL;
 	dxf_subscription_t subscription = NULL;
-	dxf_const_string_t symbols[] = { L"IBM", L"MSFT", L"YHOO", L"C", L"AAPL", L"XBT/USD" };
+	dxf_const_string_t symbols[] = {L"IBM", L"MSFT", L"YHOO", L"C", L"AAPL", L"XBT/USD"};
 	dxf_int_t symbol_count = sizeof(symbols) / sizeof(symbols[0]);
 
 	drop_event_counter(g_ntv_counter);
 	drop_event_counter(g_dex_counter);
 	drop_event_counter(g_dea_counter);
 
-	if (!dxf_create_connection(DXFEED_HOST, order_source_tests_on_thread_terminate, NULL, NULL, NULL, NULL, &connection) ||
+	if (!dxf_create_connection(DXFEED_HOST, order_source_tests_on_thread_terminate, NULL, NULL, NULL, NULL,
+							   &connection) ||
 		!dxf_create_subscription(connection, DXF_ET_ORDER, &subscription) ||
-		!dxf_set_order_source(subscription, "NTV") ||
-		!dxf_add_symbols(subscription, symbols, symbol_count) ||
+		!dxf_set_order_source(subscription, "NTV") || !dxf_add_symbols(subscription, symbols, symbol_count) ||
 		!dxf_attach_event_listener(subscription, listener, NULL)) {
-
 		process_last_error();
 		return false;
 	}
 
-	if (!ost_wait_events(ost_get_ntv_counter) ||
-		!dx_is_equal_int(0, ost_get_dex_counter()) ||
+	if (!ost_wait_events(ost_get_ntv_counter) || !dx_is_equal_int(0, ost_get_dex_counter()) ||
 		!dx_is_equal_int(0, ost_get_dea_counter())) {
-
-		printf("at %s, line: %d\n"
-				"    Expected: ntv=%5s, dex=%5s, dea=%5s; \n"
-				"    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n",
-				__FUNCTION__, __LINE__, ">0", "0", "0",
-				ost_get_ntv_counter(), ost_get_dex_counter(), ost_get_dea_counter());
+		printf(
+			"at %s, line: %d\n"
+			"    Expected: ntv=%5s, dex=%5s, dea=%5s; \n"
+			"    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n",
+			__FUNCTION__, __LINE__, ">0", "0", "0", ost_get_ntv_counter(), ost_get_dex_counter(),
+			ost_get_dea_counter());
 		close_data(connection, subscription, listener);
 		return false;
 	}
@@ -427,10 +403,8 @@ int add_order_source_test() {
 		close_data(connection, subscription, listener);
 		return false;
 	}
-	if (!wait_all_events_received(g_ntv_counter) ||
-		!wait_all_events_received(g_dex_counter) ||
+	if (!wait_all_events_received(g_ntv_counter) || !wait_all_events_received(g_dex_counter) ||
 		!wait_all_events_received(g_dea_counter)) {
-
 		PRINT_TEST_FAILED;
 		close_data(connection, subscription, listener);
 		return false;
@@ -438,14 +412,13 @@ int add_order_source_test() {
 	drop_event_counter(g_ntv_counter);
 	drop_event_counter(g_dex_counter);
 	drop_event_counter(g_dea_counter);
-	if (!ost_wait_two_events(ost_get_ntv_counter, ost_get_dex_counter) ||
-		!dx_is_equal_int(0, ost_get_dea_counter())) {
-
-		printf("at %s, line: %d\n"
-				"    Expected: ntv=%5s, dex=%5s, dea=%5s; \n"
-				"    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n",
-				__FUNCTION__, __LINE__, ">0", ">0", "0",
-				ost_get_ntv_counter(), ost_get_dex_counter(), ost_get_dea_counter());
+	if (!ost_wait_two_events(ost_get_ntv_counter, ost_get_dex_counter) || !dx_is_equal_int(0, ost_get_dea_counter())) {
+		printf(
+			"at %s, line: %d\n"
+			"    Expected: ntv=%5s, dex=%5s, dea=%5s; \n"
+			"    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n",
+			__FUNCTION__, __LINE__, ">0", ">0", "0", ost_get_ntv_counter(), ost_get_dex_counter(),
+			ost_get_dea_counter());
 		close_data(connection, subscription, listener);
 		return false;
 	}
@@ -456,10 +429,8 @@ int add_order_source_test() {
 		close_data(connection, subscription, listener);
 		return false;
 	}
-	if (!wait_all_events_received(g_ntv_counter) ||
-		!wait_all_events_received(g_dex_counter) ||
+	if (!wait_all_events_received(g_ntv_counter) || !wait_all_events_received(g_dex_counter) ||
 		!wait_all_events_received(g_dea_counter)) {
-
 		PRINT_TEST_FAILED;
 		close_data(connection, subscription, listener);
 		return false;
@@ -468,19 +439,18 @@ int add_order_source_test() {
 	drop_event_counter(g_dex_counter);
 	drop_event_counter(g_dea_counter);
 	if (!ost_wait_multiple_events(g_all_counters, SIZE_OF_ARRAY(g_all_counters))) {
-		printf("at %s, line: %d\n"
-				"    Expected: ntv=%5s, dex=%5s, dea=%5s; \n"
-				"    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n",
-				__FUNCTION__, __LINE__, ">0", ">0", ">0",
-				ost_get_ntv_counter(), ost_get_dex_counter(), ost_get_dea_counter());
+		printf(
+			"at %s, line: %d\n"
+			"    Expected: ntv=%5s, dex=%5s, dea=%5s; \n"
+			"    But was:  ntv=%5d, dex=%5d, dea=%5d.\n\n",
+			__FUNCTION__, __LINE__, ">0", ">0", ">0", ost_get_ntv_counter(), ost_get_dex_counter(),
+			ost_get_dea_counter());
 		close_data(connection, subscription, listener);
 		return false;
 	}
 
-	if (!dxf_detach_event_listener(subscription, listener) ||
-		!dxf_close_subscription(subscription) ||
+	if (!dxf_detach_event_listener(subscription, listener) || !dxf_close_subscription(subscription) ||
 		!dxf_close_connection(connection)) {
-
 		process_last_error();
 		return false;
 	}
@@ -501,43 +471,39 @@ int add_order_source_test() {
 int input_order_source_test() {
 	dxf_connection_t connection = NULL;
 	dxf_subscription_t subscription = NULL;
-	dxf_const_string_t symbols[] = { { L"IBM" },{ L"MSFT" },{ L"YHOO" },{ L"C" },{ L"AAPL" } };
+	dxf_const_string_t symbols[] = {{L"IBM"}, {L"MSFT"}, {L"YHOO"}, {L"C"}, {L"AAPL"}};
 	dxf_int_t symbol_count = sizeof(symbols) / sizeof(symbols[0]);
 
-	if (!dxf_create_connection(DXFEED_HOST, order_source_tests_on_thread_terminate, NULL, NULL, NULL, NULL, &connection) ||
+	if (!dxf_create_connection(DXFEED_HOST, order_source_tests_on_thread_terminate, NULL, NULL, NULL, NULL,
+							   &connection) ||
 		!dxf_create_subscription(connection, DXF_ET_ORDER, &subscription)) {
-
 		process_last_error();
 		return false;
 	}
 
 	if (
-		//Try to add order source with NULL subscription
+		// Try to add order source with NULL subscription
 		dxf_add_order_source(NULL, "NTV") ||
-		//Try to add NULL order source
+		// Try to add NULL order source
 		dxf_add_order_source(subscription, NULL) ||
-		//Try to add empty-string order source
+		// Try to add empty-string order source
 		dxf_add_order_source(subscription, "") ||
-		//Try to add very-long-string order source
+		// Try to add very-long-string order source
 		dxf_add_order_source(subscription, "abcde") ||
-		//Try to set order source with NULL subscription
+		// Try to set order source with NULL subscription
 		dxf_set_order_source(NULL, "NTV") ||
-		//Try to set NULL order source
+		// Try to set NULL order source
 		dxf_set_order_source(subscription, NULL) ||
-		//Try to set empty-string order source
+		// Try to set empty-string order source
 		dxf_set_order_source(subscription, "") ||
-		//Try to set very-long-string order source
-		dxf_set_order_source(subscription, "abcde")
-		) {
-
+		// Try to set very-long-string order source
+		dxf_set_order_source(subscription, "abcde")) {
 		PRINT_TEST_FAILED;
 		close_data(connection, subscription, listener);
 		return false;
 	}
 
-	if (!dxf_close_subscription(subscription) ||
-		!dxf_close_connection(connection)) {
-
+	if (!dxf_close_subscription(subscription) || !dxf_close_connection(connection)) {
 		process_last_error();
 		return false;
 	}
@@ -554,11 +520,8 @@ int order_source_configuration_test(void) {
 	init_event_counter2(g_dex_counter, "DEX");
 	init_event_counter2(g_dea_counter, "DEA");
 
-	if (!input_order_source_test() ||
-		!add_order_source_test() ||
-		!set_order_source_test() ||
+	if (!input_order_source_test() || !add_order_source_test() || !set_order_source_test() ||
 		!mixed_order_source_test()) {
-
 		res &= false;
 	}
 

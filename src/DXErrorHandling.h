@@ -28,11 +28,9 @@
 #include "DXErrorCodes.h"
 #include "DXTypes.h"
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Error subsystem function return value roster
  */
-/* -------------------------------------------------------------------------- */
 
 typedef enum {
 	dx_efr_success,
@@ -40,11 +38,10 @@ typedef enum {
 	dx_efr_error_subsys_init_failure
 } dx_error_function_result_t;
 
-/* -------------------------------------------------------------------------- */
 /*
  *	The error manipulation functions
  */
-/* -------------------------------------------------------------------------- */
+
 /*
  *  Reports an error.
 
@@ -62,7 +59,6 @@ dx_error_function_result_t dx_set_last_error(dx_error_code_t error_code);
 
 dx_error_function_result_t dx_set_last_error_impl(dx_error_code_t error_code, int with_logging);
 
-/* -------------------------------------------------------------------------- */
 /*
  *  Retrieves an information about a previously reported error.
 
@@ -79,7 +75,6 @@ dx_error_function_result_t dx_set_last_error_impl(dx_error_code_t error_code, in
 
 dx_error_function_result_t dx_get_last_error (int* error_code);
 
-/* -------------------------------------------------------------------------- */
 /*
  *  Erases the information about the last reported error, thus making the
 	subsequent successful 'dx_get_last_error' calls return 'dx_ec_success'
@@ -96,7 +91,6 @@ dx_error_function_result_t dx_get_last_error (int* error_code);
 
 int dx_pop_last_error ();
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Explicitly initializes the error subsystem.
 	Should not be called unless you know what you're doing.
@@ -111,11 +105,9 @@ int dx_pop_last_error ();
 
 int dx_init_error_subsystem (void);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Convenient helper functions
  */
-/* -------------------------------------------------------------------------- */
 
 /*
  *	Returns the currently stored error code.

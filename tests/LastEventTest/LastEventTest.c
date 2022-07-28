@@ -32,10 +32,14 @@
 #include "Logger.h"
 
 #ifdef _WIN32
-#	pragma warning(push)
-#	pragma warning(disable : 5105)
+#	if !defined(__MINGW32__)
+#		pragma warning(push)
+#		pragma warning(disable : 5105)
+#	endif
 #	include <Windows.h>
-#	pragma warning(pop)
+#	if !defined(__MINGW32__)
+#		pragma warning(pop)
+#	endif
 void dxs_sleep(int milliseconds) { Sleep((DWORD)milliseconds); }
 #else
 #	include <time.h>
@@ -53,8 +57,6 @@ static dxf_const_string_t g_symbols[] = {L"IBM", L"MSFT", L"YHOO", L"C"};
 static const dxf_int_t g_symbols_size = sizeof(g_symbols) / sizeof(g_symbols[0]);
 static const int g_event_type = DXF_ET_TRADE;
 static int g_iteration_count = 10;
-
-/* -------------------------------------------------------------------------- */
 
 void process_last_error() {
 	int error_code = dx_ec_success;
@@ -80,8 +82,6 @@ void process_last_error() {
 	wprintf(L"An error occurred but the error subsystem failed to initialize\n");
 }
 
-/* -------------------------------------------------------------------------- */
-
 void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
 			  void* user_data) {
 	dxf_int_t i = 0;
@@ -104,8 +104,6 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 		}
 	}
 }
-
-/* -------------------------------------------------------------------------- */
 
 int main(int argc, char* argv[]) {
 	dxf_connection_t connection;

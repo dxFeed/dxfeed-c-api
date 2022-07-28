@@ -32,10 +32,14 @@
 #include "Logger.h"
 
 #ifdef _WIN32
-#	pragma warning(push)
-#	pragma warning(disable : 5105)
+#	if !defined(__MINGW32__)
+#		pragma warning(push)
+#		pragma warning(disable : 5105)
+#	endif
 #	include <Windows.h>
-#	pragma warning(pop)
+#	if !defined(__MINGW32__)
+#		pragma warning(pop)
+#	endif
 void dxs_sleep(int milliseconds) { Sleep((DWORD)milliseconds); }
 #else
 void dxs_sleep(int milliseconds) {
@@ -48,8 +52,6 @@ void dxs_sleep(int milliseconds) {
 
 const char dxfeed_host[] = "demo.dxfeed.com:7300";
 
-/* -------------------------------------------------------------------------- */
-
 void print_timestamp(dxf_long_t timestamp) {
 	wchar_t timefmt[80];
 
@@ -59,8 +61,6 @@ void print_timestamp(dxf_long_t timestamp) {
 	wcsftime(timefmt, 80, L"%Y%m%d-%H%M%S", timeinfo);
 	wprintf(L"%ls", timefmt);
 }
-
-/* -------------------------------------------------------------------------- */
 
 void first_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
 					void* user_data) {
@@ -130,14 +130,10 @@ void first_listener(int event_type, dxf_const_string_t symbol_name, const dxf_ev
 	}
 }
 
-/* -------------------------------------------------------------------------- */
-
 void second_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
 					 void* user_data) {
 	wprintf(L"Second listener. Event: %ls Symbol: %ls\n", dx_event_type_to_string(event_type), symbol_name);
 }
-
-/* -------------------------------------------------------------------------- */
 
 void process_last_error();
 
@@ -146,8 +142,6 @@ void conn_termination_notifier(dxf_connection_t conn, void* user_data) {
 
 	process_last_error();
 }
-
-/* -------------------------------------------------------------------------- */
 
 void process_last_error() {
 	int error_code = dx_ec_success;
@@ -172,8 +166,6 @@ void process_last_error() {
 
 	wprintf(L"An error occurred but the error subsystem failed to initialize\n");
 }
-
-/* -------------------------------------------------------------------------- */
 
 int main(int argc, char* argv[]) {
 	dxf_connection_t connection;

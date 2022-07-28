@@ -31,11 +31,9 @@
  * @brief dxFeed C API domain types declarations
  */
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Record type constants
  */
-/* -------------------------------------------------------------------------- */
 
 /// Record info ID
 typedef enum {
@@ -68,11 +66,9 @@ typedef dxf_int_t dx_record_id_t;
 /* Invalid or empty record id */
 static const dx_record_id_t DX_RECORD_ID_INVALID = -1;
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Record structures
  */
-/* -------------------------------------------------------------------------- */
 
 /// Trade
 typedef struct dx_trade {

@@ -8,8 +8,10 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(DXFC_TEST_SOURCES WideDecimalTest.cpp)
-set(DXFC_INCLUDE_DIRS ../../include ../../src ../../thirdparty/Catch2-2.13.8/single_include)
+set(DXFC_TEST_SOURCES WideDecimalTest.cpp SnapshotTest.cpp)
+set(DXFC_INCLUDE_DIRS ../../include ../../src ../../thirdparty/Catch2-2.13.8/single_include
+        ../../thirdparty/boost-1_79 ../../thirdparty/variant-lite-2.0.0 ../../thirdparty/optional-lite-3.5.0
+        ../../thirdparty/fmt-8.1.1/include)
 
 string(REPLACE ".cpp" "" DXFC_TEST_BASENAMES "${DXFC_TEST_SOURCES}")
 set(DXFC_TEST_TARGETS ${DXFC_TEST_BASENAMES})
@@ -17,12 +19,13 @@ set(DXFC_TEST_TARGETS ${DXFC_TEST_BASENAMES})
 add_library(DXFeedTests2Main OBJECT Main.cpp)
 target_include_directories(DXFeedTests2Main PRIVATE ${DXFC_INCLUDE_DIRS})
 
-add_executable(WideDecimalTest WideDecimalTest.cpp ../../src/WideDecimal.h ../../src/WideDecimal.hpp)
+add_executable(WideDecimalTest WideDecimalTest.cpp ../../src/WideDecimal.cpp ../../src/WideDecimal.h ../../src/WideDecimal.hpp)
+add_executable(SnapshotTest SnapshotTest.cpp ../../src/Snapshot/Snapshot.cpp ../../src/Snapshot/Snapshot.h ../../src/Snapshot/Snapshot.hpp)
 
-foreach(name ${DXFC_TEST_TARGETS})
+foreach (name ${DXFC_TEST_TARGETS})
     target_include_directories(${name} PRIVATE ${DXFC_INCLUDE_DIRS})
     target_link_libraries(${name} PRIVATE DXFeedTests2Main)
     set_property(TARGET ${name} PROPERTY CXX_STANDARD 17)
     set_property(TARGET ${name} PROPERTY CXX_EXTENSIONS OFF)
     add_test(NAME ${name} COMMAND ${name})
-endforeach()
+endforeach ()

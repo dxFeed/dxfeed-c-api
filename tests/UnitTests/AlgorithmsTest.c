@@ -74,8 +74,6 @@ static int algorithms_base64_length_test(void) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 static int base64_run_case(const base64_test_case* test_case, base64_test_context* context) {
 	size_t source_size = strlen(test_case->source);
 	int i;
@@ -123,8 +121,6 @@ static int algorithms_base64_encode_decode_test(void) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 static dx_property_item_t source_props_array[] = {
 	{ L"a", L"A" },
 	{ L"b", L"B" },
@@ -132,8 +128,6 @@ static dx_property_item_t source_props_array[] = {
 };
 static size_t source_props_size = SIZE_OF_ARRAY(source_props_array);
 static dx_property_map_t source = { source_props_array, SIZE_OF_ARRAY(source_props_array), SIZE_OF_ARRAY(source_props_array) };
-
-/* -------------------------------------------------------------------------- */
 
 static int dx_is_equal_property_map(const dx_property_map_t* expected, const dx_property_map_t* actual) {
 	size_t i;
@@ -146,8 +140,6 @@ static int dx_is_equal_property_map(const dx_property_map_t* expected, const dx_
 	}
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 /*
  * Test
@@ -169,8 +161,6 @@ int properties_map_set_null_test(void) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 /*
  * Test
  *
@@ -190,8 +180,6 @@ int properties_map_set_empty_test(void) {
 	dx_property_map_free_collection(&props);
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 /*
  * Test
@@ -216,8 +204,6 @@ int properties_map_get_all_test(void) {
 	dx_property_map_free_collection(&props);
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 /*
  * Test
@@ -255,8 +241,6 @@ int properties_map_set_change_test(void) {
 	dx_property_map_free_collection(&props);
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 /*
  * Test
@@ -298,8 +282,6 @@ int properties_map_set_many_test(void) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 /*
  * Test
  *
@@ -332,8 +314,6 @@ int properties_map_set_many_invalid_test(void) {
 	dx_property_map_free_collection(&props);
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 /*
  * Test
@@ -369,8 +349,6 @@ int properties_map_contains_test(void) {
 	dx_property_map_free_collection(&props);
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 /*
  * Test
@@ -410,8 +388,6 @@ int property_map_clone_test(void) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 /*
  * Test
  *
@@ -440,8 +416,6 @@ int property_map_try_get_value_test(void) {
 	dx_property_map_free_collection(&props);
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int algorithms_all_tests(void) {
 	int res = true;

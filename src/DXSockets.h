@@ -27,11 +27,15 @@
 #define DX_SOCKETS_H_INCLUDED
 
 #ifdef _WIN32
-#	pragma warning(push)
-#	pragma warning(disable : 5105)
+#	if !defined(__MINGW32__)
+#		pragma warning(push)
+#		pragma warning(disable : 5105)
+#	endif
 #	include <WinSock2.h>
 #	include <WS2tcpip.h>
-#	pragma warning(pop)
+#	if !defined(__MINGW32__)
+#		pragma warning(pop)
+#	endif
 
 	typedef SOCKET dx_socket_t;
 #else
@@ -52,20 +56,16 @@ typedef int dx_socket_t;
 
 #define INVALID_DATA_SIZE (-1)
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Socket subsystem initialization
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_on_connection_created (void);
 int dx_on_connection_destroyed (void);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Socket function wrappers
  */
-/* -------------------------------------------------------------------------- */
 
 dx_socket_t dx_socket (int family, int type, int protocol);
 int dx_connect (dx_socket_t s, const struct sockaddr* addr, socklen_t addrlen);

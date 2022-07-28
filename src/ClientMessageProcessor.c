@@ -36,11 +36,9 @@
 #include "TaskQueue.h"
 #include "Version.h"
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Event subscription auxiliary stuff
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_to_subscription_message_type(int subscribe, dx_subscription_type_t subscr_type, OUT dx_message_type_t* res) {
 	if (res == NULL) {
@@ -63,11 +61,9 @@ int dx_to_subscription_message_type(int subscribe, dx_subscription_type_t subscr
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Event subscription task stuff
  */
-/* -------------------------------------------------------------------------- */
 
 typedef struct {
 	dxf_connection_t connection;
@@ -79,8 +75,6 @@ typedef struct {
 	dxf_uint_t subscr_flags;
 	dxf_long_t time;
 } dx_event_subscription_task_data_t;
-
-/* -------------------------------------------------------------------------- */
 
 void* dx_destroy_event_subscription_task_data(dx_event_subscription_task_data_t* data) {
 	if (data == NULL) {
@@ -116,8 +110,6 @@ size_t dx_count_symbols(dxf_const_string_t* symbols, size_t symbol_count, const 
 
 	return count;
 }
-
-/* -------------------------------------------------------------------------- */
 
 void* dx_create_event_subscription_task_data(dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
 											 dxf_const_string_t* symbols, size_t symbol_count,
@@ -179,11 +171,9 @@ void* dx_create_event_subscription_task_data(dxf_connection_t connection, dx_ord
 	return data;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Common helpers
  */
-/* -------------------------------------------------------------------------- */
 
 static int dx_compose_message_header(void* bocc, dx_message_type_t message_type) {
 	CHECKED_CALL_2(dx_write_byte, bocc, (dxf_byte_t)0); /* reserve one byte for message length */
@@ -192,8 +182,6 @@ static int dx_compose_message_header(void* bocc, dx_message_type_t message_type)
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 static int dx_move_message_data(void* bocc, int old_offset, int new_offset, int data_length) {
 	CHECKED_CALL_2(dx_ensure_capacity, bocc, new_offset + data_length);
 
@@ -201,8 +189,6 @@ static int dx_move_message_data(void* bocc, int old_offset, int new_offset, int 
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 static int dx_finish_composing_message(void* bocc) {
 	int message_length = dx_get_out_buffer_position(bocc) - 1; /* 1 is for the one byte reserved for size */
@@ -221,11 +207,9 @@ static int dx_finish_composing_message(void* bocc) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Symbol subscription helpers
  */
-/* -------------------------------------------------------------------------- */
 
 static int dx_compose_body(void* bocc, dxf_int_t record_id, dxf_int_t cipher, dxf_const_string_t symbol) {
 	if (cipher == 0 && symbol == NULL) {
@@ -237,8 +221,6 @@ static int dx_compose_body(void* bocc, dxf_int_t record_id, dxf_int_t cipher, dx
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 static int dx_subscribe_symbol_to_record(dxf_connection_t connection, dx_message_type_t type, dxf_const_string_t symbol,
 										 dxf_int_t cipher, dxf_int_t record_id, dxf_long_t time,
@@ -305,8 +287,6 @@ static int dx_subscribe_symbol_to_record(dxf_connection_t connection, dx_message
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_subscribe_symbols_to_events_task(void* data, int command) {
 	dx_event_subscription_task_data_t* task_data = data;
 	int res = dx_tes_pop_me;
@@ -332,11 +312,9 @@ int dx_subscribe_symbols_to_events_task(void* data, int command) {
 	return res;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Describe record helpers
  */
-/* -------------------------------------------------------------------------- */
 
 static int dx_write_record_field(void* bocc, const dx_field_info_t* field) {
 	CHECKED_CALL_2(dx_write_utf_string, bocc, field->field_name);
@@ -344,8 +322,6 @@ static int dx_write_record_field(void* bocc, const dx_field_info_t* field) {
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 static int dx_write_event_record(void* bocc, const dx_record_item_t* record, dx_record_id_t record_id) {
 	int field_index = 0;
@@ -361,8 +337,6 @@ static int dx_write_event_record(void* bocc, const dx_record_item_t* record, dx_
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_write_event_records(void* bocc, void* dscc) {
 	dx_record_id_t record_id = dx_get_next_unsubscribed_record_id(dscc, false);
 	dx_record_id_t count = dx_get_records_list_count(dscc);
@@ -374,8 +348,6 @@ int dx_write_event_records(void* bocc, void* dscc) {
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_describe_records_sender_task(void* data, int command) {
 	int res = dx_tes_pop_me;
@@ -391,7 +363,6 @@ int dx_describe_records_sender_task(void* data, int command) {
 	return res;
 }
 
-/* -------------------------------------------------------------------------- */
 int dx_load_events_for_subscription(dxf_connection_t connection, dx_order_source_array_ptr_t order_sources,
 									int event_types, dxf_uint_t subscr_flags) {
 	dx_event_id_t eid = dx_eid_begin;
@@ -405,8 +376,6 @@ int dx_load_events_for_subscription(dxf_connection_t connection, dx_order_source
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_get_event_server_support(dxf_connection_t connection, dx_order_source_array_ptr_t order_source, int event_types,
 								int unsubscribe, dxf_uint_t subscr_flags, OUT dx_message_support_status_t* res) {
@@ -459,11 +428,9 @@ int dx_get_event_server_support(dxf_connection_t connection, dx_order_source_arr
 	return success;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Describe protocol helpers
  */
-/* -------------------------------------------------------------------------- */
 
 static int dx_write_describe_protocol_magic(void* bocc) {
 	/* hex value is 0x44585033 */
@@ -474,8 +441,6 @@ static int dx_write_describe_protocol_magic(void* bocc) {
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 static int dx_write_describe_protocol_properties(void* bocc, const dx_property_map_t* properties) {
 	size_t i;
@@ -492,8 +457,6 @@ static int dx_write_describe_protocol_properties(void* bocc, const dx_property_m
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 static int dx_write_describe_protocol_message_data(void* bocc, const int* msg_roster, int msg_count) {
 	int i = 0;
 
@@ -508,21 +471,15 @@ static int dx_write_describe_protocol_message_data(void* bocc, const int* msg_ro
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 static int dx_write_describe_protocol_sends(void* bocc) {
 	return dx_write_describe_protocol_message_data(bocc, dx_get_send_message_roster(),
 												   dx_get_send_message_roster_size());
 }
 
-/* -------------------------------------------------------------------------- */
-
 static int dx_write_describe_protocol_recvs(void* bocc) {
 	return dx_write_describe_protocol_message_data(bocc, dx_get_recv_message_roster(),
 												   dx_get_recv_message_roster_size());
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_heartbeat_sender_task(void* data, int command) {
 	int res = dx_tes_pop_me;
@@ -551,11 +508,9 @@ int dx_describe_protocol_sender_task(void* data, int command) {
 	return res;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	External interface
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_subscribe_symbols_to_events(dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
 								   dxf_const_string_t* symbols, size_t symbol_count, int* symbols_indices_to_subscribe,
@@ -665,8 +620,6 @@ int dx_subscribe_symbols_to_events(dxf_connection_t connection, dx_order_source_
 	return success;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_send_record_description(dxf_connection_t connection, int task_mode) {
 	static const int initial_size = 1024;
 
@@ -722,7 +675,6 @@ int dx_send_record_description(dxf_connection_t connection, int task_mode) {
 
 	return true;
 }
-/* -------------------------------------------------------------------------- */
 
 int dx_send_protocol_description(dxf_connection_t connection, int task_mode) {
 	static const int initial_size = 1024;

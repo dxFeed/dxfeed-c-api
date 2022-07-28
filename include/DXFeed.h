@@ -98,11 +98,9 @@
 #include "DXTypes.h"
 #include "EventData.h"
 
-/* -------------------------------------------------------------------------- */
 /*
  *	DXFeed API function return value codes
  */
-/* -------------------------------------------------------------------------- */
 
 /**
  * @ingroup  functions-macros
@@ -117,11 +115,9 @@
  */
 #define DXF_FAILURE 0
 
-/* -------------------------------------------------------------------------- */
 /*
  *	DXFeed API generic types
  */
-/* -------------------------------------------------------------------------- */
 
 /**
  * @ingroup callback-types
@@ -193,7 +189,6 @@ typedef int (*dxf_socket_thread_creation_notifier_t)(dxf_connection_t connection
  */
 typedef void (*dxf_socket_thread_destruction_notifier_t)(dxf_connection_t connection, void* user_data);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	DXFeed C API functions
 
@@ -201,7 +196,6 @@ typedef void (*dxf_socket_thread_destruction_notifier_t)(dxf_connection_t connec
  *  has occurred. Use 'dxf_get_last_error' to retrieve the error code
  *  and description.
  */
-/* -------------------------------------------------------------------------- */
 
 /**
  * @ingroup c-api-connection-functions

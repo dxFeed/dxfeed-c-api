@@ -22,11 +22,9 @@
 #include "DXMemory.h"
 #include "EventManager.h"
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Event objects management functions
  */
-/* -------------------------------------------------------------------------- */
 
 #define EVENT_COPY_FUNCTION_NAME(struct_name) \
 	struct_name##_event_copy

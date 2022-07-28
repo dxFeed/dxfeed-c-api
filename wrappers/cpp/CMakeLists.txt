@@ -8,20 +8,20 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED on)
 
 include_directories(../../include
-    thirdparty/optional-lite/include
-    thirdparty/string-view-lite/include
-    thirdparty/variant-lite/include
-    thirdparty/fmt-8.0.0/include
-    thirdparty/args
-    )
+        ../../thirdparty/optional-lite-3.5.0
+        ../../thirdparty/fmt-8.1.1/include
+        ../../thirdparty/variant-lite-2.0.0
+        ../../thirdparty/string-view-lite-1.6.0
+        ../../thirdparty/args-6.3.0
+        )
 
 add_definitions(-DFMT_HEADER_ONLY=1)
 
 set(TARGET_PLATFORM "x86" CACHE STRING "Target platform specification")
 set(PLATFORM_POSTFIX "")
-if(TARGET_PLATFORM STREQUAL "x64")
+if (TARGET_PLATFORM STREQUAL "x64")
     set(PLATFORM_POSTFIX "_64")
-endif()
+endif ()
 set(DEBUG_POSTFIX "d${PLATFORM_POSTFIX}")
 set(RELEASE_POSTFIX ${PLATFORM_POSTFIX})
 set(LIB_TLS ../../lib/libressl)
@@ -38,7 +38,6 @@ add_subdirectory(samples)
 set(BUILD_FILES CMakeLists.txt)
 set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/DXFeedAllCPackConfig.cmake")
 
-install(DIRECTORY thirdparty DESTINATION "wrappers/cpp" CONFIGURATIONS Release)
 install(FILES ${BUILD_FILES} DESTINATION "wrappers/cpp" CONFIGURATIONS Release)
 
 set(CPACK_PACKAGE_VENDOR "Devexperts LLC")

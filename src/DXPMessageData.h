@@ -23,11 +23,9 @@
 #include "DXTypes.h"
 #include "PrimitiveTypes.h"
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Message types
  */
-/* -------------------------------------------------------------------------- */
 
 typedef enum {
 	/*
@@ -103,32 +101,26 @@ typedef enum {
 	MESSAGE_GZIP_COMPRESSION = 0x8b,  // 139 decimal, '<' char
 } dx_message_type_t;
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Message type validation functions
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_is_message_type_valid(int type);
 int dx_is_data_message(int type);
 int dx_is_subscription_message(int type);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Message roster functions
  */
-/* -------------------------------------------------------------------------- */
 
 const int* dx_get_send_message_roster(void);
 int dx_get_send_message_roster_size(void);
 const int* dx_get_recv_message_roster(void);
 int dx_get_recv_message_roster_size(void);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Miscellaneous message functions
  */
-/* -------------------------------------------------------------------------- */
 
 dxf_const_string_t dx_get_message_type_name(int type);
 

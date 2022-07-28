@@ -22,11 +22,9 @@
 #include "DXErrorHandling.h"
 #include "DXProperties.h"
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Property map functions implementations
  */
-/* -------------------------------------------------------------------------- */
 
 static void dx_property_map_free_item(void* obj) {
 	if (obj == NULL)
@@ -37,8 +35,6 @@ static void dx_property_map_free_item(void* obj) {
 	if (item->value != NULL)
 		dx_free(item->value);
 }
-
-/* -------------------------------------------------------------------------- */
 
 void dx_property_map_free_collection(dx_property_map_t* props) {
 	dx_property_item_t* item = props->elements;
@@ -52,13 +48,9 @@ void dx_property_map_free_collection(dx_property_map_t* props) {
 	props->capacity = 0;
 }
 
-/* -------------------------------------------------------------------------- */
-
 static inline int dx_property_item_comparator(dx_property_item_t item1, dx_property_item_t item2) {
 	return dx_compare_strings((dxf_const_string_t)item1.key, (dxf_const_string_t)item2.key);
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_property_map_clone(const dx_property_map_t* src, dx_property_map_t* dest) {
 	size_t i;
@@ -80,13 +72,9 @@ int dx_property_map_clone(const dx_property_map_t* src, dx_property_map_t* dest)
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 dxf_string_t dx_create_empty_string() {
 	return (dxf_string_t)dx_calloc(1, sizeof(dxf_char_t));
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_property_map_set(dx_property_map_t* props, dxf_const_string_t key, dxf_const_string_t value) {
 	dx_property_item_t item = { (dxf_string_t)key, (dxf_string_t)value };
@@ -125,8 +113,6 @@ int dx_property_map_set(dx_property_map_t* props, dxf_const_string_t key, dxf_co
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_property_map_set_many(dx_property_map_t* props, const dx_property_map_t* other) {
 	size_t i;
 	dx_property_map_t temp = { 0 };
@@ -153,8 +139,6 @@ int dx_property_map_set_many(dx_property_map_t* props, const dx_property_map_t* 
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_property_map_contains(const dx_property_map_t* props, dxf_const_string_t key) {
 	dx_property_item_t item = { (dxf_string_t)key, NULL };
 	int found;
@@ -170,8 +154,6 @@ int dx_property_map_contains(const dx_property_map_t* props, dxf_const_string_t 
 	(void)index;
 	return found;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_property_map_try_get_value(const dx_property_map_t* props,
 	dxf_const_string_t key,

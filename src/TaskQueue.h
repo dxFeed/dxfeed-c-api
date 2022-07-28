@@ -22,11 +22,9 @@
 
 #include "PrimitiveTypes.h"
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Task data
  */
-/* -------------------------------------------------------------------------- */
 
 typedef enum {
 	dx_tes_success = (1 << 0), /* if this flag is not set then some error occurred */
@@ -43,11 +41,9 @@ typedef int (*dx_task_processor_t) (void* data, int command);
 
 typedef void* dx_task_queue_t;
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Task queue functions
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_create_task_queue (OUT dx_task_queue_t* tq);
 int dx_cleanup_task_queue (dx_task_queue_t tq);

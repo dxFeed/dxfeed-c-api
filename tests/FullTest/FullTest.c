@@ -52,10 +52,14 @@ typedef struct {
 	pthread_mutexattr_t attr;
 } dxs_mutex_t;
 #else /* !defined(_WIN32) || defined(USE_PTHREADS) */
-#	pragma warning(push)
-#	pragma warning(disable : 5105)
+#	if !defined(__MINGW32__)
+#		pragma warning(push)
+#		pragma warning(disable : 5105)
+#	endif
 #	include <Windows.h>
-#	pragma warning(pop)
+#	if !defined(__MINGW32__)
+#		pragma warning(pop)
+#	endif
 #	define USE_WIN32_THREADS
 typedef HANDLE dxs_thread_t;
 typedef DWORD dxs_key_t;
@@ -75,22 +79,16 @@ int dxs_mutex_create(dxs_mutex_t* mutex) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dxs_mutex_destroy(dxs_mutex_t* mutex) {
 	DeleteCriticalSection(*mutex);
 	free(*mutex);
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dxs_mutex_lock(dxs_mutex_t* mutex) {
 	EnterCriticalSection(*mutex);
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dxs_mutex_unlock(dxs_mutex_t* mutex) {
 	LeaveCriticalSection(*mutex);
@@ -122,8 +120,6 @@ int dxs_mutex_create(dxs_mutex_t* mutex) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dxs_mutex_destroy(dxs_mutex_t* mutex) {
 	if (pthread_mutex_destroy(&mutex->mutex) != 0) {
 		return false;
@@ -136,8 +132,6 @@ int dxs_mutex_destroy(dxs_mutex_t* mutex) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dxs_mutex_lock(dxs_mutex_t* mutex) {
 	if (pthread_mutex_lock(&mutex->mutex) != 0) {
 		return false;
@@ -145,8 +139,6 @@ int dxs_mutex_lock(dxs_mutex_t* mutex) {
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dxs_mutex_unlock(dxs_mutex_t* mutex) {
 	if (pthread_mutex_unlock(&mutex->mutex) != 0) {
@@ -165,7 +157,6 @@ static char dxfeed_host_default[] = "demo.dxfeed.com:7300";
 static const dxf_const_string_t g_symbols[] = {L"IBM", L"MSFT", L"YHOO", L"C"};
 #define MAIN_LOOP_SLEEP_MILLIS 100
 
-/* -------------------------------------------------------------------------- */
 void trade_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
 					void* user_data);
 void quote_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
@@ -194,7 +185,7 @@ void series_listener(int event_type, dxf_const_string_t symbol_name, const dxf_e
 					 void* user_data);
 void configuration_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data,
 							int data_count, void* user_data);
-void snapshot_listener(dxf_snapshot_data_ptr_t snapshot_data, void* user_data);
+void snapshot_listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data);
 
 struct event_info_t {
 	dx_event_id_t id;
@@ -234,8 +225,6 @@ struct snapshot_info_t {
 static struct snapshot_info_t snapshot_info[SNAPSHOT_COUNT] = {
 	{dx_eid_order, DXF_ET_ORDER, "NTV", {0, 42}, snapshot_listener, {0}}};
 
-/* -------------------------------------------------------------------------- */
-
 static int is_listener_thread_terminated = false;
 static dxs_mutex_t listener_thread_guard;
 
@@ -248,8 +237,6 @@ int is_thread_terminate() {
 
 	return res;
 }
-
-/* -------------------------------------------------------------------------- */
 
 #ifdef _WIN32
 void print_at(COORD c, wchar_t* str) {
@@ -273,8 +260,6 @@ void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
 	wprintf(L"\nTerminating listener thread, host: %hs\n", dxfeed_host);
 }
 
-/* -------------------------------------------------------------------------- */
-
 int get_symbol_index(dxf_const_string_t symbol_name) {
 	int i = 0;
 	for (; i < SYMBOLS_COUNT; ++i) {
@@ -285,8 +270,6 @@ int get_symbol_index(dxf_const_string_t symbol_name) {
 
 	return -1;
 }
-
-/* -------------------------------------------------------------------------- */
 
 #define DXT_BUF_LEN 256
 
@@ -316,8 +299,6 @@ void trade_listener(int event_type, dxf_const_string_t symbol_name, const dxf_ev
 	print_at(coord, buf);
 }
 
-/* -------------------------------------------------------------------------- */
-
 void quote_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
 					void* user_data) {
 	wchar_t buf[DXT_BUF_LEN];
@@ -343,8 +324,6 @@ void quote_listener(int event_type, dxf_const_string_t symbol_name, const dxf_ev
 			 event_info[dx_eid_quote].total_data_count[ind]);
 	print_at(coord, buf);
 }
-
-/* -------------------------------------------------------------------------- */
 
 void summary_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
 					  void* user_data) {
@@ -372,8 +351,6 @@ void summary_listener(int event_type, dxf_const_string_t symbol_name, const dxf_
 	print_at(coord, buf);
 }
 
-/* -------------------------------------------------------------------------- */
-
 void profile_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
 					  void* user_data) {
 	wchar_t buf[DXT_BUF_LEN];
@@ -399,8 +376,6 @@ void profile_listener(int event_type, dxf_const_string_t symbol_name, const dxf_
 			 event_info[dx_eid_profile].total_data_count[ind]);
 	print_at(coord, buf);
 }
-
-/* -------------------------------------------------------------------------- */
 
 void order_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
 					void* user_data) {
@@ -428,8 +403,6 @@ void order_listener(int event_type, dxf_const_string_t symbol_name, const dxf_ev
 	print_at(coord, buf);
 }
 
-/* -------------------------------------------------------------------------- */
-
 void time_and_sale_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data,
 							int data_count, void* user_data) {
 	wchar_t buf[DXT_BUF_LEN];
@@ -455,8 +428,6 @@ void time_and_sale_listener(int event_type, dxf_const_string_t symbol_name, cons
 			 event_info[dx_eid_time_and_sale].total_data_count[ind]);
 	print_at(coord, buf);
 }
-
-/* -------------------------------------------------------------------------- */
 
 void candle_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
 					 void* user_data) {
@@ -484,8 +455,6 @@ void candle_listener(int event_type, dxf_const_string_t symbol_name, const dxf_e
 	print_at(coord, buf);
 }
 
-/* -------------------------------------------------------------------------- */
-
 void trade_eth_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
 						void* user_data) {
 	wchar_t buf[DXT_BUF_LEN];
@@ -511,8 +480,6 @@ void trade_eth_listener(int event_type, dxf_const_string_t symbol_name, const dx
 			 event_info[dx_eid_trade_eth].total_data_count[ind]);
 	print_at(coord, buf);
 }
-
-/* -------------------------------------------------------------------------- */
 
 void spread_order_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
 						   void* user_data) {
@@ -540,8 +507,6 @@ void spread_order_listener(int event_type, dxf_const_string_t symbol_name, const
 	print_at(coord, buf);
 }
 
-/* -------------------------------------------------------------------------- */
-
 void greeks_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
 					 void* user_data) {
 	wchar_t buf[DXT_BUF_LEN];
@@ -567,8 +532,6 @@ void greeks_listener(int event_type, dxf_const_string_t symbol_name, const dxf_e
 			 event_info[dx_eid_greeks].total_data_count[ind]);
 	print_at(coord, buf);
 }
-
-/* -------------------------------------------------------------------------- */
 
 void theo_price_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
 						 void* user_data) {
@@ -596,8 +559,6 @@ void theo_price_listener(int event_type, dxf_const_string_t symbol_name, const d
 	print_at(coord, buf);
 }
 
-/* -------------------------------------------------------------------------- */
-
 void underlying_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
 						 void* user_data) {
 	wchar_t buf[DXT_BUF_LEN];
@@ -623,8 +584,6 @@ void underlying_listener(int event_type, dxf_const_string_t symbol_name, const d
 			 event_info[dx_eid_underlying].total_data_count[ind]);
 	print_at(coord, buf);
 }
-
-/* -------------------------------------------------------------------------- */
 
 void series_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
 					 void* user_data) {
@@ -652,8 +611,6 @@ void series_listener(int event_type, dxf_const_string_t symbol_name, const dxf_e
 	print_at(coord, buf);
 }
 
-/* -------------------------------------------------------------------------- */
-
 void configuration_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data,
 							int data_count, void* user_data) {
 	wchar_t buf[DXT_BUF_LEN];
@@ -679,8 +636,6 @@ void configuration_listener(int event_type, dxf_const_string_t symbol_name, cons
 			 event_info[dx_eid_configuration].total_data_count[ind]);
 	print_at(coord, buf);
 }
-
-/* -------------------------------------------------------------------------- */
 
 void snapshot_listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_data) {
 	wchar_t buf[DXT_BUF_LEN];
@@ -709,8 +664,6 @@ void snapshot_listener(const dxf_snapshot_data_ptr_t snapshot_data, void* user_d
 			 info->total_data_count[ind]);
 	print_at(coord, buf);
 }
-
-/* -------------------------------------------------------------------------- */
 
 void process_last_error() {
 	int error_code = dx_ec_success;
@@ -829,7 +782,7 @@ void* create_snapshot_subscription(dxf_connection_t connection, struct snapshot_
 
 	return info;
 }
-/* -------------------------------------------------------------------------- */
+
 #ifdef _WIN32
 int initialize_console() {
 	CONSOLE_SCREEN_BUFFER_INFO info;

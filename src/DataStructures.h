@@ -27,19 +27,15 @@
 #include "EventData.h"
 #include "DXThreads.h"
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Connection context functions
  */
-/* -------------------------------------------------------------------------- */
 
 void* dx_get_data_structures_connection_context (dxf_connection_t connection);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Event record types and structures
  */
-/* -------------------------------------------------------------------------- */
 
 typedef enum {
 	dx_fid_void = 0,
@@ -85,15 +81,11 @@ typedef enum {
 	dx_fid_flag_seq_by_ci = dx_fid_flag_sequence_by_compact_int,
 } dx_field_id_t;
 
-/* -------------------------------------------------------------------------- */
-
 typedef enum {
 	dx_ft_common_field = 0,
 	dx_ft_first_time_int_field = 1,
 	dx_ft_second_time_int_field = 2
 } dx_scheme_field_time_t;
-
-/* -------------------------------------------------------------------------- */
 
 typedef struct {
 	int type;
@@ -105,8 +97,6 @@ typedef struct {
 	dx_record_field_getter_t getter;
 	dx_scheme_field_time_t time;
 } dx_field_info_t;
-
-/* -------------------------------------------------------------------------- */
 
 typedef struct {
 	dxf_const_string_t default_name;
@@ -130,11 +120,9 @@ typedef struct {
 	size_t capacity;
 } dx_record_server_support_state_list_t;
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Record functions
  */
-/* -------------------------------------------------------------------------- */
 
 dx_record_id_t dx_get_record_id(void* context, dxf_int_t server_record_id);
 int dx_assign_server_record_id(void* context, dx_record_id_t record_id, dxf_int_t server_record_id);

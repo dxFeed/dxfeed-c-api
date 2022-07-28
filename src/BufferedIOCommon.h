@@ -23,11 +23,9 @@
 #include "PrimitiveTypes.h"
 #include "DXTypes.h"
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Common Unicode functions
  */
-/* -------------------------------------------------------------------------- */
 
 /*
  * Determines if the given dx_char_t value is a
@@ -102,11 +100,9 @@ dxf_int_t dx_surrogates_to_code_point (dxf_char_t high, dxf_char_t low);
  */
 int dx_code_point_to_utf16_chars (dxf_int_t code_point, dxf_string_t dest_buffer, int dest_buffer_pos, int dest_buffer_length, OUT int* result);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Common compact API functions
  */
-/* -------------------------------------------------------------------------- */
 
 /*
  * Returns number of bytes that are needed to write specified number in a compact format.

@@ -23,11 +23,9 @@
 #include "EventData.h"
 #include "PrimitiveTypes.h"
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Subscription defines
  */
-/* -------------------------------------------------------------------------- */
 
 extern const dxf_subscription_t dx_invalid_subscription;
 
@@ -51,21 +49,17 @@ typedef enum dxf_special_order_source_t {
 	dxf_sos_AGGREGATE = 10,
 } dxf_special_order_source_t;
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Subscription types
  */
-/* -------------------------------------------------------------------------- */
 
 typedef int (*dx_subscription_processor_t)(dxf_connection_t connection, dx_order_source_array_ptr_t order_source,
 										   dxf_const_string_t* symbols, size_t symbol_count, unsigned event_types,
 										   dxf_uint_t subscr_flags, dxf_long_t time);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Subscription functions
  */
-/* -------------------------------------------------------------------------- */
 
 #ifdef __cplusplus
 extern "C" {
@@ -73,7 +67,8 @@ extern "C" {
 
 /* returns dx_invalid_subscription on error */
 dxf_subscription_t dx_create_event_subscription(dxf_connection_t connection, unsigned event_types,
-												dx_event_subscr_flag subscr_flags, dxf_long_t time);
+												dx_event_subscr_flag subscr_flags, dxf_long_t time,
+												int add_all_sources);
 int dx_close_event_subscription(dxf_subscription_t subscr_id);
 int dx_add_symbols(dxf_subscription_t subscr_id, dxf_const_string_t* symbols, int symbol_count);
 // Adds symbols to the subscription and counts the number of unique added symbols that will be sent to the server for

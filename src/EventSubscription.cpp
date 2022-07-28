@@ -41,11 +41,9 @@ extern "C" {
 #include "Configuration.hpp"
 #include "EventSubscription.hpp"
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Internal data structures and objects
  */
-/* -------------------------------------------------------------------------- */
 
 /**
  * @addtogroup event-data-structures-order-spread-order
@@ -64,27 +62,27 @@ const dxf_const_string_t dx_all_order_sources[] = {
 	L"DEA",	  /// Direct-Edge EDGA Exchange.
 	L"DEX",	  /// Direct-Edge EDGX Exchange.
 	L"BYX",	  /// Bats BYX Exchange.
-	L"BZX",  /// Bats BZX Exchange.
-	L"BATE", /// Bats Europe BXE Exchange.
-	L"CHIX", /// Bats Europe CXE Exchange.
-	L"CEUX", /// Bats Europe DXE Exchange.
-	L"BXTR", /// Bats Europe TRF.
-	L"IST",  /// Borsa Istanbul Exchange.
-	L"BI20", /// Borsa Istanbul Exchange. Record for particular top 20 order book.
-	L"ABE",  /// ABE (abe.io) exchange.
-	L"FAIR", /// FAIR (FairX) exchange.
-	L"GLBX", /// CME Globex.
-	L"glbx", /// CME Globex. Record for price level book.
-	L"ERIS", /// Eris Exchange group of companies.
-	L"XEUR", /// Eurex Exchange.
-	L"xeur", /// Eurex Exchange. Record for price level book.
-	L"CFE",  /// CBOE Futures Exchange.
-	L"C2OX", /// CBOE Options C2 Exchange.
-	L"SMFE", /// Small Exchange.
-	L"smfe", /// Small Exchange. Record for price level book.
-	L"iex",  /// Investors exchange. Record for price level book.
-	L"MEMX", /// Members Exchange.
-	L"memx", /// Members Exchange. Record for price level book.
+	L"BZX",	  /// Bats BZX Exchange.
+	L"BATE",  /// Bats Europe BXE Exchange.
+	L"CHIX",  /// Bats Europe CXE Exchange.
+	L"CEUX",  /// Bats Europe DXE Exchange.
+	L"BXTR",  /// Bats Europe TRF.
+	L"IST",	  /// Borsa Istanbul Exchange.
+	L"BI20",  /// Borsa Istanbul Exchange. Record for particular top 20 order book.
+	L"ABE",	  /// ABE (abe.io) exchange.
+	L"FAIR",  /// FAIR (FairX) exchange.
+	L"GLBX",  /// CME Globex.
+	L"glbx",  /// CME Globex. Record for price level book.
+	L"ERIS",  /// Eris Exchange group of companies.
+	L"XEUR",  /// Eurex Exchange.
+	L"xeur",  /// Eurex Exchange. Record for price level book.
+	L"CFE",	  /// CBOE Futures Exchange.
+	L"C2OX",  /// CBOE Options C2 Exchange.
+	L"SMFE",  /// Small Exchange.
+	L"smfe",  /// Small Exchange. Record for price level book.
+	L"iex",	  /// Investors exchange. Record for price level book.
+	L"MEMX",  /// Members Exchange.
+	L"memx",  /// Members Exchange. Record for price level book.
 	nullptr};
 
 const dxf_const_string_t dx_all_special_order_sources[] = {
@@ -316,7 +314,8 @@ void SubscriptionData::clearRawOrderSources() {
 }
 
 const std::unordered_set<std::wstring> EventSubscriptionConnectionContext::specialOrderSources{
-	std::begin(dx_all_special_order_sources), std::begin(dx_all_special_order_sources) + dx_all_special_order_sources_count};
+	std::begin(dx_all_special_order_sources),
+	std::begin(dx_all_special_order_sources) + dx_all_special_order_sources_count};
 
 EventSubscriptionConnectionContext::EventSubscriptionConnectionContext(dxf_connection_t connectionHandle)
 	: connectionHandle{connectionHandle}, mutex{}, symbols{}, subscriptions{} {}
@@ -417,8 +416,6 @@ bool EventSubscriptionConnectionContext::hasAnySymbol() {
 
 }  // namespace dx
 
-/* -------------------------------------------------------------------------- */
-
 DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_event_subscription) {
 	CHECKED_CALL_2(dx_validate_connection_handle, connection, true);
 
@@ -432,8 +429,6 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_event_subscription) {
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_event_subscription) {
 	int res = true;
@@ -449,30 +444,25 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_event_subscription) {
 	return res;
 }
 
-/* -------------------------------------------------------------------------- */
-
 DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_event_subscription) { return true; }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Helper functions
  */
-/* -------------------------------------------------------------------------- */
 
 dxf_ulong_t dx_symbol_name_hasher(dxf_const_string_t symbol_name) {
 	return static_cast<dxf_ulong_t>(std::hash<std::wstring>{}(symbol_name));
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Subscription functions implementation
  */
-/* -------------------------------------------------------------------------- */
 
 const dxf_subscription_t dx_invalid_subscription = (dxf_subscription_t) nullptr;
 
 dxf_subscription_t dx_create_event_subscription(dxf_connection_t connection, unsigned event_types,
-												dx_event_subscr_flag subscr_flags, dxf_long_t time) {
+												dx_event_subscr_flag subscr_flags, dxf_long_t time,
+												int add_all_sources) {
 	if (!dx_validate_connection_handle(connection, false)) {
 		return dx_invalid_subscription;
 	}
@@ -508,7 +498,7 @@ dxf_subscription_t dx_create_event_subscription(dxf_connection_t connection, uns
 	subscr_data->time = time;
 
 	res = true;
-	if (event_types & DXF_ET_ORDER) {
+	if ((event_types & DXF_ET_ORDER) == DXF_ET_ORDER && add_all_sources != 0) {
 		for (int i = 0; dx_all_order_sources[i]; i++) {
 			res = res && dx_add_order_source(subscr_data, dx_all_order_sources[i]);
 		}
@@ -587,8 +577,6 @@ int dx_add_symbols(dxf_subscription_t subscr_id, dxf_const_string_t* symbols, in
 	return dx_add_symbols_impl(subscr_id, symbols, symbol_count, nullptr, nullptr);
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_remove_symbols(dxf_subscription_t subscr_id, dxf_const_string_t* symbols, size_t symbol_count) {
 	auto subscr_data = static_cast<dx::SubscriptionData*>(subscr_id);
 
@@ -622,8 +610,6 @@ int dx_remove_symbols(dxf_subscription_t subscr_id, dxf_const_string_t* symbols,
 	});
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_add_listener_impl(dxf_subscription_t subscr_id, dx::ListenerContext::ListenerPtr listener,
 						 dx::EventListenerVersion version, void* user_data) {
 	if (subscr_id == dx_invalid_subscription) {
@@ -647,21 +633,15 @@ int dx_add_listener_impl(dxf_subscription_t subscr_id, dx::ListenerContext::List
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_add_listener(dxf_subscription_t subscr_id, dxf_event_listener_t listener, void* user_data) {
 	return dx_add_listener_impl(subscr_id, (dx::ListenerContext::ListenerPtr)listener,
 								dx::EventListenerVersion::Default, user_data);
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_add_listener_v2(dxf_subscription_t subscr_id, dxf_event_listener_v2_t listener, void* user_data) {
 	return dx_add_listener_impl(subscr_id, (dx::ListenerContext::ListenerPtr)listener, dx::EventListenerVersion::V2,
 								user_data);
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_remove_listener_impl(dxf_subscription_t subscr_id, dx::ListenerContext::ListenerPtr listener) {
 	if (subscr_id == dx_invalid_subscription) {
@@ -689,13 +669,9 @@ int dx_remove_listener(dxf_subscription_t subscr_id, dxf_event_listener_t listen
 	return dx_remove_listener_impl(subscr_id, (dx::ListenerContext::ListenerPtr)listener);
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_remove_listener_v2(dxf_subscription_t subscr_id, dxf_event_listener_v2_t listener) {
 	return dx_remove_listener_impl(subscr_id, (dx::ListenerContext::ListenerPtr)listener);
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_get_subscription_connection(dxf_subscription_t subscr_id, OUT dxf_connection_t* connection) {
 	auto subscr_data = static_cast<dx::SubscriptionData*>(subscr_id);
@@ -713,8 +689,6 @@ int dx_get_subscription_connection(dxf_subscription_t subscr_id, OUT dxf_connect
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_get_event_subscription_event_types(dxf_subscription_t subscr_id, OUT unsigned* event_types) {
 	auto subscr_data = static_cast<dx::SubscriptionData*>(subscr_id);
@@ -773,8 +747,6 @@ int dx_get_event_subscription_symbols(dxf_subscription_t subscr_id, OUT dxf_cons
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_get_event_subscription_flags(dxf_subscription_t subscr_id, OUT dx_event_subscr_flag* subscr_flags) {
 	auto subscr_data = static_cast<dx::SubscriptionData*>(subscr_id);
 
@@ -790,8 +762,6 @@ int dx_get_event_subscription_flags(dxf_subscription_t subscr_id, OUT dx_event_s
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_set_event_subscription_flags(dxf_subscription_t subscr_id, dx_event_subscr_flag subscr_flags) {
 	auto subscr_data = static_cast<dx::SubscriptionData*>(subscr_id);
@@ -809,8 +779,6 @@ int dx_set_event_subscription_flags(dxf_subscription_t subscr_id, dx_event_subsc
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_get_event_subscription_time(dxf_subscription_t subscr_id, OUT dxf_long_t* time) {
 	auto subscr_data = static_cast<dx::SubscriptionData*>(subscr_id);
 
@@ -826,8 +794,6 @@ int dx_get_event_subscription_time(dxf_subscription_t subscr_id, OUT dxf_long_t*
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 static void dx_call_subscr_listeners(dx::SubscriptionData* subscr_data, unsigned event_bitmask,
 									 dxf_const_string_t symbol_name, dxf_const_event_data_t data,
@@ -880,15 +846,18 @@ void pass_event_data_to_listeners(dx::EventSubscriptionConnectionContext* ctx, d
 			call = subscription_data->orderSources.find(sourceStr) != subscription_data->orderSources.end();
 
 			if (!call) {
-				if (sourceStr == dx_all_special_order_sources[dxf_sos_AGGREGATE_ASK] || sourceStr == dx_all_special_order_sources[dxf_sos_AGGREGATE_BID]) {
+				if (sourceStr == dx_all_special_order_sources[dxf_sos_AGGREGATE_ASK] ||
+					sourceStr == dx_all_special_order_sources[dxf_sos_AGGREGATE_BID]) {
 					call = subscription_data->orderSources.find(dx_all_special_order_sources[dxf_sos_AGGREGATE]) !=
-							subscription_data->orderSources.end();
-				} else if (sourceStr == dx_all_special_order_sources[dxf_sos_COMPOSITE_ASK] || sourceStr == dx_all_special_order_sources[dxf_sos_COMPOSITE_BID]) {
+						subscription_data->orderSources.end();
+				} else if (sourceStr == dx_all_special_order_sources[dxf_sos_COMPOSITE_ASK] ||
+						   sourceStr == dx_all_special_order_sources[dxf_sos_COMPOSITE_BID]) {
 					call = subscription_data->orderSources.find(dx_all_special_order_sources[dxf_sos_COMPOSITE]) !=
-							subscription_data->orderSources.end();
-				} else if (sourceStr == dx_all_special_order_sources[dxf_sos_REGIONAL_ASK] || sourceStr == dx_all_special_order_sources[dxf_sos_REGIONAL_BID]) {
+						subscription_data->orderSources.end();
+				} else if (sourceStr == dx_all_special_order_sources[dxf_sos_REGIONAL_ASK] ||
+						   sourceStr == dx_all_special_order_sources[dxf_sos_REGIONAL_BID]) {
 					call = subscription_data->orderSources.find(dx_all_special_order_sources[dxf_sos_REGIONAL]) !=
-							subscription_data->orderSources.end();
+						subscription_data->orderSources.end();
 				}
 			}
 		} else {
@@ -946,7 +915,6 @@ int dx_process_event_data(dxf_connection_t connection, dx_event_id_t event_id, d
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	event type is a one-bit mask here
  */
@@ -993,8 +961,6 @@ int dx_get_last_symbol_event(dxf_connection_t connection, dxf_const_string_t sym
 	});
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_process_connection_subscriptions(dxf_connection_t connection, dx_subscription_processor_t processor) {
 	int res;
 	auto context = static_cast<dx::EventSubscriptionConnectionContext*>(
@@ -1032,11 +998,7 @@ int dx_process_connection_subscriptions(dxf_connection_t connection, dx_subscrip
 	});
 }
 
-/* -------------------------------------------------------------------------- */
-
 /* Functions for working with order source */
-
-/* -------------------------------------------------------------------------- */
 
 int dx_add_order_source(dxf_subscription_t subscr_id, dxf_const_string_t source) {
 	auto subscriptionData = static_cast<dx::SubscriptionData*>(subscr_id);
@@ -1045,8 +1007,6 @@ int dx_add_order_source(dxf_subscription_t subscr_id, dxf_const_string_t source)
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 void dx_clear_order_sources(dxf_subscription_t subscr_id) {
 	if (subscr_id == nullptr) {

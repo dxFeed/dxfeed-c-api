@@ -26,17 +26,9 @@
 
 extern const dxf_snapshot_t dx_invalid_snapshot;
 
-/* -------------------------------------------------------------------------- */
-/*
- *	Subscription types
- */
-/* -------------------------------------------------------------------------- */
-
-/* -------------------------------------------------------------------------- */
 /*
  *	Subscription functions
  */
-/* -------------------------------------------------------------------------- */
 
 /* returns dx_invalid_snapshot on error */
 dxf_snapshot_t dx_create_snapshot(dxf_connection_t connection,

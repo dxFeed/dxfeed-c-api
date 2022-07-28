@@ -27,11 +27,9 @@
 #include "PrimitiveTypes.h"
 #include "DXTypes.h"
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Various types
  */
-/* -------------------------------------------------------------------------- */
 
 typedef enum {
 	dx_ccs_begin,
@@ -53,11 +51,9 @@ typedef enum {
 
 typedef int (*dx_conn_ctx_subsys_manipulator_t) (dxf_connection_t connection);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Subsystem initializer/deinitializer macros
  */
-/* -------------------------------------------------------------------------- */
 
 #define DX_CONNECTION_SUBSYS_INIT_NAME(subsys_id) \
 	subsys_id##_init
@@ -77,11 +73,9 @@ typedef int (*dx_conn_ctx_subsys_manipulator_t) (dxf_connection_t connection);
 #define DX_CONNECTION_SUBSYS_CHECK_PROTO(subsys_id) \
 	int DX_CONNECTION_SUBSYS_CHECK_NAME(subsys_id) (dxf_connection_t connection)
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Subsystem initializer/deinitializer prototypes
  */
-/* -------------------------------------------------------------------------- */
 
 DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_network);
 DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_event_subscription);
@@ -120,11 +114,9 @@ DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_snapshot_subscription);
 DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_price_level_book);
 DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_regional_book);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Main functions
  */
-/* -------------------------------------------------------------------------- */
 
 dxf_connection_t dx_init_connection (void);
 int dx_deinit_connection (dxf_connection_t connection);

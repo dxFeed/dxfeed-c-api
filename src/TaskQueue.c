@@ -24,11 +24,9 @@
 #include "DXErrorHandling.h"
 #include "Logger.h"
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Task queue data
  */
-/* -------------------------------------------------------------------------- */
 
 typedef struct {
 	dx_task_processor_t processor;
@@ -47,11 +45,9 @@ typedef struct {
 
 #define MUTEX_FIELD_FLAG (1 << 0)
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Helper functions
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_clear_task_queue_data (dx_task_queue_data_t* tqd) {
 	int res = true;
@@ -70,11 +66,9 @@ int dx_clear_task_queue_data (dx_task_queue_data_t* tqd) {
 	return res;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Task queue functions implementation
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_create_task_queue (OUT dx_task_queue_t* tq) {
 	dx_task_queue_data_t* tqd = NULL;
@@ -100,8 +94,6 @@ int dx_create_task_queue (OUT dx_task_queue_t* tq) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_cleanup_task_queue (dx_task_queue_t tq) {
 	dx_task_queue_data_t* tqd = tq;
 	size_t i = 0;
@@ -121,8 +113,6 @@ int dx_cleanup_task_queue (dx_task_queue_t tq) {
 	return dx_mutex_unlock(&(tqd->guard)) && res;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_destroy_task_queue (dx_task_queue_t tq) {
 	int res = true;
 
@@ -135,8 +125,6 @@ int dx_destroy_task_queue (dx_task_queue_t tq) {
 
 	return res;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_add_task_to_queue (dx_task_queue_t tq, dx_task_processor_t processor, void* data) {
 	dx_task_queue_data_t* tqd = tq;
@@ -154,8 +142,6 @@ int dx_add_task_to_queue (dx_task_queue_t tq, dx_task_processor_t processor, voi
 
 #ifdef _DEBUG_TQ
 	dx_logging_dbg_lock();
-	dx_logging_dbg(L"NEWTASK Submit [0x%016p] %ls(0x%016p) at %u", processor, dx_logging_dbg_sym(processor), data, tqd->size);
-	dx_logging_dbg_stack();
 	dx_logging_dbg_unlock();
 #endif
 
@@ -163,8 +149,6 @@ int dx_add_task_to_queue (dx_task_queue_t tq, dx_task_processor_t processor, voi
 
 	return dx_mutex_unlock(&(tqd->guard)) && !failed;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_execute_task_queue (dx_task_queue_t tq) {
 	dx_task_queue_data_t* tqd = tq;
@@ -181,8 +165,6 @@ int dx_execute_task_queue (dx_task_queue_t tq) {
 		dx_task_data_t* task = &(tqd->elements[i]);
 #ifdef _DEBUG_TQ
 		dx_logging_dbg_lock();
-		dx_logging_dbg(L"RUNTASK Execute [0x%016p] %ls(0x%016p) at %u", task->processor, dx_logging_dbg_sym(task->processor), task->data, i);
-		dx_logging_dbg_stack();
 		dx_logging_dbg_unlock();
 #endif
 		int task_res = task->processor(task->data, 0);
@@ -211,8 +193,6 @@ int dx_execute_task_queue (dx_task_queue_t tq) {
 
 	return dx_mutex_unlock(&(tqd->guard)) && res;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_is_queue_empty (dx_task_queue_t tq, OUT int* res) {
 	dx_task_queue_data_t* tqd = tq;

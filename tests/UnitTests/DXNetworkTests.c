@@ -38,8 +38,6 @@ static int dx_is_equal_property_map(const dx_property_map_t* expected, const dx_
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 /*
  * Test
  *
@@ -51,8 +49,6 @@ int protocol_get_basic_auth_data_test(void) {
 	DX_CHECK(dx_is_equal_ansi("eHh4Onl5eXk=", dx_protocol_get_basic_auth_data("xxx", "yyyy")));
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 /*
  * Test
@@ -77,8 +73,6 @@ int protocol_configure_basic_auth_test(void) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 /*
  * Test
  *
@@ -101,8 +95,6 @@ int protocol_configure_custom_auth_test(void) {
 	dx_deinit_connection(connection);
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int network_all_test(void) {
 	int res = true;

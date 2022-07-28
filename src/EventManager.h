@@ -25,11 +25,9 @@
 #include "PrimitiveTypes.h"
 #include "ObjectArray.h"
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Event objects management functions
  */
-/* -------------------------------------------------------------------------- */
 
 typedef dxf_bool_t(*dx_event_copy_function_t) (const dxf_event_data_t source,
 	OUT dx_string_array_ptr_t* string_buffer,

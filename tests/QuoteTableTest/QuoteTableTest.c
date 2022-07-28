@@ -45,10 +45,14 @@ typedef struct {
 	pthread_mutexattr_t attr;
 } dxs_mutex_t;
 #else /* !defined(_WIN32) || defined(USE_PTHREADS) */
-#	pragma warning(push)
-#	pragma warning(disable : 5105)
+#	if !defined(__MINGW32__)
+#		pragma warning(push)
+#		pragma warning(disable : 5105)
+#	endif
 #	include <Windows.h>
-#	pragma warning(pop)
+#	if !defined(__MINGW32__)
+#		pragma warning(pop)
+#	endif
 #	define USE_WIN32_THREADS
 typedef HANDLE dxs_thread_t;
 typedef DWORD dxs_key_t;
@@ -67,22 +71,16 @@ int dxs_mutex_create(dxs_mutex_t* mutex) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dxs_mutex_destroy(dxs_mutex_t* mutex) {
 	DeleteCriticalSection(*mutex);
 	free(*mutex);
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dxs_mutex_lock(dxs_mutex_t* mutex) {
 	EnterCriticalSection(*mutex);
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dxs_mutex_unlock(dxs_mutex_t* mutex) {
 	LeaveCriticalSection(*mutex);
@@ -114,8 +112,6 @@ int dxs_mutex_create(dxs_mutex_t* mutex) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dxs_mutex_destroy(dxs_mutex_t* mutex) {
 	if (pthread_mutex_destroy(&mutex->mutex) != 0) {
 		return false;
@@ -128,8 +124,6 @@ int dxs_mutex_destroy(dxs_mutex_t* mutex) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dxs_mutex_lock(dxs_mutex_t* mutex) {
 	if (pthread_mutex_lock(&mutex->mutex) != 0) {
 		return false;
@@ -137,8 +131,6 @@ int dxs_mutex_lock(dxs_mutex_t* mutex) {
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dxs_mutex_unlock(dxs_mutex_t* mutex) {
 	if (pthread_mutex_unlock(&mutex->mutex) != 0) {
@@ -177,7 +169,6 @@ static dxf_quote_t* quotes[SYMBOLS_COUNT] = {0};
 static dxf_summary_t* summaries[SYMBOLS_COUNT] = {0};
 static dxf_profile_t* profiles[SYMBOLS_COUNT] = {0};
 
-/* -------------------------------------------------------------------------- */
 void trade_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
 					void* user_data);
 void quote_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
@@ -192,8 +183,6 @@ static struct event_info_t event_info[EVENTS_COUNT] = {{DXF_ET_TRADE, trade_list
 													   {DXF_ET_SUMMARY, summary_listener},
 													   {DXF_ET_PROFILE, profile_listener}};
 
-/* -------------------------------------------------------------------------- */
-
 static int is_listener_thread_terminated = false;
 static dxs_mutex_t listener_thread_guard;
 
@@ -206,8 +195,6 @@ int is_thread_terminate() {
 	return res;
 }
 
-/* -------------------------------------------------------------------------- */
-
 void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
 	char* host = (char*)user_data;
 	dxs_mutex_lock(&listener_thread_guard);
@@ -216,8 +203,6 @@ void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
 
 	wprintf(L"\nTerminating listener thread, host: %hs\n", host);
 }
-
-/* -------------------------------------------------------------------------- */
 
 int get_symbol_index(dxf_const_string_t symbol_name) {
 	int i = 0;
@@ -229,8 +214,6 @@ int get_symbol_index(dxf_const_string_t symbol_name) {
 
 	return -1;
 }
-
-/* -------------------------------------------------------------------------- */
 
 void output_data(int i) {
 	dxf_trade_t* trade = trades[i];
@@ -253,7 +236,6 @@ void output_data(int i) {
 		profile ? profile->description : dummy);
 }
 
-/* -------------------------------------------------------------------------- */
 dxf_event_data_t getData(int event_type, int i) {
 	if (event_type == DXF_ET_TRADE) {
 		if (trades[i] == NULL) {
@@ -310,8 +292,6 @@ void trade_listener(int event_type, dxf_const_string_t symbol_name, const dxf_ev
 	}
 }
 
-/* -------------------------------------------------------------------------- */
-
 void quote_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
 					void* user_data) {
 	int symb_ind = get_symbol_index(symbol_name);
@@ -339,8 +319,6 @@ void quote_listener(int event_type, dxf_const_string_t symbol_name, const dxf_ev
 		output_data(symb_ind);
 	}
 }
-
-/* -------------------------------------------------------------------------- */
 
 void summary_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
 					  void* user_data) {
@@ -370,8 +348,6 @@ void summary_listener(int event_type, dxf_const_string_t symbol_name, const dxf_
 	}
 }
 
-/* -------------------------------------------------------------------------- */
-
 void profile_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
 					  void* user_data) {
 	int symb_ind = get_symbol_index(symbol_name);
@@ -399,8 +375,6 @@ void profile_listener(int event_type, dxf_const_string_t symbol_name, const dxf_
 		output_data(symb_ind);
 	}
 }
-
-/* -------------------------------------------------------------------------- */
 
 void process_last_error() {
 	int error_code = dx_ec_success;
@@ -448,7 +422,6 @@ dxf_subscription_t create_subscription(dxf_connection_t connection, int event_id
 
 	return subscription;
 }
-/* -------------------------------------------------------------------------- */
 
 void print_usage() {
 	wprintf(

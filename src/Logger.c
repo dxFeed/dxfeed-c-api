@@ -18,12 +18,13 @@
  */
 
 #ifdef _WIN32
-#	pragma warning(push)
-#	pragma warning(disable : 5105)
+#	if !defined(__MINGW32__)
+#		pragma warning(push)
+#		pragma warning(disable : 5105)
+#	endif
 #	include <Windows.h>
-#	pragma warning(pop)
-#	ifdef _DEBUG
-#		include <DbgHelp.h>
+#	if !defined(__MINGW32__)
+#		pragma warning(pop)
 #	endif
 #else
 #	include <pthread.h>
@@ -45,11 +46,9 @@
 #include "DXThreads.h"
 #include "Version.h"
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Implementation Details
  */
-/* -------------------------------------------------------------------------- */
 
 #define CURRENT_TIME_STR_LENGTH		 31
 #define CURRENT_TIME_STR_TIME_OFFSET 24
@@ -83,11 +82,9 @@ static int g_key_created = false;
 
 static dxf_char_t current_time_str[CURRENT_TIME_STR_LENGTH + 1];
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Auxiliary functions
  */
-/* -------------------------------------------------------------------------- */
 
 dxf_string_t dx_get_current_time_buffer(void);
 
@@ -198,8 +195,6 @@ void dx_vlog_debug_message(const dxf_char_t *format, va_list ap) {
 
 #endif	// _WIN32
 
-/* -------------------------------------------------------------------------- */
-
 static void dx_current_time_buffer_destructor(void *data) {
 	if (data != current_time_str && data != NULL) {
 		dx_free(data);
@@ -212,8 +207,6 @@ static void dx_key_remover(void *data) {
 		g_key_created = g_key_creation_attempted = false;
 	}
 }
-
-/* -------------------------------------------------------------------------- */
 
 dxf_string_t dx_get_current_time_buffer(void) {
 	/*
@@ -247,8 +240,6 @@ dxf_string_t dx_get_current_time_buffer(void) {
 	return buffer;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_init_current_time_key(void) {
 	if (g_key_creation_attempted) {
 		return g_key_created;
@@ -271,8 +262,6 @@ int dx_init_current_time_key(void) {
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 void dx_flush_log(void) {
 	if (g_log_file == NULL) {
@@ -324,11 +313,9 @@ static void dx_close_logging(void *arg) {
 	}
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	External interface
  */
-/* -------------------------------------------------------------------------- */
 
 ERRORCODE dx_initialize_logger_impl(const char *file_name, int rewrite_file, int show_timezone_info, int verbose,
 									int log_data_transfer) {
@@ -488,8 +475,6 @@ DXFEED_API ERRORCODE dxf_initialize_logger_v2(const char *file_name, int rewrite
 	return dx_initialize_logger_impl(file_name, rewrite_file, show_timezone_info, verbose, log_data_transfer);
 }
 
-/* -------------------------------------------------------------------------- */
-
 void dx_logging_error(dxf_const_string_t message) {
 	if (g_log_file == NULL || message == NULL) {
 		return;
@@ -567,20 +552,7 @@ void dx_logging_error_by_code(int error_code) {
 	dx_flush_log();
 }
 
-/* -------------------------------------------------------------------------- */
-
 void dx_logging_last_error(void) { dx_logging_error_by_code(dx_get_error_code()); }
-
-/* -------------------------------------------------------------------------- */
-
-void dx_logging_last_error_verbose(void) {
-	if (!g_verbose_logger_mode) {
-		return;
-	}
-
-	dx_logging_error_by_code(dx_get_error_code());
-	dx_flush_log();
-}
 
 void dx_logging_verbose(dx_log_level_t log_level, const dxf_char_t *format, ...) {
 	if (!g_verbose_logger_mode) {
@@ -641,73 +613,11 @@ void dx_logging_dbg(const dxf_char_t *format, ...) {
 #endif
 }
 
-#ifdef _DEBUG
-#	ifdef _WIN32
-#		define STACK_SIZE 256
-static dxf_ubyte_t SYM_INFO[sizeof(SYM_TYPE) + 255];
-static void *STACK[STACK_SIZE];
-#	endif
-#endif
-
-void dx_logging_dbg_stack() {
-#ifdef _DEBUG
-#	ifdef _WIN32
-	if (dx_ll_debug < dx_get_minimum_logging_level(g_default_log_level)) return;
-
-	USHORT frames;
-	SYMBOL_INFO *symbol = (SYMBOL_INFO *)&SYM_INFO[0];
-	HANDLE process;
-
-	process = GetCurrentProcess();
-	SymInitialize(process, NULL, TRUE);
-	frames = CaptureStackBackTrace(0, 256, STACK, NULL);
-	symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
-	symbol->MaxNameLen = 255;
-
-	for (USHORT i = 1; i < frames; i++) {
-		SymFromAddr(process, (DWORD64)(STACK[i]), 0, symbol);
-		dx_logging_dbg(L"* %3hu: %ls - 0x%016p", frames - i - 1, symbol->Name, (void *)symbol->Address);
-	}
-	dx_logging_dbg_flush();
-#	else
-	dx_logging_dbg(L"* <STACK IS NOT SUPPORTED>");
-	dx_logging_dbg_flush();
-#	endif
-#endif
-}
-
-const char *dx_logging_dbg_sym(void *addr) {
-#ifdef _DEBUG
-#	ifdef _WIN32
-	SYMBOL_INFO *symbol = (SYMBOL_INFO *)&SYM_INFO[0];
-	HANDLE process;
-	process = GetCurrentProcess();
-	SymInitialize(process, NULL, TRUE);
-	symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
-	symbol->MaxNameLen = 255;
-	SymFromAddr(process, (DWORD64)addr, 0, symbol);
-	return symbol->Name;
-#	else
-	return "<STACK IS NOT SUPPORTED>";
-#	endif
-#else
-	return "";
-#endif
-}
-
-void dx_logging_dbg_flush() {
-#ifdef _DEBUG
-	fflush(g_dbg_file);
-#endif
-}
-
 void dx_logging_dbg_unlock() {
 #ifdef _DEBUG
 	dx_mutex_unlock(&g_dbg_lock);
 #endif
 }
-
-/* -------------------------------------------------------------------------- */
 
 void dx_logging_info(const dxf_char_t *format, ...) {
 	if (dx_ll_info < dx_get_minimum_logging_level(g_default_log_level)) return;
@@ -736,24 +646,6 @@ void dx_logging_info(const dxf_char_t *format, ...) {
 	}
 
 	dx_mutex_unlock(&g_log_file_lock);
-	dx_flush_log();
-}
-
-/* -------------------------------------------------------------------------- */
-
-void dx_logging_verbose_gap(void) {
-	if (g_log_file == NULL || !g_verbose_logger_mode) {
-		return;
-	}
-
-	if (!dx_mutex_lock(&g_log_file_lock)) {
-		return;
-	}
-
-	fwprintf(g_log_file, L"\n");
-
-	dx_mutex_unlock(&g_log_file_lock);
-
 	dx_flush_log();
 }
 

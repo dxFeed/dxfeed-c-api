@@ -25,7 +25,7 @@
 #include <Error.hpp>
 
 #include <args.hxx>
-#include <nonstd/variant.hpp>
+#include <variant.hpp>
 
 //Prevents file names globbing (converting * to all files in the current dir)
 #ifdef __MINGW64_VERSION_MAJOR

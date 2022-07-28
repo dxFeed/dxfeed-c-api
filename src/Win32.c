@@ -18,10 +18,14 @@
  */
 
 #ifdef _WIN32
-#	pragma warning(push)
-#	pragma warning(disable : 5105)
+#	if !defined(__MINGW32__)
+#		pragma warning(push)
+#		pragma warning(disable : 5105)
+#	endif
 #	include <Windows.h>
-#	pragma warning(pop)
+#	if !defined(__MINGW32__)
+#		pragma warning(pop)
+#	endif
 
 #	include "DXMemory.h"
 #	include "Logger.h"
@@ -29,7 +33,7 @@
 #	include "DXThreads.h"
 
 typedef struct dx_callback_tag {
-	void (*callback)(void*);
+	void (*callback)(void *);
 	void *arg;
 } dx_callback_t;
 
@@ -56,9 +60,8 @@ static void dx_fini_cb_queue(dx_callback_queue_t *q) {
 	dx_mutex_destroy(&q->mutex);
 }
 
-static void dx_add_cb_queue(dx_callback_queue_t *q, void (*callback)(void*), void *arg) {
-	if (!dx_mutex_lock(&q->mutex))
-		return;
+static void dx_add_cb_queue(dx_callback_queue_t *q, void (*callback)(void *), void *arg) {
+	if (!dx_mutex_lock(&q->mutex)) return;
 	if (q->size == q->count) {
 		dx_callback_t *cbs;
 		q->size *= 2;
@@ -75,48 +78,45 @@ static void dx_add_cb_queue(dx_callback_queue_t *q, void (*callback)(void*), voi
 
 static void dx_run_cb_queue(dx_callback_queue_t *q) {
 	int i;
-	if (!dx_mutex_lock(&q->mutex))
-		return;
-	for (i = 0; i < q->count; i++)
-		q->callbacks[i].callback(q->callbacks[i].arg);
+	if (!dx_mutex_lock(&q->mutex)) return;
+	for (i = 0; i < q->count; i++) q->callbacks[i].callback(q->callbacks[i].arg);
 	dx_mutex_unlock(&q->mutex);
 }
 
-void dx_register_thread_constructor(void (*constructor)(void*), void *arg) {
+void dx_register_thread_constructor(void (*constructor)(void *), void *arg) {
 	dx_add_cb_queue(&g_thread_constructors, constructor, arg);
 }
 
-void dx_register_thread_destructor(void (*destructor)(void*), void *arg) {
+void dx_register_thread_destructor(void (*destructor)(void *), void *arg) {
 	dx_add_cb_queue(&g_thread_destructors, destructor, arg);
 }
 
-void dx_register_process_destructor(void (*destructor)(void*), void *arg) {
+void dx_register_process_destructor(void (*destructor)(void *), void *arg) {
 	dx_add_cb_queue(&g_process_destructors, destructor, arg);
 }
 
 extern void dx_init_threads();
 
-BOOL APIENTRY DllMain (HANDLE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved)
-{
+BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
 	switch (ul_reason_for_call) {
-	case DLL_PROCESS_ATTACH:
-		dx_init_cb_queue(&g_thread_constructors);
-		dx_init_cb_queue(&g_thread_destructors);
-		dx_init_cb_queue(&g_process_destructors);
-		dx_init_threads();
-		break;
-	case DLL_THREAD_ATTACH:
-		dx_run_cb_queue(&g_thread_constructors);
-		break;
-	case DLL_THREAD_DETACH:
-		dx_run_cb_queue(&g_thread_destructors);
-		break;
-	case DLL_PROCESS_DETACH:
-		dx_run_cb_queue(&g_process_destructors);
-		dx_fini_cb_queue(&g_thread_constructors);
-		dx_fini_cb_queue(&g_thread_destructors);
-		dx_fini_cb_queue(&g_process_destructors);
-		break;
+		case DLL_PROCESS_ATTACH:
+			dx_init_cb_queue(&g_thread_constructors);
+			dx_init_cb_queue(&g_thread_destructors);
+			dx_init_cb_queue(&g_process_destructors);
+			dx_init_threads();
+			break;
+		case DLL_THREAD_ATTACH:
+			dx_run_cb_queue(&g_thread_constructors);
+			break;
+		case DLL_THREAD_DETACH:
+			dx_run_cb_queue(&g_thread_destructors);
+			break;
+		case DLL_PROCESS_DETACH:
+			dx_run_cb_queue(&g_process_destructors);
+			dx_fini_cb_queue(&g_thread_constructors);
+			dx_fini_cb_queue(&g_thread_destructors);
+			dx_fini_cb_queue(&g_process_destructors);
+			break;
 	}
 	return TRUE;
 }

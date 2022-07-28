@@ -50,11 +50,9 @@
 
 static dxf_const_string_t wildcard_symbol = L"*";
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Auxiliary internal functions
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_subscribe(dxf_connection_t connection, dx_order_source_array_ptr_t order_source, dxf_const_string_t *symbols,
 				 size_t symbols_count, int *symbols_indices_to_subscribe, int symbols_indices_count, int event_types,
@@ -64,19 +62,15 @@ int dx_subscribe(dxf_connection_t connection, dx_order_source_array_ptr_t order_
 										  false, subscr_flags, time);
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_unsubscribe(dxf_connection_t connection, dx_order_source_array_ptr_t order_source, dxf_const_string_t *symbols,
 				   size_t symbols_count, int event_types, dxf_uint_t subscr_flags, dxf_long_t time) {
 	return dx_subscribe_symbols_to_events(connection, order_source, symbols, symbols_count, NULL, 0, event_types, true,
 										  false, subscr_flags, time);
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Delayed tasks data
  */
-/* -------------------------------------------------------------------------- */
 
 typedef struct {
 	dxf_connection_t *elements;
@@ -88,8 +82,6 @@ typedef struct {
 } dx_connection_array_t;
 
 static dx_connection_array_t g_connection_queue = {0};
-
-/* -------------------------------------------------------------------------- */
 
 int dx_queue_connection_for_close(dxf_connection_t connection) {
 	int conn_exists = false;
@@ -122,8 +114,6 @@ int dx_queue_connection_for_close(dxf_connection_t connection) {
 	return dx_mutex_unlock(&g_connection_queue.guard);
 }
 
-/* -------------------------------------------------------------------------- */
-
 void dx_close_queued_connections(void) {
 	size_t i = 0;
 
@@ -149,8 +139,6 @@ void dx_close_queued_connections(void) {
 	dx_mutex_unlock(&g_connection_queue.guard);
 }
 
-/* -------------------------------------------------------------------------- */
-
 void dx_init_connection_queue(void) {
 	static int initialized = false;
 
@@ -161,14 +149,10 @@ void dx_init_connection_queue(void) {
 	}
 }
 
-/* -------------------------------------------------------------------------- */
-
 void dx_perform_implicit_tasks(void) {
 	dx_init_connection_queue();
 	dx_close_queued_connections();
 }
-
-/* -------------------------------------------------------------------------- */
 
 ERRORCODE dx_perform_common_actions(int resetError) {
 	dx_perform_implicit_tasks();
@@ -190,8 +174,6 @@ static ERRORCODE dx_init_codec() {
 	}
 	return DXF_SUCCESS;
 }
-
-/* -------------------------------------------------------------------------- */
 
 ERRORCODE dx_close_subscription(dxf_subscription_t subscription, int resetError) {
 	dxf_connection_t connection;
@@ -224,19 +206,15 @@ ERRORCODE dx_close_subscription(dxf_subscription_t subscription, int resetError)
 	return DXF_SUCCESS;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	DXFeed API constants
  */
-/* -------------------------------------------------------------------------- */
 
 #define DEFAULT_SUBSCRIPTION_TIME 0
 
-/* -------------------------------------------------------------------------- */
 /*
  *	DXFeed API implementation
  */
-/* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_create_connection_impl(const char *address, const char *authscheme, const char *authdata,
 												dxf_conn_termination_notifier_t notifier,
@@ -296,8 +274,6 @@ DXFEED_API ERRORCODE dxf_create_connection_impl(const char *address, const char 
 	return DXF_SUCCESS;
 }
 
-/* -------------------------------------------------------------------------- */
-
 DXFEED_API ERRORCODE dxf_create_connection(const char *address, dxf_conn_termination_notifier_t notifier,
 										   dxf_conn_status_notifier_t conn_status_notifier,
 										   dxf_socket_thread_creation_notifier_t stcn,
@@ -313,8 +289,6 @@ DXFEED_API ERRORCODE dxf_create_connection(const char *address, dxf_conn_termina
 
 	return result;
 }
-
-/* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_create_connection_auth_basic(const char *address, const char *user, const char *password,
 													  dxf_conn_termination_notifier_t notifier,
@@ -357,8 +331,6 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_basic(const char *address, const
 	return res;
 }
 
-/* -------------------------------------------------------------------------- */
-
 DXFEED_API ERRORCODE dxf_create_connection_auth_bearer(const char *address, const char *token,
 													   dxf_conn_termination_notifier_t notifier,
 													   dxf_conn_status_notifier_t conn_status_notifier,
@@ -385,8 +357,6 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_bearer(const char *address, cons
 
 	return res;
 }
-
-/* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_create_connection_auth_custom(const char *address, const char *authscheme,
 													   const char *authdata, dxf_conn_termination_notifier_t notifier,
@@ -440,8 +410,6 @@ DXFEED_API ERRORCODE dxf_set_on_server_heartbeat_notifier(dxf_connection_t conne
 	return res;
 }
 
-/* -------------------------------------------------------------------------- */
-
 DXFEED_API ERRORCODE dxf_close_connection(dxf_connection_t connection) {
 	dx_logging_verbose(dx_ll_debug, L"dxf_close_connection(con = %p)", connection);
 
@@ -466,8 +434,6 @@ DXFEED_API ERRORCODE dxf_close_connection(dxf_connection_t connection) {
 	return (res ? DXF_SUCCESS : DXF_FAILURE);
 }
 
-/* -------------------------------------------------------------------------- */
-
 ERRORCODE dxf_create_subscription_impl(dxf_connection_t connection, int event_types, dx_event_subscr_flag subscr_flags,
 									   dxf_long_t time, OUT dxf_subscription_t *subscription) {
 	dx_perform_common_actions(DX_RESET_ERROR);
@@ -485,7 +451,7 @@ ERRORCODE dxf_create_subscription_impl(dxf_connection_t connection, int event_ty
 		return DXF_FAILURE;
 	}
 
-	if ((*subscription = dx_create_event_subscription(connection, event_types, subscr_flags, time)) ==
+	if ((*subscription = dx_create_event_subscription(connection, event_types, subscr_flags, time, 0)) ==
 		dx_invalid_subscription) {
 		return DXF_FAILURE;
 	}
@@ -523,8 +489,6 @@ DXFEED_API ERRORCODE dxf_create_subscription_with_flags(dxf_connection_t connect
 
 	return res;
 }
-
-/* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_create_subscription_timed(dxf_connection_t connection, int event_types, dxf_long_t time,
 												   OUT dxf_subscription_t *subscription) {
@@ -571,8 +535,6 @@ DXFEED_API ERRORCODE dxf_close_subscription(dxf_subscription_t subscription) {
 	return res;
 }
 
-/* -------------------------------------------------------------------------- */
-
 DXFEED_API ERRORCODE dxf_add_symbol(dxf_subscription_t subscription, dxf_const_string_t symbol) {
 	dx_logging_verbose(dx_ll_debug, L"dxf_add_symbol(sub = %p, symbol = '%ls')", subscription,
 					   (symbol == NULL) ? L"NULL" : symbol);
@@ -585,11 +547,7 @@ DXFEED_API ERRORCODE dxf_add_symbol(dxf_subscription_t subscription, dxf_const_s
 	return res;
 }
 
-/* -------------------------------------------------------------------------- */
-
 #define DX_WILDCARD_COMPARATOR(l, r) (dx_compare_strings_num(l, r, 1))
-
-/* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_add_symbols(dxf_subscription_t subscription, dxf_const_string_t *symbols, int symbol_count) {
 	dx_perform_common_actions(DX_RESET_ERROR);
@@ -644,7 +602,7 @@ DXFEED_API ERRORCODE dxf_add_symbols(dxf_subscription_t subscription, dxf_const_
 	size_t index;
 	(void)index;
 
-	DX_ARRAY_SEARCH(symbols, 0, symbol_count, wildcard_symbol, DX_WILDCARD_COMPARATOR, false, found_wildcard, index);
+	DX_ARRAY_SEARCH(symbols, 0, (size_t)symbol_count, wildcard_symbol, DX_WILDCARD_COMPARATOR, false, found_wildcard, index);
 
 	if (found_wildcard) {
 		subscr_symbols = &wildcard_symbol;
@@ -706,8 +664,6 @@ DXFEED_API ERRORCODE dxf_add_symbols(dxf_subscription_t subscription, dxf_const_
 	return DXF_SUCCESS;
 }
 
-/* -------------------------------------------------------------------------- */
-
 DXFEED_API ERRORCODE dxf_remove_symbol(dxf_subscription_t subscription, dxf_const_string_t symbol) {
 	dx_logging_verbose(dx_ll_debug, L"dxf_remove_symbol(sub = %p, symbol = '%ls')", subscription, symbol);
 
@@ -717,8 +673,6 @@ DXFEED_API ERRORCODE dxf_remove_symbol(dxf_subscription_t subscription, dxf_cons
 
 	return res;
 }
-
-/* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_remove_symbols(dxf_subscription_t subscription, dxf_const_string_t *symbols,
 										int symbol_count) {
@@ -765,7 +719,7 @@ DXFEED_API ERRORCODE dxf_remove_symbols(dxf_subscription_t subscription, dxf_con
 	size_t index;
 	(void)index;
 
-	DX_ARRAY_SEARCH(symbols, 0, symbol_count, wildcard_symbol, DX_WILDCARD_COMPARATOR, false, found_wildcard, index);
+	DX_ARRAY_SEARCH(symbols, 0, (size_t)symbol_count, wildcard_symbol, DX_WILDCARD_COMPARATOR, false, found_wildcard, index);
 
 	if (found_wildcard) {
 		dx_logging_verbose(
@@ -821,8 +775,6 @@ DXFEED_API ERRORCODE dxf_remove_symbols(dxf_subscription_t subscription, dxf_con
 	return DXF_SUCCESS;
 }
 
-/* -------------------------------------------------------------------------- */
-
 DXFEED_API ERRORCODE dxf_get_symbols(dxf_subscription_t subscription, OUT dxf_const_string_t **symbols,
 									 OUT int *symbol_count) {
 	dx_perform_common_actions(DX_RESET_ERROR);
@@ -860,8 +812,6 @@ DXFEED_API ERRORCODE dxf_get_symbols(dxf_subscription_t subscription, OUT dxf_co
 	return DXF_SUCCESS;
 }
 
-/* -------------------------------------------------------------------------- */
-
 DXFEED_API ERRORCODE dxf_set_symbols(dxf_subscription_t subscription, dxf_const_string_t *symbols, int symbol_count) {
 	dx_perform_common_actions(DX_RESET_ERROR);
 
@@ -895,8 +845,6 @@ DXFEED_API ERRORCODE dxf_set_symbols(dxf_subscription_t subscription, dxf_const_
 
 	return DXF_SUCCESS;
 }
-
-/* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_clear_symbols(dxf_subscription_t subscription) {
 	dxf_connection_t connection;
@@ -951,8 +899,6 @@ DXFEED_API ERRORCODE dxf_clear_symbols(dxf_subscription_t subscription) {
 	return DXF_SUCCESS;
 }
 
-/* -------------------------------------------------------------------------- */
-
 DXFEED_API ERRORCODE dxf_attach_event_listener(dxf_subscription_t subscription, dxf_event_listener_t event_listener,
 											   void *user_data) {
 	dx_logging_verbose(dx_ll_debug, L"dxf_attach_event_listener(sub = %p, listener = %p, user_data = %p)", subscription,
@@ -986,8 +932,6 @@ DXFEED_API ERRORCODE dxf_attach_event_listener(dxf_subscription_t subscription, 
 	return DXF_SUCCESS;
 }
 
-/* -------------------------------------------------------------------------- */
-
 DXFEED_API ERRORCODE dxf_detach_event_listener(dxf_subscription_t subscription, dxf_event_listener_t event_listener) {
 	dx_logging_verbose(dx_ll_debug, L"dxf_detach_event_listener(sub = %p, listener = %p)", subscription,
 					   event_listener);
@@ -1017,8 +961,6 @@ DXFEED_API ERRORCODE dxf_detach_event_listener(dxf_subscription_t subscription, 
 
 	return DXF_SUCCESS;
 }
-
-/* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_attach_event_listener_v2(dxf_subscription_t subscription,
 												  dxf_event_listener_v2_t event_listener, void *user_data) {
@@ -1052,8 +994,6 @@ DXFEED_API ERRORCODE dxf_attach_event_listener_v2(dxf_subscription_t subscriptio
 	return DXF_SUCCESS;
 }
 
-/* -------------------------------------------------------------------------- */
-
 DXFEED_API ERRORCODE dxf_detach_event_listener_v2(dxf_subscription_t subscription,
 												  dxf_event_listener_v2_t event_listener) {
 	dx_logging_verbose(dx_ll_debug, L"dxf_detach_event_listener_v2(sub = %p, listener = %p)", subscription,
@@ -1084,8 +1024,6 @@ DXFEED_API ERRORCODE dxf_detach_event_listener_v2(dxf_subscription_t subscriptio
 
 	return DXF_SUCCESS;
 }
-
-/* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_get_subscription_event_types(dxf_subscription_t subscription, OUT int *event_types) {
 	dx_logging_verbose(dx_ll_debug, L"dxf_get_subscription_event_types(sub = %p, event_types = %p)", subscription,
@@ -1120,8 +1058,6 @@ DXFEED_API ERRORCODE dxf_get_subscription_event_types(dxf_subscription_t subscri
 
 	return DXF_SUCCESS;
 }
-
-/* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_get_last_event(dxf_connection_t connection, int event_type, dxf_const_string_t symbol,
 										OUT dxf_event_data_t *data) {
@@ -1166,8 +1102,6 @@ DXFEED_API ERRORCODE dxf_get_last_event(dxf_connection_t connection, int event_t
 	return DXF_SUCCESS;
 }
 
-/* -------------------------------------------------------------------------- */
-
 DXFEED_API ERRORCODE dxf_get_last_error(OUT int *error_code, OUT dxf_const_string_t *error_descr) {
 	dx_logging_verbose(dx_ll_debug, L"dxf_get_last_error(error_code = %p, error_descr = %p)", error_code, error_descr);
 
@@ -1199,8 +1133,6 @@ DXFEED_API ERRORCODE dxf_get_last_error(OUT int *error_code, OUT dxf_const_strin
 
 	return DXF_FAILURE;
 }
-
-/* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_set_order_source(dxf_subscription_t subscription, const char *source) {
 	dx_logging_verbose(dx_ll_debug, L"dxf_set_order_source(sub = %p, source = '%hs')", subscription,
@@ -1288,8 +1220,6 @@ DXFEED_API ERRORCODE dxf_set_order_source(dxf_subscription_t subscription, const
 	return DXF_SUCCESS;
 }
 
-/* -------------------------------------------------------------------------- */
-
 DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const char *source) {
 	dx_logging_verbose(dx_ll_debug, L"dxf_add_order_source(sub = %p, source = '%hs')", subscription,
 					   (source == NULL) ? "NULL" : source);
@@ -1366,8 +1296,6 @@ DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const
 
 	return DXF_SUCCESS;
 }
-
-/* -------------------------------------------------------------------------- */
 
 ERRORCODE dx_create_snapshot_impl(dxf_connection_t connection, dx_event_id_t event_id, dxf_const_string_t symbol,
 								  dxf_const_string_t source, dxf_long_t time, OUT dxf_snapshot_t *snapshot) {
@@ -1450,8 +1378,6 @@ ERRORCODE dx_create_snapshot_impl(dxf_connection_t connection, dx_event_id_t eve
 	return DXF_SUCCESS;
 }
 
-/* -------------------------------------------------------------------------- */
-
 DXFEED_API ERRORCODE dxf_create_snapshot(dxf_connection_t connection, dx_event_id_t event_id, dxf_const_string_t symbol,
 										 const char *source, dxf_long_t time, OUT dxf_snapshot_t *snapshot) {
 	dx_logging_verbose(dx_ll_debug,
@@ -1475,8 +1401,6 @@ DXFEED_API ERRORCODE dxf_create_snapshot(dxf_connection_t connection, dx_event_i
 	return res;
 }
 
-/* -------------------------------------------------------------------------- */
-
 DXFEED_API ERRORCODE dxf_create_order_snapshot(dxf_connection_t connection, dxf_const_string_t symbol,
 											   const char *source, dxf_long_t time, OUT dxf_snapshot_t *snapshot) {
 	dx_logging_verbose(
@@ -1494,8 +1418,6 @@ DXFEED_API ERRORCODE dxf_create_order_snapshot(dxf_connection_t connection, dxf_
 
 	return res;
 }
-
-/* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_create_candle_snapshot(dxf_connection_t connection, dxf_candle_attributes_t candle_attributes,
 												dxf_long_t time, OUT dxf_snapshot_t *snapshot) {
@@ -1528,8 +1450,6 @@ DXFEED_API ERRORCODE dxf_create_candle_snapshot(dxf_connection_t connection, dxf
 	return res;
 }
 
-/* -------------------------------------------------------------------------- */
-
 DXFEED_API ERRORCODE dxf_close_snapshot(dxf_snapshot_t snapshot) {
 	dx_logging_verbose(dx_ll_debug, L"dxf_close_snapshot(snapshot = %p)", snapshot);
 
@@ -1558,8 +1478,6 @@ DXFEED_API ERRORCODE dxf_close_snapshot(dxf_snapshot_t snapshot) {
 
 	return DXF_SUCCESS;
 }
-
-/* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_attach_snapshot_listener(dxf_snapshot_t snapshot, dxf_snapshot_listener_t snapshot_listener,
 												  void *user_data) {
@@ -1592,8 +1510,6 @@ DXFEED_API ERRORCODE dxf_attach_snapshot_listener(dxf_snapshot_t snapshot, dxf_s
 	return DXF_SUCCESS;
 }
 
-/* -------------------------------------------------------------------------- */
-
 DXFEED_API ERRORCODE dxf_detach_snapshot_listener(dxf_snapshot_t snapshot, dxf_snapshot_listener_t snapshot_listener) {
 	dx_logging_verbose(dx_ll_debug, L"dxf_detach_snapshot_listener(snapshot = %p, listener = %p)", snapshot,
 					   snapshot_listener);
@@ -1623,8 +1539,6 @@ DXFEED_API ERRORCODE dxf_detach_snapshot_listener(dxf_snapshot_t snapshot, dxf_s
 
 	return DXF_SUCCESS;
 }
-
-/* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_attach_snapshot_inc_listener(dxf_snapshot_t snapshot,
 													  dxf_snapshot_inc_listener_t snapshot_listener, void *user_data) {
@@ -1658,8 +1572,6 @@ DXFEED_API ERRORCODE dxf_attach_snapshot_inc_listener(dxf_snapshot_t snapshot,
 	return DXF_SUCCESS;
 }
 
-/* -------------------------------------------------------------------------- */
-
 DXFEED_API ERRORCODE dxf_detach_snapshot_inc_listener(dxf_snapshot_t snapshot,
 													  dxf_snapshot_inc_listener_t snapshot_listener) {
 	dx_logging_verbose(dx_ll_debug, L"dxf_detach_snapshot_inc_listener(snapshot = %p, listener = %p)", snapshot,
@@ -1690,8 +1602,6 @@ DXFEED_API ERRORCODE dxf_detach_snapshot_inc_listener(dxf_snapshot_t snapshot,
 
 	return DXF_SUCCESS;
 }
-
-/* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_get_snapshot_symbol(dxf_snapshot_t snapshot, OUT dxf_string_t *symbol) {
 	dx_logging_verbose(dx_ll_debug, L"dxf_get_snapshot_symbol(snapshot = %p, symbol ptr = %p)", snapshot, symbol);
@@ -1802,8 +1712,6 @@ ERRORCODE dx_create_price_level_book_impl(dxf_connection_t connection, dxf_const
 	return DXF_SUCCESS;
 }
 
-/* -------------------------------------------------------------------------- */
-
 DXFEED_API ERRORCODE dxf_create_price_level_book(dxf_connection_t connection, dxf_const_string_t symbol,
 												 const char **sources, OUT dxf_price_level_book_t *book) {
 	int sources_count = dx_get_sources_count(sources);
@@ -1843,8 +1751,6 @@ DXFEED_API ERRORCODE dxf_create_price_level_book_v2(dxf_connection_t connection,
 	return res;
 }
 
-/* -------------------------------------------------------------------------- */
-
 DXFEED_API ERRORCODE dxf_close_price_level_book(dxf_price_level_book_t book) {
 	dx_logging_verbose(dx_ll_debug, L"dxf_close_price_level_book(book = %p)", book);
 
@@ -1868,8 +1774,6 @@ DXFEED_API ERRORCODE dxf_close_price_level_book(dxf_price_level_book_t book) {
 
 	return DXF_SUCCESS;
 }
-
-/* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_attach_price_level_book_listener(dxf_price_level_book_t book,
 														  dxf_price_level_book_listener_t book_listener,
@@ -1903,8 +1807,6 @@ DXFEED_API ERRORCODE dxf_attach_price_level_book_listener(dxf_price_level_book_t
 
 	return DXF_SUCCESS;
 }
-
-/* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_detach_price_level_book_listener(dxf_price_level_book_t book,
 														  dxf_price_level_book_listener_t book_listener) {
@@ -2103,8 +2005,6 @@ DXFEED_API ERRORCODE dxf_create_regional_book(dxf_connection_t connection, dxf_c
 	return DXF_SUCCESS;
 }
 
-/* -------------------------------------------------------------------------- */
-
 DXFEED_API ERRORCODE dxf_close_regional_book(dxf_regional_book_t book) {
 	dx_logging_verbose(dx_ll_debug, L"dxf_close_regional_book(book = %p)", book);
 	dx_perform_common_actions(DX_RESET_ERROR);
@@ -2129,8 +2029,6 @@ DXFEED_API ERRORCODE dxf_close_regional_book(dxf_regional_book_t book) {
 
 	return DXF_SUCCESS;
 }
-
-/* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_attach_regional_book_listener(dxf_regional_book_t book,
 													   dxf_price_level_book_listener_t book_listener, void *user_data) {
@@ -2164,8 +2062,6 @@ DXFEED_API ERRORCODE dxf_attach_regional_book_listener(dxf_regional_book_t book,
 	return DXF_SUCCESS;
 }
 
-/* -------------------------------------------------------------------------- */
-
 DXFEED_API ERRORCODE dxf_detach_regional_book_listener(dxf_regional_book_t book,
 													   dxf_price_level_book_listener_t book_listener) {
 	dx_logging_verbose(dx_ll_debug, L"dxf_detach_regional_book_listener(book = %p, listener = %p)", book,
@@ -2195,8 +2091,6 @@ DXFEED_API ERRORCODE dxf_detach_regional_book_listener(dxf_regional_book_t book,
 
 	return DXF_SUCCESS;
 }
-
-/* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_attach_regional_book_listener_v2(dxf_regional_book_t book,
 														  dxf_regional_quote_listener_t listener, void *user_data) {
@@ -2230,8 +2124,6 @@ DXFEED_API ERRORCODE dxf_attach_regional_book_listener_v2(dxf_regional_book_t bo
 	return DXF_SUCCESS;
 }
 
-/* -------------------------------------------------------------------------- */
-
 DXFEED_API ERRORCODE dxf_detach_regional_book_listener_v2(dxf_regional_book_t book,
 														  dxf_regional_quote_listener_t listener) {
 	dx_logging_verbose(dx_ll_debug, L"dxf_detach_regional_book_listener_v2(book = %p, listener = %p)", book, listener);
@@ -2261,8 +2153,6 @@ DXFEED_API ERRORCODE dxf_detach_regional_book_listener_v2(dxf_regional_book_t bo
 
 	return DXF_SUCCESS;
 }
-
-/* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_write_raw_data(dxf_connection_t connection, const char *raw_file_name) {
 	if (!dx_add_raw_dump_file(connection, raw_file_name)) {

@@ -27,12 +27,10 @@
 #include "PrimitiveTypes.h"
 #include "DXTypes.h"
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Property map functions implementations
  * Note: not fast map-dictionary realization, but enough for properties
  */
-/* -------------------------------------------------------------------------- */
 
 typedef struct {
 	dxf_string_t key;

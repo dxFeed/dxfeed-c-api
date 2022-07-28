@@ -24,10 +24,14 @@
 #endif
 
 #ifdef _WIN32
-#	pragma warning(push)
-#	pragma warning(disable : 5105)
+#	if !defined(__MINGW32__)
+#		pragma warning(push)
+#		pragma warning(disable : 5105)
+#	endif
 #	include <Windows.h>
-#	pragma warning(pop)
+#	if !defined(__MINGW32__)
+#		pragma warning(pop)
+#	endif
 #else
 #	include <stdlib.h>
 #	include <string.h>
@@ -83,22 +87,16 @@ int dxs_mutex_create(dxs_mutex_t* mutex) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dxs_mutex_destroy(dxs_mutex_t* mutex) {
 	DeleteCriticalSection(*mutex);
 	free(*mutex);
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dxs_mutex_lock(dxs_mutex_t* mutex) {
 	EnterCriticalSection(*mutex);
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dxs_mutex_unlock(dxs_mutex_t* mutex) {
 	LeaveCriticalSection(*mutex);
@@ -130,8 +128,6 @@ int dxs_mutex_create(dxs_mutex_t* mutex) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dxs_mutex_destroy(dxs_mutex_t* mutex) {
 	if (pthread_mutex_destroy(&mutex->mutex) != 0) {
 		return false;
@@ -144,8 +140,6 @@ int dxs_mutex_destroy(dxs_mutex_t* mutex) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dxs_mutex_lock(dxs_mutex_t* mutex) {
 	if (pthread_mutex_lock(&mutex->mutex) != 0) {
 		return false;
@@ -153,8 +147,6 @@ int dxs_mutex_lock(dxs_mutex_t* mutex) {
 
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dxs_mutex_unlock(dxs_mutex_t* mutex) {
 	if (pthread_mutex_unlock(&mutex->mutex) != 0) {
@@ -178,7 +170,7 @@ int dxs_mutex_unlock(dxs_mutex_t* mutex) {
 #define LOG_DATA_TRANSFER_TAG		"-p"
 #define TIMEOUT_TAG					"-o"
 #define LOG_HEARTBEAT_TAG			"-b"
-#define RECONNECT_TAG			    "-r"
+#define RECONNECT_TAG				"-r"
 
 // Prevents file names globbing (converting * to all files in the current dir)
 #ifdef __MINGW64_VERSION_MAJOR
@@ -264,7 +256,6 @@ void print_timestamp(dxf_long_t timestamp) {
 	wcsftime(timefmt, 80, L"%Y%m%d-%H%M%S", timeinfo);
 	wprintf(L"%ls", timefmt);
 }
-/* -------------------------------------------------------------------------- */
 
 void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
 			  void* user_data) {
@@ -419,7 +410,6 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 		wprintf(L"object=%ls}\n", cnf->object);
 	}
 }
-/* -------------------------------------------------------------------------- */
 
 dxf_string_t ansi_to_unicode(const char* ansi_str, size_t len) {
 #ifdef _WIN32
@@ -446,8 +436,6 @@ dxf_string_t ansi_to_unicode(const char* ansi_str, size_t len) {
 	return wide_str;
 #endif /* _WIN32 */
 }
-
-/* -------------------------------------------------------------------------- */
 
 typedef struct {
 	int type;
@@ -620,8 +608,6 @@ void on_server_heartbeat_notifier(dxf_connection_t connection, dxf_long_t server
 			 server_millis, server_lag_mark, connection_rtt);
 }
 
-/* -------------------------------------------------------------------------- */
-
 int main(int argc, char* argv[]) {
 	dxf_connection_t connection;
 	dxf_subscription_t subscription;
@@ -637,8 +623,8 @@ int main(int argc, char* argv[]) {
 			"[" DUMP_PARAM_LONG_TAG " | " DUMP_PARAM_SHORT_TAG " <filename>] [" TOKEN_PARAM_SHORT_TAG
 			" <token>] "
 			"[" SUBSCRIPTION_DATA_PARAM_TAG " <subscr_data>] [" LOG_DATA_TRANSFER_TAG "] [" TIMEOUT_TAG
-			" <timeout>] [" LOG_HEARTBEAT_TAG
-			"] [" RECONNECT_TAG "]\n"
+			" <timeout>] [" LOG_HEARTBEAT_TAG "] [" RECONNECT_TAG
+			"]\n"
 			"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
 			"                     If you want to use file instead of server data just\n"
 			"                     write there path to file e.g. path\\to\\raw.bin\n"
@@ -748,7 +734,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	dxf_initialize_logger_v2("command-line-api.log", true, true, true, log_data_transfer_flag);
-	//dxf_load_config_from_string("network.heartbeatTimeout = 11\n");
+	// dxf_load_config_from_string("network.heartbeatTimeout = 11\n");
 
 	wprintf(L"Command line sample started.\n");
 	wprintf(L"Connecting to host %hs...\n", dxfeed_host);

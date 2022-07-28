@@ -33,21 +33,17 @@ typedef struct dx_buffered_output_connection_context_t {
 	int set_field_mask;
 } dx_buffered_output_connection_context_t;
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Connection context functions
  */
-/* -------------------------------------------------------------------------- */
 
 void* dx_get_buffered_output_connection_context (dxf_connection_t connection);
 int dx_lock_buffered_output (void* context);
 int dx_unlock_buffered_output (void* context);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Buffer manipulators
  */
-/* -------------------------------------------------------------------------- */
 
 dxf_byte_t* dx_get_out_buffer (void* context);
 int dx_get_out_buffer_length (void* context);
@@ -62,11 +58,9 @@ void dx_set_out_buffer_position (void* context, int new_position);
  */
 int dx_ensure_capacity (void* context, int required_capacity);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Write operations
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_write_boolean (void* context, dxf_bool_t value);
 int dx_write_byte (void* context, dxf_byte_t value);
@@ -80,11 +74,9 @@ int dx_write_byte_buffer (void* context, const dxf_char_t* value);
 int dx_write_char_buffer  (void* context, const dxf_char_t* value);
 int dx_write_utf (void* context, dxf_const_string_t value);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Compact write operations
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_write_compact_int (void* context, dxf_int_t value);
 int dx_write_compact_long (void* context, dxf_long_t value);
@@ -98,11 +90,9 @@ int dx_write_compact_long (void* context, dxf_long_t value);
  */
 int dx_write_byte_array (void* context, const dxf_byte_t* buffer, int buffer_size);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	UTF write operations
  */
-/* -------------------------------------------------------------------------- */
 
 /*
  * Writes a Unicode code point in a UTF-8 format.

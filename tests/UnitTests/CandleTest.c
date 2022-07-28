@@ -23,10 +23,14 @@
 #include <stdio.h>
 #include <string.h>
 
-#pragma warning(push)
-#pragma warning(disable : 5105)
-#include <Windows.h>
-#pragma warning(pop)
+#	if !defined(__MINGW32__)
+#		pragma warning(push)
+#		pragma warning(disable : 5105)
+#	endif
+#	include <Windows.h>
+#	if !defined(__MINGW32__)
+#		pragma warning(pop)
+#	endif
 
 #include "Candle.h"
 #include "CandleTest.h"
@@ -145,15 +149,11 @@ static event_counter_data_ptr_t g_order_data = &g_order_event_counter_data;
 static dxf_candle_t g_last_candle = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
 dxf_listener_thread_data_t g_ct_listener_thread_data = NULL;
 
-/* -------------------------------------------------------------------------- */
-
 void candle_tests_on_thread_terminate(dxf_connection_t connection, void* user_data) {
 	if (g_ct_listener_thread_data == NULL)
 		return;
 	on_reader_thread_terminate(g_ct_listener_thread_data, connection, user_data);
 }
-
-/* -------------------------------------------------------------------------- */
 
 void aapl_candle_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data,
 						int data_count, void* user_data) {
@@ -196,8 +196,6 @@ void common_candle_listener(int event_type, dxf_const_string_t symbol_name, cons
 		inc_event_counter(g_ibm_candle_data);
 	}
 }
-
-/* -------------------------------------------------------------------------- */
 
 int add_symbol_to_existing_candle(dxf_subscription_t subscription, dxf_const_string_t symbol) {
 	dxf_candle_attributes_t candle_attributes = NULL;
@@ -295,8 +293,6 @@ int get_order_event_counter() {
 	return get_event_counter(g_order_data);
 }
 
-/* -------------------------------------------------------------------------- */
-
 /*Test*/
 int candle_attributes_test(void) {
 	int candle_attribute_cases_size = sizeof(g_candle_attribute_cases) / sizeof(g_candle_attribute_cases[0]);
@@ -325,8 +321,6 @@ int candle_attributes_test(void) {
 	}
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 /*Test*/
 int candle_subscription_test(void) {

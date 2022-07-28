@@ -55,10 +55,14 @@ typedef struct {
 	pthread_mutexattr_t attr;
 } dxs_mutex_t;
 #else /* !defined(_WIN32) || defined(USE_PTHREADS) */
-#	pragma warning(push)
-#	pragma warning(disable : 5105)
+#	if !defined(__MINGW32__)
+#		pragma warning(push)
+#		pragma warning(disable : 5105)
+#	endif
 #	include <Windows.h>
-#	pragma warning(pop)
+#	if !defined(__MINGW32__)
+#		pragma warning(pop)
+#	endif
 #	define USE_WIN32_THREADS
 typedef HANDLE dxs_thread_t;
 typedef DWORD dxs_key_t;
@@ -216,8 +220,6 @@ typedef struct {
 	dxf_snapshot_t snapshot;
 } listener_arg_t;
 
-/* -------------------------------------------------------------------------- */
-
 void process_last_error() {
 	int error_code = dx_ec_success;
 	dxf_const_string_t error_descr = NULL;
@@ -240,8 +242,6 @@ void process_last_error() {
 
 	wprintf(L"An error occurred but the error subsystem failed to initialize\n");
 }
-
-/* -------------------------------------------------------------------------- */
 
 dxf_string_t ansi_to_unicode(const char *ansi_str) {
 #ifdef _WIN32
@@ -269,8 +269,6 @@ dxf_string_t ansi_to_unicode(const char *ansi_str) {
 	return wide_str;
 #endif /* _WIN32 */
 }
-
-/* -------------------------------------------------------------------------- */
 
 void print_order_snapshot(dxf_snapshot_data_ptr_t snapshot_data, dxf_int_t records_print_limit) {
 	size_t i = 0;
@@ -375,8 +373,8 @@ void print_greeks_snapshot(dxf_snapshot_data_ptr_t snapshot_data, dxf_int_t reco
 			wprintf(L"   { ... %zu records left ...}\n", records_count - i);
 			break;
 		}
-
-		wprintf(L"   {time=");
+    
+    wprintf(L"   {time=");
 		print_timestamp(grks.time);
 		wprintf(L", index=0x%"LS(PRIX64)L", greeks price=%.15g, volatility=%.15g, "
 			        L"delta=%.15g, gamma=%.15g, theta=%.15g, rho=%.15g, vega=%.15g, flags=0x%X}\n",
@@ -419,8 +417,8 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void *user_data) {
 		records_print_limit = listener_args->records_print_limit;
 		snapshot = listener_args->snapshot;
 	}
-
-	dxf_snapshot_data_t filtered_records = {
+  
+  dxf_snapshot_data_t filtered_records = {
 		.event_type = snapshot_data->event_type,
 		.symbol = snapshot_data->symbol,
 		.records = NULL,
@@ -489,8 +487,6 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, void *user_data) {
 		print_series_snapshot(snapshot_data, records_print_limit);
 	}
 }
-
-/* -------------------------------------------------------------------------- */
 
 int atoi2(char *str, int *result) {
 	if (str == NULL || str[0] == '\0' || result == NULL) {
@@ -568,7 +564,7 @@ int main(int argc, char *argv[]) {
 			"of events and a full order book.\n"
 			"-------------------------------------------------------------------------------\n"
 			"Usage: SnapshotConsoleSample <server address> <event type> <symbol>\n"
-			"       [order_source] [" FROM_TIME_PARAM_SHORT_TAG " <DD-MM-YYYYTHH:mm:ss>] [" TO_TIME_PARAM_SHORT_TAG " <DD-MM-YYYYTHH:mm:ss>]" 
+			"       [order_source] [" FROM_TIME_PARAM_SHORT_TAG " <DD-MM-YYYYTHH:mm:ss>] [" TO_TIME_PARAM_SHORT_TAG " <DD-MM-YYYYTHH:mm:ss>]"
 			" [" RECORDS_PRINT_LIMIT_SHORT_PARAM " <records_print_limit>] [" TOKEN_PARAM_SHORT_TAG " <token>]\n"
 			"       [" LOG_DATA_TRANSFER_TAG "] [" TIMEOUT_TAG " <timeout>]\n\n"
 			"  <server address> - The dxFeed server address, e.g. demo.dxfeed.com:7300\n"
@@ -579,7 +575,7 @@ int main(int argc, char *argv[]) {
 			"                        BZX, DEA, ISE, DEX, IST, ...\n"
 			"                     b) source for MarketMaker, one of following: AGGREGATE_BID\n"
 			"                        or AGGREGATE_ASK\n"
-			"  " FROM_TIME_PARAM_SHORT_TAG " <DD-MM-YYYYTHH:mm:ss>  - Time from which to receive data (default: current date and time)\n"			
+			"  " FROM_TIME_PARAM_SHORT_TAG " <DD-MM-YYYYTHH:mm:ss>  - Time from which to receive data (default: current date and time)\n"
 			"  " TO_TIME_PARAM_SHORT_TAG "   <DD-MM-YYYYTHH:mm:ss>  - Time to which to receive data (default: infinity, exist only for CANDLE, TIME_AND_SALE and GREEKS)\n"
 			"  " RECORDS_PRINT_LIMIT_SHORT_PARAM " <limit>       - The number of displayed records "
 			"(0 - unlimited, default: " STRINGIFY(DEFAULT_RECORDS_PRINT_LIMIT)")\n"

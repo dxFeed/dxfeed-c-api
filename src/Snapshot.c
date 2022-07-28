@@ -27,11 +27,9 @@
 #include "Logger.h"
 #include "Snapshot.h"
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Internal data structures and defines
  */
-/* -------------------------------------------------------------------------- */
 
 typedef enum {
 	dx_status_unknown = 0,
@@ -128,11 +126,9 @@ const dxf_snapshot_t dx_invalid_snapshot = (dxf_snapshot_t)NULL;
 
 #define SNAPSHOT_KEY_SOURCE_MASK 0xFFFFFFu
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Event subscription connection context
  */
-/* -------------------------------------------------------------------------- */
 
 typedef struct {
 	dxf_connection_t connection;
@@ -145,8 +141,6 @@ typedef struct {
 
 #define CTX(context) \
 	((dx_snapshot_subscription_connection_context_t*)context)
-
-/* -------------------------------------------------------------------------- */
 
 int dx_clear_snapshot_subscription_connection_context(dx_snapshot_subscription_connection_context_t* context);
 int dx_free_snapshot_data(dx_snapshot_data_ptr_t snapshot_data);
@@ -181,8 +175,6 @@ DX_CONNECTION_SUBSYS_INIT_PROTO(dx_ccs_snapshot_subscription) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_snapshot_subscription) {
 	int res = true;
 	dx_snapshot_subscription_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_snapshot_subscription, &res);
@@ -194,13 +186,9 @@ DX_CONNECTION_SUBSYS_DEINIT_PROTO(dx_ccs_snapshot_subscription) {
 	return dx_clear_snapshot_subscription_connection_context(context);
 }
 
-/* -------------------------------------------------------------------------- */
-
 DX_CONNECTION_SUBSYS_CHECK_PROTO(dx_ccs_snapshot_subscription) {
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_clear_snapshot_subscription_connection_context(dx_snapshot_subscription_connection_context_t* context) {
 	int res = true;
@@ -223,11 +211,9 @@ int dx_clear_snapshot_subscription_connection_context(dx_snapshot_subscription_c
 	return res;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Helpers functions implementation
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_snapshot_records_comparator(dxf_time_int_field_t t1, dxf_time_int_field_t t2) {
 	return t1 > t2 ? -1 : (t1 < t2 ? 1 : 0);
@@ -806,11 +792,9 @@ int dx_free_snapshot_data(dx_snapshot_data_ptr_t snapshot_data) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Subscription functions implementation
  */
-/* -------------------------------------------------------------------------- */
 
 dxf_snapshot_t dx_create_snapshot(dxf_connection_t connection,
 								dxf_subscription_t subscription,

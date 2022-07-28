@@ -33,11 +33,9 @@
 #define DX_AUTH_BASIC_KEY "Basic"
 #define DX_AUTH_BEARER_KEY "Bearer"
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Auxiliary structures and types
  */
-/* -------------------------------------------------------------------------- */
 
 typedef int (*dx_socket_data_receiver_t) (dxf_connection_t connection, const void* buffer, int buffer_size);
 
@@ -52,11 +50,10 @@ typedef struct dx_connection_context_data_t {
 	void* on_server_heartbeat_notifier_user_data;
 } dx_connection_context_data_t;
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Advanced network functions
  */
-/* -------------------------------------------------------------------------- */
+
 /*
  *  Binds the connection to the specified address with the given context.
 
@@ -77,7 +74,7 @@ typedef struct dx_connection_context_data_t {
 int dx_bind_to_address (dxf_connection_t connection, const char* address,
 						const dx_connection_context_data_t* ccd);
 
-/* -------------------------------------------------------------------------- */
+
 /*
  *  Sends a portion data via a previously bound connection.
 
@@ -93,7 +90,6 @@ int dx_bind_to_address (dxf_connection_t connection, const char* address,
 
 int dx_send_data (dxf_connection_t connection, const void* buffer, int buffer_size);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Adds a task for a socket reader thread. The task is put into a special queue.
  *  The task queue is executed on each iteration of the internal infinite loop
@@ -113,20 +109,16 @@ int dx_send_data (dxf_connection_t connection, const void* buffer, int buffer_si
 
 int dx_add_worker_thread_task (dxf_connection_t connection, dx_task_processor_t processor, void* data);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Connection status functions
  */
-/* -------------------------------------------------------------------------- */
 
 void dx_connection_status_set(dxf_connection_t connection, dxf_connection_status_t status);
 dxf_connection_status_t dx_connection_status_get(dxf_connection_t connection);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Protocol properties functions
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_protocol_property_get_snapshot(dxf_connection_t connection,
 							OUT dxf_property_item_t** ppProperties, OUT int* pSize);

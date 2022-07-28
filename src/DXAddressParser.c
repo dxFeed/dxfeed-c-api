@@ -98,8 +98,6 @@ static const char* schemes[] = {
 };
 static const size_t scheme_count = sizeof(schemes) / sizeof(schemes[0]);
 
-/* -------------------------------------------------------------------------- */
-
 static int dx_is_empty_entry(const char* entry_begin, const char* entry_end) {
 	if (entry_begin >= entry_end)
 		return true;
@@ -111,16 +109,12 @@ static int dx_is_empty_entry(const char* entry_begin, const char* entry_end) {
 	return false;
 }
 
-/* -------------------------------------------------------------------------- */
-
 static const char* dx_find_first(const char* from, const char* to, int ch) {
 	const char* pos = strchr(from, ch);
 	if (pos > to)
 		return NULL;
 	return pos;
 }
-
-/* -------------------------------------------------------------------------- */
 
 static const char* dx_find_last(const char* from, const char* to, int ch) {
 	char* substr = dx_ansi_create_string_src_len(from, to - from);
@@ -138,8 +132,6 @@ static const char* dx_find_last(const char* from, const char* to, int ch) {
 	return from + offset;
 }
 
-/* -------------------------------------------------------------------------- */
-
 static const char* dx_find_first_of_values(const char* from, const char* to, int first, int second) {
 	const char* first_pos = dx_find_first(from, to, first);
 	const char* second_pos = dx_find_first(from, to, second);
@@ -150,13 +142,9 @@ static const char* dx_find_first_of_values(const char* from, const char* to, int
 	return MIN(first_pos, second_pos);
 }
 
-/* -------------------------------------------------------------------------- */
-
 static int dx_has_next(const char* next) {
 	return next != NULL && *next != null_symbol;
 }
-
-/* -------------------------------------------------------------------------- */
 
 static int dx_is_numeric(const char* str) {
 	const char* next = str;
@@ -168,8 +156,6 @@ static int dx_is_numeric(const char* str) {
 	}
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 static int dx_get_next_entry(OUT const char** next, OUT const char** entry, OUT size_t* size) {
 	if (entry == NULL || size == NULL || next == NULL)
@@ -206,8 +192,6 @@ static int dx_get_next_entry(OUT const char** next, OUT const char** entry, OUT 
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 static int dx_get_next_codec(OUT const char** next, const char* next_end, OUT const char** codec, OUT size_t* size) {
 	if (codec == NULL || size == NULL || next == NULL)
 		return dx_set_error_code(dx_ec_invalid_func_param_internal);
@@ -235,8 +219,6 @@ static int dx_get_next_codec(OUT const char** next, const char* next_end, OUT co
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 static int dx_get_codec_name(const char* codec, size_t codec_size, OUT const char** name, OUT size_t* name_size) {
 	char* end = NULL;
 	if (codec == NULL || name == NULL || name_size == NULL) {
@@ -257,8 +239,6 @@ static int dx_get_codec_name(const char* codec, size_t codec_size, OUT const cha
 	}
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 static int dx_get_codec_properties(const char* codec, size_t codec_size, OUT const char** props, OUT size_t* props_size) {
 	const char* name;
@@ -285,8 +265,6 @@ static int dx_get_codec_properties(const char* codec, size_t codec_size, OUT con
 	}
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 static int dx_get_next_property(OUT const char** next, OUT size_t* next_size, OUT const char** prop, OUT size_t* prop_size) {
 	if (next == NULL || next_size == NULL || prop == NULL || prop_size == NULL) {
@@ -326,8 +304,6 @@ static int dx_get_next_property(OUT const char** next, OUT size_t* next_size, OU
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 static int dx_get_host_port_string(const char* entry, size_t entry_size, OUT const char** address, OUT size_t* size) {
 	const char* begin;
 	const char* end;
@@ -346,8 +322,6 @@ static int dx_get_host_port_string(const char* entry, size_t entry_size, OUT con
 	*address = begin;
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 static int dx_get_properties(const char* entry, size_t entry_size, OUT const char** props, OUT size_t* props_size) {
 	const char* begin;
@@ -374,8 +348,6 @@ static int dx_get_properties(const char* entry, size_t entry_size, OUT const cha
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 static void dx_free_property(OUT dx_address_property_t* prop) {
 	if (prop == NULL)
 		return;
@@ -386,8 +358,6 @@ static void dx_free_property(OUT dx_address_property_t* prop) {
 	prop->key = NULL;
 	prop->value = NULL;
 }
-
-/* -------------------------------------------------------------------------- */
 
 //Note: free allocated memory for prop!
 static int dx_parse_property(const char* str, size_t size, OUT dx_address_property_t* prop) {
@@ -410,8 +380,6 @@ static int dx_parse_property(const char* str, size_t size, OUT dx_address_proper
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_codec_tls_copy(const dx_codec_tls_t* src, OUT dx_codec_tls_t* dest) {
 	if (src == NULL || dest == NULL)
 		return dx_set_error_code(dx_ec_invalid_func_param_internal);
@@ -431,8 +399,6 @@ int dx_codec_tls_copy(const dx_codec_tls_t* src, OUT dx_codec_tls_t* dest) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 void dx_codec_tls_free(dx_codec_tls_t* tls) {
 	if (tls->key_store != NULL)
 		dx_free(tls->key_store);
@@ -447,8 +413,6 @@ void dx_codec_tls_free(dx_codec_tls_t* tls) {
 	tls->trust_store = NULL;
 	tls->trust_store_password = NULL;
 }
-
-/* -------------------------------------------------------------------------- */
 
 static int dx_codec_tls_parser(const char* codec, size_t size, OUT dx_address_t* addr) {
 	const char* next;
@@ -493,8 +457,6 @@ static int dx_codec_tls_parser(const char* codec, size_t size, OUT dx_address_t*
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_codec_gzip_copy(const dx_codec_gzip_t* src, OUT dx_codec_gzip_t* dest) {
 	if (src == NULL || dest == NULL)
 		return dx_set_error_code(dx_ec_invalid_func_param_internal);
@@ -503,14 +465,10 @@ int dx_codec_gzip_copy(const dx_codec_gzip_t* src, OUT dx_codec_gzip_t* dest) {
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 static int dx_codec_gzip_parser(const char* codec, size_t size, OUT dx_address_t* addr) {
 	addr->gzip.enabled = true;
 	return true;
 }
-
-/* -------------------------------------------------------------------------- */
 
 static int dx_codec_parse(const char* codec, size_t codec_size, OUT dx_address_t* addr) {
 	const char* codec_name;
@@ -529,8 +487,6 @@ static int dx_codec_parse(const char* codec, size_t codec_size, OUT dx_address_t
 	}
 	return dx_set_error_code(dx_nec_unknown_codec);
 }
-
-/* -------------------------------------------------------------------------- */
 
 static int dx_parse_host_port(const char* host, size_t size, OUT dx_address_t* addr) {
 	size_t i;
@@ -579,8 +535,6 @@ static int dx_parse_host_port(const char* host, size_t size, OUT dx_address_t* a
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 static void dx_free_address(OUT dx_address_t* addr) {
 	if (addr == NULL)
 		return;
@@ -596,8 +550,6 @@ static void dx_free_address(OUT dx_address_t* addr) {
 	dx_codec_tls_free(&addr->tls);
 	memset((void*)addr, 0, sizeof(dx_address_t));
 }
-
-/* -------------------------------------------------------------------------- */
 
 static int dx_parse_address(const char* entry, size_t entry_size, OUT dx_address_t* addr) {
 	const char* next = entry;
@@ -668,8 +620,6 @@ static int dx_parse_address(const char* entry, size_t entry_size, OUT dx_address
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 void dx_clear_address_array(dx_address_array_t* addresses) {
 	size_t i = 0;
 
@@ -684,8 +634,6 @@ void dx_clear_address_array(dx_address_array_t* addresses) {
 	dx_free(addresses->elements);
 	memset((void*)addresses, 0, sizeof(dx_address_array_t));
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_get_addresses_from_collection(const char* collection, OUT dx_address_array_t* addresses) {
 	char* collection_copied = NULL;

@@ -70,11 +70,9 @@
 
 extern dxf_int_t g_wildcard_cipher;
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Symbol codec functions
  */
-/* -------------------------------------------------------------------------- */
 
 /*
  *	Initialize of symbol codec
@@ -83,27 +81,23 @@ extern dxf_int_t g_wildcard_cipher;
  */
 int dx_init_symbol_codec (void);
 
-/* -------------------------------------------------------------------------- */
 /*
  *  valid cipher defines range of valid encoded ciphers.
  */
 dxf_int_t dx_get_codec_valid_cipher (void);
 
-/* -------------------------------------------------------------------------- */
 /*
  * Returns encoded cipher for specified symbol.
  * Returns 0 if specified symbol is NULL or if encoding is impossible.
  */
 dxf_int_t dx_encode_symbol_name (dxf_const_string_t symbol);
 
-/* -------------------------------------------------------------------------- */
 /*
  * Restores symbol for specified cipher.
  * Restored symbol is NULL if specified cipher is 0.
  */
 int dx_decode_symbol_name (dxf_int_t cipher, OUT dxf_const_string_t* symbol);
 
-/* -------------------------------------------------------------------------- */
 /*
  * Reads symbol from connection context input buffer and returns it in several ways depending on its encodability and length.
  * If this method produces:
@@ -122,7 +116,6 @@ int dx_codec_read_symbol(void* bicc, dxf_char_t* buffer, int buffer_length, OUT 
 						OUT dxf_int_t* cipher_result, OUT dxf_event_flags_t* flags,
 						OUT dxf_event_flags_t* mru_event_flags);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Writes the symbol into the buffered output connection context buffer
  */

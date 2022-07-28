@@ -22,11 +22,9 @@
 #include "DXErrorCodes.h"
 #include "DXAlgorithms.h"
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Message roster structures
  */
-/* -------------------------------------------------------------------------- */
 
 static const int g_send_msg_roster[] = {
 	/* the messages our application is able and is going to send */
@@ -54,11 +52,9 @@ static const int g_recv_msg_roster[] = {
 static const int g_send_msg_count = sizeof(g_send_msg_roster) / sizeof(g_send_msg_roster[0]);
 static const int g_recv_msg_count = sizeof(g_recv_msg_roster) / sizeof(g_recv_msg_roster[0]);
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Message type validation functions implementation
  */
-/* -------------------------------------------------------------------------- */
 
 int dx_is_message_type_valid (int type) {
 	return type == MESSAGE_HEARTBEAT ||
@@ -79,15 +75,11 @@ int dx_is_message_type_valid (int type) {
 		type == MESSAGE_TEXT_FORMAT;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_is_data_message (int type) {
 	return type == MESSAGE_TICKER_DATA ||
 		type == MESSAGE_STREAM_DATA ||
 		type == MESSAGE_HISTORY_DATA;
 }
-
-/* -------------------------------------------------------------------------- */
 
 int dx_is_subscription_message (int type) {
 	return type == MESSAGE_TICKER_ADD_SUBSCRIPTION ||
@@ -98,39 +90,29 @@ int dx_is_subscription_message (int type) {
 		type == MESSAGE_HISTORY_REMOVE_SUBSCRIPTION;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Message roster functions implementation
  */
-/* -------------------------------------------------------------------------- */
 
 const int* dx_get_send_message_roster (void) {
 	return g_send_msg_roster;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_get_send_message_roster_size (void) {
 	return g_send_msg_count;
 }
-
-/* -------------------------------------------------------------------------- */
 
 const int* dx_get_recv_message_roster (void) {
 	return g_recv_msg_roster;
 }
 
-/* -------------------------------------------------------------------------- */
-
 int dx_get_recv_message_roster_size (void) {
 	return g_recv_msg_count;
 }
 
-/* -------------------------------------------------------------------------- */
 /*
  *	Miscellaneous message functions implementation
  */
-/* -------------------------------------------------------------------------- */
 
 dxf_const_string_t dx_get_message_type_name (int type) {
 	switch (type){

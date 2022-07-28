@@ -20,10 +20,14 @@
 #include <math.h>
 
 #ifdef _WIN32
-#	pragma warning(push)
-#	pragma warning(disable : 5105)
+#	if !defined(__MINGW32__)
+#		pragma warning(push)
+#		pragma warning(disable : 5105)
+#	endif
 #	include <Windows.h>
-#	pragma warning(pop)
+#	if !defined(__MINGW32__)
+#		pragma warning(pop)
+#	endif
 #else
 #	include <unistd.h>
 #	include <string.h>
@@ -89,9 +93,7 @@ void init_listener_thread_data(OUT dxf_listener_thread_data_t* data) {
 	*data = (dxf_listener_thread_data_t)internal_data;
 }
 
-void free_listener_thread_data(dxf_listener_thread_data_t data) {
-	free(data);
-}
+void free_listener_thread_data(dxf_listener_thread_data_t data) { free(data); }
 
 int is_thread_terminate(dxf_listener_thread_data_t data) {
 	int res;
@@ -107,8 +109,6 @@ void on_reader_thread_terminate(dxf_connection_t connection, void* user_data) {
 }
 #endif
 
-/* -------------------------------------------------------------------------- */
-
 void process_last_error() {
 	int error_code = dx_ec_success;
 	dxf_const_string_t error_descr = NULL;
@@ -122,7 +122,8 @@ void process_last_error() {
 			return;
 		}
 
-		wprintf(L"Error occurred and successfully retrieved:\n"
+		wprintf(
+			L"Error occurred and successfully retrieved:\n"
 			L"error code = %d, description = \"%ls\"\n",
 			error_code, error_descr);
 		return;
@@ -131,12 +132,8 @@ void process_last_error() {
 	wprintf(L"An error occurred but the error subsystem failed to initialize\n");
 }
 
-/* -------------------------------------------------------------------------- */
-
-int create_event_subscription(dxf_connection_t connection, int event_type,
-							dxf_const_string_t symbol,
-							dxf_event_listener_t event_listener,
-							OUT dxf_subscription_t* res_subscription) {
+int create_event_subscription(dxf_connection_t connection, int event_type, dxf_const_string_t symbol,
+							  dxf_event_listener_t event_listener, OUT dxf_subscription_t* res_subscription) {
 	dxf_subscription_t subscription = NULL;
 
 	if (!dxf_create_subscription(connection, event_type, &subscription)) {
@@ -160,8 +157,6 @@ int create_event_subscription(dxf_connection_t connection, int event_type,
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 /* Event counter functions */
 
 void init_event_counter(event_counter_data_ptr_t counter_data) {
@@ -170,7 +165,7 @@ void init_event_counter(event_counter_data_ptr_t counter_data) {
 	counter_data->counter_name = NULL;
 }
 
-void init_event_counter2(event_counter_data_ptr_t counter_data, const char *name) {
+void init_event_counter2(event_counter_data_ptr_t counter_data, const char* name) {
 	InitializeCriticalSection(&counter_data->event_counter_guard);
 	counter_data->event_counter = 0;
 	counter_data->counter_name = name;
@@ -200,53 +195,51 @@ void drop_event_counter(event_counter_data_ptr_t counter_data) {
 	LeaveCriticalSection(&counter_data->event_counter_guard);
 }
 
-const char *get_event_counter_name(event_counter_data_ptr_t counter_data) {
-	const char * value = 0;
+const char* get_event_counter_name(event_counter_data_ptr_t counter_data) {
+	const char* value = 0;
 	EnterCriticalSection(&counter_data->event_counter_guard);
 	value = counter_data->counter_name;
 	LeaveCriticalSection(&counter_data->event_counter_guard);
 	return value;
 }
 
-/* -------------------------------------------------------------------------- */
-
 #define DX_TOLLERANCE 0.000001
 
-#define DX_IS_EQUAL_FUNCTION_DEFINITION(type, tmpl) \
-DX_IS_EQUAL_FUNCTION_DECLARATION(type) { \
-	if (expected != actual) { \
-		wprintf(L"%ls failed: expected=" tmpl L", but was=" tmpl L"\n", __FUNCTIONW__, expected, actual); \
-		return false; \
-			} \
-	return true; \
-}
+#define DX_IS_EQUAL_FUNCTION_DEFINITION(type, tmpl)                                                           \
+	DX_IS_EQUAL_FUNCTION_DECLARATION(type) {                                                                  \
+		if (expected != actual) {                                                                             \
+			wprintf(L"%ls failed: expected=" tmpl L", but was=" tmpl L"\n", __FUNCTIONW__, expected, actual); \
+			return false;                                                                                     \
+		}                                                                                                     \
+		return true;                                                                                          \
+	}
 
-#define DX_IS_EQUAL_STRING_FUNCTION_DEFINITION(type, tmpl) \
-DX_IS_EQUAL_FUNCTION_DECLARATION(type) { \
-	if (wcscmp(expected, actual) != 0) { \
-		wprintf(L"%ls failed: expected=" tmpl L", but was=" tmpl L"\n", __FUNCTIONW__, expected, actual); \
-		return false; \
-				} \
-	return true; \
-}
+#define DX_IS_EQUAL_STRING_FUNCTION_DEFINITION(type, tmpl)                                                    \
+	DX_IS_EQUAL_FUNCTION_DECLARATION(type) {                                                                  \
+		if (wcscmp(expected, actual) != 0) {                                                                  \
+			wprintf(L"%ls failed: expected=" tmpl L", but was=" tmpl L"\n", __FUNCTIONW__, expected, actual); \
+			return false;                                                                                     \
+		}                                                                                                     \
+		return true;                                                                                          \
+	}
 
-#define DX_IS_EQUAL_ANSI_FUNCTION_DEFINITION(type, tmpl, alias) \
-DX_IS_EQUAL_FUNCTION_DECLARATION_A(type, alias) { \
-	if (expected == NULL && actual == NULL) { \
-		return true; \
-	} else if (expected == NULL) { \
-		printf("%s failed: expected=NULL, but was=" tmpl "\n", __FUNCTION__, actual); \
-		return false; \
-	} else if (actual == NULL) { \
-		printf("%s failed: expected=" tmpl ", but was=NULL\n", __FUNCTION__, expected); \
-		return false; \
-	} \
-	if (strcmp(expected, actual) != 0) { \
-		printf("%s failed: expected=" tmpl ", but was=" tmpl "\n", __FUNCTION__, expected, actual); \
-		return false; \
-	} \
-	return true; \
-}
+#define DX_IS_EQUAL_ANSI_FUNCTION_DEFINITION(type, tmpl, alias)                                         \
+	DX_IS_EQUAL_FUNCTION_DECLARATION_A(type, alias) {                                                   \
+		if (expected == NULL && actual == NULL) {                                                       \
+			return true;                                                                                \
+		} else if (expected == NULL) {                                                                  \
+			printf("%s failed: expected=NULL, but was=" tmpl "\n", __FUNCTION__, actual);               \
+			return false;                                                                               \
+		} else if (actual == NULL) {                                                                    \
+			printf("%s failed: expected=" tmpl ", but was=NULL\n", __FUNCTION__, expected);             \
+			return false;                                                                               \
+		}                                                                                               \
+		if (strcmp(expected, actual) != 0) {                                                            \
+			printf("%s failed: expected=" tmpl ", but was=" tmpl "\n", __FUNCTION__, expected, actual); \
+			return false;                                                                               \
+		}                                                                                               \
+		return true;                                                                                    \
+	}
 
 DX_IS_EQUAL_FUNCTION_DEFINITION(int, L"%d")
 DX_IS_EQUAL_FUNCTION_DEFINITION(ERRORCODE, L"%d")
@@ -272,9 +265,7 @@ DX_IS_EQUAL_FUNCTION_DECLARATION(double) {
 	return true;
 }
 
-DX_IS_EQUAL_FUNCTION_DECLARATION(size_t) {
-	return dx_is_equal_dxf_ulong_t((dxf_ulong_t)expected, actual);
-}
+DX_IS_EQUAL_FUNCTION_DECLARATION(size_t) { return dx_is_equal_dxf_ulong_t((dxf_ulong_t)expected, actual); }
 
 int dx_is_not_null(void* actual) {
 	if (actual == NULL) {
@@ -308,8 +299,7 @@ int dx_is_false(int actual) {
 	return true;
 }
 
-int dx_is_equal_ptr(void* expected, void* actual)
-{
+int dx_is_equal_ptr(void* expected, void* actual) {
 	if (expected != actual) {
 		wprintf(L"%ls failed: expected=%p, but was=%p\n", __FUNCTIONW__, expected, actual);
 		return false;
@@ -317,14 +307,15 @@ int dx_is_equal_ptr(void* expected, void* actual)
 	return true;
 }
 
-#define DX_IS_GREATER_OR_EQUAL_FUNCTION_DEFINITION(type, tmpl) \
-DX_IS_GREATER_OR_EQUAL_FUNCTION_DECLARATION(type) { \
-	if (actual < param) { \
-		wprintf(L"%ls failed: expected greater or equal to " tmpl L", but was=" tmpl L"\n", __FUNCTIONW__, param, actual); \
-		return false; \
-				} \
-	return true; \
-}
+#define DX_IS_GREATER_OR_EQUAL_FUNCTION_DEFINITION(type, tmpl)                                                        \
+	DX_IS_GREATER_OR_EQUAL_FUNCTION_DECLARATION(type) {                                                               \
+		if (actual < param) {                                                                                         \
+			wprintf(L"%ls failed: expected greater or equal to " tmpl L", but was=" tmpl L"\n", __FUNCTIONW__, param, \
+					actual);                                                                                          \
+			return false;                                                                                             \
+		}                                                                                                             \
+		return true;                                                                                                  \
+	}
 
 DX_IS_GREATER_OR_EQUAL_FUNCTION_DEFINITION(dxf_uint_t, L"%u")
 DX_IS_GREATER_OR_EQUAL_FUNCTION_DEFINITION(dxf_long_t, L"%lld")
