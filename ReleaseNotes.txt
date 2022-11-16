@@ -1,4 +1,5 @@
 Version 8.7.0
+* [DXFC-394] [Breaking changes] Disabled mixing of specified addresses for connection in the form: (hos1:port1)(host2:port2)(host3:port3)
 * [DXFC-334] Fixed a bug with precision error when converting WideDecimal to Double
 * [DXFC-376] The SnapshotConsoleSample was improved: added an ability to specify from-time and to-time arguments.
 
