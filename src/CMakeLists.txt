@@ -339,9 +339,9 @@ if (NOT DISABLE_TLS)
         ADD_CUSTOM_COMMAND(
                 TARGET ${PROJECT}
                 POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/win/${TARGET_PLATFORM}/libtls-15${PLATFORM_POSTFIX}.dll ${CMAKE_BINARY_DIR}/$(Configuration)
-                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/win/${TARGET_PLATFORM}/libssl-43${PLATFORM_POSTFIX}.dll ${CMAKE_BINARY_DIR}/$(Configuration)
-                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/win/${TARGET_PLATFORM}/libcrypto-41${PLATFORM_POSTFIX}.dll ${CMAKE_BINARY_DIR}/$(Configuration)
+                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/win/${TARGET_PLATFORM}/libtls-15${PLATFORM_POSTFIX}.dll ${CMAKE_BINARY_DIR}
+                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/win/${TARGET_PLATFORM}/libssl-43${PLATFORM_POSTFIX}.dll ${CMAKE_BINARY_DIR}
+                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/win/${TARGET_PLATFORM}/libcrypto-41${PLATFORM_POSTFIX}.dll ${CMAKE_BINARY_DIR}
         )
     elseif (MACOSX)
         ADD_CUSTOM_COMMAND(
@@ -352,18 +352,18 @@ if (NOT DISABLE_TLS)
         ADD_CUSTOM_COMMAND(
                 TARGET ${PROJECT}
                 POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libcrypto.46.0.0.dylib ${CMAKE_BINARY_DIR}/$(Configuration)
-                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libcrypto.46.dylib ${CMAKE_BINARY_DIR}/$(Configuration)
-                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libcrypto.a ${CMAKE_BINARY_DIR}/$(Configuration)
-                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libcrypto.dylib ${CMAKE_BINARY_DIR}/$(Configuration)
-                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libssl.48.0.0.dylib ${CMAKE_BINARY_DIR}/$(Configuration)
-                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libssl.48.dylib ${CMAKE_BINARY_DIR}/$(Configuration)
-                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libssl.a ${CMAKE_BINARY_DIR}/$(Configuration)
-                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libssl.dylib ${CMAKE_BINARY_DIR}/$(Configuration)
-                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libtls.20.0.0.dylib ${CMAKE_BINARY_DIR}/$(Configuration)
-                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libtls.20.dylib ${CMAKE_BINARY_DIR}/$(Configuration)
-                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libtls.a ${CMAKE_BINARY_DIR}/$(Configuration)
-                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libtls.dylib ${CMAKE_BINARY_DIR}/$(Configuration)
+                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libcrypto.46.0.0.dylib ${CMAKE_BINARY_DIR}
+                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libcrypto.46.dylib ${CMAKE_BINARY_DIR}
+                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libcrypto.a ${CMAKE_BINARY_DIR}
+                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libcrypto.dylib ${CMAKE_BINARY_DIR}
+                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libssl.48.0.0.dylib ${CMAKE_BINARY_DIR}
+                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libssl.48.dylib ${CMAKE_BINARY_DIR}
+                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libssl.a ${CMAKE_BINARY_DIR}
+                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libssl.dylib ${CMAKE_BINARY_DIR}
+                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libtls.20.0.0.dylib ${CMAKE_BINARY_DIR}
+                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libtls.20.dylib ${CMAKE_BINARY_DIR}
+                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libtls.a ${CMAKE_BINARY_DIR}
+                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/mac/${TARGET_PLATFORM}/libtls.dylib ${CMAKE_BINARY_DIR}
         )
     else (WIN32)
         ADD_CUSTOM_COMMAND(
@@ -374,15 +374,15 @@ if (NOT DISABLE_TLS)
         ADD_CUSTOM_COMMAND(
                 TARGET ${PROJECT}
                 POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/nix/${TARGET_PLATFORM}/libcrypto.so.41.1.0 ${CMAKE_BINARY_DIR}/$(Configuration)
-                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/nix/${TARGET_PLATFORM}/libcrypto.so.41 ${CMAKE_BINARY_DIR}/$(Configuration)
-                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/nix/${TARGET_PLATFORM}/libcrypto.so ${CMAKE_BINARY_DIR}/$(Configuration)
-                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/nix/${TARGET_PLATFORM}/libssl.so.43.2.0 ${CMAKE_BINARY_DIR}/$(Configuration)
-                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/nix/${TARGET_PLATFORM}/libssl.so.43 ${CMAKE_BINARY_DIR}/$(Configuration)
-                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/nix/${TARGET_PLATFORM}/libssl.so ${CMAKE_BINARY_DIR}/$(Configuration)
-                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/nix/${TARGET_PLATFORM}/libtls.so.15.4.0 ${CMAKE_BINARY_DIR}/$(Configuration)
-                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/nix/${TARGET_PLATFORM}/libtls.so.15 ${CMAKE_BINARY_DIR}/$(Configuration)
-                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/nix/${TARGET_PLATFORM}/libtls.so ${CMAKE_BINARY_DIR}/$(Configuration)
+                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/nix/${TARGET_PLATFORM}/libcrypto.so.41.1.0 ${CMAKE_BINARY_DIR}
+                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/nix/${TARGET_PLATFORM}/libcrypto.so.41 ${CMAKE_BINARY_DIR}
+                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/nix/${TARGET_PLATFORM}/libcrypto.so ${CMAKE_BINARY_DIR}
+                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/nix/${TARGET_PLATFORM}/libssl.so.43.2.0 ${CMAKE_BINARY_DIR}
+                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/nix/${TARGET_PLATFORM}/libssl.so.43 ${CMAKE_BINARY_DIR}
+                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/nix/${TARGET_PLATFORM}/libssl.so ${CMAKE_BINARY_DIR}
+                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/nix/${TARGET_PLATFORM}/libtls.so.15.4.0 ${CMAKE_BINARY_DIR}
+                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/nix/${TARGET_PLATFORM}/libtls.so.15 ${CMAKE_BINARY_DIR}
+                COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/nix/${TARGET_PLATFORM}/libtls.so ${CMAKE_BINARY_DIR}
         )
     endif (WIN32)
 endif (NOT DISABLE_TLS)
