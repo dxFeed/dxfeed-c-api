@@ -21,16 +21,15 @@
 
 #include <array>
 #include <cassert>
+#include <cstring>
 #include <limits>
 #include <string>
 #include <type_traits>
-#include <cstring>
 
 extern "C" {
 
 #include "DXTypes.h"
 #include "PrimitiveTypes.h"
-
 }
 
 namespace dx {
@@ -187,7 +186,7 @@ struct WideDecimal {
 		static const dxf_long_t NEGATIVE_INFINITY = -0x100;
 
 		static const dxf_long_t MAX_DOUBLE_SIGNIFICAND = (1LL << 53) - 1;
-	    static const dxf_long_t MAX_DOUBLE_VALUE = 1LL << 51;
+		static const dxf_long_t MAX_DOUBLE_VALUE = 1LL << 51;
 		static const dxf_long_t MIN_SIGNIFICAND;
 		static const dxf_long_t MAX_SIGNIFICAND;
 		static const dxf_int_t BIAS = 128;
@@ -308,11 +307,12 @@ struct WideDecimal {
 			dxf_long_t dotPosition = static_cast<dxf_long_t>(result.length()) - (rank - Consts::BIAS);
 
 			if (dotPosition > firstDigit) {
-				return result.insert(dotPosition, ".");
+				return result.insert(static_cast<std::size_t>(dotPosition), ".");
 			}
 
 			if (firstDigit - dotPosition <= static_cast<dxf_long_t>(Consts::MAX_LEADING_ZEROES)) {
-				return result.insert(firstDigit, consts.zeroChars, 0, 2 + (firstDigit - dotPosition));
+				return result.insert(static_cast<std::size_t>(firstDigit), consts.zeroChars, 0,
+									 static_cast<std::size_t>(2 + (firstDigit - dotPosition)));
 			}
 		} else {
 			// integer number
@@ -324,7 +324,7 @@ struct WideDecimal {
 		dxf_long_t digits = static_cast<dxf_long_t>(result.length()) - firstDigit;
 
 		if (digits != 1) {
-			result.insert(firstDigit + 1, ".");
+			result.insert(static_cast<std::size_t>(firstDigit) + 1, ".");
 		}
 
 		result += Consts::EXPONENT_CHAR;
@@ -400,8 +400,7 @@ struct WideDecimal {
 
 	inline static dxf_long_t composeWide(dxf_long_t significand, dxf_int_t scale) {
 		// check exceedingly large scales to avoid rank overflows
-		if (scale > 255 + static_cast<dxf_int_t>(Consts::EXACT_LONG_POWERS) -
-				static_cast<dxf_int_t>(Consts::BIAS)) {
+		if (scale > 255 + static_cast<dxf_int_t>(Consts::EXACT_LONG_POWERS) - static_cast<dxf_int_t>(Consts::BIAS)) {
 			return static_cast<dxf_long_t>(Consts::BIAS);
 		}
 
@@ -468,9 +467,9 @@ struct WideDecimal {
 	}
 
 	inline static dxf_long_t composeWide(double value) {
-		return value >= 0 ? composeNonNegative(value, Consts::BIAS) :
-			value < 0 ? neg(composeNonNegative(-value, Consts::BIAS)) :
-					  Consts::NaN;
+		return value >= 0 ? composeNonNegative(value, Consts::BIAS)
+			: value < 0	  ? neg(composeNonNegative(-value, Consts::BIAS))
+						  : Consts::NaN;
 	}
 
 	inline static dxf_long_t sum(dxf_long_t w1, dxf_long_t w2) {
@@ -622,13 +621,18 @@ private:
 		assert(value >= 0);
 
 		dxf_int_t rank = findRank(value);
-		if (rank <= 0)
-			return Consts::POSITIVE_INFINITY;
+		if (rank <= 0) return Consts::POSITIVE_INFINITY;
 
 		auto significand = static_cast<dxf_long_t>(value * consts.divisors[rank] + 0.5);
 
 		return composeFitting(significand, rank, targetRank);
 	}
 };
+
+#if defined(_MSC_VER) && _MSC_VER == 1900
+#else
+template <typename T>
+const typename RightShift<T>::Consts RightShift<T>::consts{};
+#endif
 
 }  // namespace dx

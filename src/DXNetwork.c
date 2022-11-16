@@ -788,14 +788,6 @@ void dx_sleep_before_resolve(dx_network_connection_context_t* context) {
 	*last_res_timestamp = dx_millisecond_timestamp();
 }
 
-/* -------------------------------------------------------------------------- */
-
-void dx_shuffle_addrs(dx_address_resolution_context_t* addrs) {
-	DX_ARRAY_SHUFFLE(addrs->elements, dx_ext_address_t, addrs->size);
-}
-
-/* -------------------------------------------------------------------------- */
-
 static int dx_create_ext_address(const dx_address_t* source, OUT dx_ext_address_t* dest) {
 	if (source == NULL || dest == NULL) return dx_set_error_code(dx_ec_invalid_func_param_internal);
 	dx_memset((void*)dest, 0, sizeof(dx_ext_address_t));
@@ -926,8 +918,6 @@ int dx_resolve_address(dx_network_connection_context_t* context) {
 	if (resolved_count == 0) {
 		return false;
 	}
-
-	dx_shuffle_addrs(&(context->addr_context));
 
 	return true;
 }
