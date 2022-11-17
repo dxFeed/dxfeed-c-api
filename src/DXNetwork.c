@@ -544,17 +544,18 @@ unsigned dx_queue_executor(void* arg) {
 		int queue_empty = true;
 
 		if (context->queue_thread_termination_trigger) {
-
-		  break;
+			break;
 		}
 
-
 		const time_t last_server_heartbeat = atomic_read_time(&context->last_server_heartbeat);
-		if (last_server_heartbeat != 0 && difftime(time(NULL), last_server_heartbeat) >= context->heartbeat_timeout) {
-			dx_logging_info(L"No messages from server for at least %d seconds. Disconnecting...",
-							context->heartbeat_timeout);
+		const double time_diff = difftime(time(NULL), last_server_heartbeat);
+
+		if (last_server_heartbeat != 0 && time_diff >= context->heartbeat_timeout) {
+			dx_logging_info(L"No messages from server for %.6g s (heartbeat_timeout = %d s). Disconnecting...",
+							time_diff, context->heartbeat_timeout);
 			dx_close_socket(context);
 			dx_sleep(s_idle_timeout);
+
 			continue;
 		}
 		if (difftime(time(NULL), context->next_heartbeat) >= 0) {
@@ -868,9 +869,9 @@ int dx_resolve_address(dx_network_connection_context_t* context) {
 	}
 
 	for (i = 0; i < addresses.size; ++i) {
-	  if (context->is_closing) {
-	    break;
-	  }
+		if (context->is_closing) {
+			break;
+		}
 
 		dx_addrinfo_ptr addr = NULL;
 		dx_addrinfo_ptr cur_addr = NULL;
@@ -1347,8 +1348,7 @@ void dx_connection_status_set(dxf_connection_t connection, dxf_connection_status
 	dx_mutex_lock(&(context->status_guard));
 	old_status = context->status;
 	dx_logging_verbose(dx_ll_info, L"Connection status changed %d (%ls) -> %d (%ls)", old_status,
-							dx_get_connection_status_string(old_status), status,
-							dx_get_connection_status_string(status));
+					   dx_get_connection_status_string(old_status), status, dx_get_connection_status_string(status));
 
 	context->status = status;
 	dx_mutex_unlock(&(context->status_guard));
@@ -1658,19 +1658,19 @@ dx_connection_context_data_t* dx_get_connection_context_data(dxf_connection_t co
 }
 
 int dx_set_is_closing(dxf_connection_t connection) {
-  int res = true;
+	int res = true;
 
-  dx_network_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
+	dx_network_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
 
-  if (context == NULL) {
-    if (res) {
-      dx_set_error_code(dx_cec_connection_context_not_initialized);
-    }
+	if (context == NULL) {
+		if (res) {
+			dx_set_error_code(dx_cec_connection_context_not_initialized);
+		}
 
-    return false;
-  }
+		return false;
+	}
 
-  context->is_closing = true;
+	context->is_closing = true;
 
-  return res;
+	return res;
 }
