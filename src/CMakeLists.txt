@@ -73,6 +73,8 @@ set(EXPORT_HEADERS
         )
 
 set(HEADER_FILES
+        AddressesManager.hpp
+        AddressesManager.h
         BinaryQTPComposer.hpp
         BinaryQTPParser.hpp
         Candle.h
@@ -139,6 +141,7 @@ set(PARSER_SOURCES
         )
 
 set(SOURCE_FILES
+        AddressesManager.cpp
         BinaryQTPComposer.cpp
         BinaryQTPParser.cpp
         Candle.c
