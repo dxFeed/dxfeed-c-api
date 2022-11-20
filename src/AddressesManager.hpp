@@ -45,23 +45,14 @@ inline static std::int64_t currentTimeMillis() {
 }
 }  // namespace System
 
-struct Math {
-private:
-	class Random {
-		std::random_device rd{};
-		std::mt19937 gen;
-		std::uniform_real_distribution<> dis{0, 1};
+namespace Math {
+	inline static double random() {
+		static std::random_device randomDevice{};
+		static std::mt19937 engine{randomDevice()};
+		static std::uniform_real_distribution<> distribution{0, 1};
 
-	public:
-		Random() : gen{rd()} {}
-
-		double operator()() { return dis(gen); }
-	};
-
-	static Random random_;
-
-public:
-	static double random() { return random_(); }
+		return distribution(engine);
+	}
 };
 
 /// Not thread-safe
@@ -101,7 +92,8 @@ struct SocketAddress {
 
 struct ResolvedAddresses {
 	std::unordered_map<std::string, SocketAddress> hostAndPortToAddress;
-	std::unordered_map<SocketAddress, std::string> address;
+	// std::hash
+	// std::unordered_map<SocketAddress, std::string> address;
 	std::vector<SocketAddress> addresses;
 };
 
