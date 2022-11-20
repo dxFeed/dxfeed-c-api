@@ -26,12 +26,108 @@ extern "C" {
 #include "EventData.h"
 }
 
+#include <chrono>
+#include <cstdint>
+#include <memory>
+#include <mutex>
+#include <random>
+#include <string>
+#include <thread>
+#include <unordered_map>
+#include <vector>
+
 namespace dx {
+
+namespace System {
+inline static std::int64_t currentTimeMillis() {
+	return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+		.count();
+}
+}  // namespace System
+
+struct Math {
+private:
+	class Random {
+		std::random_device rd{};
+		std::mt19937 gen;
+		std::uniform_real_distribution<> dis{0, 1};
+
+	public:
+		Random() : gen{rd()} {}
+
+		double operator()() { return dis(gen); }
+	};
+
+	static Random random_;
+
+public:
+	static double random() { return random_(); }
+};
+
+/// Not thread-safe
+class ReconnectHelper {
+	std::int64_t delay_;
+	std::int64_t startTime_{};
+
+public:
+	ReconnectHelper(std::int64_t delay = 100) : delay_{delay} {}
+
+	void setDelay(std::int64_t delay) { delay_ = delay; }
+
+	void sleepBeforeConnection() {
+		std::int64_t worked = System::currentTimeMillis() - startTime_;
+		std::int64_t sleepTime = worked >= delay_
+			? 0
+			: static_cast<std::int64_t>(static_cast<double>(delay_ - worked) * (1.0 + Math::random()));
+
+		if (sleepTime > 0) {
+			std::this_thread::sleep_for(std::chrono::milliseconds{sleepTime});
+		}
+
+		startTime_ = System::currentTimeMillis();
+	}
+
+	void reset() {
+		startTime_ = 0;
+	}
+};
 
 struct SocketAddress {
 	sockaddr nativeSocketAddress;
+	std::string host;
+	std::string resolvedIp;
+	std::string port;
 };
 
-struct AddressesManager {};
+struct ResolvedAddresses {
+	std::unordered_map<std::string, SocketAddress> hostAndPortToAddress;
+	std::unordered_map<SocketAddress, std::string> address;
+	std::vector<SocketAddress> addresses;
+};
+
+// singleton
+class AddressesManager {
+	// connection context -> addresses
+	std::unordered_map<void*, ResolvedAddresses> resolvedAddresses_;
+	// connection context -> helper
+	std::unordered_map<void*, ReconnectHelper> reconnectHelpers_;
+	std::mutex mutex_;
+
+	AddressesManager() : resolvedAddresses_{}, reconnectHelpers_{}, mutex_{} {}
+
+public:
+	static std::shared_ptr<AddressesManager> getInstance() {
+		static std::shared_ptr<AddressesManager> instance{new AddressesManager()};
+
+		return instance;
+	}
+
+	std::vector<SocketAddress> resolveAddresses(void* connectionContext) { return {}; }
+
+	SocketAddress getNextAddress(void* connectionContext) { return {}; }
+
+	void clearAddresses(void* connectionContext) {
+	}
+};
 
 }  // namespace dx
