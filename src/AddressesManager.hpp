@@ -20,7 +20,10 @@
 #pragma once
 
 extern "C" {
+
+#include "DXAddressParser.h"
 #include "DXFeed.h"
+#include "DXNetwork.h"
 #include "DXSockets.h"
 #include "DXThreads.h"
 #include "EventData.h"
@@ -46,20 +49,18 @@ inline static std::int64_t currentTimeMillis() {
 }  // namespace System
 
 namespace Math {
-	inline static double random() {
-		static std::random_device randomDevice{};
-		static std::mt19937 engine{randomDevice()};
-		static std::uniform_real_distribution<> distribution{0, 1};
+inline static double random() {
+	static std::random_device randomDevice{};
+	static std::mt19937 engine{randomDevice()};
+	static std::uniform_real_distribution<> distribution{0, 1};
 
-		return distribution(engine);
-	}
-};
+	return distribution(engine);
+}
+};	// namespace Math
 
 namespace Thread {
-	inline static void sleep(std::int64_t millis) {
-		std::this_thread::sleep_for(std::chrono::milliseconds{millis});
-	}
-}
+inline static void sleep(std::int64_t millis) { std::this_thread::sleep_for(std::chrono::milliseconds{millis}); }
+}  // namespace Thread
 
 /// Not thread-safe
 class ReconnectHelper {
@@ -84,9 +85,7 @@ public:
 		startTime_ = System::currentTimeMillis();
 	}
 
-	void reset() {
-		startTime_ = 0;
-	}
+	void reset() { startTime_ = 0; }
 };
 
 struct SocketAddress {
@@ -142,7 +141,53 @@ class AddressesManager {
 		reconnectHelper.sleepBeforeConnection();
 	}
 
-	std::vector<SocketAddress> resolveAddresses(void* connectionContext) { return {}; }
+	std::vector<SocketAddress> resolveAddresses(void* connectionContext) {
+		auto address = dx_get_connection_address_string(connectionContext);
+
+		if (address == nullptr) {
+			return {};
+		}
+
+		dx_address_array_t addressArray;
+
+		if (!dx_get_addresses_from_collection(address, &addressArray) || addressArray.size == 0) {
+			return {};
+		}
+
+		addrinfo hints = {};
+
+		hints.ai_family = AF_INET;
+		hints.ai_socktype = SOCK_STREAM;
+		hints.ai_protocol = IPPROTO_TCP;
+		std::vector<SocketAddress> socketAddresses;
+
+		/*
+typedef struct {
+	char* host;
+	const char* port;
+	char* username;
+	char* password;
+	dx_codec_tls_t tls;
+	dx_codec_gzip_t gzip;
+} dx_address_t;
+		 */
+
+		// TODO: enum addresses
+		addrinfo* addr = nullptr;
+
+		for (std::size_t addressIndex = 0; addressIndex < addressArray.size; addressIndex++) {
+			if (!dx_getaddrinfo(addressArray.elements[addressIndex].host, addressArray.elements[addressIndex].port,
+								&hints, &addr)) {
+				continue;
+			}
+
+			//...
+		}
+
+		dx_clear_address_array(&addressArray);
+
+		return {};
+	}
 
 public:
 	static std::shared_ptr<AddressesManager> getInstance() {
@@ -179,7 +224,7 @@ public:
 		resolvedAddress->currentSocketAddress++;
 
 		if (resolvedAddress->currentSocketAddress >= resolvedAddress->socketAddresses.size()) {
-			//TODO: sleep in the current thread only
+			// TODO: sleep in the current thread only
 			sleepBeforeResolve();
 			resolveAddresses(connectionContext);
 			resolvedAddress->currentSocketAddress = 0;
@@ -190,11 +235,9 @@ public:
 		}
 
 		return resolvedAddress->socketAddresses[resolvedAddress->currentSocketAddress];
-
 	}
 
-	void clearAddresses(void* connectionContext) {
-	}
+	void clearAddresses(void* connectionContext) {}
 };
 
 }  // namespace dx

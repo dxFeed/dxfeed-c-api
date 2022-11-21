@@ -1672,3 +1672,19 @@ int dx_set_is_closing(dxf_connection_t connection) {
 
 	return res;
 }
+
+const char* dx_get_connection_address_string(dxf_connection_t connection) {
+	int res = true;
+
+	dx_network_connection_context_t* context = dx_get_subsystem_data(connection, dx_ccs_network, &res);
+
+	if (context == NULL) {
+		if (res) {
+			dx_set_error_code(dx_cec_connection_context_not_initialized);
+		}
+
+		return NULL;
+	}
+
+	return context->address;
+}

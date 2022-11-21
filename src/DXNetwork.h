@@ -154,4 +154,6 @@ int dx_set_on_server_heartbeat_notifier(dxf_connection_t connection, dxf_conn_on
 
 int dx_set_is_closing(dxf_connection_t connection);
 
+const char* dx_get_connection_address_string(dxf_connection_t connection);
+
 #endif /* DX_NETWORK_H_INCLUDED */
