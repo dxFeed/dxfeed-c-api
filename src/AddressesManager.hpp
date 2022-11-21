@@ -55,6 +55,12 @@ namespace Math {
 	}
 };
 
+namespace Thread {
+	inline static void sleep(std::int64_t millis) {
+		std::this_thread::sleep_for(std::chrono::milliseconds{millis});
+	}
+}
+
 /// Not thread-safe
 class ReconnectHelper {
 	std::int64_t delay_;
@@ -72,7 +78,7 @@ public:
 			: static_cast<std::int64_t>(static_cast<double>(delay_ - worked) * (1.0 + Math::random()));
 
 		if (sleepTime > 0) {
-			std::this_thread::sleep_for(std::chrono::milliseconds{sleepTime});
+			Thread::sleep(sleepTime);
 		}
 
 		startTime_ = System::currentTimeMillis();
@@ -84,28 +90,59 @@ public:
 };
 
 struct SocketAddress {
+	struct TlsData {
+		bool enabled;
+		std::string keyStore;
+		std::string keyStorePassword;
+		std::string trustStore;
+		std::string trustStorePassword;
+	};
+
+	struct GzipData {
+		bool enabled;
+	};
+
 	sockaddr nativeSocketAddress;
 	std::string host;
 	std::string resolvedIp;
 	std::string port;
+	std::string user;
+	std::string password;
+	TlsData tlsData;
+	GzipData gzipData;
+
+#ifdef DXFEED_CODEC_TLS_ENABLED
+	uint8_t* keyStoreMem;
+	size_t keyStoreLen;
+	uint8_t* trustStoreMem;
+	size_t trustStoreLen;
+#endif	// DXFEED_CODEC_TLS_ENABLED
+
+	bool isConnectionFailed;
 };
 
 struct ResolvedAddresses {
-	std::unordered_map<std::string, SocketAddress> hostAndPortToAddress;
-	// std::hash
-	// std::unordered_map<SocketAddress, std::string> address;
-	std::vector<SocketAddress> addresses;
+	// host:port -> socket address idx
+	std::unordered_map<std::string, std::size_t> hostAndPortToAddress;
+	std::vector<SocketAddress> socketAddresses;
+	std::size_t currentSocketAddress{};
 };
 
 // singleton
 class AddressesManager {
 	// connection context -> addresses
-	std::unordered_map<void*, ResolvedAddresses> resolvedAddresses_;
-	// connection context -> helper
-	std::unordered_map<void*, ReconnectHelper> reconnectHelpers_;
+	std::unordered_map<void*, std::shared_ptr<ResolvedAddresses>> resolvedAddresses_;
 	std::mutex mutex_;
 
-	AddressesManager() : resolvedAddresses_{}, reconnectHelpers_{}, mutex_{} {}
+	AddressesManager() : resolvedAddresses_{}, mutex_{} {}
+
+	static void sleepBeforeResolve() {
+		thread_local ReconnectHelper reconnectHelper{};
+
+		reconnectHelper.sleepBeforeConnection();
+	}
+
+	std::vector<SocketAddress> resolveAddresses(void* connectionContext) { return {}; }
 
 public:
 	static std::shared_ptr<AddressesManager> getInstance() {
@@ -114,9 +151,47 @@ public:
 		return instance;
 	}
 
-	std::vector<SocketAddress> resolveAddresses(void* connectionContext) { return {}; }
+	SocketAddress getNextAddress(void* connectionContext) {
+		if (connectionContext == nullptr) {
+			return {};
+		}
 
-	SocketAddress getNextAddress(void* connectionContext) { return {}; }
+		auto resolvedAddress = [&]() -> std::shared_ptr<ResolvedAddresses> {
+			auto found = resolvedAddresses_.find(connectionContext);
+
+			if (found == resolvedAddresses_.end()) {
+				auto result = resolvedAddresses_.emplace(connectionContext, std::make_shared<ResolvedAddresses>());
+
+				if (result.second) {
+					return result.first->second;
+				}
+
+				return nullptr;
+			}
+
+			return found->second;
+		}();
+
+		if (!resolvedAddress) {
+			return {};
+		}
+
+		resolvedAddress->currentSocketAddress++;
+
+		if (resolvedAddress->currentSocketAddress >= resolvedAddress->socketAddresses.size()) {
+			//TODO: sleep in the current thread only
+			sleepBeforeResolve();
+			resolveAddresses(connectionContext);
+			resolvedAddress->currentSocketAddress = 0;
+		}
+
+		if (resolvedAddress->socketAddresses.empty()) {
+			return {};
+		}
+
+		return resolvedAddress->socketAddresses[resolvedAddress->currentSocketAddress];
+
+	}
 
 	void clearAddresses(void* connectionContext) {
 	}

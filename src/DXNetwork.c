@@ -828,12 +828,6 @@ static int dx_create_ext_address(const dx_address_t* source, OUT dx_ext_address_
 /* -------------------------------------------------------------------------- */
 
 int dx_resolve_address(dx_network_connection_context_t* context) {
-	struct addrinfo hints;
-	size_t i = 0;
-	FILE* raw_dump_file = NULL;
-	dx_address_array_t addresses;
-	int resolved_count = 0;
-
 	if (context == NULL) {
 		dx_set_last_error(dx_ec_invalid_func_param_internal);
 
@@ -843,7 +837,7 @@ int dx_resolve_address(dx_network_connection_context_t* context) {
 	// check raw data file is used
 	if (IS_FLAG_SET(context->set_fields_flags, DUMPING_RAW_DATA_FIELD_FLAG)) return true;
 	// check address is local file
-	raw_dump_file = fopen(context->address, "rb");
+	FILE* raw_dump_file = fopen(context->address, "rb");
 	if (raw_dump_file != NULL) {
 		fclose(raw_dump_file);
 		context->set_fields_flags |= DUMPING_RAW_DATA_FIELD_FLAG;
@@ -852,9 +846,11 @@ int dx_resolve_address(dx_network_connection_context_t* context) {
 
 	dx_sleep_before_resolve(context);
 
+	dx_address_array_t addresses;
 	CHECKED_CALL_2(dx_get_addresses_from_collection, context->address, &addresses);
 	if (addresses.size == 0) return false;
 
+	struct addrinfo hints;
 	dx_memset(&hints, 0, sizeof(hints));
 
 	hints.ai_family = AF_INET;
@@ -868,7 +864,9 @@ int dx_resolve_address(dx_network_connection_context_t* context) {
 		return false;
 	}
 
-	for (i = 0; i < addresses.size; ++i) {
+	int resolved_count = 0;
+
+	for (size_t i = 0; i < addresses.size; ++i) {
 		if (context->is_closing) {
 			break;
 		}
