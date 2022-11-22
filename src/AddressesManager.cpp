@@ -25,4 +25,10 @@ extern "C" {
 
 extern "C" {
 
+void dx_addresses_manager_get_next_address(dxf_connection_t connection) {
+	auto s = dx::AddressesManager::getInstance()->getNextAddress(connection);
+	auto s2 = dx::AddressesManager::getInstance()->getNextAddress(connection);
+	auto s3 = dx::AddressesManager::getInstance()->getNextAddress(connection);
+}
+
 }

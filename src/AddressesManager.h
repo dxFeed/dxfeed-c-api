@@ -27,6 +27,8 @@
 extern "C" {
 #endif
 
+void dx_addresses_manager_get_next_address(dxf_connection_t connection);
+
 #ifdef __cplusplus
 }
 #endif

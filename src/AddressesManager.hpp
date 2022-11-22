@@ -29,6 +29,7 @@ extern "C" {
 #include "EventData.h"
 }
 
+#include <algorithm>
 #include <chrono>
 #include <cstdint>
 #include <memory>
@@ -88,7 +89,7 @@ public:
 	void reset() { startTime_ = 0; }
 };
 
-struct SocketAddress {
+struct Address {
 	struct TlsData {
 		bool enabled;
 		std::string keyStore;
@@ -101,9 +102,7 @@ struct SocketAddress {
 		bool enabled;
 	};
 
-	sockaddr nativeSocketAddress;
 	std::string host;
-	std::string resolvedIp;
 	std::string port;
 	std::string user;
 	std::string password;
@@ -116,21 +115,61 @@ struct SocketAddress {
 	uint8_t* trustStoreMem;
 	size_t trustStoreLen;
 #endif	// DXFEED_CODEC_TLS_ENABLED
+};
 
+struct SocketAddress {
+	sockaddr nativeSocketAddress;
+	std::string resolvedIp;
+	std::size_t addressIdx;
 	bool isConnectionFailed;
 };
 
 struct ResolvedAddresses {
-	// host:port -> socket address idx
-	std::unordered_map<std::string, std::size_t> hostAndPortToAddress;
+	std::vector<Address> addresses;
 	std::vector<SocketAddress> socketAddresses;
-	std::size_t currentSocketAddress{};
+	std::size_t currentSocketAddress;
 };
+
+// struct InetAddress {
+//	int family;
+//	int type;
+//	int protocol;
+//
+//	static std::vector<>
+// };
+
+std::string ipToString(const sockaddr* sa) {
+	const std::size_t size = 256;
+	char buf[size] = {};
+
+	switch (sa->sa_family) {
+		case AF_INET:
+			inet_ntop(AF_INET, &(((struct sockaddr_in*)sa)->sin_addr), buf, size - 1);
+			break;
+
+		case AF_INET6:
+			inet_ntop(AF_INET6, &(((struct sockaddr_in6*)sa)->sin6_addr), buf, size - 1);
+			break;
+
+		default:
+			return "";
+	}
+
+	return buf;
+}
+
+std::string toString(const char* cString) {
+	if (cString == nullptr) {
+		return "";
+	}
+
+	return cString;
+}
 
 // singleton
 class AddressesManager {
-	// connection context -> addresses
-	std::unordered_map<void*, std::shared_ptr<ResolvedAddresses>> resolvedAddresses_;
+	// connection -> addresses
+	std::unordered_map<dxf_connection_t, std::shared_ptr<ResolvedAddresses>> resolvedAddresses_;
 	std::mutex mutex_;
 
 	AddressesManager() : resolvedAddresses_{}, mutex_{} {}
@@ -141,8 +180,8 @@ class AddressesManager {
 		reconnectHelper.sleepBeforeConnection();
 	}
 
-	std::vector<SocketAddress> resolveAddresses(void* connectionContext) {
-		auto address = dx_get_connection_address_string(connectionContext);
+	static ResolvedAddresses resolveAddresses(dxf_connection_t connection) {
+		auto address = dx_get_connection_address_string(connection);
 
 		if (address == nullptr) {
 			return {};
@@ -156,23 +195,12 @@ class AddressesManager {
 
 		addrinfo hints = {};
 
-		hints.ai_family = AF_INET;
+		hints.ai_family = AF_UNSPEC;
+		// hints.ai_family = AF_INET;
 		hints.ai_socktype = SOCK_STREAM;
 		hints.ai_protocol = IPPROTO_TCP;
+		std::vector<Address> addresses;
 		std::vector<SocketAddress> socketAddresses;
-
-		/*
-typedef struct {
-	char* host;
-	const char* port;
-	char* username;
-	char* password;
-	dx_codec_tls_t tls;
-	dx_codec_gzip_t gzip;
-} dx_address_t;
-		 */
-
-		// TODO: enum addresses
 		addrinfo* addr = nullptr;
 
 		for (std::size_t addressIndex = 0; addressIndex < addressArray.size; addressIndex++) {
@@ -181,12 +209,33 @@ typedef struct {
 				continue;
 			}
 
-			//...
+			for (; addr != nullptr; addr = addr->ai_next) {
+				if (addr->ai_family != AF_INET && addr->ai_family != AF_INET6) {
+					continue;
+				}
+
+				socketAddresses.push_back(
+					SocketAddress{*(addr->ai_addr), ipToString(addr->ai_addr), addresses.size(), false});
+			}
+
+			addresses.push_back(Address{toString(addressArray.elements[addressIndex].host),
+										toString(addressArray.elements[addressIndex].port),
+										toString(addressArray.elements[addressIndex].username),
+										toString(addressArray.elements[addressIndex].password),
+										{addressArray.elements[addressIndex].tls.enabled != 0,
+										 toString(addressArray.elements[addressIndex].tls.key_store),
+										 toString(addressArray.elements[addressIndex].tls.key_store_password),
+										 toString(addressArray.elements[addressIndex].tls.trust_store),
+										 toString(addressArray.elements[addressIndex].tls.trust_store_password)},
+										{addressArray.elements[addressIndex].gzip.enabled != 0}});
 		}
+
+		auto randomEngine = std::default_random_engine{};
+		std::shuffle(socketAddresses.begin(), socketAddresses.end(), randomEngine);
 
 		dx_clear_address_array(&addressArray);
 
-		return {};
+		return ResolvedAddresses{addresses, socketAddresses, 0};
 	}
 
 public:
@@ -196,48 +245,59 @@ public:
 		return instance;
 	}
 
-	SocketAddress getNextAddress(void* connectionContext) {
-		if (connectionContext == nullptr) {
+	SocketAddress getNextAddress(dxf_connection_t connection) {
+		if (connection == nullptr) {
 			return {};
 		}
 
-		auto resolvedAddress = [&]() -> std::shared_ptr<ResolvedAddresses> {
-			auto found = resolvedAddresses_.find(connectionContext);
+		{
+			std::lock_guard<std::mutex> guard(mutex_);
 
-			if (found == resolvedAddresses_.end()) {
-				auto result = resolvedAddresses_.emplace(connectionContext, std::make_shared<ResolvedAddresses>());
+			auto resolvedAddress = [&]() -> std::shared_ptr<ResolvedAddresses> {
+				auto found = resolvedAddresses_.find(connection);
 
-				if (result.second) {
-					return result.first->second;
+				if (found == resolvedAddresses_.end()) {
+					auto result = resolvedAddresses_.emplace(connection, std::make_shared<ResolvedAddresses>());
+
+					if (result.second) {
+						return result.first->second;
+					}
+
+					return nullptr;
 				}
 
-				return nullptr;
+				return found->second;
+			}();
+
+			if (!resolvedAddress) {
+				return {};
 			}
 
-			return found->second;
-		}();
+			resolvedAddress->currentSocketAddress++;
 
-		if (!resolvedAddress) {
-			return {};
+			if (resolvedAddress->currentSocketAddress < resolvedAddress->socketAddresses.size()) {
+				return resolvedAddress->socketAddresses[resolvedAddress->currentSocketAddress];
+			}
 		}
 
-		resolvedAddress->currentSocketAddress++;
+		sleepBeforeResolve();
 
-		if (resolvedAddress->currentSocketAddress >= resolvedAddress->socketAddresses.size()) {
-			// TODO: sleep in the current thread only
-			sleepBeforeResolve();
-			resolveAddresses(connectionContext);
-			resolvedAddress->currentSocketAddress = 0;
+		auto newResolvedAddresses = resolveAddresses(connection);
+
+		{
+			std::lock_guard<std::mutex> guard(mutex_);
+
+			*resolvedAddresses_[connection] = newResolvedAddresses;
+
+			if (newResolvedAddresses.socketAddresses.empty()) {
+				return {};
+			}
+
+			return resolvedAddresses_[connection]->socketAddresses[0];
 		}
-
-		if (resolvedAddress->socketAddresses.empty()) {
-			return {};
-		}
-
-		return resolvedAddress->socketAddresses[resolvedAddress->currentSocketAddress];
 	}
 
-	void clearAddresses(void* connectionContext) {}
+	void clearAddresses(dxf_connection_t connection) {}
 };
 
 }  // namespace dx

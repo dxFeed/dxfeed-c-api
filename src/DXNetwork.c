@@ -43,6 +43,7 @@
 #include "EventSubscription.h"
 #include "Logger.h"
 #include "ServerMessageProcessor.h"
+#include "AddressesManager.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -1051,6 +1052,8 @@ int dx_connect_to_resolved_addresses(dx_network_connection_context_t* context) {
 		}
 		return true;
 	}
+
+	dx_addresses_manager_get_next_address(context->connection);
 
 	CHECKED_CALL(dx_mutex_lock, &(context->socket_guard));
 
