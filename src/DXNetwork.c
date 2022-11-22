@@ -691,9 +691,14 @@ static int dx_connect_via_socket(dx_network_connection_context_t* context) {
 		return false;
 	}
 
+	dx_logging_info(L"Connecting to %hs (%hs)", dx_am_get_current_connected_address(context->connection),
+					dx_am_get_current_connected_socket_address(context->connection));
 	context->s = dx_socket(address_family, address_socket_type, address_protocol);
 
 	if (context->s == INVALID_SOCKET) {
+		dx_logging_info(L"Failed to connect to %hs (%hs): Invalid socket",
+						dx_am_get_current_connected_address(context->connection),
+						dx_am_get_current_connected_socket_address(context->connection));
 		/* failed to create a new socket */
 
 		return false;
@@ -702,6 +707,8 @@ static int dx_connect_via_socket(dx_network_connection_context_t* context) {
 	if (!dx_connect(context->s, &native_socket_address, (socklen_t)native_socket_address_length)) {
 		/* failed to connect */
 
+		dx_logging_info(L"Failed to connect to %hs (%hs)", dx_am_get_current_connected_address(context->connection),
+						dx_am_get_current_connected_socket_address(context->connection));
 		dx_close(context->s);
 
 		return false;
@@ -940,7 +947,8 @@ int dx_bind_to_address(dxf_connection_t connection, const char* address, const d
 
 	context->set_fields_flags |= MUTEX_FIELD_FLAG;
 
-	if ((context->address = dx_ansi_create_string_src(address)) == NULL || !dx_check_if_address_is_file_and_set_raw_dump_file_flag(context) ||
+	if ((context->address = dx_ansi_create_string_src(address)) == NULL ||
+		!dx_check_if_address_is_file_and_set_raw_dump_file_flag(context) ||
 		!dx_connect_to_file_or_open_socket(context)) {
 		return false;
 	}

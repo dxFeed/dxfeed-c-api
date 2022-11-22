@@ -122,4 +122,13 @@ const char* dx_am_get_current_connected_address(dxf_connection_t connection) {
 
 	return currentConnectedAddress.c_str();
 }
+
+const char* dx_am_get_current_connected_socket_address(dxf_connection_t connection) {
+	thread_local std::string currentConnectedSocketAddress{};
+
+	currentConnectedSocketAddress = dx::AddressesManager::getInstance()->getCurrentSocketIpAddress(connection) + ":" +
+		dx::AddressesManager::getInstance()->getCurrentAddressPort(connection);
+
+	return currentConnectedSocketAddress.c_str();
+}
 }

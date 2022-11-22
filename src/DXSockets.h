@@ -33,17 +33,18 @@
 #	include <WS2tcpip.h>
 #	pragma warning(pop)
 
-	typedef SOCKET dx_socket_t;
+typedef SOCKET dx_socket_t;
 #else
 #	include <unistd.h>
 #	include <sys/types.h>
 #	include <sys/socket.h>
 #	include <netinet/in.h>
+#	include <arpa/inet.h>
 #	include <netdb.h>
 #	include <errno.h>
 
 #	define INVALID_SOCKET -1
-#	define SOCKET_ERROR -1
+#	define SOCKET_ERROR   -1
 
 typedef int dx_socket_t;
 #endif /* _WIN32 */
@@ -58,8 +59,8 @@ typedef int dx_socket_t;
  */
 /* -------------------------------------------------------------------------- */
 
-int dx_on_connection_created (void);
-int dx_on_connection_destroyed (void);
+int dx_on_connection_created(void);
+int dx_on_connection_destroyed(void);
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -67,13 +68,12 @@ int dx_on_connection_destroyed (void);
  */
 /* -------------------------------------------------------------------------- */
 
-dx_socket_t dx_socket (int family, int type, int protocol);
-int dx_connect (dx_socket_t s, const struct sockaddr* addr, socklen_t addrlen);
-int dx_send (dx_socket_t s, const void* buffer, int buflen);
-int dx_recv (dx_socket_t s, void* buffer, int buflen);
-int dx_close (dx_socket_t s);
-int dx_getaddrinfo (const char* nodename, const char* servname,
-					const struct addrinfo* hints, struct addrinfo** res);
-void dx_freeaddrinfo (struct addrinfo* res);
+dx_socket_t dx_socket(int family, int type, int protocol);
+int dx_connect(dx_socket_t s, const struct sockaddr* addr, socklen_t addrlen);
+int dx_send(dx_socket_t s, const void* buffer, int buflen);
+int dx_recv(dx_socket_t s, void* buffer, int buflen);
+int dx_close(dx_socket_t s);
+int dx_getaddrinfo(const char* nodename, const char* servname, const struct addrinfo* hints, struct addrinfo** res);
+void dx_freeaddrinfo(struct addrinfo* res);
 
 #endif /* DX_SOCKETS_H_INCLUDED */

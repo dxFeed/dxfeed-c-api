@@ -300,7 +300,7 @@ class AddressesManager {
 	}
 
 	// Non thread-safe. Checks the connection
-	SocketAddress* getCurrentSocketAddress(dxf_connection_t connection) {
+	SocketAddress* getCurrentSocketAddressImpl(dxf_connection_t connection) {
 		if (connection == nullptr) {
 			return nullptr;
 		}
@@ -392,7 +392,7 @@ public:
 
 	bool isCurrentSocketAddressConnectionFailed(dxf_connection_t connection) {
 		std::lock_guard<std::mutex> guard(mutex_);
-		const auto* sa = getCurrentSocketAddress(connection);
+		const auto* sa = getCurrentSocketAddressImpl(connection);
 
 		if (!sa) {
 			return true;
@@ -403,7 +403,7 @@ public:
 
 	void setCurrentSocketAddressConnectionFailed(dxf_connection_t connection, bool connectionFailed) {
 		std::lock_guard<std::mutex> guard(mutex_);
-		auto* sa = getCurrentSocketAddress(connection);
+		auto* sa = getCurrentSocketAddressImpl(connection);
 
 		if (!sa) {
 			return;
@@ -432,6 +432,17 @@ public:
 		}
 
 		return a->password;
+	}
+
+	std::string getCurrentSocketIpAddress(dxf_connection_t connection) {
+		std::lock_guard<std::mutex> guard(mutex_);
+		const auto* sa = getCurrentSocketAddressImpl(connection);
+
+		if (!sa) {
+			return "";
+		}
+
+		return sa->resolvedIp;
 	}
 
 	std::string getCurrentAddressHost(dxf_connection_t connection) {
@@ -471,7 +482,7 @@ public:
 									 int* addressProtocol, sockaddr* nativeSocketAddress,
 									 std::size_t* nativeSocketAddressLength) {
 		std::lock_guard<std::mutex> guard(mutex_);
-		const auto* sa = getCurrentSocketAddress(connection);
+		const auto* sa = getCurrentSocketAddressImpl(connection);
 
 		if (!sa || !addressFamily || !addressSocketType || !addressProtocol || !nativeSocketAddress ||
 			!nativeSocketAddressLength) {
