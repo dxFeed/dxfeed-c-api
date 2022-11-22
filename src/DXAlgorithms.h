@@ -497,6 +497,7 @@ dxf_string_t dx_copy_string (dxf_string_t dest, dxf_const_string_t src);
 dxf_string_t dx_copy_string_len(dxf_string_t dest, dxf_const_string_t src, size_t len);
 size_t dx_string_length(dxf_const_string_t str);
 int dx_string_null_or_empty(dxf_const_string_t str);
+int dx_cstring_null_or_empty(const char* str);
 int dx_compare_strings (dxf_const_string_t s1, dxf_const_string_t s2);
 int dx_compare_strings_num (dxf_const_string_t s1, dxf_const_string_t s2, size_t num);
 dxf_char_t dx_toupper (dxf_char_t c);

@@ -412,7 +412,7 @@ public:
 		sa->isConnectionFailed = connectionFailed;
 	}
 
-	std::string currentAddressUsername(dxf_connection_t connection) {
+	std::string getCurrentAddressUsername(dxf_connection_t connection) {
 		std::lock_guard<std::mutex> guard(mutex_);
 		const auto* a = getCurrentAddressImpl(connection);
 
@@ -423,7 +423,7 @@ public:
 		return a->username;
 	}
 
-	std::string currentAddressPassword(dxf_connection_t connection) {
+	std::string getCurrentAddressPassword(dxf_connection_t connection) {
 		std::lock_guard<std::mutex> guard(mutex_);
 		const auto* a = getCurrentAddressImpl(connection);
 
@@ -432,6 +432,28 @@ public:
 		}
 
 		return a->password;
+	}
+
+	std::string getCurrentAddressHost(dxf_connection_t connection) {
+		std::lock_guard<std::mutex> guard(mutex_);
+		const auto* a = getCurrentAddressImpl(connection);
+
+		if (!a) {
+			return "";
+		}
+
+		return a->host;
+	}
+
+	std::string getCurrentAddressPort(dxf_connection_t connection) {
+		std::lock_guard<std::mutex> guard(mutex_);
+		const auto* a = getCurrentAddressImpl(connection);
+
+		if (!a) {
+			return "";
+		}
+
+		return a->port;
 	}
 
 	bool isCurrentAddressTlsEnabled(dxf_connection_t connection) {

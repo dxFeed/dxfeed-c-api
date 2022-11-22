@@ -31,6 +31,7 @@
 #	include <tls.h>
 #endif	// DXFEED_CODEC_TLS_ENABLED
 
+#include "AddressesManager.h"
 #include "ClientMessageProcessor.h"
 #include "Configuration.h"
 #include "ConnectionContextData.h"
@@ -43,7 +44,6 @@
 #include "EventSubscription.h"
 #include "Logger.h"
 #include "ServerMessageProcessor.h"
-#include "AddressesManager.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -315,18 +315,6 @@ static void dx_logging_ansi_error(const char* ansi_error) {
 }
 #endif
 
-/* -------------------------------------------------------------------------- */
-
-static dx_ext_address_t* dx_get_current_address(dx_network_connection_context_t* context) {
-	if (context == NULL || context->addr_context.elements == NULL) {
-		return NULL;
-	}
-
-	return &(context->addr_context.elements[context->addr_context.cur_addr_index]);
-}
-
-/* -------------------------------------------------------------------------- */
-
 void dx_clear_addr_context_data(dx_address_resolution_context_t* context_data) {
 	if (context_data->elements_to_free != NULL) {
 		int i = 0;
@@ -405,7 +393,7 @@ int dx_clear_connection_data(dx_network_connection_context_t* context) {
 
 	if (IS_FLAG_SET(set_fields_flags, SOCKET_FIELD_FLAG)) {
 #ifdef DXFEED_CODEC_TLS_ENABLED
-		if (dx_get_current_address(context)->tls.enabled) {
+		if (dx_am_is_current_address_tls_enabled(context->connection)) {
 			tls_close(context->tls_context);
 			tls_free(context->tls_context);
 			tls_config_free(context->tls_config);
@@ -463,7 +451,7 @@ static int dx_close_socket(dx_network_connection_context_t* context) {
 	}
 
 #ifdef DXFEED_CODEC_TLS_ENABLED
-	if (dx_get_current_address(context)->tls.enabled) {
+	if (dx_am_is_current_address_tls_enabled(context->connection)) {
 		tls_close(context->tls_context);
 		tls_free(context->tls_context);
 		tls_config_free(context->tls_config);
@@ -491,7 +479,7 @@ void dx_notify_conn_termination(dx_network_connection_context_t* context, OUT in
 	// if connection required login and we have credentials - don't call notifier
 	if (dx_connection_status_get(context->connection) == dxf_cs_login_required) {
 		if (dx_have_credentials(context)) return;
-		dx_get_current_address(context)->is_connection_failed = true;
+		dx_am_set_current_socket_address_connection_failed(context->connection, true);
 		dx_set_error_code(dx_pec_credentials_required);
 	}
 
@@ -504,7 +492,7 @@ void dx_notify_conn_termination(dx_network_connection_context_t* context, OUT in
 	}
 
 	if (dx_get_error_code() == dx_pec_authentication_error) {
-		dx_get_current_address(context)->is_connection_failed = true;
+		dx_am_set_current_socket_address_connection_failed(context->connection, true);
 	}
 
 	dx_close_socket(context);
@@ -744,7 +732,7 @@ void dx_socket_reader(dx_network_connection_context_t* context) {
 		} else {
 			atomic_write_time(&context->last_server_heartbeat, time(NULL));
 #ifdef DXFEED_CODEC_TLS_ENABLED
-			if (dx_get_current_address(context)->tls.enabled) {
+			if (dx_am_is_current_address_tls_enabled(context->connection)) {
 				number_of_bytes_read = (int)tls_read(context->tls_context, (void*)read_buf, READ_CHUNK_SIZE);
 				if (number_of_bytes_read == -1) dx_logging_ansi_error(tls_error(context->tls_context));
 			} else {
@@ -845,6 +833,8 @@ int dx_resolve_address(dx_network_connection_context_t* context) {
 		return true;
 	}
 
+	// TODO: clean up
+
 	dx_sleep_before_resolve(context);
 
 	dx_address_array_t addresses;
@@ -924,36 +914,43 @@ int dx_resolve_address(dx_network_connection_context_t* context) {
 
 /* -------------------------------------------------------------------------- */
 
-static int dx_connect_via_socket(dx_network_connection_context_t* context, dx_ext_address_t* address) {
-	for (; address->cur_info_index < address->size; ++address->cur_info_index) {
-		dx_addrinfo_ptr cur_addr = address->elements[address->cur_info_index];
+static int dx_connect_via_socket(dx_network_connection_context_t* context) {
+	int address_family;
+	int address_socket_type;
+	int address_protocol;
+	struct sockaddr native_socket_address;
+	size_t native_socket_address_length;
 
-		context->s = dx_socket(cur_addr->ai_family, cur_addr->ai_socktype, cur_addr->ai_protocol);
-
-		if (context->s == INVALID_SOCKET) {
-			/* failed to create a new socket */
-
-			continue;
-		}
-
-		if (!dx_connect(context->s, cur_addr->ai_addr, (socklen_t)cur_addr->ai_addrlen)) {
-			/* failed to connect */
-
-			dx_close(context->s);
-
-			continue;
-		}
-
-		dx_connection_status_set(context->connection, dxf_cs_connected);
-		return true;
+	if (!dx_ma_get_current_socket_address_info(context->connection, &address_family, &address_socket_type,
+											   &address_protocol, &native_socket_address,
+											   &native_socket_address_length)) {
+		return false;
 	}
-	return false;
+
+	context->s = dx_socket(address_family, address_socket_type, address_protocol);
+
+	if (context->s == INVALID_SOCKET) {
+		/* failed to create a new socket */
+
+		return false;
+	}
+
+	if (!dx_connect(context->s, &native_socket_address, (socklen_t)native_socket_address_length)) {
+		/* failed to connect */
+
+		dx_close(context->s);
+
+		return false;
+	}
+
+	dx_connection_status_set(context->connection, dxf_cs_connected);
+	return true;
 }
 
 /* -------------------------------------------------------------------------- */
 
 #ifdef DXFEED_CODEC_TLS_ENABLED
-static int dx_connect_via_tls(dx_network_connection_context_t* context, dx_ext_address_t* address) {
+static int dx_connect_via_tls(dx_network_connection_context_t* context) {
 	context->tls_config = tls_config_new();
 	if (context->tls_config == NULL) {
 		/* failed to create TLS config */
@@ -969,36 +966,48 @@ static int dx_connect_via_tls(dx_network_connection_context_t* context, dx_ext_a
 	}
 
 	/* load root CA */
-	if (address->tls.trust_store != NULL) {
-		if (address->tls.trust_store_password == NULL) {
-			if (tls_config_set_ca_file(context->tls_config, address->tls.trust_store) < 0) {
+	if (!dx_cstring_null_or_empty(dx_am_get_current_address_tls_trust_store(context->connection))) {
+		if (!dx_cstring_null_or_empty(dx_am_get_current_address_tls_trust_store_password(context->connection))) {
+			if (tls_config_set_ca_file(context->tls_config,
+									   dx_am_get_current_address_tls_trust_store(context->connection)) < 0) {
 				dx_logging_ansi_error(tls_config_error(context->tls_config));
 				tls_config_free(context->tls_config);
 				return false;
 			}
 		} else {
-			address->trust_store_mem =
-				tls_load_file(address->tls.trust_store, &(address->trust_store_len), address->tls.trust_store_password);
-			if (address->trust_store_mem == NULL ||
-				tls_config_set_ca_mem(context->tls_config, address->trust_store_mem, address->trust_store_len) < 0) {
+			size_t trust_store_len = 0;
+			uint8_t* trust_store_mem =
+				tls_load_file(dx_am_get_current_address_tls_trust_store(context->connection), &trust_store_len,
+							  (char*)(dx_am_get_current_address_tls_trust_store_password(context->connection)));
+			dx_am_set_current_address_tls_trust_store_mem(context->connection, trust_store_mem);
+			dx_am_set_current_address_tls_trust_store_len(context->connection, trust_store_len);
+
+			if (trust_store_mem == NULL ||
+				tls_config_set_ca_mem(context->tls_config, trust_store_mem, trust_store_len) < 0) {
 				tls_config_free(context->tls_config);
 				return false;
 			}
 		}
 	}
 	/* load private certificate */
-	if (address->tls.key_store != NULL) {
-		if (address->tls.key_store_password == NULL) {
-			if (tls_config_set_key_file(context->tls_config, address->tls.key_store) < 0) {
+	if (!dx_cstring_null_or_empty(dx_am_get_current_address_tls_key_store(context->connection))) {
+		if (!dx_cstring_null_or_empty(dx_am_get_current_address_tls_key_store_password(context->connection))) {
+			if (tls_config_set_key_file(context->tls_config,
+										dx_am_get_current_address_tls_key_store(context->connection)) < 0) {
 				dx_logging_ansi_error(tls_config_error(context->tls_config));
 				tls_config_free(context->tls_config);
 				return false;
 			}
 		} else {
-			address->key_store_mem =
-				tls_load_file(address->tls.key_store, &(address->key_store_len), address->tls.key_store_password);
-			if (address->key_store_mem == NULL ||
-				tls_config_set_key_mem(context->tls_config, address->key_store_mem, address->key_store_len) < 0) {
+			size_t key_store_len = 0;
+			uint8_t* key_store_mem =
+				tls_load_file(dx_am_get_current_address_tls_key_store(context->connection), &key_store_len,
+							  (char*)(dx_am_get_current_address_tls_key_store_password(context->connection)));
+			dx_am_set_current_address_tls_key_store_mem(context->connection, key_store_mem);
+			dx_am_set_current_address_tls_key_store_len(context->connection, key_store_len);
+
+			if (key_store_mem == NULL ||
+				tls_config_set_key_mem(context->tls_config, key_store_mem, key_store_len) < 0) {
 				tls_config_free(context->tls_config);
 				return false;
 			}
@@ -1013,7 +1022,8 @@ static int dx_connect_via_tls(dx_network_connection_context_t* context, dx_ext_a
 		return false;
 	}
 	if (tls_configure(context->tls_context, context->tls_config) < 0 ||
-		tls_connect(context->tls_context, address->host, address->port) < 0) {
+		tls_connect(context->tls_context, dx_am_get_current_address_host(context->connection),
+					dx_am_get_current_address_port(context->connection)) < 0) {
 		dx_logging_ansi_error(tls_error(context->tls_context));
 
 		/* failed to configure or connect */
@@ -1053,14 +1063,16 @@ int dx_connect_to_resolved_addresses(dx_network_connection_context_t* context) {
 		return true;
 	}
 
-	dx_addresses_manager_get_next_address(context->connection);
-
 	CHECKED_CALL(dx_mutex_lock, &(context->socket_guard));
 
-	for (; ctx->cur_addr_index < ctx->size; ++ctx->cur_addr_index) {
-		dx_ext_address_t* cur_addr = &(ctx->elements[ctx->cur_addr_index]);
+	while (true) {
+		if (!dx_am_next_socket_address(context->connection)) {
+			continue;
+		}
 
-		if (cur_addr->is_connection_failed) continue;
+		if (dx_am_is_current_socket_address_connection_failed(context->connection)) {
+			continue;
+		}
 
 		/* Make backup of properties configured via API on first pass */
 		if (!IS_FLAG_SET(context->set_fields_flags, PROPERTIES_BACKUP_FLAG)) {
@@ -1077,22 +1089,24 @@ int dx_connect_to_resolved_addresses(dx_network_connection_context_t* context) {
 			}
 		}
 
-		if (cur_addr->username != NULL && cur_addr->password != NULL &&
-			!dx_property_map_contains(&context->properties, DX_PROPERTY_AUTH)) {
-			if (!dx_protocol_configure_basic_auth(context->connection, cur_addr->username, cur_addr->password)) {
-				dx_mutex_unlock(&(context->socket_guard));
-				return false;
-			}
+		if (!dx_cstring_null_or_empty(dx_am_get_current_address_username(context->connection)) &&
+			!dx_cstring_null_or_empty(dx_am_get_current_address_password(context->connection)) &&
+			!dx_property_map_contains(&context->properties, DX_PROPERTY_AUTH) &&
+			!dx_protocol_configure_basic_auth(context->connection,
+											  dx_am_get_current_address_username(context->connection),
+											  dx_am_get_current_address_password(context->connection))) {
+			dx_mutex_unlock(&(context->socket_guard));
+			return false;
 		}
 
 #ifdef DXFEED_CODEC_TLS_ENABLED
-		if (cur_addr->tls.enabled) {
-			if (dx_connect_via_tls(context, cur_addr)) break;
+		if (dx_am_is_current_address_tls_enabled(context->connection)) {
+			if (dx_connect_via_tls(context)) break;
 		} else {
-			if (dx_connect_via_socket(context, cur_addr)) break;
+			if (dx_connect_via_socket(context)) break;
 		}
 #else
-		if (dx_connect_via_socket(context, cur_addr)) break;
+		if (dx_connect_via_socket(context)) break;
 #endif	// DXFEED_CODEC_TLS_ENABLED
 	}
 
@@ -1256,21 +1270,16 @@ int dx_send_data(dxf_connection_t connection, const void* buffer, int buffer_siz
 			sent_count = buffer_size;
 		} else {
 #ifdef DXFEED_CODEC_TLS_ENABLED
-			dx_ext_address_t* current_address = dx_get_current_address(context);
+			if (dx_am_is_current_address_tls_enabled(context->connection)) {
+				if (context->tls_context != NULL) {
+					sent_count = (int)tls_write(context->tls_context, (const void*)char_buf, buffer_size);
 
-			// prevent sending while reconnecting
-			if (current_address != NULL) {
-				if (current_address->tls.enabled) {
-					if (context->tls_context != NULL) {
-						sent_count = (int)tls_write(context->tls_context, (const void*)char_buf, buffer_size);
-
-						if (sent_count == -1) dx_logging_ansi_error(tls_error(context->tls_context));
-					} else {
-						dx_logging_ansi_error("TLS context is NULL");
-					}
+					if (sent_count == -1) dx_logging_ansi_error(tls_error(context->tls_context));
 				} else {
-					sent_count = dx_send(context->s, (const void*)char_buf, buffer_size);
+					dx_logging_ansi_error("TLS context is NULL");
 				}
+			} else {
+				sent_count = dx_send(context->s, (const void*)char_buf, buffer_size);
 			}
 #else
 			sent_count = dx_send(context->s, (const void*)char_buf, buffer_size);
