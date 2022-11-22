@@ -54,6 +54,7 @@ uint8_t* dx_am_get_current_address_tls_key_store_mem(dxf_connection_t connection
 void dx_am_set_current_address_tls_key_store_mem(dxf_connection_t connection, uint8_t* key_store_mem);
 size_t dx_am_get_current_address_tls_key_store_len(dxf_connection_t connection);
 void dx_am_set_current_address_tls_key_store_len(dxf_connection_t connection, size_t key_store_len);
+const char* dx_am_get_current_connected_address(dxf_connection_t connection);
 
 #ifdef __cplusplus
 }

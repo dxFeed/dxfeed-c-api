@@ -106,37 +106,28 @@ const char* dx_am_get_current_address_tls_key_store_password(dxf_connection_t co
 	return currentAddressTlsKeyStorePassword.c_str();
 }
 
-uint8_t* dx_am_get_current_address_tls_trust_store_mem(dxf_connection_t connection) {
-	return nullptr;
+uint8_t* dx_am_get_current_address_tls_trust_store_mem(dxf_connection_t connection) { return nullptr; }
+
+void dx_am_set_current_address_tls_trust_store_mem(dxf_connection_t connection, uint8_t* trust_store_mem) {}
+
+size_t dx_am_get_current_address_tls_trust_store_len(dxf_connection_t connection) { return 0; }
+
+void dx_am_set_current_address_tls_trust_store_len(dxf_connection_t connection, size_t trust_store_len) {}
+
+uint8_t* dx_am_get_current_address_tls_key_store_mem(dxf_connection_t connection) { return nullptr; }
+
+void dx_am_set_current_address_tls_key_store_mem(dxf_connection_t connection, uint8_t* key_store_mem) {}
+
+size_t dx_am_get_current_address_tls_key_store_len(dxf_connection_t connection) { return 0; }
+
+void dx_am_set_current_address_tls_key_store_len(dxf_connection_t connection, size_t key_store_len) {}
+
+const char* dx_am_get_current_connected_address(dxf_connection_t connection) {
+	thread_local std::string currentConnectedAddress{};
+
+	currentConnectedAddress = dx::AddressesManager::getInstance()->getCurrentAddressHost(connection) + ":" +
+		dx::AddressesManager::getInstance()->getCurrentAddressPort(connection);
+
+	return currentConnectedAddress.c_str();
 }
-
-void dx_am_set_current_address_tls_trust_store_mem(dxf_connection_t connection, uint8_t* trust_store_mem) {
-
-}
-
-size_t dx_am_get_current_address_tls_trust_store_len(dxf_connection_t connection) {
-	return 0;
-}
-
-void dx_am_set_current_address_tls_trust_store_len(dxf_connection_t connection, size_t trust_store_len) {
-
-}
-
-uint8_t* dx_am_get_current_address_tls_key_store_mem(dxf_connection_t connection) {
-	return nullptr;
-}
-
-void dx_am_set_current_address_tls_key_store_mem(dxf_connection_t connection, uint8_t* key_store_mem) {
-
-}
-
-size_t dx_am_get_current_address_tls_key_store_len(dxf_connection_t connection) {
-	return 0;
-}
-
-void dx_am_set_current_address_tls_key_store_len(dxf_connection_t connection, size_t key_store_len) {
-
-}
-
-
 }

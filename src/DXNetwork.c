@@ -1110,14 +1110,6 @@ int dx_connect_to_resolved_addresses(dx_network_connection_context_t* context) {
 #endif	// DXFEED_CODEC_TLS_ENABLED
 	}
 
-	if (ctx->cur_addr_index == ctx->size) {
-		/* we failed to establish connection */
-
-		dx_mutex_unlock(&(context->socket_guard));
-
-		return dx_set_error_code(dx_nec_open_connection_error);
-	}
-
 	context->set_fields_flags |= SOCKET_FIELD_FLAG;
 
 	return dx_mutex_unlock(&(context->socket_guard));
