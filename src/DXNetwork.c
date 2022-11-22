@@ -35,7 +35,6 @@
 #include "ClientMessageProcessor.h"
 #include "Configuration.h"
 #include "ConnectionContextData.h"
-#include "DXAddressParser.h"
 #include "DXAlgorithms.h"
 #include "DXErrorHandling.h"
 #include "DXNetwork.h"
@@ -50,43 +49,6 @@
  *	Internal structures and types
  */
 /* -------------------------------------------------------------------------- */
-
-typedef struct addrinfo* dx_addrinfo_ptr;
-
-typedef struct {
-	char* host;
-	char* port;
-	char* username;
-	char* password;
-	dx_codec_tls_t tls;
-	dx_codec_gzip_t gzip;
-
-	dx_addrinfo_ptr* elements;
-	size_t size;
-	size_t capacity;
-	size_t cur_info_index;
-
-#ifdef DXFEED_CODEC_TLS_ENABLED
-	uint8_t* key_store_mem;
-	size_t key_store_len;
-	uint8_t* trust_store_mem;
-	size_t trust_store_len;
-#endif	// DXFEED_CODEC_TLS_ENABLED
-
-	int is_connection_failed;
-} dx_ext_address_t;
-
-typedef struct {
-	dx_ext_address_t* elements;
-	size_t size;
-	size_t capacity;
-
-	dx_addrinfo_ptr* elements_to_free;
-	int elements_to_free_count;
-
-	int last_resolution_timestamp;
-	size_t cur_addr_index;
-} dx_address_resolution_context_t;
 
 #ifdef DXFEED_CODEC_TLS_ENABLED
 typedef struct tls* dx_tls;
@@ -103,7 +65,6 @@ typedef struct {
 	dxf_connection_t connection;
 
 	dx_connection_context_data_t context_data;
-	dx_address_resolution_context_t addr_context;
 
 	const char* address;
 	dx_socket_t s;
@@ -315,72 +276,6 @@ static void dx_logging_ansi_error(const char* ansi_error) {
 }
 #endif
 
-void dx_clear_addr_context_data(dx_address_resolution_context_t* context_data) {
-	if (context_data->elements_to_free != NULL) {
-		int i = 0;
-
-		for (; i < context_data->elements_to_free_count; ++i) {
-			dx_freeaddrinfo(context_data->elements_to_free[i]);
-		}
-
-		dx_free(context_data->elements_to_free);
-
-		context_data->elements_to_free = NULL;
-		context_data->elements_to_free_count = 0;
-	}
-
-	if (context_data->elements != NULL) {
-		size_t i;
-		for (i = 0; i < context_data->size; i++) {
-			dx_ext_address_t* addr = &(context_data->elements[i]);
-			if (addr->host != NULL) {
-				dx_free(addr->host);
-				addr->host = NULL;
-			}
-			if (addr->port != NULL) {
-				dx_free(addr->port);
-				addr->port = NULL;
-			}
-			if (addr->username != NULL) {
-				dx_free(addr->username);
-				addr->username = NULL;
-			}
-			if (addr->password != NULL) {
-				dx_free(addr->password);
-				addr->password = NULL;
-			}
-
-			dx_codec_tls_free(&addr->tls);
-
-			dx_free(addr->elements);
-			addr->elements = NULL;
-			addr->size = 0;
-			addr->capacity = 0;
-
-#ifdef DXFEED_CODEC_TLS_ENABLED
-			if (addr->key_store_mem != NULL) {
-				tls_unload_file(addr->key_store_mem, addr->key_store_len);
-				addr->key_store_mem = NULL;
-				addr->key_store_len = 0;
-			}
-			if (addr->trust_store_mem != NULL) {
-				tls_unload_file(addr->trust_store_mem, addr->trust_store_len);
-				addr->trust_store_mem = NULL;
-				addr->trust_store_len = 0;
-			}
-#endif	// DXFEED_CODEC_TLS_ENABLED
-		}
-
-		dx_free(context_data->elements);
-		context_data->elements = NULL;
-		context_data->size = 0;
-		context_data->capacity = 0;
-		context_data->cur_addr_index = 0;
-	}
-}
-
-/* -------------------------------------------------------------------------- */
-
 int dx_clear_connection_data(dx_network_connection_context_t* context) {
 	int set_fields_flags = 0;
 	int success = true;
@@ -404,8 +299,6 @@ int dx_clear_connection_data(dx_network_connection_context_t* context) {
 		success = dx_close(context->s) && success;
 #endif	// DXFEED_CODEC_TLS_ENABLED
 	}
-
-	dx_clear_addr_context_data(&(context->addr_context));
 
 	if (IS_FLAG_SET(set_fields_flags, MUTEX_FIELD_FLAG)) {
 		success = dx_mutex_destroy(&context->socket_guard) && success;
@@ -763,60 +656,7 @@ void dx_socket_reader(dx_network_connection_context_t* context) {
 	}
 }
 
-/* -------------------------------------------------------------------------- */
-
-void dx_sleep_before_resolve(dx_network_connection_context_t* context) {
-	static int RECONNECT_TIMEOUT = 100;
-
-	int* last_res_timestamp = &(context->addr_context.last_resolution_timestamp);
-	int timestamp_diff = dx_millisecond_timestamp_diff(dx_millisecond_timestamp(), *last_res_timestamp);
-
-	if (*last_res_timestamp != 0 && timestamp_diff < RECONNECT_TIMEOUT) {
-		dx_sleep((int)((1.0 + dx_random_double(1)) * (RECONNECT_TIMEOUT - timestamp_diff)));
-	}
-
-	*last_res_timestamp = dx_millisecond_timestamp();
-}
-
-static int dx_create_ext_address(const dx_address_t* source, OUT dx_ext_address_t* dest) {
-	if (source == NULL || dest == NULL) return dx_set_error_code(dx_ec_invalid_func_param_internal);
-	dx_memset((void*)dest, 0, sizeof(dx_ext_address_t));
-
-	if (source->host != NULL) {
-		dest->host = dx_ansi_create_string_src(source->host);
-		if (dest->host == NULL) return false;
-	}
-
-	if (source->port != NULL) {
-		dest->port = dx_ansi_create_string_src(source->port);
-		if (dest->port == NULL) return false;
-	}
-
-	if (source->username != NULL) {
-		dest->username = dx_ansi_create_string_src(source->username);
-		if (dest->username == NULL) return false;
-	}
-
-	if (source->password != NULL) {
-		dest->password = dx_ansi_create_string_src(source->password);
-		if (dest->password == NULL) return false;
-	}
-
-	if (!dx_codec_tls_copy(&(source->tls), OUT & (dest->tls)) ||
-		!dx_codec_gzip_copy(&(source->gzip), OUT & (dest->gzip)))
-		return false;
-
-#ifdef DXFEED_CODEC_TLS_ENABLED
-	if (dest->tls.enabled && dest->tls.trust_store == NULL)
-		dest->tls.trust_store = dx_ansi_create_string_src(TRUST_STORE_DEFAULT_NAME);
-#endif	// !DXFEED_CODEC_TLS_ENABLED
-
-	return true;
-}
-
-/* -------------------------------------------------------------------------- */
-
-int dx_resolve_address(dx_network_connection_context_t* context) {
+int dx_check_if_address_is_file_and_set_raw_dump_file_flag(dx_network_connection_context_t* context) {
 	if (context == NULL) {
 		dx_set_last_error(dx_ec_invalid_func_param_internal);
 
@@ -831,82 +671,6 @@ int dx_resolve_address(dx_network_connection_context_t* context) {
 		fclose(raw_dump_file);
 		context->set_fields_flags |= DUMPING_RAW_DATA_FIELD_FLAG;
 		return true;
-	}
-
-	// TODO: clean up
-
-	dx_sleep_before_resolve(context);
-
-	dx_address_array_t addresses;
-	CHECKED_CALL_2(dx_get_addresses_from_collection, context->address, &addresses);
-	if (addresses.size == 0) return false;
-
-	struct addrinfo hints;
-	dx_memset(&hints, 0, sizeof(hints));
-
-	hints.ai_family = AF_INET;
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_protocol = IPPROTO_TCP;
-
-	context->addr_context.elements_to_free = dx_calloc(addresses.size, sizeof(dx_addrinfo_ptr));
-
-	if (context->addr_context.elements_to_free == NULL) {
-		dx_clear_address_array(&addresses);
-		return false;
-	}
-
-	int resolved_count = 0;
-
-	for (size_t i = 0; i < addresses.size; ++i) {
-		if (context->is_closing) {
-			break;
-		}
-
-		dx_addrinfo_ptr addr = NULL;
-		dx_addrinfo_ptr cur_addr = NULL;
-		dx_ext_address_t address;
-		int failed = false;
-
-		if (!dx_create_ext_address(&(addresses.elements[i]), OUT & address)) {
-			dx_clear_addr_context_data(&(context->addr_context));
-			dx_clear_address_array(&addresses);
-			return false;
-		}
-
-		DX_ARRAY_INSERT(context->addr_context, dx_ext_address_t, address, context->addr_context.size,
-						dx_capacity_manager_halfer, failed);
-		if (failed) {
-			dx_clear_addr_context_data(&(context->addr_context));
-			dx_clear_address_array(&addresses);
-			return false;
-		}
-
-		if (!dx_getaddrinfo(addresses.elements[i].host, addresses.elements[i].port, &hints, &addr)) {
-			continue;
-		}
-
-		cur_addr = context->addr_context.elements_to_free[context->addr_context.elements_to_free_count++] = addr;
-
-		for (; cur_addr != NULL; cur_addr = cur_addr->ai_next) {
-			int failed = false;
-			dx_ext_address_t* last = &(context->addr_context.elements[context->addr_context.size - 1]);
-
-			DX_ARRAY_INSERT(*last, dx_addrinfo_ptr, cur_addr, last->size, dx_capacity_manager_halfer, failed);
-
-			if (failed) {
-				dx_clear_addr_context_data(&(context->addr_context));
-				dx_clear_address_array(&addresses);
-				return false;
-			}
-			resolved_count++;
-		}
-	}
-
-	dx_clear_address_array(&addresses);
-
-	// all addresses in collection cannot be resolved
-	if (resolved_count == 0) {
-		return false;
 	}
 
 	return true;
@@ -1049,9 +813,7 @@ static int dx_connect_via_tls(dx_network_connection_context_t* context) {
 
 /* -------------------------------------------------------------------------- */
 
-int dx_connect_to_resolved_addresses(dx_network_connection_context_t* context) {
-	dx_address_resolution_context_t* ctx = &(context->addr_context);
-
+int dx_connect_to_file_or_open_socket(dx_network_connection_context_t* context) {
 	// raw data file
 	if (IS_FLAG_SET(context->set_fields_flags, DUMPING_RAW_DATA_FIELD_FLAG)) {
 		if (context->raw_dump_file != NULL) return true;
@@ -1140,23 +902,7 @@ int dx_reestablish_connection(dx_network_connection_context_t* context) {
 	}
 
 	CHECKED_CALL(dx_clear_server_info, context->connection);
-
-	if (!dx_connect_to_resolved_addresses(context)) {
-		/*
-		 *	An important moment here.
-		 *  Before we resolve address anew, we must attempt to connect to the previously
-		 *  resolved addresses, because there might still be some valid addresses resolved from
-		 *  the previous attempt. And only if the new connection attempt fails, which also means
-		 *  there are no valid addresses left, a new resolution is started, and then we repeat
-		 *  the connection attempt with the newly resolved addresses.
-		 */
-
-		dx_clear_addr_context_data(&(context->addr_context));
-
-		CHECKED_CALL(dx_resolve_address, context);
-		CHECKED_CALL(dx_connect_to_resolved_addresses, context);
-	}
-
+	CHECKED_CALL(dx_connect_to_file_or_open_socket, context);
 	CHECKED_CALL_2(dx_send_protocol_description, context->connection, false);
 	CHECKED_CALL_2(dx_send_record_description, context->connection, false);
 	CHECKED_CALL_2(dx_process_connection_subscriptions, context->connection, dx_server_event_subscription_refresher);
@@ -1194,8 +940,8 @@ int dx_bind_to_address(dxf_connection_t connection, const char* address, const d
 
 	context->set_fields_flags |= MUTEX_FIELD_FLAG;
 
-	if ((context->address = dx_ansi_create_string_src(address)) == NULL || !dx_resolve_address(context) ||
-		!dx_connect_to_resolved_addresses(context)) {
+	if ((context->address = dx_ansi_create_string_src(address)) == NULL || !dx_check_if_address_is_file_and_set_raw_dump_file_flag(context) ||
+		!dx_connect_to_file_or_open_socket(context)) {
 		return false;
 	}
 
@@ -1608,42 +1354,20 @@ int dx_get_current_connected_address(dxf_connection_t connection, OUT char** ppA
 		return dx_set_error_code(dx_ec_invalid_func_param);
 	}
 	*ppAddress = NULL;
-	int res = true;
-	dx_network_connection_context_t* const pContext = dx_get_subsystem_data(connection, dx_ccs_network, &res);
-	if (pContext == NULL) {
-		if (res) {
-			dx_set_error_code(dx_cec_connection_context_not_initialized);
-		}
-		return false;
-	}
-	CHECKED_CALL(dx_mutex_lock, &pContext->socket_guard);
-	if (pContext->addr_context.cur_addr_index >= pContext->addr_context.size) {
-		dx_mutex_unlock(&pContext->socket_guard);
-		return true;
-	}
-	const dx_ext_address_t* const pExtAddress = &pContext->addr_context.elements[pContext->addr_context.cur_addr_index];
-	if (pExtAddress == NULL) {
-		dx_mutex_unlock(&pContext->socket_guard);
-		return true;
-	}
-	const char* const host = pExtAddress->host;
-	const char* const port = pExtAddress->port;
-	const size_t host_len = dx_ansi_string_length(host);
-	const size_t port_len = dx_ansi_string_length(port);
-	char* const pAddress = dx_calloc(1, host_len + port_len + 2);
+
+	const char* address = dx_am_get_current_connected_address(connection);
+	size_t address_length = strlen(address);
+
+	char* const pAddress = dx_calloc(1, address_length + 1);
+
 	if (pAddress == NULL) {
-		dx_mutex_unlock(&pContext->socket_guard);
 		return false;
 	}
-	dx_ansi_copy_string_len(pAddress, host, host_len);
-	pAddress[host_len] = ':';
-	dx_ansi_copy_string_len(pAddress + host_len + 1, port, port_len);
-	pAddress[host_len + port_len + 1] = '\0';
-	if (!dx_mutex_unlock(&pContext->socket_guard)) {
-		free(pAddress);
-		return false;
-	}
+
+	dx_ansi_copy_string_len(pAddress, address, address_length);
+	pAddress[address_length] = '\0';
 	*ppAddress = pAddress;
+
 	return true;
 }
 
