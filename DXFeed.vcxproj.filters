@@ -146,6 +146,9 @@
     <ClCompile Include="src\Configuration.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\AddressesManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="src\BinaryQTPComposer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -177,6 +180,12 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\AddressesManager.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AddressesManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="src\ClientMessageProcessor.h">
       <Filter>Header Files</Filter>
     </ClInclude>

@@ -179,6 +179,9 @@
     <ClCompile Include="..\..\src\WideDecimal.cpp">
       <Filter>Common\Sources</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\AddressesManager.cpp">
+      <Filter>Common\Sources</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\BinaryQTPComposer.cpp">
       <Filter>Common\Sources</Filter>
     </ClCompile>
@@ -299,6 +302,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\DXProperties.h">
+      <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\AddressesManager.hpp">
+      <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\AddressesManager.h">
       <Filter>Common\Headers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\BinaryQTPComposer.hpp">
