@@ -27,6 +27,7 @@ extern "C" {
 #include "DXSockets.h"
 #include "DXThreads.h"
 #include "EventData.h"
+#include "Logger.h"
 }
 
 #include <algorithm>
@@ -244,11 +245,21 @@ class AddressesManager {
 		for (std::size_t addressIndex = 0; addressIndex < addressArray.size; addressIndex++) {
 			auto host = StringUtils::toString(addressArray.elements[addressIndex].host);
 			auto port = StringUtils::toString(addressArray.elements[addressIndex].port);
+
+			dx_logging_info(L"AddressesManager - [con = %p] Resolving IPs for %hs", connection, host.c_str());
+
 			auto inetAddresses =
 				SocketAddress::getAllInetAddresses(host, port, [&addresses] { return addresses.size(); });
 
+			dx_logging_info(L"AddressesManager - [con = %p] Resolved IPs: %d", connection,
+							static_cast<int>(inetAddresses.size()));
+
 			if (inetAddresses.empty()) {
 				continue;
+			}
+
+			for (const auto& a : inetAddresses) {
+				dx_logging_verbose(dx_ll_debug, L"AddressesManager - [con = %p]     %hs", connection, a.resolvedIp.c_str());
 			}
 
 			socketAddresses.insert(socketAddresses.end(), inetAddresses.begin(), inetAddresses.end());
@@ -274,6 +285,11 @@ class AddressesManager {
 		}
 
 		shuffle(socketAddresses.begin(), socketAddresses.end());
+
+		dx_logging_verbose(dx_ll_debug, L"AddressesManager - [con = %p] Shuffled addresses:", connection);
+		for (const auto& a : socketAddresses) {
+			dx_logging_verbose(dx_ll_debug, L"AddressesManager - [con = %p]     %hs", connection, a.resolvedIp.c_str());
+		}
 
 		dx_clear_address_array(&addressArray);
 

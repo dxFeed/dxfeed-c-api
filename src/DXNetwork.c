@@ -693,12 +693,13 @@ static int dx_connect_via_socket(dx_network_connection_context_t* context) {
 		return false;
 	}
 
-	dx_logging_info(L"Connecting to %hs (%hs)", dx_am_get_current_connected_address(context->connection),
+	dx_logging_info(L"dx_connect_via_socket - [con = %p] Connecting to %hs (%hs)", context->connection,
+					dx_am_get_current_connected_address(context->connection),
 					dx_am_get_current_connected_socket_address(context->connection));
 	context->s = dx_socket(address_family, address_socket_type, address_protocol);
 
 	if (context->s == INVALID_SOCKET) {
-		dx_logging_info(L"Failed to connect to %hs (%hs): Invalid socket",
+		dx_logging_info(L"dx_connect_via_socket - [con = %p] Failed to connect to %hs (%hs): Invalid socket", context->connection,
 						dx_am_get_current_connected_address(context->connection),
 						dx_am_get_current_connected_socket_address(context->connection));
 		/* failed to create a new socket */
@@ -709,7 +710,8 @@ static int dx_connect_via_socket(dx_network_connection_context_t* context) {
 	if (!dx_connect(context->s, &native_socket_address, (socklen_t)native_socket_address_length)) {
 		/* failed to connect */
 
-		dx_logging_info(L"Failed to connect to %hs (%hs)", dx_am_get_current_connected_address(context->connection),
+		dx_logging_info(L"dx_connect_via_socket - [con = %p] Failed to connect to %hs (%hs)", context->connection,
+						dx_am_get_current_connected_address(context->connection),
 						dx_am_get_current_connected_socket_address(context->connection));
 		dx_close(context->s);
 
