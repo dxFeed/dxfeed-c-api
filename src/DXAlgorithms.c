@@ -201,6 +201,10 @@ int dx_string_null_or_empty(dxf_const_string_t str) {
 	return str == NULL || dx_string_length(str) == 0;
 }
 
+int dx_cstring_null_or_empty(const char* str) {
+	return str == NULL || strlen(str) == 0;
+}
+
 /* -------------------------------------------------------------------------- */
 
 int dx_compare_strings (dxf_const_string_t s1, dxf_const_string_t s2) {

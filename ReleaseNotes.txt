@@ -1,5 +1,9 @@
 Version 8.7.0
-* [DXFC-394] [Breaking changes] Disabled mixing of specified addresses for connection in the form: (hos1:port1)(host2:port2)(host3:port3)
+* [DXFC-395] Added the ability to enumerate all resolved IP addresses by DNS names. IP addresses will be shuffled.
+  - For the address of QD endpoints specified in the form `(host1:port1)(host2:port2)(host3:port3)` IP addresses will be determined, then they will be shuffled.
+  - Shuffled addresses will be selected in order until a connection occurs. When the end of the list is reached, the endpoints will again be determined by IP addresses, and so on.
+  - If a disconnect occurs, the next IP from the list will be selected and an attempt will be made to reconnect.
+* [DXFC-394] Disabled shuffling of specified addresses (DNS names) for connection in the form: `(hos1:port1)(host2:port2)(host3:port3)`
 * [DXFC-334] Fixed a bug with precision error when converting WideDecimal to Double
 * [DXFC-376] The SnapshotConsoleSample was improved: added an ability to specify from-time and to-time arguments.
 
