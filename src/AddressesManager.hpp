@@ -99,10 +99,7 @@ class ReconnectHelper {
 	std::int64_t startTime_{};
 
 public:
-	// ReconnectHelper(std::int64_t delay = 100) : delay_{delay} {}
-	ReconnectHelper(std::int64_t delay = 10000) : delay_{delay} {}
-
-	void setDelay(std::int64_t delay) { delay_ = delay; }
+	explicit ReconnectHelper(std::int64_t delay = 10000) : delay_{delay} {}
 
 	void sleepBeforeConnection() {
 		std::int64_t worked = System::currentTimeMillis() - startTime_;
@@ -222,9 +219,10 @@ class AddressesManager {
 
 	template <typename It>
 	static void shuffle(It begin, It end) {
-		static std::default_random_engine randomEngine{};
+		static std::random_device randomDevice{};
+		static std::mt19937 engine{randomDevice()};
 
-		std::shuffle(begin, end, randomEngine);
+		std::shuffle(begin, end, engine);
 	}
 
 	static ResolvedAddresses resolveAddresses(dxf_connection_t connection) {
@@ -388,7 +386,11 @@ public:
 		return !SocketAddress::isInvalid(getNextSocketAddress(connection));
 	}
 
-	void clearAddresses(dxf_connection_t connection) {}
+	void clearAddresses(dxf_connection_t connection) {
+		std::lock_guard<std::mutex> guard(mutex_);
+
+		resolvedAddressesByConnection_.erase(connection);
+	}
 
 	bool isCurrentSocketAddressConnectionFailed(dxf_connection_t connection) {
 		std::lock_guard<std::mutex> guard(mutex_);
@@ -498,11 +500,105 @@ public:
 		return true;
 	}
 
-	 Address* getCurrentAddress(dxf_connection_t connection) {
-		 std::lock_guard<std::mutex> guard(mutex_);
+	std::string getCurrentAddressTlsTrustStore(dxf_connection_t connection) {
+		std::lock_guard<std::mutex> guard(mutex_);
 
-		 return getCurrentAddressImpl(connection);
-	 }
+		const auto* a = getCurrentAddressImpl(connection);
+
+		if (!a) {
+			return "";
+		}
+
+		return a->tlsData.trustStore;
+	}
+
+	std::string getCurrentAddressTlsTrustStorePassword(dxf_connection_t connection) {
+		std::lock_guard<std::mutex> guard(mutex_);
+
+		const auto* a = getCurrentAddressImpl(connection);
+
+		if (!a) {
+			return "";
+		}
+
+		return a->tlsData.trustStorePassword;
+	}
+
+	std::string getCurrentAddressTlsKeyStore(dxf_connection_t connection) {
+		std::lock_guard<std::mutex> guard(mutex_);
+
+		const auto* a = getCurrentAddressImpl(connection);
+
+		if (!a) {
+			return "";
+		}
+
+		return a->tlsData.keyStore;
+	}
+
+	std::string getCurrentAddressTlsKeyStorePassword(dxf_connection_t connection) {
+		std::lock_guard<std::mutex> guard(mutex_);
+
+		const auto* a = getCurrentAddressImpl(connection);
+
+		if (!a) {
+			return "";
+		}
+
+		return a->tlsData.keyStorePassword;
+	}
+
+	Address* getCurrentAddress(dxf_connection_t connection) {
+		std::lock_guard<std::mutex> guard(mutex_);
+
+		return getCurrentAddressImpl(connection);
+	}
+
+#ifdef DXFEED_CODEC_TLS_ENABLED
+	void setCurrentAddressTlsTrustStoreMem(dxf_connection_t connection, uint8_t* trustStoreMem) {
+		std::lock_guard<std::mutex> guard(mutex_);
+		auto* a = getCurrentAddressImpl(connection);
+
+		if (!a) {
+			return;
+		}
+
+		a->trustStoreMem = trustStoreMem;
+	}
+
+	void setCurrentAddressTlsTrustStoreLen(dxf_connection_t connection, size_t trustStoreLen) {
+		std::lock_guard<std::mutex> guard(mutex_);
+		auto* a = getCurrentAddressImpl(connection);
+
+		if (!a) {
+			return;
+		}
+
+		a->trustStoreLen = trustStoreLen;
+	}
+
+	void setCurrentAddressTlsKeyStoreMem(dxf_connection_t connection, uint8_t* keyStoreMem) {
+		std::lock_guard<std::mutex> guard(mutex_);
+		auto* a = getCurrentAddressImpl(connection);
+
+		if (!a) {
+			return;
+		}
+
+		a->keyStoreMem = keyStoreMem;
+	}
+
+	void setCurrentAddressTlsKeyStoreLen(dxf_connection_t connection, size_t keyStoreLen) {
+		std::lock_guard<std::mutex> guard(mutex_);
+		auto* a = getCurrentAddressImpl(connection);
+
+		if (!a) {
+			return;
+		}
+
+		a->keyStoreLen = keyStoreLen;
+	}
+#endif
 };
 
 }  // namespace dx

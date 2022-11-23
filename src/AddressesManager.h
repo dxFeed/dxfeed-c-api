@@ -32,6 +32,7 @@ extern "C" {
 #endif
 
 int dx_am_next_socket_address(dxf_connection_t connection);
+void dx_am_clear_addresses(dxf_connection_t connection);
 int dx_am_is_current_address_tls_enabled(dxf_connection_t connection);
 int dx_am_is_current_socket_address_connection_failed(dxf_connection_t connection);
 void dx_am_set_current_socket_address_connection_failed(dxf_connection_t connection, int is_connection_failed);
@@ -46,10 +47,14 @@ const char* dx_am_get_current_address_tls_trust_store(dxf_connection_t connectio
 const char* dx_am_get_current_address_tls_trust_store_password(dxf_connection_t connection);
 const char* dx_am_get_current_address_tls_key_store(dxf_connection_t connection);
 const char* dx_am_get_current_address_tls_key_store_password(dxf_connection_t connection);
+
+#ifdef DXFEED_CODEC_TLS_ENABLED
 void dx_am_set_current_address_tls_trust_store_mem(dxf_connection_t connection, uint8_t* trust_store_mem);
 void dx_am_set_current_address_tls_trust_store_len(dxf_connection_t connection, size_t trust_store_len);
 void dx_am_set_current_address_tls_key_store_mem(dxf_connection_t connection, uint8_t* key_store_mem);
 void dx_am_set_current_address_tls_key_store_len(dxf_connection_t connection, size_t key_store_len);
+#endif
+
 const char* dx_am_get_current_connected_address(dxf_connection_t connection);
 const char* dx_am_get_current_connected_socket_address(dxf_connection_t connection);
 

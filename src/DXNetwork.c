@@ -327,6 +327,8 @@ int dx_clear_connection_data(dx_network_connection_context_t* context) {
 
 	dx_free(context);
 
+	dx_am_clear_addresses(context->connection);
+
 	return success;
 }
 

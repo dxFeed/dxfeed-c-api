@@ -29,6 +29,10 @@ int dx_am_next_socket_address(dxf_connection_t connection) {
 	return dx::AddressesManager::getInstance()->nextSocketAddress(connection);
 }
 
+void dx_am_clear_addresses(dxf_connection_t connection) {
+	return dx::AddressesManager::getInstance()->clearAddresses(connection);
+}
+
 int dx_am_is_current_address_tls_enabled(dxf_connection_t connection) {
 	return dx::AddressesManager::getInstance()->isCurrentAddressTlsEnabled(connection);
 }
@@ -72,7 +76,7 @@ const char* dx_am_get_current_address_port(dxf_connection_t connection) {
 	currentAddressPort = dx::AddressesManager::getInstance()->getCurrentAddressPort(connection);
 
 	return currentAddressPort.c_str();
-}
+};
 
 int dx_ma_get_current_socket_address_info(dxf_connection_t connection, int* address_family, int* address_socket_type,
 										  int* address_protocol, struct sockaddr* native_socket_address,
@@ -85,11 +89,16 @@ int dx_ma_get_current_socket_address_info(dxf_connection_t connection, int* addr
 const char* dx_am_get_current_address_tls_trust_store(dxf_connection_t connection) {
 	thread_local std::string currentAddressTlsTrustStore{};
 
+	currentAddressTlsTrustStore = dx::AddressesManager::getInstance()->getCurrentAddressTlsTrustStore(connection);
+
 	return currentAddressTlsTrustStore.c_str();
 }
 
 const char* dx_am_get_current_address_tls_trust_store_password(dxf_connection_t connection) {
 	thread_local std::string currentAddressTlsTrustStorePassword{};
+
+	currentAddressTlsTrustStorePassword =
+		dx::AddressesManager::getInstance()->getCurrentAddressTlsTrustStorePassword(connection);
 
 	return currentAddressTlsTrustStorePassword.c_str();
 }
@@ -97,22 +106,37 @@ const char* dx_am_get_current_address_tls_trust_store_password(dxf_connection_t 
 const char* dx_am_get_current_address_tls_key_store(dxf_connection_t connection) {
 	thread_local std::string currentAddressTlsKeyStore{};
 
+	currentAddressTlsKeyStore = dx::AddressesManager::getInstance()->getCurrentAddressTlsKeyStore(connection);
+
 	return currentAddressTlsKeyStore.c_str();
 }
 
 const char* dx_am_get_current_address_tls_key_store_password(dxf_connection_t connection) {
 	thread_local std::string currentAddressTlsKeyStorePassword{};
 
+	currentAddressTlsKeyStorePassword =
+		dx::AddressesManager::getInstance()->getCurrentAddressTlsKeyStorePassword(connection);
+
 	return currentAddressTlsKeyStorePassword.c_str();
 }
 
-void dx_am_set_current_address_tls_trust_store_mem(dxf_connection_t connection, uint8_t* trust_store_mem) {}
+#ifdef DXFEED_CODEC_TLS_ENABLED
+void dx_am_set_current_address_tls_trust_store_mem(dxf_connection_t connection, uint8_t* trust_store_mem) {
+	dx::AddressesManager::getInstance()->setCurrentAddressTlsTrustStoreMem(connection, trust_store_mem);
+}
 
-void dx_am_set_current_address_tls_trust_store_len(dxf_connection_t connection, size_t trust_store_len) {}
+void dx_am_set_current_address_tls_trust_store_len(dxf_connection_t connection, size_t trust_store_len) {
+	dx::AddressesManager::getInstance()->setCurrentAddressTlsTrustStoreLen(connection, trust_store_len);
+}
 
-void dx_am_set_current_address_tls_key_store_mem(dxf_connection_t connection, uint8_t* key_store_mem) {}
+void dx_am_set_current_address_tls_key_store_mem(dxf_connection_t connection, uint8_t* key_store_mem) {
+	dx::AddressesManager::getInstance()->setCurrentAddressTlsKeyStoreMem(connection, key_store_mem);
+}
 
-void dx_am_set_current_address_tls_key_store_len(dxf_connection_t connection, size_t key_store_len) {}
+void dx_am_set_current_address_tls_key_store_len(dxf_connection_t connection, size_t key_store_len) {
+	dx::AddressesManager::getInstance()->setCurrentAddressTlsKeyStoreLen(connection, key_store_len);
+}
+#endif
 
 const char* dx_am_get_current_connected_address(dxf_connection_t connection) {
 	thread_local std::string currentConnectedAddress{};
