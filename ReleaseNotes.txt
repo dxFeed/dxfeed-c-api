@@ -1,5 +1,5 @@
 Version 8.7.0
-* [DXFC-395] Add the ability to enumerate all resolved IP addresses by DNS names. IP addresses will be shuffled.
+* [DXFC-395] Added the ability to enumerate all resolved IP addresses by DNS names. IP addresses will be shuffled.
   - For the address of QD endpoints specified in the form `(host1:port1)(host2:port2)(host3:port3)` IP addresses will be determined, then they will be shuffled.
   - Shuffled addresses will be selected in order until a connection occurs. When the end of the list is reached, the endpoints will again be determined by IP addresses, and so on.
   - If a disconnect occurs, the next IP from the list will be selected and an attempt will be made to reconnect.
