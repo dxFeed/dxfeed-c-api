@@ -34,7 +34,6 @@ extern "C" {
 #include <chrono>
 #include <cstdint>
 #include <deque>
-#include <exception>
 #include <memory>
 #include <mutex>
 #include <random>
@@ -49,12 +48,27 @@ extern "C" {
 namespace dx {
 
 // TODO: std::expected
-struct Ok : std::exception {
-	explicit Ok() noexcept : std::exception("Ok") {}
+class Result {
+	std::string data_;
+
+public:
+	explicit Result(const std::string& data) noexcept : data_{data} {}
+
+	virtual const std::string& what() const noexcept { return data_; }
+
+	virtual ~Result() {}
 };
 
-struct InvalidFormatError : std::invalid_argument {
-	explicit InvalidFormatError(const std::string& error) noexcept : std::invalid_argument(error) {}
+struct Ok : Result {
+	explicit Ok() noexcept : Result("Ok") {}
+};
+
+struct RuntimeError : Result {
+	explicit RuntimeError(const std::string& error) noexcept : Result(error) {}
+};
+
+struct InvalidFormatError : RuntimeError {
+	explicit InvalidFormatError(const std::string& error) noexcept : RuntimeError(error) {}
 };
 
 struct AddressSyntaxError : InvalidFormatError {
@@ -96,7 +110,7 @@ static inline bool startsWith(const std::string& str, char c) { return !str.empt
 
 static inline bool endsWith(const std::string& str, char c) { return !str.empty() && str.find(c) == str.size() - 1; }
 
-static inline std::pair<std::vector<std::string>, std::exception> splitParenthesisSeparatedString(
+static inline std::pair<std::vector<std::string>, Result> splitParenthesisSeparatedString(
 	const std::string& s) noexcept {
 	if (!startsWith(s, '(')) {
 		return {{s}, Ok{}};
@@ -147,7 +161,7 @@ static inline std::pair<std::vector<std::string>, std::exception> splitParenthes
 	return {result, Ok{}};
 }
 
-static inline std::pair<std::vector<std::string>, std::exception> splitParenthesisedStringAt(const std::string& s,
+static inline std::pair<std::vector<std::string>, Result> splitParenthesisedStringAt(const std::string& s,
 																							 char atChar) noexcept {
 	std::stack<char> stack;
 
@@ -213,7 +227,7 @@ static inline bool isEscapedCharAt(const std::string& s, std::int64_t index) noe
  * @param keyValueVector Collection of strings where parsed properties are added to.
  * @return The resulting description string without properties + Ok | std::runtime_error | InvalidFormatError.
  */
-static inline std::pair<std::string, std::exception> parseProperties(
+static inline std::pair<std::string, Result> parseProperties(
 	std::string description, std::vector<std::string>& keyValueVector) noexcept {
 	description = algorithm::trimCopy(description);
 
@@ -253,7 +267,7 @@ static inline std::pair<std::string, std::exception> parseProperties(
 				case '(':
 					if (deque.empty()) {
 						return {{description},
-								std::runtime_error("StringUtils::parseProperties: empty internal deque!")};
+								RuntimeError("StringUtils::parseProperties: empty internal deque!")};
 					}
 
 					char expect = deque.back();
