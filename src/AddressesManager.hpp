@@ -33,6 +33,7 @@ extern "C" {
 #include <algorithm>
 #include <chrono>
 #include <cstdint>
+#include <deque>
 #include <exception>
 #include <memory>
 #include <mutex>
@@ -188,7 +189,7 @@ static inline std::pair<std::vector<std::string>, std::exception> splitParenthes
 	return {{s}, Ok{}};	 // at char is not found
 }
 
-static inline bool isEscapedCharAt(const std::string& s, std::int64_t index) {
+static inline bool isEscapedCharAt(const std::string& s, std::int64_t index) noexcept {
 	std::int64_t escapeCount = 0;
 
 	while (--index >= 0 && s[index] == ESCAPE_CHAR) {
@@ -196,6 +197,100 @@ static inline bool isEscapedCharAt(const std::string& s, std::int64_t index) {
 	}
 
 	return escapeCount % 2 != 0;
+}
+
+/**
+ * Parses additional properties at the end of the given description string.
+ * Properties can be enclosed in pairs of matching '[...]' or '(...)' (the latter is deprecated).
+ * Multiple properties can be specified with multiple pair of braces or be comma-separated inside
+ * a single pair, so both "something[prop1,prop2]" and "something[prop1][prop2]" are
+ * valid properties specifications. All braces must go in matching pairs.
+ * Original string and all properties string are trimmed from extra space, so
+ * extra spaces around or inside braces are ignored.
+ * Special characters can be escaped with a backslash.
+ *
+ * @param description Description string to parse.
+ * @param keyValueVector Collection of strings where parsed properties are added to.
+ * @return The resulting description string without properties + Ok | std::runtime_error | InvalidFormatError.
+ */
+static inline std::pair<std::string, std::exception> parseProperties(
+	std::string description, std::vector<std::string>& keyValueVector) noexcept {
+	description = algorithm::trimCopy(description);
+
+	std::vector<std::string> result;
+	std::deque<char> deque;
+
+	while ((endsWith(description, ')') || endsWith(description, ']')) &&
+		   !isEscapedCharAt(description, description.size() - 1)) {
+		std::int64_t prop_end = description.size() - 1;
+		std::int64_t i = 0;
+		// going backwards
+
+		for (i = description.size(); --i >= 0;) {
+			char c = description[i];
+
+			if (c == ESCAPE_CHAR || isEscapedCharAt(description, i)) {
+				continue;
+			}
+
+			bool done = false;
+
+			switch (c) {
+				case ']':
+					deque.push_back('[');
+					break;
+				case ')':
+					deque.push_back('(');
+					break;
+				case ',':
+					if (deque.size() == 1) {
+						// this is a top-level comma
+						result.push_back(algorithm::trimCopy(description.substr(i + 1, prop_end - i - 1)));
+						prop_end = i;
+					}
+					break;
+				case '[':
+				case '(':
+					if (deque.empty()) {
+						return {{description},
+								std::runtime_error("StringUtils::parseProperties: empty internal deque!")};
+					}
+
+					char expect = deque.back();
+
+					deque.pop_back();
+
+					if (c != expect) {
+						return {{description},
+								InvalidFormatError(std::string("Unmatched '") + c + "' in a list of properties")};
+					}
+
+					if (deque.empty()) {
+						result.push_back(algorithm::trimCopy(description.substr(i + 1, prop_end - i - 1)));
+
+						done = true;
+					}
+
+					break;
+			}
+
+			if (done) {
+				break;
+			}
+		}
+
+		if (i < 0) {
+			return {{description},
+					InvalidFormatError(std::string("Extra '") + deque.front() + "' in a list of properties")};
+		}
+
+		description = algorithm::trimCopy(description.substr(0, i));
+	}
+
+	std::reverse(result.begin(), result.end());	 // reverse properties into original order
+	keyValueVector.insert(keyValueVector.end(), result.begin(), result.end());
+
+	return {{description}, Ok{}};
 }
 
 }  // namespace StringUtils
