@@ -37,14 +37,17 @@ extern "C" {
 #include <memory>
 #include <mutex>
 #include <random>
+#include <stack>
 #include <string>
 #include <thread>
 #include <unordered_map>
 #include <vector>
 
+#include "Configuration.hpp"
+
 namespace dx {
 
-//TODO: std::expected
+// TODO: std::expected
 struct Ok : std::exception {
 	explicit Ok() noexcept : std::exception("Ok") {}
 };
@@ -139,6 +142,48 @@ static inline std::pair<std::vector<std::string>, std::exception> splitParenthes
 	return {result, Ok{}};
 }
 
+static inline std::pair<std::vector<std::string>, std::exception> splitParenthesisedStringAt(const std::string& s,
+																							 char atChar) noexcept {
+	std::stack<char> stack;
+
+	for (int i = 0; i < s.size(); i++) {
+		char c = s[i];
+
+		switch (c) {
+			case '(':
+				stack.push(')');
+				break;
+			case '[':
+				stack.push(']');
+				break;
+			case ')':
+			case ']': {
+				if (stack.empty()) {
+					return {{s}, AddressSyntaxError(std::string("Extra closing parenthesis: ") + c)};
+				}
+
+				char top = stack.top();
+				stack.pop();
+
+				if (top != c) {
+					return {{s}, AddressSyntaxError(std::string("Wrong closing parenthesis: ") + c)};
+				}
+			}
+
+			break;
+			case ESCAPE_CHAR:  // escapes next char (skip it)
+				i++;
+				break;
+			default:
+				if (stack.empty() && c == atChar) {
+					return {{algorithm::trimCopy(s.substr(0, i)), algorithm::trimCopy(s.substr(i + 1))}, Ok{}};
+				}
+		}
+	}
+
+	return {{s}, Ok{}};	 // at chart is not found
+}
+
 }  // namespace StringUtils
 
 namespace System {
@@ -161,6 +206,21 @@ inline static double random() {
 namespace Thread {
 inline static void sleep(std::int64_t millis) { std::this_thread::sleep_for(std::chrono::milliseconds{millis}); }
 }  // namespace Thread
+
+struct Property {
+	std::string keyValue;
+	bool used;
+};
+
+struct ParsedAddress {
+	std::string spec;
+	std::vector<std::vector<std::string>> codecs;  // one std::vector<std::string> per codec of format: [<codec-name>,
+												   // <codec-property-1>, ..., <codec-property-N>]
+	std::string address;
+	std::vector<Property> properties;
+
+	static ParsedAddress parseAddress(const std::string& address) {}
+};
 
 /// Not thread-safe
 class ReconnectHelper {
