@@ -44,8 +44,7 @@ extern "C" {
 
 namespace dx {
 
-//TODO: std::excepted
-
+//TODO: std::expected
 struct Ok : std::exception {
 	explicit Ok() noexcept : std::exception("Ok") {}
 };
