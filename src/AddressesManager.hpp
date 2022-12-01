@@ -91,9 +91,13 @@ static inline std::string toString(const char* cString) {
 	return cString;
 }
 
+static inline bool startsWith(const std::string& str, char c) { return !str.empty() && str.find(c) == 0; }
+
+static inline bool endsWith(const std::string& str, char c) { return !str.empty() && str.find(c) == str.size() - 1; }
+
 static inline std::pair<std::vector<std::string>, std::exception> splitParenthesisSeparatedString(
 	const std::string& s) noexcept {
-	if (s.find('(') != 0) {
+	if (!startsWith(s, '(')) {
 		return {{s}, Ok{}};
 	}
 

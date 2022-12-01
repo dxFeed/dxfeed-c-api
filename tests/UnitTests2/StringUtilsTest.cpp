@@ -18,3 +18,15 @@ TEST_CASE("Split Parenthesis Separated Test", "[StringUtils]") {
 	REQUIRE(s{"Ok"} != dx::StringUtils::splitParenthesisSeparatedString("(abc)de").second.what());
 	REQUIRE(s{"Ok"} != dx::StringUtils::splitParenthesisSeparatedString("(:Quote&(IBM,MSFT)@:12345").second.what());
 }
+
+TEST_CASE("Starts With Test", "[StringUtils]") {
+	REQUIRE(dx::StringUtils::startsWith("", '1') == false);
+	REQUIRE(dx::StringUtils::startsWith(" ", '1') == false);
+	REQUIRE(dx::StringUtils::startsWith("1 ", '1') == true);
+}
+
+TEST_CASE("Ends With Test", "[StringUtils]") {
+	REQUIRE(dx::StringUtils::endsWith("", '1') == false);
+	REQUIRE(dx::StringUtils::endsWith(" ", '1') == false);
+	REQUIRE(dx::StringUtils::endsWith("   1", '1') == true);
+}

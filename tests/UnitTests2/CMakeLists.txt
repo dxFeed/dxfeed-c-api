@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(DXFC_TEST_SOURCES WideDecimalTest.cpp StringUtilsTest.cpp)
-set(DXFC_INCLUDE_DIRS ../../include ../../src ../../thirdparty/Catch2-2.13.8/single_include)
+set(DXFC_INCLUDE_DIRS ../../include ../../src ../../thirdparty/Catch2-2.13.8/single_include ../../thirdparty/toml11 ../../thirdparty/boost-1_75)
 
 string(REPLACE ".cpp" "" DXFC_TEST_BASENAMES "${DXFC_TEST_SOURCES}")
 set(DXFC_TEST_TARGETS ${DXFC_TEST_BASENAMES})
