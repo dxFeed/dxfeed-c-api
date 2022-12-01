@@ -181,7 +181,7 @@ static inline std::pair<std::vector<std::string>, std::exception> splitParenthes
 		}
 	}
 
-	return {{s}, Ok{}};	 // at chart is not found
+	return {{s}, Ok{}};	 // at char is not found
 }
 
 }  // namespace StringUtils
