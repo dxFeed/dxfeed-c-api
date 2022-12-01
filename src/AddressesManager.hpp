@@ -33,6 +33,7 @@ extern "C" {
 #include <algorithm>
 #include <chrono>
 #include <cstdint>
+#include <exception>
 #include <memory>
 #include <mutex>
 #include <random>
@@ -43,7 +44,23 @@ extern "C" {
 
 namespace dx {
 
+//TODO: std::excepted
+
+struct Ok : std::exception {
+	explicit Ok() noexcept : std::exception("Ok") {}
+};
+
+struct InvalidFormatError : std::invalid_argument {
+	explicit InvalidFormatError(const std::string& error) noexcept : std::invalid_argument(error) {}
+};
+
+struct AddressSyntaxError : InvalidFormatError {
+	explicit AddressSyntaxError(const std::string& error) noexcept : InvalidFormatError(error) {}
+};
+
 namespace StringUtils {
+static const char ESCAPE_CHAR = '\\';
+
 static inline std::string ipToString(const sockaddr* sa) {
 	const std::size_t size = 256;
 	char buf[size] = {};
@@ -71,6 +88,58 @@ static inline std::string toString(const char* cString) {
 
 	return cString;
 }
+
+static inline std::pair<std::vector<std::string>, std::exception> splitParenthesisSeparatedString(
+	const std::string& s) noexcept {
+	if (s.find('(') != 0) {
+		return {{s}, Ok{}};
+	}
+
+	std::vector<std::string> result{};
+	int cnt = 0;
+	int startIndex = -1;
+
+	for (int i = 0; i < s.size(); i++) {
+		char c = s[i];
+		switch (c) {
+			case '(':
+				if (cnt++ == 0) {
+					startIndex = i + 1;
+				}
+
+				break;
+
+			case ')':
+				if (cnt == 0) {
+					return {result, AddressSyntaxError("Extra closing parenthesis ')' in a list")};
+				}
+
+				if (--cnt == 0) {
+					result.push_back(s.substr(startIndex, i - startIndex));
+				}
+
+				break;
+
+			default:
+				if (cnt == 0 && c > ' ') {
+					return {result,
+							AddressSyntaxError(std::string("Unexpected character '") + c +
+											   "' outside parenthesis in a list")};
+				}
+
+				if (c == ESCAPE_CHAR) {	 // escapes next char (skip it)
+					i++;
+				}
+		}
+	}
+
+	if (cnt > 0) {
+		return {result, AddressSyntaxError("Missing closing parenthesis ')' in a list")};
+	}
+
+	return {result, Ok{}};
+}
+
 }  // namespace StringUtils
 
 namespace System {
@@ -259,7 +328,8 @@ class AddressesManager {
 			}
 
 			for (const auto& a : inetAddresses) {
-				dx_logging_verbose(dx_ll_debug, L"AddressesManager - [con = %p]     %hs", connection, a.resolvedIp.c_str());
+				dx_logging_verbose(dx_ll_debug, L"AddressesManager - [con = %p]     %hs", connection,
+								   a.resolvedIp.c_str());
 			}
 
 			socketAddresses.insert(socketAddresses.end(), inetAddresses.begin(), inetAddresses.end());
