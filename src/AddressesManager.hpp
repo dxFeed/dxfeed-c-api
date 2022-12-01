@@ -188,6 +188,16 @@ static inline std::pair<std::vector<std::string>, std::exception> splitParenthes
 	return {{s}, Ok{}};	 // at char is not found
 }
 
+static inline bool isEscapedCharAt(const std::string& s, std::int64_t index) {
+	std::int64_t escapeCount = 0;
+
+	while (--index >= 0 && s[index] == ESCAPE_CHAR) {
+		escapeCount++;
+	}
+
+	return escapeCount % 2 != 0;
+}
+
 }  // namespace StringUtils
 
 namespace System {
