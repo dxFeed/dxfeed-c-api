@@ -14,9 +14,9 @@ TEST_CASE("Split Parenthesis Separated Test", "[StringUtils]") {
 	REQUIRE(sv{{"a"}, {"(b)"}, {"c"}} == dx::StringUtils::splitParenthesisSeparatedString("(a)((b))(c)").first);
 	REQUIRE(sv{{"a(b)c"}} == dx::StringUtils::splitParenthesisSeparatedString("(a(b)c)").first);
 
-	REQUIRE(s{"Ok"} != dx::StringUtils::splitParenthesisSeparatedString("(abc").second.what());
-	REQUIRE(s{"Ok"} != dx::StringUtils::splitParenthesisSeparatedString("(abc)de").second.what());
-	REQUIRE(s{"Ok"} != dx::StringUtils::splitParenthesisSeparatedString("(:Quote&(IBM,MSFT)@:12345").second.what());
+	REQUIRE(!dx::StringUtils::splitParenthesisSeparatedString("(abc").second.isOk());
+	REQUIRE(!dx::StringUtils::splitParenthesisSeparatedString("(abc)de").second.isOk());
+	REQUIRE(!dx::StringUtils::splitParenthesisSeparatedString("(:Quote&(IBM,MSFT)@:12345").second.isOk());
 }
 
 TEST_CASE("Starts With Test", "[StringUtils]") {

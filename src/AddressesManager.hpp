@@ -338,12 +338,19 @@ struct Property {
 	bool used;
 };
 
+struct HostPort {
+	std::string host;
+	std::string port;
+};
+
 struct ParsedAddress {
 	std::string specification;
 	std::vector<std::vector<std::string>> codecs;  // one std::vector<std::string> per codec of format: [<codec-name>,
 												   // <codec-property-1>, ..., <codec-property-N>]
 	std::string address;
 	std::vector<Property> properties;
+	std::string defaultPort;
+	std::vector<HostPort> hostsAndPorts;
 
 	static std::pair<ParsedAddress, Result> parseAddress(std::string address) {
 		// Parse configurable message adapter factory specification in address
@@ -411,7 +418,25 @@ struct ParsedAddress {
 
 		//TODO: parse default port and split addresses + set port
 
-		return {{specification, codecs, address, properties}, Ok{}};
+		// Parse port in address
+		auto portSep = address.find_last_of(':');
+
+		if (portSep == std::string::npos) {
+			return {{}, AddressSyntaxError("Port number is missing in \"" + address + "\"")};
+		}
+
+		auto portString = address.substr(portSep + 1);
+
+		try {
+			int port = std::stoi(portString);
+			(void)(port);
+		} catch (const std::exception& e) {
+			return {{}, AddressSyntaxError("Port number format error in \"" + address + "\"")};
+		}
+
+		address = algorithm::trimCopy(address.substr(0, portSep));
+
+		return {{specification, codecs, address, properties, portString}, Ok{}};
 	}
 };
 
