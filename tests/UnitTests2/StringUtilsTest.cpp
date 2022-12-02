@@ -22,13 +22,14 @@ TEST_CASE("Split Parenthesis Separated Test", "[StringUtils]") {
 TEST_CASE("Starts With Test", "[StringUtils]") {
 	REQUIRE(dx::StringUtils::startsWith("", '1') == false);
 	REQUIRE(dx::StringUtils::startsWith(" ", '1') == false);
-	REQUIRE(dx::StringUtils::startsWith("1 ", '1') == true);
+	REQUIRE(dx::StringUtils::startsWith("1 1  ", '1') == true);
 }
 
 TEST_CASE("Ends With Test", "[StringUtils]") {
 	REQUIRE(dx::StringUtils::endsWith("", '1') == false);
 	REQUIRE(dx::StringUtils::endsWith(" ", '1') == false);
 	REQUIRE(dx::StringUtils::endsWith("   1", '1') == true);
+	REQUIRE(dx::StringUtils::endsWith("(other)test(prop1,prop2)", ')') == true);
 }
 
 void checkParseProperties(const std::string& description, const std::string& result, const std::vector<std::string>& properties) {
@@ -48,11 +49,11 @@ TEST_CASE("Parse Properties Test", "[StringUtils]") {
 	checkParseProperties("test(prop1,prop2)", "test", {"prop1", "prop2"});
 	checkParseProperties("(other)test(prop1,prop2)", "(other)test", {"prop1", "prop2"});
 	checkParseProperties("[other]test[prop1,prop2]", "[other]test", {"prop1", "prop2"});
-//	checkParseProperties("[[]]", "", {"[]"});
-//	checkParseProperties("[()]", "", {"()"});
-//	checkParseProperties("(())", "", {"()"});
-//	checkParseProperties("([])", "", {"[]"});
-//	checkParseProperties("a[]b", "a[]b", {});
-//	checkParseProperties("a[,,]", "a", {"", "", ""});
-//	checkParseProperties(" b b ( , , ) ", "b b", {"", "", ""});
+	checkParseProperties("[[]]", "", {"[]"});
+	checkParseProperties("[()]", "", {"()"});
+	checkParseProperties("(())", "", {"()"});
+	checkParseProperties("([])", "", {"[]"});
+	checkParseProperties("a[]b", "a[]b", {});
+	checkParseProperties("a[,,]", "a", {"", "", ""});
+	checkParseProperties(" b b ( , , ) ", "b b", {"", "", ""});
 }
