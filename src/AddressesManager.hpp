@@ -56,11 +56,15 @@ public:
 
 	virtual const std::string& what() const noexcept { return data_; }
 
-	virtual ~Result() {}
+	virtual ~Result() = default;
+
+	virtual bool isOk() const { return false; }
 };
 
 struct Ok : Result {
 	explicit Ok() noexcept : Result("Ok") {}
+
+	bool isOk() const override { return true; }
 };
 
 struct RuntimeError : Result {
@@ -160,9 +164,9 @@ static inline std::pair<std::vector<std::string>, Result> splitParenthesisSepara
 
 	return {result, Ok{}};
 }
-
+// -> ([""], Ok | AddressSyntaxError)
 static inline std::pair<std::vector<std::string>, Result> splitParenthesisedStringAt(const std::string& s,
-																							 char atChar) noexcept {
+																					 char atChar) noexcept {
 	std::stack<char> stack;
 
 	for (int i = 0; i < s.size(); i++) {
@@ -227,8 +231,8 @@ static inline bool isEscapedCharAt(const std::string& s, std::int64_t index) noe
  * @param keyValueVector Collection of strings where parsed properties are added to.
  * @return The resulting description string without properties + Ok | std::runtime_error | InvalidFormatError.
  */
-static inline std::pair<std::string, Result> parseProperties(
-	std::string description, std::vector<std::string>& keyValueVector) noexcept {
+static inline std::pair<std::string, Result> parseProperties(std::string description,
+															 std::vector<std::string>& keyValueVector) noexcept {
 	description = algorithm::trimCopy(description);
 
 	std::vector<std::string> result;
@@ -266,8 +270,7 @@ static inline std::pair<std::string, Result> parseProperties(
 				case '[':
 				case '(':
 					if (deque.empty()) {
-						return {{description},
-								RuntimeError("StringUtils::parseProperties: empty internal deque!")};
+						return {{description}, RuntimeError("StringUtils::parseProperties: empty internal deque!")};
 					}
 
 					char expect = deque.back();
@@ -336,13 +339,80 @@ struct Property {
 };
 
 struct ParsedAddress {
-	std::string spec;
+	std::string specification;
 	std::vector<std::vector<std::string>> codecs;  // one std::vector<std::string> per codec of format: [<codec-name>,
 												   // <codec-property-1>, ..., <codec-property-N>]
 	std::string address;
 	std::vector<Property> properties;
 
-	static ParsedAddress parseAddress(const std::string& address) {}
+	static std::pair<ParsedAddress, Result> parseAddress(std::string address) {
+		// Parse configurable message adapter factory specification in address
+		auto specSplitResult = StringUtils::splitParenthesisedStringAt(address, '@');
+
+		if (!specSplitResult.second.isOk()) {
+			return {{}, specSplitResult.second};
+		}
+
+		auto specSplit = specSplitResult.first;
+		std::string specification = specSplit.size() == 1 ? "" : specSplit[0];
+		address = specSplit.size() == 1 ? address : specSplit[1];
+
+		// Parse additional properties at the end of address
+		std::vector<std::string> propStrings{};
+
+		auto parsePropertiesResult = StringUtils::parseProperties(address, propStrings);
+
+		if (!parsePropertiesResult.second.isOk()) {
+			return {{}, parsePropertiesResult.second};
+		}
+
+		address = parsePropertiesResult.first;
+
+		// Parse codecs
+		std::vector<std::vector<std::string>> codecs{};
+
+		while (true) {
+			auto codecSplitResult = StringUtils::splitParenthesisedStringAt(address, '+');
+
+			if (!codecSplitResult.second.isOk()) {
+				return {{}, codecSplitResult.second};
+			}
+
+			auto codecSplit = codecSplitResult.first;
+
+			if (codecSplit.size() == 1) {
+				break;
+			}
+
+			auto codecStr = codecSplit[0];
+			address = codecSplit[1];
+
+			std::vector<std::string> codecInfo{};
+
+			codecInfo.emplace_back("");	 // reserving place for codec name
+
+			auto parseCodecPropertiesResult = StringUtils::parseProperties(codecStr, codecInfo);
+
+			if (!parseCodecPropertiesResult.second.isOk()) {
+				return {{}, parseCodecPropertiesResult.second};
+			}
+
+			codecStr = parseCodecPropertiesResult.first;
+			codecInfo[0] = codecStr;
+			codecs.push_back(codecInfo);
+		}
+
+		std::reverse(codecs.begin(), codecs.end());
+
+		std::vector<Property> properties{};
+
+		std::transform(propStrings.begin(), propStrings.end(), properties.begin(),
+					   [](const std::string& propertyString) -> Property { return {propertyString}; });
+
+		//TODO: parse default port and split addresses + set port
+
+		return {{specification, codecs, address, properties}, Ok{}};
+	}
 };
 
 /// Not thread-safe
