@@ -26,291 +26,24 @@ extern "C" {
 #include "DXNetwork.h"
 #include "DXSockets.h"
 #include "DXThreads.h"
-#include "EventData.h"
 #include "Logger.h"
 }
 
 #include <algorithm>
 #include <chrono>
 #include <cstdint>
-#include <deque>
 #include <memory>
 #include <mutex>
 #include <random>
-#include <stack>
 #include <string>
 #include <thread>
 #include <unordered_map>
 #include <vector>
 
-#include "Configuration.hpp"
+#include "Result.hpp"
+#include "StringUtils.hpp"
 
 namespace dx {
-
-// TODO: std::expected
-class Result {
-	std::string data_;
-
-public:
-	explicit Result(const std::string& data) noexcept : data_{data} {}
-
-	virtual const std::string& what() const noexcept { return data_; }
-
-	virtual ~Result() = default;
-
-	virtual bool isOk() const { return false; }
-};
-
-struct Ok : Result {
-	explicit Ok() noexcept : Result("Ok") {}
-
-	bool isOk() const override { return true; }
-};
-
-struct RuntimeError : Result {
-	explicit RuntimeError(const std::string& error) noexcept : Result(error) {}
-};
-
-struct InvalidFormatError : RuntimeError {
-	explicit InvalidFormatError(const std::string& error) noexcept : RuntimeError(error) {}
-};
-
-struct AddressSyntaxError : InvalidFormatError {
-	explicit AddressSyntaxError(const std::string& error) noexcept : InvalidFormatError(error) {}
-};
-
-namespace StringUtils {
-static const char ESCAPE_CHAR = '\\';
-
-static inline std::string ipToString(const sockaddr* sa) {
-	const std::size_t size = 256;
-	char buf[size] = {};
-
-	switch (sa->sa_family) {
-		case AF_INET:
-			inet_ntop(AF_INET, &(((struct sockaddr_in*)sa)->sin_addr), buf, size - 1);
-			break;
-
-		case AF_INET6:
-			inet_ntop(AF_INET6, &(((struct sockaddr_in6*)sa)->sin6_addr), buf, size - 1);
-			break;
-
-		default:
-			return "";
-	}
-
-	return buf;
-}
-
-static inline std::string toString(const char* cString) {
-	if (cString == nullptr) {
-		return "";
-	}
-
-	return cString;
-}
-
-static inline bool startsWith(const std::string& str, char c) { return !str.empty() && str.find_first_of(c) == 0; }
-
-static inline bool endsWith(const std::string& str, char c) { return !str.empty() && str.find_last_of(c) == str.size() - 1; }
-
-static inline std::pair<std::vector<std::string>, Result> splitParenthesisSeparatedString(
-	const std::string& s) noexcept {
-	if (!startsWith(s, '(')) {
-		return {{s}, Ok{}};
-	}
-
-	std::vector<std::string> result{};
-	int cnt = 0;
-	int startIndex = -1;
-
-	for (int i = 0; i < s.size(); i++) {
-		char c = s[i];
-		switch (c) {
-			case '(':
-				if (cnt++ == 0) {
-					startIndex = i + 1;
-				}
-
-				break;
-
-			case ')':
-				if (cnt == 0) {
-					return {result, AddressSyntaxError("Extra closing parenthesis ')' in a list")};
-				}
-
-				if (--cnt == 0) {
-					result.push_back(s.substr(startIndex, i - startIndex));
-				}
-
-				break;
-
-			default:
-				if (cnt == 0 && c > ' ') {
-					return {result,
-							AddressSyntaxError(std::string("Unexpected character '") + c +
-											   "' outside parenthesis in a list")};
-				}
-
-				if (c == ESCAPE_CHAR) {	 // escapes next char (skip it)
-					i++;
-				}
-		}
-	}
-
-	if (cnt > 0) {
-		return {result, AddressSyntaxError("Missing closing parenthesis ')' in a list")};
-	}
-
-	return {result, Ok{}};
-}
-// -> ([""], Ok | AddressSyntaxError)
-static inline std::pair<std::vector<std::string>, Result> splitParenthesisedStringAt(const std::string& s,
-																					 char atChar) noexcept {
-	std::stack<char> stack;
-
-	for (int i = 0; i < s.size(); i++) {
-		char c = s[i];
-
-		switch (c) {
-			case '(':
-				stack.push(')');
-				break;
-			case '[':
-				stack.push(']');
-				break;
-			case ')':
-			case ']': {
-				if (stack.empty()) {
-					return {{s}, AddressSyntaxError(std::string("Extra closing parenthesis: ") + c)};
-				}
-
-				char top = stack.top();
-				stack.pop();
-
-				if (top != c) {
-					return {{s}, AddressSyntaxError(std::string("Wrong closing parenthesis: ") + c)};
-				}
-			}
-
-			break;
-			case ESCAPE_CHAR:  // escapes next char (skip it)
-				i++;
-				break;
-			default:
-				if (stack.empty() && c == atChar) {
-					return {{algorithm::trimCopy(s.substr(0, i)), algorithm::trimCopy(s.substr(i + 1))}, Ok{}};
-				}
-		}
-	}
-
-	return {{s}, Ok{}};	 // at char is not found
-}
-
-static inline bool isEscapedCharAt(const std::string& s, std::int64_t index) noexcept {
-	std::int64_t escapeCount = 0;
-
-	while (--index >= 0 && s[index] == ESCAPE_CHAR) {
-		escapeCount++;
-	}
-
-	return escapeCount % 2 != 0;
-}
-
-/**
- * Parses additional properties at the end of the given description string.
- * Properties can be enclosed in pairs of matching '[...]' or '(...)' (the latter is deprecated).
- * Multiple properties can be specified with multiple pair of braces or be comma-separated inside
- * a single pair, so both "something[prop1,prop2]" and "something[prop1][prop2]" are
- * valid properties specifications. All braces must go in matching pairs.
- * Original string and all properties string are trimmed from extra space, so
- * extra spaces around or inside braces are ignored.
- * Special characters can be escaped with a backslash.
- *
- * @param description Description string to parse.
- * @param keyValueVector Collection of strings where parsed properties are added to.
- * @return The resulting description string without properties + Ok | std::runtime_error | InvalidFormatError.
- */
-static inline std::pair<std::string, Result> parseProperties(std::string description,
-															 std::vector<std::string>& keyValueVector) noexcept {
-	description = algorithm::trimCopy(description);
-
-	std::vector<std::string> result;
-	std::deque<char> deque;
-
-	while ((endsWith(description, ')') || endsWith(description, ']')) &&
-		   !isEscapedCharAt(description, description.size() - 1)) {
-		std::int64_t prop_end = description.size() - 1;
-		std::int64_t i = 0;
-		// going backwards
-
-		for (i = description.size(); --i >= 0;) {
-			char c = description[i];
-
-			if (c == ESCAPE_CHAR || isEscapedCharAt(description, i)) {
-				continue;
-			}
-
-			bool done = false;
-
-			switch (c) {
-				case ']':
-					deque.push_back('[');
-					break;
-				case ')':
-					deque.push_back('(');
-					break;
-				case ',':
-					if (deque.size() == 1) {
-						// this is a top-level comma
-						result.push_back(algorithm::trimCopy(description.substr(i + 1, prop_end - i - 1)));
-						prop_end = i;
-					}
-					break;
-				case '[':
-				case '(':
-					if (deque.empty()) {
-						return {{description}, RuntimeError("StringUtils::parseProperties: empty internal deque!")};
-					}
-
-					char expect = deque.back();
-
-					deque.pop_back();
-
-					if (c != expect) {
-						return {{description},
-								InvalidFormatError(std::string("Unmatched '") + c + "' in a list of properties")};
-					}
-
-					if (deque.empty()) {
-						result.push_back(algorithm::trimCopy(description.substr(i + 1, prop_end - i - 1)));
-
-						done = true;
-					}
-
-					break;
-			}
-
-			if (done) {
-				break;
-			}
-		}
-
-		if (i < 0) {
-			return {{description},
-					InvalidFormatError(std::string("Extra '") + deque.front() + "' in a list of properties")};
-		}
-
-		description = algorithm::trimCopy(description.substr(0, i));
-	}
-
-	std::reverse(result.begin(), result.end());	 // reverse properties into original order
-	keyValueVector.insert(keyValueVector.end(), result.begin(), result.end());
-
-	return {{description}, Ok{}};
-}
-
-}  // namespace StringUtils
 
 namespace System {
 inline static std::int64_t currentTimeMillis() {
@@ -416,7 +149,7 @@ struct ParsedAddress {
 		std::transform(propStrings.begin(), propStrings.end(), properties.begin(),
 					   [](const std::string& propertyString) -> Property { return {propertyString}; });
 
-		//TODO: parse default port and split addresses + set port
+		// TODO: parse default port and split addresses + set port
 
 		// Parse port in address
 		auto portSep = address.find_last_of(':');
@@ -430,11 +163,11 @@ struct ParsedAddress {
 		try {
 			int port = std::stoi(portString);
 			(void)(port);
-		} catch (const std::exception& e) {
+		} catch (const std::exception&) {
 			return {{}, AddressSyntaxError("Port number format error in \"" + address + "\"")};
 		}
 
-		address = algorithm::trimCopy(address.substr(0, portSep));
+		address = StringUtils::trimCopy(address.substr(0, portSep));
 
 		return {{specification, codecs, address, properties, portString}, Ok{}};
 	}
@@ -526,9 +259,11 @@ struct SocketAddress {
 				continue;
 			}
 
-			result.push_back(SocketAddress{addr->ai_family, addr->ai_socktype, addr->ai_protocol, *(addr->ai_addr),
-										   addr->ai_addrlen, StringUtils::ipToString(addr->ai_addr),
-										   addressIndexProvider(), false});
+			result.push_back(
+				SocketAddress{addr->ai_family, addr->ai_socktype, addr->ai_protocol, *(addr->ai_addr), addr->ai_addrlen,
+							  StringUtils::ipToString<sockaddr, AF_INET, sockaddr_in, AF_INET6, sockaddr_in6>(
+								  addr->ai_addr, inet_ntop),
+							  addressIndexProvider(), false});
 		}
 
 		dx_freeaddrinfo(addr);

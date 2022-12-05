@@ -26,7 +26,6 @@
 #define OBJECT_ARRAY_H_INCLUDED
 
 #include "DXTypes.h"
-#include "PrimitiveTypes.h"
 
 #define DX_OBJECT_ARRAY_NAME(alias) \
 dx_##alias##_array_t

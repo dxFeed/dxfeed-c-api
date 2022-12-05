@@ -19,8 +19,6 @@
 
 #pragma once
 
-#include "DXFeed.h"
-#include "PrimitiveTypes.h"
 #include "DXErrorCodes.h"
 
 #if defined(_WIN32) && defined(_DEBUG)

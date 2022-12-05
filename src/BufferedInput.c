@@ -41,10 +41,10 @@ typedef struct dx_buffered_input_connection_context_t {
 } dx_buffered_input_connection_context_t;
 
 #define CTX(context) \
-	((dx_buffered_input_connection_context_t*)context)
+	((dx_buffered_input_connection_context_t*)(context))
 
 #define IS_BUF_CAPACITY_ENOUGH(context, bytes_to_read) \
-	(CTX(context)->current_in_buffer_position + bytes_to_read <= CTX(context)->in_buffer_length)
+	(CTX(context)->current_in_buffer_position + (bytes_to_read) <= CTX(context)->in_buffer_length)
 
 /* -------------------------------------------------------------------------- */
 

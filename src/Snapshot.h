@@ -20,7 +20,6 @@
 #ifndef SNAPSHOT_H_INCLUDED
 #define SNAPSHOT_H_INCLUDED
 
-#include "PrimitiveTypes.h"
 #include "EventData.h"
 #include "DXTypes.h"
 

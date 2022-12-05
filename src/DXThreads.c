@@ -27,7 +27,7 @@
 #include "DXErrorHandling.h"
 #include "DXErrorCodes.h"
 #include "DXMemory.h"
-#include "Logger.h"
+#include "PrimitiveTypes.h"
 
 /* -------------------------------------------------------------------------- */
 /*

@@ -17,7 +17,6 @@
  *
  */
 
-#include <wctype.h>
 #include <math.h>
 
 #include "Candle.h"

@@ -20,16 +20,16 @@
 #pragma once
 
 #include <atomic>
-#include <chrono>
-#include <cstdint>
 #include <limits>
 #include <memory>
 
+extern "C" {
+#include "DXTypes.h"
+}
+
 #include "BinaryQTPComposer.hpp"
 #include "BinaryQTPParser.hpp"
-#include "DXTypes.h"
 #include "HeartbeatPayload.hpp"
-#include "TimeMarkUtil.hpp"
 
 namespace dx {
 

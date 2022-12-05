@@ -19,7 +19,6 @@
 
 #include "BufferedIOCommon.h"
 #include "DXErrorHandling.h"
-#include "DXMemory.h"
 
 /* -------------------------------------------------------------------------- */
 /*

@@ -24,8 +24,6 @@
 #ifndef DX_MEMORY_H_INCLUDED
 #define DX_MEMORY_H_INCLUDED
 
-#include "DXTypes.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif

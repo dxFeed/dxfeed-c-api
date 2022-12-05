@@ -26,12 +26,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <wchar.h>
 
 #include "DXErrorCodes.h"
 #include "DXFeed.h"
-#include "Logger.h"
+#include "PrimitiveTypes.h"
 
 #if !defined(_WIN32) || defined(USE_PTHREADS)
 #	include "pthread.h"

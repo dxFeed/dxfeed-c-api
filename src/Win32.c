@@ -24,8 +24,6 @@
 #	pragma warning(pop)
 
 #	include "DXMemory.h"
-#	include "Logger.h"
-#	include "DXAlgorithms.h"
 #	include "DXThreads.h"
 
 typedef struct dx_callback_tag {

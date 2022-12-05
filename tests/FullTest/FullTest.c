@@ -27,11 +27,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <wctype.h>
 
+#include "PrimitiveTypes.h"
 #include "DXErrorCodes.h"
 #include "DXFeed.h"
-#include "Logger.h"
 
 #ifndef _WIN32
 typedef struct {

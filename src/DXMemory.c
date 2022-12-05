@@ -31,9 +31,7 @@
 #include "DXMemory.h"
 #include "DXErrorHandling.h"
 #include "DXErrorCodes.h"
-#include "Logger.h"
 
-#include <string.h>
 #include <stdlib.h>
 
 /* -------------------------------------------------------------------------- */

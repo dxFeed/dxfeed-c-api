@@ -20,15 +20,7 @@
 extern "C" {
 
 #include "Configuration.h"
-
-#include "ConnectionContextData.h"
-#include "DXAlgorithms.h"
 #include "DXErrorCodes.h"
-#include "DXErrorHandling.h"
-#include "DXFeed.h"
-#include "DXThreads.h"
-#include "Logger.h"
-#include "SymbolCodec.h"
 
 }
 

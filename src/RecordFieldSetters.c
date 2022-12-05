@@ -22,8 +22,7 @@
  */
 
 #include "RecordFieldSetters.h"
-
-#include "DXFeed.h"
+#include "PrimitiveTypes.h"
 #include "DataStructures.h"
 #include "EventData.h"
 

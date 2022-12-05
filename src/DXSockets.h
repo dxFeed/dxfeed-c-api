@@ -49,8 +49,6 @@ typedef SOCKET dx_socket_t;
 typedef int dx_socket_t;
 #endif /* _WIN32 */
 
-#include "PrimitiveTypes.h"
-
 #define INVALID_DATA_SIZE (-1)
 
 /* -------------------------------------------------------------------------- */

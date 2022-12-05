@@ -617,9 +617,11 @@
     <ClInclude Include="src\Logger.h" />
     <ClInclude Include="src\PrimitiveTypes.h" />
     <ClInclude Include="src\RecordTranscoder.h" />
+    <ClInclude Include="src\Result.hpp" />
     <ClInclude Include="src\ServerMessageProcessor.h" />
     <ClInclude Include="src\Snapshot.h" />
     <ClInclude Include="src\StringConverter.hpp" />
+    <ClInclude Include="src\StringUtils.hpp" />
     <ClInclude Include="src\ObjectArray.h" />
     <ClInclude Include="src\TaskQueue.h" />
     <ClInclude Include="src\BufferedInput.h" />
@@ -635,6 +637,7 @@
     <ClInclude Include="include\DXTypes.h" />
     <ClInclude Include="include\EventData.h" />
     <ClInclude Include="include\RecordData.h" />
+    <ClInclude Include="src\TimeMarkUtil.hpp" />
     <ClInclude Include="thirdparty\toml11\toml.hpp" />
     <ClInclude Include="src\Version.h" />
     <ClInclude Include="src\WideDecimal.h" />

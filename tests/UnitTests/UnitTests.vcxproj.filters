@@ -277,6 +277,15 @@
     <ClInclude Include="..\..\src\RegionalBook.h">
       <Filter>Common\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Result.hpp">
+      <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\StringConverter.hpp">
+      <Filter>Common\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\StringUtils.hpp">
+      <Filter>Common\Headers</Filter>
+    </ClInclude>
     <ClInclude Include="ConnectionTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>

@@ -24,7 +24,6 @@ extern "C" {
 }
 
 #include <cstring>
-#include <new>
 
 #include "BinaryQTPComposer.hpp"
 #include "Connection.hpp"

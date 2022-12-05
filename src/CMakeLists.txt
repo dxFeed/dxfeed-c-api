@@ -31,7 +31,7 @@ if (TARGET_PLATFORM STREQUAL "x64")
     set(POSTFIX "${POSTFIX}${PLATFORM_POSTFIX}")
 endif ()
 
-set(DEF_FILE ../${PROJECT}${POSTFIX}.def)
+set(DEF_FILE "../${PROJECT}${POSTFIX}.def")
 
 set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE INTERNAL "" FORCE)
 set(CMAKE_DEBUG_POSTFIX "d${PLATFORM_POSTFIX}")
@@ -102,13 +102,15 @@ set(HEADER_FILES
         PriceLevelBook.h
         PriceLevelBookNG.h
         PriceLevelBookNG.hpp
-        RegionalBook.h
         PrimitiveTypes.h
-        resource.h
+        RegionalBook.h
         RecordTranscoder.h
+        resource.h
+        Result.hpp
         ServerMessageProcessor.h
         Snapshot.h
         StringConverter.hpp
+        StringUtils.hpp
         TaskQueue.h
         TimeMarkUtil.hpp
         Version.h

@@ -19,7 +19,6 @@
 #include "DXFeed.h"
 
 #include <inttypes.h>
-#include <stdio.h>
 #include <string.h>
 
 #include "Candle.h"
@@ -32,7 +31,6 @@
 #include "DXMemory.h"
 #include "DXNetwork.h"
 #include "DXThreads.h"
-#include "DataStructures.h"
 #include "EventSubscription.h"
 #include "Logger.h"
 #include "PriceLevelBook.h"

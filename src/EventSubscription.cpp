@@ -27,11 +27,8 @@ extern "C" {
 #include "DXErrorHandling.h"
 #include "DXFeed.h"
 #include "DXThreads.h"
-#include "Logger.h"
-#include "SymbolCodec.h"
 }
 
-#include <cmath>
 #include <functional>
 #include <mutex>
 #include <string>

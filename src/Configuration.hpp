@@ -20,156 +20,21 @@
 #pragma once
 
 #include <iostream>
-#include <iterator>
-#include <locale>
 #include <memory>
 #include <mutex>
 #include <sstream>
-#include <stdexcept>
 #include <string>
 #include <toml.hpp>
-#include <unordered_map>
+
+#include "StringUtils.hpp"
 
 extern "C" {
 #include "DXErrorCodes.h"
 #include "DXErrorHandling.h"
+#include "Logger.h"
 }
 
 namespace dx {
-namespace algorithm {
-namespace detail {
-
-class IsIEqual {
-	std::locale locale_;
-
-public:
-	explicit IsIEqual(const std::locale& locale = std::locale()) : locale_{locale} {}
-
-	template <typename T, typename U>
-	bool operator()(const T& t, const U& u) const {
-		return std::tolower<T>(t, locale_) == std::tolower<U>(u, locale_);
-	}
-};
-
-class IsSpace {
-	std::locale locale_;
-
-public:
-	explicit IsSpace(const std::locale& locale = std::locale()) : locale_{locale} {}
-
-	template <typename T>
-	bool operator()(const T& t) const {
-		return std::isspace<T>(t, locale_);
-	}
-};
-
-template <typename ForwardIterator, typename Predicate>
-inline ForwardIterator trimEndWithIteratorCategory(ForwardIterator begin, ForwardIterator end, Predicate isSpace,
-												   std::forward_iterator_tag) {
-	ForwardIterator result = begin;
-
-	for (ForwardIterator it = begin; it != end; ++it) {
-		if (!isSpace(*it)) {
-			result = it;
-			++result;
-		}
-	}
-
-	return result;
-}
-
-template <typename BidirectionalIterator, typename Predicate>
-inline BidirectionalIterator trimEndWithIteratorCategory(BidirectionalIterator begin, BidirectionalIterator end,
-														 Predicate isSpace, std::bidirectional_iterator_tag) {
-	for (BidirectionalIterator it = end; it != begin;) {
-		if (!isSpace(*(--it))) {
-			return ++it;
-		}
-	}
-
-	return begin;
-}
-
-template <typename ForwardIterator, typename Predicate>
-inline ForwardIterator trimBegin(ForwardIterator begin, ForwardIterator end, Predicate isSpace) {
-	ForwardIterator it = begin;
-
-	for (; it != end; ++it) {
-		if (!isSpace(*it)) {
-			return it;
-		}
-	}
-
-	return it;
-}
-
-template <typename Iterator, typename Predicate>
-inline Iterator trimEnd(Iterator begin, Iterator end, Predicate isSpace) {
-	return trimEndWithIteratorCategory(begin, end, isSpace,
-									   typename std::iterator_traits<Iterator>::iterator_category());
-}
-
-}  // namespace detail
-
-template <typename Range1, typename Range2, typename Predicate>
-inline bool equals(const Range1& first, const Range2& second, Predicate cmp) {
-	auto firstIt = std::begin(first);
-	auto secondIt = std::begin(second);
-
-	for (; firstIt != std::end(first) && secondIt != std::end(second); ++firstIt, secondIt++) {
-		if (!cmp(*firstIt, *secondIt)) {
-			return false;
-		}
-	}
-
-	return (secondIt == std::end(second)) && (firstIt == std::end(first));
-}
-
-template <typename Range1, typename Range2>
-inline bool iEquals(const Range1& first, const Range2& second, const std::locale& locale = std::locale()) {
-	return equals(first, second, detail::IsIEqual(locale));
-}
-
-template <typename Range, typename Predicate>
-inline Range trimCopyIf(const Range& range, Predicate isSpace) {
-	auto trimEnd = detail::trimEnd(std::begin(range), std::end(range), isSpace);
-
-	return Range(detail::trimBegin(std::begin(range), trimEnd, isSpace), trimEnd);
-}
-
-template <typename Range>
-inline Range trimCopy(const Range& range, const std::locale& locale = std::locale()) {
-	return trimCopyIf(range, detail::IsSpace(locale));
-}
-
-}  // namespace algorithm
-
-inline std::string loggingLevelToString(dx_log_level_t level) {
-	switch (level) {
-		case dx_ll_trace:
-			return "trace";
-		case dx_ll_debug:
-			return "debug";
-		case dx_ll_info:
-			return "info";
-		case dx_ll_warn:
-			return "warn";
-		case dx_ll_error:
-			return "error";
-	}
-
-	return "unknown";
-}
-
-inline dx_log_level_t stringToLoggingLevel(const std::string& s) {
-	if (algorithm::iEquals(s, std::string("trace"))) return dx_ll_trace;
-	if (algorithm::iEquals(s, std::string("debug"))) return dx_ll_debug;
-	if (algorithm::iEquals(s, std::string("info"))) return dx_ll_info;
-	if (algorithm::iEquals(s, std::string("warn"))) return dx_ll_warn;
-	if (algorithm::iEquals(s, std::string("error"))) return dx_ll_error;
-
-	return dx_ll_info;
-}
 
 struct Configuration : std::enable_shared_from_this<Configuration> {
 	enum class Type { None, String, File };
@@ -215,7 +80,7 @@ public:
 			return true;
 		}
 
-		if (algorithm::trimCopy(fileName).empty()) {
+		if (StringUtils::trimCopy(fileName).empty()) {
 			dx_set_error_code(dx_cfgec_empty_config_file_name);
 
 			return false;
@@ -248,7 +113,7 @@ public:
 			return true;
 		}
 
-		if (algorithm::trimCopy(config).empty()) {
+		if (StringUtils::trimCopy(config).empty()) {
 			dx_set_error_code(dx_cfgec_empty_config_string);
 
 			return false;
@@ -303,7 +168,7 @@ public:
 	bool getDump(bool defaultValue = false) const { return getProperty("", "dump", defaultValue); }
 
 	dx_log_level_t getMinimumLoggingLevel(dx_log_level_t defaultValue = dx_ll_info) const {
-		return stringToLoggingLevel(getProperty("logger", "level", loggingLevelToString(defaultValue)));
+		return StringUtils::stringToLoggingLevel<dx_log_level_t>(getProperty("logger", "level", StringUtils::loggingLevelToString(defaultValue)));
 	}
 
 	bool getNetworkReestablishConnections(bool defaultValue = true) const {

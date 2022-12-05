@@ -52,8 +52,6 @@ typedef unsigned (*dx_start_routine_t)(void*);
 #define DX_THREAD_RETVAL_NULL 0
 #endif /* !defined(_WIN32) || defined(USE_PTHREADS) */
 
-#include "PrimitiveTypes.h"
-
 /* -------------------------------------------------------------------------- */
 /*
  *	Callbacks management

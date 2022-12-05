@@ -548,8 +548,11 @@
     <ClInclude Include="..\..\src\HeartbeatPayload.hpp" />
     <ClInclude Include="..\..\src\PriceLevelBook.h" />
     <ClInclude Include="..\..\src\RegionalBook.h" />
+    <ClInclude Include="..\..\src\Result.hpp" />
     <ClInclude Include="..\..\src\PrimitiveTypes.h" />
     <ClInclude Include="..\..\src\Snapshot.h" />
+    <ClInclude Include="..\..\src\StringConverter.hpp" />
+    <ClInclude Include="..\..\src\StringUtils.hpp" />
     <ClInclude Include="..\..\src\ObjectArray.h" />
     <ClInclude Include="..\..\src\TaskQueue.h" />
     <ClInclude Include="..\..\src\EventSubscription.h" />

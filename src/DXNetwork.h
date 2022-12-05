@@ -24,7 +24,6 @@
 #ifndef DX_NETWORK_H_INCLUDED
 #define DX_NETWORK_H_INCLUDED
 
-#include "PrimitiveTypes.h"
 #include "DXFeed.h"
 #include "DXProperties.h"
 #include "TaskQueue.h"

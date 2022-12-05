@@ -18,9 +18,7 @@
  */
 
 #include "DXPMessageData.h"
-#include "DXErrorHandling.h"
 #include "DXErrorCodes.h"
-#include "DXAlgorithms.h"
 
 /* -------------------------------------------------------------------------- */
 /*

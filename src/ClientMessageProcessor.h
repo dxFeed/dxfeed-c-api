@@ -20,9 +20,7 @@
 #ifndef CLIENT_MESSAGE_SENDER_H_INCLUDED
 #define CLIENT_MESSAGE_SENDER_H_INCLUDED
 
-#include "DXPMessageData.h"
 #include "EventData.h"
-#include "PrimitiveTypes.h"
 
 int dx_load_events_for_subscription(dxf_connection_t connection, dx_order_source_array_ptr_t order_sources,
 									int event_types, dxf_uint_t subscr_flags);

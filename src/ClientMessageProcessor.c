@@ -24,7 +24,6 @@
 #include "ConnectionContextData.h"
 #include "DXAlgorithms.h"
 #include "DXErrorHandling.h"
-#include "DXFeed.h"
 #include "DXMemory.h"
 #include "DXNetwork.h"
 #include "DXPMessageData.h"

@@ -24,9 +24,7 @@
 #ifndef DX_ERROR_HANDLING_H_INCLUDED
 #define DX_ERROR_HANDLING_H_INCLUDED
 
-#include "PrimitiveTypes.h"
 #include "DXErrorCodes.h"
-#include "DXTypes.h"
 
 /* -------------------------------------------------------------------------- */
 /*

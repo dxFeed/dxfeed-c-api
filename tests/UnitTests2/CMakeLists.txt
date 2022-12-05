@@ -18,7 +18,7 @@ add_library(DXFeedTests2Main OBJECT Main.cpp)
 target_include_directories(DXFeedTests2Main PRIVATE ${DXFC_INCLUDE_DIRS})
 
 add_executable(WideDecimalTest WideDecimalTest.cpp ../../src/WideDecimal.cpp ../../src/WideDecimal.h ../../src/WideDecimal.hpp)
-add_executable(StringUtilsTest StringUtilsTest.cpp ../../src/AddressesManager.hpp)
+add_executable(StringUtilsTest StringUtilsTest.cpp ../../src/StringUtils.hpp)
 
 foreach(name ${DXFC_TEST_TARGETS})
     target_include_directories(${name} PRIVATE ${DXFC_INCLUDE_DIRS})

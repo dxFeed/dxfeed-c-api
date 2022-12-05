@@ -33,6 +33,7 @@
 #include "Logger.h"
 #include "DXThreads.h"
 #include "DXMemory.h"
+#include "PrimitiveTypes.h"
 
 /* -------------------------------------------------------------------------- */
 /*

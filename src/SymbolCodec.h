@@ -65,7 +65,6 @@
 #ifndef SYMBOL_CODEC_H_INCLUDED
 #define SYMBOL_CODEC_H_INCLUDED
 
-#include "PrimitiveTypes.h"
 #include "DXTypes.h"
 
 extern dxf_int_t g_wildcard_cipher;

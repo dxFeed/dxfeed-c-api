@@ -26,7 +26,6 @@
 #define RECORD_TRANSCODER_H_INCLUDED
 
 #include "RecordData.h"
-#include "PrimitiveTypes.h"
 
 typedef struct {
 	dx_record_id_t record_id;

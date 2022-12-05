@@ -21,8 +21,6 @@
 
 #include "DXSockets.h"
 #include "DXTypes.h"
-#include "EventData.h"
-#include "PrimitiveTypes.h"
 
 #ifdef __cplusplus
 extern "C" {
