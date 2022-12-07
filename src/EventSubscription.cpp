@@ -27,6 +27,7 @@ extern "C" {
 #include "DXErrorHandling.h"
 #include "DXFeed.h"
 #include "DXThreads.h"
+
 }
 
 #include <functional>

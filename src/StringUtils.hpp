@@ -459,7 +459,7 @@ inline LogLevel stringToLoggingLevel(const std::string& s) {
 }
 
 //TODO: implement
-std::string hideCredentials(const std::string& str) {
+inline std::string hideCredentials(const std::string& str) {
 	return str;
 }
 

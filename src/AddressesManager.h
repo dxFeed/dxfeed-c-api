@@ -23,7 +23,6 @@
 #include "DXTypes.h"
 
 #ifdef __cplusplus
-extern "C" {
 #	include <cstdint>
 #else
 #	include <stdint.h>
@@ -55,7 +54,3 @@ void dx_am_set_current_address_tls_key_store_len(dxf_connection_t connection, si
 
 const char* dx_am_get_current_connected_address(dxf_connection_t connection);
 const char* dx_am_get_current_connected_socket_address(dxf_connection_t connection);
-
-#ifdef __cplusplus
-}
-#endif
