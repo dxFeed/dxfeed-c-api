@@ -19,14 +19,14 @@
 
 #pragma once
 
+#include <algorithm>
+#include <cassert>
 #include <deque>
 #include <limits>
 #include <locale>
 #include <stack>
 #include <string>
 #include <vector>
-#include <cassert>
-#include <algorithm>
 
 #include "Result.hpp"
 
@@ -141,6 +141,44 @@ inline Range trimCopy(const Range& range, const std::locale& locale = std::local
 	return trimCopyIf(range, detail::IsSpace(locale));
 }
 
+inline std::vector<std::string> split(const std::string& str, const std::string& delim, int limit = 0) {
+	bool limited = limit > 0;
+	std::vector<std::string> result;
+	std::size_t found, index = 0;
+
+	while(index < str.size() && (found = str.find(delim, index)) != std::string::npos) {
+		if (!limited || result.size() < limit - 1) {
+			result.push_back(str.substr(index, found - index + (delim.empty() ? 1 : 0)));
+			index = found + (delim.empty() ? 1 : delim.size());
+		} else if (result.size() == limit - 1) {
+			result.push_back(str.substr(index));
+			index = str.size();
+		}
+	}
+
+	if (index == 0) {
+		return {str};
+	}
+
+	if (!limited || result.size() < limit) {
+		result.push_back(str.substr(index));
+	}
+
+	auto resultSize = result.size();
+
+	if (limit == 0) {
+		while (resultSize > 0 && result[resultSize - 1].empty()) {
+			resultSize--;
+		}
+	}
+
+	if (resultSize == 0) {
+		return {};
+	}
+
+	return {result.begin(), result.begin() + resultSize};
+}
+
 template <typename SockAddr, int AfInet, typename SockAddrIn, int AfInet6, typename SockAddrIn6, typename InetNToPFunc>
 static inline std::string ipToString(const SockAddr* sa, InetNToPFunc inetNToP) {
 	const std::size_t size = 256;
@@ -172,12 +210,9 @@ inline std::string toString(const char* cString) {
 
 inline bool startsWith(const std::string& str, char c) { return !str.empty() && str.find_first_of(c) == 0; }
 
-inline bool endsWith(const std::string& str, char c) {
-	return !str.empty() && str.find_last_of(c) == str.size() - 1;
-}
+inline bool endsWith(const std::string& str, char c) { return !str.empty() && str.find_last_of(c) == str.size() - 1; }
 
-inline std::pair<std::vector<std::string>, Result> splitParenthesisSeparatedString(
-	const std::string& s) noexcept {
+inline std::pair<std::vector<std::string>, Result> splitParenthesisSeparatedString(const std::string& s) noexcept {
 	if (!startsWith(s, '(')) {
 		return {{s}, Ok{}};
 	}
@@ -198,7 +233,9 @@ inline std::pair<std::vector<std::string>, Result> splitParenthesisSeparatedStri
 
 			case ')':
 				if (cnt == 0) {
-					return {result, AddressSyntaxError("dx::StringUtils::splitParenthesisSeparatedString: Extra closing parenthesis ')' in a list")};
+					return {result,
+							AddressSyntaxError("dx::StringUtils::splitParenthesisSeparatedString: Extra closing "
+											   "parenthesis ')' in a list")};
 				}
 
 				if (--cnt == 0) {
@@ -209,9 +246,11 @@ inline std::pair<std::vector<std::string>, Result> splitParenthesisSeparatedStri
 
 			default:
 				if (cnt == 0 && c > ' ') {
-					return {result,
-							AddressSyntaxError(std::string("dx::StringUtils::splitParenthesisSeparatedString: Unexpected character '") + c +
-											   "' outside parenthesis in a list")};
+					return {
+						result,
+						AddressSyntaxError(
+							std::string("dx::StringUtils::splitParenthesisSeparatedString: Unexpected character '") +
+							c + "' outside parenthesis in a list")};
 				}
 
 				if (c == ESCAPE_CHAR) {	 // escapes next char (skip it)
@@ -221,14 +260,16 @@ inline std::pair<std::vector<std::string>, Result> splitParenthesisSeparatedStri
 	}
 
 	if (cnt > 0) {
-		return {result, AddressSyntaxError("dx::StringUtils::splitParenthesisSeparatedString: Missing closing parenthesis ')' in a list")};
+		return {result,
+				AddressSyntaxError(
+					"dx::StringUtils::splitParenthesisSeparatedString: Missing closing parenthesis ')' in a list")};
 	}
 
 	return {result, Ok{}};
 }
 // -> ([""], Ok | AddressSyntaxError)
 inline std::pair<std::vector<std::string>, Result> splitParenthesisedStringAt(const std::string& s,
-																					 char atChar) noexcept {
+																			  char atChar) noexcept {
 	std::stack<char> stack;
 
 	for (std::size_t i = 0; i < s.size(); i++) {
@@ -244,14 +285,22 @@ inline std::pair<std::vector<std::string>, Result> splitParenthesisedStringAt(co
 			case ')':
 			case ']': {
 				if (stack.empty()) {
-					return {{s}, AddressSyntaxError(std::string("dx::StringUtils::splitParenthesisedStringAt: Extra closing parenthesis: ") + c)};
+					return {
+						{s},
+						AddressSyntaxError(
+							std::string("dx::StringUtils::splitParenthesisedStringAt: Extra closing parenthesis: ") +
+							c)};
 				}
 
 				char top = stack.top();
 				stack.pop();
 
 				if (top != c) {
-					return {{s}, AddressSyntaxError(std::string("dx::StringUtils::splitParenthesisedStringAt: Wrong closing parenthesis: ") + c)};
+					return {
+						{s},
+						AddressSyntaxError(
+							std::string("dx::StringUtils::splitParenthesisedStringAt: Wrong closing parenthesis: ") +
+							c)};
 				}
 			}
 
@@ -294,7 +343,7 @@ inline bool isEscapedCharAt(const std::string& s, std::int64_t index) noexcept {
  * @return The resulting description string without properties + Ok | std::runtime_error | InvalidFormatError.
  */
 inline std::pair<std::string, Result> parseProperties(std::string description,
-															 std::vector<std::string>& keyValueVector) noexcept {
+													  std::vector<std::string>& keyValueVector) noexcept {
 	assert(description.size() <= static_cast<std::size_t>((std::numeric_limits<std::int64_t>::max)()));
 
 	if (description.size() > static_cast<std::size_t>((std::numeric_limits<std::int64_t>::max)())) {
@@ -347,7 +396,8 @@ inline std::pair<std::string, Result> parseProperties(std::string description,
 
 					if (c != expect) {
 						return {{description},
-								InvalidFormatError(std::string("dx::StringUtils::parseProperties: Unmatched '") + c + "' in a list of properties")};
+								InvalidFormatError(std::string("dx::StringUtils::parseProperties: Unmatched '") + c +
+												   "' in a list of properties")};
 					}
 
 					if (deque.empty()) {
@@ -366,7 +416,8 @@ inline std::pair<std::string, Result> parseProperties(std::string description,
 
 		if (i < 0) {
 			return {{description},
-					InvalidFormatError(std::string("dx::StringUtils::parseProperties: Extra '") + deque.front() + "' in a list of properties")};
+					InvalidFormatError(std::string("dx::StringUtils::parseProperties: Extra '") + deque.front() +
+									   "' in a list of properties")};
 		}
 
 		description = trimCopy(description.substr(0, i));

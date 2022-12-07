@@ -146,7 +146,7 @@ struct ParsedAddress {
 
 		std::vector<Property> properties{};
 
-		std::transform(propStrings.begin(), propStrings.end(), properties.begin(),
+		std::transform(propStrings.begin(), propStrings.end(), std::back_inserter(properties),
 					   [](const std::string& propertyString) -> Property { return {propertyString}; });
 
 		// TODO: parse default port and split addresses + set port

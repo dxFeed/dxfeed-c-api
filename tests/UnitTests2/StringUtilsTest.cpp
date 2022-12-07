@@ -3,10 +3,10 @@
 #include <string>
 #include <vector>
 
-TEST_CASE("Split Parenthesis Separated Test", "[StringUtils]") {
-	using sv = std::vector<std::string>;
-	using s = std::string;
+using sv = std::vector<std::string>;
+using s = std::string;
 
+TEST_CASE("Split Parenthesis Separated Test", "[StringUtils]") {
 	REQUIRE(sv{{"a"}} == dx::StringUtils::splitParenthesisSeparatedString("a").first);
 	REQUIRE(sv{{"a(b)c"}} == dx::StringUtils::splitParenthesisSeparatedString("a(b)c").first);
 	REQUIRE(sv{{"(a)"}} == dx::StringUtils::splitParenthesisSeparatedString("((a))").first);
@@ -32,7 +32,8 @@ TEST_CASE("Ends With Test", "[StringUtils]") {
 	REQUIRE(dx::StringUtils::endsWith("(other)test(prop1,prop2)", ')') == true);
 }
 
-void checkParseProperties(const std::string& description, const std::string& result, const std::vector<std::string>& properties) {
+void checkParseProperties(const std::string& description, const std::string& result,
+						  const std::vector<std::string>& properties) {
 	std::vector<std::string> parsedProperties;
 	auto parseResult = dx::StringUtils::parseProperties(description, parsedProperties);
 
@@ -56,4 +57,18 @@ TEST_CASE("Parse Properties Test", "[StringUtils]") {
 	checkParseProperties("a[]b", "a[]b", {});
 	checkParseProperties("a[,,]", "a", {"", "", ""});
 	checkParseProperties(" b b ( , , ) ", "b b", {"", "", ""});
+}
+
+TEST_CASE("Split Test", "[StringUtils]") {
+	REQUIRE(sv{{"boo"}, {"and:foo"}} == dx::StringUtils::split("boo:and:foo", ":", 2));
+	REQUIRE(sv{{"boo"}, {"and"}, {"foo"}} == dx::StringUtils::split("boo:and:foo", ":", 5));
+	REQUIRE(sv{{"boo"}, {"and"}, {"foo"}} == dx::StringUtils::split("boo:and:foo", ":", -2));
+	REQUIRE(sv{{"b"}, {""}, {":and:f"}, {""}, {""}} == dx::StringUtils::split("boo:and:foo", "o", 5));
+	REQUIRE(sv{{"b"}, {""}, {":and:f"}, {""}, {""}} == dx::StringUtils::split("boo:and:foo", "o", -2));
+	REQUIRE(sv{{"b"}, {""}, {":and:f"}} == dx::StringUtils::split("boo:and:foo", "o", 0));
+	REQUIRE(sv{{"b"}, {"o"}, {"o"}, {":"}, {"a"}, {"n"}, {"d"}, {":"}, {"f"}, {"o"}, {"o"}} ==
+			dx::StringUtils::split("boo:and:foo", "", 0));
+	REQUIRE(sv{{"b"}, {"o"}, {"o"}, {":"}, {"a"}, {"n"}, {"d"}, {":"}, {"f"}, {"o"}, {"o"}, {""}} ==
+			dx::StringUtils::split("boo:and:foo", "", -2));
+	REQUIRE(sv{{"b"}, {"o"}, {"o"}, {":"}, {"and:foo"}} == dx::StringUtils::split("boo:and:foo", "", 5));
 }
