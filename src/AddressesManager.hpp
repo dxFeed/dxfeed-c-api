@@ -85,6 +85,51 @@ struct ParsedAddress {
 	std::string defaultPort;
 	std::vector<HostPort> hostsAndPorts;
 
+	static std::pair<std::vector<HostPort>, Result> parseAddressList(const std::string& hostNames,
+																	 const std::string& defaultPort) {
+		std::vector<HostPort> result;
+
+		for (const auto& addressString : StringUtils::split(hostNames, ",")) {
+			auto host = addressString;
+			auto port = defaultPort;
+			auto colonPos = addressString.find_last_of(':');
+			auto closingBracketPos = addressString.find_last_of(']');
+
+			if (colonPos != std::string::npos && colonPos > closingBracketPos) {
+				port = addressString.substr(colonPos + 1);
+
+				try {
+					int portValue = std::stoi(port);
+					(void)(portValue);
+				} catch (const std::exception& e) {
+					return {{},
+							AddressSyntaxError("Failed to parse port from address \"" +
+											   StringUtils::hideCredentials(addressString) + "\": " + e.what())};
+				}
+
+				host = addressString.substr(0, colonPos);
+			}
+
+			if (StringUtils::startsWith(host, '[')) {
+				if (!StringUtils::endsWith(host, ']')) {
+					return {{},
+							AddressSyntaxError("An expected closing square bracket is not found in address \"" +
+											   StringUtils::hideCredentials(addressString) + "\"")};
+				}
+
+				host = host.substr(1, host.size() - 2);
+			} else if (host.find(':') != std::string::npos) {
+				return {{},
+						AddressSyntaxError("IPv6 numeric address must be enclosed in square brackets in address \"" +
+										   StringUtils::hideCredentials(addressString) + "\"")};
+			}
+
+			result.push_back({host, port});
+		}
+
+		return {result, Ok{}};
+	}
+
 	static std::pair<ParsedAddress, Result> parseAddress(std::string address) {
 		// Parse configurable message adapter factory specification in address
 		auto specSplitResult = StringUtils::splitParenthesisedStringAt(address, '@');
@@ -149,27 +194,34 @@ struct ParsedAddress {
 		std::transform(propStrings.begin(), propStrings.end(), std::back_inserter(properties),
 					   [](const std::string& propertyString) -> Property { return {propertyString}; });
 
-		// TODO: parse default port and split addresses + set port
-
 		// Parse port in address
 		auto portSep = address.find_last_of(':');
 
 		if (portSep == std::string::npos) {
-			return {{}, AddressSyntaxError("Port number is missing in \"" + address + "\"")};
+			return {{},
+					AddressSyntaxError("Port number is missing in \"" + StringUtils::hideCredentials(address) + "\"")};
 		}
 
-		auto portString = address.substr(portSep + 1);
+		auto defaultPort = address.substr(portSep + 1);
 
 		try {
-			int port = std::stoi(portString);
-			(void)(port);
-		} catch (const std::exception&) {
-			return {{}, AddressSyntaxError("Port number format error in \"" + address + "\"")};
+			int portValue = std::stoi(defaultPort);
+			(void)(portValue);
+		} catch (const std::exception& e) {
+			return {{},
+					AddressSyntaxError("Port number format error in \"" + StringUtils::hideCredentials(address) +
+									   "\": " + e.what())};
 		}
 
 		address = StringUtils::trimCopy(address.substr(0, portSep));
 
-		return {{specification, codecs, address, properties, portString}, Ok{}};
+		auto parseHostsAndPortsResult = parseAddressList(address, defaultPort);
+
+		if (!parseHostsAndPortsResult.second.isOk()) {
+			return {{}, parseHostsAndPortsResult.second};
+		}
+
+		return {{specification, codecs, address, properties, defaultPort, parseHostsAndPortsResult.first}, Ok{}};
 	}
 };
 

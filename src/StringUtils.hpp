@@ -458,6 +458,11 @@ inline LogLevel stringToLoggingLevel(const std::string& s) {
 	return LogLevel::dx_ll_info;
 }
 
+//TODO: implement
+std::string hideCredentials(const std::string& str) {
+	return str;
+}
+
 }  // namespace StringUtils
 
 }  // namespace dx

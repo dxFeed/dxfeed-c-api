@@ -26,6 +26,10 @@
 
 #ifdef __cplusplus
 extern "C" {
+
+#	include <cstddef>
+#else
+#	include <stddef.h>
 #endif
 
 /* -------------------------------------------------------------------------- */

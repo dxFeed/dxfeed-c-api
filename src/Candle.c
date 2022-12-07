@@ -18,6 +18,7 @@
  */
 
 #include <math.h>
+#include <wctype.h>
 
 #include "Candle.h"
 #include "DXFeed.h"
