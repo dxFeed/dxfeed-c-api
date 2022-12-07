@@ -95,7 +95,7 @@ struct ParsedAddress {
 			auto colonPos = addressString.find_last_of(':');
 			auto closingBracketPos = addressString.find_last_of(']');
 
-			if (colonPos != std::string::npos && colonPos > closingBracketPos) {
+			if (colonPos != std::string::npos && (closingBracketPos == std::string::npos || colonPos > closingBracketPos)) {
 				port = addressString.substr(colonPos + 1);
 
 				try {
@@ -365,6 +365,8 @@ class AddressesManager {
 		if (address == nullptr) {
 			return {};
 		}
+
+		auto result = ParsedAddress::parseAddress(address);
 
 		dx_address_array_t addressArray;
 

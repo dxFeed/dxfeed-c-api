@@ -32,13 +32,11 @@ public:
 
 	virtual ~Result() = default;
 
-	virtual bool isOk() const { return false; }
+	virtual bool isOk() const { return data_ == "Ok"; }
 };
 
 struct Ok : Result {
 	explicit Ok() noexcept : Result("Ok") {}
-
-	bool isOk() const override { return true; }
 };
 
 struct Error : Result {
