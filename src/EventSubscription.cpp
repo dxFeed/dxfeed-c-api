@@ -17,6 +17,13 @@
  *
  */
 
+#include <functional>
+#include <mutex>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <cstddef>
+
 extern "C" {
 
 #include "EventSubscription.h"
@@ -30,11 +37,6 @@ extern "C" {
 
 }
 
-#include <functional>
-#include <mutex>
-#include <string>
-#include <unordered_map>
-#include <unordered_set>
 
 #include "Configuration.hpp"
 #include "EventSubscription.hpp"

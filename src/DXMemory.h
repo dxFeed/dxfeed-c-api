@@ -24,9 +24,7 @@
 #ifndef DX_MEMORY_H_INCLUDED
 #define DX_MEMORY_H_INCLUDED
 
-#ifdef __cplusplus
-#	include <cstddef>
-#else
+#ifndef __cplusplus
 #	include <stddef.h>
 #endif
 
