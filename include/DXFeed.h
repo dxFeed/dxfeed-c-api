@@ -210,12 +210,31 @@ typedef void (*dxf_socket_thread_destruction_notifier_t)(dxf_connection_t connec
  *
  * @details
  *
+ * The address string may have <b>`connectOrder`</b> property with possible values: <b>`shuffle`</b>, <b>`random`</b>, <b>`ordered`</b>, <b>`priority`</b>
+ *   - The <b>`shuffle`</b> strategy: Example: <b>`host1:port1,host2:port2,host3:port3[connectOrder=shuffle]`</b> It will shuffle the
+ *     resolved IP addresses, and it will go through them to the end, and then it will resolve and shuffle and so on.
+ *   - The <b>`random`</b> strategy: Example: <b>`host1:port1,host2:port2,host3:port3[connectOrder=random]`</b> It will shuffle IP
+ *     addresses, if the connection is successful, it will reset the state and will shuffle on the next connection, and so on.
+ *   - The <b>`ordered`</b> strategy: Example: <b>`host1:port1,host2:port2,host3:port3[connectOrder=ordered]`</b> It will NOT shuffle the
+ *     resolved IP addresses, and it will go through them to the end, and then it will resolve and NOT shuffle and so on.
+ *   - The <b>`priority`</b> strategy: Example: <b>`host1:port1,host2:port2,host3:port3[connectOrder=priority]`</b> It will NOT shuffle IP
+ *     addresses, if the connection is successful, it will reset the state and will NOT shuffle on the next connection, and so on.
+ *   - The default strategy is <b>`shuffle`</b>
+ *   - If several strategies are specified in the address line, the last one will be selected.
+ *   - Example #1: <b>`host1:port1,host2:port2,host3:port3[connectOrder=priority,connectOrder=ordered]`</b> will be equivalent
+ *     to <b>`host1:port1,host2:port2,host3:port3[connectOrder=ordered]`</b>
+ *   - Example #2: <b>`(host1:port1,host2:port2[connectOrder=random])(host3:port3[connectOrder=priority,connectOrder=ordered])`</b>
+ *     will be equivalent to <b>`host1:port1,host2:port2,host3:port3[connectOrder=ordered]`</b>
+ *
  * @param[in] address              Connection string
- *                                   - the single address: ```host:port```
- *                                   - address with credentials: ```host:port[username=xxx,password=yyy]```
+ *                                   - the single address: <b>`host:port`</b>
+ *                                   - address with credentials: <b>`host:port[username=xxx,password=yyy]`</b>
  *                                   - multiple addresses:
- * ```host1:port1,host2,host3:port3[username=xxx,password=yyy]``` or ```(host1:port1,host2:port2)(host3:port3[username=xxx,password=yyy])```
- *                                   - the data from file: ```/path/to/file``` on *nix and ```drive:\path\to\file```
+ *                                     <b>`host1:port1,host2,host3:port3[username=xxx,password=yyy]`</b>
+ *                                     or <b>`(host1:port1,host2:port2)(host3:port3[username=xxx,password=yyy])`</b>
+ *                                   - addresses with connect order:
+ *                                     <b>`host1:port1,host2,host3:port3[connectOrder=ordered]`</b>
+ *                                   - the data from file: <b>`/path/to/file`</b> on *nix and <b>`drive:\path\to\file`</b>
  *                                     on Windows
  * @param[in] notifier             The callback to inform the client side that the connection has stumbled upon and
  *                                 error and will go reconnecting
@@ -231,7 +250,7 @@ typedef void (*dxf_socket_thread_destruction_notifier_t)(dxf_connection_t connec
  * @param[out] connection          The handle of the created connection
  *
  * @return DXF_SUCCESS on successful connection establishment or DXF_FAILURE on error.
- *         Created connection is returned via OUT parameter ```connection```.
+ *         Created connection is returned via OUT parameter <b>`connection`</b>.
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure.
  */
 DXFEED_API ERRORCODE dxf_create_connection(const char* address, dxf_conn_termination_notifier_t notifier,
@@ -247,12 +266,31 @@ DXFEED_API ERRORCODE dxf_create_connection(const char* address, dxf_conn_termina
  *
  * @details
  *
+ * The address string may have <b>`connectOrder`</b> property with possible values: <b>`shuffle`</b>, <b>`random`</b>, <b>`ordered`</b>, <b>`priority`</b>
+ *   - The <b>`shuffle`</b> strategy: Example: <b>`host1:port1,host2:port2,host3:port3[connectOrder=shuffle]`</b> It will shuffle the
+ *     resolved IP addresses, and it will go through them to the end, and then it will resolve and shuffle and so on.
+ *   - The <b>`random`</b> strategy: Example: <b>`host1:port1,host2:port2,host3:port3[connectOrder=random]`</b> It will shuffle IP
+ *     addresses, if the connection is successful, it will reset the state and will shuffle on the next connection, and so on.
+ *   - The <b>`ordered`</b> strategy: Example: <b>`host1:port1,host2:port2,host3:port3[connectOrder=ordered]`</b> It will NOT shuffle the
+ *     resolved IP addresses, and it will go through them to the end, and then it will resolve and NOT shuffle and so on.
+ *   - The <b>`priority`</b> strategy: Example: <b>`host1:port1,host2:port2,host3:port3[connectOrder=priority]`</b> It will NOT shuffle IP
+ *     addresses, if the connection is successful, it will reset the state and will NOT shuffle on the next connection, and so on.
+ *   - The default strategy is <b>`shuffle`</b>
+ *   - If several strategies are specified in the address line, the last one will be selected.
+ *   - Example #1: <b>`host1:port1,host2:port2,host3:port3[connectOrder=priority,connectOrder=ordered]`</b> will be equivalent
+ *     to <b>`host1:port1,host2:port2,host3:port3[connectOrder=ordered]`</b>
+ *   - Example #2: <b>`(host1:port1,host2:port2[connectOrder=random])(host3:port3[connectOrder=priority,connectOrder=ordered])`</b>
+ *     will be equivalent to <b>`host1:port1,host2:port2,host3:port3[connectOrder=ordered]`</b>
+ *
  * @param[in] address              Connection string
- *                                   - the single address: ```host:port```
- *                                   - address with credentials: ```host:port[username=xxx,password=yyy]```
+ *                                   - the single address: <b>`host:port`</b>
+ *                                   - address with credentials: <b>`host:port[username=xxx,password=yyy]`</b>
  *                                   - multiple addresses:
- * ```host1:port1,host2,host3:port3[username=xxx,password=yyy]``` or ```(host1:port1,host2:port2)(host3:port3[username=xxx,password=yyy])```
- *                                   - the data from file: ```/path/to/file``` on *nix and ```drive:\path\to\file```
+ *                                     <b>`host1:port1,host2,host3:port3[username=xxx,password=yyy]`</b>
+ *                                     or <b>`(host1:port1,host2:port2)(host3:port3[username=xxx,password=yyy])`</b>
+ *                                   - addresses with connect order:
+ *                                     <b>`host1:port1,host2,host3:port3[connectOrder=ordered]`</b>
+ *                                   - the data from file: <b>`/path/to/file`</b> on *nix and <b>`drive:\path\to\file`</b>
  *                                     on Windows
  * @param[in] user                 The user name;
  * @param[in] password             The user password;
@@ -270,7 +308,7 @@ DXFEED_API ERRORCODE dxf_create_connection(const char* address, dxf_conn_termina
  * @param[out] connection          The handle of the created connection.
  *
  * @return {@link DXF_SUCCESS} on successful connection establishment or {@link DXF_FAILURE} on error;
- *         created connection is returned via OUT parameter *connection*;
+ *         created connection is returned via OUT parameter <b>`connection`</b>;
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure.
  *
  * @warning The user and password data from argument have a higher priority than address credentials.
@@ -289,12 +327,31 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_basic(const char* address, const
  *
  * @details
  *
+ * The address string may have <b>`connectOrder`</b> property with possible values: <b>`shuffle`</b>, <b>`random`</b>, <b>`ordered`</b>, <b>`priority`</b>
+ *   - The <b>`shuffle`</b> strategy: Example: <b>`host1:port1,host2:port2,host3:port3[connectOrder=shuffle]`</b> It will shuffle the
+ *     resolved IP addresses, and it will go through them to the end, and then it will resolve and shuffle and so on.
+ *   - The <b>`random`</b> strategy: Example: <b>`host1:port1,host2:port2,host3:port3[connectOrder=random]`</b> It will shuffle IP
+ *     addresses, if the connection is successful, it will reset the state and will shuffle on the next connection, and so on.
+ *   - The <b>`ordered`</b> strategy: Example: <b>`host1:port1,host2:port2,host3:port3[connectOrder=ordered]`</b> It will NOT shuffle the
+ *     resolved IP addresses, and it will go through them to the end, and then it will resolve and NOT shuffle and so on.
+ *   - The <b>`priority`</b> strategy: Example: <b>`host1:port1,host2:port2,host3:port3[connectOrder=priority]`</b> It will NOT shuffle IP
+ *     addresses, if the connection is successful, it will reset the state and will NOT shuffle on the next connection, and so on.
+ *   - The default strategy is <b>`shuffle`</b>
+ *   - If several strategies are specified in the address line, the last one will be selected.
+ *   - Example #1: <b>`host1:port1,host2:port2,host3:port3[connectOrder=priority,connectOrder=ordered]`</b> will be equivalent
+ *     to <b>`host1:port1,host2:port2,host3:port3[connectOrder=ordered]`</b>
+ *   - Example #2: <b>`(host1:port1,host2:port2[connectOrder=random])(host3:port3[connectOrder=priority,connectOrder=ordered])`</b>
+ *     will be equivalent to <b>`host1:port1,host2:port2,host3:port3[connectOrder=ordered]`</b>
+ *
  * @param[in] address              Connection string
- *                                   - the single address: ```host:port```
- *                                   - address with credentials: ```host:port[username=xxx,password=yyy]```
+ *                                   - the single address: <b>`host:port`</b>
+ *                                   - address with credentials: <b>`host:port[username=xxx,password=yyy]`</b>
  *                                   - multiple addresses:
- * ```host1:port1,host2,host3:port3[username=xxx,password=yyy]``` or ```(host1:port1,host2:port2)(host3:port3[username=xxx,password=yyy])```
- *                                   - the data from file: ```/path/to/file``` on *nix and ```drive:\path\to\file```
+ *                                     <b>`host1:port1,host2,host3:port3[username=xxx,password=yyy]`</b>
+ *                                     or <b>`(host1:port1,host2:port2)(host3:port3[username=xxx,password=yyy])`</b>
+ *                                   - addresses with connect order:
+ *                                     <b>`host1:port1,host2,host3:port3[connectOrder=ordered]`</b>
+ *                                   - the data from file: <b>`/path/to/file`</b> on *nix and <b>`drive:\path\to\file`</b>
  *                                     on Windows
  * @param[in] token                The authorization token;
  * @param[in] notifier             The callback to inform the client side that the connection has stumbled upon and
@@ -311,7 +368,7 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_basic(const char* address, const
  * @param[out] connection          The handle of the created connection.
  *
  * @return {@link DXF_SUCCESS} on successful connection establishment or {@link DXF_FAILURE} on error;
- *         created connection is returned via OUT parameter *connection*;
+ *         created connection is returned via OUT parameter <b>`connection`</b>;
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure.
  *
  * @warning The token data from argument have a higher priority than address credentials
@@ -330,12 +387,31 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_bearer(const char* address, cons
  *
  * @details
  *
+ * The address string may have <b>`connectOrder`</b> property with possible values: <b>`shuffle`</b>, <b>`random`</b>, <b>`ordered`</b>, <b>`priority`</b>
+ *   - The <b>`shuffle`</b> strategy: Example: <b>`host1:port1,host2:port2,host3:port3[connectOrder=shuffle]`</b> It will shuffle the
+ *     resolved IP addresses, and it will go through them to the end, and then it will resolve and shuffle and so on.
+ *   - The <b>`random`</b> strategy: Example: <b>`host1:port1,host2:port2,host3:port3[connectOrder=random]`</b> It will shuffle IP
+ *     addresses, if the connection is successful, it will reset the state and will shuffle on the next connection, and so on.
+ *   - The <b>`ordered`</b> strategy: Example: <b>`host1:port1,host2:port2,host3:port3[connectOrder=ordered]`</b> It will NOT shuffle the
+ *     resolved IP addresses, and it will go through them to the end, and then it will resolve and NOT shuffle and so on.
+ *   - The <b>`priority`</b> strategy: Example: <b>`host1:port1,host2:port2,host3:port3[connectOrder=priority]`</b> It will NOT shuffle IP
+ *     addresses, if the connection is successful, it will reset the state and will NOT shuffle on the next connection, and so on.
+ *   - The default strategy is <b>`shuffle`</b>
+ *   - If several strategies are specified in the address line, the last one will be selected.
+ *   - Example #1: <b>`host1:port1,host2:port2,host3:port3[connectOrder=priority,connectOrder=ordered]`</b> will be equivalent
+ *     to <b>`host1:port1,host2:port2,host3:port3[connectOrder=ordered]`</b>
+ *   - Example #2: <b>`(host1:port1,host2:port2[connectOrder=random])(host3:port3[connectOrder=priority,connectOrder=ordered])`</b>
+ *     will be equivalent to <b>`host1:port1,host2:port2,host3:port3[connectOrder=ordered]`</b>
+ *
  * @param[in] address              Connection string
- *                                   - the single address: ```host:port```
- *                                   - address with credentials: ```host:port[username=xxx,password=yyy]```
+ *                                   - the single address: <b>`host:port`</b>
+ *                                   - address with credentials: <b>`host:port[username=xxx,password=yyy]`</b>
  *                                   - multiple addresses:
- * ```host1:port1,host2,host3:port3[username=xxx,password=yyy]``` or ```(host1:port1,host2:port2)(host3:port3[username=xxx,password=yyy])```
- *                                   - the data from file: ```/path/to/file``` on *nix and ```drive:\path\to\file```
+ *                                     <b>`host1:port1,host2,host3:port3[username=xxx,password=yyy]`</b>
+ *                                     or <b>`(host1:port1,host2:port2)(host3:port3[username=xxx,password=yyy])`</b>
+ *                                   - addresses with connect order:
+ *                                     <b>`host1:port1,host2,host3:port3[connectOrder=ordered]`</b>
+ *                                   - the data from file: <b>`/path/to/file`</b> on *nix and <b>`drive:\path\to\file`</b>
  *                                     on Windows
  * @param[in] authscheme           The authorization scheme
  * @param[in] authdata             The authorization data
@@ -353,7 +429,7 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_bearer(const char* address, cons
  * @param[out] connection          The handle of the created connection.
  *
  * @return {@link DXF_SUCCESS} on successful connection establishment or {@link DXF_FAILURE} on error;
- *         created connection is returned via OUT parameter *connection*;
+ *         created connection is returned via OUT parameter <b>`connection`</b>;
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure.
  *
  * @warning The authscheme and authdata from argument have a higher priority than address credentials.
@@ -411,7 +487,7 @@ DXFEED_API ERRORCODE dxf_close_connection(dxf_connection_t connection);
  *
  * @return {@link DXF_SUCCESS} on successful subscription creation or {@link DXF_FAILURE} on error;
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
- *         a handle to newly created subscription is returned via ```subscription``` out parameter
+ *         a handle to newly created subscription is returned via <b>`subscription`</b> out parameter
  */
 DXFEED_API ERRORCODE dxf_create_subscription(dxf_connection_t connection, int event_types,
 											 OUT dxf_subscription_t* subscription);
@@ -431,7 +507,7 @@ DXFEED_API ERRORCODE dxf_create_subscription(dxf_connection_t connection, int ev
  *
  * @return {@link DXF_SUCCESS} on successful subscription creation or {@link DXF_FAILURE} on error;
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
- *         a handle to newly created subscription is returned via ```subscription``` out parameter
+ *         a handle to newly created subscription is returned via <b>`subscription`</b> out parameter
  */
 DXFEED_API ERRORCODE dxf_create_subscription_with_flags(dxf_connection_t connection, int event_types,
 														dx_event_subscr_flag subscr_flags,
@@ -452,7 +528,7 @@ DXFEED_API ERRORCODE dxf_create_subscription_with_flags(dxf_connection_t connect
  *
  * @return {@link DXF_SUCCESS} on successful subscription creation or {@link DXF_FAILURE} on error;
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
- *         a handle to newly created subscription is returned via ```subscription``` out parameter
+ *         a handle to newly created subscription is returned via <b>`subscription`</b> out parameter
  */
 DXFEED_API ERRORCODE dxf_create_subscription_timed(dxf_connection_t connection, int event_types, dxf_long_t time,
 												   OUT dxf_subscription_t* subscription);
@@ -473,7 +549,7 @@ DXFEED_API ERRORCODE dxf_create_subscription_timed(dxf_connection_t connection, 
  *
  * @return {@link DXF_SUCCESS} on successful subscription creation or {@link DXF_FAILURE} on error;
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
- *         a handle to newly created subscription is returned via ```subscription``` out parameter
+ *         a handle to newly created subscription is returned via <b>`subscription`</b> out parameter
  */
 DXFEED_API ERRORCODE dxf_create_subscription_timed_with_flags(dxf_connection_t connection, int event_types,
 															  dxf_long_t time, dx_event_subscr_flag subscr_flags,
@@ -869,13 +945,13 @@ DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const
  *                               enum defines possible values with dxf_cpa_last being default. For legacy
  *                               backwards-compatibility purposes, most of the price values cannot be abbreviated, so a
  *                               one-minute candle of "EUR/USD" bid price shall be specified with
- *                               ```EUR/USD{=m,price=bid}``` candle symbol string. However, the dxf_cpa_settlement can
+ *                               <b>`EUR/USD{=m,price=bid}`</b> candle symbol string. However, the dxf_cpa_settlement can
  *                               be abbreviated to "s", so a daily candle on "/ES" futures settlement prices can be
- *                               specified with ```/ES{=d,price=s}``` string.
+ *                               specified with <b>`/ES{=d,price=s}`</b> string.
  * @param[in] session            Session ("tho" key) attribute of this symbol. "tho" key with a value of "true"
  *                               corresponds to session set to dxf_csa_regular which limits the candle to trading hours
  *                               only, so a 133 tick candles on "GOOG" base symbol collected over trading hours only
- *                               can be specified with ```GOOG{=133t,tho=true}``` string. Note, that the default daily
+ *                               can be specified with <b>`GOOG{=133t,tho=true}`</b> string. Note, that the default daily
  *                               candles for US equities are special for historical reasons and correspond to the way
  *                               US equity exchange report their daily summary data. The volume the US equity default
  *                               daily candle corresponds to the total daily traded volume, while open, high, low,
@@ -884,12 +960,12 @@ DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const
  *                               enum defines possible values with dxf_caa_midnight being default. The alignment
  *                               values can be abbreviated to the first letter. So, a 1 hour candle on a symbol "AAPL"
  *                               that starts at the regular trading session at 9:30 am ET can be specified with
- *                               ```AAPL{=h,a=s,tho=true}```. Contrast that to the ```AAPL{=h,tho=true}``` candle that
+ *                               <b>`AAPL{=h,a=s,tho=true}`</b>. Contrast that to the <b>`AAPL{=h,tho=true}`</b> candle that
  *                               is aligned at midnight and thus starts at 9:00 am.
  * @param[in] price_level        Price level ("pl" key) attribute of this symbol. The candle price level defines
  *                               additional axis to split candles within particular price corridor in addition to
  *                               candle period attribute with the default value NAN. So a one-minute candles of "AAPL"
- *                               with price level 0.1 shall be specified with ```AAPL{=m,pl=0.1}```.
+ *                               with price level 0.1 shall be specified with <b>`AAPL{=m,pl=0.1}`</b>.
  * @param[out] candle_attributes Pointer to the configured candle attributes struct
  *
  * \return {@link DXF_SUCCESS} if candle attributes have been created successfully or {@link DXF_FAILURE} on error;
@@ -942,7 +1018,7 @@ DXFEED_API ERRORCODE dxf_delete_candle_symbol_attributes(dxf_candle_attributes_t
  *
  * @return {@link DXF_SUCCESS} if snapshot has been successfully created or {@link DXF_FAILURE} on error;
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
- *         newly created snapshot is return via *snapshot* output parameter
+ *         newly created snapshot is return via <b>`snapshot`</b> output parameter
  */
 DXFEED_API ERRORCODE dxf_create_snapshot(dxf_connection_t connection, dx_event_id_t event_id, dxf_const_string_t symbol,
 										 const char* source, dxf_long_t time, OUT dxf_snapshot_t* snapshot);
@@ -969,7 +1045,7 @@ DXFEED_API ERRORCODE dxf_create_snapshot(dxf_connection_t connection, dx_event_i
  *
  * @return {@link DXF_SUCCESS} if order snapshot has been successfully created or {@link DXF_FAILURE} on error;
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
- *         newly created snapshot is return via *snapshot* output parameter
+ *         newly created snapshot is return via <b>`snapshot`</b> output parameter
  */
 DXFEED_API ERRORCODE dxf_create_order_snapshot(dxf_connection_t connection, dxf_const_string_t symbol,
 											   const char* source, dxf_long_t time, OUT dxf_snapshot_t* snapshot);
@@ -988,7 +1064,7 @@ DXFEED_API ERRORCODE dxf_create_order_snapshot(dxf_connection_t connection, dxf_
  *
  * @return {@link DXF_SUCCESS} if candle snapshot has been successfully created or {@link DXF_FAILURE} on error;
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
- *         newly created snapshot is return via *snapshot* output parameter
+ *         newly created snapshot is return via <b>`snapshot`</b> output parameter
  */
 DXFEED_API ERRORCODE dxf_create_candle_snapshot(dxf_connection_t connection, dxf_candle_attributes_t candle_attributes,
 												dxf_long_t time, OUT dxf_snapshot_t* snapshot);
@@ -1107,7 +1183,7 @@ DXFEED_API ERRORCODE dxf_get_snapshot_symbol(dxf_snapshot_t snapshot, OUT dxf_st
  *
  * @return {@link DXF_SUCCESS} if price level book has been successfully created or {@link DXF_FAILURE} on error;
  *         {@link dxf_get_last_error} can be used to retrieve the error code and description in case of failure;
- *         *price level book* itself is returned via out parameter
+ *         <b>`price level book`</b> itself is returned via out parameter
  */
 DXFEED_API ERRORCODE dxf_create_price_level_book(dxf_connection_t connection, dxf_const_string_t symbol,
 												 const char** sources, OUT dxf_price_level_book_t* book);
@@ -1394,7 +1470,7 @@ DXFEED_API ERRORCODE dxf_free_connection_properties_snapshot(dxf_property_item_t
 /**
  * @ingroup c-api-connection-functions
  *
- * @brief Retrieves the null-terminated string with current connected address in format ```<host>:<port>```.
+ * @brief Retrieves the null-terminated string with current connected address in format <b>`<host>:<port>`</b>.
  *
  * @details If (*address) points to NULL then connection is not connected (reconnection, no valid addresses,
  *          closed connection and others). The memory for the resulting string is allocated during execution
