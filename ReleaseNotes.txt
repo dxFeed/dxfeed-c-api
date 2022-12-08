@@ -1,6 +1,6 @@
 Version 8.8.0
 * [DXFC-396] Added the ability to not shuffle resolved IP addresses.
-  - Added the `connectOrder` property of an address with possible values: shuffle, random, ordered, priority
+  - Added the `connectOrder` property of an address with possible values: `shuffle`, `random`, `ordered`, `priority`
   - The `shuffle` strategy: Example: `host1:port1,host2:port2,host3:port3[connectOrder=shuffle]` It will shuffle the
     resolved IP addresses, and it will go through them to the end, and then it will resolve and shuffle and so on.
   - The `random` strategy: Example: `host1:port1,host2:port2,host3:port3[connectOrder=random]` It will shuffle IP
