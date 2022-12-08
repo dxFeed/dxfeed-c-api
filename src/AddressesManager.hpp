@@ -95,7 +95,8 @@ struct ParsedAddress {
 			auto colonPos = addressString.find_last_of(':');
 			auto closingBracketPos = addressString.find_last_of(']');
 
-			if (colonPos != std::string::npos && (closingBracketPos == std::string::npos || colonPos > closingBracketPos)) {
+			if (colonPos != std::string::npos &&
+				(closingBracketPos == std::string::npos || colonPos > closingBracketPos)) {
 				port = addressString.substr(colonPos + 1);
 
 				try {
@@ -359,75 +360,168 @@ class AddressesManager {
 		std::shuffle(begin, end, engine);
 	}
 
+	static std::pair<std::string, std::string> parseUserNameAndPasswordProperties(std::vector<Property>& properties) {
+		std::string userName{};
+		std::string password{};
+
+		for (auto& p : properties) {
+			if (p.used) {
+				continue;
+			}
+
+			auto splitKeyValueResult = StringUtils::split(p.keyValue, "=");
+
+			if (splitKeyValueResult.size() != 2) {
+				continue;
+			}
+
+			if (splitKeyValueResult[0] == "username") {
+				userName = splitKeyValueResult[1];
+				p.used = true;
+			} else if (splitKeyValueResult[0] == "password") {
+				password = splitKeyValueResult[1];
+				p.used = true;
+			}
+		}
+
+		return {userName, password};
+	}
+
+	static Address::GzipData parseGzipCodecProperties(const std::vector<std::vector<std::string>>& codecs) {
+		for (const auto& codec : codecs) {
+			// check the codec name
+			if (codec[0] == "gzip") {
+				return {true};
+			}
+		}
+
+		return {false};
+	}
+
+	static Address::TlsData parseTlsCodecProperties(const std::vector<std::vector<std::string>>& codecs) {
+		Address::TlsData result{false};
+
+		for (const auto& codec : codecs) {
+			// check the codec name
+			if (codec[0] != "tls" && codec[0] != "ssl") {
+				continue;
+			}
+
+			result.enabled = true;
+
+			if (codec.size() <= 1) {
+				return result;
+			}
+
+			for (std::size_t i = 1; i < codec.size(); i++) {
+				auto splitKeyValueResult = StringUtils::split(codec[i], "=");
+
+				if (splitKeyValueResult.size() != 2) {
+					continue;
+				}
+
+				if (splitKeyValueResult[0] == "keyStore") {
+					result.keyStore = splitKeyValueResult[1];
+				} else if (splitKeyValueResult[0] == "keyStorePassword") {
+					result.keyStorePassword = splitKeyValueResult[1];
+				} else if (splitKeyValueResult[0] == "trustStore") {
+					result.trustStore = splitKeyValueResult[1];
+				} else if (splitKeyValueResult[0] == "trustStorePassword") {
+					result.trustStorePassword = splitKeyValueResult[1];
+				}
+			}
+
+			break;
+		}
+
+		return result;
+	}
+
 	static ResolvedAddresses resolveAddresses(dxf_connection_t connection) {
 		auto address = dx_get_connection_address_string(connection);
 
 		if (address == nullptr) {
+			dx_logging_error_f(L"AddressesManager::resolveAddresses: address is NULL");
+
 			return {};
 		}
 
-		auto result = ParsedAddress::parseAddress(address);
+		auto splitAddressesResult = StringUtils::splitParenthesisSeparatedString(address);
 
-		dx_address_array_t addressArray;
+		if (!splitAddressesResult.second.isOk()) {
+			dx_logging_error_f(L"AddressesManager::resolveAddresses: %hs", splitAddressesResult.second.what().c_str());
 
-		if (!dx_get_addresses_from_collection(address, &addressArray) || addressArray.size == 0) {
+			return {};
+		}
+
+		if (splitAddressesResult.first.empty()) {
+			dx_logging_error_f(L"AddressesManager::resolveAddresses: empty addresses list");
+
 			return {};
 		}
 
 		std::vector<Address> addresses;
 		std::vector<SocketAddress> socketAddresses;
 
-		for (std::size_t addressIndex = 0; addressIndex < addressArray.size; addressIndex++) {
-			auto host = StringUtils::toString(addressArray.elements[addressIndex].host);
-			auto port = StringUtils::toString(addressArray.elements[addressIndex].port);
+		for (const auto& addressList : splitAddressesResult.first) {
+			auto parseAddressResult = ParsedAddress::parseAddress(addressList);
 
-			dx_logging_info(L"AddressesManager - [con = %p] Resolving IPs for %hs", connection, host.c_str());
-
-			auto inetAddresses =
-				SocketAddress::getAllInetAddresses(host, port, [&addresses] { return addresses.size(); });
-
-			dx_logging_info(L"AddressesManager - [con = %p] Resolved IPs: %d", connection,
-							static_cast<int>(inetAddresses.size()));
-
-			if (inetAddresses.empty()) {
+			if (!parseAddressResult.second.isOk()) {
 				continue;
 			}
 
-			for (const auto& a : inetAddresses) {
-				dx_logging_verbose(dx_ll_debug, L"AddressesManager - [con = %p]     %hs", connection,
-								   a.resolvedIp.c_str());
-			}
+			auto properties = parseAddressResult.first.properties;
 
-			socketAddresses.insert(socketAddresses.end(), inetAddresses.begin(), inetAddresses.end());
+			auto gzipCodecProperties = parseGzipCodecProperties(parseAddressResult.first.codecs);
+			auto tlsCodecProperties = parseTlsCodecProperties(parseAddressResult.first.codecs);
+			auto userNameAndPassword = parseUserNameAndPasswordProperties(properties);
 
-			addresses.push_back(Address{
-				host,
-				port,
-				StringUtils::toString(addressArray.elements[addressIndex].username),
-				StringUtils::toString(addressArray.elements[addressIndex].password),
-				{addressArray.elements[addressIndex].tls.enabled != 0,
-				 StringUtils::toString(addressArray.elements[addressIndex].tls.key_store),
-				 StringUtils::toString(addressArray.elements[addressIndex].tls.key_store_password),
-				 StringUtils::toString(addressArray.elements[addressIndex].tls.trust_store),
-				 StringUtils::toString(addressArray.elements[addressIndex].tls.trust_store_password)},
-				{addressArray.elements[addressIndex].gzip.enabled != 0},
+			for (const auto& hostAndPort : parseAddressResult.first.hostsAndPorts) {
+				dx_logging_info(L"AddressesManager::resolveAddresses: [con = %p] Resolving IPs for %hs", connection,
+								hostAndPort.host.c_str());
+
+				auto inetAddresses = SocketAddress::getAllInetAddresses(hostAndPort.host, hostAndPort.port,
+																		[&addresses] { return addresses.size(); });
+
+				dx_logging_info(L"AddressesManager::resolveAddresses: [con = %p] Resolved IPs: %d", connection,
+								static_cast<int>(inetAddresses.size()));
+
+				if (inetAddresses.empty()) {
+					continue;
+				}
+
+				for (const auto& a : inetAddresses) {
+					dx_logging_verbose(dx_ll_debug, L"AddressesManager::resolveAddresses: [con = %p]     %hs",
+									   connection, a.resolvedIp.c_str());
+				}
+
+				socketAddresses.insert(socketAddresses.end(), inetAddresses.begin(), inetAddresses.end());
+
+				addresses.push_back(Address{
+					hostAndPort.host,
+					hostAndPort.port,
+					userNameAndPassword.first,
+					userNameAndPassword.second,
+					tlsCodecProperties,
+					gzipCodecProperties,
 #ifdef DXFEED_CODEC_TLS_ENABLED
-				nullptr,
-				0,
-				nullptr,
-				0
+					nullptr,
+					0,
+					nullptr,
+					0
 #endif
-			});
+				});
+			}
 		}
 
 		shuffle(socketAddresses.begin(), socketAddresses.end());
 
-		dx_logging_verbose(dx_ll_debug, L"AddressesManager - [con = %p] Shuffled addresses:", connection);
+		dx_logging_verbose(dx_ll_debug, L"AddressesManager::resolveAddresses: [con = %p] Shuffled addresses:",
+						   connection);
 		for (const auto& a : socketAddresses) {
-			dx_logging_verbose(dx_ll_debug, L"AddressesManager - [con = %p]     %hs", connection, a.resolvedIp.c_str());
+			dx_logging_verbose(dx_ll_debug, L"AddressesManager::resolveAddresses: [con = %p]     %hs", connection,
+							   a.resolvedIp.c_str());
 		}
-
-		dx_clear_address_array(&addressArray);
 
 		return ResolvedAddresses{addresses, socketAddresses, 0};
 	}
