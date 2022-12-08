@@ -27,6 +27,7 @@
 #include "DXAlgorithms.h"
 #include "DXErrorCodes.h"
 #include "DXErrorHandling.h"
+#include "DXFeed.h"
 #include "DXThreads.h"
 #include "EventManager.h"
 #include "EventSubscription.h"

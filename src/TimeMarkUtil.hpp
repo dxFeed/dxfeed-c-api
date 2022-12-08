@@ -25,7 +25,7 @@ namespace dx {
 namespace TimeMarkUtil {
 static const unsigned TIME_MARK_MASK = 0x3fffffffU;
 
-inline static int currentTimeMark() {
+inline int currentTimeMark() {
 	return static_cast<int>(
 		static_cast<unsigned>(std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now())
 								  .time_since_epoch()

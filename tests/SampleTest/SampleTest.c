@@ -31,7 +31,7 @@
 
 #include "DXErrorCodes.h"
 #include "DXFeed.h"
-#include "Logger.h"
+#include "PrimitiveTypes.h"
 
 #if !defined(_WIN32) || defined(USE_PTHREADS)
 #	include "pthread.h"

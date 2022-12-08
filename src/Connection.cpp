@@ -31,6 +31,7 @@ extern "C" {
 }
 
 #include "Connection.hpp"
+#include "TimeMarkUtil.hpp"
 
 namespace dx {
 

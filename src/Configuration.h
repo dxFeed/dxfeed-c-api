@@ -19,8 +19,6 @@
 
 #pragma once
 
-#include "PrimitiveTypes.h"
-#include "EventData.h"
 #include "DXTypes.h"
 #include "DXErrorCodes.h"
 

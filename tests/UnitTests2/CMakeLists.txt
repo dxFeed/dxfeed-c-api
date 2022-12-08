@@ -8,8 +8,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(DXFC_TEST_SOURCES WideDecimalTest.cpp)
-set(DXFC_INCLUDE_DIRS ../../include ../../src ../../thirdparty/Catch2-2.13.8/single_include)
+set(DXFC_TEST_SOURCES WideDecimalTest.cpp StringUtilsTest.cpp)
+set(DXFC_INCLUDE_DIRS ../../include ../../src ../../thirdparty/Catch2-2.13.8/single_include ../../thirdparty/toml11 ../../thirdparty/boost-1_75)
 
 string(REPLACE ".cpp" "" DXFC_TEST_BASENAMES "${DXFC_TEST_SOURCES}")
 set(DXFC_TEST_TARGETS ${DXFC_TEST_BASENAMES})
@@ -18,6 +18,7 @@ add_library(DXFeedTests2Main OBJECT Main.cpp)
 target_include_directories(DXFeedTests2Main PRIVATE ${DXFC_INCLUDE_DIRS})
 
 add_executable(WideDecimalTest WideDecimalTest.cpp ../../src/WideDecimal.cpp ../../src/WideDecimal.h ../../src/WideDecimal.hpp)
+add_executable(StringUtilsTest StringUtilsTest.cpp ../../src/StringUtils.hpp)
 
 foreach(name ${DXFC_TEST_TARGETS})
     target_include_directories(${name} PRIVATE ${DXFC_INCLUDE_DIRS})

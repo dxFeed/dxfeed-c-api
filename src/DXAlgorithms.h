@@ -27,6 +27,7 @@
 #include <time.h>
 #include "PrimitiveTypes.h"
 #include "DXMemory.h"
+#include "DXTypes.h"
 
 /* -------------------------------------------------------------------------- */
 /*

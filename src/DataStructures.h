@@ -20,10 +20,8 @@
 #ifndef DATA_STRUCTURES_H_INCLUDED
 #define DATA_STRUCTURES_H_INCLUDED
 
-#include "PrimitiveTypes.h"
 #include "DXTypes.h"
 #include "RecordFieldSetters.h"
-#include "BufferedIOCommon.h"
 #include "EventData.h"
 #include "DXThreads.h"
 

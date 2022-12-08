@@ -24,7 +24,6 @@
 #ifndef CONNECTION_CONTEXT_DATA_H_INCLUDED
 #define CONNECTION_CONTEXT_DATA_H_INCLUDED
 
-#include "PrimitiveTypes.h"
 #include "DXTypes.h"
 
 /* -------------------------------------------------------------------------- */

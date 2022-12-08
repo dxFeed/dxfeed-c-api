@@ -31,10 +31,10 @@
 #define MUTEX_FIELD_FLAG    (0x1)
 
 #define CTX(context) \
-	((dx_buffered_output_connection_context_t*)context)
+	((dx_buffered_output_connection_context_t*)(context))
 
 #define IS_CUR_CAPACITY_ENOUGH(context, bytes_to_write) \
-	(CTX(context)->current_out_buffer_position + bytes_to_write <= CTX(context)->out_buffer_length)
+	(CTX(context)->current_out_buffer_position + (bytes_to_write) <= CTX(context)->out_buffer_length)
 
 /* -------------------------------------------------------------------------- */
 

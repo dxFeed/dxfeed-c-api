@@ -29,7 +29,7 @@
 extern "C" {
 
 #include "DXTypes.h"
-#include "PrimitiveTypes.h"
+
 }
 
 namespace dx {

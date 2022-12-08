@@ -31,6 +31,8 @@
 #include "Logger.h"
 #include "RegionalBook.h"
 
+#include "DXFeed.h"
+
 #define MAX_PRICE_LEVELS    10
 
 struct dx_regional_book;

@@ -21,7 +21,6 @@
 
 #include "DXTypes.h"
 #include "EventData.h"
-#include "PrimitiveTypes.h"
 
 /* -------------------------------------------------------------------------- */
 /*

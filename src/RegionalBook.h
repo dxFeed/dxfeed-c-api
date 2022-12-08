@@ -20,7 +20,6 @@
 #ifndef REGIONALBOOK_H_INCLUDED
 #define REGIONALBOOK_H_INCLUDED
 
-#include "PrimitiveTypes.h"
 #include "EventData.h"
 #include "DXTypes.h"
 

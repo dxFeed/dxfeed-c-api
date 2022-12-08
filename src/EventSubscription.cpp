@@ -17,6 +17,13 @@
  *
  */
 
+#include <functional>
+#include <mutex>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <cstddef>
+
 extern "C" {
 
 #include "EventSubscription.h"
@@ -27,16 +34,9 @@ extern "C" {
 #include "DXErrorHandling.h"
 #include "DXFeed.h"
 #include "DXThreads.h"
-#include "Logger.h"
-#include "SymbolCodec.h"
+
 }
 
-#include <cmath>
-#include <functional>
-#include <mutex>
-#include <string>
-#include <unordered_map>
-#include <unordered_set>
 
 #include "Configuration.hpp"
 #include "EventSubscription.hpp"

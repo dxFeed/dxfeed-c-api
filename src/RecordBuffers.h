@@ -25,7 +25,6 @@
 #ifndef RECORD_BUFFERS_H_INCLUDED
 #define RECORD_BUFFERS_H_INCLUDED
 
-#include "PrimitiveTypes.h"
 #include "EventData.h"
 
 /* -------------------------------------------------------------------------- */

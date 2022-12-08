@@ -22,14 +22,15 @@
 #	pragma warning(disable : 5105)
 #	include <Windows.h>
 #	pragma warning(pop)
-#	ifdef _DEBUG
-#		include <DbgHelp.h>
-#	endif
+//#	ifdef _DEBUG
+//#		include <DbgHelp.h>
+//#	endif
 #else
 #	include <pthread.h>
 #	include <time.h>
 #endif
 
+#include "DXFeed.h"
 #include "Logger.h"
 
 #include <assert.h>
@@ -55,11 +56,11 @@
 #define CURRENT_TIME_STR_TIME_OFFSET 24
 #define TIME_ZONE_BIAS_TO_HOURS		 -60
 
-static dxf_const_string_t g_error_prefix = L"Error: ";
-static dxf_const_string_t g_warn_prefix = L"Warn: ";
-static dxf_const_string_t g_info_prefix = L"Info: ";
-static dxf_const_string_t g_debug_prefix = L"Debug: ";
-static dxf_const_string_t g_trace_prefix = L"Trace: ";
+static dxf_const_string_t g_error_prefix = L"[E] ";
+static dxf_const_string_t g_warn_prefix = L"[W] ";
+static dxf_const_string_t g_info_prefix = L"[I] ";
+static dxf_const_string_t g_debug_prefix = L"[D] ";
+static dxf_const_string_t g_trace_prefix = L"[T] ";
 static dx_log_level_t g_default_log_level = dx_ll_info;
 
 static int g_verbose_logger_mode;
@@ -102,7 +103,8 @@ void dx_log_debug_message(const dxf_char_t *format, ...) {
 	swprintf(message, 255, L"[%08lx] ", (unsigned long)GetCurrentThreadId());
 	va_start(ap, format);
 	vswprintf(&message[11], 244, format, ap);
-	OutputDebugStringW(message);
+	//OutputDebugStringW(message);
+	wprintf(L"%ls", message);
 	va_end(ap);
 }
 
@@ -112,7 +114,8 @@ void dx_vlog_debug_message(const dxf_char_t *format, va_list ap) {
 	dxf_char_t message[256];
 	swprintf(message, 255, L"[%08lx] ", (unsigned long)GetCurrentThreadId());
 	vswprintf(&message[11], 244, format, ap);
-	OutputDebugStringW(message);
+	//OutputDebugStringW(message);
+	wprintf(L"%ls", message);
 }
 #	else
 #		define dx_vlog_debug_message(f, ap)
@@ -597,7 +600,7 @@ void dx_logging_verbose(dx_log_level_t log_level, const dxf_char_t *format, ...)
 		return;
 	}
 
-	fwprintf(g_log_file, L"\n%ls [%08lx] %ls ", dx_get_current_time(),
+	fwprintf(g_log_file, L"\n%ls [%08lx] %ls", dx_get_current_time(),
 #ifdef _WIN32
 			 (unsigned long)GetCurrentThreadId(),
 #else
@@ -641,66 +644,6 @@ void dx_logging_dbg(const dxf_char_t *format, ...) {
 #endif
 }
 
-#ifdef _DEBUG
-#	ifdef _WIN32
-#		define STACK_SIZE 256
-static dxf_ubyte_t SYM_INFO[sizeof(SYM_TYPE) + 255];
-static void *STACK[STACK_SIZE];
-#	endif
-#endif
-
-void dx_logging_dbg_stack() {
-#ifdef _DEBUG
-#	ifdef _WIN32
-	if (dx_ll_debug < dx_get_minimum_logging_level(g_default_log_level)) return;
-
-	USHORT frames;
-	SYMBOL_INFO *symbol = (SYMBOL_INFO *)&SYM_INFO[0];
-	HANDLE process;
-
-	process = GetCurrentProcess();
-	SymInitialize(process, NULL, TRUE);
-	frames = CaptureStackBackTrace(0, 256, STACK, NULL);
-	symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
-	symbol->MaxNameLen = 255;
-
-	for (USHORT i = 1; i < frames; i++) {
-		SymFromAddr(process, (DWORD64)(STACK[i]), 0, symbol);
-		dx_logging_dbg(L"* %3hu: %ls - 0x%016p", frames - i - 1, symbol->Name, (void *)symbol->Address);
-	}
-	dx_logging_dbg_flush();
-#	else
-	dx_logging_dbg(L"* <STACK IS NOT SUPPORTED>");
-	dx_logging_dbg_flush();
-#	endif
-#endif
-}
-
-const char *dx_logging_dbg_sym(void *addr) {
-#ifdef _DEBUG
-#	ifdef _WIN32
-	SYMBOL_INFO *symbol = (SYMBOL_INFO *)&SYM_INFO[0];
-	HANDLE process;
-	process = GetCurrentProcess();
-	SymInitialize(process, NULL, TRUE);
-	symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
-	symbol->MaxNameLen = 255;
-	SymFromAddr(process, (DWORD64)addr, 0, symbol);
-	return symbol->Name;
-#	else
-	return "<STACK IS NOT SUPPORTED>";
-#	endif
-#else
-	return "";
-#endif
-}
-
-void dx_logging_dbg_flush() {
-#ifdef _DEBUG
-	fflush(g_dbg_file);
-#endif
-}
-
 void dx_logging_dbg_unlock() {
 #ifdef _DEBUG
 	dx_mutex_unlock(&g_dbg_lock);
@@ -727,6 +670,34 @@ void dx_logging_info(const dxf_char_t *format, ...) {
 			 (unsigned long)pthread_getthreadid_np(),
 #endif
 			 g_info_prefix);
+	{
+		va_list ap;
+		va_start(ap, format);
+		dx_vlog_debug_message(format, ap);
+		vfwprintf(g_log_file, format, ap);
+		va_end(ap);
+	}
+
+	dx_mutex_unlock(&g_log_file_lock);
+	dx_flush_log();
+}
+
+void dx_logging_error_f(const dxf_char_t *format, ...) {
+	if (g_log_file == NULL || format == NULL) {
+		return;
+	}
+
+	if (!dx_mutex_lock(&g_log_file_lock)) {
+		return;
+	}
+
+	fwprintf(g_log_file, L"\n%ls [%08lx] %ls", dx_get_current_time(),
+#ifdef _WIN32
+			 (unsigned long)GetCurrentThreadId(),
+#else
+			 (unsigned long)pthread_getthreadid_np(),
+#endif
+			 g_error_prefix);
 	{
 		va_list ap;
 		va_start(ap, format);

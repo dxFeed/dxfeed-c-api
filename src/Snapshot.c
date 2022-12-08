@@ -24,7 +24,6 @@
 #include "DXThreads.h"
 #include "EventManager.h"
 #include "EventSubscription.h"
-#include "Logger.h"
 #include "Snapshot.h"
 
 /* -------------------------------------------------------------------------- */

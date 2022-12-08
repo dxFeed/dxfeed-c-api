@@ -23,13 +23,12 @@
 #	endif
 #endif
 
-#include <stddef.h>
 #include <stdio.h>
 #include <time.h>
 
 #include "DXErrorCodes.h"
 #include "DXFeed.h"
-#include "Logger.h"
+#include "PrimitiveTypes.h"
 
 #ifdef _WIN32
 #	pragma warning(push)

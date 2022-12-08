@@ -693,13 +693,13 @@ static int dx_connect_via_socket(dx_network_connection_context_t* context) {
 		return false;
 	}
 
-	dx_logging_info(L"dx_connect_via_socket - [con = %p] Connecting to %hs (%hs)", context->connection,
+	dx_logging_info(L"DXNetwork::dx_connect_via_socket: [con = %p] Connecting to %hs (%hs)", context->connection,
 					dx_am_get_current_connected_address(context->connection),
 					dx_am_get_current_connected_socket_address(context->connection));
 	context->s = dx_socket(address_family, address_socket_type, address_protocol);
 
 	if (context->s == INVALID_SOCKET) {
-		dx_logging_info(L"dx_connect_via_socket - [con = %p] Failed to connect to %hs (%hs): Invalid socket", context->connection,
+		dx_logging_info(L"DXNetwork::dx_connect_via_socket: [con = %p] Failed to connect to %hs (%hs): Invalid socket", context->connection,
 						dx_am_get_current_connected_address(context->connection),
 						dx_am_get_current_connected_socket_address(context->connection));
 		/* failed to create a new socket */
@@ -710,7 +710,7 @@ static int dx_connect_via_socket(dx_network_connection_context_t* context) {
 	if (!dx_connect(context->s, &native_socket_address, (socklen_t)native_socket_address_length)) {
 		/* failed to connect */
 
-		dx_logging_info(L"dx_connect_via_socket - [con = %p] Failed to connect to %hs (%hs)", context->connection,
+		dx_logging_info(L"DXNetwork::dx_connect_via_socket: [con = %p] Failed to connect to %hs (%hs)", context->connection,
 						dx_am_get_current_connected_address(context->connection),
 						dx_am_get_current_connected_socket_address(context->connection));
 		dx_close(context->s);
@@ -1107,7 +1107,7 @@ void dx_connection_status_set(dxf_connection_t connection, dxf_connection_status
 
 	dx_mutex_lock(&(context->status_guard));
 	old_status = context->status;
-	dx_logging_verbose(dx_ll_info, L"Connection status changed %d (%ls) -> %d (%ls)", old_status,
+	dx_logging_verbose(dx_ll_info, L"DXNetwork::dx_connection_status_set: Connection status changed %d (%ls) -> %d (%ls)", old_status,
 					   dx_get_connection_status_string(old_status), status, dx_get_connection_status_string(status));
 
 	context->status = status;

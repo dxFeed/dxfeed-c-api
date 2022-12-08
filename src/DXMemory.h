@@ -24,10 +24,8 @@
 #ifndef DX_MEMORY_H_INCLUDED
 #define DX_MEMORY_H_INCLUDED
 
-#include "DXTypes.h"
-
-#ifdef __cplusplus
-extern "C" {
+#ifndef __cplusplus
+#	include <stddef.h>
 #endif
 
 /* -------------------------------------------------------------------------- */
@@ -54,9 +52,5 @@ void* dx_memset(void* destination, int c, size_t size);
 
 void* dx_calloc_no_ehm(size_t num, size_t size);
 void dx_free_no_ehm(void* buf);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* DX_MEMORY_H_INCLUDED */

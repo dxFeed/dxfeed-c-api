@@ -234,10 +234,16 @@
     <ClInclude Include="src\RecordTranscoder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Result.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="src\ServerMessageProcessor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\StringConverter.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\StringUtils.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\TaskQueue.h">
@@ -343,6 +349,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\WideDecimal.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\TimeMarkUtil.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

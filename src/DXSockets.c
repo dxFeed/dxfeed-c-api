@@ -23,7 +23,6 @@
 #include "DXErrorCodes.h"
 #include "DXErrorHandling.h"
 #include "DXThreads.h"
-#include "Logger.h"
 
 /* -------------------------------------------------------------------------- */
 /*

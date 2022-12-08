@@ -22,7 +22,6 @@
 
 #include "EventData.h"
 #include "DXTypes.h"
-#include "PrimitiveTypes.h"
 
 int dx_candle_symbol_to_string(dxf_candle_attributes_t attributes, OUT dxf_string_t* string);
 

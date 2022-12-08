@@ -29,7 +29,6 @@ extern "C" {
 #include <cassert>
 #include <chrono>
 #include <cmath>
-#include <deque>
 #include <functional>
 #include <iterator>
 #include <limits>

@@ -211,10 +211,10 @@ typedef void (*dxf_socket_thread_destruction_notifier_t)(dxf_connection_t connec
  * @details
  *
  * @param[in] address              Connection string
- *                                   - the single address: ```host:port``` or just ```host```
+ *                                   - the single address: ```host:port```
  *                                   - address with credentials: ```host:port[username=xxx,password=yyy]```
  *                                   - multiple addresses:
- * ```(host1:port1)(host2)(host3:port3[username=xxx,password=yyy])```
+ * ```host1:port1,host2,host3:port3[username=xxx,password=yyy]``` or ```(host1:port1,host2:port2)(host3:port3[username=xxx,password=yyy])```
  *                                   - the data from file: ```/path/to/file``` on *nix and ```drive:\path\to\file```
  *                                     on Windows
  * @param[in] notifier             The callback to inform the client side that the connection has stumbled upon and
@@ -248,10 +248,10 @@ DXFEED_API ERRORCODE dxf_create_connection(const char* address, dxf_conn_termina
  * @details
  *
  * @param[in] address              Connection string
- *                                   - the single address: ```host:port``` or just ```host```
+ *                                   - the single address: ```host:port```
  *                                   - address with credentials: ```host:port[username=xxx,password=yyy]```
  *                                   - multiple addresses:
- * ```(host1:port1)(host2)(host3:port3[username=xxx,password=yyy])```
+ * ```host1:port1,host2,host3:port3[username=xxx,password=yyy]``` or ```(host1:port1,host2:port2)(host3:port3[username=xxx,password=yyy])```
  *                                   - the data from file: ```/path/to/file``` on *nix and ```drive:\path\to\file```
  *                                     on Windows
  * @param[in] user                 The user name;
@@ -290,11 +290,12 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_basic(const char* address, const
  * @details
  *
  * @param[in] address              Connection string
- *                                   - the single address: "host:port" or just "host"
- *                                   - address with credentials: "host:port[username=xxx,password=yyy]"
+ *                                   - the single address: ```host:port```
+ *                                   - address with credentials: ```host:port[username=xxx,password=yyy]```
  *                                   - multiple addresses:
- * "(host1:port1)(host2)(host3:port3[username=xxx,password=yyy])"
- *                                   - the data from file: "/path/to/file" on *nix and "drive:\path\to\file" on Windows
+ * ```host1:port1,host2,host3:port3[username=xxx,password=yyy]``` or ```(host1:port1,host2:port2)(host3:port3[username=xxx,password=yyy])```
+ *                                   - the data from file: ```/path/to/file``` on *nix and ```drive:\path\to\file```
+ *                                     on Windows
  * @param[in] token                The authorization token;
  * @param[in] notifier             The callback to inform the client side that the connection has stumbled upon and
  *                                 error and will go reconnecting
@@ -330,10 +331,10 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_bearer(const char* address, cons
  * @details
  *
  * @param[in] address              Connection string
- *                                   - the single address: ```host:port``` or just ```host```
+ *                                   - the single address: ```host:port```
  *                                   - address with credentials: ```host:port[username=xxx,password=yyy]```
  *                                   - multiple addresses:
- ```(host1:port1)(host2)(host3:port3[username=xxx,password=yyy])```
+ * ```host1:port1,host2,host3:port3[username=xxx,password=yyy]``` or ```(host1:port1,host2:port2)(host3:port3[username=xxx,password=yyy])```
  *                                   - the data from file: ```/path/to/file``` on *nix and ```drive:\path\to\file```
  *                                     on Windows
  * @param[in] authscheme           The authorization scheme

@@ -21,7 +21,6 @@
 #define CONFIGURATION_PARSER_H_INCLUDED
 
 #include "DXTypes.h"
-#include "PrimitiveTypes.h"
 
 /*
  * Note: current realization of C API ConfigurationDeserializer support only
