@@ -39,6 +39,7 @@ extern "C" {
 #include <string>
 #include <thread>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "Result.hpp"
@@ -350,18 +351,11 @@ private:
 		: name_{std::move(name)}, randomized_{randomized}, resetOnConnect_{resetOnConnect} {}
 
 public:
+	const std::string& getName() const& { return name_; }
 
-	const std::string& getName() const& {
-		return name_;
-	}
+	bool isRandomized() const { return randomized_; }
 
-	bool isRandomized() const {
-		return randomized_;
-	}
-
-	bool isResetOnConnect() const {
-		return resetOnConnect_;
-	}
+	bool isResetOnConnect() const { return resetOnConnect_; }
 
 	static ConnectOrder valueOf(const std::string& name) {
 		auto found = VALUES_.find(name);
@@ -375,24 +369,37 @@ public:
 };
 
 struct ResolvedAddresses {
+	static const ConnectOrder DEFAULT_CONNECT_ORDER;
+
 	std::vector<Address> addresses;
 	std::vector<SocketAddress> socketAddresses;
 	std::size_t currentSocketAddress;
+	ConnectOrder connectOrder;
+
+	ResolvedAddresses()
+		: addresses{}, socketAddresses{}, currentSocketAddress{0}, connectOrder{DEFAULT_CONNECT_ORDER} {}
+	ResolvedAddresses(std::vector<Address> addresses, std::vector<SocketAddress> socketAddresses,
+					  std::size_t currentSocketAddress, ConnectOrder connectOrder = DEFAULT_CONNECT_ORDER)
+		: addresses{std::move(addresses)},
+		  socketAddresses{std::move(socketAddresses)},
+		  currentSocketAddress{currentSocketAddress},
+		  connectOrder{std::move(connectOrder)} {}
+
+	void clear() {
+		addresses.clear();
+		socketAddresses.clear();
+		currentSocketAddress = 0;
+	}
 };
 
 // singleton
 class AddressesManager {
 	// connection -> addresses
 	std::unordered_map<dxf_connection_t, std::shared_ptr<ResolvedAddresses>> resolvedAddressesByConnection_;
+	std::unordered_map<dxf_connection_t, std::shared_ptr<ReconnectHelper>> reconnectHelpersByConnection_;
 	std::mutex mutex_;
 
-	AddressesManager() : resolvedAddressesByConnection_{}, mutex_{} {}
-
-	static void sleepBeforeResolve() {
-		thread_local ReconnectHelper reconnectHelper{};
-
-		reconnectHelper.sleepBeforeConnection();
-	}
+	AddressesManager() : resolvedAddressesByConnection_{}, reconnectHelpersByConnection_{}, mutex_{} {}
 
 	template <typename It>
 	static void shuffle(It begin, It end) {
@@ -427,6 +434,29 @@ class AddressesManager {
 		}
 
 		return {userName, password};
+	}
+
+	static ConnectOrder parseConnectOrderProperty(std::vector<Property>& properties) {
+		ConnectOrder connectOrder{ResolvedAddresses::DEFAULT_CONNECT_ORDER};
+
+		for (auto& p : properties) {
+			if (p.used) {
+				continue;
+			}
+
+			auto splitKeyValueResult = StringUtils::split(p.keyValue, "=");
+
+			if (splitKeyValueResult.size() != 2) {
+				continue;
+			}
+
+			if (splitKeyValueResult[0] == "connectOrder") {
+				connectOrder = ConnectOrder::valueOf(splitKeyValueResult[1]);
+				p.used = true;
+			}
+		}
+
+		return connectOrder;
 	}
 
 	static Address::GzipData parseGzipCodecProperties(const std::vector<std::vector<std::string>>& codecs) {
@@ -504,6 +534,7 @@ class AddressesManager {
 
 		std::vector<Address> addresses;
 		std::vector<SocketAddress> socketAddresses;
+		ConnectOrder connectOrder{ResolvedAddresses::DEFAULT_CONNECT_ORDER};
 
 		for (const auto& addressList : splitAddressesResult.first) {
 			auto parseAddressResult = ParsedAddress::parseAddress(addressList);
@@ -517,6 +548,7 @@ class AddressesManager {
 			auto gzipCodecProperties = parseGzipCodecProperties(parseAddressResult.first.codecs);
 			auto tlsCodecProperties = parseTlsCodecProperties(parseAddressResult.first.codecs);
 			auto userNameAndPassword = parseUserNameAndPasswordProperties(properties);
+			connectOrder = parseConnectOrderProperty(properties);
 
 			for (const auto& hostAndPort : parseAddressResult.first.hostsAndPorts) {
 				dx_logging_info(L"AddressesManager::resolveAddresses: [con = %p] Resolving IPs for %hs", connection,
@@ -548,7 +580,9 @@ class AddressesManager {
 			}
 		}
 
-		shuffle(socketAddresses.begin(), socketAddresses.end());
+		if (connectOrder.isRandomized()) {
+			shuffle(socketAddresses.begin(), socketAddresses.end());
+		}
 
 		dx_logging_verbose(dx_ll_debug, L"AddressesManager::resolveAddresses: [con = %p] Shuffled addresses:",
 						   connection);
@@ -557,7 +591,7 @@ class AddressesManager {
 							   a.resolvedIp.c_str());
 		}
 
-		return ResolvedAddresses{addresses, socketAddresses, 0};
+		return ResolvedAddresses{addresses, socketAddresses, 0, connectOrder};
 	}
 
 	// not thread-safe
@@ -566,6 +600,22 @@ class AddressesManager {
 
 		if (found == resolvedAddressesByConnection_.end()) {
 			auto result = resolvedAddressesByConnection_.emplace(connection, std::make_shared<ResolvedAddresses>());
+
+			if (result.second) {
+				return result.first->second;
+			}
+
+			return nullptr;
+		}
+
+		return found->second;
+	}
+
+	std::shared_ptr<ReconnectHelper> getOrCreateReconnectHelper(dxf_connection_t connection) {
+		auto found = reconnectHelpersByConnection_.find(connection);
+
+		if (found == reconnectHelpersByConnection_.end()) {
+			auto result = reconnectHelpersByConnection_.emplace(connection, std::make_shared<ReconnectHelper>());
 
 			if (result.second) {
 				return result.first->second;
@@ -617,6 +667,44 @@ class AddressesManager {
 	}
 
 public:
+	void sleepBeforeResolve(dxf_connection_t connection) {
+		std::lock_guard<std::mutex> guard(mutex_);
+
+		auto reconnectHelper = getOrCreateReconnectHelper(connection);
+
+		if (reconnectHelper) {
+			reconnectHelper->sleepBeforeConnection();
+		}
+	}
+
+	void reset(dxf_connection_t connection) {
+		std::lock_guard<std::mutex> guard(mutex_);
+
+		auto resolvedAddresses = getOrCreateResolvedAddresses(connection);
+
+		if (resolvedAddresses) {
+			resolvedAddresses->clear();
+		}
+
+		auto reconnectHelper = getOrCreateReconnectHelper(connection);
+
+		if (reconnectHelper) {
+			reconnectHelper->reset();
+		}
+	}
+
+	bool isResetOnConnect(dxf_connection_t connection) {
+		std::lock_guard<std::mutex> guard(mutex_);
+
+		auto resolvedAddresses = getOrCreateResolvedAddresses(connection);
+
+		if (resolvedAddresses) {
+			return resolvedAddresses->connectOrder.isResetOnConnect();
+		}
+
+		return false;
+	}
+
 	static std::shared_ptr<AddressesManager> getInstance() {
 		static std::shared_ptr<AddressesManager> instance{new AddressesManager()};
 
@@ -644,8 +732,7 @@ public:
 			}
 		}
 
-		// don't freeze all threads
-		sleepBeforeResolve();
+		sleepBeforeResolve(connection);
 
 		auto newResolvedAddresses = resolveAddresses(connection);
 
@@ -670,6 +757,7 @@ public:
 		std::lock_guard<std::mutex> guard(mutex_);
 
 		resolvedAddressesByConnection_.erase(connection);
+		reconnectHelpersByConnection_.erase(connection);
 	}
 
 	bool isCurrentSocketAddressConnectionFailed(dxf_connection_t connection) {
