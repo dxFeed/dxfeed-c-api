@@ -32,6 +32,7 @@ extern "C" {
 #include <algorithm>
 #include <chrono>
 #include <cstdint>
+#include <iterator>
 #include <memory>
 #include <mutex>
 #include <random>
@@ -39,7 +40,6 @@ extern "C" {
 #include <thread>
 #include <unordered_map>
 #include <vector>
-#include <iterator>
 
 #include "Result.hpp"
 #include "StringUtils.hpp"
@@ -333,6 +333,47 @@ struct SocketAddress {
 
 const SocketAddress SocketAddress::INVALID{-1, -1, -1};
 
+struct ConnectOrder {
+	static const ConnectOrder SHUFFLE;
+	static const ConnectOrder RANDOM;
+	static const ConnectOrder ORDERED;
+	static const ConnectOrder PRIORITY;
+
+private:
+	static const std::unordered_map<std::string, ConnectOrder> VALUES_;
+
+	std::string name_;
+	bool randomized_;
+	bool resetOnConnect_;
+
+	ConnectOrder(std::string name, bool randomized, bool resetOnConnect)
+		: name_{std::move(name)}, randomized_{randomized}, resetOnConnect_{resetOnConnect} {}
+
+public:
+
+	const std::string& getName() const& {
+		return name_;
+	}
+
+	bool isRandomized() const {
+		return randomized_;
+	}
+
+	bool isResetOnConnect() const {
+		return resetOnConnect_;
+	}
+
+	static ConnectOrder valueOf(const std::string& name) {
+		auto found = VALUES_.find(name);
+
+		if (found == VALUES_.end()) {
+			return SHUFFLE;
+		}
+
+		return found->second;
+	}
+};
+
 struct ResolvedAddresses {
 	std::vector<Address> addresses;
 	std::vector<SocketAddress> socketAddresses;
@@ -498,18 +539,10 @@ class AddressesManager {
 
 				socketAddresses.insert(socketAddresses.end(), inetAddresses.begin(), inetAddresses.end());
 
-				addresses.push_back(Address{
-					hostAndPort.host,
-					hostAndPort.port,
-					userNameAndPassword.first,
-					userNameAndPassword.second,
-					tlsCodecProperties,
-					gzipCodecProperties,
+				addresses.push_back(Address{hostAndPort.host, hostAndPort.port, userNameAndPassword.first,
+											userNameAndPassword.second, tlsCodecProperties, gzipCodecProperties,
 #ifdef DXFEED_CODEC_TLS_ENABLED
-					nullptr,
-					0,
-					nullptr,
-					0
+											nullptr, 0, nullptr, 0
 #endif
 				});
 			}

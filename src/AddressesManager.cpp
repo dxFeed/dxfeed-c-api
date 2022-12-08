@@ -23,6 +23,22 @@ extern "C" {
 
 #include "AddressesManager.hpp"
 
+namespace dx {
+
+const ConnectOrder ConnectOrder::SHUFFLE("shuffle", true, false);
+const ConnectOrder ConnectOrder::RANDOM("random", true, true);
+const ConnectOrder ConnectOrder::ORDERED("ordered", false, false);
+const ConnectOrder ConnectOrder::PRIORITY("priority", false, true);
+
+const std::unordered_map<std::string, ConnectOrder> ConnectOrder::VALUES_{
+	{SHUFFLE.getName(), SHUFFLE},
+	{RANDOM.getName(), RANDOM},
+	{ORDERED.getName(), ORDERED},
+	{PRIORITY.getName(), PRIORITY},
+};
+
+}  // namespace dx
+
 extern "C" {
 
 int dx_am_next_socket_address(dxf_connection_t connection) {
