@@ -4,11 +4,11 @@ Version 8.8.0
   - The `shuffle` strategy: Example: `host1:port1,host2:port2,host3:port3[connectOrder=shuffle]` It will shuffle the
     resolved IP addresses, and it will go through them to the end, and then it will resolve and shuffle and so on.
   - The `random` strategy: Example: `host1:port1,host2:port2,host3:port3[connectOrder=random]` It will shuffle IP
-    addresses, if the connection is successful, it will reset the state and will shuffle on the next connection, and so on.
+    addresses, if the connection is successful, it will reset the state and will shuffle on the next connection after resolve, and so on.
   - The `ordered` strategy: Example: `host1:port1,host2:port2,host3:port3[connectOrder=ordered]` It will NOT shuffle the
     resolved IP addresses, and it will go through them to the end, and then it will resolve and NOT shuffle and so on.
   - The `priority` strategy: Example: `host1:port1,host2:port2,host3:port3[connectOrder=priority]` It will NOT shuffle IP
-    addresses, if the connection is successful, it will reset the state and will NOT shuffle on the next connection, and so on.
+    addresses, if the connection is successful, it will reset the state and will NOT shuffle on the next connection after resolve, and so on.
   - The default strategy is `shuffle`
   - If several strategies are specified in the address line, the last one will be selected.
     - Example #1: `host1:port1,host2:port2,host3:port3[connectOrder=priority,connectOrder=ordered]` will be equivalent
