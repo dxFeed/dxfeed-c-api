@@ -99,7 +99,7 @@ public:
 			return true;
 		} catch (const std::exception& e) {
 			dx_set_error_code(dx_cfgec_toml_parser_error);
-			dx_logging_verbose(dx_ll_warn, L"dxFeed::API::Configuration.loadFromFile: %hs", e.what());
+			dx_logging_verbose(dx_ll_warn, L"Configuration::loadFromFile: %hs", e.what());
 			loaded_ = false;
 		}
 
@@ -134,7 +134,7 @@ public:
 			return true;
 		} catch (const std::exception& e) {
 			dx_set_error_code(dx_cfgec_toml_parser_error);
-			dx_logging_verbose(dx_ll_warn, L"dxFeed::API::Configuration.loadFromString: %hs", e.what());
+			dx_logging_verbose(dx_ll_warn, L"Configuration::loadFromString: %hs", e.what());
 			loaded_ = false;
 		}
 

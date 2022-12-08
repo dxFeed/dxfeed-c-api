@@ -290,7 +290,7 @@ DXFEED_API ERRORCODE dxf_create_connection_impl(const char *address, const char 
 		return DXF_FAILURE;
 	}
 
-	dx_logging_verbose(dx_ll_info, L"Return connection at %p", *connection);
+	dx_logging_verbose(dx_ll_info, L"DXFeed::dxf_create_connection_impl: Return connection at %p", *connection);
 	return DXF_SUCCESS;
 }
 
@@ -301,12 +301,12 @@ DXFEED_API ERRORCODE dxf_create_connection(const char *address, dxf_conn_termina
 										   dxf_socket_thread_creation_notifier_t stcn,
 										   dxf_socket_thread_destruction_notifier_t stdn, void *user_data,
 										   OUT dxf_connection_t *connection) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_create_connection(address = '%hs', ...)", address);
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_create_connection(address = '%hs', ...)", address);
 
 	ERRORCODE result = dxf_create_connection_impl(address, NULL, NULL, notifier, conn_status_notifier, stcn, stdn,
 												  user_data, OUT connection);
 
-	dx_logging_verbose(dx_ll_debug, L"dxf_create_connection(address = '%hs', ...) -> %d, %p", address, result,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_create_connection(address = '%hs', ...) -> %d, %p", address, result,
 					   (connection != NULL) ? *connection : NULL);
 
 	return result;
@@ -320,7 +320,7 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_basic(const char *address, const
 													  dxf_socket_thread_creation_notifier_t stcn,
 													  dxf_socket_thread_destruction_notifier_t stdn, void *user_data,
 													  OUT dxf_connection_t *connection) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_create_connection_auth_basic(address = '%hs', user = '%hs'...)", address,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_create_connection_auth_basic(address = '%hs', user = '%hs'...)", address,
 					   user);
 
 	char *base64_buf;
@@ -328,7 +328,7 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_basic(const char *address, const
 	if (user == NULL || password == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_create_connection_auth_basic(address = '%hs', user = '%hs'...) -> %d, 'The login or "
+						   L"DXFeed::dxf_create_connection_auth_basic(address = '%hs', user = '%hs'...) -> %d, 'The login or "
 						   L"password is NULL'",
 						   address, user, DXF_FAILURE);
 
@@ -338,7 +338,7 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_basic(const char *address, const
 	base64_buf = dx_protocol_get_basic_auth_data(user, password);
 	if (base64_buf == NULL) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_create_connection_auth_basic(address = '%hs', user = '%hs'...) -> %d, 'Error creating "
+						   L"DXFeed::dxf_create_connection_auth_basic(address = '%hs', user = '%hs'...) -> %d, 'Error creating "
 						   L"base64 basic authentication pair'",
 						   address, user, DXF_FAILURE);
 
@@ -350,7 +350,7 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_basic(const char *address, const
 
 	dx_free(base64_buf);
 
-	dx_logging_verbose(dx_ll_debug, L"dxf_create_connection_auth_basic(address = '%hs', user = '%hs'...) -> %d, %p",
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_create_connection_auth_basic(address = '%hs', user = '%hs'...) -> %d, %p",
 					   address, user, res, (connection != NULL) ? *connection : NULL);
 	return res;
 }
@@ -363,14 +363,14 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_bearer(const char *address, cons
 													   dxf_socket_thread_creation_notifier_t stcn,
 													   dxf_socket_thread_destruction_notifier_t stdn, void *user_data,
 													   OUT dxf_connection_t *connection) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_create_connection_auth_bearer(address = '%hs', token = '%hs'...)", address,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_create_connection_auth_bearer(address = '%hs', token = '%hs'...)", address,
 					   token);
 
 	if (token == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
 		dx_logging_verbose(
 			dx_ll_debug,
-			L"dxf_create_connection_auth_bearer(address = '%hs', token = '%hs'...) -> %d, 'The token is NULL'", address,
+			L"DXFeed::dxf_create_connection_auth_bearer(address = '%hs', token = '%hs'...) -> %d, 'The token is NULL'", address,
 			token, DXF_FAILURE);
 
 		return DXF_FAILURE;
@@ -378,7 +378,7 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_bearer(const char *address, cons
 
 	ERRORCODE res = dxf_create_connection_auth_custom(address, DX_AUTH_BEARER_KEY, token, notifier,
 													  conn_status_notifier, stcn, stdn, user_data, connection);
-	dx_logging_verbose(dx_ll_debug, L"dxf_create_connection_auth_bearer(address = '%hs', token = '%hs'...) -> %d, %p",
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_create_connection_auth_bearer(address = '%hs', token = '%hs'...) -> %d, %p",
 					   address, token, res, (connection != NULL) ? *connection : NULL);
 
 	return res;
@@ -392,7 +392,7 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_custom(const char *address, cons
 													   dxf_socket_thread_creation_notifier_t stcn,
 													   dxf_socket_thread_destruction_notifier_t stdn, void *user_data,
 													   OUT dxf_connection_t *connection) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_create_connection_auth_custom(address = '%hs', auth scheme = '%hs'...)",
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_create_connection_auth_custom(address = '%hs', auth scheme = '%hs'...)",
 					   address, authscheme);
 
 	if (authscheme == NULL || authdata == NULL) {
@@ -400,7 +400,7 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_custom(const char *address, cons
 
 		dx_set_error_code(dx_ec_invalid_func_param);
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_create_connection_auth_custom(address = '%hs', auth scheme = '%hs'...) -> %d, 'The "
+						   L"DXFeed::dxf_create_connection_auth_custom(address = '%hs', auth scheme = '%hs'...) -> %d, 'The "
 						   L"auth scheme or auth data is NULL'",
 						   address, authscheme, DXF_FAILURE);
 		return DXF_FAILURE;
@@ -409,7 +409,7 @@ DXFEED_API ERRORCODE dxf_create_connection_auth_custom(const char *address, cons
 	ERRORCODE res = dxf_create_connection_impl(address, authscheme, authdata, notifier, conn_status_notifier, stcn,
 											   stdn, user_data, OUT connection);
 	dx_logging_verbose(dx_ll_debug,
-					   L"dxf_create_connection_auth_custom(address = '%hs', auth scheme = '%hs'...) -> %d, %p", address,
+					   L"DXFeed::dxf_create_connection_auth_custom(address = '%hs', auth scheme = '%hs'...) -> %d, %p", address,
 					   authscheme, res, (connection != NULL) ? *connection : NULL);
 
 	return res;
@@ -429,11 +429,11 @@ DXFEED_API ERRORCODE dxf_set_on_server_heartbeat_notifier_impl(dxf_connection_t 
 DXFEED_API ERRORCODE dxf_set_on_server_heartbeat_notifier(dxf_connection_t connection,
 														  dxf_conn_on_server_heartbeat_notifier_t notifier,
 														  void *user_data) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_set_on_server_heartbeat_notifier(con = %p...)", connection);
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_set_on_server_heartbeat_notifier(con = %p...)", connection);
 
 	ERRORCODE res = dxf_set_on_server_heartbeat_notifier_impl(connection, notifier, user_data);
 
-	dx_logging_verbose(dx_ll_debug, L"dxf_set_on_server_heartbeat_notifier(con = %p...) -> %d", connection, res);
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_set_on_server_heartbeat_notifier(con = %p...) -> %d", connection, res);
 
 	return res;
 }
@@ -441,24 +441,24 @@ DXFEED_API ERRORCODE dxf_set_on_server_heartbeat_notifier(dxf_connection_t conne
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_close_connection(dxf_connection_t connection) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_close_connection(con = %p)", connection);
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_close_connection(con = %p)", connection);
 
 	if (!dx_validate_connection_handle(connection, false)) {
-		dx_logging_verbose(dx_ll_debug, L"dxf_close_connection(con = %p) -> %d", connection, DXF_FAILURE);
+		dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_close_connection(con = %p) -> %d", connection, DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
 
 	if (!dx_can_deinit_connection(connection)) {
 		dx_queue_connection_for_close(connection);
-		dx_logging_verbose(dx_ll_debug, L"dxf_close_connection(con = %p) -> %d", connection, DXF_SUCCESS);
+		dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_close_connection(con = %p) -> %d", connection, DXF_SUCCESS);
 
 		return DXF_SUCCESS;
 	}
 
 	dx_set_is_closing(connection);
 	int res = dx_deinit_connection(connection);
-	dx_logging_verbose(dx_ll_debug, L"dxf_close_connection(con = %p) -> %d", connection,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_close_connection(con = %p) -> %d", connection,
 					   (res ? DXF_SUCCESS : DXF_FAILURE));
 
 	return (res ? DXF_SUCCESS : DXF_FAILURE);
@@ -493,12 +493,12 @@ ERRORCODE dxf_create_subscription_impl(dxf_connection_t connection, int event_ty
 
 DXFEED_API ERRORCODE dxf_create_subscription(dxf_connection_t connection, int event_types,
 											 OUT dxf_subscription_t *subscription) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_create_subscription(con = %p, event types = 0x%X ...)", connection,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_create_subscription(con = %p, event types = 0x%X ...)", connection,
 					   event_types);
 
 	ERRORCODE res =
 		dxf_create_subscription_impl(connection, event_types, dx_esf_default, DEFAULT_SUBSCRIPTION_TIME, subscription);
-	dx_logging_verbose(dx_ll_debug, L"dxf_create_subscription(con = %p, event types = 0x%X ...) -> %d, %p", connection,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_create_subscription(con = %p, event types = 0x%X ...) -> %d, %p", connection,
 					   event_types, res, (subscription != NULL) ? *subscription : NULL);
 
 	return res;
@@ -508,7 +508,7 @@ DXFEED_API ERRORCODE dxf_create_subscription_with_flags(dxf_connection_t connect
 														dx_event_subscr_flag subscr_flags,
 														OUT dxf_subscription_t *subscription) {
 	dx_logging_verbose(dx_ll_debug,
-					   L"dxf_create_subscription_with_flags(con = %p, event types = 0x%X, subscr flags = 0x%X ...)",
+					   L"DXFeed::dxf_create_subscription_with_flags(con = %p, event types = 0x%X, subscr flags = 0x%X ...)",
 					   connection, event_types, subscr_flags);
 
 	ERRORCODE res =
@@ -516,7 +516,7 @@ DXFEED_API ERRORCODE dxf_create_subscription_with_flags(dxf_connection_t connect
 
 	dx_logging_verbose(
 		dx_ll_debug,
-		L"dxf_create_subscription_with_flags(con = %p, event types = 0x%X, subscr flags = 0x%X ...) -> %d, %p",
+		L"DXFeed::dxf_create_subscription_with_flags(con = %p, event types = 0x%X, subscr flags = 0x%X ...) -> %d, %p",
 		connection, event_types, subscr_flags, res, (subscription != NULL) ? *subscription : NULL);
 
 	return res;
@@ -527,14 +527,14 @@ DXFEED_API ERRORCODE dxf_create_subscription_with_flags(dxf_connection_t connect
 DXFEED_API ERRORCODE dxf_create_subscription_timed(dxf_connection_t connection, int event_types, dxf_long_t time,
 												   OUT dxf_subscription_t *subscription) {
 	dx_logging_verbose(dx_ll_debug,
-					   L"dxf_create_subscription_timed(con = %p, event types = 0x%X, time = %" LS(PRId64) L" ...)",
+					   L"DXFeed::dxf_create_subscription_timed(con = %p, event types = 0x%X, time = %" LS(PRId64) L" ...)",
 					   connection, event_types, time);
 
 	ERRORCODE res = dxf_create_subscription_impl(connection, event_types, dx_esf_time_series, time, subscription);
 
 	dx_logging_verbose(
 		dx_ll_debug,
-		L"dxf_create_subscription_timed(con = %p, event types = 0x%X, time = %" LS(PRId64) L" ...) -> %d, %p",
+		L"DXFeed::dxf_create_subscription_timed(con = %p, event types = 0x%X, time = %" LS(PRId64) L" ...) -> %d, %p",
 		connection, event_types, time, res, (subscription != NULL) ? *subscription : NULL);
 
 	return res;
@@ -544,7 +544,7 @@ DXFEED_API ERRORCODE dxf_create_subscription_timed_with_flags(dxf_connection_t c
 															  dxf_long_t time, dx_event_subscr_flag subscr_flags,
 															  OUT dxf_subscription_t *subscription) {
 	dx_logging_verbose(dx_ll_debug,
-					   L"dxf_create_subscription_timed_with_flags(con = %p, event types = 0x%X, time = %" LS(
+					   L"DXFeed::dxf_create_subscription_timed_with_flags(con = %p, event types = 0x%X, time = %" LS(
 						   PRId64) L", subscr flags = 0x%X ...)",
 					   connection, event_types, time, subscr_flags);
 
@@ -552,7 +552,7 @@ DXFEED_API ERRORCODE dxf_create_subscription_timed_with_flags(dxf_connection_t c
 		dxf_create_subscription_impl(connection, event_types, dx_esf_time_series | subscr_flags, time, subscription);
 
 	dx_logging_verbose(dx_ll_debug,
-					   L"dxf_create_subscription_timed_with_flags(con = %p, event types = 0x%X, time = %" LS(
+					   L"DXFeed::dxf_create_subscription_timed_with_flags(con = %p, event types = 0x%X, time = %" LS(
 						   PRId64) L", subscr flags = 0x%X ...) -> %d, %p",
 					   connection, event_types, time, subscr_flags, res, (subscription != NULL) ? *subscription : NULL);
 
@@ -560,11 +560,11 @@ DXFEED_API ERRORCODE dxf_create_subscription_timed_with_flags(dxf_connection_t c
 }
 
 DXFEED_API ERRORCODE dxf_close_subscription(dxf_subscription_t subscription) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_close_subscription(sub = %p)", subscription);
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_close_subscription(sub = %p)", subscription);
 
 	ERRORCODE res = dx_close_subscription(subscription, DX_RESET_ERROR);
 
-	dx_logging_verbose(dx_ll_debug, L"dxf_close_subscription(sub = %p) -> %d", subscription, res);
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_close_subscription(sub = %p) -> %d", subscription, res);
 
 	return res;
 }
@@ -572,12 +572,12 @@ DXFEED_API ERRORCODE dxf_close_subscription(dxf_subscription_t subscription) {
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_add_symbol(dxf_subscription_t subscription, dxf_const_string_t symbol) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_add_symbol(sub = %p, symbol = '%ls')", subscription,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_add_symbol(sub = %p, symbol = '%ls')", subscription,
 					   (symbol == NULL) ? L"NULL" : symbol);
 
 	ERRORCODE res = dxf_add_symbols(subscription, &symbol, 1);
 
-	dx_logging_verbose(dx_ll_debug, L"dxf_add_symbol(sub = %p, symbol = '%ls') -> %d", subscription,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_add_symbol(sub = %p, symbol = '%ls') -> %d", subscription,
 					   (symbol == NULL) ? L"NULL" : symbol, res);
 
 	return res;
@@ -592,14 +592,14 @@ DXFEED_API ERRORCODE dxf_add_symbol(dxf_subscription_t subscription, dxf_const_s
 DXFEED_API ERRORCODE dxf_add_symbols(dxf_subscription_t subscription, dxf_const_string_t *symbols, int symbol_count) {
 	dx_perform_common_actions(DX_RESET_ERROR);
 
-	dx_logging_verbose(dx_ll_debug, L"dxf_add_symbols(sub = %p, symbols[%d] = '%ls'...)", subscription, symbol_count,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_add_symbols(sub = %p, symbols[%d] = '%ls'...)", subscription, symbol_count,
 					   (symbols == NULL) ? L"NULL" : (symbol_count > 0 ? symbols[0] : L""));
 
 	if (subscription == dx_invalid_subscription || symbols == NULL || symbol_count < 0) {
 		dx_set_error_code(dx_ec_invalid_func_param);
 
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_add_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'The subscription is invalid or "
+						   L"DXFeed::dxf_add_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'The subscription is invalid or "
 						   L"symbols is NULL or symbols count < 0'",
 						   subscription, symbol_count,
 						   (symbols == NULL) ? L"NULL" : (symbol_count > 0 ? symbols[0] : L""), DXF_FAILURE);
@@ -609,7 +609,7 @@ DXFEED_API ERRORCODE dxf_add_symbols(dxf_subscription_t subscription, dxf_const_
 
 	if (symbol_count == 0) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_add_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'The symbols count == 0'",
+						   L"DXFeed::dxf_add_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'The symbols count == 0'",
 						   subscription, symbol_count, L"", DXF_SUCCESS);
 		return DXF_SUCCESS;
 	}
@@ -622,7 +622,7 @@ DXFEED_API ERRORCODE dxf_add_symbols(dxf_subscription_t subscription, dxf_const_
 		!dx_get_event_subscription_event_types(subscription, &events) ||
 		!dx_get_event_subscription_flags(subscription, &subscr_flags)) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_add_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'Unable to get connection "
+						   L"DXFeed::dxf_add_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'Unable to get connection "
 						   L"information or event types or subscription flags'",
 						   subscription, symbol_count, symbols[0], DXF_FAILURE);
 		return DXF_FAILURE;
@@ -631,7 +631,7 @@ DXFEED_API ERRORCODE dxf_add_symbols(dxf_subscription_t subscription, dxf_const_
 	if (IS_FLAG_SET(subscr_flags, dx_esf_wildcard)) {
 		dx_logging_verbose(
 			dx_ll_debug,
-			L"dxf_add_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'Already subscribed to the wildcard (*)'",
+			L"DXFeed::dxf_add_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'Already subscribed to the wildcard (*)'",
 			subscription, symbol_count, symbols[0], DXF_SUCCESS);
 		return DXF_SUCCESS;
 	}
@@ -650,7 +650,7 @@ DXFEED_API ERRORCODE dxf_add_symbols(dxf_subscription_t subscription, dxf_const_
 
 		if (!dxf_clear_symbols(subscription)) {
 			dx_logging_verbose(dx_ll_debug,
-							   L"dxf_add_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'Tried unsuccessfully to "
+							   L"DXFeed::dxf_add_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'Tried unsuccessfully to "
 							   L"clear symbols to subscribe to wildcard (*) '",
 							   subscription, symbol_count, symbols[0], DXF_FAILURE);
 
@@ -670,7 +670,7 @@ DXFEED_API ERRORCODE dxf_add_symbols(dxf_subscription_t subscription, dxf_const_
 						   &added_symbols_count)) {
 		dx_free(added_symbols_indices);
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_add_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'Unsuccessfully attempted to add "
+						   L"DXFeed::dxf_add_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'Unsuccessfully attempted to add "
 						   L"symbols to the subscription'",
 						   subscription, symbol_count, symbols[0], DXF_FAILURE);
 		return DXF_FAILURE;
@@ -679,7 +679,7 @@ DXFEED_API ERRORCODE dxf_add_symbols(dxf_subscription_t subscription, dxf_const_
 	if (added_symbols_count == 0) {
 		dx_free(added_symbols_indices);
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_add_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'The added symbols are already "
+						   L"DXFeed::dxf_add_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'The added symbols are already "
 						   L"in the subscription'",
 						   subscription, symbol_count, symbols[0], DXF_SUCCESS);
 		return DXF_SUCCESS;
@@ -692,13 +692,13 @@ DXFEED_API ERRORCODE dxf_add_symbols(dxf_subscription_t subscription, dxf_const_
 		dx_free(added_symbols_indices);
 		dx_logging_verbose(
 			dx_ll_debug,
-			L"dxf_add_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'Tried unsuccessfully to subscribe to symbols'",
+			L"DXFeed::dxf_add_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'Tried unsuccessfully to subscribe to symbols'",
 			subscription, symbol_count, symbols[0], DXF_FAILURE);
 		return DXF_FAILURE;
 	}
 
 	dx_free(added_symbols_indices);
-	dx_logging_verbose(dx_ll_debug, L"dxf_add_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d", subscription,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_add_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d", subscription,
 					   symbol_count, symbols[0], DXF_SUCCESS);
 
 	return DXF_SUCCESS;
@@ -707,11 +707,11 @@ DXFEED_API ERRORCODE dxf_add_symbols(dxf_subscription_t subscription, dxf_const_
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_remove_symbol(dxf_subscription_t subscription, dxf_const_string_t symbol) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_remove_symbol(sub = %p, symbol = '%ls')", subscription, symbol);
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_remove_symbol(sub = %p, symbol = '%ls')", subscription, symbol);
 
 	ERRORCODE res = dxf_remove_symbols(subscription, &symbol, 1);
 
-	dx_logging_verbose(dx_ll_debug, L"dxf_remove_symbol(sub = %p, symbol = '%ls') -> %d", subscription, symbol, res);
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_remove_symbol(sub = %p, symbol = '%ls') -> %d", subscription, symbol, res);
 
 	return res;
 }
@@ -722,7 +722,7 @@ DXFEED_API ERRORCODE dxf_remove_symbols(dxf_subscription_t subscription, dxf_con
 										int symbol_count) {
 	dx_perform_common_actions(DX_RESET_ERROR);
 
-	dx_logging_verbose(dx_ll_debug, L"dxf_remove_symbols(sub = %p, symbols[%d] = '%ls'...)", subscription, symbol_count,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_remove_symbols(sub = %p, symbols[%d] = '%ls'...)", subscription, symbol_count,
 					   (symbols == NULL) ? L"NULL" : (symbol_count > 0 ? symbols[0] : L""));
 
 	if (subscription == dx_invalid_subscription || symbols == NULL || symbol_count < 0) {
@@ -730,7 +730,7 @@ DXFEED_API ERRORCODE dxf_remove_symbols(dxf_subscription_t subscription, dxf_con
 
 		dx_logging_verbose(
 			dx_ll_debug,
-			L"dxf_remove_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'The subscription is invalid or "
+			L"DXFeed::dxf_remove_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'The subscription is invalid or "
 			L"symbols is NULL or symbols count < 0'",
 			subscription, symbol_count, (symbols == NULL) ? L"NULL" : (symbol_count > 0 ? symbols[0] : L""),
 			DXF_FAILURE);
@@ -743,7 +743,7 @@ DXFEED_API ERRORCODE dxf_remove_symbols(dxf_subscription_t subscription, dxf_con
 	if (!dx_get_event_subscription_symbols_count(subscription, &current_symbol_count)) {
 		dx_logging_verbose(
 			dx_ll_debug,
-			L"dxf_remove_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'Unable to get current symbols count'",
+			L"DXFeed::dxf_remove_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'Unable to get current symbols count'",
 			subscription, symbol_count, symbols[0], DXF_FAILURE);
 
 		return DXF_FAILURE;
@@ -753,7 +753,7 @@ DXFEED_API ERRORCODE dxf_remove_symbols(dxf_subscription_t subscription, dxf_con
 	// Let's use a simple check to remove symbols so that we don't use a flag for each subscription.
 	if (current_symbol_count == 0u) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_remove_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'Current symbols count == 0'",
+						   L"DXFeed::dxf_remove_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'Current symbols count == 0'",
 						   subscription, symbol_count, L"", DXF_SUCCESS);
 
 		return DXF_SUCCESS;
@@ -768,7 +768,7 @@ DXFEED_API ERRORCODE dxf_remove_symbols(dxf_subscription_t subscription, dxf_con
 	if (found_wildcard) {
 		dx_logging_verbose(
 			dx_ll_debug,
-			L"dxf_remove_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'An attempt to unsubscribe from "
+			L"DXFeed::dxf_remove_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'An attempt to unsubscribe from "
 			L"a wildcard (*), unsubscribing from all symbols. '",
 			subscription, symbol_count, symbols[0], DXF_SUCCESS);
 
@@ -783,7 +783,7 @@ DXFEED_API ERRORCODE dxf_remove_symbols(dxf_subscription_t subscription, dxf_con
 		!dx_get_event_subscription_event_types(subscription, &events) ||
 		!dx_get_event_subscription_flags(subscription, &subscr_flags)) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_remove_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'Unable to get connection "
+						   L"DXFeed::dxf_remove_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'Unable to get connection "
 						   L"information or event types or subscription flags'",
 						   subscription, symbol_count, symbols[0], DXF_FAILURE);
 
@@ -792,7 +792,7 @@ DXFEED_API ERRORCODE dxf_remove_symbols(dxf_subscription_t subscription, dxf_con
 
 	if (IS_FLAG_SET(subscr_flags, dx_esf_wildcard)) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_remove_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'An attempt to unsubscribe "
+						   L"DXFeed::dxf_remove_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'An attempt to unsubscribe "
 						   L"from symbols, despite the fact that there is a subscription to a wildcard. Skipped.'",
 						   subscription, symbol_count, symbols[0], DXF_SUCCESS);
 
@@ -806,14 +806,14 @@ DXFEED_API ERRORCODE dxf_remove_symbols(dxf_subscription_t subscription, dxf_con
 						subscr_flags, time) ||
 		!dx_remove_symbols(subscription, symbols, symbol_count)) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_remove_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'Tried unsuccessfully to "
+						   L"DXFeed::dxf_remove_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'Tried unsuccessfully to "
 						   L"unsubscribe from symbols'",
 						   subscription, symbol_count, symbols[0], DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
 
-	dx_logging_verbose(dx_ll_debug, L"dxf_remove_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d", subscription,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_remove_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d", subscription,
 					   symbol_count, symbols[0], DXF_SUCCESS);
 
 	return DXF_SUCCESS;
@@ -825,14 +825,14 @@ DXFEED_API ERRORCODE dxf_get_symbols(dxf_subscription_t subscription, OUT dxf_co
 									 OUT int *symbol_count) {
 	dx_perform_common_actions(DX_RESET_ERROR);
 
-	dx_logging_verbose(dx_ll_debug, L"dxf_get_symbols(sub = %p, symbols = %p, count = %p)", subscription, symbols,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_get_symbols(sub = %p, symbols = %p, count = %p)", subscription, symbols,
 					   symbol_count);
 
 	if (subscription == dx_invalid_subscription || symbols == NULL || symbol_count == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
 
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_get_symbols(sub = %p, symbols = %p, count = %p) -> %d, 'Tried unsuccessfully to "
+						   L"DXFeed::dxf_get_symbols(sub = %p, symbols = %p, count = %p) -> %d, 'Tried unsuccessfully to "
 						   L"retrieve the subscription symbols'",
 						   subscription, symbols, symbol_count, DXF_FAILURE);
 
@@ -843,7 +843,7 @@ DXFEED_API ERRORCODE dxf_get_symbols(dxf_subscription_t subscription, OUT dxf_co
 
 	if (!dx_get_event_subscription_symbols(subscription, symbols, &symbols_size)) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_get_symbols(sub = %p, symbols = %p, count = %p) -> %d, 'The subscription is invalid "
+						   L"DXFeed::dxf_get_symbols(sub = %p, symbols = %p, count = %p) -> %d, 'The subscription is invalid "
 						   L"or symbols is NULL or symbols count is NULL'",
 						   subscription, symbols, symbol_count, DXF_FAILURE);
 
@@ -852,7 +852,7 @@ DXFEED_API ERRORCODE dxf_get_symbols(dxf_subscription_t subscription, OUT dxf_co
 
 	*symbol_count = (int)symbols_size;
 
-	dx_logging_verbose(dx_ll_debug, L"dxf_get_symbols(sub = %p, symbols = %p, count = %p {*count = %d}) -> %d",
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_get_symbols(sub = %p, symbols = %p, count = %p {*count = %d}) -> %d",
 					   subscription, symbols, symbol_count, *symbol_count, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
@@ -863,14 +863,14 @@ DXFEED_API ERRORCODE dxf_get_symbols(dxf_subscription_t subscription, OUT dxf_co
 DXFEED_API ERRORCODE dxf_set_symbols(dxf_subscription_t subscription, dxf_const_string_t *symbols, int symbol_count) {
 	dx_perform_common_actions(DX_RESET_ERROR);
 
-	dx_logging_verbose(dx_ll_debug, L"dxf_set_symbols(sub = %p, symbols[%d] = '%ls'...)", subscription, symbol_count,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_set_symbols(sub = %p, symbols[%d] = '%ls'...)", subscription, symbol_count,
 					   (symbols == NULL) ? L"NULL" : (symbol_count > 0 ? symbols[0] : L""));
 
 	if (subscription == dx_invalid_subscription || symbols == NULL || symbol_count < 0) {
 		dx_set_error_code(dx_ec_invalid_func_param);
 
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_set_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'The subscription is invalid or "
+						   L"DXFeed::dxf_set_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'The subscription is invalid or "
 						   L"symbols is NULL or symbols count < 0'",
 						   subscription, symbol_count,
 						   (symbols == NULL) ? L"NULL" : (symbol_count > 0 ? symbols[0] : L""), DXF_FAILURE);
@@ -882,13 +882,13 @@ DXFEED_API ERRORCODE dxf_set_symbols(dxf_subscription_t subscription, dxf_const_
 		dxf_add_symbols(subscription, symbols, symbol_count) == DXF_FAILURE) {
 		dx_logging_verbose(
 			dx_ll_debug,
-			L"dxf_set_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'Tried unsuccessfully to clear and add symbols'",
+			L"DXFeed::dxf_set_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d, 'Tried unsuccessfully to clear and add symbols'",
 			subscription, symbol_count, symbols[0], DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
 
-	dx_logging_verbose(dx_ll_debug, L"dxf_set_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d", subscription,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_set_symbols(sub = %p, symbols[%d] = '%ls'...) -> %d", subscription,
 					   symbol_count, symbols[0], DXF_SUCCESS);
 
 	return DXF_SUCCESS;
@@ -905,13 +905,13 @@ DXFEED_API ERRORCODE dxf_clear_symbols(dxf_subscription_t subscription) {
 	dx_event_subscr_flag subscr_flags;
 	dxf_long_t time;
 
-	dx_logging_verbose(dx_ll_debug, L"dxf_clear_symbols(sub = %p)", subscription);
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_clear_symbols(sub = %p)", subscription);
 
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (subscription == dx_invalid_subscription) {
 		dx_set_error_code(dx_ec_invalid_func_param);
-		dx_logging_verbose(dx_ll_debug, L"dxf_clear_symbols(sub = %p) -> %d, 'The subscription is invalid'",
+		dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_clear_symbols(sub = %p) -> %d, 'The subscription is invalid'",
 						   subscription, DXF_FAILURE);
 
 		return DXF_FAILURE;
@@ -925,7 +925,7 @@ DXFEED_API ERRORCODE dxf_clear_symbols(dxf_subscription_t subscription) {
 		!dx_unsubscribe(connection, dx_get_order_sources(subscription), symbols, symbol_count, (int)events,
 						subscr_flags, time) ||
 		!dx_remove_symbols(subscription, symbols, symbol_count)) {
-		dx_logging_verbose(dx_ll_debug, L"dxf_clear_symbols(sub = %p) -> %d, 'Tried unsuccessfully to remove symbols'",
+		dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_clear_symbols(sub = %p) -> %d, 'Tried unsuccessfully to remove symbols'",
 						   subscription, DXF_FAILURE);
 
 		return DXF_FAILURE;
@@ -937,14 +937,14 @@ DXFEED_API ERRORCODE dxf_clear_symbols(dxf_subscription_t subscription) {
 		if (!dx_set_event_subscription_flags(subscription, subscr_flags)) {
 			dx_logging_verbose(
 				dx_ll_debug,
-				L"dxf_clear_symbols(sub = %p) -> %d, 'Tried unsuccessfully to unset wildcard subscription flag'",
+				L"DXFeed::dxf_clear_symbols(sub = %p) -> %d, 'Tried unsuccessfully to unset wildcard subscription flag'",
 				subscription, DXF_FAILURE);
 
 			return DXF_FAILURE;
 		}
 	}
 
-	dx_logging_verbose(dx_ll_debug, L"dxf_clear_symbols(sub = %p) -> %d", subscription, DXF_SUCCESS);
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_clear_symbols(sub = %p) -> %d", subscription, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
 }
@@ -953,7 +953,7 @@ DXFEED_API ERRORCODE dxf_clear_symbols(dxf_subscription_t subscription) {
 
 DXFEED_API ERRORCODE dxf_attach_event_listener(dxf_subscription_t subscription, dxf_event_listener_t event_listener,
 											   void *user_data) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_attach_event_listener(sub = %p, listener = %p, user_data = %p)", subscription,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_attach_event_listener(sub = %p, listener = %p, user_data = %p)", subscription,
 					   event_listener, user_data);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
@@ -961,7 +961,7 @@ DXFEED_API ERRORCODE dxf_attach_event_listener(dxf_subscription_t subscription, 
 		dx_set_error_code(dx_ec_invalid_func_param);
 		dx_logging_verbose(
 			dx_ll_debug,
-			L"dxf_attach_event_listener(sub = %p, listener = %p, user_data = %p) -> %d, 'The subscription is "
+			L"DXFeed::dxf_attach_event_listener(sub = %p, listener = %p, user_data = %p) -> %d, 'The subscription is "
 			L"invalid or listener is NULL'",
 			subscription, event_listener, user_data, DXF_FAILURE);
 
@@ -971,14 +971,14 @@ DXFEED_API ERRORCODE dxf_attach_event_listener(dxf_subscription_t subscription, 
 	if (!dx_add_listener(subscription, event_listener, user_data)) {
 		dx_logging_verbose(
 			dx_ll_debug,
-			L"dxf_attach_event_listener(sub = %p, listener = %p, user_data = %p) -> %d, 'Tried unsuccessfully "
+			L"DXFeed::dxf_attach_event_listener(sub = %p, listener = %p, user_data = %p) -> %d, 'Tried unsuccessfully "
 			L"to attach the listener'",
 			subscription, event_listener, user_data, DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
 
-	dx_logging_verbose(dx_ll_debug, L"dxf_attach_event_listener(sub = %p, listener = %p, user_data = %p) -> %d",
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_attach_event_listener(sub = %p, listener = %p, user_data = %p) -> %d",
 					   subscription, event_listener, user_data, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
@@ -987,14 +987,14 @@ DXFEED_API ERRORCODE dxf_attach_event_listener(dxf_subscription_t subscription, 
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_detach_event_listener(dxf_subscription_t subscription, dxf_event_listener_t event_listener) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_detach_event_listener(sub = %p, listener = %p)", subscription,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_detach_event_listener(sub = %p, listener = %p)", subscription,
 					   event_listener);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (subscription == dx_invalid_subscription || event_listener == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_detach_event_listener(sub = %p, listener = %p) -> %d, 'The subscription is "
+						   L"DXFeed::dxf_detach_event_listener(sub = %p, listener = %p) -> %d, 'The subscription is "
 						   L"invalid or listener is NULL'",
 						   subscription, event_listener, DXF_FAILURE);
 
@@ -1004,13 +1004,13 @@ DXFEED_API ERRORCODE dxf_detach_event_listener(dxf_subscription_t subscription, 
 	if (!dx_remove_listener(subscription, event_listener)) {
 		dx_logging_verbose(
 			dx_ll_debug,
-			L"dxf_detach_event_listener(sub = %p, listener = %p) -> %d, 'Tried unsuccessfully to detach the listener'",
+			L"DXFeed::dxf_detach_event_listener(sub = %p, listener = %p) -> %d, 'Tried unsuccessfully to detach the listener'",
 			subscription, event_listener, DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
 
-	dx_logging_verbose(dx_ll_debug, L"dxf_detach_event_listener(sub = %p, listener = %p) -> %d", subscription,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_detach_event_listener(sub = %p, listener = %p) -> %d", subscription,
 					   event_listener, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
@@ -1020,14 +1020,14 @@ DXFEED_API ERRORCODE dxf_detach_event_listener(dxf_subscription_t subscription, 
 
 DXFEED_API ERRORCODE dxf_attach_event_listener_v2(dxf_subscription_t subscription,
 												  dxf_event_listener_v2_t event_listener, void *user_data) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_attach_event_listener_v2(sub = %p, listener = %p, user_data = %p)",
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_attach_event_listener_v2(sub = %p, listener = %p, user_data = %p)",
 					   subscription, event_listener, user_data);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (subscription == dx_invalid_subscription || event_listener == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_attach_event_listener_v2(sub = %p, listener = %p) -> %d, 'The subscription is "
+						   L"DXFeed::dxf_attach_event_listener_v2(sub = %p, listener = %p) -> %d, 'The subscription is "
 						   L"invalid or listener is NULL'",
 						   subscription, event_listener, DXF_FAILURE);
 
@@ -1037,14 +1037,14 @@ DXFEED_API ERRORCODE dxf_attach_event_listener_v2(dxf_subscription_t subscriptio
 	if (!dx_add_listener_v2(subscription, event_listener, user_data)) {
 		dx_logging_verbose(
 			dx_ll_debug,
-			L"dxf_attach_event_listener_v2(sub = %p, listener = %p, user_data = %p) -> %d, 'Tried unsuccessfully "
+			L"DXFeed::dxf_attach_event_listener_v2(sub = %p, listener = %p, user_data = %p) -> %d, 'Tried unsuccessfully "
 			L"to attach the listener'",
 			subscription, event_listener, user_data, DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
 
-	dx_logging_verbose(dx_ll_debug, L"dxf_attach_event_listener_v2(sub = %p, listener = %p, user_data = %p) -> %d",
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_attach_event_listener_v2(sub = %p, listener = %p, user_data = %p) -> %d",
 					   subscription, event_listener, user_data, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
@@ -1054,14 +1054,14 @@ DXFEED_API ERRORCODE dxf_attach_event_listener_v2(dxf_subscription_t subscriptio
 
 DXFEED_API ERRORCODE dxf_detach_event_listener_v2(dxf_subscription_t subscription,
 												  dxf_event_listener_v2_t event_listener) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_detach_event_listener_v2(sub = %p, listener = %p)", subscription,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_detach_event_listener_v2(sub = %p, listener = %p)", subscription,
 					   event_listener);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (subscription == dx_invalid_subscription || event_listener == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_detach_event_listener_v2(sub = %p, listener = %p) -> %d, 'The subscription is "
+						   L"DXFeed::dxf_detach_event_listener_v2(sub = %p, listener = %p) -> %d, 'The subscription is "
 						   L"invalid or listener is NULL'",
 						   subscription, event_listener, DXF_FAILURE);
 
@@ -1070,14 +1070,14 @@ DXFEED_API ERRORCODE dxf_detach_event_listener_v2(dxf_subscription_t subscriptio
 
 	if (!dx_remove_listener_v2(subscription, event_listener)) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_detach_event_listener_v2(sub = %p, listener = %p) -> %d, 'Tried unsuccessfully to "
+						   L"DXFeed::dxf_detach_event_listener_v2(sub = %p, listener = %p) -> %d, 'Tried unsuccessfully to "
 						   L"detach the listener'",
 						   subscription, event_listener, DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
 
-	dx_logging_verbose(dx_ll_debug, L"dxf_detach_event_listener_v2(sub = %p, listener = %p) -> %d", subscription,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_detach_event_listener_v2(sub = %p, listener = %p) -> %d", subscription,
 					   event_listener, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
@@ -1086,14 +1086,14 @@ DXFEED_API ERRORCODE dxf_detach_event_listener_v2(dxf_subscription_t subscriptio
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_get_subscription_event_types(dxf_subscription_t subscription, OUT int *event_types) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_get_subscription_event_types(sub = %p, event_types = %p)", subscription,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_get_subscription_event_types(sub = %p, event_types = %p)", subscription,
 					   event_types);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (subscription == dx_invalid_subscription || event_types == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_get_subscription_event_types(sub = %p, event_types = %p) -> %d, 'The subscription is "
+						   L"DXFeed::dxf_get_subscription_event_types(sub = %p, event_types = %p) -> %d, 'The subscription is "
 						   L"invalid or event_types is NULL'",
 						   subscription, event_types, DXF_FAILURE);
 
@@ -1104,7 +1104,7 @@ DXFEED_API ERRORCODE dxf_get_subscription_event_types(dxf_subscription_t subscri
 
 	if (!dx_get_event_subscription_event_types(subscription, &tmp_event_types)) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_get_subscription_event_types(sub = %p, event_types = %p) -> %d, 'Tried unsuccessfully "
+						   L"DXFeed::dxf_get_subscription_event_types(sub = %p, event_types = %p) -> %d, 'Tried unsuccessfully "
 						   L"to retrieve the event types'",
 						   subscription, event_types, DXF_FAILURE);
 
@@ -1113,7 +1113,7 @@ DXFEED_API ERRORCODE dxf_get_subscription_event_types(dxf_subscription_t subscri
 
 	*event_types = (int)tmp_event_types;
 
-	dx_logging_verbose(dx_ll_debug, L"dxf_get_subscription_event_types(sub = %p, event_types = %p) -> %d, 0x%0X",
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_get_subscription_event_types(sub = %p, event_types = %p) -> %d, 0x%0X",
 					   subscription, event_types, DXF_SUCCESS, *event_types);
 
 	return DXF_SUCCESS;
@@ -1123,13 +1123,13 @@ DXFEED_API ERRORCODE dxf_get_subscription_event_types(dxf_subscription_t subscri
 
 DXFEED_API ERRORCODE dxf_get_last_event(dxf_connection_t connection, int event_type, dxf_const_string_t symbol,
 										OUT dxf_event_data_t *data) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_get_last_event(con = %p, event_type = %d, symbol = '%ls', event data = %p)",
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_get_last_event(con = %p, event_type = %d, symbol = '%ls', event data = %p)",
 					   connection, event_type, symbol, data);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (!dx_validate_connection_handle(connection, false)) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_get_last_event(con = %p, event_type = %d, symbol = '%ls', event data = %p) -> %d, "
+						   L"DXFeed::dxf_get_last_event(con = %p, event_type = %d, symbol = '%ls', event data = %p) -> %d, "
 						   L"'Invalid connection handle'",
 						   connection, event_type, symbol, data, DXF_FAILURE);
 
@@ -1140,7 +1140,7 @@ DXFEED_API ERRORCODE dxf_get_last_event(dxf_connection_t connection, int event_t
 		dx_set_error_code(dx_ec_invalid_func_param);
 		dx_logging_verbose(
 			dx_ll_debug,
-			L"dxf_get_last_event(con = %p, event_type = %d, symbol = '%ls', event data = %p) -> %d, 'The "
+			L"DXFeed::dxf_get_last_event(con = %p, event_type = %d, symbol = '%ls', event data = %p) -> %d, 'The "
 			L"event data ptr is NULL'",
 			connection, event_type, symbol, data, DXF_FAILURE);
 
@@ -1150,7 +1150,7 @@ DXFEED_API ERRORCODE dxf_get_last_event(dxf_connection_t connection, int event_t
 	if (!dx_get_last_symbol_event(connection, symbol, event_type, data)) {
 		dx_logging_verbose(
 			dx_ll_debug,
-			L"dxf_get_last_event(con = %p, event_type = %d, symbol = '%ls', event data = %p) -> %d, 'Tried "
+			L"DXFeed::dxf_get_last_event(con = %p, event_type = %d, symbol = '%ls', event data = %p) -> %d, 'Tried "
 			L"unsuccessfully to retrieve the event data'",
 			connection, event_type, symbol, data, DXF_FAILURE);
 
@@ -1158,7 +1158,7 @@ DXFEED_API ERRORCODE dxf_get_last_event(dxf_connection_t connection, int event_t
 	}
 
 	dx_logging_verbose(dx_ll_debug,
-					   L"dxf_get_last_event(con = %p, event_type = %d, symbol = '%ls', event data = %p) -> %d",
+					   L"DXFeed::dxf_get_last_event(con = %p, event_type = %d, symbol = '%ls', event data = %p) -> %d",
 					   connection, event_type, symbol, data, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
@@ -1167,12 +1167,12 @@ DXFEED_API ERRORCODE dxf_get_last_event(dxf_connection_t connection, int event_t
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_get_last_error(OUT int *error_code, OUT dxf_const_string_t *error_descr) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_get_last_error(error_code = %p, error_descr = %p)", error_code, error_descr);
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_get_last_error(error_code = %p, error_descr = %p)", error_code, error_descr);
 
 	if (error_code == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_get_last_error(error_code = %p, error_descr = %p) -> %d, 'The error code ptr is NULL'",
+						   L"DXFeed::dxf_get_last_error(error_code = %p, error_descr = %p) -> %d, 'The error code ptr is NULL'",
 						   error_code, error_descr, DXF_FAILURE);
 
 		return DXF_FAILURE;
@@ -1183,7 +1183,7 @@ DXFEED_API ERRORCODE dxf_get_last_error(OUT int *error_code, OUT dxf_const_strin
 			*error_descr = dx_get_error_description(*error_code);
 		}
 
-		dx_logging_verbose(dx_ll_debug, L"dxf_get_last_error(error_code = %p, error_descr = %p) -> %d, %d, '%ls'",
+		dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_get_last_error(error_code = %p, error_descr = %p) -> %d, %d, '%ls'",
 						   error_code, error_descr, DXF_SUCCESS, *error_code,
 						   (error_descr == NULL) ? L"NULL" : *error_descr);
 
@@ -1191,7 +1191,7 @@ DXFEED_API ERRORCODE dxf_get_last_error(OUT int *error_code, OUT dxf_const_strin
 	}
 
 	dx_logging_verbose(dx_ll_debug,
-					   L"dxf_get_last_error(error_code = %p, error_descr = %p) -> %d, 'Tried unsuccessfully to "
+					   L"DXFeed::dxf_get_last_error(error_code = %p, error_descr = %p) -> %d, 'Tried unsuccessfully to "
 					   L"retrieve the error code & description'",
 					   error_code, error_descr, DXF_FAILURE);
 
@@ -1201,14 +1201,14 @@ DXFEED_API ERRORCODE dxf_get_last_error(OUT int *error_code, OUT dxf_const_strin
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_set_order_source(dxf_subscription_t subscription, const char *source) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_set_order_source(sub = %p, source = '%hs')", subscription,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_set_order_source(sub = %p, source = '%hs')", subscription,
 					   (source == NULL) ? "NULL" : source);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (subscription == dx_invalid_subscription) {
 		dx_set_error_code(dx_ec_invalid_func_param);
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_set_order_source(sub = %p, source = '%hs') -> %d, 'The subscription is invalid'",
+						   L"DXFeed::dxf_set_order_source(sub = %p, source = '%hs') -> %d, 'The subscription is invalid'",
 						   subscription, (source == NULL) ? "NULL" : source, DXF_FAILURE);
 
 		return DXF_FAILURE;
@@ -1219,7 +1219,7 @@ DXFEED_API ERRORCODE dxf_set_order_source(dxf_subscription_t subscription, const
 	if (source_len == 0 || source_len >= DXF_RECORD_SUFFIX_SIZE) {
 		dx_set_error_code(dx_ec_invalid_func_param);
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_set_order_source(sub = %p, source = '%hs') -> %d, 'The source is invalid'",
+						   L"DXFeed::dxf_set_order_source(sub = %p, source = '%hs') -> %d, 'The source is invalid'",
 						   subscription, (source == NULL) ? "NULL" : source, DXF_FAILURE);
 
 		return DXF_FAILURE;
@@ -1241,7 +1241,7 @@ DXFEED_API ERRORCODE dxf_set_order_source(dxf_subscription_t subscription, const
 		!dx_unsubscribe(connection, dx_get_order_sources(subscription), symbols, symbol_count, (int)events,
 						subscr_flags, time)) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_set_order_source(sub = %p, source = '%hs') -> %d, 'Tried unsuccessfully to "
+						   L"DXFeed::dxf_set_order_source(sub = %p, source = '%hs') -> %d, 'Tried unsuccessfully to "
 						   L"unsubscribe from the old order sources'",
 						   subscription, source, DXF_FAILURE);
 
@@ -1259,7 +1259,7 @@ DXFEED_API ERRORCODE dxf_set_order_source(dxf_subscription_t subscription, const
 		dx_free(str);
 		dx_logging_verbose(
 			dx_ll_debug,
-			L"dxf_set_order_source(sub = %p, source = '%hs') -> %d, 'Error while adding the new order source'",
+			L"DXFeed::dxf_set_order_source(sub = %p, source = '%hs') -> %d, 'Error while adding the new order source'",
 			subscription, source, DXF_FAILURE);
 
 		return DXF_FAILURE;
@@ -1273,14 +1273,14 @@ DXFEED_API ERRORCODE dxf_set_order_source(dxf_subscription_t subscription, const
 		!dx_subscribe(connection, dx_get_order_sources(subscription), symbols, symbol_count, NULL, 0, (int)events,
 					  subscr_flags, time)) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_set_order_source(sub = %p, source = '%hs') -> %d, 'Tried unsuccessfully to subscribe "
+						   L"DXFeed::dxf_set_order_source(sub = %p, source = '%hs') -> %d, 'Tried unsuccessfully to subscribe "
 						   L"to the new order source'",
 						   subscription, source, DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
 
-	dx_logging_verbose(dx_ll_debug, L"dxf_set_order_source(sub = %p, source = '%hs') -> %d", subscription, source,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_set_order_source(sub = %p, source = '%hs') -> %d", subscription, source,
 					   DXF_SUCCESS);
 
 	return DXF_SUCCESS;
@@ -1289,14 +1289,14 @@ DXFEED_API ERRORCODE dxf_set_order_source(dxf_subscription_t subscription, const
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const char *source) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_add_order_source(sub = %p, source = '%hs')", subscription,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_add_order_source(sub = %p, source = '%hs')", subscription,
 					   (source == NULL) ? "NULL" : source);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (subscription == dx_invalid_subscription) {
 		dx_set_error_code(dx_ec_invalid_func_param);
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_add_order_source(sub = %p, source = '%hs') -> %d, 'The subscription is invalid'",
+						   L"DXFeed::dxf_add_order_source(sub = %p, source = '%hs') -> %d, 'The subscription is invalid'",
 						   subscription, (source == NULL) ? "NULL" : source, DXF_FAILURE);
 
 		return DXF_FAILURE;
@@ -1307,7 +1307,7 @@ DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const
 	if (source_len == 0 || source_len >= DXF_RECORD_SUFFIX_SIZE) {
 		dx_set_error_code(dx_ec_invalid_func_param);
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_add_order_source(sub = %p, source = '%hs') -> %d, 'The source is invalid'",
+						   L"DXFeed::dxf_add_order_source(sub = %p, source = '%hs') -> %d, 'The source is invalid'",
 						   subscription, (source == NULL) ? "NULL" : source, DXF_FAILURE);
 
 		return DXF_FAILURE;
@@ -1326,7 +1326,7 @@ DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const
 
 	if (failed) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_add_order_source(sub = %p, source = '%hs') -> %d, 'Error while inserting the order "
+						   L"DXFeed::dxf_add_order_source(sub = %p, source = '%hs') -> %d, 'Error while inserting the order "
 						   L"source into the array'",
 						   subscription, source, DXF_FAILURE);
 
@@ -1351,7 +1351,7 @@ DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const
 		!dx_add_order_source(subscription, elem.suffix)) {
 		dx_free(new_source_array.elements);
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_add_order_source(sub = %p, source = '%hs') -> %d, 'Tried unsuccessfully to subscribe "
+						   L"DXFeed::dxf_add_order_source(sub = %p, source = '%hs') -> %d, 'Tried unsuccessfully to subscribe "
 						   L"to the order source and to add it'",
 						   subscription, source, DXF_FAILURE);
 
@@ -1359,7 +1359,7 @@ DXFEED_API ERRORCODE dxf_add_order_source(dxf_subscription_t subscription, const
 	}
 
 	dx_free(new_source_array.elements);
-	dx_logging_verbose(dx_ll_debug, L"dxf_add_order_source(sub = %p, source = '%hs') -> %d", subscription, source,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_add_order_source(sub = %p, source = '%hs') -> %d", subscription, source,
 					   DXF_SUCCESS);
 
 	return DXF_SUCCESS;
@@ -1453,7 +1453,7 @@ ERRORCODE dx_create_snapshot_impl(dxf_connection_t connection, dx_event_id_t eve
 DXFEED_API ERRORCODE dxf_create_snapshot(dxf_connection_t connection, dx_event_id_t event_id, dxf_const_string_t symbol,
 										 const char *source, dxf_long_t time, OUT dxf_snapshot_t *snapshot) {
 	dx_logging_verbose(dx_ll_debug,
-					   L"dxf_create_snapshot(con = %p, event id = 0x%X, symbol = '%ls', source = '%hs', time = %" LS(
+					   L"DXFeed::dxf_create_snapshot(con = %p, event id = 0x%X, symbol = '%ls', source = '%hs', time = %" LS(
 						   PRId64) L", snapshot = %p)",
 					   connection, event_id, (symbol == NULL) ? L"NULL" : symbol, (source == NULL) ? "NULL" : source,
 					   time, snapshot);
@@ -1465,7 +1465,7 @@ DXFEED_API ERRORCODE dxf_create_snapshot(dxf_connection_t connection, dx_event_i
 	dx_free(source_str);
 
 	dx_logging_verbose(dx_ll_debug,
-					   L"dxf_create_snapshot(con = %p, event id = 0x%X, symbol = '%ls', source = '%hs', time = %" LS(
+					   L"DXFeed::dxf_create_snapshot(con = %p, event id = 0x%X, symbol = '%ls', source = '%hs', time = %" LS(
 						   PRId64) L", snapshot = %p) -> %d, %p",
 					   connection, event_id, (symbol == NULL) ? L"NULL" : symbol, (source == NULL) ? "NULL" : source,
 					   time, snapshot, res, (snapshot == NULL) ? NULL : *snapshot);
@@ -1479,13 +1479,13 @@ DXFEED_API ERRORCODE dxf_create_order_snapshot(dxf_connection_t connection, dxf_
 											   const char *source, dxf_long_t time, OUT dxf_snapshot_t *snapshot) {
 	dx_logging_verbose(
 		dx_ll_debug,
-		L"dxf_create_order_snapshot(con = %p, symbol = '%ls', source = '%hs', time = %" LS(PRId64) L", snapshot = %p)",
+		L"DXFeed::dxf_create_order_snapshot(con = %p, symbol = '%ls', source = '%hs', time = %" LS(PRId64) L", snapshot = %p)",
 		connection, (symbol == NULL) ? L"NULL" : symbol, (source == NULL) ? "NULL" : source, time, snapshot);
 
 	ERRORCODE res = dxf_create_snapshot(connection, dx_eid_order, symbol, source, time, snapshot);
 
 	dx_logging_verbose(dx_ll_debug,
-					   L"dxf_create_order_snapshot(con = %p, symbol = '%ls', source = '%hs', time = %" LS(
+					   L"DXFeed::dxf_create_order_snapshot(con = %p, symbol = '%ls', source = '%hs', time = %" LS(
 						   PRId64) L", snapshot = %p) -> %d, %p",
 					   connection, (symbol == NULL) ? L"NULL" : symbol, (source == NULL) ? "NULL" : source, time,
 					   snapshot, res, (snapshot == NULL) ? NULL : *snapshot);
@@ -1498,7 +1498,7 @@ DXFEED_API ERRORCODE dxf_create_order_snapshot(dxf_connection_t connection, dxf_
 DXFEED_API ERRORCODE dxf_create_candle_snapshot(dxf_connection_t connection, dxf_candle_attributes_t candle_attributes,
 												dxf_long_t time, OUT dxf_snapshot_t *snapshot) {
 	dx_logging_verbose(
-		dx_ll_debug, L"dxf_create_candle_snapshot(con = %p, candle attr = %p, time = %" LS(PRId64) L", snapshot = %p)",
+		dx_ll_debug, L"DXFeed::dxf_create_candle_snapshot(con = %p, candle attr = %p, time = %" LS(PRId64) L", snapshot = %p)",
 		connection, candle_attributes, time, snapshot);
 
 	ERRORCODE res;
@@ -1507,7 +1507,7 @@ DXFEED_API ERRORCODE dxf_create_candle_snapshot(dxf_connection_t connection, dxf
 	if (!dx_candle_symbol_to_string(candle_attributes, &candle_symbol)) {
 		dx_logging_verbose(
 			dx_ll_debug,
-			L"dxf_create_candle_snapshot(con = %p, candle attr = %p, time = %" LS(
+			L"DXFeed::dxf_create_candle_snapshot(con = %p, candle attr = %p, time = %" LS(
 				PRId64) L", snapshot = %p) -> %d, 'Error while converting the candle attributes to a candle symbol'",
 			connection, candle_attributes, time, snapshot, DXF_FAILURE);
 
@@ -1520,7 +1520,7 @@ DXFEED_API ERRORCODE dxf_create_candle_snapshot(dxf_connection_t connection, dxf
 
 	dx_logging_verbose(
 		dx_ll_debug,
-		L"dxf_create_candle_snapshot(con = %p, candle attr = %p, time = %" LS(PRId64) L", snapshot = %p) -> %d, %p",
+		L"DXFeed::dxf_create_candle_snapshot(con = %p, candle attr = %p, time = %" LS(PRId64) L", snapshot = %p) -> %d, %p",
 		connection, candle_attributes, time, snapshot, res, (snapshot == NULL) ? NULL : *snapshot);
 
 	return res;
@@ -1529,7 +1529,7 @@ DXFEED_API ERRORCODE dxf_create_candle_snapshot(dxf_connection_t connection, dxf
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_close_snapshot(dxf_snapshot_t snapshot) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_close_snapshot(snapshot = %p)", snapshot);
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_close_snapshot(snapshot = %p)", snapshot);
 
 	dxf_subscription_t subscription = NULL;
 
@@ -1537,7 +1537,7 @@ DXFEED_API ERRORCODE dxf_close_snapshot(dxf_snapshot_t snapshot) {
 
 	if (snapshot == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
-		dx_logging_verbose(dx_ll_debug, L"dxf_close_snapshot(snapshot = %p) -> %d, 'Invalid snapshot'", snapshot,
+		dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_close_snapshot(snapshot = %p) -> %d, 'Invalid snapshot'", snapshot,
 						   DXF_FAILURE);
 
 		return DXF_FAILURE;
@@ -1546,13 +1546,13 @@ DXFEED_API ERRORCODE dxf_close_snapshot(dxf_snapshot_t snapshot) {
 	if (!dx_get_snapshot_subscription(snapshot, &subscription) || !dxf_close_subscription(subscription) ||
 		!dx_close_snapshot(snapshot)) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_close_snapshot(snapshot = %p) -> %d, 'Tried unsuccessfully to close the snapshot'",
+						   L"DXFeed::dxf_close_snapshot(snapshot = %p) -> %d, 'Tried unsuccessfully to close the snapshot'",
 						   snapshot, DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
 
-	dx_logging_verbose(dx_ll_debug, L"dxf_close_snapshot(snapshot = %p) -> %d", snapshot, DXF_SUCCESS);
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_close_snapshot(snapshot = %p) -> %d", snapshot, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
 }
@@ -1561,14 +1561,14 @@ DXFEED_API ERRORCODE dxf_close_snapshot(dxf_snapshot_t snapshot) {
 
 DXFEED_API ERRORCODE dxf_attach_snapshot_listener(dxf_snapshot_t snapshot, dxf_snapshot_listener_t snapshot_listener,
 												  void *user_data) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_attach_snapshot_listener(snapshot = %p, listener = %p, user data = %p)",
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_attach_snapshot_listener(snapshot = %p, listener = %p, user data = %p)",
 					   snapshot, snapshot_listener, user_data);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (snapshot == dx_invalid_snapshot || snapshot_listener == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_attach_snapshot_listener(snapshot = %p, listener = %p, user data = %p) -> %d, "
+						   L"DXFeed::dxf_attach_snapshot_listener(snapshot = %p, listener = %p, user data = %p) -> %d, "
 						   L"'Invalid snapshot or the listener is NULL'",
 						   snapshot, snapshot_listener, user_data, DXF_FAILURE);
 
@@ -1577,14 +1577,14 @@ DXFEED_API ERRORCODE dxf_attach_snapshot_listener(dxf_snapshot_t snapshot, dxf_s
 
 	if (!dx_add_snapshot_listener(snapshot, snapshot_listener, user_data)) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_attach_snapshot_listener(snapshot = %p, listener = %p, user data = %p) -> %d, 'Tried "
+						   L"DXFeed::dxf_attach_snapshot_listener(snapshot = %p, listener = %p, user data = %p) -> %d, 'Tried "
 						   L"unsuccessfully to add the snapshot listener'",
 						   snapshot, snapshot_listener, user_data, DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
 
-	dx_logging_verbose(dx_ll_debug, L"dxf_attach_snapshot_listener(snapshot = %p, listener = %p, user data = %p) -> %d",
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_attach_snapshot_listener(snapshot = %p, listener = %p, user data = %p) -> %d",
 					   snapshot, snapshot_listener, user_data, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
@@ -1593,14 +1593,14 @@ DXFEED_API ERRORCODE dxf_attach_snapshot_listener(dxf_snapshot_t snapshot, dxf_s
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_detach_snapshot_listener(dxf_snapshot_t snapshot, dxf_snapshot_listener_t snapshot_listener) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_detach_snapshot_listener(snapshot = %p, listener = %p)", snapshot,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_detach_snapshot_listener(snapshot = %p, listener = %p)", snapshot,
 					   snapshot_listener);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (snapshot == dx_invalid_subscription || snapshot_listener == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_detach_snapshot_listener(snapshot = %p, listener = %p) -> %d, 'Invalid snapshot or "
+						   L"DXFeed::dxf_detach_snapshot_listener(snapshot = %p, listener = %p) -> %d, 'Invalid snapshot or "
 						   L"the listener is NULL'",
 						   snapshot, snapshot_listener, DXF_FAILURE);
 
@@ -1609,14 +1609,14 @@ DXFEED_API ERRORCODE dxf_detach_snapshot_listener(dxf_snapshot_t snapshot, dxf_s
 
 	if (!dx_remove_snapshot_listener(snapshot, snapshot_listener)) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_detach_snapshot_listener(snapshot = %p, listener = %p) -> %d, 'Tried unsuccessfully "
+						   L"DXFeed::dxf_detach_snapshot_listener(snapshot = %p, listener = %p) -> %d, 'Tried unsuccessfully "
 						   L"to remove the snapshot listener'",
 						   snapshot, snapshot_listener, DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
 
-	dx_logging_verbose(dx_ll_debug, L"dxf_detach_snapshot_listener(snapshot = %p, listener = %p) -> %d", snapshot,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_detach_snapshot_listener(snapshot = %p, listener = %p) -> %d", snapshot,
 					   snapshot_listener, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
@@ -1626,14 +1626,14 @@ DXFEED_API ERRORCODE dxf_detach_snapshot_listener(dxf_snapshot_t snapshot, dxf_s
 
 DXFEED_API ERRORCODE dxf_attach_snapshot_inc_listener(dxf_snapshot_t snapshot,
 													  dxf_snapshot_inc_listener_t snapshot_listener, void *user_data) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_attach_snapshot_inc_listener(snapshot = %p, listener = %p, user data = %p)",
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_attach_snapshot_inc_listener(snapshot = %p, listener = %p, user data = %p)",
 					   snapshot, snapshot_listener, user_data);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (snapshot == dx_invalid_snapshot || snapshot_listener == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_attach_snapshot_inc_listener(snapshot = %p, listener = %p, user data = %p) -> %d, "
+						   L"DXFeed::dxf_attach_snapshot_inc_listener(snapshot = %p, listener = %p, user data = %p) -> %d, "
 						   L"'Invalid snapshot or the listener is NULL'",
 						   snapshot, snapshot_listener, user_data, DXF_FAILURE);
 
@@ -1642,7 +1642,7 @@ DXFEED_API ERRORCODE dxf_attach_snapshot_inc_listener(dxf_snapshot_t snapshot,
 
 	if (!dx_add_snapshot_inc_listener(snapshot, snapshot_listener, user_data)) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_attach_snapshot_inc_listener(snapshot = %p, listener = %p, user data = %p) -> %d, "
+						   L"DXFeed::dxf_attach_snapshot_inc_listener(snapshot = %p, listener = %p, user data = %p) -> %d, "
 						   L"'Tried unsuccessfully to add the snapshot listener'",
 						   snapshot, snapshot_listener, user_data, DXF_FAILURE);
 
@@ -1650,7 +1650,7 @@ DXFEED_API ERRORCODE dxf_attach_snapshot_inc_listener(dxf_snapshot_t snapshot,
 	}
 
 	dx_logging_verbose(dx_ll_debug,
-					   L"dxf_attach_snapshot_inc_listener(snapshot = %p, listener = %p, user data = %p) -> %d",
+					   L"DXFeed::dxf_attach_snapshot_inc_listener(snapshot = %p, listener = %p, user data = %p) -> %d",
 					   snapshot, snapshot_listener, user_data, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
@@ -1660,14 +1660,14 @@ DXFEED_API ERRORCODE dxf_attach_snapshot_inc_listener(dxf_snapshot_t snapshot,
 
 DXFEED_API ERRORCODE dxf_detach_snapshot_inc_listener(dxf_snapshot_t snapshot,
 													  dxf_snapshot_inc_listener_t snapshot_listener) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_detach_snapshot_inc_listener(snapshot = %p, listener = %p)", snapshot,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_detach_snapshot_inc_listener(snapshot = %p, listener = %p)", snapshot,
 					   snapshot_listener);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (snapshot == dx_invalid_subscription || snapshot_listener == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_detach_snapshot_inc_listener(snapshot = %p, listener = %p) -> %d, 'Invalid snapshot "
+						   L"DXFeed::dxf_detach_snapshot_inc_listener(snapshot = %p, listener = %p) -> %d, 'Invalid snapshot "
 						   L"or the listener is NULL'",
 						   snapshot, snapshot_listener, DXF_FAILURE);
 
@@ -1676,14 +1676,14 @@ DXFEED_API ERRORCODE dxf_detach_snapshot_inc_listener(dxf_snapshot_t snapshot,
 
 	if (!dx_remove_snapshot_inc_listener(snapshot, snapshot_listener)) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_detach_snapshot_inc_listener(snapshot = %p, listener = %p) -> %d, 'Tried "
+						   L"DXFeed::dxf_detach_snapshot_inc_listener(snapshot = %p, listener = %p) -> %d, 'Tried "
 						   L"unsuccessfully to remove the snapshot listener'",
 						   snapshot, snapshot_listener, DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
 
-	dx_logging_verbose(dx_ll_debug, L"dxf_detach_snapshot_inc_listener(snapshot = %p, listener = %p) -> %d", snapshot,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_detach_snapshot_inc_listener(snapshot = %p, listener = %p) -> %d", snapshot,
 					   snapshot_listener, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
@@ -1692,7 +1692,7 @@ DXFEED_API ERRORCODE dxf_detach_snapshot_inc_listener(dxf_snapshot_t snapshot,
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_get_snapshot_symbol(dxf_snapshot_t snapshot, OUT dxf_string_t *symbol) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_get_snapshot_symbol(snapshot = %p, symbol ptr = %p)", snapshot, symbol);
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_get_snapshot_symbol(snapshot = %p, symbol ptr = %p)", snapshot, symbol);
 
 	dx_perform_common_actions(DX_RESET_ERROR);
 
@@ -1700,7 +1700,7 @@ DXFEED_API ERRORCODE dxf_get_snapshot_symbol(dxf_snapshot_t snapshot, OUT dxf_st
 		dx_set_error_code(dx_ec_invalid_func_param);
 		dx_logging_verbose(
 			dx_ll_debug,
-			L"dxf_get_snapshot_symbol(snapshot = %p, symbol ptr = %p) -> %d, 'Invalid snapshot or symbol ptr'",
+			L"DXFeed::dxf_get_snapshot_symbol(snapshot = %p, symbol ptr = %p) -> %d, 'Invalid snapshot or symbol ptr'",
 			snapshot, symbol, DXF_FAILURE);
 
 		return DXF_FAILURE;
@@ -1708,7 +1708,7 @@ DXFEED_API ERRORCODE dxf_get_snapshot_symbol(dxf_snapshot_t snapshot, OUT dxf_st
 
 	*symbol = dx_get_snapshot_symbol(snapshot);
 
-	dx_logging_verbose(dx_ll_debug, L"dxf_get_snapshot_symbol(snapshot = %p, symbol ptr = %p) -> %d, '%ls'", snapshot,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_get_snapshot_symbol(snapshot = %p, symbol ptr = %p) -> %d, '%ls'", snapshot,
 					   symbol, DXF_SUCCESS, (*symbol == NULL) ? L"NULL" : *symbol);
 
 	return DXF_SUCCESS;
@@ -1807,7 +1807,7 @@ DXFEED_API ERRORCODE dxf_create_price_level_book(dxf_connection_t connection, dx
 	int sources_count = dx_get_sources_count(sources);
 
 	dx_logging_verbose(dx_ll_debug,
-					   L"dxf_create_price_level_book(con = %p, symbol = '%ls', sources[%d] = '%hs'..., book = %p)",
+					   L"DXFeed::dxf_create_price_level_book(con = %p, symbol = '%ls', sources[%d] = '%hs'..., book = %p)",
 					   connection, (symbol == NULL) ? L"NULL" : symbol, sources_count,
 					   (sources == NULL) ? "NULL" : (sources_count > 0 ? sources[0] : ""), book);
 
@@ -1815,7 +1815,7 @@ DXFEED_API ERRORCODE dxf_create_price_level_book(dxf_connection_t connection, dx
 
 	dx_logging_verbose(
 		dx_ll_debug,
-		L"dxf_create_price_level_book(con = %p, symbol = '%ls', sources[%d] = '%hs'..., book = %p) -> %d, %p",
+		L"DXFeed::dxf_create_price_level_book(con = %p, symbol = '%ls', sources[%d] = '%hs'..., book = %p) -> %d, %p",
 		connection, (symbol == NULL) ? L"NULL" : symbol, sources_count,
 		(sources == NULL) ? "NULL" : (sources_count > 0 ? sources[0] : ""), book, res, (book == NULL) ? NULL : *book);
 
@@ -1826,7 +1826,7 @@ DXFEED_API ERRORCODE dxf_create_price_level_book_v2(dxf_connection_t connection,
 													const char **sources, int sources_count,
 													OUT dxf_price_level_book_t *book) {
 	dx_logging_verbose(dx_ll_debug,
-					   L"dxf_create_price_level_book_v2(con = %p, symbol = '%ls', sources[%d] = '%hs'..., book = %p)",
+					   L"DXFeed::dxf_create_price_level_book_v2(con = %p, symbol = '%ls', sources[%d] = '%hs'..., book = %p)",
 					   connection, (symbol == NULL) ? L"NULL" : symbol, sources_count,
 					   (sources == NULL) ? "NULL" : (sources_count > 0 ? sources[0] : ""), book);
 
@@ -1834,7 +1834,7 @@ DXFEED_API ERRORCODE dxf_create_price_level_book_v2(dxf_connection_t connection,
 
 	dx_logging_verbose(
 		dx_ll_debug,
-		L"dxf_create_price_level_book_v2(con = %p, symbol = '%ls', sources[%d] = '%hs'..., book = %p) -> %d, %p",
+		L"DXFeed::dxf_create_price_level_book_v2(con = %p, symbol = '%ls', sources[%d] = '%hs'..., book = %p) -> %d, %p",
 		connection, (symbol == NULL) ? L"NULL" : symbol, sources_count,
 		(sources == NULL) ? "NULL" : (sources_count > 0 ? sources[0] : ""), book, res, (book == NULL) ? NULL : *book);
 
@@ -1844,25 +1844,25 @@ DXFEED_API ERRORCODE dxf_create_price_level_book_v2(dxf_connection_t connection,
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_close_price_level_book(dxf_price_level_book_t book) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_close_price_level_book(book = %p)", book);
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_close_price_level_book(book = %p)", book);
 
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (book == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
-		dx_logging_verbose(dx_ll_debug, L"dxf_close_price_level_book(book = %p) -> %d, 'Invalid PLB'", book,
+		dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_close_price_level_book(book = %p) -> %d, 'Invalid PLB'", book,
 						   DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
 	if (!dx_close_price_level_book(book)) {
-		dx_logging_verbose(dx_ll_debug, L"dxf_close_price_level_book(book = %p) -> %d, 'Error while closing the PLB'",
+		dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_close_price_level_book(book = %p) -> %d, 'Error while closing the PLB'",
 						   book, DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
 
-	dx_logging_verbose(dx_ll_debug, L"dxf_close_price_level_book(book = %p) -> %d", book, DXF_SUCCESS);
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_close_price_level_book(book = %p) -> %d", book, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
 }
@@ -1872,7 +1872,7 @@ DXFEED_API ERRORCODE dxf_close_price_level_book(dxf_price_level_book_t book) {
 DXFEED_API ERRORCODE dxf_attach_price_level_book_listener(dxf_price_level_book_t book,
 														  dxf_price_level_book_listener_t book_listener,
 														  void *user_data) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_attach_price_level_book_listener(book = %p, listener = %p, user data = %p)",
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_attach_price_level_book_listener(book = %p, listener = %p, user data = %p)",
 					   book, book_listener, user_data);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
@@ -1880,7 +1880,7 @@ DXFEED_API ERRORCODE dxf_attach_price_level_book_listener(dxf_price_level_book_t
 		dx_set_error_code(dx_ec_invalid_func_param);
 		dx_logging_verbose(
 			dx_ll_debug,
-			L"dxf_attach_price_level_book_listener(book = %p, listener = %p, user data = %p) -> %d, 'Invalid PLB'",
+			L"DXFeed::dxf_attach_price_level_book_listener(book = %p, listener = %p, user data = %p) -> %d, 'Invalid PLB'",
 			book, book_listener, user_data, DXF_FAILURE);
 
 		return DXF_FAILURE;
@@ -1888,7 +1888,7 @@ DXFEED_API ERRORCODE dxf_attach_price_level_book_listener(dxf_price_level_book_t
 
 	if (!dx_add_price_level_book_listener(book, book_listener, user_data)) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_attach_price_level_book_listener(book = %p, listener = %p, user data = %p) -> %d, "
+						   L"DXFeed::dxf_attach_price_level_book_listener(book = %p, listener = %p, user data = %p) -> %d, "
 						   L"'Error while adding the PLB listener'",
 						   book, book_listener, user_data, DXF_FAILURE);
 
@@ -1896,7 +1896,7 @@ DXFEED_API ERRORCODE dxf_attach_price_level_book_listener(dxf_price_level_book_t
 	}
 
 	dx_logging_verbose(dx_ll_debug,
-					   L"dxf_attach_price_level_book_listener(book = %p, listener = %p, user data = %p) -> %d", book,
+					   L"DXFeed::dxf_attach_price_level_book_listener(book = %p, listener = %p, user data = %p) -> %d", book,
 					   book_listener, user_data, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
@@ -1906,7 +1906,7 @@ DXFEED_API ERRORCODE dxf_attach_price_level_book_listener(dxf_price_level_book_t
 
 DXFEED_API ERRORCODE dxf_detach_price_level_book_listener(dxf_price_level_book_t book,
 														  dxf_price_level_book_listener_t book_listener) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_detach_price_level_book_listener(book = %p, listener = %p)", book,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_detach_price_level_book_listener(book = %p, listener = %p)", book,
 					   book_listener);
 
 	dx_perform_common_actions(DX_RESET_ERROR);
@@ -1914,7 +1914,7 @@ DXFEED_API ERRORCODE dxf_detach_price_level_book_listener(dxf_price_level_book_t
 	if (book == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_detach_price_level_book_listener(book = %p, listener = %p) -> %d, 'Invalid PLB'", book,
+						   L"DXFeed::dxf_detach_price_level_book_listener(book = %p, listener = %p) -> %d, 'Invalid PLB'", book,
 						   book_listener, DXF_FAILURE);
 
 		return DXF_FAILURE;
@@ -1922,14 +1922,14 @@ DXFEED_API ERRORCODE dxf_detach_price_level_book_listener(dxf_price_level_book_t
 
 	if (!dx_remove_price_level_book_listener(book, book_listener)) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_detach_price_level_book_listener(book = %p, listener = %p) -> %d, 'Error while "
+						   L"DXFeed::dxf_detach_price_level_book_listener(book = %p, listener = %p) -> %d, 'Error while "
 						   L"removing the PLB listener'",
 						   book, book_listener, DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
 
-	dx_logging_verbose(dx_ll_debug, L"dxf_detach_price_level_book_listener(book = %p, listener = %p) -> %d", book,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_detach_price_level_book_listener(book = %p, listener = %p) -> %d", book,
 					   book_listener, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
@@ -1940,13 +1940,13 @@ DXFEED_API ERRORCODE dxf_create_price_level_book_v3(dxf_connection_t connection,
 													OUT dxf_price_level_book_v2_t *book) {
 	dx_logging_verbose(
 		dx_ll_debug,
-		L"dxf_create_price_level_book_v3(con = %p, symbol = '%ls', source = '%hs', levels_number = %d, book = %p)",
+		L"DXFeed::dxf_create_price_level_book_v3(con = %p, symbol = '%ls', source = '%hs', levels_number = %d, book = %p)",
 		connection, (symbol == NULL) ? L"NULL" : symbol, (source == NULL) ? "NULL" : source, levels_number, book);
 
 	dx_perform_common_actions(DX_RESET_ERROR);
 	if (!dx_init_codec()) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_create_price_level_book_v3(con = %p, symbol = '%ls', source = '%hs', levels_number = "
+						   L"DXFeed::dxf_create_price_level_book_v3(con = %p, symbol = '%ls', source = '%hs', levels_number = "
 						   L"%d, book = %p) -> %d, 'Error while initializing the symbol codec.'",
 						   connection, (symbol == NULL) ? L"NULL" : symbol, (source == NULL) ? "NULL" : source,
 						   levels_number, book, DXF_FAILURE);
@@ -1956,7 +1956,7 @@ DXFEED_API ERRORCODE dxf_create_price_level_book_v3(dxf_connection_t connection,
 
 	if (book == NULL) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_create_price_level_book_v3(con = %p, symbol = '%ls', source = '%hs', levels_number = "
+						   L"DXFeed::dxf_create_price_level_book_v3(con = %p, symbol = '%ls', source = '%hs', levels_number = "
 						   L"%d, book = %p) -> %d, 'Invalid PLB pointer'",
 						   connection, (symbol == NULL) ? L"NULL" : symbol, (source == NULL) ? "NULL" : source,
 						   levels_number, book, DXF_FAILURE);
@@ -1967,7 +1967,7 @@ DXFEED_API ERRORCODE dxf_create_price_level_book_v3(dxf_connection_t connection,
 
 	if (symbol == NULL || dx_string_length(symbol) == 0) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_create_price_level_book_v3(con = %p, symbol = '%ls', source = '%hs', levels_number = "
+						   L"DXFeed::dxf_create_price_level_book_v3(con = %p, symbol = '%ls', source = '%hs', levels_number = "
 						   L"%d, book = %p) -> %d, 'Invalid PLB symbol'",
 						   connection, (symbol == NULL) ? L"NULL" : symbol, (source == NULL) ? "NULL" : source,
 						   levels_number, book, DXF_FAILURE);
@@ -1978,7 +1978,7 @@ DXFEED_API ERRORCODE dxf_create_price_level_book_v3(dxf_connection_t connection,
 
 	if (source == NULL || strlen(source) == 0) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_create_price_level_book_v3(con = %p, symbol = '%ls', source = '%hs', levels_number = "
+						   L"DXFeed::dxf_create_price_level_book_v3(con = %p, symbol = '%ls', source = '%hs', levels_number = "
 						   L"%d, book = %p) -> %d, 'Invalid PLB source'",
 						   connection, symbol, (source == NULL) ? "NULL" : source, levels_number, book, DXF_FAILURE);
 
@@ -1990,7 +1990,7 @@ DXFEED_API ERRORCODE dxf_create_price_level_book_v3(dxf_connection_t connection,
 
 	if (book == NULL) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_create_price_level_book_v3(con = %p, symbol = '%ls', source = '%hs', levels_number = %d, "
+						   L"DXFeed::dxf_create_price_level_book_v3(con = %p, symbol = '%ls', source = '%hs', levels_number = %d, "
 						   L"book = %p) -> %d, %p",
 						   connection, symbol, source, levels_number, book, DXF_FAILURE, *book);
 
@@ -1998,7 +1998,7 @@ DXFEED_API ERRORCODE dxf_create_price_level_book_v3(dxf_connection_t connection,
 	}
 
 	dx_logging_verbose(dx_ll_debug,
-					   L"dxf_create_price_level_book_v3(con = %p, symbol = '%ls', source = '%hs', levels_number = %d, "
+					   L"DXFeed::dxf_create_price_level_book_v3(con = %p, symbol = '%ls', source = '%hs', levels_number = %d, "
 					   L"book = %p) -> %d, %p",
 					   connection, symbol, source, levels_number, book, DXF_SUCCESS, *book);
 
@@ -2006,25 +2006,25 @@ DXFEED_API ERRORCODE dxf_create_price_level_book_v3(dxf_connection_t connection,
 }
 
 DXFEED_API ERRORCODE dxf_close_price_level_book_v2(dxf_price_level_book_v2_t book) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_close_price_level_book_v2(book = %p)", book);
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_close_price_level_book_v2(book = %p)", book);
 
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (book == NULL) {
 		dx_set_error_code(dx_plbec_invalid_book_handle);
-		dx_logging_verbose(dx_ll_debug, L"dxf_close_price_level_book_v2(book = %p) -> %d, 'Invalid PLB'", book,
+		dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_close_price_level_book_v2(book = %p) -> %d, 'Invalid PLB'", book,
 						   DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
 
 	if (!dx_close_price_level_book_v2(book)) {
-		dx_logging_verbose(dx_ll_debug, L"dxf_close_price_level_book_v2(book = %p) -> %d", book, DXF_FAILURE);
+		dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_close_price_level_book_v2(book = %p) -> %d", book, DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
 
-	dx_logging_verbose(dx_ll_debug, L"dxf_close_price_level_book_v2(book = %p) -> %d", book,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_close_price_level_book_v2(book = %p) -> %d", book,
 					   DXF_SUCCESS);
 
 	return DXF_SUCCESS;
@@ -2035,7 +2035,7 @@ DXFEED_API ERRORCODE dxf_set_price_level_book_listeners_v2(
 	dxf_price_level_book_listener_t on_book_update_listener,
 	dxf_price_level_book_inc_listener_t on_incremental_change_listener, void *user_data) {
 	dx_logging_verbose(dx_ll_debug,
-					   L"dxf_set_price_level_book_listeners_v2(book = %p, new = %p, update = %p, inc = %p)", book,
+					   L"DXFeed::dxf_set_price_level_book_listeners_v2(book = %p, new = %p, update = %p, inc = %p)", book,
 					   on_new_book_listener, on_book_update_listener, on_incremental_change_listener);
 
 	dx_perform_common_actions(DX_RESET_ERROR);
@@ -2044,7 +2044,7 @@ DXFEED_API ERRORCODE dxf_set_price_level_book_listeners_v2(
 														 on_incremental_change_listener, user_data);
 
 	dx_logging_verbose(dx_ll_debug,
-					   L"dxf_set_price_level_book_listeners_v2(book = %p, new = %p, update = %p, inc = %p) -> %d", book,
+					   L"DXFeed::dxf_set_price_level_book_listeners_v2(book = %p, new = %p, update = %p, inc = %p) -> %d", book,
 					   on_new_book_listener, on_book_update_listener, on_incremental_change_listener, res);
 
 	return res;
@@ -2052,13 +2052,13 @@ DXFEED_API ERRORCODE dxf_set_price_level_book_listeners_v2(
 
 DXFEED_API ERRORCODE dxf_create_regional_book(dxf_connection_t connection, dxf_const_string_t symbol,
 											  OUT dxf_regional_book_t *book) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_create_regional_book(con = %p, symbol = '%ls', book ptr = %p)", connection,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_create_regional_book(con = %p, symbol = '%ls', book ptr = %p)", connection,
 					   (symbol == NULL) ? L"NULL" : symbol, book);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (!dx_init_codec()) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_create_regional_book(con = %p, symbol = '%ls', book ptr = %p) -> %d, 'Error while "
+						   L"DXFeed::dxf_create_regional_book(con = %p, symbol = '%ls', book ptr = %p) -> %d, 'Error while "
 						   L"initializing a symbol codec'",
 						   connection, (symbol == NULL) ? L"NULL" : symbol, book, DXF_FAILURE);
 
@@ -2069,7 +2069,7 @@ DXFEED_API ERRORCODE dxf_create_regional_book(dxf_connection_t connection, dxf_c
 		dx_set_error_code(dx_ec_invalid_func_param);
 		dx_logging_verbose(
 			dx_ll_debug,
-			L"dxf_create_regional_book(con = %p, symbol = '%ls', book ptr = %p) -> %d, 'Invalid regional book ptr'",
+			L"DXFeed::dxf_create_regional_book(con = %p, symbol = '%ls', book ptr = %p) -> %d, 'Invalid regional book ptr'",
 			connection, (symbol == NULL) ? L"NULL" : symbol, book, DXF_FAILURE);
 
 		return DXF_FAILURE;
@@ -2078,7 +2078,7 @@ DXFEED_API ERRORCODE dxf_create_regional_book(dxf_connection_t connection, dxf_c
 	if (symbol == NULL || dx_string_length(symbol) == 0) {
 		dx_set_error_code(dx_ssec_invalid_symbol);
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_create_regional_book(con = %p, symbol = '%ls', book ptr = %p) -> %d, 'Invalid symbol'",
+						   L"DXFeed::dxf_create_regional_book(con = %p, symbol = '%ls', book ptr = %p) -> %d, 'Invalid symbol'",
 						   connection, (symbol == NULL) ? L"NULL" : symbol, book, DXF_FAILURE);
 
 		return DXF_FAILURE;
@@ -2088,14 +2088,14 @@ DXFEED_API ERRORCODE dxf_create_regional_book(dxf_connection_t connection, dxf_c
 
 	if (*book == NULL) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_create_regional_book(con = %p, symbol = '%ls', book ptr = %p) -> %d, 'Tried "
+						   L"DXFeed::dxf_create_regional_book(con = %p, symbol = '%ls', book ptr = %p) -> %d, 'Tried "
 						   L"unsuccessfully to create regional book'",
 						   connection, symbol, book, DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
 
-	dx_logging_verbose(dx_ll_debug, L"dxf_create_regional_book(con = %p, symbol = '%ls', book ptr = %p) -> %d, %p",
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_create_regional_book(con = %p, symbol = '%ls', book ptr = %p) -> %d, %p",
 					   connection, symbol, book, DXF_SUCCESS, *book);
 
 	return DXF_SUCCESS;
@@ -2104,12 +2104,12 @@ DXFEED_API ERRORCODE dxf_create_regional_book(dxf_connection_t connection, dxf_c
 /* -------------------------------------------------------------------------- */
 
 DXFEED_API ERRORCODE dxf_close_regional_book(dxf_regional_book_t book) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_close_regional_book(book = %p)", book);
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_close_regional_book(book = %p)", book);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (book == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
-		dx_logging_verbose(dx_ll_debug, L"dxf_close_regional_book(book = %p) -> %d, 'Invalid regional book'", book,
+		dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_close_regional_book(book = %p) -> %d, 'Invalid regional book'", book,
 						   DXF_FAILURE);
 
 		return DXF_FAILURE;
@@ -2117,13 +2117,13 @@ DXFEED_API ERRORCODE dxf_close_regional_book(dxf_regional_book_t book) {
 
 	if (!dx_close_regional_book(book)) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_close_regional_book(book = %p) -> %d, 'Tried unsuccessfully to close regional book'",
+						   L"DXFeed::dxf_close_regional_book(book = %p) -> %d, 'Tried unsuccessfully to close regional book'",
 						   book, DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
 
-	dx_logging_verbose(dx_ll_debug, L"dxf_close_regional_book(book = %p) -> %d", book, DXF_SUCCESS);
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_close_regional_book(book = %p) -> %d", book, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
 }
@@ -2132,14 +2132,14 @@ DXFEED_API ERRORCODE dxf_close_regional_book(dxf_regional_book_t book) {
 
 DXFEED_API ERRORCODE dxf_attach_regional_book_listener(dxf_regional_book_t book,
 													   dxf_price_level_book_listener_t book_listener, void *user_data) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_attach_regional_book_listener(book = %p, listener = %p, user data = %p)",
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_attach_regional_book_listener(book = %p, listener = %p, user data = %p)",
 					   book, book_listener, user_data);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (book == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_attach_regional_book_listener(book = %p, listener = %p, user data = %p) -> %d, "
+						   L"DXFeed::dxf_attach_regional_book_listener(book = %p, listener = %p, user data = %p) -> %d, "
 						   L"'Invalid regional book'",
 						   book, book_listener, user_data, DXF_FAILURE);
 
@@ -2148,7 +2148,7 @@ DXFEED_API ERRORCODE dxf_attach_regional_book_listener(dxf_regional_book_t book,
 
 	if (!dx_add_regional_book_listener(book, book_listener, user_data)) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_attach_regional_book_listener(book = %p, listener = %p, user data = %p) -> %d, 'Error "
+						   L"DXFeed::dxf_attach_regional_book_listener(book = %p, listener = %p, user data = %p) -> %d, 'Error "
 						   L"while adding the regional book listener'",
 						   book, book_listener, user_data, DXF_FAILURE);
 
@@ -2156,7 +2156,7 @@ DXFEED_API ERRORCODE dxf_attach_regional_book_listener(dxf_regional_book_t book,
 	}
 
 	dx_logging_verbose(dx_ll_debug,
-					   L"dxf_attach_regional_book_listener(book = %p, listener = %p, user data = %p) -> %d", book,
+					   L"DXFeed::dxf_attach_regional_book_listener(book = %p, listener = %p, user data = %p) -> %d", book,
 					   book_listener, user_data, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
@@ -2166,14 +2166,14 @@ DXFEED_API ERRORCODE dxf_attach_regional_book_listener(dxf_regional_book_t book,
 
 DXFEED_API ERRORCODE dxf_detach_regional_book_listener(dxf_regional_book_t book,
 													   dxf_price_level_book_listener_t book_listener) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_detach_regional_book_listener(book = %p, listener = %p)", book,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_detach_regional_book_listener(book = %p, listener = %p)", book,
 					   book_listener);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (book == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
 		dx_logging_verbose(
-			dx_ll_debug, L"dxf_detach_regional_book_listener(book = %p, listener = %p) -> %d, 'Invalid regional book'",
+			dx_ll_debug, L"DXFeed::dxf_detach_regional_book_listener(book = %p, listener = %p) -> %d, 'Invalid regional book'",
 			book, book_listener, DXF_FAILURE);
 
 		return DXF_FAILURE;
@@ -2181,14 +2181,14 @@ DXFEED_API ERRORCODE dxf_detach_regional_book_listener(dxf_regional_book_t book,
 
 	if (!dx_remove_regional_book_listener(book, book_listener)) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_detach_regional_book_listener(book = %p, listener = %p) -> %d, 'Error while removing "
+						   L"DXFeed::dxf_detach_regional_book_listener(book = %p, listener = %p) -> %d, 'Error while removing "
 						   L"the regional book listener'",
 						   book, book_listener, DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
 
-	dx_logging_verbose(dx_ll_debug, L"dxf_attach_regional_book_listener(book = %p, listener = %p) -> %d", book,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_attach_regional_book_listener(book = %p, listener = %p) -> %d", book,
 					   book_listener, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
@@ -2198,14 +2198,14 @@ DXFEED_API ERRORCODE dxf_detach_regional_book_listener(dxf_regional_book_t book,
 
 DXFEED_API ERRORCODE dxf_attach_regional_book_listener_v2(dxf_regional_book_t book,
 														  dxf_regional_quote_listener_t listener, void *user_data) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_attach_regional_book_listener_v2(book = %p, listener = %p, user data = %p)",
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_attach_regional_book_listener_v2(book = %p, listener = %p, user data = %p)",
 					   book, listener, user_data);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (book == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_attach_regional_book_listener_v2(book = %p, listener = %p, user data = %p) -> %d, "
+						   L"DXFeed::dxf_attach_regional_book_listener_v2(book = %p, listener = %p, user data = %p) -> %d, "
 						   L"'Invalid regional book'",
 						   book, listener, user_data, DXF_FAILURE);
 
@@ -2214,7 +2214,7 @@ DXFEED_API ERRORCODE dxf_attach_regional_book_listener_v2(dxf_regional_book_t bo
 
 	if (!dx_add_regional_book_listener_v2(book, listener, user_data)) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_attach_regional_book_listener_v2(book = %p, listener = %p, user data = %p) -> %d, "
+						   L"DXFeed::dxf_attach_regional_book_listener_v2(book = %p, listener = %p, user data = %p) -> %d, "
 						   L"'Error while adding the regional book listener'",
 						   book, listener, user_data, DXF_FAILURE);
 
@@ -2222,7 +2222,7 @@ DXFEED_API ERRORCODE dxf_attach_regional_book_listener_v2(dxf_regional_book_t bo
 	}
 
 	dx_logging_verbose(dx_ll_debug,
-					   L"dxf_attach_regional_book_listener_v2(book = %p, listener = %p, user data = %p) -> %d", book,
+					   L"DXFeed::dxf_attach_regional_book_listener_v2(book = %p, listener = %p, user data = %p) -> %d", book,
 					   listener, user_data, DXF_SUCCESS);
 
 	return DXF_SUCCESS;
@@ -2232,14 +2232,14 @@ DXFEED_API ERRORCODE dxf_attach_regional_book_listener_v2(dxf_regional_book_t bo
 
 DXFEED_API ERRORCODE dxf_detach_regional_book_listener_v2(dxf_regional_book_t book,
 														  dxf_regional_quote_listener_t listener) {
-	dx_logging_verbose(dx_ll_debug, L"dxf_detach_regional_book_listener_v2(book = %p, listener = %p)", book, listener);
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_detach_regional_book_listener_v2(book = %p, listener = %p)", book, listener);
 	dx_perform_common_actions(DX_RESET_ERROR);
 
 	if (book == NULL) {
 		dx_set_error_code(dx_ec_invalid_func_param);
 		dx_logging_verbose(
 			dx_ll_debug,
-			L"dxf_detach_regional_book_listener_v2(book = %p, listener = %p) -> %d, 'Invalid regional book'", book,
+			L"DXFeed::dxf_detach_regional_book_listener_v2(book = %p, listener = %p) -> %d, 'Invalid regional book'", book,
 			listener, DXF_FAILURE);
 
 		return DXF_FAILURE;
@@ -2247,14 +2247,14 @@ DXFEED_API ERRORCODE dxf_detach_regional_book_listener_v2(dxf_regional_book_t bo
 
 	if (!dx_remove_regional_book_listener_v2(book, listener)) {
 		dx_logging_verbose(dx_ll_debug,
-						   L"dxf_detach_regional_book_listener_v2(book = %p, listener = %p) -> %d, 'Error while "
+						   L"DXFeed::dxf_detach_regional_book_listener_v2(book = %p, listener = %p) -> %d, 'Error while "
 						   L"removing the regional book listener'",
 						   book, listener, DXF_FAILURE);
 
 		return DXF_FAILURE;
 	}
 
-	dx_logging_verbose(dx_ll_debug, L"dxf_detach_regional_book_listener_v2(book = %p, listener = %p) -> %d", book,
+	dx_logging_verbose(dx_ll_debug, L"DXFeed::dxf_detach_regional_book_listener_v2(book = %p, listener = %p) -> %d", book,
 					   listener, DXF_SUCCESS);
 
 	return DXF_SUCCESS;

@@ -56,11 +56,11 @@
 #define CURRENT_TIME_STR_TIME_OFFSET 24
 #define TIME_ZONE_BIAS_TO_HOURS		 -60
 
-static dxf_const_string_t g_error_prefix = L"Error: ";
-static dxf_const_string_t g_warn_prefix = L"Warn: ";
-static dxf_const_string_t g_info_prefix = L"Info: ";
-static dxf_const_string_t g_debug_prefix = L"Debug: ";
-static dxf_const_string_t g_trace_prefix = L"Trace: ";
+static dxf_const_string_t g_error_prefix = L"[E] ";
+static dxf_const_string_t g_warn_prefix = L"[W] ";
+static dxf_const_string_t g_info_prefix = L"[I] ";
+static dxf_const_string_t g_debug_prefix = L"[D] ";
+static dxf_const_string_t g_trace_prefix = L"[T] ";
 static dx_log_level_t g_default_log_level = dx_ll_info;
 
 static int g_verbose_logger_mode;
@@ -600,7 +600,7 @@ void dx_logging_verbose(dx_log_level_t log_level, const dxf_char_t *format, ...)
 		return;
 	}
 
-	fwprintf(g_log_file, L"\n%ls [%08lx] %ls ", dx_get_current_time(),
+	fwprintf(g_log_file, L"\n%ls [%08lx] %ls", dx_get_current_time(),
 #ifdef _WIN32
 			 (unsigned long)GetCurrentThreadId(),
 #else

@@ -5,6 +5,7 @@ Version 8.8.0
     will be equivalent to `host1:port3,host2:port2,host3:port3`
   - The notation separated by parentheses remains valid, but will be "linearized", i.e. the list
     `(host1:port1)(host2:port2)(host3:port3)` will be equivalent to `host1:port1,host2:port2,host3:port3` when resolving addresses
+* Fixed log formatting
 
 Version 8.7.0
 * [DXFC-395] Added the ability to enumerate all resolved IP addresses by DNS names. IP addresses will be shuffled.
