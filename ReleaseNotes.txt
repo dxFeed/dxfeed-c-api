@@ -1,9 +1,17 @@
+Version 8.8.0
+* [DXFC-397] Fixed format for specifying a list of DNS names for resolve.
+  - The list of addresses can now be specified separated by commas: `host1:port1,host2:port2,host3:port3`
+  - The last specified port will be considered the default port, i.e. such a list of `host1,host2:port2,host3:port3`
+    will be equivalent to `host1:port3,host2:port2,host3:port3`
+  - The notation separated by parentheses remains valid, but will be "linearized", i.e. the list
+    `(host1:port1)(host2:port2)(host3:port3)` will be equivalent to `host1:port1,host2:port2,host3:port3` when resolving addresses
+
 Version 8.7.0
 * [DXFC-395] Added the ability to enumerate all resolved IP addresses by DNS names. IP addresses will be shuffled.
   - For the address of QD endpoints specified in the form `(host1:port1)(host2:port2)(host3:port3)` IP addresses will be determined, then they will be shuffled.
   - Shuffled addresses will be selected in order until a connection occurs. When the end of the list is reached, the endpoints will again be determined by IP addresses, and so on.
   - If a disconnect occurs, the next IP from the list will be selected and an attempt will be made to reconnect.
-* [DXFC-394] Disabled shuffling of specified addresses (DNS names) for connection in the form: `(hos1:port1)(host2:port2)(host3:port3)`
+* [DXFC-394] Disabled shuffling of specified addresses (DNS names) for connection in the form: `(host1:port1)(host2:port2)(host3:port3)`
 * [DXFC-334] Fixed a bug with precision error when converting WideDecimal to Double
 * [DXFC-376] The SnapshotConsoleSample was improved: added an ability to specify from-time and to-time arguments.
 
