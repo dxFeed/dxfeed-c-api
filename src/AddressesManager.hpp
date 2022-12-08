@@ -39,6 +39,7 @@ extern "C" {
 #include <thread>
 #include <unordered_map>
 #include <vector>
+#include <iterator>
 
 #include "Result.hpp"
 #include "StringUtils.hpp"
