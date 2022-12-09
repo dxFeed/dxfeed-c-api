@@ -718,7 +718,17 @@ static int dx_connect_via_socket(dx_network_connection_context_t* context) {
 		return false;
 	}
 
+
+	dx_logging_info(L"DXNetwork::dx_connect_via_socket: [con = %p] Connected to %hs (%hs)", context->connection,
+					dx_am_get_current_connected_address(context->connection),
+					dx_am_get_current_connected_socket_address(context->connection));
+
+	if (dx_am_is_reset_on_connect(context->connection)) {
+		dx_am_reset(context->connection);
+	}
+
 	dx_connection_status_set(context->connection, dxf_cs_connected);
+
 	return true;
 }
 

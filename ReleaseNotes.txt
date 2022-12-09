@@ -1,4 +1,20 @@
 Version 8.8.0
+* [DXFC-396] Added the ability to not shuffle resolved IP addresses.
+  - Added the `connectOrder` property of an address with possible values: `shuffle`, `random`, `ordered`, `priority`
+  - The `shuffle` strategy: Example: `host1:port1,host2:port2,host3:port3[connectOrder=shuffle]` It will shuffle the
+    resolved IP addresses, and it will go through them to the end, and then it will resolve and shuffle and so on.
+  - The `random` strategy: Example: `host1:port1,host2:port2,host3:port3[connectOrder=random]` It will shuffle IP
+    addresses, if the connection is successful, it will reset the state and will shuffle on the next connection after resolve, and so on.
+  - The `ordered` strategy: Example: `host1:port1,host2:port2,host3:port3[connectOrder=ordered]` It will NOT shuffle the
+    resolved IP addresses, and it will go through them to the end, and then it will resolve and NOT shuffle and so on.
+  - The `priority` strategy: Example: `host1:port1,host2:port2,host3:port3[connectOrder=priority]` It will NOT shuffle IP
+    addresses, if the connection is successful, it will reset the state and will NOT shuffle on the next connection after resolve, and so on.
+  - The default strategy is `shuffle`
+  - If several strategies are specified in the address line, the last one will be selected.
+    - Example #1: `host1:port1,host2:port2,host3:port3[connectOrder=priority,connectOrder=ordered]` will be equivalent
+      to `host1:port1,host2:port2,host3:port3[connectOrder=ordered]`
+    - Example #2: `(host1:port1,host2:port2[connectOrder=random])(host3:port3[connectOrder=priority,connectOrder=ordered])`
+      will be equivalent to `host1:port1,host2:port2,host3:port3[connectOrder=ordered]`
 * [DXFC-397] Fixed format for specifying a list of DNS names for resolve.
   - The list of addresses can now be specified separated by commas: `host1:port1,host2:port2,host3:port3`
   - The last specified port will be considered the default port, i.e. such a list of `host1,host2:port2,host3:port3`

@@ -23,6 +23,24 @@ extern "C" {
 
 #include "AddressesManager.hpp"
 
+namespace dx {
+
+const ConnectOrder ConnectOrder::SHUFFLE("shuffle", true, false);
+const ConnectOrder ConnectOrder::RANDOM("random", true, true);
+const ConnectOrder ConnectOrder::ORDERED("ordered", false, false);
+const ConnectOrder ConnectOrder::PRIORITY("priority", false, true);
+
+const std::unordered_map<std::string, ConnectOrder> ConnectOrder::VALUES_{
+	{SHUFFLE.getName(), SHUFFLE},
+	{RANDOM.getName(), RANDOM},
+	{ORDERED.getName(), ORDERED},
+	{PRIORITY.getName(), PRIORITY},
+};
+
+const ConnectOrder ResolvedAddresses::DEFAULT_CONNECT_ORDER{ConnectOrder::SHUFFLE};
+
+}  // namespace dx
+
 extern "C" {
 
 int dx_am_next_socket_address(dxf_connection_t connection) {
@@ -31,6 +49,14 @@ int dx_am_next_socket_address(dxf_connection_t connection) {
 
 void dx_am_clear_addresses(dxf_connection_t connection) {
 	return dx::AddressesManager::getInstance()->clearAddresses(connection);
+}
+
+void dx_am_reset(dxf_connection_t connection) {
+	return dx::AddressesManager::getInstance()->reset(connection);
+}
+
+int dx_am_is_reset_on_connect(dxf_connection_t connection) {
+	return dx::AddressesManager::getInstance()->isResetOnConnect(connection);
 }
 
 int dx_am_is_current_address_tls_enabled(dxf_connection_t connection) {

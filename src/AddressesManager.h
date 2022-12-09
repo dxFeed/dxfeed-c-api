@@ -30,6 +30,8 @@
 
 int dx_am_next_socket_address(dxf_connection_t connection);
 void dx_am_clear_addresses(dxf_connection_t connection);
+void dx_am_reset(dxf_connection_t connection);
+int dx_am_is_reset_on_connect(dxf_connection_t connection);
 int dx_am_is_current_address_tls_enabled(dxf_connection_t connection);
 int dx_am_is_current_socket_address_connection_failed(dxf_connection_t connection);
 void dx_am_set_current_socket_address_connection_failed(dxf_connection_t connection, int is_connection_failed);
