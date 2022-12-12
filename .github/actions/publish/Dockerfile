@@ -21,7 +21,9 @@ RUN curl -s https://api.github.com/repos/tcnksm/ghr/releases/latest | \
     chown root:root /usr/local/bin/ghr && \
     chmod 777 /usr/local/bin/ghr && \
     ls -al && \
-    ls -al /usr/local/bin
+    ls -al /usr/local/bin && \
+    cp /usr/local/bin/ghr /tmp && \
+    cp /usr/local/bin/ghr /usr/bin
 
 COPY entrypoint.sh /entrypoint.sh
 
