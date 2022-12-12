@@ -33,7 +33,6 @@ if [ -n "${INPUT_DRAFT_REGEX}" ]; then
 fi
 
 echo "$PATH"
-ls -al /usr/local/bin
 
 ghr -v
 echo "GHR>>> ghr -debug -u ${GITHUB_REPOSITORY%/*} -r ${GITHUB_REPOSITORY#*/} $DRAFT_ARG $PRERELEASE_ARG -replace -delete -n $RELEASE_TITLE $TAG $@"
