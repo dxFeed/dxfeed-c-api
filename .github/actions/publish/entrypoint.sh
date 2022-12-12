@@ -32,6 +32,8 @@ if [ -n "${INPUT_DRAFT_REGEX}" ]; then
   fi
 fi
 
+echo $PATH
+
 # recreate release
 ghr -u "${GITHUB_REPOSITORY%/*}" -r "${GITHUB_REPOSITORY#*/}" $DRAFT_ARG $PRERELEASE_ARG -replace -delete -n "$RELEASE_TITLE" "$TAG" $@
 
