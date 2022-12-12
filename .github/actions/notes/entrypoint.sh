@@ -52,9 +52,7 @@ if [ -n "$RELEASE_NOTES" ]; then
      RELEASE_NOTES="${RELEASE_NOTES//'%'/'%25'}"
      RELEASE_NOTES="${RELEASE_NOTES//$'\n'/'%0A'}"
      RELEASE_NOTES="${RELEASE_NOTES//$'\r'/'%0D'}"
-#    echo ::set-output name=data::"$RELEASE_NOTES"
     echo "data=$RELEASE_NOTES" >> $GITHUB_OUTPUT
 else
-#    echo ::set-output name=data::""
     echo "data=" >> $GITHUB_OUTPUT
 fi

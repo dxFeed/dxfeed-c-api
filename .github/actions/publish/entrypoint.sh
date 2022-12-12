@@ -34,6 +34,7 @@ fi
 
 echo "$PATH"
 
+/usr/local/bin/ghr -v
 ghr -v
 echo "GHR>>> ghr -debug -u ${GITHUB_REPOSITORY%/*} -r ${GITHUB_REPOSITORY#*/} $DRAFT_ARG $PRERELEASE_ARG -replace -delete -n $RELEASE_TITLE $TAG $@"
 

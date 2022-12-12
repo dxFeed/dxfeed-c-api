@@ -18,9 +18,10 @@ RUN curl -s https://api.github.com/repos/tcnksm/ghr/releases/latest | \
     mkdir -p ghr && \
     tar xzf ghr.tgz && \
     mv ghr_v*_linux_amd64/ghr /usr/local/bin && \
-    chown root:root /usr/local/bin/ghr
-RUN ls -al
-RUN ls -al /usr/local/bin
+    chown root:root /usr/local/bin/ghr && \
+    chmod 777 /usr/local/bin/ghr && \
+    ls -al && \
+    ls -al /usr/local/bin
 
 COPY entrypoint.sh /entrypoint.sh
 
