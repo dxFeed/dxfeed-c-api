@@ -10,6 +10,14 @@ fi
 TAG="${GITHUB_REF#refs/tags/}"
 echo "TAG: $TAG"
 
+if [[ "$TAG" =~ ^([0-9]+.[0-9]+.[0-9]+)-[a-zA-Z]+$ ]]; then
+  TAG="${BASH_REMATCH[1]}"
+elif [[ "$TAG" =~ ^[a-zA-Z]+-([0-9]+.[0-9]+.[0-9]+)$ ]]; then
+  TAG="${BASH_REMATCH[1]}"
+fi
+
+echo "TAG2: $TAG"
+
 IFS=''
 NL=$'\n'
 RELEASE_NOTES=''
