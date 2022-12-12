@@ -348,6 +348,31 @@ if (NOT DISABLE_TLS)
                 COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/win/${TARGET_PLATFORM}/libssl-43${PLATFORM_POSTFIX}.dll ${CMAKE_BINARY_DIR}
                 COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/win/${TARGET_PLATFORM}/libcrypto-41${PLATFORM_POSTFIX}.dll ${CMAKE_BINARY_DIR}
         )
+
+        if (TARGET_PLATFORM STREQUAL "x64")
+            ADD_CUSTOM_COMMAND(
+                    TARGET ${PROJECT}
+                    POST_BUILD
+                    COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/win/${TARGET_PLATFORM}/vcruntime140.dll ${CMAKE_BINARY_DIR}
+            )
+        endif ()
+
+        if (MSVC)
+            ADD_CUSTOM_COMMAND(
+                    TARGET ${PROJECT}
+                    POST_BUILD
+                    COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/win/${TARGET_PLATFORM}/libtls-15${PLATFORM_POSTFIX}.dll ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}
+                    COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/win/${TARGET_PLATFORM}/libssl-43${PLATFORM_POSTFIX}.dll ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}
+                    COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/win/${TARGET_PLATFORM}/libcrypto-41${PLATFORM_POSTFIX}.dll ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}
+            )
+            if (TARGET_PLATFORM STREQUAL "x64")
+                ADD_CUSTOM_COMMAND(
+                        TARGET ${PROJECT}
+                        POST_BUILD
+                        COMMAND ${CMAKE_COMMAND} -E copy ${LIB_TLS}/win/${TARGET_PLATFORM}/vcruntime140.dll ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}
+                )
+            endif ()
+        endif ()
     elseif (MACOSX)
         ADD_CUSTOM_COMMAND(
                 TARGET ${PROJECT}
@@ -415,6 +440,12 @@ if (NOT DISABLE_TLS)
                 "${LIB_TLS}/win/${TARGET_PLATFORM}/libcrypto-41${PLATFORM_POSTFIX}.dll"
                 DESTINATION "bin/${TARGET_PLATFORM}"
                 )
+        if (TARGET_PLATFORM STREQUAL "x64")
+            install(FILES
+                    "${LIB_TLS}/win/${TARGET_PLATFORM}/vcruntime140.dll"
+                    DESTINATION "bin/${TARGET_PLATFORM}"
+                    )
+        endif ()
     elseif (MACOSX)
         install(FILES
                 "${LIB_TLS}/mac/${TARGET_PLATFORM}/libcrypto.46.0.0.dylib"
