@@ -12,7 +12,7 @@ LABEL homepage="http://github.com/mvkvl/github-upload-release-artifacts-action"
 RUN apk add --no-cache jq curl go
 
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
-RUN go get -u github.com/tcnksm/ghr
+RUN go install github.com/tcnksm/ghr@latest
 #RUN curl -s https://api.github.com/repos/tcnksm/ghr/releases/latest | \
 #    jq -r '.assets[] | select(.browser_download_url | contains("linux_amd64"))  | .browser_download_url' | \
 #    xargs curl -o ghr.tgz -sSL && \

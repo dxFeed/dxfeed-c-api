@@ -19,16 +19,8 @@ while read LINE; do
         if [[ "$LINE" == Version* ]];then
             break
         else
-          #
-          # only lines, starting with '*' or '-'
-          # should be prepended with new-line character
-          #
           if [ -n "$RELEASE_NOTES" ]; then
-            if [[ "$LINE" =~ ^\*.*  ]]; then
-              RELEASE_NOTES="${RELEASE_NOTES}${NL}"
-            elif [[ "$LINE" =~ ^[[:space:]]*-.*  ]]; then
-              RELEASE_NOTES="${RELEASE_NOTES}${NL}"
-            fi
+            RELEASE_NOTES="${RELEASE_NOTES}${NL}"
           fi
           RELEASE_NOTES="${RELEASE_NOTES}${LINE}"
         fi
@@ -52,7 +44,9 @@ if [ -n "$RELEASE_NOTES" ]; then
      RELEASE_NOTES="${RELEASE_NOTES//'%'/'%25'}"
      RELEASE_NOTES="${RELEASE_NOTES//$'\n'/'%0A'}"
      RELEASE_NOTES="${RELEASE_NOTES//$'\r'/'%0D'}"
-    echo ::set-output name=data::"$RELEASE_NOTES"
+#    echo ::set-output name=data::"$RELEASE_NOTES"
+    echo "data=$RELEASE_NOTES" >> $GITHUB_OUTPUT
 else
-    echo ::set-output name=data::""
+#    echo ::set-output name=data::""
+    echo "data=" >> $GITHUB_OUTPUT
 fi
