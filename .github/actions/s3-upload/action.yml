@@ -1,0 +1,9 @@
+# action.yml
+name: 'GitHub S3 Upload'
+description: 'Upload files to AWS S3.'
+branding:
+  icon: 'upload-cloud'
+  color: 'green'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
