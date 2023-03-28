@@ -414,6 +414,8 @@ int dx_write_utf (void* context, dxf_const_string_t value) {
 /* -------------------------------------------------------------------------- */
 
 int dx_write_compact_int (void* context, dxf_int_t value) {
+	/* TODO: need refactoring, make it like in java */
+
 	CHECKED_CALL_2(dx_check_write_possibility, context, 5);
 
 	if (value >= 0) {
@@ -456,6 +458,8 @@ int dx_write_compact_int (void* context, dxf_int_t value) {
 /* -------------------------------------------------------------------------- */
 
 int dx_write_compact_long (void* context, dxf_long_t value) {
+	/* TODO: need refactoring, make it like in java */
+
 	dxf_int_t hi = (dxf_int_t)(value >> 32);
 
 	if (value == (dxf_long_t)(dxf_int_t)value) {
