@@ -20,6 +20,7 @@
 #pragma once
 
 #include <chrono>
+#include "WideDecimal.hpp"
 
 namespace dx {
 namespace TimeMarkUtil {
@@ -34,7 +35,7 @@ inline int currentTimeMark() {
 }
 
 inline static int signedDeltaMark(int mark) {
-	return static_cast<int>(static_cast<unsigned>(mark) << 2U) >> 2U;
+	return dx::rightShift<int>(static_cast<int>(static_cast<unsigned>(mark) << 2U), 2U);
 }
 
 }  // namespace TimeMarkUtil
