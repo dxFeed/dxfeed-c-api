@@ -115,7 +115,7 @@ void dx_vlog_debug_message(const dxf_char_t *format, va_list ap) {
 	swprintf(message, 255, L"[%08lx] ", (unsigned long)GetCurrentThreadId());
 	vswprintf(&message[11], 244, format, ap);
 	//OutputDebugStringW(message);
-	wprintf(L"%ls", message);
+	wprintf(L"%ls\n", message);
 }
 #	else
 #		define dx_vlog_debug_message(f, ap)
@@ -610,7 +610,7 @@ void dx_logging_verbose(dx_log_level_t log_level, const dxf_char_t *format, ...)
 	{
 		va_list ap;
 		va_start(ap, format);
-		dx_vlog_debug_message(format, ap);
+//		dx_vlog_debug_message(format, ap);
 		vfwprintf(g_log_file, format, ap);
 		va_end(ap);
 	}
@@ -637,7 +637,7 @@ void dx_logging_dbg(const dxf_char_t *format, ...) {
 	fwprintf(g_dbg_file, L"[%08lx] ", (unsigned long)GetCurrentThreadId());
 	va_list ap;
 	va_start(ap, format);
-	dx_vlog_debug_message(format, ap);
+	//dx_vlog_debug_message(format, ap);
 	vfwprintf(g_dbg_file, format, ap);
 	va_end(ap);
 	fwprintf(g_dbg_file, L"\n");
@@ -673,7 +673,7 @@ void dx_logging_info(const dxf_char_t *format, ...) {
 	{
 		va_list ap;
 		va_start(ap, format);
-		dx_vlog_debug_message(format, ap);
+//		dx_vlog_debug_message(format, ap);
 		vfwprintf(g_log_file, format, ap);
 		va_end(ap);
 	}
@@ -701,7 +701,7 @@ void dx_logging_error_f(const dxf_char_t *format, ...) {
 	{
 		va_list ap;
 		va_start(ap, format);
-		dx_vlog_debug_message(format, ap);
+//		dx_vlog_debug_message(format, ap);
 		vfwprintf(g_log_file, format, ap);
 		va_end(ap);
 	}
