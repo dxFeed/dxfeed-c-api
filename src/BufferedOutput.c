@@ -27,6 +27,7 @@
 #include "DXAlgorithms.h"
 #include "DXThreads.h"
 #include "ConnectionContextData.h"
+#include "WideDecimal.h"
 
 #define MUTEX_FIELD_FLAG    (0x1)
 
@@ -192,37 +193,49 @@ static int dx_check_write_possibility (void* context, int bytes_to_write) {
 	return IS_CUR_CAPACITY_ENOUGH(context, bytes_to_write) || dx_ensure_capacity(context, bytes_to_write);
 }
 
-/* -------------------------------------------------------------------------- */
-
-void dx_write_utf2_unchecked (void* context, dxf_int_t code_point) {
-	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0xC0 | code_point >> 6);
-	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0x80 | (code_point & 0x3F));
+void dx_write_byte_unchecked  (void* context, dxf_byte_t value) {
+	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)value;
 }
 
-/* -------------------------------------------------------------------------- */
-
-void dx_write_utf3_unchecked (void* context, dxf_int_t code_point) {
-	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0xE0 | code_point >> 12);
-	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0x80 | (code_point >> 6 & 0x3F));
-	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0x80 | (code_point & 0x3F));
+void dx_write_short_unchecked (void* context, dxf_short_t value) {
+	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 8);
+	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)value;
 }
 
-/* -------------------------------------------------------------------------- */
-
-void dx_write_utf4_unchecked (void* context, dxf_int_t code_point) {
-	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0xF0 | code_point >> 18);
-	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0x80 | (code_point >> 12 & 0x3F));
-	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0x80 | (code_point >> 6 & 0x3F));
-	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0x80 | (code_point & 0x3F));
+void dx_write_char_unchecked (void* context, dxf_char_t value) {
+	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 8);
+	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)value;
 }
-
-/* -------------------------------------------------------------------------- */
 
 void dx_write_int_unchecked (void* context, dxf_int_t value) {
 	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 24);
 	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 16);
 	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 8);
 	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)value;
+}
+
+void dx_write_long_unchecked (void* context, dxf_long_t value) {
+	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 56);
+	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 48);
+	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 40);
+	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 32);
+	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 24);
+	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 16);
+	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 8);
+	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)value;
+}
+
+void dx_write_utf2_unchecked (void* context, dxf_int_t code_point) {
+	dx_write_short_unchecked(context, 0xC080 | ((code_point << 2) & 0x1F00) | (code_point & 0x3F));
+}
+
+void dx_write_utf3_unchecked (void* context, dxf_int_t code_point) {
+    dx_write_byte_unchecked(context, 0xE0 | (code_point >> 12));
+    dx_write_short_unchecked(context, 0x8080 | ((code_point << 2) & 0x3F00) | (code_point & 0x3F));
+}
+
+void dx_write_utf4_unchecked (void* context, dxf_int_t code_point) {
+	dx_write_int_unchecked(context, 0xF0808080 | ((code_point << 6) & 0x07000000) | ((code_point << 4) & 0x3F0000) | ((code_point << 2) & 0x3F00) | (code_point & 0x3F));
 }
 
 /* -------------------------------------------------------------------------- */
@@ -266,7 +279,7 @@ int dx_write_boolean (void* context, dxf_bool_t value) {
 int dx_write_byte (void* context, dxf_byte_t value) {
 	CHECKED_CALL_2(dx_check_write_possibility, context, 1);
 
-	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)value;
+	dx_write_byte_unchecked(context, value);
 
 	return true;
 }
@@ -276,8 +289,7 @@ int dx_write_byte (void* context, dxf_byte_t value) {
 int dx_write_short (void* context, dxf_short_t value) {
 	CHECKED_CALL_2(dx_check_write_possibility, context, 2);
 
-	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 8);
-	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)value;
+	dx_write_short_unchecked(context, value);
 
 	return true;
 }
@@ -287,8 +299,7 @@ int dx_write_short (void* context, dxf_short_t value) {
 int dx_write_char (void* context, dxf_char_t value) {
 	CHECKED_CALL_2(dx_check_write_possibility, context, 2);
 
-	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 8);
-	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)value;
+	dx_write_char_unchecked(context, value);
 
 	return true;
 }
@@ -298,10 +309,7 @@ int dx_write_char (void* context, dxf_char_t value) {
 int dx_write_int (void* context, dxf_int_t value) {
 	CHECKED_CALL_2(dx_check_write_possibility, context, 4);
 
-	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 24);
-	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 16);
-	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 8);
-	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)value;
+	dx_write_int_unchecked(context, value);
 
 	return true;
 }
@@ -311,14 +319,7 @@ int dx_write_int (void* context, dxf_int_t value) {
 int dx_write_long (void* context, dxf_long_t value) {
 	CHECKED_CALL_2(dx_check_write_possibility, context, 8);
 
-	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 56);
-	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 48);
-	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 40);
-	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 32);
-	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 24);
-	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 16);
-	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 8);
-	CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)value;
+	dx_write_long_unchecked(context, value);
 
 	return true;
 }
@@ -418,34 +419,30 @@ int dx_write_compact_int (void* context, dxf_int_t value) {
 
 	if (value >= 0) {
 		if (value < 0x40) {
-			CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)value;
+			dx_write_byte_unchecked(context, value);
 		} else if (value < 0x2000) {
-			CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0x80 | value >> 8);
-			CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)value;
+			dx_write_short_unchecked(context, 0x8000 | value);
 		} else if (value < 0x100000) {
-			CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0xC0 | value >> 16);
-			CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 8);
-			CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)value;
+			dx_write_byte_unchecked(context, 0xC0 | dx_right_shift_int(value, 16));
+			dx_write_short_unchecked(context, value);
 		} else if (value < 0x08000000) {
 			dx_write_int_unchecked(context, 0xE0000000 | value);
 		} else {
-			CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)0xF0;
+			dx_write_byte_unchecked(context, 0xF0);
 			dx_write_int_unchecked(context, value);
 		}
 	} else {
 		if (value >= -0x40) {
-			CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0x7F & value);
+			dx_write_byte_unchecked(context, (0x7F & value));
 		} else if (value >= -0x2000) {
-			CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0xBF & value >> 8);
-			CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)value;
+			dx_write_short(context, 0xBFFF & value);
 		} else if (value >= -0x100000) {
-			CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0xDF & value >> 16);
-			CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(value >> 8);
-			CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)value;
+			dx_write_byte_unchecked(context, 0xDF & dx_right_shift_int(value, 16));
+			dx_write_short(context, value);
 		} else if (value >= -0x08000000) {
 			dx_write_int_unchecked(context, 0xEFFFFFFF & value);
 		} else {
-			CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)0xF7;
+			dx_write_byte_unchecked(context, 0xF7);
 			dx_write_int_unchecked(context, value);
 		}
 	}
@@ -456,6 +453,7 @@ int dx_write_compact_int (void* context, dxf_int_t value) {
 /* -------------------------------------------------------------------------- */
 
 int dx_write_compact_long (void* context, dxf_long_t value) {
+
 	dxf_int_t hi = (dxf_int_t)(value >> 32);
 
 	if (value == (dxf_long_t)(dxf_int_t)value) {
@@ -466,34 +464,30 @@ int dx_write_compact_long (void* context, dxf_long_t value) {
 
 	if (hi >= 0) {
 		if (hi < 0x04) {
-			CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0xF0 | hi);
+			dx_write_byte_unchecked(context, 0xF0 | hi);
 		} else if (hi < 0x0200) {
-			CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0xF8 | hi >> 8);
-			CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)hi;
+			dx_write_short_unchecked(context, 0xF800 | hi);
 		} else if (hi < 0x010000) {
-			CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)0xFC;
-			CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(hi >> 8);
-			CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)hi;
+			dx_write_byte_unchecked(context, 0xFC);
+			dx_write_short_unchecked(context, hi);
 		} else if (hi < 0x800000) {
 			dx_write_int_unchecked(context, 0xFE000000 | hi);
 		} else {
-			CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)0xFF;
+			dx_write_byte_unchecked(context, 0xFF);
 			dx_write_int_unchecked(context, hi);
 		}
 	} else {
 		if (hi >= -0x04) {
-			CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0xF7 & hi);
+			dx_write_byte_unchecked(context, 0xF7 & hi);
 		} else if (hi >= -0x0200) {
-			CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(0xFB & hi >> 8);
-			CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)hi;
+			dx_write_short_unchecked(context, 0xFBFF & hi);
 		} else if (hi >= -0x010000) {
-			CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)0xFD;
-			CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)(hi >> 8);
-			CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)hi;
+			dx_write_byte_unchecked(context, 0xFD);
+			dx_write_short_unchecked(context, hi);
 		} else if (hi >= -0x800000) {
 			dx_write_int_unchecked(context, 0xFEFFFFFF & hi);
 		} else {
-			CTX(context)->out_buffer[CTX(context)->current_out_buffer_position++] = (dxf_byte_t)0xFF;
+			dx_write_byte_unchecked(context, 0xFF);
 			dx_write_int_unchecked(context, hi);
 		}
 	}

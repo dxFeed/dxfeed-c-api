@@ -26,6 +26,7 @@
 #include "DXMemory.h"
 #include "DXAlgorithms.h"
 #include "ConnectionContextData.h"
+#include "WideDecimal.h"
 
 /* -------------------------------------------------------------------------- */
 /*
@@ -525,7 +526,7 @@ int dx_read_compact_int (void* context, OUT dxf_int_t* value) {
 	n = (dxf_int_t)temp_uint_byte;
 
 	if (n < 0x80) {
-		*value = (n << 25) >> 25;
+		*value = dx_right_shift_int((n << 25), 25);
 
 		return true;
 	}
@@ -536,7 +537,7 @@ int dx_read_compact_int (void* context, OUT dxf_int_t* value) {
 		CHECKED_CALL_2(dx_read_unsigned_byte, context, &temp_uint_byte);
 		m = (dxf_int_t)temp_uint_byte;
 
-		*value = (((n << 8) | m) << 18) >> 18;
+		*value = dx_right_shift_int((((n << 8) | m) << 18), 18);
 
 		return true;
 	}
@@ -547,7 +548,7 @@ int dx_read_compact_int (void* context, OUT dxf_int_t* value) {
 		CHECKED_CALL_2(dx_read_unsigned_short, context, &temp_uint_byte);
 		m = (dxf_int_t)temp_uint_byte;
 
-		*value = (((n << 16) | m) << 11) >> 11;
+		*value = dx_right_shift_int((((n << 16) | m) << 11), 11);
 
 		return true;
 	}
@@ -563,7 +564,7 @@ int dx_read_compact_int (void* context, OUT dxf_int_t* value) {
 		tmp_byte = (dxf_int_t)temp_uint_byte;
 		tmp_short = (dxf_int_t)temp_uint_short;
 
-		*value = (((n << 24) | (tmp_byte << 16) | tmp_short) << 4) >> 4;
+		*value = dx_right_shift_int((((n << 24) | (tmp_byte << 16) | tmp_short) << 4), 4);
 
 		return true;
 	}
@@ -600,8 +601,7 @@ int dx_read_compact_long (void* context, OUT dxf_long_t* value) {
 	n = (dxf_int_t)temp_uint_byte;
 
 	if (n < 0x80) {
-		*value = (n << 25) >> 25;
-
+		*value = dx_right_shift_int((n << 25), 25);
 		return true;
 	}
 
@@ -610,8 +610,7 @@ int dx_read_compact_long (void* context, OUT dxf_long_t* value) {
 
 		CHECKED_CALL_2(dx_read_unsigned_byte, context, &tmp_byte);
 
-		*value = (((n << 8) | tmp_byte) << 18) >> 18;
-
+		*value = dx_right_shift_int((((n << 8) | tmp_byte) << 18), 18);
 		return true;
 	}
 
@@ -621,7 +620,7 @@ int dx_read_compact_long (void* context, OUT dxf_long_t* value) {
 		CHECKED_CALL_2(dx_read_unsigned_short, context, &temp_uint_short);
 		tmp_short = (dxf_int_t)temp_uint_short;
 
-		*value = (((n << 16) | tmp_short) << 11) >> 11;
+		*value = dx_right_shift_int((((n << 16) | tmp_short) << 11), 11);
 
 		return true;
 	}
@@ -635,27 +634,27 @@ int dx_read_compact_long (void* context, OUT dxf_long_t* value) {
 		tmp_byte = (dxf_int_t)temp_uint_byte;
 		tmp_short = (dxf_int_t)temp_uint_short;
 
-		*value = (((n << 24) | (tmp_byte << 16) | tmp_short) << 4) >> 4;
+		*value = dx_right_shift_int((((n << 24) | (tmp_byte << 16) | tmp_short) << 4), 4);
 
 		return true;
 	}
 
 	if (n < 0xF8) {
-		n = (n << 29) >> 29;
+		n = dx_right_shift_int((n << 29), 29);
 	} else if (n < 0xFC) {
 		dxf_int_t tmp_byte;
 
 		CHECKED_CALL_2(dx_read_unsigned_byte, context, &temp_uint_byte);
 		tmp_byte = (dxf_int_t)temp_uint_byte;
 
-		n = (((n << 8) | tmp_byte) << 22) >> 22;
+		n = dx_right_shift_int((((n << 8) | tmp_byte) << 22), 22);
 	} else if (n < 0xFE) {
 		dxf_int_t tmp_short;
 
 		CHECKED_CALL_2(dx_read_unsigned_short, context, &temp_uint_short);
 		tmp_short = (dxf_int_t)temp_uint_short;
 
-		n = (((n << 16) | tmp_short) << 15) >> 15;
+		n = dx_right_shift_int((((n << 16) | tmp_short) << 15), 15);
 	} else if (n < 0xFF) {
 		dxf_byte_t tmp_byte;
 		dxf_int_t tmp_short;
