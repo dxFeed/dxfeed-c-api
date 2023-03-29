@@ -1,3 +1,7 @@
+Version 8.8.1
+* [DXFC-398] Fixed a defect with incorrect serialization of negative numbers (for example, "prices" of indices)
+  transmitted via the QD protocol.
+
 Version 8.8.0
 * [DXFC-396] Added the ability to not shuffle resolved IP addresses.
   - Added the `connectOrder` property of an address with possible values: `shuffle`, `random`, `ordered`, `priority`
