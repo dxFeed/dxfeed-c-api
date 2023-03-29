@@ -468,13 +468,13 @@ int dx_write_compact_long (void* context, dxf_long_t value) {
 		} else if (hi < 0x0200) {
 			dx_write_short_unchecked(context, 0xF800 | hi);
 		} else if (hi < 0x010000) {
-            dx_write_byte_unchecked(context, 0xFC);
-            dx_write_short_unchecked(context, hi);
+			dx_write_byte_unchecked(context, 0xFC);
+			dx_write_short_unchecked(context, hi);
 		} else if (hi < 0x800000) {
-            dx_write_int_unchecked(context, 0xFE000000 | hi);
+			dx_write_int_unchecked(context, 0xFE000000 | hi);
 		} else {
-            dx_write_byte_unchecked(context, 0xFF);
-            dx_write_int_unchecked(context, hi);
+			dx_write_byte_unchecked(context, 0xFF);
+			dx_write_int_unchecked(context, hi);
 		}
 	} else {
 		if (hi >= -0x04) {
@@ -483,12 +483,12 @@ int dx_write_compact_long (void* context, dxf_long_t value) {
 			dx_write_short_unchecked(context, 0xFBFF & hi);
 		} else if (hi >= -0x010000) {
 			dx_write_byte_unchecked(context, 0xFD);
-            dx_write_short_unchecked(context, hi);
+			dx_write_short_unchecked(context, hi);
 		} else if (hi >= -0x800000) {
 			dx_write_int_unchecked(context, 0xFEFFFFFF & hi);
 		} else {
-            dx_write_byte_unchecked(context, 0xFF);
-            dx_write_int_unchecked(context, hi);
+			dx_write_byte_unchecked(context, 0xFF);
+			dx_write_int_unchecked(context, hi);
 		}
 	}
 
