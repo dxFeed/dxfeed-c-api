@@ -593,7 +593,7 @@ private:
 			return Consts::NF_WIDE[dx::signum(significand) & 3];
 		}
 
-		reduction = std::max(reduction, rank - 255);
+		reduction = (std::max)(reduction, rank - 255);
 
 		if (reduction > 0) {
 			significand = div10(significand, consts.longPowers[reduction]);
