@@ -147,7 +147,7 @@ inline std::vector<std::string> split(const std::string& str, const std::string&
 	std::size_t found, index = 0;
 
 	while(index < str.size() && (found = str.find(delim, index)) != std::string::npos) {
-		if (!limited || result.size() < limit - 1) {
+		if (!limited || result.size() < static_cast<unsigned>(limit - 1)) {
 			result.push_back(str.substr(index, found - index + (delim.empty() ? 1 : 0)));
 			index = found + (delim.empty() ? 1 : delim.size());
 		} else if (result.size() == limit - 1) {
@@ -160,7 +160,7 @@ inline std::vector<std::string> split(const std::string& str, const std::string&
 		return {str};
 	}
 
-	if (!limited || result.size() < limit) {
+	if (!limited || result.size() < static_cast<unsigned>(limit)) {
 		result.push_back(str.substr(index));
 	}
 
@@ -239,7 +239,7 @@ inline std::pair<std::vector<std::string>, Result> splitParenthesisSeparatedStri
 				}
 
 				if (--cnt == 0) {
-					result.push_back(s.substr(startIndex, i - startIndex));
+					result.push_back(s.substr(static_cast<std::string::size_type>(startIndex), i - static_cast<std::string::size_type>(startIndex)));
 				}
 
 				break;
@@ -321,7 +321,7 @@ inline std::pair<std::vector<std::string>, Result> splitParenthesisedStringAt(co
 inline bool isEscapedCharAt(const std::string& s, std::int64_t index) noexcept {
 	std::int64_t escapeCount = 0;
 
-	while (--index >= 0 && s[index] == ESCAPE_CHAR) {
+	while (--index >= 0 && s[static_cast<std::size_t>(index)] == ESCAPE_CHAR) {
 		escapeCount++;
 	}
 
@@ -362,7 +362,7 @@ inline std::pair<std::string, Result> parseProperties(std::string description,
 		// going backwards
 
 		for (i = description.size(); --i >= 0;) {
-			char c = description[i];
+			char c = description[static_cast<std::size_t>(i)];
 
 			if (c == ESCAPE_CHAR || isEscapedCharAt(description, i)) {
 				continue;
@@ -380,7 +380,7 @@ inline std::pair<std::string, Result> parseProperties(std::string description,
 				case ',':
 					if (deque.size() == 1) {
 						// this is a top-level comma
-						result.push_back(trimCopy(description.substr(i + 1, prop_end - i - 1)));
+						result.push_back(trimCopy(description.substr(static_cast<std::string::size_type>(i + 1), static_cast<std::string::size_type>(prop_end - i - 1))));
 						prop_end = i;
 					}
 					break;
@@ -401,7 +401,7 @@ inline std::pair<std::string, Result> parseProperties(std::string description,
 					}
 
 					if (deque.empty()) {
-						result.push_back(trimCopy(description.substr(i + 1, prop_end - i - 1)));
+						result.push_back(trimCopy(description.substr(static_cast<std::string::size_type>(i + 1), static_cast<std::string::size_type>(prop_end - i - 1))));
 
 						done = true;
 					}
@@ -420,7 +420,7 @@ inline std::pair<std::string, Result> parseProperties(std::string description,
 									   "' in a list of properties")};
 		}
 
-		description = trimCopy(description.substr(0, i));
+		description = trimCopy(description.substr(0, static_cast<std::string::size_type>(i)));
 	}
 
 	std::reverse(result.begin(), result.end());	 // reverse properties into original order

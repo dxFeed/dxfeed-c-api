@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.10.0)
 
 cmake_policy(SET CMP0015 NEW)
 
@@ -92,7 +92,6 @@ set(PROJECT_FILES
         ${PROJECT}.vcxproj.filters
         )
 set(BUILD_FILES
-        build.bat
         CMakeLists.txt
         )
 set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/DXFeedAllCPackConfig.cmake")

@@ -4,12 +4,18 @@ rem Script build all targets from CMakeLists.txt by successively calling
 rem build.bat for next configurations: Debug x86, Release x86, Debug x64, 
 rem Release x64. If one of configurations fail the process stopped.
 rem Usage: 
-rem     make_package <major>.<minor>[.<patch>] [rebuild|clean] [no-test] [no-tls]
+rem     make_package <major>.<minor>[.<patch>] [rebuild|clean] [no-test] [no-tls] [<CMake Generator>]
 rem Where
 rem     <major>.<minor>[.<patch>] - Version of package, i.e. 1.2.6
 rem     clean                     - removes build directory
 rem     rebuild                   - performs clean and build
 rem     no-test                   - build testing will not be started
+rem     no-tls                    - performs build without TLS\SSL support
+rem     <CMake Generator>:
+rem         vs2015                - performs build using "Visual Studio 14 2015" CMake generator
+rem         vs2017                - performs build using "Visual Studio 15 2017" CMake generator
+rem         vs2019                - performs build using "Visual Studio 16 2019" CMake generator
+rem         vs2022                - performs build using "Visual Studio 17 2022" CMake generator
 rem 
 rem The operation order:
 rem     1. Build sources in next configurations Debug x86, Release x86, 
@@ -35,11 +41,11 @@ if %ERRORLEVEL% GEQ 1 (
     goto exit_error
 )
 rem Check msbuild application in PATH
-where /q msbuild
-if %ERRORLEVEL% GEQ 1 (
-    echo The 'msbuild' application is missing. Ensure it is installed and placed in your PATH.
-    goto exit_error
-)
+rem where /q msbuild
+rem if %ERRORLEVEL% GEQ 1 (
+rem     echo The 'msbuild' application is missing. Ensure it is installed and placed in your PATH.
+rem     goto exit_error
+rem )
 rem Check cpack application in PATH
 where /q cpack
 if %ERRORLEVEL% GEQ 1 (
@@ -61,6 +67,7 @@ set PACKAGE_WORK_DIR=_CPack_Packages
 set TARGET_PACKAGE=dxfeed-c-api-%VERSION%
 set NO_TLS=
 set PACKAGE_SUFFIX=
+set GENERATOR=vs2022
 
 for %%A in (%*) do (
     if [%%A] EQU [clean] (
@@ -73,11 +80,51 @@ for %%A in (%*) do (
     ) else if [%%A] EQU [no-tls] (
         set NO_TLS=no-tls
         set PACKAGE_SUFFIX=-no-tls
+    ) else if [%%A] EQU [vs2015] (
+        set GENERATOR=%%A
+    ) else if [%%A] EQU [vs2017] (
+        set GENERATOR=%%A
+    ) else if [%%A] EQU [vs2019] (
+        set GENERATOR=%%A
+    ) else if [%%A] EQU [vs2022] (
+        set GENERATOR=%%A
     )
 )
 
 rem Check version parameter
 if [%VERSION%] EQU [] (
+    echo ERROR: The version of package is not specified or invalid^!
+    goto usage
+)
+if [%VERSION%] EQU [clean] (
+    echo ERROR: The version of package is not specified or invalid^!
+    goto usage
+)
+if [%VERSION%] EQU [rebuild] (
+    echo ERROR: The version of package is not specified or invalid^!
+    goto usage
+)
+if [%VERSION%] EQU [no-test] (
+    echo ERROR: The version of package is not specified or invalid^!
+    goto usage
+)
+if [%VERSION%] EQU [no-tls] (
+    echo ERROR: The version of package is not specified or invalid^!
+    goto usage
+)
+if [%VERSION%] EQU [vs2015] (
+    echo ERROR: The version of package is not specified or invalid^!
+    goto usage
+)
+if [%VERSION%] EQU [vs2017] (
+    echo ERROR: The version of package is not specified or invalid^!
+    goto usage
+)
+if [%VERSION%] EQU [vs2019] (
+    echo ERROR: The version of package is not specified or invalid^!
+    goto usage
+)
+if [%VERSION%] EQU [vs2022] (
     echo ERROR: The version of package is not specified or invalid^!
     goto usage
 )
@@ -89,16 +136,16 @@ set APP_VERSION=%VERSION%
 
 rem === BUILD ALL TARGETS ===
 
-call build.bat Debug x86 %NO_TLS%
+call build.bat Debug x86 %NO_TLS% %GENERATOR%
 if %ERRORLEVEL% GEQ 1 goto exit_error
 
-call build.bat Release x86 %NO_TLS%
+call build.bat Release x86 %NO_TLS% %GENERATOR%
 if %ERRORLEVEL% GEQ 1 goto exit_error
 
-call build.bat Debug x64 %NO_TLS%
+call build.bat Debug x64 %NO_TLS% %GENERATOR%
 if %ERRORLEVEL% GEQ 1 goto exit_error
 
-call build.bat Release x64 %NO_TLS%
+call build.bat Release x64 %NO_TLS% %GENERATOR%
 if %ERRORLEVEL% GEQ 1 goto exit_error
 
 rem === TEST BUILDS ===
@@ -140,12 +187,17 @@ rem === FINISH ===
 goto exit_success
 
 :usage
-echo Usage: %0 ^<major^>.^<minor^>[.^<patch^>] [rebuild^|clean] [no-test] [no-tls]
+echo Usage: %0 ^<major^>.^<minor^>[.^<patch^>] [rebuild^|clean] [no-test] [no-tls] [^<CMake Generator^>]
 echo    ^<major^>.^<minor^>[.^<patch^>] - Version of package, i.e. 1.2.6
 echo    clean                     - removes build directory
 echo    rebuild                   - performs clean and build
 echo    no-test                   - build tests will not be started
-echo    no-tls                    - build without TLS support
+echo    no-tls                    - performs build without TLS\SSL support
+echo    ^<CMake Generator^>:
+echo        vs2015           - performs build using "Visual Studio 14 2015" CMake generator
+echo        vs2017           - performs build using "Visual Studio 15 2017" CMake generator
+echo        vs2019           - performs build using "Visual Studio 16 2019" CMake generator
+echo        vs2022           - performs build using "Visual Studio 17 2022" CMake generator
 goto exit_error
 
 :exit_success
