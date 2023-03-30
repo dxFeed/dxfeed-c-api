@@ -12,18 +12,11 @@ LABEL homepage="http://github.com/mvkvl/github-upload-release-artifacts-action"
 RUN apk add --no-cache jq curl
 
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
-RUN curl -s https://api.github.com/repos/tcnksm/ghr/releases/latest | \
-    jq -r '.assets[] | select(.browser_download_url | contains("linux_amd64"))  | .browser_download_url' | \
-    xargs curl -o ghr.tgz -sSL && \
-    mkdir -p ghr && \
-    tar xzf ghr.tgz && \
-    mv ghr_v*_linux_amd64/ghr /usr/local/bin && \
-    chown root:root /usr/local/bin/ghr && \
-    chmod 777 /usr/local/bin/ghr && \
-    ls -al && \
-    ls -al /usr/local/bin && \
-    cp /usr/local/bin/ghr /tmp && \
-    cp /usr/local/bin/ghr /usr/bin
+
+RUN mkdir -p /opt/tools/go && \
+    export GOPATH=/opt/tools/go && \
+    export PATH=$GOPATH/bin:$PATH && \
+    go install github.com/tcnksm/ghr@latest
 
 COPY entrypoint.sh /entrypoint.sh
 
