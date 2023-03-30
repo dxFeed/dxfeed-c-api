@@ -1,7 +1,7 @@
 FROM debian:stable-slim as base
 
 RUN apt-get update && \
-    apt-get install -y jq curl go && \
+    apt-get install -y jq curl golang && \
     apt-get clean && \
     rm -rf "/var/lib/apt/lists/*"
 
