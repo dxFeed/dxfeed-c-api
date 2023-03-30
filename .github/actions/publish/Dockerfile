@@ -9,7 +9,7 @@ LABEL version="1.0.0"
 LABEL repository="http://github.com/mvkvl/github-upload-release-artifacts-action"
 LABEL homepage="http://github.com/mvkvl/github-upload-release-artifacts-action"
 
-RUN apk add --no-cache jq curl
+RUN apk add --no-cache jq curl go
 
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
