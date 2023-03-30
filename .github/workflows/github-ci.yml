@@ -57,16 +57,18 @@ jobs:
         run: |
           echo Artifact: ${{ env.ARTIFACT }}
           echo Release : ${{ env.RELEASE_VERSION }}
-      - name: Build linux library (TLS)
-        uses: ./.github/actions/linux
-        id: build-linux
-        with:
-          artifact: ${{ env.ARTIFACT }}
-          release: ${{ env.RELEASE_VERSION }}
+      - name: Build Linux library (TLS)
+        run: |
+          ./make_package.sh ${{ env.RELEASE_VERSION }} no-test
+      - name: Post build
+        run: |
+          ls ./build
+          mv build/dxfeed-c-api-${{ env.RELEASE_VERSION }}.zip build/${{ env.ARTIFACT }}.zip
+          ls ./build
       - uses: actions/upload-artifact@v1
         with:
           name: ${{ env.ARTIFACT }}.zip
-          path: artifact/${{ env.ARTIFACT }}.zip
+          path: build/${{ env.ARTIFACT }}.zip
 
 
   # --------------------------- BUILD LINUX LIBRARY (WITHOUT TLS SUPPORT)
@@ -83,17 +85,18 @@ jobs:
         run: |
           echo Artifact: ${{ env.ARTIFACT }}
           echo Release : ${{ env.RELEASE_VERSION }}
-      - name: Build linux library (no TLS)
-        uses: ./.github/actions/linux
-        id: build-linux-nt
-        with:
-          artifact: ${{ env.ARTIFACT }}
-          release: ${{ env.RELEASE_VERSION }}
-          notls: true
+      - name: Build Linux library (no TLS)
+        run: |
+          ./make_package.sh ${{ env.RELEASE_VERSION }} no-test no-tls
+      - name: Post build
+        run: |
+          ls ./build
+          mv build/dxfeed-c-api-${{ env.RELEASE_VERSION }}-no-tls.zip build/${{ env.ARTIFACT }}-no-tls.zip
+          ls ./build
       - uses: actions/upload-artifact@v1
         with:
           name: ${{ env.ARTIFACT }}-no-tls.zip
-          path: artifact/${{ env.ARTIFACT }}-no-tls.zip
+          path: build/${{ env.ARTIFACT }}-no-tls.zip
 
 
   # --------------------------- BUILD OLD LINUX (CENTOS 7) LIBRARY (WITH TLS SUPPORT)
