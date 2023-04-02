@@ -164,8 +164,6 @@ jobs:
           ls ./build
           mv build/dxfeed-c-api-${{ env.RELEASE_VERSION }}.zip build/${{ env.ARTIFACT }}.zip
           ls ./build
-  
-  
 
   # --------------------------- BUILD MACOSX LIBRARY (WITHOUT TLS SUPPORT)
   build_macos_no_tls:
@@ -196,7 +194,7 @@ jobs:
   # --------------------------- BUILD WIN LIBRARY (WITH TLS SUPPORT)
   build_win_tls:
     runs-on: windows-2022
-    name: build Windows (TLS)
+    name: build windows (TLS)
     steps:
       - uses: actions/checkout@main
       - name: Set env
@@ -219,7 +217,7 @@ jobs:
   # --------------------------- BUILD WIN LIBRARY (WITHOUT TLS SUPPORT)
   build_win_no_tls:
     runs-on: windows-2022
-    name: build Windows (no TLS)
+    name: build windows (no TLS)
     steps:
       - uses: actions/checkout@main
       - name: Set env
