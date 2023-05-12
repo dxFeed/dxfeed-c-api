@@ -23,7 +23,7 @@ This package provides access to **[dxFeed](https://www.dxfeed.com/)** market dat
     * [Stream](#stream) 
     * [History](#history)  
   * [Subscription creation](#subscription-creation)
-  * [Listiner attachement](#listiner-attachement)
+  * [Listener attachment](#listener-attachment)
   * [Order sources](#order-sources)
 - [Usage](#usage)
   * [Create connection](#create-connection)
@@ -212,7 +212,7 @@ Default contracts for events (*in most cases*):
 
 ---
 
-#### Listener attachement
+#### Listener attachment
 
 |#		|Method				|Handle			|Callback listener 		|
 |:-----:|:------------------|:--------------------------|:------------------|
