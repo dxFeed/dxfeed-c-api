@@ -46,7 +46,7 @@
 
 #ifndef true
 
-#	define true 1
+#	define true  1
 #	define false 0
 #endif
 
@@ -57,6 +57,8 @@
 #define MAX_SOURCE_SIZE					42
 #define TOKEN_PARAM_SHORT_TAG			"-T"
 #define LOG_DATA_TRANSFER_TAG			"-p"
+#define LOG_SERVER_HEARTBEATS_TAG		"-b"
+#define QUIET_MODE_TAG					"-q"
 #define TIMEOUT_TAG						"-o"
 
 // Prevents file names globbing (converting * to all files in the current dir)
@@ -111,6 +113,18 @@ void print_timestamp(dxf_long_t timestamp) {
 	timeinfo = localtime(&tmpint);
 	wcsftime(timefmt, 80, L"%Y%m%d-%H%M%S", timeinfo);
 	wprintf(L"%ls", timefmt);
+}
+
+void print_timestamp_with_millis(dxf_long_t timestamp) {
+	print_timestamp(timestamp);
+	wprintf(L".%03d", timestamp % 1000);
+}
+
+void on_server_heartbeat(dxf_connection_t connection, dxf_long_t server_millis, dxf_int_t server_lag_mark,
+						 dxf_int_t connection_rtt, void* user_data) {
+	wprintf(L"##### Server time (LOCAL TZ) = ");
+	print_timestamp_with_millis(server_millis);
+	wprintf(L", Server lag = %d us, RTT = %d us #####\n", server_lag_mark, connection_rtt);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -318,6 +332,8 @@ void listener(const dxf_snapshot_data_ptr_t snapshot_data, int new_snapshot, voi
 	}
 }
 
+void dummy_listener(const dxf_snapshot_data_ptr_t snapshot_data, int new_snapshot, void* user_data) {}
+
 int atoi2(char* str, int* result) {
 	if (str == NULL || str[0] == '\0' || result == NULL) {
 		return false;
@@ -355,7 +371,7 @@ int main(int argc, char* argv[]) {
 		printf("DXFeed command line sample.\n"
 			"Usage: IncSnapshotConsoleSample <server address> <event type> <symbol> [order_source] "
 			"[" RECORDS_PRINT_LIMIT_SHORT_PARAM " <records_print_limit>] [" TOKEN_PARAM_SHORT_TAG " <token>] "
-			"[" LOG_DATA_TRANSFER_TAG "] [" TIMEOUT_TAG " <timeout>]\n"
+			"[" LOG_DATA_TRANSFER_TAG "] [" LOG_SERVER_HEARTBEATS_TAG "] [" QUIET_MODE_TAG "] [" TIMEOUT_TAG " <timeout>]\n"
 			"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
 			"  <event type> - The event type, one of the following: ORDER, CANDLE, SPREAD_ORDER,\n"
 			"                 TIME_AND_SALE, GREEKS, SERIES\n"
@@ -367,7 +383,12 @@ int main(int argc, char* argv[]) {
 			"  " RECORDS_PRINT_LIMIT_SHORT_PARAM " <records_print_limit> - The number of displayed records (0 - unlimited, default: " STRINGIFY(DEFAULT_RECORDS_PRINT_LIMIT) ")\n"
 			"  " TOKEN_PARAM_SHORT_TAG " <token>               - The authorization token\n"
 			"  " LOG_DATA_TRANSFER_TAG "                       - Enables the data transfer logging\n"
+			"  " LOG_SERVER_HEARTBEATS_TAG
+			"                       - Enables the server's heartbeat logging to console\n"
+			"  " QUIET_MODE_TAG
+			"                       - Quiet mode (do not print snapshot records)\n"
 			"  " TIMEOUT_TAG " <timeout>             - Sets the program timeout in seconds (default = 604800, i.e a week)\n"
+			"Example: IncSnapshotConsoleSample demo.dxfeed.com:7300 ORDER IBM NTV -l 5\n\n"
 			);
 
 		return 0;
@@ -402,6 +423,8 @@ int main(int argc, char* argv[]) {
 	int records_print_limit = DEFAULT_RECORDS_PRINT_LIMIT;
 	char* token = NULL;
 	int log_data_transfer_flag = false;
+	int log_server_heartbeats_flag = false;
+	int quite_mode = false;
 	int program_timeout = 604800;  // a week
 
 	if (argc > STATIC_PARAMS_COUNT) {
@@ -439,6 +462,10 @@ int main(int argc, char* argv[]) {
 				token_is_set = true;
 			} else if (log_data_transfer_flag == false && strcmp(argv[i], LOG_DATA_TRANSFER_TAG) == 0) {
 				log_data_transfer_flag = true;
+			} else if (log_server_heartbeats_flag == false && strcmp(argv[i], LOG_SERVER_HEARTBEATS_TAG) == 0) {
+				log_server_heartbeats_flag = true;
+			} else if (quite_mode == false && strcmp(argv[i], QUIET_MODE_TAG) == 0) {
+				quite_mode = true;
 			} else if (program_timeout_is_set == false && strcmp(argv[i], TIMEOUT_TAG) == 0) {
 				if (i + 1 == argc) {
 					wprintf(L"The program timeout argument error\n");
@@ -498,6 +525,10 @@ int main(int argc, char* argv[]) {
 		return 10;
 	}
 
+	if (log_server_heartbeats_flag == true) {
+		dxf_set_on_server_heartbeat_notifier(connection, &on_server_heartbeat, NULL);
+	}
+
 	wprintf(L"Connected\n");
 
 	if (event_id == dx_eid_candle) {
@@ -540,13 +571,24 @@ int main(int argc, char* argv[]) {
 
 	free(base_symbol);
 
-	if (!dxf_attach_snapshot_inc_listener(snapshot, listener, (void*)&records_print_limit)) {
-		process_last_error();
-		dxf_close_snapshot(snapshot);
-		if (candle_attributes != NULL) dxf_delete_candle_symbol_attributes(candle_attributes);
-		dxf_close_connection(connection);
+	if (quite_mode == true) {
+		if (!dxf_attach_snapshot_inc_listener(snapshot, dummy_listener, NULL)) {
+			process_last_error();
+			dxf_close_snapshot(snapshot);
+			if (candle_attributes != NULL) dxf_delete_candle_symbol_attributes(candle_attributes);
+			dxf_close_connection(connection);
 
-		return 24;
+			return 24;
+		}
+	} else {
+		if (!dxf_attach_snapshot_inc_listener(snapshot, listener, (void*)&records_print_limit)) {
+			process_last_error();
+			dxf_close_snapshot(snapshot);
+			if (candle_attributes != NULL) dxf_delete_candle_symbol_attributes(candle_attributes);
+			dxf_close_connection(connection);
+
+			return 24;
+		}
 	}
 
 	wprintf(L"Subscribed\n");

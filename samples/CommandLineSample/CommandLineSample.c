@@ -176,9 +176,10 @@ int dxs_mutex_unlock(dxs_mutex_t* mutex) {
 #define TOKEN_PARAM_SHORT_TAG		"-T"
 #define SUBSCRIPTION_DATA_PARAM_TAG "-s"
 #define LOG_DATA_TRANSFER_TAG		"-p"
+#define LOG_SERVER_HEARTBEATS_TAG	"-b"
+#define QUIET_MODE_TAG				"-q"
 #define TIMEOUT_TAG					"-o"
-#define LOG_HEARTBEAT_TAG			"-b"
-#define RECONNECT_TAG			    "-r"
+#define RECONNECT_TAG				"-r"
 
 // Prevents file names globbing (converting * to all files in the current dir)
 #ifdef __MINGW64_VERSION_MAJOR
@@ -188,7 +189,7 @@ int _CRT_glob = 0;
 static int is_listener_thread_terminated = false;
 static dxs_mutex_t listener_thread_guard;
 
-int is_thread_terminate() {
+int is_thread_terminate(void) {
 	int res;
 	dxs_mutex_lock(&listener_thread_guard);
 	res = is_listener_thread_terminated;
@@ -197,7 +198,7 @@ int is_thread_terminate() {
 	return res;
 }
 
-void process_last_error() {
+void process_last_error(void) {
 	int error_code = dx_ec_success;
 	dxf_const_string_t error_descr = NULL;
 	int res;
@@ -264,6 +265,19 @@ void print_timestamp(dxf_long_t timestamp) {
 	wcsftime(timefmt, 80, L"%Y%m%d-%H%M%S", timeinfo);
 	wprintf(L"%ls", timefmt);
 }
+
+void print_timestamp_with_millis(dxf_long_t timestamp) {
+	print_timestamp(timestamp);
+	wprintf(L".%03d", timestamp % 1000);
+}
+
+void on_server_heartbeat(dxf_connection_t connection, dxf_long_t server_millis, dxf_int_t server_lag_mark,
+						 dxf_int_t connection_rtt, void* user_data) {
+	wprintf(L"##### Server time (LOCAL TZ) = ");
+	print_timestamp_with_millis(server_millis);
+	wprintf(L", Server lag = %d us, RTT = %d us #####\n", server_lag_mark, connection_rtt);
+}
+
 /* -------------------------------------------------------------------------- */
 
 void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
@@ -419,6 +433,9 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 		wprintf(L"object=%ls}\n", cnf->object);
 	}
 }
+
+void dummy_listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_data_t* data, int data_count,
+					void* user_data) {}
 /* -------------------------------------------------------------------------- */
 
 dxf_string_t ansi_to_unicode(const char* ansi_str, size_t len) {
@@ -614,12 +631,6 @@ int atoi2(char* str, int* result) {
 	return true;
 }
 
-void on_server_heartbeat_notifier(dxf_connection_t connection, dxf_long_t server_millis, dxf_int_t server_lag_mark,
-								  dxf_int_t connection_rtt, void* user_data) {
-	fwprintf(stderr, L"\n##### Server time (UTC) = %" PRId64 " ms, Server lag = %d us, RTT = %d us #####\n",
-			 server_millis, server_lag_mark, connection_rtt);
-}
-
 /* -------------------------------------------------------------------------- */
 
 int main(int argc, char* argv[]) {
@@ -636,9 +647,9 @@ int main(int argc, char* argv[]) {
 			"Usage: CommandLineSample <server address>|<path> <event type> <symbol> "
 			"[" DUMP_PARAM_LONG_TAG " | " DUMP_PARAM_SHORT_TAG " <filename>] [" TOKEN_PARAM_SHORT_TAG
 			" <token>] "
-			"[" SUBSCRIPTION_DATA_PARAM_TAG " <subscr_data>] [" LOG_DATA_TRANSFER_TAG "] [" TIMEOUT_TAG
-			" <timeout>] [" LOG_HEARTBEAT_TAG
-			"] [" RECONNECT_TAG "]\n"
+			"[" SUBSCRIPTION_DATA_PARAM_TAG " <subscr_data>] [" LOG_DATA_TRANSFER_TAG "] [" LOG_SERVER_HEARTBEATS_TAG
+			"] [" QUIET_MODE_TAG "] [" TIMEOUT_TAG " <timeout>] [" RECONNECT_TAG
+			"]\n"
 			"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
 			"                     If you want to use file instead of server data just\n"
 			"                     write there path to file e.g. path\\to\\raw.bin\n"
@@ -658,10 +669,12 @@ int main(int argc, char* argv[]) {
 			" <subscr_data>       - The subscription data: TICKER, STREAM or HISTORY\n"
 			"  " LOG_DATA_TRANSFER_TAG
 			"                     - Enables the data transfer logging\n"
+			"  " LOG_SERVER_HEARTBEATS_TAG
+			"                     - Enables the server's heartbeat logging to console\n"
+			"  " QUIET_MODE_TAG
+			"                     - Quiet mode (do not print events)\n"
 			"  " TIMEOUT_TAG
 			" <timeout>           - Sets the program timeout in seconds (default = 604800, i.e a week)\n"
-			"  " LOG_HEARTBEAT_TAG
-			"                     - Enables the server's heartbeat logging to console\n"
 			"  " RECONNECT_TAG
 			"                     - Enables the reconnection\n"
 			"Examples:\n"
@@ -682,7 +695,8 @@ int main(int argc, char* argv[]) {
 	char* subscr_data = NULL;
 	int log_data_transfer_flag = false;
 	int program_timeout = 604800;  // a week
-	int log_heartbeat_is_set = false;
+	int log_server_heartbeats_flag = false;
+	int quite_mode = false;
 	int reconnect_is_set = false;
 
 	if (argc > STATIC_PARAMS_COUNT) {
@@ -722,6 +736,10 @@ int main(int argc, char* argv[]) {
 				subscr_data_is_set = true;
 			} else if (log_data_transfer_flag == false && strcmp(argv[i], LOG_DATA_TRANSFER_TAG) == 0) {
 				log_data_transfer_flag = true;
+			} else if (log_server_heartbeats_flag == false && strcmp(argv[i], LOG_SERVER_HEARTBEATS_TAG) == 0) {
+				log_server_heartbeats_flag = true;
+			} else if (quite_mode == false && strcmp(argv[i], QUIET_MODE_TAG) == 0) {
+				quite_mode = true;
 			} else if (program_timeout_is_set == false && strcmp(argv[i], TIMEOUT_TAG) == 0) {
 				if (i + 1 == argc) {
 					wprintf(L"The program timeout argument error\n");
@@ -739,8 +757,6 @@ int main(int argc, char* argv[]) {
 
 				program_timeout = new_program_timeout;
 				program_timeout_is_set = true;
-			} else if (log_heartbeat_is_set == false && strcmp(argv[i], LOG_HEARTBEAT_TAG) == 0) {
-				log_heartbeat_is_set = true;
 			} else if (reconnect_is_set == false && strcmp(argv[i], RECONNECT_TAG) == 0) {
 				reconnect_is_set = true;
 			}
@@ -748,7 +764,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	dxf_initialize_logger_v2("command-line-api.log", true, true, true, log_data_transfer_flag);
-	//dxf_load_config_from_string("network.heartbeatTimeout = 11\n");
+	// dxf_load_config_from_string("network.heartbeatTimeout = 11\n");
 	dxf_load_config_from_string("logger.level = \"debug\"\n");
 
 	wprintf(L"Command line sample started.\n");
@@ -776,8 +792,8 @@ int main(int argc, char* argv[]) {
 
 	wprintf(L"Connected\n");
 
-	if (log_heartbeat_is_set) {
-		dxf_set_on_server_heartbeat_notifier(connection, on_server_heartbeat_notifier, NULL);
+	if (log_server_heartbeats_flag == true) {
+		dxf_set_on_server_heartbeat_notifier(connection, on_server_heartbeat, NULL);
 	}
 
 	if (dump_file_name != NULL) {
@@ -810,14 +826,27 @@ int main(int argc, char* argv[]) {
 		return 30;
 	}
 
-	if (!dxf_attach_event_listener(subscription, listener, NULL)) {
-		free_symbols(symbols, symbol_count);
-		process_last_error();
-		dxf_close_subscription(subscription);
-		dxf_close_connection(connection);
-		dxs_mutex_destroy(&listener_thread_guard);
+	if (quite_mode == true) {
+		if (!dxf_attach_event_listener(subscription, dummy_listener, NULL)) {
+			free_symbols(symbols, symbol_count);
+			process_last_error();
+			dxf_close_subscription(subscription);
+			dxf_close_connection(connection);
+			dxs_mutex_destroy(&listener_thread_guard);
 
-		return 31;
+			return 31;
+		}
+	}
+	else {
+		if (!dxf_attach_event_listener(subscription, listener, NULL)) {
+			free_symbols(symbols, symbol_count);
+			process_last_error();
+			dxf_close_subscription(subscription);
+			dxf_close_connection(connection);
+			dxs_mutex_destroy(&listener_thread_guard);
+
+			return 31;
+		}
 	}
 
 	if (!dxf_add_symbols(subscription, (dxf_const_string_t*)symbols, symbol_count)) {

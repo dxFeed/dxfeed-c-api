@@ -39,16 +39,18 @@
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 
-#define true 1
+#define true  1
 #define false 0
 
 // plus the name of the executable
-#define STATIC_PARAMS_COUNT	  5
-#define TOKEN_PARAM_SHORT_TAG "-T"
-#define LOG_DATA_TRANSFER_TAG "-p"
-#define TIMEOUT_TAG			  "-o"
-#define MAX_SOURCE_SIZE		  42
-#define MAX_SOURCES			  10
+#define STATIC_PARAMS_COUNT		  5
+#define TOKEN_PARAM_SHORT_TAG	  "-T"
+#define LOG_DATA_TRANSFER_TAG	  "-p"
+#define LOG_SERVER_HEARTBEATS_TAG "-b"
+#define QUIET_MODE_TAG			  "-q"
+#define TIMEOUT_TAG				  "-o"
+#define MAX_SOURCE_SIZE			  42
+#define MAX_SOURCES				  10
 
 // Prevents file names globbing (converting * to all files in the current dir)
 #ifdef __MINGW64_VERSION_MAJOR
@@ -102,6 +104,19 @@ void print_timestamp(dxf_long_t timestamp) {
 	timeinfo = localtime(&tmpint);
 	wcsftime(timefmt, 80, L"%Y%m%d-%H%M%S", timeinfo);
 	wprintf(L"%ls", timefmt);
+}
+
+void print_timestamp_with_millis(dxf_long_t timestamp) {
+	print_timestamp(timestamp);
+	wprintf(L".%03d", timestamp % 1000);
+}
+
+void on_server_heartbeat(dxf_connection_t connection, dxf_long_t server_millis,
+														dxf_int_t server_lag_mark, dxf_int_t connection_rtt,
+														void* user_data) {
+	wprintf(L"##### Server time (LOCAL TZ) = ");
+	print_timestamp_with_millis(server_millis);
+	wprintf(L", Server lag = %d us, RTT = %d us #####\n", server_lag_mark, connection_rtt);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -162,7 +177,8 @@ dxf_string_t ansi_to_unicode(const char* ansi_str) {
 
 void listener(const dxf_price_level_book_data_ptr_t book_data, void* user_data) {
 	size_t i = 0;
-	wprintf(L"\nNew Price Level Order Book for %ls#%hs:\n", book_data->symbol, user_data == NULL ? "" : (char*)user_data);
+	wprintf(L"\nNew Price Level Order Book for %ls#%hs:\n", book_data->symbol,
+			user_data == NULL ? "" : (char*)user_data);
 	/* Time is 4 + 2 + 2 + 1 + 2 + 2 + 2 = 15 */
 	wprintf(L" %-15ls %-8ls %-15ls |  %-15ls %-8ls %-15ls\n", L"Ask", L"Size", L"Time", L"Bid", L"Size", L"Time");
 	for (; i < MAX(book_data->asks_count, book_data->bids_count); i++) {
@@ -183,7 +199,8 @@ void listener(const dxf_price_level_book_data_ptr_t book_data, void* user_data) 
 
 void listener2(const dxf_price_level_book_data_ptr_t book_data, void* user_data) {
 	size_t i = 0;
-	wprintf(L"\nThe Update of Price Level Order Book for %ls#%hs:\n", book_data->symbol, user_data == NULL ? "" : (char*)user_data);
+	wprintf(L"\nThe Update of Price Level Order Book for %ls#%hs:\n", book_data->symbol,
+			user_data == NULL ? "" : (char*)user_data);
 	/* Time is 4 + 2 + 2 + 1 + 2 + 2 + 2 = 15 */
 	wprintf(L" %-15ls %-8ls %-15ls |  %-15ls %-8ls %-15ls\n", L"Ask", L"Size", L"Time", L"Bid", L"Size", L"Time");
 	for (; i < MAX(book_data->asks_count, book_data->bids_count); i++) {
@@ -202,10 +219,12 @@ void listener2(const dxf_price_level_book_data_ptr_t book_data, void* user_data)
 	}
 }
 
-void inc_listener(dxf_price_level_book_const_data_ptr_t removals,
-				  dxf_price_level_book_const_data_ptr_t additions,
+void dummy_listener(const dxf_price_level_book_data_ptr_t book_data, void* user_data) {}
+
+void inc_listener(dxf_price_level_book_const_data_ptr_t removals, dxf_price_level_book_const_data_ptr_t additions,
 				  dxf_price_level_book_const_data_ptr_t updates, void* user_data) {
-	wprintf(L"\nIncremental Update for The Price Level Order Book for %ls#%hs:\n", removals->symbol, user_data == NULL ? "" : (char*)user_data);
+	wprintf(L"\nIncremental Update for The Price Level Order Book for %ls#%hs:\n", removals->symbol,
+			user_data == NULL ? "" : (char*)user_data);
 	if (removals->asks_count != 0 || removals->bids_count != 0) {
 		wprintf(L"\nREMOVALS:\n");
 		/* Time is 4 + 2 + 2 + 1 + 2 + 2 + 2 = 15 */
@@ -265,8 +284,10 @@ void inc_listener(dxf_price_level_book_const_data_ptr_t removals,
 			wprintf(L"\n");
 		}
 	}
-
 }
+
+void dummy_inc_listener(dxf_price_level_book_const_data_ptr_t removals, dxf_price_level_book_const_data_ptr_t additions,
+						dxf_price_level_book_const_data_ptr_t updates, void* user_data) {}
 
 int atoi2(char* str, int* result) {
 	if (str == NULL || str[0] == '\0' || result == NULL) {
@@ -300,9 +321,10 @@ int main(int argc, char* argv[]) {
 	if (argc < STATIC_PARAMS_COUNT) {
 		printf(
 			"DXFeed Price Level Book command line sample.\n"
-			"Usage: PriceLevelBookSample <server address> <symbol> <order_source> <levels_number> [" TOKEN_PARAM_SHORT_TAG
+			"Usage: PriceLevelBookSample <server address> <symbol> <order_source> <levels_number> "
+			"[" TOKEN_PARAM_SHORT_TAG
 			" <token>] "
-			"[" LOG_DATA_TRANSFER_TAG "] [" TIMEOUT_TAG
+			"[" LOG_DATA_TRANSFER_TAG "] [" LOG_SERVER_HEARTBEATS_TAG "] [" QUIET_MODE_TAG "] [" TIMEOUT_TAG
 			" <timeout>]\n"
 			"  <server address> - The DXFeed server address, e.g. demo.dxfeed.com:7300\n"
 			"  <symbol>         - The trade symbol, e.g. C, MSFT, YHOO, IBM\n"
@@ -312,6 +334,10 @@ int main(int argc, char* argv[]) {
 			" <token>       - The authorization token\n"
 			"  " LOG_DATA_TRANSFER_TAG
 			"               - Enables the data transfer logging\n"
+			"  " LOG_SERVER_HEARTBEATS_TAG
+			"               - Enables the server's heartbeat logging to console\n"
+			"  " QUIET_MODE_TAG
+			"               - Quiet mode (do not print plb levels)\n"
 			"  " TIMEOUT_TAG
 			" <timeout>     - Sets the program timeout in seconds (default = 604800, i.e a week)\n"
 			"Example: PriceLevelBookSample demo.dxfeed.com:7300 IBM NTV 5\n\n");
@@ -334,6 +360,8 @@ int main(int argc, char* argv[]) {
 
 	char* token = NULL;
 	int log_data_transfer_flag = false;
+	int log_server_heartbeats_flag = false;
+	int quite_mode = false;
 	int program_timeout = 604800;  // a week
 
 	if (argc > STATIC_PARAMS_COUNT) {
@@ -352,6 +380,10 @@ int main(int argc, char* argv[]) {
 				token_is_set = true;
 			} else if (log_data_transfer_flag == false && strcmp(argv[i], LOG_DATA_TRANSFER_TAG) == 0) {
 				log_data_transfer_flag = true;
+			} else if (log_server_heartbeats_flag == false && strcmp(argv[i], LOG_SERVER_HEARTBEATS_TAG) == 0) {
+				log_server_heartbeats_flag = true;
+			} else if (quite_mode == false && strcmp(argv[i], QUIET_MODE_TAG) == 0) {
+				quite_mode = true;
 			} else if (program_timeout_is_set == false && strcmp(argv[i], TIMEOUT_TAG) == 0) {
 				if (i + 1 == argc) {
 					wprintf(L"The program timeout argument error\n");
@@ -372,7 +404,6 @@ int main(int argc, char* argv[]) {
 			}
 		}
 	}
-
 
 	dxf_initialize_logger_v2("price-level-book2-api.log", true, true, true, log_data_transfer_flag);
 	wprintf(L"Price level book 2 sample started.\n");
@@ -400,6 +431,10 @@ int main(int argc, char* argv[]) {
 		return 10;
 	}
 
+	if (log_server_heartbeats_flag == true) {
+		dxf_set_on_server_heartbeat_notifier(connection, &on_server_heartbeat, NULL);
+	}
+
 	wprintf(L"Connected\n");
 
 	if (!dxf_create_price_level_book_v3(connection, base_symbol, order_source, levels_number, &book)) {
@@ -412,12 +447,22 @@ int main(int argc, char* argv[]) {
 
 	free(base_symbol);
 
-	if (!dxf_set_price_level_book_listeners_v2(book, &listener, &listener2, &inc_listener, order_source)) {
-		process_last_error();
-		dxf_close_price_level_book_v2(book);
-		dxf_close_connection(connection);
+	if (quite_mode == true) {
+		if (!dxf_set_price_level_book_listeners_v2(book, &dummy_listener, &dummy_listener, &dummy_inc_listener, NULL)) {
+			process_last_error();
+			dxf_close_price_level_book_v2(book);
+			dxf_close_connection(connection);
 
-		return 21;
+			return 21;
+		}
+	} else {
+		if (!dxf_set_price_level_book_listeners_v2(book, &listener, &listener2, &inc_listener, order_source)) {
+			process_last_error();
+			dxf_close_price_level_book_v2(book);
+			dxf_close_connection(connection);
+
+			return 21;
+		}
 	}
 
 	wprintf(L"Subscribed\n");
