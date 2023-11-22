@@ -117,7 +117,7 @@ void print_timestamp(dxf_long_t timestamp) {
 
 void print_timestamp_with_millis(dxf_long_t timestamp) {
 	print_timestamp(timestamp);
-	wprintf(L".%03d", timestamp % 1000);
+	wprintf(L".%03d", (int)(timestamp % 1000));
 }
 
 void on_server_heartbeat(dxf_connection_t connection, dxf_long_t server_millis, dxf_int_t server_lag_mark,
