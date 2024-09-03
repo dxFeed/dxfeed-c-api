@@ -302,55 +302,55 @@ jobs:
           echo "MacOSX (no TLS) Artifact: ${{ env.MAC_NO_TLS_ARTIFACT }}"
 
       - name: Download documentation artifact
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4.1.7
         with:
           name: ${{ env.DOC_ARTIFACT }}
           path: downloads/
 
       - name: Download linux artifact
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4.1.7
         with:
           name: ${{ env.LINUX_ARTIFACT }}
           path: downloads/
 
       - name: Download linux-no-tls artifact
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4.1.7
         with:
           name: ${{ env.LINUX_NO_TLS_ARTIFACT }}
           path: downloads/
 
       - name: Download centos artifact
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4.1.7
         with:
           name: ${{ env.CENTOS_ARTIFACT }}
           path: downloads/
 
       - name: Download centos-no-tls artifact
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4.1.7
         with:
           name: ${{ env.CENTOS_NO_TLS_ARTIFACT }}
           path: downloads/
 
       - name: Download macosx artifact
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4.1.7
         with:
           name: ${{ env.MAC_ARTIFACT }}
           path: downloads/
 
       - name: Download macosx-no-tls artifact
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4.1.7
         with:
           name: ${{ env.MAC_NO_TLS_ARTIFACT }}
           path: downloads/
 
       - name: Download win artifact
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4.1.7
         with:
           name: ${{ env.WINDOWS_ARTIFACT }}
           path: downloads/
 
       - name: Download win-no-tls artifact
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4.1.7
         with:
           name: ${{ env.WINDOWS_NO_TLS_ARTIFACT }}
           path: downloads/
@@ -400,7 +400,7 @@ jobs:
           echo "Documentation Artifact: ${DOC_ARTIFACT}"
 
       - name: Download documentation artifact
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4.1.7
         with:
           name: ${{ env.DOC_ARTIFACT }}
           path: downloads/
