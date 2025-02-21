@@ -8,7 +8,7 @@ env:
   DOCS_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-docs
   MAC_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-macosx
   LINUX_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-linux
-  CENTOS_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-centos
+#  CENTOS_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-centos
   WINDOWS_ARTIFACT_TEMPLATE: dxfeed-c-api-#VERSION#-windows
   RELEASE_PREFIX: "dxFeed C API "
   BUILD_VERSION: 0.0.0-pr
@@ -97,51 +97,51 @@ jobs:
           ls ./build
 
   # --------------------------- BUILD OLD LINUX (CENTOS 7) LIBRARY (WITH TLS SUPPORT)
-  build_centos_tls:
-    runs-on: ubuntu-latest
-    name: build centos (TLS)
-    steps:
-      - name: Set env
-        run: |
-          echo RELEASE_VERSION=${BUILD_VERSION} >> $GITHUB_ENV
-          echo ARTIFACT=$(echo ${CENTOS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/${BUILD_VERSION}/g" ) >> $GITHUB_ENV
-      - name: Check env
-        run: |
-          echo Artifact: ${{ env.ARTIFACT }}
-          echo Release : ${{ env.RELEASE_VERSION }}
-      - uses: actions/checkout@main
-      - name: Build centos library (TLS)
-        uses: ./.github/actions/centos
-        id: build-centos
-        with:
-          artifact: ${{ env.ARTIFACT }}
-          release: ${{ env.RELEASE_VERSION }}
+#  build_centos_tls:
+#    runs-on: ubuntu-latest
+#    name: build centos (TLS)
+#    steps:
+#      - name: Set env
+#        run: |
+#          echo RELEASE_VERSION=${BUILD_VERSION} >> $GITHUB_ENV
+#          echo ARTIFACT=$(echo ${CENTOS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/${BUILD_VERSION}/g" ) >> $GITHUB_ENV
+#      - name: Check env
+#        run: |
+#          echo Artifact: ${{ env.ARTIFACT }}
+#          echo Release : ${{ env.RELEASE_VERSION }}
+#      - uses: actions/checkout@main
+#      - name: Build centos library (TLS)
+#        uses: ./.github/actions/centos
+#        id: build-centos
+#        with:
+#          artifact: ${{ env.ARTIFACT }}
+#          release: ${{ env.RELEASE_VERSION }}
 
   # --------------------------- BUILD OLD LINUX (CENTOS 7) LIBRARY (WITHOUT TLS SUPPORT)
-  build_centos_no_tls:
-    runs-on: ubuntu-latest
-    name: build centos (no TLS)
-    steps:
-      - name: Set env
-        run: |
-          echo RELEASE_VERSION=${BUILD_VERSION} >> $GITHUB_ENV
-          echo ARTIFACT=$(echo ${CENTOS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/${BUILD_VERSION}/g" ) >> $GITHUB_ENV
-      - name: Check env
-        run: |
-          echo Artifact: ${{ env.ARTIFACT }}
-          echo Release : ${{ env.RELEASE_VERSION }}
-      - uses: actions/checkout@main
-      - name: Build centos library (no TLS)
-        uses: ./.github/actions/centos
-        id: build-centos-nt
-        with:
-          artifact: ${{ env.ARTIFACT }}
-          release: ${{ env.RELEASE_VERSION }}
-          notls: true
+#  build_centos_no_tls:
+#    runs-on: ubuntu-latest
+#    name: build centos (no TLS)
+#    steps:
+#      - name: Set env
+#        run: |
+#          echo RELEASE_VERSION=${BUILD_VERSION} >> $GITHUB_ENV
+#          echo ARTIFACT=$(echo ${CENTOS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/${BUILD_VERSION}/g" ) >> $GITHUB_ENV
+#      - name: Check env
+#        run: |
+#          echo Artifact: ${{ env.ARTIFACT }}
+#          echo Release : ${{ env.RELEASE_VERSION }}
+#      - uses: actions/checkout@main
+#      - name: Build centos library (no TLS)
+#        uses: ./.github/actions/centos
+#        id: build-centos-nt
+#        with:
+#          artifact: ${{ env.ARTIFACT }}
+#          release: ${{ env.RELEASE_VERSION }}
+#          notls: true
 
   # --------------------------- BUILD MACOSX LIBRARY (WITH TLS SUPPORT)
   build_macos_tls:
-    runs-on: macos-latest
+    runs-on: macos-13
     name: build macos (TLS)
     steps:
       - uses: actions/checkout@main
@@ -167,7 +167,7 @@ jobs:
 
   # --------------------------- BUILD MACOSX LIBRARY (WITHOUT TLS SUPPORT)
   build_macos_no_tls:
-    runs-on: macos-latest
+    runs-on: macos-13
     name: build macos (no TLS)
     steps:
       - uses: actions/checkout@main

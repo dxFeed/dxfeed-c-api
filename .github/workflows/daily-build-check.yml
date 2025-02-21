@@ -9,7 +9,7 @@ env:
   DOCS_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-docs
   MAC_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-macosx
   LINUX_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-linux
-  CENTOS_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-centos
+#  CENTOS_ARTIFACT_TEMPLATE: dxfeed-c-api-%VERSION%-centos
   WINDOWS_ARTIFACT_TEMPLATE: dxfeed-c-api-#VERSION#-windows
   RELEASE_PREFIX: "dxFeed C API "
   BUILD_VERSION: 0.0.0
@@ -56,29 +56,29 @@ jobs:
           ./make_package.sh ${{ env.RELEASE_VERSION }} no-test
 
   # --------------------------- BUILD OLD LINUX (CENTOS 7) LIBRARY (WITH TLS SUPPORT)
-  build_centos_tls:
-    runs-on: ubuntu-latest
-    name: build centos (TLS)
-    steps:
-      - uses: actions/checkout@master
-      - name: Set env
-        run: |
-          echo RELEASE_VERSION=${BUILD_VERSION} >> $GITHUB_ENV
-          echo ARTIFACT=$(echo ${CENTOS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/${BUILD_VERSION}/g" ) >> $GITHUB_ENV
-      - name: Check env
-        run: |
-          echo Artifact: ${{ env.ARTIFACT }}
-          echo Release : ${{ env.RELEASE_VERSION }}
-      - name: Build centos library (TLS)
-        uses: ./.github/actions/centos
-        id: build-centos
-        with:
-          artifact: ${{ env.ARTIFACT }}
-          release:  ${{ env.RELEASE_VERSION }}
+#  build_centos_tls:
+#    runs-on: ubuntu-latest
+#    name: build centos (TLS)
+#    steps:
+#      - uses: actions/checkout@master
+#      - name: Set env
+#        run: |
+#          echo RELEASE_VERSION=${BUILD_VERSION} >> $GITHUB_ENV
+#          echo ARTIFACT=$(echo ${CENTOS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/${BUILD_VERSION}/g" ) >> $GITHUB_ENV
+#      - name: Check env
+#        run: |
+#          echo Artifact: ${{ env.ARTIFACT }}
+#          echo Release : ${{ env.RELEASE_VERSION }}
+#      - name: Build centos library (TLS)
+#        uses: ./.github/actions/centos
+#        id: build-centos
+#        with:
+#          artifact: ${{ env.ARTIFACT }}
+#          release:  ${{ env.RELEASE_VERSION }}
 
   # --------------------------- BUILD MACOSX LIBRARY (WITH TLS SUPPORT)
   build_macos_tls:
-    runs-on: macos-latest
+    runs-on: macos-13
     name: build macos (TLS)
     steps:
       - uses: actions/checkout@master
