@@ -1,3 +1,6 @@
+Version 8.8.3
+* [DXFC-413] Fixed date handling when system calendar is set to Buddhist calendar
+
 Version 8.8.2
 * Fixed build on Windows + docs uploading
 

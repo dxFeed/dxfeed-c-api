@@ -43,7 +43,7 @@
 #define DX_VER_INTERNAL_FILENAME DX_VER_ORIGINAL_FILENAME 
 #define DX_VER_COMPANY_NAME      "Devexperts LLC"
 #define DX_VER_FILE_DESCRIPTION  "The framework provides a common application programming interface (API) to real-time, delayed and historical market data feeds."
-#define DX_VER_LEGAL_COPYRIGHT   "Copyright (C) 2010-2023 Devexperts LLC"
+#define DX_VER_LEGAL_COPYRIGHT   "Copyright (C) 2010-2025 Devexperts LLC"
 #define DX_VER_PRODUCT_NAME      "dxFeed C API framework"
 
 #define DX_LIBRARY_VERSION L"DXFeed.cpp v @C_API_VERSION_MAJOR@.@C_API_VERSION_MINOR@.@C_API_VERSION_PATCH@ (c) Devexperts LLC"
