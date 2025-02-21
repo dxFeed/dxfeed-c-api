@@ -37,7 +37,7 @@ jobs:
         with:
           artifact: ${{ env.ARTIFACT }}
           release: ${{ env.RELEASE_VERSION }}
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ARTIFACT }}.zip
           path: artifact/${{ env.ARTIFACT }}.zip
@@ -65,7 +65,7 @@ jobs:
           ls ./build
           mv build/dxfeed-c-api-${{ env.RELEASE_VERSION }}.zip build/${{ env.ARTIFACT }}.zip
           ls ./build
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ARTIFACT }}.zip
           path: build/${{ env.ARTIFACT }}.zip
@@ -93,7 +93,7 @@ jobs:
           ls ./build
           mv build/dxfeed-c-api-${{ env.RELEASE_VERSION }}-no-tls.zip build/${{ env.ARTIFACT }}-no-tls.zip
           ls ./build
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ARTIFACT }}-no-tls.zip
           path: build/${{ env.ARTIFACT }}-no-tls.zip
@@ -119,7 +119,7 @@ jobs:
         with:
           artifact: ${{ env.ARTIFACT }}
           release: ${{ env.RELEASE_VERSION }}
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ARTIFACT }}.zip
           path: artifact/${{ env.ARTIFACT }}.zip
@@ -146,7 +146,7 @@ jobs:
           artifact: ${{ env.ARTIFACT }}
           release: ${{ env.RELEASE_VERSION }}
           notls: true
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ARTIFACT }}-no-tls.zip
           path: artifact/${{ env.ARTIFACT }}-no-tls.zip
@@ -176,7 +176,7 @@ jobs:
           ls ./build
           mv build/dxfeed-c-api-${{ env.RELEASE_VERSION }}.zip build/${{ env.ARTIFACT }}.zip
           ls ./build
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ARTIFACT }}.zip
           path: build/${{ env.ARTIFACT }}.zip
@@ -207,7 +207,7 @@ jobs:
           ls ./build
           mv build/dxfeed-c-api-${{ env.RELEASE_VERSION }}-no-tls.zip build/${{ env.ARTIFACT }}-no-tls.zip
           ls ./build
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ARTIFACT }}-no-tls.zip
           path: build/${{ env.ARTIFACT }}-no-tls.zip
@@ -234,7 +234,7 @@ jobs:
           ls ./build
           mv build/dxfeed-c-api-${{ env.RELEASE_VERSION }}.zip build/${{ env.ARTIFACT }}.zip
           ls ./build
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ARTIFACT }}.zip
           path: build/${{ env.ARTIFACT }}.zip
@@ -261,7 +261,7 @@ jobs:
           ls ./build
           mv build/dxfeed-c-api-${{ env.RELEASE_VERSION }}-no-tls.zip build/${{ env.ARTIFACT }}-no-tls.zip
           ls ./build
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ARTIFACT }}-no-tls.zip
           path: build/${{ env.ARTIFACT }}-no-tls.zip
@@ -400,7 +400,7 @@ jobs:
           echo "Documentation Artifact: ${DOC_ARTIFACT}"
 
       - name: Download documentation artifact
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4
         with:
           name: ${{ env.DOC_ARTIFACT }}
           path: downloads/
