@@ -274,15 +274,12 @@ jobs:
     steps:
 
       - uses: actions/checkout@master
-
       - name: Set env
         run: |
           echo RELEASE_VERSION=$(echo ${GITHUB_REF:10}) >> $GITHUB_ENV
           echo DOC_ARTIFACT=$(echo ${DOCS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g").zip >> $GITHUB_ENV
           echo LINUX_ARTIFACT=$(echo ${LINUX_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g").zip >> $GITHUB_ENV
           echo LINUX_NO_TLS_ARTIFACT=$(echo ${LINUX_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g")-no-tls.zip >> $GITHUB_ENV
-#          echo CENTOS_ARTIFACT=$(echo ${CENTOS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g").zip >> $GITHUB_ENV
-#          echo CENTOS_NO_TLS_ARTIFACT=$(echo ${CENTOS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g")-no-tls.zip >> $GITHUB_ENV
           echo MAC_ARTIFACT=$(echo ${MAC_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g").zip >> $GITHUB_ENV
           echo MAC_NO_TLS_ARTIFACT=$(echo ${MAC_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g")-no-tls.zip >> $GITHUB_ENV
           echo WINDOWS_ARTIFACT=$(echo ${WINDOWS_ARTIFACT_TEMPLATE} | sed "s/#VERSION#/$(echo ${GITHUB_REF:10})/g").zip >> $GITHUB_ENV
@@ -316,18 +313,6 @@ jobs:
         with:
           name: ${{ env.LINUX_NO_TLS_ARTIFACT }}
           path: downloads/
-
-#      - name: Download centos artifact
-#        uses: actions/download-artifact@v4
-#        with:
-#          name: ${{ env.CENTOS_ARTIFACT }}
-#          path: downloads/
-#
-#      - name: Download centos-no-tls artifact
-#        uses: actions/download-artifact@v4
-#        with:
-#          name: ${{ env.CENTOS_NO_TLS_ARTIFACT }}
-#          path: downloads/
 
       - name: Download macosx artifact
         uses: actions/download-artifact@v4
