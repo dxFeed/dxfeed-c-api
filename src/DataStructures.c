@@ -592,6 +592,16 @@ int dx_validate_record_id(void* context, dx_record_id_t record_id) {
 
 /* -------------------------------------------------------------------------- */
 
+void dx_lock_records_list(void* context) {
+	dx_data_structures_connection_context_t* dscc = CTX(context);
+	dx_mutex_lock(&dscc->guard_records_list);
+}
+
+void dx_unlock_records_list(void* context) {
+	dx_data_structures_connection_context_t* dscc = CTX(context);
+	dx_mutex_unlock(&dscc->guard_records_list);
+}
+
 /*
  * Returns pointer to record data.
  * Don't modify any field of struct and don't free this resources.
