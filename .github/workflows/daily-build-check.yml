@@ -78,7 +78,7 @@ jobs:
 
   # --------------------------- BUILD MACOSX LIBRARY (WITH TLS SUPPORT)
   build_macos_tls:
-    runs-on: macos-15
+    runs-on: macos-15-intel
     name: build macos (TLS)
     steps:
       - uses: actions/checkout@master
