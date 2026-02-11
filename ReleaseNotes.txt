@@ -1,3 +1,8 @@
+Version 9.0.0
+* [INFO] The release was prepared because the CandleWebService was broken due to an "unknown" field in TimeAndSale.
+  Adding a new field to the structure is breaking, so a major version was released.
+* [DXFC-414] [BREAKING] Added a TradeId field to the Trade, TradeETH, and TimeAndSale events.
+
 Version 8.8.3
 * [DXFC-413] Fixed date handling when system calendar is set to Buddhist calendar
 

@@ -397,6 +397,7 @@ static int dx_trade_t_transcoder_impl(dx_record_transcoder_connection_context_t*
 	event_buffer->sequence = DX_SEQUENCE(record_buffer);
 	event_buffer->time_nanos = record_buffer->time_nanos;
 	event_buffer->exchange_code = record_buffer->exchange_code ? record_buffer->exchange_code : exchange_code;
+	event_buffer->trade_id = record_buffer->trade_id;
 	event_buffer->price = record_buffer->price;
 	event_buffer->size = record_buffer->size;
 
@@ -893,6 +894,7 @@ int RECORD_TRANSCODER_NAME(dx_time_and_sale_t) (dx_record_transcoder_connection_
 	}
 
 	event_buffer->exchange_code = record_buffer->exchange_code;
+	event_buffer->trade_id = record_buffer->trade_id;
 	event_buffer->price = record_buffer->price;
 	event_buffer->size = record_buffer->size;
 	event_buffer->bid_price = record_buffer->bid_price;

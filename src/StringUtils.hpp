@@ -27,6 +27,7 @@
 #include <stack>
 #include <string>
 #include <vector>
+#include <cstdint>
 
 #include "Result.hpp"
 
