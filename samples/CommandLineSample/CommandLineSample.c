@@ -315,9 +315,9 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 
 		print_timestamp(tr->time);
 		wprintf(
-			L", exchangeCode=%c, price=%.15g, size=%.15g, tick=%i, change=%.15g, day id=%d, day volume=%.15g, "
+			L", exchangeCode=%c, tradeId=%"LS(PRId64)L", price=%.15g, size=%.15g, tick=%i, change=%.15g, day id=%d, day volume=%.15g, "
 			L"scope=%d}\n",
-			tr->exchange_code, tr->price, tr->size, tr->tick, tr->change, tr->day_id, tr->day_volume, (int)tr->scope);
+			tr->exchange_code, tr->trade_id, tr->price, tr->size, tr->tick, tr->change, tr->day_id, tr->day_volume, (int)tr->scope);
 	}
 
 	if (event_type == DXF_ET_SUMMARY) {
@@ -352,10 +352,10 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 		wprintf(L"event id=%" LS(PRId64) L", time=", tns->index);
 		print_timestamp(tns->time);
 		wprintf(
-			L", exchange code=%c, price=%.15g, size=%.15g, bid price=%.15g, ask price=%.15g, "
+			L", exchange code=%c, tradeId=%"LS(PRId64)L", price=%.15g, size=%.15g, bid price=%.15g, ask price=%.15g, "
 			L"exchange sale conditions=\'%ls\', is ETH trade=%ls, type=%i, buyer=\'%ls\', seller=\'%ls\', "
 			L"scope=%d, flags=0x%X, raw_flags=0x%X}\n",
-			tns->exchange_code, tns->price, tns->size, tns->bid_price, tns->ask_price, tns->exchange_sale_conditions,
+			tns->exchange_code, tns->trade_id, tns->price, tns->size, tns->bid_price, tns->ask_price, tns->exchange_sale_conditions,
 			tns->is_eth_trade ? L"True" : L"False", tns->type, tns->buyer ? tns->buyer : L"<UNKNOWN>",
 			tns->seller ? tns->seller : L"<UNKNOWN>", tns->scope, tns->event_flags, tns->raw_flags);
 	}
@@ -365,9 +365,9 @@ void listener(int event_type, dxf_const_string_t symbol_name, const dxf_event_da
 
 		print_timestamp(tr->time);
 		wprintf(
-			L", exchangeCode=%c, flags=%d, price=%.15g, size=%.15g, change=%.15g, day id=%d, day volume=%.15g, "
+			L", exchangeCode=%c, tradeId=%"LS(PRId64)L", flags=%d, price=%.15g, size=%.15g, change=%.15g, day id=%d, day volume=%.15g, "
 			L"scope=%d}\n",
-			tr->exchange_code, tr->raw_flags, tr->price, tr->size, tr->change, tr->day_id, tr->day_volume,
+			tr->exchange_code, tr->trade_id, tr->raw_flags, tr->price, tr->size, tr->change, tr->day_id, tr->day_volume,
 			(int)tr->scope);
 	}
 

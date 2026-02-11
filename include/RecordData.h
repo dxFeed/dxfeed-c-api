@@ -80,6 +80,7 @@ typedef struct dx_trade {
     dxf_int_t sequence;
     dxf_int_t time_nanos;
     dxf_char_t exchange_code;
+	dxf_long_t trade_id;
     dxf_double_t price;
 	dxf_double_t size;
     dxf_int_t tick;
@@ -201,6 +202,7 @@ typedef struct dx_time_and_sale {
     dxf_int_t sequence;
 	dxf_int_t time_nanos;
     dxf_char_t exchange_code;
+	dxf_long_t trade_id;
     dxf_double_t price;
 	dxf_double_t size;
     dxf_double_t bid_price;

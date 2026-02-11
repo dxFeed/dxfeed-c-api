@@ -419,6 +419,8 @@ typedef struct dxf_trade_t {
 	dxf_int_t time_nanos;
 	/// Exchange code of the last trade
 	dxf_char_t exchange_code;
+	/// Trade id of the last trade
+	dxf_long_t trade_id;
 	/// Price of the last trade
 	dxf_double_t price;
 	/// Size of the last trade
@@ -697,6 +699,8 @@ typedef struct dxf_time_and_sale {
 	dxf_long_t time;
 	/// Exchange code of this time and sale event
 	dxf_char_t exchange_code;
+	// Trade id of this time and sale event
+	dxf_long_t trade_id;
 	/// Price of this time and sale event
 	dxf_double_t price;
 	/// Size of this time and sale event
