@@ -153,7 +153,7 @@ jobs:
 
   # --------------------------- BUILD MACOSX LIBRARY (WITH TLS SUPPORT)
   build_macos_tls:
-    runs-on: macos-13
+    runs-on: macos-15
     name: build macos (TLS)
     steps:
       - uses: actions/checkout@master
@@ -184,7 +184,7 @@ jobs:
 
   # --------------------------- BUILD MACOSX LIBRARY (WITHOUT TLS SUPPORT)
   build_macos_no_tls:
-    runs-on: macos-13
+    runs-on: macos-15
     name: build macos (no TLS)
     steps:
       - uses: actions/checkout@master
@@ -359,54 +359,3 @@ jobs:
         env:
           RELEASE_PREFIX: ${{ env.RELEASE_PREFIX }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  # --------------------------- PUBLISH DOCUMENTATION TO AWS S3
-  publish_documentation:
-    # run this job for "normal" releases only (tag does not contain '-')
-    if: ${{ !contains( github.ref, '-' ) }}
-    runs-on: ubuntu-latest
-    name: publish documentation
-    needs: [ publish_release ]
-    steps:
-
-      - uses: actions/checkout@master
-
-      - name: Set env
-        run: |
-          echo RELEASE_VERSION=$(echo ${GITHUB_REF:10}) >> $GITHUB_ENV
-          echo DOC_ARTIFACT=$(echo ${DOCS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g").zip >> $GITHUB_ENV
-          echo DOC_DIR=$(echo ${DOCS_ARTIFACT_TEMPLATE} | sed "s/%VERSION%/$(echo ${GITHUB_REF:10})/g") >> $GITHUB_ENV
-
-      - name: Check env
-        run: |
-          echo "Release : ${{ env.RELEASE_VERSION }}"
-          echo "Documentation Artifact: ${DOC_ARTIFACT}"
-
-      - name: Download documentation artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ env.DOC_ARTIFACT }}
-          path: downloads/
-
-      - name: Prepare documentation
-        run: |
-          cd downloads
-          unzip ${{ env.DOC_ARTIFACT }}
-          rm ${{ env.DOC_ARTIFACT }}
-
-      - name: Check documentation
-        run: |
-          cd downloads/${{ env.DOC_DIR }}
-          ls -lah
-
-      - name: Upload documentation to S3
-        uses: ./.github/actions/s3-upload
-        id: upload-docs-to-s3
-        env:
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_OUTPUT: text
-          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-          AWS_S3_PATH: ${{ secrets.AWS_S3_PATH }}
-          SOURCE_DIR: ./downloads/${{ env.DOC_DIR }}

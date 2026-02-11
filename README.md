@@ -48,10 +48,12 @@ Find useful information in self-service dxFeed Knowledge Base, or C API framewor
   * [Order sources](https://kb.dxfeed.com/en/data-model/qd-model-of-market-events.html#UUID-858ebdb1-0127-8577-162a-860e97bfe408_para-idm53255963764388)
   * [Order book reconstruction](https://kb.dxfeed.com/en/data-model/dxfeed-order-book-reconstruction.html)
   * [Symbol guide](https://downloads.dxfeed.com/specifications/dxFeed-Symbol-Guide.pdf)
+<!--
 - [dxFeed С API framework Documentation](https://docs.dxfeed.com/c-api/index.html?_ga=2.205912859.947963636.1629966027-849088511.1627377760)
   * [Order scopes](https://docs.dxfeed.com/c-api/group__event-data-structures-order-spread-order.html#ga78939b26eeb8eb1798e348451db90093)
   * [Event flags](https://docs.dxfeed.com/c-api/group__event-data-structures-event-subscription-stuff.html#ga3b406a7d463b6cc5fc2e14f33990b103)
   * [Subscriptions](https://docs.dxfeed.com/c-api/group__c-api-basic-subscription-functions.html)
+-->
 
 
 ## Dependencies

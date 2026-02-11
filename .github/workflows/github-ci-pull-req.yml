@@ -141,7 +141,7 @@ jobs:
 
   # --------------------------- BUILD MACOSX LIBRARY (WITH TLS SUPPORT)
   build_macos_tls:
-    runs-on: macos-13
+    runs-on: macos-15
     name: build macos (TLS)
     steps:
       - uses: actions/checkout@main
@@ -167,7 +167,7 @@ jobs:
 
   # --------------------------- BUILD MACOSX LIBRARY (WITHOUT TLS SUPPORT)
   build_macos_no_tls:
-    runs-on: macos-13
+    runs-on: macos-15
     name: build macos (no TLS)
     steps:
       - uses: actions/checkout@main
